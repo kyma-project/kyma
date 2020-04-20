@@ -11,7 +11,7 @@ kubectl get crd functions.serverless.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-The following Function object creates a lambda which responds to HTTP requests with with the "Hello John" message.
+The following Function object creates a lambda which responds to HTTP requests with the "Hello John" message.
 
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha1
@@ -79,16 +79,16 @@ This table lists all the possible properties of a given resource together with t
 | **spec.deps** | No | Specifies the lambda's dependencies. |
 | **spec.minReplicas** | No | Defines the minimum number of lambda's Pods to run at a time. |
 | **spec.maxReplicas** | No | Defines the maximum number of lambda's Pods to run at a time. |
-| **spec.resources.limits.cpu** | No | Maximum number of CPUs available for the lambda's Pod to use. |
-| **spec.resources.limits.memory** | No | Maximum amount of memory available for the lambda's Pod to use. |
-| **spec.resources.requests.cpu** | No |  Number of CPUs requested by the lambda's Pod to operate. |
-| **spec.resources.requests.memory** | No | Amount of memory requested by the lambda's Pod to operate. |
+| **spec.resources.limits.cpu** | No | Defines the maximum number of CPUs available for the lambda's Pod to use. |
+| **spec.resources.limits.memory** | No | Defines the maximum amount of memory available for the lambda's Pod to use. |
+| **spec.resources.requests.cpu** | No |  Specifies the number of CPUs requested by the lambda's Pod to operate. |
+| **spec.resources.requests.memory** | No |  Specifies the amount of memory requested by the lambda's Pod to operate. |
 | **spec.source** | Yes | Provides the lambda's source code. |
 | **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the lambda's condition status changed from one to another. |
 | **status.conditions.message** | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.  |
 | **status.conditions.reason** | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. All status reasons are in camelCase. |
 | **status.conditions.status** | Not applicable | Describes the status of processing the Function CR by the Function Controller. It can be `True` for success, `False` for failure, or `Unknown` if the CR processing is still in progress. If the status of all conditions is `True`, the overall status of the Function CR is ready. |
-| **status.conditions.type** | Not applicable | Describes a substage of the Function CR processing. There are three condition types that a lambda has to meet to be ready: `ConfigurationReady`, `BuildReady`, and `Running`. When displaying the lambda status in the terminal, these types are shown under `CONFIGURED`, `BUILT`, and `RUNNING` columns respectively. All condition types can change asynchronously depending on a type of lambda modification, but all three need to be in the `True` status for the lambda to be considered successfully processed. |
+| **status.conditions.type** | Not applicable | Describes a substage of the Function CR processing. There are three condition types that a lambda has to meet to be ready: `ConfigurationReady`, `BuildReady`, and `Running`. When displaying the lambda status in the terminal, these types are shown under `CONFIGURED`, `BUILT`, and `RUNNING` columns respectively. All condition types can change asynchronously depending on the type of lambda modification, but all three need to be in the `True` status for the lambda to be considered successfully processed. |
 
 ### Status reasons
 
@@ -98,15 +98,15 @@ Processing of a Function CR can succeed, continue, or fail for one of these reas
 | --------- | ------------- | ----------- |----------- |
 | `ConfigMapCreated` | `ConfigurationReady` | A new ConfigMap was created based on the Function CR definition. |
 | `ConfigMapUpdated` | `ConfigurationReady` | The existing ConfigMap was updated after changes in the Function CR name, its source code or dependencies. |
-| `ConfigMapError` | `ConfigurationReady` | The ConfigMap couldn't be created or updated due to an error. |
-| `JobFailed` | `BuildReady` | The image with the lambda's configuration couldn't be created due to an error. |
+| `ConfigMapError` | `ConfigurationReady` | The ConfigMap could not be created or updated due to an error. |
+| `JobFailed` | `BuildReady` | The image with the lambda's configuration could not be created due to an error. |
 | `JobCreated` | `BuildReady` | The Kubernetes Job resource that builds the lambda image was created. |
 | `JobRunning` | `BuildReady` | The Job is in progress.  |
 | `JobsDeleted` | `BuildReady` | Previous Jobs responsible for building lambda images were deleted. |
 | `JobFinished` | `BuildReady` | The Job was finished and the lambda's image was uploaded to the Docker Registry. |
 | `ServiceCreated` | `Running` | A new KService referencing the lambda's image was created. |
 | `ServiceUpdated` | `Running` | The existing KService was updated after changes in the lambda's image, scaling parameters, variables, etc, or labels. |
-| `ServiceFailed` | `Running` | The lambda's Pod crashed or couldn't start due to an error. |
+| `ServiceFailed` | `Running` | The lambda's Pod crashed or could not start due to an error. |
 | `ServiceWaiting` | `Running` | Creation or update of the KService is in progress. |
 | `ServiceReady` | `Running` | The lambda was deployed in the Namespace. |
 

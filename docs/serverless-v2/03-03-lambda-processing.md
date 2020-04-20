@@ -16,7 +16,7 @@ NAME                        CONFIGURED   BUILT   RUNNING   VERSION   AGE
 test-lambda                 True         True    True      1         18m
 ```
 
-When you update the an existing lambda, conditions change asynchronously depending on the change type.  
+When you update an existing lambda, conditions change asynchronously depending on the change type.  
 
 The diagrams illustrate all three core status changes in the lambda processing circle that the Function Controller handles. They also list all custom resources involved in this process and specify in which cases their update is required.
 
@@ -30,9 +30,9 @@ This initial phase starts when you create a Function CR with configuration speci
 
 ## Built
 
-This phase involves creating and processing the Job CR. It ends successfully when the lambda image is built and sent to the Docker registry. If the image already existed and only update is required, the Docker image receives a new tag.
+This phase involves creating and processing the Job CR. It ends successfully when the lambda image is built and sent to the Docker registry. If the image already existed and only an update is required, the Docker image receives a new tag.
 
-Updating an existing lambda requires an image rebuild only if you change lambda's body (**source**) or dependencies (**deps**). An update of lambda's other configuration details, such as environment variables, replicas, resources, etc, or labels, doesn't require image rebuild, and it only affects KService.
+Updating an existing lambda requires an image rebuild only if you change the lambda's body (**source**) or dependencies (**deps**). An update of lambda's other configuration details, such as environment variables, replicas, resources, etc, or labels, does not require image rebuild, and it only affects KService.
 
 > **NOTE:** Each time you update lambda's configuration, the Function Controller deletes all previous Job CRs for the given lambda's **UID**.
 
