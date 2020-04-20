@@ -1,26 +1,26 @@
 ---
-title: Expose a lambda with an API Rule
+title: Expose a function with an API Rule
 type: Tutorials
 ---
 
-This tutorial shows how you can expose a lambda function to access it outside the cluster, through an HTTP proxy. To expose it, use an APIRule custom resource (CR) managed by the in-house API Gateway Controller. This controller reacts to an instance of the APIRule CR and, based on its details, it creates an Istio Virtual Service and Oathkeeper Access Rules that specify your permissions for the exposed function.
+This tutorial shows how you can expose a function function to access it outside the cluster, through an HTTP proxy. To expose it, use an APIRule custom resource (CR) managed by the in-house API Gateway Controller. This controller reacts to an instance of the APIRule CR and, based on its details, it creates an Istio Virtual Service and Oathkeeper Access Rules that specify your permissions for the exposed function.
 
-When you complete this tutorial, you get a lambda that:
+When you complete this tutorial, you get a function that:
 
 - Is available under an unsecured endpoint (**handler** set to `noop` in the APIRule CR).
 - Accepts `GET`, `POST`, `PUT`, and `DELETE` methods.
 
->**NOTE:** To learn more about securing your lambda, see [this](/components/api-gateway-v2/#tutorials-expose-and-secure-a-service-deploy-expose-and-secure-the-sample-resources) tutorial.
+>**NOTE:** To learn more about securing your function, see [this](/components/api-gateway-v2/#tutorials-expose-and-secure-a-service-deploy-expose-and-secure-the-sample-resources) tutorial.
 
 ## Prerequisites
 
-This tutorial is based on an existing lambda. To create one, follow the [Create a lambda](#tutorials-create-a-lambda) tutorial.
+This tutorial is based on an existing function. To create one, follow the [Create a function](#tutorials-create-a-function) tutorial.
 
 ## Steps
 
 Follows these steps:
 
-<div tabs name="steps" group="expose-lambda">
+<div tabs name="steps" group="expose-function">
   <details>
   <summary label="cli">
   CLI
@@ -34,9 +34,9 @@ Follows these steps:
     export NAMESPACE={LAMBDA_NAMESPACE}
     ```
 
-    >**NOTE:** Lambda takes the name from the Function CR name. The APIRule CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
+    >**NOTE:** Function takes the name from the Function CR name. The APIRule CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 
-2. Create an APIRule CR for your lambda. It is exposed on port `80` that is the default port of the [Service Placeholder](#architecture-architecture).
+2. Create an APIRule CR for your function. It is exposed on port `80` that is the default port of the [Service Placeholder](#architecture-architecture).
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -70,7 +70,7 @@ Follows these steps:
     kubectl get apirules $NAME -n $NAMESPACE -o=jsonpath='{.status.APIRuleStatus.code}'
     ```
 
-4. Access the lambda's external address:
+4. Access the function's external address:
 
     ```bash
     curl https://$NAME.$DOMAIN
@@ -82,21 +82,21 @@ Follows these steps:
     Console UI
     </summary>
 
-> **NOTE:** The API Rules functionality that allow you to expose lambdas is an experimental feature, and it is not enabled by default in the Console UI. To use it, enable **Experimental functionalities** in the **General Settings** view before you follow the steps. Refresh the page after enabling this option.
+> **NOTE:** The API Rules functionality that allow you to expose functions is an experimental feature, and it is not enabled by default in the Console UI. To use it, enable **Experimental functionalities** in the **General Settings** view before you follow the steps. Refresh the page after enabling this option.
 
-1. Select a Namespace from the drop-down list in the top navigation panel. Make sure the Namespace includes the lambda that you want to expose through an API Rule.
+1. Select a Namespace from the drop-down list in the top navigation panel. Make sure the Namespace includes the function that you want to expose through an API Rule.
 
 2. Go to the **API Rules [preview]** view at the bottom of the left navigation panel and select **Add API Rule**.
 
 3. In the **General settings** section:
 
-    - Enter the API Rule's **Name** matching the lambda's name.
+    - Enter the API Rule's **Name** matching the function's name.
 
-    >**NOTE:** The APIRule CR can have a different name than the lambda, but it is recommended that all related resources share a common name.
+    >**NOTE:** The APIRule CR can have a different name than the function, but it is recommended that all related resources share a common name.
 
-    - Enter **Hostname** to indicate the host on which you want to expose your lambda.
+    - Enter **Hostname** to indicate the host on which you want to expose your function.
 
-    - Select the lambda from the drop-down list in the **Service** column.
+    - Select the function from the drop-down list in the **Service** column.
 
 4. In the **Access strategies** section, leave the default settings, with `GET`, `POST`, `PUT`, and `DELETE` methods and the `noop` handler selected.
 
@@ -104,7 +104,7 @@ Follows these steps:
 
     The `API Rule {NAME} created successfully` message appears confirming the changes were saved.
 
-6. In the API Rule's details view that opens up automatically, check if you can access the lambda by selecting the HTTPS link under **Host**.
+6. In the API Rule's details view that opens up automatically, check if you can access the function by selecting the HTTPS link under **Host**.
 
     </details>
 </div>
