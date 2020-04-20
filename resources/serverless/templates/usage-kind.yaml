@@ -1,7 +1,7 @@
 apiVersion: servicecatalog.kyma-project.io/v1alpha1
 kind: UsageKind
 metadata:
-  name: knative-service
+  name: function
 spec:
   displayName: "Knative Service"
   resource:
