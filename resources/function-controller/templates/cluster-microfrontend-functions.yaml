@@ -1,4 +1,4 @@
-{{ if .Values.clusterMicroFrontend.enable }}
+{{- if .Values.clusterMicroFrontend.enabled }}
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
@@ -6,24 +6,27 @@ metadata:
   labels:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 spec:
-  displayName: Lambdas
+  displayName: Functions
   version: v1
   category: Development
   placement: namespace
   viewBaseUrl: 'https://core-ui.{{ js .Values.global.ingress.domainName }}'
   navigationNodes:
-    - label: Lambdas
-      navigationPath: lambdas
+    - label: Functions
+      navigationPath: functions
       viewUrl: '/lambdas'
       order: 1
+      viewGroup: "_core_ui_"
       requiredBackendModules:
         - serverless
-    - label: Lambdas
-      navigationPath: lambdas/details
+    - label: Functions
+      navigationPath: functions/details
       viewUrl: '/lambdas'
       showInNavigation: false
-    - label: Lambda Details
-      navigationPath: lambdas/details/:lambda
+      viewGroup: "_core_ui_"
+    - label: Function Details
+      navigationPath: functions/details/:lambda
       viewUrl: '/lambda/:lambda'
       showInNavigation: false
+      viewGroup: "_core_ui_"
 {{- end }}
