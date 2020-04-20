@@ -108,9 +108,10 @@ data:
   filter-kubernetes.conf: |
     [FILTER]
         Name                kubernetes
-        Match               *
+        Match               {{ .Values.conf.Filter.Kubernetes.Match }}
         Kube_URL            https://kubernetes.default.svc:443
         Merge_Log           {{ .Values.conf.Filter.Kubernetes.Merge_Log }}
+        Keep_Log            {{ .Values.conf.Filter.Kubernetes.Keep_Log }}
         Merge_Log_Key       {{ .Values.conf.Filter.Kubernetes.Merge_Log_Key }}
         K8S-Logging.Parser  On
         K8S-Logging.Exclude On
@@ -118,12 +119,12 @@ data:
         regex_parser        {{ .Values.conf.Filter.custom_parser.name }}
 {{- end }}
 
-{{- if .Values.conf.Filter.record_modifier.cluster_name }}
+{{- if .Values.conf.Filter.record_modifier.enabled }}
   filter-record-modifier.conf: |
     [FILTER]
             Name record_modifier
-            Match *
-            Record cluster_name {{ .Values.conf.Filter.record_modifier.cluster_name }}
+            Match {{ .Values.conf.Filter.record_modifier.Match }}
+            Record {{ .Values.conf.Filter.record_modifier.Key }} {{ .Values.conf.Filter.record_modifier.Value }}
 {{- end }}
 
 {{- if .Values.conf.Output.Elasticsearch.enabled }}

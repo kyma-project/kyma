@@ -166,13 +166,18 @@ conf:
     Kubernetes:
       # When enabled, it checks if the log field content is a JSON string map, if so, it append the map fields as part of the log structure.
       Merge_Log: "On"
+      Keep_Log: "On"
+      Match: "*"
       # When Merge_Log is enabled, the filter tries to assume the log field from the incoming message is a JSON string message and make a structured representation of it at the same level of the log field in the map. Now if Merge_Log_Key is set (a string name), all the new structured fields taken from the original log content are inserted under the new key.
       Merge_Log_Key: "logs"
     custom_parser:
-      enable: false
+      enabled: false
       name:
     record_modifier:
-      cluster_name:
+      enabled: false
+      Match: "*"
+      Key: cluster_name
+      Value:
   Parsers: |
     [PARSER]
         Name              docker
