@@ -205,6 +205,7 @@ spec:
         imagePullPolicy: IfNotPresent
         args:
           - -tillerTLSInsecureSkipVerify=true
+          - -overrideLogFile=/app/log.txt
         volumeMounts:
           - mountPath: /etc/certs
             name: helm-certs
