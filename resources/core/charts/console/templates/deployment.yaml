@@ -34,10 +34,10 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: {{ .Values.statusPort }}
+              port: {{ .Values.console.statusPort }}
             initialDelaySeconds: 10
           ports:
-            - containerPort: {{ .Values.statusPort }}
+            - containerPort: {{ .Values.console.statusPort }}
             - containerPort: {{ .Values.console.service.internalPort }}
           volumeMounts:
           - name: config
@@ -50,10 +50,10 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: {{ .Values.statusPort }}
+              port: {{ .Values.core_ui.statusPort }}
             initialDelaySeconds: 10
           ports:
-            - containerPort: {{ .Values.statusPort }}
+            - containerPort: {{ .Values.core_ui.statusPort }}
             - containerPort: {{ .Values.core_ui.service.internalPort }}
           volumeMounts:
             - name: config
@@ -66,10 +66,10 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: {{ .Values.statusPort }}
+              port: {{ .Values.compass_mfs.statusPort }}
             initialDelaySeconds: 10
           ports:
-            - containerPort: {{ .Values.statusPort }}
+            - containerPort: {{ .Values.compass_mfs.statusPort }}
             - containerPort: {{ .Values.compass_mfs.service.internalPort }}
           volumeMounts:
           - name: config

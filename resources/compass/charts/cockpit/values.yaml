@@ -5,7 +5,7 @@ images:
     dir: /pr
     version: PR-1708
 
-statusPort: 6969
+statusPort: 6082
 
 ui:
   host: compass
