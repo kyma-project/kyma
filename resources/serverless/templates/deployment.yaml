@@ -90,6 +90,7 @@ spec:
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_LIMITS_CPU" "value" .Values.containers.manager.envs.buildLimitsCPU "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_LIMITS_MEMORY" "value" .Values.containers.manager.envs.buildLimitsMemory "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_CONFIG_WATCHER_NAMESPACE_REQUEUE_DURATION" "value" .Values.containers.manager.envs.namespaceRequeueDuration "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_CONFIG_WATCHER_EXCLUDED_NAMESPACES" "value" .Values.containers.manager.envs.namespaceExcludedNames "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_PULL_SECRET_NAME" "value" .Values.containers.manager.envs.imagePullSecretName "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_PULL_ACCOUNT_NAME" "value" .Values.containers.manager.envs.imagePullAccountName "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_REQUEUE_DURATION" "value" .Values.containers.manager.envs.functionRequeueDuration "context" . ) | nindent 12 }}
