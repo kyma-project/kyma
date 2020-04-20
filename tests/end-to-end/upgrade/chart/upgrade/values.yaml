@@ -9,3 +9,11 @@ image:
 dex:
   namespace: kyma-system
   userSecret: admin-user
+
+authorizationPolicy:
+  eventService:
+    namespace: kyma-integration
+    applicationName: eventmesh-upgrade
+  consoleBackendService:
+    namespace: kyma-system
+    serviceAccount: core-console-backend-service
