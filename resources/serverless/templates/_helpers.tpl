@@ -84,6 +84,6 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
 {{- define "registry-fullname" -}}
-{{- "function-controller-docker-registry" -}}
+{{- "serverless-docker-registry" -}}
 {{- end -}}
 

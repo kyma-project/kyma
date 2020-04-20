@@ -34,7 +34,7 @@ Follow the steps to install the chart:
 3. Install the Function Controller charts:
 
     ```bash
-    NAME=function-controller
+    NAME=serverless
     NAMESPACE=serverless-system
 
     FN_REGISTRY=https://index.docker.io/v2/

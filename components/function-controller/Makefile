@@ -98,7 +98,7 @@ endif
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
-	@echo "resources/function-controller"
+	@echo "resources/serverless"
 
 $(eval $(call buildpack-mount,resolve))
 $(eval $(call buildpack-mount,mod-verify))

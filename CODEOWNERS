@@ -195,11 +195,8 @@
 # The `tekton-pipelines` chart
 /resources/tekton-pipelines/ @michal-hudy @m00g3n @aerfio @pPrecel @magicmatatjahu 
 
-# The `function-controller-init` chart
-/resources/function-controller-init/ @michal-hudy @m00g3n @aerfio @pPrecel @magicmatatjahu
-
-# The `function-controller` chart
-/resources/function-controller/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @pPrecel @magicmatatjahu
+# The `serverless` chart
+/resources/serverless/ @Abd4llA @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @pPrecel @magicmatatjahu
 
 # The `uaa-activator` chart
 /resources/uaa-activator/ @mszostok @polskikiel @ksputo @piotrmiskiewicz @PK85 @jasiu001
