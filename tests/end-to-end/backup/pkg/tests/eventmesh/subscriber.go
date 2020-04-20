@@ -10,6 +10,7 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 )
 
+// TODO(k15r): change image to a release image, not PR-XXX image
 const subscriberImage = "eu.gcr.io/kyma-project/event-subscriber-tools:f766b186"
 
 type SubscriberOption func(deployment *appsv1.Deployment)
