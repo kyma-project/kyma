@@ -1,4 +1,7 @@
-# Kyma Backup Strategy
+---
+title: Kyma Backup Strategy
+type: Architecture
+---
 
 User load on a Kyma cluster typically consists of various Kubernetes objects and volumes. Kyma relies on the backing cloud provider for periodic backups of the Kubernetes objects. That's why it does not require the user to do any manual settings to take backups.
 

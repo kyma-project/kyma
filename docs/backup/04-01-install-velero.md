@@ -3,6 +3,8 @@ title: Install Velero
 type: Installation
 ---
 
+>**NOTE**: Velero support is being deprecated with Kyma 1.12. For the new backup strategy, check out [this](/components/backup/#new-backup-strategy).
+
 Install and configure [Velero](https://github.com/heptio/velero/) to back up and restore your Kyma cluster.
 
 >**NOTE**: To successfully set up Velero, define a supported storage location and credentials to access it. Currently, you can install Velero on GCP and Azure. AWS is not supported.

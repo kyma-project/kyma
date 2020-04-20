@@ -3,6 +3,8 @@ title: Restore troubleshooting
 type: Troubleshooting
 ---
 
+>**NOTE**: Velero support is being deprecated with Kyma 1.12. For the new backup strategy, check out [this](/components/backup/#new-backup-strategy).
+
 ## Pod stuck in Init phase
 
 In case the `service-catalog-addons-service-binding-usage-controller` Pod gets stuck in the `Init` phase, try deleting the Pod:
