@@ -117,7 +117,10 @@ func (r *TestRunner) ExecuteTests(stopCh <-chan struct{}) error {
 				if failed {
 					failedTaskCnt++
 				}
-				r.testRegistry.MarkTestPassed(test.Name())
+				err := r.testRegistry.MarkTestPassed(test.Name())
+				if err != nil {
+					r.log.Errorf("Unable to mark test passed: %s", err.Error())
+				}
 			}
 			wg.Done()
 		}()
