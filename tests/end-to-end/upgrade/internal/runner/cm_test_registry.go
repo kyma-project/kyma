@@ -20,7 +20,7 @@ type ConfigMapTestRegistry struct {
 func NewConfigMapTestRegistry(k8s kubernetes.Interface, namespace, name string) (*ConfigMapTestRegistry, error) {
 	cm, err := k8s.CoreV1().ConfigMaps(namespace).Get(name, v1.GetOptions{})
 	if err != nil {
-		return nil, errors.Wrapf(err, "while reading ConfigMap with list of passed tests")
+		return nil, errors.Wrapf(err, "while reading ConfigMap %s/%s with list of passed tests", namespace, name)
 	}
 	passed := make(map[string]struct{})
 	for key := range cm.Data {
