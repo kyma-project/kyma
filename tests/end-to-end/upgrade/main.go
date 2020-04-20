@@ -32,6 +32,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/injector"
+	apigateway "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-gateway"
 	applicationoperator "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/application-operator"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
@@ -97,8 +98,8 @@ func main() {
 	messagingCli, err := messagingclientv1alpha1.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating knative Messaging clientset")
 
-	//domainName, err := getDomainNameFromCluster(k8sCli)
-	//fatalOnError(err, "while reading domain name from cluster")
+	domainName, err := getDomainNameFromCluster(k8sCli)
+	fatalOnError(err, "while reading domain name from cluster")
 
 	//kymaAPI, err := kyma.NewForConfig(k8sConfig)
 	//fatalOnError(err, "while creating Kyma Api clientset")
@@ -109,8 +110,8 @@ func main() {
 	dynamicCli, err := dynamic.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating K8s Dynamic client")
 
-	//dexConfig, err := getDexConfigFromCluster(k8sCli, cfg.DexUserSecret, cfg.DexNamespace, domainName)
-	//fatalOnError(err, "while reading dex config from cluster")
+	dexConfig, err := getDexConfigFromCluster(k8sCli, cfg.DexUserSecret, cfg.DexNamespace, domainName)
+	fatalOnError(err, "while reading dex config from cluster")
 
 	servingCli, err := servingclientset.NewForConfig(k8sConfig)
 	fatalOnError(err, "while generating knative serving client")
@@ -136,14 +137,14 @@ func main() {
 		"HelmBrokerConflictUpgradeTest": servicecatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest":  servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
 		"GrafanaUpgradeTest":            monitoring.NewGrafanaUpgradeTest(k8sCli),
-		//"MetricsUpgradeTest":              metricUpgradeTest,
+		//"MetricsUpgradeTest":            metricUpgradeTest,
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
-		//"ApiGatewayUpgradeTest":           apigateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
-		"ApplicationOperatorUpgradeTest": applicationoperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
-		"RafterUpgradeTest":              rafter.NewRafterUpgradeTest(dynamicCli),
-		"EventMeshUpgradeTest":           eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli),
-		//"LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
+		"ApiGatewayUpgradeTest":           apigateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
+		"ApplicationOperatorUpgradeTest":  applicationoperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
+		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
+		"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli),
+		//"LoggingUpgradeTest":            logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
 	}
 
 	// Execute requested action
