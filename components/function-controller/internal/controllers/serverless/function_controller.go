@@ -18,6 +18,26 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
+const (
+	serviceBindingUsagesAnnotation = "servicebindingusages.servicecatalog.kyma-project.io/tracing-information"
+
+	configMapFunction = "handler.js"
+	configMapHandler  = "handler.main"
+	configMapDeps     = "package.json"
+)
+
+var (
+	envVarsForRevision = []corev1.EnvVar{
+		{Name: "FUNC_HANDLER", Value: "main"},
+		{Name: "MOD_NAME", Value: "handler"},
+		{Name: "FUNC_TIMEOUT", Value: "180"},
+		{Name: "FUNC_RUNTIME", Value: "nodejs12"},
+		// {Name: "FUNC_MEMORY_LIMIT", Value: "128Mi"},
+		{Name: "FUNC_PORT", Value: "8080"},
+		{Name: "NODE_PATH", Value: "$(KUBELESS_INSTALL_VOLUME)/node_modules"},
+	}
+)
+
 func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Function, configMaps []corev1.ConfigMap, service *servingv1.Service) bool {
 	image := r.buildExternalImageAddress(instance)
 	if service != nil && service.Spec.Template.Spec.Containers[0].Image == image {

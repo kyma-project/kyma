@@ -17,26 +17,6 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
-const (
-	serviceBindingUsagesAnnotation = "servicebindingusages.servicecatalog.kyma-project.io/tracing-information"
-
-	configMapFunction = "handler.js"
-	configMapHandler  = "handler.main"
-	configMapDeps     = "package.json"
-)
-
-var (
-	envVarsForRevision = []corev1.EnvVar{
-		{Name: "FUNC_HANDLER", Value: "main"},
-		{Name: "MOD_NAME", Value: "handler"},
-		{Name: "FUNC_TIMEOUT", Value: "180"},
-		{Name: "FUNC_RUNTIME", Value: "nodejs12"},
-		// {Name: "FUNC_MEMORY_LIMIT", Value: "128Mi"},
-		{Name: "FUNC_PORT", Value: "8080"},
-		{Name: "NODE_PATH", Value: "$(KUBELESS_INSTALL_VOLUME)/node_modules"},
-	}
-)
-
 type FunctionReconciler struct {
 	client.Client
 	Log            logr.Logger
