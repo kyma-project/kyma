@@ -2,15 +2,15 @@
 
 User load on a Kyma cluster typically consists of various Kubernetes objects and volumes. Kyma relies on the backing cloud provider for periodic backups of the Kubernetes objects. That's why it does not require the user to do any manual settings to take backups.
 
-For example, Gardener uses etcd as the Kubernetes' backing store for all cluster data. That is, all Kubernetes objects are stored on etcd. Gardener has perodic jobs to take major and minor backups of etcd database. A major backup including all the resources takes place every hour, and each minor backups including only the changes inbetween take place every five minutes. In case of a problem on etcd database, Gardener automatically restores the Kubernetes cluster using the latest backup.
+For example, Gardener uses etcd as the Kubernetes' backing store for all cluster data. That is, all Kubernetes objects are stored on etcd. Gardener has perodic jobs to take major and minor snapshots of etcd database. A major snapshot including all the resources takes place every day, and each minor snapshot including only the changes inbetween takes place every five minutes. In case of a problem on etcd database, Gardener automatically restores the Kubernetes cluster using the latest snapshot.
 
-However, volumes are typically not a part of these backups. That's why Kyma encourages users to take periodic backups of their volumes. This can be done using the new Kubernetes API `VolumeSnapshot` that is explained below.
+However, volumes are typically not a part of these backups. That's why Kyma encourages users to take periodic backups of their volumes. This can be done using the Kubernetes API `VolumeSnapshot` that is explained below.
 
 ## On-Demand Volume Snapshots
 
-Kubernetes provides a new API resource called VolumeSnapshot that can be used to take the snapshot of a volume on Kubernetes. A snapshot can be used either to provision a new volume (pre-populated with the snapshot data) or to restore the existing volume to a previous state (represented by the snapshot).
+Kubernetes provides an API resource called VolumeSnapshot that can be used to take the snapshot of a volume on Kubernetes. A snapshot can be used either to provision a new volume (pre-populated with the snapshot data) or to restore the existing volume to a previous state (represented by the snapshot).
 
-VolumeSnapshot support is only available for CSI drivers. However, not all the CSI drivers support the volume snapshot functionality. You can find a list of all the drivers with the supported functionalities [here](https://kubernetes-csi.github.io/docs/drivers.html).
+VolumeSnapshot support is only available for [CSI drivers](https://kubernetes-csi.github.io/docs/). However, not all the CSI drivers support the volume snapshot functionality. You can find a list of all the drivers with the supported functionalities [here](https://kubernetes-csi.github.io/docs/drivers.html).
 
 An example VolumeSnapshot created to take a snapshot from the PVC named `pvc-to-backup`:
 
@@ -94,7 +94,7 @@ metadata:
 rules:
 - apiGroups: ["snapshot.storage.k8s.io"]
   resources: ["volumesnapshots"]
-  verbs: ["create", "get"]
+  verbs: ["create", "get", "list", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -146,13 +146,27 @@ spec:
                     persistentVolumeClaimName: <PVC_NAME>
                 EOF
 
-                # Check if volume snapshot is ready to use
-                while [[ "$(kubectl get volumesnapshot volume-snapshot-${RANDOM_ID} -n <NAMESPACE> -o jsonpath='{.status.readyToUse}'" != "true") ]]; then
-                  sleep 15
+                # Wait until volume snapshot is ready to use.
+                attempts=3
+                retryTimeInSec="30"
+                for ((i=1; i<=attempts; i++)); do
+                    STATUS=$(kubectl get volumesnapshot volume-snapshot-${RANDOM_ID} -n <NAMESPACE> -o jsonpath='{.status.readyToUse}')
+                    if [ "${STATUS}" == "true" ]; then
+                        echo "Volume snapshot is ready to use."
+                        break
+                    fi
+
+                    if [[ "${i}" -lt "${attempts}" ]]; then
+                        echo "Volume snapshot is not yet ready to use, let's wait ${retryTimeInSec} seconds and retry. Attempts ${i} of ${attempts}."
+                    else
+                        echo "Volume snapshot is still not ready to use after ${attempts} attempts, giving up."
+                        exit 1
+                    fi
+                    sleep ${retryTimeInSec}
                 done
 
                 # Delete old volume snapshots.
-                kubectl delete volumesnapshot -l job=volume-snapshotter,name!=volume-snapshot-${RANDOM_ID}
+                kubectl delete volumesnapshot -n <NAMESPACE> -l job=volume-snapshotter,name!=volume-snapshot-${RANDOM_ID}
 ```
 
 ### Troubleshooting
