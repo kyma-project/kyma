@@ -105,7 +105,7 @@ Processing of a Function CR can succeed, continue, or fail for one of these reas
 | `JobsDeleted` | `BuildReady` | Previous Jobs responsible for building lambda images were deleted. |
 | `JobFinished` | `BuildReady` | The Job was finished and the lambda's image was uploaded to the Docker Registry. |
 | `ServiceCreated` | `Running` | A new KService referencing the lambda's image was created. |
-| `ServiceUpdated` | `Running` | The existing KService was updated after changes in the lambda's image, scaling parameters, variables, or labels. |
+| `ServiceUpdated` | `Running` | The existing KService was updated after such changes as the lambda's image, scaling parameters, variables, or labels. |
 | `ServiceFailed` | `Running` | The lambda's Pod crashed or could not start due to an error. |
 | `ServiceWaiting` | `Running` | Creation or update of the KService is in progress. |
 | `ServiceReady` | `Running` | The lambda was deployed in the Namespace. |
