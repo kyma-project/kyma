@@ -66,7 +66,7 @@ The Function custom resource relies on these Kubernetes and [Knative Serving](ht
 | Resource | Description |
 |----------|-------------|
 |[KService CR](https://github.com/knative/docs/blob/master/docs/serving/spec/knative-api-specification-1.0.md#service) | Orchestrates the deployment and availability of the function.|
-|[Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) | Builds an image with the function code on a chosen runtime. |
+|[Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) | Builds an image with the function code on a runtime. |
 
 These components use this CR:
 
