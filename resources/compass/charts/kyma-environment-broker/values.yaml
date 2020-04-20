@@ -16,6 +16,8 @@ broker:
   username: "broker"
   # password can be set manually by user. If empty then it will be randomized.
   password: ""
+  # serving health probes routes on statusPort
+  statusPort: "8071"
 
 service:
   type: ClusterIP
@@ -51,7 +53,7 @@ additionalRuntimeComponents:
   - name: "knative-eventing-kafka"
     namespace: "knative-eventing"
 
-kymaVersion: "1.11.0-rc2"
+kymaVersion: "9c738f01"
 kymaVersionOnDemand: "false"
 
 enablePlans: "azure,gcp"
@@ -78,7 +80,9 @@ avs:
   oauthPassword: "TBD"
   oauthTokenEndpoint: "TBD"
   oauthUserName: "TBD"
-
+  internalTesterAccessId: "TBD"
+  externalTesterAccessId: "TBD"
+  groupId: "TBD"
 
 lms:
   secretName: "lms-creds"
@@ -88,3 +92,9 @@ lms:
   environment: "dev"
   samlTenant: "TBD"
   disabled: false
+
+e2e:
+  azure:
+    configName: "e2e-runtime-config-azure"
+  gcp:
+    configName: "e2e-runtime-config-gcp"

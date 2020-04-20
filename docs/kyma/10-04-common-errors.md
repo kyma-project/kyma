@@ -61,4 +61,14 @@ kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{YOUR_KYMA_
 
 ## Maximum number of retries reached
 
-Kyma Installer retries installing a failed release a given number of times (default is 5). It stops the installation when it reaches the limit and returns this message: `Max number of retries reached during step {STEP_NAME}`. To start it again, check Kyma Installer logs to find out why this step failed, fix the issue, and follow the [update process](#installation-update-kyma).
+The Kyma Installer retries the failed installation of releases a set number of times (default is 5). It stops the installation when it reaches the limit and returns this message: `Max number of retries reached during step {STEP_NAME}`. Fetch the logs of the Kyma Installer to check the reason for failure. Run:
+
+```bash 
+kubectl -n kyma-installer logs -l 'name=kyma-installer'
+```
+
+After you fix the error that caused the installation to fail, run this command to restart the installation process: 
+
+```bash
+kubectl -n default label installation/kyma-installation action=install
+```

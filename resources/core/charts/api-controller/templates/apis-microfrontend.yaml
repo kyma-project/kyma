@@ -7,7 +7,7 @@ metadata:
 spec:
   displayName: APIs
   version: v1
-  category: Configuration
+  category: Deprecated
   placement: namespace
   viewBaseUrl: 'https://console.{{ js .Values.global.ingress.domainName }}/consoleapp.html#'
   navigationNodes:

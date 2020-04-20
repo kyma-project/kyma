@@ -13,14 +13,17 @@ import (
 
 type CloseFunction func()
 
-// MockEventMesh mocks the event mesh and returns its URL as a string.
-func MockEventMesh(t *testing.T) (string, CloseFunction) {
+// StartMockEventMeshServer mocks the event mesh with the given HTTP response code and returns its URL as a string.
+func StartMockEventMeshServer(t *testing.T, respCode int) (string, CloseFunction) {
 	t.Helper()
 	log.Info("Initialising the mock server...")
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		resp := &cloudevents.EventResponse{Status: http.StatusOK}
-		encoder := json.NewEncoder(w)
-		if err := encoder.Encode(resp); err != nil {
+		w.WriteHeader(respCode)
+		resp := &cloudevents.EventResponse{
+			Status: respCode,
+		}
+
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
 			t.Fatalf("failed to write response")
 		}
 	}))

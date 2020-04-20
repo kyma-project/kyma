@@ -51,9 +51,15 @@ spec:
               value: "{{ .Values.deployment.args.certificateValidityTime }}"
             - name: APP_CA_SECRET_NAME
               value: "{{ .Values.global.connector.secrets.ca.namespace }}/{{ .Values.global.connector.secrets.ca.name }}"
+            - name: APP_CA_SECRET_CERTIFICATE_KEY
+              value: "{{ .Values.global.connector.secrets.ca.certificateKey }}"
+            - name: APP_CA_SECRET_KEY_KEY
+              value: "{{ .Values.global.connector.secrets.ca.keyKey }}"
             {{ if .Values.deployment.args.attachRootCAToChain }}
-            - name: APP_ROOT_CA_CERTIFICATE_SECRET_NAME
-              value: "{{ .Values.global.connector.secrets.rootCA.namespace }}/{{ .Values.global.connector.secrets.rootCA.name }}"
+            - name: APP_ROOT_CA_SECRET_NAME
+              value: "{{ .Values.global.connector.secrets.rootCA.namespace }}/{{ .Values.global.connector.secrets.rootCA.cacert }}"
+            - name: APP_ROOT_CA_SECRET_CERTIFICATE_KEY
+              value: "{{ .Values.global.connector.secrets.rootCA.certificateKey }}"
             {{ end }}
             - name: APP_CERTIFICATE_DATA_HEADER
               value: "{{ .Values.global.connector.certificateDataHeader }}"
@@ -77,3 +83,17 @@ spec:
           securityContext:
 {{ toYaml . | indent 12 }}
           {{- end }}
+          livenessProbe:
+            httpGet:
+              port: {{ .Values.global.connector.graphql.external.port }}
+              path: "/healthz"
+            initialDelaySeconds: {{ .Values.global.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.global.livenessProbe.timeoutSeconds }}
+            periodSeconds: {{.Values.global.livenessProbe.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              port: {{ .Values.global.connector.graphql.external.port }}
+              path: "/healthz"
+            initialDelaySeconds: {{ .Values.global.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.global.readinessProbe.timeoutSeconds }}
+            periodSeconds: {{.Values.global.readinessProbe.periodSeconds }}

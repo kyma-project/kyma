@@ -43,7 +43,7 @@ spec:
         message: the API server has a 99th percentile latency of {{`{{ $value }}`}} seconds
           for {{`{{$labels.verb}}`}} {{`{{$labels.resource}}`}}
     - alert: APIServerErrorsHigh2
-      expr: rate(apiserver_request_count{code=~"^(?:5..)$"}[5m]) / rate(apiserver_request_count[5m])
+      expr: rate(apiserver_request_total{code=~"^(?:5..)$"}[5m]) / rate(apiserver_request_total[5m])
         * 100 > 2
       for: 10m
       labels:
@@ -51,7 +51,7 @@ spec:
       annotations:
         message: API server returns errors for {{`{{ $value }}`}}% of requests for job `{{`{{$labels.job}}`}}`/HTTP `{{`{{$labels.verb}}`}}`
     - alert: APIServerErrorsHigh
-      expr: rate(apiserver_request_count{code=~"^(?:5..)$"}[5m]) / rate(apiserver_request_count[5m])
+      expr: rate(apiserver_request_total{code=~"^(?:5..)$"}[5m]) / rate(apiserver_request_total[5m])
         * 100 > 5
       for: 10m
       labels:

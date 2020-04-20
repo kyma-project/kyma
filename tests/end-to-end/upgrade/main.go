@@ -30,16 +30,14 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
-
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/injector"
 	apigateway "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-gateway"
 	applicationoperator "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/application-operator"
-	migrateeventmesh "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh-migration/migrate-eventmesh"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/logging"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/rafter"
 	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
@@ -134,26 +132,26 @@ func main() {
 	// Test name is sanitized and used for creating dedicated namespace for given test,
 	// so it cannot overlap with others.
 
-	metricUpgradeTest, err := monitoring.NewMetricsUpgradeTest(k8sCli)
-	fatalOnError(err, "while creating Metrics Upgrade Test")
+	// metricUpgradeTest, err := monitoring.NewMetricsUpgradeTest(k8sCli)
+	// fatalOnError(err, "while creating Metrics Upgrade Test")
 
 	aInjector, err := injector.NewAddons("end-to-end-upgrade-test", cfg.TestingAddonsURL)
 	fatalOnError(err, "while creating addons configuration injector")
 
 	tests := map[string]runner.UpgradeTest{
-		"HelmBrokerUpgradeTest":           servicecatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
-		"HelmBrokerConflictUpgradeTest":   servicecatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
-		"ApplicationBrokerUpgradeTest":    servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
-		"LambdaFunctionUpgradeTest":       function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
-		"GrafanaUpgradeTest":              monitoring.NewGrafanaUpgradeTest(k8sCli),
-		"MetricsUpgradeTest":              metricUpgradeTest,
+		"HelmBrokerUpgradeTest":         servicecatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
+		"HelmBrokerConflictUpgradeTest": servicecatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
+		"ApplicationBrokerUpgradeTest":  servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
+		"LambdaFunctionUpgradeTest":     function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
+		"GrafanaUpgradeTest":            monitoring.NewGrafanaUpgradeTest(k8sCli),
+		//"MetricsUpgradeTest":              metricUpgradeTest,
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
 		"ApiGatewayUpgradeTest":           apigateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
 		"ApplicationOperatorUpgradeTest":  applicationoperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
-		"MigrateFromEventMeshUpgradeTest": migrateeventmesh.NewMigrateFromEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli),
-		"LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
+		"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli),
+		//"LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
 	}
 
 	// Execute requested action

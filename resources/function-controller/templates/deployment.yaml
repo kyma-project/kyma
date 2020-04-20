@@ -41,11 +41,6 @@ spec:
       {{- if .Values.pod.extraProperties }}
       {{ include "tplValue" ( dict "value" .Values.pod.extraProperties  "context" . ) | nindent 6 }}
       {{- end }}
-      volumes:
-        - name: cert
-          secret:
-            defaultMode: 420
-            secretName: webhook-server-cert
       containers:
         - name: kube-rbac-proxy
           image: "{{ .Values.images.kubeRbacProxy.repository }}:{{ .Values.images.kubeRbacProxy.tag }}"
@@ -71,54 +66,35 @@ spec:
           image: "{{ .Values.images.manager.repository }}:{{ .Values.images.manager.tag }}"
           imagePullPolicy: {{ .Values.images.manager.pullPolicy }}
           command:
-          - /manager
-          args:
-          {{- if .Values.metrics.enabled }}
-          - --metrics-addr
-          - "127.0.0.1:{{ .Values.metrics.manager.port.port }}"
-          {{- end }}
-          {{- if gt (int .Values.deployment.replicas) 1 }}
-          - --enable-leader-election
-          - --leader-election-configmap-namespace
-          - {{ .Release.Namespace | quote }}
-          {{- end }}
-          - --devlog
-          - "false"
+          - /app/manager
           {{- if .Values.containers.manager.resources }}
           resources:
             {{- include "tplValue" ( dict "value" .Values.containers.manager.resources "context" . ) | nindent 12 }}
           {{- end }}
           ports:
-            - containerPort: {{ .Values.services.manager.port.targerPort }}
-              name: webhook-server
-              protocol: TCP
             - containerPort: {{ .Values.metrics.manager.port.port }}
               name: {{ .Values.metrics.manager.port.name }}
               protocol: {{ .Values.metrics.manager.port.protocol }}
-          volumeMounts:
-            - mountPath: /tmp/k8s-webhook-server/serving-certs
-              name: cert
-              readOnly: true
           env:
-            - name: POD_NAMESPACE
-              value: {{ .Release.Namespace }}
-            - name: CONTROL_PLANE
-              value: "controller-manager"
-            - name: CONTROLLER_CONFIGMAP
-              value: {{ template "fullname" . }}-config
-            - name: CONTROLLER_CONFIGMAP_NS
-              value: {{ .Release.Namespace }}
-            - name: CONTROLLER_IMAGE_PULL_SECRET_NAME
-              value: {{ template "fullname" . }}-image-pull-secret
-            - name: CONTROLLER_DOCKER_REGISTRY_EXTERNAL_ADDRESS
+          {{- if .Values.metrics.enabled }}
+            - name: APP_METRICS_ADDRESS
+              value: "127.0.0.1:{{ .Values.metrics.manager.port.port }}"
+          {{- end }}
+          {{- if gt (int .Values.deployment.replicas) 1 }}
+            - name: APP_LEADER_ELECTION_ENABLED
+              value: "true"    
+          {{- end }}
+            - name: APP_FUNCTION_BUILD_RUNTIME_CONFIG_MAP_NAME
+              value: dockerfile-nodejs-12
+            - name: APP_FUNCTION_DOCKER_EXTERNAL_ADDRESS
               value: registry.{{ .Values.global.ingress.domainName }}
-            - name: CONTROLLER_TEKTON_REQUESTS_CPU
+            - name: APP_FUNCTION_BUILD_REQUESTS_CPU
               value: 400m
-            - name: CONTROLLER_TEKTON_REQUESTS_MEMORY
+            - name: APP_FUNCTION_BUILD_REQUESTS_MEMORY
               value: 700Mi
-            - name: CONTROLLER_TEKTON_LIMITS_CPU
+            - name: APP_FUNCTION_BUILD_LIMITS_CPU
               value: 800m
-            - name: CONTROLLER_TEKTON_LIMITS_MEMORY
+            - name: APP_FUNCTION_BUILD_LIMITS_MEMORY
               value: 1200Mi
             {{ include "createEnv" ( dict "name" "BUILD_TIMEOUT" "value" .Values.containers.manager.envs.buildTimeout "context" . ) | nindent 12 }}
           {{- if .Values.containers.manager.extraProperties }}

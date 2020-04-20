@@ -10,7 +10,6 @@ keywords:
   - tekton-pipelines
   - function
   - serverless
-  - cert-manager
   - docker-registry
 maintainers:
   - name: michal-hudy

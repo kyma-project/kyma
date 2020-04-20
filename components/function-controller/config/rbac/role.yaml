@@ -10,29 +10,7 @@ rules:
   - ""
   resources:
   - configmaps
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
+  - serviceaccounts
   - secrets
   verbs:
   - create
@@ -45,64 +23,10 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - serviceaccounts
-  verbs:
-  - get
-  - list
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - services
+  - events
   verbs:
   - create
-  - delete
-  - get
-  - list
   - patch
-  - update
-  - watch
-- apiGroups:
-  - admissionregistration.k8s.io
-  resources:
-  - mutatingwebhookconfigurations
-  - validatingwebhookconfigurations
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - apps;extensions
-  resources:
-  - deployments
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - build.knative.dev
-  resources:
-  - builds
-  - buildtemplates
-  - clusterbuildtemplates
-  - services
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
 - apiGroups:
   - serverless.kyma-project.io
   resources:
@@ -126,9 +50,6 @@ rules:
 - apiGroups:
   - serving.knative.dev
   resources:
-  - configurations
-  - revisions
-  - routes
   - services
   verbs:
   - create
@@ -139,15 +60,39 @@ rules:
   - update
   - watch
 - apiGroups:
-  - tekton.dev
+  - serving.knative.dev
   resources:
-  - taskruns
-  - tasks
+  - services/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - batch
+  resources:
+  - jobs
   verbs:
   - create
   - delete
+  - deletecollection
   - get
   - list
   - patch
   - update
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
   - watch

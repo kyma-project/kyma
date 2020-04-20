@@ -11,8 +11,8 @@ Follows these steps:
 
 <div tabs name="steps" group="create-lambda">
   <details>
-  <summary label="kubectl">
-  kubectl
+  <summary label="cli">
+  CLI
   </summary>
 
 1. Export these variables:
@@ -22,7 +22,7 @@ Follows these steps:
     export NAMESPACE={LAMBDA_NAMESPACE}
     ```
 
-2. Create a Function CR that specifies the lambda's logic and defines a runtime on which it should run:
+2. Create a Function CR that specifies the lambda's logic:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -32,21 +32,26 @@ Follows these steps:
       name: $NAME
       namespace: $NAMESPACE
     spec:
-      functionContentType: plaintext
-      runtime: nodejs8
-      function: |
+      source: |
         module.exports = {
           main: function(event, context) {
             return 'Hello World!'
           }
         }
-    EOF    
+    EOF
     ```
 
-3. Check if your lambda was created successfully and has the `Running` status:
+3. Check if your lambda was created successfully and all conditions are set to `True`:
 
     ```bash
-    kubectl get functions $NAME -n $NAMESPACE -o=jsonpath='{.status.condition}'
+    kubectl get functions $NAME -n $NAMESPACE
+    ```
+
+    You should get a result similar to the following example:
+
+    ```bash
+    NAME                        CONFIGURED   BUILT   RUNNING   VERSION   AGE
+    test-lambda                 True         True    True      1         18m
     ```
 
     </details>

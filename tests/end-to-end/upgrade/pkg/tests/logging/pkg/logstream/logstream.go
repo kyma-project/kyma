@@ -1,8 +1,10 @@
 package logstream
 
 import (
+	"bytes"
 	"fmt"
-	"os/exec"
+	"io"
+	"net/http"
 	"regexp"
 	"strconv"
 	"time"
@@ -51,7 +53,7 @@ func WaitForDummyPodToRun(namespace string, coreInterface kubernetes.Interface) 
 		select {
 		case <-timeout:
 			tick.Stop()
-			return errors.Errorf("Timed out while waiting for test-counter-pod to be Running!")
+			return errors.Errorf("timed out while waiting for test-counter-pod to be Running!")
 		case <-tick.C:
 			pod, err := coreInterface.CoreV1().Pods(namespace).Get("test-counter-pod", metav1.GetOptions{})
 			if err != nil {
@@ -65,26 +67,24 @@ func WaitForDummyPodToRun(namespace string, coreInterface kubernetes.Interface) 
 }
 
 // Test querys loki api with the given label key-value pair and checks that the logs of the dummy pod are present
-func Test(labelKey string, labelValue string, authHeader string, startTimeUnixNano int64) error {
-	timeout := time.After(1 * time.Minute)
-	tick := time.NewTicker(1 * time.Second)
-	lokiURL := "http://logging-loki.kyma-system:3100/api/prom/query"
-	query := fmt.Sprintf("query={%s=\"%s\"}", labelKey, labelValue)
-	startTimeParam := fmt.Sprintf("start=%s", strconv.FormatInt(startTimeUnixNano, 10))
+func Test(labelKey string, labelValue string, authHeader string, httpClient *http.Client) error {
+	timeout := time.After(3 * time.Minute)
+	tick := time.NewTicker(5 * time.Second)
+	currentTimeUnixNano := time.Now().UnixNano()
+	startTimeParam := strconv.FormatInt(currentTimeUnixNano, 10)
+	lokiURL := fmt.Sprintf(`http://logging-loki.kyma-system:3100/api/prom/query?query={%s="%s"}&start=%s`, labelKey, labelValue, startTimeParam)
 	for {
 		select {
 		case <-timeout:
 			tick.Stop()
-			return errors.Errorf("The string 'logTest-' is not present in logs when using the following query: %s", query)
+			return errors.Errorf(`the string "logTest-" is not present in logs when using the following query: {%s="%s"}`, labelKey, labelValue)
 		case <-tick.C:
-			cmd := exec.Command("curl", "-v", "-G", "-s", lokiURL, "--data-urlencode", query, "--data-urlencode", startTimeParam, "-H", authHeader)
-			stdoutStderr, err := cmd.CombinedOutput()
+			respBody, err := doGet(httpClient, lokiURL, authHeader)
 			if err != nil {
-				return errors.Wrapf(err, "Error in HTTP GET to %s: %s", lokiURL, string(stdoutStderr))
+				return errors.Wrap(err, "cannot query loki for logs")
 			}
-
 			var testDataRegex = regexp.MustCompile(`logTest-`)
-			submatches := testDataRegex.FindStringSubmatch(string(stdoutStderr))
+			submatches := testDataRegex.FindStringSubmatch(respBody)
 			if submatches != nil {
 				return nil
 			}
@@ -102,4 +102,26 @@ func Cleanup(namespace string, coreInterface kubernetes.Interface) error {
 		return errors.Wrap(err, "cannot delete test-counter-pod")
 	}
 	return nil
+}
+
+func doGet(httpClient *http.Client, url string, authHeader string) (string, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", errors.Wrap(err, "cannot create a new HTTP request")
+	}
+	req.Header.Add("Authorization", authHeader)
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return "", errors.Wrapf(err, "cannot send HTTP request to %s", url)
+	}
+	defer resp.Body.Close()
+	var body bytes.Buffer
+	if _, err := io.Copy(&body, resp.Body); err != nil {
+		return "", errors.Wrap(err, "cannot read response body")
+	}
+	if resp.StatusCode != 200 {
+		return "", errors.Errorf("error in HTTP GET to %s.\nStatus Code: %d\nResponse: %s", url, resp.StatusCode, body.String())
+	}
+	return body.String(), nil
 }

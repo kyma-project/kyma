@@ -5,6 +5,11 @@ rbacJob:
     repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
     tag: "v20200310-5f52f407"
 
+apiMigratorJob:
+  image:
+    repository: eu.gcr.io/kyma-project/api-gateway-migrator
+    tag: "274e49ce"
+
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
   tag: 0c4d7ae5
@@ -74,8 +79,11 @@ tests:
   enabled: true
   image:
     registry: "eu.gcr.io/kyma-project"
-    version: "0fa8f3f8"
+    version: "6eaa615a"
   env:
     testUser: "admin-user"
     timeout: 120
-    delay: 15
+    delay: 10
+    jwtTimeout: "30s"
+    jwtMaxAttempts: 5
+    jwtDelay: 5

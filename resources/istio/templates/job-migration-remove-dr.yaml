@@ -1,0 +1,27 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
+    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "5"
+  name: remove-dr
+spec:
+  activeDeadlineSeconds: 1000
+  backoffLimit: 3
+  template:
+    spec:
+      containers:
+        -
+          command:
+            - bash
+            - "-c"
+            - |
+              set -e
+              kubectl delete dr istio-ingressgateway -n istio-system --ignore-not-found=true
+          image: {{ .Values.kyma.labelJob.image }}:{{ .Values.kyma.labelJob.tag }}
+          name: remove-dr
+          terminationMessagePolicy: "FallbackToLogsOnError"
+      restartPolicy: Never
+      serviceAccountName: remove-dr

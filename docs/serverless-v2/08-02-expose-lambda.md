@@ -1,5 +1,5 @@
 ---
-title: Expose the lambda with an API Rule
+title: Expose a lambda with an API Rule
 type: Tutorials
 ---
 
@@ -22,8 +22,8 @@ Follows these steps:
 
 <div tabs name="steps" group="expose-lambda">
   <details>
-  <summary label="kubectl">
-  kubectl
+  <summary label="cli">
+  CLI
   </summary>
 
 1. Export these variables:

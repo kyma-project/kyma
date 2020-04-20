@@ -8,15 +8,19 @@ tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-7581"
+    tag: "PR-8043"
     pullPolicy: IfNotPresent
-  disableConcurrency: true
+  disableConcurrency: false
   restartPolicy: Never
   resources:
+    requests:
+      memory: 32Mi
+      cpu: 100m
     limits:
-      memory: 128Mi
+      memory: 64Mi
+      cpu: 200m
   envs:
-    waitTimeout: 45m # sorry guys :sadgabens:
+    waitTimeout: 10m
     verifySSL: "false"
 
 global:
@@ -34,8 +38,8 @@ global:
 
 images:
   manager:
-    repository: eu.gcr.io/kyma-project/function-controller
-    tag: PR-7404
+    repository: "eu.gcr.io/kyma-project/function-controller"
+    tag: "PR-8004"
     pullPolicy: IfNotPresent
   kubeRbacProxy:
     repository: gcr.io/kubebuilder/kube-rbac-proxy
@@ -151,10 +155,6 @@ backendModule:
 
 clusterMicroFrontend:
   enable: true
-
-cert-manager:
-  enabled: true
-  fullnameOverride: "function-controller-cert-manager"
 
 docker-registry:
   enabled: true
