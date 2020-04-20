@@ -2,7 +2,7 @@ images:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   ui:
-    dir: /pr
+    dir: pr/
     version: PR-1708
 
 statusPort: 6082
