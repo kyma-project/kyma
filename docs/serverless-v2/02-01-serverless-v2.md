@@ -2,25 +2,25 @@
 title: Architecture
 ---
 
-Serverless v2 relies on [Knative Serving](https://knative.dev/docs/serving/) for deploying and managing functions, and [Tekton Pipelines](https://github.com/tektoncd/pipeline) for creating Docker images. See how these and other resources process a lambda within a Kyma cluster:
+Serverless v2 relies on [Knative Serving](https://knative.dev/docs/serving/) for deploying and managing functions and [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) for creating Docker images. See how these and other resources process a lambda within a Kyma cluster:
 
-![Serverless v2 architecture](./assets/serverless-v2-architecture.svg)
+![Serverless architecture](./assets/serverless-architecture.svg)
 
 1. Create a lambda either through the UI or by applying a Function custom resource (CR). This CR contains the lambda definition (business logic that you want to execute) and information on the environment on which it should run.
 
     >**NOTE:** Function Controller currently supports Node.js 6 and Node.js 8 runtimes.
 
-2. Function Controller (FC) detects a new Function CR and reads its definition.
+2. Function Controller (FC) detects a new Function CR.
 
-3. Based on the Function CR definition, FC creates a [TaskRun CR](https://github.com/tektoncd/pipeline/blob/master/docs/taskruns.md), the purpose of which is to create an image based on the defined lambda.
+3. FC creates a ConfigMap with the lambda definition.
 
-4. Tekton Pipelines Controller (TPC) detects the new TaskRun CR and reads its definition.
+4. Based on the ConfigMap, FC creates a Kubernetes Job that triggers the creation of a lambda image.
 
-5. Based on the TaskRun CR definition, TPC triggers a pipeline that uses [Kaniko](https://github.com/GoogleContainerTools/kaniko/blob/master/README.md) to create a Docker image with lambda definition and publish this image in a Docker registry.
+5. The Job creates a Pod with the Docker image containing the lambda definition. It also pushes the image to a Docker registry.
 
-6. FC monitors the TaskRun CR. When the image creation finishes successfully, FC creates a Service CR (KService) that points to the Pod with the image.
+6. FC monitors the Job status. When the image creation finishes successfully, FC creates a Service CR (KService) that points to the Pod with the image.
 
-7. Knative Serving controller (KSC) detects the new KService and reads its definition.
+7. Knative Serving Controller (KSC) detects the new KService and reads its definition.
 
 8. KSC creates these resources:
 
