@@ -1,15 +1,15 @@
 ---
-title: Create a lambda
+title: Create a function
 type: Tutorials
 ---
 
-This tutorial shows how you can create a simple "Hello World!" lambda.
+This tutorial shows how you can create a simple "Hello World!" function.
 
 ## Steps
 
 Follows these steps:
 
-<div tabs name="steps" group="create-lambda">
+<div tabs name="steps" group="create-function">
   <details>
   <summary label="cli">
   CLI
@@ -18,11 +18,11 @@ Follows these steps:
 1. Export these variables:
 
     ```bash
-    export NAME={LAMBDA_NAME}
-    export NAMESPACE={LAMBDA_NAMESPACE}
+    export NAME={FUNCTION_NAME}
+    export NAMESPACE={FUNCTION_NAMESPACE}
     ```
 
-2. Create a Function CR that specifies the lambda's logic:
+2. Create a Function CR that specifies the function's logic:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -41,7 +41,7 @@ Follows these steps:
     EOF
     ```
 
-3. Check if your lambda was created successfully and all conditions are set to `True`:
+3. Check if your function was created successfully and all conditions are set to `True`:
 
     ```bash
     kubectl get functions $NAME -n $NAMESPACE
@@ -51,7 +51,7 @@ Follows these steps:
 
     ```bash
     NAME                        CONFIGURED   BUILT   RUNNING   VERSION   AGE
-    test-lambda                 True         True    True      1         18m
+    test-function                 True         True    True      1         18m
     ```
 
     </details>
@@ -64,13 +64,13 @@ Follows these steps:
 
 1. Create a Namespace or select one from the drop-down list in the top navigation panel.
 
-2. Go to the **Functions [preview]** view at the bottom of the left navigation panel and select **Create lambda**.
+2. Go to the **Functions [preview]** view at the bottom of the left navigation panel and select **Create function**.
 
-3. In the pop-up box, provide the lambda's name and select **Create** to confirm changes.
+3. In the pop-up box, provide the function's name and select **Create** to confirm changes.
 
-     The pop-up box closes and the `Lambda created successfully` message appears.
+     The pop-up box closes and the `Function created successfully` message appears.
 
-4. In the lambda details view that opens up automatically, go to the **Code** tab and enter the lambda's code:
+4. In the function details view that opens up automatically, go to the **Code** tab and enter the function's code:
 
     ```
     module.exports = {
@@ -82,7 +82,7 @@ Follows these steps:
 
 5. Select **Save** to confirm changes.
 
-    The `Lambda {NAME} updated successfully` message appears confirming the changes were saved. Once deployed, the new lambda should have the `RUNNING` status in the list of all lambdas under the **Functions [preview]** view.
+    The `Function {NAME} updated successfully` message appears confirming the changes were saved. Once deployed, the new function should have the `RUNNING` status in the list of all functions under the **Functions [preview]** view.
 
     </details>
 </div>

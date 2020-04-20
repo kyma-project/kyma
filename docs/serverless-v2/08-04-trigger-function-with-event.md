@@ -1,15 +1,15 @@
 ---
-title: Trigger a lambda with an event
+title: Trigger a function with an event
 type: Tutorials
 ---
 
-This tutorial shows how to trigger a lambda with an event from an Application connected to Kyma.
+This tutorial shows how to trigger a function with an event from an Application connected to Kyma.
 
 > **NOTE:** To learn more about events flow in Kyma, read the [eventing](/components/knative-eventing-mesh) documentation.
 
 ## Prerequisites
 
-This tutorial is based on an existing lambda. To create one, follow the [Create a lambda](#tutorials-create-a-lambda) tutorial.
+This tutorial is based on an existing function. To create one, follow the [Create a function](#tutorials-create-a-function) tutorial.
 
 You must also have:
 
@@ -21,7 +21,7 @@ You must also have:
 
 Follows these steps:
 
-<div tabs name="steps" group="trigger-lambda">
+<div tabs name="steps" group="trigger-function">
   <details>
   <summary label="cli">
   CLI
@@ -30,22 +30,22 @@ Follows these steps:
 1. Export these variables:
 
     ```bash
-    export NAME={LAMBDA_NAME}
-    export NAMESPACE={LAMBDA_NAMESPACE}
+    export NAME={FUNCTION_NAME}
+    export NAMESPACE={FUNCTION_NAMESPACE}
     export APP_NAME={APPLICATION_NAME}
     export EVENT_VERSION={EVENT_TYPE_VERSION}
     export EVENT_TYPE={EVENT_TYPE_NAME}
     ```
 
-    > **NOTE:** Lambda takes the name from the Function CR name. The Trigger CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
+    > **NOTE:** Function takes the name from the Function CR name. The Trigger CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 
 These variables refer to the following:
 
 - **APP_NAME** is taken from the name of the Application CR and specifies the source of events.
 - **EVENT_VERSION** points to the specific event version, such as `v1`.
-- **EVENT_TYPE** points to the given event type to which you want to subscribe your lambda, such as `user.created`.
+- **EVENT_TYPE** points to the given event type to which you want to subscribe your function, such as `user.created`.
 
-2. Create a Trigger CR for your lambda to subscribe your lambda to a specific event type.
+2. Create a Trigger CR for your function to subscribe your function to a specific event type.
 
     ```yaml
     cat <<EOF | kubectl apply -f  -
@@ -80,13 +80,13 @@ These variables refer to the following:
 
 1. From the drop-down list in the top navigation panel, select the Namespace in which your Application exposes events.
 
-2. Go to the **Functions [preview]** view at the bottom of the left navigation panel and navigate to your lambda.
+2. Go to the **Functions [preview]** view at the bottom of the left navigation panel and navigate to your function.
 
-3. Once in the lambda view, select **Add Event Trigger** in the **Event Triggers** section.
+3. Once in the function view, select **Add Event Trigger** in the **Event Triggers** section.
 
-4. Select the event type and version that you want to use as a trigger for your lambda and select **Add** to confirm changes.
+4. Select the event type and version that you want to use as a trigger for your function and select **Add** to confirm changes.
 
-The `Event Trigger created successfully` message appears and you will see the trigger available in the **Event Triggers** section in your lambda.
+The `Event Trigger created successfully` message appears and you will see the trigger available in the **Event Triggers** section in your function.
 
     </details>
 </div>
@@ -95,9 +95,9 @@ The `Event Trigger created successfully` message appears and you will see the tr
 
 > **CAUTION:** Before you follow steps in this section and send a sample event, bear in mind that it will be propagated to all services subscribed to this event type.
 
-To test if the Trigger CR is properly connected to the lambda:
+To test if the Trigger CR is properly connected to the function:
 
-1. Change the lambda's code to:​
+1. Change the function's code to:​
 
     ```js
     module.exports = {
@@ -107,7 +107,7 @@ To test if the Trigger CR is properly connected to the lambda:
     }
     ```
 
-2. Send an event manually to trigger the lambda:
+2. Send an event manually to trigger the function:
 
     ```bash
     curl -X POST -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
@@ -123,7 +123,7 @@ To test if the Trigger CR is properly connected to the lambda:
 
     - **CERT_FILE_NAME** and **KEY_FILE_NAME** are client certificates for a given Application. You can get them by completing steps in [this](/components/application-connector/#tutorials-get-the-client-certificate) tutorial.
 
-3. After sending an event, you should get this result from logs of your lambda's latest Pod:
+3. After sending an event, you should get this result from logs of your function's latest Pod:
 
     ```text
     User created: 123456789
