@@ -434,7 +434,6 @@ func fixCompassDocumentExt(suffix string, content *graphql.CLOB) *graphql.Docume
 func fixCompassAPIDefinition(suffix string, spec *graphql.APISpec) *graphql.APIDefinition {
 	desc := baseAPIDesc + suffix
 
-
 	return &graphql.APIDefinition{
 		ID:          baseAPIId + suffix,
 		Name:        baseAPIName + suffix,
