@@ -106,7 +106,8 @@ func (t ApiGatewayTest) CreateResourcesError(namespace string) error {
 }
 
 func (t ApiGatewayTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	return t.TestResourcesError(namespace)
+	t.TestResourcesError(namespace)
+	return errors.New("for testing purposes")
 }
 
 func (t ApiGatewayTest) TestResourcesError(namespace string) error {
