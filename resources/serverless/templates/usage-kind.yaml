@@ -3,7 +3,7 @@ kind: UsageKind
 metadata:
   name: function
 spec:
-  displayName: "Knative Service"
+  displayName: "Function"
   resource:
     group: serving.knative.dev
     kind: service
