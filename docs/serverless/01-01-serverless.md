@@ -1,9 +1,10 @@
 ---
 title: Overview
 ---
-The term "serverless" refers to the Internet-based architecture. Application development that uses serverless technology relies solely on a combination of cloud-based, third-party services, client-side logic, and service-hosted remote procedure calls, also known as Functions as a Service (FaaS). Developers create this combination using [lambda functions](/components/serverless#details-managing-lambdas) which connect third-party services and Kyma,replacing the common use of a server.
 
-Using the serverless approach reduces the implementation and operation effort to the absolute minimum.
+"Serverless" refers to an architecture in which the infrastructure of your applications is managed by cloud providers. Contrary to its name, a serverless application does require a server but it doesn't require you to run and manage it on your own. Instead, you subscribe to a given cloud provider, such as AWS, Azure or GCP, and pay a subscription fee only for the resources you actually use. Since the resource allocation can be dynamic and depends on your current needs, the serverless model is particularly cost-effective when you want to implement a certain logic that is triggered on demand. Simply, you get your things done and don't pay for the infrastructure that sits idle.
 
-The serverless implementation of Kyma is based on [Kubeless](https://github.com/kubeless/kubeless).
+Similarly to cloud providers, Kyma offers a service (known as "functions-as-a-service" or "FaaS") that provides a platform on which you can build, run, and manage serverless applications in Kubernetes. These applications are called **functions** and are based on the Function CR objects. They are simple code snippets that implement the exact business logic you define in them. After you create a function, you can:
 
+- Configure it to be triggered by events coming from external sources to which you subscribe.
+- Expose it to an external endpoint (HTTPS).

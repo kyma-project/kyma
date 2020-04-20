@@ -82,11 +82,9 @@ Follows these steps:
     Console UI
     </summary>
 
-> **NOTE:** The API Rules functionality that allow you to expose functions is an experimental feature, and it is not enabled by default in the Console UI. To use it, enable **Experimental functionalities** in the **General Settings** view before you follow the steps. Refresh the page after enabling this option.
-
 1. Select a Namespace from the drop-down list in the top navigation panel. Make sure the Namespace includes the function that you want to expose through an API Rule.
 
-2. Go to the **API Rules [preview]** view at the bottom of the left navigation panel and select **Add API Rule**.
+2. Go to the **API Rules** view at the bottom of the left navigation panel and select **Add API Rule**.
 
 3. In the **General settings** section:
 
@@ -102,7 +100,7 @@ Follows these steps:
 
 5. Select **Create** to confirm changes.
 
-    The `API Rule {NAME} created successfully` message appears confirming the changes were saved.
+    The message appears on the screen confirming the changes were saved.
 
 6. In the API Rule's details view that opens up automatically, check if you can access the function by selecting the HTTPS link under **Host**.
 

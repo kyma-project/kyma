@@ -76,17 +76,15 @@ These variables refer to the following:
     Console UI
     </summary>
 
-> **NOTE:** Serverless v2 is an experimental feature, and it is not enabled by default in the Console UI. To use its **Functions [preview]** view, enable **Experimental functionalities** in the **General Settings** view before you follow the steps. Refresh the page after enabling this option.
-
 1. From the drop-down list in the top navigation panel, select the Namespace in which your Application exposes events.
 
-2. Go to the **Functions [preview]** view at the bottom of the left navigation panel and navigate to your function.
+2. Go to the **Functions** view in the left navigation panel and navigate to your function.
 
 3. Once in the function view, select **Add Event Trigger** in the **Event Triggers** section.
 
 4. Select the event type and version that you want to use as a trigger for your function and select **Add** to confirm changes.
 
-The `Event Trigger created successfully` message appears and you will see the trigger available in the **Event Triggers** section in your function.
+The message appears on the UI confirming that the Event Trigger was successfully created, and you will see it in the **Event Triggers** section in your function.
 
     </details>
 </div>
