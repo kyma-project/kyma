@@ -11,7 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: ea308cc3
+    version: PR-7946
     tests:
       enabled: true
 
@@ -1831,8 +1831,10 @@ prometheus:
       matchNames:
         - istio-system
     endpoints:
-      - port: prometheus
-        interval: 30s
+# disabled to fix wrong istio-ingressgateway service port configuration
+# remove commented config after fix https://github.com/istio/istio/issues/22801
+#      - port: prometheus
+#        interval: 30s
       - port: statsd-prom
         interval: 30s
       - port: http-monitoring

@@ -17,6 +17,8 @@ broker:
   username: "broker"
   # password can be set manually by user. If empty then it will be randomized.
   password: ""
+  # serving health probes routes on statusPort
+  statusPort: "8071"
 
 service:
   type: ClusterIP
@@ -92,3 +94,8 @@ lms:
   samlTenant: "TBD"
   disabled: false
 
+e2e:
+  azure:
+    configName: "e2e-runtime-config-azure"
+  gcp:
+    configName: "e2e-runtime-config-gcp"

@@ -42,12 +42,16 @@ spec:
           image: "{{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.kyma_environment_broker.dir }}kyma-environment-broker:{{ .Values.global.images.kyma_environment_broker.version }}"
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           env:
+            - name: APP_DISABLE_PROCESS_OPERATIONS_IN_PROGRESS
+              value: "false"
             - name: APP_BROKER_ENABLE_PLANS
               value: "{{ .Values.enablePlans }}"
             - name: APP_PROVISIONING_URL
               value: "{{ .Values.provisioner.URL }}"
             - name: APP_PORT
               value: "{{ .Values.broker.port }}"
+            - name: APP_STATUS_PORT
+              value: "{{ .Values.broker.statusPort }}"
             - name: APP_AUTH_USERNAME
               value: "{{ .Values.broker.username }}"
             - name: APP_AUTH_PASSWORD
@@ -186,6 +190,14 @@ spec:
             - name: http
               containerPort: {{ .Values.broker.port }}
               protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.broker.statusPort }}
+            failureThreshold: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+            initialDelaySeconds: 20
           resources:
               {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:

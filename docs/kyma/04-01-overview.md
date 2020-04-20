@@ -30,9 +30,7 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `permission-controller` | ✅ | ✅ |
 | `apiserver-proxy` | ✅ | ✅ |
 | `iam-kubeconfig-service` | ✅ | ✅ |
-| `tekton-pipelines` | ⛔️ | ⛔️ |
-| `function-controller-init` | ⛔️ | ⛔️ |
-| `function-controller` | ⛔️ | ⛔️ |
+| `serverless` | ✅ | ✅ |
 | `knative-provisioner-natss` | ✅ | ✅ |
 | `event-sources` | ✅ | ✅ |
 | `application-connector-ingress` | ✅ | ✅ |

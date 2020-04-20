@@ -1,0 +1,36 @@
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: httpbin
+spec:
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  service:
+    name: httpbin
+    port: 8000
+    host: httpbin-new.kyma.local
+  rules:
+  - path: .*/suffix.ico
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    accessStrategies:
+    - handler: allow
+  - path: /anything.*
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    accessStrategies:
+    - handler: allow
+  - path: /prefixed/.*
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    accessStrategies:
+    - handler: allow
+  - path: /exact/path/to/resource.jpg
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    accessStrategies:
+    - handler: allow
+  - path: /.*
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    accessStrategies:
+    - handler: jwt
+      config:
+        trusted_issuers:
+        - "https://dex.kyma.local"
+        jwks_urls:
+        - "http://dex-service.kyma-system.svc.cluster.local:5556/keys"

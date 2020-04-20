@@ -57,6 +57,11 @@ dex:
   expiry:
     signingKeys: "720h"
     idTokens: "8h"
+  logger:
+    # Log level, can be "debug", "info", "warn", "error", "fatal", "panic"
+    level: info
+    # log format, can be "text" or "json"
+    format: json
   useStaticConnector: true
 
 deploymentStrategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy

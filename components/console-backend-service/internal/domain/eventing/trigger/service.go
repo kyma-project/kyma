@@ -89,34 +89,41 @@ func NewService(serviceFactory *resource.ServiceFactory, extractor extractor.Tri
 }
 
 func (s *triggerService) List(namespace string, subscriber *gqlschema.SubscriberInput) ([]*v1alpha1.Trigger, error) {
-	items := make([]*v1alpha1.Trigger, 0)
+	var items []interface{}
+	var err error
+
 	if subscriber == nil {
-		err := s.ListInIndex(Namespace, namespace, &items)
-		if err != nil {
-			return nil, err
-		}
+		items, err = s.Informer.GetIndexer().ByIndex(Namespace, fmt.Sprintf(namespace))
 	} else if subscriber.Ref != nil {
-		err := s.ListInIndex(Namespace_Subscriber_Ref_Index,
-			fmt.Sprintf("%s/%s/%s/%s/%s",
-				namespace,
-				subscriber.Ref.APIVersion,
-				subscriber.Ref.Kind,
-				subscriber.Ref.Name,
-				subscriber.Ref.Namespace), &items)
-		if err != nil {
-			return nil, err
-		}
+		key := fmt.Sprintf("%s/%s/%s/%s/%s",
+			namespace,
+			subscriber.Ref.APIVersion,
+			subscriber.Ref.Kind,
+			subscriber.Ref.Name,
+			subscriber.Ref.Namespace)
+		items, err = s.Informer.GetIndexer().ByIndex(Namespace_Subscriber_Ref_Index, key)
 	} else if subscriber.URI != nil {
-		err := s.ListInIndex(Namespace_Subscriber_Uri_Index,
-			fmt.Sprintf("%s/%s", namespace, *subscriber.URI), &items)
-		if err != nil {
-			return nil, err
-		}
+		key := fmt.Sprintf("%s/%s", namespace, *subscriber.URI)
+		items, err = s.Informer.GetIndexer().ByIndex(Namespace_Subscriber_Uri_Index, key)
 	} else {
-		return nil, errors.New("subscription is not null but it is empty")
+		return nil, errors.New("subscriber is not null but it is empty")
 	}
 
-	return items, nil
+	if err != nil {
+		return nil, err
+	}
+
+	var triggers []*v1alpha1.Trigger
+	for _, item := range items {
+		trigger, err := s.extractor.Do(item)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Incorrect item type: %T, should be: *%s", item, pretty.TriggerType)
+		}
+
+		triggers = append(triggers, trigger)
+	}
+
+	return triggers, nil
 }
 
 var triggerTypeMeta = metav1.TypeMeta{

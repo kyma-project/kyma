@@ -4,6 +4,7 @@ package servicecatalogaddons
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
 
 	"time"
@@ -103,17 +104,31 @@ func TestAddonsConfigurationMutationsAndQueries(t *testing.T) {
 	AuthSuite.Run(t, ops)
 }
 
+func generateRandomName() string {
+	var random *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	const charset = "abcdefghijklmnopqrstuvwxyz"
+	const length = 8
+
+	str := make([]byte, length)
+	for i := range str {
+		str[i] = charset[random.Intn(len(charset))]
+	}
+	return string(str)
+}
+
 func newAddonsConfigurationSuite(t *testing.T) *addonsConfigurationTestSuite {
 	c, err := graphql.New()
 	require.NoError(t, err)
 	addonsCli, _, err := client.NewAddonsConfigurationsClientWithConfig()
 	require.NoError(t, err)
 
+	name := generateRandomName()
 	return &addonsConfigurationTestSuite{
 		gqlCli:                   c,
 		addonsCli:                addonsCli,
 		t:                        t,
-		givenAddonsConfiguration: fixture.AddonsConfiguration("test", []string{"test"}, map[string]string{"label": "true"}),
+		givenAddonsConfiguration: fixture.AddonsConfiguration(name, []string{"test"}, map[string]string{"label": "true"}),
 	}
 }
 

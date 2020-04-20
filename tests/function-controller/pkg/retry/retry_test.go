@@ -48,7 +48,7 @@ func Test_fnWithIgnore(t *testing.T) {
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("test%d", i), func(t *testing.T) {
 			g := NewGomegaWithT(t)
-			actualErr := fnWithIgnore(test.fn, test.ignoreFn)()
+			actualErr := fnWithIgnore(test.fn, test.ignoreFn, t)()
 			switch {
 			case test.expected == nil:
 				g.Expect(actualErr).To(BeNil())
@@ -66,9 +66,7 @@ func Test_fnWithIgnore_callback(t *testing.T) {
 		return errTest1
 	}, func(err error) bool {
 		return true
-	}, func(args ...interface{}) {
-		actual = true
-	})()
+	}, t)()
 	g.Expect(err).To(BeNil())
 	g.Expect(actual).To(Equal(true))
 }
@@ -102,7 +100,7 @@ func Test_errorFn(t *testing.T) {
 		},
 	}
 	for i, test := range tests {
-		retry := errorFn()
+		retry := errorFn(t)
 		t.Run(fmt.Sprintf("test%d", i), func(t *testing.T) {
 			g := NewGomegaWithT(t)
 			actual := retry(test.err)
@@ -115,10 +113,8 @@ func Test_errorFn_callback(t *testing.T) {
 	g := NewGomegaWithT(t)
 	var actual string
 	var ok bool
-	cbk := func(data ...interface{}) {
-		actual, ok = data[0].(string)
-	}
-	errorFn(cbk)(apierrors.NewTimeoutError("test timeout error", 10))
+
+	errorFn(t)(apierrors.NewTimeoutError("test timeout error", 10))
 	g.Expect(ok).To(BeTrue())
 	g.Expect(actual).To(Equal("retrying due to: Timeout: test timeout error"))
 }

@@ -9,12 +9,15 @@ import (
 )
 
 type envConfig struct {
-	Domain        string        `envconfig:"default=kyma.local"`
-	UserEmail     string        `envconfig:"TEST_USER_EMAIL"`
-	UserPassword  string        `envconfig:"TEST_USER_PASSWORD"`
-	ClientTimeout time.Duration `envconfig:"default=10s"` //Don't forget the unit!
+	Domain           string        `envconfig:"TEST_DOMAIN,default=kyma.local"`
+	UserEmail        string        `envconfig:"TEST_USER_EMAIL"`
+	UserPassword     string        `envconfig:"TEST_USER_PASSWORD"`
+	ClientTimeout    time.Duration `envconfig:"TEST_CLIENT_TIMEOUT,default=10s"` //Don't forget the unit!
+	RetryMaxAttempts uint          `envconfig:"TEST_RETRY_MAX_ATTEMPTS,default=5"`
+	RetryDelay       uint          `envconfig:"TEST_RETRY_DELAY,default=5"`
 }
 
+//Config JWT configuration structure
 type Config struct {
 	IdProviderConfig idProviderConfig
 	EnvConfig        envConfig
@@ -49,6 +52,7 @@ type userCredentials struct {
 	Password string
 }
 
+//LoadConfig Generate test config from envs
 func LoadConfig() (Config, error) {
 	env := envConfig{}
 	err := envconfig.Init(&env)
@@ -70,8 +74,8 @@ func LoadConfig() (Config, error) {
 			TimeoutSeconds: env.ClientTimeout,
 		},
 		RetryConfig: retryConfig{
-			MaxAttempts: 4,
-			Delay:       3 * time.Second,
+			MaxAttempts: env.RetryMaxAttempts,
+			Delay:       time.Duration(env.RetryDelay) * time.Second,
 		},
 	}
 

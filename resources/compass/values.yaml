@@ -14,25 +14,25 @@ global:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir:
-      version: "c4dcfb72"
+      version: "2a54a16c"
     connectivity_adapter:
       dir:
-      version: "ec24ea39"
+      version: "9fae2df7"
     pairing_adapter:
       dir:
-      version: "ffe1a7c3"
+      version: "9fae2df7"
     director:
       dir:
-      version: "1ec36154"
+      version: "a232fdab"
     gateway:
       dir:
-      version: "b544d2e5"
+      version: "9fae2df7"
     healthchecker:
       dir:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "492efbfa"
+      version: "0ac13cfb"
     provisioner:
       dir:
       version: "c4dcfb72"
@@ -43,11 +43,11 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "cbf30894"
+      version: "89c662d3"
     tests:
       director:
         dir:
-        version: "1ec36154"
+        version: "96671fab"
       connector:
         dir:
         version: "9cebaf5c"
@@ -56,13 +56,21 @@ global:
         version: "ffd45e1d"
       e2e_provisioning:
         dir:
-        version: "85f7b0ea"
+        version: "ef98664d"
       connectivity_adapter:
         dir:
-        version: "7f966018"
+        version: "9fae2df7"
   isLocalEnv: false
   oauth2:
     host: oauth2
+  livenessProbe:
+    initialDelaySeconds: 30
+    timeoutSeconds: 1
+    periodSeconds: 10
+  readinessProbe:
+    initialDelaySeconds: 5
+    timeoutSeconds: 1
+    periodSeconds: 2
 
   agentPreconfiguration: true
 
@@ -100,10 +108,13 @@ global:
       ca:
         name: connector-service-app-ca
         namespace: kyma-integration
+        certificateKey: ca.crt
+        keyKey: ca.key
       rootCA:
         name: kyma-gateway-certs
         namespace: istio-system # For Ingress Gateway to work properly the namespace needs to be istio-system
         cacert: kyma-gateway-certs-cacert # For cert-rotation the cacert should be in different secret
+        certificateKey: cacert
     certificateDataHeader: "Certificate-Data"
     revocation:
       configmap:
@@ -160,6 +171,8 @@ global:
     gateway:
       name: "kyma-gateway"
       namespace: "kyma-system"
+    proxy:
+      port: 15020
 
   database:
     manageSecrets: true

@@ -17,6 +17,7 @@ func (b *Batch) CreateResources(k8sClient dynamic.Interface, resources ...unstru
 	for _, res := range resources {
 		resourceSchema, ns, _ := GetResourceSchemaAndNamespace(res)
 		b.ResourceManager.CreateResource(k8sClient, resourceSchema, ns, res)
+		b.ResourceManager.GetResource(k8sClient, resourceSchema, ns, res.GetName())
 	}
 }
 

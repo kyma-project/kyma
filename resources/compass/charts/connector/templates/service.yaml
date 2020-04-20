@@ -33,6 +33,9 @@ spec:
     - port: {{ .Values.global.connector.graphql.internal.port }}
       protocol: TCP
       name: http-gql-int
+    - port: {{ .Values.global.istio.proxy.port }}
+      protocol: TCP
+      name: proxy-status
   selector:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}

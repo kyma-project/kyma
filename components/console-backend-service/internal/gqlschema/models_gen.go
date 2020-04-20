@@ -9,24 +9,6 @@ import (
 	"time"
 )
 
-type API struct {
-	Name                   string                 `json:"name"`
-	Hostname               string                 `json:"hostname"`
-	Service                ApiService             `json:"service"`
-	AuthenticationPolicies []AuthenticationPolicy `json:"authenticationPolicies"`
-	CreationTimestamp      time.Time              `json:"creationTimestamp"`
-}
-
-type APIInput struct {
-	Hostname                   string `json:"hostname"`
-	ServiceName                string `json:"serviceName"`
-	ServicePort                int    `json:"servicePort"`
-	JwksURI                    string `json:"jwksUri"`
-	Issuer                     string `json:"issuer"`
-	DisableIstioAuthPolicyMTLS *bool  `json:"disableIstioAuthPolicyMTLS"`
-	AuthenticationEnabled      *bool  `json:"authenticationEnabled"`
-}
-
 type APIRule struct {
 	Name    string          `json:"name"`
 	Service APIRuleService  `json:"service"`
@@ -114,19 +96,9 @@ type AddonsConfigurationStatusRepository struct {
 	Message string                            `json:"message"`
 }
 
-type ApiEvent struct {
-	Type SubscriptionEventType `json:"type"`
-	API  API                   `json:"api"`
-}
-
 type ApiRuleEvent struct {
 	Type    SubscriptionEventType `json:"type"`
 	APIRule APIRule               `json:"apiRule"`
-}
-
-type ApiService struct {
-	Name string `json:"name"`
-	Port int    `json:"port"`
 }
 
 type ApplicationEntry struct {
@@ -182,12 +154,6 @@ type AssetStatus struct {
 	Phase   AssetPhaseType `json:"phase"`
 	Reason  string         `json:"reason"`
 	Message string         `json:"message"`
-}
-
-type AuthenticationPolicy struct {
-	Type    AuthenticationPolicyType `json:"type"`
-	Issuer  string                   `json:"issuer"`
-	JwksURI string                   `json:"jwksURI"`
 }
 
 type BackendModule struct {
@@ -902,41 +868,6 @@ func (e *AssetPhaseType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AssetPhaseType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type AuthenticationPolicyType string
-
-const (
-	AuthenticationPolicyTypeJwt AuthenticationPolicyType = "JWT"
-)
-
-func (e AuthenticationPolicyType) IsValid() bool {
-	switch e {
-	case AuthenticationPolicyTypeJwt:
-		return true
-	}
-	return false
-}
-
-func (e AuthenticationPolicyType) String() string {
-	return string(e)
-}
-
-func (e *AuthenticationPolicyType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = AuthenticationPolicyType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid AuthenticationPolicyType", str)
-	}
-	return nil
-}
-
-func (e AuthenticationPolicyType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

@@ -1,5 +1,0 @@
-dependencies:
-  - name: cert-manager
-    condition: cert-manager.enabled
-  - name: docker-registry
-    condition: docker-registry.enabled  
