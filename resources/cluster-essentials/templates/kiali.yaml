@@ -8,11 +8,8 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: kialis.kiali.io
-  annotations:
-    "helm.sh/hook": crd-install
-    "helm.sh/hook-delete-policy": "before-hook-creation"
   labels:
-    app: {{ template "kiali.name" . }}-operator
+    app: kiali-operator
 spec:
   group: kiali.io
   names:
