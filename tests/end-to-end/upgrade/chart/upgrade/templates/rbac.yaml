@@ -82,7 +82,7 @@ rules:
 
 # Gateway
 - apiGroups: ["gateway.kyma-project.io"]	
-  resources: ["apis", "apirules"]	
+  resources: ["apirules"]
   verbs: ["create", "delete", "get", "list"]
 
 # Ory

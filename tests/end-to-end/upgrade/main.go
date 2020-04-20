@@ -101,9 +101,6 @@ func main() {
 	domainName, err := getDomainNameFromCluster(k8sCli)
 	fatalOnError(err, "while reading domain name from cluster")
 
-	//kymaAPI, err := kyma.NewForConfig(k8sConfig)
-	//fatalOnError(err, "while creating Kyma Api clientset")
-
 	mfCli, err := mfClient.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Microfrontends clientset")
 
