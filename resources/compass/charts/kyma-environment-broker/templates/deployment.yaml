@@ -184,6 +184,8 @@ spec:
               value: {{ .Values.gardener.project }}
             - name: APP_GARDENER_KUBECONFIG_PATH
               value: {{ .Values.gardener.kubeconfigPath }}
+            - name: APP_DUMP_PROVISIONER_REQUESTS
+              value: "{{ .Values.provisioner.dumpRequests }}"
           ports:
             - name: http
               containerPort: {{ .Values.broker.port }}
