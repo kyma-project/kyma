@@ -301,14 +301,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1ba1d79f2810270045c328ae5d674321db34e3aae468eb4233883b473c5c0467"
-  name = "github.com/golang/glog"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
-
-[[projects]]
-  branch = "master"
   digest = "1:b7cb6054d3dff43b38ad2e92492f220f57ae6087ee797dca298139776749ace8"
   name = "github.com/golang/groupcache"
   packages = ["lru"]
@@ -496,20 +488,6 @@
   pruneopts = "UT"
   revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
   version = "v1.0.2"
-
-[[projects]]
-  digest = "1:fbaebcca308516382d20300b34dd080022c0321292ddf14631b53d8be9a8d9af"
-  name = "github.com/kubeless/kubeless"
-  packages = [
-    "pkg/apis/kubeless",
-    "pkg/apis/kubeless/v1beta1",
-    "pkg/client/clientset/versioned",
-    "pkg/client/clientset/versioned/scheme",
-    "pkg/client/clientset/versioned/typed/kubeless/v1beta1",
-  ]
-  pruneopts = "UT"
-  revision = "3460f03865f91ad15aa84b5de752efd2f01e1499"
-  version = "v1.0.5"
 
 [[projects]]
   digest = "1:9a250b328a9564739d21af7eae0e92b3a1277410b880db9efe29984c1835704a"
@@ -1640,9 +1618,6 @@
     "github.com/cloudevents/sdk-go",
     "github.com/hashicorp/errwrap",
     "github.com/hashicorp/go-multierror",
-    "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
-    "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
-    "github.com/kubeless/kubeless/pkg/client/clientset/versioned/typed/kubeless/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",

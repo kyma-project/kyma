@@ -1,7 +1,10 @@
 package helpers
 
 import (
+	"fmt"
+
 	"github.com/pkg/errors"
+	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
@@ -16,6 +19,21 @@ func IsPodReady(pod v1.Pod) bool {
 		}
 	}
 	return false
+}
+
+// IsDeploymentReady checks whether the DeploymentReady condition is true
+func IsDeploymentReady(deployment appsv1.Deployment) bool {
+	for _, condition := range deployment.Status.Conditions {
+		if condition.Type == appsv1.DeploymentAvailable {
+			return condition.Status == v1.ConditionTrue
+		}
+	}
+	return false
+}
+
+// InClusterEndpoint build in-cluster address to communicate with services
+func InClusterEndpoint(name, namespace string, port int) string {
+	return fmt.Sprintf("http://%s.%s.svc.cluster.local:%v", name, namespace, port)
 }
 
 // AwaitResourceDeleted retries until the resources cannot be found any more

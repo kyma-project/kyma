@@ -5,10 +5,13 @@ kind: CustomResourceDefinition
 metadata:
   name: functions.kubeless.io
   labels:
-{{ include "labels.standard" . | indent 4 }}
+    app: kubeless
+    chart: kubeless-0.2.0
+    heritage: Tiller
+    release: core
   annotations:
-    kubeless.io/namespace: {{ .Release.Namespace }}
-    kubeless.io/config: {{ template "fullname" . }}-config
+    kubeless.io/namespace: kyma-system
+    kubeless.io/config: core-kubeless-config
 spec:
   group: kubeless.io
   names:
