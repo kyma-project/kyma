@@ -6,11 +6,11 @@ import (
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config/mocks"
 )
 
 const (

@@ -8,11 +8,11 @@ import (
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
 
-	"github.com/pkg/errors"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/connector"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
+	"github.com/pkg/errors"
 )
 
 //go:generate mockery -name=ClientsProvider

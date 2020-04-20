@@ -1,8 +1,8 @@
 package director
 
 import (
-	"github.com/stretchr/testify/require"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
+	"github.com/stretchr/testify/require"
 
 	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 

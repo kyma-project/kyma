@@ -20,13 +20,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	certsMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates/mocks"
 	directorMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director/mocks"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 	configMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config/mocks"
 	kymaMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/mocks"
 	kymaModel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	compassMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/mocks"
 
@@ -38,8 +38,8 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/stretchr/testify/require"
 )

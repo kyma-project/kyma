@@ -11,8 +11,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql/mocks"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
 )

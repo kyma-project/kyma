@@ -3,8 +3,8 @@
 package mocks
 
 import (
-	mock "github.com/stretchr/testify/mock"
 	apperrors "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+	mock "github.com/stretchr/testify/mock"
 
 	upload "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/upload"
 )
