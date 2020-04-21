@@ -58,7 +58,7 @@ rules:
     verbs: ["get", "list", "watch"]
   - apiGroups: ["serverless.kyma-project.io"]
     resources: ["functions"]
-    verbs: ["get", "list", "create", "delete", "update"]
+    verbs: ["get", "list", "create", "delete", "update", "watch"]
   - apiGroups: ["*"]
     resources: ["*"]
     verbs: ["create"]
