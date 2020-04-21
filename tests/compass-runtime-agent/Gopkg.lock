@@ -230,8 +230,7 @@
   version = "v0.2.2"
 
 [[projects]]
-  branch = "api-cleanup"
-  digest = "1:cab876fad415ed8e7eb69f0347bbb86b51ee1ac703541286438d2273b1cad6b5"
+  digest = "1:3b5487e80c2bb6033e04eda0793a8582eb327acd06a522c20c4a6c9eabe0e490"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/connector/pkg/graphql/clientset",
@@ -245,8 +244,7 @@
     "components/director/pkg/scalar",
   ]
   pruneopts = "UT"
-  revision = "2b6856caab79999401f1ebf6d2b7fc8919f08eaf"
-  source = "github.com/kjaksik/compass"
+  revision = "8604d53a20a2848c53cad30c288bf8f6c823b825"
 
 [[projects]]
   digest = "1:6e5f4ed4104a26c92a98f44c5cc907d3ce3f9424051aad2a28dd284e620ab58d"

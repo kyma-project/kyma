@@ -20,9 +20,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-incubator/compass"
-  source = "github.com/kjaksik/compass"
-  branch = "api-cleanup"
-
+  revision = "8604d53a20a2848c53cad30c288bf8f6c823b825"
 [[constraint]]
   name = "knative.dev/eventing"
   version = "v0.12.0"
