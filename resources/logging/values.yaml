@@ -34,8 +34,7 @@ loki:
     runAsNonRoot: true
     runAsUser: 10001
 
-  extraArgs:
-    {}
+  extraArgs: {}
     # log.level: debug
 
   image:
@@ -99,8 +98,7 @@ loki:
   ## Affinity for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   ##
-  affinity:
-    {}
+  affinity: {}
     # podAntiAffinity:
     #   requiredDuringSchedulingIgnoredDuringExecution:
     #   - labelSelector:
