@@ -1,4 +1,4 @@
-{{- range $name := .Values.staticGroupNames }}
+{{- range $name := .Values.adminGroupNames }}
 - groupname: "{{ $name }}"
   scopes:
     - "application:read"
@@ -16,3 +16,12 @@
     - "automatic_scenario_assignment:read"
     - "automatic_scenario_assignment:write"
 {{- end }}
+- groupname: "{{ .Values.operatorGroupName }}"
+  scopes:
+    - "application:read"
+    - "application_template:read"
+    - "integration_system:read"
+    - "runtime:read"
+    - "label_definition:read"
+    - "tenant:read"
+    - "automatic_scenario_assignment:read"
