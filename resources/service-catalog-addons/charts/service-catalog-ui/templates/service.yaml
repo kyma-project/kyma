@@ -17,10 +17,6 @@ spec:
     targetPort: {{ .Values.catalog.service.internalPort }}
     protocol: TCP
     name: http2-catalog
-  - port: {{ .Values.instances.service.externalPort }}
-    targetPort: {{ .Values.instances.service.internalPort }}
-    protocol: TCP
-    name: http2-instances
   - port: {{ .Values.brokers.service.externalPort }}
     targetPort: {{ .Values.brokers.service.internalPort }}
     protocol: TCP

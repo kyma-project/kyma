@@ -3,37 +3,48 @@ kind: ClusterMicroFrontend
 metadata:
   name: servicecatalogmicrofrontend
   labels:
-    app:  servicecatalogmicrofrontend
+    app: servicecatalogmicrofrontend
 spec:
   displayName: Service Catalog
   version: v1
   category: Service Management
   placement: namespace
-  viewBaseUrl: 'https://catalog.{{ js .Values.global.ingress.domainName }}'
-  preloadUrl: 'https://catalog.{{ js .Values.global.ingress.domainName }}/preload'
+  viewBaseUrl: "https://catalog.{{ js .Values.global.ingress.domainName }}"
+  preloadUrl: "https://catalog.{{ js .Values.global.ingress.domainName }}/preload"
   navigationNodes:
     - label: Catalog
       navigationPath: service-catalog
-      viewUrl: ''
+      viewUrl: "/catalog"
       order: 1
     - label: Service Details
       navigationPath: service-catalog/details
-      viewUrl: ''
+      viewUrl: "/catalog"
       showInNavigation: false
-    - label: Serive Details
+    - label: Service Details
       navigationPath: service-catalog/details/:serviceId
-      viewUrl: '/details/:serviceId'
+      viewUrl: "/catalog/details/:serviceId"
       showInNavigation: false
     - label: Service Details in plan context
       navigationPath: service-catalog/details/:serviceId/plan
       showInNavigation: false
-      viewUrl: '/details/:serviceId/plan'
+      viewUrl: "/catalog/details/:serviceId/plan"
     - label: Service Details in plan context
       navigationPath: service-catalog/details/:serviceId/plan/:planId
       showInNavigation: false
-      viewUrl: '/details/:serviceId/plan/:planId'
+      viewUrl: "/catalog/details/:serviceId/plan/:planId"
     - label: Service Class Plans
       navigationPath: service-catalog/details/:serviceId/plans
       showInNavigation: false
-      viewUrl: '/details/:serviceId/plans'
-
+      viewUrl: "/catalog/details/:serviceId/plans"
+    - label: Instances
+      navigationPath: instances
+      viewUrl: "/instances"
+      order: 2
+    - label: Instance Details
+      navigationPath: instances/details
+      viewUrl: "/instances"
+      showInNavigation: false
+    - label: Instance Details
+      navigationPath: instances/details/:name
+      viewUrl: "/instances/details/:name"
+      showInNavigation: false
