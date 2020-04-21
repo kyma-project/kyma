@@ -104,7 +104,7 @@ spec:
   selector:
     matchLabels:
       name: kyma-installer
-  # Installer is designed to be a singleton, we enforce it by changing default rolling update to recreate startegy.
+  # Installer is designed to be run as a single instance only, we enforce it by changing default rolling update to recreate startegy.
   # With that k8s will first delete old pod and then provision new one during upgrade.
   strategy:
     type: Recreate
