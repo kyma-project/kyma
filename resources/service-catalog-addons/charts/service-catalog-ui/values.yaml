@@ -1,6 +1,7 @@
 replicaCount: 1
 image:
-  dir: /pr
+  dir:
+  tag: "49294757"
   pullPolicy: IfNotPresent
 catalog:
   service:
