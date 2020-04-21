@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "kiali.name" . }}-kcproxy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "kiali.name" . }}-kcproxy
+    chart: {{ template "kiali.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.kcproxy.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "kiali.name" . }}-kcproxy
+  template:
+    metadata:
+      labels:
+        app: {{ template "kiali.name" . }}-kcproxy
+    spec:
+      {{- if .Values.global.isLocalEnv }}
+      hostNetwork: true   #only for minikube
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+          - "dex.{{ .Values.global.ingress.domainName }}"
+      {{- end }}
+      containers:
+      - image: "{{ .Values.kcproxy.image.repository }}:{{ .Values.kcproxy.image.tag }}"
+        imagePullPolicy: {{ .Values.kcproxy.image.pullPolicy }}
+        name: kcproxy
+        command: ["/keycloak-gatekeeper"]
+        args:
+        - --discovery-url=https://dex.{{ .Values.global.ingress.domainName }}
+        - --skip-openid-provider-tls-verify=true
+        - --client-id={{ .Values.kcproxy.clientId }}
+        - --client-secret={{ .Values.kcproxy.clientSecret }}
+        - --resources=uri=/*|methods=GET,POST,PUT,DELETE
+        - --redirection-url=https://kiali.{{ .Values.global.ingress.domainName }}
+        - --verbose=false
+        - --listen=0.0.0.0:{{ .Values.kcproxy.inPort }}
+        - --upstream-url=http://{{ template "kiali.name" . }}:{{ .Values.kiali.spec.server.port }}
+        - --enable-logging=true
+        - --secure-cookie=true
+        - --enable-authorization-cookies=false
+        - --enable-token-header=false
+        - --enable-encrypted-token=true
+        - --enable-security-filter=true
+        - --filter-browser-xss=true
+        - --filter-content-nosniff=true
+        - --filter-frame-deny=true
+        - --encryption-key={{ randAlphaNum 32 }}
+        - --http-only-cookie=true
+        - --upstream-keepalives=true
+        - --upstream-keepalive-timeout=60s
+        - --cookie-domain=https://kiali.{{ .Values.global.ingress.domainName }}
+        - --cookie-access-name=KYMA_KIALI_TOKEN
+        ports:
+        - containerPort: {{ .Values.kcproxy.inPort }}
+        resources:
+{{ toYaml .Values.kcproxy.resources | indent 10 }}
