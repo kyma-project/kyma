@@ -12,12 +12,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/tools/record"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const timeout = time.Second * 15
@@ -137,37 +134,25 @@ func TestFunctionReconciler_getOldRevisionSelector(t *testing.T) {
 }
 
 var _ = ginkgo.Describe("KService controller", func() {
-	var (
-		reconciler *ServiceReconciler
-		request    ctrl.Request
-	)
+	ctx := context.TODO()
+	srvName := "test-service"
+	ns := SetupTest(ctx)
+	numberOfRevisions := 5
 
-	ginkgo.BeforeEach(func() {
-		srv := fixKservice("test-service")
-		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: srv.GetNamespace(), Name: srv.GetName()}}
-		gm.Expect(k8sClient.Create(context.TODO(), &srv)).To(gm.Succeed())
+	ginkgo.It("should cleanup old revisions, leaving newest one", func() {
+		ginkgo.By("Creating test resources")
+		srv := fixKservice(srvName, ns.Name)
+		err := k8sClient.Create(ctx, &srv)
+		gm.Expect(err).NotTo(gm.HaveOccurred(), "failed to create test KService resource")
 
-		revisionList := fixRevisionList("test-service", 4)
+		revisionList := fixRevisionList(srvName, ns.Name, numberOfRevisions)
 		for _, rev := range revisionList {
 			pinnedRev := rev // pin
 			gm.Expect(k8sClient.Create(context.TODO(), &pinnedRev)).NotTo(gm.HaveOccurred())
 			gm.Expect(k8sClient.Status().Update(context.TODO(), &pinnedRev)).NotTo(gm.HaveOccurred())
 		}
-		reconciler =
-			NewServiceReconciler(k8sClient, ctrl.Log.WithName("controllers").WithName("kservice"),
-				config, scheme.Scheme, record.NewFakeRecorder(100))
-	})
 
-	ginkgo.It("should successfully delete leftover revisions", func() {
-		_, err := reconciler.Reconcile(request)
-		gm.Expect(err).To(gm.BeNil())
-
-		srv := servingv1.Service{}
-		gm.Expect(k8sClient.Get(context.TODO(), request.NamespacedName, &srv)).NotTo(gm.HaveOccurred())
-
-		_, err = reconciler.Reconcile(request)
-		gm.Expect(err).To(gm.BeNil())
-
+		ginkgo.By("Update service to be ready")
 		srv.Status.Status.Conditions = duckv1.Conditions{{
 			Type:   servingv1.ServiceConditionReady,
 			Status: corev1.ConditionTrue,
@@ -176,28 +161,35 @@ var _ = ginkgo.Describe("KService controller", func() {
 		gm.Expect(k8sClient.Update(context.TODO(), &srv)).Should(gm.Succeed())
 		gm.Expect(k8sClient.Status().Update(context.TODO(), &srv)).Should(gm.Succeed())
 
-		_, err = reconciler.Reconcile(request)
-		gm.Expect(err).To(gm.BeNil())
+		ginkgo.By("waiting for controller to delete excess revisions")
+		revList := servingv1.RevisionList{}
+		gm.Eventually(func() int {
+			_ = k8sClient.List(ctx, &revList, &client.ListOptions{
+				LabelSelector: labels.SelectorFromSet(map[string]string{
+					serviceLabelKey: srvName,
+				}),
+				Namespace: ns.Name,
+			})
+			return len(revList.Items)
+		}, 5*time.Second, 500*time.Millisecond).Should(gm.Equal(1))
 
-		var revisions servingv1.RevisionList
-		err := reconciler.resourceClient.ListByLabel(context.TODO(), srv.GetNamespace(), map[string]string{
-			serviceLabelKey: srv.GetName(),
-		}, &revisions)
-
-		// look at their deletion timestamp
+		ginkgo.By("verify that the only rev")
+		cfgLabelValue, ok := revList.Items[0].Labels[cfgGenerationLabel]
+		gm.Expect(ok).To(gm.BeTrue())
+		gm.Expect(cfgLabelValue).To(gm.Equal(strconv.Itoa(numberOfRevisions)))
 	})
 })
 
-func fixRevisionList(parentSvcName string, num int) []servingv1.Revision {
+func fixRevisionList(parentSvcName, namespace string, num int) []servingv1.Revision {
 	revList := []servingv1.Revision{}
 	for i := 0; i < num; i++ {
 		revision := servingv1.Revision{
 			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "default",
-				Name:      fmt.Sprintf("test-revision-%d", i),
+				Namespace: namespace,
+				Name:      fmt.Sprintf("test-revision-%d", i+1),
 				Labels: map[string]string{
 					serviceLabelKey:    parentSvcName,
-					cfgGenerationLabel: strconv.Itoa(i),
+					cfgGenerationLabel: strconv.Itoa(i + 1),
 				},
 			},
 			Spec: servingv1.RevisionSpec{},
@@ -208,22 +200,20 @@ func fixRevisionList(parentSvcName string, num int) []servingv1.Revision {
 	return revList
 }
 
-func fixKservice(name string) servingv1.Service {
+func fixKservice(name, namespace string) servingv1.Service {
 	return servingv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: "default",
+			Namespace: namespace,
 			Labels:    nil,
 		},
 		Spec: servingv1.ServiceSpec{
 			ConfigurationSpec: servingv1.ConfigurationSpec{
 				Template: servingv1.RevisionTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
-						Labels: nil,
 					},
 					Spec: servingv1.RevisionSpec{
 						PodSpec: corev1.PodSpec{
-
 						},
 					},
 				},

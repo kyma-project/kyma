@@ -58,7 +58,7 @@ func (r *resourceSvc) ListByLabel(ctx context.Context, namespace string, labels 
 }
 
 func (r *resourceSvc) DeleteAllBySelector(ctx context.Context, resourceType Object, namespace string, selector apilabels.Selector) error {
-	propagationPolicy := metav1.DeletePropagationForeground
+	propagationPolicy := metav1.DeletePropagationBackground
 
 	return r.client.DeleteAllOf(ctx, resourceType, &client.DeleteAllOfOptions{
 		ListOptions: client.ListOptions{
