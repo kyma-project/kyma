@@ -36,9 +36,8 @@ spec:
       app: helm
       name: tiller
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0
+    type: Recreate
+
   template:
     metadata:
       labels:
