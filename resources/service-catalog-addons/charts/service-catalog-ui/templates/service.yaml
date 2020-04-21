@@ -4,7 +4,6 @@ metadata:
   name: {{ template "fullname" . }}
   annotations:
     "auth.istio.io/{{ .Values.catalog.service.externalPort }}": NONE
-    "auth.istio.io/{{ .Values.instances.service.externalPort }}": NONE
     "auth.istio.io/{{ .Values.brokers.service.externalPort }}": NONE
   labels:
     app: {{ template "name" . }}
