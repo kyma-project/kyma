@@ -210,11 +210,9 @@ func fixKservice(name, namespace string) servingv1.Service {
 		Spec: servingv1.ServiceSpec{
 			ConfigurationSpec: servingv1.ConfigurationSpec{
 				Template: servingv1.RevisionTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
-					},
+					ObjectMeta: metav1.ObjectMeta{},
 					Spec: servingv1.RevisionSpec{
-						PodSpec: corev1.PodSpec{
-						},
+						PodSpec: corev1.PodSpec{},
 					},
 				},
 			},
