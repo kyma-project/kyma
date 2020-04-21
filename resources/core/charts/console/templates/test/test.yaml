@@ -72,7 +72,7 @@ spec:
               - |
                 echo 'TESTING start'
                 sleep 10
-                npm run test:cluster
+                npm run test:cluster && npm run test:cluster_firefox
                 exit_code=$?
                 echo "code is $exit_code"
                 echo 'killing pilot-agent...'
