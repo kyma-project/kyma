@@ -56,7 +56,6 @@ const (
 		eventDefinitions {data {
 		
 			id
-			applicationID
 			name
 			description
 			group 
@@ -77,7 +76,6 @@ const (
 		documents {data {
 		
 		id
-		applicationID
 		title
 		displayName
 		description

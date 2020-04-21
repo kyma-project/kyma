@@ -1,7 +1,6 @@
 package testkit
 
 import (
-	kubelessclientset "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
@@ -21,7 +20,6 @@ var (
 type KymaClients struct {
 	AppOperatorClientset         *appoperatorclientset.Clientset
 	AppBrokerClientset           *appbrokerclientset.Clientset
-	KubelessClientset            *kubelessclientset.Clientset
 	CoreClientset                *k8s.Clientset
 	Pods                         coreclient.PodInterface
 	ServiceCatalogClientset      *servicecatalogclientset.Clientset
@@ -35,7 +33,6 @@ func InitKymaClients(config *rest.Config, testID string) KymaClients {
 	return KymaClients{
 		AppOperatorClientset:         appoperatorclientset.NewForConfigOrDie(config),
 		AppBrokerClientset:           appbrokerclientset.NewForConfigOrDie(config),
-		KubelessClientset:            kubelessclientset.NewForConfigOrDie(config),
 		CoreClientset:                coreClientset,
 		Pods:                         coreClientset.CoreV1().Pods(testID),
 		ServiceCatalogClientset:      servicecatalogclientset.NewForConfigOrDie(config),

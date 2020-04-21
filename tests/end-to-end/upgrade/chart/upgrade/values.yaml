@@ -3,9 +3,17 @@ containerRegistry:
 
 image:
   dir:
-  version: 138deae2
+  version: PR-8046
   pullPolicy: "IfNotPresent"
 
 dex:
   namespace: kyma-system
   userSecret: admin-user
+
+authorizationPolicy:
+  eventService:
+    namespace: kyma-integration
+    applicationName: eventmesh-upgrade
+  consoleBackendService:
+    namespace: kyma-system
+    serviceAccount: core-console-backend-service

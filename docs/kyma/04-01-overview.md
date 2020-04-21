@@ -30,7 +30,7 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `permission-controller` | ✅ | ✅ |
 | `apiserver-proxy` | ✅ | ✅ |
 | `iam-kubeconfig-service` | ✅ | ✅ |
-| `function-controller` | ⛔️ | ⛔️ |
+| `serverless` | ✅ | ✅ |
 | `knative-provisioner-natss` | ✅ | ✅ |
 | `event-sources` | ✅ | ✅ |
 | `application-connector-ingress` | ✅ | ✅ |
@@ -39,7 +39,7 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `backup-init` | ✅ | ⛔️ |
 | `backup`  | ✅ | ⛔️ |
 | `logging` | ✅ | ⛔️ |
-| `jaeger` | ✅ | ⛔️ |
+| `tracing` | ✅ | ⛔️ |
 | `monitoring` | ✅ | ⛔️ |
 | `kiali` | ✅ | ⛔️ |
 | `compass` | ⛔️ | ⛔️ |

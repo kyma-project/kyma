@@ -1,0 +1,75 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "jaeger-operator.fullname" . }}-jaeger-operator
+  labels:
+{{ include "jaeger-operator.labels" . | indent 4 }}
+    prometheus: monitoring
+spec:
+  endpoints:
+  - port: metrics
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-operator
+
+{{- if eq .Values.jaeger.spec.strategy "allInOne" }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "jaeger-operator.fullname" . }}-jaeger
+  labels:
+    app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger
+    prometheus: monitoring
+spec:
+  endpoints:
+  - port: metrics
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-metrics
+{{- end }}
+
+{{- if eq .Values.jaeger.spec.strategy "production" }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "jaeger-operator.fullname" . }}-jaeger-agent
+  labels:
+    app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-agent
+    prometheus: monitoring
+spec:
+  endpoints:
+  - port: metrics
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-agent-metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "jaeger-operator.fullname" . }}-jaeger-collector
+  labels:
+    app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-collector
+    prometheus: monitoring
+spec:
+  endpoints:
+  - port: metrics
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-collector-metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "jaeger-operator.fullname" . }}-jaeger-query
+  labels:
+    app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-query
+    prometheus: monitoring
+spec:
+  endpoints:
+  - port: metrics
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-query-metrics
+{{- end }}
