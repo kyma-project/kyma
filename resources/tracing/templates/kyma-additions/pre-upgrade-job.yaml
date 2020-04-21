@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "jaeger-operator.fullname" . }}-pre-install
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "jaeger-operator.fullname" . }}-pre-install
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/status"]
+    verbs: ["list", "get"]
+  - apiGroups: [""]
+    resources: ["pods/portforward"]
+    verbs: ["create", "get", "delete"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "jaeger-operator.fullname" . }}-pre-install
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "jaeger-operator.fullname" . }}-pre-install
+    namespace: kyma-system
+roleRef:
+  kind: ClusterRole
+  name: {{ template "jaeger-operator.fullname" . }}-pre-install
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "jaeger-operator.fullname" . }}-pre-install
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-weight: "10"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: {{ template "jaeger-operator.fullname" . }}-pre-install
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ template "jaeger-operator.fullname" . }}-pre-install
+      restartPolicy: Never
+      containers:
+      - name: job
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200312-fc2a4147
+        terminationMessagePolicy: "FallbackToLogsOnError"
+        command:
+          - /bin/bash
+          - -c
+          - |
+            set -e
+            echo "*** tracing-pre-install job starts ***"
+
+            echo "+ Deleting Jaeger Helm package"
+            kubectl get -n kyma-installer secret helm-secret \
+              -o jsonpath="{.data['global\.helm\.ca\.crt']}" | base64 --decode > "$HOME/.helm/ca.pem"
+            kubectl get -n kyma-installer secret helm-secret \
+              -o jsonpath="{.data['global\.helm\.tls\.crt']}" | base64 --decode > "$HOME/.helm/cert.pem"
+            kubectl get -n kyma-installer secret helm-secret \
+              -o jsonpath="{.data['global\.helm\.tls\.key']}" | base64 --decode > "$HOME/.helm/key.pem"
+            if [[ $(helm list --tls jaeger) ]]; then
+              helm del --purge --tls jaeger
+            else
+              echo "+ No Jaeger Helm release found"
+            fi

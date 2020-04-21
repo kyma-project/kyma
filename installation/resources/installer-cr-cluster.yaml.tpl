@@ -68,7 +68,7 @@ spec:
       namespace: "kyma-system"
     - name: "backup"
       namespace: "kyma-system"
-    - name: "jaeger"
+    - name: "tracing"
       namespace: "kyma-system"
     - name: "monitoring"
       namespace: "kyma-system"

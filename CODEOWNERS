@@ -157,8 +157,8 @@
 # The `knative-eventing` chart
 /resources/knative-eventing/ @Abd4llA  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
-# The `jaeger` charts
-/resources/jaeger/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
+# The `tracing` chart
+/resources/tracing/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # The `service-catalog` chart
 /resources/service-catalog/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
