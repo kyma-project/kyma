@@ -12,7 +12,7 @@ import (
 )
 
 type Config struct {
-	UsageKind string `envconfig:"default=knative-service"`
+	UsageKind string `envconfig:"default=function"`
 }
 
 type PluggableContainer struct {
