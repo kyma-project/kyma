@@ -1,65 +1,113 @@
 ---
-title: Migration from the previous Api resources
+title: Migration from API resources to APIRules
 type: Details
 ---
 
-The migration is done automatically by a job that runs during the Kyma upgrade. During the migration, an old Api object is being translated to an APIRule object, which may result in a temporary downtime of the exposed service. The original resource is deleted as a part of the migration process. The tool used by the job is described [in this document](https://github.com/kyma-project/kyma/blob/master/components/api-gateway-migrator/README.md#api-gateway-migrator).
+The migration is done automatically by a job that runs during the Kyma upgrade. During this process, the [API Gateway Migrator tool](https://github.com/kyma-project/kyma/blob/master/components/api-gateway-migrator/README.md#api-gateway-migrator) translates existing API resources to APIRule objects and deletes the original resource.
 
->**CAUTION:** Some Api configurations are too complex or do not meet all requirements to be automatically migrated. To make sure all your services are exposed via APIRules, [verify the outcome](#verify-automatic-migration) of the migration job and follow the [manual migration process](#manual-migration) guide if necessary. Skipping the migration won't break the existing service exposure, but any further changes or removal of the Api resource won't affect how the service is exposed - the original configuration will be used.
+
+>**CAUTION:** Some API configurations are too complex or do not meet all requirements to pass the automatic migration. 
+
+To ensure all your services are exposed using APIRules, [verify the migration outcome](#verify-automatic-migration). Skipping some resources during migration won't break the way existing services are exposed. Changing or removing the API resource won't affect how the service is exposed as it will use the original configuration. If you want to ensure migration of all API resources to APIRules, follow the [manual migration](#manual-migration) guide.
+
 
 ## Verify automatic migration
 
-List the existing Api objects after the Kyma upgrade is finished. Run this command:
+Follow these steps to verify if all the API resources were migrated to APIRules:
+
+1. Once the Kyma upgrade finishes, list the existing API objects:
 
 ```shell script
 kubectl get apis --all-namespaces
 ```
 
-As Api objects are removed after a successful migration, all the listed resources are considered not migrated. Fetch logs from the job's pod to learn the reason for skipping the migration. 
+2. As API objects are removed after a successful migration, the list shows all resources that the migration job skipped. Fetch the logs from the job's Pod to learn the reasons for this behavior: 
 
 ```shell script
 kubectl logs api-gateway-api-migrator-job -n kyma-system
 ```
 
-
-If the Api was not migrated due to the invalid status or a blacklisted label, you either shouldn't or will not be able to do the migration.
+>**NOTE:** If the migration process skipped the API resources due to the invalid status or a blacklisted label, you either should not or will not be able to migrate them.
 
 ## Manual migration
 
-The manual migration process consists of the following steps:
+This guide shows how you can manually migrate API resources to API Rules.
 
-1. Fetch the Api resource you want to migrate:
+>**NOTE:** Before you start the manual migration process, see the [API CR](/components/api-gateway/#custom-resource-api-sample-custom-resource) and [APIRule CR](/components/api-gateway-v2#custom-resource-api-rule) documents for the custom resource detailed definition.
+
+Follow these steps:
+
+1. Fetch the API resource you want to migrate:
 
 ```shell script
-kubectl get api <NAME> -n <NAMESPACE> -o yaml
+kubectl get api {NAME} -n {NAMESPACE} -o yaml
 ```
 
-2. Create an APIRule resource based on the original Api object
+2. Create an APIRule resource based on the API object's specification:
 
-> **TIP:** Here is the documentation for both custom resources, which may be useful during the migration: 
-> * [Api CR](https://kyma-project.io/docs/1.11/components/api-gateway/#custom-resource-api-sample-custom-resource), 
-> * [APIRule CR](https://kyma-project.io/docs/1.11/components/api-gateway-v2#custom-resource-api-rule).
+>**NOTE:** This step focuses on the`spec` part of the CRD. You can `metadata` field in a preferred way and do not copy the [`status`](components/api-gateway-v2#custom-resource-api-rule-additional-information) field from the original API resource.
 
-Only the `spec` part of the CRD will be described. `metadata` field can be adjusted in any way and `status` field should not be copied.
+a. Replace the default value (`kyma-gateway.kyma-system.svc.cluster.local`) for the **gateway** parameter with Istio Gateway used to expose services. 
 
-Starting from the `service` field of APIRule:
- * Copy `name` and `port` fields from the `service` field of Api object. 
- * Set `host` value to any temporary value including the domain. For example, if the `hostname` value of Api was set to `sample-service.kyma.local` you can change it to `temp-sample-service.kyma.local`. Just make sure that the hostname is not used by other services on your cluster. That value will be changed in a later step, but for now it needs to be different than the original value. 
- * Set `gateway` field of APIRule to the Istio Gateway used to expose services. By default it will be `kyma-gateway.kyma-system.svc.cluster.local`.
+b. Copy the values for **service.name** and **service.port** parameters from the corresponding fields of the API object. 
 
-The configuration of the `rules` field of APIRule is more complex and depends on the `authentication` configuration of Api. As all the basic scenarios are covered by automatic migration, this explanation will only concern the configurations that are not handled automatically.
+c. Set the value for **service.host** parameter to any temporary value which includes the domain. For example, if the value for the **hostname** parameter of the API object was set to `sample-service.kyma.local`, change it to `temp-sample-service.kyma.local` so that differs from the original value. Make sure other services on your cluster do not use this hostname. 
 
-The most important difference in authentication configuration between Apis and APIRules is that an Api object is configured with a list of JWT issuers set for all paths of a service, while an APIRule is configured with a list of path definitions along with their respective authentication methods.
-In the Api you can define a list of excluded paths for an issuer. Requests for these paths will not require authentication by this issuer but will require authentication from other configured issuers.
-The APIRule has an approach where you specify what authentication should be used per the path definition.
-Because paths are defined using regular expressions, you can define an expression that matches every path, or a subset of possible paths, or a single one.
-Remember that path definitions in the APIRule must not overlap - if they do, requests to such paths are rejected. That's why translating an Api with multiple issuers having different excluded paths requires sophisticated regex definitions in a corresponding APIRule.
+d. Configure the **rules** parameter of APIRule.
 
-In the example below:
- * to access `/exact/path/to/resource.jpg` path the token issued from `https://auth.kyma.local` is required, 
- * to access any path starting with `/pref/` the token issued from `https://dex.kyma.local` is required, 
- * to access the `/no/auth/needed/resource.html` no token is required because it is excluded for both settings, 
- * to access all other paths the token from one of the issuers is required.
+>**NOTE:** For details on authentication configuration and possible values you can use, see [this](#authentication-of-api-resources-and-apirules) section.
+
+When the configuration is ready, create the APIRule object and test if the service is working as expected on the new host. It should work the same on both hosts.
+
+
+3. Remove the dependent resources of the API object:
+
+```shell script
+kubectl delete virtualservice {API_NAME} -n {NAMESPACE}
+```
+Make sure that the Virtual Service resource is deleted before proceeding.
+
+4. If the API resource was secured with an authentication mechanism, delete the Policy resource:
+
+```shell script
+kubectl delete policy {API_NAME} -n {NAMESPACE}
+```
+
+5. To make the service returns to its original host, set the **spec.service.host** parameter of APIRule to the value used by the API resource.
+
+```shell script
+kubectl edit apirule {APIRULE_NAME} -n {NAMESPACE}
+```
+
+After saving that configuration, the service should be available on the original hostname.
+
+6. Remove API resource
+
+```shell script
+kubectl delete api <API_NAME> -n <NAMESPACE>
+```
+
+## Authentication of API resources and APIRules
+
+To properly configure the authentication mechanism for the new APIRule, learn more about the differences in authentication configuration for API resources and APIRules:
+
+| API resource | APIRule| 
+|--------------| -------|
+|Configured with a list of JWT issuers set for all paths of a service.| Configured with a list of path definitions along with their respective authentication methods.|
+| You can define a list of excluded paths for a given issuer. Requests for these paths won't require authentication by this issuer but will require authentication from other configured issuers.| You can specify what authentication to use per path definition and use a regular expression to match every path, or a subset of possible paths, or a single one. |
+
+
+>**NOTE:** Path definitions in the APIRule must not overlap, otherwise the requests to such paths are rejected. That's why migrating an API resource that has multiple issuers and different excluded paths often requires providing complex regex definitions for a corresponding APIRule.
+
+### Authentication configuration 
+
+<div tabs>
+  <details>
+  <summary>
+  Authentication configuration for API objects
+ </summary>
+
+ This example shows the authentication configuration for an API object. 
 
 ```yaml
 authentication:
@@ -80,8 +128,20 @@ authentication:
       - prefix: /pref/
       - exact: /no/auth/needed/resource.html
 ```
+In this configuration:
 
-Here is the ApiRule configuration which enforces the same authentication policies:
+ * To access the `/exact/path/to/resource.jpg` path, you need a token issued by `https://auth.kyma.local`.
+ * To access any path starting with `/pref/` you need a token issued by `https://dex.kyma.local`. 
+ * To access the `/no/auth/needed/resource.html` you don't need any token because the path is excluded for both configurations. 
+ * To access all other paths you need a token from one of the issuers.
+
+  </details>
+  <details>
+  <summary>
+  Authentication configuration for APIRules
+  </summary>
+
+This APIRule configuration enforces the same authentication policies as for the API object:
 
 ```yaml
 rules:
@@ -119,46 +179,18 @@ rules:
         - "http://dex-service.kyma-system.svc.cluster.local:5556/keys"
         - "http://auth-service.kyma-system.svc.cluster.local:5556/keys"
 ```
+The value for the last **rules.path** parameter is a regular expression with a negative lookahead. Its purpose is to exclude the paths already handled by other configuration settings from the `/.*` path to avoid two different configurations for a single path. 
+However, if the same `excludedPaths` element is present throughout the authentication settings, a particular path doesn't require any authentication. In that case, create a rule with `handler: allow`, so that you don't have to exclude the path using a negative lookahead.
 
-Note that the last path configuration contains a regular expression with a negative lookahead. It is used to exclude paths handled by other path settings from the `/.*` path, as there can't be two different configurations for a single path. There is one exception to that, which applies only if the same `excludedPaths` element is present on all `authentication` settings, so the specific path doesn't require any authentication at all. In that case, a rule with `handler: allow` should be created, and the path doesn't have to be excluded using a negative lookahead.
+  </details>
+</div>
 
-Below is the list showing how ApiRule path value corresponds to the excludedPaths values from Api resource, and what negative lookahead value should be added to the `/.*` path:
 
-| excludedPaths expression type | description | excludedPaths sample value | path value | negative lookahead value |
+The table shows how the APIRule's path value corresponds to the **excludedPaths** values for the API resource, and what negative lookahead value you should add to the `/.*` path:
+
+| Expression type | Description | Sample value | Path value | Negative lookahead value |
 |---|---|---|---|---|
-|**exact**| no changes to be made | /exact/path/to/resource.jpg | /exact/path/to/resource.jpg | (?!/exact/path/to/resource.jpg) |
-|**prefix**| add `.*` to the end | /pref/ | /pref/.* | (?!/pref/.*) |
-|**suffix**| add `.*` to the beginning; in negative lookahead add `\s` to the end | /suffix.ico | .*/suffix.ico | (?!.*/suffix.ico\s) |
-|**regex**| no changes to be made | /anything.* | /anything.* | (?!/anything.*) |
-
-When the configuration is ready, create the APIRule object and test if the service is working as expected on the new host. It should work the same on both hosts.
-
-3. Remove dependent resources of an Api
-
-```shell script
-kubectl delete virtualservice <API_NAME> -n <NAMESPACE>
-```
-
-Make sure that the Virtual Service resource is deleted before proceeding to the next instruction.
-
-If the api was secured with an authentication mechanism delete the Policy resource:
-
-```shell script
-kubectl delete policy <API_NAME> -n <NAMESPACE>
-```
-
-4. Edit host of APIRule
-
-To make the service return to its original host, edit the `spec.service.host` field of APIRule to an original value.
-
-```shell script
-kubectl edit apirule <APIRULE_NAME> -n <NAMESPACE>
-```
-
-After saving that configuration, the service should be available on the original hostname.
-
-5. Remove Api resource
-
-```shell script
-kubectl delete api <API_NAME> -n <NAMESPACE>
-```
+|**exact**| no changes to be made | `/exact/path/to/resource.jpg` | `/exact/path/to/resource.jpg` | `(?!/exact/path/to/resource.jpg)` |
+|**prefix**| add `.*` at the end | `/pref/` | `/pref/.*` | `(?!/pref/.*)` |
+|**suffix**| add `.*` at the beginning; in negative lookahead add `\s` at the end | `/suffix.ico` | `.*/suffix.ico | (?!.*/suffix.ico\s)` |
+|**regex**| no changes to be made | `/anything.*` | `/anything.*` | `(?!/anything.*)` |
