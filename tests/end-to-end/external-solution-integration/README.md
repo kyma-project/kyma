@@ -9,7 +9,7 @@ This test verifies if the user can connect an external application to Kyma and i
 When you run the test, these actions are performed in the order listed:
 
 1. Create an Application.
-2. Create an ApplicationMapping CR for the created application in the ` e2e-test` Namespace.
+2. Create an ApplicationMapping CR for the created Application in the ` e2e-test` Namespace.
 3. Deploy a function in the ` e2e-test` Namespace.
 4. Start a test service in the ` e2e-test` Namespace. The function calls it when it receives an event.
 5. Connect the Application through the Application Gateway with client certificates.
