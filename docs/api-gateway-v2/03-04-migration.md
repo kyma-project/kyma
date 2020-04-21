@@ -6,9 +6,10 @@ type: Details
 The migration is done automatically by a job that runs during the Kyma upgrade. During this process, the [API Gateway Migrator tool](https://github.com/kyma-project/kyma/blob/master/components/api-gateway-migrator/README.md#api-gateway-migrator) translates existing API resources to APIRule objects and deletes the original resource.
 
 
->**CAUTION:** Some API configurations are too complex or do not meet all requirements to pass the automatic migration. 
+>**CAUTION:** Some API configurations are too complex or do not meet all requirements to pass the automatic migration. To ensure all your services are exposed using APIRules, [verify the migration outcome](#verify-automatic-migration). If there still are API resources in use, follow [this](#manual-migration) guide to migrate them.
 
-To ensure all your services are exposed using APIRules, [verify the migration outcome](#verify-automatic-migration). Skipping some resources during migration won't break the way existing services are exposed. Changing or removing the API resource won't affect how the service is exposed as it will use the original configuration. If you want to ensure migration of all API resources to APIRules, follow the [manual migration](#manual-migration) guide.
+
+Skipping some resources during migration will not break the way existing services are exposed. However, bear in mind that if you want to introduce changes or remove the API resource, it won't have any effect on how the service is exposed because the service will still use the original configuration. 
 
 
 ## Verify automatic migration
@@ -17,15 +18,15 @@ Follow these steps to verify if all the API resources were migrated to APIRules:
 
 1. Once the Kyma upgrade finishes, list the existing API objects:
 
-```shell script
-kubectl get apis --all-namespaces
-```
+    ```shell script
+      kubectl get apis --all-namespaces
+    ```
 
 2. As API objects are removed after a successful migration, the list shows all resources that the migration job skipped. Fetch the logs from the job's Pod to learn the reasons for this behavior: 
 
-```shell script
-kubectl logs api-gateway-api-migrator-job -n kyma-system
-```
+    ```shell script
+    kubectl logs api-gateway-api-migrator-job -n kyma-system
+    ```
 
 >**NOTE:** If the migration process skipped the API resources due to the invalid status or a blacklisted label, you either should not or will not be able to migrate them.
 
@@ -39,9 +40,9 @@ Follow these steps:
 
 1. Fetch the API resource you want to migrate:
 
-```shell script
-kubectl get api {NAME} -n {NAMESPACE} -o yaml
-```
+    ```shell script
+    kubectl get api {NAME} -n {NAMESPACE} -o yaml
+    ```
 
 2. Create an APIRule resource based on the API object's specification:
 
@@ -62,30 +63,30 @@ When the configuration is ready, create the APIRule object and test if the servi
 
 3. Remove the dependent resources of the API object:
 
-```shell script
-kubectl delete virtualservice {API_NAME} -n {NAMESPACE}
-```
+   ```shell script
+     kubectl delete virtualservice {API_NAME} -n {NAMESPACE}
+    ```
 Make sure that the Virtual Service resource is deleted before proceeding.
 
 4. If the API resource was secured with an authentication mechanism, delete the Policy resource:
 
-```shell script
-kubectl delete policy {API_NAME} -n {NAMESPACE}
-```
+    ```shell script
+     kubectl delete policy {API_NAME} -n {NAMESPACE}
+    ```
 
 5. To make the service returns to its original host, set the **spec.service.host** parameter of APIRule to the value used by the API resource.
 
-```shell script
-kubectl edit apirule {APIRULE_NAME} -n {NAMESPACE}
-```
+    ```shell script
+    kubectl edit apirule {APIRULE_NAME} -n {NAMESPACE}
+    ```
 
 After saving that configuration, the service should be available on the original hostname.
 
 6. Remove API resource
 
-```shell script
-kubectl delete api <API_NAME> -n <NAMESPACE>
-```
+    ```shell script
+    kubectl delete api {API_NAME} -n {NAMESPACE}
+    ```
 
 ## Authentication of API resources and APIRules
 
