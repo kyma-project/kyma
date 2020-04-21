@@ -28,7 +28,7 @@ To start the Application Registry, run this command:
 
 The Application Registry has the following parameters:
 - **externalAPIPort** is the port that exposes the Metadata API to an external solution. The default port is `8081`.
-- **proxyPort** is the port that acts as a proxy for the calls from services and lambdas to an external solution. The default port is `8080`.
+- **proxyPort** is the port that acts as a proxy for the calls from services and functions to an external solution. The default port is `8080`.
 - **namespace** is the Namespace where Application Registry is deployed. The default Namespace is `kyma-system`.
 - **requestTimeout** is the time-out for requests sent through the Application Registry. It is provided in seconds. The default time-out is `1`.
 - **requestLogging** is the flag for logging incoming requests. The default value is `false`.
