@@ -8,14 +8,14 @@ This diagram explains the event flow in Kyma, from the moment the Application se
 ![Eventing flow](./assets/eventing-mesh-flow.svg)
 
 1. The Application sends events to the HTTP Source Adapter which forwards them to a resource such as the Broker.
-   
-    >**NOTE:** The HTTP Source Adapter accepts only CloudEvents in version 1.0. 
+
+    >**NOTE:** The HTTP Source Adapter accepts only CloudEvents in version 1.0.
 
 2. The Subscription defines the Broker as the subscriber. This way, the Channel can communicate with the Broker to send events.
 
 3. The Channel listens for incoming events. When it receives an event, the underlying messaging layer dispatches it to the Broker.
 
-4. The Broker sends the event to the Trigger which is configured to receive events of this type. 
+4. The Broker sends the event to the Trigger which is configured to receive events of this type.
 
 5. The Trigger filters the events based on the attributes you can find in the [Trigger specification](https://knative.dev/docs/eventing/broker-trigger/). See the example of a Trigger CR:
 
@@ -48,4 +48,4 @@ The **filter** section of the Trigger CR specification defines the Broker which 
 | **spec.filter.attributes.eventtypeversion** | Event version, such as `v1`. |
 | **spec.filter.attributes.source** | Name of the Application which sends events. |
 
-To learn how to trigger a lambda with an event, follow [this](/components/serverless-v2/#tutorials-trigger-a-lambda-with-an-event) tutorial.
+To learn how to trigger a lambda with an event, follow [this](/components/serverless/#tutorials-trigger-a-lambda-with-an-event) tutorial.
