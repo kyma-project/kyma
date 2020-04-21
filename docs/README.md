@@ -19,6 +19,7 @@ Start with the overarching [Kyma](./kyma) documentation where you can find the g
 -   [Monitoring](./monitoring/)
 -   [Security](./security/)
 -   [Serverless](./serverless/)
+-   [Serverless v2](./serverless-v2/)
 -   [Service Catalog](./service-catalog/)
 -   [Service Mesh](./service-mesh/)
 -   [Tracing](./tracing/)
