@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/knative"
 	"github.com/vrischmann/envconfig"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -16,6 +15,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/configwatcher"
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/knative"
 	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
