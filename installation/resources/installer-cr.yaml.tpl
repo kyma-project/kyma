@@ -46,6 +46,8 @@ spec:
       namespace: "natss"
     - name: "core"
       namespace: "kyma-system"
+    - name: "cluster-users"
+      namespace: "kyma-system"
     #- name: "logging"
     #  namespace: "kyma-system"
     - name: "permission-controller"

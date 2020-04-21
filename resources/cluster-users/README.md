@@ -1,3 +1,3 @@
 # Cluster Users
 
-The `cluster-users` chart uses role-based access control (RBAC) to define roles and accesses in Kyma.
+The `cluster-users` chart uses Role-Based Access Control (RBAC) to define roles and access permissions in Kyma.
