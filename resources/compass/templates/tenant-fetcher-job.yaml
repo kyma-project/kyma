@@ -7,7 +7,7 @@ spec:
   schedule: "{{ .Values.global.tenantFetcher.schedule }}"
   failedJobsHistoryLimit: 5
   concurrencyPolicy: Forbid
-  startingDeadlineSeconds: 60
+  startingDeadlineSeconds: 60 # Fix for https://github.com/kyma-incubator/compass/issues/1155
   jobTemplate:
     spec:
       template:

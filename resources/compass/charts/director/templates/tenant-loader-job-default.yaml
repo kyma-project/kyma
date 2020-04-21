@@ -1,13 +1,13 @@
-{{- if or (eq .Values.global.tenantConfig.useExternalTenants true) (eq .Values.global.tenantConfig.useDefaultTenants true) }}
+{{- if eq .Values.global.tenantConfig.useDefaultTenants true }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-    name: {{ template "fullname" . }}-tenant-loader
+    name: {{ template "fullname" . }}-tenant-loader-default
     labels:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
     annotations:
-        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook": post-install
         "helm.sh/hook-weight": "1"
         "helm.sh/hook-delete-policy": before-hook-creation
 spec:
@@ -59,16 +59,9 @@ spec:
                       - name: APP_DB_MAX_IDLE_CONNECTIONS
                         value: "{{.Values.global.tenantConfig.dbPool.maxIdleConnections}}"
                   volumeMounts:
-                    {{if eq .Values.global.tenantConfig.useDefaultTenants true}}
                     - name: default-tenant-config
                       mountPath: /data/default-tenants.json
                       subPath: tenants.json
-                    {{end}}
-                    {{if eq .Values.global.tenantConfig.useExternalTenants true}}
-                    - name: external-tenant-config
-                      mountPath: /data/external-tenants.json
-                      subPath: tenants.json
-                    {{end}}
                   command:
                     - "/bin/sh"
                   args:
@@ -88,16 +81,9 @@ spec:
                       readOnly: true
               {{end}}
             volumes:
-            {{if eq .Values.global.tenantConfig.useDefaultTenants true}}
               - name: default-tenant-config
                 configMap:
                   name: {{ template "fullname" . }}-default-tenant-config
-            {{end}}
-            {{if eq .Values.global.tenantConfig.useExternalTenants true}}
-              - name: external-tenant-config
-                configMap:
-                  name: compass-director-external-tenant-config
-            {{end}}
             {{if eq .Values.global.database.embedded.enabled false}}
               - name: cloudsql-instance-credentials
                 secret:
