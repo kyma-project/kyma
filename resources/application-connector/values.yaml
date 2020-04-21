@@ -8,7 +8,7 @@ global:
   disableLegacyConnectivity: false
   isLocalEnv: false
   namespace: kyma-integration
-  strictMode: disabled
+  strictMode: enabled
   istio:
     namespace: istio-system
     tls:

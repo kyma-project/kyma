@@ -10,7 +10,7 @@ global:
       version: "PR-7913"
     compassExternalSolutionTests:
       dir:
-      version: "PR-7738"
+      version: "PR-7800"
   istio:
     gateway:
       name: kyma-gateway

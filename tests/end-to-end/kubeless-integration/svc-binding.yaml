@@ -1,9 +1,0 @@
----
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceBinding
-metadata:
-  namespace: kubeless-test
-  name: redis-binding
-spec:
-  instanceRef:
-    name: redis

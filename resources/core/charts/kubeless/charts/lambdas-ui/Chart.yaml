@@ -1,4 +1,0 @@
-apiVersion: v1
-description: Lambdas UI chart for console application.
-name: lambdas-ui
-version: 0.1.0
