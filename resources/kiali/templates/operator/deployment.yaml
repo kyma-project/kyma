@@ -41,7 +41,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: OPERATOR_NAME
-          value: "kiali-operator"
+          value: "{{ template "kiali.name" . }}-operator"
         - name: ANSIBLE_DEBUG_LOGS
           value: "True"
         resources:
