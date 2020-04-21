@@ -33,7 +33,7 @@ data:
 {{- if .Values.conf.Output.Elasticsearch.enabled }}
     @INCLUDE output-elasticsearch.conf
 {{- end }}
-{{- if .Values.conf.Filter.record_modifier.cluster_name }}
+{{- if .Values.conf.Filter.record_modifier.enabled }}
     @INCLUDE filter-record-modifier.conf
 {{- end }}
 {{- if .Values.conf.Output.loki.enabled }}
