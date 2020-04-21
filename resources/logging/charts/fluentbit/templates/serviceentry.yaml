@@ -1,8 +1,8 @@
-{{- if .Values.serviceEntry }}
+{{- if .Values.externalServiceEntry }}
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
-  name: {{ template "fluent-bit.fullname" . }}-service-entry
+  name: {{ template "fluent-bit.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "fluent-bit.metaLabels" . | trim | nindent 4 }}
@@ -12,9 +12,9 @@ metadata:
       {{- end }}
 spec:
   hosts:
-  {{- toYaml .Values.serviceEntry.hosts | trim | nindent 4 }}
+  {{- toYaml .Values.externalServiceEntry.hosts | trim | nindent 4 }}
   location: MESH_EXTERNAL
   ports:
-  {{- toYaml .Values.serviceEntry.ports | trim | nindent 4 }}
-  resolution: DNS
+  {{- toYaml .Values.externalServiceEntry.ports | trim | nindent 4 }}
+  resolution: {{ .Values.externalServiceEntry.resolutionMode }}
 {{- end }}
