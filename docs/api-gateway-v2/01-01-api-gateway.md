@@ -2,7 +2,7 @@
 title: Overview
 ---
 
->**CAUTION:** This implementation replaces the API Gateway that is based on the API custom resource. The services you exposed and secured using the deprecated implementation are automatically migrated to use the new implementation. Read [this](/components/api-gateway-v2#details-migration-from-the-previous-api-resources) document to learn how to check if a service was properly migrated.
+>**CAUTION:** This implementation replaces the API Gateway that is based on the Api custom resource. The services you exposed and secured using the deprecated implementation are automatically migrated to use the new implementation. Read [this](/components/api-gateway-v2#details-migration-from-the-previous-api-resources) document to learn how to check if a service was properly migrated.
 
 To make your service accessible outside the Kyma cluster, expose it using the Kyma API Gateway Controller, which listens for the custom resource (CR) objects that follow the `apirules.gateway.kyma-project.io` CustomResourceDefinition (CRD). Creating a valid CR triggers the API Gateway Controller to create an Istio Virtual Service. Optionally, you can specify the **rules** attribute of the CR to secure the exposed service with Oathkeeper Access Rules.
 
