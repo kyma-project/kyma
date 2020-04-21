@@ -41,9 +41,6 @@ global:
     version: "c8430e15"
   console_backend_service_test:
     version: 145e3920
-  cluster_users_integration_tests:
-    dir:
-    version: 08e313d5
   xip_patch:
     dir:
     version: 0e322dac

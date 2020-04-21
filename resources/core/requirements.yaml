@@ -1,8 +1,6 @@
 dependencies:
   - name: console
     condition: console.enabled
-  - name: cluster-users
-    condition: cluster-users.enabled
   - name: kubeless
     condition: kubeless.enabled
   - name: console-backend-service
