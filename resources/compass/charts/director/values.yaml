@@ -16,4 +16,5 @@ adminGroupNames:
   - "runtimeAdmin"
   - "runtimeNamespaceAdmin"
 
-operatorGroupName: "runtimeOperator"
+operatorGroupNames:
+  - "runtimeOperator"

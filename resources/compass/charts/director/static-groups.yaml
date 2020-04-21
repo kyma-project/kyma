@@ -16,7 +16,8 @@
     - "automatic_scenario_assignment:read"
     - "automatic_scenario_assignment:write"
 {{- end }}
-- groupname: "{{ .Values.operatorGroupName }}"
+{{- range $name := .Values.operatorGroupNames }}
+- groupname: "{{ $name }}"
   scopes:
     - "application:read"
     - "application_template:read"
@@ -25,3 +26,4 @@
     - "label_definition:read"
     - "tenant:read"
     - "automatic_scenario_assignment:read"
+{{- end }}
