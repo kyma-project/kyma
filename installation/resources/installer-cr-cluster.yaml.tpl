@@ -48,7 +48,7 @@ spec:
       namespace: "natss"
     - name: "core"
       namespace: "kyma-system"
-    - name: "user-management"
+    - name: "cluster-users"
       namespace: "kyma-system"
     - name: "logging"
       namespace: "kyma-system"
