@@ -53,7 +53,7 @@ spec:
         - --upstream-keepalives=true
         - --upstream-keepalive-timeout=60s
         - --cookie-domain=https://jaeger.{{ .Values.global.ingress.domainName }}
-        - --cookie-access-name=KYMA_TOKEN
+        - --cookie-access-name=KYMA_JAEGER_TOKEN
         ports:
         - containerPort: {{ .Values.kcproxy.inPort }}
         resources:
