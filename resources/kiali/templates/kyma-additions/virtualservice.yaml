@@ -14,11 +14,8 @@ spec:
   hosts:
   - kiali.{{ .Values.global.ingress.domainName }}
   http:
-  - match:
-    - uri:
-        regex: /.*
-    route:
+  - route:
     - destination:
         port:
-          number: {{ .Values.server.port }}
-        host: kiali
+          number: {{ .Values.kiali.spec.server.port }}
+        host: {{ template "kiali.name" . }}-secured
