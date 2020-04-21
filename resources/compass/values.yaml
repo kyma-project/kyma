@@ -23,7 +23,7 @@ global:
       version: "9fae2df7"
     director:
       dir:
-      version: "8604d53a"
+      version: "c75aca63"
     gateway:
       dir:
       version: "9fae2df7"
@@ -90,7 +90,6 @@ global:
 
   tenantConfig:
     useDefaultTenants: true
-    useExternalTenants: false
     dbPool:
       maxOpenConnections: 1
       maxIdleConnections: 1
