@@ -104,6 +104,8 @@ spec:
   selector:
     matchLabels:
       name: kyma-installer
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
