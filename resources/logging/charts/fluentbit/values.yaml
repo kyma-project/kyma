@@ -176,8 +176,8 @@ conf:
     record_modifier:
       enabled: false
       Match: "*"
-      Key: cluster_name
-      Value:
+      Key: "myKey"
+      Value: "myValue"
   Parsers: |
     [PARSER]
         Name              docker
@@ -194,7 +194,7 @@ conf:
   #      Name              test
   #      Match             *
   script: #|
-  # my script() {}
+  # myScript() {}
 
 backend:
   es:
