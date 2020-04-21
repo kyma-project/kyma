@@ -317,7 +317,7 @@ tolerations:
 affinity: {}
 
 # external service entry configuration, this config add an external service to the service mesh
-# If your pod istio enabled (istio proxy injected), in some cases istio doesn't allow applications to access external services through https and use none standard ports (not 443 or 8443)
+# By default, the fluent-bit daemon will be part of the service-mesh (having istio sidecar injection enabled). In some cases the sidecar doesn't allow access to external services through https using none standard ports (not 443 or 8443)
 # Typical error message look like 'routines:ssl3_get_record:wrong version number', in this case remove comment for values below and change it accordingly for your service
 #externalServiceEntry:
 #  hosts:
