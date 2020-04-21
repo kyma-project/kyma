@@ -44,13 +44,15 @@ import (
 
 // Config holds application configuration
 type Config struct {
-	Logger              logger.Config
-	DexUserSecret       string `envconfig:"default=admin-user"`
-	DexNamespace        string `envconfig:"default=kyma-system"`
-	KubeNamespace       string `envconfig:"default=kube-system"`
-	MaxConcurrencyLevel int    `envconfig:"default=1"`
-	KubeconfigPath      string `envconfig:"optional"`
-	TestingAddonsURL    string
+	Logger                 logger.Config
+	DexUserSecret          string `envconfig:"default=admin-user"`
+	DexNamespace           string `envconfig:"default=kyma-system"`
+	KubeNamespace          string `envconfig:"default=kube-system"`
+	MaxConcurrencyLevel    int    `envconfig:"default=1"`
+	KubeconfigPath         string `envconfig:"optional"`
+	TestingAddonsURL       string
+	WorkingNamespace       string `envconfig:"default=e2e-upgrade-test"`
+	TestsInfoConfigMapName string `envconfig:"default=upgrade-tests-info"`
 }
 
 const (
@@ -143,9 +145,11 @@ func main() {
 		"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli),
 		//"LoggingUpgradeTest":            logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
 	}
+	tRegistry, err := runner.NewConfigMapTestRegistry(k8sCli, cfg.WorkingNamespace, cfg.TestsInfoConfigMapName)
+	fatalOnError(err, "while creating Test Registry")
 
 	// Execute requested action
-	testRunner, err := runner.NewTestRunner(log, k8sCli.CoreV1().Namespaces(), tests, cfg.MaxConcurrencyLevel, verbose)
+	testRunner, err := runner.NewTestRunner(log, k8sCli.CoreV1().Namespaces(), tRegistry, tests, cfg.MaxConcurrencyLevel, verbose)
 	fatalOnError(err, "while creating test runner")
 
 	switch action {

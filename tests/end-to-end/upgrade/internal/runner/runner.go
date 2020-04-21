@@ -31,10 +31,16 @@ type NamespaceCreator interface {
 	Create(*v1.Namespace) (*v1.Namespace, error)
 }
 
+type TestRegistry interface {
+	IsTestPassed(name string) bool
+	MarkTestPassed(name string) error
+}
+
 // TestRunner executes registered tests
 type TestRunner struct {
 	log                 *logrus.Entry
 	nsCreator           NamespaceCreator
+	testRegistry        TestRegistry
 	tests               map[string]UpgradeTest
 	maxConcurrencyLevel int
 	sanitizeRegex       *regexp.Regexp
@@ -42,7 +48,7 @@ type TestRunner struct {
 }
 
 // NewTestRunner is a constructor for TestRunner
-func NewTestRunner(log *logrus.Entry, nsCreator NamespaceCreator, tests map[string]UpgradeTest, maxConcurrencyLevel int, verbose bool) (*TestRunner, error) {
+func NewTestRunner(log *logrus.Entry, nsCreator NamespaceCreator, testRegistry TestRegistry, tests map[string]UpgradeTest, maxConcurrencyLevel int, verbose bool) (*TestRunner, error) {
 	sanitizeRegex, err := regexp.Compile(regexSanitize)
 	if err != nil {
 		return nil, errors.Wrap(err, "while compiling sanitize regexp")
@@ -51,6 +57,7 @@ func NewTestRunner(log *logrus.Entry, nsCreator NamespaceCreator, tests map[stri
 	return &TestRunner{
 		log:                 log.WithField("service", "test:runner"),
 		nsCreator:           nsCreator,
+		testRegistry:        testRegistry,
 		tests:               tests,
 		maxConcurrencyLevel: maxConcurrencyLevel,
 		sanitizeRegex:       sanitizeRegex,
@@ -109,6 +116,11 @@ func (r *TestRunner) ExecuteTests(stopCh <-chan struct{}) error {
 				failed := r.executeTaskFunc(test.TestResources, stopCh, "TestResources", test.Name(), false)
 				if failed {
 					failedTaskCnt++
+				} else {
+					err := r.testRegistry.MarkTestPassed(test.Name())
+					if err != nil {
+						r.log.Errorf("Unable to mark test passed: %s", err.Error())
+					}
 				}
 			}
 			wg.Done()
@@ -116,7 +128,12 @@ func (r *TestRunner) ExecuteTests(stopCh <-chan struct{}) error {
 	}
 
 	// populate all tests
+	numOfTests := 0
 	for name, test := range r.tests {
+		if r.testRegistry.IsTestPassed(name) {
+			continue
+		}
+		numOfTests++
 		queue <- task{name, test}
 	}
 	close(queue)
@@ -125,7 +142,7 @@ func (r *TestRunner) ExecuteTests(stopCh <-chan struct{}) error {
 	r.wgWait(stopCh, &wg)
 
 	if failedTaskCnt > 0 {
-		return fmt.Errorf("executed %d task and %d of them failed", len(r.tests), failedTaskCnt)
+		return fmt.Errorf("executed %d task and %d of them failed", numOfTests, failedTaskCnt)
 	}
 
 	return nil
