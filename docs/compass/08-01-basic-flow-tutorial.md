@@ -68,21 +68,6 @@ For simplicity reasons, use the available Order Service as the sample external A
 
     f. Click the **Functions** tab and wait until the function status is completed and marked as `RUNNING`.
 
-5. Test your function. Navigate to your function and go to the **Testing** tab. After you click the **Send** button, you can see the following output in the **Response** field:
-
-    ```
-    {
-      "status": 200,
-      "data": []
-    }
-    ```
-
-    You can test your function by performing the following actions in the **Payload** field:
-
-    - `{"action":"add"}` - adds the new order
-    - `{"action":"list"}` - lists all orders (this is the default command executed after you click the **Send** button)
-    - `{"action":"delete"}` - deletes all the orders
-
 ### Cleanup
 
 Clean up your cluster after going through this tutorial. To do so, delete your resources in the following order:
