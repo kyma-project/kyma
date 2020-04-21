@@ -1,7 +1,6 @@
 package event_mesh
 
 import (
-	kubelessclientset "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -35,9 +34,7 @@ var (
 func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	appOperatorClientset := appoperatorclientset.NewForConfigOrDie(config)
 	appBrokerClientset := appbrokerclientset.NewForConfigOrDie(config)
-	kubelessClientset := kubelessclientset.NewForConfigOrDie(config)
 	coreClientset := k8s.NewForConfigOrDie(config)
-	pods := coreClientset.CoreV1().Pods(s.testID)
 	serviceCatalogClientset := servicecatalogclientset.NewForConfigOrDie(config)
 	serviceBindingUsageClientset := sbuclientset.NewForConfigOrDie(config)
 	connectionTokenHandlerClientset := connectiontokenhandlerclientset.NewForConfigOrDie(config)
@@ -60,7 +57,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		s.testID,
 	)
 
-	lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
+	lambdaEndpoint := helpers.InClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
 	state := s.NewState()
 
 	return []step.Step{
@@ -72,7 +69,11 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
-			testsuite.NewDeployLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort, kubelessClientset.KubelessV1beta1().Functions(s.testID), pods, true),
+			testsuite.NewDeployFakeLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort,
+				coreClientset.AppsV1().Deployments(s.testID),
+				coreClientset.CoreV1().Services(s.testID),
+				coreClientset.CoreV1().Pods(s.testID),
+				true),
 			testsuite.NewStartTestServer(testService),
 			testsuite.NewConnectApplication(connector, state, s.applicationTenant, s.applicationGroup),
 		),

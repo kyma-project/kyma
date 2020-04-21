@@ -1,0 +1,47 @@
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: {{ .Release.Name }}-event-service-authorization-policy
+  namespace: {{ .Values.authorizationPolicy.eventService.namespace }}
+  labels:
+    app: {{ .Release.Name }}-event-service
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.authorizationPolicy.eventService.applicationName }}-event-service
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/{{ .Release.Namespace }}/sa/test-{{ template "fullname" . }}
+              - cluster.local/ns/{{ .Values.authorizationPolicy.eventService.namespace }}/sa/{{ .Values.authorizationPolicy.eventService.applicationName }}-connectivity-validator
+              - cluster.local/ns/{{ .Values.authorizationPolicy.eventService.namespace }}/sa/{{ .Values.authorizationPolicy.eventService.applicationName }}-event-service-acceptance
+      to:
+        - operation:
+            methods:
+              - POST
+            paths:
+              - /{{ .Values.authorizationPolicy.eventService.applicationName }}/v1/events
+              - /{{ .Values.authorizationPolicy.eventService.applicationName }}/v2/events
+        - operation:
+            methods:
+              - GET
+            paths:
+              - /{{ .Values.authorizationPolicy.eventService.applicationName }}/v1/events/subscribed
+              - /v1/health
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/{{ .Values.authorizationPolicy.consoleBackendService.namespace }}/sa/{{ .Values.authorizationPolicy.consoleBackendService.serviceAccount }}
+      to:
+        - operation:
+            methods:
+              - GET
+            paths:
+              - /v1/health
+---
+{{- end }}

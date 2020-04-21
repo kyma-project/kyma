@@ -46,8 +46,6 @@ List ReplicaSets in the given Namespace and loop through them. You must check ev
 To achieve that, implement the logic which calculates if the ReplicaSet has enough resources to create the next replica.
 When there is not enough resources to create the next replica and the number of desired replicas is not reached, return a ResourceQuotasStatus with a flag set to `true`.
 
->**NOTE:** The Kubeless functions work with this solution because they use the Deployment and the ReplicaSet underneath.
-
 ### Check the StatefulSets
 
 List StatefulSets in the given Namespace and loop through them. You must check every StatefulSet which does not reach the number of desired replicas.

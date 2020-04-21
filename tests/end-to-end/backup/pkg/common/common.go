@@ -10,7 +10,6 @@ import (
 
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/client"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/eventmesh"
-	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/helloworld"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/monitoring"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup/pkg/tests/ory"
@@ -39,9 +38,6 @@ func RunTest(t *testing.T, mode TestMode) {
 	//
 	//client, err := dynamic.NewForConfig(cfg)
 	//fatalOnError(t, err, "while creating dynamic client")
-
-	myFunctionTest, err := function.NewFunctionTest()
-	fatalOnError(t, err, "while creating structure for Function test")
 
 	myStatefulSetTest, err := helloworld.NewStatefulSetTest()
 	fatalOnError(t, err, "while creating structure for StatefulSet test")
@@ -81,7 +77,6 @@ func RunTest(t *testing.T, mode TestMode) {
 	backupTests := []e2eTest{
 		{enabled: true, backupTest: myPrometheusTest},
 		{enabled: false, backupTest: myGrafanaTest}, //disabled due to flakiness
-		{enabled: true, backupTest: myFunctionTest},
 		{enabled: true, backupTest: myDeploymentTest},
 		{enabled: true, backupTest: myStatefulSetTest},
 		{enabled: true, backupTest: scAddonsTest},
