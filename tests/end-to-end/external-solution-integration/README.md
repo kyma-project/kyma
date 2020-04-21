@@ -12,12 +12,12 @@ When you run the test, these actions are performed in the order listed:
 2. Create an ApplicationMapping CR for the created application in the ` e2e-test` Namespace.
 3. Deploy a function in the ` e2e-test` Namespace.
 4. Start a test service in the ` e2e-test` Namespace. The function calls it when it receives an event.
-5. Connect an application through the Application Gateway with client certificates.
+5. Connect the Application through the Application Gateway with client certificates.
 6. Register a test service in the Application Registry. The service exposes an event API.
 7. Create a ServiceInstance for the registered ServiceClass.
 8. Create a ServiceBinding for the ServiceInstance.
 9. Create ServiceBindingUsage CR of that binding for the deployed function.
-10. Create a Subscription for the function, so it is subscribed to the events exposed by the application.
+10. Create a Subscription for the function, so it is subscribed to the events exposed by the Application.
 11. Send an event to the Application Gateway.
 12. Verify if the call from the function reached the test service.
 
@@ -81,15 +81,15 @@ The test requires the following environment variables:
 When you run the test, these actions are performed in the order listed:
 
 1. Create an Application.
-2. Create an ApplicationMapping CR for the created application in the ` e2e-mesh-ns` Namespace.
+2. Create an ApplicationMapping CR for the created Application in the ` e2e-mesh-ns` Namespace.
 3. Deploy a function in the `e2e-mesh-ns` Namespace.
 4. Start a test service in the ` e2e-mesh-ns` Namespace. The function calls it when it receives an event.
-5. Connect an application through the Application Gateway with client certificates.
+5. Connect the Application through the Application Gateway with client certificates.
 6. Register a test service in the Application Registry. The service exposes an event API.
 7. Create a ServiceInstance for the registered ServiceClass.
 8. Create a ServiceBinding for the ServiceInstance.
 9. Create ServiceBindingUsage CR of that binding for the deployed function.
-10. Create a Knative Trigger for the function, so it is subscribed to the events exposed by the application.
+10. Create a Knative Trigger for the function, so it is subscribed to the events exposed by the Application.
 11. Send a Cloud event to the Application Gateway at `/events` path.
 12. Verify if the call from the function reached the test service.
 
