@@ -20,6 +20,7 @@ Use the following environment variables to configure the application:
 | APP_RAFTER_ADDRESS | No | `storage.kyma.local` | The address of the content storage server. |
 | APP_RAFTER_SECURE | No | `true` | Use HTTPS for the connection with the content storage server. |
 | APP_RAFTER_VERIFY_SSL | No | `true` | Ignore invalid SSL certificates. |
+| APP_SERVERLESS_USAGE_KIND | No | `function` | The name of the UsageKind CR for the Function CR. |
 | APP_APPLICATION_GATEWAY_STATUS_REFRESH_PERIOD | No | `15s` | The period of time after which the application refreshes the Application statuses. |
 | APP_APPLICATION_GATEWAY_STATUS_CALL_TIMEOUT | No | `500ms` | The timeout of the HTTP call status check. |
 | APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE | Yes | None | The namespace with gateway services. |

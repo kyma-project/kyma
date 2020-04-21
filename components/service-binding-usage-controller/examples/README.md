@@ -89,7 +89,7 @@ kubectl create -f servicecatalog/redis-instance-binding.yaml -n $namespace
 ```bash
 kubectl get serviceinstance/redis -n $namespace -o jsonpath='{ .status.conditions[0].reason }'
 ```
-6. Create a lambda.
+6. Create a function.
 ```bash
 kubectl create -f function/redis-client.yaml -n $namespace
 ```

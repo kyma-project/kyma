@@ -13,7 +13,7 @@ For GraphQL queries, the Console Backend Service uses caching which is based on 
 
 ## Modularization
 
-The Console Backend Service consists of the Kubernetes resource logic and cache for different domains, such as the Service Catalog, Application, or Kubeless. The Console Backend Service introduces modularization changes which are based on toggling modules while the server is running. The enabled module synchronizes cache for its resource and enables the module's logic for all server requests. If you disable a given module, every GraphQL query, mutation, and subscription related to this module returns an error.
+The Console Backend Service consists of the Kubernetes resource logic and cache for different domains, such as the Service Catalog, Application, or Serverless. The Console Backend Service introduces modularization changes which are based on toggling modules while the server is running. The enabled module synchronizes cache for its resource and enables the module's logic for all server requests. If you disable a given module, every GraphQL query, mutation, and subscription related to this module returns an error.
 
 These are the available Console Backend Service pluggable modules which contain the GraphQL resolver logic, where:
 - `apicontroller` relates to the API Controller.

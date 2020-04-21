@@ -39,7 +39,7 @@ After you register your addons in the Service Catalog, you can provision and bin
 
 1. Select a given addon Service Class from the Service Catalog.
 2. Provision this Service Class by creating its ServiceInstance in a given Namespace.
-3. Bind your ServiceInstance to a service or a lambda function.
-4. The service or lambda calls a given addon.
+3. Bind your ServiceInstance to a service or a function.
+4. The service or function calls a given addon.
 
 ![Helm Broker architecture](./assets/hb-architecture.svg)

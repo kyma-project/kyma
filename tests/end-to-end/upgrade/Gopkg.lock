@@ -1363,6 +1363,7 @@
     "k8s.io/client-go/kubernetes/typed/apps/v1",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
+    "k8s.io/client-go/util/retry",
     "k8s.io/utils/pointer",
     "knative.dev/eventing/pkg/apis/eventing/v1alpha1",
     "knative.dev/eventing/pkg/apis/messaging/v1alpha1",
