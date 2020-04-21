@@ -179,7 +179,7 @@ backendModule:
   enable: true
 
 clusterMicroFrontend:
-  enable: true
+  enabled: true
 
 docker-registry:
   enabled: true
