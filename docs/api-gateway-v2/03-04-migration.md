@@ -1,80 +1,80 @@
 ---
-title: Migration from API resources to APIRules
+title: Migration from Api custom resources to APIRule custom resources
 type: Details
 ---
 
-The migration is done automatically by a job that runs during the Kyma upgrade. During this process, the [API Gateway Migrator tool](https://github.com/kyma-project/kyma/blob/master/components/api-gateway-migrator/README.md#api-gateway-migrator) translates existing API resources to APIRule objects and deletes the original resource.
+The migration from Api to APIRule custom resources (CRs) is done automatically by a job that runs during the Kyma upgrade. During this process, the [API Gateway Migrator tool](https://github.com/kyma-project/kyma/blob/master/components/api-gateway-migrator/README.md#api-gateway-migrator) translates existing Api CRs to APIRule CRs and deletes the original resource.
 
 
->**CAUTION:** Some API configurations are too complex or do not meet all requirements to pass the automatic migration. To ensure all your services are exposed using APIRules, [verify the migration outcome](#verify-automatic-migration). If there still are API resources in use, follow [this](#manual-migration) guide to migrate them.
+>**CAUTION:** Some Api CR specifications are too complex or do not meet all requirements to pass the automatic migration. To ensure all your services are exposed using APIRule CRs, [verify the migration outcome](#verify-automatic-migration). If there still are Api CRs in use, follow [this](#manual-migration) guide to migrate them.
 
 
-Skipping some resources during migration will not break the way existing services are exposed. However, bear in mind that if you want to introduce changes or remove the API resource, it won't have any effect on how the service is exposed because the service will still use the original configuration. 
+Skipping some resources during migration will not break the way existing services are exposed. However, bear in mind that if you want to introduce changes or remove the Api CR, it won't have any effect on how the service is exposed because the service will still use the original configuration. 
 
 
 ## Verify automatic migration
 
-Follow these steps to verify if all the API resources were migrated to APIRules:
+Follow these steps to verify if all the Api CRs were migrated to APIRule CRs:
 
-1. Once the Kyma upgrade finishes, list the existing API objects:
+1. Once the Kyma upgrade finishes, list the existing Api CRs:
 
     ```shell script
       kubectl get apis --all-namespaces
     ```
 
-2. As API objects are removed after a successful migration, the list shows all resources that the migration job skipped. Fetch the logs from the job's Pod to learn the reasons for this behavior: 
+2. As Api CRs are removed after a successful migration, the list shows all resources that the migration job skipped. Fetch the logs from the job's Pod to learn the reasons for this behavior: 
 
     ```shell script
     kubectl logs api-gateway-api-migrator-job -n kyma-system
     ```
 
->**NOTE:** If the migration process skipped the API resources due to the invalid status or a blacklisted label, you either should not or will not be able to migrate them.
+>**NOTE:** If the migration process skipped the Api resources due to the invalid status or a blacklisted label, you either should not or will not be able to migrate them.
 
 ## Manual migration
 
-This guide shows how you can manually migrate API resources to API Rules.
+This guide shows how you can manually migrate Api resources to API Rules.
 
->**NOTE:** Before you start the manual migration process, see the [API CR](/components/api-gateway/#custom-resource-api-sample-custom-resource) and [APIRule CR](/components/api-gateway-v2#custom-resource-api-rule) documents for the custom resource detailed definition.
+>**NOTE:** Before you start the manual migration process, see the [Api CR](/components/api-gateway/#custom-resource-api-sample-custom-resource) and [APIRule CR](/components/api-gateway-v2#custom-resource-api-rule) documents for the custom resource detailed definition.
 
 Follow these steps:
 
-1. Fetch the API resource you want to migrate:
+1. Fetch the Api CRs you want to migrate:
 
     ```shell script
     kubectl get api {NAME} -n {NAMESPACE} -o yaml
     ```
 
-2. Create an APIRule resource based on the API object's specification:
+2. Create an APIRule CR based on the Api CR's specification:
 
->**NOTE:** This step focuses on the`spec` part of the CRD. You can `metadata` field in a preferred way and do not copy the [`status`](components/api-gateway-v2#custom-resource-api-rule-additional-information) field from the original API resource.
+>**NOTE:** This step focuses on the`spec` part of the CRD. You can `metadata` field in a preferred way and do not copy the [`status`](components/api-gateway-v2#custom-resource-api-rule-additional-information) field from the original Api CR.
 
 a. Replace the default value (`kyma-gateway.kyma-system.svc.cluster.local`) for the **gateway** parameter with Istio Gateway used to expose services. 
 
-b. Copy the values for **service.name** and **service.port** parameters from the corresponding fields of the API object. 
+b. Copy the values for **service.name** and **service.port** parameters from the corresponding fields of the Api CR. 
 
-c. Set the value for **service.host** parameter to any temporary value which includes the domain. For example, if the value for the **hostname** parameter of the API object was set to `sample-service.kyma.local`, change it to `temp-sample-service.kyma.local` so that differs from the original value. Make sure other services on your cluster do not use this hostname. 
+c. Set the value for **service.host** parameter to any temporary value which includes the domain. For example, if the value for the **hostname** parameter of the Api CR was set to `sample-service.kyma.local`, change it to `temp-sample-service.kyma.local` so that differs from the original value. Make sure other services on your cluster do not use this hostname. 
 
-d. Configure the **rules** parameter of APIRule.
+d. Configure the **rules** parameter of APIRule CR.
 
 >**NOTE:** For details on authentication configuration and possible values you can use, see [this](#authentication-of-api-resources-and-apirules) section.
 
 When the configuration is ready, create the APIRule object and test if the service is working as expected on the new host. It should work the same on both hosts.
 
 
-3. Remove the dependent resources of the API object:
+3. Remove the dependent resources of the Api CR:
 
    ```shell script
      kubectl delete virtualservice {API_NAME} -n {NAMESPACE}
     ```
 Make sure that the Virtual Service resource is deleted before proceeding.
 
-4. If the API resource was secured with an authentication mechanism, delete the Policy resource:
+4. If the Api CR was secured with an authentication mechanism, delete the Policy resource:
 
     ```shell script
      kubectl delete policy {API_NAME} -n {NAMESPACE}
     ```
 
-5. To make the service returns to its original host, set the **spec.service.host** parameter of APIRule to the value used by the API resource.
+5. To make the service returns to its original host, set the **spec.service.host** parameter of APIRule CR to the value used by the Api CR.
 
     ```shell script
     kubectl edit apirule {APIRULE_NAME} -n {NAMESPACE}
@@ -82,33 +82,33 @@ Make sure that the Virtual Service resource is deleted before proceeding.
 
 After saving that configuration, the service should be available on the original hostname.
 
-6. Remove API resource
+6. Remove the Api CR:
 
     ```shell script
     kubectl delete api {API_NAME} -n {NAMESPACE}
     ```
 
-## Authentication of API resources and APIRules
+## Authentication of Apis and APIRules
 
-To properly configure the authentication mechanism for the new APIRule, learn more about the differences in authentication configuration for API resources and APIRules:
+To properly configure the authentication mechanism for the new APIRule, learn more about the differences in authentication configuration for Api and APIRule CRs:
 
-| API resource | APIRule| 
-|--------------| -------|
+| Api CR       | APIRule CR| 
+|--------------| ----------|
 |Configured with a list of JWT issuers set for all paths of a service.| Configured with a list of path definitions along with their respective authentication methods.|
 | You can define a list of excluded paths for a given issuer. Requests for these paths won't require authentication by this issuer but will require authentication from other configured issuers.| You can specify what authentication to use per path definition and use a regular expression to match every path, or a subset of possible paths, or a single one. |
 
 
->**NOTE:** Path definitions in the APIRule must not overlap, otherwise the requests to such paths are rejected. That's why migrating an API resource that has multiple issuers and different excluded paths often requires providing complex regex definitions for a corresponding APIRule.
+>**NOTE:** Path definitions in the APIRule CR must not overlap, otherwise the requests to such paths are rejected. That's why migrating an Api CR that has multiple issuers and different excluded paths often requires providing complex regex definitions for a corresponding APIRule CR.
 
 ### Authentication configuration 
 
 <div tabs>
   <details>
   <summary>
-  Authentication configuration for API objects
+  Authentication configuration for Api CRs
  </summary>
 
- This example shows the authentication configuration for an API object. 
+ This example shows the authentication configuration for an Api CR. 
 
 ```yaml
 authentication:
@@ -139,10 +139,10 @@ In this configuration:
   </details>
   <details>
   <summary>
-  Authentication configuration for APIRules
+  Authentication configuration for APIRule CRs
   </summary>
 
-This APIRule configuration enforces the same authentication policies as for the API object:
+This APIRule configuration enforces the same authentication policies as for Api objects:
 
 ```yaml
 rules:
@@ -187,7 +187,7 @@ However, if the same `excludedPaths` element is present throughout the authentic
 </div>
 
 
-The table shows how the APIRule's path value corresponds to the **excludedPaths** values for the API resource, and what negative lookahead value you should add to the `/.*` path:
+The table shows how the APIRule CR's path value corresponds to the **excludedPaths** values for the Api CR, and what negative lookahead value you should add to the `/.*` path:
 
 | Expression type | Description | Sample value | Path value | Negative lookahead value |
 |---|---|---|---|---|
