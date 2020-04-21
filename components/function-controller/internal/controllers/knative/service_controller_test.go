@@ -173,7 +173,7 @@ var _ = ginkgo.Describe("KService controller", func() {
 			return len(revList.Items)
 		}, 5*time.Second, 500*time.Millisecond).Should(gm.Equal(1))
 
-		ginkgo.By("verify that the only rev")
+		ginkgo.By("verify that the only revision left is the correct one")
 		cfgLabelValue, ok := revList.Items[0].Labels[cfgGenerationLabel]
 		gm.Expect(ok).To(gm.BeTrue())
 		gm.Expect(cfgLabelValue).To(gm.Equal(strconv.Itoa(numberOfRevisions)))
