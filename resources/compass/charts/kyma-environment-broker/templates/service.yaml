@@ -11,6 +11,9 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+    - port: {{ .Values.global.istio.proxy.port }}
+      protocol: TCP
+      name: proxy-status
   selector:
     app.kubernetes.io/name: {{ include "kyma-env-broker.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
