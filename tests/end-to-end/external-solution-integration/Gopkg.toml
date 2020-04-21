@@ -19,9 +19,8 @@ required = [
     version = "2.4.1"
 
 [[constraint]]
-  revision = "0c1abadb417cbe4aa5822697e2915dbf5f956f01"
   name = "github.com/kyma-incubator/compass"
-
+  revision = "8604d53a20a2848c53cad30c288bf8f6c823b825"
 [[constraint]]
   name = "knative.dev/eventing"
   version = "v0.12.0"

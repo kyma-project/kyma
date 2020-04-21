@@ -243,12 +243,10 @@ func apiDefinitionData() string {
 	return fmt.Sprintf(`		id
 		name
 		description
-		applicationID
 		spec {%s}
 		targetURL
 		group
-		auths {%s}
-		version {%s}`, apiSpecData(), runtimeAuthData(), versionData())
+		version {%s}`, apiSpecData(), versionData())
 }
 
 func apiSpecData() string {
@@ -272,7 +270,6 @@ func versionData() string {
 func eventAPIData() string {
 	return fmt.Sprintf(`
 			id
-			applicationID
 			name
 			description
 			group 
@@ -290,7 +287,6 @@ func eventSpecData() string {
 func documentData() string {
 	return `
 		id
-		applicationID
 		title
 		displayName
 		description

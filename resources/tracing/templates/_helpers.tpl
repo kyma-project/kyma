@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "jaeger.name" -}}
+{{- define "jaeger-operator.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "jaeger.fullname" -}}
+{{- define "jaeger-operator.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -25,8 +25,24 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{/*
+Create the name of the service account to use
+*/}}
+{{- define "jaeger-operator.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{ default (include "jaeger-operator.fullname" .) .Values.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "jaeger.chart" -}}
+{{- define "jaeger-operator.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/* Generate basic labels */}}
+{{- define "jaeger-operator.labels" }}
+app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-operator
+{{- end }}

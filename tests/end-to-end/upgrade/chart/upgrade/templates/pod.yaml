@@ -32,6 +32,12 @@ spec:
         sleep 5
         exit $exit_code
     env:
+    - name: APP_WORKING_NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+    - name: APP_TESTS_INFO_CONFIG_MAP_NAME
+      value: test-{{ template "fullname" . }}-info
     - name: APP_MAX_CONCURRENCY_LEVEL
       value: "1"
     - name: APP_LOGGER_LEVEL
