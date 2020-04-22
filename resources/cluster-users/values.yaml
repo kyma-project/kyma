@@ -53,6 +53,11 @@ clusterRoles:
       - "velero.io"
     rafter:
       - "rafter.kyma-project.io"
+    knativeServing:
+      - "networking.internal.knative.dev"
+      - "caching.internal.knative.dev"
+      - "autoscaling.internal.knative.dev"
+      - "serving.knative.dev"
   verbs:
     edit:
       - "create"

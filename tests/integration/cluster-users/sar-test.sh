@@ -18,6 +18,9 @@
 RETRY_TIME=3 #Seconds
 MAX_RETRIES=5
 
+readonly VIEW_OPERATIONS=( "get" "list" )
+readonly EDIT_OPERATIONS=( "create" "delete" "deletecollection" "get" "list" "patch" "update" "watch" )
+
 # Helper used to count retry attempts
 function __retry() {
     local current="${1}"
@@ -266,81 +269,77 @@ function getConfigFile() {
 	fi
 }
 
+function testKnativeServing() {
+	local -r userEmail="${1}"
+	local -r testNamespace="${2}"
+	local -r isAdmin="${3}"
+	local isAdminText=""
+	if [[ "${isAdmin}" == "no" ]]; then
+		isAdminText=" NOT"
+	fi
+	readonly isAdminText
+
+	local -r resources=( "services.serving.knative.dev" "routes.serving.knative.dev" "revisions.serving.knative.dev" "configurations.serving.knative.dev" "clusteringresses.networking.internal.knative.dev" "podautoscalers.autoscaling.internal.knative.dev" "images.caching.internal.knative.dev" )
+
+	# View
+	for resource in "${resources[@]}"; do
+		for operation in "${VIEW_OPERATIONS[@]}"; do
+			echo "--> ${userEmail} should be able to ${operation} ${resource} CR in ${testNamespace}"
+			testPermissions "${operation}" "${resource}" "${testNamespace}" "yes"
+		done
+	done
+
+	# Edit
+	for resource in "${resources[@]}"; do
+		for operation in "${EDIT_OPERATIONS[@]}"; do
+			echo "--> ${userEmail} should${isAdminText} be able to ${operation} ${resource} CR in ${testNamespace}"
+			testPermissions "${operation}" "${resource}" "${testNamespace}" "${isAdmin}"
+		done
+	done
+}
+
 function testRafter() {
-	local -r USER_EMAIL="${1}"
-	local -r TEST_NAMESPACE="${2}"
+	local -r userEmail="${1}"
+	local -r testNamespace="${2}"
+	local -r isAdmin="${3}"
+	local isAdminText=""
+	if [[ "${isAdmin}" == "no" ]]; then
+		isAdminText=" NOT"
+	fi
+	readonly isAdminText
 
-	echo "--> ${USER_EMAIL} should be able to get AssetGroup CR in ${TEST_NAMESPACE}"
-	testPermissions "get" "assetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "yes"
+	local -r resources=( "assetgroup.rafter.kyma-project.io" "asset.rafter.kyma-project.io" "bucket.rafter.kyma-project.io" )
+	local -r clusterResources=( "clusterassetgroup.rafter.kyma-project.io" "clusterasset.rafter.kyma-project.io" "clusterbucket.rafter.kyma-project.io" )
 
-	echo "--> ${USER_EMAIL} should NOT be able to create AssetGroup CR in ${TEST_NAMESPACE}"
-	testPermissions "create" "assetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+	# View
+	for resource in "${resources[@]}"; do
+		for operation in "${VIEW_OPERATIONS[@]}"; do
+			echo "--> ${userEmail} should be able to ${operation} ${resource} CR in ${testNamespace}"
+			testPermissions "${operation}" "${resource}" "${testNamespace}" "yes"
+		done
+	done
 
-	echo "--> ${USER_EMAIL} should NOT be able to delete AssetGroup CR in ${TEST_NAMESPACE}"
-	testPermissions "delete" "assetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+	for resource in "${clusterResources[@]}"; do
+		for operation in "${VIEW_OPERATIONS[@]}"; do
+			echo "--> ${userEmail} should be able to ${operation} ${resource} CR"
+			testPermissionsClusterScoped "${operation}" "${resource}" "yes"
+		done
+	done
 
-	echo "--> ${USER_EMAIL} should NOT be able to patch AssetGroup CR in ${TEST_NAMESPACE}"
-	testPermissions "patch" "assetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+	# Edit
+	for resource in "${resources[@]}"; do
+		for operation in "${EDIT_OPERATIONS[@]}"; do
+			echo "--> ${userEmail} should${isAdminText} be able to ${operation} ${resource} CR in ${testNamespace}"
+			testPermissions "${operation}" "${resource}" "${testNamespace}" "${isAdmin}"
+		done
+	done
 
-	echo "--> ${USER_EMAIL} should be able to get ClusterAssetGroup CR in ${TEST_NAMESPACE}"
-	testPermissions "get" "clusterassetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "yes"
-
-	echo "--> ${USER_EMAIL} should NOT be able to create ClusterAssetGroup CR in ${TEST_NAMESPACE}"
-	testPermissions "create" "clusterassetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
-
-	echo "--> ${USER_EMAIL} should NOT be able to delete ClusterAssetGroup CR in ${TEST_NAMESPACE}"
-	testPermissions "delete" "clusterassetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
-
-	echo "--> ${USER_EMAIL} should NOT be able to patch ClusterAssetGroup CR in ${TEST_NAMESPACE}"
-	testPermissions "patch" "clusterassetgroup.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
-
-	echo "--> ${USER_EMAIL} should be able to get Asset CR in ${TEST_NAMESPACE}"
-	testPermissions "get" "asset.rafter.kyma-project.io" "${TEST_NAMESPACE}" "yes"
-
-	echo "--> ${USER_EMAIL} should NOT be able to create Asset CR in ${TEST_NAMESPACE}"
-	testPermissions "create" "asset.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
-
-	echo "--> ${USER_EMAIL} should NOT be able to delete Asset CR in ${TEST_NAMESPACE}"
-	testPermissions "delete" "asset.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
-
-	echo "--> ${USER_EMAIL} should NOT be able to patch Asset CR in ${TEST_NAMESPACE}"
-	testPermissions "patch" "asset.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
-
-	echo "--> ${USER_EMAIL} should be able to get ClusterAsset CR in ${TEST_NAMESPACE}"
-	testPermissions "get" "asset.rafter.kyma-project.io" "${TEST_NAMESPACE}" "yes"
-
-	echo "--> ${USER_EMAIL} should NOT be able to create ClusterAsset CR in ${TEST_NAMESPACE}"
-	testPermissions "create" "asset.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
-
-	echo "--> ${USER_EMAIL} should NOT be able to delete ClusterAsset CR in ${TEST_NAMESPACE}"
-	testPermissions "delete" "asset.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
-
-	echo "--> ${USER_EMAIL} should NOT be able to patch ClusterAsset CR in ${TEST_NAMESPACE}"
-	testPermissions "patch" "asset.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
-
-	echo "--> ${USER_EMAIL} should be able to get Bucket CR in ${TEST_NAMESPACE}"
-	testPermissions "get" "bucket.rafter.kyma-project.io" "${TEST_NAMESPACE}" "yes"
-
-	echo "--> ${USER_EMAIL} should NOT be able to create Bucket CR in ${TEST_NAMESPACE}"
-	testPermissions "create" "bucket.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
-
-	echo "--> ${USER_EMAIL} should NOT be able to delete Bucket CR in ${TEST_NAMESPACE}"
-	testPermissions "delete" "bucket.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
-
-	echo "--> ${USER_EMAIL} should NOT be able to patch Bucket CR in ${TEST_NAMESPACE}"
-	testPermissions "patch" "bucket.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
-
-	echo "--> ${USER_EMAIL} should be able to get ClusterBucket CR in ${TEST_NAMESPACE}"
-	testPermissions "get" "clusterbucket.rafter.kyma-project.io" "${TEST_NAMESPACE}" "yes"
-
-	echo "--> ${USER_EMAIL} should NOT be able to create ClusterBucket CR in ${TEST_NAMESPACE}"
-	testPermissions "create" "clusterbucket.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
-
-	echo "--> ${USER_EMAIL} should NOT be able to delete ClusterBucket CR in ${TEST_NAMESPACE}"
-	testPermissions "delete" "clusterbucket.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
-
-	echo "--> ${USER_EMAIL} should NOT be able to patch ClusterBucket CR in ${TEST_NAMESPACE}"
-	testPermissions "patch" "clusterbucket.rafter.kyma-project.io" "${TEST_NAMESPACE}" "no"
+	for resource in "${clusterResources[@]}"; do
+		for operation in "${EDIT_OPERATIONS[@]}"; do
+			echo "--> ${userEmail} should${isAdminText} be able to ${operation} ${resource} CR"
+			testPermissionsClusterScoped "${operation}" "${resource}" "${isAdmin}"
+		done
+	done
 }
 
 function runTests() {
@@ -392,7 +391,9 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to create servicebindings in ${NAMESPACE}"
 	testPermissions "create" "servicebindings" "${NAMESPACE}" "yes"
 
-	testRafter "${ADMIN_EMAIL}" "${NAMESPACE}"
+	testRafter "${ADMIN_EMAIL}" "${NAMESPACE}" "yes"
+
+	testKnativeServing "${ADMIN_EMAIL}" "${NAMESPACE}" "yes"
 
 	echo "--> ${ADMIN_EMAIL} should be able to delete any namespace in the cluster"
 	testPermissionsClusterScoped "delete" "namespace" "yes"
@@ -433,7 +434,9 @@ function runTests() {
 	echo "--> ${VIEW_EMAIL} should NOT be able to create ory Access Rule"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "no"
 
-	testRafter "${VIEW_EMAIL}" "${NAMESPACE}"
+	testRafter "${VIEW_EMAIL}" "${NAMESPACE}" "no"
+
+	testKnativeServing "${VIEW_EMAIL}" "${NAMESPACE}" "no"
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to create serviceinstances in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "serviceinstances" "${CUSTOM_NAMESPACE}" "no"
@@ -623,7 +626,9 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list addonsconfigurations.addons.kyma-project.io in the namespace they created"
 	testPermissions "list" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
-	testRafter "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}"
+	testRafter "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "no"
+
+	testKnativeServing "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "no"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get addonsconfigurations.addons.kyma-project.io in the namespace they created"
 	testPermissions "get" "addonsconfigurations/status.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
@@ -732,7 +737,9 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create servicebindings in system namespace"
 	testPermissions "create" "servicebindings" "${SYSTEM_NAMESPACE}" "no"
 
-	testRafter "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}"
+	testRafter "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}" "no"
+
+	testKnativeServing "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}" "no"
 
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create servicebindingusages in system namespace"
 	testPermissions "create" "servicebindingusages" "${SYSTEM_NAMESPACE}" "no"
