@@ -80,7 +80,7 @@ These variables refer to the following:
 
 2. Go to the **Functions** view in the left navigation panel and navigate to your function.
 
-3. Once in the function view, select **Add Event Trigger** in the **Event Triggers** section.
+3. Once in the function view, Switch to the **Configuration** tab, and select **Add Event Trigger** in the **Event Triggers** section.
 
 4. Select the event type and version that you want to use as a trigger for your function and select **Add** to confirm changes.
 
