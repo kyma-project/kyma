@@ -14,6 +14,9 @@ spec:
     - port: {{ .Values.core_ui.service.externalPort }}
       name: http2-core-ui
       targetPort: {{ .Values.core_ui.service.internalPort }}
+    - port: {{ .Values.core_ui.statusPort }}
+      name: status-port-core-ui
+      targetPort: {{ .Values.core_ui.statusPort }}
   selector:
     app: core-{{ template "name" . }}
     release: {{ .Release.Name }}
