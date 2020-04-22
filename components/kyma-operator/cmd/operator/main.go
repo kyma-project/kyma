@@ -57,7 +57,7 @@ func main() {
 	TLSInsecureSkipVerify := flag.Bool("tillerTLSInsecureSkipVerify", false, "Disable verification of Tiller TLS cert")
 	backoffIntervalsRaw := flag.String("backoffIntervals", "10,20,40,60,80", "Number of seconds to wait before subsequent retries")
 	overrideLogFile := flag.String("overrideLogFile", STDOUT, "Log File to Print Installation overrides. (Default: /dev/stdout)")
-	overrideLogFormatToJSON := flag.Bool("overrideLogFormatToJSON", false, "Log Installation Override in JSON format")
+	overrideLogFormat := flag.String("overrideLogFormat", "text", "Installation Override Log format (Accepted values: text or json)")
 
 	flag.Parse()
 
@@ -81,7 +81,7 @@ func main() {
 		log.Fatalf("Unable to create internal client. Error: %v", err)
 	}
 
-	overridesLogger, closeFn, err := setupLogrus(*overrideLogFile, *overrideLogFormatToJSON)
+	overridesLogger, closeFn, err := setupLogrus(*overrideLogFile, getLogrusFormatter(*overrideLogFormat))
 	if err != nil {
 		log.Fatalf("Unable to create logrus Instance. Error: %v", err)
 	}
@@ -117,9 +117,7 @@ func main() {
 
 	installationController.Run(stop)
 
-	if closeFn != nil {
-		closeFn(stop)
-	}
+	closeFn(stop)
 }
 
 func getClientConfig(kubeconfig string) (*rest.Config, error) {
@@ -145,13 +143,10 @@ func parseBackoffIntervals(backoffIntervals string) ([]uint, error) {
 	return backoffIntervalsParsed, nil
 }
 
-func setupLogrus(logFile string, overrideLogFormatToJSON bool) (*logrus.Logger, func(ch <-chan struct{}), error) {
+func setupLogrus(logFile string, formatter logrus.Formatter) (*logrus.Logger, func(ch <-chan struct{}), error) {
 	// create the logger
 	logger := logrus.New()
-
-	if overrideLogFormatToJSON { // with Json Formatter
-		logger.SetFormatter(&logrus.JSONFormatter{})
-	}
+	logger.SetFormatter(formatter)
 
 	//open the log file
 	file, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
@@ -160,7 +155,7 @@ func setupLogrus(logFile string, overrideLogFormatToJSON bool) (*logrus.Logger, 
 	}
 	logger.SetOutput(file)
 	if logFile == STDOUT { //if the output file is /dev/stdout, we should not return a function to close the file
-		return logger, nil, nil
+		return logger, func(ch <-chan struct{}) {}, nil
 	}
 
 	// return logger instance and function which can close the log file at recieving signal from the channel
@@ -174,4 +169,12 @@ func setupLogrus(logFile string, overrideLogFormatToJSON bool) (*logrus.Logger, 
 		// Wait for Channel to send stop signal
 		<-ch
 	}, nil
+}
+
+func getLogrusFormatter(format string) logrus.Formatter {
+	switch format {
+	case "json":
+		return new(logrus.JSONFormatter)
+	}
+	return new(logrus.TextFormatter)
 }

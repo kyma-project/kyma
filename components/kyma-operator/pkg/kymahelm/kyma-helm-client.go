@@ -33,7 +33,7 @@ type Client struct {
 }
 
 // NewClient .
-func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify bool, logger *logrus.Logger) (*Client, error) {
+func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify bool, overridesLogger *logrus.Logger) (*Client, error) {
 	tlsopts := tlsutil.Options{
 		KeyFile:            TLSKey,
 		CertFile:           TLSCert,
@@ -42,7 +42,7 @@ func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify
 	tlscfg, err := tlsutil.ClientConfig(tlsopts)
 	return &Client{
 		helm:            helm.NewClient(helm.Host(host), helm.WithTLS(tlscfg), helm.ConnectTimeout(30)),
-		overridesLogger: logger,
+		overridesLogger: overridesLogger,
 	}, err
 }
 
