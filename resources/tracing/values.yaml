@@ -1,0 +1,114 @@
+# Default values for jaeger-operator.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+image:
+    repository: jaegertracing/jaeger-operator
+    tag: 1.17.1
+    pullPolicy: IfNotPresent
+    imagePullSecrets: []
+
+resources:
+    limits:
+        cpu: 50m
+        memory: 100Mi
+    requests:
+        cpu: 10m
+        memory: 40Mi
+
+crd:
+    install: true
+
+jaeger:
+    # Specifies whether Jaeger instance should be created
+    create: true
+    kyma:
+      uiPort: 16686
+      zipkinPort: 9411
+      badgerPvc:
+        enabled: false
+        accessModes:
+        - ReadWriteOnce
+        size: 1Gi
+        storageClassName: ""
+    spec:
+        strategy: allInOne #allInOne | production
+        storage:
+            type: memory #memory | badger | elasticsearch | cassandra
+            options:
+                badger:
+                    ephemeral: false
+                    truncate: true
+                    span-store-ttl: 24h
+                    directory-key: "/badger/key"
+                    directory-value: "/badger/data"
+                memory:
+                  max-traces: 10000
+                es:
+                  # Note: This assumes elasticsearch is running in the "default" namespace.
+                  server-urls: http://elasticsearch-client.default.svc:9200
+                cassandra:
+                  # Note: This assumes cassandra is running in the "default" namespace.
+                  servers: cassandra.default.svc
+                  keyspace: jaeger_v1_datacenter3
+        ui:
+            options:
+                dependencies:
+                    menuEnabled: true
+                menu:
+                  - label: "About Jaeger"
+                    items:
+                      - label: "Documentation"
+                        url: "https://www.jaegertracing.io/docs/latest"
+                  - label: "About Kyma"
+                    items:
+                      - label: "Documentation"
+                        url: "https://kyma-project.io/docs/components/tracing/"
+        ingress:
+            enabled: false
+        annotations:
+            sidecar.istio.io/inject: "true"
+            sidecar.istio.io/rewriteAppHTTPProbers: "true"
+        resources:
+            limits:
+                cpu: 100m
+                memory: 500Mi
+            requests:
+                cpu: 10m
+                memory: 40Mi
+
+rbac:
+  # Specifies whether RBAC resources should be created
+  create: true
+  pspEnabled: false
+  clusterRole: true
+
+serviceAccount:
+  # Specifies whether a ServiceAccount should be created
+  create: true
+  # The name of the ServiceAccount to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+global:
+  isLocalEnv: false
+  istio:
+    gateway:
+      name: kyma-gateway
+      namespace: kyma-system
+
+kcproxy:
+    replicaCount: 1
+    inPort: 10001
+    clientId: jaeger
+    clientSecret: oiEWUWOIEwedfgg
+    image:
+      repository: bitnami/keycloak-gatekeeper
+      tag: 9.0.3
+      pullPolicy: IfNotPresent
+    resources:
+      limits:
+          cpu: 50m
+          memory: 20Mi
+      requests:
+          cpu: 10m
+          memory: 5Mi

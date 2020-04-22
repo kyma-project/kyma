@@ -1,0 +1,21 @@
+{{- /*
+  Taken from https://github.com/kiali/kiali-operator/tree/master/deploy
+  */ -}}
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "kiali.name" . }}-operator
+  labels:
+    app: {{ template "kiali.name" . }}-operator
+    chart: {{ template "kiali.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "kiali.name" . }}-operator
+subjects:
+- kind: ServiceAccount
+  name: {{ template "kiali.name" . }}-operator
+  namespace: {{ .Release.Namespace }}

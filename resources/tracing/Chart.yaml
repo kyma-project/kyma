@@ -1,0 +1,11 @@
+name: tracing
+apiVersion: v1
+description: jaeger-operator Helm chart for Kubernetes
+version: 2.14.1
+appVersion: 1.17.0
+keywords:
+  - Istio
+  - tracing
+  - Jaeger
+sources:
+  - https://github.com/jaegertracing/jaeger

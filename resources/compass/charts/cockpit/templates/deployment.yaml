@@ -21,9 +21,15 @@ spec:
         - name: {{ .Chart.Name }}
           image: {{ .Values.images.containerRegistry.path }}/{{ .Values.images.ui.dir }}compass-ui:{{ .Values.images.ui.version }}
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.statusPort }}
+            initialDelaySeconds: 10
           ports:
+            - containerPort: {{ .Values.statusPort }}
             - containerPort: {{ .Values.service.internalPort }}
-            - containerPort: {{ .Values.service.mfInternalPort}}
+            - containerPort: {{ .Values.service.mfInternalPort }}
           volumeMounts:
           - name: config
             mountPath: /var/public/config

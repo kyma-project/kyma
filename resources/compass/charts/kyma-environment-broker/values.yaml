@@ -43,7 +43,7 @@ provisioner:
     # name of the gardener project
     projectName: "gopher"
 
-additionalRuntimeComponents:
+additionalRuntimeComponents: |-
   - name: "service-manager-proxy"
     namespace: "kyma-system"
   - name: "uaa-activator"

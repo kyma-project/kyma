@@ -14,6 +14,14 @@ func NewServiceBindingUsageLister(err error) *ServiceBindingUsageLister {
 	return &ServiceBindingUsageLister{err: err}
 }
 
+// DeleteAllByUsageKind provides a failing mock function with given fields: namespace, kind, resourceName
+func (_m *ServiceBindingUsageLister) DeleteAllByUsageKind(namespace string, kind string, resourceName string) error {
+	var r0 error
+	r0 = _m.err
+
+	return r0
+}
+
 // ListByUsageKind provides a failing mock function with given fields: namespace, kind, resourceName
 func (_m *ServiceBindingUsageLister) ListByUsageKind(namespace string, kind string, resourceName string) ([]*v1alpha1.ServiceBindingUsage, error) {
 	var r0 []*v1alpha1.ServiceBindingUsage

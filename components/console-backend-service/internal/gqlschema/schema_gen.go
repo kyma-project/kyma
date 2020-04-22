@@ -41,7 +41,6 @@ type ResolverRoot interface {
 	ClusterServicePlan() ClusterServicePlanResolver
 	Deployment() DeploymentResolver
 	EventActivation() EventActivationResolver
-	Function() FunctionResolver
 	Mutation() MutationResolver
 	Namespace() NamespaceResolver
 	Query() QueryResolver
@@ -425,21 +424,55 @@ type ComplexityRoot struct {
 	}
 
 	Function struct {
-		Name                 func(childComplexity int) int
-		Namespace            func(childComplexity int) int
-		Uid                  func(childComplexity int) int
-		Labels               func(childComplexity int) int
-		Runtime              func(childComplexity int) int
-		Size                 func(childComplexity int) int
-		Status               func(childComplexity int) int
-		Content              func(childComplexity int) int
-		Dependencies         func(childComplexity int) int
-		ServiceBindingUsages func(childComplexity int) int
+		Name         func(childComplexity int) int
+		Namespace    func(childComplexity int) int
+		Uid          func(childComplexity int) int
+		Labels       func(childComplexity int) int
+		Source       func(childComplexity int) int
+		Dependencies func(childComplexity int) int
+		Env          func(childComplexity int) int
+		Replicas     func(childComplexity int) int
+		Resources    func(childComplexity int) int
+		Status       func(childComplexity int) int
 	}
 
-	FunctionMutationOutput struct {
+	FunctionEnv struct {
+		Name      func(childComplexity int) int
+		Value     func(childComplexity int) int
+		ValueFrom func(childComplexity int) int
+	}
+
+	FunctionEnvValueFrom struct {
+		Type     func(childComplexity int) int
+		Name     func(childComplexity int) int
+		Key      func(childComplexity int) int
+		Optional func(childComplexity int) int
+	}
+
+	FunctionEvent struct {
+		Type     func(childComplexity int) int
+		Function func(childComplexity int) int
+	}
+
+	FunctionMetadata struct {
 		Name      func(childComplexity int) int
 		Namespace func(childComplexity int) int
+	}
+
+	FunctionReplicas struct {
+		Min func(childComplexity int) int
+		Max func(childComplexity int) int
+	}
+
+	FunctionResources struct {
+		Limits   func(childComplexity int) int
+		Requests func(childComplexity int) int
+	}
+
+	FunctionStatus struct {
+		Phase   func(childComplexity int) int
+		Reason  func(childComplexity int) int
+		Message func(childComplexity int) int
 	}
 
 	Idppreset struct {
@@ -533,9 +566,10 @@ type ComplexityRoot struct {
 		UpdateApirule                              func(childComplexity int, name string, namespace string, params APIRuleInput) int
 		DeleteApirule                              func(childComplexity int, name string, namespace string) int
 		CreateLimitRange                           func(childComplexity int, namespace string, name string, limitRange LimitRangeInput) int
-		DeleteFunction                             func(childComplexity int, name string, namespace string) int
-		CreateFunction                             func(childComplexity int, name string, namespace string, labels Labels, size string, runtime string) int
-		UpdateFunction                             func(childComplexity int, name string, namespace string, params FunctionUpdateInput) int
+		CreateFunction                             func(childComplexity int, name string, namespace string, params FunctionMutationInput) int
+		UpdateFunction                             func(childComplexity int, name string, namespace string, params FunctionMutationInput) int
+		DeleteFunction                             func(childComplexity int, function FunctionMetadataInput) int
+		DeleteManyFunctions                        func(childComplexity int, functions []FunctionMetadataInput) int
 		CreateTrigger                              func(childComplexity int, trigger TriggerCreateInput, ownerRef []OwnerReference) int
 		CreateManyTriggers                         func(childComplexity int, triggers []TriggerCreateInput, ownerRef []OwnerReference) int
 		DeleteTrigger                              func(childComplexity int, trigger TriggerMetadataInput) int
@@ -602,6 +636,7 @@ type ComplexityRoot struct {
 		ServiceBrokers              func(childComplexity int, namespace string, first *int, offset *int) int
 		ServiceBroker               func(childComplexity int, name string, namespace string) int
 		ServiceBindingUsage         func(childComplexity int, name string, namespace string) int
+		ServiceBindingUsages        func(childComplexity int, namespace string, resourceKind *string, resourceName *string) int
 		ServiceBinding              func(childComplexity int, name string, namespace string) int
 		UsageKinds                  func(childComplexity int, first *int, offset *int) int
 		ClusterAddonsConfigurations func(childComplexity int, first *int, offset *int) int
@@ -636,8 +671,8 @@ type ComplexityRoot struct {
 		MicroFrontends              func(childComplexity int, namespace string) int
 		ClusterMicroFrontends       func(childComplexity int) int
 		SelfSubjectRules            func(childComplexity int, namespace *string) int
-		Functions                   func(childComplexity int, namespace string) int
 		Function                    func(childComplexity int, name string, namespace string) int
+		Functions                   func(childComplexity int, namespace string) int
 		Triggers                    func(childComplexity int, namespace string, subscriber *SubscriberInput) int
 	}
 
@@ -915,6 +950,7 @@ type ComplexityRoot struct {
 		AddonsConfigurationEvent        func(childComplexity int, namespace string) int
 		ApiRuleEvent                    func(childComplexity int, namespace string, serviceName *string) int
 		NamespaceEvent                  func(childComplexity int, withSystemNamespaces *bool) int
+		FunctionEvent                   func(childComplexity int, namespace string, functionName *string) int
 		TriggerEvent                    func(childComplexity int, namespace string, subscriber *SubscriberInput) int
 	}
 
@@ -1002,9 +1038,6 @@ type DeploymentResolver interface {
 type EventActivationResolver interface {
 	Events(ctx context.Context, obj *EventActivation) ([]EventActivationEvent, error)
 }
-type FunctionResolver interface {
-	ServiceBindingUsages(ctx context.Context, obj *Function) ([]ServiceBindingUsage, error)
-}
 type MutationResolver interface {
 	CreateResource(ctx context.Context, namespace string, resource JSON) (*JSON, error)
 	CreateServiceInstance(ctx context.Context, namespace string, params ServiceInstanceCreateInput) (*ServiceInstance, error)
@@ -1056,9 +1089,10 @@ type MutationResolver interface {
 	UpdateAPIRule(ctx context.Context, name string, namespace string, params APIRuleInput) (*APIRule, error)
 	DeleteAPIRule(ctx context.Context, name string, namespace string) (*APIRule, error)
 	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*LimitRange, error)
-	DeleteFunction(ctx context.Context, name string, namespace string) (*FunctionMutationOutput, error)
-	CreateFunction(ctx context.Context, name string, namespace string, labels Labels, size string, runtime string) (*Function, error)
-	UpdateFunction(ctx context.Context, name string, namespace string, params FunctionUpdateInput) (*Function, error)
+	CreateFunction(ctx context.Context, name string, namespace string, params FunctionMutationInput) (*Function, error)
+	UpdateFunction(ctx context.Context, name string, namespace string, params FunctionMutationInput) (*Function, error)
+	DeleteFunction(ctx context.Context, function FunctionMetadataInput) (*FunctionMetadata, error)
+	DeleteManyFunctions(ctx context.Context, functions []FunctionMetadataInput) ([]FunctionMetadata, error)
 	CreateTrigger(ctx context.Context, trigger TriggerCreateInput, ownerRef []OwnerReference) (*Trigger, error)
 	CreateManyTriggers(ctx context.Context, triggers []TriggerCreateInput, ownerRef []OwnerReference) ([]Trigger, error)
 	DeleteTrigger(ctx context.Context, trigger TriggerMetadataInput) (*TriggerMetadata, error)
@@ -1081,6 +1115,7 @@ type QueryResolver interface {
 	ServiceBrokers(ctx context.Context, namespace string, first *int, offset *int) ([]ServiceBroker, error)
 	ServiceBroker(ctx context.Context, name string, namespace string) (*ServiceBroker, error)
 	ServiceBindingUsage(ctx context.Context, name string, namespace string) (*ServiceBindingUsage, error)
+	ServiceBindingUsages(ctx context.Context, namespace string, resourceKind *string, resourceName *string) ([]ServiceBindingUsage, error)
 	ServiceBinding(ctx context.Context, name string, namespace string) (*ServiceBinding, error)
 	UsageKinds(ctx context.Context, first *int, offset *int) ([]UsageKind, error)
 	ClusterAddonsConfigurations(ctx context.Context, first *int, offset *int) ([]AddonsConfiguration, error)
@@ -1115,8 +1150,8 @@ type QueryResolver interface {
 	MicroFrontends(ctx context.Context, namespace string) ([]MicroFrontend, error)
 	ClusterMicroFrontends(ctx context.Context) ([]ClusterMicroFrontend, error)
 	SelfSubjectRules(ctx context.Context, namespace *string) ([]ResourceRule, error)
-	Functions(ctx context.Context, namespace string) ([]Function, error)
 	Function(ctx context.Context, name string, namespace string) (*Function, error)
+	Functions(ctx context.Context, namespace string) ([]Function, error)
 	Triggers(ctx context.Context, namespace string, subscriber *SubscriberInput) ([]Trigger, error)
 }
 type ServiceBindingResolver interface {
@@ -1163,6 +1198,7 @@ type SubscriptionResolver interface {
 	AddonsConfigurationEvent(ctx context.Context, namespace string) (<-chan AddonsConfigurationEvent, error)
 	APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan ApiRuleEvent, error)
 	NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan NamespaceEvent, error)
+	FunctionEvent(ctx context.Context, namespace string, functionName *string) (<-chan FunctionEvent, error)
 	TriggerEvent(ctx context.Context, namespace string, subscriber *SubscriberInput) (<-chan TriggerEvent, error)
 }
 
@@ -3040,30 +3076,6 @@ func field_Mutation_createLimitRange_args(rawArgs map[string]interface{}) (map[s
 
 }
 
-func field_Mutation_deleteFunction_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["namespace"]; ok {
-		var err error
-		arg1, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["namespace"] = arg1
-	return args, nil
-
-}
-
 func field_Mutation_createFunction_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
@@ -3084,33 +3096,15 @@ func field_Mutation_createFunction_args(rawArgs map[string]interface{}) (map[str
 		}
 	}
 	args["namespace"] = arg1
-	var arg2 Labels
-	if tmp, ok := rawArgs["labels"]; ok {
+	var arg2 FunctionMutationInput
+	if tmp, ok := rawArgs["params"]; ok {
 		var err error
-		err = (&arg2).UnmarshalGQL(tmp)
+		arg2, err = UnmarshalFunctionMutationInput(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["labels"] = arg2
-	var arg3 string
-	if tmp, ok := rawArgs["size"]; ok {
-		var err error
-		arg3, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["size"] = arg3
-	var arg4 string
-	if tmp, ok := rawArgs["runtime"]; ok {
-		var err error
-		arg4, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["runtime"] = arg4
+	args["params"] = arg2
 	return args, nil
 
 }
@@ -3135,15 +3129,56 @@ func field_Mutation_updateFunction_args(rawArgs map[string]interface{}) (map[str
 		}
 	}
 	args["namespace"] = arg1
-	var arg2 FunctionUpdateInput
+	var arg2 FunctionMutationInput
 	if tmp, ok := rawArgs["params"]; ok {
 		var err error
-		arg2, err = UnmarshalFunctionUpdateInput(tmp)
+		arg2, err = UnmarshalFunctionMutationInput(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["params"] = arg2
+	return args, nil
+
+}
+
+func field_Mutation_deleteFunction_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 FunctionMetadataInput
+	if tmp, ok := rawArgs["function"]; ok {
+		var err error
+		arg0, err = UnmarshalFunctionMetadataInput(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["function"] = arg0
+	return args, nil
+
+}
+
+func field_Mutation_deleteManyFunctions_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 []FunctionMetadataInput
+	if tmp, ok := rawArgs["functions"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg0 = make([]FunctionMetadataInput, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg0[idx1], err = UnmarshalFunctionMetadataInput(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["functions"] = arg0
 	return args, nil
 
 }
@@ -3637,6 +3672,49 @@ func field_Query_serviceBindingUsage_args(rawArgs map[string]interface{}) (map[s
 		}
 	}
 	args["namespace"] = arg1
+	return args, nil
+
+}
+
+func field_Query_serviceBindingUsages_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["resourceKind"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["resourceKind"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["resourceName"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg2 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["resourceName"] = arg2
 	return args, nil
 
 }
@@ -4513,21 +4591,6 @@ func field_Query_selfSubjectRules_args(rawArgs map[string]interface{}) (map[stri
 
 }
 
-func field_Query_functions_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["namespace"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["namespace"] = arg0
-	return args, nil
-
-}
-
 func field_Query_function_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
@@ -4548,6 +4611,21 @@ func field_Query_function_args(rawArgs map[string]interface{}) (map[string]inter
 		}
 	}
 	args["namespace"] = arg1
+	return args, nil
+
+}
+
+func field_Query_functions_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
 	return args, nil
 
 }
@@ -4819,6 +4897,35 @@ func field_Subscription_namespaceEvent_args(rawArgs map[string]interface{}) (map
 		}
 	}
 	args["withSystemNamespaces"] = arg0
+	return args, nil
+
+}
+
+func field_Subscription_functionEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["functionName"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["functionName"] = arg1
 	return args, nil
 
 }
@@ -6396,33 +6503,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Function.Labels(childComplexity), true
 
-	case "Function.runtime":
-		if e.complexity.Function.Runtime == nil {
+	case "Function.source":
+		if e.complexity.Function.Source == nil {
 			break
 		}
 
-		return e.complexity.Function.Runtime(childComplexity), true
-
-	case "Function.size":
-		if e.complexity.Function.Size == nil {
-			break
-		}
-
-		return e.complexity.Function.Size(childComplexity), true
-
-	case "Function.status":
-		if e.complexity.Function.Status == nil {
-			break
-		}
-
-		return e.complexity.Function.Status(childComplexity), true
-
-	case "Function.content":
-		if e.complexity.Function.Content == nil {
-			break
-		}
-
-		return e.complexity.Function.Content(childComplexity), true
+		return e.complexity.Function.Source(childComplexity), true
 
 	case "Function.dependencies":
 		if e.complexity.Function.Dependencies == nil {
@@ -6431,26 +6517,159 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Function.Dependencies(childComplexity), true
 
-	case "Function.serviceBindingUsages":
-		if e.complexity.Function.ServiceBindingUsages == nil {
+	case "Function.env":
+		if e.complexity.Function.Env == nil {
 			break
 		}
 
-		return e.complexity.Function.ServiceBindingUsages(childComplexity), true
+		return e.complexity.Function.Env(childComplexity), true
 
-	case "FunctionMutationOutput.name":
-		if e.complexity.FunctionMutationOutput.Name == nil {
+	case "Function.replicas":
+		if e.complexity.Function.Replicas == nil {
 			break
 		}
 
-		return e.complexity.FunctionMutationOutput.Name(childComplexity), true
+		return e.complexity.Function.Replicas(childComplexity), true
 
-	case "FunctionMutationOutput.namespace":
-		if e.complexity.FunctionMutationOutput.Namespace == nil {
+	case "Function.resources":
+		if e.complexity.Function.Resources == nil {
 			break
 		}
 
-		return e.complexity.FunctionMutationOutput.Namespace(childComplexity), true
+		return e.complexity.Function.Resources(childComplexity), true
+
+	case "Function.status":
+		if e.complexity.Function.Status == nil {
+			break
+		}
+
+		return e.complexity.Function.Status(childComplexity), true
+
+	case "FunctionEnv.name":
+		if e.complexity.FunctionEnv.Name == nil {
+			break
+		}
+
+		return e.complexity.FunctionEnv.Name(childComplexity), true
+
+	case "FunctionEnv.value":
+		if e.complexity.FunctionEnv.Value == nil {
+			break
+		}
+
+		return e.complexity.FunctionEnv.Value(childComplexity), true
+
+	case "FunctionEnv.valueFrom":
+		if e.complexity.FunctionEnv.ValueFrom == nil {
+			break
+		}
+
+		return e.complexity.FunctionEnv.ValueFrom(childComplexity), true
+
+	case "FunctionEnvValueFrom.type":
+		if e.complexity.FunctionEnvValueFrom.Type == nil {
+			break
+		}
+
+		return e.complexity.FunctionEnvValueFrom.Type(childComplexity), true
+
+	case "FunctionEnvValueFrom.name":
+		if e.complexity.FunctionEnvValueFrom.Name == nil {
+			break
+		}
+
+		return e.complexity.FunctionEnvValueFrom.Name(childComplexity), true
+
+	case "FunctionEnvValueFrom.key":
+		if e.complexity.FunctionEnvValueFrom.Key == nil {
+			break
+		}
+
+		return e.complexity.FunctionEnvValueFrom.Key(childComplexity), true
+
+	case "FunctionEnvValueFrom.optional":
+		if e.complexity.FunctionEnvValueFrom.Optional == nil {
+			break
+		}
+
+		return e.complexity.FunctionEnvValueFrom.Optional(childComplexity), true
+
+	case "FunctionEvent.type":
+		if e.complexity.FunctionEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.FunctionEvent.Type(childComplexity), true
+
+	case "FunctionEvent.function":
+		if e.complexity.FunctionEvent.Function == nil {
+			break
+		}
+
+		return e.complexity.FunctionEvent.Function(childComplexity), true
+
+	case "FunctionMetadata.name":
+		if e.complexity.FunctionMetadata.Name == nil {
+			break
+		}
+
+		return e.complexity.FunctionMetadata.Name(childComplexity), true
+
+	case "FunctionMetadata.namespace":
+		if e.complexity.FunctionMetadata.Namespace == nil {
+			break
+		}
+
+		return e.complexity.FunctionMetadata.Namespace(childComplexity), true
+
+	case "FunctionReplicas.min":
+		if e.complexity.FunctionReplicas.Min == nil {
+			break
+		}
+
+		return e.complexity.FunctionReplicas.Min(childComplexity), true
+
+	case "FunctionReplicas.max":
+		if e.complexity.FunctionReplicas.Max == nil {
+			break
+		}
+
+		return e.complexity.FunctionReplicas.Max(childComplexity), true
+
+	case "FunctionResources.limits":
+		if e.complexity.FunctionResources.Limits == nil {
+			break
+		}
+
+		return e.complexity.FunctionResources.Limits(childComplexity), true
+
+	case "FunctionResources.requests":
+		if e.complexity.FunctionResources.Requests == nil {
+			break
+		}
+
+		return e.complexity.FunctionResources.Requests(childComplexity), true
+
+	case "FunctionStatus.phase":
+		if e.complexity.FunctionStatus.Phase == nil {
+			break
+		}
+
+		return e.complexity.FunctionStatus.Phase(childComplexity), true
+
+	case "FunctionStatus.reason":
+		if e.complexity.FunctionStatus.Reason == nil {
+			break
+		}
+
+		return e.complexity.FunctionStatus.Reason(childComplexity), true
+
+	case "FunctionStatus.message":
+		if e.complexity.FunctionStatus.Message == nil {
+			break
+		}
+
+		return e.complexity.FunctionStatus.Message(childComplexity), true
 
 	case "IDPPreset.name":
 		if e.complexity.Idppreset.Name == nil {
@@ -7185,18 +7404,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateLimitRange(childComplexity, args["namespace"].(string), args["name"].(string), args["limitRange"].(LimitRangeInput)), true
 
-	case "Mutation.deleteFunction":
-		if e.complexity.Mutation.DeleteFunction == nil {
-			break
-		}
-
-		args, err := field_Mutation_deleteFunction_args(rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DeleteFunction(childComplexity, args["name"].(string), args["namespace"].(string)), true
-
 	case "Mutation.createFunction":
 		if e.complexity.Mutation.CreateFunction == nil {
 			break
@@ -7207,7 +7414,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateFunction(childComplexity, args["name"].(string), args["namespace"].(string), args["labels"].(Labels), args["size"].(string), args["runtime"].(string)), true
+		return e.complexity.Mutation.CreateFunction(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(FunctionMutationInput)), true
 
 	case "Mutation.updateFunction":
 		if e.complexity.Mutation.UpdateFunction == nil {
@@ -7219,7 +7426,31 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateFunction(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(FunctionUpdateInput)), true
+		return e.complexity.Mutation.UpdateFunction(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(FunctionMutationInput)), true
+
+	case "Mutation.deleteFunction":
+		if e.complexity.Mutation.DeleteFunction == nil {
+			break
+		}
+
+		args, err := field_Mutation_deleteFunction_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteFunction(childComplexity, args["function"].(FunctionMetadataInput)), true
+
+	case "Mutation.deleteManyFunctions":
+		if e.complexity.Mutation.DeleteManyFunctions == nil {
+			break
+		}
+
+		args, err := field_Mutation_deleteManyFunctions_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteManyFunctions(childComplexity, args["functions"].([]FunctionMetadataInput)), true
 
 	case "Mutation.createTrigger":
 		if e.complexity.Mutation.CreateTrigger == nil {
@@ -7616,6 +7847,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ServiceBindingUsage(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
+	case "Query.serviceBindingUsages":
+		if e.complexity.Query.ServiceBindingUsages == nil {
+			break
+		}
+
+		args, err := field_Query_serviceBindingUsages_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ServiceBindingUsages(childComplexity, args["namespace"].(string), args["resourceKind"].(*string), args["resourceName"].(*string)), true
+
 	case "Query.serviceBinding":
 		if e.complexity.Query.ServiceBinding == nil {
 			break
@@ -8009,18 +8252,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.SelfSubjectRules(childComplexity, args["namespace"].(*string)), true
 
-	case "Query.functions":
-		if e.complexity.Query.Functions == nil {
-			break
-		}
-
-		args, err := field_Query_functions_args(rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Functions(childComplexity, args["namespace"].(string)), true
-
 	case "Query.function":
 		if e.complexity.Query.Function == nil {
 			break
@@ -8032,6 +8263,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Function(childComplexity, args["name"].(string), args["namespace"].(string)), true
+
+	case "Query.functions":
+		if e.complexity.Query.Functions == nil {
+			break
+		}
+
+		args, err := field_Query_functions_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Functions(childComplexity, args["namespace"].(string)), true
 
 	case "Query.triggers":
 		if e.complexity.Query.Triggers == nil {
@@ -9280,6 +9523,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.NamespaceEvent(childComplexity, args["withSystemNamespaces"].(*bool)), true
+
+	case "Subscription.functionEvent":
+		if e.complexity.Subscription.FunctionEvent == nil {
+			break
+		}
+
+		args, err := field_Subscription_functionEvent_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.FunctionEvent(childComplexity, args["namespace"].(string), args["functionName"].(*string)), true
 
 	case "Subscription.triggerEvent":
 		if e.complexity.Subscription.TriggerEvent == nil {
@@ -18112,7 +18367,6 @@ var functionImplementors = []string{"Function"}
 func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet, obj *Function) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, functionImplementors)
 
-	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
 	for i, field := range fields {
@@ -18141,23 +18395,8 @@ func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "runtime":
-			out.Values[i] = ec._Function_runtime(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "size":
-			out.Values[i] = ec._Function_size(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "status":
-			out.Values[i] = ec._Function_status(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "content":
-			out.Values[i] = ec._Function_content(ctx, field, obj)
+		case "source":
+			out.Values[i] = ec._Function_source(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -18166,17 +18405,31 @@ func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "serviceBindingUsages":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Function_serviceBindingUsages(ctx, field, obj)
-				wg.Done()
-			}(i, field)
+		case "env":
+			out.Values[i] = ec._Function_env(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "replicas":
+			out.Values[i] = ec._Function_replicas(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "resources":
+			out.Values[i] = ec._Function_resources(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "status":
+			out.Values[i] = ec._Function_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	wg.Wait()
+
 	if invalid {
 		return graphql.Null
 	}
@@ -18292,7 +18545,7 @@ func (ec *executionContext) _Function_labels(ctx context.Context, field graphql.
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Function_runtime(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+func (ec *executionContext) _Function_source(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -18304,88 +18557,7 @@ func (ec *executionContext) _Function_runtime(ctx context.Context, field graphql
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Runtime, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Function_size(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Function",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Size, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Function_status(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Function",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Status, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(FunctionStatusType)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return res
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Function_content(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Function",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Content, nil
+		return obj.Source, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -18427,7 +18599,7 @@ func (ec *executionContext) _Function_dependencies(ctx context.Context, field gr
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Function_serviceBindingUsages(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+func (ec *executionContext) _Function_env(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -18439,12 +18611,15 @@ func (ec *executionContext) _Function_serviceBindingUsages(ctx context.Context, 
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Function().ServiceBindingUsages(rctx, obj)
+		return obj.Env, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.([]ServiceBindingUsage)
+	res := resTmp.([]FunctionEnv)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -18469,7 +18644,7 @@ func (ec *executionContext) _Function_serviceBindingUsages(ctx context.Context, 
 			}
 			arr1[idx1] = func() graphql.Marshaler {
 
-				return ec._ServiceBindingUsage(ctx, field.Selections, &res[idx1])
+				return ec._FunctionEnv(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -18483,11 +18658,95 @@ func (ec *executionContext) _Function_serviceBindingUsages(ctx context.Context, 
 	return arr1
 }
 
-var functionMutationOutputImplementors = []string{"FunctionMutationOutput"}
+// nolint: vetshadow
+func (ec *executionContext) _Function_replicas(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Function",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Replicas, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(FunctionReplicas)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._FunctionReplicas(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Function_resources(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Function",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Resources, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(FunctionResources)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._FunctionResources(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Function_status(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Function",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(FunctionStatus)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._FunctionStatus(ctx, field.Selections, &res)
+}
+
+var functionEnvImplementors = []string{"FunctionEnv"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _FunctionMutationOutput(ctx context.Context, sel ast.SelectionSet, obj *FunctionMutationOutput) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, functionMutationOutputImplementors)
+func (ec *executionContext) _FunctionEnv(ctx context.Context, sel ast.SelectionSet, obj *FunctionEnv) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, functionEnvImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -18496,17 +18755,19 @@ func (ec *executionContext) _FunctionMutationOutput(ctx context.Context, sel ast
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("FunctionMutationOutput")
+			out.Values[i] = graphql.MarshalString("FunctionEnv")
 		case "name":
-			out.Values[i] = ec._FunctionMutationOutput_name(ctx, field, obj)
+			out.Values[i] = ec._FunctionEnv_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "namespace":
-			out.Values[i] = ec._FunctionMutationOutput_namespace(ctx, field, obj)
+		case "value":
+			out.Values[i] = ec._FunctionEnv_value(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "valueFrom":
+			out.Values[i] = ec._FunctionEnv_valueFrom(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -18519,11 +18780,11 @@ func (ec *executionContext) _FunctionMutationOutput(ctx context.Context, sel ast
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _FunctionMutationOutput_name(ctx context.Context, field graphql.CollectedField, obj *FunctionMutationOutput) graphql.Marshaler {
+func (ec *executionContext) _FunctionEnv_name(ctx context.Context, field graphql.CollectedField, obj *FunctionEnv) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "FunctionMutationOutput",
+		Object: "FunctionEnv",
 		Args:   nil,
 		Field:  field,
 	}
@@ -18546,11 +18807,370 @@ func (ec *executionContext) _FunctionMutationOutput_name(ctx context.Context, fi
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _FunctionMutationOutput_namespace(ctx context.Context, field graphql.CollectedField, obj *FunctionMutationOutput) graphql.Marshaler {
+func (ec *executionContext) _FunctionEnv_value(ctx context.Context, field graphql.CollectedField, obj *FunctionEnv) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "FunctionMutationOutput",
+		Object: "FunctionEnv",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _FunctionEnv_valueFrom(ctx context.Context, field graphql.CollectedField, obj *FunctionEnv) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FunctionEnv",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ValueFrom, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*FunctionEnvValueFrom)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._FunctionEnvValueFrom(ctx, field.Selections, res)
+}
+
+var functionEnvValueFromImplementors = []string{"FunctionEnvValueFrom"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _FunctionEnvValueFrom(ctx context.Context, sel ast.SelectionSet, obj *FunctionEnvValueFrom) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, functionEnvValueFromImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FunctionEnvValueFrom")
+		case "type":
+			out.Values[i] = ec._FunctionEnvValueFrom_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "name":
+			out.Values[i] = ec._FunctionEnvValueFrom_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "key":
+			out.Values[i] = ec._FunctionEnvValueFrom_key(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "optional":
+			out.Values[i] = ec._FunctionEnvValueFrom_optional(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _FunctionEnvValueFrom_type(ctx context.Context, field graphql.CollectedField, obj *FunctionEnvValueFrom) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FunctionEnvValueFrom",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(FunctionEnvValueFromType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _FunctionEnvValueFrom_name(ctx context.Context, field graphql.CollectedField, obj *FunctionEnvValueFrom) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FunctionEnvValueFrom",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _FunctionEnvValueFrom_key(ctx context.Context, field graphql.CollectedField, obj *FunctionEnvValueFrom) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FunctionEnvValueFrom",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Key, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _FunctionEnvValueFrom_optional(ctx context.Context, field graphql.CollectedField, obj *FunctionEnvValueFrom) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FunctionEnvValueFrom",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Optional, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalBoolean(*res)
+}
+
+var functionEventImplementors = []string{"FunctionEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _FunctionEvent(ctx context.Context, sel ast.SelectionSet, obj *FunctionEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, functionEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FunctionEvent")
+		case "type":
+			out.Values[i] = ec._FunctionEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "function":
+			out.Values[i] = ec._FunctionEvent_function(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _FunctionEvent_type(ctx context.Context, field graphql.CollectedField, obj *FunctionEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FunctionEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _FunctionEvent_function(ctx context.Context, field graphql.CollectedField, obj *FunctionEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FunctionEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Function, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Function)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Function(ctx, field.Selections, &res)
+}
+
+var functionMetadataImplementors = []string{"FunctionMetadata"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _FunctionMetadata(ctx context.Context, sel ast.SelectionSet, obj *FunctionMetadata) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, functionMetadataImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FunctionMetadata")
+		case "name":
+			out.Values[i] = ec._FunctionMetadata_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "namespace":
+			out.Values[i] = ec._FunctionMetadata_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _FunctionMetadata_name(ctx context.Context, field graphql.CollectedField, obj *FunctionMetadata) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FunctionMetadata",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _FunctionMetadata_namespace(ctx context.Context, field graphql.CollectedField, obj *FunctionMetadata) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FunctionMetadata",
 		Args:   nil,
 		Field:  field,
 	}
@@ -18570,6 +19190,299 @@ func (ec *executionContext) _FunctionMutationOutput_namespace(ctx context.Contex
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
+}
+
+var functionReplicasImplementors = []string{"FunctionReplicas"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _FunctionReplicas(ctx context.Context, sel ast.SelectionSet, obj *FunctionReplicas) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, functionReplicasImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FunctionReplicas")
+		case "min":
+			out.Values[i] = ec._FunctionReplicas_min(ctx, field, obj)
+		case "max":
+			out.Values[i] = ec._FunctionReplicas_max(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _FunctionReplicas_min(ctx context.Context, field graphql.CollectedField, obj *FunctionReplicas) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FunctionReplicas",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Min, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalInt(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _FunctionReplicas_max(ctx context.Context, field graphql.CollectedField, obj *FunctionReplicas) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FunctionReplicas",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Max, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalInt(*res)
+}
+
+var functionResourcesImplementors = []string{"FunctionResources"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _FunctionResources(ctx context.Context, sel ast.SelectionSet, obj *FunctionResources) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, functionResourcesImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FunctionResources")
+		case "limits":
+			out.Values[i] = ec._FunctionResources_limits(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "requests":
+			out.Values[i] = ec._FunctionResources_requests(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _FunctionResources_limits(ctx context.Context, field graphql.CollectedField, obj *FunctionResources) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FunctionResources",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Limits, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(ResourceValues)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._ResourceValues(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _FunctionResources_requests(ctx context.Context, field graphql.CollectedField, obj *FunctionResources) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FunctionResources",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Requests, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(ResourceValues)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._ResourceValues(ctx, field.Selections, &res)
+}
+
+var functionStatusImplementors = []string{"FunctionStatus"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _FunctionStatus(ctx context.Context, sel ast.SelectionSet, obj *FunctionStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, functionStatusImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FunctionStatus")
+		case "phase":
+			out.Values[i] = ec._FunctionStatus_phase(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "reason":
+			out.Values[i] = ec._FunctionStatus_reason(ctx, field, obj)
+		case "message":
+			out.Values[i] = ec._FunctionStatus_message(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _FunctionStatus_phase(ctx context.Context, field graphql.CollectedField, obj *FunctionStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FunctionStatus",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Phase, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(FunctionPhaseType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _FunctionStatus_reason(ctx context.Context, field graphql.CollectedField, obj *FunctionStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FunctionStatus",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reason, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*FunctionReasonType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return *res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _FunctionStatus_message(ctx context.Context, field graphql.CollectedField, obj *FunctionStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FunctionStatus",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
 }
 
 var iDPPresetImplementors = []string{"IDPPreset"}
@@ -19590,12 +20503,14 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_deleteAPIRule(ctx, field)
 		case "createLimitRange":
 			out.Values[i] = ec._Mutation_createLimitRange(ctx, field)
-		case "deleteFunction":
-			out.Values[i] = ec._Mutation_deleteFunction(ctx, field)
 		case "createFunction":
 			out.Values[i] = ec._Mutation_createFunction(ctx, field)
 		case "updateFunction":
 			out.Values[i] = ec._Mutation_updateFunction(ctx, field)
+		case "deleteFunction":
+			out.Values[i] = ec._Mutation_deleteFunction(ctx, field)
+		case "deleteManyFunctions":
+			out.Values[i] = ec._Mutation_deleteManyFunctions(ctx, field)
 		case "createTrigger":
 			out.Values[i] = ec._Mutation_createTrigger(ctx, field)
 		case "createManyTriggers":
@@ -21392,41 +22307,6 @@ func (ec *executionContext) _Mutation_createLimitRange(ctx context.Context, fiel
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Mutation_deleteFunction(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Mutation_deleteFunction_args(rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx := &graphql.ResolverContext{
-		Object: "Mutation",
-		Args:   args,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteFunction(rctx, args["name"].(string), args["namespace"].(string))
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*FunctionMutationOutput)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-
-	return ec._FunctionMutationOutput(ctx, field.Selections, res)
-}
-
-// nolint: vetshadow
 func (ec *executionContext) _Mutation_createFunction(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -21445,7 +22325,7 @@ func (ec *executionContext) _Mutation_createFunction(ctx context.Context, field 
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateFunction(rctx, args["name"].(string), args["namespace"].(string), args["labels"].(Labels), args["size"].(string), args["runtime"].(string))
+		return ec.resolvers.Mutation().CreateFunction(rctx, args["name"].(string), args["namespace"].(string), args["params"].(FunctionMutationInput))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -21480,7 +22360,7 @@ func (ec *executionContext) _Mutation_updateFunction(ctx context.Context, field 
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateFunction(rctx, args["name"].(string), args["namespace"].(string), args["params"].(FunctionUpdateInput))
+		return ec.resolvers.Mutation().UpdateFunction(rctx, args["name"].(string), args["namespace"].(string), args["params"].(FunctionMutationInput))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -21494,6 +22374,104 @@ func (ec *executionContext) _Mutation_updateFunction(ctx context.Context, field 
 	}
 
 	return ec._Function(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_deleteFunction(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_deleteFunction_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteFunction(rctx, args["function"].(FunctionMetadataInput))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*FunctionMetadata)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._FunctionMetadata(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_deleteManyFunctions(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_deleteManyFunctions_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteManyFunctions(rctx, args["functions"].([]FunctionMetadataInput))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]FunctionMetadata)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._FunctionMetadata(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
 }
 
 // nolint: vetshadow
@@ -22984,6 +23962,15 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				out.Values[i] = ec._Query_serviceBindingUsage(ctx, field)
 				wg.Done()
 			}(i, field)
+		case "serviceBindingUsages":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_serviceBindingUsages(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "serviceBinding":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -23260,6 +24247,12 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
+		case "function":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_function(ctx, field)
+				wg.Done()
+			}(i, field)
 		case "functions":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -23267,12 +24260,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
-				wg.Done()
-			}(i, field)
-		case "function":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_function(ctx, field)
 				wg.Done()
 			}(i, field)
 		case "triggers":
@@ -23900,6 +24887,72 @@ func (ec *executionContext) _Query_serviceBindingUsage(ctx context.Context, fiel
 	}
 
 	return ec._ServiceBindingUsage(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_serviceBindingUsages(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_serviceBindingUsages_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ServiceBindingUsages(rctx, args["namespace"].(string), args["resourceKind"].(*string), args["resourceName"].(*string))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ServiceBindingUsage)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ServiceBindingUsage(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
 }
 
 // nolint: vetshadow
@@ -25723,6 +26776,41 @@ func (ec *executionContext) _Query_selfSubjectRules(ctx context.Context, field g
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _Query_function(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_function_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Function(rctx, args["name"].(string), args["namespace"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Function)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Function(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _Query_functions(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -25786,41 +26874,6 @@ func (ec *executionContext) _Query_functions(ctx context.Context, field graphql.
 	}
 	wg.Wait()
 	return arr1
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Query_function(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Query_function_args(rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx := &graphql.ResolverContext{
-		Object: "Query",
-		Args:   args,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Function(rctx, args["name"].(string), args["namespace"].(string))
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*Function)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-
-	return ec._Function(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -32042,6 +33095,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_apiRuleEvent(ctx, fields[0])
 	case "namespaceEvent":
 		return ec._Subscription_namespaceEvent(ctx, fields[0])
+	case "functionEvent":
+		return ec._Subscription_functionEvent(ctx, fields[0])
 	case "triggerEvent":
 		return ec._Subscription_triggerEvent(ctx, fields[0])
 	default:
@@ -32541,6 +33596,37 @@ func (ec *executionContext) _Subscription_namespaceEvent(ctx context.Context, fi
 		var out graphql.OrderedMap
 		out.Add(field.Alias, func() graphql.Marshaler {
 			return ec._NamespaceEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_functionEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Subscription_functionEvent_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
+	results, err := ec.resolvers.Subscription().FunctionEvent(rctx, args["namespace"].(string), args["functionName"].(*string))
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._FunctionEvent(ctx, field.Selections, &res)
 		}())
 		return &out
 	}
@@ -35222,8 +36308,108 @@ func UnmarshalEnvPrefixInput(v interface{}) (EnvPrefixInput, error) {
 	return it, nil
 }
 
-func UnmarshalFunctionUpdateInput(v interface{}) (FunctionUpdateInput, error) {
-	var it FunctionUpdateInput
+func UnmarshalFunctionEnvInput(v interface{}) (FunctionEnvInput, error) {
+	var it FunctionEnvInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "value":
+			var err error
+			it.Value, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "valueFrom":
+			var err error
+			var ptr1 FunctionEnvValueFromInput
+			if v != nil {
+				ptr1, err = UnmarshalFunctionEnvValueFromInput(v)
+				it.ValueFrom = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func UnmarshalFunctionEnvValueFromInput(v interface{}) (FunctionEnvValueFromInput, error) {
+	var it FunctionEnvValueFromInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "type":
+			var err error
+			err = (&it.Type).UnmarshalGQL(v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+			it.Name, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "key":
+			var err error
+			it.Key, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "optional":
+			var err error
+			var ptr1 bool
+			if v != nil {
+				ptr1, err = graphql.UnmarshalBoolean(v)
+				it.Optional = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func UnmarshalFunctionMetadataInput(v interface{}) (FunctionMetadataInput, error) {
+	var it FunctionMetadataInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "namespace":
+			var err error
+			it.Namespace, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func UnmarshalFunctionMutationInput(v interface{}) (FunctionMutationInput, error) {
+	var it FunctionMutationInput
 	var asMap = v.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -35234,27 +36420,102 @@ func UnmarshalFunctionUpdateInput(v interface{}) (FunctionUpdateInput, error) {
 			if err != nil {
 				return it, err
 			}
-		case "size":
+		case "source":
 			var err error
-			it.Size, err = graphql.UnmarshalString(v)
-			if err != nil {
-				return it, err
-			}
-		case "runtime":
-			var err error
-			it.Runtime, err = graphql.UnmarshalString(v)
-			if err != nil {
-				return it, err
-			}
-		case "content":
-			var err error
-			it.Content, err = graphql.UnmarshalString(v)
+			it.Source, err = graphql.UnmarshalString(v)
 			if err != nil {
 				return it, err
 			}
 		case "dependencies":
 			var err error
 			it.Dependencies, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "env":
+			var err error
+			var rawIf1 []interface{}
+			if v != nil {
+				if tmp1, ok := v.([]interface{}); ok {
+					rawIf1 = tmp1
+				} else {
+					rawIf1 = []interface{}{v}
+				}
+			}
+			it.Env = make([]FunctionEnvInput, len(rawIf1))
+			for idx1 := range rawIf1 {
+				it.Env[idx1], err = UnmarshalFunctionEnvInput(rawIf1[idx1])
+			}
+			if err != nil {
+				return it, err
+			}
+		case "replicas":
+			var err error
+			it.Replicas, err = UnmarshalFunctionReplicasInput(v)
+			if err != nil {
+				return it, err
+			}
+		case "resources":
+			var err error
+			it.Resources, err = UnmarshalFunctionResourcesInput(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func UnmarshalFunctionReplicasInput(v interface{}) (FunctionReplicasInput, error) {
+	var it FunctionReplicasInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "min":
+			var err error
+			var ptr1 int
+			if v != nil {
+				ptr1, err = graphql.UnmarshalInt(v)
+				it.Min = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		case "max":
+			var err error
+			var ptr1 int
+			if v != nil {
+				ptr1, err = graphql.UnmarshalInt(v)
+				it.Max = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func UnmarshalFunctionResourcesInput(v interface{}) (FunctionResourcesInput, error) {
+	var it FunctionResourcesInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "limits":
+			var err error
+			it.Limits, err = UnmarshalResourceValuesInput(v)
+			if err != nil {
+				return it, err
+			}
+		case "requests":
+			var err error
+			it.Requests, err = UnmarshalResourceValuesInput(v)
 			if err != nil {
 				return it, err
 			}
@@ -36885,47 +38146,120 @@ type ResourceRule {
 # Function
 
 type Function {
+    # meta
     name: String!
 	namespace: String!
 	UID: String!
 	labels: Labels!
-	runtime: String!
-	size: String!
-	status: FunctionStatusType!
-    content: String!
+
+    # spec
+    source: String!
     dependencies: String!
+    env: [FunctionEnv!]!
+    replicas: FunctionReplicas!
+    resources: FunctionResources!
 
-    # Depends on servicecatalog and servicecatalogaddons modules
-    serviceBindingUsages: [ServiceBindingUsage!]
+    # status
+    status: FunctionStatus!
 }
 
-enum FunctionStatusType {
-    Unknown
-    Running
-    Building
-    Error
-    Deploying
-    Updating
+type FunctionEnv {
+    name: String!
+    value: String!
+    valueFrom: FunctionEnvValueFrom
 }
 
-type FunctionMutationOutput {
+type FunctionEnvValueFrom {
+    type: FunctionEnvValueFromType!
+    name: String!
+    key: String!
+    optional: Boolean
+}
+
+input FunctionEnvInput {
+    name: String!
+    value: String!
+    valueFrom: FunctionEnvValueFromInput
+}
+
+input FunctionEnvValueFromInput {
+    type: FunctionEnvValueFromType!
+    name: String!
+    key: String!
+    optional: Boolean
+}
+
+enum FunctionEnvValueFromType {
+    ConfigMap
+    Secret
+}
+
+type FunctionReplicas {
+    min: Int
+    max: Int
+}
+
+input FunctionReplicasInput {
+    min: Int
+    max: Int
+}
+
+type FunctionResources {
+    limits: ResourceValues!
+    requests: ResourceValues!
+}
+
+input FunctionResourcesInput {
+    limits: ResourceValuesInput!
+    requests: ResourceValuesInput!
+}
+
+type FunctionStatus {
+    phase: FunctionPhaseType!
+    reason: FunctionReasonType
+    message: String
+}
+
+enum FunctionPhaseType {
+    INITIALIZING
+    BUILDING
+    DEPLOYING
+    RUNNING
+    NEW_REVISION_ERROR
+    FAILED
+}
+
+enum FunctionReasonType {
+    CONFIG # ConfigMap
+    JOB # K8S Job
+    SERVICE # KNative Service
+}
+
+input FunctionMutationInput {
+    labels: Labels!
+    source: String!
+    dependencies: String!
+    env: [FunctionEnvInput!]!
+    replicas: FunctionReplicasInput!
+    resources: FunctionResourcesInput!
+}
+
+type FunctionMetadata {
     name: String!
     namespace: String!
 }
 
-input FunctionUpdateInput {
-    labels: Labels!
-    size: String!
-    runtime: String!
-    content: String!
-    dependencies: String!
+input FunctionMetadataInput {
+    name: String!
+    namespace: String!
 }
 
-type VersionInfo { 
-    kymaVersion: String!
+type FunctionEvent {
+    type: SubscriptionEventType!
+    function: Function!
 }
 
-# Trigger
+# KNative Trigger
 
 type Trigger {
     name: String!
@@ -37003,6 +38337,12 @@ type TriggerEvent {
     trigger: Trigger!
 }
 
+# Misc
+
+type VersionInfo {
+    kymaVersion: String!
+}
+
 # Queries
 
 type Query {
@@ -37022,6 +38362,7 @@ type Query {
     serviceBroker(name: String!, namespace: String!): ServiceBroker @HasAccess(attributes: {resource: "servicebrokers", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
 
     serviceBindingUsage(name: String!, namespace: String!): ServiceBindingUsage @HasAccess(attributes: {resource: "servicebindingusages", verb: "get", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    serviceBindingUsages(namespace: String!, resourceKind: String, resourceName: String): [ServiceBindingUsage!]! @HasAccess(attributes: {resource: "servicebindingusages", verb: "get", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     serviceBinding(name: String!, namespace: String!): ServiceBinding @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     usageKinds(first: Int, offset: Int): [UsageKind!]! @HasAccess(attributes: {resource: "usagekinds", verb: "list", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1"})
 
@@ -37076,8 +38417,8 @@ type Query {
 
     selfSubjectRules(namespace: String): [ResourceRule!]! @HasAccess(attributes: {apiGroup: "authorization.k8s.io", resource: "selfsubjectrulesreviews", verb: "create", apiVersion: "v1" namespaceArg: "namespace"})
 
-    functions(namespace: String!): [Function!]! @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "list", apiVersion: "v1alpha1" namespaceArg: "namespace"})
     function(name: String!, namespace: String!): Function @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "get", apiVersion: "v1alpha1" nameArg:"name" namespaceArg: "namespace"})
+    functions(namespace: String!): [Function!]! @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "list", apiVersion: "v1alpha1" namespaceArg: "namespace"})
 
     triggers(namespace: String!, subscriber: SubscriberInput): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "list", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
@@ -37150,9 +38491,10 @@ type Mutation {
 
     createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
-    deleteFunction(name: String!, namespace: String!): FunctionMutationOutput @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
-    createFunction(name: String!, namespace: String!, labels: Labels!, size: String!, runtime: String!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
-    updateFunction(name: String!, namespace: String!, params: FunctionUpdateInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
+    createFunction(name: String!, namespace: String!, params: FunctionMutationInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
+    updateFunction(name: String!, namespace: String!, params: FunctionMutationInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
+    deleteFunction(function: FunctionMetadataInput!): FunctionMetadata @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1"})
+    deleteManyFunctions(functions: [FunctionMetadataInput!]!): [FunctionMetadata!] @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1"})
 
     createTrigger(trigger: TriggerCreateInput!, ownerRef: [OwnerReference!]): Trigger @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
     createManyTriggers(triggers: [TriggerCreateInput!]!, ownerRef: [OwnerReference!]): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
@@ -37188,6 +38530,7 @@ type Subscription {
 
     namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 
+    functionEvent(namespace: String!, functionName: String): FunctionEvent! @HasAccess(attributes: {resource: "functions", verb: "watch", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     triggerEvent(namespace: String!, subscriber: SubscriberInput): TriggerEvent! @HasAccess(attributes: {resource: "triggers", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 

@@ -937,47 +937,120 @@ type ResourceRule {
 # Function
 
 type Function {
+    # meta
     name: String!
 	namespace: String!
 	UID: String!
 	labels: Labels!
-	runtime: String!
-	size: String!
-	status: FunctionStatusType!
-    content: String!
+
+    # spec
+    source: String!
     dependencies: String!
+    env: [FunctionEnv!]!
+    replicas: FunctionReplicas!
+    resources: FunctionResources!
 
-    # Depends on servicecatalog and servicecatalogaddons modules
-    serviceBindingUsages: [ServiceBindingUsage!]
+    # status
+    status: FunctionStatus!
 }
 
-enum FunctionStatusType {
-    Unknown
-    Running
-    Building
-    Error
-    Deploying
-    Updating
+type FunctionEnv {
+    name: String!
+    value: String!
+    valueFrom: FunctionEnvValueFrom
 }
 
-type FunctionMutationOutput {
+type FunctionEnvValueFrom {
+    type: FunctionEnvValueFromType!
+    name: String!
+    key: String!
+    optional: Boolean
+}
+
+input FunctionEnvInput {
+    name: String!
+    value: String!
+    valueFrom: FunctionEnvValueFromInput
+}
+
+input FunctionEnvValueFromInput {
+    type: FunctionEnvValueFromType!
+    name: String!
+    key: String!
+    optional: Boolean
+}
+
+enum FunctionEnvValueFromType {
+    ConfigMap
+    Secret
+}
+
+type FunctionReplicas {
+    min: Int
+    max: Int
+}
+
+input FunctionReplicasInput {
+    min: Int
+    max: Int
+}
+
+type FunctionResources {
+    limits: ResourceValues!
+    requests: ResourceValues!
+}
+
+input FunctionResourcesInput {
+    limits: ResourceValuesInput!
+    requests: ResourceValuesInput!
+}
+
+type FunctionStatus {
+    phase: FunctionPhaseType!
+    reason: FunctionReasonType
+    message: String
+}
+
+enum FunctionPhaseType {
+    INITIALIZING
+    BUILDING
+    DEPLOYING
+    RUNNING
+    NEW_REVISION_ERROR
+    FAILED
+}
+
+enum FunctionReasonType {
+    CONFIG # ConfigMap
+    JOB # K8S Job
+    SERVICE # KNative Service
+}
+
+input FunctionMutationInput {
+    labels: Labels!
+    source: String!
+    dependencies: String!
+    env: [FunctionEnvInput!]!
+    replicas: FunctionReplicasInput!
+    resources: FunctionResourcesInput!
+}
+
+type FunctionMetadata {
     name: String!
     namespace: String!
 }
 
-input FunctionUpdateInput {
-    labels: Labels!
-    size: String!
-    runtime: String!
-    content: String!
-    dependencies: String!
+input FunctionMetadataInput {
+    name: String!
+    namespace: String!
 }
 
-type VersionInfo { 
-    kymaVersion: String!
+type FunctionEvent {
+    type: SubscriptionEventType!
+    function: Function!
 }
 
-# Trigger
+# KNative Trigger
 
 type Trigger {
     name: String!
@@ -1055,6 +1128,12 @@ type TriggerEvent {
     trigger: Trigger!
 }
 
+# Misc
+
+type VersionInfo {
+    kymaVersion: String!
+}
+
 # Queries
 
 type Query {
@@ -1074,6 +1153,7 @@ type Query {
     serviceBroker(name: String!, namespace: String!): ServiceBroker @HasAccess(attributes: {resource: "servicebrokers", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
 
     serviceBindingUsage(name: String!, namespace: String!): ServiceBindingUsage @HasAccess(attributes: {resource: "servicebindingusages", verb: "get", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    serviceBindingUsages(namespace: String!, resourceKind: String, resourceName: String): [ServiceBindingUsage!]! @HasAccess(attributes: {resource: "servicebindingusages", verb: "get", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     serviceBinding(name: String!, namespace: String!): ServiceBinding @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     usageKinds(first: Int, offset: Int): [UsageKind!]! @HasAccess(attributes: {resource: "usagekinds", verb: "list", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1"})
 
@@ -1128,8 +1208,8 @@ type Query {
 
     selfSubjectRules(namespace: String): [ResourceRule!]! @HasAccess(attributes: {apiGroup: "authorization.k8s.io", resource: "selfsubjectrulesreviews", verb: "create", apiVersion: "v1" namespaceArg: "namespace"})
 
-    functions(namespace: String!): [Function!]! @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "list", apiVersion: "v1alpha1" namespaceArg: "namespace"})
     function(name: String!, namespace: String!): Function @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "get", apiVersion: "v1alpha1" nameArg:"name" namespaceArg: "namespace"})
+    functions(namespace: String!): [Function!]! @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "list", apiVersion: "v1alpha1" namespaceArg: "namespace"})
 
     triggers(namespace: String!, subscriber: SubscriberInput): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "list", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
@@ -1202,9 +1282,10 @@ type Mutation {
 
     createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
-    deleteFunction(name: String!, namespace: String!): FunctionMutationOutput @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
-    createFunction(name: String!, namespace: String!, labels: Labels!, size: String!, runtime: String!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
-    updateFunction(name: String!, namespace: String!, params: FunctionUpdateInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
+    createFunction(name: String!, namespace: String!, params: FunctionMutationInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
+    updateFunction(name: String!, namespace: String!, params: FunctionMutationInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
+    deleteFunction(function: FunctionMetadataInput!): FunctionMetadata @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1"})
+    deleteManyFunctions(functions: [FunctionMetadataInput!]!): [FunctionMetadata!] @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1"})
 
     createTrigger(trigger: TriggerCreateInput!, ownerRef: [OwnerReference!]): Trigger @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
     createManyTriggers(triggers: [TriggerCreateInput!]!, ownerRef: [OwnerReference!]): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
@@ -1240,6 +1321,7 @@ type Subscription {
 
     namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 
+    functionEvent(namespace: String!, functionName: String): FunctionEvent! @HasAccess(attributes: {resource: "functions", verb: "watch", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     triggerEvent(namespace: String!, subscriber: SubscriberInput): TriggerEvent! @HasAccess(attributes: {resource: "triggers", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 

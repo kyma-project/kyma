@@ -125,15 +125,34 @@ func (f *serviceBindingUsageService) ListForServiceInstance(namespace string, in
 	return filteredUsages, nil
 }
 
-func (f *serviceBindingUsageService) ListByUsageKind(namespace, kind, deploymentName string) ([]*api.ServiceBindingUsage, error) {
-	key := fmt.Sprintf("%s/%s/%s", namespace, strings.ToLower(kind), deploymentName)
-	indexer := f.informer.GetIndexer()
-	items, err := indexer.ByIndex("usedBy", key)
+func (f *serviceBindingUsageService) ListByUsageKind(namespace, kind, resourceName string) ([]*api.ServiceBindingUsage, error) {
+	if kind == "" || resourceName == "" {
+		return f.List(namespace)
+	}
+
+	key := fmt.Sprintf("%s/%s/%s", namespace, strings.ToLower(kind), resourceName)
+	items, err := f.informer.GetIndexer().ByIndex("usedBy", key)
 	if err != nil {
 		return nil, err
 	}
 
 	return f.toServiceBindingUsages(items)
+}
+
+func (f *serviceBindingUsageService) DeleteAllByUsageKind(namespace, kind, resourceName string) error {
+	usages, err := f.ListByUsageKind(namespace, kind, resourceName)
+	if err != nil {
+		return err
+	}
+
+	for _, usage := range usages {
+		err := f.Delete(namespace, usage.Name)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (f *serviceBindingUsageService) Subscribe(listener resource.Listener) {

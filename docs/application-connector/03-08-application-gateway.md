@@ -3,13 +3,13 @@ title: Application Gateway
 type: Details
 ---
 
->**CAUTION:** This document describes the Application Gateway working in the alternative Compass [mode](#architecture-application-connector-components-application-operator). To read about the Application Gateway working in the default legacy mode, see [this](#architecture-application-gateway) document. 
+>**CAUTION:** This document describes the Application Gateway working in the alternative Compass [mode](#architecture-application-connector-components-application-operator). To read about the Application Gateway working in the default legacy mode, see [this](#architecture-application-gateway) document.
 
-The Application Gateway is an intermediary component between a lambda function or a service and an external API. 
+The Application Gateway is an intermediary component between a function or a service and an external API.
 
 ## Proxying requests
 
-The Application Gateway proxies requests from lambda functions and services in Kyma to external APIs based on the configuration stored in Secrets.
+The Application Gateway proxies requests from functions and services in Kyma to external APIs based on the configuration stored in Secrets.
 ​
 ### Proxy configuration
 ​
@@ -23,7 +23,7 @@ data:
     CREDENTIALS_TYPE: {BASE64_ENCODED_CREDENTIALS_TYPE}
 ```
 
-* The `BASE64_ENCODED_CONFIG_JSON` configuration contains credentials and request parameters. 
+* The `BASE64_ENCODED_CONFIG_JSON` configuration contains credentials and request parameters.
 * The `BASE64_ENCODED_CREDENTIALS_TYPE` assumes one of the following values:  `OAuth`, `BasicAuth`, `NoAuth`.
 ​
 

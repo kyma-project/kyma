@@ -8,9 +8,35 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs/status
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
   - configmaps
-  - serviceaccounts
   - secrets
+  - serviceaccounts
   verbs:
   - create
   - delete
@@ -22,10 +48,11 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - events
+  - namespaces
   verbs:
-  - create
-  - patch
+  - get
+  - list
+  - watch
 - apiGroups:
   - serverless.kyma-project.io
   resources:
@@ -49,6 +76,22 @@ rules:
 - apiGroups:
   - serving.knative.dev
   resources:
+  - revisions
+  verbs:
+  - deletecollection
+  - get
+  - list
+  - watch
+- apiGroups:
+  - serving.knative.dev
+  resources:
+  - revisions
+  - services
+  verbs:
+  - get
+- apiGroups:
+  - serving.knative.dev
+  resources:
   - services
   verbs:
   - create
@@ -64,34 +107,3 @@ rules:
   - services/status
   verbs:
   - get
-  - patch
-  - update
-- apiGroups:
-  - batch
-  resources:
-  - jobs
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - batch
-  resources:
-  - jobs/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - get
-  - list
-  - watch
