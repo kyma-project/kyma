@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"kyma-project.io/compass-runtime-agent/internal/compass/director"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
 
 	"k8s.io/apimachinery/pkg/types"
 )

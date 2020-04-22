@@ -5,13 +5,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/metrics/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
-	"kyma-project.io/compass-runtime-agent/internal/metrics/mocks"
 )
 
 func Test_FetchNodeMetrics(t *testing.T) {

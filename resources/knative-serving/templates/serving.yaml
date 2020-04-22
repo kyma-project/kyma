@@ -401,16 +401,6 @@ metadata:
   namespace: knative-serving
 ---
 apiVersion: v1
-data:
-  "key": {{ .Values.global.ingress.tlsKey }}
-  "cert": {{ .Values.global.ingress.tlsCrt }}
-kind: Secret
-metadata:
-  name: knative-gateway-certs
-  namespace: istio-system
-type: Opaque
----
-apiVersion: v1
 kind: Service
 metadata:
   labels:

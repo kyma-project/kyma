@@ -3,9 +3,9 @@ title: Expose and secure a service
 type: Tutorials
 ---
 
-This tutorial shows how to expose and secure services or lambda functions using the API Gateway Controller. The controller reacts to an instance of the APIRule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured services, the tutorial uses an OAuth2 client registered through the Hydra Maester controller.
+This tutorial shows how to expose and secure services or functions using the API Gateway Controller. The controller reacts to an instance of the APIRule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured services, the tutorial uses an OAuth2 client registered through the Hydra Maester controller.
 
-The tutorial comes with a sample HttpBin service deployment and a sample lambda function.
+The tutorial comes with a sample HttpBin service deployment and a sample function.
 
 ## Register an OAuth2 client and get tokens
 
@@ -102,7 +102,7 @@ The tutorial comes with a sample HttpBin service deployment and a sample lambda 
 
 ## Deploy, expose, and secure the sample resources
 
-Follow the instructions in the tabs to deploy an instance of the HttpBin service or a sample lambda function, expose them, and secure them with Oauth2 scopes.
+Follow the instructions in the tabs to deploy an instance of the HttpBin service or a sample function, expose them, and secure them with Oauth2 scopes.
 
 <div tabs>
 
@@ -155,16 +155,16 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
 
   <details>
   <summary>
-  Secure a lambda function
+  Secure a function
   </summary>
 
-1. Create a lambda function using the [supplied code](./assets/lambda.yaml):
+1. Create a function using the [supplied code](./assets/lambda.yaml):
 
   ```shell
   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/api-gateway-v2/assets/lambda.yaml
   ```
 
-2. Expose the lambda function and secure it by creating an APIRule CR:
+2. Expose the function and secure it by creating an APIRule CR:
 
   ```shell
   cat <<EOF | kubectl apply -f -
@@ -190,7 +190,7 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
 
 >**NOTE:** If you are running Kyma on Minikube, add `lambda-example.kyma.local` to the entry with Minikube IP in your system's `/etc/hosts` file.
 
-The exposed lambda function requires all `GET` requests to have a valid token with the "read" scope.
+The exposed function requires all `GET` requests to have a valid token with the "read" scope.
 
   </details>
 </div>
@@ -199,7 +199,7 @@ The exposed lambda function requires all `GET` requests to have a valid token wi
 
 ## Access the secured resources
 
-Follow the instructions in the tabs to call the secured service or lambda functions using the tokens issued for the client you registered.
+Follow the instructions in the tabs to call the secured service or functions using the tokens issued for the client you registered.
 
 <div tabs>
 
@@ -226,16 +226,16 @@ These calls return the code `200` response. If you call the service without a to
 
   <details>
   <summary>
-  Call the secured lambda function
+  Call the secured function
   </summary>
 
-Send a `GET` request with a token that has the "read" scope to the lambda function:
+Send a `GET` request with a token that has the "read" scope to the function:
 
   ```shell
-  curl -ik https://lambda-example.$DOMAIN/lambda -H "Authorization: bearer $ACCESS_TOKEN_READ"
+  curl -ik https://function-example.$DOMAIN/function -H "Authorization: bearer $ACCESS_TOKEN_READ"
   ```
 
-This call returns the code `200` response. If you call the lambda function without a token, you get the code `401` response. If you call the lambda function with a token with the wrong scope, you get the code `403` response.
+This call returns the code `200` response. If you call the function without a token, you get the code `401` response. If you call the function with a token with the wrong scope, you get the code `403` response.
 
   </details>
 </div>

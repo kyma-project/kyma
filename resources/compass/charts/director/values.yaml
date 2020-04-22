@@ -11,7 +11,10 @@ deployment:
     maxOpenConnections: 30
     maxIdleConnections: 2
 
-staticGroupNames:
+adminGroupNames:
   - "mps-superadmin"
   - "runtimeAdmin"
   - "runtimeNamespaceAdmin"
+
+operatorGroupNames:
+  - "runtimeOperator"

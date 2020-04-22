@@ -6,7 +6,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   gateways:
-    - {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}
+    - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
   hosts:
     - oauth2.{{ .Values.global.ingress.domainName }}
   http:

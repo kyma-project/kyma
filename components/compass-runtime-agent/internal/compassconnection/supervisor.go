@@ -4,20 +4,20 @@ import (
 	"fmt"
 	"time"
 
-	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
 
-	"kyma-project.io/compass-runtime-agent/internal/compass/director"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
 
-	"kyma-project.io/compass-runtime-agent/internal/compass"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 
-	"kyma-project.io/compass-runtime-agent/internal/config"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"kyma-project.io/compass-runtime-agent/internal/certificates"
-	"kyma-project.io/compass-runtime-agent/internal/kyma"
-	"kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
