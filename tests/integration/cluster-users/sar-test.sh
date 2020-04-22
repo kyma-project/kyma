@@ -19,7 +19,7 @@ RETRY_TIME=3 #Seconds
 MAX_RETRIES=5
 
 readonly VIEW_OPERATIONS=( "get" "list" )
-readonly EDIT_OPERATIONS=( "create" "delete" "deletecollection" "get" "list" "patch" "update" "watch" )
+readonly EDIT_OPERATIONS=( "create" "delete" "deletecollection" "patch" "update" "watch" )
 
 # Helper used to count retry attempts
 function __retry() {
