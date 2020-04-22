@@ -88,12 +88,8 @@ spec:
               value: {{ .Values.gardener.kubeconfigPath }}
             - name: APP_GARDENER_AUDIT_LOGS_POLICY_CONFIG_MAP
               value: {{ .Values.gardener.auditLogsPolicyConfigMap }}
-            - name: APP_GARDENER_AUDIT_LOGS_TENANT
-              valueFrom:
-                configMapKeyRef:
-                  optional: true
-                  name: {{ .Values.global.auditlog.configmap.name }}
-                  key: auditlog-tenant
+            - name: APP_GARDENER_AUDIT_LOGS_TENANT_CONFIG_PATH
+              value: {{ .Values.gardener.auditLogTenantConfigPath }}
             - name: APP_PROVISIONER
               value: {{ .Values.provisioner }}
             - name: APP_SUPPORT_ON_DEMAND_RELEASES
@@ -103,6 +99,11 @@ spec:
             - name: APP_LOG_LEVEL
               value: "{{ .Values.logs.level }}"
           volumeMounts:
+        {{if .Values.gardener.auditLogTenantConfigMapName }}
+            - mountPath: /gardener/tenant
+              name: gardener-audit-log-tenant-config
+              readOnly: true
+        {{- end }}
             - mountPath: /gardener/kubeconfig
               name: gardener-kubeconfig
               readOnly: true
@@ -149,3 +150,9 @@ spec:
       - name: gardener-kubeconfig
         secret:
           secretName: {{ .Values.gardener.secretName }}
+      {{if .Values.gardener.auditLogTenantConfigMapName }}
+      - name: gardener-tenant-config
+        configMap:
+          name: {{ .Values.gardener.auditLogTenantConfigMapName }}
+          optional: true
+      {{end}}
