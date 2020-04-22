@@ -628,9 +628,9 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list addonsconfigurations.addons.kyma-project.io in the namespace they created"
 	testPermissions "list" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
-	testRafter "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "yes"
+	testRafter "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "no"
 
-	testKnativeServing "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "yes"
+	testKnativeServing "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "no"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get addonsconfigurations.addons.kyma-project.io in the namespace they created"
 	testPermissions "get" "addonsconfigurations/status.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
