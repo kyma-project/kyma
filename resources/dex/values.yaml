@@ -1,5 +1,7 @@
 imageRegistry: "eu.gcr.io/kyma-project/incubator/develop"
 
+replicaCount: 1
+
 containerPort: 5556
 
 oidc:
