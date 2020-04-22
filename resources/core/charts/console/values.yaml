@@ -78,3 +78,7 @@ test:
         cpu: 300m
       service_catalog:
         enabled: true
+      logging:
+        enabled: false
+      functions:
+        enabled: true
