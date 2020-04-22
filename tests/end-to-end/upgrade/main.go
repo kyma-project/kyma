@@ -136,6 +136,7 @@ func main() {
 		"HelmBrokerConflictUpgradeTest": servicecatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest":  servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
 		"GrafanaUpgradeTest":            monitoring.NewGrafanaUpgradeTest(k8sCli),
+		"TargetsAndRulesUpgradeTest":    monitoring.NewTargetsAndRulesTest(k8sCli),
 		//"MetricsUpgradeTest":            metricUpgradeTest,
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
