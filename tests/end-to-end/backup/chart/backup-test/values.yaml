@@ -8,3 +8,11 @@ image:
   namePrefix: end-to-end-backup
   nameSuffix: tests
   tag: PR-7800
+
+authorizationPolicy:
+  eventService:
+    namespace: kyma-integration
+    applicationName: event-mesh-app
+  consoleBackendService:
+    namespace: kyma-system
+    serviceAccount: core-console-backend-service
