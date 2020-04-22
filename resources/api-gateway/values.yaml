@@ -8,7 +8,7 @@ rbacJob:
 apiMigratorJob:
   image:
     repository: eu.gcr.io/kyma-project/api-gateway-migrator
-    tag: "PR-7867"
+    tag: "274e49ce"
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
@@ -79,11 +79,11 @@ tests:
   enabled: true
   image:
     registry: "eu.gcr.io/kyma-project"
-    version: "bf3187bd"
+    version: "6eaa615a"
   env:
     testUser: "admin-user"
-    timeout: 180
-    delay: 15
+    timeout: 120
+    delay: 10
     jwtTimeout: "30s"
     jwtMaxAttempts: 5
     jwtDelay: 5

@@ -67,10 +67,10 @@ deploy: install manifests
 # Generate manifests e.g. CRD, RBAC etc.
 .PHONY: manifests
 manifests: controller-gen-local generate-local
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." \
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=serverless webhook paths="./..." \
 		object:headerFile=hack/boilerplate.go.txt \
 		output:crd:artifacts:config=config/crd/bases \
-		output:rbac:artifacts:config=config/rbaca \
+		output:rbac:artifacts:config=config/rbac \
 		output:webhook:artifacts:config=config/webhook
 
 # Generate code
@@ -98,7 +98,7 @@ endif
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
-	@echo "resources/function-controller"
+	@echo "resources/serverless"
 
 $(eval $(call buildpack-mount,resolve))
 $(eval $(call buildpack-mount,mod-verify))

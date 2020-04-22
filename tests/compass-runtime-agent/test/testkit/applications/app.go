@@ -8,13 +8,10 @@ func NewApplication(name, providerName, description string, labels map[string]in
 	appLabels := graphql.Labels(labels)
 
 	app := ApplicationRegisterInput(graphql.ApplicationRegisterInput{
-		Name:             name,
-		ProviderName:     &providerName,
-		Description:      &description,
-		Labels:           &appLabels,
-		APIDefinitions:   nil,
-		EventDefinitions: nil,
-		Documents:        nil,
+		Name:         name,
+		ProviderName: &providerName,
+		Description:  &description,
+		Labels:       &appLabels,
 	})
 
 	return &app

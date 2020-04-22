@@ -3,10 +3,10 @@
 package mocks
 
 import (
-	connector "kyma-project.io/compass-runtime-agent/internal/compass/connector"
-	config "kyma-project.io/compass-runtime-agent/internal/config"
+	connector "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/connector"
+	config "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 
-	director "kyma-project.io/compass-runtime-agent/internal/compass/director"
+	director "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
 
 	mock "github.com/stretchr/testify/mock"
 )

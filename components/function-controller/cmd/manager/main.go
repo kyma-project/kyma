@@ -15,6 +15,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/configwatcher"
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/knative"
 	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -40,6 +41,7 @@ type config struct {
 	LeaderElectionID      string `envconfig:"default=serverless-controller-leader-election-helper"`
 	ConfigWatcher         configwatcher.Config
 	Function              serverless.FunctionConfig
+	KService              knative.ServiceConfig
 }
 
 func main() {
@@ -79,6 +81,13 @@ func main() {
 		setupLog.Error(err, "unable to create function controller")
 		os.Exit(1)
 	}
+
+	if err := knative.NewServiceReconciler(mgr.GetClient(), ctrl.Log.WithName("controllers").WithName("kservice"), config.KService, scheme, mgr.GetEventRecorderFor("kservice-controller")).
+		SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create knative service controller")
+		os.Exit(1)
+	}
+
 	if err := k8s.NewController(mgr.GetClient(), ctrl.Log.WithName("controllers").WithName("namespace"), config.ConfigWatcher, k8s.NamespaceType, resourceConfigServices).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Namespace controller")

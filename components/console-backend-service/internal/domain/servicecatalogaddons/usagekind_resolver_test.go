@@ -19,7 +19,7 @@ import (
 
 func TestUsageKindResolver_ListUsageKinds(t *testing.T) {
 	// GIVEN
-	resourceRef := fixKubelessFunctionResourceReference()
+	resourceRef := fixDeploymentResourceReference()
 	usageKindA := fixUsageKind("fix-A", resourceRef)
 	usageKindB := fixUsageKind("fix-B", resourceRef)
 	usageKinds := []*v1alpha1.UsageKind{

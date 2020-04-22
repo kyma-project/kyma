@@ -19,7 +19,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/ui"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/authentication"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
@@ -38,7 +37,6 @@ type RootResolver struct {
 	sca            *servicecatalogaddons.PluggableContainer
 	app            *application.PluggableContainer
 	rafter         *rafter.PluggableContainer
-	ac             *apicontroller.PluggableResolver
 	ag             *apigateway.PluggableResolver
 	authentication *authentication.PluggableResolver
 	serverless     *serverless.PluggableContainer
@@ -50,7 +48,7 @@ func GetRandomNumber() time.Duration {
 	return time.Duration(rand.Intn(120)-60) * time.Second
 }
 
-func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
+func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, serverlessCfg serverless.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
 	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod+GetRandomNumber())
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing service factory")
@@ -91,25 +89,13 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}
 
-	acResolver, err := apicontroller.New(restConfig, informerResyncPeriod+GetRandomNumber())
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing API controller resolver")
-	}
-	makePluggable(acResolver)
-
 	agResolver, err := apigateway.New(serviceFactory)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing apigateway resolver")
 	}
 	makePluggable(agResolver)
 
-	authenticationResolver, err := authentication.New(restConfig, informerResyncPeriod+GetRandomNumber())
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing authentication resolver")
-	}
-	makePluggable(authenticationResolver)
-
-	serverlessResolver, err := serverless.New(serviceFactory, scaContainer.ServiceCatalogAddonsRetriever)
+	serverlessResolver, err := serverless.New(serviceFactory, serverlessCfg, scaContainer.ServiceCatalogAddonsRetriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing serverless resolver")
 	}
@@ -121,6 +107,12 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	}
 	makePluggable(eventingResolver)
 
+	authenticationResolver, err := authentication.New(restConfig, informerResyncPeriod+GetRandomNumber())
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing authentication resolver")
+	}
+	makePluggable(authenticationResolver)
+
 	return &RootResolver{
 		k8s:            k8sResolver,
 		ui:             uiContainer.Resolver,
@@ -128,11 +120,10 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 		sca:            scaContainer,
 		app:            appContainer,
 		rafter:         rafterContainer,
-		ac:             acResolver,
 		ag:             agResolver,
-		authentication: authenticationResolver,
 		serverless:     serverlessResolver,
 		eventing:       eventingResolver,
+		authentication: authenticationResolver,
 	}, nil
 }
 
@@ -147,10 +138,10 @@ func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.sca.StopCacheSyncOnClose(stopCh)
 	r.app.StopCacheSyncOnClose(stopCh)
 	r.rafter.StopCacheSyncOnClose(stopCh)
-	r.ac.StopCacheSyncOnClose(stopCh)
 	r.ag.StopCacheSyncOnClose(stopCh)
-	r.authentication.StopCacheSyncOnClose(stopCh)
 	r.eventing.StopCacheSyncOnClose(stopCh)
+	r.serverless.StopCacheSyncOnClose(stopCh)
+	r.authentication.StopCacheSyncOnClose(stopCh)
 }
 
 func (r *RootResolver) Deployment() gqlschema.DeploymentResolver {
@@ -175,10 +166,6 @@ func (r *RootResolver) ClusterAsset() gqlschema.ClusterAssetResolver {
 
 func (r *RootResolver) Asset() gqlschema.AssetResolver {
 	return &assetResolver{r.rafter}
-}
-
-func (r *RootResolver) Function() gqlschema.FunctionResolver {
-	return &functionResolver{r.serverless}
 }
 
 func (r *RootResolver) Application() gqlschema.ApplicationResolver {
@@ -419,18 +406,6 @@ func (r *mutationResolver) DeleteNamespace(ctx context.Context, name string) (*g
 	return r.k8s.DeleteNamespace(ctx, name)
 }
 
-func (r *mutationResolver) CreateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error) {
-	return r.ac.CreateAPI(ctx, name, namespace, params)
-}
-
-func (r *mutationResolver) UpdateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error) {
-	return r.ac.UpdateAPI(ctx, name, namespace, params)
-}
-
-func (r *mutationResolver) DeleteAPI(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
-	return r.ac.DeleteAPI(ctx, name, namespace)
-}
-
 func (r *mutationResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error) {
 	return r.ag.CreateAPIRule(ctx, name, namespace, params)
 }
@@ -447,16 +422,20 @@ func (r *mutationResolver) CreateLimitRange(ctx context.Context, namespace strin
 	return r.k8s.CreateLimitRange(ctx, namespace, name, limitRange)
 }
 
-func (r *mutationResolver) DeleteFunction(ctx context.Context, name string, namespace string) (*gqlschema.FunctionMutationOutput, error) {
-	return r.serverless.Resolver.DeleteFunction(ctx, name, namespace)
+func (r *mutationResolver) CreateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionMutationInput) (*gqlschema.Function, error) {
+	return r.serverless.Resolver.CreateFunction(ctx, name, namespace, params)
 }
 
-func (r *mutationResolver) CreateFunction(ctx context.Context, name string, namespace string, labels gqlschema.Labels, size string, runtime string) (*gqlschema.Function, error) {
-	return r.serverless.Resolver.CreateFunction(ctx, name, namespace, labels, size, runtime)
-}
-
-func (r *mutationResolver) UpdateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionUpdateInput) (*gqlschema.Function, error) {
+func (r *mutationResolver) UpdateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionMutationInput) (*gqlschema.Function, error) {
 	return r.serverless.Resolver.UpdateFunction(ctx, name, namespace, params)
+}
+
+func (r *mutationResolver) DeleteFunction(ctx context.Context, function gqlschema.FunctionMetadataInput) (*gqlschema.FunctionMetadata, error) {
+	return r.serverless.Resolver.DeleteFunction(ctx, function)
+}
+
+func (r *mutationResolver) DeleteManyFunctions(ctx context.Context, functions []gqlschema.FunctionMetadataInput) ([]gqlschema.FunctionMetadata, error) {
+	return r.serverless.Resolver.DeleteManyFunctions(ctx, functions)
 }
 
 func (r *mutationResolver) CreateTrigger(ctx context.Context, trigger gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) (*gqlschema.Trigger, error) {
@@ -605,6 +584,10 @@ func (r *queryResolver) ServiceBindingUsage(ctx context.Context, name, namespace
 	return r.sca.Resolver.ServiceBindingUsageQuery(ctx, name, namespace)
 }
 
+func (r *queryResolver) ServiceBindingUsages(ctx context.Context, namespace string, resourceKind, resourceName *string) ([]gqlschema.ServiceBindingUsage, error) {
+	return r.sca.Resolver.ServiceBindingUsagesQuery(ctx, namespace, resourceKind, resourceName)
+}
+
 func (r *queryResolver) ClusterAssetGroups(ctx context.Context, viewContext *string, groupName *string) ([]gqlschema.ClusterAssetGroup, error) {
 	return r.rafter.Resolver.ClusterAssetGroupsQuery(ctx, viewContext, groupName)
 }
@@ -623,14 +606,6 @@ func (r *queryResolver) ConnectorService(ctx context.Context, application string
 
 func (r *queryResolver) EventActivations(ctx context.Context, namespace string) ([]gqlschema.EventActivation, error) {
 	return r.app.Resolver.EventActivationsQuery(ctx, namespace)
-}
-
-func (r *queryResolver) Apis(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
-	return r.ac.APIsQuery(ctx, namespace, serviceName, hostname)
-}
-
-func (r *queryResolver) API(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
-	return r.ac.APIQuery(ctx, name, namespace)
 }
 
 func (r *queryResolver) APIRule(ctx context.Context, name string, namespace string) (*gqlschema.APIRule, error) {
@@ -755,10 +730,6 @@ func (r *subscriptionResolver) ClusterAddonsConfigurationEvent(ctx context.Conte
 	return r.sca.Resolver.ClusterAddonsConfigurationEventSubscription(ctx)
 }
 
-func (r *subscriptionResolver) APIEvent(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error) {
-	return r.ac.APIEventSubscription(ctx, namespace, serviceName)
-}
-
 func (r *subscriptionResolver) APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiRuleEvent, error) {
 	return r.ag.APIRuleEventSubscription(ctx, namespace, serviceName)
 }
@@ -769,6 +740,10 @@ func (r *subscriptionResolver) NamespaceEvent(ctx context.Context, withSystemNam
 
 func (r *subscriptionResolver) TriggerEvent(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) (<-chan gqlschema.TriggerEvent, error) {
 	return r.eventing.TriggerEventSubscription(ctx, namespace, subscriber)
+}
+
+func (r *subscriptionResolver) FunctionEvent(ctx context.Context, namespace string, functionName *string) (<-chan gqlschema.FunctionEvent, error) {
+	return r.serverless.FunctionEventSubscription(ctx, namespace, functionName)
 }
 
 // Service Instance
@@ -978,14 +953,4 @@ type assetGroupResolver struct {
 
 func (r *assetGroupResolver) Assets(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]gqlschema.Asset, error) {
 	return r.rafter.Resolver.AssetGroupAssetsField(ctx, obj, types)
-}
-
-// Serverless
-
-type functionResolver struct {
-	serverless *serverless.PluggableContainer
-}
-
-func (r *functionResolver) ServiceBindingUsages(ctx context.Context, obj *gqlschema.Function) ([]gqlschema.ServiceBindingUsage, error) {
-	return r.serverless.Resolver.ServiceBindingUsagesField(ctx, obj)
 }

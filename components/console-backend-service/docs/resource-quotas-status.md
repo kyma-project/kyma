@@ -1,4 +1,4 @@
-# ResourceQuotasStatus 
+# ResourceQuotasStatus
 
 [ResourceQuota](https://kubernetes.io/docs/concepts/policy/resource-quotas/) provides constraints that limit the aggregate resource consumption per Namespace.
 
@@ -17,10 +17,10 @@ The ResourceQuotasStatus contains the flag and the list of exceeded ResourceQuot
 The ResourceQuotasStatus detects if any ReplicaSet or StatefulSet in your Namespace is blocked by the ResourceQuota and therefore cannot progress.
 To check if any ReplicaSet or StatefulSet is blocked, calculate the required number of resources to create another replica. If there are not enough resources to create another replica, return the ResourceQuotaStatus with the flag set to `true`.
 
-The Console calls for the ResourceQuotasStatus automatically. The calls are triggered after: 
+The Console calls for the ResourceQuotasStatus automatically. The calls are triggered after:
 - switching the Namespace
 - uploading a resource
-- creating a lambda 
+- creating a function 
 - opening Namespace's details
 
 ## Implementation
@@ -46,8 +46,6 @@ List ReplicaSets in the given Namespace and loop through them. You must check ev
 To achieve that, implement the logic which calculates if the ReplicaSet has enough resources to create the next replica.
 When there is not enough resources to create the next replica and the number of desired replicas is not reached, return a ResourceQuotasStatus with a flag set to `true`.
 
->**NOTE:** The Kubeless functions work with this solution because they use the Deployment and the ReplicaSet underneath.
-
 ### Check the StatefulSets
 
 List StatefulSets in the given Namespace and loop through them. You must check every StatefulSet which does not reach the number of desired replicas.
@@ -70,7 +68,7 @@ query{
       resourceName
       affectedResources
     }
-  } 
+  }
 }
 ```
 This query returns two types of response: exceeded and not exceeded.

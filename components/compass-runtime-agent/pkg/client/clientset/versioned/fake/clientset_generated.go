@@ -3,14 +3,14 @@
 package fake
 
 import (
+	clientset "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned"
+	compassv1alpha1 "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
+	fakecompassv1alpha1 "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
 	fakediscovery "k8s.io/client-go/discovery/fake"
 	"k8s.io/client-go/testing"
-	clientset "kyma-project.io/compass-runtime-agent/pkg/client/clientset/versioned"
-	compassv1alpha1 "kyma-project.io/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
-	fakecompassv1alpha1 "kyma-project.io/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1/fake"
 )
 
 // NewSimpleClientset returns a clientset that will respond with the provided objects.

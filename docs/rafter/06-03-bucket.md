@@ -43,13 +43,13 @@ This table lists all possible parameters of a given resource together with their
 | **metadata.namespace** | Yes | Specifies the Namespace in which the CR is available. |
 | **spec.region** | No | Specifies the location of the [region](https://github.com/kyma-project/rafter/blob/master/config/crd/bases/rafter.kyma-project.io_buckets.yaml) under which the Bucket Controller creates the bucket. If the field is empty, the Bucket Controller creates the bucket under the default location. |
 | **spec.policy** | No | Specifies the type of bucket access. Use `none`, `readonly`, `writeonly`, or `readwrite`. |
-| **status.lastheartbeattime** | Not applicable | Provides the last time when the Bucket Controller processed the Bucket CR. |
+| **status.lastHeartbeatTime** | Not applicable | Specifies when was the last time when the Bucket Controller processed the Bucket CR. |
 | **status.message** | Not applicable | Describes a human-readable message on the CR processing success or failure. |
 | **status.phase** | Not applicable | The Bucket Controller automatically adds it to the Bucket CR. It describes the status of processing the Bucket CR by the Bucket Controller. It can be `Ready` or `Failed`. |
 | **status.reason** | Not applicable | Provides information on the Bucket CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. |
 | **status.url** | Not applicable | Provides the address of the bucket storage under which the asset is available. |
 | **status.remoteName** | Not applicable | Provides the name of the bucket in the storage. |
-| **status.observedGeneration** | Not applicable | Specifies the generation that the Bucket Controller observes. |
+| **status.observedGeneration** | Not applicable | Specifies the most recent Bucket CR generation that the Bucket Controller observed. |
 
 > **NOTE:** The Bucket Controller automatically adds all parameters marked as **Not applicable** to the Bucket CR.
 

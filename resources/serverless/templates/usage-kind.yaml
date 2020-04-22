@@ -1,0 +1,11 @@
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
+kind: UsageKind
+metadata:
+  name: function
+spec:
+  displayName: "Function"
+  resource:
+    group: serving.knative.dev
+    kind: service
+    version: v1
+  labelsPath: spec.template.metadata.labels

@@ -1,17 +1,17 @@
 package main
 
 import (
-	"kyma-project.io/compass-runtime-agent/internal/certificates"
-	"kyma-project.io/compass-runtime-agent/internal/compass"
-	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
-	"kyma-project.io/compass-runtime-agent/internal/compass/director"
-	"kyma-project.io/compass-runtime-agent/internal/compassconnection"
-	confProvider "kyma-project.io/compass-runtime-agent/internal/config"
-	"kyma-project.io/compass-runtime-agent/internal/graphql"
-	"kyma-project.io/compass-runtime-agent/internal/healthz"
-	"kyma-project.io/compass-runtime-agent/internal/kyma"
-	"kyma-project.io/compass-runtime-agent/internal/secrets"
-	apis "kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compassconnection"
+	confProvider "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/healthz"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/secrets"
+	apis "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"

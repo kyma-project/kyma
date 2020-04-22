@@ -7,9 +7,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/httpconsts"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"kyma-project.io/compass-runtime-agent/internal/httpconsts"
 )
 
 func TestUploadClient(t *testing.T) {

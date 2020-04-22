@@ -11,7 +11,7 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 )
 
-const subscriberImage = "eu.gcr.io/kyma-project/event-subscriber-tools:PR-7832"
+const subscriberImage = "eu.gcr.io/kyma-project/event-subscriber-tools:f766b186"
 
 type SubscriberOption func(deployment *appsv1.Deployment)
 

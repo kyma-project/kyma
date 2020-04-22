@@ -1,0 +1,18 @@
+{{- /*
+  Customization: Adjusted selector labels
+*/ -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "jaeger-operator.fullname" . }}-jaeger-operator
+  labels:
+{{ include "jaeger-operator.labels" . | indent 4 }}
+spec:
+  ports:
+  - name: metrics
+    port: 8383
+    protocol: TCP
+    targetPort: 8383
+  selector:
+{{ include "jaeger-operator.labels" . | indent 4 }}
+  type: ClusterIP

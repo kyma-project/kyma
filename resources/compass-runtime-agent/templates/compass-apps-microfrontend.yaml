@@ -1,13 +1,14 @@
+{{- if .Values.managementPlane.url -}}
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
-  name: compass-apps
+  name: compass-r-a-apps
   labels:
     app: compass-apps
 spec:
   displayName: Applications
   version: v1
-  category: {{ if .Values.global.enableAPIPackages }}Integration{{ else }}Experimental{{ end }}
+  category: Experimental
   placement: cluster
   viewBaseUrl: "https://core-ui.{{ js .Values.global.ingress.domainName }}"
   navigationNodes:
@@ -60,3 +61,4 @@ spec:
       navigationPath: applications/details/:appId/apiPackage/:apiPackageId/eventApi/:eventApiId/edit
       viewUrl: '/application/:appId/apiPackage/:apiPackageId/eventApi/:eventApiId/edit'
       showInNavigation: true
+{{ end }}

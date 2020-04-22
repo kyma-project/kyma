@@ -41,7 +41,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		s.testID,
 	)
 
-	lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
+	lambdaEndpoint := helpers.InClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
 
 	return []step.Step{
 		step.Parallel(
@@ -52,8 +52,11 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 			testsuite.NewCreateMapping(s.testID, clients.AppBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
 			testsuite.NewStartTestServer(testService),
 			testsuite.NewConnectApplicationUsingCompassLegacy(compassClients.ConnectorClient, appConnector, compassClients.DirectorClient, state),
-			testsuite.NewDeployLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort, clients.KubelessClientset.KubelessV1beta1().Functions(s.testID), clients.Pods, false),
-		),
+			testsuite.NewDeployFakeLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort,
+				clients.CoreClientset.AppsV1().Deployments(s.testID),
+				clients.CoreClientset.CoreV1().Services(s.testID),
+				clients.CoreClientset.CoreV1().Pods(s.testID),
+				false)),
 		testsuite.NewRegisterLegacyServiceInCompass(s.testID, testService.GetInClusterTestServiceURL(), testService, state),
 		testsuite.NewCreateServiceInstance(s.testID, s.testID, state.GetServiceClassID, state.GetServicePlanID,
 			clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testID),

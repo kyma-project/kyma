@@ -4,13 +4,13 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir:
-      version: "PR-7913"
+      version: "PR-8050"
     runtimeAgentTests:
       dir:
-      version: "PR-7913"
+      version: "PR-8050"
     compassExternalSolutionTests:
       dir:
-      version: "PR-7738"
+      version: "PR-8050"
   istio:
     gateway:
       name: kyma-gateway

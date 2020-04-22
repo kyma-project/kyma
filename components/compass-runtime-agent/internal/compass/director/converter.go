@@ -2,7 +2,7 @@ package director
 
 import (
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
-	kymamodel "kyma-project.io/compass-runtime-agent/internal/kyma/model"
+	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 )
 
 func (app Application) ToApplication() kymamodel.Application {

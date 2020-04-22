@@ -1,0 +1,504 @@
+##########################################################################################
+# kyma-essentials: Minimal cluster view role necessary to render UI
+##########################################################################################
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-essentials-base
+  labels:
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials-base: "true"
+rules:
+- apiGroups:
+    - "authentication.kyma-project.io"
+    - "gateway.kyma-project.io"
+    - "ui.kyma-project.io"
+    - "rbac.authorization.k8s.io"
+  resources:
+    - "*"
+  verbs:
+    - "list"
+- apiGroups:
+    - "servicecatalog.k8s.io"
+    - "rafter.kyma-project.io"
+  resources:
+    - "*"
+  verbs:
+    - "list"
+    - "get"
+- apiGroups:
+    - servicecatalog.kyma-project.io
+  resources:
+    - usagekinds
+  verbs:
+    - "list"
+    - "get"
+- apiGroups:
+    - applicationconnector.kyma-project.io
+  resources:
+    - applications
+  verbs:
+    - "get"
+    - "list"
+    - "watch"
+- apiGroups:
+    - ""
+  resources:
+    - namespaces
+  verbs:
+    - "list"
+- nonResourceURLs:
+    - "*" #give access to all non resource urls
+  verbs:
+    - "list"
+    - "get"
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-essentials
+  labels:
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials: "true"
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials-base: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-crd-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-self: "true"
+rules: []
+
+---
+################################################################################
+# Viewer role
+# kyma-view = view permissions on kyma resources
+################################################################################
+
+#View access to core resources
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-view-base
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-view-base: "true"
+  annotations:
+    helm.sh/hook-weight: "0"
+rules:
+- apiGroups:
+    - ""
+    - "apps"
+    - "extensions"
+  resources:
+    - "*"
+  verbs:
+{{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
+
+---
+#View access to all non resource urls
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-nonresource-view
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-nonresource-view: "true"
+  annotations:
+    helm.sh/hook-weight: "0"
+rules:
+- nonResourceURLs:
+    - "*"
+  verbs:
+{{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-view
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-view: "true"
+  annotations:
+    helm.sh/hook-weight: "0"
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-view-base: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-nonresource-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-api-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-k8s-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-monitoring-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-addons-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-dex-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-ory-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-backup-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-rafter-view: "true"
+rules: []
+
+---
+################################################################################
+# kyma-edit = edit permissions on kyma resources
+################################################################################
+
+#Full access to all non resource urls
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-nonresource-admin
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-nonresource-admin: "true"
+  annotations:
+    helm.sh/hook-weight: "0"
+rules:
+- nonResourceURLs:
+    - "*"
+  verbs:
+    - "*"
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-edit
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-edit: "true"
+  annotations:
+    helm.sh/hook-weight: "0"
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-nonresource-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-api-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-crd-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-monitoring-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-dex-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-ory-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-backup-edit: "true"
+rules: []
+
+---
+##########################################################################################
+# Kyma Admin role
+# kyma-admin = k8s admin + kyma-specific resources admin
+##########################################################################################
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-admin
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    helm.sh/hook-weight: "0"
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.k8s.io/aggregate-to-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-subject: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-api-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-monitoring-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-addons-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-dex-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-ory-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-backup-admin: "true"
+rules: []
+
+---
+##########################################################################################
+# Kyma Namespace Admin role
+# kyma-namespace-admin = kyma admin without Addons write permissions
+##########################################################################################
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-namespace-admin
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    helm.sh/hook-weight: "0"
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.k8s.io/aggregate-to-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-subject: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-api-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-monitoring-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-addons-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-dex-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-ory-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-backup-admin: "true"
+rules: []
+
+---
+################################################################################
+# Namespace Admin role
+# kyma-namespace-admin-essentials = kyma-essentials + kyma-namespace-create
+################################################################################
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-namespace-admin-essentials
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    helm.sh/hook-weight: "0"
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-namespace-create: "true"
+rules: []
+
+---
+################################################################################
+# Developer role
+# kyma-developer = k8s edit + kyma-edit
+################################################################################
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-developer
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    helm.sh/hook-weight: "0"
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.k8s.io/aggregate-to-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-edit: "true"
+rules: []
+
+---
+################################################################################
+# Role Bindings
+################################################################################
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kube-system-view
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    helm.sh/hook-weight: "0"
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: view
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kyma-essentials-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    helm.sh/hook-weight: "1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-essentials
+subjects:
+- kind: User
+  name: read-only-user@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+- kind: User
+  name: developer@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+{{ if .Values.global.kymaRuntime.developerGroup }}
+- kind: Group
+  name: {{ .Values.global.kymaRuntime.developerGroup }}
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
+{{- range .Values.bindings.kymaEssentials.groups }}
+- kind: Group
+  name: {{ . }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
+{{- range .Values.bindings.kymaDeveloper.groups }}
+- kind: Group
+  name: {{ . }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kyma-view-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    helm.sh/hook-weight: "1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-view
+subjects:
+- kind: User
+  name: user1@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+- kind: User
+  name: user2@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+- kind: User
+  name: read-only-user@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+{{ if .Values.global.kymaRuntime.operatorGroup }}
+- kind: Group
+  name: {{ .Values.global.kymaRuntime.operatorGroup }}
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
+{{- range .Values.bindings.kymaView.groups }}
+- kind: Group
+  name: {{ .  }}
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kyma-admin-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    helm.sh/hook-weight: "1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-admin
+subjects:
+- kind: User
+  name: admin@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+{{ if .Values.users.adminGroup }}
+- kind: Group
+  name: {{ .Values.users.adminGroup }}
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
+{{ if  .Values.global.kymaRuntime.adminGroup }}
+- kind: Group
+  name: {{ .Values.global.kymaRuntime.adminGroup }}
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
+{{- range .Values.bindings.kymaAdmin.groups }}
+- kind: Group
+  name: {{ . }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kyma-namespace-admin-essentials-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    helm.sh/hook-weight: "1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-namespace-admin-essentials
+subjects:
+- kind: User
+  name: namespace.admin@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+- kind: Group
+  name: {{ .Values.global.kymaRuntime.namespaceAdminGroup }}
+  apiGroup: rbac.authorization.k8s.io

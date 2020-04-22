@@ -24,7 +24,7 @@ rules:
   verbs: ["create", "delete", "get", "list", "patch", "update"]
 - apiGroups: [""]
   resources: ["configmaps"]
-  verbs: ["list", "get", "create", "delete"]
+  verbs: ["list", "get", "create", "delete", "update"]
 - apiGroups: ["apps"]
   resources: ["deployments"]
   verbs: ["create", "get", "delete", "list"]
@@ -80,12 +80,9 @@ rules:
   resources: ["clusterassetgroups", "assetgroups", "clusterbuckets", "clusterassets", "buckets", "assets"]
   verbs: ["create", "delete", "get"]
 
-# Kubeless
-- apiGroups: ["kubeless.io"]
-  resources: ["functions", "httptriggers", "cronjobtriggers"]
-  verbs: ["get", "list", "watch", "update", "create", "delete"]
-- apiGroups: ["gateway.kyma-project.io"]
-  resources: ["apis", "apirules"]
+# Gateway
+- apiGroups: ["gateway.kyma-project.io"]	
+  resources: ["apirules"]
   verbs: ["create", "delete", "get", "list"]
 
 # Ory
