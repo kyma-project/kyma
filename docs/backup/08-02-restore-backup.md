@@ -3,7 +3,7 @@ title: Restore a Kyma cluster
 type: Tutorial
 ---
 
->**NOTE**: Velero support is being deprecated with Kyma 1.12. For the new backup strategy, check out [this](/components/backup/#new-backup-strategy).
+>**NOTE**: Velero support is deprecated. For the new backup strategy, check out [this](/components/backup/#new-backup-strategy).
 
 Follow this tutorial to restore a backed up Kyma cluster. Start with restoring CRDs, services, and endpoints, then restore other resources.
 

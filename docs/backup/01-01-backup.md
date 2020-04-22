@@ -2,7 +2,7 @@
 title: Overview
 ---
 
->**NOTE**: Velero support is being deprecated with Kyma 1.12. For the new backup strategy, check out [this](/components/backup/#new-backup-strategy).
+>**NOTE**: Velero support is deprecated. For the new backup strategy, check out [this](/components/backup/#new-backup-strategy).
 
 Kyma integrates with [Velero](https://github.com/heptio/velero/) to provide backup and restore capabilities.
 

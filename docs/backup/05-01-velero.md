@@ -3,7 +3,7 @@ title: Velero chart
 type: Configuration
 ---
 
->**NOTE**: Velero support is being deprecated with Kyma 1.12. For the new backup strategy, check out [this](/components/backup/#new-backup-strategy).
+>**NOTE**: Velero support is deprecated. For the new backup strategy, check out [this](/components/backup/#new-backup-strategy).
 
 This document lists and describes the parameters that you can configure in Velero, split into required and optional parameters.
 
