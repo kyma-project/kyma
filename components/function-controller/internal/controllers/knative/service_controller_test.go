@@ -186,11 +186,11 @@ var _ = ginkgo.Describe("KService controller", func() {
 		_, err = reconciler.Reconcile(request)
 		gm.Expect(err).NotTo(gm.HaveOccurred())
 
-		ginkgo.By("verify that the only revision left is the correct one")
 		newRevisionList := &servingv1.RevisionList{}
 		err = reconciler.resourceClient.ListByLabel(context.TODO(), srv.GetNamespace(), map[string]string{serviceLabelKey: srv.GetName()}, newRevisionList)
 		gm.Expect(newRevisionList.Items).To(gm.HaveLen(1))
 
+		ginkgo.By("verify that the only revision left is the correct one")
 		cfgLabelValue, ok := newRevisionList.Items[0].Labels[cfgGenerationLabel]
 		gm.Expect(ok).To(gm.BeTrue())
 		gm.Expect(cfgLabelValue).To(gm.Equal(strconv.Itoa(numberOfRevisions)))
