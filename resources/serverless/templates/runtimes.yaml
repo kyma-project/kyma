@@ -15,5 +15,5 @@ data:
         mkdir /kubeless && \
         cp /src/handler.js /kubeless && \
         cp /src/package.json /kubeless && \
-        sh /kubeless-npm-install.sh
+        /kubeless-npm-install.sh
     USER 1000
