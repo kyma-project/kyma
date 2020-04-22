@@ -158,7 +158,7 @@ var _ = ginkgo.Describe("KService controller", func() {
 		for _, rev := range fixRevisionList(srvName, namespace, numberOfRevisions) {
 			pinnedRev := rev // pin
 			gm.Expect(k8sClient.Create(ctx, &pinnedRev)).NotTo(gm.HaveOccurred())
-			gm.Expect(k8sClient.Status().Update(context.TODO(), &pinnedRev)).NotTo(gm.HaveOccurred())
+			gm.Expect(k8sClient.Status().Update(ctx, &pinnedRev)).NotTo(gm.HaveOccurred())
 		}
 
 		ginkgo.By("should skip reconcile on service creation")
@@ -166,7 +166,7 @@ var _ = ginkgo.Describe("KService controller", func() {
 		gm.Expect(err).NotTo(gm.HaveOccurred())
 
 		initialRevList := &servingv1.RevisionList{}
-		err = reconciler.resourceClient.ListByLabel(context.TODO(), srv.GetNamespace(), map[string]string{serviceLabelKey: srv.GetName()}, initialRevList)
+		err = reconciler.resourceClient.ListByLabel(ctx, srv.GetNamespace(), map[string]string{serviceLabelKey: srv.GetName()}, initialRevList)
 		gm.Expect(initialRevList.Items).To(gm.HaveLen(numberOfRevisions))
 
 		ginkgo.By("Update service to be ready")
@@ -175,15 +175,15 @@ var _ = ginkgo.Describe("KService controller", func() {
 			Status: corev1.ConditionTrue,
 		}}
 
-		gm.Expect(k8sClient.Update(context.TODO(), &srv)).Should(gm.Succeed())
-		gm.Expect(k8sClient.Status().Update(context.TODO(), &srv)).Should(gm.Succeed())
+		gm.Expect(k8sClient.Update(ctx, &srv)).Should(gm.Succeed())
+		gm.Expect(k8sClient.Status().Update(ctx, &srv)).Should(gm.Succeed())
 
 		ginkgo.By("waiting for controller to delete excess revisions")
 		_, err = reconciler.Reconcile(request)
 		gm.Expect(err).NotTo(gm.HaveOccurred())
 
 		newRevisionList := &servingv1.RevisionList{}
-		err = reconciler.resourceClient.ListByLabel(context.TODO(), srv.GetNamespace(), map[string]string{serviceLabelKey: srv.GetName()}, newRevisionList)
+		err = reconciler.resourceClient.ListByLabel(ctx, srv.GetNamespace(), map[string]string{serviceLabelKey: srv.GetName()}, newRevisionList)
 		gm.Expect(newRevisionList.Items).To(gm.HaveLen(1))
 
 		ginkgo.By("verify that the only revision left is the correct one")
