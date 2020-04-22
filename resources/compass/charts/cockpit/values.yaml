@@ -3,7 +3,7 @@ images:
     path: eu.gcr.io/kyma-project
   ui:
     dir: 
-    version: "49294757"
+    version: 5a8b31e2
 
 statusPort: 6082
 
