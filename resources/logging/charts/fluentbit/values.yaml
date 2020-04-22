@@ -326,4 +326,4 @@ affinity: {}
 #    - number: 8081
 #      name: https
 #      protocol: TLS
-#  resolutionMode: DNS
+#  resolution: DNS

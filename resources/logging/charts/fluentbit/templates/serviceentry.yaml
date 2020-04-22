@@ -16,5 +16,5 @@ spec:
   location: MESH_EXTERNAL
   ports:
   {{- tpl (.Values.externalServiceEntry.ports | nindent 4) . }}
-  resolution: {{ .Values.externalServiceEntry.resolutionMode }}
+  resolution: {{ .Values.externalServiceEntry.resolution }}
 {{- end }}
