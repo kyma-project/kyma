@@ -23,7 +23,7 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-verify:: mod-verify
+verify:: mod-verify build-function-base-image push-function-base-image
 
 resolve-local:
 	GO111MODULE=on go mod download
@@ -99,6 +99,19 @@ endif
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
 	@echo "resources/serverless"
+
+######## function base image
+
+FUNCTION_BASE_IMAGE_NODEJS12 = function-base-nodejs12
+FUNCTION_BASE_NODEJS12_IMG_NAME=$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(FUNCTION_BASE_IMAGE_NODEJS12)
+
+.PHONY: build-function-base-image push-function-base-image
+build-function-base-image:
+	docker build -t $(FUNCTION_BASE_IMAGE_NODEJS12) -f ./deploy/function-base-image/nodejs12/Dockerfile .
+
+push-function-base-image:
+	docker tag $(FUNCTION_BASE_IMAGE_NODEJS12) $(FUNCTION_BASE_NODEJS12_IMG_NAME):$(DOCKER_TAG)
+	docker push $(FUNCTION_BASE_NODEJS12_IMG_NAME):$(DOCKER_TAG)
 
 $(eval $(call buildpack-mount,resolve))
 $(eval $(call buildpack-mount,mod-verify))
