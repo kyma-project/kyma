@@ -1,6 +1,7 @@
 deployment:
   image:
     pullPolicy: IfNotPresent
+
   securityContext: # Set on container level
     runAsUser: 2000
     allowPrivilegeEscalation: false
@@ -26,7 +27,10 @@ kymaRelease:
 
 installation:
   timeout: 1h15m
-  errorsCountFailureThreshold: 5
+
+runtimeAgent:
+  configurationTimeout: 1h
+  connectionTimeout: 1h
 
 logs:
   level: "info"
