@@ -15,6 +15,6 @@ spec:
   {{- toYaml .Values.externalServiceEntry.hosts | trim | nindent 4 }}
   location: MESH_EXTERNAL
   ports:
-  {{- toYaml .Values.externalServiceEntry.ports | trim | nindent 4 }}
+  {{- tpl (.Values.externalServiceEntry.ports | nindent 4) . }}
   resolution: {{ .Values.externalServiceEntry.resolutionMode }}
 {{- end }}
