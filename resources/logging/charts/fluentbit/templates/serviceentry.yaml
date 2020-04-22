@@ -12,7 +12,7 @@ metadata:
       {{- end }}
 spec:
   hosts:
-  {{- toYaml .Values.externalServiceEntry.hosts | trim | nindent 4 }}
+  {{- tpl (.Values.externalServiceEntry.hosts | nindent 4) . }}
   location: MESH_EXTERNAL
   ports:
   {{- tpl (.Values.externalServiceEntry.ports | nindent 4) . }}
