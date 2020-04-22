@@ -1,7 +1,7 @@
 tests:
   enabled: true
   image:
-    version: 08e313d5
+    version: PR-8160
   env:
     namespace: default
 
