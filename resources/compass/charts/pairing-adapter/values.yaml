@@ -1,4 +1,5 @@
 deployment:
+  replicaCount: 1
   port: 8080
   oauthSecret: "pairing-adapter-oauth"
   image:
