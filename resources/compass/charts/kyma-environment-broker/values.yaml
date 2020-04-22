@@ -83,6 +83,7 @@ avs:
   internalTesterAccessId: "TBD"
   externalTesterAccessId: "TBD"
   groupId: "TBD"
+  parentId: "TBD"
 
 lms:
   secretName: "lms-creds"
