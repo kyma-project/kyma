@@ -39,6 +39,7 @@ spec:
             - --generated-objects-labels={{ .Values.config.generatedObjects.labels }}
             {{- with .Values.global.ingress.domainName }}
             - --domain-whitelist={{ . | join ", " }}
+            - --default-domain-name={{ . | join ", " }}
             {{- end }}
             {{- with .Values.config.cors.allowOrigin }}
             - --cors-allow-origin={{ . | join ", " }}
