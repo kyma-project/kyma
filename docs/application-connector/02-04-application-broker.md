@@ -40,9 +40,9 @@ This ServiceClass has a **bindable** parameter set to `false` which means that a
 2. Provision this ServiceClass by creating a ServiceInstance in the given Namespace.
 3. During the provisioning process, the [EventActivation](/components/application-connector/#custom-resource-event-activation) resource is created together with the ServiceInstance. This resource allows you to create a Trigger from Kyma Console.
 4. The Application sends an event to the Application Connector.
-5. When the Trigger receives and event, it triggers the function based on the conditions set in the Trigger specification.
+5. When the Trigger receives and event, it triggers the function based on the parametes defined for a Trigger.
 
-For more details of the event flow, see [this](/components/knative-eventing-mesh/#details-event-processing-and-delivery) document.
+For more details on event processing and deliver, see [this](/components/knative-eventing-mesh/#details-event-processing-and-delivery) document.
 
 ![Event Service Class](./assets/006-AB-event-service-class.svg)
 
