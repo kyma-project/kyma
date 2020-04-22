@@ -279,15 +279,21 @@ function testKnativeServing() {
 	if [[ "${isAdmin}" == "no" ]]; then
 		isAdminText=" NOT"
 	fi
-	readonly isAdminText
+	local viewAccess="yes"
+	local viewAccessText=""
+	if [[ "${testNamespace}" == "${SYSTEM_NAMESPACE}" ]]; then
+		viewAccess="no"
+		viewAccessText=" NOT"
+	fi
+	readonly isAdminText viewAccess viewAccessText
 
 	local -r resources=( "services.serving.knative.dev" "routes.serving.knative.dev" "revisions.serving.knative.dev" "configurations.serving.knative.dev" "podautoscalers.autoscaling.internal.knative.dev" "images.caching.internal.knative.dev" )
 
 	# View
 	for resource in "${resources[@]}"; do
 		for operation in "${VIEW_OPERATIONS[@]}"; do
-			echo "--> ${userEmail} should be able to ${operation} ${resource} CR in ${testNamespace}"
-			testPermissions "${operation}" "${resource}" "${testNamespace}" "yes"
+			echo "--> ${userEmail} should${viewAccessText} be able to ${operation} ${resource} CR in ${testNamespace}"
+			testPermissions "${operation}" "${resource}" "${testNamespace}" "${viewAccess}"
 		done
 	done
 
@@ -394,7 +400,6 @@ function runTests() {
 	testPermissions "create" "servicebindings" "${NAMESPACE}" "yes"
 
 	testRafter "${ADMIN_EMAIL}" "${NAMESPACE}" "yes"
-
 	testKnativeServing "${ADMIN_EMAIL}" "${NAMESPACE}" "yes"
 
 	echo "--> ${ADMIN_EMAIL} should be able to delete any namespace in the cluster"
@@ -437,7 +442,6 @@ function runTests() {
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "no"
 
 	testRafter "${VIEW_EMAIL}" "${NAMESPACE}" "no"
-
 	testKnativeServing "${VIEW_EMAIL}" "${NAMESPACE}" "no"
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to create serviceinstances in ${CUSTOM_NAMESPACE}"
@@ -476,6 +480,9 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create servicebindings in ${SYSTEM_NAMESPACE}"
 	testPermissions "create" "servicebindings" "${SYSTEM_NAMESPACE}" "no"
 
+	testRafter "${NAMESPACE_ADMIN_EMAIL}" "${SYSTEM_NAMESPACE}" "no"
+	testKnativeServing "${NAMESPACE_ADMIN_EMAIL}" "${SYSTEM_NAMESPACE}" "no"
+
 	# namespace admin should not be able to create clusterrolebindings - if they can't create it in one namespace,
 	# that means they can't create it in any namespace (resource is non namespaced and RBAC is permissive)
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create clusterrolebindings"
@@ -489,7 +496,7 @@ function runTests() {
 	testPermissionsClusterScoped "list" "usagekinds" "yes"
 
 	# namespace admin should be able to get/list/create/delete k8s and kyma resources in the namespace they created
-  echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Deployments in the namespace they created"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Deployments in the namespace they created"
 	testPermissions "list" "deployments" "${CUSTOM_NAMESPACE}" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create Deployment in the namespace they created"
@@ -629,7 +636,6 @@ function runTests() {
 	testPermissions "list" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
 	testRafter "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "no"
-
 	testKnativeServing "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "no"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get addonsconfigurations.addons.kyma-project.io in the namespace they created"
@@ -714,6 +720,9 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should be able to delete servicebindingusages in ${CUSTOM_NAMESPACE}"
 	testPermissions "delete" "servicebindingusages" "${CUSTOM_NAMESPACE}" "yes"
 
+	testRafter "${DEVELOPER_EMAIL}" "${CUSTOM_NAMESPACE}" "no"
+	testKnativeServing "${DEVELOPER_EMAIL}" "${CUSTOM_NAMESPACE}" "no"
+
 	# developer who was granted kyma-developer role should not be able to operate in system namespaces
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to list Deployments in system namespace"
 	testPermissions "list" "deployment" "${SYSTEM_NAMESPACE}" "no"
@@ -740,7 +749,6 @@ function runTests() {
 	testPermissions "create" "servicebindings" "${SYSTEM_NAMESPACE}" "no"
 
 	testRafter "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}" "no"
-
 	testKnativeServing "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}" "no"
 
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create servicebindingusages in system namespace"
