@@ -1,5 +1,9 @@
 tests:
   enabled: true
+  image:
+    version: 08e313d5
+  env:
+    namespace: default
 
 bindings:
   kymaEssentials:
@@ -13,7 +17,6 @@ bindings:
   kymaDeveloper:
     groups: []
 
-namespace: default
 clusterRoles:
   apiGroups:
     k8s:
@@ -74,6 +77,12 @@ global:
     operatorGroup: runtimeOperator
     developerGroup: runtimeDeveloper
     namespaceAdminGroup: runtimeNamespaceAdmin
+  isLocalEnv: false
+  containerRegistry:
+    path: "eu.gcr.io/kyma-project"
+  minikubeIP: ""
+  ingress:
+    domainName: "kyma.local"
 
 users:
   adminGroup:
