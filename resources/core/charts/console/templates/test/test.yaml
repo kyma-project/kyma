@@ -61,7 +61,7 @@ spec:
                     secretKeyRef:
                       name: admin-user
                       key: password
-                - name: API_PACKAGES_ENABLED
+                - name: DISABLE_LEGACY_CONNECTIVITY
                   value: {{ .Values.global.disableLegacyConnectivity | quote }}
                 - name: CATALOG_ENABLED
                   value: {{ .Values.test.acceptance.ui.service_catalog.enabled | quote }}
