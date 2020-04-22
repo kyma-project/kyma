@@ -281,7 +281,7 @@ function testKnativeServing() {
 	fi
 	readonly isAdminText
 
-	local -r resources=( "services.serving.knative.dev" "routes.serving.knative.dev" "revisions.serving.knative.dev" "configurations.serving.knative.dev" "clusteringresses.networking.internal.knative.dev" "podautoscalers.autoscaling.internal.knative.dev" "images.caching.internal.knative.dev" )
+	local -r resources=( "services.serving.knative.dev" "routes.serving.knative.dev" "revisions.serving.knative.dev" "configurations.serving.knative.dev" "podautoscalers.autoscaling.internal.knative.dev" "images.caching.internal.knative.dev" )
 
 	# View
 	for resource in "${resources[@]}"; do
