@@ -18,7 +18,9 @@
 RETRY_TIME=3 #Seconds
 MAX_RETRIES=5
 
+# resources/cluster-users/values.yaml clusterRoles.verbs.view
 readonly VIEW_OPERATIONS=( "get" "list" )
+# resources/cluster-users/values.yaml clusterRoles.verbs.edit - clusterRoles.verbs.view
 readonly EDIT_OPERATIONS=( "create" "delete" "deletecollection" "patch" "update" "watch" )
 
 # Helper used to count retry attempts
