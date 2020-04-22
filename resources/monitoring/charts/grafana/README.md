@@ -56,18 +56,18 @@ Users can create their own **Grafana Dashboard** by using the Grafana UI as the 
 1. Create or modify a dashboard using Grafana UI.
 2. Save the dashboard with a new name.
 
-## Lambda dashboard
+## Function dashboard
 
-The lambda dashboard provides visualisation for specific lambda function metrics such as memory usage, CPU usage or success rate response.
+The function dashboard provides visualisation for specific function metrics such as memory usage, CPU usage or success rate response.
 
-You can access the dashboard directly from the lambda UI.
+You can access the dashboard directly from the Functions UI.
 
 ## Unique Dashboard Identifier
 
-The Unique Dashboard Identifier or UID allows having consistent URLs for accessing dashboards from the lambda UI. 
+The Unique Dashboard Identifier or UID allows having consistent URLs for accessing dashboards from the Functions UI.
 This UID is defined in the dashboard YAML files.
 
->**Note:** Changing the UID breaks the URL used to access specific dashboards from the lambda UI.
+>**Note:** Changing the UID breaks the URL used to access specific dashboards from the Functions UI.
 
 ## Additional resources
 

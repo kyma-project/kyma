@@ -101,7 +101,6 @@ func TestBindingUsageServiceList(t *testing.T) {
 	assert.Len(t, actualUsages, 2)
 	assert.Contains(t, actualUsages, us1)
 	assert.Contains(t, actualUsages, us2)
-
 }
 
 func TestBindingUsageServiceListForServiceInstance(t *testing.T) {
@@ -178,26 +177,75 @@ func TestBindingUsageServiceListForServiceInstanceErrors(t *testing.T) {
 	})
 }
 
-func TestBindingUsageServiceListForDeployment(t *testing.T) {
-	// GIVEN
-	us1 := customBindingUsage("redis-1")
-	us2 := customBindingUsage("redis-2")
-	us3 := customFunctionBindingUsage("mysql-1")
+func TestBindingUsageServiceListByUsageKind(t *testing.T) {
+	t.Run("Success with kind and resourceName parameters", func(t *testing.T) {
+		// GIVEN
+		us1 := customBindingUsage("redis-1")
+		us2 := customBindingUsage("redis-2")
+		us3 := customFunctionBindingUsage("mysql-1")
 
-	fakeClient, err := newDynamicClient(us1, us2, us3)
-	require.NoError(t, err)
-	informer := newSbuFakeInformer(fakeClient)
-	sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.Resource(bindingUsageGVR), informer, nil, "sbu-name")
-	require.NoError(t, err)
-	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
-	// WHEN
-	usages, err := sut.ListByUsageKind("prod", "deployment", "app")
-	// THEN
-	require.NoError(t, err)
-	assert.Len(t, usages, 2)
-	assert.Contains(t, usages, us1)
-	assert.Contains(t, usages, us2)
+		fakeClient, err := newDynamicClient(us1, us2, us3)
+		require.NoError(t, err)
+		informer := newSbuFakeInformer(fakeClient)
+		sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.Resource(bindingUsageGVR), informer, nil, "sbu-name")
+		require.NoError(t, err)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		// WHEN
+		usages, err := sut.ListByUsageKind("prod", "deployment", "app")
+		// THEN
+		require.NoError(t, err)
+		assert.Len(t, usages, 2)
+		assert.Contains(t, usages, us1)
+		assert.Contains(t, usages, us2)
+	})
 
+	t.Run("Success with only namespace parameter", func(t *testing.T) {
+		// GIVEN
+		us1 := customBindingUsage("redis-1")
+		us2 := customBindingUsage("redis-2")
+		us3 := customFunctionBindingUsage("mysql-1")
+
+		fakeClient, err := newDynamicClient(us1, us2, us3)
+		require.NoError(t, err)
+		informer := newSbuFakeInformer(fakeClient)
+		sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.Resource(bindingUsageGVR), informer, nil, "sbu-name")
+		require.NoError(t, err)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		// WHEN
+		usages, err := sut.ListByUsageKind("prod", "", "")
+		// THEN
+		require.NoError(t, err)
+		assert.Len(t, usages, 3)
+		assert.Contains(t, usages, us1)
+		assert.Contains(t, usages, us2)
+		assert.Contains(t, usages, us3)
+	})
+}
+
+func TestBindingUsageServiceDeleteAllByUsageKind(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		// GIVEN
+		us1 := customBindingUsage("redis-1")
+		us2 := customBindingUsage("redis-2")
+		us3 := customFunctionBindingUsage("mysql-1")
+
+		fakeClient, err := newDynamicClient(us1, us2, us3)
+		require.NoError(t, err)
+		informer := newSbuFakeInformer(fakeClient)
+		sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.Resource(bindingUsageGVR), informer, nil, "sbu-name")
+		require.NoError(t, err)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		// WHEN
+		err = sut.DeleteAllByUsageKind("prod", "deployment", "app")
+		// THEN
+		require.NoError(t, err)
+		_, err = fakeClient.Resource(bindingUsageGVR).Namespace(us1.Namespace).Get(us1.Name, v1.GetOptions{})
+		require.True(t, apierrors.IsNotFound(err))
+		_, err = fakeClient.Resource(bindingUsageGVR).Namespace(us2.Namespace).Get(us2.Name, v1.GetOptions{})
+		require.True(t, apierrors.IsNotFound(err))
+		_, err = fakeClient.Resource(bindingUsageGVR).Namespace(us3.Namespace).Get(us3.Name, v1.GetOptions{})
+		require.NoError(t, err)
+	})
 }
 
 func fixBindingUsage() *api.ServiceBindingUsage {

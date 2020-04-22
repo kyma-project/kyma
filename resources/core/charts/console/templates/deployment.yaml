@@ -31,7 +31,13 @@ spec:
         - name: console
           image: "{{ .Values.global.containerRegistry.path }}{{ .Values.console.image.dir }}/console:{{ .Values.console.image.tag }}"
           imagePullPolicy: {{ .Values.console.image.pullPolicy }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.console.statusPort }}
+            initialDelaySeconds: 10
           ports:
+            - containerPort: {{ .Values.console.statusPort }}
             - containerPort: {{ .Values.console.service.internalPort }}
           volumeMounts:
           - name: config
@@ -41,7 +47,13 @@ spec:
         - name: core-ui
           image: "{{ .Values.global.containerRegistry.path }}{{ .Values.core_ui.image.dir }}/core-ui:{{ .Values.core_ui.image.tag }}"
           imagePullPolicy: {{ .Values.core_ui.image.pullPolicy }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.core_ui.statusPort }}
+            initialDelaySeconds: 10
           ports:
+            - containerPort: {{ .Values.core_ui.statusPort }}
             - containerPort: {{ .Values.core_ui.service.internalPort }}
           volumeMounts:
             - name: config
@@ -51,7 +63,13 @@ spec:
         - name: compass-mfs
           image: "{{ .Values.global.containerRegistry.path }}{{ .Values.compass_mfs.image.dir }}/compass-ui:{{ .Values.compass_mfs.image.tag }}"
           imagePullPolicy: {{ .Values.compass_mfs.image.pullPolicy }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.compass_mfs.statusPort }}
+            initialDelaySeconds: 10
           ports:
+            - containerPort: {{ .Values.compass_mfs.statusPort }}
             - containerPort: {{ .Values.compass_mfs.service.internalPort }}
           volumeMounts:
           - name: config
