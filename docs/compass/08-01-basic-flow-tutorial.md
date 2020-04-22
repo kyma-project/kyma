@@ -62,7 +62,7 @@ For simplicity reasons, use the available Order Service as the sample external A
 
 Clean up your cluster after going through this tutorial. To do so, delete your resources in the following order:
 
-1. Go to the **Functions** tab and delete `call-order-service` function.
+1. Go to the **Functions** tab and delete the `call-order-service` function.
 
 2. Go to the **Services** tab and delete `order-service`.
 
