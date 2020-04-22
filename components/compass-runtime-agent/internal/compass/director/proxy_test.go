@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
 
 	"github.com/stretchr/testify/require"
 

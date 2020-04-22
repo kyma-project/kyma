@@ -4,8 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons/disabled"
+
+	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
@@ -43,6 +44,7 @@ func (r *serviceCatalogAddonsRetriever) ServiceBindingUsageConverter() shared.Gq
 //go:generate failery -name=ServiceBindingUsageLister -case=underscore -output disabled -outpkg disabled
 type ServiceBindingUsageLister interface {
 	ListByUsageKind(namespace, kind, resourceName string) ([]*bindingUsageApi.ServiceBindingUsage, error)
+	DeleteAllByUsageKind(namespace, kind, resourceName string) error
 }
 
 //go:generate failery -name=GqlServiceBindingUsageConverter -case=underscore -output disabled -outpkg disabled
@@ -149,6 +151,7 @@ type Resolver interface {
 	DeleteServiceBindingUsageMutation(ctx context.Context, serviceBindingUsageName, namespace string) (*gqlschema.DeleteServiceBindingUsageOutput, error)
 	DeleteServiceBindingUsagesMutation(ctx context.Context, serviceBindingUsageNames []string, namespace string) ([]*gqlschema.DeleteServiceBindingUsageOutput, error)
 	ServiceBindingUsageQuery(ctx context.Context, name, namespace string) (*gqlschema.ServiceBindingUsage, error)
+	ServiceBindingUsagesQuery(ctx context.Context, namespace string, resourceKind, resourceName *string) ([]gqlschema.ServiceBindingUsage, error)
 	ServiceBindingUsagesOfInstanceQuery(ctx context.Context, instanceName, env string) ([]gqlschema.ServiceBindingUsage, error)
 	ServiceBindingUsageEventSubscription(ctx context.Context, namespace string, resourceKind, resourceName *string) (<-chan gqlschema.ServiceBindingUsageEvent, error)
 

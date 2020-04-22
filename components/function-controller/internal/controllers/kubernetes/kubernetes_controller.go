@@ -53,8 +53,8 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 // Reconcile performs the reconciling for a single request object that can be used to fetch the configMap it represents from the cache
 // +kubebuilder:rbac:groups=core,resources=namespaces,verbs=get;list;watch
-// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;create;update;patch;delete
-// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;create;update;patch;delete
+// +kubebuilder:rbac:groups=core,resources=secrets;serviceaccounts;configmaps,verbs=get;list;watch;create;update;patch;delete
+
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	switch r.resourceType {
 	case NamespaceType:

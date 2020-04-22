@@ -34,41 +34,19 @@ global:
   namespace_controller:
     dir: develop/
     version: 8a10f0ed
-  kubeless_integration_tests:
-    dir:
-    version: 1c997836
-  kubeless_tests:
-    dir:
-    version: b2aa1331
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: "c8430e15"
+    version: "7943822c"
   console_backend_service_test:
     version: 145e3920
-  cluster_users_integration_tests:
-    dir:
-    version: 08e313d5
   xip_patch:
     dir:
     version: 0e322dac
   e2e_external_solution:
     dir:
-    version: d4a1c24a
-  kubeless_images:
-    runtime:
-      node6:
-        dir:
-        version: b2aa1331
-      node8:
-        dir:
-        version: b2aa1331
-    installation:
-      node6:
-        image: "kubeless/nodejs@sha256:4d8f5d6ad51676e8faffc0da6fabe8e12cf8cf34ae0ce8e94ee4e510f9876d2e"
-      node8:
-        image: "kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7"
+    version: "PR-7800"
   disableLegacyConnectivity: false
 
 tests:

@@ -1,0 +1,51 @@
+{{- /*
+  Taken from https://github.com/kiali/kiali-operator/tree/master/deploy
+  */ -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "kiali.name" . }}-operator
+  labels:
+    app: {{ template "kiali.name" . }}-operator
+    chart: {{ template "kiali.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "kiali.name" . }}-operator
+  template:
+    metadata:
+      name: {{ template "kiali.name" . }}-operator
+      labels:
+        app: {{ template "kiali.name" . }}-operator
+    spec:
+      serviceAccountName: {{ template "kiali.name" . }}-operator
+      containers:
+      - name: operator
+        image: "{{ .Values.kiali.operator.image.repository }}:{{ .Values.kiali.operator.image.tag }}"
+        imagePullPolicy: {{ .Values.kiali.operator.image.pullPolicy }}
+        volumeMounts:
+        - mountPath: /tmp/ansible-operator/runner
+          name: runner
+        env:
+        - name: WATCH_NAMESPACE
+          value: {{ .Release.Namespace }}
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: OPERATOR_NAME
+          value: "{{ template "kiali.name" . }}-operator"
+        - name: ANSIBLE_DEBUG_LOGS
+          value: "True"
+        resources:
+{{ toYaml .Values.kiali.operator.resources | indent 10 }}
+      volumes:
+      - name: runner
+        emptyDir: {}

@@ -20,6 +20,7 @@ type serviceBindingUsageOperations interface {
 	Delete(namespace string, name string) error
 	Find(namespace string, name string) (*api.ServiceBindingUsage, error)
 	ListForServiceInstance(namespace string, instanceName string) ([]*api.ServiceBindingUsage, error)
+	ListByUsageKind(namespace, resourceKind, resourceName string) ([]*api.ServiceBindingUsage, error)
 	Subscribe(listener resource.Listener)
 	Unsubscribe(listener resource.Listener)
 }
@@ -100,6 +101,30 @@ func (r *serviceBindingUsageResolver) ServiceBindingUsageQuery(ctx context.Conte
 				"while getting single %s [name: %s, namespace: %s]: while converting %s to QL representation", pretty.ServiceBindingUsage,
 				name, namespace, pretty.ServiceBindingUsage))
 		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+	return out, nil
+}
+
+func (r *serviceBindingUsageResolver) ServiceBindingUsagesQuery(ctx context.Context, namespace string, resourceKind, resourceName *string) ([]gqlschema.ServiceBindingUsage, error) {
+	var kind = ""
+	var resName = ""
+	if resourceKind != nil {
+		kind = *resourceKind
+	}
+	if resourceName != nil {
+		resName = *resourceName
+	}
+
+	usages, err := r.operations.ListByUsageKind(namespace, kind, resName)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while getting many %s [namespace: %s, usageKind: %s, resourceName: %s]", pretty.ServiceBindingUsage, namespace, kind, resName))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithNamespace(namespace), gqlerror.WithCustomArgument("kind", kind), gqlerror.WithCustomArgument("resourceName", resName))
+	}
+
+	out, err := r.converter.ToGQLs(usages)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting many %s [namespace: %s, usageKind: %s, resourceName: %s]", pretty.ServiceBindingUsages, namespace, kind, resName))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsages, gqlerror.WithNamespace(namespace), gqlerror.WithCustomArgument("kind", kind), gqlerror.WithCustomArgument("resourceName", resName))
 	}
 	return out, nil
 }

@@ -27,6 +27,7 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `helm-broker` | ✅ | ✅ |
 | `nats-streaming` | ✅ | ✅ |
 | `core` | ✅ | ✅ |
+| `cluster-users` | ✅ | ✅ |
 | `permission-controller` | ✅ | ✅ |
 | `apiserver-proxy` | ✅ | ✅ |
 | `iam-kubeconfig-service` | ✅ | ✅ |
@@ -39,7 +40,7 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `backup-init` | ✅ | ⛔️ |
 | `backup`  | ✅ | ⛔️ |
 | `logging` | ✅ | ⛔️ |
-| `jaeger` | ✅ | ⛔️ |
+| `tracing` | ✅ | ⛔️ |
 | `monitoring` | ✅ | ⛔️ |
 | `kiali` | ✅ | ⛔️ |
 | `compass` | ⛔️ | ⛔️ |

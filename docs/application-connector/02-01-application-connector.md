@@ -34,7 +34,7 @@ The system creates a new Kubernetes service for each registered API.
 ## Event Service
 
 The Event Service sends events to the Kyma Event Bus and enriches events with metadata that indicates the source of the event.
-This allows routing events to lambda functions and services based on their source Application.
+This allows routing events to functions and services based on their source Application.
 
 ## Application
 
@@ -56,7 +56,7 @@ The Application Operator (AO) can work in two modes. In the default legacy mode,
 
 ## Application Gateway
 
-The Application Gateway is an intermediary component between a lambda function or a service and an external API. The Application Gateway can work in [two modes](#architecture-application-connector-components-application-operator), legacy (default) or Compass (required for Runtimes with the Runtime Agent connected to Compass). In the legacy mode, the Application Gateway [proxies the requests](#architecture-application-gateway) based on the services registered with the Application Registry. In the alternative Compass mode, the Application Gateway [proxies the requests](#details-application-gateway-proxying-requests) from lambda functions and services in Kyma to external APIs based on the configuration stored in Secrets.  
+The Application Gateway is an intermediary component between a function or a service and an external API. The Application Gateway can work in [two modes](#architecture-application-connector-components-application-operator), legacy (default) or Compass (required for Runtimes with the Runtime Agent connected to Compass). In the legacy mode, the Application Gateway [proxies the requests](#architecture-application-gateway) based on the services registered with the Application Registry. In the alternative Compass mode, the Application Gateway [proxies the requests](#details-application-gateway-proxying-requests) from functions and services in Kyma to external APIs based on the configuration stored in Secrets.  
 
 The Application Gateway can call services which are not secured, or are secured with:
 
@@ -68,7 +68,7 @@ Additionally, the Application Gateway supports cross-site request forgery (CSRF)
 
 ## Access Service
 
-The Access Service exposes the Application Gateway and manages the access from the Lambda functions and services deployed in Kyma to the external APIs over the Application Gateway.
+The Access Service exposes the Application Gateway and manages the access from the functions and services deployed in Kyma to the external APIs over the Application Gateway.
 
 ## Rafter
 

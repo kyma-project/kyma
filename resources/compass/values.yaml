@@ -17,13 +17,13 @@ global:
       version: "2a54a16c"
     connectivity_adapter:
       dir:
-      version: "9fae2df7"
+      version: "8604d53a"
     pairing_adapter:
       dir:
       version: "9fae2df7"
     director:
       dir:
-      version: "a232fdab"
+      version: "c75aca63"
     gateway:
       dir:
       version: "9fae2df7"
@@ -32,10 +32,10 @@ global:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "0ac13cfb"
+      version: "3d62da15"
     provisioner:
       dir:
-      version: "c4dcfb72"
+      version: "3cc7c971"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -43,11 +43,11 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "89c662d3"
+      version: "3cc7c971"
     tests:
       director:
         dir:
-        version: "96671fab"
+        version: "8604d53a"
       connector:
         dir:
         version: "9cebaf5c"
@@ -90,7 +90,6 @@ global:
 
   tenantConfig:
     useDefaultTenants: true
-    useExternalTenants: false
     dbPool:
       maxOpenConnections: 1
       maxIdleConnections: 1

@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	cache "kyma-project.io/compass-runtime-agent/internal/compass/cache"
+	cache "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
 
 	mock "github.com/stretchr/testify/mock"
 )

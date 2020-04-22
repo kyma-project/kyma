@@ -134,18 +134,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: core-tests
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: core
-    kyma-project.io/installation: ""
-data:
-  kubeless.tests.enabled: "false"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: ory-overrides
   namespace: kyma-installer
   labels:
@@ -156,6 +144,21 @@ data:
   global.ory.hydra.persistence.enabled: "false"
   global.ory.hydra.persistence.postgresql.enabled: "false"
   hydra.hydra.autoMigrate: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tracing-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: tracing
+    kyma-project.io/installation: ""
+data:
+  jaeger.spec.strategy: "allInOne"
+  jaeger.spec.storage.type: "memory"
+  jaeger.spec.storage.options.memory.max-traces: "10000"
+  jaeger.spec.resources.limits.memory: "150Mi"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -180,3 +183,20 @@ data:
   prometheus.prometheusSpec.retentionSize: "500MB"
   prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: "1Gi"
   grafana.persistence.enabled: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: serverless-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: serverless
+    kyma-project.io/installation: ""
+data:
+  containers.manager.envs.buildRequestsCPU.value: "100m"
+  containers.manager.envs.buildRequestsMemory.value: "200Mi"
+  containers.manager.envs.buildLimitsCPU.value: "200m"
+  containers.manager.envs.buildLimitsMemory.value: "400Mi"
+  # TODO: Solve a problem with DNS
+  tests.enabled: "false"

@@ -65,7 +65,7 @@ To add a component that was not installed with Kyma by default, modify the Insta
     ```
 2. Add the new component to the list of components or remove the hash character (#) preceding these lines:
     ```
-    #- name: "jaeger"
+    #- name: "tracing"
     #  namespace: "kyma-system"
     ```
 3. Trigger the installation:

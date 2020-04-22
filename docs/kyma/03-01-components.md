@@ -25,7 +25,7 @@ The Application Connector is a proprietary Kyma solution. This endpoint is the K
 
 ## Event Bus
 
-Kyma Event Bus receives Events from external solutions and triggers the business logic created with lambda functions and services in Kyma. The Event Bus is based on the [NATS Streaming](https://nats.io/) open source messaging system for cloud-native applications.
+Kyma Event Bus receives Events from external solutions and triggers the business logic created with functions and services in Kyma. The Event Bus is based on the [NATS Streaming](https://nats.io/) open source messaging system for cloud-native applications.
 
 ## Service Mesh
 
@@ -33,7 +33,7 @@ The Service Mesh is an infrastructure layer that handles service-to-service comm
 
 ## Serverless
 
-The Kyma Serverless component allows you to reduce the implementation and operation effort of an application to the absolute minimum. Kyma Serverless provides a platform to run lightweight functions in a cost-efficient and scalable way using JavaScript and Node.js. Kyma Serverless is built on the [Kubeless](http://kubeless.io/) framework, which allows you to deploy lambda functions, and uses the [NATS](https://nats.io/) messaging system that monitors business events and triggers functions accordingly.
+The Serverless component allows you to reduce the implementation and operation effort of an application to the absolute minimum. Kyma Serverless provides a platform to run lightweight functions in a cost-efficient and scalable way using JavaScript and Node.js. Serverless in Kyma relies on [Knative Serving](https://knative.dev/docs/serving/) for deploying and managing functions and [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) for creating Docker images.
 
 ## Monitoring
 

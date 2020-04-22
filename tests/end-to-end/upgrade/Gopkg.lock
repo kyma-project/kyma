@@ -193,14 +193,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1ba1d79f2810270045c328ae5d674321db34e3aae468eb4233883b473c5c0467"
-  name = "github.com/golang/glog"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
-
-[[projects]]
-  branch = "master"
   digest = "1:b7cb6054d3dff43b38ad2e92492f220f57ae6087ee797dca298139776749ace8"
   name = "github.com/golang/groupcache"
   packages = ["lru"]
@@ -340,20 +332,6 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:fbaebcca308516382d20300b34dd080022c0321292ddf14631b53d8be9a8d9af"
-  name = "github.com/kubeless/kubeless"
-  packages = [
-    "pkg/apis/kubeless",
-    "pkg/apis/kubeless/v1beta1",
-    "pkg/client/clientset/versioned",
-    "pkg/client/clientset/versioned/scheme",
-    "pkg/client/clientset/versioned/typed/kubeless/v1beta1",
-  ]
-  pruneopts = "UT"
-  revision = "3460f03865f91ad15aa84b5de752efd2f01e1499"
-  version = "v1.0.5"
-
-[[projects]]
   digest = "1:9a250b328a9564739d21af7eae0e92b3a1277410b880db9efe29984c1835704a"
   name = "github.com/kubernetes-incubator/service-catalog"
   packages = [
@@ -388,7 +366,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:01a39bc93cf1dc9da1d3cb541373896dfe05b6946ccdb740ed2629e2c07d25ba"
+  digest = "1:cef90d1e31a6dc9907c91e08f8db89d2ee3dfcf2a50fb2dce7eaa4558c773229"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -396,11 +374,6 @@
     "common/microfrontend-client/pkg/client/clientset/versioned",
     "common/microfrontend-client/pkg/client/clientset/versioned/scheme",
     "common/microfrontend-client/pkg/client/clientset/versioned/typed/ui/v1alpha1",
-    "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
-    "components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/scheme",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
     "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
     "components/application-broker/pkg/client/clientset/versioned",
     "components/application-broker/pkg/client/clientset/versioned/scheme",
@@ -1347,17 +1320,12 @@
     "github.com/go-redis/redis",
     "github.com/gofrs/uuid",
     "github.com/google/go-cmp/cmp",
-    "github.com/google/uuid",
-    "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
-    "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kyma-incubator/api-gateway/api/v1alpha1",
     "github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned",
-    "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
-    "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
@@ -1381,7 +1349,6 @@
     "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
-    "k8s.io/apimachinery/pkg/api/resource",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
     "k8s.io/apimachinery/pkg/labels",
@@ -1396,6 +1363,7 @@
     "k8s.io/client-go/kubernetes/typed/apps/v1",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
+    "k8s.io/client-go/util/retry",
     "k8s.io/utils/pointer",
     "knative.dev/eventing/pkg/apis/eventing/v1alpha1",
     "knative.dev/eventing/pkg/apis/messaging/v1alpha1",

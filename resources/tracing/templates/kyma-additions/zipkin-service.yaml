@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: zipkin #zipkin service is required for istio and envoy since they use zipkin api for adding spans
+    labels:
+        app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+        app.kubernetes.io/component: zipkin 
+spec:
+    ports:
+    - name: jaeger-collector-zipkin
+      port: {{ .Values.jaeger.kyma.zipkinPort }}
+      targetPort: {{ .Values.jaeger.kyma.zipkinPort }}
+      protocol: TCP
+    clusterIP: None
+    selector:
+{{- if eq .Values.jaeger.spec.strategy "production" }}
+        app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-collector
+{{- else }}
+        app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger
+{{- end }}
+        app.kubernetes.io/instance: {{ template "jaeger-operator.fullname" . }}-jaeger 

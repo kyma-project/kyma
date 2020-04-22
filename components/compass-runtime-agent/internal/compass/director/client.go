@@ -2,11 +2,11 @@ package director
 
 import (
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
+	gql "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
+	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	gcli "github.com/machinebox/graphql"
 	"github.com/pkg/errors"
-	"kyma-project.io/compass-runtime-agent/internal/config"
-	gql "kyma-project.io/compass-runtime-agent/internal/graphql"
-	kymamodel "kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
 const (

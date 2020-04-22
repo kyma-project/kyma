@@ -3,9 +3,9 @@
 package fake
 
 import (
+	v1alpha1 "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
-	v1alpha1 "kyma-project.io/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
 )
 
 type FakeCompassV1alpha1 struct {

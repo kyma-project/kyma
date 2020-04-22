@@ -14,7 +14,7 @@ func TestUsageKindConverter_ToGQL(t *testing.T) {
 	// GIVEN
 	conv := servicecatalogaddons.NewUsageKindConverter()
 	name := "harry"
-	resourceRef := fixKubelessFunctionResourceReference()
+	resourceRef := fixDeploymentResourceReference()
 
 	// WHEN
 	result := conv.ToGQL(fixUsageKind(name, resourceRef))
@@ -37,14 +37,6 @@ func fixUsageKind(name string, resourceRef *v1alpha1.ResourceReference) *v1alpha
 			Resource:    resourceRef,
 			LabelsPath:  fixUsageKindLabelsPath(),
 		},
-	}
-}
-
-func fixKubelessFunctionResourceReference() *v1alpha1.ResourceReference {
-	return &v1alpha1.ResourceReference{
-		Group:   "kubeless.io",
-		Kind:    "function",
-		Version: "v1beta1",
 	}
 }
 
@@ -72,14 +64,6 @@ func fixUsageKindDisplayName() string {
 
 func fixUsageKindLabelsPath() string {
 	return "meta.data"
-}
-
-func fixResource(group, kind, version string) *v1alpha1.ResourceReference {
-	return &v1alpha1.ResourceReference{
-		Group:   group,
-		Kind:    kind,
-		Version: version,
-	}
 }
 
 func fixUsageKindResourceNamespace() string {

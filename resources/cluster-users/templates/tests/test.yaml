@@ -1,0 +1,92 @@
+{{- if .Values.tests.enabled }}
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}-tests
+    app.kubernetes.io/name: {{ .Chart.Name }}-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  disableConcurrency: false
+  template:
+    metadata:
+    spec:
+      {{- if .Values.global.isLocalEnv }}
+      hostNetwork: true
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+          - "configurations-generator.{{ .Values.global.ingress.domainName }}"
+          - "apiserver.{{ .Values.global.ingress.domainName }}"
+      {{- end }}
+      dnsPolicy: ClusterFirstWithHostNet
+      serviceAccount: {{ .Chart.Name }}-tests
+      containers:
+        - name: tests
+          image: {{ .Values.global.containerRegistry.path }}/cluster-users-integration-tests:{{ .Values.tests.image.version }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              sleep 10
+              ./sar-test.sh
+              exit_code=$?
+              curl -XPOST http://127.0.0.1:15020/quitquitquit
+              sleep 5
+              exit $exit_code
+          env:
+          - name: ADMIN_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: admin-user
+                key: email
+          - name: ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: admin-user
+                key: password
+          - name: DEVELOPER_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: test-developer-user
+                key: email
+          - name: DEVELOPER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: test-developer-user
+                key: password
+          - name: VIEW_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: test-read-only-user
+                key: email
+          - name: VIEW_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: test-read-only-user
+                key: password
+          - name: NAMESPACE_ADMIN_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: test-namespace-admin-user
+                key: email
+          - name: NAMESPACE_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: test-namespace-admin-user
+                key: password
+          - name: SYSTEM_NAMESPACE
+            value: kyma-system
+          - name: CUSTOM_NAMESPACE
+            value: "test-namespace-{{ randAlphaNum 5 | lower }}"
+          - name: NAMESPACE
+            value: {{ .Values.tests.env.namespace }}
+          - name: IAM_KUBECONFIG_SVC_FQDN
+            value: "https://configurations-generator.{{ .Values.global.ingress.domainName }}"
+      restartPolicy: Never
+{{- end }}
+{{- end }}

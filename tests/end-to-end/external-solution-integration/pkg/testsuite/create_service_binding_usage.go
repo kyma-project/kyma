@@ -69,7 +69,7 @@ func (s *CreateLambdaServiceBindingUsage) Run() error {
 				Name: s.serviceBindingName,
 			},
 			UsedBy: sbuv1alpha1.LocalReferenceByKindAndName{
-				Kind: "function",
+				Kind: "deployment",
 				Name: s.lambdaName,
 			},
 		},

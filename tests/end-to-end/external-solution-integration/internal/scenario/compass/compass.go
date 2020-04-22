@@ -36,7 +36,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		s.testID,
 	)
 
-	lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
+	lambdaEndpoint := helpers.InClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
 
 	return []step.Step{
 		step.Parallel(
@@ -53,7 +53,11 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, kymaClients.AppBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
-			testsuite.NewDeployLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort, kymaClients.KubelessClientset.KubelessV1beta1().Functions(s.testID), kymaClients.Pods, false),
+			testsuite.NewDeployFakeLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort,
+				kymaClients.CoreClientset.AppsV1().Deployments(s.testID),
+				kymaClients.CoreClientset.CoreV1().Services(s.testID),
+				kymaClients.CoreClientset.CoreV1().Pods(s.testID),
+				false),
 			testsuite.NewConnectApplicationUsingCompass(compassClients.ConnectorClient, compassClients.DirectorClient, state),
 		),
 		testsuite.NewCreateServiceInstance(s.testID, s.testID, state.GetServiceClassID, state.GetServicePlanID,

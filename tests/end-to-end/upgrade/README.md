@@ -35,6 +35,8 @@ Use the following environment variables to configure the application:
 | **APP_KUBECONFIG_PATH** | NO | None | A path to the `kubeconfig` file needed to run an application outside of the cluster. |
 | **APP_MAX_CONCURRENCY_LEVEL** | NO | `1` | A maximum concurrency level used for running tests. |
 | **APP_TESTING_ADDONS_URL** | YES | None | An external link to testing addons. |
+| **APP_WORKING_NAMESPACE** | No | `e2e-upgrade-test` | A Namespace in which the test is run. |
+| **APP_TESTS_INFO_CONFIG_MAP_NAME** | No | `upgrade-tests-info` | A name of a ConfigMap in which the upgrade test framework stores information about passed tests. |
 
 ### Use flags
 
@@ -97,13 +99,14 @@ Run the application without building a binary file. To do so:
 1. Prepare the upgrade data:
 
    ```bash
-   env APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug APP_TESTING_ADDONS_URL="https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml" go run main.go --action prepareData
+   kubectl create configmap tests-info -n kyma-system
+   env APP_WORKING_NAMESPACE=kyma-system APP_TESTS_INFO_CONFIG_MAP_NAME=tests-info APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug APP_TESTING_ADDONS_URL="https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml" go run main.go --action prepareData
    ```
 
 2. Run tests:
 
    ```bash
-   env APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug APP_TESTING_ADDONS_URL="https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml" go run main.go --action executeTests
+   env APP_WORKING_NAMESPACE=kyma-system APP_TESTS_INFO_CONFIG_MAP_NAME=tests-info APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug APP_TESTING_ADDONS_URL="https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml" go run main.go --action executeTests
    ```
 
 For the description of the available environment variables, see [this](#use-environment-variables) section.

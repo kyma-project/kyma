@@ -13,7 +13,7 @@ import (
 type Resource interface {
 	Create(context.Context, Object, Object) error
 	ListByLabel(context.Context, string, map[string]string, runtime.Object) error
-	DeleteAllByLabel(context.Context, Object, string, map[string]string) error
+	DeleteAllBySelector(context.Context, Object, string, apilabels.Selector) error
 }
 
 //go:generate mockery -name=Client -output=automock -outpkg=automock -case=underscore
@@ -57,12 +57,12 @@ func (r *resourceSvc) ListByLabel(ctx context.Context, namespace string, labels 
 	})
 }
 
-func (r *resourceSvc) DeleteAllByLabel(ctx context.Context, resourceType Object, namespace string, labels map[string]string) error {
-	propagationPolicy := metav1.DeletePropagationForeground
+func (r *resourceSvc) DeleteAllBySelector(ctx context.Context, resourceType Object, namespace string, selector apilabels.Selector) error {
+	propagationPolicy := metav1.DeletePropagationBackground
 
 	return r.client.DeleteAllOf(ctx, resourceType, &client.DeleteAllOfOptions{
 		ListOptions: client.ListOptions{
-			LabelSelector: apilabels.SelectorFromSet(labels),
+			LabelSelector: selector,
 			Namespace:     namespace,
 		},
 		DeleteOptions: client.DeleteOptions{

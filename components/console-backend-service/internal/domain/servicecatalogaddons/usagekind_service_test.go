@@ -25,9 +25,9 @@ import (
 func TestUsageKindService_List(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// GIVEN
-		kubelessRef := fixKubelessFunctionResourceReference()
-		usageKindA := fixUsageKind("fix-A", kubelessRef)
-		usageKindB := fixUsageKind("fix-B", kubelessRef)
+		resourceRef := fixDeploymentResourceReference()
+		usageKindA := fixUsageKind("fix-A", resourceRef)
+		usageKindB := fixUsageKind("fix-B", resourceRef)
 		usageKinds := []*sbu.UsageKind{
 			usageKindA,
 			usageKindB,
@@ -69,8 +69,8 @@ func TestUsageKindService_List(t *testing.T) {
 func TestUsageKindService_ListResources(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// GIVEN
-		kubelessRef := fixKubelessFunctionResourceReference()
-		usageKind := fixUsageKind("fix-A", kubelessRef)
+		resourceRef := fixDeploymentResourceReference()
+		usageKind := fixUsageKind("fix-A", resourceRef)
 
 		apiVersion := fmt.Sprintf("%s/%s", usageKind.Spec.Resource.Group, usageKind.Spec.Resource.Version)
 		existingFunction := newUnstructured(apiVersion, usageKind.Spec.Resource.Kind, "test", "test", []interface{}{})
@@ -121,12 +121,12 @@ func TestUsageKindService_ListResources(t *testing.T) {
 
 	t.Run("omitResourceByOwnerRefs", func(t *testing.T) {
 		// GIVEN
-		kubelessRef := fixKubelessFunctionResourceReference()
-		usageKindA := fixUsageKind("fix-A", kubelessRef)
-		kubelessOwnerRef := []interface{}{
+		resourceRef := fixDeploymentResourceReference()
+		usageKindA := fixUsageKind("fix-A", resourceRef)
+		resourceOwnerRef := []interface{}{
 			map[string]interface{}{
-				"apiVersion": fmt.Sprintf("%s/%s", kubelessRef.Group, kubelessRef.Version),
-				"kind":       kubelessRef.Kind,
+				"apiVersion": fmt.Sprintf("%s/%s", resourceRef.Group, resourceRef.Version),
+				"kind":       resourceRef.Kind,
 			},
 		}
 
@@ -136,7 +136,7 @@ func TestUsageKindService_ListResources(t *testing.T) {
 		apiVersion := fmt.Sprintf("%s/%s", usageKindA.Spec.Resource.Group, usageKindA.Spec.Resource.Version)
 		existingFunction := newUnstructured(apiVersion, usageKindA.Spec.Resource.Kind, "test", "test-A", []interface{}{})
 		apiVersion = fmt.Sprintf("%s/%s", usageKindB.Spec.Resource.Group, usageKindB.Spec.Resource.Version)
-		existingDeploymentA := newUnstructured(apiVersion, usageKindB.Spec.Resource.Kind, "test", "test-B", kubelessOwnerRef)
+		existingDeploymentA := newUnstructured(apiVersion, usageKindB.Spec.Resource.Kind, "test", "test-B", resourceOwnerRef)
 		existingDeploymentB := newUnstructured(apiVersion, usageKindB.Spec.Resource.Kind, "test", "test-C", []interface{}{})
 
 		client, err := newDynamicClient(usageKindA, usageKindB, existingFunction, existingDeploymentA, existingDeploymentB)
@@ -153,12 +153,14 @@ func TestUsageKindService_ListResources(t *testing.T) {
 		// THEN
 		for _, item := range result {
 			if item.Kind == usageKindA.Name {
-				require.Equal(t, len(item.Resources), 1)
+				require.Equal(t, len(item.Resources), 2)
 				require.Equal(t, item.Resources[0].Name, "test-A")
+				require.Equal(t, item.Resources[1].Name, "test-C")
 			}
 			if item.Kind == usageKindB.Name {
-				require.Equal(t, len(item.Resources), 1)
-				require.Equal(t, item.Resources[0].Name, "test-C")
+				require.Equal(t, len(item.Resources), 2)
+				require.Equal(t, item.Resources[0].Name, "test-A")
+				require.Equal(t, item.Resources[1].Name, "test-C")
 			}
 		}
 	})

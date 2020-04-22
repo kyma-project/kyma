@@ -3,9 +3,10 @@
 # Declare variables to be passed into your templates.
 replicaCount: 1
 console:
+  statusPort: 6080
   image:
-    dir:
-    tag: 8e8cdf66
+    dir: 
+    tag: e0a7165b
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -13,9 +14,10 @@ console:
     internalPort: 8080
 
 core_ui:
+  statusPort: 6081
   image:
     dir: 
-    tag: 60344ce4
+    tag: 5e58b7ff
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -23,9 +25,10 @@ core_ui:
     internalPort: 80
 
 compass_mfs:
+  statusPort: 6082
   image:
     dir:
-    tag: 60344ce4
+    tag: "49294757"
     pullPolicy: IfNotPresent
   service:
     name: nginx
