@@ -23,9 +23,9 @@ The Helm Broker is a Service Broker which runs in the Kyma cluster and deploys K
 
 The Application Connector is a proprietary Kyma solution. This endpoint is the Kyma side of the connection between Kyma and the external solutions. The Application Connector allows you to register the APIs and the Event Catalog, which lists all of the available events, of the connected solution. Additionally, the Application Connector proxies the calls from Kyma to external APIs in a secure way.
 
-## Event Bus
+## Knative Eventing Mesh
 
-Kyma Event Bus receives Events from external solutions and triggers the business logic created with functions and services in Kyma. The Event Bus is based on the [NATS Streaming](https://nats.io/) open source messaging system for cloud-native applications.
+Knative Eventing Mesh allows you to easily integrate external applications with Kyma. Under the hood, the Eventing Mesh implements [Knative Eventing](https://knative.dev/docs/eventing/) to ensure Kyma receives business events from external sources and is able to trigger business flows using functions or services.
 
 ## Service Mesh
 
