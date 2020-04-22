@@ -1,13 +1,10 @@
-apiVersion: kubeless.io/v1beta1
+apiVersion: serverless.kyma-project.io/v1alpha1
 kind: Function
 metadata:
   name: redis-client
   labels:
     example: service-binding
 spec:
-  handler: app.handler
-  runtime: nodejs8
-  type: HTTP
   deps: |
     {
       "name": "app",
@@ -16,7 +13,7 @@ spec:
         "async-redis":  "1.1.4"
       }
     }
-  function: |
+  source: |
       const asyncRedis = require("async-redis");
       
       module.exports = {
