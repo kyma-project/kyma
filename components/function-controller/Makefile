@@ -1,5 +1,5 @@
 PKG = github.com/kyma-project/kyma/components/function-controller
-
+ROOT :=  $(shell pwd)
 # Image URL to use all building/pushing image targets
 APP_NAME = function-controller
 APP_PATH = components/$(APP_NAME)
@@ -107,7 +107,7 @@ FUNCTION_BASE_NODEJS12_IMG_NAME=$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY
 
 .PHONY: build-function-base-image push-function-base-image
 build-function-base-image:
-	docker build -t $(FUNCTION_BASE_IMAGE_NODEJS12) -f ./deploy/function-base-image/nodejs12/Dockerfile .
+	docker build -t $(FUNCTION_BASE_IMAGE_NODEJS12) $(ROOT)/deploy/function-base-image/nodejs12/
 
 push-function-base-image:
 	docker tag $(FUNCTION_BASE_IMAGE_NODEJS12) $(FUNCTION_BASE_NODEJS12_IMG_NAME):$(DOCKER_TAG)
