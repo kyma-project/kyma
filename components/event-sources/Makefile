@@ -56,12 +56,12 @@ resolve_clean:
 licenses_clean:
 	rm -rf licenses
 
-build-local: $(cmds) test-local resolve-local ;
+build-local: $(cmds) test-local ;
 
 # Example:
 #   make controller-manager
 GOBUILD_FLAGS := -v
-$(cmds): %: $(patched_trace)
+$(cmds): %: resolve-local $(patched_trace)
 	@echo "+ Building $*"
 	@CGO_ENABLED=0 go build -o $* \
 		$(GOBUILD_FLAGS) \
