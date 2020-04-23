@@ -18,6 +18,7 @@ broker:
   password: ""
   # serving health probes routes on statusPort
   statusPort: "8071"
+  defaultRequestRegion: "cf-eu10"
 
 service:
   type: ClusterIP
