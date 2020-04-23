@@ -87,7 +87,7 @@ containers:
       imagePullSecretName:
         value: "{{ template \"fullname\" . }}-registry-credentials"
       imagePullAccountName:
-        value: "{{ template \"fullname\" . }}"
+        value: "{{ template \"fullname\" . }}-controller-manager"
       functionRequeueDuration:
         value: 1m
       functionBuildExecutorImage:
