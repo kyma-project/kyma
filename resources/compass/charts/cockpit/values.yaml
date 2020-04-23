@@ -2,22 +2,18 @@ images:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   ui:
-    dir: 
-    version: "49294757"
-
+    dir: null
+    version: 9cee1c52
 statusPort: 6082
-
 ui:
   host: compass
 mf:
   host: compass-mf
-
 service:
   externalPort: 81
   internalPort: 81
   mfExternalPort: 8888
   mfInternalPort: 8888
-
 deployment:
   image:
     pullPolicy: IfNotPresent
