@@ -181,6 +181,9 @@ backendModule:
 clusterMicroFrontend:
   enabled: true
 
+grafanaDashboard:
+  enabled: true
+
 docker-registry:
   enabled: true
   fullnameOverride: "serverless-docker-registry"
