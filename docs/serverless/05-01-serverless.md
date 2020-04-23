@@ -13,7 +13,7 @@ To configure the Serverless chart, override the default values of its `values.ya
 
 This table lists the configurable parameters, their descriptions, and default values for both cluster and local installations.
 
->**CAUTION:** Currently, there is no automated validation for CPU and memory requests and limits. If you update their default values, make sure that the values for CPU and memory requests are not lower than the default ones, and that values for requests are lower than those for the limits.
+>**CAUTION:** Currently, there is no automated validation for CPU and memory requests and limits. If you update their default values, make sure that the values for CPU and memory requests are not lower than the default ones, and that values for requests are lower than or equal to those for the limits.
 
 >**NOTE:** You can define all **envs** either by providing them as inline values or using the **valueFrom** object. See [this](https://github.com/kyma-project/rafter/tree/master/charts/rafter-controller-manager#change-values-for-envs-parameters) document for reference.
 
