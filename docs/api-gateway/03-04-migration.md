@@ -13,7 +13,8 @@ During migration, it may turn out that some resource specifications are too comp
 >**NOTE:** If the migration process skipped the Api resources due to the invalid status or a blacklisted label, migration is not possible.
 
 Here are the steps you need to follow to ensure your services are properly migrated:
-1. [Verify the migration outcome](#verify-automatic-migration). 
+
+1. [Verify the migration outcome](#verify-the-automatic-migration). 
 2. If you can still see any Api CRs in use, use the [manual migration](#manual-migration) guide to migrate them.
 
 ## Verify the automatic migration
@@ -36,7 +37,7 @@ Follow these steps to verify if all Api CRs were migrated to APIRule CRs.
 
 This guide shows how you can manually migrate Api CRs to APIRule CRs.
 
->**NOTE:** Before you start the manual migration process, see the [Api CR](https://kyma-project.io/docs/1.11/components/api-gateway#custom-resource-api-sample-custom-resource) and [APIRule CR](/components/api-gateway-v2#custom-resource-api-rule) documents for the custom resource detailed definition.
+>**NOTE:** Before you start the manual migration process, see the [Api CR](https://kyma-project.io/docs/1.11/components/api-gateway#custom-resource-api-sample-custom-resource) and [APIRule CR](/components/api-gateway#custom-resource-api-rule) documents for the custom resource detailed definition.
 
 Follow these steps:
 
@@ -48,7 +49,7 @@ Follow these steps:
 
 2. Create an APIRule CR based on the Api CR's specification.
 
->**NOTE:** Do not copy the [**status**](/components/api-gateway-v2#custom-resource-api-rule-additional-information) parameter from the original Api CR.
+>**NOTE:** Do not copy the [**status**](/components/api-gateway#custom-resource-api-rule-additional-information) parameter from the original Api CR.
 
 | Parameter | Action  |
 |-----------|---------|

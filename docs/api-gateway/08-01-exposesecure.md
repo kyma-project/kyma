@@ -161,7 +161,7 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
 1. Create a function using the [supplied code](./assets/function.yaml):
 
   ```shell
-  kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/api-gateway-v2/assets/function.yaml
+  kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/api-gateway/assets/function.yaml
   ```
 
 2. Expose the function and secure it by creating an APIRule CR:
