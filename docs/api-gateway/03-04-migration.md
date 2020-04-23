@@ -163,7 +163,7 @@ If the same **excludedPaths** element is present throughout the authentication s
     kubectl edit apirule {APIRULE_NAME} -n {NAMESPACE}
     ```
 
-After saving that configuration, the service should be available on the original hostname.
+  After saving that configuration, the service should be available on the original hostname.
 
 7. Remove the Api CR:
 
