@@ -17,7 +17,7 @@ core_ui:
   statusPort: 6081
   image:
     dir: 
-    tag: 5e58b7ff
+    tag: e49443b2
     pullPolicy: IfNotPresent
   service:
     name: nginx
