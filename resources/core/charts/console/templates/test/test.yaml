@@ -39,7 +39,7 @@ spec:
           serviceAccountName: {{ .Chart.Name }}-tests
           containers:
             - name: tests
-              image: {{ .Values.global.containerRegistry.path }}{{ .Values.global.ui_acceptance_tests.dir }}/ui-tests:{{ .Values.global.ui_acceptance_tests.version }}
+              image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.ui_acceptance_tests.dir }}ui-tests:{{ .Values.global.ui_acceptance_tests.version }}
               imagePullPolicy: IfNotPresent
               resources:
                  requests:
