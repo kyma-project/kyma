@@ -6,6 +6,8 @@ type: Details
 
 The migration from Api to APIRule custom resources (CRs) is performed automatically by a job that runs during the Kyma upgrade. During this process, the [API Gateway Migrator tool](https://github.com/kyma-project/kyma/blob/master/components/api-gateway-migrator/README.md#api-gateway-migrator) translates the existing Api CRs to APIRule CRs and deletes original resources.
 
+**CAUTION:** Migrating resources may result in a temporary downtime of the exposed service. 
+
 During migration, it may turn out that some resource specifications are too complex or fail to meet all the migration requirements. In such a case the process skips them but doesn't break the way existing services are exposed. However, if you want to introduce further changes or remove the Api CR, your actions won't have any effect on how the service is exposed because it will still use the original configuration.  
 
 >**NOTE:** If the migration process skipped the Api resources due to the invalid status or a blacklisted label, migration is not possible.
