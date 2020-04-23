@@ -26,3 +26,5 @@ require (
 	knative.dev/serving v0.12.1
 	sigs.k8s.io/controller-runtime v0.5.1
 )
+
+replace gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.2.8

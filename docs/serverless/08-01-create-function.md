@@ -62,13 +62,13 @@ Follows these steps:
 
 1. Create a Namespace or select one from the drop-down list in the top navigation panel.
 
-2. Go to the **Functions** view in the left navigation panel and select **Create function**.
+2. Go to the **Functions** view in the left navigation panel and select **Create Function**.
 
 3. In the pop-up box, provide the function's name and select **Create** to confirm changes.
 
-     The pop-up box closes and the message appears on the screen confirming that the function was created successfully.
+     The pop-up box closes and the message appears on the screen after a while, confirming that the function was created successfully.
 
-4. In the function details view that opens up automatically, go to the **Code** tab and enter the function's code:
+4. In the function details view that opens up automatically, enter the function's code in the **Source** tab:
 
     ```
     module.exports = {

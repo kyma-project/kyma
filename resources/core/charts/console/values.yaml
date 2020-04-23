@@ -5,8 +5,8 @@ replicaCount: 1
 console:
   statusPort: 6080
   image:
-    dir:
-    tag: "49294757"
+    dir: 
+    tag: e0a7165b
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -17,7 +17,7 @@ core_ui:
   statusPort: 6081
   image:
     dir: 
-    tag: "477b7708"
+    tag: 5e58b7ff
     pullPolicy: IfNotPresent
   service:
     name: nginx

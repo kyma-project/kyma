@@ -13,6 +13,8 @@ gardener:
   project: "" # Gardener project connected to SA
   kubeconfigPath: "/gardener/kubeconfig/kubeconfig"
   kubeconfig: "" # Base64 encoded Gardener SA key
+  auditLogTenantConfigPath: "" # "/gardener/tenant/config"
+  auditLogTenantConfigMapName: ""
   secretName: "gardener-credentials"
   auditLogsPolicyConfigMap: ""
   manageSecrets: true
@@ -26,7 +28,7 @@ kymaRelease:
     enabled: true
 
 installation:
-  timeout: 1h15m
+  timeout: 24h
 
 runtimeAgent:
   configurationTimeout: 1h

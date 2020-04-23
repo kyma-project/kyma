@@ -3,10 +3,10 @@
 package v1alpha1
 
 import (
+	v1alpha1 "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
-	v1alpha1 "kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 )
 
 // CompassConnectionLister helps list CompassConnections.

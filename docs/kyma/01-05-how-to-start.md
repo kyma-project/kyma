@@ -24,4 +24,6 @@ Read, learn, and try on your own to:
 - [Bind a Service Instance to a function](/components/serverless/#tutorials-bind-a-service-instance-to-a-function)
 - [Trigger a function with events](/components/serverless/#tutorials-trigger-a-function-with-an-event)
 - [Call a registered external service from Kyma](/components/application-connector#tutorials-call-a-registered-external-service-from-kyma)
-- [Expose custom metrics in Kyma](/components/monitoring#tutorials-expose-custom-metrics-in-kyma)
+- [Expose custom metrics in Kyma](/components/monitoring#tutorials-observe-application-metrics)
+- [Create a Grafana dashboard](/components/monitoring#tutorials-create-a-grafana-dashboard)
+- [Define alerting rules](/components/monitoring#tutorials-define-alerting-rules)

@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"time"
 
-	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/connector"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
 	"github.com/pkg/errors"
-	"kyma-project.io/compass-runtime-agent/internal/compass/connector"
-	"kyma-project.io/compass-runtime-agent/internal/compass/director"
-	"kyma-project.io/compass-runtime-agent/internal/config"
-	"kyma-project.io/compass-runtime-agent/internal/graphql"
 )
 
 //go:generate mockery -name=ClientsProvider
