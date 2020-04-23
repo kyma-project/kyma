@@ -176,7 +176,7 @@ secret:
   externalRegistry: "registry.{{ .Values.global.ingress.domainName -}}"
 
 backendModule:
-  enable: true
+  enabled: true
 
 clusterMicroFrontend:
   enabled: true

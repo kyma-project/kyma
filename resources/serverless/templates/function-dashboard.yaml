@@ -1,12 +1,13 @@
+{{- if .Values.metrics.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: lambda-dashboard
+  name: function-dashboard
   labels:
     grafana_dashboard: "1"
     app: monitoring-grafana
 data:
-  lambda-dashboard.json: |-
+  function-dashboard.json: |-
     {
       "annotations": {
         "list": [
@@ -1107,3 +1108,4 @@ data:
       "uid": "opc3b8Tyik",
       "version": 1
     }
+{{- end }}
