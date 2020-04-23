@@ -83,7 +83,7 @@ containers:
       namespaceRequeueDuration:
         value: 1m
       namespaceExcludedNames:
-        value: "istio-system;knative-eventing;knative-serving;kube-node-lease;kube-public;kube-system;kyma-installer;kyma-integration;kyma-system;natss"
+        value: "istio-system,knative-eventing,knative-serving,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss"
       imagePullSecretName:
         value: "{{ template \"fullname\" . }}-registry-credentials"
       imagePullAccountName:
