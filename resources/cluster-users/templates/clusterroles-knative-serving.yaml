@@ -1,56 +1,56 @@
 ---
-# View access to rafter resources
+# View access to knative serving resources
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: kyma-rafter-view
+  name: kyma-knative-serving-view
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    rbac.authorization.kyma-project.io/aggregate-to-kyma-rafter-view: "true"
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-view: "true"
   annotations:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-{{ toYaml .Values.clusterRoles.apiGroups.rafter | indent 4 }}
+{{ toYaml .Values.clusterRoles.apiGroups.knativeServing | indent 4 }}
   resources:
     - "*"
   verbs:
 {{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
 ---
-# Admin access to rafter resources
+# Admin access to knative serving resources
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: kyma-rafter-admin
+  name: kyma-knative-serving-admin
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    rbac.authorization.kyma-project.io/aggregate-to-kyma-rafter-admin: "true"
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-admin: "true"
   annotations:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-{{ toYaml .Values.clusterRoles.apiGroups.rafter | indent 4 }}
+{{ toYaml .Values.clusterRoles.apiGroups.knativeServing | indent 4 }}
   resources:
     - "*"
   verbs:
     - "*"
 ---
-# Edit access to rafter resources
+# Edit access to knative serving resources
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: kyma-rafter-edit
+  name: kyma-knative-serving-edit
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    rbac.authorization.kyma-project.io/aggregate-to-kyma-rafter-edit: "true"
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-edit: "true"
   annotations:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-{{ toYaml .Values.clusterRoles.apiGroups.rafter | indent 4 }}
+{{ toYaml .Values.clusterRoles.apiGroups.knativeServing | indent 4 }}
   resources:
     - "*"
   verbs:
