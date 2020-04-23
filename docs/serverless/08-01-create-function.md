@@ -22,6 +22,8 @@ Follows these steps:
     export NAMESPACE={FUNCTION_NAMESPACE}
     ```
 
+    > **CAUTION:** If you create a new Namespace, do not disable sidecar injection in it as Serverless requires Istio for other resources to communicate with functions correctly. Also, if you apply custom [LimitRanges](https://kyma-project.io/docs/#details-resource-quotas) for a new Namespace, they must be higher than the default values.
+
 2. Create a Function CR that specifies the function's logic:
 
     ```yaml
@@ -61,6 +63,8 @@ Follows these steps:
     </summary>
 
 1. Create a Namespace or select one from the drop-down list in the top navigation panel.
+
+    > **CAUTION:** If you create a new Namespace, do not disable sidecar injection in it as Serverless requires Istio for other resources to communicate with functions correctly. Also, if you apply custom [LimitRanges](https://kyma-project.io/docs/#details-resource-quotas) for a new Namespace, they must be higher than the default values.
 
 2. Go to the **Functions** view in the left navigation panel and select **Create Function**.
 
