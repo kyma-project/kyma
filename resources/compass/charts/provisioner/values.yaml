@@ -1,4 +1,5 @@
 deployment:
+  replicaCount: 1
   image:
     pullPolicy: IfNotPresent
   securityContext: # Set on container level
