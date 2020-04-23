@@ -13,7 +13,7 @@ For a function to be considered ready, the status of all three conditions must b
 
 ```bash
 NAME                        CONFIGURED   BUILT   RUNNING   VERSION   AGE
-test-function                 True         True    True      1         18m
+test-function               True         True    True      1         18m
 ```
 
 When you update an existing function, conditions change asynchronously depending on the change type.  
