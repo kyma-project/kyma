@@ -24,7 +24,7 @@ GOBIN=$(shell go env GOBIN)
 endif
 
 verify:: mod-verify
-release: build-function-base-image push-function-base-image
+release: build-function-runtime-image push-function-runtime-image
 
 
 resolve-local:
@@ -102,18 +102,18 @@ endif
 path-to-referenced-charts:
 	@echo "resources/serverless"
 
-######## function base image
+######## function runtime image
 
-FUNCTION_BASE_IMAGE_NODEJS12 = function-base-nodejs12
-FUNCTION_BASE_NODEJS12_IMG_NAME=$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(FUNCTION_BASE_IMAGE_NODEJS12)
+FUNCTION_RUNTIME_IMAGE_NODEJS12 = function-runtime-nodejs12
+FUNCTION_RUNTIME_NODEJS12_IMG_NAME=$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(FUNCTION_RUNTIME_IMAGE_NODEJS12)
 
-.PHONY: build-function-base-image push-function-base-image
-build-function-base-image:
-	docker build -t $(FUNCTION_BASE_IMAGE_NODEJS12) $(ROOT)/deploy/function-base-image/nodejs12/
+.PHONY: build-function-runtime-image push-function-runtime-image
+build-function-runtime-image:
+	docker build -t $(FUNCTION_RUNTIME_IMAGE_NODEJS12) $(ROOT)/deploy/function-runtime-image/nodejs12/
 
 push-function-base-image:
-	docker tag $(FUNCTION_BASE_IMAGE_NODEJS12) $(FUNCTION_BASE_NODEJS12_IMG_NAME):$(DOCKER_TAG)
-	docker push $(FUNCTION_BASE_NODEJS12_IMG_NAME):$(DOCKER_TAG)
+	docker tag $(FUNCTION_RUNTIME_IMAGE_NODEJS12) $(FUNCTION_RUNTIME_NODEJS12_IMG_NAME):$(DOCKER_TAG)
+	docker push $(FUNCTION_RUNTIME_NODEJS12_IMG_NAME):$(DOCKER_TAG)
 
 $(eval $(call buildpack-mount,resolve))
 $(eval $(call buildpack-mount,mod-verify))

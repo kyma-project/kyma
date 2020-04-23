@@ -9,7 +9,7 @@ metadata:
     serverless.kyma-project.io/runtime: nodejs12
 data:
   Dockerfile: |-
-    FROM {{ .Values.images.functionBaseNodejs12.repository}}:{{ .Values.images.functionBaseNodejs12.tag }}
+    FROM {{ .Values.images.functionRuntimeNodejs12.repository}}:{{ .Values.images.functionRuntimeNodejs12.tag }}
     USER root
     RUN export KUBELESS_INSTALL_VOLUME='/kubeless' && \
         mkdir /kubeless && \

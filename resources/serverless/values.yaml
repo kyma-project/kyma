@@ -45,8 +45,8 @@ images:
     repository: gcr.io/kubebuilder/kube-rbac-proxy
     tag: v0.4.1
     pullPolicy: IfNotPresent
-  functionBaseNodejs12:
-    repository: "eu.gcr.io/kyma-project/function-base-nodejs12"
+  functionRuntimeNodejs12:
+    repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
     tag: "PR-8159"  
 
 deployment:
