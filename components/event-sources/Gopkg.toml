@@ -9,6 +9,11 @@ required = [
 [prune]
   go-tests = true
 
+# Due to Security Issue
+[[override]]
+  name = "golang.org/x/crypto"
+  revision = "b7391e95e576cacdcdd422573063bc057239113d"
+
 # Direct dependencies
 [[constraint]]
   name = "knative.dev/serving"
