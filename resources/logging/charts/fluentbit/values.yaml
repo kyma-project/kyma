@@ -324,3 +324,15 @@ tolerations:
 
 # Pod affinity constraint
 affinity: {}
+
+# Defines an entry to add an external service to the service mesh
+# By default, the fluent-bit daemon will be part of the service-mesh (having istio sidecar injection enabled). In some cases the sidecar doesn't allow access to external services through https using none standard ports (not 443 or 8443)
+# A typical error message will look like 'routines:ssl3_get_record:wrong version number'. In such cases, add an entry for the external service like below
+#externalServiceEntry:
+#  hosts:
+#  - my.example.host.dns
+#  ports:
+#    - number: 8081
+#      name: https
+#      protocol: TLS
+#  resolution: DNS
