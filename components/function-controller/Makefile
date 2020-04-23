@@ -23,7 +23,9 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-verify:: mod-verify build-function-base-image push-function-base-image
+verify:: mod-verify
+release:: build-function-base-image push-function-base-image
+
 
 resolve-local:
 	GO111MODULE=on go mod download
