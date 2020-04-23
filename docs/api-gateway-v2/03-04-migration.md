@@ -34,7 +34,7 @@ Follow these steps to verify if all Api CRs were migrated to APIRule CRs.
 
 This guide shows how you can manually migrate Api CRs to APIRule CRs.
 
->**NOTE:** Before you start the manual migration process, see the [Api CR](/components/api-gateway/#custom-resource-api-sample-custom-resource) and [APIRule CR](/components/api-gateway-v2#custom-resource-api-rule) documents for the custom resource detailed definition.
+>**NOTE:** Before you start the manual migration process, see the [Api CR](https://kyma-project.io/docs/1.11/components/api-gateway#custom-resource-api-sample-custom-resource) and [APIRule CR](/components/api-gateway-v2#custom-resource-api-rule) documents for the custom resource detailed definition.
 
 Follow these steps:
 
@@ -46,20 +46,46 @@ Follow these steps:
 
 2. Create an APIRule CR based on the Api CR's specification.
 
->**NOTE:** Do not copy the [**status**](components/api-gateway-v2#custom-resource-api-rule-additional-information) parameter from the original Api CR.
+>**NOTE:** Do not copy the [**status**](/components/api-gateway-v2#custom-resource-api-rule-additional-information) parameter from the original Api CR.
 
 | Parameter | Action  |
 |-----------|---------|
 | **metadata.name**| Specify the name of the API Rule.| 
-| **spec.gateway**| Replace the default value (`kyma-gateway.kyma-system.svc.cluster.local`) with Istio Gateway used to expose services.|
+| **spec.gateway**| Use `kyma-gateway.kyma-system.svc.cluster.local` which is the default Istio Gateway used to expose services.|
 | **spec.service.name**| Copy the value of the corresponding parameter of the Api CR.|
 | **spec.service.port**| Copy the value of the corresponding parameter of the Api CR.|
 | **spec.service.host**| Set the value for **service.host** parameter to any temporary value which includes the domain. For example, if the value for the **hostname** parameter of the Api CR was set to `sample-service.kyma.local`, change it to `temp-sample-service.kyma.local` so that differs from the original value. Make sure other services on your cluster do not use this hostname. |
-| **spec.rules**| The **spec.rules** parameter allows you to provide authentication by defining a list of paths along with the authentication methods. The way of handling authentication differs for Api CR and APIRule CR. Consider the section below as a point of reference when defining this part of specification.|
+| **spec.rules**| The **spec.rules** parameter allows you to provide authentication by defining a list of paths along with the authentication methods. The way of handling authentication differs for Api CR and APIRule CR. Consider the section below as a point of reference when defining this part of the resource.|  
 
-Use the **spec.rules** parameter to specify the authentication type per path and use a regular expression to match every path, a subset of possible paths, or a single one.  
+See the examples of an Api and APIRule CRs to understand how the configuration settings map from one to another.
 
-See the example:
+```yaml
+authentication:
+- type: JWT
+  jwt:
+    issuer: https://dex.kyma.local
+    jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+    triggerRule:
+      excludedPaths:
+      - exact: /exact/path/to/resource.jpg
+      - exact: /no/auth/needed/resource.html
+- type: JWT
+  jwt:
+    issuer: https://auth.kyma.local
+    jwksUri: http://auth-service.kyma-system.svc.cluster.local:5556/keys
+    triggerRule:
+      excludedPaths:
+      - prefix: /pref/
+      - exact: /no/auth/needed/resource.html
+```
+In this configuration, to access:
+
+* The `/exact/path/to/resource.jpg` path, you need a token issued by `https://auth.kyma.local`.
+* Any path starting with `/pref/` you need a token issued by `https://dex.kyma.local`.
+* The `/no/auth/needed/resource.html` you don't need any token because the path is excluded for both configurations.
+* All other paths you need a token from one of the issuers.
+
+The APIRule CR corresponding to this example would look as follows:
 
 ```yaml
 rules:
@@ -99,11 +125,11 @@ rules:
 ```
 >**NOTE:** Path definitions in the APIRule CR cannot overlap, otherwise the requests to such paths are rejected. 
 
-The **spec.rules** parameter corresponds to **spec.authentication** defined in the Api CR where you can specify a [list multiple JWT token issuers](https://kyma-project.io/docs/components/api-gateway/#details-security-specify-multiple-jwt-token-issuers) to allow secured access and use the **triggerRule.excludedPaths** parameter to exclude paths that don't require any authentication. 
+The **spec.rules** parameter corresponds to **spec.authentication** parameter set in the Api CR where you can specify a [list multiple JWT token issuers](https://kyma-project.io/docs/1.11/components/api-gateway/#details-security-specify-multiple-jwt-token-issuers) to allow secured access and use the **triggerRule.excludedPaths** parameter to exclude paths that don't require any authentication. 
 
-If you want to exclude paths in APIRule definition, for example to avoid two different configurations for a single path, you can use a regular expression with a negative lookahead. In the example, such an expression is used to in the last path exclude the paths already handled by other configuration settings from the `/.*` path. 
+If you want to exclude paths in the APIRule CR definition, for example to avoid two different configurations for a single path, you can use a regular expression with a negative lookahead. In the example, such an expression is used in the last path to exclude the paths already handled by other configuration settings from the `/.*` path. 
 
-Use this table to learn how the APIRule CR's path values correspond to the [**triggerRule.excludedPaths**](/components/api-gateway/#details-security-specify-service-resource-paths-not-secured-with-jwt-authentication) values for the Api CR, and what negative lookahead value you should add to the `/.*` path when defining your APIRule CR.
+Use this table to learn how the APIRule CR's path values correspond to the [**triggerRule.excludedPaths**](https://kyma-project.io/docs/1.11/components/api-gateway/#details-security-specify-service-resource-paths-not-secured-with-jwt-authentication) values for the Api CR, and what negative lookahead value you should add to the `/.*` path when defining your APIRule CR.
 
 | Expression type | Description | Sample value | Path value | Negative lookahead value |
 |---|---|---|---|---|
@@ -116,14 +142,13 @@ If the same **excludedPaths** element is present throughout the authentication s
  
 3. When the configuration is ready, create the APIRule object and test if the service is working as expected on the new host. It should work the same on both hosts.
 
-4. Remove the dependent resources of the Api CR:
+4. Remove the VirtualService resource and make sure it is deleted before proceeding:
 
    ```shell script
      kubectl delete virtualservice {API_NAME} -n {NAMESPACE}
     ```
-Make sure that the Virtual Service resource is deleted before proceeding.
 
-5. If the Api CR was secured with an authentication mechanism, delete the Policy resource:
+5. If the Api CR was secured with an authentication mechanism, remove the Policy resource:
 
     ```shell script
      kubectl delete policy {API_NAME} -n {NAMESPACE}
