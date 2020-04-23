@@ -11,6 +11,6 @@ roleRef:
   name: {{ template "fullname" . }}-auth-proxy
 subjects:
 - kind: ServiceAccount
-  name: {{ template "fullname" . }}
+  name: {{ template "fullname" . }}-controller-manager
   namespace: {{ .Release.Namespace }}
 {{- end }}
