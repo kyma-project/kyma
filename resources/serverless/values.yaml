@@ -47,7 +47,7 @@ images:
     pullPolicy: IfNotPresent
   functionRuntimeNodejs12:
     repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-    tag: "PR-8159"  
+    tag: "a62f4a7f"  
 
 deployment:
   replicas: 1
