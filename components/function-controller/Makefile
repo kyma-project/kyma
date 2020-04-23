@@ -111,7 +111,7 @@ FUNCTION_RUNTIME_NODEJS12_IMG_NAME=$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECT
 build-function-runtime-image:
 	docker build -t $(FUNCTION_RUNTIME_IMAGE_NODEJS12) $(ROOT)/deploy/function-runtime-image/nodejs12/
 
-push-function-base-image:
+push-function-runtime-image:
 	docker tag $(FUNCTION_RUNTIME_IMAGE_NODEJS12) $(FUNCTION_RUNTIME_NODEJS12_IMG_NAME):$(DOCKER_TAG)
 	docker push $(FUNCTION_RUNTIME_NODEJS12_IMG_NAME):$(DOCKER_TAG)
 
