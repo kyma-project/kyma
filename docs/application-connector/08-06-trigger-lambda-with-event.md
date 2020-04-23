@@ -98,7 +98,7 @@ To create a simple function and trigger it with an event, you must first registe
 
    ```bash
    cat <<EOF | kubectl apply -f -
-	 apiVersion: serverless.kyma-project.io/v1alpha1
+   apiVersion: serverless.kyma-project.io/v1alpha1
    kind: Function
    metadata:
      name: my-events-function

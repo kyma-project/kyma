@@ -56,7 +56,7 @@ This guide shows how to call a registered external service from Kyma using a sim
 
    ```bash
    cat <<EOF | kubectl apply -f -
-	 apiVersion: serverless.kyma-project.io/v1alpha1
+   apiVersion: serverless.kyma-project.io/v1alpha1
    kind: Function
    metadata:
      name: my-function
