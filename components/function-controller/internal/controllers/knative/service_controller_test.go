@@ -5,19 +5,20 @@ import (
 	"fmt"
 	"strconv"
 	"testing"
-	"time"
 
 	"github.com/onsi/ginkgo"
 	gm "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/tools/record"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
-
-const timeout = time.Second * 15
 
 func Test_getNewestGeneration(t *testing.T) {
 	type args struct {
@@ -134,23 +135,39 @@ func TestFunctionReconciler_getOldRevisionSelector(t *testing.T) {
 }
 
 var _ = ginkgo.Describe("KService controller", func() {
-	ctx := context.TODO()
-	srvName := "test-service"
-	ns := SetupTest(ctx)
-	numberOfRevisions := 5
+	var (
+		reconciler        *ServiceReconciler
+		request           ctrl.Request
+		ctx               = context.TODO()
+		srvName           = "test-service"
+		numberOfRevisions = 5
+		namespace         = "serverless"
+	)
+
+	ginkgo.BeforeEach(func() {
+		reconciler = NewServiceReconciler(k8sClient, log.Log, config, scheme.Scheme, record.NewFakeRecorder(100))
+		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: namespace, Name: srvName}}
+	})
 
 	ginkgo.It("should cleanup old revisions, leaving newest one", func() {
 		ginkgo.By("Creating test resources")
-		srv := fixKservice(srvName, ns.Name)
+		srv := fixKservice(srvName, namespace)
 		err := k8sClient.Create(ctx, &srv)
 		gm.Expect(err).NotTo(gm.HaveOccurred(), "failed to create test KService resource")
 
-		revisionList := fixRevisionList(srvName, ns.Name, numberOfRevisions)
-		for _, rev := range revisionList {
+		for _, rev := range fixRevisionList(srvName, namespace, numberOfRevisions) {
 			pinnedRev := rev // pin
-			gm.Expect(k8sClient.Create(context.TODO(), &pinnedRev)).NotTo(gm.HaveOccurred())
-			gm.Expect(k8sClient.Status().Update(context.TODO(), &pinnedRev)).NotTo(gm.HaveOccurred())
+			gm.Expect(k8sClient.Create(ctx, &pinnedRev)).NotTo(gm.HaveOccurred())
+			gm.Expect(k8sClient.Status().Update(ctx, &pinnedRev)).NotTo(gm.HaveOccurred())
 		}
+
+		ginkgo.By("should skip reconcile on service creation")
+		_, err = reconciler.Reconcile(request)
+		gm.Expect(err).NotTo(gm.HaveOccurred())
+
+		initialRevList := &servingv1.RevisionList{}
+		err = reconciler.resourceClient.ListByLabel(ctx, srv.GetNamespace(), map[string]string{serviceLabelKey: srv.GetName()}, initialRevList)
+		gm.Expect(initialRevList.Items).To(gm.HaveLen(numberOfRevisions))
 
 		ginkgo.By("Update service to be ready")
 		srv.Status.Status.Conditions = duckv1.Conditions{{
@@ -158,23 +175,19 @@ var _ = ginkgo.Describe("KService controller", func() {
 			Status: corev1.ConditionTrue,
 		}}
 
-		gm.Expect(k8sClient.Update(context.TODO(), &srv)).Should(gm.Succeed())
-		gm.Expect(k8sClient.Status().Update(context.TODO(), &srv)).Should(gm.Succeed())
+		gm.Expect(k8sClient.Update(ctx, &srv)).Should(gm.Succeed())
+		gm.Expect(k8sClient.Status().Update(ctx, &srv)).Should(gm.Succeed())
 
 		ginkgo.By("waiting for controller to delete excess revisions")
-		revList := servingv1.RevisionList{}
-		gm.Eventually(func() int {
-			_ = k8sClient.List(ctx, &revList, &client.ListOptions{
-				LabelSelector: labels.SelectorFromSet(map[string]string{
-					serviceLabelKey: srvName,
-				}),
-				Namespace: ns.Name,
-			})
-			return len(revList.Items)
-		}, 5*time.Second, 500*time.Millisecond).Should(gm.Equal(1))
+		_, err = reconciler.Reconcile(request)
+		gm.Expect(err).NotTo(gm.HaveOccurred())
+
+		newRevisionList := &servingv1.RevisionList{}
+		err = reconciler.resourceClient.ListByLabel(ctx, srv.GetNamespace(), map[string]string{serviceLabelKey: srv.GetName()}, newRevisionList)
+		gm.Expect(newRevisionList.Items).To(gm.HaveLen(1))
 
 		ginkgo.By("verify that the only revision left is the correct one")
-		cfgLabelValue, ok := revList.Items[0].Labels[cfgGenerationLabel]
+		cfgLabelValue, ok := newRevisionList.Items[0].Labels[cfgGenerationLabel]
 		gm.Expect(ok).To(gm.BeTrue())
 		gm.Expect(cfgLabelValue).To(gm.Equal(strconv.Itoa(numberOfRevisions)))
 	})
@@ -189,10 +202,9 @@ func fixRevisionList(parentSvcName, namespace string, num int) []servingv1.Revis
 				Name:      fmt.Sprintf("test-revision-%d", i+1),
 				Labels: map[string]string{
 					serviceLabelKey:    parentSvcName,
-					cfgGenerationLabel: strconv.Itoa(i + 1),
+					cfgGenerationLabel: strconv.Itoa(i + 1), // just like in real revision
 				},
 			},
-			Spec: servingv1.RevisionSpec{},
 		}
 
 		revList = append(revList, revision)
@@ -205,17 +217,6 @@ func fixKservice(name, namespace string) servingv1.Service {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
-			Labels:    nil,
-		},
-		Spec: servingv1.ServiceSpec{
-			ConfigurationSpec: servingv1.ConfigurationSpec{
-				Template: servingv1.RevisionTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{},
-					Spec: servingv1.RevisionSpec{
-						PodSpec: corev1.PodSpec{},
-					},
-				},
-			},
 		},
 	}
 }
