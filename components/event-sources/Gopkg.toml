@@ -8,37 +8,41 @@ required = [
 
 [prune]
   go-tests = true
-  unused-packages = true
 
 # Direct dependencies
 [[constraint]]
-  name = "knative.dev/pkg"
-  branch = "release-0.10"
-[[constraint]]
   name = "knative.dev/serving"
-  version = "v0.10.0"
+  branch = "release-0.12"
+[[constraint]]
+  name = "knative.dev/pkg"
+  branch = "release-0.12"
+[[constraint]]
+  name = "knative.dev/eventing"
+  branch = "release-0.12"
+[[constraint]]
+  name = "github.com/cloudevents/sdk-go"
+  version  = "0.11.0"
 
 [[constraint]]
   name = "istio.io/client-go"
-  version = "1.4.3"
+  version = "1.4.6"
 [[constraint]]
   name = "istio.io/api"
-  version = "1.4.3"
+  version = "1.4.6"
 
 # Transitive dependencies of knative.dev/pkg
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.9"
 [[override]]
   name = "k8s.io/apiextensions-apiserver"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.9"
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.9"
 [[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.9"
 [[override]]
   name = "k8s.io/code-generator"
-  version = "kubernetes-1.15.3"
-
+  version = "kubernetes-1.16.9"
