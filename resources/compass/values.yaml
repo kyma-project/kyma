@@ -23,7 +23,7 @@ global:
       version: "9fae2df7"
     director:
       dir:
-      version: "c75aca63"
+      version: "22072888"
     gateway:
       dir:
       version: "9fae2df7"
@@ -43,7 +43,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "3cc7c971"
+      version: "ddae913f"
     tests:
       director:
         dir:

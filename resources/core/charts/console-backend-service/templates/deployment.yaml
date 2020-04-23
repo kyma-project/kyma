@@ -57,15 +57,9 @@ spec:
           - name: APP_SYSTEM_NAMESPACES
             value: {{ .Values.systemNamespaces }}
           - name: APP_RAFTER_ADDRESS
-            valueFrom:
-              configMapKeyRef:
-                name: rafter-minio-envs
-                key: APP_UPLOAD_ENDPOINT_WITH_PORT
+            value: "rafter-minio.kyma-system.svc.cluster.local:9000"
           - name: APP_RAFTER_SECURE
-            valueFrom:
-              configMapKeyRef:
-                name: rafter-minio-envs
-                key: APP_UPLOAD_SECURE
+            value: "false"
           - name: APP_RAFTER_VERIFY_SSL
             value: "{{ .Values.verifySSL }}"
           - name: APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE

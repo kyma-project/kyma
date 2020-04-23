@@ -1,20 +1,11 @@
-apiVersion: kubeless.io/v1beta1
+apiVersion: serverless.kyma-project.io/v1alpha1
 kind: Function
 metadata:
+  name: call-order-service
   labels:
     app: call-order-service
-  name: call-order-service
+    orderservice: "true"
 spec:
-  deployment:
-    spec:
-      replicas: 1
-      template:
-        metadata:
-          labels:
-            orderservice: "true"
-        spec:
-          containers:
-          - name: call-order-service
   deps: |
           {
             "name": "test",
@@ -23,7 +14,7 @@ spec:
                 "axios":  "*"
             }
           }
-  function: |
+  source: |
             const axios = require("axios");
             module.exports = {
               main: async (event, context) => {
@@ -91,8 +82,5 @@ spec:
                 return await action();
               }
             }
-
-  function-content-type: text
-  handler: handler.main
-  runtime: nodejs8
-  topic: http
+  minReplicas: 1
+  maxReplicas: 1

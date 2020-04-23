@@ -33,6 +33,9 @@ data:
 {{- if .Values.conf.Output.Elasticsearch.enabled }}
     @INCLUDE output-elasticsearch.conf
 {{- end }}
+{{- if .Values.conf.Filter.record_modifier.enabled }}
+    @INCLUDE filter-record-modifier.conf
+{{- end }}
 {{- if .Values.conf.Output.loki.enabled }}
     @INCLUDE output-loki.conf
     @INCLUDE input-kubernetes-loki.conf
@@ -46,6 +49,7 @@ data:
 {{- if .Values.conf.extra }}
     @INCLUDE extra.conf
 {{- end }}
+
 
   input-kubernetes.conf: |
     [INPUT]
@@ -104,14 +108,23 @@ data:
   filter-kubernetes.conf: |
     [FILTER]
         Name                kubernetes
-        Match               *
+        Match               {{ .Values.conf.Filter.Kubernetes.Match }}
         Kube_URL            https://kubernetes.default.svc:443
         Merge_Log           {{ .Values.conf.Filter.Kubernetes.Merge_Log }}
+        Keep_Log            {{ .Values.conf.Filter.Kubernetes.Keep_Log }}
         Merge_Log_Key       {{ .Values.conf.Filter.Kubernetes.Merge_Log_Key }}
         K8S-Logging.Parser  On
         K8S-Logging.Exclude On
 {{- if .Values.conf.Filter.custom_parser.enabled }}
         regex_parser        {{ .Values.conf.Filter.custom_parser.name }}
+{{- end }}
+
+{{- if .Values.conf.Filter.record_modifier.enabled }}
+  filter-record-modifier.conf: |
+    [FILTER]
+            Name record_modifier
+            Match {{ .Values.conf.Filter.record_modifier.Match }}
+            Record {{ .Values.conf.Filter.record_modifier.Key }} {{ .Values.conf.Filter.record_modifier.Value }}
 {{- end }}
 
 {{- if .Values.conf.Output.Elasticsearch.enabled }}
@@ -219,4 +232,9 @@ data:
 
   labelmap.json: |-
     {{- .Values.conf.Output.loki.config.labelMap | toPrettyJson | nindent 4}}
+{{- end }}
+
+{{- if .Values.conf.script }}
+  script.lua:
+{{- toYaml .Values.conf.script | indent 2 }}
 {{- end }}

@@ -174,6 +174,11 @@ spec:
                 secretKeyRef:
                   key: groupId
                   name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_PARENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: parentId
+                  name: {{ .Values.avs.parentId }}
             - name: APP_KYMA_VERSION
               value: {{ .Values.kymaVersion }}
             - name: APP_ENABLE_ON_DEMAND_VERSION
@@ -184,6 +189,8 @@ spec:
               value: {{ .Values.gardener.project }}
             - name: APP_GARDENER_KUBECONFIG_PATH
               value: {{ .Values.gardener.kubeconfigPath }}
+            - name: APP_DEFAULT_REQUEST_REGION
+              value: "{{ .Values.broker.defaultRequestRegion }}"
           ports:
             - name: http
               containerPort: {{ .Values.broker.port }}

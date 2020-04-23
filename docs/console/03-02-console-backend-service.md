@@ -20,9 +20,10 @@ These are the available Console Backend Service pluggable modules which contain 
 - `apigateway` relates to the API Gateway.
 - `authentication` relates to IDP Presets.
 - `application` relates to the Application Connector.
-- `kubeless` relates to Serverless.
+- `serverless` relates to Serverless.
+- `eventing` relates to Knative Eventing.
 - `rafter` relates to Rafter.
-- `servicecatalog` relates to the Service Catalog, including Service Classes, Service Instances, and Service Bindings.
+- `servicecatalog` relates to the Service Catalog, including ServiceClasses, ServiceInstances, and ServiceBindings.
 - `servicecatalogaddons` relates to the Service Catalog add-ons, such as ServiceBindingUsage, and UsageKinds.
 - `grafana` relates to Grafana.
 - `loki` relates to Loki.

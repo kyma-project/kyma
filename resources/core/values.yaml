@@ -46,7 +46,7 @@ global:
     version: 0e322dac
   e2e_external_solution:
     dir:
-    version: "PR-7800"
+    version: "PR-8141"
   disableLegacyConnectivity: false
 
 tests:

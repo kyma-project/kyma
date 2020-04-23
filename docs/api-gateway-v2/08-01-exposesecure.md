@@ -158,10 +158,10 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
   Secure a function
   </summary>
 
-1. Create a function using the [supplied code](./assets/lambda.yaml):
+1. Create a function using the [supplied code](./assets/function.yaml):
 
   ```shell
-  kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/api-gateway-v2/assets/lambda.yaml
+  kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/api-gateway-v2/assets/function.yaml
   ```
 
 2. Expose the function and secure it by creating an APIRule CR:
@@ -171,15 +171,15 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
   apiVersion: gateway.kyma-project.io/v1alpha1
   kind: APIRule
   metadata:
-    name: lambda
+    name: function
   spec:
     gateway: kyma-gateway.kyma-system.svc.cluster.local
     service:
-      name: lambda
-      port: 8080
-      host: lambda-example.$DOMAIN
+      name: function
+      port: 80
+      host: function-example.$DOMAIN
     rules:
-      - path: /lambda
+      - path: /function
         methods: ["GET"]
         accessStrategies:
           - handler: oauth2_introspection
@@ -188,7 +188,7 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
   EOF
   ```
 
->**NOTE:** If you are running Kyma on Minikube, add `lambda-example.kyma.local` to the entry with Minikube IP in your system's `/etc/hosts` file.
+>**NOTE:** If you are running Kyma on Minikube, add `function-example.kyma.local` to the entry with Minikube IP in your system's `/etc/hosts` file.
 
 The exposed function requires all `GET` requests to have a valid token with the "read" scope.
 
