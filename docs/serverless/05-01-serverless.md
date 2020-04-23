@@ -15,7 +15,7 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value | Minikube override |
 |-----------|-------------|---------------|---------------|
-| **containers.manager.envs.buildRequestsCPU** | Specifies the number of CPUs requested by the image building Pod to operate. | `700m` | `100m`|
-| **containers.manager.envs.buildRequestsMemory** | Specifies the amount of memory requested by the image building Pod to operate.  | `700Mi` | `200Mi` |
-| **containers.manager.envs.buildLimitsCPU** | Specifies the maximum number of CPUs available for the image building Pod to use. | `1100m` | `200m` |
-| **containers.manager.envs.buildLimitsMemory** | Specifies the maximum amount of memory available for the image building Pod to use. | `1100Mi` | `400Mi` |
+| **containers.manager.envs.buildRequestsCPU** | Number of CPUs requested by the image-building Pod to operate. | `700m` | `100m`|
+| **containers.manager.envs.buildRequestsMemory** | Amount of memory requested by the image-building Pod to operate.  | `700Mi` | `200Mi` |
+| **containers.manager.envs.buildLimitsCPU** | Maximum number of CPUs available for the image-building Pod to use. | `1100m` | `200m` |
+| **containers.manager.envs.buildLimitsMemory** | Maximum amount of memory available for the image-building Pod to use. | `1100Mi` | `400Mi` |
