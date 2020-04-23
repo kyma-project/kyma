@@ -154,7 +154,7 @@ func setupLogrus(logFile string, formatter logrus.Formatter) (*logrus.Logger, fu
 		return nil, nil, err
 	}
 	logger.SetOutput(file)
-	if logFile == STDOUT { //if the output file is /dev/stdout, we should not return a function to close the file
+	if logFile == STDOUT {
 		return logger, func(ch <-chan struct{}) {}, nil
 	}
 
