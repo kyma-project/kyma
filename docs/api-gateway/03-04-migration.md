@@ -14,8 +14,8 @@ During migration, it may turn out that some resource specifications are too comp
 
 Here are the steps you need to follow to ensure your services are properly migrated:
 
-1. [Verify the migration outcome](#verify-the-automatic-migration). 
-2. If you can still see any Api CRs in use, use the [manual migration](#manual-migration) guide to migrate them.
+1. [Verify the migration outcome](#details-migration-from-api-to-api-rule-custom-resources-verify-the-automatic-migration). 
+2. If you can still see any Api CRs in use, use the [manual migration](#details-migration-from-api-to-api-rule-custom-resources-manual-migration) guide to migrate them.
 
 ## Verify the automatic migration
 
