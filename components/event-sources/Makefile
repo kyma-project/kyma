@@ -14,25 +14,17 @@
 
 APP_NAME = event-sources
 APP_PATH = components/event-sources
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.12
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200423-925aa858
 SCRIPTS_DIR = ../../common/makefiles
 
 # COMPONENT_DIR is a local path to component
 include $(SCRIPTS_DIR)/generic-make-go.mk
-
-# generate goal that runs 'all-local' inside a container
-$(eval $(call buildpack-mount,all))
-
-verify:: all
-
 
 #########
 #       #
 #  Dev  #
 #       #
 #########
-
-.DEFAULT_GOAL := all-local
 
 PKG := github.com/kyma-project/kyma/components/event-sources
 
@@ -44,33 +36,36 @@ patched_trace := vendor/go.opencensus.io/trace/trace.go.patched
 cmds := $(foreach dir,$(wildcard cmd/*),$(notdir $(dir)))
 # produce goals to build images for each cmd program ("bin1.image bin2.image ...")
 cmds_images = $(foreach cmd,$(cmds),$(cmd).image)
+cmds_clean = $(foreach cmd,$(cmds),$(cmd).clean)
 # produce goals to push images for each cmd program ("bin1.image.push bin2.image.push ...")
 cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 
+MOUNT_TARGETS = $(cmds)
+$(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
+
 
 .PHONY: clean
+clean: $(cmds_clean) resolve_clean licenses_clean
 
-all-local: clean $(cmds)
+$(cmds_clean): %.clean:
+	rm -f $*
+
+resolve_clean:
+	rm -rf vendor
+
+licenses_clean:
+	rm -rf licenses
+
+build-local: $(cmds) test-local resolve-local ;
 
 # Example:
 #   make controller-manager
 GOBUILD_FLAGS := -v
-http-adapter: $(patched_trace)
-$(cmds): vendor
-	@echo "+ Building $@"
-	@CGO_ENABLED=0 go build -o $@ \
+$(cmds): %: $(patched_trace)
+	@echo "+ Building $*"
+	@CGO_ENABLED=0 go build -o $* \
 		$(GOBUILD_FLAGS) \
-		$(PKG)/cmd/$@
-
-clean:
-	@echo "+ Cleaning"
-	rm -rf bin/
-	rm -f $(cmds)
-	@go clean -x -i $(PKG)/cmd/...
-
-vendor: Gopkg.lock
-	@echo '+ Pulling vendored dependencies'
-	@dep ensure -v --vendor-only
+		$(PKG)/cmd/$*
 
 # https://stackoverflow.com/a/13517811/4716370
 $(patched_trace): hack/set-span-id.patch vendor
@@ -80,26 +75,17 @@ $(patched_trace): hack/set-span-id.patch vendor
 	cp $< $@
 
 
-.PHONY: test
-
-GOTEST_FLAGS := -cover
-test-local: vendor $(patched_trace)
-	@echo "+ Performing unit tests"
-	$(eval testpkgs := $(shell go list -test -f '{{ if .TestGoFiles }}{{ .ForTest }}{{end}}' ./... ))
-	@go test \
-		$(GOTEST_FLAGS) \
-		$(testpkgs)
-
+test-local: $(patched_trace)
 
 .PHONY: $(cmds_images) $(cmds_images_push)
 
 # override image goals from common Makefile because we need to build several images
-build-image: ;
+build-image: $(patched_trace) $(cmds_images) ;
 push-image: $(cmds_images_push) ;
 
 # Example:
 #   make controller-manager.image
-$(cmds_images): %.image: %
+$(cmds_images): %.image: pull-licenses 
 	$(eval $@_img_name := $(APP_NAME)-$*)
 	@echo "+ Building container image $($@_img_name)"
 	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .
