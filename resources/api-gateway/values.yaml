@@ -12,7 +12,7 @@ apiMigratorJob:
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
-  tag: PR-95
+  tag: "978664da"
   # Image pull policy
   pullPolicy: IfNotPresent
 
