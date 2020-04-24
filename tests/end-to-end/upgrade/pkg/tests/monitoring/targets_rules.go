@@ -41,18 +41,15 @@ func NewTargetsAndRulesTest(k8sCli kubernetes.Interface) TargetsAndRulesTest {
 // CreateResources checks that all targets and rules are healthy before upgrade
 func (t TargetsAndRulesTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("checking that monitoring pods are ready")
-	err := t.testPodsAreReady()
-	if err != nil {
+	if err := t.testPodsAreReady(); err != nil {
 		return err
 	}
 	log.Println("checking that all targets are healthy before upgrade")
-	err = t.testTargetsAreHealthy()
-	if err != nil {
+	if err := t.testTargetsAreHealthy(); err != nil {
 		return err
 	}
 	log.Println("checking that all rules are healthy before upgrade")
-	err = t.testRulesAreHealthy()
-	if err != nil {
+	if err := t.testRulesAreHealthy(); err != nil {
 		return err
 	}
 	return nil
@@ -61,18 +58,15 @@ func (t TargetsAndRulesTest) CreateResources(stop <-chan struct{}, log logrus.Fi
 // CreateResources checks that all targets and rules are healthy after upgrade
 func (t TargetsAndRulesTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("checking that monitoring pods are ready")
-	err := t.testPodsAreReady()
-	if err != nil {
+	if err := t.testPodsAreReady(); err != nil {
 		return err
 	}
 	log.Println("checking that all targets are healthy after upgrade")
-	err = t.testTargetsAreHealthy()
-	if err != nil {
+	if err := t.testTargetsAreHealthy(); err != nil {
 		return err
 	}
 	log.Println("checking that all rules are healthy after upgrade")
-	err = t.testRulesAreHealthy()
-	if err != nil {
+	if err := t.testRulesAreHealthy(); err != nil {
 		return err
 	}
 	return nil
@@ -172,8 +166,7 @@ func (t TargetsAndRulesTest) testTargetsAreHealthy() error {
 			if err != nil {
 				return errors.Wrap(err, "cannot query targets")
 			}
-			err = json.Unmarshal([]byte(respBody), &resp)
-			if err != nil {
+			if err := json.Unmarshal([]byte(respBody), &resp); err != nil {
 				return errors.Wrapf(err, "error unmarshalling response. Response body: %s", respBody)
 			}
 			if statusCode != 200 || resp.Status != "success" {
@@ -212,8 +205,7 @@ func (t TargetsAndRulesTest) testRulesAreHealthy() error {
 			if err != nil {
 				return errors.Wrap(err, "cannot query rules")
 			}
-			err = json.Unmarshal([]byte(respBody), &resp)
-			if err != nil {
+			if err := json.Unmarshal([]byte(respBody), &resp); err != nil {
 				return errors.Wrapf(err, "error unmarshalling response. Response body: %s", respBody)
 			}
 			if statusCode != 200 || resp.Status != "success" {
