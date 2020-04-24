@@ -37,10 +37,8 @@ spec:
             - --jwks-uri={{ .Values.config.jwksURI }}
             - --service-blacklist={{ include "api-gateway.serviceBlackList" . | trimAll "," }}
             - --generated-objects-labels={{ .Values.config.generatedObjects.labels }}
-            {{- with .Values.global.ingress.domainName }}
-            - --domain-whitelist={{ . | join ", " }}
-            - --default-domain-name={{ . | join ", " }}
-            {{- end }}
+            - --domain-whitelist={{ include "api-gateway.domainWhiteList" . }}
+            - --default-domain-name={{ include "api-gateway.defaultDomain" . }}
             {{- with .Values.config.cors.allowOrigin }}
             - --cors-allow-origin={{ . | join ", " }}
             {{- end }}
