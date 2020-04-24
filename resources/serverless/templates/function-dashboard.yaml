@@ -608,7 +608,7 @@ data:
             {
               "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_revision\"}[2m])) by (destination_service, response_code)",
               "interval": "",
-              "legendFormat": "{{response_code}}",
+              "legendFormat": "{{"{{"}}response_code}}",
               "refId": "A"
             }
           ],
@@ -806,13 +806,13 @@ data:
             {
               "expr": "sum by(pod) (container_memory_usage_bytes{namespace=\"$namespace\", pod=~\"$function_revision.*\", container=\"$function_container\"})",
               "interval": "",
-              "legendFormat": "Current {{pod}}",
+              "legendFormat": "Current {{"{{"}}pod}}",
               "refId": "A"
             },
             {
               "expr": "sum by(pod) (kube_pod_container_resource_limits{namespace=\"$namespace\", resource=\"memory\", pod=~\"$function_revision.*\", container=\"$function_container\"})",
               "interval": "",
-              "legendFormat": "Limit {{pod}}",
+              "legendFormat": "Limit {{"{{"}}pod}}",
               "refId": "B"
             }
           ],
@@ -903,13 +903,13 @@ data:
               "expr": "rate(container_cpu_usage_seconds_total{container=\"$function_container\", pod=~\"$function_revision.*\", namespace=\"$namespace\"}[2m])",
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "Current {{pod}}",
+              "legendFormat": "Current {{"{{"}}pod}}",
               "refId": "A"
             },
             {
               "expr": "sum by(pod) (kube_pod_container_resource_limits{namespace=\"$namespace\", resource=\"cpu\", pod=~\"$function_revision.*\", container=\"$function_container\"})",
               "interval": "",
-              "legendFormat": "Limit {{pod}}",
+              "legendFormat": "Limit {{"{{"}}pod}}",
               "refId": "B"
             }
           ],
