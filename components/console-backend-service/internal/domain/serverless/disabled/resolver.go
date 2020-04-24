@@ -27,8 +27,8 @@ func (_m *Resolver) CreateFunction(ctx context.Context, name string, namespace s
 	return r0, r1
 }
 
-// DeleteFunction provides a failing mock function with given fields: ctx, function
-func (_m *Resolver) DeleteFunction(ctx context.Context, function gqlschema.FunctionMetadataInput) (*gqlschema.FunctionMetadata, error) {
+// DeleteFunction provides a failing mock function with given fields: ctx, namespace, function
+func (_m *Resolver) DeleteFunction(ctx context.Context, namespace string, function gqlschema.FunctionMetadataInput) (*gqlschema.FunctionMetadata, error) {
 	var r0 *gqlschema.FunctionMetadata
 	var r1 error
 	r1 = _m.err
@@ -36,8 +36,8 @@ func (_m *Resolver) DeleteFunction(ctx context.Context, function gqlschema.Funct
 	return r0, r1
 }
 
-// DeleteManyFunctions provides a failing mock function with given fields: ctx, functions
-func (_m *Resolver) DeleteManyFunctions(ctx context.Context, functions []gqlschema.FunctionMetadataInput) ([]gqlschema.FunctionMetadata, error) {
+// DeleteManyFunctions provides a failing mock function with given fields: ctx, namespace, functions
+func (_m *Resolver) DeleteManyFunctions(ctx context.Context, namespace string, functions []gqlschema.FunctionMetadataInput) ([]gqlschema.FunctionMetadata, error) {
 	var r0 []gqlschema.FunctionMetadata
 	var r1 error
 	r1 = _m.err

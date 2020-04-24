@@ -430,28 +430,28 @@ func (r *mutationResolver) UpdateFunction(ctx context.Context, name string, name
 	return r.serverless.Resolver.UpdateFunction(ctx, name, namespace, params)
 }
 
-func (r *mutationResolver) DeleteFunction(ctx context.Context, function gqlschema.FunctionMetadataInput) (*gqlschema.FunctionMetadata, error) {
-	return r.serverless.Resolver.DeleteFunction(ctx, function)
+func (r *mutationResolver) DeleteFunction(ctx context.Context, namespace string, function gqlschema.FunctionMetadataInput) (*gqlschema.FunctionMetadata, error) {
+	return r.serverless.Resolver.DeleteFunction(ctx, namespace, function)
 }
 
-func (r *mutationResolver) DeleteManyFunctions(ctx context.Context, functions []gqlschema.FunctionMetadataInput) ([]gqlschema.FunctionMetadata, error) {
-	return r.serverless.Resolver.DeleteManyFunctions(ctx, functions)
+func (r *mutationResolver) DeleteManyFunctions(ctx context.Context, namespace string, functions []gqlschema.FunctionMetadataInput) ([]gqlschema.FunctionMetadata, error) {
+	return r.serverless.Resolver.DeleteManyFunctions(ctx, namespace, functions)
 }
 
-func (r *mutationResolver) CreateTrigger(ctx context.Context, trigger gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) (*gqlschema.Trigger, error) {
-	return r.eventing.CreateTrigger(ctx, trigger, ownerRef)
+func (r *mutationResolver) CreateTrigger(ctx context.Context, namespace string, trigger gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) (*gqlschema.Trigger, error) {
+	return r.eventing.CreateTrigger(ctx, namespace, trigger, ownerRef)
 }
 
-func (r *mutationResolver) CreateManyTriggers(ctx context.Context, triggers []gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) ([]gqlschema.Trigger, error) {
-	return r.eventing.CreateManyTriggers(ctx, triggers, ownerRef)
+func (r *mutationResolver) CreateManyTriggers(ctx context.Context, namespace string, triggers []gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) ([]gqlschema.Trigger, error) {
+	return r.eventing.CreateManyTriggers(ctx, namespace, triggers, ownerRef)
 }
 
-func (r *mutationResolver) DeleteTrigger(ctx context.Context, trigger gqlschema.TriggerMetadataInput) (*gqlschema.TriggerMetadata, error) {
-	return r.eventing.DeleteTrigger(ctx, trigger)
+func (r *mutationResolver) DeleteTrigger(ctx context.Context, namespace string, trigger gqlschema.TriggerMetadataInput) (*gqlschema.TriggerMetadata, error) {
+	return r.eventing.DeleteTrigger(ctx, namespace, trigger)
 }
 
-func (r *mutationResolver) DeleteManyTriggers(ctx context.Context, triggers []gqlschema.TriggerMetadataInput) ([]gqlschema.TriggerMetadata, error) {
-	return r.eventing.DeleteManyTriggers(ctx, triggers)
+func (r *mutationResolver) DeleteManyTriggers(ctx context.Context, namespace string, triggers []gqlschema.TriggerMetadataInput) ([]gqlschema.TriggerMetadata, error) {
+	return r.eventing.DeleteManyTriggers(ctx, namespace, triggers)
 }
 
 // Queries
