@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring/promAPI"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring/prom"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
@@ -166,7 +166,7 @@ func (t TargetsAndRulesTest) testTargetsAreHealthy() error {
 			tick.Stop()
 			return errors.Errorf(timeoutMessage)
 		case <-tick.C:
-			var resp promAPI.TargetsResponse
+			var resp prom.TargetsResponse
 			url := fmt.Sprintf("%s/api/v1/targets", prometheusURL)
 			respBody, statusCode, err := t.doGet(url)
 			if err != nil {
@@ -206,7 +206,7 @@ func (t TargetsAndRulesTest) testRulesAreHealthy() error {
 			tick.Stop()
 			return errors.Errorf(timeoutMessage)
 		case <-tick.C:
-			var resp promAPI.AlertResponse
+			var resp prom.AlertResponse
 			url := fmt.Sprintf("%s/api/v1/rules", prometheusURL)
 			respBody, statusCode, err := t.doGet(url)
 			if err != nil {
