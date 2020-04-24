@@ -15,9 +15,9 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: APP_PROVISION_TIMEOUT
-              value: "3h"
+              value: "105m"
             - name: APP_DEPROVISION_TIMEOUT
-              value: "1h"
+              value: "45m"
             - name: APP_SKIP_CERT_VERIFICATION
               value: "true"
             - name: APP_TENANT_ID
@@ -77,9 +77,9 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: APP_PROVISION_TIMEOUT
-              value: "3h"
+              value: "105m"
             - name: APP_DEPROVISION_TIMEOUT
-              value: "1h"
+              value: "45m"
             - name: APP_SKIP_CERT_VERIFICATION
               value: "true"
             - name: APP_TENANT_ID
