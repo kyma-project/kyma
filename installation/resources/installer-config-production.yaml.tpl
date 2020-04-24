@@ -69,18 +69,5 @@ data:
   loki.resources.limits.memory: "512Mi"
   fluent-bit.resources.limits.memory: "256Mi"
 
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: core-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: core
-    kyma-project.io/installation: ""
-data:
-  console.test.acceptance.ui.requests.cpu: "1"
-  console.test.acceptance.ui.requests.memory: "512Mi"
-  console.test.acceptance.ui.limits.cpu: "1"
+
  
