@@ -1,7 +1,10 @@
 package main
 
 import (
+	"net/http"
 	"os"
+	sysruntime "runtime"
+	_ "runtime/pprof"
 
 	"github.com/vrischmann/envconfig"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -46,6 +49,12 @@ type config struct {
 
 func main() {
 	ctrl.SetLogger(zap.New())
+
+	sysruntime.SetBlockProfileRate(1)
+	go func() {
+		setupLog.Info("Starting pprof server")
+		http.ListenAndServe(":9876", nil)
+	}()
 
 	config, err := loadConfig("APP")
 	if err != nil {
