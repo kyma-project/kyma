@@ -10,6 +10,7 @@ image:
   tag: PR-7800
 
 authorizationPolicy:
+  enabled: false
   eventService:
     namespace: kyma-integration
     applicationName: event-mesh-app
