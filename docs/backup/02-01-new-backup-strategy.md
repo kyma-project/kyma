@@ -1,23 +1,23 @@
 ---
-title: Kyma Backup Strategy
-type: Architecture
+title: Kyma Backup strategy
+type: Details
 ---
 
 User load on a Kyma cluster typically consists of various Kubernetes objects and volumes. Kyma relies on the backing cloud provider for periodic backups of the Kubernetes objects. That's why it does not require the user to do any manual settings to take backups.
 
-For example, Gardener uses etcd as the Kubernetes' backing store for all cluster data. That is, all Kubernetes objects are stored on etcd. Gardener has perodic jobs to take major and minor snapshots of etcd database. A major snapshot including all the resources takes place every day, and each minor snapshot including only the changes inbetween takes place every five minutes. In case of a problem on etcd database, Gardener automatically restores the Kubernetes cluster using the latest snapshot.
+For example, Gardener uses etcd as the Kubernetes' backing store for all cluster data. This means all Kubernetes objects are stored on etcd. Gardener uses periodic jobs to take major and minor snapshots of the etcd database. A major snapshot including all the resources takes place every day, and each minor snapshot including only the changes in between takes place every five minutes. In case the etcd database experiences any problems, Gardener automatically restores the Kubernetes cluster using the latest snapshot.
 
-However, volumes are typically not a part of these backups. That's why Kyma encourages users to take periodic backups of their volumes. This can be done using the Kubernetes API `VolumeSnapshot` that is explained below.
+However, volumes are typically not a part of these backups. That's why it is recommended to take periodic backups of your volumes. You can do this using the VolumeSnapshot Kubernetes API resource. Read the following sections to learn how to use it.
 
 ## On-Demand Volume Snapshots
 
-Kubernetes provides an API resource called VolumeSnapshot that can be used to take the snapshot of a volume on Kubernetes. A snapshot can be used either to provision a new volume (pre-populated with the snapshot data) or to restore the existing volume to a previous state (represented by the snapshot).
+Kubernetes provides an API resource called VolumeSnapshot that you can use to take the snapshot of a volume on Kubernetes. You can then use the snapshot either to provision a new volume (pre-populated with the snapshot data) or to restore the existing volume to a previous state (represented by the snapshot).
 
-VolumeSnapshot support is only available for [CSI drivers](https://kubernetes-csi.github.io/docs/). However, not all the CSI drivers support the volume snapshot functionality. You can find a list of all the drivers with the supported functionalities [here](https://kubernetes-csi.github.io/docs/drivers.html).
+VolumeSnapshot support is only available for [CSI drivers](https://kubernetes-csi.github.io/docs/), however, not all CSI drivers support the volume snapshot functionality. You can find a list of all the drivers with the supported functionalities [here](https://kubernetes-csi.github.io/docs/drivers.html).
 
-As an example, assume that you have a PVC `pvc-to-backup` which was created using a CSI-enabled StorageClass. Now you want to take a snapshot. You can trigger a snapshot by creating a VolumeSnapshot object like the following:
+As an example, assume that you have a `pvc-to-backup` PVC which you have created using a CSI-enabled StorageClass. You can trigger a snapshot by creating a VolumeSnapshot object like the following:
 
-> **NOTE:** The PVC to be backed up must be created using CSI-enabled Storage Class.
+> **NOTE:** You must use CSI-enabled StorageClass to create a PVC, otherwise it won't be backed up.
 
 ```yaml
 apiVersion: snapshot.storage.k8s.io/v1beta1
@@ -30,7 +30,7 @@ spec:
     persistentVolumeClaimName: pvc-to-backup
 ```
 
-Now assume your PVC is corrupt, and you want to re-create it using the snapshot. Then, you can create it by using the snapshot you created before as the data source for the new PVC:
+Now assume your PVC is corrupt, and you want to re-create it using the snapshot. Create it by using the snapshot you created before as the data source for the new PVC:
 
 ```yaml
 apiVersion: v1
@@ -50,39 +50,39 @@ spec:
     apiGroup: snapshot.storage.k8s.io
 ```
 
-This will create a new PVC `pvc-restored` with pre-populated data from the snapshot.
+This will create a new `pvc-restored` PVC with pre-populated data from the snapshot.
 
-You can find more information about VolumeSnapshots [here](https://kubernetes.io/docs/concepts/storage/volume-snapshots/).
+For details about VolumeSnapshots, see [this](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) document.
 
-Currently none of the cloud providers support this API out-of-the-box yet. You must follow the instructions below to enable this feature for various providers.
+Currently, none of the cloud providers support this API out of the box. Follow the instructions below to enable this feature for various providers.
 
 ### AKS
 
 Minimum Kubernetes version supported is 1.17.
 
-Install CSI driver following [this documentation](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
+1. Install CSI driver following [this documentation](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
 
-Then, you can follow [this example](https://github.com/kubernetes-sigs/azuredisk-csi-driver/tree/master/deploy/example/snapshot) to see how you can create a VolumeSnapshot.
+2.  Follow [this example](https://github.com/kubernetes-sigs/azuredisk-csi-driver/tree/master/deploy/example/snapshot) to see how you can create a VolumeSnapshot.
 
 ### GKE
 
 Minimum Kubernetes version supported is 1.14.
 
-Enable the required feature gate on the cluster following [this document](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver#enabling_on_a_new_cluster).
+1. Enable the required feature gate on the cluster following [this](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver#enabling_on_a_new_cluster) document.
 
-Install CSI driver following the instructions [here](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver/blob/master/docs/kubernetes/user-guides/snapshots.md#kubernetes-snapshots-user-guide-alpha).
+2. Install the CSI driver using [these](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver/blob/master/docs/kubernetes/user-guides/snapshots.md#kubernetes-snapshots-user-guide-alpha) instructions.
 
-Then, you can follow [this example](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver/blob/master/docs/kubernetes/user-guides/snapshots.md#snapshot-example) to see how you can create a VolumeSnapshot.
+3. Follow [this example](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver/blob/master/docs/kubernetes/user-guides/snapshots.md#snapshot-example) to see how you can create a VolumeSnapshot.
 
 ### Gardener Azure
 
-Gardener Azure does not currently support CSI drivers, that's why VolumeSnapshots cannot be used. Its support is planned for Kubernetes 1.19 [#3](https://github.com/gardener/gardener-extension-provider-azure/issues/3).
+Gardener Azure does not currently support CSI drivers, that's why you cannot use VolumeSnapshots. This support is planned for Kubernetes 1.19. For details, see [this issue](https://github.com/gardener/gardener-extension-provider-azure/issues/3).
 
 ### Periodic Job for Volume Snapshots
 
 Users can create a Cronjob to take snapshots of the PersistentVolumes periodically.
 
-You can find an example CronJob with the required Service Account and Roles below.
+Have a look at a sample CronJob with the required Service Account and roles:
 
 ```yaml
 ---
@@ -178,6 +178,6 @@ spec:
 
 #### VolumeSnapshot creation failed
 
-If a PersistentVolumeClaim is not bound, the attempt to create a volume snapshot from that PersistentVolumeClaim will fail. No retries will be attempted. An event will be logged to indicate that the PersistentVolumeClaim is not bound.
+If a PersistentVolumeClaim is not bound, the attempt to create a volume snapshot from that PersistentVolumeClaim will fail with no retries. An event will be logged to indicate that the PersistentVolumeClaim is not bound.
 
-Note that this could happen if the PersistentVolumeClaim spec and the VolumeSnapshot spec are in the same YAML file. In this case, when the VolumeSnapshot object is created, the PersistentVolumeClaim object is created but volume creation is not complete and therefore the PersistentVolumeClaim is not yet bound. You must wait until the PersistentVolumeClaim is bound and then create the snapshot.
+Note that this can happen if the PersistentVolumeClaim spec and the VolumeSnapshot spec are in the same YAML file. In this case, when the VolumeSnapshot object is created, the PersistentVolumeClaim object is created but volume creation is not complete and therefore the PersistentVolumeClaim is not yet bound. You must wait until the PersistentVolumeClaim is bound and then create the snapshot.

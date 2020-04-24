@@ -3,7 +3,7 @@ title: Back up a Kyma cluster
 type: Tutorial
 ---
 
->**NOTE**: Velero support is deprecated. For the new backup strategy, check out [this](/components/backup/#new-backup-strategy).
+>**NOTE**: Velero is no longer supported. For the new backup strategy, see [this](/components/backup/#new-backup-strategy) document.
 
 Follow this tutorial to learn how to use the [backup.yaml](./assets/backup.yaml) specification file to create a manual or scheduled Kyma backup. For details about the file format, see [this](https://velero.io/docs/v1.2.0/api-types/backup/) document.
 

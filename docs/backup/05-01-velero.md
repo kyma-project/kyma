@@ -3,7 +3,7 @@ title: Velero chart
 type: Configuration
 ---
 
->**NOTE**: Velero support is deprecated. For the new backup strategy, check out [this](/components/backup/#new-backup-strategy).
+>**NOTE**: Velero is no longer supported. For the new backup strategy, see [this](/components/backup/#new-backup-strategy) document.
 
 This document lists and describes the parameters that you can configure in Velero, split into required and optional parameters.
 
