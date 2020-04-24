@@ -74,7 +74,17 @@ Minimum Kubernetes version supported is 1.14.
 
 3. Follow [this example](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver/blob/master/docs/kubernetes/user-guides/snapshots.md#snapshot-example) to see how you can create a VolumeSnapshot.
 
-### Gardener Azure
+### Gardener
+
+#### GCP
+
+Although Gardener GCP uses CSI drivers by default as of Kubernetes 1.18, Volume snapshotting does not work yet because of [this bug](https://github.com/gardener/gardener-extension-provider-gcp/issues/73).
+
+#### AWS
+
+Although Gardener AWS uses CSI drivers by default as of Kubernetes 1.18, Volume snapshotting does not work yet becuase of [this bug](https://github.com/gardener/gardener-extension-provider-aws/issues/75).
+
+#### Azure
 
 Gardener Azure does not currently support CSI drivers, that's why you cannot use VolumeSnapshots. This support is planned for Kubernetes 1.19. For details, see [this issue](https://github.com/gardener/gardener-extension-provider-azure/issues/3).
 
