@@ -3,7 +3,7 @@ title: Kyma Backup strategy
 type: Details
 ---
 
-User load on a Kyma cluster typically consists of various Kubernetes objects and volumes. Kyma relies on the backing cloud provider for periodic backups of the Kubernetes objects. That's why it does not require the user to do any manual settings to take backups.
+The user load on a Kyma cluster typically consists of various Kubernetes objects and volumes. Kyma relies on the managed Kubernetes cluster for periodic backups of the Kubernetes objects. That's why it does not require you to set anything manually to perform backups.
 
 For example, Gardener uses etcd as the Kubernetes' backing store for all cluster data. This means all Kubernetes objects are stored on etcd. Gardener uses periodic jobs to take major and minor snapshots of the etcd database. A major snapshot including all the resources takes place every day, and each minor snapshot including only the changes in between takes place every five minutes. In case the etcd database experiences any problems, Gardener automatically restores the Kubernetes cluster using the latest snapshot.
 
