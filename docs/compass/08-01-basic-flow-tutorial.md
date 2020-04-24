@@ -14,7 +14,7 @@ For simplicity reasons, use the available Order Service as the sample external A
 
 - [`order-service`](./assets/order-service.yaml) file that contains the service definition, deployment, and its API
 - [API specification](./assets/order-service-api-spec.yaml) of `order-service`
-- [Function](./assets/lambda.yaml) that calls `order-service` for orders
+- [Function](./assets/function.yaml) that calls `order-service` for orders
 - Kyma cluster with the Compass module and the API Packages feature enabled
 
 >**NOTE:** Read [this](#installation-enable-compass-in-kyma-default-kyma-installation) document to learn how to install Kyma with the Compass module and the API Packages feature.
@@ -50,35 +50,25 @@ For simplicity reasons, use the available Order Service as the sample external A
 
 1. Go back to the Kyma Console UI. You can see that the `test-app` Application is registered in the **Applications** view. Select `test-app` and bind it to your Namespace by selecting the **Create Binding** button.
 
-2. From the drop-down list in the top-right corner, select your Namespace and go to the **Catalog** view. You will see your services available under the **Services** tab. Provision the service instance by choosing your Package and clicking the **Add** button in the top-right corner of the page.
+2. From the drop-down list in the top-right corner, select your Namespace and go to the **Catalog** view. You will see your services available under the **Services** tab. Provision the ServiceInstance by choosing your Package and clicking the **Add** button in the top-right corner of the page.
 
-3. Create a function. In the **Overview** tab, click the **Deploy new resource** button and upload the file with the [function](./assets/lambda.yaml).
+3. Create a function. In the **Overview** tab, click the **Deploy new resource** button and upload the file with the [function](./assets/function.yaml).
 
-4. Expose your function:
+4. Expose your function following [this](/components/serverless/#tutorials-expose-a-function-with-an-api-rule) tutorial. Follow the instructions in the `Console UI` tab.
 
-    a. In the left navigation panel, go to the **Functions** tab and click the `call-order-service` function.
-
-    b. In the **Settings & Code** section, click the **Select Function Trigger** button and expose your function via HTTPS.
-
-    c. Untick the **Enable authentication** field as there is no need to secure the connection for the purpose of this tutorial. Click **Add**.
-
-    d. Scroll down to the end of your function view and bind your function to your instance by clicking the **Create Service Bindings** button in the **Service Bindings** section. Choose the ServiceInstance you want to bind your function to, and click **Create Service Bindings**.
-
-    e. Save the settings in the right top-right corner of the page.
-
-    f. Click the **Functions** tab and wait until the function status is completed and marked as `RUNNING`.
+5. Bind the ServiceInstance to your function following [this](/components/serverless/#tutorials-bind-a-service-instance-to-a-function) tutorial. Follow the instructions in the `Console UI` tab.
 
 ### Cleanup
 
 Clean up your cluster after going through this tutorial. To do so, delete your resources in the following order:
 
-1. Go to the **Functions** tab, unfold the vertical option menu and delete your function.
+1. Go to the **Functions** tab and delete the `call-order-service` function.
 
 2. Go to the **Services** tab and delete `order-service`.
 
 3. Go to the **Deployments** tab and delete the `order-service` deployment.
 
-4. Go to the **APIs** tab and delete the `order-service` API.
+4. Go to the **API Rules** tab and delete the created API Rule.
 
 5. Go to the **Instances** tab, navigate to **Services**, and deprovision your instance by selecting the trash bin icon.
 

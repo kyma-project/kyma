@@ -7,11 +7,11 @@ By default, functions in Kyma are not exposed outside the cluster. The Knative S
 
 > **TIP:** For more details on cluster-local services in Knative, read [this](https://knative.dev/docs/serving/cluster-local-route/) document.
 
-To expose a function outside the cluster, you must create an [APIRule custom resource (CR)](/components/api-gateway-v2#custom-resource-api-rule):
+To expose a function outside the cluster, you must create an [APIRule custom resource (CR)](/components/api-gateway#custom-resource-api-rule):
 
 ![Expose a function service](./assets/api-rules.svg)
 
-1. Create the APIRule CR where you specify the function to expose, define a [Oathkeeper Access Rule](/components/api-gateway-v2/#details-available-security-options) to secure it, and list which HTTP request methods you want to enable for it.
+1. Create the APIRule CR where you specify the function to expose, define a [Oathkeeper Access Rule](/components/api-gateway/#details-available-security-options) to secure it, and list which HTTP request methods you want to enable for it.
 
 2. The API Gateway Controller detects a new APIRule CR and reads its definition.
 

@@ -6,6 +6,8 @@ Serverless relies on [Knative Serving](https://knative.dev/docs/serving/) for de
 
 ![Serverless architecture](./assets/serverless-architecture.svg)
 
+> **CAUTION:** Serverless imposes some requirements on the setup of Namespaces. If you create a new Namespace, do not disable sidecar injection in it as Serverless requires Istio for other resources to communicate with functions correctly. Also, if you apply custom [LimitRanges](/root/kyma/#details-resource-quotas) for a new Namespace, they must be higher than or equal to the [limits for building Jobs' resources](#configuration-serverless-chart).
+
 1. Create a function either through the UI or by applying a Function custom resource (CR). This CR contains the function definition (business logic that you want to execute) and information on the environment on which it should run.
 
     >**NOTE:** Function Controller sets the Node.js 12 runtime by default.

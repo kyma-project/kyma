@@ -617,7 +617,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Event Broker Filter -> Lambda",
+          "title": "Event Broker Filter -> Function",
           "tooltip": {
             "shared": true,
             "sort": 0,

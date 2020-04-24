@@ -100,7 +100,7 @@ If the credentials of your OAuth2 client are compromised, follow these steps to 
 
 ## OAuth2 server in action
 
-To see the OAuth2 server in action, complete [this](/components/api-gateway-v2/#tutorials-tutorials) tutorial which shows you how to expose a service, secure it with OAuth2 tokens, and interact with it using the registered client.  
+To see the OAuth2 server in action, complete [this](/components/api-gateway/#tutorials-tutorials) tutorial which shows you how to expose a service, secure it with OAuth2 tokens, and interact with it using the registered client.  
 
 You can also interact with the OAuth2 server using its REST API. Read the official [ORY documentation](https://www.ory.sh/docs/hydra/sdk/api) to learn more about the available endpoints.
 
