@@ -74,8 +74,6 @@ Get a default domain from values if set or use the default domain name for Kyma
 {{ if .Values.config.defaultDomain }}
 {{- printf "%s" .Values.config.defaultDomain -}}
 {{ else }}
-{{- with .Values.global.ingress.domainName }}
-{{- printf "%s" . -}}
-{{- end }}
+{{- printf "%s" .Values.global.ingress.domainName -}}
 {{- end }}
 {{- end -}}
