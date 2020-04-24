@@ -10,7 +10,7 @@ When you complete this tutorial, you get a function that:
 - Is available under an unsecured endpoint (**handler** set to `noop` in the APIRule CR).
 - Accepts `GET`, `POST`, `PUT`, and `DELETE` methods.
 
->**NOTE:** To learn more about securing your function, see [this](/components/api-gateway-v2/#tutorials-expose-and-secure-a-service-deploy-expose-and-secure-the-sample-resources) tutorial.
+>**NOTE:** To learn more about securing your function, see [this](/components/api-gateway#tutorials-expose-and-secure-a-service-deploy-expose-and-secure-the-sample-resources) tutorial.
 
 ## Prerequisites
 

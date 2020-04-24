@@ -30,5 +30,5 @@ data:
 3. Use Kyma CLI to install Kyma with the overrides.
 
   ```bash
-  kyma install -o {azure-secret.yaml} -o {kafka-channel.yaml} -o {installer-with-knative-eventing-kafka.tpl}
+  kyma install -o {azure-secret.yaml} -o {kafka-channel.yaml} -o {installer-cr-azure-eventhubs.yaml.tpl}
   ```

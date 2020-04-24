@@ -1,7 +1,7 @@
 tests:
   enabled: true
   image:
-    version: 08e313d5
+    version: PR-8160
   env:
     namespace: default
 
@@ -53,6 +53,11 @@ clusterRoles:
       - "velero.io"
     rafter:
       - "rafter.kyma-project.io"
+    knativeServing:
+      - "networking.internal.knative.dev"
+      - "caching.internal.knative.dev"
+      - "autoscaling.internal.knative.dev"
+      - "serving.knative.dev"
   verbs:
     edit:
       - "create"

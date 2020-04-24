@@ -7,6 +7,7 @@ metadata:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
 spec:
+  replicas: {{ .Values.deployment.replicaCount }}
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
@@ -151,8 +152,7 @@ spec:
         secret:
           secretName: {{ .Values.gardener.secretName }}
       {{if .Values.gardener.auditLogTenantConfigMapName }}
-      - name: gardener-tenant-config
+      - name: gardener-audit-log-tenant-config
         configMap:
           name: {{ .Values.gardener.auditLogTenantConfigMapName }}
-          optional: true
       {{end}}

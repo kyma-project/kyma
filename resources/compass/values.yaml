@@ -17,13 +17,13 @@ global:
       version: "2a54a16c"
     connectivity_adapter:
       dir:
-      version: "8604d53a"
+      version: "a272bec9"
     pairing_adapter:
       dir:
       version: "9fae2df7"
     director:
       dir:
-      version: "c75aca63"
+      version: "22072888"
     gateway:
       dir:
       version: "9fae2df7"
@@ -32,7 +32,7 @@ global:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "3d62da15"
+      version: "42cf7349"
     provisioner:
       dir:
       version: "a267c133"
@@ -43,7 +43,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "cc7634a0"
+      version: "caf93a49"
     tests:
       director:
         dir:
