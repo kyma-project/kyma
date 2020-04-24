@@ -21,3 +21,4 @@ service:
 deployment:
   image:
     pullPolicy: IfNotPresent
+  resources: {}

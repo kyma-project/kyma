@@ -30,6 +30,8 @@ spec:
             - containerPort: {{ .Values.statusPort }}
             - containerPort: {{ .Values.service.internalPort }}
             - containerPort: {{ .Values.service.mfInternalPort }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
           - name: config
             mountPath: /var/public/config

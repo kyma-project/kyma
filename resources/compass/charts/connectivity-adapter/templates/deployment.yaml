@@ -25,6 +25,8 @@ spec:
             - name: http
               containerPort: {{ .Values.global.connectivity_adapter.port }}
               protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           env:
             - name: APP_ADDRESS
               value: "0.0.0.0:{{ .Values.global.connectivity_adapter.port }}"

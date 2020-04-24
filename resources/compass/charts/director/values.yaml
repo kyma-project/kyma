@@ -2,6 +2,7 @@ deployment:
   replicaCount: 1
   image:
     pullPolicy: IfNotPresent
+  resources: {}
   args:
     containerPort: 3000
   securityContext: # Set on container level
