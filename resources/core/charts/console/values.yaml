@@ -28,7 +28,7 @@ compass_mfs:
   statusPort: 6082
   image:
     dir:
-    tag: "49294757"
+    tag: 5a8b31e2
     pullPolicy: IfNotPresent
   service:
     name: nginx
