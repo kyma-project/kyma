@@ -137,7 +137,7 @@ This guide shows how to call a registered external service from Kyma using a sim
    EOF
    ```
 
-6. To expose the function outside the cluster create an Api custom resource.
+6. To expose the function outside the cluster create an APIRule custom resource.
 
    ```bash
    cat <<EOF | kubectl apply -f -

@@ -17,7 +17,7 @@ global:
       version: "2a54a16c"
     connectivity_adapter:
       dir:
-      version: "8604d53a"
+      version: "a272bec9"
     pairing_adapter:
       dir:
       version: "9fae2df7"
@@ -43,7 +43,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "ddae913f"
+      version: "5837995d"
     tests:
       director:
         dir:

@@ -17,7 +17,7 @@ core_ui:
   statusPort: 6081
   image:
     dir:
-    tag: 5f0cac61
+    tag: fc29fea3
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -28,7 +28,7 @@ compass_mfs:
   statusPort: 6082
   image:
     dir:
-    tag: "49294757"
+    tag: 5a8b31e2
     pullPolicy: IfNotPresent
   service:
     name: nginx

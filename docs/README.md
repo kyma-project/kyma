@@ -7,7 +7,6 @@ The `docs` folder contains end-to-end documentation on Kyma and its components.
 Start with the overarching [Kyma](./kyma) documentation where you can find the general information on Kyma and the Getting Started guides. Then, read about the product in more detail:
 
 -   [API Gateway](./api-gateway/)
--   [API Gateway v2](./api-gateway-v2/)
 -   [Application Connector](./application-connector/)
 -   [Backup](./backup/)
 -   [Compass](./compass/)
