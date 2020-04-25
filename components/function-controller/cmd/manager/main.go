@@ -53,7 +53,7 @@ func main() {
 	sysruntime.SetBlockProfileRate(1)
 	go func() {
 		setupLog.Info("Starting pprof server")
-		http.ListenAndServe(":9876", nil)
+		http.ListenAndServe(":98761", nil)
 	}()
 
 	config, err := loadConfig("APP")
