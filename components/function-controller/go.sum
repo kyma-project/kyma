@@ -739,6 +739,8 @@ knative.dev/pkg v0.0.0-20200410152005-2a1db869228c h1:+Ob3pOC0WuNFxKv2UdMGkC0FGS
 knative.dev/pkg v0.0.0-20200410152005-2a1db869228c/go.mod h1:pgODObA1dTyhNoFxPZTTjNWfx6F0aKsKzn+vaT9XO/Q=
 knative.dev/serving v0.12.1 h1:ZL5pJ5rZq7vNGuhBlG2hU7dp9WnTJLlv2WfwoP9crQk=
 knative.dev/serving v0.12.1/go.mod h1:x2n255JS2XBI39tmjZ8CwTxIf9EKNMCrkVuiOttLRm0=
+knative.dev/serving v0.13.2 h1:y/XGEVNZeoZ36P7+Xa76ap2r/o9LKXVfxMNiFvxPxTg=
+knative.dev/serving v0.13.2/go.mod h1:x2n255JS2XBI39tmjZ8CwTxIf9EKNMCrkVuiOttLRm0=
 knative.dev/serving v0.14.0 h1:9iDyOqTciNuAh2D5KJP0soOq23FDR4HQHdIQNBQ/rAE=
 knative.dev/serving v0.14.0/go.mod h1:x2n255JS2XBI39tmjZ8CwTxIf9EKNMCrkVuiOttLRm0=
 modernc.org/cc v1.0.0/go.mod h1:1Sk4//wdnYJiUIxnW8ddKpaOJCF37yAdqYnkxUpaYxw=
