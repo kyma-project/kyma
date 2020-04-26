@@ -12,8 +12,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/tools/record"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -145,20 +143,20 @@ var _ = ginkgo.Describe("KService controller", func() {
 	)
 
 	ginkgo.BeforeEach(func() {
-		reconciler = NewServiceReconciler(k8sClient, log.Log, config, scheme.Scheme, record.NewFakeRecorder(100))
+		reconciler = NewServiceReconciler(resourceClient, log.Log, config)
 		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: namespace, Name: srvName}}
 	})
 
 	ginkgo.It("should cleanup old revisions, leaving newest one", func() {
 		ginkgo.By("Creating test resources")
 		srv := fixKservice(srvName, namespace)
-		err := k8sClient.Create(ctx, &srv)
+		err := resourceClient.Create(ctx, &srv)
 		gm.Expect(err).NotTo(gm.HaveOccurred(), "failed to create test KService resource")
 
 		for _, rev := range fixRevisionList(srvName, namespace, numberOfRevisions) {
 			pinnedRev := rev // pin
-			gm.Expect(k8sClient.Create(ctx, &pinnedRev)).NotTo(gm.HaveOccurred())
-			gm.Expect(k8sClient.Status().Update(ctx, &pinnedRev)).NotTo(gm.HaveOccurred())
+			gm.Expect(resourceClient.Create(ctx, &pinnedRev)).NotTo(gm.HaveOccurred())
+			gm.Expect(resourceClient.Status().Update(ctx, &pinnedRev)).NotTo(gm.HaveOccurred())
 		}
 
 		ginkgo.By("should skip reconcile on service creation")
@@ -166,7 +164,7 @@ var _ = ginkgo.Describe("KService controller", func() {
 		gm.Expect(err).NotTo(gm.HaveOccurred())
 
 		initialRevList := &servingv1.RevisionList{}
-		err = reconciler.resourceClient.ListByLabel(ctx, srv.GetNamespace(), map[string]string{serviceLabelKey: srv.GetName()}, initialRevList)
+		err = reconciler.client.ListByLabel(ctx, srv.GetNamespace(), map[string]string{serviceLabelKey: srv.GetName()}, initialRevList)
 		gm.Expect(initialRevList.Items).To(gm.HaveLen(numberOfRevisions))
 
 		ginkgo.By("Update service to be ready")
@@ -175,15 +173,15 @@ var _ = ginkgo.Describe("KService controller", func() {
 			Status: corev1.ConditionTrue,
 		}}
 
-		gm.Expect(k8sClient.Update(ctx, &srv)).Should(gm.Succeed())
-		gm.Expect(k8sClient.Status().Update(ctx, &srv)).Should(gm.Succeed())
+		gm.Expect(resourceClient.Update(ctx, &srv)).Should(gm.Succeed())
+		gm.Expect(resourceClient.Status().Update(ctx, &srv)).Should(gm.Succeed())
 
 		ginkgo.By("waiting for controller to delete excess revisions")
 		_, err = reconciler.Reconcile(request)
 		gm.Expect(err).NotTo(gm.HaveOccurred())
 
 		newRevisionList := &servingv1.RevisionList{}
-		err = reconciler.resourceClient.ListByLabel(ctx, srv.GetNamespace(), map[string]string{serviceLabelKey: srv.GetName()}, newRevisionList)
+		err = reconciler.client.ListByLabel(ctx, srv.GetNamespace(), map[string]string{serviceLabelKey: srv.GetName()}, newRevisionList)
 		gm.Expect(newRevisionList.Items).To(gm.HaveLen(1))
 
 		ginkgo.By("verify that the only revision left is the correct one")

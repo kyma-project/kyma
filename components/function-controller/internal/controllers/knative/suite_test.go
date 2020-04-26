@@ -1,6 +1,7 @@
 package knative
 
 import (
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	"path/filepath"
 	"testing"
 
@@ -18,7 +19,7 @@ import (
 )
 
 var config ServiceConfig
-var k8sClient client.Client
+var resourceClient resource.Client
 var testEnv *envtest.Environment
 var cfg *rest.Config
 
@@ -54,9 +55,11 @@ var _ = ginkgo.BeforeSuite(func(done ginkgo.Done) {
 
 	// +kubebuilder:scaffold:scheme
 
-	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
+	k8sClient, err := client.New(cfg, client.Options{Scheme: scheme.Scheme})
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 	gomega.Expect(k8sClient).ToNot(gomega.BeNil())
+
+	resourceClient = resource.New(k8sClient, scheme.Scheme)
 
 	err = envconfig.InitWithPrefix(&config, "TEST")
 	gomega.Expect(err).NotTo(gomega.HaveOccurred())

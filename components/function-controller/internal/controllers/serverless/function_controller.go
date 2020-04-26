@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,6 +15,8 @@ import (
 	"knative.dev/pkg/apis"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 const (
@@ -44,10 +45,12 @@ func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Fu
 		return false
 	}
 
+	configurationStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)
 	return len(configMaps) != 1 ||
 		instance.Spec.Source != configMaps[0].Data[configMapFunction] ||
 		r.sanitizeDependencies(instance.Spec.Deps) != configMaps[0].Data[configMapDeps] ||
-		configMaps[0].Data[configMapHandler] != configMapHandler
+		configMaps[0].Data[configMapHandler] != configMapHandler ||
+		configurationStatus != corev1.ConditionTrue
 }
 
 func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, jobs []batchv1.Job, service *servingv1.Service) bool {
@@ -90,8 +93,8 @@ func (r *FunctionReconciler) onConfigMapChange(ctx context.Context, log logr.Log
 func (r *FunctionReconciler) createConfigMap(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function) (ctrl.Result, error) {
 	configMap := r.buildConfigMap(instance)
 
-	log.Info("Create ConfigMap")
-	if err := r.resourceClient.Create(ctx, instance, &configMap); err != nil {
+	log.Info("CreateWithReference ConfigMap")
+	if err := r.client.CreateWithReference(ctx, instance, &configMap); err != nil {
 		log.Error(err, "Cannot create ConfigMap")
 		return ctrl.Result{}, err
 	}
@@ -114,7 +117,7 @@ func (r *FunctionReconciler) updateConfigMap(ctx context.Context, log logr.Logge
 	newConfigMap.Labels = expectedConfigMap.Labels
 
 	log.Info(fmt.Sprintf("Updating ConfigMap %s", configMap.GetName()))
-	if err := r.Client.Update(ctx, newConfigMap); err != nil {
+	if err := r.client.Update(ctx, newConfigMap); err != nil {
 		log.Error(err, fmt.Sprintf("Cannot update ConfigMap %s", newConfigMap.GetName()))
 		return ctrl.Result{}, err
 	}
@@ -150,7 +153,7 @@ func (r *FunctionReconciler) equalJobs(existing batchv1.Job, expected batchv1.Jo
 
 func (r *FunctionReconciler) createJob(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, job batchv1.Job) (ctrl.Result, error) {
 	log.Info("Creating Job")
-	if err := r.resourceClient.Create(ctx, instance, &job); err != nil {
+	if err := r.client.CreateWithReference(ctx, instance, &job); err != nil {
 		log.Error(err, "Cannot create Job")
 		return ctrl.Result{}, err
 	}
@@ -168,7 +171,7 @@ func (r *FunctionReconciler) createJob(ctx context.Context, log logr.Logger, ins
 func (r *FunctionReconciler) deleteJobs(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function) (ctrl.Result, error) {
 	log.Info("Deleting all old jobs")
 	selector := apilabels.SelectorFromSet(r.functionLabels(instance))
-	if err := r.resourceClient.DeleteAllBySelector(ctx, &batchv1.Job{}, instance.GetNamespace(), selector); err != nil {
+	if err := r.client.DeleteAllBySelector(ctx, &batchv1.Job{}, instance.GetNamespace(), selector); err != nil {
 		log.Error(err, "Cannot delete old Jobs")
 		return ctrl.Result{}, err
 	}
@@ -230,7 +233,7 @@ func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logge
 
 func (r *FunctionReconciler) createService(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, service servingv1.Service) (ctrl.Result, error) {
 	log.Info(fmt.Sprintf("Creating Service %s", service.GetName()))
-	if err := r.resourceClient.Create(ctx, instance, &service); err != nil {
+	if err := r.client.CreateWithReference(ctx, instance, &service); err != nil {
 		log.Error(err, fmt.Sprintf("Cannot create Service with name %s", service.GetName()))
 		return ctrl.Result{}, err
 	}
@@ -251,7 +254,7 @@ func (r *FunctionReconciler) updateService(ctx context.Context, log logr.Logger,
 	service.ObjectMeta.Labels = newService.GetLabels()
 
 	log.Info(fmt.Sprintf("Updating Service %s", service.GetName()))
-	if err := r.Client.Update(ctx, service); err != nil {
+	if err := r.client.Update(ctx, service); err != nil {
 		log.Error(err, fmt.Sprintf("Cannot update Service with name %s", service.GetName()))
 		return ctrl.Result{}, err
 	}
@@ -368,7 +371,7 @@ func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Resul
 		return result, nil
 	}
 
-	if err := r.Status().Update(ctx, service); err != nil {
+	if err := r.client.Status().Update(ctx, service); err != nil {
 		return ctrl.Result{}, err
 	}
 

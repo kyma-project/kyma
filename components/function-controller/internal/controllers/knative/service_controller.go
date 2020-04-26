@@ -10,7 +10,6 @@ import (
 	apilabels "k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/selection"
-	"k8s.io/client-go/tools/record"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -28,31 +27,24 @@ type ServiceConfig struct {
 }
 
 type ServiceReconciler struct {
-	client.Client
 	Log logr.Logger
 
-	config         ServiceConfig
-	resourceClient resource.Resource
-	recorder       record.EventRecorder
-	scheme         *runtime.Scheme
+	config ServiceConfig
+	client resource.Client
+	scheme *runtime.Scheme
 }
 
-func NewServiceReconciler(c client.Client, log logr.Logger, cfg ServiceConfig, scheme *runtime.Scheme, recorder record.EventRecorder) *ServiceReconciler {
-	resourceClient := resource.New(c, scheme)
-
+func NewServiceReconciler(client resource.Client, log logr.Logger, cfg ServiceConfig) *ServiceReconciler {
 	return &ServiceReconciler{
-		Client:         c,
-		Log:            log,
-		config:         cfg,
-		resourceClient: resourceClient,
-		scheme:         scheme,
-		recorder:       recorder,
+		Log:    log.WithName("controllers").WithName("kservice"),
+		config: cfg,
+		client: client,
 	}
 }
 
 func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		Named("serverless-service-controller").
+		Named("kservice-controller").
 		For(&servingv1.Service{}).
 		Owns(&servingv1.Revision{}).
 		WithEventFilter(r.getPredicates()).
@@ -70,7 +62,7 @@ func (r *ServiceReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	defer cancel()
 
 	instance := &servingv1.Service{}
-	err := r.Get(ctx, request.NamespacedName, instance)
+	err := r.client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		r.Log.WithValues("service", request.NamespacedName).Error(err, "unable to fetch Service")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
@@ -84,7 +76,7 @@ func (r *ServiceReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 
 	log.Info("Listing Revisions")
 	var revisions servingv1.RevisionList
-	if err := r.resourceClient.ListByLabel(ctx, instance.GetNamespace(), r.serviceLabel(instance), &revisions); err != nil {
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.serviceLabel(instance), &revisions); err != nil {
 		log.Error(err, "Cannot list Revisions")
 		return ctrl.Result{}, err
 	}
@@ -104,7 +96,7 @@ func (r *ServiceReconciler) deleteRevisions(ctx context.Context, log logr.Logger
 		return err
 	}
 
-	if err := r.resourceClient.DeleteAllBySelector(ctx, &servingv1.Revision{}, service.GetNamespace(), selector); err != nil {
+	if err := r.client.DeleteAllBySelector(ctx, &servingv1.Revision{}, service.GetNamespace(), selector); err != nil {
 		log.Error(err, "Cannot delete old Revisions")
 		return err
 	}

@@ -1,8 +1,8 @@
 package serverless
 
 import (
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	"path/filepath"
-	"sync"
 	"testing"
 
 	"github.com/onsi/ginkgo"
@@ -15,25 +15,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 var config FunctionConfig
-var k8sClient client.Client
+var resourceClient resource.Client
 var testEnv *envtest.Environment
-
-func StartTestManager(mgr manager.Manager, g *gomega.GomegaWithT) (chan struct{}, *sync.WaitGroup) {
-	stop := make(chan struct{})
-	wg := &sync.WaitGroup{}
-	go func() {
-		wg.Add(1)
-		g.Expect(mgr.Start(stop)).NotTo(gomega.HaveOccurred())
-		wg.Done()
-	}()
-	return stop, wg
-}
 
 func TestAPIs(t *testing.T) {
 	gomega.RegisterFailHandler(ginkgo.Fail)
@@ -54,7 +42,6 @@ var _ = ginkgo.BeforeSuite(func(done ginkgo.Done) {
 		ErrorIfCRDPathMissing: true,
 	}
 
-	var err error
 	cfg, err := testEnv.Start()
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 	gomega.Expect(cfg).ToNot(gomega.BeNil())
@@ -70,9 +57,11 @@ var _ = ginkgo.BeforeSuite(func(done ginkgo.Done) {
 
 	// +kubebuilder:scaffold:scheme
 
-	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
+	k8sClient, err := client.New(cfg, client.Options{Scheme: scheme.Scheme})
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 	gomega.Expect(k8sClient).ToNot(gomega.BeNil())
+
+	resourceClient = resource.New(k8sClient, scheme.Scheme)
 
 	err = envconfig.InitWithPrefix(&config, "TEST")
 	gomega.Expect(err).NotTo(gomega.HaveOccurred())
