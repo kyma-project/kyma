@@ -182,7 +182,7 @@ clusterMicroFrontend:
   enabled: true
 
 grafanaDashboard:
-  enabled: false
+  enabled: true
 
 docker-registry:
   enabled: true
