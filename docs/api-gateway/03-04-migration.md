@@ -20,7 +20,7 @@ Before the migration process starts, ensure that all Api resources have a status
 kubectl get apis --all-namespaces -o json | jq '.items | .[] | select(.status == null)'
 ```
 
-Receiving no results means that you can perform the upgrade. If, however, you can see any Api resources in the output, recreate each Api using this script:
+Receiving no results means that you can perform the upgrade. If you can see any Api resources in the output, recreate each Api using this script:
 
 ```shell script
 # set variables
@@ -33,7 +33,7 @@ kubectl delete policy -n ${API_NAMESPACE} ${API_NAME} --ignore-not-found
 kubectl get api -n ${API_NAMESPACE} ${API_NAME} -o yaml | kubectl replace --force -f 
 ```
 
-Once the Apis are recreated check again the status is present. The output should not include any Api resources, allowing you to proceed with the migration. Follow these steps to ensure your services are properly migrated:
+Once the Apis are recreated check again if the status is present. The output should not include any Api resources allowing you to proceed with the migration. Follow these steps to ensure your services are properly migrated:
 
 1. [Verify the migration outcome](#details-migration-from-api-to-api-rule-custom-resources-verify-the-automatic-migration). 
 2. If you can still see any Api CRs in use, use the [manual migration](#details-migration-from-api-to-api-rule-custom-resources-manual-migration) guide to migrate them.
