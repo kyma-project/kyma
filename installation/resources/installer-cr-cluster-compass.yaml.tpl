@@ -34,3 +34,5 @@ spec:
       namespace: "kyma-system"
     - name: "logging"
       namespace: "kyma-system"
+    - name: "kiali"
+      namespace: "kyma-system"
