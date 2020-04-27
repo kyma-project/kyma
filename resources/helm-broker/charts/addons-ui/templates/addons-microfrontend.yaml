@@ -3,16 +3,21 @@ kind: ClusterMicroFrontend
 metadata:
   name: addonsmicrofrontend
   labels:
-    app:  addonsmicrofrontend
+    app: addonsmicrofrontend
 spec:
   displayName: "Addons"
   version: v1
   category: Configuration
   placement: namespace
-  viewBaseUrl: 'https://addons.{{ js .Values.global.ingress.domainName }}'
-  preloadUrl: 'https://addons.{{ js .Values.global.ingress.domainName }}/preload'
+  viewBaseUrl: "https://addons.{{ js .Values.global.ingress.domainName }}"
+  preloadUrl: "https://addons.{{ js .Values.global.ingress.domainName }}/preload"
   navigationNodes:
     - label: "Addons"
       navigationPath: addons
-      viewUrl: ''
+      viewUrl: ""
       order: -1
+      requiredPermissions:
+        - apiGroup: addons.kyma-project.io
+          resource: addonsconfigurations
+          verbs:
+            - create
