@@ -105,25 +105,54 @@ To test if the Trigger CR is properly connected to the function:
     }
     ```
 
-2. Send an event manually to trigger the function:
+2. Send an event manually to trigger the function. The event payload is delivered as the body of the HTTP request in `JSON` format. You can use [CloudEvents](https://github.com/cloudevents/spec/blob/master/spec.md) specification or the previous, Kyma-compatible solution.
 
-    ```bash
-    curl -v -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d '{
-        "specversion": "1.0",
-        "source": "{APP_NAME}",
-        "type": "{EVENT_TYPE}",
-        "eventtypeversion": "{EVENT_VERSION}",
-        "id": "A234-1234-1234",
-        "data" : "123456789"
-    }' -H "Content-Type: application/cloudevents+json" https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/events
-    ```
+<div tabs name="steps" group="trigger-test">
+  <details>
+  <summary label="CloudEvents">
+  CloudEvents
+  </summary>
+
+   ```bash
+      curl -v -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d '{
+      "specversion": "1.0",
+      "source": "{APP_NAME}",
+      "type": "{EVENT_TYPE}",
+      "eventtypeversion": "{EVENT_VERSION}",
+      "id": "A234-1234-1234",
+      "data": "123456789"
+    }' -H "Content-Type: application/cloudevents+json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/events
+  ```
+  
+  </details>
+    <details>
+    <summary label="Compatibility layer">
+    CloudEvents
+    </summary>
+
+   ```bash
+   curl -X POST -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
+   '{
+       "event-type": "{EVENT_TYPE}",
+       "event-type-version": "{EVENT_VERSION}",
+       "event-time": "2020-04-02T21:37:00Z",
+       "data": "123456789"
+    }'
+  ```
+
+   </details>
+</div>
 
     - **CLUSTER_DOMAIN** is the domain of your cluster, such as `kyma.local`.
 
     - **CERT_FILE_NAME** and **KEY_FILE_NAME** are client certificates for a given Application. You can get them by completing steps in [this](/components/application-connector/#tutorials-get-the-client-certificate) tutorial.
 
+
 3. After sending an event, you should get this result from logs of your function's latest Pod:
 
-    ```text
-    User created: 123456789
-    ```
+  ```text
+  User created: 123456789
+  ```
+
+
+
