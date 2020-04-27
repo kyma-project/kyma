@@ -126,6 +126,7 @@ global:
     enabled: false
 
   kyma_environment_broker:
+    enabled: false
     secrets:
       integrationSystemCredentials:
         name: compass-kyma-environment-broker-credentials
