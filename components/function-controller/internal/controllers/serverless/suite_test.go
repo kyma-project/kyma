@@ -1,7 +1,6 @@
 package serverless
 
 import (
-	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	"path/filepath"
 	"testing"
 
@@ -16,6 +15,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
