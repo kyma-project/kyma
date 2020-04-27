@@ -110,7 +110,7 @@ To test if the Trigger CR is properly connected to the function:
 <div tabs name="steps" group="trigger-test">
   <details>
   <summary label="CloudEvents">
-  CloudEvents
+  CloudEvents-compatible event payload
   </summary>
 
    ```bash
@@ -127,20 +127,20 @@ To test if the Trigger CR is properly connected to the function:
   </details>
     <details>
     <summary label="Compatibility layer">
-    CloudEvents
+    Compatibility layer event payload
     </summary>
 
-   ```bash
-   curl -X POST -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
-   '{
-       "event-type": "{EVENT_TYPE}",
-       "event-type-version": "{EVENT_VERSION}",
-       "event-time": "2020-04-02T21:37:00Z",
-       "data": "123456789"
-    }'
+  ```bash
+     curl -X POST -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
+    '{
+        "event-type": "{EVENT_TYPE}",
+        "event-type-version": "{EVENT_VERSION}",
+        "event-time": "2020-04-02T21:37:00Z",
+        "data": "123456789"
+      }'
   ```
 
-   </details>
+  </details>
 </div>
 
     - **CLUSTER_DOMAIN** is the domain of your cluster, such as `kyma.local`.
@@ -150,9 +150,9 @@ To test if the Trigger CR is properly connected to the function:
 
 3. After sending an event, you should get this result from logs of your function's latest Pod:
 
-  ```text
-  User created: 123456789
-  ```
+    ```text
+    User created: 123456789
+    ```
 
 
 
