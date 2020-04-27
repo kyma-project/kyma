@@ -39,7 +39,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "ab78b324"
+    tag: "PR-8236"
     pullPolicy: IfNotPresent
   kubeRbacProxy:
     repository: "gcr.io/kubebuilder/kube-rbac-proxy"
