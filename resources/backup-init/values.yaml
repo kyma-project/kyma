@@ -1,6 +1,0 @@
-# A docker image with kubectl installed
-kubectl:
-  image:
-    repository: eu.gcr.io/kyma-project/develop/etcd-tls-setup
-    tag: a12c148d
-    pullPolicy: IfNotPresent

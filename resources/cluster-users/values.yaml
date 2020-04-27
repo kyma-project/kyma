@@ -49,8 +49,6 @@ clusterRoles:
     ory:
       - "oathkeeper.ory.sh"
       - "hydra.ory.sh"
-    backup:
-      - "velero.io"
     rafter:
       - "rafter.kyma-project.io"
     knativeServing:

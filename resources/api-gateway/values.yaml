@@ -60,7 +60,7 @@ config:
       - "*"
   generatedObjects:
     # Comma-separated list of key=value pairs used to label generated objects
-    labels: "velero.io/exclude-from-backup=true"
+    labels: {}
 
   # Node labels for pod assignment.
   nodeSelector: {}
