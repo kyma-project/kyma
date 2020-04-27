@@ -29,7 +29,7 @@ export API_NAMESPACE={INSERT_API_NAMESPACE_HERE}
 # create temporary file
 export TMP_FILE=$(mktemp)
 # save Api to temporary file
-kubectl get api -n ${API_NAMESPACE} ${API_NAME} > ${TMP_FILE}
+kubectl get api -n ${API_NAMESPACE} ${API_NAME} -o yaml > ${TMP_FILE}
 # remove Api
 kubectl delete api -n ${API_NAMESPACE} ${API_NAME}
 # remove dependent resources
