@@ -105,32 +105,32 @@ To test if the Trigger CR is properly connected to the function:
     }
     ```
 
-2. Send an event manually to trigger the function. The event payload is delivered as the body of the HTTP request in `JSON` format. You can use [CloudEvents](https://github.com/cloudevents/spec/blob/master/spec.md) specification or the previous, Kyma-compatible solution.
+2.  Send an event manually to trigger the function. In the first example, the payload complies with the [CloudEvents](https://github.com/cloudevents/spec/blob/v1.0/spec.md) specification and the event is sent directly to Eventing Mesh. If you want to send the events to compatibility layer which forwards them to Eventing Mesh, use the second example. 
 
    <div tabs name="examples" group="test=trigger">
     <details>
     <summary label="CloudEvents">
-    CloudEvents-compatible event payload
+    CloudEvents
     </summary>
 
     ```bash
-        curl -v -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d '{
-            "specversion": "1.0",
-            "source": "{APP_NAME}",
-            "type": "{EVENT_TYPE}",
-            "eventtypeversion": "{EVENT_VERSION}",
-            "id": "A234-1234-1234",
-            "data": "123456789"
-        }' -H "Content-Type: application/cloudevents+json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/events
+    curl -v -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d '{
+      "specversion": "1.0",
+      "source": "{APP_NAME}",
+      "type": "{EVENT_TYPE}",
+      "eventtypeversion": "{EVENT_VERSION}",
+      "id": "A234-1234-1234",
+      "data": "123456789"
+      }' -H "Content-Type: application/cloudevents+json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/events
     ```
     </details>
     <details>
     <summary label="Compatibility layer">
-    Compatibility layer event payload
+    Compatibility layer
     </summary>
 
     ```bash
-        curl -X POST -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
+        curl -X POST -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
         '{
             "event-type": "{EVENT_TYPE}",
             "event-type-version": "{EVENT_VERSION}",
