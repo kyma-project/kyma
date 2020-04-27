@@ -154,7 +154,6 @@ var _ = ginkgo.Describe("KService controller", func() {
 		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: namespace, Name: srvName}}
 	})
 	ginkgo.AfterEach(func() {
-		// DeleteAllBySelector(ctx, &servingv1.Revision{}, service.GetNamespace(), selector)
 		sel := labels.SelectorFromSet(map[string]string{testCleanupLabelKey: testCleanupLabelValue})
 		err := resourceClient.DeleteAllBySelector(ctx, &servingv1.Revision{}, namespace, sel)
 		gm.Expect(err).To(gm.BeNil())
