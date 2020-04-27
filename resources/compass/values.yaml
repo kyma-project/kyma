@@ -17,7 +17,7 @@ global:
       version: "2a54a16c"
     connectivity_adapter:
       dir:
-      version: "PR-1208"
+      version: "93462f94"
     pairing_adapter:
       dir:
       version: "9fae2df7"
@@ -26,7 +26,7 @@ global:
       version: "22072888"
     gateway:
       dir:
-      version: "PR-1208"
+      version: "93462f94"
     healthchecker:
       dir:
       version: "109f4dc2"
