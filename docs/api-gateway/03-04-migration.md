@@ -33,7 +33,7 @@ kubectl delete policy -n ${API_NAMESPACE} ${API_NAME} --ignore-not-found
 kubectl get api -n ${API_NAMESPACE} ${API_NAME} -o yaml | kubectl replace --force -f 
 ```
 
-Once the Apis are recreated check again if the status is present. The output should not include any Api resources allowing you to proceed with the migration. Follow these steps to ensure your services are properly migrated:
+Once the Apis are recreated check again if the status is present. The output should not include any Api resources, allowing you to proceed with the migration. Follow these steps to ensure your services are properly migrated:
 
 1. [Verify the migration outcome](#details-migration-from-api-to-api-rule-custom-resources-verify-the-automatic-migration). 
 2. If you can still see any Api CRs in use, use the [manual migration](#details-migration-from-api-to-api-rule-custom-resources-manual-migration) guide to migrate them.
