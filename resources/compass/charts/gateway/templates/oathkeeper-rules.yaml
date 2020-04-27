@@ -130,6 +130,11 @@ spec:
   mutators:
   - handler: hydrator
 {{ toYaml .Values.global.oathkeeper.mutators.tokenResolverService | indent 4 }}
+  - handler: hydrator
+{{ toYaml .Values.global.oathkeeper.mutators.tenantMappingService | indent 4 }}
+  - handler: id_token
+    config:
+      claims: {{ .Values.global.oathkeeper.idTokenConfig.claims | quote }}
 ---
 apiVersion: oathkeeper.ory.sh/v1alpha1
 kind: Rule
@@ -150,3 +155,8 @@ spec:
   mutators:
   - handler: hydrator
 {{ toYaml .Values.global.oathkeeper.mutators.certificateResolverService | indent 4 }}
+  - handler: hydrator
+{{ toYaml .Values.global.oathkeeper.mutators.tenantMappingService | indent 4 }}
+  - handler: id_token
+    config:
+      claims: {{ .Values.global.oathkeeper.idTokenConfig.claims | quote }}
