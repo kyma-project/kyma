@@ -84,7 +84,6 @@ func (r *configMapService) updateConfigMap(ctx context.Context, logger logr.Logg
 	copy.Annotations = baseInstance.GetAnnotations()
 	copy.Labels = baseInstance.GetLabels()
 	copy.Data = baseInstance.Data
-	copy.Data = baseInstance.Data
 	copy.BinaryData = baseInstance.BinaryData
 
 	if err := r.client.Update(ctx, copy); err != nil {
