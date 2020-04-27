@@ -17,7 +17,7 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource/automock"
 )
 
-func TestResourceSvc_Create(t *testing.T) {
+func TestClient_CreateWithReference(t *testing.T) {
 	ctx := context.TODO()
 
 	t.Run("Success", func(t *testing.T) {
@@ -29,14 +29,35 @@ func TestResourceSvc_Create(t *testing.T) {
 		parent := &batchv1.Job{}
 		object := &corev1.Pod{}
 
-		client := new(automock.Client)
+		client := new(automock.K8sClient)
 		client.On("Create", ctx, object).Return(nil).Once()
 		defer client.AssertExpectations(t)
 
 		resourceClient := New(client, scheme)
 
 		// When
-		err := resourceClient.Create(ctx, parent, object)
+		err := resourceClient.CreateWithReference(ctx, parent, object)
+
+		// Then
+		g.Expect(err).To(gomega.BeNil())
+	})
+
+	t.Run("WithoutParent", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+		scheme := runtime.NewScheme()
+		g.Expect(clientgoscheme.AddToScheme(scheme)).To(gomega.BeNil())
+
+		object := &corev1.Pod{}
+
+		client := new(automock.K8sClient)
+		client.On("Create", ctx, object).Return(nil).Once()
+		defer client.AssertExpectations(t)
+
+		resourceClient := New(client, scheme)
+
+		// When
+		err := resourceClient.CreateWithReference(ctx, nil, object)
 
 		// Then
 		g.Expect(err).To(gomega.BeNil())
@@ -51,14 +72,14 @@ func TestResourceSvc_Create(t *testing.T) {
 		parent := &batchv1.Job{}
 		object := &corev1.Pod{}
 
-		client := new(automock.Client)
+		client := new(automock.K8sClient)
 		client.On("Create", ctx, object).Return(errors.NewAlreadyExists(controllerruntime.GroupResource{}, "test")).Once()
 		defer client.AssertExpectations(t)
 
 		resourceClient := New(client, scheme)
 
 		// When
-		err := resourceClient.Create(ctx, parent, object)
+		err := resourceClient.CreateWithReference(ctx, parent, object)
 
 		// Then
 		g.Expect(errors.IsAlreadyExists(err)).To(gomega.BeTrue())
@@ -75,14 +96,14 @@ func TestResourceSvc_Create(t *testing.T) {
 		resourceClient := New(nil, scheme)
 
 		// When
-		err := resourceClient.Create(ctx, parent, object)
+		err := resourceClient.CreateWithReference(ctx, parent, object)
 
 		// Then
 		g.Expect(runtime.IsNotRegisteredError(err)).To(gomega.BeTrue())
 	})
 }
 
-func TestResourceSvc_ListByLabel(t *testing.T) {
+func TestClient_ListByLabel(t *testing.T) {
 	ctx := context.TODO()
 
 	t.Run("Success", func(t *testing.T) {
@@ -91,7 +112,7 @@ func TestResourceSvc_ListByLabel(t *testing.T) {
 		list := &batchv1.JobList{}
 		labels := map[string]string{"test": "test"}
 
-		client := new(automock.Client)
+		client := new(automock.K8sClient)
 		client.On("List", ctx, list, mock.Anything).Return(nil).Once()
 		defer client.AssertExpectations(t)
 
@@ -109,7 +130,7 @@ func TestResourceSvc_ListByLabel(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		list := &batchv1.JobList{}
 
-		client := new(automock.Client)
+		client := new(automock.K8sClient)
 		client.On("List", ctx, list, mock.Anything).Return(nil).Once()
 		defer client.AssertExpectations(t)
 
@@ -128,7 +149,7 @@ func TestResourceSvc_ListByLabel(t *testing.T) {
 		list := &batchv1.JobList{}
 		labels := map[string]string{"test": "test"}
 
-		client := new(automock.Client)
+		client := new(automock.K8sClient)
 		client.On("List", ctx, list, mock.Anything).Return(errors.NewBadRequest("bad")).Once()
 		defer client.AssertExpectations(t)
 
@@ -142,7 +163,7 @@ func TestResourceSvc_ListByLabel(t *testing.T) {
 	})
 }
 
-func TestResourceSvc_DeleteAllBySelector(t *testing.T) {
+func TestClient_DeleteAllBySelector(t *testing.T) {
 	ctx := context.TODO()
 
 	t.Run("Success", func(t *testing.T) {
@@ -152,7 +173,7 @@ func TestResourceSvc_DeleteAllBySelector(t *testing.T) {
 		labels := map[string]string{"test": "test"}
 		selector := apilabels.SelectorFromSet(labels)
 
-		client := new(automock.Client)
+		client := new(automock.K8sClient)
 		client.On("DeleteAllOf", ctx, resourceType, mock.Anything).Return(nil).Once()
 		defer client.AssertExpectations(t)
 
@@ -170,7 +191,7 @@ func TestResourceSvc_DeleteAllBySelector(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		resourceType := &batchv1.Job{}
 
-		client := new(automock.Client)
+		client := new(automock.K8sClient)
 		client.On("DeleteAllOf", ctx, resourceType, mock.Anything).Return(nil).Once()
 		defer client.AssertExpectations(t)
 
@@ -190,7 +211,7 @@ func TestResourceSvc_DeleteAllBySelector(t *testing.T) {
 		labels := map[string]string{"test": "test"}
 		selector := apilabels.SelectorFromSet(labels)
 
-		client := new(automock.Client)
+		client := new(automock.K8sClient)
 		client.On("DeleteAllOf", ctx, resourceType, mock.Anything).Return(errors.NewBadRequest("bad")).Once()
 		defer client.AssertExpectations(t)
 

@@ -2,6 +2,7 @@
 /controller-manager
 /http-adapter
 /bin/
+/licenses
 
 # Dependencies
 /vendor/

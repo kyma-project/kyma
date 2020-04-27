@@ -26,6 +26,7 @@ knative_serving:
           cpu: 30m
           memory: 100Mi
   podmonitor:
+    enabled: false
     labels:
       # PodMonitorSelector is configured here: resources/monitoring/templates/prometheus/prometheus.yaml
       release: monitoring

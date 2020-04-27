@@ -74,8 +74,8 @@ type Resolver interface {
 
 	CreateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionMutationInput) (*gqlschema.Function, error)
 	UpdateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionMutationInput) (*gqlschema.Function, error)
-	DeleteFunction(ctx context.Context, function gqlschema.FunctionMetadataInput) (*gqlschema.FunctionMetadata, error)
-	DeleteManyFunctions(ctx context.Context, functions []gqlschema.FunctionMetadataInput) ([]gqlschema.FunctionMetadata, error)
+	DeleteFunction(ctx context.Context, namespace string, function gqlschema.FunctionMetadataInput) (*gqlschema.FunctionMetadata, error)
+	DeleteManyFunctions(ctx context.Context, namespace string, functions []gqlschema.FunctionMetadataInput) ([]gqlschema.FunctionMetadata, error)
 
 	FunctionEventSubscription(ctx context.Context, namespace string, functionName *string) (<-chan gqlschema.FunctionEvent, error)
 }

@@ -108,7 +108,7 @@ func (r *functionResolver) UpdateFunction(ctx context.Context, name string, name
 	return function, nil
 }
 
-func (r *functionResolver) DeleteFunction(ctx context.Context, function gqlschema.FunctionMetadataInput) (*gqlschema.FunctionMetadata, error) {
+func (r *functionResolver) DeleteFunction(ctx context.Context, namespace string, function gqlschema.FunctionMetadataInput) (*gqlschema.FunctionMetadata, error) {
 	err := r.functionService.Delete(function)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while deleting %s [name: %s, namespace: %s]", pretty.Function, function.Name, function.Namespace))
@@ -130,10 +130,10 @@ func (r *functionResolver) DeleteFunction(ctx context.Context, function gqlschem
 	}, nil
 }
 
-func (r *functionResolver) DeleteManyFunctions(ctx context.Context, functions []gqlschema.FunctionMetadataInput) ([]gqlschema.FunctionMetadata, error) {
+func (r *functionResolver) DeleteManyFunctions(ctx context.Context, namespace string, functions []gqlschema.FunctionMetadataInput) ([]gqlschema.FunctionMetadata, error) {
 	deletedFunctions := make([]gqlschema.FunctionMetadata, 0)
 	for _, function := range functions {
-		_, err := r.DeleteFunction(ctx, function)
+		_, err := r.DeleteFunction(ctx, namespace, function)
 		if err != nil {
 			glog.Error(errors.Wrapf(err, "while deleting %s [namespace: %s]", pretty.Functions, function.Namespace))
 			return deletedFunctions, gqlerror.New(err, pretty.Functions, gqlerror.WithNamespace(function.Namespace))

@@ -4,7 +4,6 @@ metadata:
   name: dockerfile-nodejs-12
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
     serverless.kyma-project.io/config: runtime
     serverless.kyma-project.io/runtime: nodejs12
 data:
