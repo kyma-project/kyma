@@ -14,7 +14,7 @@
 
 APP_NAME = event-sources
 APP_PATH = components/event-sources
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200423-925aa858
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200423-1d9d6590
 SCRIPTS_DIR = ../../common/makefiles
 
 # COMPONENT_DIR is a local path to component
