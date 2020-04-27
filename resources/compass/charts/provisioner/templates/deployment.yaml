@@ -79,10 +79,14 @@ spec:
               value: "{{ .Values.global.provisioner.secrets.integrationSystemCredentials.name }}"
             - name: APP_SKIP_DIRECTOR_CERT_VERIFICATION
               value: "{{ or .Values.global.isLocalEnv .Values.security.skipTLSCertificateVeryfication }}"
-            - name: APP_INSTALLATION_TIMEOUT
+            - name: APP_PROVISIONING_TIMEOUT_INSTALLATION
               value: "{{ .Values.installation.timeout }}"
-            - name: APP_INSTALLATION_ERRORS_COUNT_FAILURE_THRESHOLD
-              value: "{{ .Values.installation.errorsCountFailureThreshold }}"
+            - name: APP_PROVISIONING_TIMEOUT_UPGRADE
+              value: "{{ .Values.installation.timeout }}"
+            - name: APP_PROVISIONING_TIMEOUT_AGENT_CONFIGURATION
+              value: "{{ .Values.runtimeAgent.configurationTimeout }}"
+            - name: APP_PROVISIONING_TIMEOUT_AGENT_CONNECTION
+              value: "{{ .Values.runtimeAgent.connectionTimeout }}"
             - name: APP_GARDENER_PROJECT
               value: {{ .Values.gardener.project }}
             - name: APP_GARDENER_KUBECONFIG_PATH
@@ -93,12 +97,16 @@ spec:
               value: {{ .Values.gardener.auditLogTenantConfigPath }}
             - name: APP_PROVISIONER
               value: {{ .Values.provisioner }}
+            - name: APP_LATEST_DOWNLOADED_RELEASES
+              value: "5"
             - name: APP_SUPPORT_ON_DEMAND_RELEASES
               value: "{{ .Values.kymaRelease.onDemand.enabled }}"
             - name: APP_DOWNLOAD_PRE_RELEASES
               value: "{{ .Values.kymaRelease.preReleases.enabled }}"
             - name: APP_LOG_LEVEL
               value: "{{ .Values.logs.level }}"
+            - name: APP_ENQUEUE_IN_PROGRESS_OPERATIONS
+              value: "true"
           volumeMounts:
         {{if .Values.gardener.auditLogTenantConfigMapName }}
             - mountPath: /gardener/tenant

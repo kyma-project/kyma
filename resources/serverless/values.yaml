@@ -42,8 +42,8 @@ images:
     tag: "ab78b324"
     pullPolicy: IfNotPresent
   kubeRbacProxy:
-    repository: gcr.io/kubebuilder/kube-rbac-proxy
-    tag: v0.4.1
+    repository: "gcr.io/kubebuilder/kube-rbac-proxy"
+    tag: "v0.5.0"
     pullPolicy: IfNotPresent
   functionRuntimeNodejs12:
     repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"

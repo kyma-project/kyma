@@ -99,7 +99,17 @@ lms:
   samlTenant: "TBD"
   disabled: false
 
+ias:
+  secretName: "ias-creds"
+  url: "TBD"
+  id: "TBD"
+  secret: "TBD"
+  identityProvider: "TBD"
+  disabled: true
+
 e2e:
+  tenant:
+    id: "d9994f8f-7e46-42a8-b2c1-1bfff8d2fe05"
   azure:
     configName: "e2e-runtime-config-azure"
   gcp:
