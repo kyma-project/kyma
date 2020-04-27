@@ -53,7 +53,7 @@ Logging in Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like 
 
 ## Backup
 
-Kyma integrates with [Velero](https://github.com/heptio/velero/) to provide backup and restore capabilities for Kubernetes cluster resources. Once backed up, Velero stores the resources in buckets of [supported cloud providers](https://velero.io/docs/v1.0.0/support-matrix/).
+Kyma relies on the managed Kubernetes cluster for periodic backups of the Kubernetes objects. However, volumes are typically not a part of these backups. That's why it is recommended to take periodic backups of your volumes. You can do this using the VolumeSnapshot Kubernetes API resource. Read [this](/components/backup#new-backup-strategy) for more information.
 
 ## Console
 
