@@ -53,7 +53,7 @@ global:
         version: "9cebaf5c"
       provisioner:
         dir:
-        version: "ffd45e1d"
+        version: "9f269bf5"
       e2e_provisioning:
         dir:
         version: "ef98664d"
