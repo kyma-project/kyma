@@ -39,6 +39,7 @@ spec:
           serviceAccountName: {{ .Chart.Name }}-tests
           containers:
             - name: tests
+
               image: {{ .Values.global.containerRegistry.path }}{{ .Values.global.ui_acceptance_tests.dir }}/ui-tests:{{ .Values.global.ui_acceptance_tests.version }}
               imagePullPolicy: IfNotPresent
               resources:
@@ -72,7 +73,7 @@ spec:
               - |
                 echo 'TESTING start'
                 sleep 10
-                npm run test:cluster && npm run test:cluster_firefox
+                npm run test:cluster 
                 exit_code=$?
                 echo "code is $exit_code"
                 echo 'killing pilot-agent...'
