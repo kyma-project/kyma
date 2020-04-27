@@ -152,7 +152,7 @@ func (t TargetsAndRulesTest) testPodsAreReady() error {
 
 func (t TargetsAndRulesTest) testTargetsAreHealthy() error {
 	timeout := time.After(3 * time.Minute)
-	tick := time.NewTicker(30 * time.Second)
+	tick := time.NewTicker(5 * time.Second)
 	var timeoutMessage string
 	for {
 		select {
@@ -191,7 +191,7 @@ func (t TargetsAndRulesTest) testTargetsAreHealthy() error {
 
 func (t TargetsAndRulesTest) testRulesAreHealthy() error {
 	timeout := time.After(3 * time.Minute)
-	tick := time.NewTicker(30 * time.Second)
+	tick := time.NewTicker(5 * time.Second)
 	var timeoutMessage string
 	for {
 		select {
