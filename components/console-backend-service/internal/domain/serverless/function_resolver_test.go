@@ -249,7 +249,7 @@ func TestFunctionResolver_DeleteFunction(t *testing.T) {
 
 		resolver := newFunctionResolver(svc, nil, &Config{UsageKind: usageKind}, retriever)
 
-		result, err := resolver.DeleteFunction(nil, mutationInput)
+		result, err := resolver.DeleteFunction(nil, "a", mutationInput)
 		require.NoError(t, err)
 		assert.Equal(t, &mutation, result)
 	})
@@ -264,7 +264,7 @@ func TestFunctionResolver_DeleteFunction(t *testing.T) {
 
 		resolver := newFunctionResolver(svc, nil, nil, nil)
 
-		result, err := resolver.DeleteFunction(nil, mutationInput)
+		result, err := resolver.DeleteFunction(nil, "a", mutationInput)
 		require.Error(t, err)
 		require.Nil(t, result)
 	})
@@ -296,7 +296,7 @@ func TestFunctionResolver_DeleteManyFunction(t *testing.T) {
 
 		resolver := newFunctionResolver(svc, nil, &Config{UsageKind: usageKind}, retriever)
 
-		result, err := resolver.DeleteManyFunctions(nil, resources)
+		result, err := resolver.DeleteManyFunctions(nil, "a", resources)
 		require.NoError(t, err)
 		assert.Equal(t, mutations, result)
 	})
@@ -313,7 +313,7 @@ func TestFunctionResolver_DeleteManyFunction(t *testing.T) {
 
 		resolver := newFunctionResolver(svc, nil, nil, nil)
 
-		result, err := resolver.DeleteManyFunctions(nil, resources)
+		result, err := resolver.DeleteManyFunctions(nil, "a", resources)
 		require.Error(t, err)
 		require.Equal(t, []gqlschema.FunctionMetadata{}, result)
 	})

@@ -191,7 +191,7 @@ func TestTriggerResolver_CreateTrigger(t *testing.T) {
 
 			//when
 			res := newTriggerResolver(service, converter, extractor, name.Generate)
-			trigger, err := res.CreateTrigger(ctx, testData.trigger, testData.ownerRef)
+			trigger, err := res.CreateTrigger(ctx, "a", testData.trigger, testData.ownerRef)
 
 			//then
 			g.Expect(err).To(testData.errorMatcher)
@@ -284,7 +284,7 @@ func TestTriggerResolver_CreateTriggers(t *testing.T) {
 
 			//when
 			res := newTriggerResolver(service, converter, extractor, name.Generate)
-			trigger, err := res.CreateManyTriggers(ctx, testData.triggers, testData.ownerRef)
+			trigger, err := res.CreateManyTriggers(ctx, "a", testData.triggers, testData.ownerRef)
 
 			//then
 			g.Expect(err).To(testData.errorMatcher)
@@ -329,7 +329,7 @@ func TestTriggerResolver_DeleteTrigger(t *testing.T) {
 
 			//when
 			res := newTriggerResolver(service, converter, extractor, name.Generate)
-			trigger, err := res.DeleteTrigger(ctx, testData.trigger)
+			trigger, err := res.DeleteTrigger(ctx, "a", testData.trigger)
 
 			//then
 			g.Expect(err).To(testData.errorMatcher)
@@ -378,7 +378,7 @@ func TestTriggerResolver_DeleteManyTriggers(t *testing.T) {
 
 			//when
 			res := newTriggerResolver(service, converter, extractor, name.Generate)
-			trigger, err := res.DeleteManyTriggers(ctx, testData.triggers)
+			trigger, err := res.DeleteManyTriggers(ctx, "a", testData.triggers)
 
 			//then
 			g.Expect(err).To(testData.errorMatcher)
