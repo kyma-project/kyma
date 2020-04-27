@@ -1,7 +1,6 @@
 package knative
 
 import (
-	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	"path/filepath"
 	"testing"
 
@@ -16,6 +15,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 )
 
 var config ServiceConfig

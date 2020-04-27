@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"context"
+
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -19,7 +20,6 @@ type ConfigMapReconciler struct {
 }
 
 func NewConfigMap(client client.Client, log logr.Logger, config Config, service ConfigMapService) *ConfigMapReconciler {
-
 	return &ConfigMapReconciler{
 		client: client,
 		Log:    log.WithName("controllers").WithName("configmap"),
