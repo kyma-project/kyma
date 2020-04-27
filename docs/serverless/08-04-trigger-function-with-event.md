@@ -113,7 +113,7 @@ To test if the Trigger CR is properly connected to the function:
       CloudEvents
       </summary>
 
-      ```bash
+    ```bash
        curl -v -H "Content-Type: application/cloudevents+json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/events -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d \
           '{
             "specversion": "1.0",
@@ -124,14 +124,14 @@ To test if the Trigger CR is properly connected to the function:
             "data": "123456789",
             "datacontenttype": "application/json"
           }' 
-      ```
+    ```
       </details>
       <details>
       <summary label="Compatibility layer">
       Compatibility layer
       </summary>
 
-      ```bash
+    ```bash
       curl -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d \
         '{
             "event-type": "{EVENT_TYPE}",
@@ -139,7 +139,7 @@ To test if the Trigger CR is properly connected to the function:
             "event-time": "2020-04-02T21:37:00Z",
             "data": "123456789"
          }'
-      ``` 
+    ``` 
 
       </details>
   </div>
