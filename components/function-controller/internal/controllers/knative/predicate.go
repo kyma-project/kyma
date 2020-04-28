@@ -23,6 +23,11 @@ func (r *ServiceReconciler) getPredicates() predicate.Predicate {
 				return false
 			}
 
+			if !hasCorrectLabels(*newSrv) {
+				log.Info("Skipping reconciling because kservice doesn't have correct labels", "name", newSrv.GetName(), "namespace", newSrv.GetNamespace(), "apiVersion", newSrv.GroupVersionKind().GroupVersion(), "kind", newSrv.GroupVersionKind().Kind)
+				return false
+			}
+
 			log.Info("Reconciling due to dependent resource update", "name", newSrv.GetName(), "namespace", newSrv.GetNamespace(), "apiVersion", newSrv.GroupVersionKind().GroupVersion(), "kind", newSrv.GroupVersionKind().Kind)
 			return true
 		},
@@ -31,6 +36,12 @@ func (r *ServiceReconciler) getPredicates() predicate.Predicate {
 			if !ok {
 				return false
 			}
+
+			if !hasCorrectLabels(*srv) {
+				log.Info("Skipping reconciling because kservice doesn't have correct labels", "name", srv.GetName(), "namespace", srv.GetNamespace(), "apiVersion", srv.GroupVersionKind().GroupVersion(), "kind", srv.GroupVersionKind().Kind)
+				return false
+			}
+
 			log.Info("Reconcile due to generic event", "name", srv.GetName(), "namespace", srv.GetNamespace(), "apiVersion", srv.GroupVersionKind().Version, "kind", srv.GroupVersionKind().Kind)
 			return true
 		},
