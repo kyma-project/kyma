@@ -1,9 +1,12 @@
 package serverless
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/go-logr/logr"
+
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -11,6 +14,34 @@ import (
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
+
+const (
+	serviceBindingUsagesAnnotation = "servicebindingusages.servicecatalog.kyma-project.io/tracing-information"
+
+	autoscalingKnativeMinScaleAnn = "autoscaling.knative.dev/minScale"
+	autoscalingKnativeMaxScaleAnn = "autoscaling.knative.dev/maxScale"
+
+	servingKnativeVisibilityLabel      = "serving.knative.dev/visibility"
+	servingKnativeVisibilityLabelValue = "cluster-local"
+)
+
+func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
+	data := map[string]string{
+		configMapHandler:  configMapHandler,
+		configMapFunction: instance.Spec.Source,
+		configMapDeps:     r.sanitizeDependencies(instance.Spec.Deps),
+	}
+	labels := r.functionLabels(instance)
+
+	return corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels:       labels,
+			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
+			Namespace:    instance.GetNamespace(),
+		},
+		Data: data,
+	}
+}
 
 func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, configMapName string) batchv1.Job {
 	imageName := r.buildInternalImageAddress(instance)
@@ -120,28 +151,14 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 	return job
 }
 
-func (r *FunctionReconciler) buildService(log logr.Logger, instance *serverlessv1alpha1.Function, oldService *servingv1.Service) servingv1.Service {
+func (r *FunctionReconciler) buildService(log logr.Logger, instance *serverlessv1alpha1.Function) servingv1.Service {
 	imageName := r.buildExternalImageAddress(instance)
-	annotations := map[string]string{
-		"autoscaling.knative.dev/minScale": "1",
-		"autoscaling.knative.dev/maxScale": "1",
-	}
-	if instance.Spec.MinReplicas != nil {
-		annotations["autoscaling.knative.dev/minScale"] = fmt.Sprintf("%d", *instance.Spec.MinReplicas)
-	}
-	if instance.Spec.MaxReplicas != nil {
-		annotations["autoscaling.knative.dev/maxScale"] = fmt.Sprintf("%d", *instance.Spec.MaxReplicas)
-	}
-	serviceLabels := r.functionLabels(instance)
-	serviceLabels["serving.knative.dev/visibility"] = "cluster-local"
+	serviceLabels := r.serviceLabels(instance)
 
-	bindingAnnotation := ""
-	if oldService != nil {
-		bindingAnnotation = oldService.GetAnnotations()[serviceBindingUsagesAnnotation]
-	}
-	podLabels := r.servingPodLabels(log, instance, bindingAnnotation)
+	podAnnotations := r.servicePodAnnotations(instance)
+	podLabels := r.servicePodLabels(log, instance)
 
-	service := servingv1.Service{
+	return servingv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instance.GetName(),
 			Namespace: instance.GetNamespace(),
@@ -151,7 +168,7 @@ func (r *FunctionReconciler) buildService(log logr.Logger, instance *serverlessv
 			ConfigurationSpec: servingv1.ConfigurationSpec{
 				Template: servingv1.RevisionTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
-						Annotations: annotations,
+						Annotations: podAnnotations,
 						Labels:      podLabels,
 					},
 					Spec: servingv1.RevisionSpec{
@@ -172,6 +189,101 @@ func (r *FunctionReconciler) buildService(log logr.Logger, instance *serverlessv
 			},
 		},
 	}
+}
 
-	return service
+func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
+	imageTag := r.calculateImageTag(instance)
+	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.Address, instance.Namespace, instance.Name, imageTag)
+}
+
+func (r *FunctionReconciler) buildExternalImageAddress(instance *serverlessv1alpha1.Function) string {
+	imageTag := r.calculateImageTag(instance)
+	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.ExternalAddress, instance.Namespace, instance.Name, imageTag)
+}
+
+func (r *FunctionReconciler) sanitizeDependencies(dependencies string) string {
+	result := "{}"
+	if strings.Trim(dependencies, " ") != "" {
+		result = dependencies
+	}
+
+	return result
+}
+
+func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Function) map[string]string {
+	labels := make(map[string]string, len(instance.GetLabels())+3)
+	for key, value := range instance.GetLabels() {
+		labels[key] = value
+	}
+
+	labels[serverlessv1alpha1.FunctionNameLabel] = instance.Name
+	labels[serverlessv1alpha1.FunctionManagedByLabel] = "function-controller"
+	labels[serverlessv1alpha1.FunctionUUIDLabel] = string(instance.GetUID())
+
+	return labels
+}
+
+func (r *FunctionReconciler) serviceLabels(instance *serverlessv1alpha1.Function) map[string]string {
+	serviceLabels := r.functionLabels(instance)
+	serviceLabels[servingKnativeVisibilityLabel] = servingKnativeVisibilityLabelValue
+	return serviceLabels
+}
+
+func (r *FunctionReconciler) servicePodAnnotations(instance *serverlessv1alpha1.Function) map[string]string {
+	annotations := map[string]string{
+		autoscalingKnativeMinScaleAnn: "1",
+		autoscalingKnativeMaxScaleAnn: "1",
+	}
+	if instance.Spec.MinReplicas != nil {
+		annotations[autoscalingKnativeMinScaleAnn] = fmt.Sprintf("%d", *instance.Spec.MinReplicas)
+	}
+	if instance.Spec.MaxReplicas != nil {
+		annotations[autoscalingKnativeMaxScaleAnn] = fmt.Sprintf("%d", *instance.Spec.MaxReplicas)
+	}
+	return annotations
+}
+
+func (r *FunctionReconciler) servicePodLabels(log logr.Logger, instance *serverlessv1alpha1.Function) map[string]string {
+	functionLabels := r.functionLabels(instance)
+	bindingLabels := r.retrieveBindingLabels(log, instance)
+	podLabels := instance.Spec.PodLabels
+
+	if podLabels == nil || len(podLabels) == 0 {
+		for key, value := range bindingLabels {
+			functionLabels[key] = value
+		}
+		return functionLabels
+	}
+
+	for key, value := range functionLabels {
+		podLabels[key] = value
+	}
+	for key, value := range bindingLabels {
+		podLabels[key] = value
+	}
+
+	return podLabels
+}
+
+func (r *FunctionReconciler) retrieveBindingLabels(log logr.Logger, instance *serverlessv1alpha1.Function) map[string]string {
+	bindingLabels := map[string]string{}
+
+	bindingAnnotation := instance.GetAnnotations()[serviceBindingUsagesAnnotation]
+	if bindingAnnotation == "" {
+		return bindingLabels
+	}
+
+	type binding map[string]map[string]map[string]string
+	var bindings binding
+	if err := json.Unmarshal([]byte(bindingAnnotation), &bindings); err != nil {
+		log.Error(err, fmt.Sprintf("Cannot parse SeriveBindingUsage annotation %s", bindingAnnotation))
+	}
+
+	for _, service := range bindings {
+		for key, value := range service["injectedLabels"] {
+			bindingLabels[key] = value
+		}
+	}
+
+	return bindingLabels
 }

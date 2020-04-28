@@ -3,9 +3,7 @@ package serverless
 import (
 	"context"
 	"crypto/sha256"
-	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
@@ -20,8 +18,6 @@ import (
 )
 
 const (
-	serviceBindingUsagesAnnotation = "servicebindingusages.servicecatalog.kyma-project.io/tracing-information"
-
 	configMapFunction = "handler.js"
 	configMapHandler  = "handler.main"
 	configMapDeps     = "package.json"
@@ -219,7 +215,7 @@ func (r *FunctionReconciler) updateBuildStatus(ctx context.Context, log logr.Log
 }
 
 func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, service *servingv1.Service) (ctrl.Result, error) {
-	newService := r.buildService(log, instance, service)
+	newService := r.buildService(log, instance)
 
 	switch {
 	case service == nil:
@@ -429,75 +425,4 @@ func (r *FunctionReconciler) getConditionStatus(conditions []serverlessv1alpha1.
 	}
 
 	return corev1.ConditionUnknown
-}
-
-func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Function) map[string]string {
-	labels := make(map[string]string, len(instance.GetLabels())+3)
-	for key, value := range instance.GetLabels() {
-		labels[key] = value
-	}
-
-	labels[serverlessv1alpha1.FunctionNameLabel] = instance.Name
-	labels[serverlessv1alpha1.FunctionManagedByLabel] = "function-controller"
-	labels[serverlessv1alpha1.FunctionUUIDLabel] = string(instance.GetUID())
-
-	return labels
-}
-
-func (r *FunctionReconciler) servingPodLabels(log logr.Logger, instance *serverlessv1alpha1.Function, bindingAnnotation string) map[string]string {
-	functionLabels := r.functionLabels(instance)
-	if bindingAnnotation == "" {
-		return functionLabels
-	}
-
-	type binding map[string]map[string]map[string]string
-	var bindings binding
-	if err := json.Unmarshal([]byte(bindingAnnotation), &bindings); err != nil {
-		log.Error(err, fmt.Sprintf("Cannot parse SeriveBindingUsage annotation %s", bindingAnnotation))
-	}
-
-	for _, service := range bindings {
-		for key, value := range service["injectedLabels"] {
-			functionLabels[key] = value
-		}
-	}
-
-	return functionLabels
-}
-
-func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
-	imageTag := r.calculateImageTag(instance)
-	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.Address, instance.Namespace, instance.Name, imageTag)
-}
-
-func (r *FunctionReconciler) buildExternalImageAddress(instance *serverlessv1alpha1.Function) string {
-	imageTag := r.calculateImageTag(instance)
-	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.ExternalAddress, instance.Namespace, instance.Name, imageTag)
-}
-
-func (r *FunctionReconciler) sanitizeDependencies(dependencies string) string {
-	result := "{}"
-	if strings.Trim(dependencies, " ") != "" {
-		result = dependencies
-	}
-
-	return result
-}
-
-func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
-	data := map[string]string{
-		configMapHandler:  configMapHandler,
-		configMapFunction: instance.Spec.Source,
-		configMapDeps:     r.sanitizeDependencies(instance.Spec.Deps),
-	}
-	labels := r.functionLabels(instance)
-
-	return corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels:       labels,
-			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
-			Namespace:    instance.GetNamespace(),
-		},
-		Data: data,
-	}
 }
