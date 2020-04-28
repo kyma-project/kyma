@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	prometheus "github.com/prometheus/client_golang/api"
@@ -56,8 +57,17 @@ func (ut *MetricsUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 	if err != nil {
 		return err
 	}
+	log.Printf("data before storing: %v", result)
 	err = ut.storeMetrics(result, time)
-	return err
+	if err != nil {
+		return err
+	}
+	_, data, err := ut.retrievePreviousMetrics()
+	if err != nil {
+		return err
+	}
+	log.Printf("data retrieved from configmap before upgrade: %v:", data)
+	return nil
 }
 
 // TestResources retrieves previously installed metrics values and compares it to the metrics returned for the same query and the same time
@@ -125,6 +135,7 @@ func (ut *MetricsUpgradeTest) retrievePreviousMetrics() (time.Time, model.Vector
 
 func (ut *MetricsUpgradeTest) compareMetrics() error {
 	time, previous, err := ut.retrievePreviousMetrics()
+	log.Printf("data retrieved from configmap after upgrade: %v:", previous)
 	if err != nil {
 		return err
 	}
