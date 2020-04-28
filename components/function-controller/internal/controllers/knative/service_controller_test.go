@@ -261,18 +261,15 @@ func fixRevisionList(parentSvcName, namespace string, num int) []servingv1.Revis
 	return revList
 }
 
-func fixKservice(name, namespace string, addLables bool) servingv1.Service {
+func fixKservice(name, namespace string, addLabels bool) servingv1.Service {
 	svcLabels := map[string]string{
 		testCleanupLabelKey: testCleanupLabelValue,
 	}
 
-	if addLables {
-		svcLabels = map[string]string{
-			serverlessv1alpha1.FunctionNameLabel:      "whatever-name",
-			serverlessv1alpha1.FunctionUUIDLabel:      "whatever-uuid",
-			serverlessv1alpha1.FunctionManagedByLabel: "whatever-managed-by",
-			testCleanupLabelKey:                       testCleanupLabelValue,
-		}
+	if addLabels {
+		svcLabels[serverlessv1alpha1.FunctionNameLabel] = "whatever-name"
+		svcLabels[serverlessv1alpha1.FunctionUUIDLabel] = "whatever-uuid"
+		svcLabels[serverlessv1alpha1.FunctionManagedByLabel] = "whatever-managed-by"
 	}
 
 	return servingv1.Service{
