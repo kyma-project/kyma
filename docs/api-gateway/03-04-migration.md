@@ -12,7 +12,26 @@ During migration, it may turn out that some resource specifications are too comp
 
 >**NOTE:** If the migration process skipped the Api resources due to the invalid status or a blacklisted label, migration is not possible.
 
-Here are the steps you need to follow to ensure your services are properly migrated:
+## Prerequisites
+
+Before the migration process starts, ensure that all Api resources have a status. To do so, fetch all Apis without the status:
+
+```shell script
+kubectl get apis --all-namespaces -o json | jq '.items | .[] | select(.status == null)'
+```
+Receiving no results means that you can perform the upgrade. If you see any Api resources in the output, recreate each Api using this script:
+
+```shell script
+# set variables
+export API_NAME={INSERT_API_NAME_HERE}
+export API_NAMESPACE={INSERT_API_NAMESPACE_HERE}
+# remove dependent resources
+kubectl delete virtualservice -n ${API_NAMESPACE} ${API_NAME}
+kubectl delete policy -n ${API_NAMESPACE} ${API_NAME} --ignore-not-found
+# recreate Api
+kubectl get api -n ${API_NAMESPACE} ${API_NAME} -o yaml | kubectl replace --force -f 
+```
+Once the Apis are recreated, check again if the status is present. The output should not include any Api resources, allowing you to proceed with the migration. Follow these steps to ensure your services are properly migrated:
 
 1. [Verify the migration outcome](#details-migration-from-api-to-api-rule-custom-resources-verify-the-automatic-migration). 
 2. If you can still see any Api CRs in use, use the [manual migration](#details-migration-from-api-to-api-rule-custom-resources-manual-migration) guide to migrate them.

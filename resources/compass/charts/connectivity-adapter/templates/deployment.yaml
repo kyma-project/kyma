@@ -31,7 +31,7 @@ spec:
             - name: APP_APP_REGISTRY_DIRECTOR_ENDPOINT
               value: "http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.gateway.port }}/director/graphql"
             - name: APP_CONNECTOR_CONNECTOR_ENDPOINT
-              value: "http://compass-connector.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connector.graphql.external.port }}/graphql"
+              value: "http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.gateway.port }}/connector/graphql"
             - name: APP_CONNECTOR_ADAPTER_BASE_URL
               value: "https://{{ .Values.global.connectivity_adapter.tls.host }}.{{ .Values.global.ingress.domainName }}"
             - name: APP_CONNECTOR_ADAPTER_MTLS_BASE_URL

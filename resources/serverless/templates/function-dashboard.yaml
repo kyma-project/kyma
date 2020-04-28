@@ -1,12 +1,13 @@
+{{- if .Values.grafanaDashboard.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: lambda-dashboard
+  name: function-dashboard
   labels:
     grafana_dashboard: "1"
     app: monitoring-grafana
 data:
-  lambda-dashboard.json: |-
+  function-dashboard.json: |-
     {
       "annotations": {
         "list": [
@@ -24,8 +25,8 @@ data:
       "editable": false,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 163,
-      "iteration": 1584715933325,
+      "id": 39,
+      "iteration": 1587649200301,
       "links": [],
       "panels": [
         {
@@ -83,17 +84,20 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\",response_code=~\"2.*\"}[2m])) by (destination_service_name) / sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\",}[2m])) by (destination_service_name)",
+              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_revision\",response_code=~\"2.*\"}[2m])) by (destination_service_name) / sum(rate(istio_requests_total{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_revision\",}[2m])) by (destination_service_name)",
+              "interval": "",
               "legendFormat": "2xx response code",
               "refId": "A"
             },
             {
-              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\",response_code=~\"5.*\"}[2m])) by (destination_service_name) / sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name)",
+              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_revision\",response_code=~\"5.*\"}[2m])) by (destination_service_name) / sum(rate(istio_requests_total{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_revision\"}[2m])) by (destination_service_name)",
+              "interval": "",
               "legendFormat": "5xx response code",
               "refId": "B"
             },
             {
-              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\",response_code=~\"4.*\"}[2m])) by (destination_service_name) / sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name)",
+              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_revision\",response_code=~\"4.*\"}[2m])) by (destination_service_name) / sum(rate(istio_requests_total{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_revision\"}[2m])) by (destination_service_name)",
+              "interval": "",
               "legendFormat": "4xx response code",
               "refId": "C"
             }
@@ -181,7 +185,8 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name, le))",
+              "expr": "histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_revision\"}[2m])) by (destination_service_name, le))",
+              "interval": "",
               "legendFormat": "Request Duration",
               "refId": "A"
             }
@@ -244,37 +249,44 @@ data:
                 "mean"
               ],
               "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
                 "mappings": [],
                 "max": 100,
                 "min": 0,
                 "nullValueMode": "connected",
-                "thresholds": [
-                  {
-                    "color": "#299c46",
-                    "value": null
-                  },
-                  {
-                    "color": "rgba(237, 129, 40, 0.89)",
-                    "value": 80
-                  },
-                  {
-                    "color": "#d44a3a",
-                    "value": 90
-                  }
-                ],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#299c46",
+                      "value": null
+                    },
+                    {
+                      "color": "rgba(237, 129, 40, 0.89)",
+                      "value": 80
+                    },
+                    {
+                      "color": "#d44a3a",
+                      "value": 90
+                    }
+                  ]
+                },
                 "unit": "percent"
               },
-              "override": {},
+              "overrides": [],
               "values": false
             },
             "orientation": "horizontal",
             "showThresholdLabels": false,
             "showThresholdMarkers": true
           },
-          "pluginVersion": "6.5.0",
+          "pluginVersion": "6.7.1",
           "targets": [
             {
-              "expr": "(max(container_memory_usage_bytes{namespace=\"$environment\", pod=~\"$lambda_service.*\", container=\"$lambda_service\", container!=\"POD\"}) / max (kube_pod_container_resource_limits_memory_bytes{namespace=\"$environment\", pod=~\"$lambda_service.*\", container=\"$lambda_service\"})) * 100",
+              "expr": "(max(container_memory_usage_bytes{namespace=\"$namespace\", pod=~\"$function_revision.*\", container=\"$function_container\"}) / max (kube_pod_container_resource_limits_memory_bytes{namespace=\"$namespace\", pod=~\"$function_revision.*\", container=\"$function_container\"})) * 100",
+              "interval": "",
               "legendFormat": "memory",
               "refId": "A"
             }
@@ -325,7 +337,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -348,7 +359,8 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "max (rate(container_cpu_usage_seconds_total{container=\"$lambda_service\", pod=~\"$lambda_service.*\", namespace=\"$environment\"}[2m])  )",
+              "expr": "max (rate(container_cpu_usage_seconds_total{container=\"$function_container\", pod=~\"$function_revision.*\", namespace=\"$namespace\"}[2m])  )",
+              "interval": "",
               "legendFormat": "CPU",
               "refId": "A"
             }
@@ -412,7 +424,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -435,8 +446,9 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\", response_code=~\"2.*\"}[2m])) / sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) ",
-              "legendFormat": "2xx rate",
+              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_revision\", response_code=~\"2.*\"}[2m])) / sum(rate(istio_requests_total{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_revision\"}[2m])) ",
+              "interval": "",
+              "legendFormat": "",
               "refId": "A"
             }
           ],
@@ -496,7 +508,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -519,7 +530,8 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "kube_deployment_status_replicas_available{deployment=\"$lambda_service\",namespace=\"$environment\"}",
+              "expr": "kube_deployment_status_replicas_available{deployment=\"$function_revision-deployment\",namespace=\"$namespace\"}",
+              "interval": "",
               "legendFormat": "Replicas",
               "refId": "A"
             }
@@ -594,7 +606,8 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service, response_code)",
+              "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_revision\"}[2m])) by (destination_service, response_code)",
+              "interval": "",
               "legendFormat": "{{ `{{response_code}}` }}",
               "refId": "A"
             }
@@ -681,22 +694,26 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.50, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name, le))",
+              "expr": "histogram_quantile(0.50, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_revision\"}[2m])) by (destination_service_name, le))",
+              "interval": "",
               "legendFormat": "p50",
               "refId": "A"
             },
             {
-              "expr": "histogram_quantile(0.90, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name, le))",
+              "expr": "histogram_quantile(0.90, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_revision\"}[2m])) by (destination_service_name, le))",
+              "interval": "",
               "legendFormat": "p90",
               "refId": "B"
             },
             {
-              "expr": "histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name, le))",
+              "expr": "histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_revision\"}[2m])) by (destination_service_name, le))",
+              "interval": "",
               "legendFormat": "p95",
               "refId": "C"
             },
             {
-              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$environment\", destination_service_name=\"$lambda_service\"}[2m])) by (destination_service_name, le))",
+              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_revision\"}[2m])) by (destination_service_name, le))",
+              "interval": "",
               "legendFormat": "p99",
               "refId": "D"
             }
@@ -787,12 +804,14 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by(pod) (container_memory_usage_bytes{namespace=\"$environment\", pod=~\"$lambda_service.*\", container=\"$lambda_service\", container!=\"POD\"})",
+              "expr": "sum by(pod) (container_memory_usage_bytes{namespace=\"$namespace\", pod=~\"$function_revision.*\", container=\"$function_container\"})",
+              "interval": "",
               "legendFormat": "Current {{ `{{pod}}` }}",
               "refId": "A"
             },
             {
-              "expr": "sum by(pod) (kube_pod_container_resource_limits{namespace=\"$environment\", resource=\"memory\", pod=~\"$lambda_service.*\", container=\"$lambda_service\"})",
+              "expr": "sum by(pod) (kube_pod_container_resource_limits{namespace=\"$namespace\", resource=\"memory\", pod=~\"$function_revision.*\", container=\"$function_container\"})",
+              "interval": "",
               "legendFormat": "Limit {{ `{{pod}}` }}",
               "refId": "B"
             }
@@ -881,13 +900,15 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(container_cpu_usage_seconds_total{container=\"$lambda_service\", pod=~\"$lambda_service.*\", namespace=\"$environment\"}[2m])",
+              "expr": "rate(container_cpu_usage_seconds_total{container=\"$function_container\", pod=~\"$function_revision.*\", namespace=\"$namespace\"}[2m])",
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "Current {{ `{{pod}}` }}",
               "refId": "A"
             },
             {
-              "expr": "sum by(pod) (kube_pod_container_resource_limits{namespace=\"$environment\", resource=\"cpu\", pod=~\"$lambda_service.*\", container=\"$lambda_service\"})",
+              "expr": "sum by(pod) (kube_pod_container_resource_limits{namespace=\"$namespace\", resource=\"cpu\", pod=~\"$function_revision.*\", container=\"$function_container\"})",
+              "interval": "",
               "legendFormat": "Limit {{ `{{pod}}` }}",
               "refId": "B"
             }
@@ -976,7 +997,8 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "kube_deployment_status_replicas_available{deployment=\"$lambda_service\",namespace=\"$environment\"}",
+              "expr": "kube_deployment_status_replicas_available{deployment=\"$function_revision-deployment\",namespace=\"$namespace\"}",
+              "interval": "",
               "legendFormat": "Replicas",
               "refId": "A"
             }
@@ -1024,7 +1046,7 @@ data:
         }
       ],
       "refresh": "10s",
-      "schemaVersion": 21,
+      "schemaVersion": 22,
       "style": "dark",
       "tags": [
         "serverless",
@@ -1035,18 +1057,21 @@ data:
           {
             "allValue": null,
             "current": {
-              "text": "default",
-              "value": "default"
+              "selected": true,
+              "tags": [],
+              "text": "magic",
+              "value": "magic"
             },
             "datasource": "Prometheus",
-            "definition": "label_values(kube_service_labels{label_created_by=\"kubeless\"},namespace)",
+            "definition": "label_values(kube_service_labels{label_serving_knative_dev_route=~\".+\"},namespace)",
             "hide": 0,
             "includeAll": false,
+            "index": -1,
             "label": "Namespace",
             "multi": false,
-            "name": "environment",
+            "name": "namespace",
             "options": [],
-            "query": "label_values(kube_service_labels{label_created_by=\"kubeless\"},namespace)",
+            "query": "label_values(kube_service_labels{label_serving_knative_dev_route=~\".+\"},namespace)",
             "refresh": 1,
             "regex": "",
             "skipUrlSync": false,
@@ -1060,18 +1085,67 @@ data:
           {
             "allValue": null,
             "current": {
-              "text": "a",
-              "value": "a"
+              "selected": true,
+              "text": "test",
+              "value": "test"
             },
             "datasource": "Prometheus",
-            "definition": "label_values(kube_service_labels{label_created_by=\"kubeless\",namespace=\"$environment\"},service)",
+            "definition": "label_values(kube_service_labels{label_serving_knative_dev_route=~\".+\",namespace=\"$namespace\"},service)",
             "hide": 0,
             "includeAll": false,
-            "label": "Lambda",
+            "index": -1,
+            "label": "Function",
             "multi": false,
-            "name": "lambda_service",
+            "name": "function_name",
             "options": [],
-            "query": "label_values(kube_service_labels{label_created_by=\"kubeless\",namespace=\"$environment\"},service)",
+            "query": "label_values(kube_service_labels{label_serving_knative_dev_route=~\".+\",namespace=\"$namespace\"},service)",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "selected": true,
+              "text": "lambda",
+              "value": "lambda"
+            },
+            "hide": 2,
+            "label": null,
+            "name": "function_container",
+            "options": [
+              {
+                "selected": true,
+                "text": "lambda",
+                "value": "lambda"
+              }
+            ],
+            "query": "lambda",
+            "skipUrlSync": false,
+            "type": "constant"
+          },
+          {
+            "allValue": null,
+            "current": {
+              "selected": true,
+              "text": "test-w8z8l",
+              "value": "test-w8z8l"
+            },
+            "datasource": "Prometheus",
+            "definition": "label_values(kube_service_labels{label_serverless_kyma_project_io_function_name=\"$function_name\"},label_serving_knative_dev_revision)",
+            "hide": 0,
+            "includeAll": false,
+            "index": -1,
+            "label": "Revision",
+            "multi": false,
+            "name": "function_revision",
+            "options": [],
+            "query": "label_values(kube_service_labels{label_serverless_kyma_project_io_function_name=\"$function_name\"},label_serving_knative_dev_revision)",
             "refresh": 1,
             "regex": "",
             "skipUrlSync": false,
@@ -1103,7 +1177,11 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Kyma / Lambda",
+      "title": "Kyma / Function",
       "uid": "opc3b8Tyik",
+      "variables": {
+        "list": []
+      },
       "version": 1
     }
+{{- end }}

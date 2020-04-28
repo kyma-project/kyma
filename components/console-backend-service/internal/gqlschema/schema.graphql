@@ -1284,13 +1284,13 @@ type Mutation {
 
     createFunction(name: String!, namespace: String!, params: FunctionMutationInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
     updateFunction(name: String!, namespace: String!, params: FunctionMutationInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
-    deleteFunction(function: FunctionMetadataInput!): FunctionMetadata @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1"})
-    deleteManyFunctions(functions: [FunctionMetadataInput!]!): [FunctionMetadata!] @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1"})
+    deleteFunction(namespace: String!, function: FunctionMetadataInput!): FunctionMetadata @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    deleteManyFunctions(namespace: String!, functions: [FunctionMetadataInput!]!): [FunctionMetadata!] @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 
-    createTrigger(trigger: TriggerCreateInput!, ownerRef: [OwnerReference!]): Trigger @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
-    createManyTriggers(triggers: [TriggerCreateInput!]!, ownerRef: [OwnerReference!]): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
-    deleteTrigger(trigger: TriggerMetadataInput!): TriggerMetadata @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
-    deleteManyTriggers(triggers: [TriggerMetadataInput!]!): [TriggerMetadata!] @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1"})
+    createTrigger(namespace: String!, trigger: TriggerCreateInput!, ownerRef: [OwnerReference!]): Trigger @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    createManyTriggers(namespace: String!, triggers: [TriggerCreateInput!]!, ownerRef: [OwnerReference!]): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    deleteTrigger(namespace: String!, trigger: TriggerMetadataInput!): TriggerMetadata @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    deleteManyTriggers(namespace: String!, triggers: [TriggerMetadataInput!]!): [TriggerMetadata!] @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 # Subscriptions
