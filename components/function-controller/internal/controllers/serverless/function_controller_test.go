@@ -22,6 +22,12 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
+const (
+	testBindingLabel1     = "use-ec7cd950-9c2b-45a4-9f63-556fd8ea07f4"
+	testBindingLabel2     = "use-ec7cd950-9c2b-45a4-9f63-556fd8ea07f5"
+	testBindingLabelValue = "146000"
+)
+
 var _ = ginkgo.Describe("Function", func() {
 	var (
 		reconciler *FunctionReconciler
@@ -128,6 +134,12 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(service).ToNot(gomega.BeNil())
 		gomega.Expect(service.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
 		gomega.Expect(service.Spec.Template.Spec.Containers[0].Image).To(gomega.Equal(reconciler.buildExternalImageAddress(function)))
+		gomega.Expect(service.Spec.Template.Labels).To(gomega.HaveLen(5)) // function-name, managed-by, uuid + 2
+		gomega.Expect(service.Spec.Template.Labels[serverlessv1alpha1.FunctionNameLabel]).To(gomega.Equal(function.Name))
+		gomega.Expect(service.Spec.Template.Labels[serverlessv1alpha1.FunctionManagedByLabel]).To(gomega.Equal("function-controller"))
+		gomega.Expect(service.Spec.Template.Labels[serverlessv1alpha1.FunctionUUIDLabel]).To(gomega.Equal(string(function.UID)))
+		gomega.Expect(service.Spec.Template.Labels[testBindingLabel1]).To(gomega.Equal(testBindingLabelValue))
+		gomega.Expect(service.Spec.Template.Labels[testBindingLabel2]).To(gomega.Equal(testBindingLabelValue))
 
 		ginkgo.By("running")
 		service.Status.Conditions = duckv1.Conditions{{Type: apis.ConditionReady, Status: corev1.ConditionTrue}}
@@ -172,13 +184,18 @@ func newFixFunction(namespace, name string) *serverlessv1alpha1.Function {
 	one := int32(1)
 	two := int32(2)
 	suffix := rand.Int()
+	bindingAnnotationValue := fmt.Sprintf(`{"stupefied-mccarthy":{"injectedLabels":{"%s":"%s"}}}`, testBindingLabel1, testBindingLabelValue)
+
 	return &serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("%s-%d", name, suffix),
 			Namespace: namespace,
+			Annotations: map[string]string{
+				serviceBindingUsagesTracingAnnotation: bindingAnnotationValue,
+			},
 		},
 		Spec: serverlessv1alpha1.FunctionSpec{
-			Source: "module.exports = {main: function(event, context) {return 'Hello World 321'}}",
+			Source: "module.exports = {main: function(event, context) {return 'Hello World. Epstein didnt kill himself.'}}",
 			Deps:   "   ",
 			Env: []corev1.EnvVar{
 				{
@@ -193,6 +210,9 @@ func newFixFunction(namespace, name string) *serverlessv1alpha1.Function {
 			Resources:   corev1.ResourceRequirements{},
 			MinReplicas: &one,
 			MaxReplicas: &two,
+			PodLabels: map[string]string{
+				testBindingLabel2: testBindingLabelValue,
+			},
 		},
 	}
 }

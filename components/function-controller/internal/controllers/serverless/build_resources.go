@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	serviceBindingUsagesAnnotation = "servicebindingusages.servicecatalog.kyma-project.io/tracing-information"
+	serviceBindingUsagesTracingAnnotation = "servicebindingusages.servicecatalog.kyma-project.io/tracing-information"
 
 	autoscalingKnativeMinScaleAnn = "autoscaling.knative.dev/minScale"
 	autoscalingKnativeMaxScaleAnn = "autoscaling.knative.dev/maxScale"
@@ -268,7 +268,7 @@ func (r *FunctionReconciler) servicePodLabels(log logr.Logger, instance *serverl
 func (r *FunctionReconciler) retrieveBindingLabels(log logr.Logger, instance *serverlessv1alpha1.Function) map[string]string {
 	bindingLabels := map[string]string{}
 
-	bindingAnnotation := instance.GetAnnotations()[serviceBindingUsagesAnnotation]
+	bindingAnnotation := instance.GetAnnotations()[serviceBindingUsagesTracingAnnotation]
 	if bindingAnnotation == "" {
 		return bindingLabels
 	}
