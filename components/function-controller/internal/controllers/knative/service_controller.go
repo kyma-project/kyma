@@ -71,7 +71,7 @@ func (r *ServiceReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 
 	if !hasCorrectLabels(*instance) {
 		r.Log.WithValues("service", request.NamespacedName).Info("skipping reconcilation for a service without needed labels")
-		return ctrl.Result{RequeueAfter: r.config.RequeueDuration}, nil
+		return ctrl.Result{}, nil
 	}
 
 	if !instance.Status.IsReady() {
