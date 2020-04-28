@@ -24,7 +24,7 @@ const (
 )
 
 type ServiceConfig struct {
-	RequeueDuration time.Duration `envconfig:"default=1m"`
+	RequeueDuration time.Duration `envconfig:"default=10m"`
 }
 
 type ServiceReconciler struct {
@@ -75,7 +75,7 @@ func (r *ServiceReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	}
 
 	if !instance.Status.IsReady() {
-		return ctrl.Result{RequeueAfter: r.config.RequeueDuration}, nil
+		return ctrl.Result{}, nil
 	}
 
 	log := r.Log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "name", instance.GetName(), "namespace", instance.GetNamespace(), "version", instance.GetGeneration())
@@ -91,7 +91,7 @@ func (r *ServiceReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{}, nil
+	return ctrl.Result{RequeueAfter: r.config.RequeueDuration}, nil
 }
 
 func hasCorrectLabels(instance servingv1.Service) bool {
