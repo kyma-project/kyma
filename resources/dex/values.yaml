@@ -66,6 +66,8 @@ dex:
     format: json
   useStaticConnector: true
 
+deploymentStrategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+
 resources:
   limits:
     cpu: 100m

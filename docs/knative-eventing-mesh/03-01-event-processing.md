@@ -3,7 +3,7 @@ title: Event processing and delivery
 type: Details
 ---
 The event processing and delivery flow in Knative Eventing Mesh uses the Broker and Trigger concepts to forward events and deliver them to the subscribers.
-This diagram explains the event flow in Kyma, from the moment the Application sends an event, to the point when the event triggers the function.
+This diagram explains the event flow in Kyma, from the moment the Application sends an event, to the point when the event triggers the Function.
 
 ![Eventing flow](./assets/eventing-mesh-flow.svg)
 
@@ -44,8 +44,8 @@ The **filter** section of the Trigger CR specification defines the Broker which 
 | Parameter  |  Description  |
 |------------|-------------- |
 | **spec.broker** | Name of the Broker that receives events. By default, it receives the value `default` when the user's Namespace is labeled with `knative-eventing-injection`.  |
-| **spec.filter.attributes.type** | Specific event type to which you want to subscribe your function, such as `user.created`.|
+| **spec.filter.attributes.type** | Specific event type to which you want to subscribe your Function, such as `user.created`.|
 | **spec.filter.attributes.eventtypeversion** | Event version, such as `v1`. |
 | **spec.filter.attributes.source** | Name of the Application which sends events. |
 
-To learn how to trigger a function with an event, follow [this](/components/serverless/#tutorials-trigger-a-function-with-an-event) tutorial.
+To learn how to trigger a Function with an event, follow [this](/components/serverless/#tutorials-trigger-a-function-with-an-event) tutorial.

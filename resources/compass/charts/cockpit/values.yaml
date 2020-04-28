@@ -1,24 +1,25 @@
+deployment:
+  image:
+    pullPolicy: IfNotPresent
 images:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   ui:
-    dir:
-    version: 9cee1c52
-
-statusPort: 6082
-
-ui:
-  host: compass
+    dir: null
+    version: 65153bec
 mf:
   host: compass-mf
-
 service:
   externalPort: 81
   internalPort: 81
   mfExternalPort: 8888
   mfInternalPort: 8888
+statusPort: 6082
+ui:
+  host: compass
 
 deployment:
   image:
     pullPolicy: IfNotPresent
   resources: {}
+  strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
