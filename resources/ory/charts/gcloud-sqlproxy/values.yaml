@@ -13,6 +13,8 @@ imagePullPolicy: IfNotPresent
 ## Replicas Set count
 replicasCount: 1
 
+deploymentStrategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+
 ## Set the GCP service account key JSON file.
 ## Service account has access be set to Cloud SQL instances
 ## the key must be encoded with base64
