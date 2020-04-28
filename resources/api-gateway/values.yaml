@@ -60,7 +60,7 @@ config:
       - "*"
   generatedObjects:
     # Comma-separated list of key=value pairs used to label generated objects
-    labels: {}
+    labels:
 
   # Node labels for pod assignment.
   nodeSelector: {}
