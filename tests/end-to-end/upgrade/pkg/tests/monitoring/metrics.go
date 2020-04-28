@@ -52,7 +52,7 @@ func (ut *MetricsUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 	ut.namespace = namespace
 	ut.log = log
 
-	time := time.Now().Add(-time.Minute)
+	time := time.Now()
 	result, err := ut.collectMetrics(time)
 	if err != nil {
 		return err
