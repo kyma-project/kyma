@@ -114,16 +114,16 @@ To test if the Trigger CR is properly connected to the function:
       </summary>
 
     ```bash
-       curl -v -H "Content-Type: application/cloudevents+json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/events -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d \
-          '{
-            "specversion": "1.0",
-            "source": "{APP_NAME}",
-            "type": "{EVENT_TYPE}",
-            "eventtypeversion": "{EVENT_VERSION}",
-            "id": "A234-1234-1234",
-            "data": "123456789",
-            "datacontenttype": "application/json"
-          }' 
+    curl -v -H "Content-Type: application/cloudevents+json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/events -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d \
+      `{
+        "specversion": "1.0",
+        "source": "{APP_NAME}",
+        "type": "{EVENT_TYPE}",
+        "eventtypeversion": "{EVENT_VERSION}",
+        "id": "A234-1234-1234",
+        "data": "123456789",
+        "datacontenttype": "application/json"
+      }' 
     ```
       </details>
       <details>
@@ -132,12 +132,12 @@ To test if the Trigger CR is properly connected to the function:
       </summary>
 
     ```bash
-      curl -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d \
-        '{
-            "event-type": "{EVENT_TYPE}",
-            "event-type-version": "{EVENT_VERSION}",
-            "event-time": "2020-04-02T21:37:00Z",
-            "data": "123456789"
+    curl -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d \
+      '{
+          "event-type": "{EVENT_TYPE}",
+          "event-type-version": "{EVENT_VERSION}",
+          "event-time": "2020-04-02T21:37:00Z",
+          "data": "123456789"
          }'
     ``` 
 
@@ -153,6 +153,3 @@ To test if the Trigger CR is properly connected to the function:
     ```text
     User created: 123456789
     ```
-
-
-
