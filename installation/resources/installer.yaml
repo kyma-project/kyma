@@ -201,7 +201,7 @@ spec:
             readOnly: true
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/develop/installer:1.12.0-rc1
+        image: eu.gcr.io/kyma-project/kyma-installer:1.12
         imagePullPolicy: IfNotPresent
         args:
           - -tillerTLSInsecureSkipVerify=true
@@ -246,4 +246,3 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: kyma-installer-reader
-
