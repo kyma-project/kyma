@@ -51,10 +51,6 @@ The API Gateway aims to provide a set of functionalities which allow developers 
 
 Logging in Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system.
 
-## Backup
-
-Kyma relies on the managed Kubernetes cluster for periodic backups of the Kubernetes objects. However, volumes are typically not a part of these backups. That's why it is recommended to take periodic backups of your volumes. You can do this using the VolumeSnapshot Kubernetes API resource. Read [this](/components/backup#new-backup-strategy) for more information.
-
 ## Console
 
 The Console is a web-based administrative UI for Kyma. It uses the [Luigi framework](https://github.com/SAP/luigi) to allow you to seamlessly extend the UI content with custom micro frontends. The Console has a dedicated Console Backend Service which provides a tailor-made API for each view of the Console UI.

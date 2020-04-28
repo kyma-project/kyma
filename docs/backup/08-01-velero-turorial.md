@@ -3,11 +3,15 @@ title: Taking backup using Velero
 type: Tutorials
 ---
 
+For scenarios of partial restore of individual applications running on Kyma, you might want to use Velero. It will create a backup of your kubernetes resources and volumes so that you can restore them on a different cluster.
+
+> **NOTE:**  Be aware that a full restore of a Kyma cluster is not supported. You need to always start from an existing Kyma installation and restore explicit resources individual.
+
 Follow this tutorial to install Velero and take a backup from Kyma cluster.
 
 ## Prerequisites
 
-Download and install the [Velero CLI](https://github.com/heptio/velero/releases/tag/v1.3.2).
+Download and install the [Velero CLI](https://github.com/vmware-tanzu/velero/releases).
 
 ## Steps
 
