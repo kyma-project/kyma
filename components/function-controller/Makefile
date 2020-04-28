@@ -1,5 +1,5 @@
 PKG = github.com/kyma-project/kyma/components/function-controller
-
+ROOT :=  $(shell pwd)
 # Image URL to use all building/pushing image targets
 APP_NAME = function-controller
 APP_PATH = components/$(APP_NAME)
@@ -24,6 +24,8 @@ GOBIN=$(shell go env GOBIN)
 endif
 
 verify:: mod-verify
+release: build-function-runtime-image push-function-runtime-image
+
 
 resolve-local:
 	GO111MODULE=on go mod download
@@ -45,7 +47,7 @@ mod-verify-local:
 test-local: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
 test-local: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
 test-local: generate-local manifests
-	GO111MODULE=on go test -v -coverprofile=/tmp/artifacts/cover.out -mod vendor ./...
+	GO111MODULE=on go test -v -race -coverprofile=/tmp/artifacts/cover.out -mod vendor ./...
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
 
@@ -99,6 +101,19 @@ endif
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
 	@echo "resources/serverless"
+
+######## function runtime image
+
+FUNCTION_RUNTIME_IMAGE_NODEJS12 = function-runtime-nodejs12
+FUNCTION_RUNTIME_NODEJS12_IMG_NAME=$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(FUNCTION_RUNTIME_IMAGE_NODEJS12)
+
+.PHONY: build-function-runtime-image push-function-runtime-image
+build-function-runtime-image:
+	docker build -t $(FUNCTION_RUNTIME_IMAGE_NODEJS12) $(ROOT)/deploy/function-runtime-image/nodejs12/
+
+push-function-runtime-image:
+	docker tag $(FUNCTION_RUNTIME_IMAGE_NODEJS12) $(FUNCTION_RUNTIME_NODEJS12_IMG_NAME):$(DOCKER_TAG)
+	docker push $(FUNCTION_RUNTIME_NODEJS12_IMG_NAME):$(DOCKER_TAG)
 
 $(eval $(call buildpack-mount,resolve))
 $(eval $(call buildpack-mount,mod-verify))

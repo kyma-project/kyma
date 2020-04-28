@@ -56,10 +56,8 @@ Follow these steps:
 
   >**NOTE:** For additional values, see [this](https://github.com/kyma-incubator/knative-kafka/blob/master/resources/knative-kafka/values.yaml) file.
 
-5. [Enable](/root/kyma/#configuration-custom-component-installation) the `knative-eventing-kafka` custom component and save the installer file to `installer-with-knative-eventing-kafka.tpl`.
-
-6. Use Kyma CLI to install Kyma with the override. 
+5. Use Kyma CLI to install Kyma with the override to the `installer-cr-azure-eventhubs.yaml.tpl` installer file located [here](installation/resources/installer-cr-azure-eventhubs.yaml.tpl).
     ```bash
-    kyma install -o {azure-secret.yaml} -o {installer-with-knative-eventing-kafka.tpl}
+    kyma install -o {azure-secret.yaml} -o {installer-cr-azure-eventhubs.yaml.tpl}
     ```
   >**TIP**: If you want to set up Kafka Channel as a default Channel, follow [this](#tutorials-set-up-a-default-channel) tutorial.

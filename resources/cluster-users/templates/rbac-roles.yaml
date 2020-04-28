@@ -154,6 +154,10 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-backup-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-rafter-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-view: "true"
 rules: []
 
 ---
@@ -211,6 +215,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-ory-edit: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-backup-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-edit: "true"
 rules: []
 
 ---
@@ -255,6 +261,12 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-ory-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-backup-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-rafter-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-admin: "true"
 rules: []
 
 ---
@@ -286,8 +298,6 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-admin: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-admin: "true"
-  - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-admin: "true"
@@ -301,6 +311,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-ory-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-backup-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-admin: "true"
 rules: []
 
 ---

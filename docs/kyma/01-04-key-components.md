@@ -8,11 +8,11 @@ Kyma is built of numerous components but these three drive it forward:
   - **Application Connector**:
     - Simplifies and secures the connection between external systems and Kyma
     - Registers external Events and APIs in the Service Catalog and simplifies the API usage
-    - Provides asynchronous communication with services and functions deployed in Kyma through Events
+    - Provides asynchronous communication with services and Functions deployed in Kyma through Events
     - Manages secure access to external systems
     - Provides monitoring and tracing capabilities to facilitate operational aspects
   - **Serverless**:
-    - Ensures quick deployments following a function approach
+    - Ensures quick deployments following a Function approach
     - Enables scaling independent of the core applications
     - Gives a possibility to revert changes without causing production system downtime
     - Supports the complete asynchronous programming model

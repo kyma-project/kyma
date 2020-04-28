@@ -3,6 +3,8 @@ title: Velero chart
 type: Configuration
 ---
 
+>**NOTE**: Velero is no longer supported. For the new backup strategy, see [this](/components/backup/#details-kyma-backup-strategy) document.
+
 This document lists and describes the parameters that you can configure in Velero, split into required and optional parameters.
 
 >**TIP:** To learn more about how to use overrides in Kyma, see the following documents:

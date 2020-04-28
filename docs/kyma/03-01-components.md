@@ -23,9 +23,9 @@ The Helm Broker is a Service Broker which runs in the Kyma cluster and deploys K
 
 The Application Connector is a proprietary Kyma solution. This endpoint is the Kyma side of the connection between Kyma and the external solutions. The Application Connector allows you to register the APIs and the Event Catalog, which lists all of the available events, of the connected solution. Additionally, the Application Connector proxies the calls from Kyma to external APIs in a secure way.
 
-## Event Bus
+## Knative Eventing Mesh
 
-Kyma Event Bus receives Events from external solutions and triggers the business logic created with functions and services in Kyma. The Event Bus is based on the [NATS Streaming](https://nats.io/) open source messaging system for cloud-native applications.
+Knative Eventing Mesh allows you to easily integrate external applications with Kyma. Under the hood, the Eventing Mesh implements [Knative Eventing](https://knative.dev/docs/eventing/) to ensure Kyma receives business events from external sources and is able to trigger business flows using Functions or services.
 
 ## Service Mesh
 
@@ -33,7 +33,7 @@ The Service Mesh is an infrastructure layer that handles service-to-service comm
 
 ## Serverless
 
-The Serverless component allows you to reduce the implementation and operation effort of an application to the absolute minimum. Kyma Serverless provides a platform to run lightweight functions in a cost-efficient and scalable way using JavaScript and Node.js. Serverless in Kyma relies on [Knative Serving](https://knative.dev/docs/serving/) for deploying and managing functions and [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) for creating Docker images.
+The Serverless component allows you to reduce the implementation and operation effort of an application to the absolute minimum. Kyma Serverless provides a platform to run lightweight Functions in a cost-efficient and scalable way using JavaScript and Node.js. Serverless in Kyma relies on [Knative Serving](https://knative.dev/docs/serving/) for deploying and managing Functions and [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) for creating Docker images.
 
 ## Monitoring
 
@@ -46,8 +46,6 @@ The tracing in Kyma uses the [Jaeger](https://github.com/jaegertracing) distribu
 ## API Gateway
 
 The API Gateway aims to provide a set of functionalities which allow developers to expose, secure, and manage their APIs in an easy way. The main element of the API Gateway is the API Gateway Controller which exposes services in Kyma.
-
->**CAUTION:** The API Gateway implementation that uses the API Controller and the Api custom resource is **deprecated** until all of its functionality is covered by the `v2` implementation. The services you exposed and secured so far do not require any action as two implementations co-exist in the cluster. When you expose new services and functions secured with OAuth2, use the `v2` implementation. For more information, read [this](/components/api-gateway-v2#overview-overview) documentation.
 
 ## Logging
 

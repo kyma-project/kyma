@@ -1,9 +1,9 @@
 ---
-title: Bind a Service Instance to a function
+title: Bind a Service Instance to a Function
 type: Tutorials
 ---
 
-This tutorial shows how you can bind a sample instance of the Redis service to a function. After completing all steps, you will get the function with encoded Secrets to the service. You can use them for authentication when you connect to the service to implement custom business logic of your function.
+This tutorial shows how you can bind a sample instance of the Redis service to a Function. After completing all steps, you will get the Function with encoded Secrets to the service. You can use them for authentication when you connect to the service to implement custom business logic of your Function.
 
 To create the binding, you will use ServiceBinding and ServiceBindingUsage custom resources (CRs) managed by the Service Catalog.
 
@@ -11,7 +11,7 @@ To create the binding, you will use ServiceBinding and ServiceBindingUsage custo
 
 ## Prerequisites
 
-This tutorial is based on an existing function. To create one, follow the [Create a function](#tutorials-create-a-function) tutorial.
+This tutorial is based on an existing Function. To create one, follow the [Create a Function](#tutorials-create-a-function) tutorial.
 
 ## Steps
 
@@ -123,11 +123,11 @@ Follows these steps:
     EOF
     ```
 
-    - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the Service Binding you have just created and **spec.usedBy** points to the function. More specifically, **spec.usedBy** refers to the name of the related KService CR (`name: $NAME`) and the cluster-specific [UsageKind CR](https://kyma-project.io/docs/components/service-catalog/#custom-resource-usage-kind) (`kind: knative-service`) that defines how Secrets should be injected to your function when creating a Service Binding.
+    - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the Service Binding you have just created and **spec.usedBy** points to the Function. More specifically, **spec.usedBy** refers to the name of the related KService CR (`name: $NAME`) and the cluster-specific [UsageKind CR](https://kyma-project.io/docs/components/service-catalog/#custom-resource-usage-kind) (`kind: knative-service`) that defines how Secrets should be injected to your Function when creating a Service Binding.
 
-    - The **spec.parameters.envPrefix.name** field is optional. It adds a prefix to all environment variables injected in a Secret to the function when creating a Service Binding. In our example, **envPrefix** is `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
+    - The **spec.parameters.envPrefix.name** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a Service Binding. In our example, **envPrefix** is `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
 
-        > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
+        > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
 9. Check if the ServiceBindingUsage CR was created successfully. The last condition in the CR status should state `Ready True`:
 
@@ -157,11 +157,11 @@ Follows these steps:
     Console UI
     </summary>
 
-To create a binding, you must first create a sample Service Instance to which you can bind the function. Follow the sections and steps to complete this tutorial.
+To create a binding, you must first create a sample Service Instance to which you can bind the Function. Follow the sections and steps to complete this tutorial.
 
 ### Provision a Redis service using an Addon
 
-> **NOTE:** If you already have a Redis instance provisioned on your cluster, move directly to the **Bind the function with the Service Instance** section.
+> **NOTE:** If you already have a Redis instance provisioned on your cluster, move directly to the **Bind the Function to the Service Instance** section.
 
 Follow these steps:
 
@@ -181,17 +181,17 @@ Follow these steps:
 
 2. Select **Add** to provision the Redis ServiceClass and create its instance in your Namespace.
 
-3. Change the **Name** to match the function, select `micro` from the **Plan** drop-down list, and set **Image pull policy** to `Always`.
+3. Change the **Name** to match the Function, select `micro` from the **Plan** drop-down list, and set **Image pull policy** to `Always`.
 
-    > **NOTE:** The Service Instance, Service Binding, and Service Binding Usage can have different names than the function, but it is recommended that all related resources share a common name.
+    > **NOTE:** The Service Instance, Service Binding, and Service Binding Usage can have different names than the Function, but it is recommended that all related resources share a common name.
 
 4. Select **Create** to confirm changes.
 
     Wait until the status of the instance changes from `PROVISIONING` to `RUNNING`.
 
-### Bind the function with the Service Instance
+### Bind the Function to the Service Instance
 
-1. Go to the **Functions** view in the left navigation panel and select the function you want to bind to the Service Instance.
+1. Go to the **Functions** view in the left navigation panel and select the Function you want to bind to the Service Instance.
 
 2. Switch to the **Configuration** tab and select **Create Service Binding** in the **Service Bindings** section.
 
@@ -199,20 +199,20 @@ Follow these steps:
 
 4. Select **Create** to confirm changes.
 
-The message appears on the screen confirming that the Service Binding was successfully created, and you will see it in the **Service Bindings** section in your function, along with environment variable names.
+The message appears on the screen confirming that the Service Binding was successfully created, and you will see it in the **Service Bindings** section in your Function, along with environment variable names.
 
->**NOTE:** The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the function when creating a Service Binding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
+>**NOTE:** The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a Service Binding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
 
-> **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
+> **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
     </details>
 </div>
 
-## Test the function
+## Test the Function
 
-To test if the Secret has been properly connected to the function:
+To test if the Secret has been properly connected to the Function:
 
-1. Change the function's code to:​
+1. Change the Function's code to:​
 
     ```js
     module.exports = {
@@ -222,7 +222,7 @@ To test if the Secret has been properly connected to the function:
     }
     ```
 
-2. Expose the function through an [API Rule](#tutorials-expose-a-function-with-an-api-rule), and access the function's external address. You should get this result:
+2. Expose the Function through an [API Rule](#tutorials-expose-a-function-with-an-api-rule), and access the Function's external address. You should get this result:
 
     ```text
     Redis port: 6379

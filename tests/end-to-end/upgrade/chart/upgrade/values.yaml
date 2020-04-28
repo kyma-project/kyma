@@ -3,7 +3,7 @@ containerRegistry:
 
 image:
   dir:
-  version: PR-8046
+  version: PR-8156
   pullPolicy: "IfNotPresent"
 
 dex:
@@ -11,6 +11,7 @@ dex:
   userSecret: admin-user
 
 authorizationPolicy:
+  enabled: false
   eventService:
     namespace: kyma-integration
     applicationName: eventmesh-upgrade

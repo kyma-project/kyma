@@ -17,25 +17,25 @@ global:
       version: "2a54a16c"
     connectivity_adapter:
       dir:
-      version: "8604d53a"
+      version: "93462f94"
     pairing_adapter:
       dir:
       version: "9fae2df7"
     director:
       dir:
-      version: "c75aca63"
+      version: "22072888"
     gateway:
       dir:
-      version: "9fae2df7"
+      version: "93462f94"
     healthchecker:
       dir:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "3d62da15"
+      version: "b1da4ae4"
     provisioner:
       dir:
-      version: "3cc7c971"
+      version: "b1da4ae4"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -43,7 +43,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "3cc7c971"
+      version: "0ddb9214"
     tests:
       director:
         dir:
@@ -53,7 +53,7 @@ global:
         version: "9cebaf5c"
       provisioner:
         dir:
-        version: "ffd45e1d"
+        version: "9f269bf5"
       e2e_provisioning:
         dir:
         version: "ef98664d"
@@ -126,6 +126,7 @@ global:
     enabled: false
 
   kyma_environment_broker:
+    enabled: false
     secrets:
       integrationSystemCredentials:
         name: compass-kyma-environment-broker-credentials

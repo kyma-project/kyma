@@ -11,7 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: PR-7946
+    version: PR-8156
     tests:
       enabled: true
 

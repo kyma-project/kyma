@@ -3,7 +3,7 @@ title: EventActivation
 type: Custom Resource
 ---
 
-The `eventactivations.applicationconnector.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to create an Event Bus Subscription and to get an event schema. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `eventactivations.applicationconnector.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to create a Trigger from the Kyma Console and to get an event schema. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```bash
 kubectl get crd eventactivations.applicationconnector.kyma-project.io -o yaml
@@ -49,6 +49,6 @@ These components use this CR:
 | Component   |   Description |
 |----------|------|
 | Application Broker |  Uses this CR to enable the user to receive events from a given service. |
-| Event Bus | Uses this CR to control the consumption of an event.  |
+| Eventing Mesh | Uses this CR to control the consumption of an event.  |
 | Serverless | Functions UI sends a GraphQL query to Console Backend Service to list EventActivations. |
 | Console Backend Service |  Exposes the given CR to the Console UI. |

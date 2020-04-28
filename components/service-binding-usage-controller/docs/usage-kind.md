@@ -19,14 +19,17 @@ The UsageKind contains a finalizer which prevents deletion of the UsageKind in u
 The administrator who adds the UsageKind must take care of the RBAC settings. The BUC and console-backend-service must be allowed to perform needed operations on the resources, with the type defined in the UsageKind object.
 
 See the example of the RBAC Rule for the Binding Usage Controller:
+
 ```yaml
-- apiGroups: ["kubeless.io"]
-  resources: ["functions"]
-  verbs: ["get", "update"]
+- apiGroups: ["serving.knative.dev"]
+  resources: ["services"]
+  verbs: ["get", "list", "watch", "patch", "update"]
 ```
+
 Here is the example for the console-backend-service:
+
 ```yaml
-- apiGroups: ["kubeless.io"]
-  resources: ["functions"]
-  verbs: ["list"]
+- apiGroups: ["serving.knative.dev"]
+  resources: ["services"]
+  verbs: ["get", "list", "watch"]
 ```

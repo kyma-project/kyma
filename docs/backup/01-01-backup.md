@@ -2,6 +2,8 @@
 title: Overview
 ---
 
+>**NOTE**: Velero is no longer supported. For the new backup strategy, see [this](#details-kyma-backup-strategy) document.
+
 Kyma integrates with [Velero](https://github.com/heptio/velero/) to provide backup and restore capabilities.
 
 Velero backs up Kubernetes resources and stores them in buckets of [supported cloud providers](https://velero.io/docs/v1.2.0/supported-providers/). It triggers physical volume snapshots and includes the snapshot references in the backup. Velero can create scheduled or on-demand backups, filter objects to include in the backup, and set time to live (TTL) for stored backups.
