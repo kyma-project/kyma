@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	myLogger "log"
 	"time"
 
 	prometheus "github.com/prometheus/client_golang/api"
@@ -57,7 +57,7 @@ func (ut *MetricsUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 	if err != nil {
 		return err
 	}
-	log.Printf("data before storing: %v", result)
+	myLogger.Printf("data before storing: %v", result)
 	err = ut.storeMetrics(result, time)
 	if err != nil {
 		return err
@@ -66,7 +66,7 @@ func (ut *MetricsUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 	if err != nil {
 		return err
 	}
-	log.Printf("data retrieved from configmap before upgrade: %v:", data)
+	myLogger.Printf("data retrieved from configmap before upgrade: %v:", data)
 	return nil
 }
 
@@ -135,7 +135,7 @@ func (ut *MetricsUpgradeTest) retrievePreviousMetrics() (time.Time, model.Vector
 
 func (ut *MetricsUpgradeTest) compareMetrics() error {
 	time, previous, err := ut.retrievePreviousMetrics()
-	log.Printf("data retrieved from configmap after upgrade: %v:", previous)
+	myLogger.Printf("data retrieved from configmap after upgrade: %v:", previous)
 	if err != nil {
 		return err
 	}
