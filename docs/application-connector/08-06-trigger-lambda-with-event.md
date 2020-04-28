@@ -1,9 +1,9 @@
 ---
-title: Trigger a function with events
+title: Trigger a Function with events
 type: Tutorials
 ---
 
-To create a simple function and trigger it with an event, you must first register a service using the Application Registry that is a part of the Application Connector. This service then sends the event that triggers the function. You must create a Service Instance which enables this event in the Namespace. Follow this guide to learn how to do it.
+To create a simple Function and trigger it with an event, you must first register a service using the Application Registry that is a part of the Application Connector. This service then sends the event that triggers the Function. You must create a Service Instance which enables this event in the Namespace. Follow this guide to learn how to do it.
 
 ## Prerequisites
 
@@ -94,7 +94,7 @@ To create a simple function and trigger it with an event, you must first registe
    EOF
    ```
 
-5. Create and register a function in your Namespace.
+5. Create and register a Function in your Namespace.
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -142,7 +142,7 @@ To create a simple function and trigger it with an event, you must first registe
    EOF
    ```
 
-6. Create a Trigger to allow events to trigger the function.
+6. Create a Trigger to allow events to trigger the Function.
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -169,7 +169,7 @@ To create a simple function and trigger it with an event, you must first registe
    EOF
    ```
 
-7. Send an event to trigger the created function.
+7. Send an event to trigger the created Function.
 
    ```bash
    curl -X POST -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
@@ -182,7 +182,7 @@ To create a simple function and trigger it with an event, you must first registe
    }'
    ```
 
-8. Check the logs of the function to see if it was triggered. Every time an event successfully triggers the function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`.
+8. Check the logs of the Function to see if it was triggered. Every time an event successfully triggers the Function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`.
 
    ```bash
    kubectl -n $NAMESPACE logs "$(kubectl -n $NAMESPACE get po -l app=my-events-function -o jsonpath='{.items[0].metadata.name}')" -c lambda | grep -E "Response acquired successfully! Uuid: [a-f0-9-]+"

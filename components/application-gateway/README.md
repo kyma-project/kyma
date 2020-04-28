@@ -29,7 +29,7 @@ To start the Application Gateway, run this command:
 ```
 
 The Application Gateway has the following parameters:
-- **proxyPort** is the port that acts as a proxy for the calls from services and functions to an external solution. The default port is `8080`.
+- **proxyPort** is the port that acts as a proxy for the calls from services and Functions to an external solution. The default port is `8080`.
 - **externalAPIPort** is the port that exposes the API allowing to check component status. The default port is `8081`.
 - **application** is the Application name used to write and read information about services. The default Application is `default-ec`.
 - **namespace** is the Namespace in which the Application Gateway is deployed. The default Namespace is `kyma-system`.

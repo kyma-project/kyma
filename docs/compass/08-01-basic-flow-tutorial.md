@@ -3,10 +3,10 @@ title: Manage your Applications using Kyma Console and Compass UIs
 type: Tutorials
 ---
 
-This tutorial presents the basic flow in which you manually register an external Application's API into Compass and expose it into the Kyma Runtime. In the Kyma Runtime, you then create a function that calls the Application's API. While going through this tutorial, you will navigate between two UI views:
+This tutorial presents the basic flow in which you manually register an external Application's API into Compass and expose it into the Kyma Runtime. In the Kyma Runtime, you then create a Function that calls the Application's API. While going through this tutorial, you will navigate between two UI views:
 
 - Compass UI, where you create connections between Applications, Runtimes, and scenarios
-- Kyma Console UI, where you manage resources used in your Application, such as services, functions, and bindings
+- Kyma Console UI, where you manage resources used in your Application, such as services, Functions, and bindings
 
 ## Prerequisites
 
@@ -52,17 +52,17 @@ For simplicity reasons, use the available Order Service as the sample external A
 
 2. From the drop-down list in the top-right corner, select your Namespace and go to the **Catalog** view. You will see your services available under the **Services** tab. Provision the ServiceInstance by choosing your Package and clicking the **Add** button in the top-right corner of the page.
 
-3. Create a function. In the **Overview** tab, click the **Deploy new resource** button and upload the file with the [function](./assets/function.yaml).
+3. Create a Function. In the **Overview** tab, click the **Deploy new resource** button and upload the file with the [Function](./assets/function.yaml).
 
-4. Expose your function following [this](/components/serverless/#tutorials-expose-a-function-with-an-api-rule) tutorial. Follow the instructions in the `Console UI` tab.
+4. Expose your Function following [this](/components/serverless/#tutorials-expose-a-function-with-an-api-rule) tutorial. Follow the instructions in the `Console UI` tab.
 
-5. Bind the ServiceInstance to your function following [this](/components/serverless/#tutorials-bind-a-service-instance-to-a-function) tutorial. Follow the instructions in the `Console UI` tab.
+5. Bind the ServiceInstance to your Function following [this](/components/serverless/#tutorials-bind-a-service-instance-to-a-function) tutorial. Follow the instructions in the `Console UI` tab.
 
 ### Cleanup
 
 Clean up your cluster after going through this tutorial. To do so, delete your resources in the following order:
 
-1. Go to the **Functions** tab and delete the `call-order-service` function.
+1. Go to the **Functions** tab and delete the `call-order-service` Function.
 
 2. Go to the **Services** tab and delete `order-service`.
 
