@@ -68,12 +68,12 @@ type BackupTest interface {
 }
 ```
 
-The functions work as follows:
+The Functions work as follows:
 
-* The `CreateResources` function installs the required test data before the backup process starts.
-* The `TestResources` function validates if the test data works as expected.
+* The `CreateResources` Function installs the required test data before the backup process starts.
+* The `TestResources` Function validates if the test data works as expected.
 
-After the pipeline executes the backup and restore process, the `TestResources` function validates if the restore worked as expected.
+After the pipeline executes the backup and restore process, the `TestResources` Function validates if the restore worked as expected.
 
 The test creates a new Namespace called `{TestName}-{UUID}`. This Namespace should contain all resources created during the test. If required, the resources can be created in other Namespaces as well.
 
@@ -133,7 +133,7 @@ The repository has the following structure:
 
 ```text
 ├── chart                           # The Helm chart for deploying the backup test application
-├── pkg                             # The package where backup tests and utility functions are defined. Put your test under /tests folder.
+├── pkg                             # The package where backup tests and utility Functions are defined. Put your test under /tests folder.
 ├── backup_test.go                  # The entrypoint for backup test runner
 ├── Gopkg.toml                      # A dep manifest
 └── Gopkg.lock                      # A dep lock which is generated automatically. Do not edit it.

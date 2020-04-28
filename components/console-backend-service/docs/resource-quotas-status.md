@@ -18,10 +18,10 @@ The ResourceQuotasStatus detects if any ReplicaSet or StatefulSet in your Namesp
 To check if any ReplicaSet or StatefulSet is blocked, calculate the required number of resources to create another replica. If there are not enough resources to create another replica, return the ResourceQuotaStatus with the flag set to `true`.
 
 The Console calls for the ResourceQuotasStatus automatically. The calls are triggered after:
-- switching the Namespace
-- uploading a resource
-- creating a function 
-- opening Namespace's details
+- Switching the Namespace
+- Uploading a resource
+- Creating a Function
+- Opening Namespace's details
 
 ## Implementation
 

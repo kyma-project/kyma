@@ -58,7 +58,7 @@ Users can create their own **Grafana Dashboard** by using the Grafana UI as the 
 
 ## Function dashboard
 
-The function dashboard provides visualisation for specific function metrics such as memory usage, CPU usage or success rate response.
+The Function dashboard provides visualisation for specific Function metrics such as memory usage, CPU usage or success rate response.
 
 You can access the dashboard directly from the Functions UI.
 
