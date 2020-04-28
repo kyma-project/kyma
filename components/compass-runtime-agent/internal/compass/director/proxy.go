@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
 
 	"github.com/pkg/errors"
 )

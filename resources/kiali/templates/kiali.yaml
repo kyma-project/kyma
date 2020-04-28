@@ -1,0 +1,15 @@
+apiVersion: kiali.io/v1alpha1
+kind: Kiali
+metadata:
+  name: kiali
+  annotations:
+    ansible.operator-sdk/verbosity: "1"
+  labels:
+    app: {{ template "kiali.name" . }}
+    chart: {{ template "kiali.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+{{- with .Values.kiali.spec }}
+spec:
+{{ toYaml . | indent 2}}
+{{- end }}

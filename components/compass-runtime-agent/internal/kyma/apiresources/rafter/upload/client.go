@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/httpconsts"
 	log "github.com/sirupsen/logrus"
-	"kyma-project.io/compass-runtime-agent/internal/apperrors"
-	"kyma-project.io/compass-runtime-agent/internal/httpconsts"
 )
 
 const (

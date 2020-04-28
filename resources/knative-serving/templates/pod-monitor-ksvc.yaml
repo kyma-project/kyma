@@ -1,3 +1,4 @@
+{{- if .Values.knative_serving.podmonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
@@ -15,3 +16,4 @@ spec:
       operator: Exists
   namespaceSelector:
     any: true
+{{- end }}

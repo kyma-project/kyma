@@ -17,14 +17,14 @@ This is a sample resource that allows you to bind a given resource with the Serv
 apiVersion: servicecatalog.kyma-project.io/v1alpha1
 kind: UsageKind
 metadata:
-   name: function
+  name: function
 spec:
-   displayName: Function
-   resource:
-     group: kubeless.io
-     kind: function
-     version: v1beta1
-   labelsPath: spec.deployment.spec.template.metadata.labels
+  displayName: Function
+  resource:
+    group: serving.knative.dev
+    kind: service
+    version: v1
+  labelsPath: spec.template.metadata.labels
 ```
 
 ## Custom resource parameters
@@ -61,14 +61,17 @@ These components use this CR:
 The administrator who adds the UsageKind must take care of the RBAC settings. The Service Binding Usage Controller and Console Backend Service must be allowed to perform needed operations on the resources, with the type defined in the UsageKind object.
 
 See the example of the RBAC Rule for the Binding Usage Controller:
+
 ```yaml
-- apiGroups: ["kubeless.io"]
-  resources: ["functions"]
-  verbs: ["get", "update"]
+- apiGroups: ["serving.knative.dev"]
+  resources: ["services"]
+  verbs: ["get", "list", "watch", "patch", "update"]
 ```
+
 Here is the example for the Console Backend Service:
+
 ```yaml
-- apiGroups: ["kubeless.io"]
-  resources: ["functions"]
-  verbs: ["list"]
+- apiGroups: ["serving.knative.dev"]
+  resources: ["services"]
+  verbs: ["get", "list", "watch"]
 ```

@@ -4,12 +4,11 @@ metadata:
   name: dockerfile-nodejs-12
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
     serverless.kyma-project.io/config: runtime
     serverless.kyma-project.io/runtime: nodejs12
 data:
   Dockerfile: |-
-    FROM kubeless/nodejs@sha256:aa819e9bee6c22db0b137595ac45765ef1cad64d0dc09502a008ce4446c607ef
+    FROM {{ .Values.images.functionRuntimeNodejs12.repository}}:{{ .Values.images.functionRuntimeNodejs12.tag }}
     USER root
     RUN export KUBELESS_INSTALL_VOLUME='/kubeless' && \
         mkdir /kubeless && \

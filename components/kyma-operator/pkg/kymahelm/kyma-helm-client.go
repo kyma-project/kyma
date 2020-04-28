@@ -5,6 +5,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/sirupsen/logrus"
+
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/release"
@@ -26,11 +28,12 @@ type ClientInterface interface {
 
 // Client .
 type Client struct {
-	helm *helm.Client
+	helm            *helm.Client
+	overridesLogger *logrus.Logger
 }
 
 // NewClient .
-func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify bool) (*Client, error) {
+func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify bool, overridesLogger *logrus.Logger) (*Client, error) {
 	tlsopts := tlsutil.Options{
 		KeyFile:            TLSKey,
 		CertFile:           TLSCert,
@@ -38,7 +41,8 @@ func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify
 	}
 	tlscfg, err := tlsutil.ClientConfig(tlsopts)
 	return &Client{
-		helm: helm.NewClient(helm.Host(host), helm.WithTLS(tlscfg), helm.ConnectTimeout(30)),
+		helm:            helm.NewClient(helm.Host(host), helm.WithTLS(tlscfg), helm.ConnectTimeout(30)),
+		overridesLogger: overridesLogger,
 	}, err
 }
 
@@ -149,11 +153,11 @@ func (hc *Client) PrintRelease(release *release.Release) {
 
 // PrintOverrides .
 func (hc *Client) PrintOverrides(overrides string, releaseName string, action string) {
-	log.Printf("Overrides used for %s of component %s", action, releaseName)
+	hc.overridesLogger.Printf("Overrides used for %s of component %s", action, releaseName)
 
 	if overrides == "" {
-		log.Println("No overrides found")
+		hc.overridesLogger.Println("No overrides found")
 		return
 	}
-	log.Println("\n", overrides)
+	hc.overridesLogger.Println("\n", overrides)
 }

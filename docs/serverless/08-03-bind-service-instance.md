@@ -193,13 +193,13 @@ Follow these steps:
 
 1. Go to the **Functions** view in the left navigation panel and select the function you want to bind to the Service Instance.
 
-2. Select **Create Service Bindings** in the **Service Bindings** section.
+2. Switch to the **Configuration** tab and select **Create Service Binding** in the **Service Bindings** section.
 
 3. Select the Redis service from the **Service Instance** drop-down list, add `REDIS_` as **Prefix for injected variables**, and make sure **Create new Secret** is selected.
 
 4. Select **Create** to confirm changes.
 
-The message appears on the screen confirming that the Service Binding was successfully created, and you will see it in the **Service Bindings** section in your function, along with **Environment Variable Names**.
+The message appears on the screen confirming that the Service Binding was successfully created, and you will see it in the **Service Bindings** section in your function, along with environment variable names.
 
 >**NOTE:** The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the function when creating a Service Binding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
 

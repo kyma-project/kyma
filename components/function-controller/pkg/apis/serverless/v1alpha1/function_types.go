@@ -26,6 +26,12 @@ type FunctionSpec struct {
 	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
 }
 
+const (
+	FunctionNameLabel      = "serverless.kyma-project.io/function-name"
+	FunctionManagedByLabel = "serverless.kyma-project.io/managed-by"
+	FunctionUUIDLabel      = "serverless.kyma-project.io/uuid"
+)
+
 // ConditionType defines condition of function.
 type ConditionType string
 
@@ -66,15 +72,15 @@ type FunctionStatus struct {
 	Conditions []Condition `json:"conditions,omitempty"`
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
 // Function is the Schema for the functions API
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Configured",type="string",JSONPath=".status.conditions[?(@.type=='ConfigurationReady')].status"
 // +kubebuilder:printcolumn:name="Built",type="string",JSONPath=".status.conditions[?(@.type=='BuildReady')].status"
 // +kubebuilder:printcolumn:name="Running",type="string",JSONPath=".status.conditions[?(@.type=='Running')].status"
 // +kubebuilder:printcolumn:name="Version",type="integer",JSONPath=".metadata.generation"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+
 type Function struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

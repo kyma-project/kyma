@@ -4,18 +4,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: prometheus
-  namespace: {{ $.Release.Namespace }}
-spec:
-  host: {{ template "prometheus-operator.name" . }}-prometheus.{{ $.Release.Namespace }}
-  trafficPolicy:
-    tls:
-      mode: DISABLE
----
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: prometheus-full
+  name: {{ template "prometheus-operator.name" . }}-prometheus
   namespace: {{ $.Release.Namespace }}
 spec:
   host: {{ template "prometheus-operator.name" . }}-prometheus.{{ $.Release.Namespace }}.svc.cluster.local

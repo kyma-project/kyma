@@ -4,10 +4,10 @@ import (
 	"testing"
 
 	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
 	gql "github.com/machinebox/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"kyma-project.io/compass-runtime-agent/internal/graphql"
 )
 
 const (

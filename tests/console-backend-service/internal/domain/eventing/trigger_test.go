@@ -149,6 +149,7 @@ func mutationTrigger(client *graphql.Client, requestType, arguments, resourceDet
 
 func createTriggerArguments(namespace string) string {
 	return fmt.Sprintf(`
+		namespace: "%s",
 		trigger: {
 			name: "%s",
 			namespace: "%s",
@@ -162,7 +163,7 @@ func createTriggerArguments(namespace string) string {
 				}
 			}
 		},
-	`, TriggerName, namespace, BrokerName, SubscriberAPIVersion, SubscriberKind, SubscriberName, namespace)
+	`, namespace, TriggerName, namespace, BrokerName, SubscriberAPIVersion, SubscriberKind, SubscriberName, namespace)
 }
 
 func subscribeTriggerEvent(client *graphql.Client, arguments, resourceDetailsQuery string) *graphql.Subscription {
@@ -196,11 +197,12 @@ func createTriggerEventArguments(namespace string) string {
 
 func deleteTriggerArguments(namespace string) string {
 	return fmt.Sprintf(`
+		namespace: "%s"
 		trigger: {
 			name: "%s",
 			namespace: "%s",
 		}
-	`, TriggerName, namespace)
+	`, namespace, TriggerName, namespace)
 }
 
 func triggerDetailsFields() string {

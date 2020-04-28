@@ -11,7 +11,7 @@ metadata:
     function: serverless-function-controller
 data:
   Dockerfile: |-
-    FROM kubeless/nodejs@sha256:aa819e9bee6c22db0b137595ac45765ef1cad64d0dc09502a008ce4446c607ef
+    FROM eu.gcr.io/kyma-project/function-runtime-nodejs12:a62f4a7f
     USER root
     RUN export KUBELESS_INSTALL_VOLUME='/kubeless' && \
         mkdir /kubeless && \

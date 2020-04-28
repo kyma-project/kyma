@@ -2,13 +2,13 @@ package kyma
 
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	log "github.com/sirupsen/logrus"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"kyma-project.io/compass-runtime-agent/internal/apperrors"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
 type service struct {

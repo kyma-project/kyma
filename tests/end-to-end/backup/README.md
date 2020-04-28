@@ -17,7 +17,7 @@ To set up the project, use these tools:
 
 ## Usage
 
-The backup and restore [continuous integration flow](https://github.com/kyma-project/test-infra/blob/master/prow/scripts/cluster-integration/kyma-gke-backup-test.sh) looks as follows:
+The backup and restore continuous integration flow looks as follows:
 
 1. Create a new Namespace.
 2. Create new resources in the Namespace. The resources can be Namespace-scoped or cluster-wide.
