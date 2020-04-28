@@ -47,7 +47,7 @@ mod-verify-local:
 test-local: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
 test-local: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
 test-local: generate-local manifests
-	GO111MODULE=on go test -v -coverprofile=/tmp/artifacts/cover.out -mod vendor ./...
+	GO111MODULE=on go test -v -race -coverprofile=/tmp/artifacts/cover.out -mod vendor ./...
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
 

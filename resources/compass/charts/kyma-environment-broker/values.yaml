@@ -38,6 +38,10 @@ resources: {}
 
 provisioner:
   URL: "http://compass-provisioner.compass-system.svc.cluster.local:3000/graphql"
+
+  # Defines how long should the Kyma Environment Broker checks the status of the provisioning in the Provisioner.
+  # The Provisioner timeout is defined in chart/compass/charts/provisioner/values.yaml
+  timeout: "12h"
   gardener:
     # name of the secret with kubeconfig to the gardener cluster
     secretName: "gardener"
@@ -95,7 +99,17 @@ lms:
   samlTenant: "TBD"
   disabled: false
 
+ias:
+  secretName: "ias-creds"
+  url: "TBD"
+  id: "TBD"
+  secret: "TBD"
+  identityProvider: "TBD"
+  disabled: true
+
 e2e:
+  tenant:
+    id: "d9994f8f-7e46-42a8-b2c1-1bfff8d2fe05"
   azure:
     configName: "e2e-runtime-config-azure"
   gcp:

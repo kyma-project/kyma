@@ -48,7 +48,7 @@ func checkInternalMethod(t *testing.T, resolver *PluggableContainer, enabled boo
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
-	val, err := resolver.Resolver.CreateTrigger(ctx, fixTrigger(), []gqlschema.OwnerReference{})
+	val, err := resolver.Resolver.CreateTrigger(ctx, "test", fixTrigger(), []gqlschema.OwnerReference{})
 	if enabled {
 		require.NoError(t, err)
 	} else {
@@ -61,7 +61,7 @@ func checkExportedMethods(t *testing.T, resolver *PluggableContainer, enabled bo
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
-	val, err := resolver.Resolver.DeleteTrigger(ctx, gqlschema.TriggerMetadataInput{Name: "Name", Namespace: "Namespace"})
+	val, err := resolver.Resolver.DeleteTrigger(ctx, "test", gqlschema.TriggerMetadataInput{Name: "Name", Namespace: "Namespace"})
 	if enabled {
 		require.NoError(t, err)
 	} else {

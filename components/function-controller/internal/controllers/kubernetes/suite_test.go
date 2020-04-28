@@ -1,118 +1,148 @@
 package kubernetes
 
 import (
+	"context"
+	"fmt"
 	"testing"
 
-	ctrl "sigs.k8s.io/controller-runtime"
-
-	"github.com/kyma-project/kyma/components/function-controller/internal/configwatcher"
-
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
+	"github.com/vrischmann/envconfig"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 )
 
-// These tests use Ginkgo (BDD-style Go testing framework). Refer to
-// http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
-
-var cfg *rest.Config
-var k8sClient client.Client
-var k8sManager ctrl.Manager
-var testEnv *envtest.Environment
-var services *configwatcher.Services
+var (
+	config            Config
+	resourceClient    resource.Client
+	k8sClient         client.Client
+	testEnv           *envtest.Environment
+	configMapSvc      ConfigMapService
+	secretSvc         SecretService
+	serviceAccountSvc ServiceAccountService
+)
 
 func TestAPIs(t *testing.T) {
-	RegisterFailHandler(Fail)
+	gomega.RegisterFailHandler(ginkgo.Fail)
 
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Controller Suite",
-		[]Reporter{printer.NewlineReporter{}})
+	ginkgo.RunSpecsWithDefaultAndCustomReporters(t,
+		"Kubernetes Suite",
+		[]ginkgo.Reporter{printer.NewlineReporter{}})
 }
 
-var _ = BeforeSuite(func(done Done) {
-	logf.SetLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(GinkgoWriter)))
-
-	By("bootstrapping test environment")
+var _ = ginkgo.BeforeSuite(func(done ginkgo.Done) {
+	logf.SetLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(ginkgo.GinkgoWriter)))
+	ginkgo.By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
-		ErrorIfCRDPathMissing: false,
+		ErrorIfCRDPathMissing: true,
 	}
 
-	var err error
-	cfg, err = testEnv.Start()
-	Expect(err).ToNot(HaveOccurred())
-	Expect(cfg).ToNot(BeNil())
+	cfg, err := testEnv.Start()
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
+	gomega.Expect(cfg).ToNot(gomega.BeNil())
 
 	err = scheme.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-	err = corev1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
+	gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
-	k8sManager, err = ctrl.NewManager(cfg, ctrl.Options{
-		Scheme:             scheme.Scheme,
-		MetricsBindAddress: ":8081",
-	})
-	Expect(err).ToNot(HaveOccurred())
+	// +kubebuilder:scaffold:scheme
 
-	config := fixConfigForController()
-	services = fixServicesForController(config)
+	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
+	gomega.Expect(k8sClient).ToNot(gomega.BeNil())
 
-	err = (&Reconciler{
-		Client:       k8sManager.GetClient(),
-		Log:          ctrl.Log.WithName("controllers").WithName("Run"),
-		resourceType: NamespaceType,
-		config:       config,
-		services:     services,
-	}).SetupWithManager(k8sManager)
-	Expect(err).ToNot(HaveOccurred())
+	resourceClient = resource.New(k8sClient, scheme.Scheme)
 
-	err = (&Reconciler{
-		Client:       k8sManager.GetClient(),
-		Log:          ctrl.Log.WithName("controllers").WithName("Run"),
-		resourceType: SecretType,
-		config:       config,
-		services:     services,
-	}).SetupWithManager(k8sManager)
-	Expect(err).ToNot(HaveOccurred())
+	err = envconfig.InitWithPrefix(&config, "TEST")
+	gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
-	err = (&Reconciler{
-		Client:       k8sManager.GetClient(),
-		Log:          ctrl.Log.WithName("controllers").WithName("Run"),
-		resourceType: ConfigMapType,
-		config:       config,
-		services:     services,
-	}).SetupWithManager(k8sManager)
-	Expect(err).ToNot(HaveOccurred())
+	configMapSvc = NewConfigMapService(resourceClient, config)
+	secretSvc = NewSecretService(resourceClient, config)
+	serviceAccountSvc = NewServiceAccountService(resourceClient, config)
 
-	err = (&Reconciler{
-		Client:       k8sManager.GetClient(),
-		Log:          ctrl.Log.WithName("controllers").WithName("Run"),
-		resourceType: ServiceAccountType,
-		config:       config,
-		services:     services,
-	}).SetupWithManager(k8sManager)
-	Expect(err).ToNot(HaveOccurred())
-
-	go func() {
-		err = k8sManager.Start(ctrl.SetupSignalHandler())
-		Expect(err).ToNot(HaveOccurred())
-	}()
-
-	k8sClient = k8sManager.GetClient()
-	Expect(k8sClient).ToNot(BeNil())
+	baseNamespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: config.BaseNamespace}}
+	gomega.Expect(resourceClient.Create(context.TODO(), baseNamespace)).To(gomega.Succeed())
 
 	close(done)
 }, 60)
 
-var _ = AfterSuite(func() {
-	By("tearing down the test environment")
+var _ = ginkgo.AfterSuite(func() {
+	ginkgo.By("tearing down the test environment")
 	err := testEnv.Stop()
-	Expect(err).ToNot(HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 })
+
+func newFixBaseConfigMap(namespace, name string) *corev1.ConfigMap {
+	return &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: fmt.Sprintf("%s-", name),
+			Namespace:    namespace,
+			Labels:       map[string]string{ConfigLabel: RuntimeLabelValue},
+		},
+		Data:       map[string]string{"test_1": "value_!", "test_2": "value_2"},
+		BinaryData: map[string][]byte{"test_1_b": []byte("value"), "test_2_b": []byte("value_2")},
+	}
+}
+
+func newFixBaseSecret(namespace, name string) *corev1.Secret {
+	return &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: fmt.Sprintf("%s-", name),
+			Namespace:    namespace,
+			Labels:       map[string]string{ConfigLabel: CredentialsLabelValue},
+		},
+		Data:       map[string][]byte{"key_1_b": []byte("value_1_b"), "key_2_b": []byte("value_2_b")},
+		StringData: map[string]string{"key_1": "value_1", "key_2": "value_2"},
+		Type:       "test",
+	}
+}
+
+func newFixBaseServiceAccount(namespace, name string) *corev1.ServiceAccount {
+	falseValue := false
+	return &corev1.ServiceAccount{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: fmt.Sprintf("%s-", name),
+			Namespace:    namespace,
+			Labels:       map[string]string{ConfigLabel: ServiceAccountLabelValue},
+		},
+		Secrets:                      []corev1.ObjectReference{{Name: "test1"}, {Name: "test2"}},
+		ImagePullSecrets:             []corev1.LocalObjectReference{{Name: "test-ips-1"}, {Name: "test-ips-2"}},
+		AutomountServiceAccountToken: &falseValue,
+	}
+}
+
+func newFixNamespace(name string) *corev1.Namespace {
+	return &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: fmt.Sprintf("%s-", name),
+		},
+	}
+}
+
+func compareConfigMaps(actual, expected *corev1.ConfigMap) {
+	gomega.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
+	gomega.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
+	gomega.Expect(actual.Data).To(gomega.Equal(expected.Data))
+	gomega.Expect(actual.BinaryData).To(gomega.Equal(expected.BinaryData))
+}
+
+func compareSecrets(actual, expected *corev1.Secret) {
+	gomega.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
+	gomega.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
+	gomega.Expect(actual.Data).To(gomega.Equal(expected.Data))
+}
+
+func compareServiceAccounts(actual, expected *corev1.ServiceAccount) {
+	gomega.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
+	gomega.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
+	gomega.Expect(actual.Secrets).To(gomega.Equal(expected.Secrets))
+	gomega.Expect(actual.ImagePullSecrets).To(gomega.Equal(expected.ImagePullSecrets))
+	gomega.Expect(actual.AutomountServiceAccountToken).To(gomega.Equal(expected.AutomountServiceAccountToken))
+}

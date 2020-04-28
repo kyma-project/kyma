@@ -6,7 +6,7 @@ console:
   statusPort: 6080
   image:
     dir:
-    tag: e0a7165b
+    tag: 0ab0e906
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -16,8 +16,8 @@ console:
 core_ui:
   statusPort: 6081
   image:
-    dir:
-    tag: 5f0cac61
+    dir: 
+    tag: 86f4dcef
     pullPolicy: IfNotPresent
   service:
     name: nginx
@@ -28,7 +28,7 @@ compass_mfs:
   statusPort: 6082
   image:
     dir:
-    tag: "49294757"
+    tag: 5a8b31e2
     pullPolicy: IfNotPresent
   service:
     name: nginx

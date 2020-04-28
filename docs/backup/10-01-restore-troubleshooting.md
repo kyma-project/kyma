@@ -3,6 +3,8 @@ title: Restore troubleshooting
 type: Troubleshooting
 ---
 
+>**NOTE**: Velero is no longer supported. For the new backup strategy, see [this](/components/backup/#new-backup-strategy) document.
+
 ## Pod stuck in Init phase
 
 In case the `service-catalog-addons-service-binding-usage-controller` Pod gets stuck in the `Init` phase, try deleting the Pod:

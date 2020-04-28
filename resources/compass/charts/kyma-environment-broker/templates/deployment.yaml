@@ -46,6 +46,8 @@ spec:
               value: "{{ .Values.enablePlans }}"
             - name: APP_PROVISIONING_URL
               value: "{{ .Values.provisioner.URL }}"
+            - name: APP_PROVISIONING_TIMEOUT
+              value: "{{ .Values.provisioner.timeout }}"
             - name: APP_PORT
               value: "{{ .Values.broker.port }}"
             - name: APP_STATUS_PORT
@@ -82,6 +84,22 @@ spec:
                 secretKeyRef:
                   name: "{{ .Values.lms.secretName}}"
                   key: token
+            - name: APP_IAS_URL
+              value: "{{ .Values.ias.url }}"
+            - name: APP_IAS_USER_ID
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.ias.secretName }}"
+                  key: id
+            - name: APP_IAS_USER_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.ias.secretName }}"
+                  key: secret
+            - name: APP_IAS_IDENTITY_PROVIDER
+              value: "{{ .Values.ias.identityProvider }}"
+            - name: APP_IAS_DISABLED
+              value: "{{ .Values.ias.disabled }}"
             - name: APP_DATABASE_USER
               valueFrom:
                 secretKeyRef:

@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	pkgerrors "github.com/pkg/errors"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -48,6 +47,9 @@ import (
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 	fakeservingclient "knative.dev/serving/pkg/client/injection/client/fake"
 	routeconfig "knative.dev/serving/pkg/reconciler/route/config"
+
+	"knative.dev/pkg/client/injection/ducks/duck/v1/addressable"
+	_ "knative.dev/pkg/client/injection/ducks/duck/v1/addressable/fake"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	fakesourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
@@ -361,6 +363,7 @@ func TestReconcile(t *testing.T) {
 	}
 
 	var ctor Ctor = func(t *testing.T, ctx context.Context, ls *Listers) controller.Reconciler {
+		ctx = addressable.WithDuck(ctx)
 		defer SetEnvVar(t, metrics.DomainEnv, tMetricsDomain)()
 
 		cmw := configmap.NewStaticWatcher(
