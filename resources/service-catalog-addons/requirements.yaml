@@ -5,5 +5,3 @@ dependencies:
   condition: broker-ui.enabled
 - name: catalog-ui
   condition: catalog-ui.enabled
-- name: instances-ui
-  condition: instances-ui.enabled
