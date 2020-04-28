@@ -201,7 +201,7 @@ spec:
             readOnly: true
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/develop/installer:1.12
+        image: eu.gcr.io/kyma-project/develop/installer:1.12.0-rc1
         imagePullPolicy: IfNotPresent
         args:
           - -tillerTLSInsecureSkipVerify=true
