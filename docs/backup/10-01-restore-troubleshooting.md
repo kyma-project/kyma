@@ -3,7 +3,7 @@ title: Restore troubleshooting
 type: Troubleshooting
 ---
 
->**NOTE**: Velero is no longer supported. For the new backup strategy, see [this](/components/backup/#new-backup-strategy) document.
+>**NOTE**: Velero is no longer supported. For the new backup strategy, see [this](/components/backup/#details-kyma-backup-strategy) document.
 
 ## Pod stuck in Init phase
 

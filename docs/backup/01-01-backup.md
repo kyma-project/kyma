@@ -2,7 +2,7 @@
 title: Overview
 ---
 
->**NOTE**: Velero is no longer supported. For the new backup strategy, see [this](/components/backup/#new-backup-strategy) document.
+>**NOTE**: Velero is no longer supported. For the new backup strategy, see [this](/components/backup/#details-kyma-backup-strategy) document.
 
 Kyma integrates with [Velero](https://github.com/heptio/velero/) to provide backup and restore capabilities.
 
