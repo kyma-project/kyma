@@ -30,13 +30,14 @@ const (
 const (
 	integrationNamespace                      = "kyma-integration"
 	applicationNameLabelKey                   = "application-name"
+	serviceIDLabelKey                         = "service-id"
 	brokerNamespaceLabelKey                   = "broker-namespace"
 	knativeEventingInjectionLabelKey          = "knative-eventing-injection"
 	knativeEventingInjectionLabelValueEnabled = "enabled"
 	knSubscriptionNamePrefix                  = "brokersub"
 )
 
-func NewAppSubscription(appNs, appName string, opts ...SubscriptionOption) *messagingv1alpha1.Subscription {
+func NewAppSubscription(appNs, appName, appSvcID string, opts ...SubscriptionOption) *messagingv1alpha1.Subscription {
 	sub := &messagingv1alpha1.Subscription{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", knSubscriptionNamePrefix),
@@ -44,6 +45,7 @@ func NewAppSubscription(appNs, appName string, opts ...SubscriptionOption) *mess
 			Labels: map[string]string{
 				brokerNamespaceLabelKey: appNs,
 				applicationNameLabelKey: appName,
+				serviceIDLabelKey:       appSvcID,
 			},
 		},
 	}
