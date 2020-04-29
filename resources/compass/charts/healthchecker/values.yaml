@@ -1,6 +1,7 @@
 deployment:
   image:
     pullPolicy: IfNotPresent
+  resources: {}
   args:
     containerPort: &port 3000
   securityContext: # Set on container level

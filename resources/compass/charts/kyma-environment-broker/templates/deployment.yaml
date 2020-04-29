@@ -241,7 +241,7 @@ spec:
             timeoutSeconds: 3
             initialDelaySeconds: 20
           resources:
-              {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - mountPath: /gardener/kubeconfig
               name: gardener-kubeconfig
