@@ -60,7 +60,19 @@ func (s installStep) Run() error {
 		releaseOverrides)
 
 	if installErr != nil {
-		return errors.New("Helm install error: " + installErr.Error())
+		installErrMsg := fmt.Sprintf("Helm install error: %s ", installErr.Error())
+
+		log.Println(fmt.Sprintf("Deleting falied release %s before retrying installation...", s.component.GetReleaseName()))
+		_, err := s.helmClient.DeleteRelease(s.component.GetReleaseName())
+
+		if err != nil {
+			deleteErrMsg := fmt.Sprintf("Helm delete of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
+			log.Println(deleteErrMsg)
+			return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, deleteErrMsg))
+		}
+		log.Println("Successfully deleted release %s", s.component.GetReleaseName())
+
+		return errors.New(installErrMsg)
 	}
 
 	s.helmClient.PrintRelease(installResp.Release)
