@@ -3,11 +3,10 @@ title: Taking backup using Velero
 type: Tutorials
 ---
 
-For scenarios of partial restore of individual applications running on Kyma, you might want to use Velero. It will create a backup of your kubernetes resources and volumes so that you can restore them on a different cluster.
+This tutorial shows how to perform a partial restore of individual applications running on Kyma using Velero. Follow the guidelines to back up your Kubernetes resources and volumes so that you can restore them on a different cluster.
 
-> **NOTE:**  Be aware that a full restore of a Kyma cluster is not supported. You need to always start from an existing Kyma installation and restore explicit resources individual.
+> **NOTE:**  Be aware that a full restore of a Kyma cluster is not supported. You should start with an existing Kyma installation and restore specific resources individually.
 
-Follow this tutorial to install Velero and take a backup from Kyma cluster.
 
 ## Prerequisites
 
@@ -15,7 +14,7 @@ Download and install the [Velero CLI](https://github.com/vmware-tanzu/velero/rel
 
 ## Steps
 
-Follow these steps to install Velero and take a backup:
+Follow these steps to install Velero and back up your Kyma cluster.
 
 1. Install the Velero server.
 
@@ -35,7 +34,7 @@ Follow these steps to install Velero and take a backup:
           --wait
       ```
 
-      >**NOTE:** For details on configuring and installing Velero on GCP, see [this](https://github.com/vmware-tanzu/velero-plugin-for-gcp) repository.
+      >**NOTE:** For details on configuring and installing Velero on GCP, see [this](https://github.com/vmware-tanzu/velero-plugin-for-gcp/blob/master/README.md) document.
 
       </details>
       <details>
@@ -55,14 +54,14 @@ Follow these steps to install Velero and take a backup:
           --wait
       ```
 
-      >**NOTE:** For details on configuring and installing Velero in Azure, see [this](https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure) repository.
+      >**NOTE:** For details on configuring and installing Velero in Azure, see [this](https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure/blob/master/README.md) document.
 
       >**CAUTION:** If you are using AKS, set the **AZURE_RESOURCE_GROUP** to the name of the auto-generated resource group created when you provision your cluster on Azure since this resource group contains your cluster's virtual machines/disks.
 
       </details>
     </div>
 
-2. Take a backup of all the resources on the cluster:
+2. Create a backup of all the resources on the cluster:
 
     ```bash
     velero backup create {NAME} --wait
