@@ -1,4 +1,4 @@
-//// +build acceptance
+// +build acceptance
 
 package serverless
 
@@ -225,7 +225,7 @@ func mutationFunctionArguments(functionNameSuffix, namespaceName string, labels 
 	if len(labels) != 0 {
 		for i, label := range labels {
 			labelTemplate += fmt.Sprintf(`{"%s": "%s"}`, label, label)
-			if i + 1 < len(labels) {
+			if i+1 < len(labels) {
 				labelTemplate += ", "
 			}
 		}
