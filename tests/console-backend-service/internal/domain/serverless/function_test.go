@@ -1,4 +1,4 @@
-// +build acceptance
+//// +build acceptance
 
 package serverless
 
@@ -30,13 +30,14 @@ func TestFunctionEventQueries(t *testing.T) {
 	subscription := subscribeFunctionEvent(c, createFunctionEventArguments("1", namespaceName), functionEventDetailsFields())
 	defer subscription.Close()
 
-	err = mutationFunction(c, "createFunction", mutationFunctionArguments("1", namespaceName, ""), functionDetailsFields())
+	labels := []string{FunctionLabel}
+	err = mutationFunction(c, "createFunction", mutationFunctionArguments("1", namespaceName, labels), functionDetailsFields())
 	require.NoError(t, err)
 
 	event, err := readFunctionEvent(subscription)
 	require.NoError(t, err)
 
-	expectedFunction := fixFunction("1", namespaceName, "")
+	expectedFunction := fixFunction("1", namespaceName, labels)
 	expectedEvent := fixFunctionEvent("ADD", expectedFunction)
 	checkFunctionEvent(t, expectedEvent, event)
 
@@ -44,21 +45,22 @@ func TestFunctionEventQueries(t *testing.T) {
 	require.NoError(t, err)
 	checkFunctionQuery(t, expectedFunction, function)
 
-	err = mutationFunction(c, "updateFunction", mutationFunctionArguments("1", namespaceName, FunctionLabel), functionDetailsFields())
+	labels = []string{FunctionLabel, FunctionLabel}
+	err = mutationFunction(c, "updateFunction", mutationFunctionArguments("1", namespaceName, labels), functionDetailsFields())
 	require.NoError(t, err)
 
 	function, err = queryFunction(c, queryFunctionArguments("1", namespaceName), functionDetailsFields())
 	require.NoError(t, err)
 
-	expectedFunction = fixFunction("1", namespaceName, FunctionLabel)
+	expectedFunction = fixFunction("1", namespaceName, labels)
 	checkFunctionQuery(t, expectedFunction, function)
 
 	err = mutationFunction(c, "deleteFunction", deleteFunctionArguments("1", namespaceName), functionMetadataDetailsFields())
 	require.NoError(t, err)
 
-	err = mutationFunction(c, "createFunction", mutationFunctionArguments("2", namespaceName, ""), functionDetailsFields())
+	err = mutationFunction(c, "createFunction", mutationFunctionArguments("2", namespaceName, labels), functionDetailsFields())
 	require.NoError(t, err)
-	err = mutationFunction(c, "createFunction", mutationFunctionArguments("3", namespaceName, ""), functionDetailsFields())
+	err = mutationFunction(c, "createFunction", mutationFunctionArguments("3", namespaceName, labels), functionDetailsFields())
 	require.NoError(t, err)
 
 	functions, err := queryFunctions(c, namespaceName, functionDetailsFields())
@@ -129,15 +131,16 @@ func fixFunctionEvent(eventType string, function Function) FunctionEvent {
 	}
 }
 
-func fixFunction(nameSuffix, namespace, label string) Function {
-	labels := map[string]string{}
-	if label != "" {
-		labels[label] = label
+func fixFunction(nameSuffix, namespace string, labels []string) Function {
+	labelTemplate := map[string]string{}
+	for _, label := range labels {
+		labelTemplate[label] = label
 	}
+
 	return Function{
 		Name:      fmt.Sprintf("%s-%s", FunctionNamePrefix, nameSuffix),
 		Namespace: namespace,
-		Labels:    labels,
+		Labels:    labelTemplate,
 	}
 }
 
@@ -217,11 +220,17 @@ func deleteFunctionArguments(functionSuffix, namespace string) string {
 	`, namespace, FunctionNamePrefix, functionSuffix, namespace)
 }
 
-func mutationFunctionArguments(functionNameSuffix, namespaceName, label string) string {
+func mutationFunctionArguments(functionNameSuffix, namespaceName string, labels []string) string {
 	labelTemplate := ""
-	if label != "" {
-		labelTemplate = fmt.Sprintf(`{"%s": "%s"}`, label, label)
+	if len(labels) != 0 {
+		for i, label := range labels {
+			labelTemplate += fmt.Sprintf(`{"%s": "%s"}`, label, label)
+			if i + 1 < len(labels) {
+				labelTemplate += ", "
+			}
+		}
 	}
+
 	return fmt.Sprintf(`
 		name: "%s-%s",
 		namespace: "%s",
