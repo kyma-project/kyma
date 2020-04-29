@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/tests/function-controller
 
-go 1.13
+go 1.14
 
 require (
 	github.com/golang/protobuf v1.4.0 // indirect
@@ -28,7 +28,6 @@ require (
 	knative.dev/serving v0.12.1
 	sigs.k8s.io/controller-runtime v0.5.2
 )
-
 
 // mismatch among fun-controller, knative enevting and knative serving...
 // try to delete it after update of eventing/serving

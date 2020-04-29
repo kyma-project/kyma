@@ -7,8 +7,8 @@ import (
 
 	"github.com/onsi/gomega"
 	"github.com/vrischmann/envconfig"
-	restclient "k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	controllerruntime "sigs.k8s.io/controller-runtime"
 
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
 )
@@ -26,7 +26,7 @@ func TestFunctionController(t *testing.T) {
 	cfg, err := loadConfig("APP")
 	failOnError(g, err)
 
-	restConfig, err := newRestClientConfig(cfg.KubeconfigPath)
+	restConfig := controllerruntime.GetConfigOrDie()
 	failOnError(g, err)
 
 	testSuite, err := testsuite.New(restConfig, cfg.Test, t, g)
@@ -34,21 +34,6 @@ func TestFunctionController(t *testing.T) {
 
 	defer testSuite.Cleanup()
 	testSuite.Run()
-}
-
-func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
-	var config *restclient.Config
-	var err error
-	if kubeconfigPath != "" {
-		config, err = clientcmd.BuildConfigFromFlags("", kubeconfigPath)
-	} else {
-		config, err = restclient.InClusterConfig()
-	}
-
-	if err != nil {
-		return nil, err
-	}
-	return config, nil
 }
 
 func loadConfig(prefix string) (config, error) {

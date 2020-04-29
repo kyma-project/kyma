@@ -3,6 +3,7 @@ package trigger
 import (
 	"context"
 	"time"
+
 	corev1 "k8s.io/api/core/v1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,10 +22,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-)
-
-var (
-	ErrInvalidDataType = errors.New("invalid data type")
 )
 
 type Trigger struct {
@@ -109,7 +106,7 @@ func (t *Trigger) isTriggerReady(name string) func(event watch.Event) (bool, err
 		}
 		u, ok := event.Object.(*unstructured.Unstructured)
 		if !ok {
-			return false, ErrInvalidDataType
+			return false, shared.ErrInvalidDataType
 		}
 		if u.GetName() != name {
 			return false, nil

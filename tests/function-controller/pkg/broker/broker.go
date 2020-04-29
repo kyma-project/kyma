@@ -18,10 +18,6 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
-var (
-	ErrInvalidDataType = errors.New("invalid data type")
-)
-
 const DefaultBrokerName = "default"
 
 type Broker struct {
@@ -46,13 +42,19 @@ func New(dynamicCli dynamic.Interface, namespace string, waitTimeout time.Durati
 	}
 }
 
-func (b *Broker) get() (string, error) {
+func (b *Broker) get() (*eventingv1alpha1.Broker, error) {
 	u, err := b.resCli.Get(b.name)
 	if err != nil {
-		return "", errors.Wrapf(err, "while getting Broker %s in namespace %s", b.name, b.namespace)
+		return &eventingv1alpha1.Broker{}, errors.Wrapf(err, "while getting Broker %s in namespace %s", b.name, b.namespace)
 	}
 
-	return u.GetResourceVersion(), nil
+	broker := &eventingv1alpha1.Broker{}
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, broker)
+	if err != nil {
+		return &eventingv1alpha1.Broker{}, err
+	}
+
+	return broker, nil
 }
 
 func (b *Broker) Delete() error {
@@ -65,15 +67,21 @@ func (b *Broker) Delete() error {
 }
 
 func (b *Broker) WaitForStatusRunning() error {
-	resVersion, err := b.get()
+	broker, err := b.get()
 	if err != nil {
 		return err
 	}
 
+	if broker.Status.IsReady() {
+		b.log.Logf("%s is ready:\n%v", b.name, broker)
+		return nil
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), b.waitTimeout)
 	defer cancel()
+
 	condition := b.isBrokerReady(b.name)
-	_, err = watchtools.Until(ctx, resVersion, b.resCli.ResCli, condition)
+	_, err = watchtools.Until(ctx, broker.GetResourceVersion(), b.resCli.ResCli, condition)
 	if err != nil {
 		return err
 	}
@@ -82,14 +90,12 @@ func (b *Broker) WaitForStatusRunning() error {
 
 func (b *Broker) isBrokerReady(name string) func(event watch.Event) (bool, error) {
 	return func(event watch.Event) (bool, error) {
-		if event.Type != watch.Modified {
-			return false, nil
-		}
 		u, ok := event.Object.(*unstructured.Unstructured)
 		if !ok {
-			return false, ErrInvalidDataType
+			return false, shared.ErrInvalidDataType
 		}
 		if u.GetName() != name {
+			b.log.Logf("names mismatch, object's name %s, supplied %s", u.GetName(), name)
 			return false, nil
 		}
 

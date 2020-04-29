@@ -70,7 +70,7 @@ func (r *Resource) Get(name string) (*unstructured.Unstructured, error) {
 	if r.namespace != "" {
 		namespace = r.namespace
 	}
-	r.log.Logf("GET %s: namespace:%s kind:%s\n%v", name, namespace, r.kind, result)
+	r.log.Logf("GET name:%s: namespace:%s kind:%s\n%v", name, namespace, r.kind, result)
 	return result, nil
 }
 
