@@ -3,11 +3,12 @@ package main
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
 	"github.com/onsi/gomega"
 	"github.com/vrischmann/envconfig"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+
+	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
 )
 
 type config struct {

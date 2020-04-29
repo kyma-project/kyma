@@ -50,6 +50,10 @@ func WithIgnoreOnNotFound(backoff wait.Backoff, fn func() error, log shared.Logg
 	return retry.OnError(backoff, errorFn(log), fnWithIgnore(fn, errors.IsNotFound, log))
 }
 
+func WithIgnoreOnConflict(backoff wait.Backoff, fn func() error, log shared.Logger) error {
+	return retry.OnError(backoff, errorFn(log), fnWithIgnore(fn, errors.IsConflict, log))
+}
+
 func OnTimeout(backoff wait.Backoff, fn func() error, log shared.Logger) error {
 	return retry.OnError(backoff, errorFn(log), fn)
 }

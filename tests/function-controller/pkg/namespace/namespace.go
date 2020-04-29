@@ -1,12 +1,14 @@
 package namespace
 
 import (
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 )
 
 type Namespace struct {
@@ -24,6 +26,9 @@ func (n *Namespace) Create() (string, error) {
 		_, err := n.coreCli.Namespaces().Create(&v1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: n.name,
+				Labels: map[string]string{
+					eventingv1alpha1.InjectionAnnotation: "enabled",
+				},
 			},
 		})
 		return err

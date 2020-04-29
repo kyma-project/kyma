@@ -122,3 +122,34 @@ func (r *Resource) Delete(name string, timeout time.Duration) error {
 	}
 	return nil
 }
+
+func (r *Resource) Update(res interface{}) (*unstructured.Unstructured, error) {
+	// https://github.com/kubernetes/client-go/blob/kubernetes-1.17.4/examples/dynamic-create-update-delete-deployment/main.go#L119-L166
+
+	u, err := runtime.DefaultUnstructuredConverter.ToUnstructured(res)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while converting resource %s %s to unstructured", r.kind, res)
+	}
+
+	unstructuredObj := &unstructured.Unstructured{
+		Object: u,
+	}
+
+	var result *unstructured.Unstructured
+	err = retry.WithIgnoreOnConflict(retry.DefaultBackoff, func() error {
+		var errUpdate error
+		result, errUpdate = r.ResCli.Update(unstructuredObj, metav1.UpdateOptions{})
+		return errUpdate
+	}, r.log)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while updating resource %s '%s'", r.kind, unstructuredObj.GetName())
+	}
+
+	namespace := "-"
+	if r.namespace != "" {
+		namespace = r.namespace
+	}
+	r.log.Logf("UPDATE %s: namespace:%s kind:%s\n%v", result.GetName(), namespace, r.kind, result)
+
+	return result, nil
+}

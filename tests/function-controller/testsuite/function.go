@@ -88,6 +88,30 @@ func (f *function) Delete() error {
 	return nil
 }
 
+func (f *function) Get() error {
+	fn, err := f.resCli.Get(f.name)
+	if err != nil {
+		return errors.Wrapf(err, "while deleting Function %s in namespace %s", f.name, f.namespace)
+	}
+
+	return nil
+}
+
+
+
+
+
+func (f *function) Update() error {
+	f.resCli.
+
+	err := f.resCli.ResCli.Update(f.name, f.waitTimeout)
+	if err != nil {
+		return errors.Wrapf(err, "while updating Function %s in namespace %s", f.name, f.namespace)
+	}
+
+	return nil
+}
+
 func (f *function) isFunctionReady(name string) func(event watch.Event) (bool, error) {
 	return func(event watch.Event) (bool, error) {
 		if event.Type != watch.Modified {
