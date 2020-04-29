@@ -151,7 +151,7 @@ func (p *proxy) ServeHTTPNamespaced(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cacheEntry.Proxy.ServeHTTP(w, r)
+	cacheEntry.Proxy.ServeHTTP(w, newRequest)
 }
 
 func (p *proxy) getOrCreateCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
@@ -193,7 +193,7 @@ func (p *proxy) createCacheEntryForNamespacedGateway(id string) (*CacheEntry, ap
 		return nil, err
 	}
 
-	cacheEntry, err := p.cacheEntryFromProxyConfig(segments[0], proxyConfig)
+	cacheEntry, err := p.cacheEntryFromProxyConfig(id, proxyConfig)
 	if err != nil {
 		return nil, err
 	}

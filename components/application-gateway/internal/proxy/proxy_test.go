@@ -695,7 +695,7 @@ func TestInvalidStateHandler(t *testing.T) {
 	})
 }
 
-func TestServeHTTPNamespaced(t *testing.T) {
+func TestProxy_ServeHTTPNamespaced(t *testing.T) {
 
 	proxyTimeout := 10
 	emptyRequestParams := &authorization.RequestParameters{
@@ -703,28 +703,108 @@ func TestServeHTTPNamespaced(t *testing.T) {
 		QueryParameters: nil,
 	}
 
-	t.Run("should proxy without escaping the URL path characters when target URL does not contain path", func(t *testing.T) {
+	bodyMap := map[string]interface{}{
+		"key1": "string value",
+	}
+
+	for _, testCase := range []struct {
+		description    string
+		serverFunc     func(r *http.Request)
+		createRequest  func() *http.Request
+		assertResponse func(rr *httptest.ResponseRecorder)
+	}{
+		{
+			description: "should proxy without escaping the URL path characters when target URL does not contain path",
+			serverFunc: func(req *http.Request) {
+				assert.Equal(t, "/somepath/Xyz('123')", req.URL.String())
+			},
+			createRequest: func() *http.Request {
+				req, err := http.NewRequest(http.MethodGet, "/secret/"+secretName+"/api/"+apiName+"/somepath/Xyz('123')", nil)
+				require.NoError(t, err)
+				req = mux.SetURLVars(req, map[string]string{"secret": secretName, "apiName": apiName})
+				return req
+			},
+			assertResponse: func(rr *httptest.ResponseRecorder) {
+				assert.Equal(t, http.StatusOK, rr.Code)
+			},
+		},
+		{
+			description: "should proxy without escaping the URL path characters when target URL does not contain path",
+			serverFunc: func(req *http.Request) {
+				var receivedBody map[string]interface{}
+				err := json.NewDecoder(req.Body).Decode(&receivedBody)
+				require.NoError(t, err)
+
+				assert.Equal(t, bodyMap, receivedBody)
+				assert.Equal(t, "/somepath/abcd", req.URL.String())
+			},
+			createRequest: func() *http.Request {
+				body, err := json.Marshal(bodyMap)
+				require.NoError(t, err)
+
+				req, err := http.NewRequest(http.MethodPost, "/somepath/abcd", bytes.NewReader(body))
+				require.NoError(t, err)
+				req = mux.SetURLVars(req, map[string]string{"secret": secretName, "apiName": apiName})
+				return req
+			},
+			assertResponse: func(rr *httptest.ResponseRecorder) {
+				assert.Equal(t, http.StatusOK, rr.Code)
+				assert.Equal(t, "test", rr.Body.String())
+			},
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			// given
+			ts := NewTestServer(testCase.serverFunc)
+			defer ts.Close()
+
+			req := testCase.createRequest()
+
+			authStrategyMock := &authMock.Strategy{}
+			authStrategyMock.
+				On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
+				Return(nil).
+				Once()
+
+			credentials := &authorization.Credentials{OAuth: &authorization.OAuth{RequestParameters: emptyRequestParams}}
+			authStrategyFactoryMock := &authMock.StrategyFactory{}
+			authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
+
+			csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
+
+			targetConfig := proxy2.ProxyDestinationConfig{
+				TargetURL: ts.URL,
+				Configuration: proxy2.Configuration{
+					Credentials: &proxy2.OauthConfig{},
+				},
+			}
+			targetConfigProvider := &mocks.TargetConfigProvider{}
+			targetConfigProvider.On("GetDestinationConfig", secretName, apiName).Return(targetConfig, nil)
+
+			handler := New(nil, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), targetConfigProvider)
+			rr := httptest.NewRecorder()
+
+			// when
+			handler.ServeHTTPNamespaced(rr, req)
+
+			// then
+			testCase.assertResponse(rr)
+
+			authStrategyFactoryMock.AssertExpectations(t)
+			authStrategyMock.AssertExpectations(t)
+			csrfFactoryMock.AssertExpectations(t)
+			csrfStrategyMock.AssertExpectations(t)
+			targetConfigProvider.AssertExpectations(t)
+		})
+	}
+
+	t.Run("should proxy and use internal cache", func(t *testing.T) {
 		// given
 		ts := NewTestServer(func(req *http.Request) {
-			assert.Equal(t, "/somepath/Xyz('123')", req.URL.String())
+			assert.Equal(t, req.Method, http.MethodGet)
+			assert.Equal(t, req.RequestURI, "/orders/123")
 		})
 		defer ts.Close()
-
-		req, err := http.NewRequest(http.MethodGet, "/secret/"+secretName+"/api/"+apiName+"/somepath/Xyz('123')", nil)
-		require.NoError(t, err)
-		req = mux.SetURLVars(req, map[string]string{"secret": secretName, "apiName": apiName})
-
-		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
-			Return(nil).
-			Once()
-
-		credentials := &authorization.Credentials{OAuth: &authorization.OAuth{RequestParameters: emptyRequestParams}}
-		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
-
-		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
 
 		targetConfig := proxy2.ProxyDestinationConfig{
 			TargetURL: ts.URL,
@@ -735,6 +815,22 @@ func TestServeHTTPNamespaced(t *testing.T) {
 		targetConfigProvider := &mocks.TargetConfigProvider{}
 		targetConfigProvider.On("GetDestinationConfig", secretName, apiName).Return(targetConfig, nil)
 
+		req, err := http.NewRequest(http.MethodGet, "/secret/"+secretName+"/api/"+apiName+"/orders/123", nil)
+		require.NoError(t, err)
+		req = mux.SetURLVars(req, map[string]string{"secret": secretName, "apiName": apiName})
+
+		authStrategyMock := &authMock.Strategy{}
+		authStrategyMock.
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
+			Return(nil).
+			Twice()
+
+		credentials := &authorization.Credentials{OAuth: &authorization.OAuth{RequestParameters: emptyRequestParams}}
+		authStrategyFactoryMock := &authMock.StrategyFactory{}
+		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
+
+		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledTwice)
+
 		handler := New(nil, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), targetConfigProvider)
 		rr := httptest.NewRecorder()
 
@@ -744,11 +840,24 @@ func TestServeHTTPNamespaced(t *testing.T) {
 		// then
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, "test", rr.Body.String())
+
+		// given
+		nextReq, err := http.NewRequest(http.MethodGet, "/secret/"+secretName+"/api/"+apiName+"/orders/123", nil)
+		require.NoError(t, err)
+		nextReq = mux.SetURLVars(nextReq, map[string]string{"secret": secretName, "apiName": apiName})
+
+		rr = httptest.NewRecorder()
+
+		//when
+		handler.ServeHTTPNamespaced(rr, nextReq)
+
+		//then
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, "test", rr.Body.String())
 		authStrategyFactoryMock.AssertExpectations(t)
 		authStrategyMock.AssertExpectations(t)
 		csrfFactoryMock.AssertExpectations(t)
 		csrfStrategyMock.AssertExpectations(t)
-		targetConfigProvider.AssertExpectations(t)
 	})
 
 }
