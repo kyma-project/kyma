@@ -224,7 +224,7 @@ func mutationFunctionArguments(functionNameSuffix, namespaceName string, labels 
 	labelTemplate := ""
 	if len(labels) != 0 {
 		for i, label := range labels {
-			labelTemplate += fmt.Sprintf(`{"%s": "%s"}`, label, label)
+			labelTemplate += fmt.Sprintf(`%s: "%s"`, label, label)
 			if i+1 < len(labels) {
 				labelTemplate += ", "
 			}
@@ -235,10 +235,10 @@ func mutationFunctionArguments(functionNameSuffix, namespaceName string, labels 
 		name: "%s-%s",
 		namespace: "%s",
 		params: {
-			labels: [ %s ],
-			source: "module.exports = { main: function(event, context) { return 'Hello World' } }",
-			dependencies: "",
-			env: [  ],
+			labels: { %s },
+			source: "module.exports = { main: function (event, context) { return "Hello World!"; } }",
+			dependencies: "{ "name": "asd", "version": "1.0.0", "dependencies": {} }",
+			env: [ { name: "test", value: "test_value" } ],
 			replicas: {  },
 			resources: { limits: { memory: "100m", cpu: "128Mi" }, requests: { memory: "50m", cpu: "64Mi" } },
 		},
