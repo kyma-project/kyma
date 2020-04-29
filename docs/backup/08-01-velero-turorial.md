@@ -3,7 +3,7 @@ title: Taking backup using Velero
 type: Tutorials
 ---
 
-This tutorial shows how to perform a partial restore of individual applications running on Kyma using Velero. Follow the guidelines to back up your Kubernetes resources and volumes so that you can restore them on a different cluster.
+This tutorial shows how to use Velero to perform a partial restore of individual applications running on Kyma. Follow the guidelines to back up your Kubernetes resources and volumes so that you can restore them on a different cluster.
 
 > **NOTE:**  Be aware that a full restore of a Kyma cluster is not supported. You should start with an existing Kyma installation and restore specific resources individually.
 
@@ -54,7 +54,7 @@ Follow these steps to install Velero and back up your Kyma cluster.
           --wait
       ```
 
-      >**NOTE:** For details on configuring and installing Velero in Azure, see [this](https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure/blob/master/README.md) document.
+      >**NOTE:** For details on configuring and installing Velero on Azure, see [this](https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure/blob/master/README.md) document.
 
       >**CAUTION:** If you are using AKS, set the **AZURE_RESOURCE_GROUP** to the name of the auto-generated resource group created when you provision your cluster on Azure since this resource group contains your cluster's virtual machines/disks.
 
