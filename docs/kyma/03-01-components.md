@@ -25,7 +25,7 @@ The Application Connector is a proprietary Kyma solution. This endpoint is the K
 
 ## Knative Eventing Mesh
 
-Knative Eventing Mesh allows you to easily integrate external applications with Kyma. Under the hood, the Eventing Mesh implements [Knative Eventing](https://knative.dev/docs/eventing/) to ensure Kyma receives business events from external sources and is able to trigger business flows using functions or services.
+Knative Eventing Mesh allows you to easily integrate external applications with Kyma. Under the hood, the Eventing Mesh implements [Knative Eventing](https://knative.dev/docs/eventing/) to ensure Kyma receives business events from external sources and is able to trigger business flows using Functions or services.
 
 ## Service Mesh
 
@@ -33,7 +33,7 @@ The Service Mesh is an infrastructure layer that handles service-to-service comm
 
 ## Serverless
 
-The Serverless component allows you to reduce the implementation and operation effort of an application to the absolute minimum. Kyma Serverless provides a platform to run lightweight functions in a cost-efficient and scalable way using JavaScript and Node.js. Serverless in Kyma relies on [Knative Serving](https://knative.dev/docs/serving/) for deploying and managing functions and [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) for creating Docker images.
+The Serverless component allows you to reduce the implementation and operation effort of an application to the absolute minimum. Kyma Serverless provides a platform to run lightweight Functions in a cost-efficient and scalable way using JavaScript and Node.js. Serverless in Kyma relies on [Knative Serving](https://knative.dev/docs/serving/) for deploying and managing Functions and [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) for creating Docker images.
 
 ## Monitoring
 
@@ -50,10 +50,6 @@ The API Gateway aims to provide a set of functionalities which allow developers 
 ## Logging
 
 Logging in Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system.
-
-## Backup
-
-Kyma integrates with [Velero](https://github.com/heptio/velero/) to provide backup and restore capabilities for Kubernetes cluster resources. Once backed up, Velero stores the resources in buckets of [supported cloud providers](https://velero.io/docs/v1.0.0/support-matrix/).
 
 ## Console
 

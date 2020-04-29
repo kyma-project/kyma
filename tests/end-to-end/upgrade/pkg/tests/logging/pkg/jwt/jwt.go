@@ -3,7 +3,7 @@ package jwt
 import (
 	"fmt"
 
-	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
+	dex "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/fetch-dex-token"
 )
 
 // GetToken retrieves jwt token from dex package

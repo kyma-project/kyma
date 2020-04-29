@@ -58,6 +58,14 @@ hydra:
       enabled: false
     admin:
       enabled: false
+  deployment:
+    resources:
+      limits:
+        cpu: 100m
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 128Mi
   hydra:
     # The ORY Hydra configuration. For a full list of available settings, check:
     #   https://github.com/ory/hydra/blob/master/docs/config.yaml
@@ -80,13 +88,6 @@ hydra:
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
     existingSecret: "ory-hydra-credentials"
-  resources:
-    limits:
-      cpu: 100m
-      memory: 256Mi
-    requests:
-      cpu: 50m
-      memory: 128Mi
   hydra-maester:
     globalAccess: true
 # Overrides for the Oathkeeper chart

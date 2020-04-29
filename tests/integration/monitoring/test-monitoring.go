@@ -21,8 +21,8 @@ import (
 	"github.com/kyma-project/kyma/tests/integration/monitoring/promAPI"
 )
 
-const prometheusURL string = "http://monitoring-prometheus.kyma-system:9090"
-const grafanaURL string = "http://monitoring-grafana.kyma-system"
+const prometheusURL = "http://monitoring-prometheus.kyma-system:9090"
+const grafanaURL = "http://monitoring-grafana.kyma-system"
 const namespace = "kyma-system"
 const expectedAlertManagers = 1
 const expectedPrometheusInstances = 1
@@ -49,7 +49,7 @@ func main() {
 
 func testPodsAreReady() {
 	timeout := time.After(3 * time.Minute)
-	tick := time.Tick(5 * time.Second)
+	tick := time.NewTicker(5 * time.Second)
 	expectedNodeExporter := getNumberofNodeExporter()
 	for {
 		actualAlertManagers := 0
@@ -77,7 +77,7 @@ func testPodsAreReady() {
 				log.Fatalf("Expected grafana running is %d but got %d instances", expectedGrafanaInstance, actualGrafanaInstance)
 			}
 
-		case <-tick:
+		case <-tick.C:
 			pods, err := k8sClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app in (alertmanager,prometheus,grafana,prometheus-node-exporter)"})
 			if err != nil {
 				log.Fatalf("Error while kubectl get pods, err: %v", err)
@@ -111,11 +111,8 @@ func testPodsAreReady() {
 			for _, pod := range pods.Items {
 				podName := pod.Name
 				isReady := getPodStatus(pod)
-				if isReady {
-					switch true {
-					case strings.Contains(podName, "kube-state-metrics"):
-						actualKubeStateMetrics++
-					}
+				if isReady && strings.Contains(podName, "kube-state-metrics") {
+					actualKubeStateMetrics++
 				}
 			}
 
@@ -150,6 +147,7 @@ func testTargetsAreHealthy() {
 			}
 			activeTargets := resp.Data.ActiveTargets
 			allTargetsAreHealthy := true
+			timeoutMessage = ""
 			for _, target := range activeTargets {
 				if target.Health != "up" {
 					allTargetsAreHealthy = false
@@ -187,6 +185,7 @@ func testRulesAreHealthy() {
 			}
 			allRulesAreHealthy := true
 			alertDataGroups := resp.Data.Groups
+			timeoutMessage = ""
 			for _, group := range alertDataGroups {
 				for _, rule := range group.Rules {
 					if rule.Health != "ok" {

@@ -15,6 +15,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 const (
@@ -23,7 +24,7 @@ const (
 )
 
 type ServiceConfig struct {
-	RequeueDuration time.Duration `envconfig:"default=1m"`
+	RequeueDuration time.Duration `envconfig:"default=10m"`
 }
 
 type ServiceReconciler struct {
@@ -68,8 +69,13 @@ func (r *ServiceReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	if !hasCorrectLabels(*instance) {
+		r.Log.WithValues("service", request.NamespacedName).Info("skipping reconcilation for a service without needed labels")
+		return ctrl.Result{}, nil
+	}
+
 	if !instance.Status.IsReady() {
-		return ctrl.Result{RequeueAfter: r.config.RequeueDuration}, nil
+		return ctrl.Result{}, nil
 	}
 
 	log := r.Log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "name", instance.GetName(), "namespace", instance.GetNamespace(), "version", instance.GetGeneration())
@@ -85,7 +91,17 @@ func (r *ServiceReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{}, nil
+	return ctrl.Result{RequeueAfter: r.config.RequeueDuration}, nil
+}
+
+func hasCorrectLabels(instance servingv1.Service) bool {
+	labels := instance.GetLabels()
+
+	_, managedByLabelOk := labels[serverlessv1alpha1.FunctionManagedByLabel]
+	_, nameLabelOk := labels[serverlessv1alpha1.FunctionNameLabel]
+	_, uuidLabel := labels[serverlessv1alpha1.FunctionUUIDLabel]
+
+	return managedByLabelOk && nameLabelOk && uuidLabel
 }
 
 func (r *ServiceReconciler) deleteRevisions(ctx context.Context, log logr.Logger, service *servingv1.Service, revisions []servingv1.Revision) error {

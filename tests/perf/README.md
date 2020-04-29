@@ -102,7 +102,7 @@ export default function() {
 
 This example executes a **1** minute long load test that runs with **1000** request per second. The test is run against **http-db-service**, on a cluster deployed on **CLUSTER_DOMAIN_NAME**, across **10** virtual users.
 
-The test logic should be implemented in a function defined as **default**.
+The test logic should be implemented in a Function defined as **default**.
 
 > **NOTE:** Read more about the test execution lifecycle [here](https://docs.k6.io/docs/test-life-cycle).
 

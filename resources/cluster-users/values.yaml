@@ -1,7 +1,7 @@
 tests:
   enabled: true
   image:
-    version: PR-8160
+    version: d6e25e47
   env:
     namespace: default
 
@@ -49,8 +49,6 @@ clusterRoles:
     ory:
       - "oathkeeper.ory.sh"
       - "hydra.ory.sh"
-    backup:
-      - "velero.io"
     rafter:
       - "rafter.kyma-project.io"
     knativeServing:

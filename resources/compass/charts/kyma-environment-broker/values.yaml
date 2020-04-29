@@ -4,6 +4,7 @@ deployment:
     pullPolicy: IfNotPresent
   securityContext:
     runAsUser: 2000
+  strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 
 imagePullSecrets: []
 nameOverride: ""
@@ -106,6 +107,16 @@ ias:
   secret: "TBD"
   identityProvider: "TBD"
   disabled: true
+
+edp:
+  authURL: "TBD"
+  adminURL: "TBD"
+  namespace: "kyma-dev"
+  environment: "dev"
+  required: false
+  disabled: true
+  secret: "TBD"
+  secretName: "edp-creds"
 
 e2e:
   tenant:

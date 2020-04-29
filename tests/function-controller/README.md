@@ -2,7 +2,7 @@
 
 ## Overview
 
-The project is a test scenario for the Function Controller. It creates a sample function, exposes it using an API Rule, and sends `GET` requests to the function to check if it is accessible from the cluster and outside of the cluster.
+The project is a test scenario for the Function Controller. It creates a sample Function, exposes it using an API Rule, and sends `GET` requests to the Function to check if it is accessible from the cluster and outside of the cluster.
 
 ## Prerequisites
 
