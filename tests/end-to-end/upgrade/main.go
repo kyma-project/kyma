@@ -125,19 +125,19 @@ func main() {
 	// Test name is sanitized and used for creating dedicated namespace for given test,
 	// so it cannot overlap with others.
 
-	// metricUpgradeTest, err := monitoring.NewMetricsUpgradeTest(k8sCli)
-	// fatalOnError(err, "while creating Metrics Upgrade Test")
+	metricUpgradeTest, err := monitoring.NewMetricsUpgradeTest(k8sCli)
+	fatalOnError(err, "while creating Metrics Upgrade Test")
 
 	aInjector, err := injector.NewAddons("end-to-end-upgrade-test", cfg.TestingAddonsURL)
 	fatalOnError(err, "while creating addons configuration injector")
 
 	tests := map[string]runner.UpgradeTest{
-		"HelmBrokerUpgradeTest":         servicecatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
-		"HelmBrokerConflictUpgradeTest": servicecatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
-		"ApplicationBrokerUpgradeTest":  servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
-		"GrafanaUpgradeTest":            monitoring.NewGrafanaUpgradeTest(k8sCli),
-		"TargetsAndRulesUpgradeTest":    monitoring.NewTargetsAndRulesTest(k8sCli),
-		//"MetricsUpgradeTest":            metricUpgradeTest,
+		"HelmBrokerUpgradeTest":           servicecatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
+		"HelmBrokerConflictUpgradeTest":   servicecatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
+		"ApplicationBrokerUpgradeTest":    servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
+		"GrafanaUpgradeTest":              monitoring.NewGrafanaUpgradeTest(k8sCli),
+		"TargetsAndRulesUpgradeTest":      monitoring.NewTargetsAndRulesTest(k8sCli),
+		"MetricsUpgradeTest":              metricUpgradeTest,
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
 		"ApiGatewayUpgradeTest":           apigateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
