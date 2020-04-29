@@ -93,14 +93,13 @@ func (t *TestSuite) Run() {
 
 	t.t.Log("Creating APIRule...")
 	domainHost := fmt.Sprintf("%s-%d.%s", t.cfg.DomainName, rand.Uint32(), t.cfg.IngressHost)
-	var apiruleRsourceVersion string
-	apiruleRsourceVersion, err = t.apiRule.Create(t.cfg.DomainName, domainHost, t.cfg.DomainPort)
+	// var apiruleRsourceVersion string
+	_, err = t.apiRule.Create(t.cfg.DomainName, domainHost, t.cfg.DomainPort)
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for function to have ready phase...")
 	err = t.function.WaitForStatusRunning(resourceVersion)
 	failOnError(t.g, err)
-
 
 	t.t.Log("Waiting for broker to have ready phase...")
 	err = t.broker.WaitForStatusRunning()
@@ -108,6 +107,27 @@ func (t *TestSuite) Run() {
 
 	t.t.Log("Waiting for trigger to have ready phase...")
 	err = t.trigger.WaitForStatusRunning(triggerResourceVersion)
+	failOnError(t.g, err)
+
+
+	// you also need to wait for apirule to be ready, dumbass
+	// t.t.Log("Waiting for apirule to have ready phase...")
+
+	t.t.Log("Testing local connection through the service")
+	err = t.checkConnection(fmt.Sprintf("http://%s.%s.svc.cluster.local", t.cfg.FunctionName, ns))
+	failOnError(t.g, err)
+
+	t.t.Log("Testing connection through the gateway")
+	err = t.checkConnection(fmt.Sprintf("https://%s", domainHost))
+	failOnError(t.g, err)
+
+	t.t.Log("Testing update of a function")
+	updatedDetails := t.getUpdatedFunction()
+	err = t.function.Update(updatedDetails)
+	failOnError(t.g, err)
+
+	t.t.Log("Waiting for function to have ready phase...")
+	err = t.function.WaitForStatusRunning(resourceVersion)
 	failOnError(t.g, err)
 
 	t.t.Log("Testing local connection through the service")
@@ -125,6 +145,12 @@ func (t *TestSuite) Cleanup() {
 	failOnError(t.g, err)
 
 	err = t.function.Delete()
+	failOnError(t.g, err)
+
+	err = t.broker.Delete()
+	failOnError(t.g, err)
+
+	err = t.trigger.Delete()
 	failOnError(t.g, err)
 
 	err = t.namespace.Delete()
@@ -161,6 +187,8 @@ module.exports = {
 }
 `,
 		Deps: `{ "name": "hellowithdeps", "version": "0.0.1", "dependencies": { "lodash": "^4.17.5" } }`,
+		MaxReplicas: 2,
+		MinReplicas: 0,
 	}
 }
 
