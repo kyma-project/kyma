@@ -2,10 +2,10 @@ package testsuite
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
+
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,6 +15,8 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/dynamic"
 	watchtools "k8s.io/client-go/tools/watch"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
@@ -88,28 +90,37 @@ func (f *function) Delete() error {
 	return nil
 }
 
-func (f *function) Get() error {
-	fn, err := f.resCli.Get(f.name)
+func (f *function) Update(data *functionData) error {
+	// correct update must first perform get
+	fn, err := f.Get()
 	if err != nil {
-		return errors.Wrapf(err, "while deleting Function %s in namespace %s", f.name, f.namespace)
+		return err
 	}
 
-	return nil
+	fnCopy := fn.DeepCopy()
+
+	fnCopy.Spec.MinReplicas = &data.MinReplicas
+	fnCopy.Spec.MaxReplicas = &data.MaxReplicas
+	fnCopy.Spec.Deps = data.Deps
+	fnCopy.Spec.Source = data.Body
+
+	_, err = f.resCli.Update(fnCopy)
+	return err
 }
 
-
-
-
-
-func (f *function) Update() error {
-	f.resCli.
-
-	err := f.resCli.ResCli.Update(f.name, f.waitTimeout)
+func (f *function) Get() (*serverlessv1alpha1.Function, error) {
+	u, err := f.resCli.Get(f.name)
 	if err != nil {
-		return errors.Wrapf(err, "while updating Function %s in namespace %s", f.name, f.namespace)
+		return nil, errors.Wrapf(err, "while getting Function %s in namespace %s", f.name, f.namespace)
 	}
 
-	return nil
+	function := serverlessv1alpha1.Function{}
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &function)
+	if err != nil {
+		return nil, err
+	}
+
+	return &function, nil
 }
 
 func (f *function) isFunctionReady(name string) func(event watch.Event) (bool, error) {
