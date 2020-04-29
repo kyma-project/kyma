@@ -225,7 +225,7 @@ func mutationFunctionArguments(functionNameSuffix, namespaceName, label string) 
 	return fmt.Sprintf(`
 		name: "%s-%s",
 		namespace: "%s",
-		parans: {
+		params: {
 			labels: [ %s ],
 			source: "module.exports = { main: function(event, context) { return 'Hello World' } }",
 			dependencies: "",
