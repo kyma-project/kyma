@@ -212,6 +212,7 @@ func newFixFunction(namespace, name string) *serverlessv1alpha1.Function {
 			MinReplicas: &one,
 			MaxReplicas: &two,
 			PodLabels: map[string]string{
+				testBindingLabel1: testBindingLabelValue,
 				testBindingLabel2: testBindingLabelValue,
 				"foo":             "bar",
 			},

@@ -151,12 +151,12 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 	return job
 }
 
-func (r *FunctionReconciler) buildService(log logr.Logger, instance *serverlessv1alpha1.Function) servingv1.Service {
+func (r *FunctionReconciler) buildService(log logr.Logger, instance *serverlessv1alpha1.Function, oldService *servingv1.Service) servingv1.Service {
 	imageName := r.buildExternalImageAddress(instance)
 	serviceLabels := r.serviceLabels(instance)
 
 	podAnnotations := r.servicePodAnnotations(instance)
-	podLabels := r.servicePodLabels(log, instance)
+	podLabels := r.servicePodLabels(log, instance, oldService)
 
 	return servingv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -243,9 +243,9 @@ func (r *FunctionReconciler) servicePodAnnotations(instance *serverlessv1alpha1.
 	return annotations
 }
 
-func (r *FunctionReconciler) servicePodLabels(log logr.Logger, instance *serverlessv1alpha1.Function) map[string]string {
+func (r *FunctionReconciler) servicePodLabels(log logr.Logger, instance *serverlessv1alpha1.Function, oldService *servingv1.Service) map[string]string {
 	functionLabels := r.functionLabels(instance)
-	bindingLabels := r.retrieveBindingLabels(log, instance)
+	bindingLabels := r.retrieveBindingLabels(log, instance, oldService)
 	podLabels := instance.Spec.PodLabels
 
 	if podLabels == nil || len(podLabels) == 0 {
@@ -265,11 +265,28 @@ func (r *FunctionReconciler) servicePodLabels(log logr.Logger, instance *serverl
 	return podLabels
 }
 
-func (r *FunctionReconciler) retrieveBindingLabels(log logr.Logger, instance *serverlessv1alpha1.Function) map[string]string {
+func (r *FunctionReconciler) retrieveBindingLabels(log logr.Logger, instance *serverlessv1alpha1.Function, oldService *servingv1.Service) map[string]string {
+	bindingAnnotation := instance.GetAnnotations()[serviceBindingUsagesTracingAnnotation]
+	functionLabels := r.retrieveBindingLabelsFromAnnotation(log, bindingAnnotation)
+
+	// TODO: Remove this part after 1.13 release
+	serviceLabels := map[string]string{}
+	if oldService != nil {
+		bindingAnnotation = oldService.GetAnnotations()[serviceBindingUsagesTracingAnnotation]
+		serviceLabels = r.retrieveBindingLabelsFromAnnotation(log, bindingAnnotation)
+	}
+
+	for key, value := range functionLabels {
+		serviceLabels[key] = value
+	}
+
+	return serviceLabels
+}
+
+func (r *FunctionReconciler) retrieveBindingLabelsFromAnnotation(log logr.Logger, bindingAnnotation string) map[string]string {
 	bindingLabels := map[string]string{}
 
-	bindingAnnotation := instance.GetAnnotations()[serviceBindingUsagesTracingAnnotation]
-	if bindingAnnotation == "" {
+	if bindingAnnotation == "" || bindingAnnotation == "{}" {
 		return bindingLabels
 	}
 
