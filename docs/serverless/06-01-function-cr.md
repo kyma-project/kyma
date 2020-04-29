@@ -32,6 +32,8 @@ spec:
         "lodash": "^4.17.5"
       }
     }
+  labels:
+    app: my-test-function
   minReplicas: 3
   maxReplicas: 3
   resources:
@@ -77,6 +79,7 @@ This table lists all the possible properties of a given resource together with t
 | **metadata.namespace** | No | Defines the Namespace in which the CR is available. It is set to `default` unless you specify otherwise. |
 | **spec.env** | No | Specifies environment variables you need to export for the Function. |
 | **spec.deps** | No | Specifies the Function's dependencies. |
+| **spec.labels** | No | Specifies the Function's Pod labels. |
 | **spec.minReplicas** | No | Defines the minimum number of Function's Pods to run at a time. |
 | **spec.maxReplicas** | No | Defines the maximum number of Function's Pods to run at a time. |
 | **spec.resources.limits.cpu** | No | Defines the maximum number of CPUs available for the Function's Pod to use. |

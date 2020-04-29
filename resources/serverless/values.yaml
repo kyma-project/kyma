@@ -4,6 +4,12 @@
 
 fullnameOverride: "serverless"
 
+bindingsMigration:
+  image:
+    repository: 'eu.gcr.io/kyma-project/test-infra/alpine-kubectl'
+    tag: 'v20200310-5f52f407'
+    pullPolicy: IfNotPresent
+
 tests:
   enabled: true
   image:
@@ -40,7 +46,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "21757b11"
+    tag: "PR-8287"
     pullPolicy: IfNotPresent
   kubeRbacProxy:
     repository: "gcr.io/kubebuilder/kube-rbac-proxy"
