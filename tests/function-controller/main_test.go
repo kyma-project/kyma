@@ -1,7 +1,9 @@
 package main
 
 import (
+	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/onsi/gomega"
 	"github.com/vrischmann/envconfig"
@@ -17,6 +19,8 @@ type config struct {
 }
 
 func TestFunctionController(t *testing.T) {
+	rand.Seed(time.Now().UnixNano())
+
 	g := gomega.NewGomegaWithT(t)
 
 	cfg, err := loadConfig("APP")

@@ -29,4 +29,7 @@ require (
 	sigs.k8s.io/controller-runtime v0.5.2
 )
 
+
+// mismatch among fun-controller, knative enevting and knative serving...
+// try to delete it after update of eventing/serving
 replace knative.dev/pkg => knative.dev/pkg v0.0.0-20200113182502-b8dc5fbc6d2f
