@@ -3,12 +3,13 @@ package trigger
 import (
 	"context"
 	"time"
+	corev1 "k8s.io/api/core/v1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/watch"
 	watchtools "k8s.io/client-go/tools/watch"
-	v1 "knative.dev/pkg/apis/duck/v1"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
@@ -62,8 +63,8 @@ func (t *Trigger) Create(serviceName string) (ResourceVersion, error) {
 		},
 		Spec: eventingv1alpha1.TriggerSpec{
 			Broker: broker.DefaultBrokerName,
-			Subscriber: v1.Destination{
-				Ref: &v1.KReference{
+			Subscriber: duckv1.Destination{
+				Ref: &corev1.ObjectReference{
 					Kind:       "Service",
 					Namespace:  t.namespace,
 					Name:       serviceName,
