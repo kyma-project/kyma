@@ -70,7 +70,7 @@ func (s installStep) Run() error {
 			log.Println(deleteErrMsg)
 			return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, deleteErrMsg))
 		}
-		log.Println("Successfully deleted release %s", s.component.GetReleaseName())
+		log.Println(fmt.Sprintf("Successfully deleted release %s", s.component.GetReleaseName()))
 
 		return errors.New(installErrMsg)
 	}
