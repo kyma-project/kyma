@@ -11,6 +11,7 @@ deployment:
   dbPool:
     maxOpenConnections: 30
     maxIdleConnections: 2
+  strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 
 adminGroupNames:
   - "mps-superadmin"

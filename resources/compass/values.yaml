@@ -43,7 +43,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "caf93a49"
+      version: "0ddb9214"
     tests:
       director:
         dir:
@@ -53,7 +53,7 @@ global:
         version: "9cebaf5c"
       provisioner:
         dir:
-        version: "ffd45e1d"
+        version: "9f269bf5"
       e2e_provisioning:
         dir:
         version: "ef98664d"
@@ -126,6 +126,7 @@ global:
     enabled: false
 
   kyma_environment_broker:
+    enabled: false
     secrets:
       integrationSystemCredentials:
         name: compass-kyma-environment-broker-credentials

@@ -3,9 +3,9 @@ title: Expose and secure a service
 type: Tutorials
 ---
 
-This tutorial shows how to expose and secure services or functions using the API Gateway Controller. The controller reacts to an instance of the APIRule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured services, the tutorial uses an OAuth2 client registered through the Hydra Maester controller.
+This tutorial shows how to expose and secure services or Functions using the API Gateway Controller. The controller reacts to an instance of the APIRule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured services, the tutorial uses an OAuth2 client registered through the Hydra Maester controller.
 
-The tutorial comes with a sample HttpBin service deployment and a sample function.
+The tutorial comes with a sample HttpBin service deployment and a sample Function.
 
 ## Register an OAuth2 client and get tokens
 
@@ -102,7 +102,7 @@ The tutorial comes with a sample HttpBin service deployment and a sample functio
 
 ## Deploy, expose, and secure the sample resources
 
-Follow the instructions in the tabs to deploy an instance of the HttpBin service or a sample function, expose them, and secure them with Oauth2 scopes.
+Follow the instructions in the tabs to deploy an instance of the HttpBin service or a sample Function, expose them, and secure them with Oauth2 scopes.
 
 <div tabs>
 
@@ -155,16 +155,16 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
 
   <details>
   <summary>
-  Secure a function
+  Secure a Function
   </summary>
 
-1. Create a function using the [supplied code](./assets/function.yaml):
+1. Create a Function using the [supplied code](./assets/function.yaml):
 
   ```shell
   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/api-gateway/assets/function.yaml
   ```
 
-2. Expose the function and secure it by creating an APIRule CR:
+2. Expose the Function and secure it by creating an APIRule CR:
 
   ```shell
   cat <<EOF | kubectl apply -f -
@@ -190,7 +190,7 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
 
 >**NOTE:** If you are running Kyma on Minikube, add `function-example.kyma.local` to the entry with Minikube IP in your system's `/etc/hosts` file.
 
-The exposed function requires all `GET` requests to have a valid token with the "read" scope.
+The exposed Function requires all `GET` requests to have a valid token with the "read" scope.
 
   </details>
 </div>
@@ -199,7 +199,7 @@ The exposed function requires all `GET` requests to have a valid token with the 
 
 ## Access the secured resources
 
-Follow the instructions in the tabs to call the secured service or functions using the tokens issued for the client you registered.
+Follow the instructions in the tabs to call the secured service or Functions using the tokens issued for the client you registered.
 
 <div tabs>
 
@@ -226,16 +226,16 @@ These calls return the code `200` response. If you call the service without a to
 
   <details>
   <summary>
-  Call the secured function
+  Call the secured Function
   </summary>
 
-Send a `GET` request with a token that has the "read" scope to the function:
+Send a `GET` request with a token that has the "read" scope to the Function:
 
   ```shell
   curl -ik https://function-example.$DOMAIN/function -H "Authorization: bearer $ACCESS_TOKEN_READ"
   ```
 
-This call returns the code `200` response. If you call the function without a token, you get the code `401` response. If you call the function with a token with the wrong scope, you get the code `403` response.
+This call returns the code `200` response. If you call the Function without a token, you get the code `401` response. If you call the Function with a token with the wrong scope, you get the code `403` response.
 
   </details>
 </div>

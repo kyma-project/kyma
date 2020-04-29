@@ -2,7 +2,7 @@
 
 ## Overview
 
-This test verifies if the user can connect an external application to Kyma and interact with its APIs and events using functions. The test setup mimics a real-world scenario. This means no internal APIs are used and every request sent from the test to the cluster is routed through the ingress-gateway. Additionally, the test application is connected using client certificates, just like an application in a production environment would be connected.
+This test verifies if the user can connect an external application to Kyma and interact with its APIs and events using Functions. The test setup mimics a real-world scenario. This means no internal APIs are used and every request sent from the test to the cluster is routed through the ingress-gateway. Additionally, the test application is connected using client certificates, just like an application in a production environment would be connected.
 
 ## Test scenario
 
@@ -10,16 +10,16 @@ When you run the test, these actions are performed in the order listed:
 
 1. Create an Application.
 2. Create an ApplicationMapping CR for the created Application in the ` e2e-test` Namespace.
-3. Deploy a function in the ` e2e-test` Namespace.
-4. Start a test service in the ` e2e-test` Namespace. The function calls it when it receives an event.
+3. Deploy a Function in the ` e2e-test` Namespace.
+4. Start a test service in the ` e2e-test` Namespace. The Function calls it when it receives an event.
 5. Connect the Application through the Application Gateway with client certificates.
 6. Register a test service in the Application Registry. The service exposes an event API.
 7. Create a ServiceInstance for the registered ServiceClass.
 8. Create a ServiceBinding for the ServiceInstance.
-9. Create ServiceBindingUsage CR of that binding for the deployed function.
-10. Create a Subscription for the function, so it is subscribed to the events exposed by the Application.
+9. Create ServiceBindingUsage CR of that binding for the deployed Function.
+10. Create a Subscription for the Function, so it is subscribed to the events exposed by the Application.
 11. Send an event to the Application Gateway.
-12. Verify if the call from the function reached the test service.
+12. Verify if the call from the Function reached the test service.
 
 ## Compass end-to-end scenario
 
@@ -32,15 +32,15 @@ The test performs the following actions:
 1. Adds the tested Runtime to the `DEFAULT` scenario in Compass.
 2. Registers an Application with API and Event in Compass.
 3. Creates the ApplicationMapping CR for the created Application in the `compass-e2e-test` Namespace.
-4. Deploys a function in the `compass-e2e-test` Namespace.
-5. Starts a test service in the `compass-e2e-test` Namespace. The function calls it when it receives an event.
+4. Deploys a Function in the `compass-e2e-test` Namespace.
+5. Starts a test service in the `compass-e2e-test` Namespace. The Function calls it when it receives an event.
 6. Connects the Application through the Application Gateway with client certificates.
 7. Creates ServiceInstances for ServiceClasses registered by Compass Runtime Agent (one for API and one for Event services).
 8. Creates a ServiceBinding for the API ServiceInstance.
-9. Creates the ServiceBindingUsage CR of that binding for the deployed function.
-10. Creates a Subscription for the function, so that it is subscribed to the events exposed by the Application.
+9. Creates the ServiceBindingUsage CR of that binding for the deployed Function.
+10. Creates a Subscription for the Function, so that it is subscribed to the events exposed by the Application.
 11. Sends an event to the Application Gateway.
-12. Verifies if the call from the function reached the test service.
+12. Verifies if the call from the Function reached the test service.
 
 ### Compass connectivity adapter test
 
@@ -52,16 +52,16 @@ Connectivity Adapter is a component which translates the Application Registry an
 The test performs the following actions:
 1. Registers an empty Application in Compass.
 2. Creates the ApplicationMapping CR for the created Application in the `connectivity-adapter-e2e` Namespace.
-3. Deploys a function in the `connectivity-adapter-e2e` Namespace.
-4. Starts a test service in the `connectivity-adapter-e2e` Namespace. The function calls it when it receives an event.
+3. Deploys a Function in the `connectivity-adapter-e2e` Namespace.
+4. Starts a test service in the `connectivity-adapter-e2e` Namespace. The Function calls it when it receives an event.
 5. Connects the Application through the Connectivity Adapter with the client certificates.
 6. Registers a service for the Application using Connectivity Adapter.
 7. Creates ServiceInstances for ServiceClasses registered by Compass Runtime Agent (one for the API and one for the Event services).
 8. Creates a ServiceBinding for the API ServiceInstance.
-9. Creates the ServiceBindingUsage CR of that binding for the deployed function.
-10. Creates a Subscription for the function, so that it is subscribed to the events exposed by the Application.
+9. Creates the ServiceBindingUsage CR of that binding for the deployed Function.
+10. Creates a Subscription for the Function, so that it is subscribed to the events exposed by the Application.
 11. Sends an event to the Application Gateway.
-12. Verifies if the call from the function reached the test service.
+12. Verifies if the call from the Function reached the test service.
 
 ## Environment variables for connectivity-adapter-e2e and compass-e2e
 
@@ -82,16 +82,16 @@ When you run the test, these actions are performed in the order listed:
 
 1. Create an Application.
 2. Create an ApplicationMapping CR for the created Application in the ` e2e-mesh-ns` Namespace.
-3. Deploy a function in the `e2e-mesh-ns` Namespace.
-4. Start a test service in the ` e2e-mesh-ns` Namespace. The function calls it when it receives an event.
+3. Deploy a Function in the `e2e-mesh-ns` Namespace.
+4. Start a test service in the ` e2e-mesh-ns` Namespace. The Function calls it when it receives an event.
 5. Connect the Application through the Application Gateway with client certificates.
 6. Register a test service in the Application Registry. The service exposes an event API.
 7. Create a ServiceInstance for the registered ServiceClass.
 8. Create a ServiceBinding for the ServiceInstance.
-9. Create ServiceBindingUsage CR of that binding for the deployed function.
-10. Create a Knative Trigger for the function, so it is subscribed to the events exposed by the Application.
+9. Create ServiceBindingUsage CR of that binding for the deployed Function.
+10. Create a Knative Trigger for the Function, so it is subscribed to the events exposed by the Application.
 11. Send a Cloud event to the Application Gateway at `/events` path.
-12. Verify if the call from the function reached the test service.
+12. Verify if the call from the Function reached the test service.
 
 ## Run the test locally
 

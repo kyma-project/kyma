@@ -13,6 +13,8 @@ spec:
   selector:
     matchLabels:
       {{- include "gcloud-sqlproxy.selectorLabels" . | nindent 6 }}
+  strategy:
+    {{- toYaml .Values.deploymentStrategy | nindent 4 }}
   template:
     metadata:
       labels:

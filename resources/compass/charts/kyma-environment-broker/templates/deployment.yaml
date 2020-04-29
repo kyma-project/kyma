@@ -10,6 +10,8 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "kyma-env-broker.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
+  strategy:
+    {{- toYaml .Values.deployment.strategy | nindent 4 }}
   template:
     metadata:
       labels:
@@ -100,6 +102,23 @@ spec:
               value: "{{ .Values.ias.identityProvider }}"
             - name: APP_IAS_DISABLED
               value: "{{ .Values.ias.disabled }}"
+            - name: APP_EDP_AUTH_URL
+              value: "{{ .Values.edp.authURL }}"
+            - name: APP_EDP_ADMIN_URL
+              value: "{{ .Values.edp.adminURL }}"
+            - name: APP_EDP_NAMESPACE
+              value: "{{ .Values.edp.namespace }}"
+            - name: APP_EDP_ENVIRONMENT
+              value: "{{ .Values.edp.environment }}"
+            - name: APP_EDP_REQUIRED
+              value: "{{ .Values.edp.required }}"
+            - name: APP_EDP_DISABLED
+              value: "{{ .Values.edp.disabled }}"
+            - name: APP_EDP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.edp.secretName }}"
+                  key: secret
             - name: APP_DATABASE_USER
               valueFrom:
                 secretKeyRef:
