@@ -72,7 +72,7 @@ func (ut *AppBrokerUpgradeTest) CreateResources(stop <-chan struct{}, log logrus
 	return ut.newFlow(stop, log, namespace).CreateResources()
 }
 
-// TestResources tests resources after backup phase
+// TestResources tests resources after upgrade
 func (ut *AppBrokerUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	return ut.newFlow(stop, log, namespace).TestResources()
 }

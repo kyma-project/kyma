@@ -51,10 +51,6 @@ The API Gateway aims to provide a set of functionalities which allow developers 
 
 Logging in Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system.
 
-## Backup
-
-Kyma integrates with [Velero](https://github.com/heptio/velero/) to provide backup and restore capabilities for Kubernetes cluster resources. Once backed up, Velero stores the resources in buckets of [supported cloud providers](https://velero.io/docs/v1.0.0/support-matrix/).
-
 ## Console
 
 The Console is a web-based administrative UI for Kyma. It uses the [Luigi framework](https://github.com/SAP/luigi) to allow you to seamlessly extend the UI content with custom micro frontends. The Console has a dedicated Console Backend Service which provides a tailor-made API for each view of the Console UI.
