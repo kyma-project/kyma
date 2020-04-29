@@ -26,7 +26,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 rules:
   - apiGroups: [""]
-    resources: [configmaps]
+    resources: [secrets]
     verbs: [create, get]
 ---
 apiVersion: batch/v1
