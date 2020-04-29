@@ -44,10 +44,13 @@ global:
     kyma_environment_broker:
       dir:
       version: "13332e7c"
+    external_services_mock:
+      dir:
+      version: "PR-1250"
     tests:
       director:
         dir:
-        version: "fa12d8d7"
+        version: "PR-1250"
       connector:
         dir:
         version: "9cebaf5c"
@@ -275,5 +278,7 @@ global:
 
   enableCompassDefaultScenarioAssignment: true
 
+  externalServicesMock:
+    enabled: false
 pairing-adapter:
   enabled: false
