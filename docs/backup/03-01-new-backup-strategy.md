@@ -103,6 +103,12 @@ spec:
     persistentVolumeClaimName: <PVC_NAME>
 ```
 
+Wait until `READYTOUSE` field gets `true` to verify that snapshotting gets succeeded:
+
+```bash
+kubectl get volumesnapshot -w
+```
+
 #### AWS
 
 Gardener AWS uses CSI drivers by default as of Kubernetes 1.18, and it supports Volume snapshotting out of the box.
@@ -130,6 +136,12 @@ metadata:
 spec:
   source:
     persistentVolumeClaimName: <PVC_NAME>
+```
+
+Wait until `READYTOUSE` field gets `true` to verify that snapshotting gets succeeded:
+
+```bash
+kubectl get volumesnapshot -w
 ```
 
 #### Azure
