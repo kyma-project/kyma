@@ -58,6 +58,7 @@ If you reach your service and get `401 Unauthorized` or `403 Forbidden` in respo
         labels:
           app: ory-curl
         name: ory-curl
+        namespace: {SECRET_NAMESPACE}
       spec:
         containers:
         - name: curl
@@ -74,7 +75,7 @@ If you reach your service and get `401 Unauthorized` or `403 Forbidden` in respo
   3. Check logs from the `ory-curl` pod:
   
       ```bash
-      kubectl logs -n test-ns ory-curl curl
+      kubectl logs -n {SECRET_NAMESPACE} ory-curl curl
       ```
      
   4. If the Client ID from step 1 is not available on the clients list, make sure Hydra Maester has access to the database and/or restart the Hydra Measter Pod.
