@@ -4,5 +4,5 @@ const (
 	ModuleName         = "serverless"
 	NamespacePrefix    = "test-serverless"
 	FunctionNamePrefix = "test-function"
-	FunctionLabel      = "test-label"
+	FunctionLabel      = "testLabel"
 )

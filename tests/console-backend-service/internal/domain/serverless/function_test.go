@@ -5,6 +5,7 @@ package serverless
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
@@ -43,6 +44,9 @@ func TestFunctionEventQueries(t *testing.T) {
 	function, err := queryFunction(c, queryFunctionArguments("1", namespaceName), functionDetailsFields())
 	require.NoError(t, err)
 	checkFunctionQuery(t, expectedFunction, function)
+
+	//wait for reactions from function controller to function CR
+	time.Sleep(5) // happy sleep is happy sleep when he's sleeping :)
 
 	labels := []string{FunctionLabel}
 	err = mutationFunction(c, "updateFunction", mutationFunctionArguments("1", namespaceName, labels), functionDetailsFields())
@@ -98,7 +102,7 @@ func queryFunctions(client *graphql.Client, namespace, details string) ([]Functi
 	query := fmt.Sprintf(`
 		query{
 			functions (
-				namespace: "%s""
+				namespace: "%s"
 			){
 				%s
 			}
@@ -237,8 +241,8 @@ func mutationFunctionArguments(functionNameSuffix, namespaceName string, labels 
 			labels: { %s },
 			source: "module.exports = { main: function (event, context) { return \"Hello World!\"; } }",
 			dependencies: "{ \"name\": \"asd\", \"version\": \"1.0.0\", \"dependencies\": {} }",
-			env: [ { name: "test", value: "test_value" } ],
-			replicas: {  },
+			env: [  ],
+			replicas: { min: 1, max: 1 },
 			resources: { limits: { memory: "100m", cpu: "128Mi" }, requests: { memory: "50m", cpu: "64Mi" } },
 		},
 	`, FunctionNamePrefix, functionNameSuffix, namespaceName, labelTemplate)
