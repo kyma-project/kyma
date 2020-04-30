@@ -160,7 +160,7 @@ kiali:
     #      - "openshift.*"
     #      - "ibm.*"
     #      - "kiali-operator"
-    #      #label_selector:
+    #      label_selector: 
 
     ##########
     #  ---
@@ -213,7 +213,7 @@ kiali:
     # Kiali to be given access to all namespaces via a single cluster role (if using this special value of "**",
     # you are required to have already granted the operator permissions to create cluster roles and cluster role bindings).
     #    ---
-    #    accessible_namespaces: ["^((?!(istio-operator|kube.*|openshift.*|ibm.*|kiali-operator)).)*$"]
+      accessible_namespaces: "**"
     #
     # Additional custom yaml to add to the service definition. This is used mainly to customize the service type.
     # For example, if the deployment.service_type is set to "LoadBalancer" and you want to set the loadBalancerIP,
