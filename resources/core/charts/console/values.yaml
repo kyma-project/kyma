@@ -27,7 +27,7 @@ console:
   image:
     dir: null
     pullPolicy: IfNotPresent
-    tag: 495e6fe7
+    tag: a3891b26
   service:
     externalPort: 80
     internalPort: 8080
