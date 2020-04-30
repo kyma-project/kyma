@@ -42,6 +42,8 @@ spec:
           image: "{{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.kyma_environment_broker.dir }}kyma-environment-broker:{{ .Values.global.images.kyma_environment_broker.version }}"
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           env:
+            - name: APP_PROVISIONING_KUBERNETES_VERSION
+              value: {{ .Values.gardener.kubernetesVersion }}
             - name: APP_DISABLE_PROCESS_OPERATIONS_IN_PROGRESS
               value: "false"
             - name: APP_BROKER_ENABLE_PLANS
@@ -81,6 +83,8 @@ spec:
               value: "{{ .Values.lms.samlTenant }}"
             - name: APP_LMS_DISABLED
               value: "{{ .Values.lms.disabled }}"
+            - name: APP_LMS_REGION
+              value: "{{ .Values.lms.region }}"
             - name: APP_LMS_TOKEN
               valueFrom:
                 secretKeyRef:
@@ -226,8 +230,6 @@ spec:
               value: {{ .Values.gardener.project }}
             - name: APP_GARDENER_KUBECONFIG_PATH
               value: {{ .Values.gardener.kubeconfigPath }}
-            - name: APP_PROVISIONING_KUBERNETES_VERSION
-              value: {{ .Values.gardener.kubernetesVersion }}
             - name: APP_DEFAULT_REQUEST_REGION
               value: "{{ .Values.broker.defaultRequestRegion }}"
           ports:
