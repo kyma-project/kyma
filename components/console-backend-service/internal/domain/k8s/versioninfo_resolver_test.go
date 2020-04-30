@@ -47,7 +47,7 @@ func TestVersionInfoResolver_VersionInfoQuery(t *testing.T) {
 		resolver := k8s.NewVersionInfoResolver(svc)
 		result, err := resolver.VersionInfoQuery(nil)
 
-		require.Error(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, gqlschema.VersionInfo{}, result)
 	})
 }
