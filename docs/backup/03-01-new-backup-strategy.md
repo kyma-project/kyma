@@ -54,7 +54,7 @@ This will create a new `pvc-restored` PVC with pre-populated data from the snaps
 
 For details about VolumeSnapshots, see [this](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) document.
 
-Currently, none of the cloud providers support this API out of the box. Follow the instructions below to enable this feature for various providers.
+Follow the instructions below to enable this feature for various providers.
 
 ### AKS
 
