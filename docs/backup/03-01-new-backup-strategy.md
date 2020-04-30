@@ -100,7 +100,7 @@ metadata:
   name: snapshot
 spec:
   source:
-    persistentVolumeClaimName: {PVC_NAME}
+    persistentVolumeClaimName: <PVC_NAME>
 ```
 
 #### AWS
@@ -129,7 +129,7 @@ metadata:
   name: snapshot
 spec:
   source:
-    persistentVolumeClaimName: {PVC_NAME}
+    persistentVolumeClaimName: <PVC_NAME>
 ```
 
 #### Azure
