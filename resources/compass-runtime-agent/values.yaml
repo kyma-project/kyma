@@ -72,10 +72,10 @@ compassRuntimeAgent:
     idProvider:
       clientTimeout: 10s
   livenessProbe:
-    initialDelaySeconds: 30
+    initialDelaySeconds: 50
     timeoutSeconds: 1
     periodSeconds: 10
   readinessProbe:
-    initialDelaySeconds: 5
+    initialDelaySeconds: 10
     timeoutSeconds: 1
     periodSeconds: 2
