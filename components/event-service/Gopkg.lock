@@ -42,6 +42,14 @@
   revision = "59d068f8d8ff5b653916aa30cdc4e13c7f15d56e"
 
 [[projects]]
+  digest = "1:7b5f423f5b0dd3dfa32a19a6183b0ab9129bff371ebf3f9efae32f87e4986d8f"
+  name = "contrib.go.opencensus.io/exporter/zipkin"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "30f9fad5db2c8944c21d223496e2543aeb445d4c"
+  version = "v0.1.1"
+
+[[projects]]
   digest = "1:5d72bbcc9c8667b11c3dc3cbe681c5a6f71e5096744c0bf7726ab5c6425d5dc4"
   name = "github.com/BurntSushi/toml"
   packages = ["."]
@@ -336,6 +344,21 @@
   pruneopts = "NUT"
   revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
   version = "1.0.1"
+
+[[projects]]
+  digest = "1:1a0de55901552615e2b2f24bdb51431634165e74745b042a3ec11c3e97ce5843"
+  name = "github.com/openzipkin/zipkin-go"
+  packages = [
+    ".",
+    "idgenerator",
+    "model",
+    "propagation",
+    "reporter",
+    "reporter/http",
+  ]
+  pruneopts = "NUT"
+  revision = "c29478e51bfb2e9c93e0e9f5e015e5993a490399"
+  version = "v0.2.2"
 
 [[projects]]
   digest = "1:4047c378584616813d610c9f993bf90dd0d07aed8d94bd3bc299cd35ececdcba"
@@ -1149,7 +1172,7 @@
 
 [[projects]]
   branch = "release-0.12"
-  digest = "1:593da016ff23d158d27eda3fe6eec75a6fb47d3288815d2e5c1d3e84268f144f"
+  digest = "1:0e3dbda77dbba3fb1b6d2fb244d310f16cc6f3dd07d9722779d727cd2b4ffcc7"
   name = "knative.dev/pkg"
   packages = [
     "apis",
@@ -1168,6 +1191,8 @@
     "metrics",
     "metrics/metricskey",
     "signals",
+    "tracing",
+    "tracing/config",
     "tracker",
   ]
   pruneopts = "NUT"
@@ -1207,6 +1232,7 @@
     "knative.dev/eventing/pkg/client/injection/client/fake",
     "knative.dev/eventing/pkg/client/listers/eventing/v1alpha1",
     "knative.dev/pkg/signals",
+    "knative.dev/pkg/tracing",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
