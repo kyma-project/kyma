@@ -58,6 +58,7 @@ compassRuntimeAgent:
     loggingTimeInterval: 30m
   healthCheck:
     port: 8090
+    proxyStatusPort: 15020
   tests:
     enabled: true
     mockService:
@@ -70,3 +71,11 @@ compassRuntimeAgent:
       url: "https://compass-gateway.{{ .Values.global.ingress.domainName }}/director/graphql"
     idProvider:
       clientTimeout: 10s
+  livenessProbe:
+    initialDelaySeconds: 30
+    timeoutSeconds: 1
+    periodSeconds: 10
+  readinessProbe:
+    initialDelaySeconds: 5
+    timeoutSeconds: 1
+    periodSeconds: 2
