@@ -226,6 +226,8 @@ spec:
               value: {{ .Values.gardener.project }}
             - name: APP_GARDENER_KUBECONFIG_PATH
               value: {{ .Values.gardener.kubeconfigPath }}
+            - name: APP_PROVISIONING_KUBERNETES_VERSION
+              value: {{ .Values.gardener.kubernetesVersion }}
             - name: APP_DEFAULT_REQUEST_REGION
               value: "{{ .Values.broker.defaultRequestRegion }}"
           ports:
