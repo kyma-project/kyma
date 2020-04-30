@@ -37,11 +37,11 @@ spec:
           value: {{ .Values.tests.kyma.version }}
         - name: APP_QUERY_LOGGING
           value: "{{ .Values.tests.queryLogging }}"
-        - name: APP_DIRECTOR_CLIENT_CONFIG_URL
+        - name: APP_DIRECTOR_CLIENT_URL
           value: "https://{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}/director/graphql"
-        - name: APP_DIRECTOR_CLIENT_CONFIG_NAMESPACE
-          value: "compass-system"
-        - name: APP_DIRECTOR_CLIENT_CONFIG_OAUTH_CREDENTIALS_SECRET_NAME
+        - name: APP_DIRECTOR_CLIENT_NAMESPACE
+          value: {{ .Release.Namespace }}
+        - name: APP_DIRECTOR_CLIENT_OAUTH_CREDENTIALS_SECRET_NAME
           value: "{{ .Values.global.provisioner.secrets.integrationSystemCredentials.name }}"
         command:
         - "/bin/sh"
