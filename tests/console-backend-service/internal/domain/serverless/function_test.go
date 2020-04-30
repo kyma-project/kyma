@@ -30,14 +30,13 @@ func TestFunctionEventQueries(t *testing.T) {
 	subscription := subscribeFunctionEvent(c, createFunctionEventArguments("1", namespaceName), functionEventDetailsFields())
 	defer subscription.Close()
 
-	labels := []string{FunctionLabel}
-	err = mutationFunction(c, "createFunction", mutationFunctionArguments("1", namespaceName, labels), functionDetailsFields())
+	err = mutationFunction(c, "createFunction", mutationFunctionArguments("1", namespaceName, nil), functionDetailsFields())
 	require.NoError(t, err)
 
 	event, err := readFunctionEvent(subscription)
 	require.NoError(t, err)
 
-	expectedFunction := fixFunction("1", namespaceName, labels)
+	expectedFunction := fixFunction("1", namespaceName, nil)
 	expectedEvent := fixFunctionEvent("ADD", expectedFunction)
 	checkFunctionEvent(t, expectedEvent, event)
 
@@ -45,7 +44,7 @@ func TestFunctionEventQueries(t *testing.T) {
 	require.NoError(t, err)
 	checkFunctionQuery(t, expectedFunction, function)
 
-	labels = []string{FunctionLabel, FunctionLabel}
+	labels := []string{FunctionLabel}
 	err = mutationFunction(c, "updateFunction", mutationFunctionArguments("1", namespaceName, labels), functionDetailsFields())
 	require.NoError(t, err)
 
@@ -236,8 +235,8 @@ func mutationFunctionArguments(functionNameSuffix, namespaceName string, labels 
 		namespace: "%s",
 		params: {
 			labels: { %s },
-			source: "module.exports = { main: function (event, context) { return "Hello World!"; } }",
-			dependencies: "{ "name": "asd", "version": "1.0.0", "dependencies": {} }",
+			source: "module.exports = { main: function (event, context) { return \"Hello World!\"; } }",
+			dependencies: "{ \"name\": \"asd\", \"version\": \"1.0.0\", \"dependencies\": {} }",
 			env: [ { name: "test", value: "test_value" } ],
 			replicas: {  },
 			resources: { limits: { memory: "100m", cpu: "128Mi" }, requests: { memory: "50m", cpu: "64Mi" } },
