@@ -46,7 +46,7 @@ func TestFunctionEventQueries(t *testing.T) {
 	checkFunctionQuery(t, expectedFunction, function)
 
 	//wait for reactions from function controller to function CR
-	time.Sleep(5) // happy sleep is happy sleep when he's sleeping :)
+	time.Sleep(5 * time.Second) // happy sleep is happy sleep when he's sleeping :)
 
 	labels := []string{FunctionLabel}
 	err = mutationFunction(c, "updateFunction", mutationFunctionArguments("1", namespaceName, labels), functionDetailsFields())
@@ -275,33 +275,7 @@ func functionDetailsFields() string {
 	return `
 		name
 		namespace
-		UID
 		labels
-		source
-		dependencies
-		env {
-			name
-			value
-		}
-		replicas {
-			min
-			max
-		}
-		resources {
-			limits {
-				memory
-    			cpu
-			}
-			requests {
-				memory
-    			cpu
-			}
-		}
-		status {
-			phase
-			reason
-			message
-		}
 	`
 }
 
