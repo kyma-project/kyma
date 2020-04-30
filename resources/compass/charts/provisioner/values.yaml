@@ -1,5 +1,4 @@
 deployment:
-  replicaCount: 1
   image:
     pullPolicy: IfNotPresent
 
@@ -9,7 +8,7 @@ deployment:
   strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 
 security:
-  skipTLSCertificateVeryfication: false
+  skipTLSCertificateVeryfication: true
 
 gardener:
   project: "" # Gardener project connected to SA
@@ -17,6 +16,8 @@ gardener:
   kubeconfig: "" # Base64 encoded Gardener SA key
   auditLogTenantConfigPath: "" # "/gardener/tenant/config"
   auditLogTenantConfigMapName: ""
+  maintenanceWindowConfigPath: "/gardener/maintenance/config"
+  maintenanceWindowConfigMapName: "maintenance"
   secretName: "gardener-credentials"
   auditLogsPolicyConfigMap: ""
   manageSecrets: true
