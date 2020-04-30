@@ -16,9 +16,9 @@ console:
 core_ui:
   statusPort: 6081
   image:
-    dir: 
-    tag: 86f4dcef
+    dir: null
     pullPolicy: IfNotPresent
+    tag: 1b1385bd
   service:
     name: nginx
     externalPort: 80
