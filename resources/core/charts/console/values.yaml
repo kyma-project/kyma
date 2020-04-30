@@ -55,6 +55,6 @@ test:
         memory: 1.5Gi
       requests:
         cpu: 400m
-        memory: 300Mi
+        memory: 900Mi
       service_catalog:
         enabled: true
