@@ -12,7 +12,7 @@ func TestVersionInfoConverter_ToGQL(t *testing.T) {
 	t.Run("Non eu.gcr.io version", func(t *testing.T) {
 		image := "test-repo/test-image"
 		expected := gqlschema.VersionInfo{
-			KymaVersion: image,
+			KymaVersion: &image,
 		}
 
 		converter := &versionInfoConverter{}
@@ -24,8 +24,9 @@ func TestVersionInfoConverter_ToGQL(t *testing.T) {
 
 	t.Run("Scemantic version", func(t *testing.T) {
 		image := "eu.gcr.io/test/1.2.3"
+		version := "1.2.3"
 		expected := gqlschema.VersionInfo{
-			KymaVersion: "1.2.3",
+			KymaVersion: &version,
 		}
 
 		converter := &versionInfoConverter{}
@@ -37,8 +38,9 @@ func TestVersionInfoConverter_ToGQL(t *testing.T) {
 
 	t.Run("PR version", func(t *testing.T) {
 		image := "eu.gcr.io/test/PR-1234"
+		version := "pull request PR-1234"
 		expected := gqlschema.VersionInfo{
-			KymaVersion: "pull request PR-1234",
+			KymaVersion: &version,
 		}
 
 		converter := &versionInfoConverter{}
@@ -50,8 +52,9 @@ func TestVersionInfoConverter_ToGQL(t *testing.T) {
 
 	t.Run("Master version", func(t *testing.T) {
 		image := "eu.gcr.io/test/master-12345678"
+		version := "master-12345678"
 		expected := gqlschema.VersionInfo{
-			KymaVersion: "master-12345678",
+			KymaVersion: &version,
 		}
 
 		converter := &versionInfoConverter{}

@@ -19,7 +19,7 @@ func TestVersionInfoResolver_VersionInfoQuery(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		version := "version"
 		expected := gqlschema.VersionInfo{
-			KymaVersion: version,
+			KymaVersion: &version,
 		}
 
 		deployment := fixDeploymentWithImage()
