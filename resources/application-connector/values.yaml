@@ -51,7 +51,7 @@ global:
     version: 39d1ab87
   application_gateway:
     dir:
-    version: PR-8292
+    version: d39b80d4
   application_gateway_tests:
     dir:
     version: 1272752c
