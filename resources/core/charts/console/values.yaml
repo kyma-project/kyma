@@ -37,7 +37,7 @@ core_ui:
   image:
     dir: null
     pullPolicy: IfNotPresent
-    tag: 86f4dcef
+    tag: 1b1385bd
   service:
     externalPort: 80
     internalPort: 80
