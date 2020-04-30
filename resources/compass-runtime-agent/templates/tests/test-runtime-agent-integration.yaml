@@ -22,7 +22,7 @@ spec:
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.runtimeAgentTests.dir }}compass-runtime-agent-tests:{{ .Values.global.images.runtimeAgentTests.version }}
           imagePullPolicy: {{ .Values.compassRuntimeAgent.image.pullPolicy }}
           envFrom:
-          - configMapRef:
+          - secretRef:
               name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
               optional: true
           env:
