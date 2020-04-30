@@ -69,3 +69,17 @@ spec:
             - "compass-gateway.{{ .Values.global.ingress.domainName }}"
             - "compass-gateway-mtls.{{ .Values.global.ingress.domainName }}"
       {{ end }}
+      livenessProbe:
+        httpGet:
+          port: {{ .Values.compassRuntimeAgent.healthCheck.port }}
+          path: "/healthz"
+        initialDelaySeconds: {{ .Values.compassRuntimeAgent.livenessProbe.initialDelaySeconds }}
+        timeoutSeconds: {{ .Values.compassRuntimeAgent.livenessProbe.timeoutSeconds }}
+        periodSeconds: {{.Values.compassRuntimeAgent.livenessProbe.periodSeconds }}
+      readinessProbe:
+        httpGet:
+          port: {{.Values.compassRuntimeAgent.healthCheck.port }}
+          path: "/healthz"
+        initialDelaySeconds: {{ .Values.compassRuntimeAgent.readinessProbe.initialDelaySeconds }}
+        timeoutSeconds: {{ .Values.compassRuntimeAgent.readinessProbe.timeoutSeconds }}
+        periodSeconds: {{.Values.compassRuntimeAgent.readinessProbe.periodSeconds }}
