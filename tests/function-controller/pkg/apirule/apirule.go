@@ -27,13 +27,13 @@ type APIRule struct {
 	log         shared.Logger
 }
 
-func New(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log shared.Logger) *APIRule {
+func New(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log shared.Logger, verbose bool) *APIRule {
 	return &APIRule{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  apiruleTypes.GroupVersion.Version,
 			Group:    apiruleTypes.GroupVersion.Group,
 			Resource: "apirules",
-		}, namespace, log),
+		}, namespace, log, verbose),
 		name:        name,
 		namespace:   namespace,
 		waitTimeout: waitTimeout,
@@ -114,9 +114,11 @@ func (a *APIRule) WaitForStatusRunning() error {
 	}
 
 	if isStateReady(apirule.Status) {
-		a.log.Logf("%s is ready:\n%v", a.name, apirule)
+		a.log.Logf("%s is ready", a.name)
 		return nil
 	}
+	a.log.Logf("ApiRule %s is not ready", a.name)
+
 
 	ctx, cancel := context.WithTimeout(context.Background(), a.waitTimeout)
 	defer cancel()
@@ -147,11 +149,11 @@ func (a *APIRule) isApiRuleReady(name string) func(event watch.Event) (bool, err
 		}
 
 		if isStateReady(apirule.Status) {
-			a.log.Logf("%s is ready:\n%v", name, u)
+			a.log.Logf("Apirule %s is ready:\n%v", name, u)
 			return true, nil
 		}
 
-		a.log.Logf("%s is not ready:\n%v", name, u)
+		a.log.Logf("Apirule %s is not ready", name)
 		return false, nil
 	}
 }

@@ -11,14 +11,20 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 )
 
+const (
+	TestNamespaceLabelKey   = "created-by"
+	TestNamespaceLabelValue = "serverless-controller-manager-test"
+)
+
 type Namespace struct {
 	coreCli corev1.CoreV1Interface
 	name    string
 	log     shared.Logger
+	verbose bool
 }
 
-func New(coreCli corev1.CoreV1Interface, name string, log shared.Logger) *Namespace {
-	return &Namespace{coreCli: coreCli, name: name, log: log}
+func New(coreCli corev1.CoreV1Interface, name string, log shared.Logger, verbose bool) *Namespace {
+	return &Namespace{coreCli: coreCli, name: name, log: log, verbose: verbose}
 }
 
 func (n *Namespace) Create() (string, error) {
@@ -27,7 +33,8 @@ func (n *Namespace) Create() (string, error) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: n.name,
 				Labels: map[string]string{
-					eventingv1alpha1.InjectionAnnotation: "enabled",
+					eventingv1alpha1.InjectionAnnotation: "enabled", // https://knative.dev/v0.12-docs/eventing/broker-trigger/#annotation
+					TestNamespaceLabelKey:                TestNamespaceLabelValue,
 				},
 			},
 		})
@@ -36,6 +43,8 @@ func (n *Namespace) Create() (string, error) {
 	if err != nil {
 		return n.name, errors.Wrapf(err, "while creating namespace %s", n.name)
 	}
+
+	n.log.Logf("CREATE: namespace %s", n.name)
 	return n.name, nil
 }
 

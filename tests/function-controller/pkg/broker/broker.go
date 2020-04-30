@@ -26,19 +26,21 @@ type Broker struct {
 	namespace   string
 	waitTimeout time.Duration
 	log         shared.Logger
+	verbose     bool
 }
 
-func New(dynamicCli dynamic.Interface, namespace string, waitTimeout time.Duration, log shared.Logger) *Broker {
+func New(dynamicCli dynamic.Interface, namespace string, waitTimeout time.Duration, log shared.Logger, verbose bool) *Broker {
 	return &Broker{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  eventingv1alpha1.SchemeGroupVersion.Version,
 			Group:    eventingv1alpha1.SchemeGroupVersion.Group,
 			Resource: "brokers",
-		}, namespace, log),
+		}, namespace, log, verbose),
 		name:        DefaultBrokerName,
 		namespace:   namespace,
 		waitTimeout: waitTimeout,
 		log:         log,
+		verbose:     verbose,
 	}
 }
 
@@ -73,7 +75,7 @@ func (b *Broker) WaitForStatusRunning() error {
 	}
 
 	if broker.Status.IsReady() {
-		b.log.Logf("%s is ready:\n%v", b.name, broker)
+		// b.log.Logf("%s is ready:\n%v", b.name, broker)
 		return nil
 	}
 
@@ -106,11 +108,18 @@ func (b *Broker) isBrokerReady(name string) func(event watch.Event) (bool, error
 		}
 
 		if broker.Status.IsReady() {
-			b.log.Logf("%s is ready:\n%v", name, u)
+			b.log.Logf("%s is ready", name)
+			if b.verbose {
+				b.log.Logf("%v", u)
+			}
+
 			return true, nil
 		}
 
-		b.log.Logf("%s is not ready:\n%v", name, u)
+		b.log.Logf("Broker %s is not ready", name)
+		if b.verbose {
+			b.log.Logf("%+v", u)
+		}
 		return false, nil
 	}
 }

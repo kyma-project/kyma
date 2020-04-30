@@ -34,13 +34,13 @@ type Trigger struct {
 
 type ResourceVersion string
 
-func New(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log shared.Logger) *Trigger {
+func New(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log shared.Logger, verbose bool) *Trigger {
 	return &Trigger{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  eventingv1alpha1.SchemeGroupVersion.Version,
 			Group:    eventingv1alpha1.SchemeGroupVersion.Group,
 			Resource: "triggers",
-		}, namespace, log),
+		}, namespace, log, verbose),
 		name:        name,
 		namespace:   namespace,
 		waitTimeout: waitTimeout,
@@ -88,11 +88,36 @@ func (t *Trigger) Delete() error {
 	return nil
 }
 
+func (t *Trigger) get() (*eventingv1alpha1.Trigger, error) {
+	u, err := t.resCli.Get(t.name)
+	if err != nil {
+		return &eventingv1alpha1.Trigger{}, errors.Wrapf(err, "while getting Trigger %s in namespace %s", t.name, t.namespace)
+	}
+
+	trigger := &eventingv1alpha1.Trigger{}
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, trigger)
+	if err != nil {
+		return &eventingv1alpha1.Trigger{}, err
+	}
+
+	return trigger, nil
+}
+
 func (t *Trigger) WaitForStatusRunning(initialResourceVersion ResourceVersion) error {
+	tr, err := t.get()
+	if err != nil {
+		return err
+	}
+
+	if tr.Status.IsReady() {
+		t.log.Logf("Trigger %s in namespace %s is ready", tr.Name, tr.Namespace)
+		return nil
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), t.waitTimeout)
 	defer cancel()
 	condition := t.isTriggerReady(t.name)
-	_, err := watchtools.Until(ctx, string(initialResourceVersion), t.resCli.ResCli, condition)
+	_, err = watchtools.Until(ctx, string(initialResourceVersion), t.resCli.ResCli, condition)
 	if err != nil {
 		return err
 	}
@@ -119,11 +144,11 @@ func (t *Trigger) isTriggerReady(name string) func(event watch.Event) (bool, err
 		}
 
 		if trigger.Status.IsReady() {
-			t.log.Logf("%s is ready:\n%v", name, u)
+			t.log.Logf("Trigger %s is ready", name)
 			return true, nil
 		}
 
-		t.log.Logf("%s is not ready:\n%v", name, u)
+		t.log.Logf("Trigger %s is not ready", name)
 		return false, nil
 	}
 }

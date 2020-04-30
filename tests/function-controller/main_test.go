@@ -32,7 +32,7 @@ func TestFunctionController(t *testing.T) {
 	testSuite, err := testsuite.New(restConfig, cfg.Test, t, g)
 	failOnError(g, err)
 
-	defer testSuite.Cleanup()
+	// defer testSuite.Cleanup()
 	testSuite.Run()
 }
 

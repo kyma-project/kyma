@@ -22,13 +22,13 @@ type Resource struct {
 	ResCli    dynamic.ResourceInterface
 	namespace string
 	kind      string
-
-	log shared.Logger
+	verbose   bool
+	log       shared.Logger
 }
 
-func New(dynamicCli dynamic.Interface, s schema.GroupVersionResource, namespace string, log shared.Logger) *Resource {
+func New(dynamicCli dynamic.Interface, s schema.GroupVersionResource, namespace string, log shared.Logger, verbose bool) *Resource {
 	resCli := dynamicCli.Resource(s).Namespace(namespace)
-	return &Resource{ResCli: resCli, namespace: namespace, kind: s.Resource, log: log}
+	return &Resource{ResCli: resCli, namespace: namespace, kind: s.Resource, log: log, verbose: verbose}
 }
 
 func (r *Resource) Create(res interface{}) (string, error) {
@@ -42,7 +42,7 @@ func (r *Resource) Create(res interface{}) (string, error) {
 	}
 	err = retry.OnTimeout(retry.DefaultBackoff, func() error {
 		var resource *unstructured.Unstructured
-		r.log.Logf("[CREATE]: %s", unstructuredObj)
+
 		resource, err = r.ResCli.Create(unstructuredObj, metav1.CreateOptions{})
 		if err != nil {
 			return err
@@ -53,6 +53,11 @@ func (r *Resource) Create(res interface{}) (string, error) {
 	if err != nil {
 		return resourceVersion, errors.Wrapf(err, "while creating resource %s", unstructuredObj.GetKind())
 	}
+
+	if r.verbose {
+		r.log.Logf("[CREATE]: name %s, namespace %s, resource %v", unstructuredObj.GetName(), unstructuredObj.GetNamespace(), unstructuredObj)
+	}
+
 	return resourceVersion, nil
 }
 
@@ -70,7 +75,11 @@ func (r *Resource) Get(name string) (*unstructured.Unstructured, error) {
 	if r.namespace != "" {
 		namespace = r.namespace
 	}
-	r.log.Logf("GET name:%s: namespace:%s kind:%s\n%v", name, namespace, r.kind, result)
+
+	if r.verbose {
+		r.log.Logf("GET name:%s: namespace:%s kind:%s\n%v", name, namespace, r.kind, result)
+	}
+
 	return result, nil
 }
 
@@ -95,7 +104,11 @@ func (r *Resource) Delete(name string, timeout time.Duration) error {
 		if r.namespace != "" {
 			namespace = r.namespace
 		}
-		r.log.Logf("DELETE %s: namespace:%s name:%s", r.kind, namespace, name)
+
+		if r.verbose {
+			r.log.Logf("DELETE %s: namespace:%s name:%s", r.kind, namespace, name)
+		}
+
 		return r.ResCli.Delete(name, &metav1.DeleteOptions{})
 	}, r.log)
 
@@ -149,7 +162,10 @@ func (r *Resource) Update(res interface{}) (*unstructured.Unstructured, error) {
 	if r.namespace != "" {
 		namespace = r.namespace
 	}
-	r.log.Logf("UPDATE %s: namespace:%s kind:%s\n%v", result.GetName(), namespace, r.kind, result)
+
+	if r.verbose {
+		r.log.Logf("UPDATE %s: namespace:%s kind:%s\n%v", result.GetName(), namespace, r.kind, result)
+	}
 
 	return result, nil
 }
