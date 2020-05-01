@@ -131,16 +131,17 @@ func (f *function) isFunctionReady(name string) func(event watch.Event) (bool, e
 			return false, err
 		}
 
-		for _, condition := range function.Status.Conditions {
-			if condition.Type == serverlessv1alpha1.ConditionRunning && condition.Status == corev1.ConditionTrue {
+		conditions := function.Status.Conditions
+		if len(conditions) == 0 {
+			return false, nil
+		}
+		if conditions[0].Type == serverlessv1alpha1.ConditionRunning && conditions[0].Status == corev1.ConditionTrue {
+			f.log.Logf("%s is ready", name)
 
-				f.log.Logf("%s is ready", name)
-
-				if f.verbose {
-					f.log.Logf("%+v", function)
-				}
-				return true, nil
+			if f.verbose {
+				f.log.Logf("%+v", function)
 			}
+			return true, nil
 		}
 
 		f.log.Logf("%s is not ready", name)

@@ -1,10 +1,15 @@
 package namespace
 
 import (
+	"time"
+
 	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
+	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	k8sretry "k8s.io/client-go/util/retry"
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
@@ -17,13 +22,13 @@ const (
 )
 
 type Namespace struct {
-	coreCli corev1.CoreV1Interface
+	coreCli typedcorev1.CoreV1Interface
 	name    string
 	log     shared.Logger
 	verbose bool
 }
 
-func New(coreCli corev1.CoreV1Interface, name string, log shared.Logger, verbose bool) *Namespace {
+func New(coreCli typedcorev1.CoreV1Interface, name string, log shared.Logger, verbose bool) *Namespace {
 	return &Namespace{coreCli: coreCli, name: name, log: log, verbose: verbose}
 }
 
@@ -32,20 +37,33 @@ func (n Namespace) GetName() string {
 }
 
 func (n *Namespace) Create() (string, error) {
-	ns := &v1.Namespace{
+	ns := &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: n.name,
 			Labels: map[string]string{
-				eventingv1alpha1.InjectionAnnotation: "enabled", // https://knative.dev/v0.12-docs/eventing/broker-trigger/#annotation
-				TestNamespaceLabelKey:                TestNamespaceLabelValue,
+				eventingv1alpha1.InjectionAnnotation: "enabled",               // https://knative.dev/v0.12-docs/eventing/broker-trigger/#annotation
+				TestNamespaceLabelKey:                TestNamespaceLabelValue, // convenience for cleaning up stale namespaces during development
 			},
 		},
 	}
 
-	err := retry.WithIgnoreOnAlreadyExist(retry.DefaultBackoff, func() error {
+	backoff := wait.Backoff{
+		Duration: 500 * time.Millisecond,
+		Factor:   2,
+		Jitter:   0.1,
+		Steps:    4,
+	}
+
+	err := k8sretry.OnError(backoff, func(err error) bool {
+		return true
+	}, func() error {
 		_, err := n.coreCli.Namespaces().Create(ns)
+		if apierrors.IsAlreadyExists(err) {
+			return nil
+		}
+
 		return err
-	}, n.log)
+	})
 	if err != nil {
 		return n.name, errors.Wrapf(err, "while creating namespace %s", n.name)
 	}
