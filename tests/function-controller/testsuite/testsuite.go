@@ -253,7 +253,7 @@ func (t *TestSuite) pollForAnswer(url string, expected string) error {
 			defer res.Body.Close()
 
 			if res.StatusCode != http.StatusOK {
-				t.t.Logf("Expected status %s, got %s", http.StatusText(http.StatusOK), res.Status)
+				t.t.Logf("Expected status %s, got %s, retrying...", http.StatusText(http.StatusOK), res.Status)
 				return false, nil
 			}
 
