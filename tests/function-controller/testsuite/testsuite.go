@@ -42,6 +42,7 @@ type Config struct {
 	InsecureSkipVerify bool          `envconfig:"default=true"`
 	WaitTimeout        time.Duration `envconfig:"default=15m"` // damn istio + knative combo
 	Verbose            bool          `envconfig:"default=false"`
+	MaxPollingTime     time.Duration `envconfig:"default=5m"`
 }
 
 type TestSuite struct {
@@ -232,7 +233,7 @@ func (t *TestSuite) pollForAnswer(url string, expected string) error {
 	done := make(chan struct{})
 
 	go func() {
-		time.Sleep(4 * time.Minute)
+		time.Sleep(t.cfg.MaxPollingTime)
 		close(done)
 	}()
 
@@ -264,11 +265,11 @@ func (t *TestSuite) pollForAnswer(url string, expected string) error {
 			body := string(byteRes)
 
 			if body != expected {
-				t.t.Logf("Got: %q, retrying", body)
+				t.t.Logf("Got: %q, retrying...", body)
 				return false, nil
 			}
 
-			t.t.Logf("Got: %q, correct", body)
+			t.t.Logf("Got: %q, correct...", body)
 			return true, nil
 		}, done)
 }
