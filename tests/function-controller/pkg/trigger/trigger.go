@@ -59,7 +59,7 @@ func (t *Trigger) Create(serviceName string) (ResourceVersion, error) {
 			Namespace: t.namespace,
 		},
 		Spec: eventingv1alpha1.TriggerSpec{
-			Broker: broker.DefaultBrokerName,
+			Broker: broker.DefaultName,
 			Subscriber: duckv1.Destination{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Service",

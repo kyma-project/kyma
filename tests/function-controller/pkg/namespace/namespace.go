@@ -18,19 +18,23 @@ const (
 
 type Namespace struct {
 	coreCli corev1.CoreV1Interface
-	Name    string
+	name    string
 	log     shared.Logger
 	verbose bool
 }
 
 func New(coreCli corev1.CoreV1Interface, name string, log shared.Logger, verbose bool) *Namespace {
-	return &Namespace{coreCli: coreCli, Name: name, log: log, verbose: verbose}
+	return &Namespace{coreCli: coreCli, name: name, log: log, verbose: verbose}
+}
+
+func (n Namespace) GetName() string {
+	return n.name
 }
 
 func (n *Namespace) Create() (string, error) {
 	ns := &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: n.Name,
+			Name: n.name,
 			Labels: map[string]string{
 				eventingv1alpha1.InjectionAnnotation: "enabled", // https://knative.dev/v0.12-docs/eventing/broker-trigger/#annotation
 				TestNamespaceLabelKey:                TestNamespaceLabelValue,
@@ -43,23 +47,23 @@ func (n *Namespace) Create() (string, error) {
 		return err
 	}, n.log)
 	if err != nil {
-		return n.Name, errors.Wrapf(err, "while creating namespace %s", n.Name)
+		return n.name, errors.Wrapf(err, "while creating namespace %s", n.name)
 	}
 
-	n.log.Logf("CREATE: namespace %s", n.Name)
+	n.log.Logf("CREATE: namespace %s", n.name)
 	if n.verbose {
 		n.log.Logf("%v", ns)
 	}
-	return n.Name, nil
+	return n.name, nil
 }
 
 func (n *Namespace) Delete() error {
 	err := retry.WithIgnoreOnNotFound(retry.DefaultBackoff, func() error {
-		n.log.Logf("DELETE: namespace: %s", n.Name)
-		return n.coreCli.Namespaces().Delete(n.Name, &metav1.DeleteOptions{})
+		n.log.Logf("DELETE: namespace: %s", n.name)
+		return n.coreCli.Namespaces().Delete(n.name, &metav1.DeleteOptions{})
 	}, n.log)
 	if err != nil {
-		return errors.Wrapf(err, "while deleting namespace %s", n.Name)
+		return errors.Wrapf(err, "while deleting namespace %s", n.name)
 	}
 	return nil
 }

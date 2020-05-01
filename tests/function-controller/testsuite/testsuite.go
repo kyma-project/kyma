@@ -3,6 +3,7 @@ package testsuite
 import (
 	"crypto/tls"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -23,13 +24,20 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/trigger"
 )
 
+const (
+	helloWorld  = "Hello World"
+	testDataKey = "testData"
+	eventPing   = "event-ping"
+	gotEventMsg = "The event has come!"
+	happyMsg    = "happy"
+)
+
 type Config struct {
-	Namespace          string        `envconfig:"default=test-function"`
+	NamespaceBaseName  string        `envconfig:"default=test-function"`
 	FunctionName       string        `envconfig:"default=test-function"`
 	APIRuleName        string        `envconfig:"default=test-apirule"`
-	BrokerName         string        `envconfig:"default=default"`
 	DomainName         string        `envconfig:"default=test-function"`
-	IngressHost        string        `envconfig:"default=dunghill.wookiee.hudy.ninja"`
+	IngressHost        string        `envconfig:"default=kyma.local"`
 	DomainPort         uint32        `envconfig:"default=80"`
 	InsecureSkipVerify bool          `envconfig:"default=true"`
 	WaitTimeout        time.Duration `envconfig:"default=15m"` // damn istio + knative combo
@@ -59,13 +67,13 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		return nil, errors.Wrap(err, "while creating K8s Dynamic client")
 	}
 
-	namespaceName := fmt.Sprintf("%s-%d", cfg.Namespace, rand.Uint32())
+	namespaceName := fmt.Sprintf("%s-%d", cfg.NamespaceBaseName, rand.Uint32())
 
 	ns := namespace.New(coreCli, namespaceName, t, cfg.Verbose)
 	f := newFunction(dynamicCli, cfg.FunctionName, namespaceName, cfg.WaitTimeout, t, cfg.Verbose)
 	ar := apirule.New(dynamicCli, cfg.APIRuleName, namespaceName, cfg.WaitTimeout, t, cfg.Verbose)
 	br := broker.New(dynamicCli, namespaceName, cfg.WaitTimeout, t, cfg.Verbose)
-	tr := trigger.New(dynamicCli, cfg.BrokerName, namespaceName, cfg.WaitTimeout, t, cfg.Verbose)
+	tr := trigger.New(dynamicCli, broker.DefaultName, namespaceName, cfg.WaitTimeout, t, cfg.Verbose)
 
 	return &TestSuite{
 		namespace:  ns,
@@ -81,12 +89,12 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 }
 
 func (t *TestSuite) Run() {
-	t.t.Log("Creating namespace and broker...")
+	t.t.Logf("Creating namespace %s and default broker...", t.namespace.GetName())
 	ns, err := t.namespace.Create()
 	failOnError(t.g, err)
 
 	t.t.Log("Creating function...")
-	functionDetails := t.getFunction()
+	functionDetails := t.getFunction(helloWorld)
 	resourceVersion, err := t.function.Create(functionDetails)
 	failOnError(t.g, err)
 
@@ -119,17 +127,17 @@ func (t *TestSuite) Run() {
 	t.t.Log("Testing local connection through the service")
 	inClusterURL := fmt.Sprintf("http://%s.%s.svc.cluster.local", t.cfg.FunctionName, ns)
 	t.t.Logf("Address: %s", inClusterURL)
-	err = t.checkConnection(inClusterURL)
+	err = t.pollForAnswer(inClusterURL, helloWorld)
 	failOnError(t.g, err)
 
 	fnGatewayURL := fmt.Sprintf("https://%s", domainHost)
 	t.t.Log("Testing connection through the gateway")
 	t.t.Logf("Address: %s", fnGatewayURL)
-	err = t.checkConnection(fnGatewayURL)
+	err = t.pollForAnswer(fnGatewayURL, helloWorld)
 	failOnError(t.g, err)
 
 	t.t.Log("Testing update of a function")
-	updatedDetails := t.getUpdatedFunction()
+	updatedDetails := t.getUpdatedFunction(testDataKey, eventPing, gotEventMsg)
 	err = t.function.Update(updatedDetails)
 	failOnError(t.g, err)
 
@@ -137,18 +145,26 @@ func (t *TestSuite) Run() {
 	err = t.function.WaitForStatusRunning(resourceVersion)
 	failOnError(t.g, err)
 
-	t.t.Log("Testing local connection through the service")
+	t.t.Log("Testing local connection through the service to updated function")
 	t.t.Logf("Address: %s", inClusterURL)
-	err = t.checkConnectionWithArgs(inClusterURL, "Hello happy world 1")
+	err = t.pollForAnswer(inClusterURL, fmt.Sprintf("Hello %s world 1", happyMsg))
 	failOnError(t.g, err)
 
-	t.t.Log("Testing connection through the gateway")
+	t.t.Log("Testing connection through the gateway to updated function")
 	t.t.Logf("Address: %s", fnGatewayURL)
-	err = t.checkConnectionWithArgs(fnGatewayURL, "Hello happy world 2")
+	err = t.pollForAnswer(fnGatewayURL, fmt.Sprintf("Hello %s world 2", happyMsg))
 	failOnError(t.g, err)
 
 	t.t.Log("Testing connection to event-mesh via trigger")
 	// https://knative.dev/v0.12-docs/eventing/broker-trigger/
+	brokerURL := fmt.Sprintf("http://%s-broker.%s.svc.cluster.local", broker.DefaultName, t.namespace.GetName())
+	err = t.createEvent(brokerURL) // pinging the broker ingress sends an event to function via trigger
+	failOnError(t.g, err)
+
+	t.t.Log("Testing local connection through the service")
+	t.t.Logf("Address: %s", inClusterURL)
+	err = t.pollForAnswer(inClusterURL, gotEventMsg)
+	failOnError(t.g, err)
 }
 
 func (t *TestSuite) Cleanup() {
@@ -169,74 +185,45 @@ func (t *TestSuite) Cleanup() {
 	failOnError(t.g, err)
 }
 
-func (t *TestSuite) getFunction() *functionData {
-	return &functionData{
-		Body: `module.exports = { main: function(event, context) { return 'Hello World' } }`,
-		Deps: `{ "name": "hellowithoutdeps", "version": "0.0.1", "dependencies": { } }`,
-	}
-}
-
-func (t *TestSuite) getUpdatedFunction() *functionData {
-	return &functionData{
-		// such a function tests simultaneously importing external lib, the fact that it was triggered (by using counter) and passing argument to function in event
-		Body: `
-const _ = require("lodash");
-
-let counter = 0;
-
-module.exports = {
-  main: function (event, context) {
-    try {
-      counter = _.add(counter, 1);
-	  console.log(event.data)
-      const eventData = event.data["testData"];
-      const answer = "Hello " + eventData + " world " + counter;
-      console.log(answer);
-      return answer;
-    } catch (err) {
-	  console.error(event);
-      console.error(context);
-	  console.error(err);
-      return "Failed to parse event. Counter value: " + counter;
-    }
-  }
-}
-`,
-		Deps:        `{ "name": "hellowithdeps", "version": "0.0.1", "dependencies": { "lodash": "^4.17.5" } }`,
-		MaxReplicas: 2,
-		MinReplicas: 1,
-	}
-}
-
-const helloWorldAnswer = "Hello World"
-
-func (t *TestSuite) checkConnection(addres string) error {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: t.cfg.InsecureSkipVerify},
-	}
-	client := &http.Client{Transport: tr}
-	res, err := client.Get(addres)
-	if err == nil {
-		defer res.Body.Close()
-	}
-
-	if err != nil || res.StatusCode != 200 {
-		return errors.Wrapf(err, "while getting response from address %s", addres)
-	}
-
-	byteRes, err := ioutil.ReadAll(res.Body)
-	if err != nil || string(byteRes) != helloWorldAnswer {
-		return errors.Wrap(err, "while reading response")
-	}
-
-	return nil
-}
-
 func failOnError(g *gomega.GomegaWithT, err error) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 }
 
-func (t *TestSuite) checkConnectionWithArgs(url string, expected string) error {
+func (t *TestSuite) createEvent(url string) error {
+	// https://knative.dev/v0.12-docs/eventing/broker-trigger/#manual
+
+	payload := fmt.Sprintf(`{ "testData": "%s" }`, eventPing)
+
+	req, err := http.NewRequest(http.MethodPost, url, strings.NewReader(payload))
+	if err != nil {
+		return fmt.Errorf("while creating new request: method %s, url %s, payload %s", http.MethodPost, url, payload)
+	}
+
+	req.Header.Add("x-b3-flags", "1")
+	req.Header.Add("ce-specversion", "0.2")
+	req.Header.Add("ce-type", "dev.knative.foo.bar")
+	req.Header.Add("ce-time", "2018-04-05T03:56:24Z")
+	req.Header.Add("ce-id", "45a8b444-3213-4758-be3f-540bf93f85ff")
+	req.Header.Add("ce-source", "dev.knative.example")
+	req.Header.Add("content-type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return errors.Wrapf(err, "while making request to broker %s", url)
+	}
+
+	defer func() {
+		io.Copy(ioutil.Discard, resp.Body)
+		resp.Body.Close()
+	}()
+
+	if resp.StatusCode != http.StatusAccepted {
+		return fmt.Errorf("Invalid response status %s while making a request to %s", resp.Status, url)
+	}
+	return nil
+}
+
+func (t *TestSuite) pollForAnswer(url string, expected string) error {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: t.cfg.InsecureSkipVerify},
 	}
@@ -245,13 +232,13 @@ func (t *TestSuite) checkConnectionWithArgs(url string, expected string) error {
 	done := make(chan struct{})
 
 	go func() {
-		time.Sleep(5 * time.Minute)
+		time.Sleep(4 * time.Minute)
 		close(done)
 	}()
 
 	return wait.PollImmediateUntil(10*time.Second,
 		func() (done bool, err error) {
-			payload := strings.NewReader("{ \"testData\": \"happy\" }")
+			payload := strings.NewReader(fmt.Sprintf(`{ "%s": "happy" }`, testDataKey))
 			req, err := http.NewRequest(http.MethodGet, url, payload)
 			if err != nil {
 				return true, err
@@ -265,7 +252,8 @@ func (t *TestSuite) checkConnectionWithArgs(url string, expected string) error {
 			defer res.Body.Close()
 
 			if res.StatusCode != http.StatusOK {
-				return false, errors.Wrapf(err, "while getting response from address %s", url)
+				t.t.Logf("Expected status %s, got %s", http.StatusText(http.StatusOK), res.Status)
+				return false, nil
 			}
 
 			byteRes, err := ioutil.ReadAll(res.Body)
@@ -276,11 +264,11 @@ func (t *TestSuite) checkConnectionWithArgs(url string, expected string) error {
 			body := string(byteRes)
 
 			if body != expected {
-				t.t.Logf("Got: %s, retrying", body)
+				t.t.Logf("Got: %q, retrying", body)
 				return false, nil
 			}
 
-			t.t.Logf("Got: %s, correct", body)
+			t.t.Logf("Got: %q, correct", body)
 			return true, nil
 		}, done)
 }

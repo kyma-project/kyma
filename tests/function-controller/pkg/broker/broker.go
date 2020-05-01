@@ -18,7 +18,7 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
-const DefaultBrokerName = "default"
+const DefaultName = "default"
 
 type Broker struct {
 	resCli      *resource.Resource
@@ -36,7 +36,7 @@ func New(dynamicCli dynamic.Interface, namespace string, waitTimeout time.Durati
 			Group:    eventingv1alpha1.SchemeGroupVersion.Group,
 			Resource: "brokers",
 		}, namespace, log, verbose),
-		name:        DefaultBrokerName,
+		name:        DefaultName,
 		namespace:   namespace,
 		waitTimeout: waitTimeout,
 		log:         log,
