@@ -20,8 +20,9 @@ tests:
       memory: 64Mi
       cpu: 200m
   envs:
-    waitTimeout: 10m
+    waitTimeout: 15m
     verifySSL: "false"
+    verbose: "true"
 
 global:
   commonLabels:

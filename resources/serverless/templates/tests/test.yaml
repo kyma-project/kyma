@@ -33,7 +33,8 @@ spec:
               value: "{{ .Values.tests.envs.waitTimeout }}"
             - name: APP_TEST_INGRESS_HOST
               value: "{{ .Values.global.ingress.domainName }}"
-            - name:
+            - name: APP_TEST_VERBOSE
+              value: "{{ .Values.tests.envs.verbose }}"
           resources:
 {{ include "tplValue" ( dict "value" .Values.tests.resources "context" $ ) | indent 12 }}
 {{- end }}
