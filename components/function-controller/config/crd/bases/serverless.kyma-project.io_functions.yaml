@@ -154,6 +154,10 @@ spec:
                 - name
                 type: object
               type: array
+            labels:
+              additionalProperties:
+                type: string
+              type: object
             maxReplicas:
               format: int32
               minimum: 0
@@ -162,10 +166,6 @@ spec:
               format: int32
               minimum: 0
               type: integer
-            podLabels:
-              additionalProperties:
-                type: string
-              type: object
             resources:
               description: ResourceRequirements describes the compute resource requirements.
               properties:

@@ -105,8 +105,8 @@ func (in *FunctionSpec) DeepCopyInto(out *FunctionSpec) {
 		*out = new(int32)
 		**out = **in
 	}
-	if in.PodLabels != nil {
-		in, out := &in.PodLabels, &out.PodLabels
+	if in.Labels != nil {
+		in, out := &in.Labels, &out.Labels
 		*out = make(map[string]string, len(*in))
 		for key, val := range *in {
 			(*out)[key] = val

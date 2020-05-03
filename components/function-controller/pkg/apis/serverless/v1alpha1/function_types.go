@@ -26,7 +26,7 @@ type FunctionSpec struct {
 	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
 
 	// +optional
-	PodLabels map[string]string `json:"podLabels,omitempty"`
+	Labels map[string]string `json:"labels,omitempty"`
 }
 
 const (

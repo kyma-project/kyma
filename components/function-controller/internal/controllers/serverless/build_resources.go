@@ -16,6 +16,7 @@ import (
 )
 
 const (
+	// TODO: Remove
 	serviceBindingUsagesTracingAnnotation = "servicebindingusages.servicecatalog.kyma-project.io/tracing-information"
 
 	autoscalingKnativeMinScaleAnn = "autoscaling.knative.dev/minScale"
@@ -244,47 +245,29 @@ func (r *FunctionReconciler) servicePodAnnotations(instance *serverlessv1alpha1.
 }
 
 func (r *FunctionReconciler) servicePodLabels(log logr.Logger, instance *serverlessv1alpha1.Function, oldService *servingv1.Service) map[string]string {
+	podLabels := instance.Spec.Labels
 	functionLabels := r.functionLabels(instance)
 	bindingLabels := r.retrieveBindingLabels(log, instance, oldService)
-	podLabels := instance.Spec.PodLabels
 
-	if podLabels == nil || len(podLabels) == 0 {
-		for key, value := range bindingLabels {
-			functionLabels[key] = value
-		}
-		return functionLabels
-	}
-
-	for key, value := range functionLabels {
-		podLabels[key] = value
-	}
-	for key, value := range bindingLabels {
-		podLabels[key] = value
-	}
-
-	return podLabels
+	return r.mergeLabels(podLabels, functionLabels, bindingLabels)
 }
 
 func (r *FunctionReconciler) retrieveBindingLabels(log logr.Logger, instance *serverlessv1alpha1.Function, oldService *servingv1.Service) map[string]string {
 	bindingAnnotation := instance.GetAnnotations()[serviceBindingUsagesTracingAnnotation]
-	functionLabels := r.retrieveBindingLabelsFromAnnotation(log, bindingAnnotation)
+	bindingLabelsFromFunction := r.retrieveBindingLabelsFromAnnotation(log, bindingAnnotation)
 
 	// TODO: Remove this part after 1.13 release
-	serviceLabels := map[string]string{}
-	if oldService != nil {
-		bindingAnnotation = oldService.GetAnnotations()[serviceBindingUsagesTracingAnnotation]
-		serviceLabels = r.retrieveBindingLabelsFromAnnotation(log, bindingAnnotation)
+	if oldService == nil {
+		return bindingLabelsFromFunction
 	}
 
-	for key, value := range functionLabels {
-		serviceLabels[key] = value
-	}
-
-	return serviceLabels
+	bindingAnnotation = oldService.GetAnnotations()[serviceBindingUsagesTracingAnnotation]
+	bindingLabelsFromService := r.retrieveBindingLabelsFromAnnotation(log, bindingAnnotation)
+	return r.mergeLabels(bindingLabelsFromService, bindingLabelsFromFunction)
 }
 
 func (r *FunctionReconciler) retrieveBindingLabelsFromAnnotation(log logr.Logger, bindingAnnotation string) map[string]string {
-	bindingLabels := map[string]string{}
+	bindingLabels := make(map[string]string, 0)
 
 	if bindingAnnotation == "" || bindingAnnotation == "{}" {
 		return bindingLabels
@@ -303,4 +286,14 @@ func (r *FunctionReconciler) retrieveBindingLabelsFromAnnotation(log logr.Logger
 	}
 
 	return bindingLabels
+}
+
+func (r *FunctionReconciler) mergeLabels(labelsCollection ...map[string]string) map[string]string {
+	result := make(map[string]string, 0)
+	for _, labels := range labelsCollection {
+		for key, value := range labels {
+			result[key] = value
+		}
+	}
+	return result
 }
