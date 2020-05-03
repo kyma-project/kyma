@@ -77,7 +77,9 @@ func (n *Namespace) Create() (string, error) {
 
 func (n *Namespace) Delete() error {
 	err := retry.WithIgnoreOnNotFound(retry.DefaultBackoff, func() error {
-		n.log.Logf("DELETE: namespace: %s", n.name)
+		if n.verbose {
+			n.log.Logf("DELETE: namespace: %s", n.name)
+		}
 		return n.coreCli.Namespaces().Delete(n.name, &metav1.DeleteOptions{})
 	}, n.log)
 	if err != nil {

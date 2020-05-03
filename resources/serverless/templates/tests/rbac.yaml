@@ -25,10 +25,13 @@ rules:
     verbs: ["create", "get", "delete", "list", "deletecollection", "watch"]
   - apiGroups: ["serverless.kyma-project.io"]
     resources: ["functions"]
-    verbs: ["create", "get", "delete", "list", "deletecollection", "watch"]
+    verbs: ["create", "get", "delete", "list", "deletecollection", "watch", "update"]
     nonResourceURLs: []
   - apiGroups: ["gateway.kyma-project.io"]
     resources: ["apirules"]
+    verbs: ["create", "get", "delete", "list", "deletecollection", "watch"]
+  - apiGroups: ["serving.knative.dev"]
+    resources: ["triggers"]
     verbs: ["create", "get", "delete", "list", "deletecollection", "watch"]
 ---
 kind: ClusterRoleBinding

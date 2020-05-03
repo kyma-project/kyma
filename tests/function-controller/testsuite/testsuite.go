@@ -41,7 +41,7 @@ type Config struct {
 	DomainPort         uint32        `envconfig:"default=80"`
 	InsecureSkipVerify bool          `envconfig:"default=true"`
 	WaitTimeout        time.Duration `envconfig:"default=15m"` // damn istio + knative combo
-	Verbose            bool          `envconfig:"default=false"`
+	Verbose            bool          `envconfig:"default=true"`
 	MaxPollingTime     time.Duration `envconfig:"default=5m"`
 }
 
@@ -176,10 +176,10 @@ func (t *TestSuite) Cleanup() {
 	err = t.function.Delete()
 	failOnError(t.g, err)
 
-	err = t.broker.Delete()
+	err = t.trigger.Delete()
 	failOnError(t.g, err)
 
-	err = t.trigger.Delete()
+	err = t.broker.Delete()
 	failOnError(t.g, err)
 
 	err = t.namespace.Delete()
@@ -242,7 +242,7 @@ func (t *TestSuite) pollForAnswer(url string, expected string) error {
 			payload := strings.NewReader(fmt.Sprintf(`{ "%s": "happy" }`, testDataKey))
 			req, err := http.NewRequest(http.MethodGet, url, payload)
 			if err != nil {
-				return true, err
+				return false, err // TODO erros.wrap
 			}
 
 			req.Header.Add("content-type", "application/json")
