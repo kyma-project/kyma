@@ -47,6 +47,9 @@ global:
     external_services_mock:
       dir:
       version: "105e8ff0"
+    metris:
+      dir:
+      version: "c1e271d6"
     tests:
       director:
         dir:
@@ -275,6 +278,9 @@ global:
   enableCompassDefaultScenarioAssignment: true
 
   externalServicesMock:
+    enabled: false
+
+  metris:
     enabled: false
 
 pairing-adapter:

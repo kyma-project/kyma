@@ -180,6 +180,9 @@
 # The `kyma-environment-broker` chart
 /resources/compass/charts/kyma-environment-broker/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001
 
+# The `metris` chart
+/resources/compass/charts/metris/ @maksd
+
 # The `kiali`chart
 /resources/kiali/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
