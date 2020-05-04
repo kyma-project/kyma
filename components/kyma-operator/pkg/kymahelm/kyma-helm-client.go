@@ -18,6 +18,7 @@ import (
 type ClientInterface interface {
 	ListReleases() (*rls.ListReleasesResponse, error)
 	ReleaseStatus(rname string) (string, error)
+	IsReleaseDeletable(rname string) (bool, error)
 	InstallReleaseFromChart(chartdir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error)
 	InstallRelease(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error)
 	InstallReleaseWithoutWait(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error)
@@ -69,6 +70,16 @@ func (hc *Client) ReleaseStatus(rname string) (string, error) {
 	}
 	statusStr := fmt.Sprintf("%+v\n", status)
 	return strings.Replace(statusStr, `\n`, "\n", -1), nil
+}
+
+//IsReleaseDeletable returns true for release that can be deleted
+func (hc *Client) IsReleaseDeletable(rname string) (bool, error){
+	statusRes, err := hc.helm.ReleaseStatus(rname)
+	if err != nil {
+		return false, err
+	}
+
+	return statusRes.Info.Status.Code == release.Status_DEPLOYED || statusRes.Info.Status.Code == release.Status_FAILED, nil
 }
 
 // InstallReleaseFromChart .

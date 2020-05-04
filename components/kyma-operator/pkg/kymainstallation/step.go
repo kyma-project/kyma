@@ -33,6 +33,11 @@ func (s step) Status() (string, error) {
 	return s.helmClient.ReleaseStatus(s.component.GetReleaseName())
 }
 
+// IsReleaseDeletable returns true for release that can be deleted
+func (s step) IsReleaseDeletable() (bool, error) {
+	return s.helmClient.IsReleaseDeletable(s.component.GetReleaseName())
+}
+
 type installStep struct {
 	step
 	sourceGetter kymasources.SourceGetter
@@ -62,15 +67,25 @@ func (s installStep) Run() error {
 	if installErr != nil {
 		installErrMsg := fmt.Sprintf("Helm install error: %s ", installErr.Error())
 
-		log.Println(fmt.Sprintf("Deleting falied release %s before retrying installation...", s.component.GetReleaseName()))
-		_, err := s.helmClient.DeleteRelease(s.component.GetReleaseName())
-
-		if err != nil {
-			deleteErrMsg := fmt.Sprintf("Helm delete of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
-			log.Println(deleteErrMsg)
-			return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, deleteErrMsg))
+		isDeletable, err := s.helmClient.IsReleaseDeletable(s.component.GetReleaseName())
+		if err !=nil {
+			errMsg := fmt.Sprintf("Checking status of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
+			log.Println(errMsg)
+			return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, errMsg))
 		}
-		log.Println(fmt.Sprintf("Successfully deleted release %s", s.component.GetReleaseName()))
+
+		if isDeletable {
+
+			log.Println(fmt.Sprintf("Deleting falied release %s before retrying installation...", s.component.GetReleaseName()))
+			_, err := s.helmClient.DeleteRelease(s.component.GetReleaseName())
+
+			if err != nil {
+				deleteErrMsg := fmt.Sprintf("Helm delete of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
+				log.Println(deleteErrMsg)
+				return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, deleteErrMsg))
+			}
+			log.Println(fmt.Sprintf("Successfully deleted release %s", s.component.GetReleaseName()))
+		}
 
 		return errors.New(installErrMsg)
 	}
