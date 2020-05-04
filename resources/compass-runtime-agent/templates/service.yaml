@@ -27,6 +27,9 @@ spec:
     - port: {{ .Values.compassRuntimeAgent.healthCheck.port }}
       protocol: TCP
       name: http-health
+    - port: {{ .Values.compassRuntimeAgent.healthCheck.proxyStatusPort }}
+      protocol: TCP
+      name: proxy-status
   selector:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
