@@ -41,7 +41,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: pre-upgrade-application-connector
-  namespace: kyma-integration
+  namespace: kyma-system
 ---
 apiVersion: batch/v1
 kind: Job
