@@ -33,11 +33,6 @@ func (s step) Status() (string, error) {
 	return s.helmClient.ReleaseStatus(s.component.GetReleaseName())
 }
 
-// IsReleaseDeletable returns true for release that can be deleted
-func (s step) IsReleaseDeletable() (bool, error) {
-	return s.helmClient.IsReleaseDeletable(s.component.GetReleaseName())
-}
-
 type installStep struct {
 	step
 	sourceGetter kymasources.SourceGetter
