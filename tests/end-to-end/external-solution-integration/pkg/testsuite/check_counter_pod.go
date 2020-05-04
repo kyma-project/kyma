@@ -1,8 +1,8 @@
 package testsuite
 
 import (
-	"github.com/pkg/errors"
 	retrygo "github.com/avast/retry-go"
+	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
@@ -13,7 +13,7 @@ import (
 type CheckCounterPod struct {
 	testService   *testkit.TestService
 	expectedValue int
-	retry_opts []retrygo.Option
+	retry_opts    []retrygo.Option
 }
 
 var _ step.Step = &CheckCounterPod{}
@@ -23,7 +23,7 @@ func NewCheckCounterPod(testService *testkit.TestService, expectedValue int, opt
 	return &CheckCounterPod{
 		testService:   testService,
 		expectedValue: expectedValue,
-		retry_opts: opts,
+		retry_opts:    opts,
 	}
 }
 

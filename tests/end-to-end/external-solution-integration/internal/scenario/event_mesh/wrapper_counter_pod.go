@@ -1,10 +1,11 @@
 package event_mesh
 
 import (
+	"time"
+
 	retrygo "github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
-	"time"
 )
 
 const retryAttemptsCount = 240
