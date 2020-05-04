@@ -206,12 +206,7 @@ func (r *FunctionReconciler) sanitizeDependencies(dependencies string) string {
 }
 
 func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Function) map[string]string {
-	labels := make(map[string]string, len(instance.GetLabels())+3)
-	for key, value := range instance.GetLabels() {
-		labels[key] = value
-	}
-
-	return r.mergeLabels(labels, r.internalFunctionLabels(instance))
+	return r.mergeLabels(instance.GetLabels(), r.internalFunctionLabels(instance))
 }
 
 func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha1.Function) map[string]string {
@@ -245,10 +240,7 @@ func (r *FunctionReconciler) servicePodAnnotations(instance *serverlessv1alpha1.
 }
 
 func (r *FunctionReconciler) servicePodLabels(instance *serverlessv1alpha1.Function) map[string]string {
-	podLabels := instance.Spec.Labels
-	functionLabels := r.internalFunctionLabels(instance)
-
-	return r.mergeLabels(podLabels, functionLabels)
+	return r.mergeLabels(instance.Spec.Labels, r.internalFunctionLabels(instance))
 }
 
 func (r *FunctionReconciler) mergeLabels(labelsCollection ...map[string]string) map[string]string {
