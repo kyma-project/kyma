@@ -246,6 +246,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", tokenOAUTH.AccessToken), defaultHeaderName))
 
 			batch.DeleteResources(k8sClient, commonResources...)
+			batch.DeleteResources(k8sClient, resources...)
 
 			assert.NoError(tester.TestDeletedAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 		})
@@ -396,6 +397,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			assert.NoError(tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 
 			batch.DeleteResources(k8sClient, commonResources...)
+			batch.DeleteResources(k8sClient, unsecuredApiruleResource...)
 
 			assert.NoError(tester.TestDeletedAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 		})
