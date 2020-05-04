@@ -75,7 +75,10 @@ func (b *Broker) WaitForStatusRunning() error {
 	}
 
 	if broker.Status.IsReady() {
-		// b.log.Logf("%s is ready:\n%v", b.name, broker)
+		b.log.Logf("Broker %s is ready", b.name)
+		if b.verbose {
+			b.log.Logf("%+v", broker)
+		}
 		return nil
 	}
 
@@ -108,7 +111,7 @@ func (b *Broker) isBrokerReady(name string) func(event watch.Event) (bool, error
 		}
 
 		if broker.Status.IsReady() {
-			b.log.Logf("%s is ready", name)
+			b.log.Logf("Broker %s is ready", name)
 			if b.verbose {
 				b.log.Logf("%v", u)
 			}
