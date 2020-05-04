@@ -72,7 +72,7 @@ If you reach your service and get `401 Unauthorized` or `403 Forbidden` in respo
               curl ory-hydra-admin.kyma-system.svc.cluster.local:4445/clients | jq '.'
       ```
 
-  3. Check logs from the `ory-curl` pod:
+  3. Check logs from the `ory-curl` Pod:
   
       ```bash
       kubectl logs -n {SECRET_NAMESPACE} ory-curl curl
