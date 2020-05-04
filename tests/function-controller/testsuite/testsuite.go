@@ -21,6 +21,7 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/namespace"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/trigger"
 )
 
@@ -36,6 +37,7 @@ type Config struct {
 	NamespaceBaseName  string        `envconfig:"default=test-function"`
 	FunctionName       string        `envconfig:"default=test-function"`
 	APIRuleName        string        `envconfig:"default=test-apirule"`
+	TriggerName        string        `envconfig:"default=test-trigger"`
 	DomainName         string        `envconfig:"default=test-function"`
 	IngressHost        string        `envconfig:"default=kyma.local"`
 	DomainPort         uint32        `envconfig:"default=80"`
@@ -70,11 +72,19 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 
 	namespaceName := fmt.Sprintf("%s-%d", cfg.NamespaceBaseName, rand.Uint32())
 
-	ns := namespace.New(coreCli, namespaceName, t, cfg.Verbose)
+	container := shared.Container{
+		DynamicCli:  dynamicCli,
+		Namespace:   namespaceName,
+		WaitTimeout: cfg.WaitTimeout,
+		Verbose:     cfg.Verbose,
+		Log:         t,
+	}
+
+	ns := namespace.New(namespaceName, coreCli, container)
 	f := newFunction(dynamicCli, cfg.FunctionName, namespaceName, cfg.WaitTimeout, t, cfg.Verbose)
-	ar := apirule.New(dynamicCli, cfg.APIRuleName, namespaceName, cfg.WaitTimeout, t, cfg.Verbose)
-	br := broker.New(dynamicCli, namespaceName, cfg.WaitTimeout, t, cfg.Verbose)
-	tr := trigger.New(dynamicCli, broker.DefaultName, namespaceName, cfg.WaitTimeout, t, cfg.Verbose)
+	ar := apirule.New(cfg.APIRuleName, container)
+	br := broker.New(container)
+	tr := trigger.New(cfg.TriggerName, container)
 
 	return &TestSuite{
 		namespace:  ns,

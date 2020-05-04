@@ -28,8 +28,8 @@ type Namespace struct {
 	verbose bool
 }
 
-func New(coreCli typedcorev1.CoreV1Interface, name string, log shared.Logger, verbose bool) *Namespace {
-	return &Namespace{coreCli: coreCli, name: name, log: log, verbose: verbose}
+func New(name string, coreCli typedcorev1.CoreV1Interface, container shared.Container) *Namespace {
+	return &Namespace{coreCli: coreCli, name: name, log: container.Log, verbose: container.Verbose}
 }
 
 func (n Namespace) GetName() string {

@@ -15,7 +15,6 @@ import (
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
 )
 
 const DefaultName = "default"
@@ -29,18 +28,18 @@ type Broker struct {
 	verbose     bool
 }
 
-func New(dynamicCli dynamic.Interface, namespace string, waitTimeout time.Duration, log shared.Logger, verbose bool) *Broker {
+func New(c shared.Container) *Broker {
 	return &Broker{
-		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
+		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
 			Version:  eventingv1alpha1.SchemeGroupVersion.Version,
 			Group:    eventingv1alpha1.SchemeGroupVersion.Group,
 			Resource: "brokers",
-		}, namespace, log, verbose),
+		}, c.Namespace, c.Log, c.Verbose),
 		name:        DefaultName,
-		namespace:   namespace,
-		waitTimeout: waitTimeout,
-		log:         log,
-		verbose:     verbose,
+		namespace:   c.Namespace,
+		waitTimeout: c.WaitTimeout,
+		log:         c.Log,
+		verbose:     c.Verbose,
 	}
 }
 
@@ -50,13 +49,12 @@ func (b *Broker) get() (*eventingv1alpha1.Broker, error) {
 		return &eventingv1alpha1.Broker{}, errors.Wrapf(err, "while getting Broker %s in namespace %s", b.name, b.namespace)
 	}
 
-	broker := &eventingv1alpha1.Broker{}
-	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, broker)
+	broker, err := convertFromUnstructuredToBroker(*u)
 	if err != nil {
 		return &eventingv1alpha1.Broker{}, err
 	}
 
-	return broker, nil
+	return &broker, nil
 }
 
 func (b *Broker) Delete() error {
@@ -74,11 +72,7 @@ func (b *Broker) WaitForStatusRunning() error {
 		return err
 	}
 
-	if broker.Status.IsReady() {
-		b.log.Logf("Broker %s is ready", b.name)
-		if b.verbose {
-			b.log.Logf("%+v", broker)
-		}
+	if b.isStateReady(*broker) {
 		return nil
 	}
 
@@ -104,25 +98,33 @@ func (b *Broker) isBrokerReady(name string) func(event watch.Event) (bool, error
 			return false, nil
 		}
 
-		broker := eventingv1alpha1.Broker{}
-		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &broker)
+		broker, err := convertFromUnstructuredToBroker(*u)
 		if err != nil {
 			return false, err
 		}
 
-		if broker.Status.IsReady() {
-			b.log.Logf("Broker %s is ready", name)
-			if b.verbose {
-				b.log.Logf("%v", u)
-			}
-
-			return true, nil
-		}
-
-		b.log.Logf("Broker %s is not ready", name)
-		if b.verbose {
-			b.log.Logf("%+v", u)
-		}
-		return false, nil
+		return b.isStateReady(broker), nil
 	}
+}
+
+func convertFromUnstructuredToBroker(u unstructured.Unstructured) (eventingv1alpha1.Broker, error) {
+	broker := eventingv1alpha1.Broker{}
+	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &broker)
+	return broker, err
+}
+
+func (b Broker) isStateReady(broker eventingv1alpha1.Broker) bool {
+	ready := broker.Status.IsReady()
+
+	if ready {
+		b.log.Logf("Broker %s is ready", b.name)
+	} else {
+		b.log.Logf("Broker %s is not ready", b.name)
+	}
+
+	if b.verbose {
+		b.log.Logf("%+v", broker)
+	}
+
+	return ready
 }

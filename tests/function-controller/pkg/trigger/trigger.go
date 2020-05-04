@@ -20,7 +20,6 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 )
 
@@ -34,17 +33,17 @@ type Trigger struct {
 
 type ResourceVersion string
 
-func New(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log shared.Logger, verbose bool) *Trigger {
+func New(name string, c shared.Container) *Trigger {
 	return &Trigger{
-		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
+		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
 			Version:  eventingv1alpha1.SchemeGroupVersion.Version,
 			Group:    eventingv1alpha1.SchemeGroupVersion.Group,
 			Resource: "triggers",
-		}, namespace, log, verbose),
+		}, c.Namespace, c.Log, c.Verbose),
 		name:        name,
-		namespace:   namespace,
-		waitTimeout: waitTimeout,
-		log:         log,
+		namespace:   c.Namespace,
+		waitTimeout: c.WaitTimeout,
+		log:         c.Log,
 	}
 }
 

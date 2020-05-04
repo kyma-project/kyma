@@ -130,25 +130,28 @@ func (f *function) isFunctionReady(name string) func(event watch.Event) (bool, e
 		if err != nil {
 			return false, err
 		}
+		return f.isConditionReady(*function), nil
 
-		conditions := function.Status.Conditions
-		if len(conditions) == 0 {
-			return false, nil
-		}
-		if conditions[0].Type == serverlessv1alpha1.ConditionRunning && conditions[0].Status == corev1.ConditionTrue {
-			f.log.Logf("%s is ready", name)
-
-			if f.verbose {
-				f.log.Logf("%+v", function)
-			}
-			return true, nil
-		}
-
-		f.log.Logf("%s is not ready", name)
-		if f.verbose {
-			f.log.Logf("%+v", function)
-		}
-
-		return false, nil
 	}
+}
+
+func (f function) isConditionReady(fn serverlessv1alpha1.Function) bool {
+	conditions := fn.Status.Conditions
+	if len(conditions) == 0 {
+		return false
+	}
+
+	ready := conditions[0].Type == serverlessv1alpha1.ConditionRunning && conditions[0].Status == corev1.ConditionTrue
+	if ready {
+		f.log.Logf("Function %s is ready", f.name)
+
+	} else {
+		f.log.Logf("Function %s is not ready", f.name)
+	}
+
+	if f.verbose {
+		f.log.Logf("%+v", fn)
+	}
+
+	return ready
 }

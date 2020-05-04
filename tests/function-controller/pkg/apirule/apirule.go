@@ -16,7 +16,6 @@ import (
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
 )
 
 type APIRule struct {
@@ -25,19 +24,21 @@ type APIRule struct {
 	namespace   string
 	waitTimeout time.Duration
 	log         shared.Logger
+	verbose     bool
 }
 
-func New(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log shared.Logger, verbose bool) *APIRule {
+func New(name string, c shared.Container) *APIRule {
 	return &APIRule{
-		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
+		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
 			Version:  apiruleTypes.GroupVersion.Version,
 			Group:    apiruleTypes.GroupVersion.Group,
 			Resource: "apirules",
-		}, namespace, log, verbose),
+		}, c.Namespace, c.Log, c.Verbose),
 		name:        name,
-		namespace:   namespace,
-		waitTimeout: waitTimeout,
-		log:         log,
+		namespace:   c.Namespace,
+		waitTimeout: c.WaitTimeout,
+		log:         c.Log,
+		verbose:     c.Verbose,
 	}
 }
 
@@ -113,12 +114,9 @@ func (a *APIRule) WaitForStatusRunning() error {
 		return err
 	}
 
-	if isStateReady(apirule.Status) {
-		a.log.Logf("%s is ready", a.name)
+	if a.isStateReady(*apirule) {
 		return nil
 	}
-	a.log.Logf("ApiRule %s is not ready", a.name)
-
 
 	ctx, cancel := context.WithTimeout(context.Background(), a.waitTimeout)
 	defer cancel()
@@ -142,22 +140,35 @@ func (a *APIRule) isApiRuleReady(name string) func(event watch.Event) (bool, err
 			return false, nil
 		}
 
-		apirule := apiruleTypes.APIRule{}
-		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &apirule)
+		apirule, err := convertFromUnstructuredToAPIRule(*u)
 		if err != nil {
 			return false, err
 		}
 
-		if isStateReady(apirule.Status) {
-			a.log.Logf("Apirule %s is ready:\n%v", name, u)
-			return true, nil
-		}
-
-		a.log.Logf("Apirule %s is not ready", name)
-		return false, nil
+		return a.isStateReady(apirule), nil
 	}
 }
 
-func isStateReady(a apiruleTypes.APIRuleStatus) bool {
-	return a.AccessRuleStatus.Code == apiruleTypes.StatusOK && a.APIRuleStatus.Code == apiruleTypes.StatusOK && a.VirtualServiceStatus.Code == apiruleTypes.StatusOK
+func (a *APIRule) isStateReady(apirule apiruleTypes.APIRule) bool {
+	ready := apirule.Status.AccessRuleStatus.Code == apiruleTypes.StatusOK &&
+		apirule.Status.APIRuleStatus.Code == apiruleTypes.StatusOK &&
+		apirule.Status.VirtualServiceStatus.Code == apiruleTypes.StatusOK
+
+	if ready {
+		a.log.Logf("%APIRule %s is ready", a.name)
+	} else {
+		a.log.Logf("APIRule %s is not ready", a.name)
+	}
+
+	if a.verbose {
+		a.log.Logf("%+v", apirule)
+	}
+
+	return ready
+}
+
+func convertFromUnstructuredToAPIRule(u unstructured.Unstructured) (apiruleTypes.APIRule, error) {
+	apirule := apiruleTypes.APIRule{}
+	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &apirule)
+	return apirule, err
 }
