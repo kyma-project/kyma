@@ -42,10 +42,6 @@ func errorFn(log shared.Logger) func(error) bool {
 	}
 }
 
-func WithIgnoreOnAlreadyExist(backoff wait.Backoff, fn func() error, log shared.Logger) error {
-	return retry.OnError(backoff, errorFn(log), fnWithIgnore(fn, errors.IsAlreadyExists, log))
-}
-
 func WithIgnoreOnNotFound(backoff wait.Backoff, fn func() error, log shared.Logger) error {
 	return retry.OnError(backoff, errorFn(log), fnWithIgnore(fn, errors.IsNotFound, log))
 }

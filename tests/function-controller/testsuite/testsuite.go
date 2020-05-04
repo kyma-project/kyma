@@ -96,17 +96,19 @@ func (t *TestSuite) Run() {
 
 	t.t.Log("Creating function...")
 	functionDetails := t.getFunction(helloWorld)
-	resourceVersion, err := t.function.Create(functionDetails)
+	fnResourceVersion, err := t.function.Create(functionDetails)
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for function to have ready phase...")
-	err = t.function.WaitForStatusRunning(resourceVersion)
+	err = t.function.WaitForStatusRunning(fnResourceVersion)
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for broker to have ready phase...")
 	err = t.broker.WaitForStatusRunning()
 	failOnError(t.g, err)
 
+	// trigger needs to be created after broker, as it depends on it
+	// and knative sometimes fails to properly reconcile it in time, so that test passes
 	t.t.Log("Creating trigger...")
 	triggerResourceVersion, err := t.trigger.Create(t.cfg.FunctionName)
 	failOnError(t.g, err)
@@ -143,7 +145,7 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for function to have ready phase...")
-	err = t.function.WaitForStatusRunning(resourceVersion)
+	err = t.function.WaitForStatusRunning(fnResourceVersion)
 	failOnError(t.g, err)
 
 	t.t.Log("Testing local connection through the service to updated function")
@@ -200,6 +202,7 @@ func (t *TestSuite) createEvent(url string) error {
 		return fmt.Errorf("while creating new request: method %s, url %s, payload %s", http.MethodPost, url, payload)
 	}
 
+	// headers taken from example from documentation
 	req.Header.Add("x-b3-flags", "1")
 	req.Header.Add("ce-specversion", "0.2")
 	req.Header.Add("ce-type", "dev.knative.foo.bar")
@@ -239,7 +242,7 @@ func (t *TestSuite) pollForAnswer(url string, expected string) error {
 
 	return wait.PollImmediateUntil(10*time.Second,
 		func() (done bool, err error) {
-			payload := strings.NewReader(fmt.Sprintf(`{ "%s": "happy" }`, testDataKey))
+			payload := strings.NewReader(fmt.Sprintf(`{ "%s": "%s" }`, testDataKey, happyMsg))
 			req, err := http.NewRequest(http.MethodGet, url, payload)
 			if err != nil {
 				return false, err // TODO erros.wrap
@@ -250,7 +253,12 @@ func (t *TestSuite) pollForAnswer(url string, expected string) error {
 			if err != nil {
 				return false, err
 			}
-			defer res.Body.Close()
+			defer func() {
+				errClose := res.Body.Close()
+				if errClose != nil {
+					t.t.Logf("Error closing body in request to %s: %v", url, errClose)
+				}
+			}()
 
 			if res.StatusCode != http.StatusOK {
 				t.t.Logf("Expected status %s, got %s, retrying...", http.StatusText(http.StatusOK), res.Status)
