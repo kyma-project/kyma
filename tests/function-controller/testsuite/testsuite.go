@@ -129,13 +129,11 @@ func (t *TestSuite) Run() {
 
 	t.t.Log("Testing local connection through the service")
 	inClusterURL := fmt.Sprintf("http://%s.%s.svc.cluster.local", t.cfg.FunctionName, ns)
-	t.t.Logf("Address: %s", inClusterURL)
 	err = t.pollForAnswer(inClusterURL, helloWorld)
 	failOnError(t.g, err)
 
 	fnGatewayURL := fmt.Sprintf("https://%s", domainHost)
 	t.t.Log("Testing connection through the gateway")
-	t.t.Logf("Address: %s", fnGatewayURL)
 	err = t.pollForAnswer(fnGatewayURL, helloWorld)
 	failOnError(t.g, err)
 
@@ -149,12 +147,10 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Testing local connection through the service to updated function")
-	t.t.Logf("Address: %s", inClusterURL)
 	err = t.pollForAnswer(inClusterURL, fmt.Sprintf("Hello %s world 1", happyMsg))
 	failOnError(t.g, err)
 
 	t.t.Log("Testing connection through the gateway to updated function")
-	t.t.Logf("Address: %s", fnGatewayURL)
 	err = t.pollForAnswer(fnGatewayURL, fmt.Sprintf("Hello %s world 2", happyMsg))
 	failOnError(t.g, err)
 
@@ -165,7 +161,6 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Testing local connection through the service")
-	t.t.Logf("Address: %s", inClusterURL)
 	err = t.pollForAnswer(inClusterURL, gotEventMsg)
 	failOnError(t.g, err)
 }
