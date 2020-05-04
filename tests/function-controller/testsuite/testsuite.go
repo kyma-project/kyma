@@ -195,8 +195,7 @@ func failOnError(g *gomega.GomegaWithT, err error) {
 func (t *TestSuite) createEvent(url string) error {
 	// https://knative.dev/v0.12-docs/eventing/broker-trigger/#manual
 
-	payload := fmt.Sprintf(`{ "testData": "%s" }`, eventPing)
-
+	payload := fmt.Sprintf(`{ "%s": "%s" }`, testDataKey, eventPing)
 	req, err := http.NewRequest(http.MethodPost, url, strings.NewReader(payload))
 	if err != nil {
 		return fmt.Errorf("while creating new request: method %s, url %s, payload %s", http.MethodPost, url, payload)
