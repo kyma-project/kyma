@@ -2,12 +2,12 @@
 title: Architecture
 ---
 
-The architecture of Knative Eventing Mesh relies heavily on the functionality provided by the Knative Eventing components. To ensure a stable event flow between the sender and the subscriber, the Eventing Mesh wires Knative and Kyma components together.
+The architecture of Event Mesh relies heavily on the functionality provided by the Knative Eventing components. To ensure a stable event flow between the sender and the subscriber, the Event Mesh wires Knative and Kyma components together.
 
 
-This diagram shows how the Eventing Mesh components work together.
+This diagram shows how the Event Mesh components work together.
 
-![Eventing implementation](./assets/eventing-mesh-implementation.svg)
+![Eventing implementation](./assets/event-mesh-implementation.svg)
 
 1. The user creates an [Application CR](https://kyma-project.io/docs/components/application-connector/#custom-resource-application) and binds it to a Namespace. 
 
@@ -28,4 +28,4 @@ This diagram shows how the Eventing Mesh components work together.
 
 5. The user creates the [Trigger](https://knative.dev/docs/eventing/broker-trigger/) which references the Broker and defines the subscriber along with the conditions for filtering events. This way, subscribers receive only the events of a given type.
 
-For details on the Trigger specification, read [this](/components/knative-eventing-mesh/#details-event-processing-and-delivery) document.
+For details on the Trigger specification, read [this](/components/event-mesh/#details-event-processing-and-delivery) document.

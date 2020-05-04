@@ -74,6 +74,10 @@ required = [
   name = "k8s.io/client-go"
   version = "kubernetes-1.15.3"
 
+[[override]]
+  name = "golang.org/x/crypto"
+  revision = "b7391e95e576cacdcdd422573063bc057239113d"
+
 [[constraint]]
   branch = "master"
   name = "k8s.io/utils"

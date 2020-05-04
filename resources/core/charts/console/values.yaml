@@ -27,7 +27,7 @@ console:
   image:
     dir: null
     pullPolicy: IfNotPresent
-    tag: 495e6fe7
+    tag: a3891b26
   service:
     externalPort: 80
     internalPort: 8080
@@ -37,7 +37,7 @@ core_ui:
   image:
     dir: null
     pullPolicy: IfNotPresent
-    tag: 86f4dcef
+    tag: 1b1385bd
   service:
     externalPort: 80
     internalPort: 80
