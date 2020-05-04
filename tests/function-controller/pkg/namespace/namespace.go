@@ -70,7 +70,7 @@ func (n *Namespace) Create() (string, error) {
 
 	n.log.Logf("CREATE: namespace %s", n.name)
 	if n.verbose {
-		n.log.Logf("%v", ns)
+		n.log.Logf("%+v", ns)
 	}
 	return n.name, nil
 }

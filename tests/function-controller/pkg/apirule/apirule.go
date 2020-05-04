@@ -155,7 +155,7 @@ func (a *APIRule) isStateReady(apirule apiruleTypes.APIRule) bool {
 		apirule.Status.VirtualServiceStatus.Code == apiruleTypes.StatusOK
 
 	if ready {
-		a.log.Logf("%APIRule %s is ready", a.name)
+		a.log.Logf("APIRule %s is ready", a.name)
 	} else {
 		a.log.Logf("APIRule %s is not ready", a.name)
 	}

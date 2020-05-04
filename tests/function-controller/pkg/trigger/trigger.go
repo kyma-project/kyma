@@ -29,6 +29,7 @@ type Trigger struct {
 	namespace   string
 	waitTimeout time.Duration
 	log         shared.Logger
+	verbose     bool
 }
 
 type ResourceVersion string
@@ -44,6 +45,7 @@ func New(name string, c shared.Container) *Trigger {
 		namespace:   c.Namespace,
 		waitTimeout: c.WaitTimeout,
 		log:         c.Log,
+		verbose:     c.Verbose,
 	}
 }
 
@@ -108,8 +110,7 @@ func (t *Trigger) WaitForStatusRunning(initialResourceVersion ResourceVersion) e
 		return err
 	}
 
-	if tr.Status.IsReady() {
-		t.log.Logf("Trigger %s in namespace %s is ready", tr.Name, tr.Namespace)
+	if t.isStateReady(*tr) {
 		return nil
 	}
 
@@ -136,18 +137,33 @@ func (t *Trigger) isTriggerReady(name string) func(event watch.Event) (bool, err
 			return false, nil
 		}
 
-		trigger := eventingv1alpha1.Trigger{}
-		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &trigger)
+		trigger, err := convertFromUnstructuredToTrigger(*u)
 		if err != nil {
 			return false, err
 		}
 
-		if trigger.Status.IsReady() {
-			t.log.Logf("Trigger %s is ready", name)
-			return true, nil
-		}
-
-		t.log.Logf("Trigger %s is not ready", name)
-		return false, nil
+		return t.isStateReady(trigger), nil
 	}
+}
+
+func convertFromUnstructuredToTrigger(u unstructured.Unstructured) (eventingv1alpha1.Trigger, error) {
+	trigger := eventingv1alpha1.Trigger{}
+	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &trigger)
+	return trigger, err
+}
+
+func (t Trigger) isStateReady(trigger eventingv1alpha1.Trigger) bool {
+	ready := trigger.Status.IsReady()
+
+	if ready {
+		t.log.Logf("Trigger %s is ready", t.name)
+	} else {
+		t.log.Logf("Trigger %s is not ready", t.name)
+	}
+
+	if t.verbose {
+		t.log.Logf("%+v", trigger)
+	}
+
+	return ready
 }
