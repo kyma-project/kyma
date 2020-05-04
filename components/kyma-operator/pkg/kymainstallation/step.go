@@ -63,7 +63,7 @@ func (s installStep) Run() error {
 		installErrMsg := fmt.Sprintf("Helm install error: %s ", installErr.Error())
 
 		isDeletable, err := s.helmClient.IsReleaseDeletable(s.component.GetReleaseName())
-		if err !=nil {
+		if err != nil {
 			errMsg := fmt.Sprintf("Checking status of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
 			log.Println(errMsg)
 			return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, errMsg))

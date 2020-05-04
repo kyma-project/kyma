@@ -73,7 +73,7 @@ func (hc *Client) ReleaseStatus(rname string) (string, error) {
 }
 
 //IsReleaseDeletable returns true for release that can be deleted
-func (hc *Client) IsReleaseDeletable(rname string) (bool, error){
+func (hc *Client) IsReleaseDeletable(rname string) (bool, error) {
 	statusRes, err := hc.helm.ReleaseStatus(rname)
 	if err != nil {
 		return false, err
