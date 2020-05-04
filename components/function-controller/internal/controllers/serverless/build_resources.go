@@ -1,11 +1,8 @@
 package serverless
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
-
-	"github.com/go-logr/logr"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -16,9 +13,6 @@ import (
 )
 
 const (
-	// TODO: Remove
-	serviceBindingUsagesTracingAnnotation = "servicebindingusages.servicecatalog.kyma-project.io/tracing-information"
-
 	autoscalingKnativeMinScaleAnn = "autoscaling.knative.dev/minScale"
 	autoscalingKnativeMaxScaleAnn = "autoscaling.knative.dev/maxScale"
 
@@ -152,12 +146,12 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 	return job
 }
 
-func (r *FunctionReconciler) buildService(log logr.Logger, instance *serverlessv1alpha1.Function, oldService *servingv1.Service) servingv1.Service {
+func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function) servingv1.Service {
 	imageName := r.buildExternalImageAddress(instance)
 	serviceLabels := r.serviceLabels(instance)
 
 	podAnnotations := r.servicePodAnnotations(instance)
-	podLabels := r.servicePodLabels(log, instance, oldService)
+	podLabels := r.servicePodLabels(instance)
 
 	return servingv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -217,6 +211,12 @@ func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Functio
 		labels[key] = value
 	}
 
+	return r.mergeLabels(labels, r.internalFunctionLabels(instance))
+}
+
+func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha1.Function) map[string]string {
+	labels := make(map[string]string, 3)
+
 	labels[serverlessv1alpha1.FunctionNameLabel] = instance.Name
 	labels[serverlessv1alpha1.FunctionManagedByLabel] = "function-controller"
 	labels[serverlessv1alpha1.FunctionUUIDLabel] = string(instance.GetUID())
@@ -244,48 +244,11 @@ func (r *FunctionReconciler) servicePodAnnotations(instance *serverlessv1alpha1.
 	return annotations
 }
 
-func (r *FunctionReconciler) servicePodLabels(log logr.Logger, instance *serverlessv1alpha1.Function, oldService *servingv1.Service) map[string]string {
+func (r *FunctionReconciler) servicePodLabels(instance *serverlessv1alpha1.Function) map[string]string {
 	podLabels := instance.Spec.Labels
-	functionLabels := r.functionLabels(instance)
-	bindingLabels := r.retrieveBindingLabels(log, instance, oldService)
+	functionLabels := r.internalFunctionLabels(instance)
 
-	return r.mergeLabels(podLabels, functionLabels, bindingLabels)
-}
-
-func (r *FunctionReconciler) retrieveBindingLabels(log logr.Logger, instance *serverlessv1alpha1.Function, oldService *servingv1.Service) map[string]string {
-	bindingAnnotation := instance.GetAnnotations()[serviceBindingUsagesTracingAnnotation]
-	bindingLabelsFromFunction := r.retrieveBindingLabelsFromAnnotation(log, bindingAnnotation)
-
-	// TODO: Remove this part after 1.13 release
-	if oldService == nil {
-		return bindingLabelsFromFunction
-	}
-
-	bindingAnnotation = oldService.GetAnnotations()[serviceBindingUsagesTracingAnnotation]
-	bindingLabelsFromService := r.retrieveBindingLabelsFromAnnotation(log, bindingAnnotation)
-	return r.mergeLabels(bindingLabelsFromService, bindingLabelsFromFunction)
-}
-
-func (r *FunctionReconciler) retrieveBindingLabelsFromAnnotation(log logr.Logger, bindingAnnotation string) map[string]string {
-	bindingLabels := make(map[string]string, 0)
-
-	if bindingAnnotation == "" || bindingAnnotation == "{}" {
-		return bindingLabels
-	}
-
-	type binding map[string]map[string]map[string]string
-	var bindings binding
-	if err := json.Unmarshal([]byte(bindingAnnotation), &bindings); err != nil {
-		log.Error(err, fmt.Sprintf("Cannot parse SeriveBindingUsage annotation %s", bindingAnnotation))
-	}
-
-	for _, service := range bindings {
-		for key, value := range service["injectedLabels"] {
-			bindingLabels[key] = value
-		}
-	}
-
-	return bindingLabels
+	return r.mergeLabels(podLabels, functionLabels)
 }
 
 func (r *FunctionReconciler) mergeLabels(labelsCollection ...map[string]string) map[string]string {

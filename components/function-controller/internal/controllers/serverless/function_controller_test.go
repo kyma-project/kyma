@@ -138,7 +138,7 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(service.Spec.Template.Labels[serverlessv1alpha1.FunctionNameLabel]).To(gomega.Equal(function.Name))
 		gomega.Expect(service.Spec.Template.Labels[serverlessv1alpha1.FunctionManagedByLabel]).To(gomega.Equal("function-controller"))
 		gomega.Expect(service.Spec.Template.Labels[serverlessv1alpha1.FunctionUUIDLabel]).To(gomega.Equal(string(function.UID)))
-		gomega.Expect(service.Spec.Template.Labels[testBindingLabel1]).To(gomega.Equal(testBindingLabelValue))
+		gomega.Expect(service.Spec.Template.Labels[testBindingLabel1]).To(gomega.Equal("foobar"))
 		gomega.Expect(service.Spec.Template.Labels[testBindingLabel2]).To(gomega.Equal(testBindingLabelValue))
 		gomega.Expect(service.Spec.Template.Labels["foo"]).To(gomega.Equal("bar"))
 
@@ -185,15 +185,11 @@ func newFixFunction(namespace, name string) *serverlessv1alpha1.Function {
 	one := int32(1)
 	two := int32(2)
 	suffix := rand.Int()
-	bindingAnnotationValue := fmt.Sprintf(`{"stupefied-mccarthy":{"injectedLabels":{"%s":"%s"}}}`, testBindingLabel1, testBindingLabelValue)
 
 	return &serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("%s-%d", name, suffix),
 			Namespace: namespace,
-			Annotations: map[string]string{
-				serviceBindingUsagesTracingAnnotation: bindingAnnotationValue,
-			},
 		},
 		Spec: serverlessv1alpha1.FunctionSpec{
 			Source: "module.exports = {main: function(event, context) {return 'Hello World. Epstein didnt kill himself.'}}",
