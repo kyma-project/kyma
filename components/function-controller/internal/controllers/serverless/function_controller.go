@@ -215,7 +215,7 @@ func (r *FunctionReconciler) updateBuildStatus(ctx context.Context, log logr.Log
 }
 
 func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, service *servingv1.Service) (ctrl.Result, error) {
-	newService := r.buildService(log, instance, service)
+	newService := r.buildService(instance)
 
 	switch {
 	case service == nil:
