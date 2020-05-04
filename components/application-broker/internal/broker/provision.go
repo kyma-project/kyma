@@ -37,8 +37,8 @@ const (
 	// applicationNameLabelKey is used to select Knative channels and Subscriptions
 	applicationNameLabelKey = "application-name"
 
-	// serviceIDLabelKey is used to select Knative Subscriptions
-	serviceIDLabelKey = "service-id"
+	// applicationServiceIDLabelKey is used to select Knative Subscriptions
+	applicationServiceIDLabelKey = "application-service-id"
 
 	// brokerNamespaceLabelKey is used to select Knative Subscriptions
 	brokerNamespaceLabelKey = "broker-namespace"
@@ -366,9 +366,9 @@ func (svc *ProvisionService) persistKnativeSubscription(applicationName internal
 
 	// subscription selector labels
 	labels := map[string]string{
-		brokerNamespaceLabelKey: string(ns),
-		applicationNameLabelKey: string(applicationName),
-		serviceIDLabelKey:       string(applicationSvcID),
+		brokerNamespaceLabelKey:      string(ns),
+		applicationNameLabelKey:      string(applicationName),
+		applicationServiceIDLabelKey: string(applicationSvcID),
 	}
 
 	// get Knative subscription by labels

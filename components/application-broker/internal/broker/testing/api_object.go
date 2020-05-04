@@ -30,7 +30,7 @@ const (
 const (
 	integrationNamespace                      = "kyma-integration"
 	applicationNameLabelKey                   = "application-name"
-	serviceIDLabelKey                         = "service-id"
+	applicationServiceIDLabelKey              = "application-service-id"
 	brokerNamespaceLabelKey                   = "broker-namespace"
 	knativeEventingInjectionLabelKey          = "knative-eventing-injection"
 	knativeEventingInjectionLabelValueEnabled = "enabled"
@@ -43,9 +43,9 @@ func NewAppSubscription(appNs, appName, appSvcID string, opts ...SubscriptionOpt
 			GenerateName: fmt.Sprintf("%s-", knSubscriptionNamePrefix),
 			Namespace:    integrationNamespace,
 			Labels: map[string]string{
-				brokerNamespaceLabelKey: appNs,
-				applicationNameLabelKey: appName,
-				serviceIDLabelKey:       appSvcID,
+				brokerNamespaceLabelKey:      appNs,
+				applicationNameLabelKey:      appName,
+				applicationServiceIDLabelKey: appSvcID,
 			},
 		},
 	}

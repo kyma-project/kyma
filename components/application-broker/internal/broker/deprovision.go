@@ -259,8 +259,8 @@ func (svc *DeprovisionService) deprovisionEventActivation(id internal.Applicatio
 
 func subscriptionForApp(cli knative.Client, svcID, ns string) (*messagingv1alpha1.Subscription, error) {
 	labels := map[string]string{
-		brokerNamespaceLabelKey: ns,
-		serviceIDLabelKey:       svcID,
+		brokerNamespaceLabelKey:      ns,
+		applicationServiceIDLabelKey: svcID,
 	}
 	return cli.GetSubscriptionByLabels(integrationNamespace, labels)
 }
