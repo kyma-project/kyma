@@ -89,5 +89,5 @@ func httpUnauthorizedPredicate(response *http.Response) bool {
 }
 
 func NotFoundPredicate(response *http.Response) bool {
-	return response.StatusCode == http.StatusNotFound
+	return response.StatusCode != http.StatusNotFound
 }
