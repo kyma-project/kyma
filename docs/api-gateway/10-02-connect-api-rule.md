@@ -79,19 +79,23 @@ If you reach your service and get `401 Unauthorized` or `403 Forbidden` in respo
       ```
      
   4. If the Client ID from step 1 is not available on the clients list, make sure Hydra has access to the database and/or restart the Hydra Measter Pod.
-  You can check the logs using the following command:
+  You can check the logs using the following commands:
 
   ```bash
+  # Check logs from the Hydra-Maester controller application
   kubectl logs -n kyma-system -l "app.kubernetes.io/name=hydra-maester" -c hydra-maester
   # Example output
   2020-05-04T12:19:04.472Z  INFO  controller-runtime.controller Starting EventSource  {"controller": "oauth2client", "source": "kind source: /, Kind="}
-2020-05-04T12:19:04.472Z  INFO  setup starting manager
-2020-05-04T12:19:04.573Z  INFO  controller-runtime.controller Starting Controller {"controller": "oauth2client"}
-2020-05-04T12:19:04.673Z  INFO  controller-runtime.controller Starting workers  {"controller": "oauth2client", "worker count": 1}
-2020-05-04T12:26:30.819Z  INFO  controllers.OAuth2Client  using default client
-2020-05-04T12:26:30.835Z  INFO  controllers.OAuth2Client  using default client
-# This log informs that a client has been created, and should be visible within hydra
-2020-05-04T12:26:31.468Z  DEBUG controller-runtime.controller Successfully Reconciled {"controller": "oauth2client", "request": "test-ns/test-client"}
+  2020-05-04T12:19:04.472Z  INFO  setup starting manager
+  2020-05-04T12:19:04.573Z  INFO  controller-runtime.controller Starting Controller {"controller": "oauth2client"}
+  2020-05-04T12:19:04.673Z  INFO  controller-runtime.controller Starting workers  {"controller": "oauth2client", "worker count": 1}
+  2020-05-04T12:26:30.819Z  INFO  controllers.OAuth2Client  using default client
+  2020-05-04T12:26:30.835Z  INFO  controllers.OAuth2Client  using default client
+  # This log informs that a client has been created, and should be visible within hydra
+  2020-05-04T12:26:31.468Z  DEBUG controller-runtime.controller Successfully Reconciled {"controller": "oauth2client", "request": "test-ns/test-client"}
+
+  # Check logs from the Hydra application
+  kubectl logs -n kyma-system -l "app.kubernetes.io/name=hydra" -c hydra
   ```
       
 ## 404 Not Found
