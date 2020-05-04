@@ -9,6 +9,9 @@ global:
     dir:
     version: 2122254e
   disableLegacyConnectivity: "false"
+  controllerManager:
+    # Broker relist interval; format is a duration (`20m`, `1h`, etc)
+    brokerRelistInterval: 24h
 test:
   acceptance:
     service_catalog:

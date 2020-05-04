@@ -86,7 +86,7 @@ spec:
         - {{ .Values.controllerManager.resyncInterval }}
         {{ if .Values.controllerManager.brokerRelistIntervalActivated -}}
         - --broker-relist-interval
-        - {{ .Values.controllerManager.brokerRelistInterval }}
+        - {{ .Values.global.controllerManager.brokerRelistInterval }}
         {{- end }}
         {{ if .Values.controllerManager.operationPollingMaximumBackoffDuration -}}
         - --operation-polling-maximum-backoff-duration
