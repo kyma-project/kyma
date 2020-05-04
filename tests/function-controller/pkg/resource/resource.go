@@ -163,8 +163,9 @@ func (r *Resource) Update(res interface{}) (*unstructured.Unstructured, error) {
 		namespace = r.namespace
 	}
 
+	r.log.Logf("UPDATE %s: namespace:%s kind:%s", result.GetName(), namespace, r.kind)
 	if r.verbose {
-		r.log.Logf("UPDATE %s: namespace:%s kind:%s\n%v", result.GetName(), namespace, r.kind, result)
+		r.log.Logf("%+v", result)
 	}
 
 	return result, nil
