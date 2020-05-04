@@ -54,7 +54,7 @@ This will create a new `pvc-restored` PVC with pre-populated data from the snaps
 
 For details about VolumeSnapshots, see [this](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) document.
 
-Follow the instructions below to enable this feature for various providers.
+Follow the instructions to enable this feature for various providers.
 
 ### AKS
 
@@ -76,9 +76,9 @@ Minimum Kubernetes version supported is 1.14.
 
 #### GCP
 
-Gardener GCP uses CSI drivers by default as of Kubernetes 1.18, and it supports Volume snapshotting out of the box.
+Gardener GCP uses CSI drivers by default as of Kubernetes 1.18, and it supports taking volume snapshots out of the box.
 
-Create a VolumeSnapshotClass:
+1. Create a VolumeSnapshotClass:
 
 ```yaml
 apiVersion: snapshot.storage.k8s.io/v1beta1
@@ -91,7 +91,7 @@ driver: pd.csi.storage.gke.io
 deletionPolicy: Delete
 ```
 
-Create a VolumeSnapshot:
+2. Create a VolumeSnapshot:
 
 ```yaml
 apiVersion: snapshot.storage.k8s.io/v1beta1
@@ -103,7 +103,7 @@ spec:
     persistentVolumeClaimName: <PVC_NAME>
 ```
 
-Wait until `READYTOUSE` field gets `true` to verify that snapshotting gets succeeded:
+3. Wait until the **READYTOUSE** field has the `true` status to verify that the snapshot was taken successfully:
 
 ```bash
 kubectl get volumesnapshot -w
@@ -111,9 +111,9 @@ kubectl get volumesnapshot -w
 
 #### AWS
 
-Gardener AWS uses CSI drivers by default as of Kubernetes 1.18, and it supports Volume snapshotting out of the box.
+Gardener AWS uses CSI drivers by default as of Kubernetes 1.18, and it supports taking volume snapshots out of the box.
 
-Create a VolumeSnapshotClass:
+1. Create a VolumeSnapshotClass:
 
 ```yaml
 apiVersion: snapshot.storage.k8s.io/v1beta1
@@ -126,7 +126,7 @@ driver: ebs.csi.aws.com
 deletionPolicy: Delete
 ```
 
-Create a VolumeSnapshot:
+2. Create a VolumeSnapshot:
 
 ```yaml
 apiVersion: snapshot.storage.k8s.io/v1beta1
@@ -138,7 +138,7 @@ spec:
     persistentVolumeClaimName: <PVC_NAME>
 ```
 
-Wait until `READYTOUSE` field gets `true` to verify that snapshotting gets succeeded:
+3. Wait until the **READYTOUSE** field receives the `true` status to verify that the snapshot was taken successfully:
 
 ```bash
 kubectl get volumesnapshot -w
