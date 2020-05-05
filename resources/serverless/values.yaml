@@ -8,7 +8,7 @@ tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-8068"
+    tag: "PR-8312"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -20,8 +20,9 @@ tests:
       memory: 64Mi
       cpu: 200m
   envs:
-    waitTimeout: 10m
+    waitTimeout: 15m
     verifySSL: "false"
+    verbose: "true"
 
 global:
   commonLabels:
