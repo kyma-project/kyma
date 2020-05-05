@@ -149,11 +149,16 @@ func (a *APIRule) isApiRuleReady(name string) func(event watch.Event) (bool, err
 }
 
 func (a *APIRule) isStateReady(apirule apiruleTypes.APIRule) bool {
-	ready := apirule.Status.AccessRuleStatus.Code == apiruleTypes.StatusOK &&
-		apirule.Status.APIRuleStatus.Code == apiruleTypes.StatusOK &&
-		apirule.Status.VirtualServiceStatus.Code == apiruleTypes.StatusOK
+	status := apirule.Status
+	if status.VirtualServiceStatus == nil || status.APIRuleStatus == nil || status.AccessRuleStatus == nil {
+		return false
+	}
 
-	shared.LogReadiness(ready, a.verbose, a.name, a.namespace, a.log, apirule)
+	ready := status.AccessRuleStatus.Code == apiruleTypes.StatusOK &&
+		status.APIRuleStatus.Code == apiruleTypes.StatusOK &&
+		status.VirtualServiceStatus.Code == apiruleTypes.StatusOK
+
+	shared.LogReadiness(ready, a.verbose, a.name, a.log, apirule)
 
 	return ready
 }

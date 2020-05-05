@@ -52,6 +52,7 @@ type Config struct {
 	ServiceInstanceName     string        `envconfig:"default=test-service-instance"`
 	ServiceBindingName      string        `envconfig:"default=test-service-binding"`
 	ServiceBindingUsageName string        `envconfig:"default=test-service-binding-usage"`
+	UsageKindName           string        `envconfig:"default=knative-service"`
 	DomainName              string        `envconfig:"default=test-function"`
 	IngressHost             string        `envconfig:"default=kyma.local"`
 	DomainPort              uint32        `envconfig:"default=80"`
@@ -135,24 +136,41 @@ func (t *TestSuite) Run() {
 	fnResourceVersion, err := t.function.Create(functionDetails)
 	failOnError(t.g, err)
 
+	t.t.Log("Waiting for function to have ready phase...")
+	err = t.function.WaitForStatusRunning(fnResourceVersion)
+	failOnError(t.g, err)
+
 	t.t.Log("Creating addons configuration...")
 	err = t.addonsConfig.Create(addonsConfigUrl)
+	failOnError(t.g, err)
+
+	t.t.Log("Waiting for addons configutation to have ready phase...")
+	err = t.addonsConfig.WaitForStatusRunning()
 	failOnError(t.g, err)
 
 	t.t.Log("Creating service instance...")
 	err = t.serviceinstance.Create(serviceClassExternalName, servicePlanExternalName)
 	failOnError(t.g, err)
 
+	t.t.Log("Waiting for service instance to have ready phase...")
+	err = t.serviceinstance.WaitForStatusRunning()
+	failOnError(t.g, err)
+
 	t.t.Log("Creating service binding...")
 	err = t.servicebinding.Create(t.cfg.ServiceInstanceName)
 	failOnError(t.g, err)
 
-	t.t.Log("Waiting for function to have ready phase...")
-	err = t.function.WaitForStatusRunning(fnResourceVersion)
+	t.t.Log("Waiting for service binding to have ready phase...")
+	err = t.servicebinding.WaitForStatusRunning()
 	failOnError(t.g, err)
 
 	t.t.Log("Creating service binding usage...")
-	err = t.servicebindingusage.Create(t.cfg.ServiceBindingName, t.cfg.FunctionName, redisEnvPrefix)
+	// we are deliberately creating servicebindingusage HERE, to test how it behaves after function update
+	err = t.servicebindingusage.Create(t.cfg.ServiceBindingName, t.cfg.FunctionName, t.cfg.UsageKindName, redisEnvPrefix)
+	failOnError(t.g, err)
+
+	t.t.Log("Waiting for service binding usage to have ready phase...")
+	err = t.servicebindingusage.WaitForStatusRunning()
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for broker to have ready phase...")
@@ -162,33 +180,20 @@ func (t *TestSuite) Run() {
 	// trigger needs to be created after broker, as it depends on it
 	// watch out for a situation where broker is not created yet!
 	t.t.Log("Creating trigger...")
-	triggerResourceVersion, err := t.trigger.Create(t.cfg.FunctionName)
+	err = t.trigger.Create(t.cfg.FunctionName)
+	failOnError(t.g, err)
+
+	t.t.Log("Waiting for trigger to have ready phase...")
+	err = t.trigger.WaitForStatusRunning()
 	failOnError(t.g, err)
 
 	t.t.Log("Creating APIRule...")
 	domainHost := fmt.Sprintf("%s-%d.%s", t.cfg.DomainName, rand.Uint32(), t.cfg.IngressHost)
-	// var apiruleRsourceVersion string
 	_, err = t.apiRule.Create(t.cfg.DomainName, domainHost, t.cfg.DomainPort)
 	failOnError(t.g, err)
 
-	t.t.Log("Waiting for trigger to have ready phase...")
-	err = t.trigger.WaitForStatusRunning(triggerResourceVersion)
-	failOnError(t.g, err)
-
-	t.t.Log("Waiting for addons configutation to have ready phase...")
-	err = t.addonsConfig.WaitForStatusRunning()
-	failOnError(t.g, err)
-
-	t.t.Log("Waiting for service instance to have ready phase...")
-	err = t.serviceinstance.WaitForStatusRunning()
-	failOnError(t.g, err)
-
-	t.t.Log("Waiting for service binding to have ready phase...")
-	err = t.servicebinding.WaitForStatusRunning()
-	failOnError(t.g, err)
-
-	t.t.Log("Waiting for service binding usage to have ready phase...")
-	err = t.servicebindingusage.WaitForStatusRunning()
+	t.t.Log("Waiting for apirule to have ready phase...")
+	err = t.apiRule.WaitForStatusRunning()
 	failOnError(t.g, err)
 
 	t.t.Log("Testing local connection through the service")

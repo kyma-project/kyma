@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
 	"github.com/pkg/errors"
@@ -68,10 +70,19 @@ func (f *function) Create(data *functionData) (string, error) {
 }
 
 func (f *function) WaitForStatusRunning(initialResourceVersion string) error {
+	fn, err := f.get()
+	if err != nil {
+		return err
+	}
+
+	if f.isConditionReady(*fn) {
+		return nil
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), f.waitTimeout)
 	defer cancel()
 	condition := f.isFunctionReady()
-	_, err := watchtools.Until(ctx, initialResourceVersion, f.resCli.ResCli, condition)
+	_, err = watchtools.Until(ctx, initialResourceVersion, f.resCli.ResCli, condition)
 	if err != nil {
 		return err
 	}
@@ -89,7 +100,7 @@ func (f *function) Delete() error {
 
 func (f *function) Update(data *functionData) error {
 	// correct update must first perform get
-	fn, err := f.Get()
+	fn, err := f.get()
 	if err != nil {
 		return err
 	}
@@ -105,14 +116,13 @@ func (f *function) Update(data *functionData) error {
 	return err
 }
 
-func (f *function) Get() (*serverlessv1alpha1.Function, error) {
+func (f *function) get() (*serverlessv1alpha1.Function, error) {
 	u, err := f.resCli.Get(f.name)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while getting Function %s in namespace %s", f.name, f.namespace)
 	}
 
-	function := serverlessv1alpha1.Function{}
-	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &function)
+	function, err := convertFromUnstructuredToFunction(u)
 	if err != nil {
 		return nil, err
 	}
@@ -126,26 +136,31 @@ func (f *function) isFunctionReady() func(event watch.Event) (bool, error) {
 			return false, nil
 		}
 
-		function, err := f.Get()
+		function, err := f.get()
 
 		if err != nil {
 			return false, err
 		}
 		return f.isConditionReady(*function), nil
-
 	}
 }
 
 func (f function) isConditionReady(fn serverlessv1alpha1.Function) bool {
 	conditions := fn.Status.Conditions
 	if len(conditions) == 0 {
-		shared.LogReadiness(false, f.verbose, f.name, f.namespace, f.log, fn)
+		shared.LogReadiness(false, f.verbose, f.name, f.log, fn)
 		return false
 	}
 
 	ready := conditions[0].Type == serverlessv1alpha1.ConditionRunning && conditions[0].Status == corev1.ConditionTrue
 
-	shared.LogReadiness(ready, f.verbose, f.name, f.namespace, f.log, fn)
+	shared.LogReadiness(ready, f.verbose, f.name, f.log, fn)
 
 	return ready
+}
+
+func convertFromUnstructuredToFunction(u *unstructured.Unstructured) (serverlessv1alpha1.Function, error) {
+	fn := serverlessv1alpha1.Function{}
+	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &fn)
+	return fn, err
 }

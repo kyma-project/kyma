@@ -32,7 +32,7 @@ func New(name string, c shared.Container) *AddonConfiguration {
 		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha1.SchemeGroupVersion.Version,
 			Group:    v1alpha1.SchemeGroupVersion.Group,
-			Resource: "AddonsConfigurations",
+			Resource: "addonsconfigurations",
 		}, c.Namespace, c.Log, c.Verbose),
 		name:        name,
 		namespace:   c.Namespace,
@@ -49,7 +49,7 @@ func (a *AddonConfiguration) Create(url string) error {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      a.name,
-			Namespace: a.name,
+			Namespace: a.namespace,
 		},
 		Spec: v1alpha1.AddonsConfigurationSpec{
 			CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
@@ -139,7 +139,7 @@ func (a *AddonConfiguration) isAddonConfigurationReady() func(event watch.Event)
 func (a AddonConfiguration) isReadyPhase(addonsConfig v1alpha1.AddonsConfiguration) bool {
 	ready := addonsConfig.Status.CommonAddonsConfigurationStatus.Phase == v1alpha1.AddonsConfigurationReady
 
-	shared.LogReadiness(ready, a.verbose, a.name, a.namespace, a.log, addonsConfig)
+	shared.LogReadiness(ready, a.verbose, a.name, a.log, addonsConfig)
 
 	return ready
 }

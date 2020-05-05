@@ -18,10 +18,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-const (
-	usedByName = "knative-service"
-)
-
 type ServiceBindingUsage struct {
 	resCli      *resource.Resource
 	name        string
@@ -36,7 +32,7 @@ func New(name string, c shared.Container) *ServiceBindingUsage {
 		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha1.SchemeGroupVersion.Version,
 			Group:    v1alpha1.SchemeGroupVersion.Group,
-			Resource: "ServiceBindingUsages",
+			Resource: "servicebindingusages",
 		}, c.Namespace, c.Log, c.Verbose),
 		name:        name,
 		namespace:   c.Namespace,
@@ -45,8 +41,8 @@ func New(name string, c shared.Container) *ServiceBindingUsage {
 	}
 }
 
-func (sbu *ServiceBindingUsage) Create(serviceBindingName, fnKsvcName, envPrefix string) error {
-	servicebindingusage := v1alpha1.ServiceBindingUsage{
+func (sbu *ServiceBindingUsage) Create(serviceBindingName, fnKsvcName, usageKind, envPrefix string) error {
+	servicebindingusage := &v1alpha1.ServiceBindingUsage{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceBindingUsage",
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
@@ -61,7 +57,7 @@ func (sbu *ServiceBindingUsage) Create(serviceBindingName, fnKsvcName, envPrefix
 			},
 			UsedBy: v1alpha1.LocalReferenceByKindAndName{
 				Name: fnKsvcName,
-				Kind: usedByName,
+				Kind: usageKind,
 			},
 			Parameters: &v1alpha1.Parameters{
 				EnvPrefix: &v1alpha1.EnvPrefix{Name: envPrefix},
@@ -145,7 +141,7 @@ func (sbu *ServiceBindingUsage) isServiceBindingUsageReady() func(event watch.Ev
 
 func (sbu *ServiceBindingUsage) isReadyPhase(servicebindingusage v1alpha1.ServiceBindingUsage) bool {
 	if len(servicebindingusage.Status.Conditions) == 0 {
-		shared.LogReadiness(false, sbu.verbose, sbu.name, sbu.namespace, sbu.log, servicebindingusage)
+		shared.LogReadiness(false, sbu.verbose, sbu.name, sbu.log, servicebindingusage)
 		return false
 	}
 
@@ -156,7 +152,7 @@ func (sbu *ServiceBindingUsage) isReadyPhase(servicebindingusage v1alpha1.Servic
 		}
 	}
 
-	shared.LogReadiness(ready, sbu.verbose, sbu.name, sbu.namespace, sbu.log, servicebindingusage)
+	shared.LogReadiness(ready, sbu.verbose, sbu.name, sbu.log, servicebindingusage)
 
 	return ready
 }

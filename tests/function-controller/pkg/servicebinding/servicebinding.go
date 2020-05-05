@@ -32,7 +32,7 @@ func New(name string, c shared.Container) *ServiceBinding {
 		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
 			Version:  v1beta1.SchemeGroupVersion.Version,
 			Group:    v1beta1.SchemeGroupVersion.Group,
-			Resource: "ServiceBindings",
+			Resource: "servicebindings",
 		}, c.Namespace, c.Log, c.Verbose),
 		name:        name,
 		namespace:   c.Namespace,
@@ -42,14 +42,14 @@ func New(name string, c shared.Container) *ServiceBinding {
 }
 
 func (sb *ServiceBinding) Create(serviceInstanceName string) error {
-	ac := v1beta1.ServiceBinding{
+	ac := &v1beta1.ServiceBinding{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceBinding",
 			APIVersion: v1beta1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      sb.name,
-			Namespace: sb.name,
+			Namespace: sb.namespace,
 		},
 		Spec: v1beta1.ServiceBindingSpec{
 			InstanceRef: v1beta1.LocalObjectReference{
@@ -134,7 +134,7 @@ func (sb *ServiceBinding) isServiceBindingReady() func(event watch.Event) (bool,
 
 func (sb *ServiceBinding) isReadyPhase(servicebinding v1beta1.ServiceBinding) bool {
 	if len(servicebinding.Status.Conditions) == 0 {
-		shared.LogReadiness(false, sb.verbose, sb.name, sb.namespace, sb.log, servicebinding)
+		shared.LogReadiness(false, sb.verbose, sb.name, sb.log, servicebinding)
 		return false
 	}
 
@@ -145,7 +145,7 @@ func (sb *ServiceBinding) isReadyPhase(servicebinding v1beta1.ServiceBinding) bo
 		}
 	}
 
-	shared.LogReadiness(ready, sb.verbose, sb.name, sb.namespace, sb.log, servicebinding)
+	shared.LogReadiness(ready, sb.verbose, sb.name, sb.log, servicebinding)
 
 	return ready
 }

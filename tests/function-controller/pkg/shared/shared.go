@@ -24,14 +24,14 @@ type Container struct {
 	Log         Logger
 }
 
-func LogReadiness(ready, verbose bool, name, namespace string, log Logger, resource interface{}) {
+func LogReadiness(ready, verbose bool, name string, log Logger, resource interface{}) {
 	typeName := fmt.Sprintf("%T", resource)
 
 	if ready {
-		log.Logf("%s %s in namespace %s is ready", typeName, name, namespace)
+		log.Logf("%s %s is ready", typeName, name)
 
 	} else {
-		log.Logf("%s %s in namespace is not ready", typeName, name, namespace)
+		log.Logf("%s %s is not ready", typeName, name)
 	}
 
 	if verbose {

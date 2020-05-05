@@ -32,7 +32,7 @@ func New(name string, c shared.Container) *ServiceInstance {
 		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
 			Version:  v1beta1.SchemeGroupVersion.Version,
 			Group:    v1beta1.SchemeGroupVersion.Group,
-			Resource: "ServiceInstances",
+			Resource: "serviceinstances",
 		}, c.Namespace, c.Log, c.Verbose),
 		name:        name,
 		namespace:   c.Namespace,
@@ -42,14 +42,14 @@ func New(name string, c shared.Container) *ServiceInstance {
 }
 
 func (si *ServiceInstance) Create(serviceClassExternalName, servicePlanExternalName string) error {
-	ac := v1beta1.ServiceInstance{
+	ac := &v1beta1.ServiceInstance{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceInstance",
 			APIVersion: v1beta1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      si.name,
-			Namespace: si.name,
+			Namespace: si.namespace,
 		},
 		Spec: v1beta1.ServiceInstanceSpec{
 			PlanReference: v1beta1.PlanReference{
@@ -138,7 +138,7 @@ func (si *ServiceInstance) isServiceInstanceReady() func(event watch.Event) (boo
 
 func (si ServiceInstance) isReadyPhase(serviceinstance v1beta1.ServiceInstance) bool {
 	if len(serviceinstance.Status.Conditions) == 0 {
-		shared.LogReadiness(false, si.verbose, si.name, si.namespace, si.log, serviceinstance)
+		shared.LogReadiness(false, si.verbose, si.name, si.log, serviceinstance)
 		return false
 	}
 
@@ -148,7 +148,7 @@ func (si ServiceInstance) isReadyPhase(serviceinstance v1beta1.ServiceInstance) 
 			ready = true
 		}
 	}
-	shared.LogReadiness(ready, si.verbose, si.name, si.namespace, si.log, serviceinstance)
+	shared.LogReadiness(ready, si.verbose, si.name, si.log, serviceinstance)
 
 	return ready
 }

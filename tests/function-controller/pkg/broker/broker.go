@@ -116,7 +116,7 @@ func convertFromUnstructuredToBroker(u unstructured.Unstructured) (eventingv1alp
 func (b Broker) isStateReady(broker eventingv1alpha1.Broker) bool {
 	ready := broker.Status.IsReady()
 
-	shared.LogReadiness(ready, b.verbose, b.name, b.namespace, b.log, broker)
+	shared.LogReadiness(ready, b.verbose, b.name, b.log, broker)
 
 	return ready
 }
