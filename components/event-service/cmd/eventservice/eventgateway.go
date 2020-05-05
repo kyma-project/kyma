@@ -11,11 +11,12 @@ import (
 
 	"k8s.io/client-go/rest"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/kyma-project/kyma/components/event-service/internal/events/mesh"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed"
 	"github.com/kyma-project/kyma/components/event-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
-	log "github.com/sirupsen/logrus"
 
 	eventingclientset "knative.dev/eventing/pkg/client/clientset/versioned"
 )
@@ -37,12 +38,12 @@ func main() {
 
 	config, err := mesh.InitConfig(options.sourceID, options.eventMeshURL)
 	if err != nil {
-		log.Fatal("Failed to init the Event mesh configuration")
+		log.Fatalf("Failed to init the Event mesh configuration. Error: %v", err)
 	}
 
 	knClient, err := initKnativeClient()
 	if err != nil {
-		log.Fatal("Unable to init Knative client", err.Error())
+		log.Fatalf("Unable to init Knative client: %v", err)
 	}
 
 	eventsClient := subscribed.NewEventsClient(knClient)

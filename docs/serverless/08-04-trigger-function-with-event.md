@@ -5,7 +5,7 @@ type: Tutorials
 
 This tutorial shows how to trigger a Function with an event from an Application connected to Kyma.
 
-> **NOTE:** To learn more about events flow in Kyma, read the [eventing](/components/knative-eventing-mesh) documentation.
+> **NOTE:** To learn more about events flow in Kyma, read the [eventing](/components/event-mesh) documentation.
 
 ## Prerequisites
 

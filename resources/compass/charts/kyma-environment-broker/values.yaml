@@ -100,6 +100,8 @@ lms:
   environment: "dev"
   samlTenant: "TBD"
   disabled: false
+  # if set - always use this region, if empty - region is mapped from the OSB API request
+  region: ""
 
 ias:
   secretName: "ias-creds"
