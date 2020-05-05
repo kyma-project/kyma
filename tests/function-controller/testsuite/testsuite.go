@@ -18,45 +18,63 @@ import (
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/addons"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/namespace"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebinding"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebindingusage"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/serviceinstance"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/trigger"
 )
 
 const (
-	helloWorld  = "Hello World"
-	testDataKey = "testData"
-	eventPing   = "event-ping"
-	gotEventMsg = "The event has come!"
-	happyMsg    = "happy"
+	helloWorld   = "Hello World"
+	testDataKey  = "testData"
+	eventPing    = "event-ping"
+	redisEnvPing = "env-ping"
+
+	gotEventMsg              = "The event has come!"
+	happyMsg                 = "happy"
+	addonsConfigUrl          = "https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml"
+	serviceClassExternalName = "redis"
+	servicePlanExternalName  = "micro"
+	redisEnvPrefix           = "REDIS_TEST_"
 )
 
 type Config struct {
-	NamespaceBaseName  string        `envconfig:"default=test-function"`
-	FunctionName       string        `envconfig:"default=test-function"`
-	APIRuleName        string        `envconfig:"default=test-apirule"`
-	TriggerName        string        `envconfig:"default=test-trigger"`
-	DomainName         string        `envconfig:"default=test-function"`
-	IngressHost        string        `envconfig:"default=kyma.local"`
-	DomainPort         uint32        `envconfig:"default=80"`
-	InsecureSkipVerify bool          `envconfig:"default=true"`
-	WaitTimeout        time.Duration `envconfig:"default=15m"` // damn istio + knative combo
-	Verbose            bool          `envconfig:"default=true"`
-	MaxPollingTime     time.Duration `envconfig:"default=5m"`
+	NamespaceBaseName       string        `envconfig:"default=test-function"`
+	FunctionName            string        `envconfig:"default=test-function"`
+	APIRuleName             string        `envconfig:"default=test-apirule"`
+	TriggerName             string        `envconfig:"default=test-trigger"`
+	AddonName               string        `envconfig:"default=test-addon"`
+	ServiceInstanceName     string        `envconfig:"default=test-service-instance"`
+	ServiceBindingName      string        `envconfig:"default=test-service-binding"`
+	ServiceBindingUsageName string        `envconfig:"default=test-service-binding-usage"`
+	DomainName              string        `envconfig:"default=test-function"`
+	IngressHost             string        `envconfig:"default=kyma.local"`
+	DomainPort              uint32        `envconfig:"default=80"`
+	InsecureSkipVerify      bool          `envconfig:"default=true"`
+	WaitTimeout             time.Duration `envconfig:"default=15m"` // damn istio + knative combo
+	Verbose                 bool          `envconfig:"default=true"`
+	MaxPollingTime          time.Duration `envconfig:"default=5m"`
 }
 
 type TestSuite struct {
-	namespace  *namespace.Namespace
-	function   *function
-	apiRule    *apirule.APIRule
-	broker     *broker.Broker
-	trigger    *trigger.Trigger
-	t          *testing.T
-	g          *gomega.GomegaWithT
-	dynamicCli dynamic.Interface
-	cfg        Config
+	namespace           *namespace.Namespace
+	function            *function
+	apiRule             *apirule.APIRule
+	broker              *broker.Broker
+	trigger             *trigger.Trigger
+	addonsConfig        *addons.AddonConfiguration
+	serviceinstance     *serviceinstance.ServiceInstance
+	servicebinding      *servicebinding.ServiceBinding
+	servicebindingusage *servicebindingusage.ServiceBindingUsage
+	t                   *testing.T
+	g                   *gomega.GomegaWithT
+	dynamicCli          dynamic.Interface
+	cfg                 Config
 }
 
 func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWithT) (*TestSuite, error) {
@@ -85,17 +103,25 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	ar := apirule.New(cfg.APIRuleName, container)
 	br := broker.New(container)
 	tr := trigger.New(cfg.TriggerName, container)
+	ac := addons.New(cfg.AddonName, container)
+	si := serviceinstance.New(cfg.ServiceInstanceName, container)
+	sb := servicebinding.New(cfg.ServiceBindingName, container)
+	sbu := servicebindingusage.New(cfg.ServiceBindingUsageName, container)
 
 	return &TestSuite{
-		namespace:  ns,
-		function:   f,
-		apiRule:    ar,
-		broker:     br,
-		trigger:    tr,
-		t:          t,
-		g:          g,
-		dynamicCli: dynamicCli,
-		cfg:        cfg,
+		namespace:           ns,
+		function:            f,
+		apiRule:             ar,
+		broker:              br,
+		trigger:             tr,
+		addonsConfig:        ac,
+		serviceinstance:     si,
+		servicebinding:      sb,
+		servicebindingusage: sbu,
+		t:                   t,
+		g:                   g,
+		dynamicCli:          dynamicCli,
+		cfg:                 cfg,
 	}, nil
 }
 
@@ -109,8 +135,24 @@ func (t *TestSuite) Run() {
 	fnResourceVersion, err := t.function.Create(functionDetails)
 	failOnError(t.g, err)
 
+	t.t.Log("Creating addons configuration...")
+	err = t.addonsConfig.Create(addonsConfigUrl)
+	failOnError(t.g, err)
+
+	t.t.Log("Creating service instance...")
+	err = t.serviceinstance.Create(serviceClassExternalName, servicePlanExternalName)
+	failOnError(t.g, err)
+
+	t.t.Log("Creating service binding...")
+	err = t.servicebinding.Create(t.cfg.ServiceInstanceName)
+	failOnError(t.g, err)
+
 	t.t.Log("Waiting for function to have ready phase...")
 	err = t.function.WaitForStatusRunning(fnResourceVersion)
+	failOnError(t.g, err)
+
+	t.t.Log("Creating service binding usage...")
+	err = t.servicebindingusage.Create(t.cfg.ServiceBindingName, t.cfg.FunctionName, redisEnvPrefix)
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for broker to have ready phase...")
@@ -118,7 +160,7 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	// trigger needs to be created after broker, as it depends on it
-	// and knative sometimes fails to properly reconcile it in time, so that test passes
+	// watch out for a situation where broker is not created yet!
 	t.t.Log("Creating trigger...")
 	triggerResourceVersion, err := t.trigger.Create(t.cfg.FunctionName)
 	failOnError(t.g, err)
@@ -133,22 +175,34 @@ func (t *TestSuite) Run() {
 	err = t.trigger.WaitForStatusRunning(triggerResourceVersion)
 	failOnError(t.g, err)
 
-	t.t.Log("Waiting for apirule to have ready phase...")
-	err = t.apiRule.WaitForStatusRunning()
+	t.t.Log("Waiting for addons configutation to have ready phase...")
+	err = t.addonsConfig.WaitForStatusRunning()
+	failOnError(t.g, err)
+
+	t.t.Log("Waiting for service instance to have ready phase...")
+	err = t.serviceinstance.WaitForStatusRunning()
+	failOnError(t.g, err)
+
+	t.t.Log("Waiting for service binding to have ready phase...")
+	err = t.servicebinding.WaitForStatusRunning()
+	failOnError(t.g, err)
+
+	t.t.Log("Waiting for service binding usage to have ready phase...")
+	err = t.servicebindingusage.WaitForStatusRunning()
 	failOnError(t.g, err)
 
 	t.t.Log("Testing local connection through the service")
 	inClusterURL := fmt.Sprintf("http://%s.%s.svc.cluster.local", t.cfg.FunctionName, ns)
-	err = t.pollForAnswer(inClusterURL, helloWorld)
+	err = t.pollForAnswer(inClusterURL, "whatever-test-value", helloWorld)
 	failOnError(t.g, err)
 
 	fnGatewayURL := fmt.Sprintf("https://%s", domainHost)
 	t.t.Log("Testing connection through the gateway")
-	err = t.pollForAnswer(fnGatewayURL, helloWorld)
+	err = t.pollForAnswer(fnGatewayURL, "whatever-test-value", helloWorld)
 	failOnError(t.g, err)
 
 	t.t.Log("Testing update of a function")
-	updatedDetails := t.getUpdatedFunction(testDataKey, eventPing, gotEventMsg)
+	updatedDetails := t.getUpdatedFunction()
 	err = t.function.Update(updatedDetails)
 	failOnError(t.g, err)
 
@@ -157,11 +211,11 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Testing local connection through the service to updated function")
-	err = t.pollForAnswer(inClusterURL, fmt.Sprintf("Hello %s world 1", happyMsg))
+	err = t.pollForAnswer(inClusterURL, happyMsg, fmt.Sprintf("Hello %s world 1", happyMsg))
 	failOnError(t.g, err)
 
 	t.t.Log("Testing connection through the gateway to updated function")
-	err = t.pollForAnswer(fnGatewayURL, fmt.Sprintf("Hello %s world 2", happyMsg))
+	err = t.pollForAnswer(fnGatewayURL, happyMsg, fmt.Sprintf("Hello %s world 2", happyMsg))
 	failOnError(t.g, err)
 
 	t.t.Log("Testing connection to event-mesh via trigger")
@@ -171,7 +225,11 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Testing local connection through the service")
-	err = t.pollForAnswer(inClusterURL, gotEventMsg)
+	err = t.pollForAnswer(inClusterURL, "", gotEventMsg)
+	failOnError(t.g, err)
+
+	t.t.Log("Testing injection of env variables")
+	err = t.pollForAnswer(inClusterURL, redisEnvPing, "Redis port: 6379")
 	failOnError(t.g, err)
 }
 
@@ -187,6 +245,18 @@ func (t *TestSuite) Cleanup() {
 	failOnError(t.g, err)
 
 	err = t.broker.Delete()
+	failOnError(t.g, err)
+
+	err = t.servicebindingusage.Delete()
+	failOnError(t.g, err)
+
+	err = t.servicebinding.Delete()
+	failOnError(t.g, err)
+
+	err = t.serviceinstance.Delete()
+	failOnError(t.g, err)
+
+	err = t.addonsConfig.Delete()
 	failOnError(t.g, err)
 
 	err = t.namespace.Delete()
@@ -231,7 +301,7 @@ func (t *TestSuite) createEvent(url string) error {
 	return nil
 }
 
-func (t *TestSuite) pollForAnswer(url string, expected string) error {
+func (t *TestSuite) pollForAnswer(url, payloadStr, expected string) error {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: t.cfg.InsecureSkipVerify},
 	}
@@ -246,7 +316,7 @@ func (t *TestSuite) pollForAnswer(url string, expected string) error {
 
 	return wait.PollImmediateUntil(10*time.Second,
 		func() (done bool, err error) {
-			payload := strings.NewReader(fmt.Sprintf(`{ "%s": "%s" }`, testDataKey, happyMsg))
+			payload := strings.NewReader(fmt.Sprintf(`{ "%s": "%s" }`, testDataKey, payloadStr))
 			req, err := http.NewRequest(http.MethodGet, url, payload)
 			if err != nil {
 				return false, err // TODO erros.wrap

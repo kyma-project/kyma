@@ -35,7 +35,7 @@ func (r *Resource) Create(res interface{}) (string, error) {
 	var resourceVersion string
 	u, err := runtime.DefaultUnstructuredConverter.ToUnstructured(res)
 	if err != nil {
-		return resourceVersion, errors.Wrapf(err, "while converting resource %s %s to unstructured", r.kind, res)
+		return resourceVersion, errors.Wrapf(err, "while converting resource %s %+v to unstructured", r.kind, res)
 	}
 	unstructuredObj := &unstructured.Unstructured{
 		Object: u,

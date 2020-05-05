@@ -155,15 +155,7 @@ func convertFromUnstructuredToTrigger(u unstructured.Unstructured) (eventingv1al
 func (t Trigger) isStateReady(trigger eventingv1alpha1.Trigger) bool {
 	ready := trigger.Status.IsReady()
 
-	if ready {
-		t.log.Logf("Trigger %s is ready", t.name)
-	} else {
-		t.log.Logf("Trigger %s is not ready", t.name)
-	}
-
-	if t.verbose {
-		t.log.Logf("%+v", trigger)
-	}
+	shared.LogReadiness(ready, t.verbose, t.name, t.namespace, t.log, trigger)
 
 	return ready
 }

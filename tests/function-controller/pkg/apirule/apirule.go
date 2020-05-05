@@ -99,13 +99,12 @@ func (a *APIRule) get() (*apiruleTypes.APIRule, error) {
 		return &apiruleTypes.APIRule{}, errors.Wrapf(err, "while getting ApiRule %s in namespace %s", a.name, a.namespace)
 	}
 
-	apirule := &apiruleTypes.APIRule{}
-	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, apirule)
+	apirule, err := convertFromUnstructuredToAPIRule(u)
 	if err != nil {
 		return &apiruleTypes.APIRule{}, err
 	}
 
-	return apirule, nil
+	return &apirule, nil
 }
 
 func (a *APIRule) WaitForStatusRunning() error {
@@ -140,7 +139,7 @@ func (a *APIRule) isApiRuleReady(name string) func(event watch.Event) (bool, err
 			return false, nil
 		}
 
-		apirule, err := convertFromUnstructuredToAPIRule(*u)
+		apirule, err := convertFromUnstructuredToAPIRule(u)
 		if err != nil {
 			return false, err
 		}
@@ -154,20 +153,12 @@ func (a *APIRule) isStateReady(apirule apiruleTypes.APIRule) bool {
 		apirule.Status.APIRuleStatus.Code == apiruleTypes.StatusOK &&
 		apirule.Status.VirtualServiceStatus.Code == apiruleTypes.StatusOK
 
-	if ready {
-		a.log.Logf("APIRule %s is ready", a.name)
-	} else {
-		a.log.Logf("APIRule %s is not ready", a.name)
-	}
-
-	if a.verbose {
-		a.log.Logf("%+v", apirule)
-	}
+	shared.LogReadiness(ready, a.verbose, a.name, a.namespace, a.log, apirule)
 
 	return ready
 }
 
-func convertFromUnstructuredToAPIRule(u unstructured.Unstructured) (apiruleTypes.APIRule, error) {
+func convertFromUnstructuredToAPIRule(u *unstructured.Unstructured) (apiruleTypes.APIRule, error) {
 	apirule := apiruleTypes.APIRule{}
 	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &apirule)
 	return apirule, err
