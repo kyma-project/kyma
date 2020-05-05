@@ -34,10 +34,13 @@ const (
 	knativeEventingInjectionLabelKey          = "knative-eventing-injection"
 	knativeEventingInjectionLabelValueEnabled = "enabled"
 
-	// applicationNameLabelKey is used to selected Knative Channels and Subscriptions
+	// applicationNameLabelKey is used to select Knative channels and Subscriptions
 	applicationNameLabelKey = "application-name"
 
-	// brokerNamespaceLabelKey is used to selected Knative Subscriptions
+	// applicationServiceIDLabelKey is used to select Knative Subscriptions
+	applicationServiceIDLabelKey = "application-service-id"
+
+	// brokerNamespaceLabelKey is used to select Knative Subscriptions
 	brokerNamespaceLabelKey = "broker-namespace"
 
 	// knSubscriptionNamePrefix is the prefix used for the generated Knative Subscription name
@@ -227,7 +230,7 @@ func (svc *ProvisionService) do(inputParams map[string]interface{}, iID internal
 	}
 
 	// persist Knative Subscription
-	if err := svc.persistKnativeSubscription(appName, ns); err != nil {
+	if err := svc.persistKnativeSubscription(appName, appSvcID, ns); err != nil {
 		svc.log.Printf("Error persisting Knative Subscription: %v", err)
 		opDesc := fmt.Sprintf("provisioning failed while persisting Knative Subscription for application: %s namespace: %s on error: %s", appName, ns, err)
 		svc.updateStateFailed(iID, opID, opDesc)
@@ -351,7 +354,7 @@ func (svc *ProvisionService) enableDefaultKnativeBroker(ns internal.Namespace) e
 
 // persistKnativeSubscription will get a Knative Subscription given application name and namespace and will
 // update and persist it. If there is no Knative Subscription found, a new one will be created.
-func (svc *ProvisionService) persistKnativeSubscription(applicationName internal.ApplicationName, ns internal.Namespace) error {
+func (svc *ProvisionService) persistKnativeSubscription(applicationName internal.ApplicationName, applicationSvcID internal.ApplicationServiceID, ns internal.Namespace) error {
 	// construct the default broker URI using the given namespace.
 	defaultBrokerURI := knative.GetDefaultBrokerURI(ns)
 
@@ -363,8 +366,9 @@ func (svc *ProvisionService) persistKnativeSubscription(applicationName internal
 
 	// subscription selector labels
 	labels := map[string]string{
-		brokerNamespaceLabelKey: string(ns),
-		applicationNameLabelKey: string(applicationName),
+		brokerNamespaceLabelKey:      string(ns),
+		applicationNameLabelKey:      string(applicationName),
+		applicationServiceIDLabelKey: string(applicationSvcID),
 	}
 
 	// get Knative subscription by labels
