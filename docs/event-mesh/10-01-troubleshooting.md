@@ -32,14 +32,14 @@ Follow these steps:
     kubectl delete ksvc -n kyma-integration application
     ```
 
-4. The KService will be recreated automatically, pointing to the correct revision. Check the statuses of the KService HTTPSource CR:
+4. The KService will be recreated automatically, pointing to the correct revision. Check the statuses of the KService and the HTTPSource CR:
 
     ```bash
     kubectl get ksvc -n kyma-integration application
     NAME          URL                                                     LATESTCREATED          LATESTREADY          READY   REASON
     application   http://application.kyma-integration.svc.cluster.local   application-w57fv      application-w57fv    True
     ```
-    
+
     ```bash
     kubectl get httpsources.sources.kyma-project.io -n kyma-integration application
     NAME          READY   REASON
