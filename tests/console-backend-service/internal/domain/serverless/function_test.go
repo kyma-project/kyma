@@ -16,6 +16,8 @@ import (
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
+const sleepTime = 5 * time.Second
+
 func TestFunctionEventQueries(t *testing.T) {
 	c, err := graphql.New()
 	assert.NoError(t, err)
@@ -42,7 +44,7 @@ func TestFunctionEventQueries(t *testing.T) {
 	checkFunctionEvent(t, expectedEvent, event)
 
 	//wait for reactions from function controller to function CR
-	time.Sleep(5 * time.Second) // happy sleep is happy sleep when he's sleeping :)
+	time.Sleep(sleepTime) // happy sleep is happy sleep when he's sleeping :)
 
 	function, err := queryFunction(c, queryFunctionArguments("1", namespaceName), functionDetailsFields())
 	require.NoError(t, err)
