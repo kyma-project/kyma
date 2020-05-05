@@ -43,11 +43,11 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "e93ab4b3"
+      version: "2bfce1ce"
     tests:
       director:
         dir:
-        version: "8604d53a"
+        version: "fa12d8d7"
       connector:
         dir:
         version: "9cebaf5c"

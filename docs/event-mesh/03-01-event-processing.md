@@ -2,10 +2,10 @@
 title: Event processing and delivery
 type: Details
 ---
-The event processing and delivery flow in Knative Eventing Mesh uses the Broker and Trigger concepts to forward events and deliver them to the subscribers.
+The event processing and delivery flow in the Event Mesh uses the Broker and Trigger concepts to forward events and deliver them to the subscribers.
 This diagram explains the event flow in Kyma, from the moment the Application sends an event, to the point when the event triggers the Function.
 
-![Eventing flow](./assets/eventing-mesh-flow.svg)
+![Eventing flow](./assets/event-mesh-flow.svg)
 
 1. The Application sends events to the HTTP Source Adapter which forwards them to a resource such as the Broker.
 
