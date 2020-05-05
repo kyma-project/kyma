@@ -70,7 +70,7 @@ func (f *function) Create(data *functionData) (string, error) {
 func (f *function) WaitForStatusRunning(initialResourceVersion string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), f.waitTimeout)
 	defer cancel()
-	condition := f.isFunctionReady(f.name)
+	condition := f.isFunctionReady()
 	_, err := watchtools.Until(ctx, initialResourceVersion, f.resCli.ResCli, condition)
 	if err != nil {
 		return err
@@ -120,13 +120,14 @@ func (f *function) Get() (*serverlessv1alpha1.Function, error) {
 	return &function, nil
 }
 
-func (f *function) isFunctionReady(name string) func(event watch.Event) (bool, error) {
+func (f *function) isFunctionReady() func(event watch.Event) (bool, error) {
 	return func(event watch.Event) (bool, error) {
 		if event.Type != watch.Modified {
 			return false, nil
 		}
 
 		function, err := f.Get()
+
 		if err != nil {
 			return false, err
 		}
@@ -138,40 +139,13 @@ func (f *function) isFunctionReady(name string) func(event watch.Event) (bool, e
 func (f function) isConditionReady(fn serverlessv1alpha1.Function) bool {
 	conditions := fn.Status.Conditions
 	if len(conditions) == 0 {
-		f.logReadiness(false, fn)
+		shared.LogReadiness(false, f.verbose, f.name, f.namespace, f.log, fn)
 		return false
 	}
 
 	ready := conditions[0].Type == serverlessv1alpha1.ConditionRunning && conditions[0].Status == corev1.ConditionTrue
 
-	f.logReadiness(ready, fn)
-
-	return ready
-}
-
-func (f function) logReadiness(ready bool, fn serverlessv1alpha1.Function) {
-	if ready {
-		f.log.Logf("Function %s is ready", f.name)
-
-	} else {
-		f.log.Logf("Function %s is not ready", f.name)
-	}
-
-	if f.verbose {
-		f.log.Logf("%+v", fn)
-	}
-
-	ready := conditions[0].Type == serverlessv1alpha1.ConditionRunning && conditions[0].Status == corev1.ConditionTrue
-	if ready {
-		f.log.Logf("Function %s is ready", f.name)
-
-	} else {
-		f.log.Logf("Function %s is not ready", f.name)
-	}
-
-	if f.verbose {
-		f.log.Logf("%+v", fn)
-	}
+	shared.LogReadiness(ready, f.verbose, f.name, f.namespace, f.log, fn)
 
 	return ready
 }
