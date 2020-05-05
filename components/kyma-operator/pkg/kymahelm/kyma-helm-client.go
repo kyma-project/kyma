@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/sirupsen/logrus"
 
 	"k8s.io/helm/pkg/chartutil"
@@ -74,12 +76,29 @@ func (hc *Client) ReleaseStatus(rname string) (string, error) {
 
 //IsReleaseDeletable returns true for release that can be deleted
 func (hc *Client) IsReleaseDeletable(rname string) (bool, error) {
-	statusRes, err := hc.helm.ReleaseStatus(rname)
+	isDeletable := false
+	maxAttempts := 3
+
+	err := retry.Do(
+		func() error {
+			statusRes, err := hc.helm.ReleaseStatus(rname)
+			if err != nil {
+				return err
+			}
+			isDeletable = statusRes.Info.Status.Code != release.Status_DEPLOYED
+			return nil
+		},
+		retry.Attempts(uint(maxAttempts)),
+		retry.DelayType(func(attempt uint, config *retry.Config) time.Duration {
+			log.Printf("Retry numebr %d on getting release status.\n", attempt+1)
+			return time.Duration(maxAttempts) * time.Second
+		}),
+	)
 	if err != nil {
 		return false, err
 	}
 
-	return statusRes.Info.Status.Code != release.Status_DEPLOYED, nil
+	return isDeletable, nil
 }
 
 // InstallReleaseFromChart .
