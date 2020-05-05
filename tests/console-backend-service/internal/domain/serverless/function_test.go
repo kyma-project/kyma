@@ -1,4 +1,4 @@
-//// +build acceptance
+// +build acceptance
 
 package serverless
 
