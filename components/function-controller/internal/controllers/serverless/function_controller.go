@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"strings"
 
 	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
@@ -148,16 +149,20 @@ func (r *FunctionReconciler) equalJobs(existing batchv1.Job, expected batchv1.Jo
 	existingArgs := existing.Spec.Template.Spec.Containers[0].Args
 	expectedArgs := expected.Spec.Template.Spec.Containers[0].Args
 
-	if len(existingArgs) != len(expectedArgs) {
-		return false
-	}
+	// Compare destination argument as it contains image tag
+	existingDst := r.getArg(existingArgs, destinationArg)
+	expectedDst := r.getArg(expectedArgs, destinationArg)
 
-	for key, value := range existingArgs {
-		if value != expectedArgs[key] {
-			return false
+	return existingDst == expectedDst
+}
+
+func (r *FunctionReconciler) getArg(args []string, arg string) string {
+	for _, item := range args {
+		if strings.HasPrefix(item, arg) {
+			return item
 		}
 	}
-	return true
+	return ""
 }
 
 func (r *FunctionReconciler) createJob(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, job batchv1.Job) (ctrl.Result, error) {

@@ -17,6 +17,8 @@ import (
 const (
 	servingKnativeVisibilityLabel      = "serving.knative.dev/visibility"
 	servingKnativeVisibilityLabelValue = "cluster-local"
+
+	destinationArg = "--destination"
 )
 
 func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
@@ -113,7 +115,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 						{
 							Name:  "executor",
 							Image: r.config.Build.ExecutorImage,
-							Args:  []string{fmt.Sprintf("--destination=%s", imageName), "--insecure", "--skip-tls-verify"},
+							Args:  append(r.config.Build.ExecutorArgs, fmt.Sprintf("%s=%s", destinationArg, imageName), "--context=dir:///workspace"),
 							Resources: corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceMemory: r.config.Build.LimitsMemoryValue,
@@ -125,8 +127,11 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 								},
 							},
 							VolumeMounts: []corev1.VolumeMount{
-								{Name: "sources", ReadOnly: true, MountPath: "/src"},
-								{Name: "runtime", ReadOnly: true, MountPath: "/workspace"},
+								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
+								// If COPY is not used, then the cache will not work
+								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/package.json", SubPath: "package.json"},
+								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/handler.js", SubPath: "handler.js"},
+								{Name: "runtime", ReadOnly: true, MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile"},
 								{Name: "tekton-home", ReadOnly: false, MountPath: "/tekton/home"},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
