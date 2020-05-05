@@ -32,6 +32,7 @@ jaeger:
         storageClassName: ""
     spec:
         strategy: allInOne #allInOne | production
+        image: jaegertracing/all-in-one:1.17.1
         storage:
             type: memory #memory | badger | elasticsearch | cassandra
             options:
