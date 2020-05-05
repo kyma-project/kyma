@@ -38,6 +38,8 @@ spec:
             - name: http
               containerPort: {{ .Values.global.provisioner.graphql.port }}
               protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           env:
             - name: APP_ADDRESS
               value: "0.0.0.0:{{ .Values.global.provisioner.graphql.port }}"

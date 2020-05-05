@@ -9,7 +9,5 @@ metadata:
     chart: {{ template "kiali.chart" . }}
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
-{{- with .Values.kiali.spec }}
 spec:
-{{ toYaml . | indent 2}}
-{{- end }}
+{{ tpl (toYaml .Values.kiali.spec | indent 2) . }}

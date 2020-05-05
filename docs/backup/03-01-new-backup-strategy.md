@@ -54,7 +54,7 @@ This will create a new `pvc-restored` PVC with pre-populated data from the snaps
 
 For details about VolumeSnapshots, see [this](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) document.
 
-Currently, none of the cloud providers support this API out of the box. Follow the instructions below to enable this feature for various providers.
+Follow the instructions to enable this feature for various providers.
 
 ### AKS
 
@@ -62,27 +62,87 @@ Minimum Kubernetes version supported is 1.17.
 
 1. Install CSI driver following [this documentation](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
 
-2.  Follow [this example](https://github.com/kubernetes-sigs/azuredisk-csi-driver/tree/master/deploy/example/snapshot) to see how you can create a VolumeSnapshot.
+2. Follow [this example](https://github.com/kubernetes-sigs/azuredisk-csi-driver/tree/master/deploy/example/snapshot) to see how you can create a VolumeSnapshot.
 
 ### GKE
 
 Minimum Kubernetes version supported is 1.14.
 
-1. Enable the required feature gate on the cluster following [this](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver#enabling_on_a_new_cluster) document.
+1. Enable the required feature gate on the cluster following [this](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver) document.
 
-2. Install the CSI driver using [these](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver/blob/master/docs/kubernetes/user-guides/snapshots.md#kubernetes-snapshots-user-guide-alpha) instructions.
-
-3. Follow [this example](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver/blob/master/docs/kubernetes/user-guides/snapshots.md#snapshot-example) to see how you can create a VolumeSnapshot.
+2. Check out [this repository](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for the details on how to use VolumeSnapshots on GKE.
 
 ### Gardener
 
 #### GCP
 
-Although Gardener GCP uses CSI drivers by default as of Kubernetes 1.18, Volume snapshotting does not work yet because of [this bug](https://github.com/gardener/gardener-extension-provider-gcp/issues/73).
+Gardener GCP uses CSI drivers by default as of Kubernetes 1.18, and it supports taking volume snapshots out of the box.
+
+1. Create a VolumeSnapshotClass:
+
+```yaml
+apiVersion: snapshot.storage.k8s.io/v1beta1
+kind: VolumeSnapshotClass
+metadata:
+  annotations:
+    snapshot.storage.kubernetes.io/is-default-class: "true"
+  name: snapshot-class
+driver: pd.csi.storage.gke.io
+deletionPolicy: Delete
+```
+
+2. Create a VolumeSnapshot:
+
+```yaml
+apiVersion: snapshot.storage.k8s.io/v1beta1
+kind: VolumeSnapshot
+metadata:
+  name: snapshot
+spec:
+  source:
+    persistentVolumeClaimName: <PVC_NAME>
+```
+
+3. Wait until the **READYTOUSE** field has the `true` status to verify that the snapshot was taken successfully:
+
+```bash
+kubectl get volumesnapshot -w
+```
 
 #### AWS
 
-Although Gardener AWS uses CSI drivers by default as of Kubernetes 1.18, Volume snapshotting does not work yet becuase of [this bug](https://github.com/gardener/gardener-extension-provider-aws/issues/75).
+Gardener AWS uses CSI drivers by default as of Kubernetes 1.18, and it supports taking volume snapshots out of the box.
+
+1. Create a VolumeSnapshotClass:
+
+```yaml
+apiVersion: snapshot.storage.k8s.io/v1beta1
+kind: VolumeSnapshotClass
+metadata:
+  annotations:
+    snapshot.storage.kubernetes.io/is-default-class: "true"
+  name: snapshot-class
+driver: ebs.csi.aws.com
+deletionPolicy: Delete
+```
+
+2. Create a VolumeSnapshot:
+
+```yaml
+apiVersion: snapshot.storage.k8s.io/v1beta1
+kind: VolumeSnapshot
+metadata:
+  name: snapshot
+spec:
+  source:
+    persistentVolumeClaimName: <PVC_NAME>
+```
+
+3. Wait until the **READYTOUSE** field receives the `true` status to verify that the snapshot was taken successfully:
+
+```bash
+kubectl get volumesnapshot -w
+```
 
 #### Azure
 

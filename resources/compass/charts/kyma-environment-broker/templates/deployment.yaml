@@ -81,6 +81,8 @@ spec:
               value: "{{ .Values.lms.samlTenant }}"
             - name: APP_LMS_DISABLED
               value: "{{ .Values.lms.disabled }}"
+            - name: APP_LMS_REGION
+              value: "{{ .Values.lms.region }}"
             - name: APP_LMS_TOKEN
               valueFrom:
                 secretKeyRef:
@@ -226,6 +228,8 @@ spec:
               value: {{ .Values.gardener.project }}
             - name: APP_GARDENER_KUBECONFIG_PATH
               value: {{ .Values.gardener.kubeconfigPath }}
+            - name: APP_PROVISIONING_KUBERNETES_VERSION
+              value: {{ .Values.gardener.kubernetesVersion }}
             - name: APP_DEFAULT_REQUEST_REGION
               value: "{{ .Values.broker.defaultRequestRegion }}"
           ports:
@@ -241,7 +245,7 @@ spec:
             timeoutSeconds: 3
             initialDelaySeconds: 20
           resources:
-              {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - mountPath: /gardener/kubeconfig
               name: gardener-kubeconfig

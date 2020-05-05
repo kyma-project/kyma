@@ -5,7 +5,7 @@ type: Details
 
 ## Overview
 
-[Jaeger](http://jaeger.readthedocs.io/en/latest/) is a monitoring and tracing tool for microservice-based distributed systems. Its features include the following:
+[Jaeger](https://www.jaegertracing.io/) is a monitoring and tracing tool for microservice-based distributed systems. Its features include the following:
 
 - Distributed context propagation
 - Distributed transaction monitoring

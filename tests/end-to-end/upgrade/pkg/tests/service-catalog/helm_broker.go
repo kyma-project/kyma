@@ -60,7 +60,7 @@ func (ut *HelmBrokerUpgradeTest) CreateResources(stop <-chan struct{}, log logru
 	return ut.newFlow(stop, log, namespace).CreateResources()
 }
 
-// TestResources tests resources after backup phase
+// TestResources tests resources after upgrade
 func (ut *HelmBrokerUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	if err := ut.newFlow(stop, log, namespace).TestResources(); err != nil {
 		return err

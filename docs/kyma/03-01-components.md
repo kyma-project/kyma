@@ -23,9 +23,9 @@ The Helm Broker is a Service Broker which runs in the Kyma cluster and deploys K
 
 The Application Connector is a proprietary Kyma solution. This endpoint is the Kyma side of the connection between Kyma and the external solutions. The Application Connector allows you to register the APIs and the Event Catalog, which lists all of the available events, of the connected solution. Additionally, the Application Connector proxies the calls from Kyma to external APIs in a secure way.
 
-## Knative Eventing Mesh
+## Event Mesh
 
-Knative Eventing Mesh allows you to easily integrate external applications with Kyma. Under the hood, the Eventing Mesh implements [Knative Eventing](https://knative.dev/docs/eventing/) to ensure Kyma receives business events from external sources and is able to trigger business flows using Functions or services.
+The Event Mesh allows you to easily integrate external applications with Kyma. Under the hood, the Event Mesh implements [Knative Eventing](https://knative.dev/docs/eventing/) to ensure Kyma receives business events from external sources and is able to trigger business flows using Functions or services.
 
 ## Service Mesh
 
@@ -50,10 +50,6 @@ The API Gateway aims to provide a set of functionalities which allow developers 
 ## Logging
 
 Logging in Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system.
-
-## Backup
-
-Kyma integrates with [Velero](https://github.com/heptio/velero/) to provide backup and restore capabilities for Kubernetes cluster resources. Once backed up, Velero stores the resources in buckets of [supported cloud providers](https://velero.io/docs/v1.0.0/support-matrix/).
 
 ## Console
 

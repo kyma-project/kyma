@@ -33,12 +33,12 @@ The system creates a new Kubernetes service for each registered API.
 
 ## Event Service
 
-The Event Service sends events to the Knative Eventing Mesh and enriches events with metadata that indicates the source of the event.
+The Event Service sends events to the Event Mesh and enriches events with metadata that indicates the source of the event.
 This allows routing events to Functions and services based on their source Application.
 
 ## Application
 
-An Application represents an external solution connected to Kyma. It handles the integration with other components, such as the Service Catalog or the Eventing Mesh.
+An Application represents an external solution connected to Kyma. It handles the integration with other components, such as the Service Catalog or the Event Mesh.
 Using the components of the Application Connector, the Application creates a coherent identity for a connected external solution and ensures its separation.
 All Applications are instances of the Application custom resource, which also stores all of the relevant metadata. You can bind an Application to many Kyma Namespaces and use the APIs and the Event Catalogs of the connected external solution within their context.
 

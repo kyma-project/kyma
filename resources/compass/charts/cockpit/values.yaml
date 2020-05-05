@@ -21,4 +21,5 @@ ui:
 deployment:
   image:
     pullPolicy: IfNotPresent
+  resources: {}
   strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
