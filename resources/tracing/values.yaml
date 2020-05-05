@@ -34,6 +34,8 @@ jaeger:
         strategy: allInOne #allInOne | production
         allInOne:
           image: jaegertracing/all-in-one:1.17.1
+          options:
+            log-level: info
         storage:
             type: memory #memory | badger | elasticsearch | cassandra
             options:
