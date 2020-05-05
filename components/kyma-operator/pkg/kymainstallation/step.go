@@ -70,8 +70,7 @@ func (s installStep) Run() error {
 		}
 
 		if isDeletable {
-
-			log.Println(fmt.Sprintf("Deleting falied release %s before retrying installation...", s.component.GetReleaseName()))
+			log.Println(fmt.Sprintf("Helm installation of %s failed. Deleting before retrying installation...", s.component.GetReleaseName()))
 			_, err := s.helmClient.DeleteRelease(s.component.GetReleaseName())
 
 			if err != nil {
@@ -79,7 +78,6 @@ func (s installStep) Run() error {
 				log.Println(deleteErrMsg)
 				return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, deleteErrMsg))
 			}
-			log.Println(fmt.Sprintf("Successfully deleted release %s", s.component.GetReleaseName()))
 		}
 
 		return errors.New(installErrMsg)
