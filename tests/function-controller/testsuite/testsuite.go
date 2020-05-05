@@ -133,11 +133,11 @@ func (t *TestSuite) Run() {
 
 	t.t.Log("Creating function...")
 	functionDetails := t.getFunction(helloWorld)
-	fnResourceVersion, err := t.function.Create(functionDetails)
+	err = t.function.Create(functionDetails)
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for function to have ready phase...")
-	err = t.function.WaitForStatusRunning(fnResourceVersion)
+	err = t.function.WaitForStatusRunning()
 	failOnError(t.g, err)
 
 	t.t.Log("Creating addons configuration...")
@@ -212,7 +212,7 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for function to have ready phase...")
-	err = t.function.WaitForStatusRunning(fnResourceVersion)
+	err = t.function.WaitForStatusRunning()
 	failOnError(t.g, err)
 
 	t.t.Log("Testing local connection through the service to updated function")
@@ -233,8 +233,14 @@ func (t *TestSuite) Run() {
 	err = t.pollForAnswer(inClusterURL, "", gotEventMsg)
 	failOnError(t.g, err)
 
-	t.t.Log("Testing injection of env variables")
-	err = t.pollForAnswer(inClusterURL, redisEnvPing, "Redis port: 6379")
+	answerForEnvPing := "Redis port: 6379"
+
+	t.t.Log("Testing injection of env variables via incluster url")
+	err = t.pollForAnswer(inClusterURL, redisEnvPing, answerForEnvPing)
+	failOnError(t.g, err)
+
+	t.t.Log("Testing injection of env variables via gateway")
+	err = t.pollForAnswer(fnGatewayURL, redisEnvPing, answerForEnvPing)
 	failOnError(t.g, err)
 }
 

@@ -46,7 +46,7 @@ func newFunction(dynamicCli dynamic.Interface, name, namespace string, waitTimeo
 	}
 }
 
-func (f *function) Create(data *functionData) (string, error) {
+func (f *function) Create(data *functionData) error {
 	function := &serverlessv1alpha1.Function{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Function",
@@ -62,14 +62,14 @@ func (f *function) Create(data *functionData) (string, error) {
 		},
 	}
 
-	resourceVersion, err := f.resCli.Create(function)
+	_, err := f.resCli.Create(function)
 	if err != nil {
-		return resourceVersion, errors.Wrapf(err, "while creating Function %s in namespace %s", f.name, f.namespace)
+		return errors.Wrapf(err, "while creating Function %s in namespace %s", f.name, f.namespace)
 	}
-	return resourceVersion, err
+	return err
 }
 
-func (f *function) WaitForStatusRunning(initialResourceVersion string) error {
+func (f *function) WaitForStatusRunning() error {
 	fn, err := f.get()
 	if err != nil {
 		return err
@@ -82,7 +82,7 @@ func (f *function) WaitForStatusRunning(initialResourceVersion string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), f.waitTimeout)
 	defer cancel()
 	condition := f.isFunctionReady()
-	_, err = watchtools.Until(ctx, initialResourceVersion, f.resCli.ResCli, condition)
+	_, err = watchtools.Until(ctx, fn.GetResourceVersion(), f.resCli.ResCli, condition)
 	if err != nil {
 		return err
 	}
