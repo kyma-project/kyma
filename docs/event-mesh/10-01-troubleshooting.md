@@ -5,7 +5,7 @@ title: Troubleshooting
 ## No new events in the Namespace
 
 The upgrade of the Event Sources Controller Manager triggers the new Pod to update the KService created with the HTTPSource custom resource (CR). As a result of changes introduced in the KService, the Knative Serving Controller (KSC) creates a new Revision. The KSC does not pick up this new Revision and marks the KService as `Not ready`, looking for the original Revision. This breaks the event flow and prevents events from reaching the Namespace.
-To fix this issue, delete the existing KService. It will be recreated automatically, pointing to the right Revision.
+To fix this issue, delete the existing KService. It will be recreated automatically, pointing to the correct Revision.
 
 Follow these steps:
 
