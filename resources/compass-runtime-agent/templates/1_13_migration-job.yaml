@@ -48,6 +48,7 @@ metadata:
   annotations:
     "helm.sh/hook": post-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "2"
     sidecar.istio.io/inject: "false"
 spec:
   template:
