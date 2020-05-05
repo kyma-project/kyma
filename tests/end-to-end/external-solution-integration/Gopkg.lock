@@ -289,23 +289,18 @@
   version = "v3.6.0"
 
 [[projects]]
-  digest = "1:582e25eccee928dc12416ea4c23b6dae8f3b5687730632aa1473ebebe80a2359"
+  digest = "1:85a9bc2805bd82a7d717447eb83015d881855fee0c8201de6d2ca1df1b9ef931"
   name = "github.com/gogo/protobuf"
   packages = [
+    "jsonpb",
     "proto",
+    "protoc-gen-gogo/descriptor",
     "sortkeys",
+    "types",
   ]
   pruneopts = "UT"
   revision = "5628607bb4c51c3157aacc3a50f0ab707582b805"
   version = "v1.3.1"
-
-[[projects]]
-  branch = "master"
-  digest = "1:1ba1d79f2810270045c328ae5d674321db34e3aae468eb4233883b473c5c0467"
-  name = "github.com/golang/glog"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
   branch = "master"
@@ -498,36 +493,32 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:fbaebcca308516382d20300b34dd080022c0321292ddf14631b53d8be9a8d9af"
-  name = "github.com/kubeless/kubeless"
+  digest = "1:99bf4c33686aa208c91c8c4aba804d148169fc1385caaf5d044ca7ed3894104c"
+  name = "github.com/kubernetes-incubator/service-catalog"
   packages = [
-    "pkg/apis/kubeless",
-    "pkg/apis/kubeless/v1beta1",
-    "pkg/client/clientset/versioned",
-    "pkg/client/clientset/versioned/scheme",
-    "pkg/client/clientset/versioned/typed/kubeless/v1beta1",
+    "pkg/client/clientset_generated/clientset",
+    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
   ]
   pruneopts = "UT"
-  revision = "3460f03865f91ad15aa84b5de752efd2f01e1499"
-  version = "v1.0.5"
+  revision = "33d0c09773b4a57b652b4e08b68921f402065f1d"
+  version = "v0.2.2"
 
 [[projects]]
-  digest = "1:9a250b328a9564739d21af7eae0e92b3a1277410b880db9efe29984c1835704a"
-  name = "github.com/kubernetes-incubator/service-catalog"
+  digest = "1:a75572a74c59832071e9c2a90b8731cd69bbc4126e9c122a97ca63b91ca84b1b"
+  name = "github.com/kubernetes-sigs/service-catalog"
   packages = [
     "pkg/apis/servicecatalog",
     "pkg/apis/servicecatalog/v1beta1",
     "pkg/apis/settings",
     "pkg/apis/settings/v1alpha1",
-    "pkg/client/clientset_generated/clientset",
     "pkg/client/clientset_generated/clientset/scheme",
     "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1",
     "pkg/filter",
   ]
   pruneopts = "UT"
-  revision = "2f4d37413ff5ebf816788aa94fa2613682f3b543"
-  version = "v0.1.43"
+  revision = "33d0c09773b4a57b652b4e08b68921f402065f1d"
+  version = "v0.2.2"
 
 [[projects]]
   branch = "master"
@@ -538,7 +529,7 @@
   revision = "0c4d7ae5fdafcbfcda4bb248928a8605ebca0016"
 
 [[projects]]
-  digest = "1:b1a45d81f85344a6257eebae7455987100f6336501e9ef29a5866b372d9ee361"
+  digest = "1:e4309998625cf0d481d2b0bba72fcf18676a3736586b8c8f0e0ceba2742bae39"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/connector/pkg/graphql/clientset",
@@ -554,10 +545,11 @@
     "tests/director/pkg/idtokenprovider",
   ]
   pruneopts = "UT"
-  revision = "0c1abadb417cbe4aa5822697e2915dbf5f956f01"
+  revision = "8604d53a20a2848c53cad30c288bf8f6c823b825"
 
 [[projects]]
-  digest = "1:6f668ab8b0f47f960d9ea9622900687d2f9242286f0997343fb2a53c9a35dfe8"
+  branch = "release-1.11"
+  digest = "1:957a9ed41d3236522f82c090241b972a4d5feb616b52f18ec4a07564ba2761a2"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/resilient",
@@ -585,8 +577,7 @@
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "dd7c1d8dd26093f9875214631504f9fa022db923"
-  version = "1.8.0"
+  revision = "68742a10ec230206503af278f32b2d60b5a783e2"
 
 [[projects]]
   digest = "1:d86c8eb7189141c0e902fd8dcf6e79b8feea523978018e20f2ac794626ad0f63"
@@ -1192,9 +1183,34 @@
   version = "2019.2.3"
 
 [[projects]]
-  digest = "1:d89afbf3588e87d2c9e6efdd5528d249b32d23a12fbd7ec324f3cb373c6fb76c"
+  digest = "1:7d8ec1dc19209a12dc3172330b61d13c3d98b52808e86f2d86d9e1d7f2db70ed"
+  name = "istio.io/api"
+  packages = ["authentication/v1alpha1"]
+  pruneopts = "UT"
+  revision = "da46fe8e25be0d3f410d5b9dfcd729e7d1d2f85a"
+  version = "1.5.1"
+
+[[projects]]
+  digest = "1:3f0537a8015004b5fe8bba6fb6d41193a767a478a91cdbdc16666a0e6c34003d"
+  name = "istio.io/client-go"
+  packages = ["pkg/apis/authentication/v1alpha1"]
+  pruneopts = "UT"
+  revision = "065c5926775027f386ef768afd355c14ff3dbdd8"
+  version = "1.5.1"
+
+[[projects]]
+  digest = "1:fcf227730189418d83fabd8d0a0f52562749dfe002f81507e4ccce92c607a412"
+  name = "istio.io/gogo-genproto"
+  packages = ["googleapis/google/api"]
+  pruneopts = "UT"
+  revision = "a0338448499a99db79cf32c3b34b44670b9fb5b5"
+  version = "1.5.1"
+
+[[projects]]
+  digest = "1:274e6b4fd11a6a01212ee6af5ba488c7623f5eaa7339d3bb5642220d96ee8744"
   name = "k8s.io/api"
   packages = [
+    "admissionregistration/v1",
     "admissionregistration/v1beta1",
     "apps/v1",
     "apps/v1beta1",
@@ -1214,6 +1230,7 @@
     "coordination/v1",
     "coordination/v1beta1",
     "core/v1",
+    "discovery/v1alpha1",
     "events/v1beta1",
     "extensions/v1beta1",
     "networking/v1",
@@ -1233,11 +1250,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "UT"
-  revision = "3544db3b9e4494309507e02eced5cd9dcff47e6a"
-  version = "kubernetes-1.15.3"
+  revision = "d49a3f108dab8e8d25f22c497fb48678b124efd2"
+  version = "kubernetes-1.16.9"
 
 [[projects]]
-  digest = "1:c12c28652c117ae80b7d9540c805aeb21483fa314630fe5e9399ebd870ed4a21"
+  digest = "1:d8ee3b2c38c380c4dfaa795ec26ffc34ec21aa1a9f1200f28836d90eb70ff42a"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/equality",
@@ -1288,11 +1305,11 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "UT"
-  revision = "f2f3a405f61d6c2cdc0d00687c1b5d90de91e9f0"
-  version = "kubernetes-1.15.3"
+  revision = "f336d9be0221d10a93a7d6d2ec25f6fc799f4fc6"
+  version = "kubernetes-1.16.9"
 
 [[projects]]
-  digest = "1:f107a860bd0f6b51b21bc0d21ca093cc655560361fd812c7035951648651c128"
+  digest = "1:244061a36af793cc985f093a54c9796f216fdf4e41c06e72848b1a77d9cc7408"
   name = "k8s.io/cli-runtime"
   packages = [
     "pkg/genericclioptions",
@@ -1309,11 +1326,11 @@
     "pkg/resource",
   ]
   pruneopts = "UT"
-  revision = "541433d7ce357bd9c62ab3d00580f2b234ee0973"
-  version = "kubernetes-1.15.3"
+  revision = "f783a3654da8387af6f52378b0611c2d81ea4dd8"
+  version = "kubernetes-1.16.0"
 
 [[projects]]
-  digest = "1:e4ea569eb1b29ed544c7d9d1326ea04674994337e0dd80570b999d7daa40f36b"
+  digest = "1:7fc4670afebcb85c8ce38b4afd6e8cfe605045abb3aae5b90cbd48dd2a4a4add"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -1321,6 +1338,7 @@
     "dynamic",
     "informers",
     "informers/admissionregistration",
+    "informers/admissionregistration/v1",
     "informers/admissionregistration/v1beta1",
     "informers/apps",
     "informers/apps/v1",
@@ -1343,6 +1361,8 @@
     "informers/coordination/v1beta1",
     "informers/core",
     "informers/core/v1",
+    "informers/discovery",
+    "informers/discovery/v1alpha1",
     "informers/events",
     "informers/events/v1beta1",
     "informers/extensions",
@@ -1372,6 +1392,7 @@
     "informers/storage/v1beta1",
     "kubernetes",
     "kubernetes/scheme",
+    "kubernetes/typed/admissionregistration/v1",
     "kubernetes/typed/admissionregistration/v1beta1",
     "kubernetes/typed/apps/v1",
     "kubernetes/typed/apps/v1beta1",
@@ -1391,6 +1412,7 @@
     "kubernetes/typed/coordination/v1",
     "kubernetes/typed/coordination/v1beta1",
     "kubernetes/typed/core/v1",
+    "kubernetes/typed/discovery/v1alpha1",
     "kubernetes/typed/events/v1beta1",
     "kubernetes/typed/extensions/v1beta1",
     "kubernetes/typed/networking/v1",
@@ -1408,6 +1430,7 @@
     "kubernetes/typed/storage/v1",
     "kubernetes/typed/storage/v1alpha1",
     "kubernetes/typed/storage/v1beta1",
+    "listers/admissionregistration/v1",
     "listers/admissionregistration/v1beta1",
     "listers/apps/v1",
     "listers/apps/v1beta1",
@@ -1423,6 +1446,7 @@
     "listers/coordination/v1",
     "listers/coordination/v1beta1",
     "listers/core/v1",
+    "listers/discovery/v1alpha1",
     "listers/events/v1beta1",
     "listers/extensions/v1beta1",
     "listers/networking/v1",
@@ -1472,8 +1496,8 @@
     "util/workqueue",
   ]
   pruneopts = "UT"
-  revision = "e14f31a72a77f7aa82a95eaf542d1194fb027d04"
-  version = "kubernetes-1.15.3"
+  revision = "002560d5bf54049bf5b5ae99231cb2b591f15954"
+  version = "kubernetes-1.16.9"
 
 [[projects]]
   digest = "1:93e82f25d75aba18436ad1ac042cb49493f096011f2541075721ed6f9e05c044"
@@ -1640,12 +1664,9 @@
     "github.com/cloudevents/sdk-go",
     "github.com/hashicorp/errwrap",
     "github.com/hashicorp/go-multierror",
-    "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
-    "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
-    "github.com/kubeless/kubeless/pkg/client/clientset/versioned/typed/kubeless/v1beta1",
-    "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
+    "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kyma-incubator/api-gateway/api/v1alpha1",
     "github.com/kyma-incubator/compass/components/connector/pkg/graphql/clientset",
     "github.com/kyma-incubator/compass/components/director/pkg/graphql",

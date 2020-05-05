@@ -15,13 +15,13 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: APP_PROVISION_TIMEOUT
-              value: "3h"
+              value: "105m"
             - name: APP_DEPROVISION_TIMEOUT
-              value: "1h"
+              value: "45m"
             - name: APP_SKIP_CERT_VERIFICATION
               value: "true"
             - name: APP_TENANT_ID
-              value: "{{ .Values.global.defaultTenant }}"
+              value: "{{ .Values.e2e.tenant.id }}"
             - name: APP_DUMMY_TEST
               # For now it is set to `true`, because if anyone set global.provisioning.enabled to `true`
               # then this test will be executed on the pre-master-compass-integration job with the rest of the acceptance tests.
@@ -78,13 +78,13 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: APP_PROVISION_TIMEOUT
-              value: "3h"
+              value: "105m"
             - name: APP_DEPROVISION_TIMEOUT
-              value: "1h"
+              value: "45m"
             - name: APP_SKIP_CERT_VERIFICATION
               value: "true"
             - name: APP_TENANT_ID
-              value: "{{ .Values.global.defaultTenant }}"
+              value: "{{ .Values.e2e.tenant.id }}"
             - name: APP_DUMMY_TEST
               value: "false"
             - name: APP_CLEANUP_PHASE

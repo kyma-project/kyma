@@ -7,16 +7,16 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/configwatcher"
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/knative"
 	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
+	internalresource "github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	// +kubebuilder:scaffold:imports
 )
@@ -38,8 +38,9 @@ type config struct {
 	MetricsAddress        string `envconfig:"default=:8080"`
 	LeaderElectionEnabled bool   `envconfig:"default=false"`
 	LeaderElectionID      string `envconfig:"default=serverless-controller-leader-election-helper"`
-	ConfigWatcher         configwatcher.Config
+	Kubernetes            k8s.Config
 	Function              serverless.FunctionConfig
+	KService              knative.ServiceConfig
 }
 
 func main() {
@@ -66,39 +67,47 @@ func main() {
 		os.Exit(1)
 	}
 
-	coreClient, err := corev1.NewForConfig(restConfig)
-	if err != nil {
-		setupLog.Error(err, "Unable to initialize core client")
+	resourceClient := internalresource.New(mgr.GetClient(), scheme)
+	configMapSvc := k8s.NewConfigMapService(resourceClient, config.Kubernetes)
+	secretSvc := k8s.NewSecretService(resourceClient, config.Kubernetes)
+	serviceAccountSvc := k8s.NewServiceAccountService(resourceClient, config.Kubernetes)
+
+	if err := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, mgr.GetEventRecorderFor("function-controller")).
+		SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create Function controller")
 		os.Exit(1)
 	}
 
-	resourceConfigServices := configwatcher.NewConfigWatcherServices(coreClient, config.ConfigWatcher)
+	if err := knative.NewServiceReconciler(resourceClient, ctrl.Log, config.KService).
+		SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create Knative Service controller")
+		os.Exit(1)
+	}
 
-	if err := serverless.NewFunction(mgr.GetClient(), ctrl.Log.WithName("controllers").WithName("function"), config.Function, scheme, mgr.GetEventRecorderFor("function-controller")).
-		SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create function controller")
-		os.Exit(1)
-	}
-	if err := k8s.NewController(mgr.GetClient(), ctrl.Log.WithName("controllers").WithName("namespace"), config.ConfigWatcher, k8s.NamespaceType, resourceConfigServices).
-		SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create Namespace controller")
-		os.Exit(1)
-	}
-	if err := k8s.NewController(mgr.GetClient(), ctrl.Log.WithName("controllers").WithName("secret"), config.ConfigWatcher, k8s.SecretType, resourceConfigServices).
-		SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create Secret controller")
-		os.Exit(1)
-	}
-	if err := k8s.NewController(mgr.GetClient(), ctrl.Log.WithName("controllers").WithName("configmap"), config.ConfigWatcher, k8s.ConfigMapType, resourceConfigServices).
+	if err := k8s.NewConfigMap(mgr.GetClient(), ctrl.Log, config.Kubernetes, configMapSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create ConfigMap controller")
 		os.Exit(1)
 	}
-	if err := k8s.NewController(mgr.GetClient(), ctrl.Log.WithName("controllers").WithName("serviceaccount"), config.ConfigWatcher, k8s.ServiceAccountType, resourceConfigServices).
+
+	if err := k8s.NewNamespace(mgr.GetClient(), ctrl.Log, config.Kubernetes, configMapSvc, secretSvc, serviceAccountSvc).
+		SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create Namespace controller")
+		os.Exit(1)
+	}
+
+	if err := k8s.NewSecret(mgr.GetClient(), ctrl.Log, config.Kubernetes, secretSvc).
+		SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create Secret controller")
+		os.Exit(1)
+	}
+
+	if err := k8s.NewServiceAccount(mgr.GetClient(), ctrl.Log, config.Kubernetes, serviceAccountSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create ServiceAccount controller")
 		os.Exit(1)
 	}
+
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("Running manager")

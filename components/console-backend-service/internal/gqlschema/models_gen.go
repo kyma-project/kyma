@@ -319,29 +319,92 @@ type File struct {
 }
 
 type Function struct {
-	Name                 string                `json:"name"`
-	Namespace            string                `json:"namespace"`
-	UID                  string                `json:"UID"`
-	Labels               Labels                `json:"labels"`
-	Runtime              string                `json:"runtime"`
-	Size                 string                `json:"size"`
-	Status               FunctionStatusType    `json:"status"`
-	Content              string                `json:"content"`
-	Dependencies         string                `json:"dependencies"`
-	ServiceBindingUsages []ServiceBindingUsage `json:"serviceBindingUsages"`
+	Name         string            `json:"name"`
+	Namespace    string            `json:"namespace"`
+	UID          string            `json:"UID"`
+	Labels       Labels            `json:"labels"`
+	Source       string            `json:"source"`
+	Dependencies string            `json:"dependencies"`
+	Env          []FunctionEnv     `json:"env"`
+	Replicas     FunctionReplicas  `json:"replicas"`
+	Resources    FunctionResources `json:"resources"`
+	Status       FunctionStatus    `json:"status"`
 }
 
-type FunctionMutationOutput struct {
+type FunctionEnv struct {
+	Name      string                `json:"name"`
+	Value     string                `json:"value"`
+	ValueFrom *FunctionEnvValueFrom `json:"valueFrom"`
+}
+
+type FunctionEnvInput struct {
+	Name      string                     `json:"name"`
+	Value     string                     `json:"value"`
+	ValueFrom *FunctionEnvValueFromInput `json:"valueFrom"`
+}
+
+type FunctionEnvValueFrom struct {
+	Type     FunctionEnvValueFromType `json:"type"`
+	Name     string                   `json:"name"`
+	Key      string                   `json:"key"`
+	Optional *bool                    `json:"optional"`
+}
+
+type FunctionEnvValueFromInput struct {
+	Type     FunctionEnvValueFromType `json:"type"`
+	Name     string                   `json:"name"`
+	Key      string                   `json:"key"`
+	Optional *bool                    `json:"optional"`
+}
+
+type FunctionEvent struct {
+	Type     SubscriptionEventType `json:"type"`
+	Function Function              `json:"function"`
+}
+
+type FunctionMetadata struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
 }
 
-type FunctionUpdateInput struct {
-	Labels       Labels `json:"labels"`
-	Size         string `json:"size"`
-	Runtime      string `json:"runtime"`
-	Content      string `json:"content"`
-	Dependencies string `json:"dependencies"`
+type FunctionMetadataInput struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
+type FunctionMutationInput struct {
+	Labels       Labels                 `json:"labels"`
+	Source       string                 `json:"source"`
+	Dependencies string                 `json:"dependencies"`
+	Env          []FunctionEnvInput     `json:"env"`
+	Replicas     FunctionReplicasInput  `json:"replicas"`
+	Resources    FunctionResourcesInput `json:"resources"`
+}
+
+type FunctionReplicas struct {
+	Min *int `json:"min"`
+	Max *int `json:"max"`
+}
+
+type FunctionReplicasInput struct {
+	Min *int `json:"min"`
+	Max *int `json:"max"`
+}
+
+type FunctionResources struct {
+	Limits   ResourceValues `json:"limits"`
+	Requests ResourceValues `json:"requests"`
+}
+
+type FunctionResourcesInput struct {
+	Limits   ResourceValuesInput `json:"limits"`
+	Requests ResourceValuesInput `json:"requests"`
+}
+
+type FunctionStatus struct {
+	Phase   FunctionPhaseType   `json:"phase"`
+	Reason  *FunctionReasonType `json:"reason"`
+	Message *string             `json:"message"`
 }
 
 type IDPPreset struct {
@@ -908,43 +971,116 @@ func (e ContainerStateType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type FunctionStatusType string
+type FunctionEnvValueFromType string
 
 const (
-	FunctionStatusTypeUnknown   FunctionStatusType = "Unknown"
-	FunctionStatusTypeRunning   FunctionStatusType = "Running"
-	FunctionStatusTypeBuilding  FunctionStatusType = "Building"
-	FunctionStatusTypeError     FunctionStatusType = "Error"
-	FunctionStatusTypeDeploying FunctionStatusType = "Deploying"
-	FunctionStatusTypeUpdating  FunctionStatusType = "Updating"
+	FunctionEnvValueFromTypeConfigMap FunctionEnvValueFromType = "ConfigMap"
+	FunctionEnvValueFromTypeSecret    FunctionEnvValueFromType = "Secret"
 )
 
-func (e FunctionStatusType) IsValid() bool {
+func (e FunctionEnvValueFromType) IsValid() bool {
 	switch e {
-	case FunctionStatusTypeUnknown, FunctionStatusTypeRunning, FunctionStatusTypeBuilding, FunctionStatusTypeError, FunctionStatusTypeDeploying, FunctionStatusTypeUpdating:
+	case FunctionEnvValueFromTypeConfigMap, FunctionEnvValueFromTypeSecret:
 		return true
 	}
 	return false
 }
 
-func (e FunctionStatusType) String() string {
+func (e FunctionEnvValueFromType) String() string {
 	return string(e)
 }
 
-func (e *FunctionStatusType) UnmarshalGQL(v interface{}) error {
+func (e *FunctionEnvValueFromType) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = FunctionStatusType(str)
+	*e = FunctionEnvValueFromType(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid FunctionStatusType", str)
+		return fmt.Errorf("%s is not a valid FunctionEnvValueFromType", str)
 	}
 	return nil
 }
 
-func (e FunctionStatusType) MarshalGQL(w io.Writer) {
+func (e FunctionEnvValueFromType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type FunctionPhaseType string
+
+const (
+	FunctionPhaseTypeInitializing     FunctionPhaseType = "INITIALIZING"
+	FunctionPhaseTypeBuilding         FunctionPhaseType = "BUILDING"
+	FunctionPhaseTypeDeploying        FunctionPhaseType = "DEPLOYING"
+	FunctionPhaseTypeRunning          FunctionPhaseType = "RUNNING"
+	FunctionPhaseTypeNewRevisionError FunctionPhaseType = "NEW_REVISION_ERROR"
+	FunctionPhaseTypeFailed           FunctionPhaseType = "FAILED"
+)
+
+func (e FunctionPhaseType) IsValid() bool {
+	switch e {
+	case FunctionPhaseTypeInitializing, FunctionPhaseTypeBuilding, FunctionPhaseTypeDeploying, FunctionPhaseTypeRunning, FunctionPhaseTypeNewRevisionError, FunctionPhaseTypeFailed:
+		return true
+	}
+	return false
+}
+
+func (e FunctionPhaseType) String() string {
+	return string(e)
+}
+
+func (e *FunctionPhaseType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = FunctionPhaseType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid FunctionPhaseType", str)
+	}
+	return nil
+}
+
+func (e FunctionPhaseType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type FunctionReasonType string
+
+const (
+	FunctionReasonTypeConfig  FunctionReasonType = "CONFIG"
+	FunctionReasonTypeJob     FunctionReasonType = "JOB"
+	FunctionReasonTypeService FunctionReasonType = "SERVICE"
+)
+
+func (e FunctionReasonType) IsValid() bool {
+	switch e {
+	case FunctionReasonTypeConfig, FunctionReasonTypeJob, FunctionReasonTypeService:
+		return true
+	}
+	return false
+}
+
+func (e FunctionReasonType) String() string {
+	return string(e)
+}
+
+func (e *FunctionReasonType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = FunctionReasonType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid FunctionReasonType", str)
+	}
+	return nil
+}
+
+func (e FunctionReasonType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

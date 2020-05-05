@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	kymamodel "kyma-project.io/compass-runtime-agent/internal/kyma/model"
+	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 )
 
 const (
@@ -332,7 +332,7 @@ func fixCompassAPIDefinitionExt(suffix string, spec *graphql.APISpecExt) *graphq
 		apiSpec = &spec.APISpec
 	}
 
-	apiDefinition := fixCompassAPIDefinition(suffix, nil, apiSpec)
+	apiDefinition := fixCompassAPIDefinition(suffix, apiSpec)
 
 	return &graphql.APIDefinitionExt{
 		APIDefinition: *apiDefinition,
@@ -431,20 +431,14 @@ func fixCompassDocumentExt(suffix string, content *graphql.CLOB) *graphql.Docume
 	}
 }
 
-func fixCompassAPIDefinition(suffix string, auth *graphql.APIRuntimeAuth, spec *graphql.APISpec) *graphql.APIDefinition {
+func fixCompassAPIDefinition(suffix string, spec *graphql.APISpec) *graphql.APIDefinition {
 	desc := baseAPIDesc + suffix
-
-	var defaultAuth *graphql.Auth
-	if auth != nil {
-		defaultAuth = auth.Auth
-	}
 
 	return &graphql.APIDefinition{
 		ID:          baseAPIId + suffix,
 		Name:        baseAPIName + suffix,
 		Description: &desc,
 		TargetURL:   baseAPIURL + suffix,
-		DefaultAuth: defaultAuth, // TODO: can be removed after switching to use Auth
 		Spec:        spec,
 	}
 }

@@ -13,6 +13,8 @@ spec:
       control-plane: controller-manager
       app.kubernetes.io/name: {{ include "hydra-maester.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
+  strategy:
+    {{- toYaml .Values.deployment.strategy | nindent 4 }}
   template:
     metadata:
       labels:

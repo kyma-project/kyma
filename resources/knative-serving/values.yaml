@@ -26,6 +26,7 @@ knative_serving:
           cpu: 30m
           memory: 100Mi
   podmonitor:
+    enabled: false
     labels:
       # PodMonitorSelector is configured here: resources/monitoring/templates/prometheus/prometheus.yaml
       release: monitoring
@@ -41,10 +42,10 @@ global:
     path: eu.gcr.io/kyma-project
   test_knative_serving_acceptance:
     dir: 
-    version: 98d973d5
+    version: "PR-8141"
   ingress:
     domainName:
 
 test:
   target: "Test Target"
-  enabled: true
+  enabled: false

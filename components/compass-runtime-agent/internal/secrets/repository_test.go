@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"kyma-project.io/compass-runtime-agent/internal/secrets/mocks"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/secrets/mocks"
 
 	"k8s.io/apimachinery/pkg/types"
 

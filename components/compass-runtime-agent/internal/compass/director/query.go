@@ -96,7 +96,6 @@ func versionData() string {
 func eventAPIData() string {
 	return fmt.Sprintf(`
 			id
-			applicationID
 			name
 			description
 			group 
@@ -114,7 +113,6 @@ func eventSpecData() string {
 func documentData() string {
 	return fmt.Sprintf(`
 		id
-		applicationID
 		title
 		displayName
 		description

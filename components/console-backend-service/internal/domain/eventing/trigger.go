@@ -49,7 +49,7 @@ func (r *triggerResolver) TriggersQuery(ctx context.Context, namespace string, s
 	return out, nil
 }
 
-func (r *triggerResolver) CreateTrigger(ctx context.Context, trigger gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) (*gqlschema.Trigger, error) {
+func (r *triggerResolver) CreateTrigger(ctx context.Context, namespace string, trigger gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) (*gqlschema.Trigger, error) {
 	trigger = r.checkTriggerName(trigger)
 
 	converted, err := r.converter.ToTrigger(trigger, ownerRef)
@@ -73,7 +73,7 @@ func (r *triggerResolver) CreateTrigger(ctx context.Context, trigger gqlschema.T
 	return out, nil
 }
 
-func (r *triggerResolver) CreateManyTriggers(ctx context.Context, triggers []gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) ([]gqlschema.Trigger, error) {
+func (r *triggerResolver) CreateManyTriggers(ctx context.Context, namespace string, triggers []gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) ([]gqlschema.Trigger, error) {
 	triggers = r.checkTriggersNames(triggers)
 
 	converted, err := r.converter.ToTriggers(triggers, ownerRef)
@@ -97,7 +97,7 @@ func (r *triggerResolver) CreateManyTriggers(ctx context.Context, triggers []gql
 	return out, nil
 }
 
-func (r *triggerResolver) DeleteTrigger(ctx context.Context, trigger gqlschema.TriggerMetadataInput) (*gqlschema.TriggerMetadata, error) {
+func (r *triggerResolver) DeleteTrigger(ctx context.Context, namespace string, trigger gqlschema.TriggerMetadataInput) (*gqlschema.TriggerMetadata, error) {
 	err := r.service.Delete(trigger)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while deleting %s `%s`", pretty.Trigger, trigger.Name))
@@ -109,10 +109,10 @@ func (r *triggerResolver) DeleteTrigger(ctx context.Context, trigger gqlschema.T
 	}, nil
 }
 
-func (r *triggerResolver) DeleteManyTriggers(ctx context.Context, triggers []gqlschema.TriggerMetadataInput) ([]gqlschema.TriggerMetadata, error) {
+func (r *triggerResolver) DeleteManyTriggers(ctx context.Context, namespace string, triggers []gqlschema.TriggerMetadataInput) ([]gqlschema.TriggerMetadata, error) {
 	deletedTriggers := make([]gqlschema.TriggerMetadata, 0)
 	for _, trigger := range triggers {
-		_, err := r.DeleteTrigger(ctx, trigger)
+		_, err := r.DeleteTrigger(ctx, namespace, trigger)
 		if err != nil {
 			return deletedTriggers, err
 		}

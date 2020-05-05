@@ -11,6 +11,8 @@ spec:
     matchLabels:
       app: {{ .Chart.Name }}
       release: {{ .Release.Name }}
+  strategy:
+    {{- toYaml .Values.deployment.strategy | nindent 4 }}
   template:
     metadata:
       labels:
@@ -32,6 +34,8 @@ spec:
             - name: http-validator
               containerPort: {{ .Values.global.connector.validator.port }}
               protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           env:
             - name: APP_EXTERNAL_ADDRESS
               value: "0.0.0.0:{{ .Values.global.connector.graphql.external.port }}"

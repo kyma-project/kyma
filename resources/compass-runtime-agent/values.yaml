@@ -4,13 +4,13 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir:
-      version: "PR-7913"
+      version: "PR-8050"
     runtimeAgentTests:
       dir:
-      version: "PR-7913"
+      version: "PR-8050"
     compassExternalSolutionTests:
       dir:
-      version: "PR-7738"
+      version: "PR-8141"
   istio:
     gateway:
       name: kyma-gateway
@@ -58,6 +58,7 @@ compassRuntimeAgent:
     loggingTimeInterval: 30m
   healthCheck:
     port: 8090
+    proxyStatusPort: 15020
   tests:
     enabled: true
     mockService:
@@ -70,3 +71,11 @@ compassRuntimeAgent:
       url: "https://compass-gateway.{{ .Values.global.ingress.domainName }}/director/graphql"
     idProvider:
       clientTimeout: 10s
+  livenessProbe:
+    initialDelaySeconds: 50
+    timeoutSeconds: 1
+    periodSeconds: 10
+  readinessProbe:
+    initialDelaySeconds: 10
+    timeoutSeconds: 1
+    periodSeconds: 2

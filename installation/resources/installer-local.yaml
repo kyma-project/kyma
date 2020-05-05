@@ -104,6 +104,11 @@ spec:
   selector:
     matchLabels:
       name: kyma-installer
+  # Installer is designed to be run as a single instance only
+  # We enforce it by changing default rolling update to recreate startegy.
+  # With that k8s will first delete old pod and then provision new one during upgrade.
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
@@ -203,6 +208,7 @@ spec:
         imagePullPolicy: IfNotPresent
         args:
           - -tillerTLSInsecureSkipVerify=true
+          - -overrideLogFile=/app/overrides.txt
         volumeMounts:
           - mountPath: /etc/certs
             name: helm-certs

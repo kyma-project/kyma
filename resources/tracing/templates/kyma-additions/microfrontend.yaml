@@ -1,0 +1,18 @@
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: {{ template "jaeger-operator.fullname" . }}
+  labels:
+      app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+spec:
+  displayName: Tracing
+  version: v1
+  category: Diagnostics
+  placement: cluster
+  viewBaseUrl: https://jaeger.{{ js .Values.global.ingress.domainName }}
+  navigationNodes:
+    - label: Tracing
+      navigationPath: ''
+      viewUrl: ''
+      externalLink: https://jaeger.{{ js .Values.global.ingress.domainName }}
+      order: 2

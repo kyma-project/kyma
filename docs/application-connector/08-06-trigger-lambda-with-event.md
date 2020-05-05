@@ -1,9 +1,9 @@
 ---
-title: Trigger a lambda with events
+title: Trigger a Function with events
 type: Tutorials
 ---
 
-To create a simple lambda function and trigger it with an event, you must first register a service using the Application Registry that is a part of the Application Connector. This service then sends the event that triggers the lambda. You must create a Service Instance which enables this event in the Namespace. Follow this guide to learn how to do it. 
+To create a simple Function and trigger it with an event, you must first register a service using the Application Registry that is a part of the Application Connector. This service then sends the event that triggers the Function. You must create a Service Instance which enables this event in the Namespace. Follow this guide to learn how to do it.
 
 ## Prerequisites
 
@@ -94,25 +94,18 @@ To create a simple lambda function and trigger it with an event, you must first 
    EOF
    ```
 
-5. Create and register a lambda function in your Namespace.
+5. Create and register a Function in your Namespace.
 
    ```bash
    cat <<EOF | kubectl apply -f -
-   apiVersion: kubeless.io/v1beta1
+   apiVersion: serverless.kyma-project.io/v1alpha1
    kind: Function
    metadata:
-     name: my-events-lambda
+     name: my-events-function
      namespace: $NAMESPACE
      labels:
-       app: my-events-lambda
+       app: my-events-function
    spec:
-     deployment:
-       spec:
-         template:
-           spec:
-             containers:
-             - name: ""
-               resources: {}
      deps: |-
        {
            "name": "example-1",
@@ -121,7 +114,7 @@ To create a simple lambda function and trigger it with an event, you must first 
              "request": "^2.85.0"
            }
        }
-     function: |-
+     source: |-
        const request = require('request');
 
        module.exports = { main: function (event, context) {
@@ -144,50 +137,42 @@ To create a simple lambda function and trigger it with an event, you must first 
                resolve(response);
            })
        }
-     function-content-type: text
-     handler: handler.main
-     horizontalPodAutoscaler:
-       spec:
-         maxReplicas: 0
-     runtime: nodejs8
-     service:
-       ports:
-       - name: http-function-port
-         port: 8080
-         protocol: TCP
-         targetPort: 8080
-       selector:
-         created-by: kubeless
-         function: my-events-lambda
-     timeout: ""
-     topic: exampleEvent
+     minReplicas: 1
+     maxReplicas: 1
    EOF
    ```
 
-6. Create a Subscription to allow events to trigger the lambda function.
+6. Create a Trigger to allow events to trigger the Function.
 
    ```bash
    cat <<EOF | kubectl apply -f -
-   apiVersion: eventing.kyma-project.io/v1alpha1
-   kind: Subscription
+   apiVersion: eventing.knative.dev/v1alpha1
+   kind: Trigger
    metadata:
      labels:
-       Function: my-events-lambda
-     name: lambda-my-events-lambda-exampleevent-v1
+       function: my-events-function
+     name: function-my-events-function-exampleevent-v1
      namespace: $NAMESPACE
    spec:
-     endpoint: http://my-events-lambda.$NAMESPACE:8080/
-     event_type: exampleevent
-     event_type_version: v1
-     include_subscription_name_header: true
-     source_id: $APP_NAME
+     broker: default
+     filter:
+       attributes:
+         eventtypeversion: v1
+         source: $APP_NAME
+         type: exampleevent
+     subscriber:
+       ref:
+         apiVersion: serving.knative.dev/v1
+         kind: Service
+         name: my-events-function
+         namespace: $NAMESPACE
    EOF
    ```
 
-7. Send an event to trigger the created lambda.
+7. Send an event to trigger the created Function.
 
    ```bash
-   curl -X POST https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
+   curl -X POST -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
    '{
        "event-type": "exampleevent",
        "event-type-version": "v1",
@@ -197,8 +182,8 @@ To create a simple lambda function and trigger it with an event, you must first 
    }'
    ```
 
-8. Check the logs of the lambda function to see if it was triggered. Every time an event successfully triggers the function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`.
+8. Check the logs of the Function to see if it was triggered. Every time an event successfully triggers the Function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`.
 
    ```bash
-   kubectl -n $NAMESPACE logs "$(kubectl -n $NAMESPACE get po -l function=my-events-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-events-lambda | grep -E "Response acquired successfully! Uuid: [a-f0-9-]+"
+   kubectl -n $NAMESPACE logs "$(kubectl -n $NAMESPACE get po -l app=my-events-function -o jsonpath='{.items[0].metadata.name}')" -c lambda | grep -E "Response acquired successfully! Uuid: [a-f0-9-]+"
    ```

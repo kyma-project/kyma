@@ -1,6 +1,8 @@
 deployment:
+  replicaCount: 1
   image:
     pullPolicy: IfNotPresent
+  resources: {}
   args:
     containerPort: 3000
   securityContext: # Set on container level
@@ -10,8 +12,12 @@ deployment:
   dbPool:
     maxOpenConnections: 30
     maxIdleConnections: 2
+  strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 
-staticGroupNames:
+adminGroupNames:
   - "mps-superadmin"
   - "runtimeAdmin"
   - "runtimeNamespaceAdmin"
+
+operatorGroupNames:
+  - "runtimeOperator"

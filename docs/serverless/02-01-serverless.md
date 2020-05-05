@@ -2,54 +2,42 @@
 title: Architecture
 ---
 
-The following diagram illustrates a generic serverless implementation.
+Serverless relies on [Knative Serving](https://knative.dev/docs/serving/) for deploying and managing Functions and [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) for creating Docker images. See how these and other resources process a Function within a Kyma cluster:
 
-![General serverless architecture](./assets/serverless_general.svg)
+![Serverless architecture](./assets/serverless-architecture.svg)
 
-The application flow takes place on the client side. Third parties handle the infrastructural logic. Custom logic can process updates and encapsulate databases. Authentication is an example of custom logic. Third parties can also handle business logic. A hosted database contains read-only data that the client reads. None of this functionality runs on a single, central server. Instead, the client relies on FaaS as its resource.
+> **CAUTION:** Serverless imposes some requirements on the setup of Namespaces. If you create a new Namespace, do not disable sidecar injection in it as Serverless requires Istio for other resources to communicate with Functions correctly. Also, if you apply custom [LimitRanges](/root/kyma/#details-resource-quotas) for a new Namespace, they must be higher than or equal to the [limits for building Jobs' resources](#configuration-serverless-chart).
 
-The following diagram shows an example of tasks that lambdas can perform in Kyma after a user invokes them.
+1. Create a Function either through the UI or by applying a Function custom resource (CR). This CR contains the Function definition (business logic that you want to execute) and information on the environment on which it should run.
 
-![Lambdas in Kyma](./assets/lambda_example.svg)
+    >**NOTE:** Function Controller sets the Node.js 12 runtime by default.
 
-First, the user invokes the exposed lambda endpoint. Then, the lambda function can carry out a number of tasks, such as:
+2. Function Controller (FC) detects a new Function CR.
 
-* Retrieving cart information from Enterprise Commerce
-* Retrieving stock details
-* Updating a database
+3. FC creates a ConfigMap with the Function definition.
 
-## Open source components
+4. Based on the ConfigMap, FC creates a Kubernetes Job that triggers the creation of a Function image.
 
-Kyma is comprised of several open source technologies to provide extensive functionality.
+5. The Job creates a Pod with the Docker image containing the Function definition. It also pushes the image to a Docker registry.
 
-### Kubeless
+6. FC monitors the Job status. When the image creation finishes successfully, FC creates a Service CR (KService) that points to the Pod with the image.
 
-Kubeless is the serverless framework integrated into Kyma that allows you to deploy lambda functions. These functions run in Pods inside the Kubeless controller on a node, which can be a virtual or hardware machine.
+7. Knative Serving Controller (KSC) detects the new KService and reads its definition.
 
-Kubeless also has a command line interface. Use Node.js to create lambda functions.
+8. KSC creates these resources:
 
-### Istio
+    - Service Placeholder - a Kubernetes Service which has exactly the same name as the KService but [has no selectors](https://kubernetes.io/docs/concepts/services-networking/service/#services-without-selectors) (does not point to any Pods). Its purpose is only to register the actual service name, such as `helloworld`, so it is unique. This service is exposed on port `80`.
 
-Istio is a third-party component that makes it possible to expose and consume services in Kyma. See the [Istio documentation](https://istio.io) to learn more. Istio helps create a network of deployed services, called a service mesh.
+    - Revision - a Kubernetes Service that KSC creates after any change in the KService. Each Revision is a different version of the KService. Revisions have selectors and point to specific Pods in a given Revision. Their names take the `{service-name}-{revision-number}` format, such as `helloworld-48thy` or `helloworld-vge8m`.
 
-In Kyma, functions run in Pods. Istio provides a proxy for specified pods that talk to a pilot. The pilot confirms whether access to the pod is permissible as per the request. In the diagram, Pod B requests access to Pod A. Pod A has an Istio proxy that contains a set of instructions on which services can access Pod A. The Istio proxy also notifies Pod A as to whether Pod B is a part of the service mesh. The Istio Proxy gets all of its information from the Pilot.
+    - Virtual Service - a cluster-local Service that communicates only with resources within the cluster. This Virtual Service points to the Istio service mesh as a gateway to Service Revisions. The Virtual Service is registered for the name specified in the Service Placeholder, for example `helloworld.default.svc.cluster.local`.
 
-![Istio architecture](./assets/istio.svg)
+        >**NOTE:** The **cluster-local** label in the KService instructs the KSC that it should not create an additional public Virtual Service.  
 
-### NATS
+    - Route - a resource that redirects HTTP requests to specific Revisions.
 
-The Event Bus in Kyma monitors business events and trigger functions based on those events. At the heart of the Event Bus is NATS, an open source, stand-alone messaging system. To learn more about NATS, visit the [NATS website](https://nats.io).
+    - Configuration - a resource that holds information on the desired Revision configuration.
 
-The following diagram demonstrates the Event Bus architecture.
+    >**TIP:** For more details on all Knative Serving resources, read the official [Knative documentation](https://knative.dev/docs/serving/).
 
-![Event Bus architecture](./assets/nats.svg)
-
-The Event Bus exposes an HTTP endpoint that the system can consume. An external event, such as a subscription, triggers the Event Bus. A lambda function works with a push notification, and the subscription handling of the Event Bus processes the notification.
-
-### Knative
-
-Knative is a platform which manages serverless workloads inside Kubernetes environments. Due to its high versatility, Knative can manage the whole lifecycle of a lambda function, from building the source code to serving it.
-
-Kyma bridges the gap between developers and Knative using its own [Function Controller](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md) which uses the Function custom resource to facilitate the deployment of lambda functions.
-
-For details, see the [Knative project](https://knative.dev/docs/) documentation.
+To sum up, the overall eventing communication with the Function takes place through the Virtual Service that points to a given Revision. By default, the Virtual Service is set to the latest Revision but that can be modified to distribute traffic between Revisions if there is a high number of incoming events.

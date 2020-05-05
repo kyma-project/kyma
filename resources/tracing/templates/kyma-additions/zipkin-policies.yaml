@@ -1,0 +1,14 @@
+---
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+    name: zipkin
+    labels:
+        app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+        app.kubernetes.io/component: zipkin
+spec:
+  targets:
+    - name: zipkin
+  peers:
+    - mtls:
+        mode: "PERMISSIVE"

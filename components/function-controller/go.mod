@@ -14,7 +14,6 @@ require (
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.8.1
 	github.com/openzipkin/zipkin-go v0.2.2 // indirect
-	github.com/pkg/errors v0.8.1
 	github.com/prometheus/client_golang v1.2.1 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/vrischmann/envconfig v1.2.0
@@ -26,3 +25,5 @@ require (
 	knative.dev/serving v0.12.1
 	sigs.k8s.io/controller-runtime v0.5.1
 )
+
+replace gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.2.8

@@ -121,7 +121,7 @@ For this step, you need a running local Kyma instance. Read [this](#installation
 
 ### Modify the code locally and see the results immediately in Minikube
 
-1. Edit the `main.go` file by adding a new `test` endpoint to the `startService` function:
+1. Edit the `main.go` file by adding a new `test` endpoint to the `startService` Function:
 
    ```go
    router.HandleFunc("/test", func (w http.ResponseWriter, r *http.Request) {

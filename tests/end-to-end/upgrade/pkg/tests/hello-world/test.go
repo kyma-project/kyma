@@ -11,7 +11,7 @@ import (
 
 const deployName = "hello-world-nginx"
 
-// HelloWorld shows the example hello world backup test
+// HelloWorld shows the example hello world upgrade test
 type HelloWorld struct {
 	deployCli appsCli.DeploymentsGetter
 }
@@ -68,7 +68,7 @@ func (h *HelloWorld) CreateResources(stop <-chan struct{}, log logrus.FieldLogge
 	return nil
 }
 
-// TestResources tests resources after backup phase
+// TestResources tests resources after upgrade
 func (h *HelloWorld) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	_, err := h.deployCli.Deployments(namespace).Get(deployName, metav1.GetOptions{})
 	if err != nil {

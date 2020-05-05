@@ -7,4 +7,6 @@ metadata:
 data:
   additionalRuntimeComponents.yaml: |-
     components:
-{{ toYaml .Values.additionalRuntimeComponents | indent 6 }}
+{{- with .Values.additionalRuntimeComponents }}
+{{ tpl . $ | indent 6 }}
+{{- end }}

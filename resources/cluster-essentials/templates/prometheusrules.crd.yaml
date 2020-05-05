@@ -1,11 +1,10 @@
-# https://raw.githubusercontent.com/coreos/prometheus-operator/release-0.35/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.4
   creationTimestamp: null
   name: prometheusrules.monitoring.coreos.com
-  labels:
-    app: monitoring-operator
 spec:
   group: monitoring.coreos.com
   names:
@@ -60,8 +59,8 @@ spec:
                           type: object
                         expr:
                           anyOf:
-                          - type: integer
-                          - type: string
+                            - type: integer
+                            - type: string
                           x-kubernetes-int-or-string: true
                         for:
                           type: string
@@ -72,23 +71,23 @@ spec:
                         record:
                           type: string
                       required:
-                      - expr
+                        - expr
                       type: object
                     type: array
                 required:
-                - name
-                - rules
+                  - name
+                  - rules
                 type: object
               type: array
           type: object
       required:
-      - spec
+        - spec
       type: object
   version: v1
   versions:
-  - name: v1
-    served: true
-    storage: true
+    - name: v1
+      served: true
+      storage: true
 status:
   acceptedNames:
     kind: ""

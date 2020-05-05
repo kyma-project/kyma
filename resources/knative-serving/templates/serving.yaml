@@ -114,7 +114,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    rbac.authorization.k8s.io/aggregate-to-admin: "true"
     serving.knative.dev/release: "{{ .Values.global.version }}"
   name: knative-serving-namespaced-admin
 rules:
@@ -133,7 +132,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    rbac.authorization.k8s.io/aggregate-to-edit: "true"
     serving.knative.dev/release: "{{ .Values.global.version }}"
   name: knative-serving-namespaced-edit
 rules:
@@ -154,7 +152,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    rbac.authorization.k8s.io/aggregate-to-view: "true"
     serving.knative.dev/release: "{{ .Values.global.version }}"
   name: knative-serving-namespaced-view
 rules:
@@ -399,16 +396,6 @@ metadata:
     serving.knative.dev/release: "{{ .Values.global.version }}"
   name: webhook-certs
   namespace: knative-serving
----
-apiVersion: v1
-data:
-  "key": {{ .Values.global.ingress.tlsKey }}
-  "cert": {{ .Values.global.ingress.tlsCrt }}
-kind: Secret
-metadata:
-  name: knative-gateway-certs
-  namespace: istio-system
-type: Opaque
 ---
 apiVersion: v1
 kind: Service

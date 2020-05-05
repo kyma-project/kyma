@@ -1,0 +1,70 @@
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+    name: {{ template "jaeger-operator.fullname" . }}-jaeger-operator-metrics
+    labels:
+        app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+spec:
+  targets:
+    - name: {{ template "jaeger-operator.fullname" . }}-jaeger-operator
+  peers:
+    - mtls:
+        mode: "PERMISSIVE"
+
+{{- if eq .Values.jaeger.spec.strategy "allInOne" }}
+---
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+    name: {{ template "jaeger-operator.fullname" . }}-jaeger-metrics
+    labels:
+        app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+spec:
+  targets:
+    - name: {{ template "jaeger-operator.fullname" . }}-jaeger-metrics
+  peers:
+    - mtls:
+        mode: "PERMISSIVE"
+{{- end }}
+
+{{- if eq .Values.jaeger.spec.strategy "production" }}
+---
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+    name: {{ template "jaeger-operator.fullname" . }}-jaeger-collector-metrics
+    labels:
+        app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+spec:
+  targets:
+    - name: {{ template "jaeger-operator.fullname" . }}-jaeger-collector-metrics
+  peers:
+    - mtls:
+        mode: "PERMISSIVE"
+---
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+    name: {{ template "jaeger-operator.fullname" . }}-jaeger-agent-metrics
+    labels:
+        app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+spec:
+  targets:
+    - name: {{ template "jaeger-operator.fullname" . }}-jaeger-agent-metrics
+  peers:
+    - mtls:
+        mode: "PERMISSIVE"
+---
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+    name: {{ template "jaeger-operator.fullname" . }}-jaeger-query-metrics
+    labels:
+        app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+spec:
+  targets:
+    - name: {{ template "jaeger-operator.fullname" . }}-jaeger-query-metrics
+  peers:
+    - mtls:
+        mode: "PERMISSIVE"
+{{- end }}

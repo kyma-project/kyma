@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: {{ template "jaeger-operator.fullname" . }}-jaeger-query-secured
+    labels:
+        app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+        app.kubernetes.io/component: kcproxy 
+spec:
+    ports:
+      - port: {{ .Values.jaeger.kyma.uiPort }}
+        targetPort: {{ .Values.kcproxy.inPort }}
+        protocol: TCP
+        name: http
+    selector:
+        app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+        app.kubernetes.io/component: kcproxy

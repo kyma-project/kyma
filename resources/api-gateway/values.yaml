@@ -12,7 +12,7 @@ apiMigratorJob:
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
-  tag: 0c4d7ae5
+  tag: "978664da"
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -45,7 +45,7 @@ config:
       - apiserver-proxy
       - apiserver-proxy-ssl
   domainWhiteList:
-    - kyma.local
+  defaultDomain:
   cors: # values listed below will be used to set corsPolicy in created VirtualServices (https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/#CorsPolicy)
     allowOrigin:
       - "*"
@@ -60,7 +60,7 @@ config:
       - "*"
   generatedObjects:
     # Comma-separated list of key=value pairs used to label generated objects
-    labels: "velero.io/exclude-from-backup=true"
+    labels:
 
   # Node labels for pod assignment.
   nodeSelector: {}
