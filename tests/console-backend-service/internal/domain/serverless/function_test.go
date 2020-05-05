@@ -41,12 +41,12 @@ func TestFunctionEventQueries(t *testing.T) {
 	expectedEvent := fixFunctionEvent("ADD", expectedFunction)
 	checkFunctionEvent(t, expectedEvent, event)
 
+	//wait for reactions from function controller to function CR
+	time.Sleep(5 * time.Second) // happy sleep is happy sleep when he's sleeping :)
+
 	function, err := queryFunction(c, queryFunctionArguments("1", namespaceName), functionDetailsFields())
 	require.NoError(t, err)
 	checkFunctionQuery(t, expectedFunction, function)
-
-	//wait for reactions from function controller to function CR
-	time.Sleep(5 * time.Second) // happy sleep is happy sleep when he's sleeping :)
 
 	labels := []string{FunctionLabel}
 	err = mutationFunction(c, "updateFunction", mutationFunctionArguments("1", namespaceName, labels), functionDetailsFields())
@@ -119,7 +119,7 @@ func queryFunctions(client *graphql.Client, namespace, details string) ([]Functi
 func checkFunctionQuery(t *testing.T, expected, actual Function) {
 	assert.Equal(t, expected.Name, actual.Name)
 	assert.Equal(t, expected.Namespace, actual.Namespace)
-	assert.Equal(t, expected.Labels, actual.Labels)
+	assert.Equal(t, len(expected.Labels), len(actual.Labels))
 }
 
 func checkFunctionEvent(t *testing.T, expected, actual FunctionEvent) {
@@ -168,11 +168,15 @@ func queryFunction(client *graphql.Client, arguments, details string) (Function,
 			}
 		}
 	`, arguments, details)
+	type Response struct {
+		Function Function
+	}
+
 	req := graphql.NewRequest(query)
-	var res Function
+	var res Response
 	err := client.Do(req, &res)
 
-	return res, err
+	return res.Function, err
 }
 
 func mutationFunction(client *graphql.Client, requestType, arguments, resourceDetailsQuery string) error {
