@@ -79,7 +79,7 @@ func (hc *Client) IsReleaseDeletable(rname string) (bool, error) {
 		return false, err
 	}
 
-	return statusRes.Info.Status.Code == release.Status_DEPLOYED || statusRes.Info.Status.Code == release.Status_FAILED, nil
+	return statusRes.Info.Status.Code != release.Status_DEPLOYED, nil
 }
 
 // InstallReleaseFromChart .
