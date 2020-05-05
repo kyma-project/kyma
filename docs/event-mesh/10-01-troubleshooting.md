@@ -4,8 +4,7 @@ title: Troubleshooting
 
 ## Events do not reach the Namespace
 
-The upgrade of the Event Sources Controller Manager triggers the new Pod to update the KService for the HTTP Source. As a result of changes introduced to the KService, the Knative Serving Controller (KSC) creates a new Revision. The KSC does not pick up this new Revision and, while looking for the old Revision, marks the KService as `Not ready`. 
-This brakes the event flow and prevents events from reaching the Namespace.
+The upgrade of the Event Sources Controller Manager triggers the new Pod to update the KService for the HTTPSource custom resource. As a result of changes introduced to the KService, the Knative Serving Controller (KSC) creates a new Revision. The KSC does not pick up this new Revision and, while looking for the old Revision, marks the KService as `Not ready`. This brakes the event flow and prevents events from reaching the Namespace.
 To fix this issue, delete the existing KService. It will be recreated automatically, pointing to the right Revision.
 
 Follow these steps:
