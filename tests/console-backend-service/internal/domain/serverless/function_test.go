@@ -1,4 +1,4 @@
-// +build acceptance
+//// +build acceptance
 
 package serverless
 
@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
@@ -25,62 +27,94 @@ func TestFunctionEventQueries(t *testing.T) {
 	coreCli, _, err := client.NewClientWithConfig()
 	require.NoError(t, err)
 
+	t.Logf("Create namespace with prefix: %s", namespacePrefix)
 	namespace, err := fixNamespace(coreCli)
 	require.NoError(t, err)
 	namespaceName := namespace.Name()
 	defer namespace.Delete()
 
-	subscription := subscribeFunctionEvent(c, createFunctionEventArguments("1", namespaceName), functionEventDetailsFields())
+	t.Logf("Subscribe on function: %s", functionName1)
+	subscription := subscribeFunctionEvent(c, createFunctionEventArguments(functionName1, namespaceName), functionEventDetailsFields())
 	defer subscription.Close()
 
-	err = mutationFunction(c, "createFunction", mutationFunctionArguments("1", namespaceName, nil), functionDetailsFields())
+	t.Logf("Create function: %s", functionName1)
+	err = mutationFunction(c, "createFunction",
+		mutationFunctionArguments(functionName1, namespaceName, nil), functionDetailsFields())
 	require.NoError(t, err)
 
+	t.Logf("Check subscription event")
 	event, err := readFunctionEvent(subscription)
 	require.NoError(t, err)
 
-	expectedFunction := fixFunction("1", namespaceName, nil)
+	expectedFunction := fixFunction(functionName1, namespaceName, nil)
 	expectedEvent := fixFunctionEvent("ADD", expectedFunction)
 	checkFunctionEvent(t, expectedEvent, event)
 
 	//wait for reactions from function controller to function CR
 	time.Sleep(sleepTime) // happy sleep is happy sleep when he's sleeping :)
 
-	function, err := queryFunction(c, queryFunctionArguments("1", namespaceName), functionDetailsFields())
+	t.Logf("Query function: %s", functionName1)
+	function, err := queryFunction(c, queryFunctionArguments(functionName1, namespaceName), functionDetailsFields())
 	require.NoError(t, err)
 	checkFunctionQuery(t, expectedFunction, function)
 
-	labels := []string{FunctionLabel}
-	err = mutationFunction(c, "updateFunction", mutationFunctionArguments("1", namespaceName, labels), functionDetailsFields())
+	t.Logf("Update function: %s", functionName1)
+	labels := []string{functionLabel}
+	err = mutationFunction(c, "updateFunction",
+		mutationFunctionArguments(functionName1, namespaceName, labels), functionDetailsFields())
 	require.NoError(t, err)
 
-	function, err = queryFunction(c, queryFunctionArguments("1", namespaceName), functionDetailsFields())
+	t.Logf("Query function: %s", functionName1)
+	function, err = queryFunction(c, queryFunctionArguments(functionName1, namespaceName), functionDetailsFields())
 	require.NoError(t, err)
 
-	expectedFunction = fixFunction("1", namespaceName, labels)
+	expectedFunction = fixFunction(functionName1, namespaceName, labels)
 	checkFunctionQuery(t, expectedFunction, function)
 
-	err = mutationFunction(c, "deleteFunction", deleteFunctionArguments("1", namespaceName), functionMetadataDetailsFields())
+	t.Logf("Delete function: %s", functionName1)
+	err = mutationFunction(c, "deleteFunction",
+		deleteFunctionArguments(functionName1, namespaceName), functionMetadataDetailsFields())
 	require.NoError(t, err)
 
-	err = mutationFunction(c, "createFunction", mutationFunctionArguments("2", namespaceName, labels), functionDetailsFields())
+	t.Logf("Create functions: %s, %s", functionName2, functionName3)
+	err = mutationFunction(c, "createFunction",
+		mutationFunctionArguments(functionName2, namespaceName, labels), functionDetailsFields())
 	require.NoError(t, err)
-	err = mutationFunction(c, "createFunction", mutationFunctionArguments("3", namespaceName, labels), functionDetailsFields())
+	err = mutationFunction(c, "createFunction",
+		mutationFunctionArguments(functionName3, namespaceName, labels), functionDetailsFields())
 	require.NoError(t, err)
 
+	t.Logf("Query functions: %s, %s", functionName2, functionName3)
 	functions, err := queryFunctions(c, namespaceName, functionDetailsFields())
-	names := []string{fmt.Sprintf("%s-%s", FunctionNamePrefix, "2"), fmt.Sprintf("%s-%s", FunctionNamePrefix, "3")}
-	checkFunctionList(t, namespaceName, names, functions)
+	checkFunctionList(t, namespaceName, []string{functionName2, functionName3}, functions)
 
+	t.Logf("Delete functions: %s, %s", functionName2, functionName3)
 	functionsMeta := []FunctionMetadataInput{
-		{Name: fmt.Sprintf("%s-%s", FunctionNamePrefix, "2"), Namespace: namespaceName},
-		{Name: fmt.Sprintf("%s-%s", FunctionNamePrefix, "3"), Namespace: namespaceName},
+		{Name: functionName2, Namespace: namespaceName},
+		{Name: functionName3, Namespace: namespaceName},
 	}
-	err = mutationFunction(c, "deleteManyFunctions", deleteManyFunctionsArguments(namespaceName, functionsMeta), functionMetadataDetailsFields())
+	err = mutationFunction(c, "deleteManyFunctions",
+		deleteManyFunctionsArguments(namespaceName, functionsMeta), functionMetadataDetailsFields())
 	require.NoError(t, err)
 
+	t.Logf("Query functions in namespace: %s", namespaceName)
 	functions, err = queryFunctions(c, namespaceName, functionDetailsFields())
 	assert.Equal(t, 0, len(functions))
+
+	t.Log("Check auth connection")
+	opts := &auth.OperationsInput{
+		auth.Create: {fixFunctionRequest("mutation", "createFunction",
+			mutationFunctionArguments(functionName1, namespaceName, nil), functionDetailsFields())},
+		auth.Update: {fixFunctionRequest("mutation", "updateFunction",
+			mutationFunctionArguments(functionName1, namespaceName, labels), functionDetailsFields())},
+		auth.Get: {fixFunctionRequest("query", "function",
+			queryFunctionArguments(functionName1, namespaceName), functionDetailsFields())},
+		auth.List: {fixFunctionRequest("query", "functions",
+			queryFunctionArguments(functionName1, namespaceName), functionDetailsFields())},
+		auth.Delete: {fixFunctionRequest("mutation", "deleteFunction",
+			deleteFunctionArguments(functionName1, namespaceName), functionMetadataDetailsFields())},
+	}
+	auth.New().Run(t, opts)
 }
 
 func checkFunctionList(t *testing.T, expectedNamespace string, expectedNames []string, actual []Function) {
@@ -136,14 +170,14 @@ func fixFunctionEvent(eventType string, function Function) FunctionEvent {
 	}
 }
 
-func fixFunction(nameSuffix, namespace string, labels []string) Function {
+func fixFunction(name, namespace string, labels []string) Function {
 	labelTemplate := map[string]string{}
 	for _, label := range labels {
 		labelTemplate[label] = label
 	}
 
 	return Function{
-		Name:      fmt.Sprintf("%s-%s", FunctionNamePrefix, nameSuffix),
+		Name:      name,
 		Namespace: namespace,
 		Labels:    labelTemplate,
 	}
@@ -155,26 +189,17 @@ func readFunctionEvent(sub *graphql.Subscription) (FunctionEvent, error) {
 	}
 
 	var response Response
-	err := sub.Next(&response, tester.DefaultDeletionTimeout)
+	err := sub.Next(&response, tester.DefaultSubscriptionTimeout)
 
 	return response.FunctionEvent, err
 }
 
 func queryFunction(client *graphql.Client, arguments, details string) (Function, error) {
-	query := fmt.Sprintf(`
-		query{
-			function (
-				%s
-			){
-				%s
-			}
-		}
-	`, arguments, details)
 	type Response struct {
 		Function Function
 	}
 
-	req := graphql.NewRequest(query)
+	req := fixFunctionRequest("query", "function", arguments, details)
 	var res Response
 	err := client.Do(req, &res)
 
@@ -182,26 +207,36 @@ func queryFunction(client *graphql.Client, arguments, details string) (Function,
 }
 
 func mutationFunction(client *graphql.Client, requestType, arguments, resourceDetailsQuery string) error {
+	req := fixFunctionRequest("mutation", requestType, arguments, resourceDetailsQuery)
+	err := client.Do(req, nil)
+
+	return err
+}
+
+func subscribeFunctionEvent(client *graphql.Client, arguments, resourceDetailsQuery string) *graphql.Subscription {
+	req := fixFunctionRequest("subscription", "functionEvent", arguments, resourceDetailsQuery)
+
+	return client.Subscribe(req)
+}
+
+func fixFunctionRequest(requestType, requestName, arguments, details string) *graphql.Request {
 	query := fmt.Sprintf(`
-		mutation {
+		%s {
 			%s (
 				%s
 			){
 				%s
 			}
 		}
-	`, requestType, arguments, resourceDetailsQuery)
-	req := graphql.NewRequest(query)
-	err := client.Do(req, nil)
-
-	return err
+	`, requestType, requestName, arguments, details)
+	return graphql.NewRequest(query)
 }
 
-func queryFunctionArguments(nameSuffix, namespace string) string {
+func queryFunctionArguments(name, namespace string) string {
 	return fmt.Sprintf(`
-		name: "%s-%s",
+		name: "%s",
 		namespace: "%s"
-	`, FunctionNamePrefix, nameSuffix, namespace)
+	`, name, namespace)
 }
 
 func deleteManyFunctionsArguments(namespace string, functionsMetadata []FunctionMetadataInput) string {
@@ -219,17 +254,17 @@ func deleteManyFunctionsArguments(namespace string, functionsMetadata []Function
 	`, namespace, functions)
 }
 
-func deleteFunctionArguments(functionSuffix, namespace string) string {
+func deleteFunctionArguments(name, namespace string) string {
 	return fmt.Sprintf(`
 		namespace: "%s",
 		function: {
-			name: "%s-%s",
+			name:      "%s",
     		namespace: "%s"
 		}
-	`, namespace, FunctionNamePrefix, functionSuffix, namespace)
+	`, namespace, name, namespace)
 }
 
-func mutationFunctionArguments(functionNameSuffix, namespaceName string, labels []string) string {
+func mutationFunctionArguments(name, namespaceName string, labels []string) string {
 	labelTemplate := ""
 	if len(labels) != 0 {
 		for i, label := range labels {
@@ -241,7 +276,7 @@ func mutationFunctionArguments(functionNameSuffix, namespaceName string, labels 
 	}
 
 	return fmt.Sprintf(`
-		name: "%s-%s",
+		name:      "%s",
 		namespace: "%s",
 		params: {
 			labels: { %s },
@@ -251,14 +286,14 @@ func mutationFunctionArguments(functionNameSuffix, namespaceName string, labels 
 			replicas: { min: 1, max: 1 },
 			resources: { limits: { memory: "100m", cpu: "128Mi" }, requests: { memory: "50m", cpu: "64Mi" } },
 		},
-	`, FunctionNamePrefix, functionNameSuffix, namespaceName, labelTemplate)
+	`, name, namespaceName, labelTemplate)
 }
 
-func createFunctionEventArguments(functionSuffix, namespace string) string {
+func createFunctionEventArguments(name, namespace string) string {
 	return fmt.Sprintf(`
 		namespace: "%s"
-		functionName: "%s-%s"
-	`, namespace, FunctionNamePrefix, functionSuffix)
+		functionName: "%s"
+	`, namespace, name)
 }
 
 func functionEventDetailsFields() string {
@@ -285,23 +320,8 @@ func functionDetailsFields() string {
 	`
 }
 
-func subscribeFunctionEvent(client *graphql.Client, arguments, resourceDetailsQuery string) *graphql.Subscription {
-	query := fmt.Sprintf(`
-		subscription {
-			functionEvent (
-				%s
-			){
-				%s
-			}
-		}
-	`, arguments, resourceDetailsQuery)
-	req := graphql.NewRequest(query)
-
-	return client.Subscribe(req)
-}
-
 func fixNamespace(dynamicCli *corev1.CoreV1Client) (*configurer.NamespaceConfigurer, error) {
-	namespace := configurer.NewNamespace(NamespacePrefix, dynamicCli)
+	namespace := configurer.NewNamespace(namespacePrefix, dynamicCli)
 	err := namespace.Create(nil)
 
 	return namespace, err

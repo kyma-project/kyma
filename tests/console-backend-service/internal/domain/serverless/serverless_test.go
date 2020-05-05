@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 	c, err := graphql.New()
 	exitOnError(err, "while GraphQL client setup")
 
-	module.SkipPluggableMainIfShould(c, ModuleName)
+	module.SkipPluggableMainIfShould(c, moduleName)
 
 	AuthSuite = auth.New()
 

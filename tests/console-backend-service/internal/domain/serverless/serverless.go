@@ -1,8 +1,10 @@
 package serverless
 
 const (
-	ModuleName         = "serverless"
-	NamespacePrefix    = "test-serverless"
-	FunctionNamePrefix = "test-function"
-	FunctionLabel      = "testLabel"
+	moduleName      = "serverless"
+	namespacePrefix = "test-serverless-"
+	functionName1   = "test-function-1"
+	functionName2   = "test-function-2"
+	functionName3   = "test-function-3"
+	functionLabel   = "testLabel"
 )
