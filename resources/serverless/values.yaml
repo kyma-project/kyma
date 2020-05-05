@@ -8,7 +8,7 @@ tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-8312"
+    tag: "PR-8364"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
