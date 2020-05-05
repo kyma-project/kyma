@@ -1,4 +1,4 @@
-FROM golang:1.13.5-alpine3.10 as builder
+FROM golang:1.14-alpine3.11 as builder
 
 ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/tests/function-controller
 WORKDIR ${BASE_APP_DIR}
@@ -17,9 +17,10 @@ COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 # Build tests
 #
 
-RUN cd ${BASE_APP_DIR} && GO111MODULE=on go mod download && CGO_ENABLED=0 go test main_test.go -c
+RUN cd ${BASE_APP_DIR} && GO111MODULE=on go mod download
+RUN CGO_ENABLED=0 go test main_test.go -c
 
-FROM alpine:3.10
+FROM alpine:3.11
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 

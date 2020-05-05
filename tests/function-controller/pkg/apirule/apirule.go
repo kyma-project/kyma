@@ -1,7 +1,13 @@
 package apirule
 
 import (
+	"context"
 	"time"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/watch"
+	watchtools "k8s.io/client-go/tools/watch"
 
 	apiruleTypes "github.com/kyma-project/kyma/tests/function-controller/pkg/apirule/types"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
@@ -10,7 +16,6 @@ import (
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
 )
 
 type APIRule struct {
@@ -19,19 +24,21 @@ type APIRule struct {
 	namespace   string
 	waitTimeout time.Duration
 	log         shared.Logger
+	verbose     bool
 }
 
-func New(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log shared.Logger) *APIRule {
+func New(name string, c shared.Container) *APIRule {
 	return &APIRule{
-		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
+		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
 			Version:  apiruleTypes.GroupVersion.Version,
 			Group:    apiruleTypes.GroupVersion.Group,
 			Resource: "apirules",
-		}, namespace, log),
+		}, c.Namespace, c.Log, c.Verbose),
 		name:        name,
-		namespace:   namespace,
-		waitTimeout: waitTimeout,
-		log:         log,
+		namespace:   c.Namespace,
+		waitTimeout: c.WaitTimeout,
+		log:         c.Log,
+		verbose:     c.Verbose,
 	}
 }
 
@@ -84,4 +91,84 @@ func (a *APIRule) Delete() error {
 	}
 
 	return nil
+}
+
+func (a *APIRule) get() (*apiruleTypes.APIRule, error) {
+	u, err := a.resCli.Get(a.name)
+	if err != nil {
+		return &apiruleTypes.APIRule{}, errors.Wrapf(err, "while getting ApiRule %s in namespace %s", a.name, a.namespace)
+	}
+
+	apirule := &apiruleTypes.APIRule{}
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, apirule)
+	if err != nil {
+		return &apiruleTypes.APIRule{}, err
+	}
+
+	return apirule, nil
+}
+
+func (a *APIRule) WaitForStatusRunning() error {
+	apirule, err := a.get()
+	if err != nil {
+		return err
+	}
+
+	if a.isStateReady(*apirule) {
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), a.waitTimeout)
+	defer cancel()
+
+	condition := a.isApiRuleReady(a.name)
+	_, err = watchtools.Until(ctx, apirule.GetResourceVersion(), a.resCli.ResCli, condition)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *APIRule) isApiRuleReady(name string) func(event watch.Event) (bool, error) {
+	return func(event watch.Event) (bool, error) {
+		u, ok := event.Object.(*unstructured.Unstructured)
+		if !ok {
+			return false, shared.ErrInvalidDataType
+		}
+		if u.GetName() != name {
+			a.log.Logf("names mismatch, object's name %s, supplied %s", u.GetName(), name)
+			return false, nil
+		}
+
+		apirule, err := convertFromUnstructuredToAPIRule(*u)
+		if err != nil {
+			return false, err
+		}
+
+		return a.isStateReady(apirule), nil
+	}
+}
+
+func (a *APIRule) isStateReady(apirule apiruleTypes.APIRule) bool {
+	ready := apirule.Status.AccessRuleStatus.Code == apiruleTypes.StatusOK &&
+		apirule.Status.APIRuleStatus.Code == apiruleTypes.StatusOK &&
+		apirule.Status.VirtualServiceStatus.Code == apiruleTypes.StatusOK
+
+	if ready {
+		a.log.Logf("APIRule %s is ready", a.name)
+	} else {
+		a.log.Logf("APIRule %s is not ready", a.name)
+	}
+
+	if a.verbose {
+		a.log.Logf("%+v", apirule)
+	}
+
+	return ready
+}
+
+func convertFromUnstructuredToAPIRule(u unstructured.Unstructured) (apiruleTypes.APIRule, error) {
+	apirule := apiruleTypes.APIRule{}
+	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &apirule)
+	return apirule, err
 }
