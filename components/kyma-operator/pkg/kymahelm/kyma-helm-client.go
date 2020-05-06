@@ -13,6 +13,7 @@ import (
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/release"
 	rls "k8s.io/helm/pkg/proto/hapi/services"
+	"k8s.io/helm/pkg/storage/errors"
 	"k8s.io/helm/pkg/tlsutil"
 )
 
@@ -83,6 +84,10 @@ func (hc *Client) IsReleaseDeletable(rname string) (bool, error) {
 		func() error {
 			statusRes, err := hc.helm.ReleaseStatus(rname)
 			if err != nil {
+				if strings.Contains(err.Error(), errors.ErrReleaseNotFound(rname).Error()) {
+					isDeletable = false
+					return nil
+				}
 				return err
 			}
 			isDeletable = statusRes.Info.Status.Code != release.Status_DEPLOYED
