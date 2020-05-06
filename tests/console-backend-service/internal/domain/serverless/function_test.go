@@ -51,7 +51,7 @@ func TestFunctionEventQueries(t *testing.T) {
 	checkFunctionEvent(t, expectedEvent, event)
 
 	//wait for reactions from function controller to function CR
-	time.Sleep(sleepTime) // happy sleep is happy sleep when he's sleeping :)
+	time.Sleep(sleepTime)
 
 	t.Logf("Query function: %s", functionName1)
 	function, err := queryFunction(c, queryFunctionArguments(functionName1, namespaceName), functionDetailsFields())
