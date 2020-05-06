@@ -22,7 +22,12 @@ spec:
         - name: crd-apirules
           mountPath: /etc/crd
           readOnly: true
-        command: ["kubectl",  "apply", "-f", "/etc/crd/apirules.yaml"]
+        command:
+        - /bin/sh
+        - -c
+        - |-
+          set -e
+          kubectl replace -f /etc/crd/apirules.yaml || kubectl apply -f /etc/crd/apirules.yaml
       volumes:
       - name: crd-apirules
         configMap:
