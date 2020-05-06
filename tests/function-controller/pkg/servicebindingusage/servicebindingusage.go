@@ -25,9 +25,10 @@ type ServiceBindingUsage struct {
 	waitTimeout time.Duration
 	log         shared.Logger
 	verbose     bool
+	usageKind   string
 }
 
-func New(name string, c shared.Container) *ServiceBindingUsage {
+func New(name, usageKind string, c shared.Container) *ServiceBindingUsage {
 	return &ServiceBindingUsage{
 		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha1.SchemeGroupVersion.Version,
@@ -38,10 +39,11 @@ func New(name string, c shared.Container) *ServiceBindingUsage {
 		namespace:   c.Namespace,
 		waitTimeout: c.WaitTimeout,
 		log:         c.Log,
+		usageKind:   usageKind,
 	}
 }
 
-func (sbu *ServiceBindingUsage) Create(serviceBindingName, fnKsvcName, usageKind, envPrefix string) error {
+func (sbu *ServiceBindingUsage) Create(serviceBindingName, fnKsvcName, envPrefix string) error {
 	servicebindingusage := &v1alpha1.ServiceBindingUsage{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceBindingUsage",
@@ -57,7 +59,7 @@ func (sbu *ServiceBindingUsage) Create(serviceBindingName, fnKsvcName, usageKind
 			},
 			UsedBy: v1alpha1.LocalReferenceByKindAndName{
 				Name: fnKsvcName,
-				Kind: usageKind,
+				Kind: sbu.usageKind,
 			},
 			Parameters: &v1alpha1.Parameters{
 				EnvPrefix: &v1alpha1.EnvPrefix{Name: envPrefix},

@@ -36,6 +36,7 @@ const (
 	redisEnvPing = "env-ping"
 
 	gotEventMsg              = "The event has come!"
+	answerForEnvPing         = "Redis port: 6379"
 	happyMsg                 = "happy"
 	addonsConfigUrl          = "https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml"
 	serviceClassExternalName = "redis"
@@ -107,7 +108,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	ac := addons.New(cfg.AddonName, container)
 	si := serviceinstance.New(cfg.ServiceInstanceName, container)
 	sb := servicebinding.New(cfg.ServiceBindingName, container)
-	sbu := servicebindingusage.New(cfg.ServiceBindingUsageName, container)
+	sbu := servicebindingusage.New(cfg.ServiceBindingUsageName, cfg.UsageKindName, container)
 
 	return &TestSuite{
 		namespace:           ns,
@@ -166,7 +167,7 @@ func (t *TestSuite) Run() {
 
 	t.t.Log("Creating service binding usage...")
 	// we are deliberately creating servicebindingusage HERE, to test how it behaves after function update
-	err = t.servicebindingusage.Create(t.cfg.ServiceBindingName, t.cfg.FunctionName, t.cfg.UsageKindName, redisEnvPrefix)
+	err = t.servicebindingusage.Create(t.cfg.ServiceBindingName, t.cfg.FunctionName, redisEnvPrefix)
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for service binding usage to have ready phase...")
@@ -232,8 +233,6 @@ func (t *TestSuite) Run() {
 	t.t.Log("Testing local connection through the service")
 	err = t.pollForAnswer(inClusterURL, "", gotEventMsg)
 	failOnError(t.g, err)
-
-	answerForEnvPing := "Redis port: 6379"
 
 	t.t.Log("Testing injection of env variables via incluster url")
 	err = t.pollForAnswer(inClusterURL, redisEnvPing, answerForEnvPing)
