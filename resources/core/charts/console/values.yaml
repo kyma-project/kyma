@@ -52,10 +52,10 @@ test:
       # tests uses chromium that require more memory
       requests:
         memory: 400Mi
-        cpu: 340m
+        cpu: 360m
       limits:
         memory: 1.5Gi
-        cpu: 340m
+        cpu: 360m
       service_catalog:
         enabled: true
       logging:
