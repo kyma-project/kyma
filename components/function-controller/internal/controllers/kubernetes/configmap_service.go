@@ -19,6 +19,8 @@ type ConfigMapService interface {
 	UpdateNamespace(ctx context.Context, logger logr.Logger, namespace string, baseInstance *corev1.ConfigMap) error
 }
 
+var _ ConfigMapService = &configMapService{}
+
 type configMapService struct {
 	client resource.Client
 	config Config
