@@ -46,11 +46,11 @@ global:
       version: "13332e7c"
     external_services_mock:
       dir:
-      version: "PR-1250"
+      version: "105e8ff0"
     tests:
       director:
         dir:
-        version: "PR-1250"
+        version: "105e8ff0"
       connector:
         dir:
         version: "9cebaf5c"
