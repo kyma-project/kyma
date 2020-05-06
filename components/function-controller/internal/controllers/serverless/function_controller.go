@@ -41,11 +41,12 @@ var (
 
 func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Function, configMaps []corev1.ConfigMap, service *servingv1.Service) bool {
 	image := r.buildExternalImageAddress(instance)
-	if service != nil && service.Spec.Template.Spec.Containers[0].Image == image {
+	configurationStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)
+
+	if service != nil && service.Spec.Template.Spec.Containers[0].Image == image && configurationStatus != corev1.ConditionUnknown {
 		return false
 	}
 
-	configurationStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)
 	return len(configMaps) != 1 ||
 		instance.Spec.Source != configMaps[0].Data[configMapFunction] ||
 		r.sanitizeDependencies(instance.Spec.Deps) != configMaps[0].Data[configMapDeps] ||
@@ -55,12 +56,13 @@ func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Fu
 
 func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, jobs []batchv1.Job, service *servingv1.Service) bool {
 	image := r.buildExternalImageAddress(instance)
-	if service != nil && service.Spec.Template.Spec.Containers[0].Image == image {
+	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
+
+	if service != nil && service.Spec.Template.Spec.Containers[0].Image == image && buildStatus != corev1.ConditionUnknown {
 		return false
 	}
 
 	expectedJob := r.buildJob(instance, "")
-	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
 	return len(jobs) != 1 ||
 		len(jobs[0].Spec.Template.Spec.Containers) != 1 ||
