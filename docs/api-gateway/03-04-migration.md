@@ -5,22 +5,16 @@ type: Details
 
 Migration from Api to APIRule custom resources (CRs) is performed automatically by a job that runs during the Kyma upgrade. During this process, the [API Gateway Migrator tool](https://github.com/kyma-project/kyma/blob/master/components/api-gateway-migrator/README.md#api-gateway-migrator) translates the existing Api CRs to APIRule CRs and deletes the original resources.
 
->**CAUTION:** Migrating resources may result in a temporary downtime of the exposed service. 
-
-During migration, it may turn out that some resource specifications are too complex or fail to meet all the migration requirements. In such a case the process skips them but doesn't break the way existing services are exposed. However, if you want to introduce further changes or remove the Api CR, your actions won't have any effect on how the service is exposed because it will still use the original configuration.  
-
->**NOTE:** If the migration process skipped the Api resources due to the invalid status or a blacklisted label, migration is not possible.
-
 ## Prerequisites
 
-Before the upgrade process starts, ensure that all Api resources have a status. Follow the steps:
+Before the upgrade process starts, ensure that all Apis have a status. Follow the steps:
 
 1. Fetch all Apis without the status:
 
 ```shell script
 kubectl get apis --all-namespaces -o json | jq '.items | .[] | select(.status == null)'
 ```
-2. If you see any Api resources in the output, recreate each Api using this script:
+2. If you see any Apis in the output, recreate each Api using this script:
 
 ```shell script
 # set variables
@@ -32,9 +26,19 @@ kubectl delete policy -n ${API_NAMESPACE} ${API_NAME} --ignore-not-found
 # recreate Api
 kubectl get api -n ${API_NAMESPACE} ${API_NAME} -o yaml | kubectl replace --force -f 
 ```
-3. Once the Apis are recreated, check again if the status is present. If the output does not include any Api resources, you can proceed with the upgrade. 
+3. Once the Apis are recreated, check again if the status is present.
 
-## Migration
+## Upgrade
+
+If all Apis have the status, proceed with the upgrade to migrate the resources.
+
+>**CAUTION:** Migrating resources may result in a temporary downtime of the exposed service. 
+
+During upgrade, it may turn out that some resource specifications are too complex or fail to meet all the migration requirements. In such a case the process skips them but doesn't break the way existing services are exposed. However, if you want to introduce further changes or remove the Api CR, your actions won't have any effect on how the service is exposed because it will still use the original configuration.  
+
+>**NOTE:** If the migration process skipped the Api resources due to the invalid status or a blacklisted label, migration is not possible.
+
+## Post-upgrade actions
 
 After the upgrade procedure is completed, follow these steps to ensure your services are properly migrated:
 
