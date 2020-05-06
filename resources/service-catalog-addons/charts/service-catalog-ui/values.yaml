@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   dir:
-  tag: "c6c52588"
+  tag: "de98a919"
   pullPolicy: IfNotPresent
 catalog:
   service:
