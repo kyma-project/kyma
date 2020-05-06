@@ -39,7 +39,7 @@ func New(parentServiceName string, c shared.Container) *Revision {
 
 func (r *Revision) list() (*servingv1.RevisionList, error) {
 	selector := map[string]string{
-		"serving.knative.dev/service": r.parentServiceName,
+		serving.ServiceLabelKey: r.parentServiceName,
 	}
 
 	u, err := r.resCli.List(selector)
