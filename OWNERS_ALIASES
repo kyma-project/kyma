@@ -30,7 +30,6 @@ aliases:
     - akucharska
     - sjanota
   knative-eventing-kafka-approvers:
-    - Abd4llA
     - rakesh-garimella
     - lilitgh
     - k15r
@@ -41,7 +40,6 @@ aliases:
     - radufa
     - sayanh
   knative-eventing-kafka-reviewers:
-    - Abd4llA
     - rakesh-garimella
     - lilitgh
     - k15r
@@ -52,7 +50,6 @@ aliases:
     - radufa
     - sayanh
   event-bus-approvers:
-    - Abd4llA
     - rakesh-garimella
     - lilitgh
     - k15r
@@ -63,7 +60,6 @@ aliases:
     - radufa
     - sayanh
   event-bus-reviewers:
-    - Abd4llA
     - rakesh-garimella
     - lilitgh
     - k15r
@@ -74,7 +70,6 @@ aliases:
     - radufa
     - sayanh
   event-sources-approvers:
-    - Abd4llA
     - rakesh-garimella
     - lilitgh
     - k15r
@@ -85,7 +80,6 @@ aliases:
     - radufa
     - sayanh
   event-sources-reviewers:
-    - Abd4llA
     - rakesh-garimella
     - lilitgh
     - k15r
@@ -96,7 +90,6 @@ aliases:
     - radufa
     - sayanh
   serverless-approvers:
-    - Abd4llA
     - rakesh-garimella
     - lilitgh
     - k15r
@@ -107,7 +100,6 @@ aliases:
     - radufa
     - sayanh
   serverless-reviewers:
-    - Abd4llA
     - rakesh-garimella
     - lilitgh
     - k15r
