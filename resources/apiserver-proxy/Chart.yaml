@@ -2,5 +2,6 @@ name: apiserver-proxy
 version: 0.0.1
 description: Proxy for Kyma apiserver
 keywords:
-  - apiproxy
-  - apiserver
+- apiproxy
+- apiserver
+apiVersion: v1

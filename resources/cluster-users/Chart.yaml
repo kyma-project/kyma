@@ -1,3 +1,4 @@
+apiVersion: v1
 name: cluster-users
 version: 0.0.1
 description: Users of the Kyma K8S cluster
