@@ -101,7 +101,10 @@ metadata:
 spec:
   maxRetries: 1
   concurrency: ${CONCURRENCY}
-${matchTests}
+selectors:
+  matchNames:
+    - name: core-console
+      namespace: kyma-system
 EOF
 
 waitForTestSuiteResult ${suiteName}
