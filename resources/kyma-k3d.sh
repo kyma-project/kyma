@@ -34,36 +34,36 @@ kubectl create ns natss
 kubectl label ns istio-system istio-injection=disabled --overwrite
 kubectl label ns cert-manager istio-injection=disabled --overwrite
 
-helm3 install cluster-essentials cluster-essentials --set $OVERRIDES -n kyma-system 
-helm3 install testing testing --set $OVERRIDES -n kyma-system
+helm3 upgrade -i cluster-essentials cluster-essentials --set $OVERRIDES -n kyma-system 
+helm3 upgrade -i testing testing --set $OVERRIDES -n kyma-system
 kubectl apply -f kyma-yaml/cert-manager.yaml
 kubectl -n kube-system patch cm coredns --patch "$(cat kyma-yaml/coredns-patch.yaml)"
-helm3 install istio istio -n istio-system --set $OVERRIDES 
+helm3 upgrade -i istio istio -n istio-system --set $OVERRIDES 
 
 while [[ $(kubectl get pods -n istio-system -l istio=sidecar-injector -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for istio" && sleep 5; done
 
-helm3 install ingress-dns-cert ingress-dns-cert --set $OVERRIDES -n istio-system  
-helm3 install istio-kyma-patch istio-kyma-patch -n istio-system --set $OVERRIDES 
-helm3 install knative-serving-init knative-serving-init -n knative-serving --set $OVERRIDES
-helm3 install knative-serving knative-serving -n knative-serving --set $OVERRIDES 
-helm3 install knative-eventing knative-eventing -n knative-eventing --set $OVERRIDES 
+helm3 upgrade -i ingress-dns-cert ingress-dns-cert --set $OVERRIDES -n istio-system  
+helm3 upgrade -i istio-kyma-patch istio-kyma-patch -n istio-system --set $OVERRIDES 
+helm3 upgrade -i knative-serving-init knative-serving-init -n knative-serving --set $OVERRIDES
+helm3 upgrade -i knative-serving knative-serving -n knative-serving --set $OVERRIDES 
+helm3 upgrade -i knative-eventing knative-eventing -n knative-eventing --set $OVERRIDES 
 
-helm3 install dex dex --set $OVERRIDES -n kyma-system 
-helm3 install ory ory --set $OVERRIDES --set $ORY -n kyma-system 
-helm3 install api-gateway api-gateway --set $OVERRIDES -n kyma-system 
-helm3 install rafter rafter --set $OVERRIDES -n kyma-system 
-helm3 install service-catalog service-catalog --set $OVERRIDES -n kyma-system 
-helm3 install service-catalog-addons service-catalog-addons --set $OVERRIDES -n kyma-system 
-# helm3 install helm-broker helm-broker --set $OVERRIDES -n kyma-system 
-helm3 install nats-streaming nats-streaming --set $OVERRIDES -n natss 
+helm3 upgrade -i dex dex --set $OVERRIDES -n kyma-system 
+helm3 upgrade -i ory ory --set $OVERRIDES --set $ORY -n kyma-system 
+helm3 upgrade -i api-gateway api-gateway --set $OVERRIDES -n kyma-system 
+helm3 upgrade -i rafter rafter --set $OVERRIDES -n kyma-system 
+helm3 upgrade -i service-catalog service-catalog --set $OVERRIDES -n kyma-system 
+helm3 upgrade -i service-catalog-addons service-catalog-addons --set $OVERRIDES -n kyma-system 
+# helm3 upgrade -i helm-broker helm-broker --set $OVERRIDES -n kyma-system 
+helm3 upgrade -i nats-streaming nats-streaming --set $OVERRIDES -n natss 
 
-helm3 install core core --set $OVERRIDES -n kyma-system 
-helm3 install cluster-users cluster-users --set $OVERRIDES -n kyma-system 
-helm3 install apiserver-proxy apiserver-proxy --set $OVERRIDES -n kyma-system 
-helm3 install serverless serverless --set $LOCALREGISTRY -n kyma-system 
-helm3 install knative-provisioner-natss knative-provisioner-natss --set $OVERRIDES -n knative-eventing 
-helm3 install event-sources event-sources --set $OVERRIDES -n kyma-system 
-helm3 install application-connector application-connector --set $OVERRIDES -n kyma-integration 
+helm3 upgrade -i core core --set $OVERRIDES -n kyma-system 
+helm3 upgrade -i cluster-users cluster-users --set $OVERRIDES -n kyma-system 
+helm3 upgrade -i apiserver-proxy apiserver-proxy --set $OVERRIDES -n kyma-system 
+helm3 upgrade -i serverless serverless --set $LOCALREGISTRY -n kyma-system 
+helm3 upgrade -i knative-provisioner-natss knative-provisioner-natss --set $OVERRIDES -n knative-eventing 
+helm3 upgrade -i event-sources event-sources --set $OVERRIDES -n kyma-system 
+helm3 upgrade -i application-connector application-connector --set $OVERRIDES -n kyma-integration 
 
 # Create installer deployment scaled to 0 to get console running:
 kubectl apply -f kyma-yaml/installer-local.yaml
