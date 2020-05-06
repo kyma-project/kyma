@@ -23,7 +23,7 @@ global:
       version: "9fae2df7"
     director:
       dir:
-      version: "PR-1222"
+      version: "a2a2a07e"
     gateway:
       dir:
       version: "93462f94"
@@ -32,10 +32,10 @@ global:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "PR-1222"
+      version: "a2a2a07e"
     provisioner:
       dir:
-      version: "PR-1285"
+      version: "a1b9f227"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -53,7 +53,7 @@ global:
         version: "9cebaf5c"
       provisioner:
         dir:
-        version: "PR-1252"
+        version: "56a6adc1"
       e2e_provisioning:
         dir:
         version: "ef98664d"
