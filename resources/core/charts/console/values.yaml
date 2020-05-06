@@ -6,8 +6,8 @@ console:
   statusPort: 6080
   image:
     dir:
-    tag: a3891b26
     pullPolicy: IfNotPresent
+    tag: de43ba06
   service:
     name: nginx
     externalPort: 80
