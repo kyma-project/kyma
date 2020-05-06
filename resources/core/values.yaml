@@ -38,7 +38,7 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: "4ea4dad6"
+    version: "PR-8384"
   console_backend_service_test:
     version: PR-8301
   xip_patch:
