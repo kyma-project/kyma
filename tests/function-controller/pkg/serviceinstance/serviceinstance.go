@@ -15,7 +15,6 @@ import (
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 type ServiceInstance struct {
@@ -29,11 +28,7 @@ type ServiceInstance struct {
 
 func New(name string, c shared.Container) *ServiceInstance {
 	return &ServiceInstance{
-		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
-			Version:  v1beta1.SchemeGroupVersion.Version,
-			Group:    v1beta1.SchemeGroupVersion.Group,
-			Resource: "serviceinstances",
-		}, c.Namespace, c.Log, c.Verbose),
+		resCli:      resource.New(c.DynamicCli, v1beta1.SchemeGroupVersion.WithResource("serviceinstances"), c.Namespace, c.Log, c.Verbose),
 		name:        name,
 		namespace:   c.Namespace,
 		waitTimeout: c.WaitTimeout,

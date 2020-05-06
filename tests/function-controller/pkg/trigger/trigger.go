@@ -19,7 +19,6 @@ import (
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 )
 
@@ -34,11 +33,7 @@ type Trigger struct {
 
 func New(name string, c shared.Container) *Trigger {
 	return &Trigger{
-		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
-			Version:  eventingv1alpha1.SchemeGroupVersion.Version,
-			Group:    eventingv1alpha1.SchemeGroupVersion.Group,
-			Resource: "triggers",
-		}, c.Namespace, c.Log, c.Verbose),
+		resCli:      resource.New(c.DynamicCli, eventingv1alpha1.SchemeGroupVersion.WithResource("triggers"), c.Namespace, c.Log, c.Verbose),
 		name:        name,
 		namespace:   c.Namespace,
 		waitTimeout: c.WaitTimeout,

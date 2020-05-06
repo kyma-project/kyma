@@ -14,7 +14,6 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 const DefaultName = "default"
@@ -30,11 +29,7 @@ type Broker struct {
 
 func New(c shared.Container) *Broker {
 	return &Broker{
-		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
-			Version:  eventingv1alpha1.SchemeGroupVersion.Version,
-			Group:    eventingv1alpha1.SchemeGroupVersion.Group,
-			Resource: "brokers",
-		}, c.Namespace, c.Log, c.Verbose),
+		resCli:      resource.New(c.DynamicCli, eventingv1alpha1.SchemeGroupVersion.WithResource("brokers"), c.Namespace, c.Log, c.Verbose),
 		name:        DefaultName,
 		namespace:   c.Namespace,
 		waitTimeout: c.WaitTimeout,
