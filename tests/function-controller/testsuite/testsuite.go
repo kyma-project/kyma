@@ -111,7 +111,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	si := serviceinstance.New(cfg.ServiceInstanceName, container)
 	sb := servicebinding.New(cfg.ServiceBindingName, container)
 	sbu := servicebindingusage.New(cfg.ServiceBindingUsageName, cfg.UsageKindName, container)
-	revList := revision.New(cfg.FunctionName, coreCli.RESTClient(), container)
+	revList := revision.New(cfg.FunctionName, container)
 
 	return &TestSuite{
 		namespace:           ns,

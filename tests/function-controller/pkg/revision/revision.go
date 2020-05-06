@@ -10,7 +10,6 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/rest"
 	"knative.dev/serving/pkg/apis/serving"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -20,7 +19,6 @@ import (
 
 type Revision struct {
 	resCli            *resource.Resource
-	restclient        rest.Interface
 	parentServiceName string
 	namespace         string
 	waitTimeout       time.Duration
@@ -28,10 +26,9 @@ type Revision struct {
 	verbose           bool
 }
 
-func New(parentServiceName string, restclient rest.Interface, c shared.Container) *Revision {
+func New(parentServiceName string, c shared.Container) *Revision {
 	return &Revision{
 		resCli:            resource.New(c.DynamicCli, servingv1.SchemeGroupVersion.WithResource("revisions"), c.Namespace, c.Log, c.Verbose),
-		restclient:        restclient,
 		parentServiceName: parentServiceName,
 		namespace:         c.Namespace,
 		waitTimeout:       c.WaitTimeout,
