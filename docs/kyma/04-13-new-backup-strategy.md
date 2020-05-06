@@ -1,6 +1,6 @@
 ---
-title: Kyma Backup strategy
-type: Details
+title: Back up Kyma
+type: Installation
 ---
 
 The user load on a Kyma cluster typically consists of various Kubernetes objects and volumes. Kyma relies on the managed Kubernetes cluster for periodic backups of the Kubernetes objects. That's why it does not require you to set anything manually to perform backups.
@@ -9,7 +9,7 @@ For example, Gardener uses etcd as the Kubernetes' backing store for all cluster
 
 However, volumes are typically not a part of these backups. That's why it is recommended to take periodic backups of your volumes. You can do this using the VolumeSnapshot Kubernetes API resource. Read the following sections to learn how to use it.
 
-## On-Demand Volume Snapshots
+## On-Demand volume snapshots
 
 Kubernetes provides an API resource called VolumeSnapshot that you can use to take the snapshot of a volume on Kubernetes. You can then use the snapshot either to provision a new volume (pre-populated with the snapshot data) or to restore the existing volume to a previous state (represented by the snapshot).
 
