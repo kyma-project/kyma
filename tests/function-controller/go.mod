@@ -7,6 +7,9 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
+	github.com/kubernetes-incubator/service-catalog v0.2.2
+	github.com/kubernetes-sigs/service-catalog v0.2.2 // indirect
+	github.com/kyma-project/helm-broker v1.0.0
 	github.com/kyma-project/kyma/components/function-controller v0.0.0-20200429131806-d45e012bf689
 	github.com/onsi/gomega v1.9.0
 	github.com/pkg/errors v0.9.1
