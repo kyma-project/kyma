@@ -1,67 +1,86 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: pre-upgrade-application-connector
+  name: {{ .Release.Name }}-pre-application-connector
   annotations:
-    helm.sh/hook: pre-upgrade
+    helm.sh/hook: "pre-upgrade, pre-install"
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
   labels:
-    job: pre-upgrade-application-connector
+    job: {{ .Release.Name }}-pre-application-connector
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: pre-upgrade-application-connector
+  name: {{ .Release.Name }}-pre-application-connector
   annotations:
-    helm.sh/hook: pre-upgrade
+    helm.sh/hook: "pre-upgrade, pre-install"
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
   labels:
-    job: pre-upgrade-application-connector
+    job: {{ .Release.Name }}-pre-application-connector
 rules:
 - apiGroups: ["apiextensions.k8s.io"]
   resources: ["customresourcedefinitions"]
-  verbs: ["get", "delete"]
+  verbs: ["get", "update"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: pre-upgrade-application-connector
+  name: {{ .Release.Name }}-pre-application-connector
   annotations:
-    helm.sh/hook: pre-upgrade
+    helm.sh/hook: "pre-upgrade, pre-install"
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
   labels:
-    job: pre-upgrade-application-connector
+    job: {{ .Release.Name }}-pre-application-connector
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: pre-upgrade-application-connector
+  name: {{ .Release.Name }}-pre-application-connector
 subjects:
 - kind: ServiceAccount
-  name: pre-upgrade-application-connector
+  name: {{ .Release.Name }}-pre-application-connector
   namespace: kyma-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-crd-apirules
+  annotations:
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+data:
+  crd-applications.applicationconnector.yaml: |-
+{{.Files.Get "files/crd-applications.applicationconnector.yaml" | printf "%s" | indent 4}}
+  crd-certificaterequests.applicationconnector.yaml: |-
+{{.Files.Get "files/crd-certificaterequests.applicationconnector.yaml" | printf "%s" | indent 4}}
+  crd-tokenrequests.applicationconnector.yaml: |-
+{{.Files.Get "files/crd-tokenrequests.applicationconnector.yaml" | printf "%s" | indent 4}}
+  crd-centralconnections.applicationconnector.yaml: |-
+{{.Files.Get "files/crd-centralconnections.applicationconnector.yaml" | printf "%s" | indent 4}}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: pre-upgrade-application-connector
+  name: {{ .Release.Name }}-pre-application-connector
   annotations:
     helm.sh/hook-delete-policy: "hook-succeeded, before-hook-creation"
-    helm.sh/hook: pre-upgrade
+    helm.sh/hook: "pre-upgrade, pre-install"
     helm.sh/hook-weight: "10"
   labels:
-    job: pre-upgrade-application-connector
+    job: {{ .Release.Name }}-pre-application-connector
 spec:
   backoffLimit: 1
   template:
     metadata:
-      name: backup-upgrade-helper
+      name: {{ .Release.Name }}-pre-application-connector
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
-        job: pre-upgrade-application-connector
+        job: {{ .Release.Name }}-pre-application-connector
     spec:
       serviceAccountName: pre-upgrade-application-connector
       restartPolicy: Never
@@ -69,14 +88,26 @@ spec:
       - name: job
         image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
         terminationMessagePolicy: "FallbackToLogsOnError"
+        volumeMounts:
+        - name: crd-application-connector
+          mountPath: /etc/crd
+          readOnly: true
         command:
         - /bin/bash
         - -c
         - |-
           set -e
-          kubectl delete crd \
-          certificaterequests.applicationconnector.kyma-project.io \
-          centralconnections.applicationconnector.kyma-project.io \
-          tokenrequests.applicationconnector.kyma-project.io \
-          applications.applicationconnector.kyma-project.io \
-          --ignore-not-found
+
+          crds=( crd-applications.applicationconnector.yaml, \
+                 crd-certificaterequests.applicationconnector.yaml, \
+                 crd-tokenrequests.applicationconnector.yaml, \
+                 crd-centralconnections.applicationconnector.yaml )
+
+          for crd in "$crds[@]"
+          do
+            kubectl replace -f /etc/crd/"$crd" || kubectl apply -f /etc/crd/"$crd"
+          done
+      volumes:
+      - name: crd-application-connector
+        configMap:
+          name: {{ .Release.Name }}-crd-application-connector
