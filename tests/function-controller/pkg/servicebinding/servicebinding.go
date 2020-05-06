@@ -15,7 +15,6 @@ import (
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 type ServiceBinding struct {
@@ -28,12 +27,9 @@ type ServiceBinding struct {
 }
 
 func New(name string, c shared.Container) *ServiceBinding {
+
 	return &ServiceBinding{
-		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
-			Version:  v1beta1.SchemeGroupVersion.Version,
-			Group:    v1beta1.SchemeGroupVersion.Group,
-			Resource: "servicebindings",
-		}, c.Namespace, c.Log, c.Verbose),
+		resCli:      resource.New(c.DynamicCli, v1beta1.SchemeGroupVersion.WithResource("servicebindings"), c.Namespace, c.Log, c.Verbose),
 		name:        name,
 		namespace:   c.Namespace,
 		waitTimeout: c.WaitTimeout,

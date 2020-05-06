@@ -15,7 +15,6 @@ import (
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 type AddonConfiguration struct {
@@ -28,12 +27,9 @@ type AddonConfiguration struct {
 }
 
 func New(name string, c shared.Container) *AddonConfiguration {
+
 	return &AddonConfiguration{
-		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
-			Version:  v1alpha1.SchemeGroupVersion.Version,
-			Group:    v1alpha1.SchemeGroupVersion.Group,
-			Resource: "addonsconfigurations",
-		}, c.Namespace, c.Log, c.Verbose),
+		resCli:      resource.New(c.DynamicCli, v1alpha1.SchemeGroupVersion.WithResource("addonsconfigurations"), c.Namespace, c.Log, c.Verbose),
 		name:        name,
 		namespace:   c.Namespace,
 		waitTimeout: c.WaitTimeout,

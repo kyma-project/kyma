@@ -38,13 +38,16 @@ rules:
     verbs: ["get", "delete", "list", "watch"]
   - apiGroups: ["addons.kyma-project.io"]
     resources: ["addonsconfigurations"]
-    verbs: ["create", "get", "delete", "list", "watch"] 
+    verbs: ["create", "get", "delete", "list", "watch"]
   - apiGroups: ["servicecatalog.kyma-project.io"]
     resources: ["servicebindingusages"]
     verbs: ["create", "get", "delete", "list", "watch"]
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["serviceinstances", "servicebindings"]
     verbs: ["create", "get", "delete", "list", "watch"]
+  - apiGroups: ["serving.knative.dev"]
+    resources: ["revisions"]
+    verbs: ["list"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1

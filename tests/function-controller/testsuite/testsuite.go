@@ -22,6 +22,7 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/namespace"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/revision"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebinding"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebindingusage"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/serviceinstance"
@@ -73,6 +74,7 @@ type TestSuite struct {
 	serviceinstance     *serviceinstance.ServiceInstance
 	servicebinding      *servicebinding.ServiceBinding
 	servicebindingusage *servicebindingusage.ServiceBindingUsage
+	revisions           *revision.Revision
 	t                   *testing.T
 	g                   *gomega.GomegaWithT
 	dynamicCli          dynamic.Interface
@@ -109,6 +111,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	si := serviceinstance.New(cfg.ServiceInstanceName, container)
 	sb := servicebinding.New(cfg.ServiceBindingName, container)
 	sbu := servicebindingusage.New(cfg.ServiceBindingUsageName, cfg.UsageKindName, container)
+	revList := revision.New(cfg.FunctionName, container)
 
 	return &TestSuite{
 		namespace:           ns,
@@ -120,6 +123,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		serviceinstance:     si,
 		servicebinding:      sb,
 		servicebindingusage: sbu,
+		revisions:           revList,
 		t:                   t,
 		g:                   g,
 		dynamicCli:          dynamicCli,
@@ -240,6 +244,14 @@ func (t *TestSuite) Run() {
 
 	t.t.Log("Testing injection of env variables via gateway")
 	err = t.pollForAnswer(fnGatewayURL, redisEnvPing, answerForEnvPing)
+	failOnError(t.g, err)
+
+	t.t.Log("Testing cleanup of stale revisions")
+	err = t.revisions.WaitForRevisionCleanup()
+	failOnError(t.g, err)
+
+	t.t.Log("Testing that remaining revision is the newest one")
+	err = t.revisions.VerifyConfigurationGeneration(3) // 1 update caused from fn update, one from servicebindingusage
 	failOnError(t.g, err)
 }
 

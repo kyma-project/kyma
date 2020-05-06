@@ -15,7 +15,6 @@ import (
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 type ServiceBindingUsage struct {
@@ -30,11 +29,7 @@ type ServiceBindingUsage struct {
 
 func New(name, usageKind string, c shared.Container) *ServiceBindingUsage {
 	return &ServiceBindingUsage{
-		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
-			Version:  v1alpha1.SchemeGroupVersion.Version,
-			Group:    v1alpha1.SchemeGroupVersion.Group,
-			Resource: "servicebindingusages",
-		}, c.Namespace, c.Log, c.Verbose),
+		resCli:      resource.New(c.DynamicCli, v1alpha1.SchemeGroupVersion.WithResource("servicebindingusages"), c.Namespace, c.Log, c.Verbose),
 		name:        name,
 		namespace:   c.Namespace,
 		waitTimeout: c.WaitTimeout,

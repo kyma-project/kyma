@@ -15,7 +15,6 @@ import (
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 type APIRule struct {
@@ -29,11 +28,7 @@ type APIRule struct {
 
 func New(name string, c shared.Container) *APIRule {
 	return &APIRule{
-		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
-			Version:  apiruleTypes.GroupVersion.Version,
-			Group:    apiruleTypes.GroupVersion.Group,
-			Resource: "apirules",
-		}, c.Namespace, c.Log, c.Verbose),
+		resCli:      resource.New(c.DynamicCli, apiruleTypes.GroupVersion.WithResource("apirules"), c.Namespace, c.Log, c.Verbose),
 		name:        name,
 		namespace:   c.Namespace,
 		waitTimeout: c.WaitTimeout,
