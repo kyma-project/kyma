@@ -54,3 +54,26 @@ Create a list of namespaced services to blacklist
 {{- end }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Create a list of domains to whitelist
+*/}}
+{{- define "api-gateway.domainWhiteList" -}}
+{{- range $domain := .Values.config.domainWhiteList -}}
+{{ printf "%s," $domain -}}
+{{- end }}
+{{- with .Values.global.ingress.domainName }}
+{{- printf "%s" . -}}
+{{- end }}
+{{- end -}}
+
+{{/*
+Get a default domain from values if set or use the default domain name for Kyma
+*/}}
+{{- define "api-gateway.defaultDomain" -}}
+{{ if .Values.config.defaultDomain }}
+{{- printf "%s" .Values.config.defaultDomain -}}
+{{ else }}
+{{- printf "%s" .Values.global.ingress.domainName -}}
+{{- end }}
+{{- end -}}

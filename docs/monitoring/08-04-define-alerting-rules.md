@@ -46,7 +46,7 @@ Follow these steps to create an alerting rule:
    |-----------|-------------|---------------|
    | **groups.name** | Specifies the name of the group listing the rules.  | `cpu.temp.rules` |
    | **rules.alert** | Specifies the name of the alert. | `CPUTempHigh`  |
-   | **rules.expr** | A PromQL expression which specifies the conditions that must be met for the alarm to fire. Specify the expression using Kubernetes [functions](https://prometheus.io/docs/prometheus/latest/querying/functions/) and [metrics](https://github.com/kubernetes/kube-state-metrics/blob/master/docs/README.md). | `cpu_temperature_celsius >= 75`  |
+   | **rules.expr** | A PromQL expression which specifies the conditions that must be met for the alarm to fire. Specify the expression using Kubernetes [Functions](https://prometheus.io/docs/prometheus/latest/querying/functions/) and [metrics](https://github.com/kubernetes/kube-state-metrics/blob/master/docs/README.md). | `cpu_temperature_celsius >= 75`  |
    | **rules.for** | Specifies the time period between encountering an active alert for the first time during rule evaluation and firing the alert.  | `10s` |
    | **rules.labels.severity** | Specifies the severity of the alert.  | `critical` |
    | **rules.annotations.description** | Provides the alert details. | `CPU temperature is equal to or greater than 75 degrees Celsius` |

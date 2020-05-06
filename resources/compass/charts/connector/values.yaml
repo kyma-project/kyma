@@ -1,6 +1,7 @@
 deployment:
   image:
     pullPolicy: IfNotPresent
+  resources: {}
   args:
     token:
       length: 64
@@ -14,6 +15,8 @@ deployment:
       province: "province"
     certificateValidityTime: "2160h"
     attachRootCAToChain: false
+
+  strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 
   securityContext: # Set on container level
     runAsUser: 2000

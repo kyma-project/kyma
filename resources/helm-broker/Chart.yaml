@@ -1,3 +1,4 @@
 name: helm-broker
 description: Helm service-broker deployment chart.
-version: 2e995131
+version: 0.6.0
+apiVersion: v1

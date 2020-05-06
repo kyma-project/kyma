@@ -14,6 +14,9 @@ spec:
     - port: {{ .Values.compass_mfs.service.externalPort }}
       name: http2-compass-mfs
       targetPort: {{ .Values.compass_mfs.service.internalPort }}
+    - port: {{ .Values.compass_mfs.statusPort }}
+      name: status-port-compass-mfs
+      targetPort: {{ .Values.compass_mfs.statusPort }}
   selector:
     app: core-{{ template "name" . }}
     release: {{ .Release.Name }}

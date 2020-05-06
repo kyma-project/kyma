@@ -6,40 +6,40 @@ import (
 	"testing"
 	"time"
 
-	"kyma-project.io/compass-runtime-agent/internal/compass/cache"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 
-	"kyma-project.io/compass-runtime-agent/internal/compass/director"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
 
-	"kyma-project.io/compass-runtime-agent/internal/kyma"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
 
-	"kyma-project.io/compass-runtime-agent/internal/apperrors"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 
-	"kyma-project.io/compass-runtime-agent/internal/certificates"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 
 	"github.com/stretchr/testify/assert"
 
+	certsMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates/mocks"
+	directorMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director/mocks"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
+	configMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config/mocks"
+	kymaMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/mocks"
+	kymaModel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	certsMocks "kyma-project.io/compass-runtime-agent/internal/certificates/mocks"
-	directorMocks "kyma-project.io/compass-runtime-agent/internal/compass/director/mocks"
-	"kyma-project.io/compass-runtime-agent/internal/config"
-	configMocks "kyma-project.io/compass-runtime-agent/internal/config/mocks"
-	kymaMocks "kyma-project.io/compass-runtime-agent/internal/kyma/mocks"
-	kymaModel "kyma-project.io/compass-runtime-agent/internal/kyma/model"
 
-	compassMocks "kyma-project.io/compass-runtime-agent/internal/compass/mocks"
+	compassMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/mocks"
 
 	"github.com/stretchr/testify/mock"
 
 	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
 
-	connectorMocks "kyma-project.io/compass-runtime-agent/internal/compass/connector/mocks"
+	connectorMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/connector/mocks"
 
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 
 	"github.com/stretchr/testify/require"
 )

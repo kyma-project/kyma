@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/metrics/mocks"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -17,7 +18,6 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubernetesFake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
-	"kyma-project.io/compass-runtime-agent/internal/metrics/mocks"
 )
 
 const (

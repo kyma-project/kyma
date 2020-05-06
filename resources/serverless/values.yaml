@@ -8,7 +8,7 @@ tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-8068"
+    tag: "PR-8312"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -20,8 +20,9 @@ tests:
       memory: 64Mi
       cpu: 200m
   envs:
-    waitTimeout: 10m
+    waitTimeout: 15m
     verifySSL: "false"
+    verbose: "true"
 
 global:
   commonLabels:
@@ -39,12 +40,15 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-8068"
+    tag: "e56a613c"
     pullPolicy: IfNotPresent
   kubeRbacProxy:
-    repository: gcr.io/kubebuilder/kube-rbac-proxy
-    tag: v0.4.1
+    repository: "gcr.io/kubebuilder/kube-rbac-proxy"
+    tag: "v0.5.0"
     pullPolicy: IfNotPresent
+  functionRuntimeNodejs12:
+    repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
+    tag: "a62f4a7f"  
 
 deployment:
   replicas: 1
@@ -80,16 +84,22 @@ containers:
         value: 1100m
       buildLimitsMemory:
         value: 1100Mi
-      namespaceRequeueDuration:
-        value: 1m
+      configMapRequeueDuration:
+        value: 5m
+      secretRequeueDuration:
+        value: 5m
+      serviceAccountRequeueDuration:
+        value: 5m
       namespaceExcludedNames:
-        value: "istio-system;knative-eventing;knative-serving;kube-node-lease;kube-public;kube-system;kyma-installer;kyma-integration;kyma-system;natss"
+        value: "istio-system,knative-eventing,knative-serving,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
       imagePullSecretName:
         value: "{{ template \"fullname\" . }}-registry-credentials"
       imagePullAccountName:
         value: "{{ template \"fullname\" . }}"
+      kserviceRequeueDuration:
+        value: 5m
       functionRequeueDuration:
-        value: 1m
+        value: 5m
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v0.17.1
       functionBuildCredsInitImage:
@@ -176,9 +186,12 @@ secret:
   externalRegistry: "registry.{{ .Values.global.ingress.domainName -}}"
 
 backendModule:
-  enable: true
+  enabled: true
 
 clusterMicroFrontend:
+  enabled: true
+
+grafanaDashboard:
   enabled: true
 
 docker-registry:

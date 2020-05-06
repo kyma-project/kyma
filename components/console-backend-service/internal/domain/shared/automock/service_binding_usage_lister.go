@@ -10,6 +10,20 @@ type ServiceBindingUsageLister struct {
 	mock.Mock
 }
 
+// DeleteAllByUsageKind provides a mock function with given fields: namespace, kind, resourceName
+func (_m *ServiceBindingUsageLister) DeleteAllByUsageKind(namespace string, kind string, resourceName string) error {
+	ret := _m.Called(namespace, kind, resourceName)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string, string) error); ok {
+		r0 = rf(namespace, kind, resourceName)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // ListByUsageKind provides a mock function with given fields: ns, kind, resourceName
 func (_m *ServiceBindingUsageLister) ListByUsageKind(ns string, kind string, resourceName string) ([]*v1alpha1.ServiceBindingUsage, error) {
 	ret := _m.Called(ns, kind, resourceName)

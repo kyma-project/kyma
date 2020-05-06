@@ -30,7 +30,7 @@ Follow these rules while you develop new features for this project.
 - Do not make direct dependencies between a resolver type and services. Define interfaces, which contain only used methods. Use these interface types in a constructor of a resolver type.
 - Do not export domain's interfaces and types which are not used in other places. For testing purposes, use the `export_test.go` file, which exports constructors only for tests.
 - If an error appears, the resolver must return a general error message, which hides the applied solutions and logic behind them. Log the details of the error using the `glog` logger.
-- Avoid creating functions in domains as they are accessible in whole domain. Create types and define their methods.
+- Avoid creating Functions in domains as they are accessible in whole domain. Create types and define their methods.
 - Return pointers for objects that represents resources in services and converters. Pass objects by pointer as method arguments in converters.
 - If a specific resource does not exist during `find` operation, return `nil` without an error.
 - Use cache whenever possible for small pieces of data. Monitor resources usage and consider invalidating cache after some period of inactivity that lasts, for example, one day.

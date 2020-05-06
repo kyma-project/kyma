@@ -19,15 +19,15 @@ package testing
 import (
 	pkgerrors "github.com/pkg/errors"
 
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/tools/cache"
-
 	authv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	fakeistioclientset "istio.io/client-go/pkg/clientset/versioned/fake"
 	authenticationlistersv1alpha1 "istio.io/client-go/pkg/listers/authentication/v1alpha1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/cache"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	fakeeventingclientset "knative.dev/eventing/pkg/client/clientset/versioned/fake"
 	messaginglistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
+	fakelegacyclientset "knative.dev/eventing/pkg/legacyclient/clientset/versioned/fake"
 	rt "knative.dev/pkg/reconciler/testing"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 	fakeservingclientset "knative.dev/serving/pkg/client/clientset/versioned/fake"
@@ -36,12 +36,15 @@ import (
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	fakesourcesclientset "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/fake"
 	sourceslistersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/lister/sources/v1alpha1"
+
+	_ "knative.dev/pkg/client/injection/ducks/duck/v1/addressable/fake"
 )
 
 var clientSetSchemes = []func(*runtime.Scheme) error{
 	fakeservingclientset.AddToScheme,
 	fakesourcesclientset.AddToScheme,
 	fakeeventingclientset.AddToScheme,
+	fakelegacyclientset.AddToScheme,
 	fakeistioclientset.AddToScheme,
 }
 
@@ -77,6 +80,10 @@ func (l *Listers) IndexerFor(obj runtime.Object) cache.Indexer {
 
 func (l *Listers) GetSourcesObjects() []runtime.Object {
 	return l.sorter.ObjectsForSchemeFunc(fakesourcesclientset.AddToScheme)
+}
+
+func (l *Listers) GetLegacyObjects() []runtime.Object {
+	return l.sorter.ObjectsForSchemeFunc(fakelegacyclientset.AddToScheme)
 }
 
 func (l *Listers) GetServingObjects() []runtime.Object {

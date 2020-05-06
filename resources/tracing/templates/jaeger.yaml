@@ -3,10 +3,8 @@ apiVersion: jaegertracing.io/v1
 kind: Jaeger
 metadata:
   name: {{ include "jaeger-operator.fullname" . }}-jaeger
-{{- with .Values.jaeger.spec }}
 spec:
-{{ toYaml . | indent 2}}
-{{- end }}
+{{ tpl (toYaml .Values.jaeger.spec | indent 2) . }}
 {{- /*
   Customization: This if block was added to support for badger PVs.
 */ -}}

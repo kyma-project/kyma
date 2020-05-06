@@ -2,21 +2,23 @@
 title: Architecture
 ---
 
-Serverless relies on [Knative Serving](https://knative.dev/docs/serving/) for deploying and managing functions and [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) for creating Docker images. See how these and other resources process a function within a Kyma cluster:
+Serverless relies on [Knative Serving](https://knative.dev/docs/serving/) for deploying and managing Functions and [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) for creating Docker images. See how these and other resources process a Function within a Kyma cluster:
 
 ![Serverless architecture](./assets/serverless-architecture.svg)
 
-1. Create a function either through the UI or by applying a Function custom resource (CR). This CR contains the function definition (business logic that you want to execute) and information on the environment on which it should run.
+> **CAUTION:** Serverless imposes some requirements on the setup of Namespaces. If you create a new Namespace, do not disable sidecar injection in it as Serverless requires Istio for other resources to communicate with Functions correctly. Also, if you apply custom [LimitRanges](/root/kyma/#details-resource-quotas) for a new Namespace, they must be higher than or equal to the [limits for building Jobs' resources](#configuration-serverless-chart).
+
+1. Create a Function either through the UI or by applying a Function custom resource (CR). This CR contains the Function definition (business logic that you want to execute) and information on the environment on which it should run.
 
     >**NOTE:** Function Controller sets the Node.js 12 runtime by default.
 
 2. Function Controller (FC) detects a new Function CR.
 
-3. FC creates a ConfigMap with the function definition.
+3. FC creates a ConfigMap with the Function definition.
 
-4. Based on the ConfigMap, FC creates a Kubernetes Job that triggers the creation of a function image.
+4. Based on the ConfigMap, FC creates a Kubernetes Job that triggers the creation of a Function image.
 
-5. The Job creates a Pod with the Docker image containing the function definition. It also pushes the image to a Docker registry.
+5. The Job creates a Pod with the Docker image containing the Function definition. It also pushes the image to a Docker registry.
 
 6. FC monitors the Job status. When the image creation finishes successfully, FC creates a Service CR (KService) that points to the Pod with the image.
 
@@ -38,4 +40,4 @@ Serverless relies on [Knative Serving](https://knative.dev/docs/serving/) for de
 
     >**TIP:** For more details on all Knative Serving resources, read the official [Knative documentation](https://knative.dev/docs/serving/).
 
-To sum up, the overall eventing communication with the function takes place through the Virtual Service that points to a given Revision. By default, the Virtual Service is set to the latest Revision but that can be modified to distribute traffic between Revisions if there is a high number of incoming events.
+To sum up, the overall eventing communication with the Function takes place through the Virtual Service that points to a given Revision. By default, the Virtual Service is set to the latest Revision but that can be modified to distribute traffic between Revisions if there is a high number of incoming events.

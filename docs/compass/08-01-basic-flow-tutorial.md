@@ -3,10 +3,10 @@ title: Manage your Applications using Kyma Console and Compass UIs
 type: Tutorials
 ---
 
-This tutorial presents the basic flow in which you manually register an external Application's API into Compass and expose it into the Kyma Runtime. In the Kyma Runtime, you then create a lambda that calls the Application's API. While going through this tutorial, you will navigate between two UI views:
+This tutorial presents the basic flow in which you manually register an external Application's API into Compass and expose it into the Kyma Runtime. In the Kyma Runtime, you then create a Function that calls the Application's API. While going through this tutorial, you will navigate between two UI views:
 
 - Compass UI, where you create connections between Applications, Runtimes, and scenarios
-- Kyma Console UI, where you manage resources used in your Application, such as services, lambdas, and bindings
+- Kyma Console UI, where you manage resources used in your Application, such as services, Functions, and bindings
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ For simplicity reasons, use the available Order Service as the sample external A
 
 - [`order-service`](./assets/order-service.yaml) file that contains the service definition, deployment, and its API
 - [API specification](./assets/order-service-api-spec.yaml) of `order-service`
-- [Lambda function](./assets/lambda.yaml) that calls `order-service` for orders
+- [Function](./assets/function.yaml) that calls `order-service` for orders
 - Kyma cluster with the Compass module and the API Packages feature enabled
 
 >**NOTE:** Read [this](#installation-enable-compass-in-kyma-default-kyma-installation) document to learn how to install Kyma with the Compass module and the API Packages feature.
@@ -50,50 +50,25 @@ For simplicity reasons, use the available Order Service as the sample external A
 
 1. Go back to the Kyma Console UI. You can see that the `test-app` Application is registered in the **Applications** view. Select `test-app` and bind it to your Namespace by selecting the **Create Binding** button.
 
-2. From the drop-down list in the top-right corner, select your Namespace and go to the **Catalog** view. You will see your services available under the **Services** tab. Provision the service instance by choosing your Package and clicking the **Add** button in the top-right corner of the page.
+2. From the drop-down list in the top-right corner, select your Namespace and go to the **Catalog** view. You will see your services available under the **Services** tab. Provision the ServiceInstance by choosing your Package and clicking the **Add** button in the top-right corner of the page.
 
-3. Create a lambda function. In the **Overview** tab, click the **Deploy new resource** button and upload the file with the [lambda function](./assets/lambda.yaml).
+3. Create a Function. In the **Overview** tab, click the **Deploy new resource** button and upload the file with the [Function](./assets/function.yaml).
 
-4. Expose your lambda:
+4. Expose your Function following [this](/components/serverless/#tutorials-expose-a-function-with-an-api-rule) tutorial. Follow the instructions in the `Console UI` tab.
 
-    a. In the left navigation panel, go to the **Lambdas** tab and click the `call-order-service` lambda.
-
-    b. In the **Settings & Code** section, click the **Select Function Trigger** button and expose your lambda via HTTPS.
-
-    c. Untick the **Enable authentication** field as there is no need to secure the connection for the purpose of this tutorial. Click **Add**.
-
-    d. Scroll down to the end of your lambda view and bind your lambda to your instance by clicking the **Create Service Binding** button in the **Service Binding** section. Choose the ServiceInstance you want to bind your lambda to, and click **Create Service Binding**.
-
-    e. Save the settings in the right top-right corner of the page.
-
-    f. Click the **Lambdas** tab and wait until the lambda status is completed and marked as `1/1`.
-
-5. Test your lambda. Navigate to your lambda and go to the **Testing** tab. After you click the **Send** button, you can see the following output in the **Response** field:
-
-    ```
-    {
-      "status": 200,
-      "data": []
-    }
-    ```
-
-    You can test your lambda by performing the following actions in the **Payload** field:
-
-    - `{"action":"add"}` - adds the new order
-    - `{"action":"list"}` - lists all orders (this is the default command executed after you click the **Send** button)
-    - `{"action":"delete"}` - deletes all the orders
+5. Bind the ServiceInstance to your Function following [this](/components/serverless/#tutorials-bind-a-service-instance-to-a-function) tutorial. Follow the instructions in the `Console UI` tab.
 
 ### Cleanup
 
 Clean up your cluster after going through this tutorial. To do so, delete your resources in the following order:
 
-1. Go to the **Lambdas** tab, unfold the vertical option menu and delete your lambda.
+1. Go to the **Functions** tab and delete the `call-order-service` Function.
 
 2. Go to the **Services** tab and delete `order-service`.
 
 3. Go to the **Deployments** tab and delete the `order-service` deployment.
 
-4. Go to the **APIs** tab and delete the `order-service` API.
+4. Go to the **API Rules** tab and delete the created API Rule.
 
 5. Go to the **Instances** tab, navigate to **Services**, and deprovision your instance by selecting the trash bin icon.
 

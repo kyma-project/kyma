@@ -269,6 +269,76 @@ func TestServiceBindingUsageResolver_ServiceBindingUsageQuery(t *testing.T) {
 	})
 }
 
+func TestServiceBindingUsageResolver_ServiceBindingUsagesQuery(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		svc := automock.NewServiceBindingUsageOperations()
+		converter := automock.NewServiceBindingUsageConverter()
+
+		bindingUsage1 := fixServiceBindingUsageResource()
+		bindingUsage1.Name = "app1"
+		bindingUsage2 := fixServiceBindingUsageResource()
+		bindingUsage2.Name = "app2"
+		bindingUsages := []*api.ServiceBindingUsage{
+			bindingUsage1, bindingUsage1,
+		}
+
+		gqlBindingUsage1 := fixServiceBindingUsage()
+		gqlBindingUsage1.Name = "app1"
+		gqlBindingUsage2 := fixServiceBindingUsage()
+		gqlBindingUsage2.Name = "app2"
+		gqlBindingUsages := []gqlschema.ServiceBindingUsage{
+			*gqlBindingUsage1, *gqlBindingUsage2,
+		}
+
+		converter.On("ToGQLs", bindingUsages).Return(gqlBindingUsages, nil).Once()
+		defer svc.AssertExpectations(t)
+
+		svc.On("ListByUsageKind", "test", "", "").Return(bindingUsages, nil).Once()
+		defer svc.AssertExpectations(t)
+
+		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc, converter)
+
+		result, err := resolver.ServiceBindingUsagesQuery(nil, "test", (*string)(nil), (*string)(nil))
+
+		require.NoError(t, err)
+		assert.ElementsMatch(t, gqlBindingUsages, result)
+	})
+
+	t.Run("Not found", func(t *testing.T) {
+		svc := automock.NewServiceBindingUsageOperations()
+		converter := automock.NewServiceBindingUsageConverter()
+
+		usages := []*api.ServiceBindingUsage{}
+		gqlUsages := []gqlschema.ServiceBindingUsage{}
+
+		converter.On("ToGQLs", usages).Return(gqlUsages, nil).Once()
+		defer svc.AssertExpectations(t)
+
+		svc.On("ListByUsageKind", "test", "", "").Return(usages, nil).Once()
+		defer svc.AssertExpectations(t)
+		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc, converter)
+
+		result, err := resolver.ServiceBindingUsagesQuery(nil, "test", (*string)(nil), (*string)(nil))
+
+		require.NoError(t, err)
+		assert.Equal(t, gqlUsages, result)
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		svc := automock.NewServiceBindingUsageOperations()
+		converter := automock.NewServiceBindingUsageConverter()
+
+		svc.On("ListByUsageKind", "test", "", "").Return(nil, errors.New("trolololo")).Once()
+		defer svc.AssertExpectations(t)
+		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc, converter)
+
+		_, err := resolver.ServiceBindingUsagesQuery(nil, "test", (*string)(nil), (*string)(nil))
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+	})
+}
+
 func TestServiceBindingUsageResolver_ServiceBindingUsagesOfInstanceQuery(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		usages := []*api.ServiceBindingUsage{

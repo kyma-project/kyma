@@ -1,5 +1,7 @@
 imageRegistry: "eu.gcr.io/kyma-project/incubator/develop"
 
+replicaCount: 1
+
 containerPort: 5556
 
 oidc:
@@ -63,6 +65,8 @@ dex:
     # log format, can be "text" or "json"
     format: json
   useStaticConnector: true
+
+deploymentStrategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 
 resources:
   limits:
