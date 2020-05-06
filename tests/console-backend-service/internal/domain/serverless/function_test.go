@@ -85,7 +85,7 @@ func TestFunctionEventQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Logf("Query functions: %s, %s", functionName2, functionName3)
-	functions, err := queryFunctions(c, namespaceName, functionDetailsFields())
+	functions, err := queryFunctions(c, queryFunctionsArguments(namespaceName), functionDetailsFields())
 	checkFunctionList(t, namespaceName, []string{functionName2, functionName3}, functions)
 
 	t.Logf("Delete functions: %s, %s", functionName2, functionName3)
@@ -98,7 +98,7 @@ func TestFunctionEventQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Logf("Query functions in namespace: %s", namespaceName)
-	functions, err = queryFunctions(c, namespaceName, functionDetailsFields())
+	functions, err = queryFunctions(c, queryFunctionsArguments(namespaceName), functionDetailsFields())
 	assert.Equal(t, 0, len(functions))
 
 	t.Log("Check auth connection")
@@ -110,7 +110,7 @@ func TestFunctionEventQueries(t *testing.T) {
 		auth.Get: {fixFunctionRequest("query", "function",
 			queryFunctionArguments(functionName1, namespaceName), functionDetailsFields())},
 		auth.List: {fixFunctionRequest("query", "functions",
-			queryFunctionArguments(functionName1, namespaceName), functionDetailsFields())},
+			queryFunctionsArguments(namespaceName), functionDetailsFields())},
 		auth.Delete: {fixFunctionRequest("mutation", "deleteFunction",
 			deleteFunctionArguments(functionName1, namespaceName), functionMetadataDetailsFields())},
 	}
@@ -134,18 +134,8 @@ func isInArray(data string, array []string) bool {
 	return false
 }
 
-func queryFunctions(client *graphql.Client, namespace, details string) ([]Function, error) {
-	query := fmt.Sprintf(`
-		query{
-			functions (
-				namespace: "%s"
-			){
-				%s
-			}
-		}
-	`, namespace, details)
-
-	req := graphql.NewRequest(query)
+func queryFunctions(client *graphql.Client, arguments, details string) ([]Function, error) {
+	req := fixFunctionRequest("query", "functions", arguments, details)
 	var res FunctionListQueryResponse
 	err := client.Do(req, &res)
 
@@ -237,6 +227,12 @@ func queryFunctionArguments(name, namespace string) string {
 		name: "%s",
 		namespace: "%s"
 	`, name, namespace)
+}
+
+func queryFunctionsArguments(namespace string) string {
+	return fmt.Sprintf(`
+		namespace: "%s"
+	`, namespace)
 }
 
 func deleteManyFunctionsArguments(namespace string, functionsMetadata []FunctionMetadataInput) string {
