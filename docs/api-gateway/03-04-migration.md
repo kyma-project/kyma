@@ -34,13 +34,13 @@ If all Apis have the status, proceed with the upgrade to migrate the resources.
 
 >**CAUTION:** Migrating resources may result in a temporary downtime of the exposed service. 
 
-During upgrade, it may turn out that some resource specifications are too complex or fail to meet all the migration requirements. In such a case the process skips them but doesn't break the way existing services are exposed. However, if you want to introduce further changes or remove the Api CR, your actions won't have any effect on how the service is exposed because it will still use the original configuration.  
+During the upgrade process, it may turn out that some resource specifications are too complex or fail to meet all the migration requirements. In such a case, the process skips them, but it doesn't break the way existing services are exposed. However, if you want to introduce further changes or remove the Api CR, your actions won't have any effect on how the service is exposed, because it will still use the original configuration.  
 
 >**NOTE:** If the migration process skipped the Api resources due to the invalid status or a blacklisted label, migration is not possible.
 
 ## Post-upgrade actions
 
-After the upgrade procedure is completed, follow these steps to ensure your services are properly migrated:
+After the upgrade process completes, follow these steps to ensure your services are properly migrated:
 
 1. [Verify the migration outcome](#details-migration-from-api-to-api-rule-custom-resources-verify-the-automatic-migration). 
 2. If you can still see any Api CRs in use, use the [manual migration](#details-migration-from-api-to-api-rule-custom-resources-manual-migration) guide to migrate them.
