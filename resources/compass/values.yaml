@@ -84,12 +84,8 @@ global:
       scopes: "runtime:write application:write label_definition:write integration_system:write application:read runtime:read label_definition:read integration_system:read health_checks:read application_template:read application_template:write eventing:manage tenant:read automatic_scenario_assignment:read automatic_scenario_assignment:write"
 
   auditlog:
-    enabled: false
-    configmap:
-      name: "compass-gateway-auditlog-config"
-    secret:
-      name: "compass-gateway-auditlog-secret"
-
+    configMapName: "compass-gateway-auditlog-config"
+    secretName: "compass-gateway-auditlog-secret"
 
   tenantConfig:
     useDefaultTenants: true
@@ -280,5 +276,6 @@ global:
 
   externalServicesMock:
     enabled: false
+
 pairing-adapter:
   enabled: false
