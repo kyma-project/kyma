@@ -2,7 +2,7 @@
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: {{ .Chart.Name }}-external-services-mock
+  name: {{ .Chart.Name }}-gateway-auditlog
   labels:
     app: {{ .Chart.Name }}-e2e-tests
     app.kubernetes.io/name: {{ .Chart.Name }}-e2e-tests
