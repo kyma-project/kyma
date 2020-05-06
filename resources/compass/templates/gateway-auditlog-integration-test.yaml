@@ -1,4 +1,4 @@
-{{if eq .Values.global.externalServicesMock.enabled true}}
+{{if and (eq .Values.global.externalServicesMock.enabled true) (eq .Values.gateway.gateway.auditlog.enabled true)}}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
@@ -25,13 +25,14 @@ spec:
             - "oauth2.{{ .Values.global.ingress.domainName }}"
             - "{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}"
             - "{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}"
+            - "compass-external-services-mock.compass-system.svc.cluster.local"
       {{ end }}
       containers:
         - name: auditlog-tests
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.director.dir }}compass-director-tests:{{ .Values.global.images.tests.director.version }}
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh"]
-          args: ["-c", "./wait-for-director.sh && /external-services-mock.test -test.v; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
+          args: ["-c", "./wait-for-director.sh && /external-services-mock-integration.test -test.v; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
           env:
             - name: DIRECTOR_URL
               value: "https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/director"
@@ -60,6 +61,6 @@ spec:
             - name: GATEWAY_CLIENT_CERTS_SUBDOMAIN
               value: "{{ .Values.global.gateway.mtls.host }}"
             - name: AUDITLOG_MOCK_BASE_URL
-              value: "http://compass-external-services-mock.compass-system.svc.cluster.local:8080/"
+              value: "http://compass-external-services-mock.{{ .Release.Namespace }}.svc.cluster.local:8080/"
       restartPolicy: Never
   {{end}}
