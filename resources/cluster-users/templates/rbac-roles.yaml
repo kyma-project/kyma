@@ -216,6 +216,33 @@ aggregationRule:
 rules: []
 
 ---
+################################################################################
+# kyma-snapshots = manage volume snapshots for backups.
+################################################################################
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-snapshots
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-snapshots: "true"
+  annotations:
+    helm.sh/hook-weight: "0"
+rules:
+- apiGroups:
+    - "snapshot.storage.k8s.io"
+  resources:
+    - "volumesnapshots"
+  verbs:
+    - "list"
+    - "get"
+    - "watch"
+    - "create"
+    - "update"
+    - "delete"
+
+---
 ##########################################################################################
 # Kyma Admin role
 # kyma-admin = k8s admin + kyma-specific resources admin
@@ -261,6 +288,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-snapshots: "true"
 rules: []
 
 ---
@@ -305,6 +334,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-ory-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-snapshots: "true"
 rules: []
 
 ---
