@@ -8,11 +8,9 @@ cluster:
   orgId: my-org-123
   orgName: My Organization
   runtimeAdminGroupName: runtimeAdmin
-  scope:
-    audience:server:client_id:kyma-client audience:server:client_id:console openid
+  scope: audience:server:client_id:kyma-client audience:server:client_id:console openid
     profile email groups
-  systemNamespaces:
-    istio-system knative-eventing knative-serving kube-public kube-system
+  systemNamespaces: istio-system knative-eventing knative-serving kube-public kube-system
     kyma-installer kyma-integration kyma-system natss compass-system kube-node-lease
     kubernetes-dashboard
 compass_mfs:
@@ -53,12 +51,11 @@ test:
     ui:
       # tests uses chromium that require more memory
       requests:
-        memory: 300Mi
-        cpu: 375m
+        memory: 400Mi
+        cpu: 400m
       limits:
-        cpu: 300m
         memory: 1.5Gi
-        cpu: 375m
+        cpu: 450m
       service_catalog:
         enabled: true
       logging:
