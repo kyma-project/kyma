@@ -2,7 +2,7 @@ package kymainstallation
 
 import (
 	"errors"
-
+	"fmt"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 
 	"testing"
@@ -16,20 +16,21 @@ import (
 )
 
 func TestInstallStep(t *testing.T) {
-	Convey("Run method should delete failed release", t, func() {
+	Convey("Run method of the installStep should delete failed release", t, func() {
 		//installStep
-		testInstallStep := &installStep{
-			step: step{
-				helmClient: &mockHelmClient{},
-				component:  v1alpha1.KymaComponent{},
-			},
-			sourceGetter: &mockSourceGetter{},
-			overrideData: &mockOverrideData{},
+		expectedError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
+
+		mockHelmClient := &mockHelmClient{
+			failInstallingRelease: true,
+			isReleaseDeletable:    true,
 		}
+
+		testInstallStep := getInstallStep(mockHelmClient)
 
 		err := testInstallStep.Run()
 
-		So(err, ShouldBeNil)
+		So(err.Error(), ShouldEqual, expectedError)
+		So(mockHelmClient.deleteReleaseCalled, ShouldBeTrue)
 	})
 }
 
@@ -40,10 +41,10 @@ type mockHelmClient struct {
 	failInstallingRelease bool
 	failDeletingRelease   bool
 	isReleaseDeletable    bool
+	deleteReleaseCalled   bool
 }
 
 func (hc *mockHelmClient) IsReleaseDeletable(rname string) (bool, error) {
-	// TODO: do we need a case in which we return an error?
 	return hc.isReleaseDeletable, nil
 }
 
@@ -56,6 +57,7 @@ func (hc *mockHelmClient) InstallRelease(chartdir, ns, releasename, overrides st
 }
 
 func (hc *mockHelmClient) DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error) {
+	hc.deleteReleaseCalled = true
 	if hc.failDeletingRelease {
 		err := errors.New("failed to delete release")
 		return nil, err
@@ -106,3 +108,13 @@ func (mod *mockOverrideData) ForRelease(releaseName string) (string, error) {
 }
 
 //instancja install stepa
+func getInstallStep(hc *mockHelmClient) *installStep {
+	return &installStep{
+		step: step{
+			helmClient: hc,
+			component:  v1alpha1.KymaComponent{},
+		},
+		sourceGetter: &mockSourceGetter{},
+		overrideData: &mockOverrideData{},
+	}
+}
