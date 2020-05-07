@@ -13,6 +13,7 @@ type Scenario struct {
 	skipSSLVerify     bool
 	applicationTenant string
 	applicationGroup  string
+	waitTime          int
 }
 
 // AddFlags adds CLI flags to given FlagSet
@@ -22,6 +23,7 @@ func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 	pflag.BoolVar(&s.skipSSLVerify, "skipSSLVerify", false, "Skip verification of service SSL certificates")
 	pflag.StringVar(&s.applicationTenant, "applicationTenant", "", "Application CR Tenant")
 	pflag.StringVar(&s.applicationGroup, "applicationGroup", "", "Application CR Group")
+	pflag.IntVar(&s.waitTime, "waitTime", 10, "Wait time in seconds")
 }
 
 func (s *Scenario) NewState() *state {

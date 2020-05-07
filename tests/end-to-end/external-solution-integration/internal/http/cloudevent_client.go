@@ -2,12 +2,21 @@ package http
 
 import (
 	"context"
+	"time"
 
 	retrygo "github.com/avast/retry-go"
 	cloudevents "github.com/cloudevents/sdk-go"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 )
+
+const retryAttemptsCount = 20
+const retryDelay = 250 * time.Millisecond
+
+var defaultOpts = []retrygo.Option{
+	retrygo.Attempts(retryAttemptsCount),
+	retrygo.Delay(retryDelay),
+}
 
 type WrappedCloudEventClient struct {
 	underlying cloudevents.Client
@@ -21,7 +30,7 @@ type ResilientCloudEventClient interface {
 func NewWrappedCloudEventClient(ceClient cloudevents.Client, opts ...retrygo.Option) *WrappedCloudEventClient {
 	var client = &WrappedCloudEventClient{
 		underlying: ceClient,
-		options:    opts,
+		options:    append(defaultOpts, opts...),
 	}
 	return client
 }
