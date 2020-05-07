@@ -21,7 +21,9 @@ func TestInstallStep(t *testing.T) {
 		Convey("install step should", func() {
 			Convey("delete failed release if it is deletable", func() {
 				//given
-				expectedError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
+				installError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
+				deleteSuccessMsg := fmt.Sprintf("Helm delete of %s was successfull", "")
+				expectedError := fmt.Sprintf("%s %s", installError, deleteSuccessMsg)
 
 				mockHelmClient := &mockHelmClient{
 					failInstallingRelease: true,
@@ -39,7 +41,9 @@ func TestInstallStep(t *testing.T) {
 			})
 			Convey("not delete failed release if it is not deletable", func() {
 				//given
-				expectedError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
+				installError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
+				deleteSuccessMsg := ""
+				expectedError := fmt.Sprintf("%s %s", installError, deleteSuccessMsg)
 
 				mockHelmClient := &mockHelmClient{
 					failInstallingRelease: true,
@@ -55,7 +59,7 @@ func TestInstallStep(t *testing.T) {
 				So(err.Error(), ShouldEqual, expectedError)
 				So(mockHelmClient.deleteReleaseCalled, ShouldBeFalse)
 			})
-			Convey("return an error when IsReleaseDeletable returns an error", func() {
+			Convey("return an error when getting the release status fails", func() {
 				//given
 				installError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
 				isDeletableError := fmt.Sprintf("Checking status of %s failed with an error: %s", "", "failed to get release status")
@@ -72,8 +76,28 @@ func TestInstallStep(t *testing.T) {
 
 				//then
 				So(err.Error(), ShouldEqual, expectedError)
-
 			})
+			Convey("return an error when release deletion fails", func() {
+				//given
+				installError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
+				deletingError := fmt.Sprintf("Helm delete of %s failed with an error: %s", "", "failed to delete release")
+				expectedError := fmt.Sprintf("%s \n %s \n", installError, deletingError)
+
+				mockHelmClient := &mockHelmClient{
+					failInstallingRelease: true,
+					failDeletingRelease:   true,
+					isReleaseDeletable:    true,
+				}
+
+				testInstallStep := getInstallStep(mockHelmClient)
+
+				//when
+				err := testInstallStep.Run()
+
+				//then
+				So(err.Error(), ShouldEqual, expectedError)
+			})
+
 		})
 
 	})
