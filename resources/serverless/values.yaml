@@ -29,6 +29,7 @@ tests:
     waitTimeout: 15m
     verifySSL: "false"
     verbose: "true"
+    usageKind: function
 
 global:
   commonLabels:
