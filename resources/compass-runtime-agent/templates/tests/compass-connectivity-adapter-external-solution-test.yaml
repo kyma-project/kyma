@@ -51,7 +51,7 @@ spec:
               sleep 4
               exit $exit_code
           envFrom:
-              - configMapRef:
+              - secretRef:
                     name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
                     optional: true
           env:
