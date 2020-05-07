@@ -40,7 +40,7 @@ global:
   console_backend_service:
     version: "4ea4dad6"
   console_backend_service_test:
-    version: PR-8301
+    version: "009a142"
   xip_patch:
     dir:
     version: 0e322dac
