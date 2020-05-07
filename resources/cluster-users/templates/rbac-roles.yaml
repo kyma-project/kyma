@@ -235,12 +235,7 @@ rules:
   resources:
     - "volumesnapshots"
   verbs:
-    - "list"
-    - "get"
-    - "watch"
-    - "create"
-    - "update"
-    - "delete"
+{{ toYaml .Values.clusterRoles.verbs.edit | indent 4 }}
 
 ---
 ##########################################################################################
