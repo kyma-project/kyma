@@ -8,3 +8,4 @@ metadata:
     release: {{ .Release.Name }}
 data:
   {{- (.Files.Glob "config.yaml" ).AsConfig | nindent 2 }}
+    applicationHideSelectors: {{- .Values.applicationHideSelectors | nindent 6 }}
