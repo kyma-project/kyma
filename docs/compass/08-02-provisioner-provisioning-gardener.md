@@ -102,7 +102,6 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 kubernetesVersion: "1.15.4"
                 diskType: "pd-standard"
                 volumeSizeGB: 30
-                nodeCount: 3
                 machineType: "n1-standard-4"
                 region: "europe-west4"
                 provider: "gcp"
@@ -113,7 +112,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 autoScalerMax: 4
                 maxSurge: 4
                 maxUnavailable: 1
-                providerSpecificConfig: { gcpConfig: { zone: "europe-west4-a" } }
+                providerSpecificConfig: { gcpConfig: { zone: ["europe-west4-a"] } }
               }
             }
             kymaConfig: {
@@ -194,7 +193,6 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 kubernetesVersion: "1.15.4"
                 diskType: "Standard_LRS"
                 volumeSizeGB: 35
-                nodeCount: 3
                 machineType: "Standard_D2_v3"
                 region: "westeurope"
                 provider: "azure"
@@ -205,7 +203,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 autoScalerMax: 4
                 maxSurge: 4
                 maxUnavailable: 1
-                providerSpecificConfig: { azureConfig: { vnetCidr: "10.250.0.0/19" } }
+                providerSpecificConfig: { azureConfig: { vnetCidr: "10.250.0.0/19", zones : ["westeurope-1"] } }
               }
             }
             kymaConfig: {
