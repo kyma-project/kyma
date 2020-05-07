@@ -2,7 +2,10 @@ package kymainstallation
 
 import (
 	"errors"
+
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
+
+	"testing"
 
 	v1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
@@ -10,7 +13,6 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"k8s.io/helm/pkg/proto/hapi/release"
 	rls "k8s.io/helm/pkg/proto/hapi/services"
-	"testing"
 )
 
 func TestInstallStep(t *testing.T) {
