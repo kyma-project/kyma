@@ -15,14 +15,6 @@ import (
 
 func TestInstallStep(t *testing.T) {
 	Convey("Run method should delete failed release", t, func() {
-		step := step{
-			mockHelmClient{
-				failInstallingRelease: true,
-				failDeletingRelease:   true,
-				isReleaseDeletable:    true,
-			},
-			v1alpha1.KymaComponent{},
-		}
 	})
 }
 
