@@ -126,6 +126,7 @@ spec:
         {{- end }}
             - mountPath: /gardener/kubeconfig
               name: gardener-kubeconfig
+              readOnly: true
         {{- with .Values.deployment.securityContext }}
           securityContext:
 {{ toYaml . | indent 12 }}
