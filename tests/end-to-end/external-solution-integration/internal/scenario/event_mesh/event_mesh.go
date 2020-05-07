@@ -28,6 +28,7 @@ const (
 
 var (
 	apiRuleRes = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
+	function   = schema.GroupVersionResource{Group: "serverless.kyma-project.io", Version: "v1alpha1", Resource: "functions"}
 )
 
 // Steps return scenario steps
@@ -57,7 +58,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		s.testID,
 	)
 
-	lambdaEndpoint := helpers.InClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
+	lambdaEndpoint := helpers.InClusterEndpoint(s.testID, s.testID, helpers.FunctionPort)
 	state := s.NewState()
 
 	return []step.Step{
@@ -68,11 +69,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 				httpSourceClientset.HTTPSources(kymaIntegrationNamespace)),
 		),
 		testsuite.NewCreateMapping(s.testID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
-		testsuite.NewDeployFakeLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort,
-			coreClientset.AppsV1().Deployments(s.testID),
-			coreClientset.CoreV1().Services(s.testID),
-			coreClientset.CoreV1().Pods(s.testID),
-			true),
+		testsuite.NewDeployFunction(s.testID, helpers.FunctionPayload, helpers.FunctionPort, dynamic.Resource(function).Namespace(s.testID), true),
 		testsuite.NewStartTestServer(testService),
 		testsuite.NewSleep(s.waitTime),
 		testsuite.NewConnectApplication(connector, state, s.applicationTenant, s.applicationGroup),
