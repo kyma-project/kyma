@@ -10,7 +10,7 @@ deployment:
   strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 
 security:
-  skipTLSCertificateVeryfication: true
+  skipTLSCertificateVeryfication: false
 
 gardener:
   project: "" # Gardener project connected to SA
