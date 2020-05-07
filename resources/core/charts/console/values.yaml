@@ -27,9 +27,9 @@ compass_mfs:
   statusPort: 6082
 console:
   image:
-    dir: null
+    dir: 
     pullPolicy: IfNotPresent
-    tag: de43ba06
+    tag: 02bd947b
   service:
     externalPort: 80
     internalPort: 8080
