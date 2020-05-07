@@ -25,19 +25,27 @@ spec:
       {{- end }}
       dnsPolicy: ClusterFirstWithHostNet
       serviceAccount: {{ .Chart.Name }}-tests
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Chart.Name }}
       containers:
         - name: tests
-          image: {{ .Values.global.containerRegistry.path }}/cluster-users-integration-tests:{{ .Values.tests.image.version }}
+          image: {{ .Values.tests.image.name }}:{{ .Values.tests.image.version }}
           command:
             - /bin/bash
             - -c
             - |
               sleep 10
-              ./sar-test.sh
+              bash /etc/cluster-users/sar-test.sh
               exit_code=$?
               curl -XPOST http://127.0.0.1:15020/quitquitquit
               sleep 5
               exit $exit_code
+          volumeMounts:
+          - name: config
+            mountPath: /etc/cluster-users/
+            readOnly: true
           env:
           - name: ADMIN_EMAIL
             valueFrom:
