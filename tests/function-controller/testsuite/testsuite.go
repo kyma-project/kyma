@@ -54,7 +54,7 @@ type Config struct {
 	ServiceInstanceName     string        `envconfig:"default=test-service-instance"`
 	ServiceBindingName      string        `envconfig:"default=test-service-binding"`
 	ServiceBindingUsageName string        `envconfig:"default=test-service-binding-usage"`
-	UsageKindName           string        `envconfig:"default=knative-service"`
+	UsageKindName           string        `envconfig:"default=function"`
 	DomainName              string        `envconfig:"default=test-function"`
 	IngressHost             string        `envconfig:"default=kyma.local"`
 	DomainPort              uint32        `envconfig:"default=80"`
