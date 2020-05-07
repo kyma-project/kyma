@@ -371,9 +371,6 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 # E2E Rafter Upgrade Tests
 /tests/end-to-end/upgrade/pkg/tests/rafter/ @michal-hudy @m00g3n @aerfio @pPrecel @magicmatatjahu
 
-# Cluster Users Test
-/tests/integration/cluster-users/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
-
 # All .md files
 *.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc @mmitoraj @majakurcius @alexandra-simeonova
 
