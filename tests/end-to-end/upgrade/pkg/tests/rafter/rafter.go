@@ -47,7 +47,7 @@ func (ut *UpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLog
 	return ut.newFlow(stop, log, namespace).createResources()
 }
 
-// TestResources tests resources after backup phase
+// TestResources tests resources after upgrade
 func (ut *UpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	return ut.newFlow(stop, log, namespace).testResources()
 }

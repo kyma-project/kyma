@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 
+	cloudevents "github.com/cloudevents/sdk-go"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
@@ -34,9 +36,22 @@ func (h *maxBytesHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	h.next.ServeHTTP(rw, r)
 }
 
+type traceHeaderHandler struct {
+	next http.Handler
+}
+
+func (h traceHeaderHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	for key := range r.Header {
+		if strings.HasPrefix(strings.ToLower(key), "x-b3-") || strings.ToLower(key) == "b3" {
+			r = r.WithContext(cloudevents.ContextWithHeader(r.Context(), key, r.Header.Get(key)))
+		}
+	}
+	h.next.ServeHTTP(rw, r)
+}
+
 // NewEventsHandler creates an http.Handler to handle the events endpoint
 func NewEventsHandler(config *mesh.Configuration, maxRequestSize int64) http.Handler {
-	return &maxBytesHandler{next: http.HandlerFunc(getEventsHandler(config)), limit: maxRequestSize}
+	return traceHeaderHandler{next: &maxBytesHandler{next: http.HandlerFunc(getEventsHandler(config)), limit: maxRequestSize}}
 }
 
 type permanentRedirectionHandler struct {

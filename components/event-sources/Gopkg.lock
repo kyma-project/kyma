@@ -1357,6 +1357,7 @@
     "pkg/logging",
     "pkg/reconciler",
     "pkg/tracing",
+    "pkg/utils",
   ]
   pruneopts = "T"
   revision = "8a92a8c91447a6ff71e4be97a42c548790d52a22"
@@ -1485,6 +1486,7 @@
     "github.com/google/go-cmp/cmp",
     "github.com/kelseyhightower/envconfig",
     "github.com/pkg/errors",
+    "go.opencensus.io/trace",
     "go.uber.org/zap",
     "istio.io/api/authentication/v1alpha1",
     "istio.io/client-go/pkg/apis/authentication/v1alpha1",
@@ -1535,6 +1537,7 @@
     "knative.dev/eventing/pkg/legacyclient/clientset/versioned/fake",
     "knative.dev/eventing/pkg/legacyclient/injection/client/fake",
     "knative.dev/eventing/pkg/reconciler",
+    "knative.dev/eventing/pkg/utils",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/duck/v1",
     "knative.dev/pkg/apis/duck/v1alpha1",
@@ -1556,6 +1559,7 @@
     "knative.dev/pkg/resolver",
     "knative.dev/pkg/source",
     "knative.dev/pkg/system",
+    "knative.dev/pkg/tracing",
     "knative.dev/serving/pkg/apis/autoscaling",
     "knative.dev/serving/pkg/apis/serving",
     "knative.dev/serving/pkg/apis/serving/v1",

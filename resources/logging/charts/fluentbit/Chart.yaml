@@ -11,3 +11,4 @@ home: http://fluentbit.io
 icon: http://fluentbit.io/assets/img/logo1-default.png
 sources:
 - https://github.com/fluent/fluent-bit
+apiVersion: v1

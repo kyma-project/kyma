@@ -8,7 +8,7 @@ tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-8068"
+    tag: "PR-8379"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -20,8 +20,9 @@ tests:
       memory: 64Mi
       cpu: 200m
   envs:
-    waitTimeout: 10m
+    waitTimeout: 15m
     verifySSL: "false"
+    verbose: "true"
 
 global:
   commonLabels:
@@ -39,7 +40,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "e56a613c"
+    tag: "21757b11"
     pullPolicy: IfNotPresent
   kubeRbacProxy:
     repository: "gcr.io/kubebuilder/kube-rbac-proxy"

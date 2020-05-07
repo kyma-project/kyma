@@ -34497,9 +34497,6 @@ func (ec *executionContext) _VersionInfo(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = graphql.MarshalString("VersionInfo")
 		case "kymaVersion":
 			out.Values[i] = ec._VersionInfo_kymaVersion(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -34527,15 +34524,16 @@ func (ec *executionContext) _VersionInfo_kymaVersion(ctx context.Context, field 
 		return obj.KymaVersion, nil
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
@@ -38394,7 +38392,7 @@ type TriggerEvent {
 # Misc
 
 type VersionInfo {
-    kymaVersion: String!
+    kymaVersion: String
 }
 
 # Queries

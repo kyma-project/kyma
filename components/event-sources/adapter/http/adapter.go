@@ -8,10 +8,13 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/pkg/errors"
+	"go.opencensus.io/trace"
 	"go.uber.org/zap"
 	"knative.dev/eventing/pkg/adapter"
+	"knative.dev/eventing/pkg/utils"
 	"knative.dev/pkg/logging"
 	"knative.dev/pkg/source"
+	"knative.dev/pkg/tracing"
 
 	"github.com/kyma-project/kyma/components/event-sources/apis/sources"
 )
@@ -88,6 +91,7 @@ func (h *httpAdapter) Start(_ <-chan struct{}) error {
 		cloudevents.WithPort(h.accessor.GetPort()),
 		cloudevents.WithPath(endpointCE),
 		cloudevents.WithMiddleware(WithReadinessMiddleware),
+		cloudevents.WithMiddleware(tracing.HTTPSpanMiddleware),
 	)
 	if err != nil {
 		return errors.Wrap(err, "failed to create transport")
@@ -137,6 +141,7 @@ func (r readinessMiddleware) ServeHTTP(w http.ResponseWriter, req *http.Request)
 func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, resp *cloudevents.EventResponse) error {
 	logger := h.logger
 	logger.Debug("got event", zap.Any("event_context", event.Context))
+	tctx := cloudevents.HTTPTransportContextFrom(ctx)
 
 	if !isSupportedCloudEvent(event) {
 		resp.Error(http.StatusBadRequest, "")
@@ -162,7 +167,12 @@ func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, re
 	}
 
 	logger.Debug("sending event", zap.Any("sink", h.accessor.GetSinkURI()))
-	rctx, revt, err := h.ceClient.Send(ctx, event)
+	// Shamelessly copied from https://github.com/knative/eventing/blob/5631d771968bbf00e64988a0e4217c2915ee778e/pkg/broker/ingress/ingress_handler.go#L116
+	// Due to an issue in utils.ContextFrom, we don't retain the original trace context from ctx, so
+	// bring it in manually.
+	sendingCTX := utils.ContextFrom(tctx, nil)
+	sendingCTX = trace.NewContext(sendingCTX, trace.FromContext(ctx))
+	rctx, revt, err := h.ceClient.Send(sendingCTX, event)
 	if err != nil {
 		h.logger.Error("failed to send cloudevent to sink", zap.Error(err), zap.Any("sink", h.accessor.GetSinkURI()))
 		resp.Error(http.StatusBadGateway, "")

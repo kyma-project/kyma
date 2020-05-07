@@ -23,7 +23,7 @@ global:
       version: "9fae2df7"
     director:
       dir:
-      version: "22072888"
+      version: "a2a2a07e"
     gateway:
       dir:
       version: "93462f94"
@@ -32,7 +32,7 @@ global:
       version: "109f4dc2"
     schema_migrator:
       dir:
-      version: "b1da4ae4"
+      version: "a2a2a07e"
     provisioner:
       dir:
       version: "f4b3be5e"
@@ -43,17 +43,20 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "0ddb9214"
+      version: "13332e7c"
+    external_services_mock:
+      dir:
+      version: "105e8ff0"
     tests:
       director:
         dir:
-        version: "8604d53a"
+        version: "105e8ff0"
       connector:
         dir:
         version: "9cebaf5c"
       provisioner:
         dir:
-        version: "9f269bf5"
+        version: "56a6adc1"
       e2e_provisioning:
         dir:
         version: "ef98664d"
@@ -81,12 +84,8 @@ global:
       scopes: "runtime:write application:write label_definition:write integration_system:write application:read runtime:read label_definition:read integration_system:read health_checks:read application_template:read application_template:write eventing:manage tenant:read automatic_scenario_assignment:read automatic_scenario_assignment:write"
 
   auditlog:
-    enabled: false
-    configmap:
-      name: "compass-gateway-auditlog-config"
-    secret:
-      name: "compass-gateway-auditlog-secret"
-
+    configMapName: "compass-gateway-auditlog-config"
+    secretName: "compass-gateway-auditlog-secret"
 
   tenantConfig:
     useDefaultTenants: true
@@ -274,6 +273,9 @@ global:
       maxIdleConnections: 1
 
   enableCompassDefaultScenarioAssignment: true
+
+  externalServicesMock:
+    enabled: false
 
 pairing-adapter:
   enabled: false

@@ -1,6 +1,7 @@
 deployment:
   image:
     pullPolicy: IfNotPresent
+  resources: {}
   args:
     token:
       length: 64

@@ -42,7 +42,7 @@ global:
     version: fbf1000b
   event_service:
     dir:
-    version: 271bafcc
+    version: 08b6fe17
   event_service_integration_tests:
     dir:
     version: 3bf47c25
@@ -51,7 +51,7 @@ global:
     version: 39d1ab87
   application_gateway:
     dir:
-    version: PR-8292
+    version: d39b80d4
   application_gateway_tests:
     dir:
     version: 1272752c
@@ -63,7 +63,7 @@ global:
     version: c608dbf3
   application_broker:
     dir:
-    version: 7a244165
+    version: a5ccfe43
   application_connectivity_certs_setup_job:
     dir:
     version: fbf1000b

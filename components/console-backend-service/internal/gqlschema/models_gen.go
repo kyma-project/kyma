@@ -810,7 +810,7 @@ type UsageKindResource struct {
 }
 
 type VersionInfo struct {
-	KymaVersion string `json:"kymaVersion"`
+	KymaVersion *string `json:"kymaVersion"`
 }
 
 type CompassMetadata struct {

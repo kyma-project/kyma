@@ -13,7 +13,7 @@ spec:
       methods: ["GET", "PUT", "DELETE"]
       accessStrategies:
         - handler: noop
-    - path: /oauth/.*/v2/.*
+    - path: /oauth/([^/]+/)?v2/.*
       methods: ["GET", "PUT", "DELETE"]
       accessStrategies:
         - handler: oauth2_introspection
