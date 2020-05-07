@@ -59,7 +59,7 @@ global:
         version: "d068b250"
       e2e_provisioning:
         dir:
-        version: "d068b250"
+        version: "93c7ff2d"
       connectivity_adapter:
         dir:
         version: "d068b250"
