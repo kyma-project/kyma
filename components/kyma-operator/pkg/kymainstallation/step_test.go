@@ -17,6 +17,19 @@ import (
 
 func TestInstallStep(t *testing.T) {
 	Convey("Run method should delete failed release", t, func() {
+		//installStep
+		testInstallStep := &installStep{
+			step: step{
+				helmClient: &mockHelmClient{},
+				component:  v1alpha1.KymaComponent{},
+			},
+			sourceGetter: &mockSourceGetter{},
+			overrideData: &mockOverrideData{},
+		}
+
+		err := testInstallStep.Run()
+
+		So(err, ShouldBeNil)
 	})
 }
 
@@ -79,8 +92,7 @@ type mockSourceGetter struct {
 }
 
 func (sg *mockSourceGetter) SrcDirFor(component v1alpha1.KymaComponent) (string, error) {
-	//TODO: do we need any meaningful data here?
-	return "", nil
+	return "testDir/testChart", nil
 }
 
 // OverrideData Mock
@@ -89,8 +101,7 @@ type mockOverrideData struct {
 	overrides.OverrideData
 }
 
-func ForRelease(releaseName string) (string, error) {
-	//TODO: do we need any meaningful data here?
+func (mod *mockOverrideData) ForRelease(releaseName string) (string, error) {
 	return "", nil
 }
 
