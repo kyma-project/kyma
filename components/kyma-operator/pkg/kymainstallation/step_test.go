@@ -37,9 +37,8 @@ func TestInstallStep(t *testing.T) {
 			})
 			Convey("delete failed release if it is deletable", func() {
 				//given
-				installError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
-				deleteSuccessMsg := fmt.Sprintf("Helm delete of %s was successfull", testReleaseName)
-				expectedError := fmt.Sprintf("%s %s", installError, deleteSuccessMsg)
+				installError := fmt.Sprintf("Helm install error: %s", "failed to install release")
+				expectedError := fmt.Sprintf("%s\nHelm delete of %s was successfull", installError, testReleaseName)
 
 				mockHelmClient := &mockHelmClient{
 					failInstallingRelease: true,
@@ -57,9 +56,7 @@ func TestInstallStep(t *testing.T) {
 			})
 			Convey("not delete failed release if it is not deletable", func() {
 				//given
-				installError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
-				deleteSuccessMsg := ""
-				expectedError := fmt.Sprintf("%s %s", installError, deleteSuccessMsg)
+				expectedError := fmt.Sprintf("Helm install error: %s", "failed to install release")
 
 				mockHelmClient := &mockHelmClient{
 					failInstallingRelease: true,
@@ -77,7 +74,7 @@ func TestInstallStep(t *testing.T) {
 			})
 			Convey("return an error when getting the release status fails", func() {
 				//given
-				installError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
+				installError := fmt.Sprintf("Helm install error: %s", "failed to install release")
 				isDeletableError := fmt.Sprintf("Checking status of %s failed with an error: %s", testReleaseName, "failed to get release status")
 				expectedError := fmt.Sprintf("%s \n %s \n", installError, isDeletableError)
 
@@ -95,7 +92,7 @@ func TestInstallStep(t *testing.T) {
 			})
 			Convey("return an error when release deletion fails", func() {
 				//given
-				installError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
+				installError := fmt.Sprintf("Helm install error: %s", "failed to install release")
 				deletingError := fmt.Sprintf("Helm delete of %s failed with an error: %s", testReleaseName, "failed to delete release")
 				expectedError := fmt.Sprintf("%s \n %s \n", installError, deletingError)
 

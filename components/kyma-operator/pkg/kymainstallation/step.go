@@ -60,7 +60,7 @@ func (s installStep) Run() error {
 		releaseOverrides)
 
 	if installErr != nil {
-		installErrMsg := fmt.Sprintf("Helm install error: %s ", installErr.Error())
+		installErrMsg := fmt.Sprintf("Helm install error: %s", installErr.Error())
 		errorMsg := installErrMsg
 
 		isDeletable, err := s.helmClient.IsReleaseDeletable(s.component.GetReleaseName())
@@ -81,7 +81,7 @@ func (s installStep) Run() error {
 				return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, deleteErrMsg))
 			}
 
-			errorMsg = fmt.Sprintf("%s. \n Helm delete of %s was successfull", installErrMsg, s.component.GetReleaseName())
+			errorMsg = fmt.Sprintf("%s\nHelm delete of %s was successfull", installErrMsg, s.component.GetReleaseName())
 		}
 
 		return errors.New(errorMsg)
