@@ -2,6 +2,7 @@ package testsuite
 
 import (
 	"fmt"
+
 	serverless "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -159,7 +160,7 @@ func (s *DeployFunction) isFunctionReady() error {
 
 func (s *DeployFunction) isLambdaTerminated() error {
 	function, err := s.getFunctions()
-	if err != nil && function.Name != ""{
+	if err != nil && function.Name != "" {
 		return err
 	}
 
