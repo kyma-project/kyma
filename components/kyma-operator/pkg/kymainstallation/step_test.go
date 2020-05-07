@@ -16,13 +16,29 @@ import (
 	rls "k8s.io/helm/pkg/proto/hapi/services"
 )
 
+const (
+	testReleaseName = "test-release"
+)
+
 func TestInstallStep(t *testing.T) {
 	Convey("Run method of the", t, func() {
 		Convey("install step should", func() {
+			Convey("install release without errors", func() {
+				//given
+				mockHelmClient := &mockHelmClient{}
+
+				testInstallStep := getInstallStep(mockHelmClient)
+
+				//when
+				err := testInstallStep.Run()
+
+				//then
+				So(err, ShouldBeNil)
+			})
 			Convey("delete failed release if it is deletable", func() {
 				//given
 				installError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
-				deleteSuccessMsg := fmt.Sprintf("Helm delete of %s was successfull", "")
+				deleteSuccessMsg := fmt.Sprintf("Helm delete of %s was successfull", testReleaseName)
 				expectedError := fmt.Sprintf("%s %s", installError, deleteSuccessMsg)
 
 				mockHelmClient := &mockHelmClient{
@@ -62,7 +78,7 @@ func TestInstallStep(t *testing.T) {
 			Convey("return an error when getting the release status fails", func() {
 				//given
 				installError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
-				isDeletableError := fmt.Sprintf("Checking status of %s failed with an error: %s", "", "failed to get release status")
+				isDeletableError := fmt.Sprintf("Checking status of %s failed with an error: %s", testReleaseName, "failed to get release status")
 				expectedError := fmt.Sprintf("%s \n %s \n", installError, isDeletableError)
 
 				mockHelmClient := &mockHelmClient{
@@ -80,7 +96,7 @@ func TestInstallStep(t *testing.T) {
 			Convey("return an error when release deletion fails", func() {
 				//given
 				installError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
-				deletingError := fmt.Sprintf("Helm delete of %s failed with an error: %s", "", "failed to delete release")
+				deletingError := fmt.Sprintf("Helm delete of %s failed with an error: %s", testReleaseName, "failed to delete release")
 				expectedError := fmt.Sprintf("%s \n %s \n", installError, deletingError)
 
 				mockHelmClient := &mockHelmClient{
@@ -186,7 +202,9 @@ func getInstallStep(hc *mockHelmClient) *installStep {
 	return &installStep{
 		step: step{
 			helmClient: hc,
-			component:  v1alpha1.KymaComponent{},
+			component: v1alpha1.KymaComponent{
+				ReleaseName: testReleaseName,
+			},
 		},
 		sourceGetter: &mockSourceGetter{},
 		overrideData: &mockOverrideData{},
