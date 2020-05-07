@@ -24,6 +24,9 @@ type FunctionSpec struct {
 
 	// +kubebuilder:validation:Minimum:=0
 	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
+
+	// +optional
+	Labels map[string]string `json:"labels,omitempty"`
 }
 
 const (

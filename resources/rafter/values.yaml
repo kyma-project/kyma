@@ -35,7 +35,7 @@ controller-manager:
   pod:
     annotations:
       sidecar.istio.io/inject: "false"
-      recreate: "{{ .Release.Time.Seconds }}"
+      recreate: "{{ now }}"
     resources:
       limits:
         cpu: 150m
@@ -251,7 +251,7 @@ upload-service:
   pod:
     annotations:
       sidecar.istio.io/inject: "false"
-      recreate: "{{ .Release.Time.Seconds }}"
+      recreate: "{{ now }}"
     extraProperties:
       strategy:
         type: RollingUpdate

@@ -38,7 +38,7 @@ type APIRuleStatus struct {
 	AccessRuleStatus     *APIRuleResourceStatus `json:"accessRuleStatus,omitempty"`
 }
 
-//APIRule is the Schema for the apis ApiRule
+// APIRule is the Schema for the apis ApiRule
 // +kubebuilder:storageversion
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status

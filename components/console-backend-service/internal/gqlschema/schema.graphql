@@ -1131,7 +1131,7 @@ type TriggerEvent {
 # Misc
 
 type VersionInfo {
-    kymaVersion: String!
+    kymaVersion: String
 }
 
 # Queries

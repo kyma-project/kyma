@@ -321,7 +321,7 @@ func TestDoDeprovision(t *testing.T) {
 			initialObjs: []runtime.Object{
 				bt.NewAppNamespace(string(appNs), true),
 				bt.NewDefaultBroker(string(appNs)),
-				bt.NewAppSubscription(string(appNs), string(appName), bt.WithNameSuffix(bt.FakeSubscriptionName)),
+				bt.NewAppSubscription(string(appNs), string(appName), string(appSvcID), bt.WithNameSuffix(bt.FakeSubscriptionName)),
 				bt.NewEventActivation(string(appNs), string(iID)),
 			},
 			expectK8sDeletes: []string{
@@ -368,7 +368,7 @@ func TestDoDeprovision(t *testing.T) {
 			)
 
 			// WHEN
-			dpr.do(instance, opID, appSvcID, appName)
+			dpr.do(instance, opID, appSvcID)
 
 			//THEN
 			actionsAsserter := bt.NewActionsAsserter(t, knCli, k8sCli, eaClient)

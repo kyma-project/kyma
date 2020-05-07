@@ -80,7 +80,7 @@ func (h *Tester) withRetries(httpCall func() (*http.Response, error), isResponse
 }
 
 func httpOkPredicate(response *http.Response) bool {
-	return response.StatusCode > 200 && response.StatusCode < 299
+	return response.StatusCode >= 200 && response.StatusCode <= 299
 }
 
 func httpUnauthorizedPredicate(response *http.Response) bool {

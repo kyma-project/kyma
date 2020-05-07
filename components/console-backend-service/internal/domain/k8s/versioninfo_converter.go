@@ -17,20 +17,21 @@ func (c *versionInfoConverter) ToGQL(in *v1.Deployment) gqlschema.VersionInfo {
 	source := deploymentImageSeparated[0]
 	if source != "eu.gcr.io" {
 		return gqlschema.VersionInfo{
-			KymaVersion: deploymentImage,
+			KymaVersion: &deploymentImage,
 		}
 	}
 
 	version := deploymentImageSeparated[len(deploymentImageSeparated)-1]
 	_, err := semver.Parse(version)
 	if err != nil && strings.HasPrefix(version, "PR-") {
+		pullRequestVersion := strings.Join([]string{"pull request", version}, " ")
 		return gqlschema.VersionInfo{
-			KymaVersion: strings.Join([]string{"pull request", version}, " "),
+			KymaVersion: &pullRequestVersion,
 		}
 	}
 
 	return gqlschema.VersionInfo{
-		KymaVersion: version,
+		KymaVersion: &version,
 	}
 }
 

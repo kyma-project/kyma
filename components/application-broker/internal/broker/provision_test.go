@@ -506,7 +506,7 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 				bt.NewAppChannel(string(appName)),
 			},
 			expectCreates: []runtime.Object{
-				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
+				bt.NewAppSubscription(string(appNs), string(appName), string(appSvcID), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
 			},
 		},
 		{
@@ -530,13 +530,13 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 			initialObjs: []runtime.Object{
 				bt.NewAppChannel(string(appName)),
 				bt.NewAppNamespace(string(appNs), false),
-				bt.NewAppSubscription(string(appNs), string(appName)),
+				bt.NewAppSubscription(string(appNs), string(appName), string(appSvcID)),
 			},
 			expectCreates: []runtime.Object{
 				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
 			},
 			expectUpdates: []runtime.Object{
-				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
+				bt.NewAppSubscription(string(appNs), string(appName), string(appSvcID), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
 				bt.NewAppNamespace(string(appNs), true),
 			},
 		},
@@ -552,7 +552,7 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 				bt.NewAppNamespace(string(appNs), false),
 			},
 			expectCreates: []runtime.Object{
-				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
+				bt.NewAppSubscription(string(appNs), string(appName), string(appSvcID), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
 				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
 			},
 			expectUpdates: []runtime.Object{
@@ -571,7 +571,7 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 				bt.NewAppNamespace(string(appNs), false),
 			},
 			expectCreates: []runtime.Object{
-				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
+				bt.NewAppSubscription(string(appNs), string(appName), string(appSvcID), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
 				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
 			},
 			expectUpdates: []runtime.Object{
@@ -591,7 +591,7 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
 			},
 			expectCreates: []runtime.Object{
-				bt.NewAppSubscription(string(appNs), string(appName), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
+				bt.NewAppSubscription(string(appNs), string(appName), string(appSvcID), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
 				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
 			},
 			expectUpdates: []runtime.Object{

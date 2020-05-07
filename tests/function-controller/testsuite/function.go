@@ -2,25 +2,24 @@ package testsuite
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
+
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/dynamic"
 	watchtools "k8s.io/client-go/tools/watch"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-)
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 
-var (
-	ErrInvalidDataType = errors.New("invalid data type")
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 type function struct {
@@ -29,23 +28,25 @@ type function struct {
 	namespace   string
 	waitTimeout time.Duration
 	log         shared.Logger
+	verbose     bool
 }
 
-func newFunction(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log shared.Logger) *function {
+func newFunction(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log shared.Logger, verbose bool) *function {
 	return &function{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  serverlessv1alpha1.GroupVersion.Version,
 			Group:    serverlessv1alpha1.GroupVersion.Group,
 			Resource: "functions",
-		}, namespace, log),
+		}, namespace, log, verbose),
 		name:        name,
 		namespace:   namespace,
 		waitTimeout: waitTimeout,
 		log:         log,
+		verbose:     verbose,
 	}
 }
 
-func (f *function) Create(data *functionData) (string, error) {
+func (f *function) Create(data *functionData) error {
 	function := &serverlessv1alpha1.Function{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Function",
@@ -61,18 +62,27 @@ func (f *function) Create(data *functionData) (string, error) {
 		},
 	}
 
-	resourceVersion, err := f.resCli.Create(function)
+	_, err := f.resCli.Create(function)
 	if err != nil {
-		return resourceVersion, errors.Wrapf(err, "while creating Function %s in namespace %s", f.name, f.namespace)
+		return errors.Wrapf(err, "while creating Function %s in namespace %s", f.name, f.namespace)
 	}
-	return resourceVersion, err
+	return err
 }
 
-func (f *function) WaitForStatusRunning(initialResourceVersion string) error {
+func (f *function) WaitForStatusRunning() error {
+	fn, err := f.get()
+	if err != nil {
+		return err
+	}
+
+	if f.isConditionReady(*fn) {
+		return nil
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), f.waitTimeout)
 	defer cancel()
-	condition := f.isFunctionReady(f.name)
-	_, err := watchtools.Until(ctx, initialResourceVersion, f.resCli.ResCli, condition)
+	condition := f.isFunctionReady()
+	_, err = watchtools.Until(ctx, fn.GetResourceVersion(), f.resCli.ResCli, condition)
 	if err != nil {
 		return err
 	}
@@ -88,33 +98,69 @@ func (f *function) Delete() error {
 	return nil
 }
 
-func (f *function) isFunctionReady(name string) func(event watch.Event) (bool, error) {
+func (f *function) Update(data *functionData) error {
+	// correct update must first perform get
+	fn, err := f.get()
+	if err != nil {
+		return err
+	}
+
+	fnCopy := fn.DeepCopy()
+
+	fnCopy.Spec.MinReplicas = &data.MinReplicas
+	fnCopy.Spec.MaxReplicas = &data.MaxReplicas
+	fnCopy.Spec.Deps = data.Deps
+	fnCopy.Spec.Source = data.Body
+
+	_, err = f.resCli.Update(fnCopy)
+	return err
+}
+
+func (f *function) get() (*serverlessv1alpha1.Function, error) {
+	u, err := f.resCli.Get(f.name)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while getting Function %s in namespace %s", f.name, f.namespace)
+	}
+
+	function, err := convertFromUnstructuredToFunction(u)
+	if err != nil {
+		return nil, err
+	}
+
+	return &function, nil
+}
+
+func (f *function) isFunctionReady() func(event watch.Event) (bool, error) {
 	return func(event watch.Event) (bool, error) {
 		if event.Type != watch.Modified {
 			return false, nil
 		}
-		u, ok := event.Object.(*unstructured.Unstructured)
-		if !ok {
-			return false, ErrInvalidDataType
-		}
-		if u.GetName() != name {
-			return false, nil
-		}
 
-		function := serverlessv1alpha1.Function{}
-		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &function)
+		function, err := f.get()
+
 		if err != nil {
 			return false, err
 		}
-
-		for _, condition := range function.Status.Conditions {
-			if condition.Type == serverlessv1alpha1.ConditionRunning && condition.Status == corev1.ConditionTrue {
-				f.log.Logf("%s is ready:\n%v", name, u)
-				return true, nil
-			}
-		}
-
-		f.log.Logf("%s is not ready:\n%v", name, u)
-		return false, nil
+		return f.isConditionReady(*function), nil
 	}
+}
+
+func (f function) isConditionReady(fn serverlessv1alpha1.Function) bool {
+	conditions := fn.Status.Conditions
+	if len(conditions) == 0 {
+		shared.LogReadiness(false, f.verbose, f.name, f.log, fn)
+		return false
+	}
+
+	ready := conditions[0].Type == serverlessv1alpha1.ConditionRunning && conditions[0].Status == corev1.ConditionTrue
+
+	shared.LogReadiness(ready, f.verbose, f.name, f.log, fn)
+
+	return ready
+}
+
+func convertFromUnstructuredToFunction(u *unstructured.Unstructured) (serverlessv1alpha1.Function, error) {
+	fn := serverlessv1alpha1.Function{}
+	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &fn)
+	return fn, err
 }

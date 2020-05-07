@@ -1,0 +1,4 @@
+apiVersion: v1
+description: A Helm chart for Compass External Services Mock
+name: external-services-mock
+version: 0.1.0
