@@ -8,7 +8,7 @@ import (
 
 	"testing"
 
-	v1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	. "github.com/smartystreets/goconvey/convey"
@@ -16,36 +16,125 @@ import (
 	rls "k8s.io/helm/pkg/proto/hapi/services"
 )
 
+const (
+	testReleaseName = "test-release"
+)
+
 func TestInstallStep(t *testing.T) {
-	Convey("Run method of the installStep should delete failed release", t, func() {
-		//installStep
-		expectedError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
+	Convey("Run method of the", t, func() {
+		Convey("install step should", func() {
+			Convey("install release without errors", func() {
+				//given
+				mockHelmClient := &mockHelmClient{}
 
-		mockHelmClient := &mockHelmClient{
-			failInstallingRelease: true,
-			isReleaseDeletable:    true,
-		}
+				testInstallStep := getInstallStep(mockHelmClient)
 
-		testInstallStep := getInstallStep(mockHelmClient)
+				//when
+				err := testInstallStep.Run()
 
-		err := testInstallStep.Run()
+				//then
+				So(err, ShouldBeNil)
+			})
+			Convey("delete failed release if it is deletable", func() {
+				//given
+				installError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
+				deleteSuccessMsg := fmt.Sprintf("Helm delete of %s was successfull", testReleaseName)
+				expectedError := fmt.Sprintf("%s %s", installError, deleteSuccessMsg)
 
-		So(err.Error(), ShouldEqual, expectedError)
-		So(mockHelmClient.deleteReleaseCalled, ShouldBeTrue)
+				mockHelmClient := &mockHelmClient{
+					failInstallingRelease: true,
+					isReleaseDeletable:    true,
+				}
+
+				testInstallStep := getInstallStep(mockHelmClient)
+
+				//when
+				err := testInstallStep.Run()
+
+				//then
+				So(err.Error(), ShouldEqual, expectedError)
+				So(mockHelmClient.deleteReleaseCalled, ShouldBeTrue)
+			})
+			Convey("not delete failed release if it is not deletable", func() {
+				//given
+				installError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
+				deleteSuccessMsg := ""
+				expectedError := fmt.Sprintf("%s %s", installError, deleteSuccessMsg)
+
+				mockHelmClient := &mockHelmClient{
+					failInstallingRelease: true,
+					isReleaseDeletable:    false,
+				}
+
+				testInstallStep := getInstallStep(mockHelmClient)
+
+				//when
+				err := testInstallStep.Run()
+
+				//then
+				So(err.Error(), ShouldEqual, expectedError)
+				So(mockHelmClient.deleteReleaseCalled, ShouldBeFalse)
+			})
+			Convey("return an error when getting the release status fails", func() {
+				//given
+				installError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
+				isDeletableError := fmt.Sprintf("Checking status of %s failed with an error: %s", testReleaseName, "failed to get release status")
+				expectedError := fmt.Sprintf("%s \n %s \n", installError, isDeletableError)
+
+				mockHelmClient := &mockHelmClient{
+					failInstallingRelease:  true,
+					failIsReleaseDeletable: true,
+				}
+				testInstallStep := getInstallStep(mockHelmClient)
+
+				//when
+				err := testInstallStep.Run()
+
+				//then
+				So(err.Error(), ShouldEqual, expectedError)
+			})
+			Convey("return an error when release deletion fails", func() {
+				//given
+				installError := fmt.Sprintf("Helm install error: %s ", "failed to install release")
+				deletingError := fmt.Sprintf("Helm delete of %s failed with an error: %s", testReleaseName, "failed to delete release")
+				expectedError := fmt.Sprintf("%s \n %s \n", installError, deletingError)
+
+				mockHelmClient := &mockHelmClient{
+					failInstallingRelease: true,
+					failDeletingRelease:   true,
+					isReleaseDeletable:    true,
+				}
+
+				testInstallStep := getInstallStep(mockHelmClient)
+
+				//when
+				err := testInstallStep.Run()
+
+				//then
+				So(err.Error(), ShouldEqual, expectedError)
+			})
+
+		})
+
 	})
+
 }
 
 // Helm Client Mock
 
 type mockHelmClient struct {
 	kymahelm.ClientInterface
-	failInstallingRelease bool
-	failDeletingRelease   bool
-	isReleaseDeletable    bool
-	deleteReleaseCalled   bool
+	failInstallingRelease  bool
+	failDeletingRelease    bool
+	failIsReleaseDeletable bool
+	isReleaseDeletable     bool
+	deleteReleaseCalled    bool
 }
 
 func (hc *mockHelmClient) IsReleaseDeletable(rname string) (bool, error) {
+	if hc.failIsReleaseDeletable {
+		return false, errors.New("failed to get release status")
+	}
 	return hc.isReleaseDeletable, nil
 }
 
@@ -113,7 +202,9 @@ func getInstallStep(hc *mockHelmClient) *installStep {
 	return &installStep{
 		step: step{
 			helmClient: hc,
-			component:  v1alpha1.KymaComponent{},
+			component: v1alpha1.KymaComponent{
+				ReleaseName: testReleaseName,
+			},
 		},
 		sourceGetter: &mockSourceGetter{},
 		overrideData: &mockOverrideData{},
