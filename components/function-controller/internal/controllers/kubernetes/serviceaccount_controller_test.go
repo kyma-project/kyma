@@ -39,7 +39,16 @@ var _ = ginkgo.Describe("ServiceAccount", func() {
 	})
 
 	ginkgo.It("should successfully propagate base ServiceAccount to user namespace", func() {
-		ginkgo.By("reconciling the Secret")
+		ginkgo.By("reconciling the non existing Service Account")
+		_, err := reconciler.Reconcile(ctrl.Request{
+			NamespacedName: types.NamespacedName{
+				Namespace: baseServiceAccount.GetNamespace(),
+				Name:      "non-existing-svc-acc",
+			},
+		})
+		gomega.Expect(err).To(gomega.BeNil())
+
+		ginkgo.By("reconciling the Service Account")
 		result, err := reconciler.Reconcile(request)
 		gomega.Expect(err).To(gomega.BeNil())
 		gomega.Expect(result.Requeue).To(gomega.BeFalse())

@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/go-logr/logr"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
@@ -103,38 +102,6 @@ func Test_serviceAccountService_shiftSecretTokens(t *testing.T) {
 			se := &serviceAccountService{}
 			if got := se.shiftSecretTokens(tt.args.serviceAccount); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("shiftSecretTokens() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_serviceAccountService_updateServiceAccount(t *testing.T) {
-	type fields struct {
-		client resource.Client
-		config Config
-	}
-	type args struct {
-		ctx          context.Context
-		logger       logr.Logger
-		instance     *corev1.ServiceAccount
-		baseInstance *corev1.ServiceAccount
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r := &serviceAccountService{
-				client: tt.fields.client,
-				config: tt.fields.config,
-			}
-			if err := r.updateServiceAccount(tt.args.ctx, tt.args.logger, tt.args.instance, tt.args.baseInstance); (err != nil) != tt.wantErr {
-				t.Errorf("updateServiceAccount() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

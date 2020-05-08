@@ -41,6 +41,10 @@ var _ = ginkgo.Describe("Namespace", func() {
 	})
 
 	ginkgo.It("should successfully propagate base ServiceAccount to user namespace", func() {
+		ginkgo.By("reconciling Namespace that doesn't exist")
+		_, err := reconciler.Reconcile(ctrl.Request{NamespacedName: types.NamespacedName{Name: "not-existing-ns"}})
+		gomega.Expect(err).To(gomega.BeNil(), "should not throw error on non existing namespace")
+
 		ginkgo.By("reconciling the Namespace")
 		result, err := reconciler.Reconcile(request)
 		gomega.Expect(err).To(gomega.BeNil())

@@ -32,6 +32,10 @@ var _ = ginkgo.Describe("ConfigMap", func() {
 	})
 
 	ginkgo.It("should successfully propagate base ConfigMap to user namespace", func() {
+		ginkgo.By("reconciling ConfigMap that doesn't exist")
+		_, err := reconciler.Reconcile(ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseConfigMap.GetNamespace(), Name: "not-existing-cm"}})
+		gomega.Expect(err).To(gomega.BeNil(), "should not throw error on non existing configmap")
+
 		ginkgo.By("reconciling the ConfigMap")
 		result, err := reconciler.Reconcile(request)
 		gomega.Expect(err).To(gomega.BeNil())

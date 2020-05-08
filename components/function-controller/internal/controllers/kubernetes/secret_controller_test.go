@@ -32,6 +32,15 @@ var _ = ginkgo.Describe("Secret", func() {
 	})
 
 	ginkgo.It("should successfully propagate base Secret to user namespace", func() {
+		ginkgo.By("reconciling non-existing secret")
+		_, err := reconciler.Reconcile(ctrl.Request{
+			NamespacedName: types.NamespacedName{
+				Namespace: baseSecret.GetNamespace(),
+				Name:      "not-existing-secret",
+			},
+		})
+		gomega.Expect(err).To(gomega.BeNil())
+
 		ginkgo.By("reconciling the Secret")
 		result, err := reconciler.Reconcile(request)
 		gomega.Expect(err).To(gomega.BeNil())
