@@ -112,7 +112,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 autoScalerMax: 4
                 maxSurge: 4
                 maxUnavailable: 1
-                providerSpecificConfig: { gcpConfig: { zone: ["europe-west4-a"] } }
+                providerSpecificConfig: { gcpConfig: { zones: ["europe-west4-a"] } }
               }
             }
             kymaConfig: {
