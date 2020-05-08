@@ -1,4 +1,4 @@
-package resource
+package resource_test
 
 import (
 	"context"
@@ -14,6 +14,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource/automock"
 )
 
@@ -33,7 +34,7 @@ func TestClient_CreateWithReference(t *testing.T) {
 		client.On("Create", ctx, object).Return(nil).Once()
 		defer client.AssertExpectations(t)
 
-		resourceClient := New(client, scheme)
+		resourceClient := resource.New(client, scheme)
 
 		// When
 		err := resourceClient.CreateWithReference(ctx, parent, object)
@@ -54,7 +55,7 @@ func TestClient_CreateWithReference(t *testing.T) {
 		client.On("Create", ctx, object).Return(nil).Once()
 		defer client.AssertExpectations(t)
 
-		resourceClient := New(client, scheme)
+		resourceClient := resource.New(client, scheme)
 
 		// When
 		err := resourceClient.CreateWithReference(ctx, nil, object)
@@ -76,7 +77,7 @@ func TestClient_CreateWithReference(t *testing.T) {
 		client.On("Create", ctx, object).Return(errors.NewAlreadyExists(controllerruntime.GroupResource{}, "test")).Once()
 		defer client.AssertExpectations(t)
 
-		resourceClient := New(client, scheme)
+		resourceClient := resource.New(client, scheme)
 
 		// When
 		err := resourceClient.CreateWithReference(ctx, parent, object)
@@ -93,7 +94,7 @@ func TestClient_CreateWithReference(t *testing.T) {
 		parent := &batchv1.Job{}
 		object := &corev1.Pod{}
 
-		resourceClient := New(nil, scheme)
+		resourceClient := resource.New(nil, scheme)
 
 		// When
 		err := resourceClient.CreateWithReference(ctx, parent, object)
@@ -116,7 +117,7 @@ func TestClient_ListByLabel(t *testing.T) {
 		client.On("List", ctx, list, mock.Anything).Return(nil).Once()
 		defer client.AssertExpectations(t)
 
-		resourceClient := New(client, nil)
+		resourceClient := resource.New(client, nil)
 
 		// When
 		err := resourceClient.ListByLabel(ctx, "test", labels, list)
@@ -134,7 +135,7 @@ func TestClient_ListByLabel(t *testing.T) {
 		client.On("List", ctx, list, mock.Anything).Return(nil).Once()
 		defer client.AssertExpectations(t)
 
-		resourceClient := New(client, nil)
+		resourceClient := resource.New(client, nil)
 
 		// When
 		err := resourceClient.ListByLabel(ctx, "test", nil, list)
@@ -153,7 +154,7 @@ func TestClient_ListByLabel(t *testing.T) {
 		client.On("List", ctx, list, mock.Anything).Return(errors.NewBadRequest("bad")).Once()
 		defer client.AssertExpectations(t)
 
-		resourceClient := New(client, nil)
+		resourceClient := resource.New(client, nil)
 
 		// When
 		err := resourceClient.ListByLabel(ctx, "test", labels, list)
@@ -177,7 +178,7 @@ func TestClient_DeleteAllBySelector(t *testing.T) {
 		client.On("DeleteAllOf", ctx, resourceType, mock.Anything).Return(nil).Once()
 		defer client.AssertExpectations(t)
 
-		resourceClient := New(client, nil)
+		resourceClient := resource.New(client, nil)
 
 		// When
 		err := resourceClient.DeleteAllBySelector(ctx, resourceType, "test", selector)
@@ -195,7 +196,7 @@ func TestClient_DeleteAllBySelector(t *testing.T) {
 		client.On("DeleteAllOf", ctx, resourceType, mock.Anything).Return(nil).Once()
 		defer client.AssertExpectations(t)
 
-		resourceClient := New(client, nil)
+		resourceClient := resource.New(client, nil)
 
 		// When
 		err := resourceClient.DeleteAllBySelector(ctx, resourceType, "test", nil)
@@ -215,7 +216,7 @@ func TestClient_DeleteAllBySelector(t *testing.T) {
 		client.On("DeleteAllOf", ctx, resourceType, mock.Anything).Return(errors.NewBadRequest("bad")).Once()
 		defer client.AssertExpectations(t)
 
-		resourceClient := New(client, nil)
+		resourceClient := resource.New(client, nil)
 
 		// When
 		err := resourceClient.DeleteAllBySelector(ctx, resourceType, "test", selector)

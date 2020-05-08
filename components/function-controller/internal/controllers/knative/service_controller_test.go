@@ -163,8 +163,12 @@ var _ = ginkgo.Describe("KService controller", func() {
 
 	ginkgo.It("should cleanup old revisions, leaving newest one", func() {
 		ginkgo.By("Creating test resources")
+
+		_, err := reconciler.Reconcile(request)
+		gm.Expect(err).NotTo(gm.HaveOccurred(), "should ignore not found err")
+
 		srv := fixKservice(srvName, namespace, true)
-		err := resourceClient.Create(ctx, &srv)
+		err = resourceClient.Create(ctx, &srv)
 		gm.Expect(err).NotTo(gm.HaveOccurred(), "failed to create test KService resource")
 
 		for _, rev := range fixRevisionList(srvName, namespace, numberOfRevisions) {

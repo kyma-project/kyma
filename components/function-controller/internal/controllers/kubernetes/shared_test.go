@@ -110,6 +110,7 @@ var _ = ginkgo.Describe("getNamespaces", func() {
 			Phase: corev1.NamespaceTerminating,
 		}}
 	)
+
 	ginkgo.It("should successfully return non base, non excluded namespace", func() {
 		fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme, &ns1)
 		namespaces, err := getNamespaces(ctx, fakeClient, baseNs.Name, excludedNamespaces)
