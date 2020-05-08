@@ -1,0 +1,161 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-app-conn-migration
+  annotations:
+    helm.sh/hook: "pre-upgrade, pre-install"
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+  labels:
+    job: {{ .Release.Name }}-app-conn-migration
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Name }}-app-conn-migration
+  annotations:
+    helm.sh/hook: "pre-upgrade, pre-install"
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+  labels:
+    job: {{ .Release.Name }}-app-conn-migration
+rules:
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["create", "get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Release.Name }}-app-conn-migration
+  annotations:
+    helm.sh/hook: "pre-upgrade, pre-install"
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+  labels:
+    job: {{ .Release.Name }}-app-conn-migration
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Name }}-app-conn-migration
+subjects:
+- kind: ServiceAccount
+  name: {{ .Release.Name }}-app-conn-migration
+  namespace: kyma-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-crd-application-connector
+  annotations:
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
+data:
+  applications.applicationconnector.kyma-project.io: |-
+{{.Files.Get "files/crd-applications.applicationconnector.yaml" | printf "%s" | indent 4}}
+  certificaterequests.applicationconnector.kyma-project.io: |-
+{{.Files.Get "files/crd-certificaterequests.applicationconnector.yaml" | printf "%s" | indent 4}}
+  tokenrequests.applicationconnector.kyma-project.io: |-
+{{.Files.Get "files/crd-tokenrequests.applicationconnector.yaml" | printf "%s" | indent 4}}
+  centralconnections.applicationconnector.kyma-project.io: |-
+{{.Files.Get "files/crd-centralconnections.applicationconnector.yaml" | printf "%s" | indent 4}}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-app-conn-migration
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded"
+    helm.sh/hook: "pre-upgrade, pre-install"
+    helm.sh/hook-weight: "10"
+  labels:
+    job: {{ .Release.Name }}-app-conn-migration
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: {{ .Release.Name }}-app-conn-migration
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        job: {{ .Release.Name }}-app-conn-migration
+    spec:
+      serviceAccountName: {{ .Release.Name }}-app-conn-migration
+      restartPolicy: Never
+      containers:
+      - name: job
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
+        terminationMessagePolicy: "FallbackToLogsOnError"
+        volumeMounts:
+        - name: crd-application-connector
+          mountPath: /etc/crd
+          readOnly: true
+        command:
+        - /bin/bash
+        - -c
+        - |-
+          kubectl annotate crd applications.applicationconnector.kyma-project.io helm.sh/hook- \
+          || kubectl apply -f /etc/crd/applications.applicationconnector.kyma-project.io
+      volumes:
+      - name: crd-application-connector
+        configMap:
+          name: {{ .Release.Name }}-crd-application-connector
+---
+{{- if not .Values.global.disableLegacyConnectivity }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-app-conn-migration-opt
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded"
+    helm.sh/hook: "pre-upgrade, pre-install"
+    helm.sh/hook-weight: "10"
+  labels:
+    job: {{ .Release.Name }}-app-conn-migration-opt
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: {{ .Release.Name }}-app-conn-migration-opt
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        job: {{ .Release.Name }}-app-conn-migration-opt
+    spec:
+      serviceAccountName: {{ .Release.Name }}-app-conn-migration
+      restartPolicy: Never
+      containers:
+      - name: job
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
+        terminationMessagePolicy: "FallbackToLogsOnError"
+        volumeMounts:
+        - name: crd-application-connector
+          mountPath: /etc/crd
+          readOnly: true
+        command:
+        - /bin/bash
+        - -c
+        - |-
+          set -e
+          # list of crds to install
+          crds=( \
+            certificaterequests.applicationconnector.kyma-project.io \
+            tokenrequests.applicationconnector.kyma-project.io \
+            centralconnections.applicationconnector.kyma-project.io \
+          )
+          for crd in "${crds[@]}"; do
+            # if crd exists - make sure it does not have crd-install helm annotation
+            kubectl get crd "$crd" \
+            && kubectl annotate crd "$crd" helm.sh/hook-
+            # crd does not exist create it
+            kubectl apply -f /etc/crd/tokenrequests.applicationconnector.kyma-project.io
+          done
+      volumes:
+      - name: crd-application-connector
+        configMap:
+          name: {{ .Release.Name }}-crd-application-connector
+{{- end }}
