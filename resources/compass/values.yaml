@@ -56,7 +56,7 @@ global:
         version: "d068b250"
       provisioner:
         dir:
-        version: "PR-1306"
+        version: "PR-1320"
       e2e_provisioning:
         dir:
         version: "d068b250"
