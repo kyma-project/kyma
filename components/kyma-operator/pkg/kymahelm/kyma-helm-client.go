@@ -29,6 +29,7 @@ type ClientInterface interface {
 	UpgradeRelease(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error)
 	DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error)
 	PrintRelease(release *release.Release)
+	RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error)
 }
 
 // Client .
@@ -182,7 +183,17 @@ func (hc *Client) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.
 		helm.ReuseValues(false),
 		helm.UpgradeTimeout(3600),
 		helm.UpgradeWait(true),
+		helm.UpgradeCleanupOnFail(true),
 	)
+}
+
+func (hc *Client) RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error) {
+	return hc.helm.RollbackRelease(
+		releaseName,
+		helm.RollbackWait(true),
+		helm.RollbackVersion(revision),
+		helm.RollbackCleanupOnFail(true),
+		helm.RollbackTimeout(3600))
 }
 
 // DeleteRelease .
