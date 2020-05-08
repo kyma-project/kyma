@@ -29,7 +29,6 @@ tests:
     waitTimeout: 15m
     verifySSL: "false"
     verbose: "true"
-    usageKind: function
 
 global:
   commonLabels:
@@ -200,6 +199,9 @@ clusterMicroFrontend:
 
 grafanaDashboard:
   enabled: true
+
+usageKind: 
+  name: serverless-function
 
 docker-registry:
   enabled: true

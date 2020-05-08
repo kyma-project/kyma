@@ -6,9 +6,9 @@ set -o pipefail
 
 readonly SBU_RESOURCE_TYPE="servicebindingusages.servicecatalog.kyma-project.io"
 readonly OLD_USAGE_KIND="knative-service"
-readonly NEW_USAGE_KIND="function"
+readonly NEW_USAGE_KIND="serverless-function"
 
-# patchBindingUsages patches all ServiceBindingUsage in all namespaces to "function" UsageKind
+# patchBindingUsages patches all ServiceBindingUsage in all namespaces to "serverless-function" UsageKind
 #
 patchBindingUsages() {
   local -r bindingUsages=$(kubectl get ${SBU_RESOURCE_TYPE} --all-namespaces -ojson | jq -c ".items[] | select( .spec.usedBy.kind == \"${OLD_USAGE_KIND}\" )")
@@ -24,7 +24,7 @@ patchBindingUsages() {
   done
 }
 
-# patchSingleBindingUsage patches single ServiceBindingUsage to "function" UsageKind
+# patchSingleBindingUsage patches single ServiceBindingUsage to "serverless-function" UsageKind
 #
 # Arguments:
 #   $1 - ServiceBindingUsage resource
