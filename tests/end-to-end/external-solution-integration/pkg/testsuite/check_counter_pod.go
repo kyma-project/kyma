@@ -13,7 +13,7 @@ import (
 type CheckCounterPod struct {
 	testService   *testkit.TestService
 	expectedValue int
-	retry_opts    []retrygo.Option
+	retryOpts     []retrygo.Option
 }
 
 var _ step.Step = &CheckCounterPod{}
@@ -23,7 +23,7 @@ func NewCheckCounterPod(testService *testkit.TestService, expectedValue int, opt
 	return &CheckCounterPod{
 		testService:   testService,
 		expectedValue: expectedValue,
-		retry_opts:    opts,
+		retryOpts:     opts,
 	}
 }
 
@@ -36,7 +36,7 @@ func (s *CheckCounterPod) Name() string {
 func (s *CheckCounterPod) Run() error {
 	err := retry.Do(func() error {
 		return s.testService.WaitForCounterPodToUpdateValue(s.expectedValue)
-	}, s.retry_opts...)
+	}, s.retryOpts...)
 	if err != nil {
 		return errors.Wrapf(err, "the counter pod is not updated")
 	}
