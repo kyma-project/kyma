@@ -39,13 +39,19 @@ function sendReq(url, resolve, reject) {
 }
 function getGateway() {
 	if (legacy) {
-		return process.env.GATEWAY_URL
+		console.log("Get gateway with legacy method");
+		return process.env.GATEWAY_URL;
 	} else {
-		return Object.keys(process.env).find(val => val.endsWith('_GATEWAY_URL'))
+		console.log("Get gateway with non legacy method");
+		return Object.keys(process.env).find(val => val.endsWith('_GATEWAY_URL'));
 	}
 }
 
 module.exports = { main: function (event, context) {	
+	console.log("==============================");	
+	console.log("Legacy:           ", legacy)
+	console.log("Expected Payload: ", expectedPayload)
+	console.log("==============================");
 	console.log("Received event: ");	
 	console.log(JSON.stringify(event, null, 2));	
 	console.log("==============================");	
