@@ -15,7 +15,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 6 }}
+      {{- include "tplValue" ( dict "value" .Values.global.commonMatchLabels "context" . ) | nindent 6 }}
   replicas: {{ .Values.deployment.replicas }}
   {{- if .Values.deployment.extraProperties }}
   {{ include "tplValue" ( dict "value" .Values.deployment.extraProperties "context" . ) | nindent 2 }}

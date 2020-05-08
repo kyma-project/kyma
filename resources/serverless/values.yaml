@@ -39,6 +39,12 @@ global:
     app.kubernetes.io/managed-by: "{{ .Release.Service }}"
     app.kubernetes.io/version: "{{ .Values.images.manager.tag }}"
     helm.sh/chart: "{{ include \"chart\" . }}"
+  commonMatchLabels:
+    app: "{{ template \"name\" . }}"
+    app.kubernetes.io/name: "{{ template \"name\" . }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+    helm.sh/chart: "{{ include \"chart\" . }}"
   dockerServicePort: 5000
   ingress:
     domainName:
