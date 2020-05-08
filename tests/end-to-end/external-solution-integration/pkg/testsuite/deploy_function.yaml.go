@@ -43,7 +43,8 @@ function getGateway() {
 		return process.env.GATEWAY_URL;
 	} else {
 		console.log("Get gateway with non legacy method");
-		return Object.keys(process.env).find(val => val.endsWith('_GATEWAY_URL'));
+		let envKey = Object.keys(process.env).find(val => val.endsWith('_GATEWAY_URL'));
+		return process.env[envKey]
 	}
 }
 
