@@ -19,6 +19,8 @@ gardener:
   kubeconfig: "" # Base64 encoded Gardener SA key
   auditLogTenantConfigPath: "" # "/gardener/tenant/config"
   auditLogTenantConfigMapName: ""
+  maintenanceWindowConfigPath: # "/gardener/maintenance/config"
+  maintenanceWindowConfigMapName: ""
   secretName: "gardener-credentials"
   auditLogsPolicyConfigMap: ""
   manageSecrets: true
