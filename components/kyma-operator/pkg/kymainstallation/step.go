@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
@@ -80,6 +81,9 @@ func (s installStep) Run() error {
 				log.Println(deleteErrMsg)
 				return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, deleteErrMsg))
 			}
+
+			//waiting for release to be deleted
+			time.Sleep(time.Second * time.Duration(5))
 
 			errorMsg = fmt.Sprintf("%s\nHelm delete of %s was successfull", installErrMsg, s.component.GetReleaseName())
 		}
