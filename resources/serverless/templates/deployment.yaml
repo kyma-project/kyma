@@ -23,7 +23,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 8 }}
+        {{- include "tplValue" ( dict "value" .Values.global.commonMatchLabels "context" . ) | nindent 8 }}
       {{- if .Values.pod.labels }}
         {{ include "tplValue" ( dict "value" .Values.pod.labels "context" . ) | nindent 8 }}
       {{- end }}
