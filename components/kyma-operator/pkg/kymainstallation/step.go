@@ -83,7 +83,7 @@ func (s installStep) Run() error {
 			}
 
 			//waiting for release to be deleted
-			time.Sleep(time.Second * time.Duration(5))
+			time.Sleep(time.Second * time.Duration(10))
 
 			errorMsg = fmt.Sprintf("%s\nHelm delete of %s was successfull", installErrMsg, s.component.GetReleaseName())
 		}

@@ -96,14 +96,11 @@ func (hc *Client) IsReleaseDeletable(rname string) (bool, error) {
 		retry.Attempts(uint(maxAttempts)),
 		retry.DelayType(func(attempt uint, config *retry.Config) time.Duration {
 			log.Printf("Retry number %d on getting release status.\n", attempt+1)
-			return time.Duration(maxAttempts) * time.Second
+			return time.Duration(3) * time.Second
 		}),
 	)
-	if err != nil {
-		return false, err
-	}
 
-	return isDeletable, nil
+	return isDeletable, err
 }
 
 // InstallReleaseFromChart .
