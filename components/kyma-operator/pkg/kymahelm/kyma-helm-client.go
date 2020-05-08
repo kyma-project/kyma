@@ -95,7 +95,7 @@ func (hc *Client) IsReleaseDeletable(rname string) (bool, error) {
 		},
 		retry.Attempts(uint(maxAttempts)),
 		retry.DelayType(func(attempt uint, config *retry.Config) time.Duration {
-			log.Printf("Retry numebr %d on getting release status.\n", attempt+1)
+			log.Printf("Retry number %d on getting release status.\n", attempt+1)
 			return time.Duration(maxAttempts) * time.Second
 		}),
 	)
