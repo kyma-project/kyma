@@ -17,7 +17,7 @@ import (
 
 const functionFmt = `	
 const expectedPayload = "%s";	
-const legacy = "%v";	
+const legacy = %t;	
 const request = require('request');	
 const JSON = require('circular-json');	
 
@@ -55,7 +55,6 @@ module.exports = { main: function (event, context) {
 	
 	const gateway = getGateway()
     if (gateway === undefined) {
-		console.log(process.env)
 		throw new Error("gateway is undefined")	
 	}
     if (event["data"] !== expectedPayload) {	
