@@ -1,8 +1,6 @@
 package event_mesh
 
 import (
-	"time"
-
 	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	appbrokerclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appoperatorclientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
@@ -29,7 +27,6 @@ const (
 
 var (
 	apiRuleRes = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
-	sleep      = func(s *Scenario) time.Duration { return time.Duration(s.waitTime) * time.Second }
 )
 
 // Steps return scenario steps
@@ -76,7 +73,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 			coreClientset.CoreV1().Pods(s.testID),
 			true),
 		testsuite.NewStartTestServer(testService),
-		testsuite.NewSleep(sleep(s)),
+		testsuite.NewSleep(s.waitTime),
 		testsuite.NewConnectApplication(connector, state, s.applicationTenant, s.applicationGroup),
 		testsuite.NewRegisterTestService(s.testID, testService, state),
 		testsuite.NewCreateLegacyServiceInstance(s.testID, s.testID, state.GetServiceClassID,
@@ -86,9 +83,9 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID,
 			serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID),
 			knativeEventingClientSet.EventingV1alpha1().Brokers(s.testID), knativeEventingClientSet.MessagingV1alpha1().Subscriptions(kymaIntegrationNamespace)),
-		testsuite.NewSleep(sleep(s)),
+		testsuite.NewSleep(s.waitTime),
 		testsuite.NewCreateKnativeTrigger(s.testID, defaultBrokerName, lambdaEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
-		testsuite.NewSleep(sleep(s)),
+		testsuite.NewSleep(s.waitTime),
 		testsuite.NewSendEventToMesh(s.testID, helpers.LambdaPayload, state),
 		NewWrappedCounterPod(testService, 1),
 		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.LambdaPayload, state),

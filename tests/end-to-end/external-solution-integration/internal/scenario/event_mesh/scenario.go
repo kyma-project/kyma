@@ -1,9 +1,10 @@
 package event_mesh
 
 import (
-	"github.com/spf13/pflag"
+	"time"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
+	"github.com/spf13/pflag"
 )
 
 // E2EScenario executes complete external solution integration test scenario
@@ -13,7 +14,7 @@ type Scenario struct {
 	skipSSLVerify     bool
 	applicationTenant string
 	applicationGroup  string
-	waitTime          int
+	waitTime          time.Duration
 }
 
 // AddFlags adds CLI flags to given FlagSet
@@ -23,7 +24,7 @@ func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 	pflag.BoolVar(&s.skipSSLVerify, "skipSSLVerify", false, "Skip verification of service SSL certificates")
 	pflag.StringVar(&s.applicationTenant, "applicationTenant", "", "Application CR Tenant")
 	pflag.StringVar(&s.applicationGroup, "applicationGroup", "", "Application CR Group")
-	pflag.IntVar(&s.waitTime, "waitTime", 10, "Wait time in seconds")
+	s.waitTime = time.Duration(*pflag.Int("waitTime", 10, "Wait time in seconds")) * time.Second
 }
 
 func (s *Scenario) NewState() *state {

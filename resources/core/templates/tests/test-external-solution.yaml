@@ -1,5 +1,4 @@
-{{- range $suffix, $val := .Values.test.external_solution }}
-  {{- if and ( $val.enabled ) ( $.Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" ) }}
+{{- if .Values.test.external_solution.event_mesh.enabled }}
 ---
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -54,5 +53,4 @@ spec:
               curl -XPOST http://127.0.0.1:15020/quitquitquit
               sleep 4
               exit $exit_code
-  {{- end}}
 {{- end }}
