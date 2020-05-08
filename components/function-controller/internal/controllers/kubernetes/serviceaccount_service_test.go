@@ -42,7 +42,6 @@ func Test_serviceAccountService_extractSecretTokens(t *testing.T) {
 			}},
 			want: []corev1.ObjectReference{},
 		},
-
 		{
 			name: "should return multiple correct secrets",
 			args: args{serviceAccount: &corev1.ServiceAccount{
@@ -112,7 +111,7 @@ var _ = ginkgo.Describe("updateServiceAccount method", func() {
 		ctx = context.TODO()
 	)
 
-	ginkgo.It("should update serviceAccount merging two svcAcc together", func() {
+	ginkgo.It("should update configmap merging two svcAcc together", func() {
 		client := new(automock.Client)
 
 		var obj resource.Object
@@ -312,7 +311,7 @@ var _ = ginkgo.Describe("createServiceAccount method", func() {
 		ctx = context.TODO()
 	)
 
-	ginkgo.It("should create serviceAccount correctly", func() {
+	ginkgo.It("should create configmap correctly", func() {
 		client := new(automock.Client)
 
 		var obj resource.Object

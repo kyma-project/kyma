@@ -177,7 +177,7 @@ var _ = ginkgo.Describe("KService controller", func() {
 			gm.Expect(resourceClient.Status().Update(ctx, &pinnedRev)).NotTo(gm.HaveOccurred())
 		}
 
-		ginkgo.By("should skip reconcile on service creation")
+		ginkgo.By("should skip reconcile when service is not ready")
 		_, err = reconciler.Reconcile(request)
 		gm.Expect(err).NotTo(gm.HaveOccurred())
 
