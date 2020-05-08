@@ -41,9 +41,11 @@ global:
     helm.sh/chart: "{{ include \"chart\" . }}"
   commonMatchLabels:
     app: "{{ template \"name\" . }}"
+    version: "21757b11"
     app.kubernetes.io/name: "{{ template \"name\" . }}"
     app.kubernetes.io/instance: "{{ .Release.Name }}"
     app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+    app.kubernetes.io/version: "21757b11"
     helm.sh/chart: "{{ include \"chart\" . }}"
   dockerServicePort: 5000
   ingress:
