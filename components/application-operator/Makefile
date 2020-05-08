@@ -1,6 +1,6 @@
 APP_NAME = application-operator
 APP_PATH = components/$(APP_NAME)
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20191011-51ed45a
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200117-d3885041
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 override ENTRYPOINT = cmd/manager/manager.go
