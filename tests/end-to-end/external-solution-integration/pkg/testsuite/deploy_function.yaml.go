@@ -54,7 +54,8 @@ module.exports = { main: function (event, context) {
 	console.log("==============================");	
 	
 	const gateway = getGateway()
-    if (gateway === undefined) {	
+    if (gateway === undefined) {
+		console.log(process.env)
 		throw new Error("gateway is undefined")	
 	}
     if (event["data"] !== expectedPayload) {	
@@ -69,7 +70,7 @@ module.exports = { main: function (event, context) {
 `
 const functionDeps = `{"dependencies":{"request": "^2.88.0", "circular-json": "^0.5.9"}}`
 
-// DeployFunction deploys lambda to the cluster. The lambda will do PUT /counter to connected application upon receiving
+// DeployFunction deploys function to the cluster. The function will do PUT /counter to connected application upon receiving
 // an event
 type DeployFunction struct {
 	client          dynamic.ResourceInterface
