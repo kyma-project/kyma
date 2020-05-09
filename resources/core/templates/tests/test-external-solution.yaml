@@ -1,4 +1,5 @@
 {{- if .Values.test.external_solution.event_mesh.enabled }}
+{{- $val := .Values.test.external_solution -}}
 ---
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
