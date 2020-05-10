@@ -39,10 +39,8 @@ function sendReq(url, resolve, reject) {
 }
 function getGateway() {
 	if (legacy) {
-		console.log("Get gateway with legacy method");
 		return process.env.GATEWAY_URL;
 	} else {
-		console.log("Get gateway with non legacy method");
 		let envKey = Object.keys(process.env).find(val => val.endsWith('_GATEWAY_URL'));
 		return process.env[envKey]
 	}
