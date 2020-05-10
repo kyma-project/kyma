@@ -5,7 +5,7 @@ metadata:
   annotations:
     helm.sh/hook: "pre-upgrade, pre-install"
     helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook-delete-policy: "before-hook-creation"
   labels:
     job: {{ .Release.Name }}-app-conn-migration
 ---
@@ -16,7 +16,7 @@ metadata:
   annotations:
     helm.sh/hook: "pre-upgrade, pre-install"
     helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook-delete-policy: "before-hook-creation"
   labels:
     job: {{ .Release.Name }}-app-conn-migration
 rules:
@@ -31,7 +31,7 @@ metadata:
   annotations:
     helm.sh/hook: "pre-upgrade, pre-install"
     helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook-delete-policy: "before-hook-creation"
   labels:
     job: {{ .Release.Name }}-app-conn-migration
 roleRef:
@@ -51,7 +51,7 @@ metadata:
   annotations:
     "helm.sh/hook": "pre-install, pre-upgrade"
     "helm.sh/hook-weight": "1"
-    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
 data:
   applications.applicationconnector.kyma-project.io: |-
 {{.Files.Get "files/crd-applications.applicationconnector.yaml" | printf "%s" | indent 4}}
@@ -68,7 +68,7 @@ metadata:
   name: {{ .Release.Name }}-app-conn-migration
   namespace: {{ .Release.Namespace }}
   annotations:
-    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded"
+    helm.sh/hook-delete-policy: before-hook-creation"
     helm.sh/hook: "pre-upgrade, pre-install"
     helm.sh/hook-weight: "10"
   labels:
@@ -111,7 +111,7 @@ metadata:
   name: {{ .Release.Name }}-app-conn-migration-opt
   namespace: {{ .Release.Namespace }}
   annotations:
-    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded"
+    helm.sh/hook-delete-policy: before-hook-creation"
     helm.sh/hook: "pre-upgrade, pre-install"
     helm.sh/hook-weight: "10"
   labels:
@@ -141,19 +141,21 @@ spec:
         - -c
         - |-
           set -e
-          # list of crds to install
-          crds=( \
-            certificaterequests.applicationconnector.kyma-project.io \
-            tokenrequests.applicationconnector.kyma-project.io \
-            centralconnections.applicationconnector.kyma-project.io \
-          )
-          for crd in "${crds[@]}"; do
-            # if crd exists - make sure it does not have crd-install helm annotation
-            kubectl get crd "$crd" \
-            && kubectl annotate crd "$crd" helm.sh/hook-
-            # crd does not exist create it
-            kubectl apply -f /etc/crd/tokenrequests.applicationconnector.kyma-project.io
-          done
+
+          echo "processing certificaterequests.applicationconnector.kyma-project.io"
+          kubectl annotate crd certificaterequests.applicationconnector.kyma-project.io helm.sh/hook- \
+          || kubectl apply -f /etc/crd/certificaterequests.applicationconnector.kyma-project.io
+          echo "done processing certificaterequests.applicationconnector.kyma-project.io"
+
+          echo "processing tokenrequests.applicationconnector.kyma-project.io"
+          kubectl annotate crd tokenrequests.applicationconnector.kyma-project.io helm.sh/hook- \
+          || kubectl apply -f /etc/crd/tokenrequests.applicationconnector.kyma-project.io
+          echo "done processing tokenrequests.applicationconnector.kyma-project.io"
+
+          echo "processing centralconnections.applicationconnector.kyma-project.io"
+          kubectl annotate crd centralconnections.applicationconnector.kyma-project.io helm.sh/hook- \
+          || kubectl apply -f /etc/crd/centralconnections.applicationconnector.kyma-project.io
+          echo "done processing centralconnections.applicationconnector.kyma-project.io"
       volumes:
       - name: crd-application-connector
         configMap:
