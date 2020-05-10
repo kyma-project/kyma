@@ -20,4 +20,4 @@ spec:
       protocol: {{ .Values.services.manager.port.protocol }}
       targetPort: {{ .Values.services.manager.port.targerPort }}
   selector:
-    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+    {{- include "tplValue" ( dict "value" .Values.global.commonMatchLabels "context" . ) | nindent 4 }}
