@@ -34,13 +34,10 @@ spec:
               value: 'https://{{ .Values.host }}.{{ .Values.global.ingress.domainName }}'
             - name: APP_BROKER_PROVISION_GCP
               value: "true"
-            - name: APP_BROKER_AUTH_USERNAME
-              value: "{{ .Values.broker.username }}"
-            - name: APP_BROKER_AUTH_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "kyma-env-broker.fullname" . }}
-                  key: broker-password
+            - name: APP_BROKER_CLIENT_NAME
+              value: {{ include "kyma-env-broker.fullname" . | quote }}
+            - name: APP_BROKER_TOKEN_URL
+              value: "https://oauth2.{{ .Values.global.ingress.domainName }}/oauth2/token"
             - name: APP_RUNTIME_PROVISIONER_URL
               value: "{{ .Values.provisioner.URL }}"
             - name: APP_RUNTIME_UUA_INSTANCE_NAME
@@ -92,13 +89,10 @@ spec:
               value: 'https://{{ .Values.host }}.{{ .Values.global.ingress.domainName }}'
             - name: APP_BROKER_PROVISION_GCP
               value: "true"
-            - name: APP_BROKER_AUTH_USERNAME
-              value: "{{ .Values.broker.username }}"
-            - name: APP_BROKER_AUTH_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "kyma-env-broker.fullname" . }}
-                  key: broker-password
+            - name: APP_BROKER_CLIENT_NAME
+              value: {{ include "kyma-env-broker.fullname" . | quote }}
+            - name: APP_BROKER_TOKEN_URL
+              value: "https://oauth2.{{ .Values.global.ingress.domainName }}/oauth2/token"
             - name: APP_RUNTIME_PROVISIONER_URL
               value: "{{ .Values.provisioner.URL }}"
             - name: APP_RUNTIME_UUA_INSTANCE_NAME
