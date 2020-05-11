@@ -15,7 +15,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: {{ .Release.Name }}-crd-init
-  namespace: compass-system
+  namespace: kyma-system
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -51,7 +51,7 @@ spec:
       labels:
         job: {{ .Release.Name }}-init-compass-rt-agent
     spec:
-      serviceAccountname: {{ .Release.Name }}-init-compass-rt-agent
+      serviceAccountName: {{ .Release.Name }}-crd-init
       restartPolicy: Never
       containers:
       - name: job
