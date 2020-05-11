@@ -9,10 +9,19 @@ spec:
   template:
     spec:
       serviceAccountName: e2e-provisioning
+      volumes:
+        - name: gardener-kubeconfig
+          secret:
+            defaultMode: 420
+            secretName: {{ .Values.gardener.secretName }}
       containers:
         - name: tests
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.e2e_provisioning.dir }}e2e-provisioning-test:{{ .Values.global.images.tests.e2e_provisioning.version }}
           imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /gardener/kubeconfig
+              name: gardener-kubeconfig
+              readOnly: true
           env:
             - name: APP_PROVISION_TIMEOUT
               value: "105m"
@@ -54,6 +63,18 @@ spec:
               value: "compass-system"
             - name: APP_DIRECTOR_OAUTH_CREDENTIALS_SECRET_NAME
               value: "{{ .Values.global.kyma_environment_broker.secrets.integrationSystemCredentials.name }}"
+            - name: APP_GARDENER_PROJECT
+              value: {{ .Values.gardener.project }}
+            - name: APP_GARDENER_KUBECONFIG_PATH
+              value: {{ .Values.gardener.kubeconfigPath }}
+            - name: APP_TEST_AZURE_EVENT_HUBS_ENABLED
+              value: "true"
+            - name: APP_GARDENER_PROJECT
+              value: {{ .Values.gardener.project }}
+            - name: APP_GARDENER_KUBECONFIG_PATH
+              value: {{ .Values.gardener.kubeconfigPath }}
+            - name: APP_TEST_AZURE_EVENT_HUBS_ENABLED
+              value: "true"
           command: ["/bin/sh"]
           args: ["-c", "echo 'Starting e2e-provisioning test on Azure. Waiting 20s for api server...'; sleep 20; ./test.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
 
@@ -69,10 +90,19 @@ spec:
   template:
     spec:
       serviceAccountName: e2e-provisioning
+      volumes:
+        - name: gardener-kubeconfig
+          secret:
+            defaultMode: 420
+            secretName: {{ .Values.gardener.secretName }}
       containers:
         - name: tests
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.e2e_provisioning.dir }}e2e-provisioning-test:{{ .Values.global.images.tests.e2e_provisioning.version }}
           imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /gardener/kubeconfig
+              name: gardener-kubeconfig
+              readOnly: true
           env:
             - name: APP_PROVISION_TIMEOUT
               value: "105m"
@@ -110,5 +140,17 @@ spec:
               value: "compass-system"
             - name: APP_DIRECTOR_OAUTH_CREDENTIALS_SECRET_NAME
               value: "{{ .Values.global.kyma_environment_broker.secrets.integrationSystemCredentials.name }}"
+            - name: APP_GARDENER_PROJECT
+              value: {{ .Values.gardener.project }}
+            - name: APP_GARDENER_KUBECONFIG_PATH
+              value: {{ .Values.gardener.kubeconfigPath }}
+            - name: APP_TEST_AZURE_EVENT_HUBS_ENABLED
+              value: "true"
+            - name: APP_GARDENER_PROJECT
+              value: {{ .Values.gardener.project }}
+            - name: APP_GARDENER_KUBECONFIG_PATH
+              value: {{ .Values.gardener.kubeconfigPath }}
+            - name: APP_TEST_AZURE_EVENT_HUBS_ENABLED
+              value: "true"
           command: ["/bin/sh"]
           args: ["-c", "echo 'Starting e2e-provisioning cleanup test on Azure. Waiting 20s for api server...'; sleep 20; ./test.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
