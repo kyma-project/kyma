@@ -8,8 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
 	"github.com/sirupsen/logrus"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
 )
 
 type cfg struct {
