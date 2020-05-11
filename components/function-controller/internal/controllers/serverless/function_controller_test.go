@@ -181,6 +181,28 @@ var _ = ginkgo.Describe("Function", func() {
 	})
 })
 
+var _ = ginkgo.Describe("updateConfigMap", func() {
+	var (
+		reconciler *FunctionReconciler
+		request    ctrl.Request
+	)
+
+	ginkgo.BeforeEach(func() {
+		function := newFixFunction("tutaj", "ah-tak-przeciez")
+		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: function.GetNamespace(), Name: function.GetName()}}
+		gomega.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
+
+		reconciler = NewFunction(resourceClient, log.Log, config, record.NewFakeRecorder(100))
+	})
+
+	ginkgo.It("should update configmap", func() {
+		result, err := reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(result.Requeue).To(gomega.BeFalse())
+		gomega.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
+	})
+})
+
 func newFixFunction(namespace, name string) *serverlessv1alpha1.Function {
 	one := int32(1)
 	two := int32(2)

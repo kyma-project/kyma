@@ -84,7 +84,6 @@ var _ = ginkgo.Describe("ConfigMap", func() {
 	})
 })
 
-
 func TestConfigMapReconciler_predicate(t *testing.T) {
 	gm := gomega.NewGomegaWithT(t)
 	baseNs := "base_ns"

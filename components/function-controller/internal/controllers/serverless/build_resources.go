@@ -9,13 +9,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
+	"knative.dev/serving/pkg/apis/autoscaling"
+
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 const (
-	autoscalingKnativeMinScaleAnn = "autoscaling.knative.dev/minScale"
-	autoscalingKnativeMaxScaleAnn = "autoscaling.knative.dev/maxScale"
-
 	servingKnativeVisibilityLabel      = "serving.knative.dev/visibility"
 	servingKnativeVisibilityLabelValue = "cluster-local"
 )
@@ -227,14 +226,14 @@ func (r *FunctionReconciler) serviceLabels(instance *serverlessv1alpha1.Function
 
 func (r *FunctionReconciler) servicePodAnnotations(instance *serverlessv1alpha1.Function) map[string]string {
 	annotations := map[string]string{
-		autoscalingKnativeMinScaleAnn: "1",
-		autoscalingKnativeMaxScaleAnn: "1",
+		autoscaling.MinScaleAnnotationKey: "1",
+		autoscaling.MaxScaleAnnotationKey: "1",
 	}
 	if instance.Spec.MinReplicas != nil {
-		annotations[autoscalingKnativeMinScaleAnn] = fmt.Sprintf("%d", *instance.Spec.MinReplicas)
+		annotations[autoscaling.MinScaleAnnotationKey] = fmt.Sprintf("%d", *instance.Spec.MinReplicas)
 	}
 	if instance.Spec.MaxReplicas != nil {
-		annotations[autoscalingKnativeMaxScaleAnn] = fmt.Sprintf("%d", *instance.Spec.MaxReplicas)
+		annotations[autoscaling.MaxScaleAnnotationKey] = fmt.Sprintf("%d", *instance.Spec.MaxReplicas)
 	}
 	return annotations
 }

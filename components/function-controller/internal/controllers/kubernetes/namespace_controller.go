@@ -49,6 +49,9 @@ func (r *NamespaceReconciler) predicate() predicate.Predicate {
 			}
 			return !isExcludedNamespace(namespace.Name, r.config.BaseNamespace, r.config.ExcludedNamespaces)
 		},
+		GenericFunc: func(genericEvent event.GenericEvent) bool {
+			return false
+		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
 			return false
 		},

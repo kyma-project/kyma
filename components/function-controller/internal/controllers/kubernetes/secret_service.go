@@ -19,6 +19,8 @@ type SecretService interface {
 	UpdateNamespace(ctx context.Context, logger logr.Logger, namespace string, baseInstance *corev1.Secret) error
 }
 
+var _ SecretService = &secretService{}
+
 type secretService struct {
 	client resource.Client
 	config Config

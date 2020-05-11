@@ -51,6 +51,13 @@ func (r *SecretReconciler) predicate() predicate.Predicate {
 			}
 			return r.svc.IsBase(runtime)
 		},
+		GenericFunc: func(e event.GenericEvent) bool {
+			runtime, ok := e.Object.(*corev1.Secret)
+			if !ok {
+				return false
+			}
+			return r.svc.IsBase(runtime)
+		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
 			return false
 		},

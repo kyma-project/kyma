@@ -1,0 +1,16 @@
+mode: set
+github.com/kyma-project/kyma/tests/function-controller/pkg/retry/retry.go:18.96,19.22 1 1
+github.com/kyma-project/kyma/tests/function-controller/pkg/retry/retry.go:19.22,20.16 1 1
+github.com/kyma-project/kyma/tests/function-controller/pkg/retry/retry.go:23.3,24.23 2 1
+github.com/kyma-project/kyma/tests/function-controller/pkg/retry/retry.go:27.3,27.21 1 1
+github.com/kyma-project/kyma/tests/function-controller/pkg/retry/retry.go:31.3,31.13 1 0
+github.com/kyma-project/kyma/tests/function-controller/pkg/retry/retry.go:20.16,22.4 1 1
+github.com/kyma-project/kyma/tests/function-controller/pkg/retry/retry.go:24.23,26.4 1 1
+github.com/kyma-project/kyma/tests/function-controller/pkg/retry/retry.go:27.21,30.4 2 1
+github.com/kyma-project/kyma/tests/function-controller/pkg/retry/retry.go:35.50,36.30 1 1
+github.com/kyma-project/kyma/tests/function-controller/pkg/retry/retry.go:36.30,37.92 1 1
+github.com/kyma-project/kyma/tests/function-controller/pkg/retry/retry.go:41.3,41.15 1 1
+github.com/kyma-project/kyma/tests/function-controller/pkg/retry/retry.go:37.92,40.4 2 1
+github.com/kyma-project/kyma/tests/function-controller/pkg/retry/retry.go:45.91,47.2 1 0
+github.com/kyma-project/kyma/tests/function-controller/pkg/retry/retry.go:49.91,51.2 1 0
+github.com/kyma-project/kyma/tests/function-controller/pkg/retry/retry.go:53.80,55.2 1 0
