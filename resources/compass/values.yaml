@@ -43,7 +43,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "b3adcb94"
+      version: "33a9188e"
     external_services_mock:
       dir:
       version: "105e8ff0"
@@ -89,6 +89,7 @@ global:
   auditlog:
     configMapName: "compass-gateway-auditlog-config"
     secretName: "compass-gateway-auditlog-secret"
+    script.configMapName: "auditlog-script"
 
   tenantConfig:
     useDefaultTenants: true
