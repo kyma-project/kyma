@@ -137,45 +137,30 @@ func (s *DeployFunction) createFunction() error {
 }
 
 func (s *DeployFunction) Cleanup() error {
-	err := s.client.Delete(s.name, &metav1.DeleteOptions{})
-	if err != nil {
-		return err
-	}
-
-	return retry.Do(
-		s.isLambdaTerminated)
+	return s.client.Delete(s.name, &metav1.DeleteOptions{})
 }
 
 func (s *DeployFunction) isFunctionReady() error {
-	function, err := s.getFunctions()
+	function, err := s.getFunction()
 	if err != nil {
 		return err
 	}
 
-	if function.Name == "" {
-		return errors.New("no function found")
-	}
-
-	if !s.isConditionReady(function) {
+	if !s.isReady(function) {
 		return errors.New("function is not ready yet")
 	}
 
 	return nil
 }
 
-func (s *DeployFunction) isLambdaTerminated() error {
-	function, err := s.getFunctions()
-	if err != nil && function.Name != "" {
-		return err
-	}
-
-	return nil
-}
-
-func (s *DeployFunction) getFunctions() (serverless.Function, error) {
+func (s *DeployFunction) getFunction() (serverless.Function, error) {
 	functionUnstructed, err := s.client.Get(s.name, metav1.GetOptions{})
 	if err != nil {
 		return serverless.Function{}, err
+	}
+
+	if len(functionUnstructed.Object) == 0 {
+		return serverless.Function{}, errors.New("no function found")
 	}
 
 	var functions serverless.Function
@@ -187,12 +172,16 @@ func (s *DeployFunction) getFunctions() (serverless.Function, error) {
 	return functions, nil
 }
 
-func (s *DeployFunction) isConditionReady(fn serverless.Function) bool {
+func (s *DeployFunction) isReady(fn serverless.Function) bool {
 	conditions := fn.Status.Conditions
 	if len(conditions) == 0 {
 		return false
 	}
 
-	ready := conditions[0].Type == serverless.ConditionRunning && conditions[0].Status == corev1.ConditionTrue
-	return ready
+	for _, condition := range conditions {
+		if condition.Type == serverless.ConditionRunning {
+			return condition.Status == corev1.ConditionTrue
+		}
+	}
+	return false
 }
