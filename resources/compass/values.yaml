@@ -89,7 +89,8 @@ global:
   auditlog:
     configMapName: "compass-gateway-auditlog-config"
     secretName: "compass-gateway-auditlog-secret"
-    script.configMapName: "auditlog-script"
+    script:
+      configMapName: "auditlog-script"
 
   tenantConfig:
     useDefaultTenants: true
