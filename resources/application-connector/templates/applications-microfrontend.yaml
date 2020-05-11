@@ -11,7 +11,7 @@ spec:
   placement: cluster
   viewBaseUrl: 'https://console.{{ js .Values.global.ingress.domainName }}/consoleapp.html#'
   navigationNodes:
-    - label: Applications
+    - label: Applications/Systems
       navigationPath: apps
       viewUrl: '/home/settings/apps'
       order: 1
@@ -23,10 +23,10 @@ spec:
           verbs:
             - get
             - list
-    - label: Application Details
+    - label: Application/System Details
       navigationPath: apps/details
       viewUrl: '/home/settings/apps'
-    - label: Application Details
+    - label: Application/System Details
       navigationPath: apps/details/:name
       viewUrl: '/home/settings/apps/:name'
       settings:

@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"k8s.io/apimachinery/pkg/labels"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
@@ -35,7 +37,7 @@ func (r *Resource) Create(res interface{}) (string, error) {
 	var resourceVersion string
 	u, err := runtime.DefaultUnstructuredConverter.ToUnstructured(res)
 	if err != nil {
-		return resourceVersion, errors.Wrapf(err, "while converting resource %s %s to unstructured", r.kind, res)
+		return resourceVersion, errors.Wrapf(err, "while converting resource %s %+v to unstructured", r.kind, res)
 	}
 	unstructuredObj := &unstructured.Unstructured{
 		Object: u,
@@ -59,6 +61,33 @@ func (r *Resource) Create(res interface{}) (string, error) {
 	}
 
 	return resourceVersion, nil
+}
+
+func (r *Resource) List(set map[string]string) (*unstructured.UnstructuredList, error) {
+	var result *unstructured.UnstructuredList
+
+	selector := labels.SelectorFromSet(set).String()
+
+	err := retry.OnTimeout(retry.DefaultBackoff, func() error {
+		var err error
+		result, err = r.ResCli.List(metav1.ListOptions{
+			LabelSelector: selector,
+		})
+		return err
+	}, r.log)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while listing resource %s in namespace %s", r.kind, r.namespace)
+	}
+	namespace := "-"
+	if r.namespace != "" {
+		namespace = r.namespace
+	}
+
+	if r.verbose {
+		r.log.Logf("LIST %s: namespace:%s kind:%s\n%v", selector, namespace, r.kind, result)
+	}
+
+	return result, nil
 }
 
 func (r *Resource) Get(name string) (*unstructured.Unstructured, error) {

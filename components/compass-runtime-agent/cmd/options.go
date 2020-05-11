@@ -15,7 +15,7 @@ const (
 )
 
 type Config struct {
-	ConnectionConfigMap          string        `envconfig:"default=compass-system/compass-agent-configuration"`
+	AgentConfigurationSecret     string        `envconfig:"default=compass-system/compass-agent-configuration"`
 	ControllerSyncPeriod         time.Duration `envconfig:"default=20s"`
 	MinimalCompassSyncTime       time.Duration `envconfig:"default=10s"`
 	CertValidityRenewalThreshold float64       `envconfig:"default=0.3"`
@@ -33,14 +33,14 @@ type Config struct {
 }
 
 func (o *Config) String() string {
-	return fmt.Sprintf("ConnectionConfigMap=%s, "+
+	return fmt.Sprintf("AgentConfigurationSecret=%s, "+
 		"ControllerSyncPeriod=%s, MinimalCompassSyncTime=%s, "+
 		"CertValidityRenewalThreshold=%f, ClusterCertificatesSecret=%s, CaCertificatesSecret=%s, "+
 		"SkipCompassTLSVerify=%v, GatewayPort=%d, UploadServiceUrl=%s, "+
 		"QueryLogging=%v, MetricsLoggingTimeInterval=%s, "+
 		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s"+
 		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v, HealthPort=%s",
-		o.ConnectionConfigMap,
+		o.AgentConfigurationSecret,
 		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
 		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
 		o.SkipCompassTLSVerify, o.GatewayPort, o.UploadServiceUrl,

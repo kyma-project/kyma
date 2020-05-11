@@ -89,7 +89,9 @@ func TestFunctionService_Update(t *testing.T) {
 		oldLabels := map[string]string{"foo": "bar"}
 		newLabels := map[string]string{"bar": "foo"}
 		function1 := fixFunction("1", "a", "1", "content", "dependencies", oldLabels)
+		function1.Spec.Labels = oldLabels
 		function2 := fixFunction("1", "a", "1", "content", "dependencies", newLabels)
+		function2.Spec.Labels = newLabels
 
 		service := fixFakeFunctionService(t, function1)
 

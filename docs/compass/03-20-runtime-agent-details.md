@@ -23,9 +23,9 @@ The initial connection requires the following parameters:
 | **TENANT** | Tenant ID  | `3e64ebae-38b5-46a0-b1ed-9ccee153a0ae` |
 | **TOKEN** | One-time token generated for the Runtime | `2I7VVX5CqxHioEBQGPxWSp3k90uw51tmx5dbo0IZd5VNFzGoPfppYrMIuoCNwFOKp05wsioJNLJYxdI-LKlUYA==` |
 
-Runtime Agent reads this configuration from the ConfigMap specified in the Runtime Agent Deployment (`compass-agent-configuration` by default).
+Runtime Agent reads this configuration from the Secret specified in the Runtime Agent Deployment (`compass-agent-configuration` by default).
 
-To see how to create the ConfigMap, see [this](#tutorials-configure-runtime-agent-with-compass) tutorial. 
+To see how to create the Secret, see [this](#tutorials-configure-runtime-agent-with-compass) tutorial. 
 
 ## Connection status
 
@@ -33,6 +33,6 @@ The connection status is preserved in the [CompassConnection Custom Resource](#c
 
 ## Reconnecting Runtime Agent
 
-If the connection with Compass fails, the Runtime Agent keeps trying to connect with the token from the ConfigMap. If the connection is established successfully, the Runtime Agent ignores the ConfigMap until the connection is lost. 
+If the connection with Compass fails, the Runtime Agent keeps trying to connect with the token from the Secret. If the connection is established successfully, the Runtime Agent ignores the Secret until the connection is lost. 
 
 To see how to reconnect the Runtime Agent with Compass, see [this](#tutorials-reconnect-runtime-agent-with-compass) tutorial.

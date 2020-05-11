@@ -1,7 +1,8 @@
 tests:
   enabled: true
   image:
-    version: d6e25e47
+    name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
+    version: v20200507-070ff576
   env:
     namespace: default
 

@@ -25,9 +25,9 @@ compass_mfs:
   statusPort: 6082
 console:
   image:
-    dir: null
+    dir: 
     pullPolicy: IfNotPresent
-    tag: 46dc8376
+    tag: 02bd947b
   service:
     externalPort: 80
     internalPort: 8080
@@ -36,7 +36,7 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: 3f06568f
+    tag: 50c12447
   service:
     externalPort: 80
     internalPort: 80
@@ -50,12 +50,12 @@ test:
     enabled: true
     ui:
       # tests uses chromium that require more memory
-      requests:
-        memory: 900Mi
-        cpu: 350m
       limits:
-        memory: 1.5Gi
         cpu: 4000m
+        memory: 1.5Gi
+      requests:
+        cpu: 350m
+        memory: 900Mi
       service_catalog:
         enabled: true
       logging:

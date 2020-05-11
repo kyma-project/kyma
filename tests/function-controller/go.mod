@@ -3,11 +3,16 @@ module github.com/kyma-project/kyma/tests/function-controller
 go 1.14
 
 require (
+	contrib.go.opencensus.io/exporter/stackdriver v0.13.1 // indirect
 	github.com/golang/protobuf v1.4.0 // indirect
+	github.com/google/go-containerregistry v0.0.0-20200430153450-5cbd060f5c92 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
-	github.com/kyma-project/kyma/components/function-controller v0.0.0-20200429131806-d45e012bf689
+	github.com/kubernetes-incubator/service-catalog v0.2.2
+	github.com/kubernetes-sigs/service-catalog v0.2.2 // indirect
+	github.com/kyma-project/helm-broker v1.0.0
+	github.com/kyma-project/kyma/components/function-controller v0.0.0-20200507074609-9796320d6479
 	github.com/onsi/gomega v1.9.0
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron v1.2.0 // indirect

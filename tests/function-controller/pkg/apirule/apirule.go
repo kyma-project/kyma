@@ -15,7 +15,6 @@ import (
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 type APIRule struct {
@@ -29,11 +28,7 @@ type APIRule struct {
 
 func New(name string, c shared.Container) *APIRule {
 	return &APIRule{
-		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
-			Version:  apiruleTypes.GroupVersion.Version,
-			Group:    apiruleTypes.GroupVersion.Group,
-			Resource: "apirules",
-		}, c.Namespace, c.Log, c.Verbose),
+		resCli:      resource.New(c.DynamicCli, apiruleTypes.GroupVersion.WithResource("apirules"), c.Namespace, c.Log, c.Verbose),
 		name:        name,
 		namespace:   c.Namespace,
 		waitTimeout: c.WaitTimeout,
@@ -99,13 +94,12 @@ func (a *APIRule) get() (*apiruleTypes.APIRule, error) {
 		return &apiruleTypes.APIRule{}, errors.Wrapf(err, "while getting ApiRule %s in namespace %s", a.name, a.namespace)
 	}
 
-	apirule := &apiruleTypes.APIRule{}
-	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, apirule)
+	apirule, err := convertFromUnstructuredToAPIRule(u)
 	if err != nil {
 		return &apiruleTypes.APIRule{}, err
 	}
 
-	return apirule, nil
+	return &apirule, nil
 }
 
 func (a *APIRule) WaitForStatusRunning() error {
@@ -140,7 +134,7 @@ func (a *APIRule) isApiRuleReady(name string) func(event watch.Event) (bool, err
 			return false, nil
 		}
 
-		apirule, err := convertFromUnstructuredToAPIRule(*u)
+		apirule, err := convertFromUnstructuredToAPIRule(u)
 		if err != nil {
 			return false, err
 		}
@@ -150,24 +144,21 @@ func (a *APIRule) isApiRuleReady(name string) func(event watch.Event) (bool, err
 }
 
 func (a *APIRule) isStateReady(apirule apiruleTypes.APIRule) bool {
-	ready := apirule.Status.AccessRuleStatus.Code == apiruleTypes.StatusOK &&
-		apirule.Status.APIRuleStatus.Code == apiruleTypes.StatusOK &&
-		apirule.Status.VirtualServiceStatus.Code == apiruleTypes.StatusOK
-
-	if ready {
-		a.log.Logf("APIRule %s is ready", a.name)
-	} else {
-		a.log.Logf("APIRule %s is not ready", a.name)
+	status := apirule.Status
+	if status.VirtualServiceStatus == nil || status.APIRuleStatus == nil || status.AccessRuleStatus == nil {
+		return false
 	}
 
-	if a.verbose {
-		a.log.Logf("%+v", apirule)
-	}
+	ready := status.AccessRuleStatus.Code == apiruleTypes.StatusOK &&
+		status.APIRuleStatus.Code == apiruleTypes.StatusOK &&
+		status.VirtualServiceStatus.Code == apiruleTypes.StatusOK
+
+	shared.LogReadiness(ready, a.verbose, a.name, a.log, apirule)
 
 	return ready
 }
 
-func convertFromUnstructuredToAPIRule(u unstructured.Unstructured) (apiruleTypes.APIRule, error) {
+func convertFromUnstructuredToAPIRule(u *unstructured.Unstructured) (apiruleTypes.APIRule, error) {
 	apirule := apiruleTypes.APIRule{}
 	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &apirule)
 	return apirule, err

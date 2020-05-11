@@ -33,10 +33,13 @@ data:
       runtimeAdminGroupName: '{{ js .Values.cluster.runtimeAdminGroupName }}',
 {{- if .Values.global.isLocalEnv }}
       compassApiUrl: 'https://compass-gateway.{{ js .Values.global.ingress.domainName }}/director/graphql',
-      compassDefaultTenant: '{{ js $compassDefaultTenant }}'
+      compassDefaultTenant: '{{ js $compassDefaultTenant }}',
 {{- else }}
       compassApiUrl: '{{ js $compassApiUrl }}',      
 {{- end}}
+      serverless: {
+        functionUsageKind: "serverless-function",
+      },
     };
     
   nginx-extended.conf: |

@@ -3,23 +3,18 @@ title: Migration from Api to APIRule custom resources
 type: Details
 ---
 
-
 Migration from Api to APIRule custom resources (CRs) is performed automatically by a job that runs during the Kyma upgrade. During this process, the [API Gateway Migrator tool](https://github.com/kyma-project/kyma/blob/master/components/api-gateway-migrator/README.md#api-gateway-migrator) translates the existing Api CRs to APIRule CRs and deletes the original resources.
-
->**CAUTION:** Migrating resources may result in a temporary downtime of the exposed service. 
-
-During migration, it may turn out that some resource specifications are too complex or fail to meet all the migration requirements. In such a case the process skips them but doesn't break the way existing services are exposed. However, if you want to introduce further changes or remove the Api CR, your actions won't have any effect on how the service is exposed because it will still use the original configuration.  
-
->**NOTE:** If the migration process skipped the Api resources due to the invalid status or a blacklisted label, migration is not possible.
 
 ## Prerequisites
 
-Before the migration process starts, ensure that all Api resources have a status. To do so, fetch all Apis without the status:
+Before the upgrade process starts, ensure that all Apis have a status. Follow the steps:
+
+1. Fetch all Apis without the status:
 
 ```shell script
 kubectl get apis --all-namespaces -o json | jq '.items | .[] | select(.status == null)'
 ```
-Receiving no results means that you can perform the upgrade. If you see any Api resources in the output, recreate each Api using this script:
+2. If you see any Apis in the output, recreate each Api using this script:
 
 ```shell script
 # set variables
@@ -31,12 +26,26 @@ kubectl delete policy -n ${API_NAMESPACE} ${API_NAME} --ignore-not-found
 # recreate Api
 kubectl get api -n ${API_NAMESPACE} ${API_NAME} -o yaml | kubectl replace --force -f 
 ```
-Once the Apis are recreated, check again if the status is present. The output should not include any Api resources, allowing you to proceed with the migration. Follow these steps to ensure your services are properly migrated:
+3. Once the Apis are recreated, check again if the status is present.
+
+## Upgrade
+
+If all Apis have the status, proceed with the upgrade to migrate the resources.
+
+>**CAUTION:** Migrating resources may result in a temporary downtime of the exposed service. 
+
+During the upgrade process, it may turn out that some resource specifications are too complex or fail to meet all the migration requirements. In such a case, the process skips them, but it doesn't break the way existing services are exposed. However, if you want to introduce further changes or remove the Api CR, your actions won't have any effect on how the service is exposed, because it will still use the original configuration.  
+
+>**NOTE:** If the migration process skipped the Api resources due to the invalid status or a blacklisted label, migration is not possible.
+
+## Post-upgrade actions
+
+After the upgrade process completes, follow these steps to ensure your services are properly migrated:
 
 1. [Verify the migration outcome](#details-migration-from-api-to-api-rule-custom-resources-verify-the-automatic-migration). 
 2. If you can still see any Api CRs in use, use the [manual migration](#details-migration-from-api-to-api-rule-custom-resources-manual-migration) guide to migrate them.
 
-## Verify the automatic migration
+### Verify the automatic migration
 
 Follow these steps to verify if all Api CRs were migrated to APIRule CRs.
 
@@ -52,7 +61,7 @@ Follow these steps to verify if all Api CRs were migrated to APIRule CRs.
     kubectl logs api-gateway-api-migrator-job -n kyma-system
     ```
 
-## Manual migration
+### Manual migration
 
 This guide shows how you can manually migrate Api CRs to APIRule CRs.
 
