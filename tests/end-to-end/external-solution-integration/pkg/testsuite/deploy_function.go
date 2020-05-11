@@ -2,6 +2,7 @@ package testsuite
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 
 	serverless "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/pkg/errors"
@@ -137,7 +138,14 @@ func (s *DeployFunction) createFunction() error {
 }
 
 func (s *DeployFunction) Cleanup() error {
-	return s.client.Delete(s.name, &metav1.DeleteOptions{})
+	err := s.client.Delete(s.name, &metav1.DeleteOptions{})
+	if err != nil {
+		return err
+	}
+
+	return helpers.AwaitResourceDeleted(func() (interface{}, error){
+		return s.client.Get(s.name, metav1.GetOptions{})
+	})
 }
 
 func (s *DeployFunction) isFunctionReady() error {
