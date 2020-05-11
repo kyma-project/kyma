@@ -2,6 +2,13 @@ package event_mesh
 
 import (
 	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	log "github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
+	k8s "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	eventingclientset "knative.dev/eventing/pkg/client/clientset/versioned"
+
 	appbrokerclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appoperatorclientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	connectiontokenhandlerclientset "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
@@ -12,12 +19,6 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
-	log "github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
-	k8s "k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	eventingclientset "knative.dev/eventing/pkg/client/clientset/versioned"
 )
 
 const (

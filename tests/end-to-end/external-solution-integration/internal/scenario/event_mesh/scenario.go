@@ -3,8 +3,9 @@ package event_mesh
 import (
 	"time"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
 	"github.com/spf13/pflag"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
 )
 
 // E2EScenario executes complete external solution integration test scenario
