@@ -98,10 +98,66 @@ spec:
         - -c
         - |-
           kubectl annotate crd applications.applicationconnector.kyma-project.io helm.sh/hook- \
-          || kubectl apply -f /etc/crd/applications.applicationconnector.kyma-project.io \
-          && kubectl annotate crd tokenrequests.applicationconnector.kyma-project.io helm.sh/hook- \
-          || kubectl apply -f /etc/crd/tokenrequests.applicationconnector.kyma-project.io
+          || kubectl apply -f /etc/crd/applications.applicationconnector.kyma-project.io
       volumes:
       - name: crd-application-connector
         configMap:
           name: {{ .Release.Name }}-crd-application-connector
+---
+{{- if not .Values.global.disableLegacyConnectivity }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-app-conn-migration-opt
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation"
+    helm.sh/hook: "pre-upgrade, pre-install"
+    helm.sh/hook-weight: "10"
+  labels:
+    job: {{ .Release.Name }}-app-conn-migration-opt
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: {{ .Release.Name }}-app-conn-migration-opt
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        job: {{ .Release.Name }}-app-conn-migration-opt
+    spec:
+      serviceAccountName: {{ .Release.Name }}-app-conn-migration
+      restartPolicy: Never
+      containers:
+      - name: job
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
+        terminationMessagePolicy: "FallbackToLogsOnError"
+        volumeMounts:
+        - name: crd-application-connector
+          mountPath: /etc/crd
+          readOnly: true
+        command:
+        - /bin/bash
+        - -c
+        - |-
+          set -e
+
+          echo "processing certificaterequests.applicationconnector.kyma-project.io"
+          kubectl annotate crd certificaterequests.applicationconnector.kyma-project.io helm.sh/hook- \
+          || kubectl apply -f /etc/crd/certificaterequests.applicationconnector.kyma-project.io
+          echo "done processing certificaterequests.applicationconnector.kyma-project.io"
+
+          echo "processing tokenrequests.applicationconnector.kyma-project.io"
+          kubectl annotate crd tokenrequests.applicationconnector.kyma-project.io helm.sh/hook- \
+          || kubectl apply -f /etc/crd/tokenrequests.applicationconnector.kyma-project.io
+          echo "done processing tokenrequests.applicationconnector.kyma-project.io"
+
+          echo "processing centralconnections.applicationconnector.kyma-project.io"
+          kubectl annotate crd centralconnections.applicationconnector.kyma-project.io helm.sh/hook- \
+          || kubectl apply -f /etc/crd/centralconnections.applicationconnector.kyma-project.io
+          echo "done processing centralconnections.applicationconnector.kyma-project.io"
+      volumes:
+      - name: crd-application-connector
+        configMap:
+          name: {{ .Release.Name }}-crd-application-connector
+{{- end }}
