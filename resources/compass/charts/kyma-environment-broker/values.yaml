@@ -52,6 +52,8 @@ provisioner:
 additionalRuntimeComponents: |-
   - name: "service-manager-proxy"
     namespace: "kyma-system"
+    source:
+      url: github.com/kyma-project/kyma.git//resources/service-manager-proxy
   - name: "uaa-activator"
     namespace: "kyma-system"
   - name: "compass-runtime-agent"
