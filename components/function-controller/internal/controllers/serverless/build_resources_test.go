@@ -18,19 +18,39 @@ func TestFunctionReconciler_buildConfigMap(t *testing.T) {
 		want v1.ConfigMap
 	}{
 		{
-			name: "xdddd",
+			name: "should properly build configmap",
 			fn: &serverlessv1alpha1.Function{
-				ObjectMeta: metav1.ObjectMeta{},
-				Spec:       serverlessv1alpha1.FunctionSpec{},
-				Status:     serverlessv1alpha1.FunctionStatus{},
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: "fn-ns",
+					UID:       "fn-uuid",
+					Name:      "function-name",
+				},
+				Spec: serverlessv1alpha1.FunctionSpec{Source: "fn-source", Deps: ""},
+			},
+			want: v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace:    "fn-ns",
+					GenerateName: "function-name-",
+					Labels: map[string]string{
+						"serverless.kyma-project.io/managed-by":    "function-controller",
+						"serverless.kyma-project.io/uuid":          "fn-uuid",
+						"serverless.kyma-project.io/function-name": "function-name",
+					},
+				},
+				Data: map[string]string{
+					"handler.main": "handler.main",
+					"handler.js":   "fn-source",
+					"package.json": "{}",
+				},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewGomegaWithT(t)
 			r := &FunctionReconciler{}
 			got := r.buildConfigMap(tt.fn)
-			gomega.Expect(got).To(gomega.Equal(tt.want))
+			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
 }
