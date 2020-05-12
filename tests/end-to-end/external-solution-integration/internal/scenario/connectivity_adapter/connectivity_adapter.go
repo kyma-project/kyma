@@ -41,7 +41,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		s.testID,
 	)
 
-	lambdaEndpoint := helpers.InClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
+	functionEndpoint := helpers.InClusterEndpoint(s.testID, s.testID, helpers.FunctionPort)
 
 	return []step.Step{
 		step.Parallel(
@@ -52,11 +52,8 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 			testsuite.NewCreateMapping(s.testID, clients.AppBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
 			testsuite.NewStartTestServer(testService),
 			testsuite.NewConnectApplicationUsingCompassLegacy(compassClients.ConnectorClient, appConnector, compassClients.DirectorClient, state),
-			testsuite.NewDeployFakeLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort,
-				clients.CoreClientset.AppsV1().Deployments(s.testID),
-				clients.CoreClientset.CoreV1().Services(s.testID),
-				clients.CoreClientset.CoreV1().Pods(s.testID),
-				false)),
+			testsuite.NewDeployFunction(s.testID, helpers.FunctionPayload, helpers.FunctionPort, clients.Function, false),
+		),
 		testsuite.NewRegisterLegacyServiceInCompass(s.testID, testService.GetInClusterTestServiceURL(), testService, state),
 		testsuite.NewCreateServiceInstance(s.testID, s.testID, state.GetServiceClassID, state.GetServicePlanID,
 			clients.ServiceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testID),
@@ -68,10 +65,10 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 			clients.ServiceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID),
 			knativeEventingClientSet.EventingV1alpha1().Brokers(s.testID),
 			knativeEventingClientSet.MessagingV1alpha1().Subscriptions(helpers.KymaIntegrationNamespace)),
-		testsuite.NewCreateKnativeTrigger(s.testID, helpers.DefaultBrokerName, lambdaEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
-		testsuite.NewSendEventToMesh(s.testID, helpers.LambdaPayload, state),
+		testsuite.NewCreateKnativeTrigger(s.testID, helpers.DefaultBrokerName, functionEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
+		testsuite.NewSendEventToMesh(s.testID, helpers.FunctionPayload, state),
 		testsuite.NewCheckCounterPod(testService, 1),
-		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.LambdaPayload, state),
+		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.FunctionPayload, state),
 		testsuite.NewCheckCounterPod(testService, 2),
 	}, nil
 }
