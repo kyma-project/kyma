@@ -12,7 +12,7 @@ spec:
   rules:
   - services: ["{{ template "loki.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"]
     methods: ["GET", "POST", "OPTIONS"]
-    paths: ["/api/*"]
+    paths: ["/api/*", "/loki/api/v1/*]
   - services: ["{{ template "loki.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"]
     methods: ["GET"]
     paths: ["/metrics"]
