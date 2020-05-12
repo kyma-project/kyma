@@ -79,6 +79,7 @@ func (hc *Client) ReleaseStatus(rname string) (string, error) {
 func (hc *Client) IsReleaseDeletable(rname string) (bool, error) {
 	isDeletable := false
 	maxAttempts := 3
+	fixedDelay := 3
 
 	err := retry.Do(
 		func() error {
@@ -96,7 +97,7 @@ func (hc *Client) IsReleaseDeletable(rname string) (bool, error) {
 		retry.Attempts(uint(maxAttempts)),
 		retry.DelayType(func(attempt uint, config *retry.Config) time.Duration {
 			log.Printf("Retry number %d on getting release status.\n", attempt+1)
-			return time.Duration(3) * time.Second
+			return time.Duration(fixedDelay) * time.Second
 		}),
 	)
 
