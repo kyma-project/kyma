@@ -321,18 +321,23 @@ func (r *FunctionReconciler) isServiceInProgress(service *servingv1.Service) boo
 	return true
 }
 
+func equalResources(existing, expected corev1.ResourceRequirements) bool {
+	return existing.Requests.Memory().Equal(*expected.Requests.Memory()) &&
+		existing.Requests.Cpu().Equal(*expected.Requests.Cpu()) &&
+		existing.Limits.Memory().Equal(*expected.Limits.Memory()) &&
+		existing.Limits.Cpu().Equal(*expected.Limits.Cpu())
+}
+
 func (r *FunctionReconciler) equalServices(existing *servingv1.Service, expected servingv1.Service) bool {
 	return existing != nil &&
+		len(existing.Spec.Template.Spec.Containers) > 0 &&
 		len(existing.Spec.Template.Spec.Containers) == len(expected.Spec.Template.Spec.Containers) &&
 		existing.Spec.Template.Spec.Containers[0].Image == expected.Spec.Template.Spec.Containers[0].Image &&
 		r.envsEqual(existing.Spec.Template.Spec.Containers[0].Env, expected.Spec.Template.Spec.Containers[0].Env) &&
 		r.mapsEqual(existing.GetLabels(), expected.GetLabels()) &&
 		r.mapsEqual(existing.Spec.Template.GetLabels(), expected.Spec.Template.GetLabels()) &&
 		r.mapsEqual(existing.Spec.Template.GetAnnotations(), expected.Spec.Template.GetAnnotations()) &&
-		existing.Spec.Template.Spec.Containers[0].Resources.Limits[corev1.ResourceCPU] == expected.Spec.Template.Spec.Containers[0].Resources.Limits[corev1.ResourceCPU] &&
-		existing.Spec.Template.Spec.Containers[0].Resources.Limits[corev1.ResourceMemory] == expected.Spec.Template.Spec.Containers[0].Resources.Limits[corev1.ResourceMemory] &&
-		existing.Spec.Template.Spec.Containers[0].Resources.Requests[corev1.ResourceCPU] == expected.Spec.Template.Spec.Containers[0].Resources.Requests[corev1.ResourceCPU] &&
-		existing.Spec.Template.Spec.Containers[0].Resources.Requests[corev1.ResourceMemory] == expected.Spec.Template.Spec.Containers[0].Resources.Requests[corev1.ResourceMemory]
+		equalResources(existing.Spec.Template.Spec.Containers[0].Resources, expected.Spec.Template.Spec.Containers[0].Resources)
 }
 
 func (r *FunctionReconciler) mapsEqual(existing, expected map[string]string) bool {
@@ -356,7 +361,7 @@ func (r *FunctionReconciler) envsEqual(existing, expected []corev1.EnvVar) bool 
 	for key, value := range existing {
 		expectedValue := expected[key]
 
-		if expectedValue.Name != value.Name || expectedValue.Value != value.Value || expectedValue.ValueFrom != value.ValueFrom {
+		if expectedValue.Name != value.Name || expectedValue.Value != value.Value || expectedValue.ValueFrom != value.ValueFrom { // valueFrom check is by reference
 			return false
 		}
 	}
