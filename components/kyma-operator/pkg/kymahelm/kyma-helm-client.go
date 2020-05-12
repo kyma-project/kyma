@@ -105,9 +105,9 @@ func (hc *Client) IsReleaseDeletable(rname string) (bool, error) {
 	return isDeletable, err
 }
 
-func (hc *Client) ReleaseDeployedRevision(rname string) (int32, error){
+func (hc *Client) ReleaseDeployedRevision(rname string) (int32, error) {
 	maxHistory := 10
-	var  deployedRevision int32 = 0
+	var deployedRevision int32 = 0
 
 	releaseHistoryRes, err := hc.helm.ReleaseHistory(rname, helm.WithMaxHistory(int32(maxHistory)))
 	if err != nil {

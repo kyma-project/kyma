@@ -123,7 +123,7 @@ func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) (Step, e
 
 	if isf.installedReleases[component.GetReleaseName()] {
 		deployedRev, err := isf.helmClient.ReleaseDeployedRevision(component.GetReleaseName())
-		if err != nil{
+		if err != nil {
 			return nil, err
 		}
 
