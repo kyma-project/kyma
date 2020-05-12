@@ -231,7 +231,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Values.global.auditlog.configMapName }}
-                  key: auditlog-url
+                  key: auditlog-url-basic
             - name: APP_AUDITLOG_USER
               valueFrom:
                 secretKeyRef:
