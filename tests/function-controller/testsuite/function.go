@@ -12,7 +12,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/dynamic"
 	watchtools "k8s.io/client-go/tools/watch"
@@ -33,11 +32,7 @@ type function struct {
 
 func newFunction(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log shared.Logger, verbose bool) *function {
 	return &function{
-		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
-			Version:  serverlessv1alpha1.GroupVersion.Version,
-			Group:    serverlessv1alpha1.GroupVersion.Group,
-			Resource: "functions",
-		}, namespace, log, verbose),
+		resCli:      resource.New(dynamicCli, serverlessv1alpha1.GroupVersion.WithResource("functions"), namespace, log, verbose),
 		name:        name,
 		namespace:   namespace,
 		waitTimeout: waitTimeout,

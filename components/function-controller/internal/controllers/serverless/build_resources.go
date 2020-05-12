@@ -42,7 +42,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 	one := int32(1)
 	zero := int32(0)
 
-	job := batchv1.Job{
+	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-build-", instance.GetName()),
 			Namespace:    instance.GetNamespace(),
@@ -141,8 +141,6 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 			},
 		},
 	}
-
-	return job
 }
 
 func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function) servingv1.Service {

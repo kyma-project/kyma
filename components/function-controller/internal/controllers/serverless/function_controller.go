@@ -145,8 +145,19 @@ func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, i
 }
 
 func (r *FunctionReconciler) equalJobs(existing batchv1.Job, expected batchv1.Job) bool {
-	// Compare image argument
-	return existing.Spec.Template.Spec.Containers[0].Args[0] == expected.Spec.Template.Spec.Containers[0].Args[0]
+	existingArgs := existing.Spec.Template.Spec.Containers[0].Args
+	expectedArgs := expected.Spec.Template.Spec.Containers[0].Args
+
+	if len(existingArgs) != len(expectedArgs) {
+		return false
+	}
+
+	for key, value := range existingArgs {
+		if value != expectedArgs[key] {
+			return false
+		}
+	}
+	return true
 }
 
 func (r *FunctionReconciler) createJob(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, job batchv1.Job) (ctrl.Result, error) {
@@ -330,7 +341,7 @@ func (r *FunctionReconciler) mapsEqual(existing, expected map[string]string) boo
 	}
 
 	for key, value := range existing {
-		if expected[key] != value {
+		if v, ok := expected[key]; !ok || v != value {
 			return false
 		}
 	}
