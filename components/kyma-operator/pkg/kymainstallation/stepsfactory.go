@@ -19,7 +19,7 @@ type StepFactoryCreator interface {
 
 // StepFactory defines the contract for obtaining an instance of an installation/uninstallation Step
 type StepFactory interface {
-	NewStep(component v1alpha1.KymaComponent) Step
+	NewStep(component v1alpha1.KymaComponent) (Step, error)
 }
 
 type stepFactory struct {
@@ -109,7 +109,7 @@ func (sfc *stepFactoryCreator) NewUninstallStepFactory() (StepFactory, error) {
 }
 
 // NewStep method returns instance of the installation/upgrade step based on component details
-func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
+func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) (Step, error) {
 	step := step{
 		helmClient: isf.helmClient,
 		component:  component,
@@ -122,16 +122,22 @@ func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 	}
 
 	if isf.installedReleases[component.GetReleaseName()] {
+		deployedRev, err := isf.helmClient.ReleaseDeployedRevision(component.GetReleaseName())
+		if err != nil{
+			return nil, err
+		}
+
 		return upgradeStep{
 			inststp,
-		}
+			deployedRev,
+		}, nil
 	}
 
-	return inststp
+	return inststp, nil
 }
 
 // NewStep method returns instance of the uninstallation step based on component details
-func (usf uninstallStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
+func (usf uninstallStepFactory) NewStep(component v1alpha1.KymaComponent) (Step, error) {
 	step := step{
 		helmClient: usf.helmClient,
 		component:  component,
@@ -140,10 +146,10 @@ func (usf uninstallStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 	if usf.installedReleases[component.GetReleaseName()] {
 		return uninstallStep{
 			step,
-		}
+		}, nil
 	}
 
 	return noStep{
 		step,
-	}
+	}, nil
 }

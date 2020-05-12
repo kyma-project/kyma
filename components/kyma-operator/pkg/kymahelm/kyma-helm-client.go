@@ -22,6 +22,7 @@ type ClientInterface interface {
 	ListReleases() (*rls.ListReleasesResponse, error)
 	ReleaseStatus(rname string) (string, error)
 	IsReleaseDeletable(rname string) (bool, error)
+	ReleaseDeployedRevision(rname string) (int32, error)
 	InstallReleaseFromChart(chartdir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error)
 	InstallRelease(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error)
 	InstallReleaseWithoutWait(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error)
@@ -102,6 +103,24 @@ func (hc *Client) IsReleaseDeletable(rname string) (bool, error) {
 	)
 
 	return isDeletable, err
+}
+
+func (hc *Client) ReleaseDeployedRevision(rname string) (int32, error){
+	maxHistory := 10
+	var  deployedRevision int32 = 0
+
+	releaseHistoryRes, err := hc.helm.ReleaseHistory(rname, helm.WithMaxHistory(int32(maxHistory)))
+	if err != nil {
+		return deployedRevision, err
+	}
+
+	for _, rel := range releaseHistoryRes.Releases {
+		if rel.Info.Status.Code == release.Status_DEPLOYED {
+			deployedRevision = rel.Version
+		}
+	}
+
+	return deployedRevision, nil
 }
 
 // InstallReleaseFromChart .
