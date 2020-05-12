@@ -54,13 +54,6 @@ spec:
               value: "{{ .Values.broker.port }}"
             - name: APP_STATUS_PORT
               value: "{{ .Values.broker.statusPort }}"
-            - name: APP_AUTH_USERNAME
-              value: "{{ .Values.broker.username }}"
-            - name: APP_AUTH_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "kyma-env-broker.fullname" . }}
-                  key: broker-password
             - name: APP_DIRECTOR_NAMESPACE
               value: "{{ .Release.Namespace }}"
             - name: APP_DIRECTOR_DEFAULT_TENANT
