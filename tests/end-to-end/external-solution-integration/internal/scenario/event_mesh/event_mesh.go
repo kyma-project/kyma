@@ -58,7 +58,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		s.testID,
 	)
 
-	lambdaEndpoint := helpers.InClusterEndpoint(s.testID, s.testID, helpers.FunctionPort)
+	functionEndpoint := helpers.InClusterEndpoint(s.testID, s.testID, helpers.FunctionPort)
 	state := s.NewState()
 
 	return []step.Step{
@@ -82,11 +82,11 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 			serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID),
 			knativeEventingClientSet.EventingV1alpha1().Brokers(s.testID), knativeEventingClientSet.MessagingV1alpha1().Subscriptions(kymaIntegrationNamespace)),
 		testsuite.NewSleep(s.waitTime),
-		testsuite.NewCreateKnativeTrigger(s.testID, defaultBrokerName, lambdaEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
+		testsuite.NewCreateKnativeTrigger(s.testID, defaultBrokerName, functionEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
 		testsuite.NewSleep(s.waitTime),
-		testsuite.NewSendEventToMesh(s.testID, helpers.LambdaPayload, state),
+		testsuite.NewSendEventToMesh(s.testID, helpers.FunctionPayload, state),
 		NewWrappedCounterPod(testService, 1),
-		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.LambdaPayload, state),
+		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.FunctionPayload, state),
 		NewWrappedCounterPod(testService, 2),
 	}, nil
 }
