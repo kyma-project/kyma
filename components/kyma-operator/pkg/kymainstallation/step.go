@@ -72,6 +72,8 @@ func (s installStep) Run() error {
 		}
 
 		if isDeletable {
+			deleteWaitTime := 10
+
 			log.Println(fmt.Sprintf("Helm installation of %s failed. Deleting before retrying installation.", s.component.GetReleaseName()))
 			log.Println("Look at the proceeding logs to see the reason of failure")
 			_, err := s.helmClient.DeleteRelease(s.component.GetReleaseName())
@@ -83,7 +85,7 @@ func (s installStep) Run() error {
 			}
 
 			//waiting for release to be deleted
-			time.Sleep(time.Second * time.Duration(10))
+			time.Sleep(time.Second * time.Duration(deleteWaitTime))
 
 			errorMsg = fmt.Sprintf("%s\nHelm delete of %s was successfull", installErrMsg, s.component.GetReleaseName())
 		}
