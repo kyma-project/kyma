@@ -85,7 +85,7 @@ spec:
             httpGet:
               path: /health/ready
               port: http-admin
-            initialDelaySeconds: 45
+            initialDelaySeconds: 120
             periodSeconds: 10
             failureThreshold: 10
           env:
