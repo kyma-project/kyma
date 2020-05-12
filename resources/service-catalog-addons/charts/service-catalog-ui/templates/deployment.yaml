@@ -27,15 +27,9 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.catalog.service.internalPort }}
-            - containerPort: {{ .Values.instances.service.internalPort }}
-            - containerPort: {{ .Values.brokers.service.internalPort }}
           volumeMounts:
           - name: config
             mountPath: /var/catalog-public/config
-          - name: config
-            mountPath: /var/instances-public/config
-          - name: config
-            mountPath: /var/brokers-public/config
       volumes:
       - name: config
         configMap:
