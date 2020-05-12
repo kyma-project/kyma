@@ -172,13 +172,13 @@ func (s *DeployFunction) getFunction() (serverless.Function, error) {
 		return serverless.Function{}, errors.New("no function found")
 	}
 
-	var functions serverless.Function
-	runtime.DefaultUnstructuredConverter.FromUnstructured(functionUnstructed.Object, &functions)
+	var function serverless.Function
+	runtime.DefaultUnstructuredConverter.FromUnstructured(functionUnstructed.Object, &function)
 	if err != nil {
 		return serverless.Function{}, err
 	}
 
-	return functions, nil
+	return function, nil
 }
 
 func (s *DeployFunction) isReady(fn serverless.Function) bool {
