@@ -15,36 +15,41 @@ spec:
     - label: Catalog
       navigationPath: service-catalog
       order: 1
-      viewUrl: ""
+      viewUrl: /catalog
     - label: Service Details
       navigationPath: service-catalog/details
       showInNavigation: false
-      viewUrl: ""
-    - label: Serive Details
+      viewUrl: /catalog/details
+    - label: Service Details
       navigationPath: service-catalog/details/:serviceId
       showInNavigation: false
-      viewUrl: /details/:serviceId
+      viewUrl: /catalog/details/:serviceId
     - label: Service Details in plan context
       navigationPath: service-catalog/details/:serviceId/plan
       showInNavigation: false
-      viewUrl: /details/:serviceId/plan
+      viewUrl: /catalog/details/:serviceId/plan
     - label: Service Details in plan context
       navigationPath: service-catalog/details/:serviceId/plan/:planId
       showInNavigation: false
-      viewUrl: /details/:serviceId/plan/:planId
+      viewUrl: /catalog/details/:serviceId/plan/:planId
     - label: Service Class Plans
       navigationPath: service-catalog/details/:serviceId/plans
       showInNavigation: false
-      viewUrl: /details/:serviceId/plans
+      viewUrl: /catalog/details/:serviceId/plans
     - label: Instances
       navigationPath: instances
       order: 2
-      viewUrl: instances
+      viewUrl: /instances
     - label: Instance Details
       navigationPath: instances/details
       showInNavigation: false
-      viewUrl: ""
+      viewUrl: /instances
     - label: Instance Details
       navigationPath: instances/details/:name
       showInNavigation: false
-      viewUrl: instances/details/:name
+      viewUrl: /instances/details/:name
+    - category: Configuration
+      label: Brokers
+      navigationPath: brokers
+      order: -2
+      viewUrl: /brokers
