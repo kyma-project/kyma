@@ -45,7 +45,7 @@ global:
     version: 08b6fe17
   event_service_integration_tests:
     dir:
-    version: 3bf47c25
+    version: PR-8459
   application_connectivity_validator:
     dir:
     version: 39d1ab87
@@ -63,7 +63,7 @@ global:
     version: c608dbf3
   application_broker:
     dir:
-    version: a5ccfe43
+    version: PR-8459
   application_connectivity_certs_setup_job:
     dir:
     version: fbf1000b
