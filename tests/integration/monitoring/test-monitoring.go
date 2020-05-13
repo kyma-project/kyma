@@ -170,7 +170,7 @@ func testTargetsAreHealthy() {
 
 }
 
-func hasLabels(targetLabels promAPI.Labels, labelsToBeIgnored promAPI.Labels) bool {
+func hasLabels(targetLabels, labelsToBeIgnored promAPI.Labels) bool {
 	for l, _ := range targetLabels {
 		if labelsToBeIgnored[l] == targetLabels[l] {
 			return true
