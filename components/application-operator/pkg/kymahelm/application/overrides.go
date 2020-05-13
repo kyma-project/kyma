@@ -1,7 +1,7 @@
 package application
 
 const (
-	overridesTemplate = `global: 
+	overridesTemplate = `global:
     domainName: {{ .DomainName }}
     applicationGatewayImage: {{ .ApplicationGatewayImage }}
     applicationGatewayTestsImage: {{ .ApplicationGatewayTestsImage }}
