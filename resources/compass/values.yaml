@@ -288,5 +288,8 @@ global:
   metris:
     enabled: false
 
+  metrics:
+    enabled: true
+
 pairing-adapter:
   enabled: false
