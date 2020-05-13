@@ -26,7 +26,7 @@ spec:
           image: "{{ .Values.global.containerRegistry.path }}/service-catalog-ui:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.catalog.service.internalPort }}
+            - containerPort: {{ .Values.service.internalPort }}
           volumeMounts:
           - name: config
             mountPath: /var/public/config

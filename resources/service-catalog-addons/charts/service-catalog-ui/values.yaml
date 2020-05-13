@@ -2,12 +2,11 @@ replicaCount: 1
 image:
   tag: "PR-1784"
   pullPolicy: IfNotPresent
-catalog:
-  service:
-    internalPort: 8080
-    externalPort: 8080
-  hostname: catalog
+service:
+  internalPort: 80
+  externalPort: 80
 protocol: TCP
 virtualservice:
   enabled: true
   annotations: {}
+  hostname: catalog
