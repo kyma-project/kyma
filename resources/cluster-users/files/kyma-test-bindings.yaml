@@ -2,25 +2,43 @@
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
-  name: cluster-users-test-admin-binding
+  name: {{ .Chart.Name }}-test-admin-binding
+  namespace: {{ .Values.tests.config.namespace.testNamespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: kyma-admin
 subjects:
 - kind: User
-  name: admin@kyma.cx
+  name: {{ printf "%s@kyma.cx" .Values.tests.config.users.admin }}
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
-  name: cluster-users-test-ro-user-binding
+  name: {{ .Chart.Name }}-test-ro-user-binding
+  namespace: {{ .Values.tests.config.namespace.testNamespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: kyma-view
 subjects:
 - kind: User
-  name: read-only-user@kyma.cx
+  name: {{ printf "%s@kyma.cx" .Values.tests.config.users.viewer }}
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: {{ .Chart.Name }}-test-namespace-developer
+  {{- with .Values.tests.config.namespace.dynamicNamespace }}
+  namespace: {{ tpl . $ }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-developer
+subjects:
+- kind: User
+  name: {{ printf "%s@kyma.cx" .Values.tests.config.users.NSAdmin }}
   apiGroup: rbac.authorization.k8s.io

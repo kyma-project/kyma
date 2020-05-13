@@ -3,8 +3,17 @@ tests:
   image:
     name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
     version: v20200507-070ff576
-  env:
-    namespace: default
+  config:
+    namespace:
+      namespace: default
+      testNamespace: default
+      dynamicNamespace: "test-namespace-{{ randAlphaNum 5 | lower }}"
+      systemNamespace: kyma-system
+    users:
+      admin: admin-user
+      developer: test-developer-user
+      viewer: test-read-only-user
+      NSAdmin: test-namespace-admin-user
 
 bindings:
   kymaEssentials:
