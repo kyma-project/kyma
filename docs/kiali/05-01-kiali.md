@@ -1,5 +1,5 @@
 ---
-title: Kiali chart
+title: Kiali Chart
 type: Configuration
 ---
 
