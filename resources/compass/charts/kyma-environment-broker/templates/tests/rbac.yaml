@@ -39,3 +39,6 @@ rules:
   - apiGroups: ["testing.kyma-project.io"]
     resources: ["clustertestsuites", "testdefinitions"]
     verbs: ["*"]
+  - apiGroups: ["hydra.ory.sh"]
+    resources: ["oauth2clients"]
+    verbs: ["get"]
