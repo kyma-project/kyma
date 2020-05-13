@@ -8,7 +8,6 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
-	rls "k8s.io/helm/pkg/proto/hapi/release"
 )
 
 // StepFactoryCreator knows how to create an instance of the StepFactory
@@ -19,12 +18,12 @@ type StepFactoryCreator interface {
 
 // StepFactory defines the contract for obtaining an instance of an installation/uninstallation Step
 type StepFactory interface {
-	NewStep(component v1alpha1.KymaComponent) (Step, error)
+	NewStep(component v1alpha1.KymaComponent) Step
 }
 
 type stepFactory struct {
 	helmClient        kymahelm.ClientInterface
-	installedReleases map[string]bool
+	installedReleases map[string]int32
 }
 
 // StepFactory implementation for installation operation
@@ -57,9 +56,9 @@ func NewStepFactoryCreator(helmClient kymahelm.ClientInterface, kymaPackages kym
 	}
 }
 
-func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]bool, error) {
+func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]int32, error) {
 
-	installedReleases := make(map[string]bool)
+	installedReleases := make(map[string]int32)
 
 	list, err := sfc.helmClient.ListReleases()
 	if err != nil {
@@ -69,10 +68,16 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]bool, error) {
 	if list != nil {
 		log.Println("Helm releases list:")
 		for _, release := range list.Releases {
+			deployedRev, err := sfc.helmClient.ReleaseDeployedRevision(release.Name)
+			if err != nil {
+				return nil, errors.New("Helm error: " + err.Error())
+			}
+
 			statusCode := release.Info.Status.Code
-			log.Printf("%s status: %s", release.Name, statusCode)
-			if statusCode == rls.Status_DEPLOYED {
-				installedReleases[release.Name] = true
+			log.Printf("%s status: %s, last deployed revision: %d", release.Name, statusCode, deployedRev)
+
+			if deployedRev > 0 {
+				installedReleases[release.Name] = deployedRev
 			}
 		}
 	}
@@ -109,7 +114,7 @@ func (sfc *stepFactoryCreator) NewUninstallStepFactory() (StepFactory, error) {
 }
 
 // NewStep method returns instance of the installation/upgrade step based on component details
-func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) (Step, error) {
+func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 	step := step{
 		helmClient: isf.helmClient,
 		component:  component,
@@ -121,35 +126,30 @@ func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) (Step, e
 		overrideData: isf.overrideData,
 	}
 
-	if isf.installedReleases[component.GetReleaseName()] {
-		deployedRev, err := isf.helmClient.ReleaseDeployedRevision(component.GetReleaseName())
-		if err != nil {
-			return nil, err
-		}
-
+	if isf.installedReleases[component.GetReleaseName()] > 0 {
 		return upgradeStep{
 			inststp,
-			deployedRev,
-		}, nil
+			isf.installedReleases[component.GetReleaseName()],
+		}
 	}
 
-	return inststp, nil
+	return inststp
 }
 
 // NewStep method returns instance of the uninstallation step based on component details
-func (usf uninstallStepFactory) NewStep(component v1alpha1.KymaComponent) (Step, error) {
+func (usf uninstallStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 	step := step{
 		helmClient: usf.helmClient,
 		component:  component,
 	}
 
-	if usf.installedReleases[component.GetReleaseName()] {
+	if usf.installedReleases[component.GetReleaseName()] > 0 {
 		return uninstallStep{
 			step,
-		}, nil
+		}
 	}
 
 	return noStep{
 		step,
-	}, nil
+	}
 }

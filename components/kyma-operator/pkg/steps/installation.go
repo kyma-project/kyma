@@ -124,12 +124,7 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 		stepName := logPrefix + " component " + component.GetReleaseName()
 		_ = steps.statusManager.InProgress(stepName)
 
-		step, stepErr := stepsFactory.NewStep(component)
-		if steps.errorHandlers.CheckError("Step error: ", stepErr) {
-			_ = steps.statusManager.Error(component.GetReleaseName(), stepName, stepErr)
-			return stepErr
-		}
-
+		step := stepsFactory.NewStep(component)
 		steps.PrintStep(stepName)
 
 		err := retry.Do(
