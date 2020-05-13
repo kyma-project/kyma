@@ -21,7 +21,6 @@ global:
     gateway:
       name: kyma-gateway
   ui_acceptance_tests:
-    dir:
     version: PR-1714
   api_controller:
     dir:
