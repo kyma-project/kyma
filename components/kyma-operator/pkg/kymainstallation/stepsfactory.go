@@ -8,6 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
+	helm "k8s.io/helm/pkg/proto/hapi/release"
 )
 
 // StepFactoryCreator knows how to create an instance of the StepFactory
@@ -58,7 +59,7 @@ func NewStepFactoryCreator(helmClient kymahelm.ClientInterface, kymaPackages kym
 
 func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]int32, error) {
 
-	installedReleases := make(map[string]int32)
+	existingReleases := make(map[string]int32)
 
 	list, err := sfc.helmClient.ListReleases()
 	if err != nil {
@@ -67,21 +68,24 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]int32, error) 
 
 	if list != nil {
 		log.Println("Helm releases list:")
+
 		for _, release := range list.Releases {
-			deployedRev, err := sfc.helmClient.ReleaseDeployedRevision(release.Name)
-			if err != nil {
-				return nil, errors.New("Helm error: " + err.Error())
-			}
+			var lastDeployedRev int32
 
 			statusCode := release.Info.Status.Code
-			log.Printf("%s status: %s, last deployed revision: %d", release.Name, statusCode, deployedRev)
-
-			if deployedRev > 0 {
-				installedReleases[release.Name] = deployedRev
+			if statusCode == helm.Status_DEPLOYED {
+				lastDeployedRev = release.Version
+			} else {
+				lastDeployedRev, err = sfc.helmClient.ReleaseDeployedRevision(release.Name)
+				if err != nil {
+					return nil, errors.New("Helm error: " + err.Error())
+				}
 			}
+			existingReleases[release.Name] = lastDeployedRev
+			log.Printf("%s status: %s, last deployed revision: %d", release.Name, statusCode, lastDeployedRev)
 		}
 	}
-	return installedReleases, nil
+	return existingReleases, nil
 }
 
 // NewInstallStepFactory returns implementation of StepFactory interface used to install or upgrade Kyma
@@ -126,7 +130,9 @@ func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 		overrideData: isf.overrideData,
 	}
 
-	if isf.installedReleases[component.GetReleaseName()] > 0 {
+	revision, exists := isf.installedReleases[component.GetReleaseName()]
+
+	if exists && revision > 0 {
 		return upgradeStep{
 			inststp,
 			isf.installedReleases[component.GetReleaseName()],
@@ -143,7 +149,9 @@ func (usf uninstallStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 		component:  component,
 	}
 
-	if usf.installedReleases[component.GetReleaseName()] > 0 {
+	revision, exists := usf.installedReleases[component.GetReleaseName()]
+
+	if exists && revision > 0 {
 		return uninstallStep{
 			step,
 		}
