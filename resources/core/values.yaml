@@ -21,8 +21,8 @@ global:
     gateway:
       name: kyma-gateway
   ui_acceptance_tests:
-    dir:
-    version: 00d84dcf
+    dir: 
+    version: cc3793ec
   api_controller:
     dir:
     version: 3b88aaaf
@@ -46,7 +46,7 @@ global:
     version: 0e322dac
   e2e_external_solution:
     dir:
-    version: "891d9bc2"
+    version: PR-8398
   disableLegacyConnectivity: false
 
 tests:
