@@ -1,8 +1,8 @@
 package helpers
 
 const (
-	LambdaPort               = 8080
-	LambdaPayload            = "payload"
+	FunctionPort             = 80
+	FunctionPayload          = "payload"
 	KymaIntegrationNamespace = "kyma-integration"
 	DefaultBrokerName        = "default"
 )

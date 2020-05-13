@@ -46,7 +46,7 @@ global:
     version: 0e322dac
   e2e_external_solution:
     dir:
-    version: "88f5bc2a"
+    version: PR-8398
   disableLegacyConnectivity: false
 
 tests:

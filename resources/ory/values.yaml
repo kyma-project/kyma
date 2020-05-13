@@ -175,6 +175,10 @@ oathkeeper:
       serve:
         proxy:
           port: 4455
+          timeout:
+            read: 120s
+            write: 120s
+            idle: 120s
         api:
           port: 4456
   deployment:

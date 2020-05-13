@@ -1,6 +1,7 @@
 package testsuite
 
 import (
+	retrygo "github.com/avast/retry-go"
 	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
@@ -12,15 +13,17 @@ import (
 type CheckCounterPod struct {
 	testService   *testkit.TestService
 	expectedValue int
+	retryOpts     []retrygo.Option
 }
 
 var _ step.Step = &CheckCounterPod{}
 
 // NewCheckCounterPod returns new CheckCounterPod
-func NewCheckCounterPod(testService *testkit.TestService, expectedValue int) *CheckCounterPod {
+func NewCheckCounterPod(testService *testkit.TestService, expectedValue int, opts ...retrygo.Option) *CheckCounterPod {
 	return &CheckCounterPod{
 		testService:   testService,
 		expectedValue: expectedValue,
+		retryOpts:     opts,
 	}
 }
 
@@ -33,7 +36,7 @@ func (s *CheckCounterPod) Name() string {
 func (s *CheckCounterPod) Run() error {
 	err := retry.Do(func() error {
 		return s.testService.WaitForCounterPodToUpdateValue(s.expectedValue)
-	})
+	}, s.retryOpts...)
 	if err != nil {
 		return errors.Wrapf(err, "the counter pod is not updated")
 	}

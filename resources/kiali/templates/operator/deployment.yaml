@@ -42,8 +42,6 @@ spec:
               fieldPath: metadata.namespace
         - name: OPERATOR_NAME
           value: "{{ template "kiali.name" . }}-operator"
-        - name: ANSIBLE_DEBUG_LOGS
-          value: "True"
         resources:
 {{ toYaml .Values.kiali.operator.resources | indent 10 }}
       volumes:

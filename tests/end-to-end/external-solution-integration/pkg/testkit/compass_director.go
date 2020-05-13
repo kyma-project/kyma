@@ -120,7 +120,7 @@ func (dc *CompassDirectorClient) runOperation(req *gcli.Request, resp interface{
 }
 
 func (dc *CompassDirectorClient) withRetryOnTemporaryConnectionProblems(risky func() error) error {
-	return retry.WithCustomOpts(risky, retrygo.OnRetry(func(n uint, err error) {
+	return retry.Do(risky, retrygo.OnRetry(func(n uint, err error) {
 		logrus.WithField("component", "TestContext").Warnf("OnRetry: attempts: %d, error: %v", n, err)
 
 	}), retrygo.LastErrorOnly(true), retrygo.RetryIf(func(err error) bool {

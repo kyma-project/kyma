@@ -63,6 +63,9 @@ func (mhc *MockHelmClient) ListReleases() (*rls.ListReleasesResponse, error) { r
 //ReleaseStatus mocks a call to helm client's ReleaseStatus function
 func (mhc *MockHelmClient) ReleaseStatus(rname string) (string, error) { return "", nil }
 
+//IsReleaseDeletable returns true for release that can be deleted
+func (mhc *MockHelmClient) IsReleaseDeletable(rname string) (bool, error) { return true, nil }
+
 //InstallReleaseFromChart mocks a call to helm client's InstallReleaseFromChart function
 func (mhc *MockHelmClient) InstallReleaseFromChart(chartdir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error) {
 	return nil, nil
@@ -110,6 +113,9 @@ func (mehc *MockErrorHelmClient) ReleaseStatus(rname string) (string, error) {
 	mehc.ReleaseStatusCalled = true
 	return "Release test info", nil
 }
+
+//IsReleaseDeletable returns true for release that can be deleted
+func (mehc *MockErrorHelmClient) IsReleaseDeletable(rname string) (bool, error) { return true, nil }
 
 //ListReleases mocks a call to helm client's ListRelease function
 func (mehc *MockErrorHelmClient) ListReleases() (*rls.ListReleasesResponse, error) { return nil, nil }

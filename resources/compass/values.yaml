@@ -17,7 +17,7 @@ global:
       version: "d068b250"
     connectivity_adapter:
       dir:
-      version: "d068b250"
+      version: "76738d5c"
     pairing_adapter:
       dir:
       version: "d068b250"
@@ -43,7 +43,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "b3adcb94"
+      version: "21e378d8"
     external_services_mock:
       dir:
       version: "105e8ff0"
@@ -62,7 +62,7 @@ global:
         version: "8fb2e53b"
       e2e_provisioning:
         dir:
-        version: "93c7ff2d"
+        version: "a8287494"
       connectivity_adapter:
         dir:
         version: "d068b250"
@@ -89,6 +89,8 @@ global:
   auditlog:
     configMapName: "compass-gateway-auditlog-config"
     secretName: "compass-gateway-auditlog-secret"
+    script:
+      configMapName: "auditlog-script"
 
   tenantConfig:
     useDefaultTenants: true

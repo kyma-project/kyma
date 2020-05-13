@@ -54,13 +54,6 @@ spec:
               value: "{{ .Values.broker.port }}"
             - name: APP_STATUS_PORT
               value: "{{ .Values.broker.statusPort }}"
-            - name: APP_AUTH_USERNAME
-              value: "{{ .Values.broker.username }}"
-            - name: APP_AUTH_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "kyma-env-broker.fullname" . }}
-                  key: broker-password
             - name: APP_DIRECTOR_NAMESPACE
               value: "{{ .Release.Namespace }}"
             - name: APP_DIRECTOR_DEFAULT_TENANT
@@ -234,6 +227,26 @@ spec:
               value: {{ .Values.gardener.kubernetesVersion }}
             - name: APP_DEFAULT_REQUEST_REGION
               value: "{{ .Values.broker.defaultRequestRegion }}"
+            - name: APP_AUDITLOG_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.global.auditlog.configMapName }}
+                  key: auditlog-url-basic
+            - name: APP_AUDITLOG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.auditlog.secretName }}
+                  key: auditlog-user
+            - name: APP_AUDITLOG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.auditlog.secretName }}
+                  key: auditlog-password
+            - name: APP_AUDITLOG_TENANT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.global.auditlog.configMapName }}
+                  key: auditlog-tenant
           ports:
             - name: http
               containerPort: {{ .Values.broker.port }}
@@ -254,6 +267,8 @@ spec:
               readOnly: true
             - mountPath: /config
               name: config-volume
+            - mountPath: /auditlog-script
+              name: auditlog-script
           {{if eq .Values.global.database.embedded.enabled false}}
             - name: cloudsql-instance-credentials
               mountPath: /secrets/cloudsql-instance-credentials
@@ -287,3 +302,6 @@ spec:
       - name: gardener-kubeconfig
         secret:
           secretName: {{ .Values.gardener.secretName }}
+      - name: auditlog-script
+        configMap:
+          name: {{ .Values.global.auditlog.script.configMapName }}

@@ -42,7 +42,7 @@ func NewEventSender(httpClient *http.Client, domain, application string) *EventS
 	return &EventSender{
 		httpClient: resilient.WrapHttpClient(httpClient),
 		domain:     domain,
-		ceClient:   ceClient,
+		ceClient:   http2.NewWrappedCloudEventClient(ceClient),
 	}
 }
 
