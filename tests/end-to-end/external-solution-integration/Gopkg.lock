@@ -1532,32 +1532,46 @@
   revision = "94aeca20bf0991bf33922a5938174b9147ab8ca7"
 
 [[projects]]
-  digest = "1:4d211e0e7a46e1e0da1f385a1639347ce2ee12b728838b2e74b5e39356a05905"
+  digest = "1:99e33300f9e87e3548944b3a9e6dc7ccb78f035a117ab2b1e1a953b391abfa23"
   name = "knative.dev/eventing"
   packages = [
+    "pkg/apis/config",
+    "pkg/apis/configs",
+    "pkg/apis/configs/v1alpha1",
     "pkg/apis/duck",
     "pkg/apis/duck/v1alpha1",
+    "pkg/apis/duck/v1beta1",
     "pkg/apis/eventing",
     "pkg/apis/eventing/v1alpha1",
+    "pkg/apis/eventing/v1beta1",
     "pkg/apis/flows",
     "pkg/apis/flows/v1alpha1",
+    "pkg/apis/flows/v1beta1",
     "pkg/apis/legacysources",
     "pkg/apis/legacysources/v1alpha1",
     "pkg/apis/messaging",
+    "pkg/apis/messaging/config",
     "pkg/apis/messaging/v1alpha1",
+    "pkg/apis/messaging/v1beta1",
     "pkg/apis/sources",
     "pkg/apis/sources/v1alpha1",
+    "pkg/apis/sources/v1alpha2",
     "pkg/client/clientset/versioned",
     "pkg/client/clientset/versioned/scheme",
+    "pkg/client/clientset/versioned/typed/configs/v1alpha1",
     "pkg/client/clientset/versioned/typed/eventing/v1alpha1",
+    "pkg/client/clientset/versioned/typed/eventing/v1beta1",
     "pkg/client/clientset/versioned/typed/flows/v1alpha1",
+    "pkg/client/clientset/versioned/typed/flows/v1beta1",
     "pkg/client/clientset/versioned/typed/messaging/v1alpha1",
+    "pkg/client/clientset/versioned/typed/messaging/v1beta1",
     "pkg/client/clientset/versioned/typed/sources/v1alpha1",
+    "pkg/client/clientset/versioned/typed/sources/v1alpha2",
     "pkg/logging",
   ]
   pruneopts = "UT"
-  revision = "8a92a8c91447a6ff71e4be97a42c548790d52a22"
-  version = "v0.12.0"
+  revision = "7710ed581efe6533e095540800d49618b3603820"
+  version = "v0.13.8"
 
 [[projects]]
   branch = "release-0.13"

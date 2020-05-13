@@ -162,6 +162,14 @@
   version = "v4.6.0"
 
 [[projects]]
+  digest = "1:81466b4218bf6adddac2572a30ac733a9255919bc2f470b4827a317bd4ee1756"
+  name = "github.com/ghodss/yaml"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:2b0e6c0bea11257c646616ebd6a62be0ef2b6a0fd8210ac3caeaf57ee136123b"
   name = "github.com/gogo/protobuf"
   packages = [
@@ -1099,57 +1107,87 @@
   revision = "861946025e3491219eaccb1bf693e23df70c2fa8"
 
 [[projects]]
-  digest = "1:7584216f37fc1c9ac1fab5373707d0e8c00297df76c502b2582122f686ffc204"
+  digest = "1:1df605c53691b2583aebc38b6f155b5c4b619a3c7134d8ab8ac531f62ede50d6"
   name = "knative.dev/eventing"
   packages = [
+    "pkg/apis/config",
+    "pkg/apis/configs",
+    "pkg/apis/configs/v1alpha1",
     "pkg/apis/duck",
     "pkg/apis/duck/v1alpha1",
+    "pkg/apis/duck/v1beta1",
     "pkg/apis/eventing",
     "pkg/apis/eventing/v1alpha1",
+    "pkg/apis/eventing/v1beta1",
     "pkg/apis/flows",
     "pkg/apis/flows/v1alpha1",
+    "pkg/apis/flows/v1beta1",
     "pkg/apis/legacysources",
     "pkg/apis/legacysources/v1alpha1",
     "pkg/apis/messaging",
+    "pkg/apis/messaging/config",
     "pkg/apis/messaging/v1alpha1",
+    "pkg/apis/messaging/v1beta1",
     "pkg/apis/sources",
     "pkg/apis/sources/v1alpha1",
+    "pkg/apis/sources/v1alpha2",
     "pkg/client/clientset/versioned",
     "pkg/client/clientset/versioned/fake",
     "pkg/client/clientset/versioned/scheme",
+    "pkg/client/clientset/versioned/typed/configs/v1alpha1",
+    "pkg/client/clientset/versioned/typed/configs/v1alpha1/fake",
     "pkg/client/clientset/versioned/typed/eventing/v1alpha1",
     "pkg/client/clientset/versioned/typed/eventing/v1alpha1/fake",
+    "pkg/client/clientset/versioned/typed/eventing/v1beta1",
+    "pkg/client/clientset/versioned/typed/eventing/v1beta1/fake",
     "pkg/client/clientset/versioned/typed/flows/v1alpha1",
     "pkg/client/clientset/versioned/typed/flows/v1alpha1/fake",
+    "pkg/client/clientset/versioned/typed/flows/v1beta1",
+    "pkg/client/clientset/versioned/typed/flows/v1beta1/fake",
     "pkg/client/clientset/versioned/typed/messaging/v1alpha1",
     "pkg/client/clientset/versioned/typed/messaging/v1alpha1/fake",
+    "pkg/client/clientset/versioned/typed/messaging/v1beta1",
+    "pkg/client/clientset/versioned/typed/messaging/v1beta1/fake",
     "pkg/client/clientset/versioned/typed/sources/v1alpha1",
     "pkg/client/clientset/versioned/typed/sources/v1alpha1/fake",
+    "pkg/client/clientset/versioned/typed/sources/v1alpha2",
+    "pkg/client/clientset/versioned/typed/sources/v1alpha2/fake",
     "pkg/client/informers/externalversions",
+    "pkg/client/informers/externalversions/configs",
+    "pkg/client/informers/externalversions/configs/v1alpha1",
     "pkg/client/informers/externalversions/eventing",
     "pkg/client/informers/externalversions/eventing/v1alpha1",
+    "pkg/client/informers/externalversions/eventing/v1beta1",
     "pkg/client/informers/externalversions/flows",
     "pkg/client/informers/externalversions/flows/v1alpha1",
+    "pkg/client/informers/externalversions/flows/v1beta1",
     "pkg/client/informers/externalversions/internalinterfaces",
     "pkg/client/informers/externalversions/messaging",
     "pkg/client/informers/externalversions/messaging/v1alpha1",
+    "pkg/client/informers/externalversions/messaging/v1beta1",
     "pkg/client/informers/externalversions/sources",
     "pkg/client/informers/externalversions/sources/v1alpha1",
+    "pkg/client/informers/externalversions/sources/v1alpha2",
     "pkg/client/injection/client",
     "pkg/client/injection/client/fake",
+    "pkg/client/listers/configs/v1alpha1",
     "pkg/client/listers/eventing/v1alpha1",
+    "pkg/client/listers/eventing/v1beta1",
     "pkg/client/listers/flows/v1alpha1",
+    "pkg/client/listers/flows/v1beta1",
     "pkg/client/listers/messaging/v1alpha1",
+    "pkg/client/listers/messaging/v1beta1",
     "pkg/client/listers/sources/v1alpha1",
+    "pkg/client/listers/sources/v1alpha2",
     "pkg/logging",
   ]
   pruneopts = "NUT"
-  revision = "8a92a8c91447a6ff71e4be97a42c548790d52a22"
-  version = "v0.12.0"
+  revision = "7710ed581efe6533e095540800d49618b3603820"
+  version = "v0.13.8"
 
 [[projects]]
   branch = "release-0.13"
-  digest = "1:593da016ff23d158d27eda3fe6eec75a6fb47d3288815d2e5c1d3e84268f144f"
+  digest = "1:e7db1c24397ef0c81fadc81f94097548acf07851b6e111705c445b5653dace6d"
   name = "knative.dev/pkg"
   packages = [
     "apis",
@@ -1167,6 +1205,7 @@
     "logging/logkey",
     "metrics",
     "metrics/metricskey",
+    "ptr",
     "signals",
     "tracker",
   ]
