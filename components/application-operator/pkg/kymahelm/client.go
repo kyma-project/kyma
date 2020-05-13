@@ -1,6 +1,9 @@
 package kymahelm
 
 import (
+	"os"
+	"time"
+
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
@@ -8,8 +11,6 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 	"helm.sh/helm/v3/pkg/release"
 	"k8s.io/klog"
-	"os"
-	"time"
 )
 
 //go:generate mockery -name HelmClient
@@ -137,7 +138,6 @@ func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName, overrides st
 
 	return response, nil
 
-
 	//return hc.helm.UpdateRelease(
 	//	releaseName,
 	//	chartDir,
@@ -166,13 +166,12 @@ func (hc *helmClient) DeleteRelease(releaseName string) (*release.UninstallRelea
 	return response, nil
 }
 
-
 func (hc *helmClient) ReleaseStatus(rlsName string) (*release.Release, error) {
 	// return hc.helm.ReleaseStatus(rlsName)
 
 	actionConfig, err := hc.actionConfigInit()
 	if err != nil {
-		return nil , err
+		return nil, err
 	}
 
 	client := action.NewStatus(&actionConfig)
@@ -183,7 +182,6 @@ func (hc *helmClient) ReleaseStatus(rlsName string) (*release.Release, error) {
 
 	return release, nil
 }
-
 
 func (hc *helmClient) actionConfigInit() (action.Configuration, error) {
 

@@ -2,8 +2,9 @@ package application
 
 import (
 	"fmt"
-	hapi_release5 "helm.sh/helm/v3/pkg/release"
 	"testing"
+
+	hapi_release5 "helm.sh/helm/v3/pkg/release"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application/mocks"
 
@@ -52,7 +53,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 	t.Run("should install release with CN equal to app name", func(t *testing.T) {
 
 		// given
-		installationResponse := &hapi_release5.Release {
+		installationResponse := &hapi_release5.Release{
 			Info: &hapi_release5.Info{
 				Status:      hapi_release5.StatusDeployed,
 				Description: "Installed",
@@ -78,7 +79,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 
 	t.Run("should install release with CN equal to app name, O equal to tenant and OU equal to group", func(t *testing.T) {
 		// given
-		installationResponse := &hapi_release5.Release {
+		installationResponse := &hapi_release5.Release{
 			Info: &hapi_release5.Info{
 				Status:      hapi_release5.StatusDeployed,
 				Description: "Installed",
@@ -257,7 +258,7 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 			},
 		}
 
-		updateResponse := &hapi_release5.Release {
+		updateResponse := &hapi_release5.Release{
 			Info: &hapi_release5.Info{
 				Status:      hapi_release5.StatusDeployed,
 				Description: "Installed",
@@ -285,7 +286,7 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 	t.Run("should set a proper status if upgrade failed", func(t *testing.T) {
 		// given
 
-		updateResponse := &hapi_release5.Release {
+		updateResponse := &hapi_release5.Release{
 			Info: &hapi_release5.Info{
 				Status:      hapi_release5.StatusFailed,
 				Description: "Failed",

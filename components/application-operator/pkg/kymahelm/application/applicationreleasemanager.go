@@ -13,6 +13,7 @@ import (
 const (
 	applicationChartDirectory = "application"
 )
+
 //go:generate mockery -name ApplicationClient
 type ApplicationClient interface {
 	List(opts v1.ListOptions) (*v1alpha1.ApplicationList, error)

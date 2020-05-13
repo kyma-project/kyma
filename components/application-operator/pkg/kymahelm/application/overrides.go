@@ -1,7 +1,7 @@
 package application
 
 const (
-	overridesTemplate = `global:
+	overridesTemplate = `global: dla event servisu + gateway w legacy mode
     domainName: {{ .DomainName }}
     applicationGatewayImage: {{ .ApplicationGatewayImage }}
     applicationGatewayTestsImage: {{ .ApplicationGatewayTestsImage }}

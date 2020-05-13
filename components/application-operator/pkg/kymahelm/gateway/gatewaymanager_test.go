@@ -2,8 +2,9 @@ package gateway
 
 import (
 	"errors"
-	"helm.sh/helm/v3/pkg/release"
 	"testing"
+
+	"helm.sh/helm/v3/pkg/release"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/gateway/mocks"
@@ -41,7 +42,7 @@ var (
 func TestGatewayManager_InstallGateway(t *testing.T) {
 	t.Run("Should install Gateway", func(t *testing.T) {
 		//given
-		installationResponse := &release.Release {}
+		installationResponse := &release.Release{}
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", gatewayChartDirectory, namespace, gatewayName, expectedOverrides).Return(installationResponse, nil)
@@ -58,7 +59,7 @@ func TestGatewayManager_InstallGateway(t *testing.T) {
 
 	t.Run("Should fail when Helm fails to install release", func(t *testing.T) {
 		//given
-		installationResponse := &release.Release {}
+		installationResponse := &release.Release{}
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", gatewayChartDirectory, namespace, gatewayName, expectedOverrides).
@@ -204,7 +205,7 @@ func TestGatewayManager_UpgradeGateways(t *testing.T) {
 				}},
 		}
 
-		response := &release.Release {}
+		response := &release.Release{}
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil).Once()
@@ -242,15 +243,14 @@ func TestGatewayManager_UpgradeGateways(t *testing.T) {
 			},
 		}
 
-
 		secondNotEmptyListReleaseResponse := []*release.Release{
 			{
 				Name: getGatewayReleaseName(secondNamespace),
-				Info: &release.Info{ Status: release.StatusDeployed,},
+				Info: &release.Info{Status: release.StatusDeployed},
 			},
 		}
 
-		response := &release.Release {}
+		response := &release.Release{}
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil).Once()
