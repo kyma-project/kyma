@@ -19,7 +19,8 @@ resources: {}
 securityContext:
   runAsUser: 1001
 
-podAnnotations: {}
+podAnnotations:
+  sidecar.istio.io/inject: "false"
 
 loglevel: info
 port: 8080
