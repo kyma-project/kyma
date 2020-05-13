@@ -1,22 +1,3 @@
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: {{ .Release.Name }}-init-compass-rt-agent
-  annotations:
-    helm.sh/hook: "pre-upgrade, pre-install"
-    helm.sh/hook-weight: "0"
-    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
-  labels:
-    job: {{ .Release.Name }}-init-compass-rt-agent
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: {{ .Release.Name }}-crd-init
-subjects:
-- kind: ServiceAccount
-  name: {{ .Release.Name }}-crd-init
-  namespace: kyma-system
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
