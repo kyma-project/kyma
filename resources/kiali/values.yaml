@@ -587,7 +587,7 @@ kiali:
 
     ##########
     #  ---
-    #  kubernetes_config:
+    kubernetes_config:
     #
     # The Burst value of the Kubernetes client.
     #    ---
@@ -635,7 +635,7 @@ kiali:
     #
     # The QPS value of the Kubernetes client.
     #    ---
-    #    qps: 175
+      qps: 50
     #
 
     ##########
