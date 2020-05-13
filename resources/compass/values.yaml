@@ -46,14 +46,14 @@ global:
       version: "21e378d8"
     external_services_mock:
       dir:
-      version: "PR-1315"
+      version: "e2837b23"
     metris:
       dir:
       version: "c1e271d6"
     tests:
       director:
         dir:
-        version: "PR-1315"
+        version: "e2837b23"
       connector:
         dir:
         version: "d068b250"
