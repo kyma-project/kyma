@@ -70,21 +70,6 @@ func Test_isExcludedNamespace(t *testing.T) {
 	}
 }
 
-func Test_ConfigStruct(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "Exlucdes",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-		})
-	}
-}
-
 var _ = ginkgo.Describe("ConfigStruct", func() {
 	ginkgo.It("Excluded namespaces should not have length of 1", func() {
 		// this test is just to be secure if someone used "," instead of ";"

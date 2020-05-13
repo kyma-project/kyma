@@ -32,9 +32,9 @@ func TestFunctionReconciler_buildConfigMap(t *testing.T) {
 					Namespace:    "fn-ns",
 					GenerateName: "function-name-",
 					Labels: map[string]string{
-						"serverless.kyma-project.io/managed-by":    "function-controller",
-						"serverless.kyma-project.io/uuid":          "fn-uuid",
-						"serverless.kyma-project.io/function-name": "function-name",
+						serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+						serverlessv1alpha1.FunctionNameLabel:      "function-name",
+						serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
 					},
 				},
 				Data: map[string]string{

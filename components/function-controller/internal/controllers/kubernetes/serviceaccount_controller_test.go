@@ -90,7 +90,7 @@ var _ = ginkgo.Describe("ServiceAccount", func() {
 	})
 })
 
-func TestServiceReconciler_getPredicates(t *testing.T) {
+func TestServiceAccountReconciler_getPredicates(t *testing.T) {
 	gm := gomega.NewGomegaWithT(t)
 	baseNs := "base_ns"
 

@@ -13,7 +13,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/dynamic"
 	watchtools "k8s.io/client-go/tools/watch"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
@@ -30,14 +29,14 @@ type function struct {
 	verbose     bool
 }
 
-func newFunction(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, log shared.Logger, verbose bool) *function {
+func newFunction(name string, c shared.Container) *function {
 	return &function{
-		resCli:      resource.New(dynamicCli, serverlessv1alpha1.GroupVersion.WithResource("functions"), namespace, log, verbose),
+		resCli:      resource.New(c.DynamicCli, serverlessv1alpha1.GroupVersion.WithResource("functions"), c.Namespace, c.Log, c.Verbose),
 		name:        name,
-		namespace:   namespace,
-		waitTimeout: waitTimeout,
-		log:         log,
-		verbose:     verbose,
+		namespace:   c.Namespace,
+		waitTimeout: c.WaitTimeout,
+		log:         c.Log,
+		verbose:     c.Verbose,
 	}
 }
 

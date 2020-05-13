@@ -1,48 +1,19 @@
 package serverless
 
 import (
-	"context"
 	"fmt"
 	"math/rand"
 	"testing"
-	"time"
 
-	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8sresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/record"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
-
-var _ = ginkgo.Describe("updateConfigMap", func() {
-	var (
-		reconciler *FunctionReconciler
-		request    ctrl.Request
-	)
-
-	ginkgo.BeforeEach(func() {
-		function := newFixFunction("tutaj", "ah-tak-przeciez")
-		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: function.GetNamespace(), Name: function.GetName()}}
-		gomega.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
-
-		reconciler = NewFunction(resourceClient, log.Log, config, record.NewFakeRecorder(100))
-	})
-
-	ginkgo.It("should update configmap", func() {
-		result, err := reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(result.Requeue).To(gomega.BeFalse())
-		gomega.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
-	})
-})
 
 func newFixFunction(namespace, name string) *serverlessv1alpha1.Function {
 	one := int32(1)
@@ -453,9 +424,9 @@ func TestFunctionReconciler_envsEqual(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "different valueFrom in one env",
+			name: "same valueFrom in one env",
 			args: args{
-				existing: []corev1.EnvVar{{Name: "env1", Value: "val1"}, {Name: "env2", ValueFrom: envVarSrc}},
+				existing: []corev1.EnvVar{{Name: "env1", Value: "val1"}, {Name: "env2", ValueFrom: envVarSrc}}, // pointer equality by ==
 				expected: []corev1.EnvVar{{Name: "env1", Value: "val1"}, {Name: "env2", ValueFrom: envVarSrc}},
 			},
 			want: true,
@@ -486,22 +457,22 @@ func Test_equalResources(t *testing.T) {
 			args: args{
 				existing: corev1.ResourceRequirements{
 					Limits: map[corev1.ResourceName]k8sresource.Quantity{
-						corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
-						corev1.ResourceCPU:    k8sresource.MustParse("50m"),
-					},
-					Requests: map[corev1.ResourceName]k8sresource.Quantity{
 						corev1.ResourceMemory: k8sresource.MustParse("51Mi"),
 						corev1.ResourceCPU:    k8sresource.MustParse("51m"),
+					},
+					Requests: map[corev1.ResourceName]k8sresource.Quantity{
+						corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
+						corev1.ResourceCPU:    k8sresource.MustParse("50m"),
 					},
 				},
 				expected: corev1.ResourceRequirements{
 					Limits: map[corev1.ResourceName]k8sresource.Quantity{
-						corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
-						corev1.ResourceCPU:    k8sresource.MustParse("50m"),
-					},
-					Requests: map[corev1.ResourceName]k8sresource.Quantity{
 						corev1.ResourceMemory: k8sresource.MustParse("51Mi"),
 						corev1.ResourceCPU:    k8sresource.MustParse("51m"),
+					},
+					Requests: map[corev1.ResourceName]k8sresource.Quantity{
+						corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
+						corev1.ResourceCPU:    k8sresource.MustParse("50m"),
 					},
 				}},
 			want: true,
@@ -511,22 +482,22 @@ func Test_equalResources(t *testing.T) {
 			args: args{
 				existing: corev1.ResourceRequirements{
 					Limits: map[corev1.ResourceName]k8sresource.Quantity{
-						corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
-						corev1.ResourceCPU:    k8sresource.MustParse("50m"),
-					},
-					Requests: map[corev1.ResourceName]k8sresource.Quantity{
 						corev1.ResourceMemory: k8sresource.MustParse("51Mi"),
 						corev1.ResourceCPU:    k8sresource.MustParse("51m"),
+					},
+					Requests: map[corev1.ResourceName]k8sresource.Quantity{
+						corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
+						corev1.ResourceCPU:    k8sresource.MustParse("50m"),
 					},
 				},
 				expected: corev1.ResourceRequirements{
 					Limits: map[corev1.ResourceName]k8sresource.Quantity{
-						corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
+						corev1.ResourceMemory: k8sresource.MustParse("51Mi"),
 						corev1.ResourceCPU:    k8sresource.MustParse("52m"), // this one is different
 					},
 					Requests: map[corev1.ResourceName]k8sresource.Quantity{
-						corev1.ResourceMemory: k8sresource.MustParse("51Mi"),
-						corev1.ResourceCPU:    k8sresource.MustParse("51m"),
+						corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
+						corev1.ResourceCPU:    k8sresource.MustParse("50m"),
 					},
 				}},
 			want: false,
@@ -538,7 +509,7 @@ func Test_equalResources(t *testing.T) {
 				expected: corev1.ResourceRequirements{
 					Limits: map[corev1.ResourceName]k8sresource.Quantity{
 						corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
-						corev1.ResourceCPU:    k8sresource.MustParse("52m"), // this one is different
+						corev1.ResourceCPU:    k8sresource.MustParse("50m"),
 					},
 					Requests: map[corev1.ResourceName]k8sresource.Quantity{
 						corev1.ResourceMemory: k8sresource.MustParse("51Mi"),
@@ -546,6 +517,13 @@ func Test_equalResources(t *testing.T) {
 					},
 				}},
 			want: false,
+		},
+		{
+			name: "should return truefor two empty structs",
+			args: args{
+				existing: corev1.ResourceRequirements{},
+				expected: corev1.ResourceRequirements{}},
+			want: true,
 		},
 	}
 	for _, tt := range tests {

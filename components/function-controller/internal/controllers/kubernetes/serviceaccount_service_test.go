@@ -111,7 +111,7 @@ var _ = ginkgo.Describe("updateServiceAccount method", func() {
 		ctx = context.TODO()
 	)
 
-	ginkgo.It("should update configmap merging two svcAcc together", func() {
+	ginkgo.It("should update serviceAccount merging two svcAcc together", func() {
 		client := new(automock.Client)
 
 		var obj resource.Object
