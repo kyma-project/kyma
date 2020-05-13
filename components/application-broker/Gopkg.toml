@@ -128,11 +128,11 @@ required = [
 
 [[override]]
   name = "knative.dev/eventing"
-  version = "v0.12.0"
+  version = "v0.13.0"
 
 [[override]]
   name = "knative.dev/pkg"
-  branch = "release-0.12"
+  branch = "release-0.13"
 
 [[override]]
   name = "github.com/docker/distribution"

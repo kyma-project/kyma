@@ -1297,7 +1297,7 @@
   revision = "6ca3b61696b65b0e81f1a39b4937fc2d2994ed6a"
 
 [[projects]]
-  branch = "release-0.12"
+  branch = "release-0.13"
   digest = "1:a01ff0fe05f13a6e07d77fd91100251958dd50886758276e879b24b8e9e54eb1"
   name = "knative.dev/eventing"
   packages = [
@@ -1363,7 +1363,7 @@
   revision = "8a92a8c91447a6ff71e4be97a42c548790d52a22"
 
 [[projects]]
-  branch = "release-0.12"
+  branch = "release-0.13"
   digest = "1:048b68ed41f274d9f9c663076f987bb4be938273ba13bc68088910ad634a354b"
   name = "knative.dev/pkg"
   packages = [
@@ -1414,7 +1414,7 @@
   revision = "b8dc5fbc6d2f4717a69d15382921a51f93ab4cbb"
 
 [[projects]]
-  branch = "release-0.12"
+  branch = "release-0.13"
   digest = "1:1d242c5c4e479bf32943c6358122c5662f95e8e7d753b282e053e8108a1f1955"
   name = "knative.dev/serving"
   packages = [

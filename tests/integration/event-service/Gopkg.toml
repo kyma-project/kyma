@@ -42,7 +42,7 @@
 
 [[constraint]]
   name = "knative.dev/pkg"
-  branch = "release-0.12"
+  branch = "release-0.13"
 
 # Transitive dependencies of knative.dev/pkg
 [[override]]

@@ -1560,7 +1560,7 @@
   version = "v0.12.0"
 
 [[projects]]
-  branch = "release-0.12"
+  branch = "release-0.13"
   digest = "1:4780b87cdd61ee79d7075cebd4572409154d5aaca982534c2bf9a43f68203858"
   name = "knative.dev/pkg"
   packages = [
