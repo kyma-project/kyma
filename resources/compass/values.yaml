@@ -23,10 +23,10 @@ global:
       version: "d068b250"
     director:
       dir:
-      version: "5d78b5cb"
+      version: "f7fd46e4"
     gateway:
       dir:
-      version: "PR-1330"
+      version: "53b12181"
     healthchecker:
       dir:
       version: "109f4dc2"
