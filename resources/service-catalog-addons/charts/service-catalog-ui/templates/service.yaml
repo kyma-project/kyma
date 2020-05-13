@@ -4,8 +4,6 @@ metadata:
   name: {{ template "fullname" . }}
   annotations:
     "auth.istio.io/{{ .Values.catalog.service.externalPort }}": NONE
-    "auth.istio.io/{{ .Values.instances.service.externalPort }}": NONE
-    "auth.istio.io/{{ .Values.brokers.service.externalPort }}": NONE
   labels:
     app: {{ template "name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -17,13 +15,5 @@ spec:
     targetPort: {{ .Values.catalog.service.internalPort }}
     protocol: TCP
     name: http2-catalog
-  - port: {{ .Values.instances.service.externalPort }}
-    targetPort: {{ .Values.instances.service.internalPort }}
-    protocol: TCP
-    name: http2-instances
-  - port: {{ .Values.brokers.service.externalPort }}
-    targetPort: {{ .Values.brokers.service.internalPort }}
-    protocol: TCP
-    name: http2-brokers
   selector:
     app: {{ template "name" . }}

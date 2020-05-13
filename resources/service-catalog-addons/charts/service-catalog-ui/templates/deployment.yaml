@@ -29,7 +29,7 @@ spec:
             - containerPort: {{ .Values.catalog.service.internalPort }}
           volumeMounts:
           - name: config
-            mountPath: /var/catalog-public/config
+            mountPath: /var/public/config
       volumes:
       - name: config
         configMap:
