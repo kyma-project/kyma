@@ -15,12 +15,7 @@ var defaultOpts = []retry.Option{
 	retry.DelayType(retry.FixedDelay),
 }
 
-func Do(fn retry.RetryableFunc) error {
-	return retry.Do(fn, defaultOpts...)
-}
-
-func WithCustomOpts(fn retry.RetryableFunc, opts ...retry.Option) error {
+func Do(fn retry.RetryableFunc, opts ...retry.Option) error {
 	allOpts := append(defaultOpts, opts...)
-
 	return retry.Do(fn, allOpts...)
 }

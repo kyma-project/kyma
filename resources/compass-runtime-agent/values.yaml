@@ -4,13 +4,13 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir:
-      version: "PR-8050"
+      version: "PR-8273"
     runtimeAgentTests:
       dir:
       version: "PR-8050"
     compassExternalSolutionTests:
       dir:
-      version: "PR-8141"
+      version: PR-8398
   istio:
     gateway:
       name: kyma-gateway
@@ -33,6 +33,10 @@ compassRuntimeAgent:
   config:
     insecureConfigurationFetch: true
     configMap:
+      # TODO: Remove together with migration job after release 1.13
+      name: compass-agent-configuration
+      namespace: compass-system
+    secret:
       name: compass-agent-configuration
       namespace: compass-system
   certificates:

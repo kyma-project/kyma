@@ -99,6 +99,8 @@ spec:
               value: {{ .Values.gardener.auditLogsPolicyConfigMap }}
             - name: APP_GARDENER_AUDIT_LOGS_TENANT_CONFIG_PATH
               value: {{ .Values.gardener.auditLogTenantConfigPath }}
+            - name: APP_GARDENER_MAINTENANCE_WINDOW_CONFIG_PATH
+              value: {{ .Values.gardener.maintenanceWindowConfigPath }}
             - name: APP_PROVISIONER
               value: {{ .Values.provisioner }}
             - name: APP_LATEST_DOWNLOADED_RELEASES
@@ -115,6 +117,11 @@ spec:
         {{if .Values.gardener.auditLogTenantConfigMapName }}
             - mountPath: /gardener/tenant
               name: gardener-audit-log-tenant-config
+              readOnly: true
+        {{- end }}
+        {{if .Values.gardener.maintenanceWindowConfigMapName }}
+            - mountPath: /gardener/maintenance
+              name: gardener-maintenance-config
               readOnly: true
         {{- end }}
             - mountPath: /gardener/kubeconfig
@@ -167,4 +174,10 @@ spec:
       - name: gardener-audit-log-tenant-config
         configMap:
           name: {{ .Values.gardener.auditLogTenantConfigMapName }}
+      {{end}}
+      {{if .Values.gardener.maintenanceWindowConfigMapName }}
+      - name: gardener-maintenance-config
+        configMap:
+          name: {{ .Values.gardener.maintenanceWindowConfigMapName }}
+          optional: true
       {{end}}

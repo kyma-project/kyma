@@ -35,6 +35,8 @@ spec:
               value: "{{ .Values.global.ingress.domainName }}"
             - name: APP_TEST_VERBOSE
               value: "{{ .Values.tests.envs.verbose }}"
+            - name: APP_TEST_USAGE_KIND_NAME
+              value: "{{ .Values.usageKind.name }}"
           resources:
 {{ include "tplValue" ( dict "value" .Values.tests.resources "context" $ ) | indent 12 }}
 {{- end }}

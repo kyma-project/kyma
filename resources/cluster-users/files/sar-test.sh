@@ -18,6 +18,8 @@
 RETRY_TIME=3 #Seconds
 MAX_RETRIES=5
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 # resources/cluster-users/values.yaml clusterRoles.verbs.view
 readonly VIEW_OPERATIONS=( "get" "list" )
 # resources/cluster-users/values.yaml clusterRoles.verbs.edit - clusterRoles.verbs.view
@@ -39,12 +41,12 @@ function __failRetry() {
 
 function __createTestBindings() {
 	echo "---> $1"
-	kubectl create -f ./kyma-test-bindings.yaml -n "${NAMESPACE}"
+	kubectl create -f "${DIR}/kyma-test-bindings.yaml" -n "${NAMESPACE}"
 }
 
 function __deleteTestBindings() {
 	echo "---> $1"
-	kubectl delete -f ./kyma-test-bindings.yaml -n "${NAMESPACE}"
+	kubectl delete -f "${DIR}/kyma-test-bindings.yaml" -n "${NAMESPACE}"
 }
 
 function __deleteTestNamespace() {

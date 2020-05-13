@@ -180,6 +180,9 @@
 # The `kyma-environment-broker` chart
 /resources/compass/charts/kyma-environment-broker/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001
 
+# The `metris` chart
+/resources/compass/charts/metris/ @maksd @PK85 @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @rafalpotempa
+
 # The `kiali`chart
 /resources/kiali/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
@@ -370,9 +373,6 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 
 # E2E Rafter Upgrade Tests
 /tests/end-to-end/upgrade/pkg/tests/rafter/ @michal-hudy @m00g3n @aerfio @pPrecel @magicmatatjahu
-
-# Cluster Users Test
-/tests/integration/cluster-users/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # All .md files
 *.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc @mmitoraj @majakurcius @alexandra-simeonova

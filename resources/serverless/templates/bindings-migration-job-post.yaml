@@ -1,0 +1,107 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}-bindings-migration-job
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: hook-succeeded
+data:
+  bindings-migration: |-
+{{ include (print $.Template.BasePath "/_helper_bindings_migration.txt") . | indent 4 }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "fullname" . }}-bindings-migration-job
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "fullname" . }}-bindings-migration-job
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
+rules:
+- apiGroups: ["serving.knative.dev"]
+  resources: ["services"]
+  verbs: ["*"]
+- apiGroups: ["serverless.kyma-project.io"]
+  resources: ["functions"]
+  verbs: ["*"]
+- apiGroups: ["servicecatalog.kyma-project.io"]
+  resources: ["servicebindingusages", "usagekinds"]
+  verbs: ["*"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "fullname" . }}-bindings-migration-job
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
+subjects:
+- kind: ServiceAccount
+  name: {{ template "fullname" . }}-bindings-migration-job
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ template "fullname" . }}-bindings-migration-job
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "fullname" . }}-bindings-migration-job
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 8 }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ template "fullname" . }}-bindings-migration-job
+      restartPolicy: OnFailure
+      volumes:
+        - name: migration-script
+          projected:
+            sources:
+            - configMap:
+                name: {{ template "fullname" . }}-bindings-migration-job
+        - name: export
+          emptyDir: {}
+      containers:
+      - name: bindings-migration-job
+        image: "{{ .Values.bindingsMigration.image.repository }}:{{ .Values.bindingsMigration.image.tag }}"
+        imagePullPolicy: "{{ .Values.bindingsMigration.image.pullPolicy }}"
+        command: 
+          - "/bin/bash"
+          - "/config/bindings-migration"
+        volumeMounts:
+          - name: migration-script
+            mountPath: /config

@@ -38,7 +38,7 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: 3f06568f
+    tag: 50c12447
   service:
     externalPort: 80
     internalPort: 80
@@ -52,10 +52,10 @@ test:
     enabled: true
     ui:
       limits:
-        cpu: 300m
+        cpu: 400m
         memory: 1.5Gi
       requests:
-        cpu: 300m
-        memory: 300Mi
+        cpu: 350m
+        memory: 900Mi
       service_catalog:
         enabled: true
