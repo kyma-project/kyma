@@ -153,7 +153,7 @@ func testTargetsAreHealthy() {
 			timeoutMessage = ""
 			for _, target := range activeTargets {
 				// Ignoring the targets with certain labels
-				if hasAnyLabels(target.Labels, labelsToBeIgnored) {
+				if hasAnyLabel(target.Labels, labelsToBeIgnored) {
 					continue
 				}
 				if target.Health != "up" {
@@ -170,7 +170,7 @@ func testTargetsAreHealthy() {
 
 }
 
-func hasAnyLabels(target, anyOf promAPI.Labels) bool {
+func hasAnyLabel(target, anyOf promAPI.Labels) bool {
 	for l, _ := range target {
 		if target[l] == anyOf[l] {
 			return true
