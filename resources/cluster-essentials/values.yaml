@@ -1,3 +1,7 @@
+image:
+  repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
+  tag: "v20200310-5f52f407"
+
 global:
   isLocalEnv: false
   disableLegacyConnectivity: false
