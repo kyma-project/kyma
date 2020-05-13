@@ -68,7 +68,7 @@ func main() {
 
 	log.Printf("Preparing Helm Client.")
 
-	helmClient, err := kymahelm.NewClient(options.tillerUrl, options.helmTLSKeyFile, options.helmTLSCertificateFile, options.tillerTLSSkipVerify, options.installationTimeout)
+	helmClient, err := kymahelm.NewClient(options.namespace, options.tillerUrl, options.helmTLSKeyFile, options.helmTLSCertificateFile, options.tillerTLSSkipVerify, options.installationTimeout)
 	if err != nil {
 		log.Fatal(err)
 	}

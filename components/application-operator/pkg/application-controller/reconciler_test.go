@@ -11,11 +11,11 @@ import (
 	helmmocks "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	hapi_4 "helm.sh/helm/v3/pkg/release"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
-	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
@@ -43,7 +43,7 @@ func (checker applicationChecker) checkStatus(args mock.Arguments) {
 }
 
 func TestApplicationReconciler_Reconcile(t *testing.T) {
-	releaseStatus := hapi_4.Status_DEPLOYED
+	releaseStatus := hapi_4.StatusDeployed
 	statusDescription := "Deployed"
 
 	statusChecker := applicationChecker{
@@ -396,7 +396,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		ApplicationReleaseManager := &helmmocks.ApplicationReleaseManager{}
 		ApplicationReleaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
-		ApplicationReleaseManager.On("InstallChart", mock.AnythingOfType("*v1alpha1.Application")).Return(hapi_4.Status_FAILED, "", errors.NewBadRequest("error"))
+		ApplicationReleaseManager.On("InstallChart", mock.AnythingOfType("*v1alpha1.Application")).Return(hapi_4.StatusFailed, "", errors.NewBadRequest("error"))
 
 		reReconciler := NewReconciler(managerClient, ApplicationReleaseManager, logger)
 

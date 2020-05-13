@@ -2,6 +2,7 @@ package application
 
 import (
 	"fmt"
+	hapi_release5 "helm.sh/helm/v3/pkg/release"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application/mocks"
@@ -14,9 +15,6 @@ import (
 	helmmocks "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/mocks"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	"k8s.io/helm/pkg/proto/hapi/release"
-	hapi_release5 "k8s.io/helm/pkg/proto/hapi/release"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
 )
 
 const (
@@ -38,14 +36,11 @@ const (
 )
 
 var (
-	notEmptyListReleaseResponse = &rls.ListReleasesResponse{
-		Count: 1,
-		Releases: []*release.Release{
-			{Name: appName},
-		},
+	notEmptyListReleaseResponse = []*hapi_release5.Release{
+		{Name: appName},
 	}
 
-	emptyListReleaseResponse = &rls.ListReleasesResponse{}
+	emptyListReleaseResponse []*hapi_release5.Release
 )
 
 func TestReleaseManager_InstallNewAppChart(t *testing.T) {
@@ -55,15 +50,12 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 	}
 
 	t.Run("should install release with CN equal to app name", func(t *testing.T) {
+
 		// given
-		installationResponse := &rls.InstallReleaseResponse{
-			Release: &hapi_release5.Release{
-				Info: &hapi_release5.Info{
-					Status: &hapi_release5.Status{
-						Code: hapi_release5.Status_DEPLOYED,
-					},
-					Description: "Installed",
-				},
+		installationResponse := &hapi_release5.Release {
+			Info: &hapi_release5.Info{
+				Status:      hapi_release5.StatusDeployed,
+				Description: "Installed",
 			},
 		}
 
@@ -79,21 +71,17 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		assert.Equal(t, hapi_release5.Status_DEPLOYED, status)
+		assert.Equal(t, hapi_release5.StatusDeployed, status)
 		assert.Equal(t, "Installed", description)
 		helmClient.AssertExpectations(t)
 	})
 
 	t.Run("should install release with CN equal to app name, O equal to tenant and OU equal to group", func(t *testing.T) {
 		// given
-		installationResponse := &rls.InstallReleaseResponse{
-			Release: &hapi_release5.Release{
-				Info: &hapi_release5.Info{
-					Status: &hapi_release5.Status{
-						Code: hapi_release5.Status_DEPLOYED,
-					},
-					Description: "Installed",
-				},
+		installationResponse := &hapi_release5.Release {
+			Info: &hapi_release5.Info{
+				Status:      hapi_release5.StatusDeployed,
+				Description: "Installed",
 			},
 		}
 
@@ -114,7 +102,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		assert.Equal(t, hapi_release5.Status_DEPLOYED, status)
+		assert.Equal(t, hapi_release5.StatusDeployed, status)
 		assert.Equal(t, "Installed", description)
 		helmClient.AssertExpectations(t)
 	})
@@ -269,14 +257,10 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 			},
 		}
 
-		updateResponse := &rls.UpdateReleaseResponse{
-			Release: &hapi_release5.Release{
-				Info: &hapi_release5.Info{
-					Status: &hapi_release5.Status{
-						Code: hapi_release5.Status_DEPLOYED,
-					},
-					Description: "Installed",
-				},
+		updateResponse := &hapi_release5.Release {
+			Info: &hapi_release5.Info{
+				Status:      hapi_release5.StatusDeployed,
+				Description: "Installed",
 			},
 		}
 
@@ -301,14 +285,10 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 	t.Run("should set a proper status if upgrade failed", func(t *testing.T) {
 		// given
 
-		updateResponse := &rls.UpdateReleaseResponse{
-			Release: &hapi_release5.Release{
-				Info: &hapi_release5.Info{
-					Status: &hapi_release5.Status{
-						Code: hapi_release5.Status_FAILED,
-					},
-					Description: "Failed",
-				},
+		updateResponse := &hapi_release5.Release {
+			Info: &hapi_release5.Info{
+				Status:      hapi_release5.StatusFailed,
+				Description: "Failed",
 			},
 		}
 
@@ -327,7 +307,7 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 			ObjectMeta: v1.ObjectMeta{Name: "app-1"},
 			Status: v1alpha1.ApplicationStatus{
 				InstallationStatus: v1alpha1.InstallationStatus{
-					Status:      "FAILED",
+					Status:      "failed",
 					Description: "",
 				},
 			},

@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"errors"
+	"helm.sh/helm/v3/pkg/release"
 	"testing"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -11,8 +12,8 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/helm/pkg/proto/hapi/release"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
+	//"k8s.io/helm/pkg/proto/hapi/release"
+	//rls "k8s.io/helm/pkg/proto/hapi/services"
 )
 
 const (
@@ -24,25 +25,23 @@ const (
 )
 
 var (
-	gatewayName                 = getGatewayReleaseName(namespace)
-	notEmptyListReleaseResponse = &rls.ListReleasesResponse{
-		Count: 1,
-		Releases: []*release.Release{
-			{Name: gatewayName, Info: &release.Info{
-				Status: &release.Status{
-					Code: release.Status_DEPLOYED,
-				},
+	gatewayName = getGatewayReleaseName(namespace)
+
+	notEmptyListReleaseResponse = []*release.Release{
+		{
+			Name: gatewayName,
+			Info: &release.Info{
+				Status: release.StatusDeployed,
 			}},
-		},
 	}
 
-	emptyListReleaseResponse = &rls.ListReleasesResponse{}
+	emptyListReleaseResponse []*release.Release
 )
 
 func TestGatewayManager_InstallGateway(t *testing.T) {
 	t.Run("Should install Gateway", func(t *testing.T) {
 		//given
-		installationResponse := &rls.InstallReleaseResponse{}
+		installationResponse := &release.Release {}
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", gatewayChartDirectory, namespace, gatewayName, expectedOverrides).Return(installationResponse, nil)
@@ -59,7 +58,7 @@ func TestGatewayManager_InstallGateway(t *testing.T) {
 
 	t.Run("Should fail when Helm fails to install release", func(t *testing.T) {
 		//given
-		installationResponse := &rls.InstallReleaseResponse{}
+		installationResponse := &release.Release {}
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", gatewayChartDirectory, namespace, gatewayName, expectedOverrides).
@@ -153,7 +152,7 @@ func TestGatewayManager_GatewayExists(t *testing.T) {
 
 		//then
 		require.NoError(t, err)
-		require.Equal(t, status, release.Status_DEPLOYED)
+		require.Equal(t, status, release.StatusDeployed)
 		assert.True(t, exists)
 	})
 
@@ -169,7 +168,7 @@ func TestGatewayManager_GatewayExists(t *testing.T) {
 
 		//then
 		require.NoError(t, err)
-		require.Equal(t, status, release.Status_UNKNOWN)
+		require.Equal(t, status, release.StatusUnknown)
 		assert.False(t, exists)
 	})
 
@@ -205,7 +204,7 @@ func TestGatewayManager_UpgradeGateways(t *testing.T) {
 				}},
 		}
 
-		response := &rls.UpdateReleaseResponse{}
+		response := &release.Release {}
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil).Once()
@@ -243,18 +242,15 @@ func TestGatewayManager_UpgradeGateways(t *testing.T) {
 			},
 		}
 
-		secondNotEmptyListReleaseResponse := &rls.ListReleasesResponse{
-			Count: 1,
-			Releases: []*release.Release{
-				{Name: getGatewayReleaseName(secondNamespace), Info: &release.Info{
-					Status: &release.Status{
-						Code: release.Status_DEPLOYED,
-					},
-				}},
+
+		secondNotEmptyListReleaseResponse := []*release.Release{
+			{
+				Name: getGatewayReleaseName(secondNamespace),
+				Info: &release.Info{ Status: release.StatusDeployed,},
 			},
 		}
 
-		response := &rls.UpdateReleaseResponse{}
+		response := &release.Release {}
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil).Once()

@@ -6,8 +6,8 @@ import (
 	v1beta12 "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	log "github.com/sirupsen/logrus"
 
+	"helm.sh/helm/v3/pkg/release"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"k8s.io/helm/pkg/proto/hapi/release"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/utils"
@@ -24,7 +24,7 @@ const (
 type GatewayManager interface {
 	InstallGateway(namespace string) error
 	DeleteGateway(namespace string) error
-	GatewayExists(namespace string) (bool, release.Status_Code, error)
+	GatewayExists(namespace string) (bool, release.Status, error)
 	UpgradeGateways() error
 }
 
@@ -84,7 +84,7 @@ func (g *gatewayManager) deleteGateway(gateway string) error {
 	return nil
 }
 
-func (g *gatewayManager) GatewayExists(namespace string) (bool, release.Status_Code, error) {
+func (g *gatewayManager) GatewayExists(namespace string) (bool, release.Status, error) {
 	name := getGatewayReleaseName(namespace)
 	exists, status, err := g.gatewayExists(name, namespace)
 	return exists, status, err
@@ -133,7 +133,7 @@ func (g *gatewayManager) updateGateways(namespaces []string) {
 		}
 
 		if exists {
-			if status == release.Status_FAILED {
+			if status == release.StatusFailed {
 				log.Infof("Deleting Gateway %s in failed status", namespace)
 				err := g.deleteGateway(gateway)
 				if err != nil {
@@ -149,22 +149,22 @@ func (g *gatewayManager) updateGateways(namespaces []string) {
 	}
 }
 
-func (g *gatewayManager) gatewayExists(name, namespace string) (bool, release.Status_Code, error) {
+func (g *gatewayManager) gatewayExists(name, namespace string) (bool, release.Status, error) {
 	listResponse, err := g.helmClient.ListReleases(namespace)
 	if err != nil {
-		return false, release.Status_UNKNOWN, errors.Errorf("Error listing releases: %s", err.Error())
+		return false, release.StatusUnknown, errors.Errorf("Error listing releases: %s", err.Error())
 	}
 
 	if listResponse == nil {
-		return false, release.Status_UNKNOWN, nil
+		return false, release.StatusUnknown, nil
 	}
 
-	for _, rel := range listResponse.Releases {
+	for _, rel := range listResponse {
 		if rel.Name == name {
-			return true, rel.Info.Status.Code, nil
+			return true, rel.Info.Status, nil
 		}
 	}
-	return false, release.Status_UNKNOWN, nil
+	return false, release.StatusUnknown, nil
 }
 
 func (g *gatewayManager) upgradeGateway(gateway string) error {
