@@ -22,7 +22,13 @@ spec:
         - name: crd-oauth2clients
           mountPath: /etc/crd
           readOnly: true
-        command: ["kubectl",  "apply", "-f", "/etc/crd/oauth2clients.yaml"]
+        command:
+        - /bin/bash
+        - -c
+        - |-
+          set -e
+          kubectl get crd oauth2clients.hydra.ory.sh \
+          || kubectl apply -f /etc/crd/oauth2clients.yaml
       volumes:
       - name: crd-oauth2clients
         configMap:

@@ -22,7 +22,13 @@ spec:
         - name: crd-rules
           mountPath: /etc/ory/crd
           readOnly: true
-        command: ["kubectl",  "apply", "-f", "/etc/ory/crd/rules.yaml"]
+        command:
+        - /bin/bash
+        - -c
+        - |-
+          set -e
+          kubectl get crd rules.oathkeeper.ory.sh \
+          || kubectl apply -f /etc/ory/crd/rules.yaml
       volumes:
       - name: crd-rules
         configMap:
