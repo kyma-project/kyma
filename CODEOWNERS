@@ -82,6 +82,9 @@
 # The `helm-broker` subchart
 /resources/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
+# The `addons-ui` subchart
+/resources/helm-broker/charts/addons-ui/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
+
 # The `monitoring` subchart
 /resources/monitoring/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
@@ -385,10 +388,6 @@ milv.config.yaml @michal-hudy @m00g3n @aerfio @pPrecel @magicmatatjahu @kazydek 
 
 # The `api-gateway ui` micro front-end definition
 /resources/api-gateway/templates/api-rules-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
-# add-on ui microfrontend definitions
-/resources/helm-broker/charts/addons-ui/templates/addons-clustermicrofrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-/resources/helm-broker/charts/addons-ui/templates/addons-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # application ui microfrontend definitions
 /resources/application-connector/templates/applications-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
