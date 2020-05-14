@@ -49,9 +49,7 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
-  resourceNames:
-   - {{ template "service-broker-proxy.fullname" . }}-regsecret
-  verbs: ["get"]
+  verbs: ["get", "create", "delete", "update", "patch"]
 
 ---
 

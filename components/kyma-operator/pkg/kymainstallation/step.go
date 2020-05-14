@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
@@ -60,7 +61,36 @@ func (s installStep) Run() error {
 		releaseOverrides)
 
 	if installErr != nil {
-		return errors.New("Helm install error: " + installErr.Error())
+		installErrMsg := fmt.Sprintf("Helm install error: %s", installErr.Error())
+		errorMsg := installErrMsg
+
+		isDeletable, err := s.helmClient.IsReleaseDeletable(s.component.GetReleaseName())
+		if err != nil {
+			errMsg := fmt.Sprintf("Checking status of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
+			log.Println(errMsg)
+			return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, errMsg))
+		}
+
+		if isDeletable {
+			deleteWaitTime := 10
+
+			log.Println(fmt.Sprintf("Helm installation of %s failed. Deleting before retrying installation.", s.component.GetReleaseName()))
+			log.Println("Look at the proceeding logs to see the reason of failure")
+			_, err := s.helmClient.DeleteRelease(s.component.GetReleaseName())
+
+			if err != nil {
+				deleteErrMsg := fmt.Sprintf("Helm delete of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
+				log.Println(deleteErrMsg)
+				return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, deleteErrMsg))
+			}
+
+			//waiting for release to be deleted
+			time.Sleep(time.Second * time.Duration(deleteWaitTime))
+
+			errorMsg = fmt.Sprintf("%s\nHelm delete of %s was successfull", installErrMsg, s.component.GetReleaseName())
+		}
+
+		return errors.New(errorMsg)
 	}
 
 	s.helmClient.PrintRelease(installResp.Release)
@@ -70,6 +100,7 @@ func (s installStep) Run() error {
 
 type upgradeStep struct {
 	installStep
+	deployedRevision int32
 }
 
 // Run method for upgradeStep triggers step upgrade via helm

@@ -1,0 +1,11 @@
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
+kind: UsageKind
+metadata:
+  name: "{{ .Values.usageKind.name }}"
+spec:
+  displayName: Function
+  resource:
+    group: serverless.kyma-project.io
+    kind: function
+    version: v1alpha1
+  labelsPath: spec.labels

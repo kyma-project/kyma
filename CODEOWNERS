@@ -180,8 +180,11 @@
 # The `kyma-environment-broker` chart
 /resources/compass/charts/kyma-environment-broker/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001
 
+# The `metris` chart
+/resources/compass/charts/metris/ @maksd @PK85 @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @rafalpotempa
+
 # The `kiali`chart
-/resources/kiali/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/resources/kiali/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # The `serverless` chart
 /resources/serverless/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @pPrecel @magicmatatjahu

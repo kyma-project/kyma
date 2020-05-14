@@ -12,5 +12,5 @@ spec:
       port: {{ .Values.metrics.authProxy.port.name }}
       interval: "{{ .Values.metrics.serviceMonitor.scrapeInterval }}"
   selector:
-    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+    {{- include "tplValue" ( dict "value" .Values.global.commonMatchLabels "context" . ) | nindent 4 }}
 {{- end }}

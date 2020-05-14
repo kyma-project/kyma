@@ -9,3 +9,5 @@ dependencies:
   condition: pairing-adapter.enabled
 - name: external-services-mock
   condition: global.externalServicesMock.enabled
+- name: metris
+  condition: global.metris.enabled

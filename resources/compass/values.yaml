@@ -17,16 +17,16 @@ global:
       version: "d068b250"
     connectivity_adapter:
       dir:
-      version: "d068b250"
+      version: "76738d5c"
     pairing_adapter:
       dir:
       version: "d068b250"
     director:
       dir:
-      version: "e0659ba7"
+      version: "f7fd46e4"
     gateway:
       dir:
-      version: "d068b250"
+      version: "53b12181"
     healthchecker:
       dir:
       version: "109f4dc2"
@@ -35,7 +35,7 @@ global:
       version: "778b2bb3"
     provisioner:
       dir:
-      version: "f4b3be5e"
+      version: "336a704a"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -43,23 +43,26 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "14ea1a2b"
+      version: "ae194203"
     external_services_mock:
       dir:
-      version: "105e8ff0"
+      version: "e2837b23"
+    metris:
+      dir:
+      version: "c1e271d6"
     tests:
       director:
         dir:
-        version: "d068b250"
+        version: "e2837b23"
       connector:
         dir:
         version: "d068b250"
       provisioner:
         dir:
-        version: "d068b250"
+        version: "8fb2e53b"
       e2e_provisioning:
         dir:
-        version: "d068b250"
+        version: "a8287494"
       connectivity_adapter:
         dir:
         version: "d068b250"
@@ -86,6 +89,8 @@ global:
   auditlog:
     configMapName: "compass-gateway-auditlog-config"
     secretName: "compass-gateway-auditlog-secret"
+    script:
+      configMapName: "auditlog-script"
 
   tenantConfig:
     useDefaultTenants: true
@@ -275,6 +280,9 @@ global:
   enableCompassDefaultScenarioAssignment: true
 
   externalServicesMock:
+    enabled: false
+
+  metris:
     enabled: false
 
 pairing-adapter:

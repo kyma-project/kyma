@@ -548,8 +548,8 @@
   revision = "8604d53a20a2848c53cad30c288bf8f6c823b825"
 
 [[projects]]
-  branch = "release-1.11"
-  digest = "1:957a9ed41d3236522f82c090241b972a4d5feb616b52f18ec4a07564ba2761a2"
+  branch = "release-1.12"
+  digest = "1:69bb4199ec01c0ef717a86698d1092b8a4ba83fd7c9e07ce6c18c988b7ebdbbc"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/resilient",
@@ -569,6 +569,7 @@
     "components/event-sources/apis/sources/v1alpha1",
     "components/event-sources/client/generated/clientset/internalclientset/scheme",
     "components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1",
+    "components/function-controller/pkg/apis/serverless/v1alpha1",
     "components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "components/service-binding-usage-controller/pkg/apis/settings/v1alpha1",
     "components/service-binding-usage-controller/pkg/client/clientset/versioned",
@@ -577,7 +578,7 @@
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "68742a10ec230206503af278f32b2d60b5a783e2"
+  revision = "0109f7092efcc07168931f39bbeeba93407b0bfb"
 
 [[projects]]
   digest = "1:d86c8eb7189141c0e902fd8dcf6e79b8feea523978018e20f2ac794626ad0f63"
@@ -1684,6 +1685,7 @@
     "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1",
+    "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
