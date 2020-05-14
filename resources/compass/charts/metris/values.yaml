@@ -2,9 +2,8 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  # repository, tag and pullSecrets from global chart values override these
-  repository:
-  tag:
+  repository: "eu.gcr.io/kyma-project/incubator/metris"
+  tag: "d1b75eac"
   pullSecrets: []
   pullPolicy: IfNotPresent
 
