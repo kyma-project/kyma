@@ -23,7 +23,7 @@ type Config struct {
 	ServiceAccountRequeueDuration time.Duration `envconfig:"default=1m"`
 }
 
-func getNamespaces(ctx context.Context, client client.Client, base string, exluded []string) ([]string, error) {
+func getNamespaces(ctx context.Context, client client.Client, base string, excluded []string) ([]string, error) {
 	var namespaces corev1.NamespaceList
 	if err := client.List(ctx, &namespaces); err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func getNamespaces(ctx context.Context, client client.Client, base string, exlud
 
 	names := make([]string, 0)
 	for _, namespace := range namespaces.Items {
-		if !isExcludedNamespace(namespace.GetName(), base, exluded) && namespace.Status.Phase != corev1.NamespaceTerminating {
+		if !isExcludedNamespace(namespace.GetName(), base, excluded) && namespace.Status.Phase != corev1.NamespaceTerminating {
 			names = append(names, namespace.GetName())
 		}
 	}

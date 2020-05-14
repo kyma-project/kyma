@@ -12,6 +12,7 @@ tags:
 paths:
   /v1/health:
     get:
+      deprecated: true
       summary: 'Returns health of a service'
       operationId: 'getHealth'
       tags:
@@ -21,6 +22,7 @@ paths:
           description: 'The service is in a good health'
   /v1/metadata/services:
     post:
+      deprecated: true
       tags:
       - 'services'
       summary: 'Registers a new service'
@@ -52,6 +54,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/MetadataErrorResponse'
     get:
+      deprecated: true
       tags:
       - 'services'
       summary: 'Gets all registered services'
@@ -73,6 +76,7 @@ paths:
                 $ref: '#/components/schemas/MetadataErrorResponse'
   /v1/metadata/services/{serviceId}:
     get:
+      deprecated: true
       tags:
       - 'services'
       summary: 'Gets a service by service ID'
@@ -105,6 +109,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/MetadataErrorResponse'
     put:
+      deprecated: true
       tags:
       - 'services'
       summary: 'Updates a service by service ID'
@@ -140,6 +145,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/MetadataErrorResponse'
     delete:
+      deprecated: true
       tags:
       - 'services'
       summary: 'Deletes a service by service ID'
