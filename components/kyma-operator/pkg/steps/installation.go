@@ -125,7 +125,6 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 		_ = steps.statusManager.InProgress(stepName)
 
 		step := stepsFactory.NewStep(component)
-
 		steps.PrintStep(stepName)
 
 		err := retry.Do(

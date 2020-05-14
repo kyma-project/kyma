@@ -193,7 +193,7 @@ spec:
             type: Opaque
             EOF
 
-            timeout 35s bash -c 'until kubectl create -f /tmp/secret.yaml ; do sleep 5; done'
+            timeout 60s bash -c 'until kubectl create -f /tmp/secret.yaml ; do sleep 2; done'
 
         volumeMounts:
           - mountPath: /etc/certs
@@ -246,4 +246,3 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: kyma-installer-reader
-
