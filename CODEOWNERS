@@ -227,7 +227,7 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 # Console Backend Service Component
 /components/console-backend-service/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 /components/console-backend-service/internal/gqlschema @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @michal-hudy @aerfio @pPrecel @magicmatatjahu
-/components/console-backend-service/internal/domain/root_resolver.go @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @michal-hudy @aerfio @pPrecel @magicmatatjahu
+/components/console-backend-service/internal/domain/*.go @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @michal-hudy @aerfio @pPrecel @magicmatatjahu
 /components/console-backend-service/internal/domain/serverless @michal-hudy @aerfio @pPrecel @magicmatatjahu
 /components/console-backend-service/internal/domain/rafter @michal-hudy @aerfio @pPrecel @magicmatatjahu
 
