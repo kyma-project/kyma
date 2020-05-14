@@ -33,7 +33,7 @@ const (
 
 	defaultCheckInterval         = 3 * time.Second
 	serviceInstanceCheckInterval = 2 * time.Second
-	serviceInstanceWait          = 60 * time.Second
+	serviceInstanceWait          = 2 * time.Minute
 
 	serviceInstanceDeletionWaitTime = 30 * time.Second
 )
