@@ -20,24 +20,24 @@ paths:
     post:
       deprecated: true
       parameters:
-        - in: header
-          name: Group
-          schema:
-            type: string
-            format: uuid
-          required: false
-        - in: header
-          name: Tenant
-          schema:
-            type: string
-          required: false
-        - in: header
-          name: Application
-          schema:
-            type: string
-          required: true
+      - in: header
+        name: Group
+        schema:
+          type: string
+          format: uuid
+        required: false
+      - in: header
+        name: Tenant
+        schema:
+          type: string
+        required: false
+      - in: header
+        name: Application
+        schema:
+          type: string
+        required: true
       tags:
-        - applications internal API
+      - applications internal API
       summary: 'Creates a token used for certificate signing flow.'
       responses:
         '201':
@@ -62,7 +62,7 @@ paths:
     post:
       deprecated: true
       tags:
-        - applications external API
+      - applications external API
       summary: 'Marks certificate as revoked.'
       responses:
         '201':
@@ -77,28 +77,28 @@ paths:
     get:
       deprecated: true
       parameters:
-        - in: query
-          name: token
-          description: 'Access Token fetched from /tokens endpoint.'
-          required: true
-          schema:
-            type: string
-        - in: header
-          name: EventsHost
-          description: 'Value of the URL to Event service which must be returned to the caller'
-          schema:
-            type: string
-            format: url
-          required: false
-        - in: header
-          name: MetadataHost
-          description: 'Value of the URL to Application Registry which must be returned to the caller'
-          schema:
-            type: string
-            format: url
-          required: false
+      - in: query
+        name: token
+        description: 'Access Token fetched from /tokens endpoint.'
+        required: true
+        schema:
+          type: string
+      - in: header
+        name: EventsHost
+        description: 'Value of the URL to Event service which must be returned to the caller'
+        schema:
+          type: string
+          format: url
+        required: false
+      - in: header
+        name: MetadataHost
+        description: 'Value of the URL to Application Registry which must be returned to the caller'
+        schema:
+          type: string
+          format: url
+        required: false
       tags:
-        - applications external API
+      - applications external API
       summary: 'Allows for fetching information for CSR.'
       responses:
         '200':
@@ -123,22 +123,22 @@ paths:
     get:
       deprecated: true
       parameters:
-        - in: header
-          name: EventsHost
-          description: 'Value of the URL to Event service which must be returned to the caller'
-          schema:
-            type: string
-            format: url
-          required: false
-        - in: header
-          name: MetadataHost
-          description: 'Value of the URL to Application Registry which must be returned to the caller'
-          schema:
-            type: string
-            format: url
-          required: false
+      - in: header
+        name: EventsHost
+        description: 'Value of the URL to Event service which must be returned to the caller'
+        schema:
+          type: string
+          format: url
+        required: false
+      - in: header
+        name: MetadataHost
+        description: 'Value of the URL to Application Registry which must be returned to the caller'
+        schema:
+          type: string
+          format: url
+        required: false
       tags:
-        - applications external API
+      - applications external API
       summary: 'Returns information on available services.'
       responses:
         '200':
@@ -157,14 +157,14 @@ paths:
     post:
       deprecated: true
       parameters:
-        - in: query
-          name: token
-          description: 'Access Token fetched from /tokens endpoint.'
-          required: true
-          schema:
-            type: string
+      - in: query
+        name: token
+        description: 'Access Token fetched from /tokens endpoint.'
+        required: true
+        schema:
+          type: string
       tags:
-        - applications external API
+      - applications external API
       summary: 'Signs CSR.'
       requestBody:
         description: 'The CSR to be signed'
@@ -208,7 +208,7 @@ paths:
     post:
       deprecated: true
       tags:
-        - applications external API
+      - applications external API
       summary: 'Renews certificate using CSR.'
       requestBody:
         description: 'The CSR to be signed'
@@ -240,19 +240,19 @@ paths:
     post:
       deprecated: true
       parameters:
-        - in: header
-          name: Group
-          schema:
-            type: string
-            format: uuid
-          required: false
-        - in: header
-          name: Tenant
-          schema:
-            type: string
-          required: false
+      - in: header
+        name: Group
+        schema:
+          type: string
+          format: uuid
+        required: false
+      - in: header
+        name: Tenant
+        schema:
+          type: string
+        required: false
       tags:
-        - runtimes internal API
+      - runtimes internal API
       summary: 'Creates a token used for certificate signing flow.'
       responses:
         '201':
@@ -271,7 +271,7 @@ paths:
     post:
       deprecated: true
       tags:
-        - runtimes external API
+      - runtimes external API
       summary: 'Marks certificate as revoked.'
       responses:
         '201':
@@ -286,14 +286,14 @@ paths:
     get:
       deprecated: true
       parameters:
-        - in: query
-          name: token
-          description: 'Access Token fetched from /tokens endpoint.'
-          required: true
-          schema:
-            type: string
+      - in: query
+        name: token
+        description: 'Access Token fetched from /tokens endpoint.'
+        required: true
+        schema:
+          type: string
       tags:
-        - runtimes external API
+      - runtimes external API
       summary: 'Allows for fetching information for CSR.'
       responses:
         '200':
@@ -318,7 +318,7 @@ paths:
     get:
       deprecated: true
       tags:
-        - runtimes external API
+      - runtimes external API
       summary: 'Returns information on available services.'
       responses:
         '200':
@@ -337,14 +337,14 @@ paths:
     post:
       deprecated: true
       parameters:
-        - in: query
-          name: token
-          description: 'Access Token fetched from /tokens endpoint.'
-          required: true
-          schema:
-            type: string
+      - in: query
+        name: token
+        description: 'Access Token fetched from /tokens endpoint.'
+        required: true
+        schema:
+          type: string
       tags:
-        - runtimes external API
+      - runtimes external API
       summary: 'Signs CSR.'
       requestBody:
         description: 'The CSR to be signed'
@@ -388,7 +388,7 @@ paths:
     post:
       deprecated: true
       tags:
-        - runtimes external API
+      - runtimes external API
       summary: 'Renews certificate using CSR.'
       requestBody:
         description: 'The CSR to be signed'
