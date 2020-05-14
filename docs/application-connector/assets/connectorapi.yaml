@@ -12,7 +12,7 @@ paths:
       deprecated: true
       summary: 'Returns health status'
       tags:
-        - health API
+      - health API
       responses:
         '200':
           description: 'The service is up.'
