@@ -103,7 +103,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	}
 
 	ns := namespace.New(namespaceName, coreCli, container)
-	f := newFunction(dynamicCli, cfg.FunctionName, namespaceName, cfg.WaitTimeout, t, cfg.Verbose)
+	f := newFunction(cfg.FunctionName, container)
 	ar := apirule.New(cfg.APIRuleName, container)
 	br := broker.New(container)
 	tr := trigger.New(cfg.TriggerName, container)

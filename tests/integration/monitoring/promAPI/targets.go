@@ -18,7 +18,4 @@ type ActiveTarget struct {
 	Health    string `json:"health"`
 }
 
-type Labels struct {
-	Instance string `json:"instance"`
-	Job      string `json:"job"`
-}
+type Labels map[string]string

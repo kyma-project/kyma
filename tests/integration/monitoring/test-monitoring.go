@@ -128,6 +128,9 @@ func testPodsAreReady() {
 func testTargetsAreHealthy() {
 	timeout := time.After(3 * time.Minute)
 	tick := time.NewTicker(30 * time.Second)
+	var labelsToBeIgnored = promAPI.Labels{
+		"namespace": "e2e-event-mesh", // e2e test pod
+	}
 	var timeoutMessage string
 	for {
 		select {
@@ -149,9 +152,13 @@ func testTargetsAreHealthy() {
 			allTargetsAreHealthy := true
 			timeoutMessage = ""
 			for _, target := range activeTargets {
+				// Ignoring the targets with certain labels
+				if hasAnyLabel(target.Labels, labelsToBeIgnored) {
+					continue
+				}
 				if target.Health != "up" {
 					allTargetsAreHealthy = false
-					timeoutMessage += fmt.Sprintf("Target with job=%s and instance=%s is not healthy\n", target.Labels.Job, target.Labels.Instance)
+					timeoutMessage += fmt.Sprintf("Target with job=%s and instance=%s is not healthy\n", target.Labels["job"], target.Labels["instance"])
 				}
 			}
 			if allTargetsAreHealthy {
@@ -161,6 +168,15 @@ func testTargetsAreHealthy() {
 		}
 	}
 
+}
+
+func hasAnyLabel(target, anyOf promAPI.Labels) bool {
+	for l, _ := range target {
+		if target[l] == anyOf[l] {
+			return true
+		}
+	}
+	return false
 }
 
 func testRulesAreHealthy() {
