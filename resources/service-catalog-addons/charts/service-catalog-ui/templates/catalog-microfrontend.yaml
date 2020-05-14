@@ -51,5 +51,5 @@ spec:
     - category: Configuration
       label: Brokers
       navigationPath: brokers
-      order: -2
+      order: 3
       viewUrl: /brokers
