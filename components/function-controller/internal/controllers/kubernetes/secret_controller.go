@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -52,6 +51,13 @@ func (r *SecretReconciler) predicate() predicate.Predicate {
 			}
 			return r.svc.IsBase(runtime)
 		},
+		GenericFunc: func(e event.GenericEvent) bool {
+			runtime, ok := e.Object.(*corev1.Secret)
+			if !ok {
+				return false
+			}
+			return r.svc.IsBase(runtime)
+		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
 			return false
 		},
@@ -68,10 +74,7 @@ func (r *SecretReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) 
 
 	instance := &corev1.Secret{}
 	if err := r.client.Get(ctx, request.NamespacedName, instance); err != nil {
-		if errors.IsNotFound(err) {
-			return ctrl.Result{}, nil
-		}
-		return ctrl.Result{}, err
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	logger := r.Log.WithValues("namespace", instance.GetNamespace(), "name", instance.GetName())
