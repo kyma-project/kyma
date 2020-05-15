@@ -48,7 +48,8 @@ func main() {
 	router.Handle("/ce", cehandler).Methods("POST")
 	router.HandleFunc("/", increaseCounter).Methods("POST")
 
-	router.HandleFunc("/ce/{uuid}", checkCE).Methods("GET")
+	router.HandleFunc("/ce/{source}/{type}/{version}", checkCEBySourceTypeVersion).Methods("GET")
+	router.HandleFunc("/ce/by-uuid/{uuid}", checkCEbyUUID).Methods("GET")
 	router.HandleFunc("/", checkCounter).Methods("GET")
 
 	router.HandleFunc("/", reset).Methods("DELETE")
@@ -73,15 +74,36 @@ func increaseCounter(_ http.ResponseWriter, _ *http.Request) {
 	log.Infof("Received Request: counter = %v", counter)
 }
 
-func checkCE(w http.ResponseWriter, r *http.Request) {
+func checkCEBySourceTypeVersion(w http.ResponseWriter, r *http.Request) {
+	mu.Lock()
+	defer mu.Unlock()
+	vars := mux.Vars(r)
+	eventsource := vars["source"]
+	eventtype := vars["type"]
+	eventversion := vars["version"]
+
+	events := make([]cloudevents.Event, 0)
+	for _, event := range receivedCEs {
+		if event.Source() == eventsource &&
+			event.Type() == eventtype &&
+			event.Extensions()["eventtypeversion"] == eventversion {
+			events = append(events, event)
+		}
+	}
+	if err := json.NewEncoder(w).Encode(events); err != nil {
+		log.Errorf("Error during checkCEbySourceTypeVersion: %v", err)
+	}
+	log.Infof("Checking for source: %v, type: %v, version: %v  :: found: %v", eventsource, eventtype, eventversion, events)
+}
+
+func checkCEbyUUID(w http.ResponseWriter, r *http.Request) {
 	mu.Lock()
 	defer mu.Unlock()
 	vars := mux.Vars(r)
 	uuid := vars["uuid"]
 	log.Infof("Checking for uuid: %v. found: %v", uuid, receivedCEs[uuid])
-	cloudevents.Client
 	if err := json.NewEncoder(w).Encode(receivedCEs[uuid]); err != nil {
-		log.Errorf("Error during checkCE: %v", err)
+		log.Errorf("Error during checkCEbyUUID: %v", err)
 	}
 }
 
