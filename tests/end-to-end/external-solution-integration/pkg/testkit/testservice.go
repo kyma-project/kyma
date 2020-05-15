@@ -199,6 +199,7 @@ func (ts *TestService) createDeployment() error {
 							Ports: []v1.ContainerPort{
 								{ContainerPort: testServicePort},
 							},
+							ImagePullPolicy: v1.PullAlways,
 						},
 					},
 				},
@@ -255,8 +256,11 @@ func (ts *TestService) createAPI() error {
 			Gateway: &gateway,
 			Rules: []apiRulev1alpha1.Rule{
 				{
-					Path:    "/.*",
-					Methods: []string{"GET"},
+					Path: "/.*",
+					Methods: []string{
+						"GET",
+						"DELETE",
+					},
 					AccessStrategies: []*rulev1alpha1.Authenticator{
 						{
 							Handler: &rulev1alpha1.Handler{

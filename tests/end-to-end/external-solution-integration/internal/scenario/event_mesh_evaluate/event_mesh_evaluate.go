@@ -49,6 +49,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 
 	return []step.Step{
 		testsuite.NewReuseApplication(state),
+		testsuite.NewResetCounterPod(testService),
 		testsuite.NewSendEventToMesh(s.testID, helpers.FunctionPayload, state),
 		testsuite.NewCheckCounterPod(testService, 1, retry_opts...),
 		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.FunctionPayload, state),
