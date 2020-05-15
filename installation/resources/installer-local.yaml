@@ -92,7 +92,7 @@ metadata:
     kyma-project.io/installation: ""
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: kyma-installer
   namespace: kyma-installer
@@ -104,11 +104,7 @@ spec:
   selector:
     matchLabels:
       name: kyma-installer
-  # Installer is designed to be run as a single instance only
-  # We enforce it by changing default rolling update to recreate startegy.
-  # With that k8s will first delete old pod and then provision new one during upgrade.
-  strategy:
-    type: Recreate
+  serviceName: kyma-installer
   template:
     metadata:
       labels:
@@ -196,7 +192,6 @@ spec:
             EOF
 
             timeout 60s bash -c 'until kubectl create -f /tmp/secret.yaml ; do sleep 2; done'
-
         volumeMounts:
           - mountPath: /etc/certs
             name: helm-certs
@@ -222,6 +217,7 @@ spec:
               path: tls.crt
             - key: global.helm.tls.key
               path: tls.key
+      terminationGracePeriodSeconds: 10
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
