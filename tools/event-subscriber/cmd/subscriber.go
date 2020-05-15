@@ -20,6 +20,10 @@ var (
 	mu          sync.Mutex
 )
 
+type counterResponse struct {
+	Counter int `json:"counter"`
+}
+
 func main() {
 	port := flag.Int("port", 9000, "tcp port on which to listen for http requests")
 	flag.Parse()
@@ -123,8 +127,10 @@ func checkCEbyUUID(w http.ResponseWriter, r *http.Request) {
 }
 
 func checkCounter(w http.ResponseWriter, r *http.Request) {
-	log.Infof("Checking counter = %v", counter)
-	if err := json.NewEncoder(w).Encode(counter); err != nil {
+	response := counterResponse{Counter: int(counter)}
+	log.Infof("Checking counter: %v", response)
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Errorf("Error during checkCounter: %v", err)
 	}
 }
