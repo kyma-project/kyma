@@ -13,6 +13,12 @@ rules:
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["serviceinstances"]
     verbs: ["get", "list", "watch"]
+  - apiGroups: ["*"]
+    resources: ["configmaps"]
+    verbs: ["get", "update"]
+  - apiGroups: ["*"]
+    resources: ["secrets"]
+    verbs: ["get", "update"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
