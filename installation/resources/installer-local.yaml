@@ -105,6 +105,7 @@ spec:
     matchLabels:
       name: kyma-installer
   serviceName: kyma-installer
+  podManagementPolicy: Parallel
   template:
     metadata:
       labels:

@@ -105,6 +105,7 @@ spec:
     matchLabels:
       name: kyma-installer
   serviceName: kyma-installer
+  podManagementPolicy: Parallel
   template:
     metadata:
       labels:
@@ -198,8 +199,7 @@ spec:
             readOnly: true
       containers:
       - name: kyma-installer-container
-        # image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
-        image: eu.gcr.io/kyma-project/kyma-installer:1.12.0
+        image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
         imagePullPolicy: IfNotPresent
         args:
           - -tillerTLSInsecureSkipVerify=true
