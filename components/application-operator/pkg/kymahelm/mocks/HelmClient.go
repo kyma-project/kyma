@@ -36,11 +36,11 @@ func (_m *HelmClient) DeleteRelease(releaseName string) (*release.UninstallRelea
 }
 
 // InstallReleaseFromChart provides a mock function with given fields: chartDir, ns, releaseName, overrides
-func (_m *HelmClient) InstallReleaseFromChart(chartDir string, ns string, releaseName string, overrides string) (*release.Release, error) {
+func (_m *HelmClient) InstallReleaseFromChart(chartDir string, ns string, releaseName string, overrides map[string]interface{}) (*release.Release, error) {
 	ret := _m.Called(chartDir, ns, releaseName, overrides)
 
 	var r0 *release.Release
-	if rf, ok := ret.Get(0).(func(string, string, string, string) *release.Release); ok {
+	if rf, ok := ret.Get(0).(func(string, string, string, map[string]interface{}) *release.Release); ok {
 		r0 = rf(chartDir, ns, releaseName, overrides)
 	} else {
 		if ret.Get(0) != nil {
@@ -49,7 +49,7 @@ func (_m *HelmClient) InstallReleaseFromChart(chartDir string, ns string, releas
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, string, string) error); ok {
+	if rf, ok := ret.Get(1).(func(string, string, string, map[string]interface{}) error); ok {
 		r1 = rf(chartDir, ns, releaseName, overrides)
 	} else {
 		r1 = ret.Error(1)
@@ -105,11 +105,11 @@ func (_m *HelmClient) ReleaseStatus(rlsName string) (*release.Release, error) {
 }
 
 // UpdateReleaseFromChart provides a mock function with given fields: chartDir, releaseName, overrides
-func (_m *HelmClient) UpdateReleaseFromChart(chartDir string, releaseName string, overrides string) (*release.Release, error) {
+func (_m *HelmClient) UpdateReleaseFromChart(chartDir string, releaseName string, overrides map[string]interface{}) (*release.Release, error) {
 	ret := _m.Called(chartDir, releaseName, overrides)
 
 	var r0 *release.Release
-	if rf, ok := ret.Get(0).(func(string, string, string) *release.Release); ok {
+	if rf, ok := ret.Get(0).(func(string, string, map[string]interface{}) *release.Release); ok {
 		r0 = rf(chartDir, releaseName, overrides)
 	} else {
 		if ret.Get(0) != nil {
@@ -118,7 +118,7 @@ func (_m *HelmClient) UpdateReleaseFromChart(chartDir string, releaseName string
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, string) error); ok {
+	if rf, ok := ret.Get(1).(func(string, string, map[string]interface{}) error); ok {
 		r1 = rf(chartDir, releaseName, overrides)
 	} else {
 		r1 = ret.Error(1)

@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"encoding/json"
 	"fmt"
 
 	v1beta12 "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -49,7 +50,7 @@ type gatewayManager struct {
 }
 
 func (g *gatewayManager) InstallGateway(namespace string) error {
-	overrides, err := kymahelm.ParseOverrides(g.overrides, overridesTemplate)
+	overrides, err := g.getOverrides()
 	if err != nil {
 		return errors.Errorf("Error parsing overrides: %s", err.Error())
 	}
@@ -168,7 +169,8 @@ func (g *gatewayManager) gatewayExists(name, namespace string) (bool, release.St
 }
 
 func (g *gatewayManager) upgradeGateway(gateway string) error {
-	overrides, err := kymahelm.ParseOverrides(g.overrides, overridesTemplate)
+	overrides, err := g.getOverrides()
+
 	if err != nil {
 		return errors.Errorf("Error parsing overrides: %s", err.Error())
 	}
@@ -179,6 +181,21 @@ func (g *gatewayManager) upgradeGateway(gateway string) error {
 	}
 
 	return nil
+}
+
+func (g *gatewayManager) getOverrides() (map[string]interface{}, error) {
+	overridesData := g.overrides
+
+	var overridesMap map[string]interface{}
+	bytes, err := json.Marshal(overridesData)
+
+	if err == nil {
+		if err = json.Unmarshal(bytes, &overridesMap); err == nil {
+			return overridesMap, nil
+		}
+	}
+
+	return map[string]interface{}{}, err
 }
 
 func appendNamespace(namespaces []string, namespace string) []string {

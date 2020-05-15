@@ -13,16 +13,10 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	//"k8s.io/helm/pkg/proto/hapi/release"
-	//rls "k8s.io/helm/pkg/proto/hapi/services"
 )
 
 const (
-	namespace         = "test"
-	expectedOverrides = `global:
-    applicationGatewayImage: 
-    applicationGatewayTestsImage: 
-    deployGatewayOncePerNamespace: false`
+	namespace = "test"
 )
 
 var (
@@ -37,6 +31,7 @@ var (
 	}
 
 	emptyListReleaseResponse []*release.Release
+	expectedOverrides        = map[string]interface{}{}
 )
 
 func TestGatewayManager_InstallGateway(t *testing.T) {

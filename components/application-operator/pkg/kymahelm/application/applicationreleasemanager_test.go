@@ -1,7 +1,6 @@
 package application
 
 import (
-	"fmt"
 	"testing"
 
 	hapi_release5 "helm.sh/helm/v3/pkg/release"
@@ -19,29 +18,23 @@ import (
 )
 
 const (
-	appName                 = "default-app"
-	namespace               = "integration"
-	group                   = "group"
-	tenant                  = "tenant"
-	expectedOverridesFormat = `global:
-    domainName: 
-    applicationGatewayImage: 
-    applicationGatewayTestsImage: 
-    eventServiceImage: 
-    eventServiceTestsImage: 
-    applicationConnectivityValidatorImage: 
-    tenant: %s
-    group: %s
-    deployGatewayOncePerNamespace: false
-    strictMode: `
+	appName   = "default-app"
+	namespace = "integration"
+	group     = "group"
+	tenant    = "tenant"
 )
 
 var (
 	notEmptyListReleaseResponse = []*hapi_release5.Release{
 		{Name: appName},
 	}
-
 	emptyListReleaseResponse []*hapi_release5.Release
+
+	emptyOverrides              = map[string]interface{}{}
+	overridesWithTenantAndGroup = map[string]interface{}{
+		"Tenant": tenant,
+		"Group":  group,
+	}
 )
 
 func TestReleaseManager_InstallNewAppChart(t *testing.T) {
@@ -60,10 +53,8 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 			},
 		}
 
-		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, "", "")
-
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)
+		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, emptyOverrides).Return(installationResponse, nil)
 
 		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
@@ -91,10 +82,8 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 			Spec:       v1alpha1.ApplicationSpec{Tenant: tenant, Group: group},
 		}
 
-		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, tenant, group)
-
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)
+		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, overridesWithTenantAndGroup).Return(installationResponse, nil)
 
 		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
@@ -111,7 +100,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 	t.Run("should return error when failed to install release", func(t *testing.T) {
 		// given
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, mock.AnythingOfType("string")).Return(nil, errors.New("Error"))
+		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, emptyOverrides).Return(nil, errors.New("Error"))
 
 		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
@@ -269,8 +258,8 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 		appClient.On("List", mock.AnythingOfType("ListOptions")).Return(applicationList, nil)
 
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", mock.AnythingOfType("string")).Return(updateResponse, nil)
-		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-2", mock.AnythingOfType("string")).Return(updateResponse, nil)
+		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", emptyOverrides).Return(updateResponse, nil)
+		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-2", emptyOverrides).Return(updateResponse, nil)
 
 		releaseManager := NewApplicationReleaseManager(helmClient, appClient, OverridesData{}, namespace)
 
@@ -319,7 +308,7 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 		appClient.On("Update", updatedApplication).Return(&applicationList.Items[0], nil)
 
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", mock.AnythingOfType("string")).Return(updateResponse, errors.New("Error"))
+		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", emptyOverrides).Return(updateResponse, errors.New("Error"))
 
 		releaseManager := NewApplicationReleaseManager(helmClient, appClient, OverridesData{}, namespace)
 

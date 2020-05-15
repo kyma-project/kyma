@@ -1,14 +1,7 @@
 package gateway
 
-const (
-	overridesTemplate = `global:
-    applicationGatewayImage: {{ .ApplicationGatewayImage }}
-    applicationGatewayTestsImage: {{ .ApplicationGatewayTestsImage }}
-    deployGatewayOncePerNamespace: {{ .GatewayOncePerNamespace }}`
-)
-
 type OverridesData struct {
-	ApplicationGatewayImage      string
-	ApplicationGatewayTestsImage string
-	GatewayOncePerNamespace      bool
+	ApplicationGatewayImage      string `json:"ApplicationGatewayImage,omitempty"`
+	ApplicationGatewayTestsImage string `json:"ApplicationGatewayTestsImage,omitempty"`
+	GatewayOncePerNamespace      bool   `json:"GatewayOncePerNamespace,omitempty"`
 }

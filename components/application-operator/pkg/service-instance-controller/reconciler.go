@@ -5,8 +5,6 @@ import (
 
 	"helm.sh/helm/v3/pkg/release"
 
-	//"k8s.io/helm/pkg/proto/hapi/release"
-
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/gateway"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/utils"

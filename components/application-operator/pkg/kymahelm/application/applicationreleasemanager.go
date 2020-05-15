@@ -1,6 +1,8 @@
 package application
 
 import (
+	"encoding/json"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	"github.com/pkg/errors"
@@ -100,7 +102,7 @@ func (r *releaseManager) upgradeChart(application *v1alpha1.Application) (hapi_4
 	return upgradeResponse.Info.Status, upgradeResponse.Info.Description, nil
 }
 
-func (r *releaseManager) prepareOverrides(application *v1alpha1.Application) (string, error) {
+func (r *releaseManager) prepareOverrides(application *v1alpha1.Application) (map[string]interface{}, error) {
 	overridesData := r.overridesDefaults
 
 	if application.Spec.HasTenant() == true || application.Spec.HasGroup() == true {
@@ -108,7 +110,16 @@ func (r *releaseManager) prepareOverrides(application *v1alpha1.Application) (st
 		overridesData.Group = application.Spec.Group
 	}
 
-	return kymahelm.ParseOverrides(overridesData, overridesTemplate)
+	var overridesMap map[string]interface{}
+	bytes, err := json.Marshal(overridesData)
+
+	if err == nil {
+		if err = json.Unmarshal(bytes, &overridesMap); err == nil {
+			return overridesMap, nil
+		}
+	}
+
+	return map[string]interface{}{}, err
 }
 
 func (r *releaseManager) DeleteReleaseIfExists(name string) error {

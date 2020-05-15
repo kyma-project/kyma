@@ -1,37 +1,39 @@
 package kymahelm
 
 import (
-	"os"
 	"time"
 
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
-	"helm.sh/helm/v3/pkg/cli/values"
-	"helm.sh/helm/v3/pkg/getter"
 	"helm.sh/helm/v3/pkg/release"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/client-go/rest"
 	"k8s.io/klog"
 )
 
 //go:generate mockery -name HelmClient
 type HelmClient interface {
 	ListReleases(namespace string) ([]*release.Release, error)
-	InstallReleaseFromChart(chartDir, ns, releaseName, overrides string) (*release.Release, error)
-	UpdateReleaseFromChart(chartDir, releaseName, overrides string) (*release.Release, error)
+	InstallReleaseFromChart(chartDir, ns, releaseName string, overrides map[string]interface{}) (*release.Release, error)
+	UpdateReleaseFromChart(chartDir, releaseName string, overrides map[string]interface{}) (*release.Release, error)
 	DeleteRelease(releaseName string) (*release.UninstallReleaseResponse, error)
 	ReleaseStatus(rlsName string) (*release.Release, error)
 }
 
 type helmClient struct {
-	namespace           string
+	namespace           string // "Namespace in which the Application chart will be installed" default ""kyma-integration"
 	installationTimeout int64
 	settings            *cli.EnvSettings
+	config              *rest.Config
+	helmdriver          string
 }
 
-func NewClient(namespace string, host, tlsKeyFile, tlsCertFile string, skipVerify bool, installationTimeout int64) (HelmClient, error) {
+func NewClient(namespace string, config *rest.Config, driver string, installationTimeout int64) (HelmClient, error) {
 
 	return &helmClient{
-		//helm:                helm.NewClient(helm.Host(host), helm.WithTLS(tlsCfg)),
+		config:              config,
+		helmdriver:          driver,
 		settings:            cli.New(),
 		namespace:           namespace,
 		installationTimeout: installationTimeout,
@@ -45,7 +47,7 @@ func (hc *helmClient) ListReleases(namespace string) ([]*release.Release, error)
 		return nil, err
 	}
 
-	client := action.NewList(&actionConfig)
+	client := action.NewList(actionConfig)
 	client.Deployed = true
 	client.Uninstalled = true
 	client.Superseded = true
@@ -62,13 +64,13 @@ func (hc *helmClient) ListReleases(namespace string) ([]*release.Release, error)
 	return results, nil
 }
 
-func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName, overrides string) (*release.Release, error) {
+func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName string, overrides map[string]interface{}) (*release.Release, error) {
 
 	actionConfig, err := hc.actionConfigInit()
 	if err != nil {
 		return nil, err
 	}
-	client := action.NewInstall(&actionConfig)
+	client := action.NewInstall(actionConfig)
 
 	client.ReleaseName = releaseName
 	client.Timeout = time.Duration(hc.installationTimeout)
@@ -90,8 +92,7 @@ func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName, overrid
 	//	}
 	//}
 
-	valueOpts := hc.getOptions(overrides)
-	response, err := client.Run(chartRequested, valueOpts)
+	response, err := client.Run(chartRequested, overrides)
 
 	return response, nil
 
@@ -105,14 +106,13 @@ func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName, overrid
 	//)
 }
 
-// not ready
-func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName, overrides string) (*release.Release, error) {
+func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName string, overrides map[string]interface{}) (*release.Release, error) {
 
 	actionConfig, err := hc.actionConfigInit()
 	if err != nil {
 		return nil, err
 	}
-	client := action.NewUpgrade(&actionConfig)
+	client := action.NewUpgrade(actionConfig)
 
 	client.Timeout = time.Duration(hc.installationTimeout)
 	client.Namespace = hc.namespace
@@ -133,8 +133,7 @@ func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName, overrides st
 	//	}
 	//}
 
-	valueOpts := hc.getOptions(overrides)
-	response, err := client.Run(releaseName, chartRequested, valueOpts)
+	response, err := client.Run(releaseName, chartRequested, overrides)
 
 	return response, nil
 
@@ -157,7 +156,7 @@ func (hc *helmClient) DeleteRelease(releaseName string) (*release.UninstallRelea
 	if err != nil {
 		return nil, err
 	}
-	client := action.NewUninstall(&actionConfig)
+	client := action.NewUninstall(actionConfig)
 	response, err := client.Run(releaseName)
 	if err != nil {
 		return nil, err
@@ -166,16 +165,15 @@ func (hc *helmClient) DeleteRelease(releaseName string) (*release.UninstallRelea
 	return response, nil
 }
 
-func (hc *helmClient) ReleaseStatus(rlsName string) (*release.Release, error) {
-	// return hc.helm.ReleaseStatus(rlsName)
+func (hc *helmClient) ReleaseStatus(releaseName string) (*release.Release, error) {
 
 	actionConfig, err := hc.actionConfigInit()
 	if err != nil {
 		return nil, err
 	}
 
-	client := action.NewStatus(&actionConfig)
-	release, err := client.Run(rlsName)
+	client := action.NewStatus(actionConfig)
+	release, err := client.Run(releaseName)
 	if err != nil {
 		return nil, err
 	}
@@ -183,29 +181,35 @@ func (hc *helmClient) ReleaseStatus(rlsName string) (*release.Release, error) {
 	return release, nil
 }
 
-func (hc *helmClient) actionConfigInit() (action.Configuration, error) {
+func (hc *helmClient) actionConfigInit() (*action.Configuration, error) {
+
+	//type MyRESTClientGetter interface {
+	//	ToRESTConfig() (*rest.Config, error)
+	//	ToDiscoveryClient() (discovery.CachedDiscoveryInterface, error)
+	//	ToRESTMapper() (meta.RESTMapper, error)
+	//}
+	//kubeConfig.ToRawKubeConfigLoader()
+	//kubeConfig.ToRESTMapper()
+	//hc.settings.RESTClientGetter()
+
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, err
+	}
+	// Create the ConfigFlags struct instance with initialized values from ServiceAccount
+	// how to use existing rest.Config from manager ?????
+	//var kubeConfig *genericclioptions.ConfigFlags
+	kubeConfig := genericclioptions.NewConfigFlags(false)
+	kubeConfig.APIServer = &config.Host
+	kubeConfig.BearerToken = &config.BearerToken
+	kubeConfig.CAFile = &config.CAFile
+	kubeConfig.Namespace = &hc.namespace
 
 	actionConfig := new(action.Configuration)
-	err := actionConfig.Init(hc.settings.RESTClientGetter(), hc.namespace, os.Getenv("HELM_DRIVER"), klog.Infof)
+	err = actionConfig.Init(kubeConfig, hc.namespace, hc.helmdriver, klog.Infof)
 	if err != nil {
-		return *actionConfig, err
+		return actionConfig, err
 	}
 
-	return *actionConfig, nil
-}
-
-func (hc *helmClient) getOptions(s string) map[string]interface{} {
-
-	valueOpts := &values.Options{}
-	// this will probably fail must find a way to pass overrides
-	//
-	// 	// values  vals map[string]interface{}
-	//	//emptyValues := map[string]interface{}{}
-	p := getter.All(hc.settings)
-	vals, err := valueOpts.MergeValues(p)
-	if err != nil {
-		return vals
-	}
-
-	return map[string]interface{}{}
+	return actionConfig, nil
 }
