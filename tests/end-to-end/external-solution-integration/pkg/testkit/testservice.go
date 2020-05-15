@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -27,11 +28,11 @@ import (
 const (
 	testServiceNamePrefix   = "ctr-svc"
 	testServicePort         = 8090
-	testServiceImage        = "maladie/counterservice:latest"
+	testServiceImage        = "eu.gcr.io/kyma-project/event-subscriber-tools:PR-8483"
 	labelKey                = "component"
 	healthEndpointFormat    = "https://%s.%s/health"
 	endpointFormat          = "https://%s.%s"
-	inClusterEndpointFormat = "http://%s.%s.svc.cluster.local:8090"
+	inClusterEndpointFormat = "http://%s.%s.svc.cluster.local:%v"
 	gateway                 = "kyma-gateway.kyma-system.svc.cluster.local"
 )
 
@@ -72,7 +73,7 @@ func (ts *TestService) CreateTestService() error {
 func (ts *TestService) checkValue() (int, error) {
 
 	url := ts.GetTestServiceURL()
-	resp, err := ts.HttpClient.Get(url + "/counter")
+	resp, err := ts.HttpClient.Get(url)
 
 	if err != nil {
 		return 0, err
@@ -117,6 +118,20 @@ func (ts *TestService) IsReady() error {
 
 	return nil
 }
+
+func (ts *TestService) Reset() error {
+	url := ts.GetTestServiceURL()
+	req, err := http.NewRequest("DELETE", url, nil)
+	resp, err := ts.HttpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("expected 200, got %s", resp.StatusCode)
+	}
+	return nil
+}
+
 func (ts *TestService) WaitForCounterPodToUpdateValue(val int) error {
 	count, err := ts.checkValue()
 	if err != nil {
@@ -142,7 +157,7 @@ func (ts *TestService) GetTestServiceURL() string {
 }
 
 func (ts *TestService) GetInClusterTestServiceURL() string {
-	return fmt.Sprintf(inClusterEndpointFormat, ts.testServiceName, ts.namespace)
+	return fmt.Sprintf(inClusterEndpointFormat, ts.testServiceName, ts.namespace, testServicePort)
 }
 
 func (ts *TestService) getHealthEndpointURL() string {
@@ -174,8 +189,13 @@ func (ts *TestService) createDeployment() error {
 				Spec: v1.PodSpec{
 					Containers: []v1.Container{
 						{
-							Name:  ts.testServiceName,
-							Image: testServiceImage,
+							Name:    ts.testServiceName,
+							Image:   testServiceImage,
+							Command: []string{"/event-subscriber"},
+							Args: []string{
+								"--port",
+								strconv.Itoa(testServicePort),
+							},
 							Ports: []v1.ContainerPort{
 								{ContainerPort: testServicePort},
 							},

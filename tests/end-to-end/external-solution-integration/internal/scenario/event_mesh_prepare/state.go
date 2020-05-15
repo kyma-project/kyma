@@ -17,8 +17,7 @@ import (
 
 type e2EEventMeshState struct {
 	scenario.E2EState
-	ServiceClassID string
-	dataStore      *testkit.DataStore
+	dataStore *testkit.DataStore
 }
 
 type PEMCertificate struct {
@@ -59,11 +58,6 @@ func PEMToCertificate(pemCert PEMCertificate) (tls.Certificate, error) {
 	return cert, nil
 }
 
-// // SetServiceClassID allows to set ServiceClassID so it can be shared between steps
-// func (s *e2EEventMeshState) SetServiceClassID(serviceID string) {
-// 	s.ServiceClassID = serviceID
-// }
-
 func (s *e2EEventMeshState) SetDataStore(dataStore *testkit.DataStore) {
 	s.dataStore = dataStore
 }
@@ -71,11 +65,6 @@ func (s *e2EEventMeshState) SetDataStore(dataStore *testkit.DataStore) {
 func (s *e2EEventMeshState) GetDataStore() *testkit.DataStore {
 	return s.dataStore
 }
-
-// // GetServiceClassID allows to get ServiceClassID so it can be shared between steps
-// func (s *e2EEventMeshState) GetServiceClassID() string {
-// 	return s.ServiceClassID
-// }
 
 // SetGatewayClientCerts allows to set application gateway client certificates so they can be used by later steps
 func (s *e2EEventMeshState) SetGatewayClientCerts(certs []tls.Certificate) {

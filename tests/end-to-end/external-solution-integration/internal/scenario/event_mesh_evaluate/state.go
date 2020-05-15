@@ -16,21 +16,9 @@ import (
 
 type e2EEventMeshState struct {
 	scenario.E2EState
-	ServiceClassID string
 	registryClient *testkit.RegistryClient
 	dataStore      *testkit.DataStore
 }
-
-// // SetServiceClassID allows to set ServiceClassID so it can be shared between steps
-// func (s *e2EEventMeshState) SetServiceClassID(serviceID string) {
-// 	s.ServiceClassID = serviceID
-//
-// }
-
-// // GetServiceClassID allows to get ServiceClassID so it can be shared between steps
-// func (s *e2EEventMeshState) GetServiceClassID() string {
-// 	return s.ServiceClassID
-// }
 
 func (s *e2EEventMeshState) SetDataStore(dataStore *testkit.DataStore) {
 	s.dataStore = dataStore
