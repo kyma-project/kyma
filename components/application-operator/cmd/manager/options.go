@@ -46,7 +46,7 @@ func parseArgs() *options {
 	gatewayOncePerNamespace := flag.Bool("gatewayOncePerNamespace", false, "Specifies if Gateway should be deployed once per Namespace based on ServiceInstance or for every Application")
 	strictMode := flag.String("strictMode", "disabled", "Toggles Istio authorization policy for Validator and HTTP source adapter")
 	healthPort := flag.String("healthPort", "8090", "Port for healthcheck server")
-	helmDriver := flag.String("helmDriver", "disabled", "Toggles Helm 3 configuration storage between configMap and secret")
+	helmDriver := flag.String("helmDriver", "configmap", "Toggles Helm 3 configuration storage between configMap and secret")
 
 	flag.Parse()
 
