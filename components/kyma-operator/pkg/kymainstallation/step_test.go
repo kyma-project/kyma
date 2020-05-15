@@ -22,6 +22,58 @@ const (
 
 func TestInstallStep(t *testing.T) {
 	Convey("Run method of the", t, func() {
+		Convey("upgrade step should", func() {
+			Convey("upgrade release without errors", func() {
+				//given
+				mockHelmClient := &mockHelmClient{}
+
+				testUpgradeStep := getUpgradeStep(mockHelmClient)
+
+				//when
+				err := testUpgradeStep.Run()
+
+				//then
+				So(err, ShouldBeNil)
+			})
+			Convey("rollback failed upgrade", func() {
+				//given
+				upgradeError := fmt.Sprintf("Helm upgrade error: %s", "failed to upgrade release")
+				expectedError := fmt.Sprintf("%s\nHelm rollback of %s was successfull", upgradeError, testReleaseName)
+
+				mockHelmClient := &mockHelmClient{
+					failUpgradingRelease: true,
+				}
+
+				testUpgradeStep := getUpgradeStep(mockHelmClient)
+
+				//when
+				err := testUpgradeStep.Run()
+
+				//then
+				So(err.Error(), ShouldEqual, expectedError)
+				So(mockHelmClient.rollbackReleaseCalled, ShouldBeTrue)
+			})
+			Convey("return an error when release rollback fails", func() {
+				//given
+				upgradeError := fmt.Sprintf("Helm upgrade error: %s", "failed to upgrade release")
+				rollbackError := fmt.Sprintf("Helm rollback of %s failed with an error: %s", testReleaseName, "failed to rollback release")
+				expectedError := fmt.Sprintf("%s \n %s \n", upgradeError, rollbackError)
+
+				mockHelmClient := &mockHelmClient{
+					failUpgradingRelease: true,
+					failRollback:   true,
+				}
+
+				testUpgradeStep := getUpgradeStep(mockHelmClient)
+
+				//when
+				err := testUpgradeStep.Run()
+
+				//then
+				So(err.Error(), ShouldEqual, expectedError)
+			})
+
+		})
 		Convey("install step should", func() {
 			Convey("install release without errors", func() {
 				//given
@@ -118,14 +170,16 @@ func TestInstallStep(t *testing.T) {
 }
 
 // Helm Client Mock
-
 type mockHelmClient struct {
 	kymahelm.ClientInterface
 	failInstallingRelease  bool
+	failUpgradingRelease bool
 	failDeletingRelease    bool
+	failRollback    bool
 	failIsReleaseDeletable bool
 	isReleaseDeletable     bool
 	deleteReleaseCalled    bool
+	rollbackReleaseCalled    bool
 }
 
 func (hc *mockHelmClient) IsReleaseDeletable(rname string) (bool, error) {
@@ -152,6 +206,15 @@ func (hc *mockHelmClient) DeleteRelease(releaseName string) (*rls.UninstallRelea
 	return &rls.UninstallReleaseResponse{}, nil
 }
 
+func (hc *mockHelmClient) RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error){
+	hc.rollbackReleaseCalled = true
+	if hc.failRollback {
+		err := errors.New("failed to rollback release")
+		return nil, err
+	}
+	return &rls.RollbackReleaseResponse{}, nil
+}
+
 func (hc *mockHelmClient) ListReleases() (*rls.ListReleasesResponse, error) {
 	return nil, nil
 }
@@ -169,7 +232,24 @@ func (hc *mockHelmClient) InstallReleaseWithoutWait(chartdir, ns, releasename, o
 }
 
 func (hc *mockHelmClient) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error) {
-	return nil, nil
+	if hc.failUpgradingRelease == true {
+		err := errors.New("failed to upgrade release")
+		return nil, err
+	}
+
+	return &rls.UpdateReleaseResponse{
+		Release: &release.Release{
+			Name: "testRelease",
+			Namespace: "testNamespace",
+			Version: 14,
+			Info: &release.Info{
+				Status: &release.Status{
+					Code: release.Status_DEPLOYED,
+				},
+				Description: "",
+			},
+		},
+	}, nil
 }
 
 func (hc *mockHelmClient) PrintRelease(release *release.Release) {}
@@ -194,7 +274,7 @@ func (mod *mockOverrideData) ForRelease(releaseName string) (string, error) {
 	return "", nil
 }
 
-//instancja install stepa
+//returns install step
 func getInstallStep(hc *mockHelmClient) *installStep {
 	return &installStep{
 		step: step{
@@ -205,5 +285,22 @@ func getInstallStep(hc *mockHelmClient) *installStep {
 		},
 		sourceGetter: &mockSourceGetter{},
 		overrideData: &mockOverrideData{},
+	}
+}
+
+//returns upgrade step
+func getUpgradeStep(hc *mockHelmClient) *upgradeStep {
+	return &upgradeStep{
+		installStep: installStep{
+			step: step{
+				helmClient: hc,
+				component: v1alpha1.KymaComponent{
+					ReleaseName: testReleaseName,
+				},
+			},
+			sourceGetter: &mockSourceGetter{},
+			overrideData: &mockOverrideData{},
+		},
+		deployedRevision: 13,
 	}
 }

@@ -107,6 +107,7 @@ func (hc *Client) IsReleaseDeletable(rname string) (bool, error) {
 }
 
 func (hc *Client) ReleaseDeployedRevision(rname string) (int32, error) {
+	//TODO make it configurable
 	maxHistory := 10
 	var deployedRevision int32 = 0
 
@@ -187,12 +188,14 @@ func (hc *Client) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.
 	)
 }
 
+//RollbackRelease performs rollback to given revision
 func (hc *Client) RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error) {
 	return hc.helm.RollbackRelease(
 		releaseName,
 		helm.RollbackWait(true),
 		helm.RollbackVersion(revision),
 		helm.RollbackCleanupOnFail(true),
+		helm.RollbackRecreate(true),
 		helm.RollbackTimeout(3600))
 }
 
