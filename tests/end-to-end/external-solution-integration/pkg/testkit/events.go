@@ -12,12 +12,12 @@ import (
 
 	"github.com/kyma-project/kyma/common/resilient"
 
-	http2 "github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/http"
+	cehttp "github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/http"
 )
 
 type EventSender struct {
 	httpClient resilient.HttpClient
-	ceClient   http2.ResilientCloudEventClient
+	ceClient   cehttp.ResilientCloudEventClient
 	domain     string
 }
 
@@ -42,7 +42,7 @@ func NewEventSender(httpClient *http.Client, domain, application string) *EventS
 	return &EventSender{
 		httpClient: resilient.WrapHttpClient(httpClient),
 		domain:     domain,
-		ceClient:   http2.NewWrappedCloudEventClient(ceClient),
+		ceClient:   cehttp.NewWrappedCloudEventClient(ceClient),
 	}
 }
 
