@@ -16,13 +16,15 @@ import (
 
 var (
 	counter     uint32
-	receivedCEs map[string]bool
+	receivedCEs map[string]cloudevents.Event
 	mu          sync.Mutex
 )
 
 func main() {
 	port := flag.Int("port", 9000, "tcp port on which to listen for http requests")
 	flag.Parse()
+
+	receivedCEs = make(map[string]cloudevents.Event)
 
 	ctx := context.Background()
 	p, err := cloudevents.NewHTTP()
@@ -62,7 +64,7 @@ func receiveCE(_ context.Context, event cloudevents.Event) {
 	defer mu.Unlock()
 	id := event.Context.GetID()
 	log.Infof("Received CE: %v", id)
-	receivedCEs[id] = true
+	receivedCEs[id] = event
 
 }
 
@@ -77,6 +79,7 @@ func checkCE(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	uuid := vars["uuid"]
 	log.Infof("Checking for uuid: %v. found: %v", uuid, receivedCEs[uuid])
+	cloudevents.Client
 	if err := json.NewEncoder(w).Encode(receivedCEs[uuid]); err != nil {
 		log.Errorf("Error during checkCE: %v", err)
 	}
@@ -93,6 +96,6 @@ func reset(w http.ResponseWriter, r *http.Request) {
 	mu.Lock()
 	defer mu.Unlock()
 	log.Info("Reset")
-	receivedCEs = make(map[string]bool)
+	receivedCEs = make(map[string]cloudevents.Event)
 	atomic.StoreUint32(&counter, 0)
 }
