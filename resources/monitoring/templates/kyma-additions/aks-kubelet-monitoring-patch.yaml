@@ -14,7 +14,7 @@ data:
 
     if [[ "$(kubectl get nodes -l kubernetes.azure.com/role=agent)" ]]; then
       echo "AKS Cluster found, applying patch..."
-      kubectl delete servicemonitors.monitoring.coreos.com monitoring-kubelet -n kyma-system
+      kubectl delete servicemonitors.monitoring.coreos.com monitoring-kubelet -n kyma-system --ignore-not-found
       kubectl apply -f /scripts/patch.yaml
     else
         echo "No AKS Cluster found, skipping..."
@@ -131,6 +131,13 @@ spec:
             - name: aks-kubelet-monitoring-kyma-patch
               mountPath: /scripts
           terminationMessagePolicy: "FallbackToLogsOnError"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
       volumes:
         - name: aks-kubelet-monitoring-kyma-patch
           configMap:
