@@ -50,6 +50,7 @@ func main() {
 
 	router.HandleFunc("/ce/{source}/{type}/{version}", checkCEBySourceTypeVersion).Methods("GET")
 	router.HandleFunc("/ce/by-uuid/{uuid}", checkCEbyUUID).Methods("GET")
+	router.HandleFunc("/ce", getAllCE).Methods("GET")
 	router.HandleFunc("/", checkCounter).Methods("GET")
 
 	router.HandleFunc("/", reset).Methods("DELETE")
@@ -94,6 +95,20 @@ func checkCEBySourceTypeVersion(w http.ResponseWriter, r *http.Request) {
 		log.Errorf("Error during checkCEbySourceTypeVersion: %v", err)
 	}
 	log.Infof("Checking for source: %v, type: %v, version: %v  :: found: %v", eventsource, eventtype, eventversion, events)
+}
+
+func getAllCE(w http.ResponseWriter, r *http.Request) {
+	mu.Lock()
+	defer mu.Unlock()
+	events := make([]cloudevents.Event, 0)
+	for _, event := range receivedCEs {
+		events = append(events, event)
+	}
+	log.Infof("Getting all CE: %v", events)
+
+	if err := json.NewEncoder(w).Encode(events); err != nil {
+		log.Errorf("Error during getAllCE: %v", err)
+	}
 }
 
 func checkCEbyUUID(w http.ResponseWriter, r *http.Request) {
