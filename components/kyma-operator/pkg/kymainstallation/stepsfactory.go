@@ -1,9 +1,9 @@
 package kymainstallation
 
 import (
+	"log"
 
 	errors "github.com/pkg/errors"
-	"log"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"

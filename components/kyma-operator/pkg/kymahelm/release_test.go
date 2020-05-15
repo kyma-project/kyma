@@ -1,10 +1,11 @@
 package kymahelm_test
 
 import (
+	"testing"
+
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/stretchr/testify/assert"
 	helm "k8s.io/helm/pkg/proto/hapi/release"
-	"testing"
 )
 
 func TestIsUpgradeStep(t *testing.T) {
