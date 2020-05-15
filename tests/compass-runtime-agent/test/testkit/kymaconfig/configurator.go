@@ -33,9 +33,9 @@ const (
 
 	defaultCheckInterval         = 3 * time.Second
 	serviceInstanceCheckInterval = 2 * time.Second
-	serviceInstanceWait          = 2 * time.Minute
+	serviceInstanceWait          = 3 * time.Minute
 
-	serviceInstanceDeletionWaitTime = 30 * time.Second
+	serviceInstanceDeletionWaitTime = time.Minute
 )
 
 // KymaConfigurator configures Compass Applications to be usable from Kyma
