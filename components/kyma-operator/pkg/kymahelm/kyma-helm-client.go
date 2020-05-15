@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/sirupsen/logrus"
 
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/release"
 	rls "k8s.io/helm/pkg/proto/hapi/services"
+	"k8s.io/helm/pkg/storage/errors"
 	"k8s.io/helm/pkg/tlsutil"
 )
 
@@ -18,6 +21,8 @@ import (
 type ClientInterface interface {
 	ListReleases() (*rls.ListReleasesResponse, error)
 	ReleaseStatus(rname string) (string, error)
+	IsReleaseDeletable(rname string) (bool, error)
+	ReleaseDeployedRevision(rname string) (int32, error)
 	InstallReleaseFromChart(chartdir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error)
 	InstallRelease(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error)
 	InstallReleaseWithoutWait(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error)
@@ -69,6 +74,53 @@ func (hc *Client) ReleaseStatus(rname string) (string, error) {
 	}
 	statusStr := fmt.Sprintf("%+v\n", status)
 	return strings.Replace(statusStr, `\n`, "\n", -1), nil
+}
+
+//IsReleaseDeletable returns true for release that can be deleted
+func (hc *Client) IsReleaseDeletable(rname string) (bool, error) {
+	isDeletable := false
+	maxAttempts := 3
+	fixedDelay := 3
+
+	err := retry.Do(
+		func() error {
+			statusRes, err := hc.helm.ReleaseStatus(rname)
+			if err != nil {
+				if strings.Contains(err.Error(), errors.ErrReleaseNotFound(rname).Error()) {
+					isDeletable = false
+					return nil
+				}
+				return err
+			}
+			isDeletable = statusRes.Info.Status.Code != release.Status_DEPLOYED
+			return nil
+		},
+		retry.Attempts(uint(maxAttempts)),
+		retry.DelayType(func(attempt uint, config *retry.Config) time.Duration {
+			log.Printf("Retry number %d on getting release status.\n", attempt+1)
+			return time.Duration(fixedDelay) * time.Second
+		}),
+	)
+
+	return isDeletable, err
+}
+
+func (hc *Client) ReleaseDeployedRevision(rname string) (int32, error) {
+	maxHistory := 10
+	var deployedRevision int32 = 0
+
+	releaseHistoryRes, err := hc.helm.ReleaseHistory(rname, helm.WithMaxHistory(int32(maxHistory)))
+	if err != nil {
+		return deployedRevision, err
+	}
+
+	for _, rel := range releaseHistoryRes.Releases {
+		if rel.Info.Status.Code == release.Status_DEPLOYED {
+			deployedRevision = rel.Version
+		}
+	}
+
+	return deployedRevision, nil
 }
 
 // InstallReleaseFromChart .

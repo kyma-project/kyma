@@ -3,9 +3,7 @@ package serverless
 import (
 	"context"
 	"crypto/sha256"
-	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
@@ -20,8 +18,6 @@ import (
 )
 
 const (
-	serviceBindingUsagesAnnotation = "servicebindingusages.servicecatalog.kyma-project.io/tracing-information"
-
 	configMapFunction = "handler.js"
 	configMapHandler  = "handler.main"
 	configMapDeps     = "package.json"
@@ -41,11 +37,12 @@ var (
 
 func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Function, configMaps []corev1.ConfigMap, service *servingv1.Service) bool {
 	image := r.buildExternalImageAddress(instance)
-	if service != nil && service.Spec.Template.Spec.Containers[0].Image == image {
+	configurationStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)
+
+	if service != nil && service.Spec.Template.Spec.Containers[0].Image == image && configurationStatus != corev1.ConditionUnknown {
 		return false
 	}
 
-	configurationStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)
 	return len(configMaps) != 1 ||
 		instance.Spec.Source != configMaps[0].Data[configMapFunction] ||
 		r.sanitizeDependencies(instance.Spec.Deps) != configMaps[0].Data[configMapDeps] ||
@@ -55,12 +52,13 @@ func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Fu
 
 func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, jobs []batchv1.Job, service *servingv1.Service) bool {
 	image := r.buildExternalImageAddress(instance)
-	if service != nil && service.Spec.Template.Spec.Containers[0].Image == image {
+	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
+
+	if service != nil && service.Spec.Template.Spec.Containers[0].Image == image && buildStatus != corev1.ConditionUnknown {
 		return false
 	}
 
 	expectedJob := r.buildJob(instance, "")
-	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
 	return len(jobs) != 1 ||
 		len(jobs[0].Spec.Template.Spec.Containers) != 1 ||
@@ -147,8 +145,19 @@ func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, i
 }
 
 func (r *FunctionReconciler) equalJobs(existing batchv1.Job, expected batchv1.Job) bool {
-	// Compare image argument
-	return existing.Spec.Template.Spec.Containers[0].Args[0] == expected.Spec.Template.Spec.Containers[0].Args[0]
+	existingArgs := existing.Spec.Template.Spec.Containers[0].Args
+	expectedArgs := expected.Spec.Template.Spec.Containers[0].Args
+
+	if len(existingArgs) != len(expectedArgs) {
+		return false
+	}
+
+	for key, value := range existingArgs {
+		if value != expectedArgs[key] {
+			return false
+		}
+	}
+	return true
 }
 
 func (r *FunctionReconciler) createJob(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, job batchv1.Job) (ctrl.Result, error) {
@@ -219,7 +228,7 @@ func (r *FunctionReconciler) updateBuildStatus(ctx context.Context, log logr.Log
 }
 
 func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, service *servingv1.Service) (ctrl.Result, error) {
-	newService := r.buildService(log, instance, service)
+	newService := r.buildService(instance)
 
 	switch {
 	case service == nil:
@@ -312,18 +321,23 @@ func (r *FunctionReconciler) isServiceInProgress(service *servingv1.Service) boo
 	return true
 }
 
+func equalResources(existing, expected corev1.ResourceRequirements) bool {
+	return existing.Requests.Memory().Equal(*expected.Requests.Memory()) &&
+		existing.Requests.Cpu().Equal(*expected.Requests.Cpu()) &&
+		existing.Limits.Memory().Equal(*expected.Limits.Memory()) &&
+		existing.Limits.Cpu().Equal(*expected.Limits.Cpu())
+}
+
 func (r *FunctionReconciler) equalServices(existing *servingv1.Service, expected servingv1.Service) bool {
 	return existing != nil &&
+		len(existing.Spec.Template.Spec.Containers) > 0 &&
 		len(existing.Spec.Template.Spec.Containers) == len(expected.Spec.Template.Spec.Containers) &&
 		existing.Spec.Template.Spec.Containers[0].Image == expected.Spec.Template.Spec.Containers[0].Image &&
 		r.envsEqual(existing.Spec.Template.Spec.Containers[0].Env, expected.Spec.Template.Spec.Containers[0].Env) &&
 		r.mapsEqual(existing.GetLabels(), expected.GetLabels()) &&
 		r.mapsEqual(existing.Spec.Template.GetLabels(), expected.Spec.Template.GetLabels()) &&
 		r.mapsEqual(existing.Spec.Template.GetAnnotations(), expected.Spec.Template.GetAnnotations()) &&
-		existing.Spec.Template.Spec.Containers[0].Resources.Limits[corev1.ResourceCPU] == expected.Spec.Template.Spec.Containers[0].Resources.Limits[corev1.ResourceCPU] &&
-		existing.Spec.Template.Spec.Containers[0].Resources.Limits[corev1.ResourceMemory] == expected.Spec.Template.Spec.Containers[0].Resources.Limits[corev1.ResourceMemory] &&
-		existing.Spec.Template.Spec.Containers[0].Resources.Requests[corev1.ResourceCPU] == expected.Spec.Template.Spec.Containers[0].Resources.Requests[corev1.ResourceCPU] &&
-		existing.Spec.Template.Spec.Containers[0].Resources.Requests[corev1.ResourceMemory] == expected.Spec.Template.Spec.Containers[0].Resources.Requests[corev1.ResourceMemory]
+		equalResources(existing.Spec.Template.Spec.Containers[0].Resources, expected.Spec.Template.Spec.Containers[0].Resources)
 }
 
 func (r *FunctionReconciler) mapsEqual(existing, expected map[string]string) bool {
@@ -332,7 +346,7 @@ func (r *FunctionReconciler) mapsEqual(existing, expected map[string]string) boo
 	}
 
 	for key, value := range existing {
-		if expected[key] != value {
+		if v, ok := expected[key]; !ok || v != value {
 			return false
 		}
 	}
@@ -347,7 +361,7 @@ func (r *FunctionReconciler) envsEqual(existing, expected []corev1.EnvVar) bool 
 	for key, value := range existing {
 		expectedValue := expected[key]
 
-		if expectedValue.Name != value.Name || expectedValue.Value != value.Value || expectedValue.ValueFrom != value.ValueFrom {
+		if expectedValue.Name != value.Name || expectedValue.Value != value.Value || expectedValue.ValueFrom != value.ValueFrom { // valueFrom check is by reference
 			return false
 		}
 	}
@@ -429,75 +443,4 @@ func (r *FunctionReconciler) getConditionStatus(conditions []serverlessv1alpha1.
 	}
 
 	return corev1.ConditionUnknown
-}
-
-func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Function) map[string]string {
-	labels := make(map[string]string, len(instance.GetLabels())+3)
-	for key, value := range instance.GetLabels() {
-		labels[key] = value
-	}
-
-	labels[serverlessv1alpha1.FunctionNameLabel] = instance.Name
-	labels[serverlessv1alpha1.FunctionManagedByLabel] = "function-controller"
-	labels[serverlessv1alpha1.FunctionUUIDLabel] = string(instance.GetUID())
-
-	return labels
-}
-
-func (r *FunctionReconciler) servingPodLabels(log logr.Logger, instance *serverlessv1alpha1.Function, bindingAnnotation string) map[string]string {
-	functionLabels := r.functionLabels(instance)
-	if bindingAnnotation == "" {
-		return functionLabels
-	}
-
-	type binding map[string]map[string]map[string]string
-	var bindings binding
-	if err := json.Unmarshal([]byte(bindingAnnotation), &bindings); err != nil {
-		log.Error(err, fmt.Sprintf("Cannot parse SeriveBindingUsage annotation %s", bindingAnnotation))
-	}
-
-	for _, service := range bindings {
-		for key, value := range service["injectedLabels"] {
-			functionLabels[key] = value
-		}
-	}
-
-	return functionLabels
-}
-
-func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
-	imageTag := r.calculateImageTag(instance)
-	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.Address, instance.Namespace, instance.Name, imageTag)
-}
-
-func (r *FunctionReconciler) buildExternalImageAddress(instance *serverlessv1alpha1.Function) string {
-	imageTag := r.calculateImageTag(instance)
-	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.ExternalAddress, instance.Namespace, instance.Name, imageTag)
-}
-
-func (r *FunctionReconciler) sanitizeDependencies(dependencies string) string {
-	result := "{}"
-	if strings.Trim(dependencies, " ") != "" {
-		result = dependencies
-	}
-
-	return result
-}
-
-func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
-	data := map[string]string{
-		configMapHandler:  configMapHandler,
-		configMapFunction: instance.Spec.Source,
-		configMapDeps:     r.sanitizeDependencies(instance.Spec.Deps),
-	}
-	labels := r.functionLabels(instance)
-
-	return corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels:       labels,
-			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
-			Namespace:    instance.GetNamespace(),
-		},
-		Data: data,
-	}
 }

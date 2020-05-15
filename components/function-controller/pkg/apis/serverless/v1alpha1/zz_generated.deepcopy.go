@@ -5,7 +5,7 @@
 package v1alpha1
 
 import (
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -104,6 +104,13 @@ func (in *FunctionSpec) DeepCopyInto(out *FunctionSpec) {
 		in, out := &in.MaxReplicas, &out.MaxReplicas
 		*out = new(int32)
 		**out = **in
+	}
+	if in.Labels != nil {
+		in, out := &in.Labels, &out.Labels
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 }
 

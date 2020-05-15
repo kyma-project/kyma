@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/configurer"
 
 	v1 "k8s.io/api/core/v1"
@@ -58,6 +60,16 @@ func TestTriggerEventQueries(t *testing.T) {
 	assert.NoError(t, err)
 
 	checkTriggerList(t, triggers)
+
+	opts := &auth.OperationsInput{
+		auth.Create: {fixTriggerRequest("mutation", "createTrigger",
+			createTriggerArguments(namespaceName), triggerDetailsFields())},
+		auth.List: {fixTriggerRequest("query", "triggers",
+			listTriggersArguments(namespaceName), triggerDetailsFields())},
+		auth.Delete: {fixTriggerRequest("mutation", "deleteTrigger",
+			deleteTriggerArguments(namespaceName), metadataDetailsFields())},
+	}
+	auth.New().Run(t, opts)
 }
 
 func newTriggerEvent(eventType string, trigger Trigger) TriggerEvent {
@@ -100,21 +112,38 @@ func readTriggerEvent(sub *graphql.Subscription) (TriggerEvent, error) {
 	return response.TriggerEvent, err
 }
 
-func listTriggers(client *graphql.Client, arguments, resourceDetailsQuery string) (TriggerListQueryResponse, error) {
+func fixTriggerRequest(requestType, requestName, arguments, details string) *graphql.Request {
 	query := fmt.Sprintf(`
-		query{
-			triggers (
+		%s {
+			%s (
 				%s
 			){
 				%s
 			}
 		}
-	`, arguments, resourceDetailsQuery)
-	req := graphql.NewRequest(query)
+	`, requestType, requestName, arguments, details)
+	return graphql.NewRequest(query)
+}
+
+func listTriggers(client *graphql.Client, arguments, resourceDetailsQuery string) (TriggerListQueryResponse, error) {
+	req := fixTriggerRequest("query", "triggers", arguments, resourceDetailsQuery)
 	var res TriggerListQueryResponse
 	err := client.Do(req, &res)
 
 	return res, err
+}
+
+func mutationTrigger(client *graphql.Client, requestName, arguments, resourceDetailsQuery string) error {
+	req := fixTriggerRequest("mutation", fmt.Sprintf("%sTrigger", requestName), arguments, resourceDetailsQuery)
+	err := client.Do(req, nil)
+
+	return err
+}
+
+func subscribeTriggerEvent(client *graphql.Client, arguments, resourceDetailsQuery string) *graphql.Subscription {
+	req := fixTriggerRequest("subscription", "triggerEvent", arguments, resourceDetailsQuery)
+
+	return client.Subscribe(req)
 }
 
 func listTriggersArguments(namespace string) string {
@@ -129,22 +158,6 @@ func listTriggersArguments(namespace string) string {
 			}
 		}
 	`, namespace, SubscriberAPIVersion, SubscriberKind, SubscriberName, namespace)
-}
-
-func mutationTrigger(client *graphql.Client, requestType, arguments, resourceDetailsQuery string) error {
-	query := fmt.Sprintf(`
-		mutation {
-			%sTrigger (
-				%s
-			){
-				%s
-			}
-		}
-	`, requestType, arguments, resourceDetailsQuery)
-	req := graphql.NewRequest(query)
-	err := client.Do(req, nil)
-
-	return err
 }
 
 func createTriggerArguments(namespace string) string {
@@ -164,21 +177,6 @@ func createTriggerArguments(namespace string) string {
 			}
 		},
 	`, namespace, TriggerName, namespace, BrokerName, SubscriberAPIVersion, SubscriberKind, SubscriberName, namespace)
-}
-
-func subscribeTriggerEvent(client *graphql.Client, arguments, resourceDetailsQuery string) *graphql.Subscription {
-	query := fmt.Sprintf(`
-		subscription {
-			triggerEvent (
-				%s
-			){
-				%s
-			}
-		}
-	`, arguments, resourceDetailsQuery)
-	req := graphql.NewRequest(query)
-
-	return client.Subscribe(req)
 }
 
 func createTriggerEventArguments(namespace string) string {

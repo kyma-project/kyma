@@ -64,12 +64,11 @@ func main() {
 	syncService, err := createSynchronisationService(k8sResourceClientSets, options)
 	exitOnError(err, "Failed to create synchronization service")
 
-	configMapNamespacedName := parseNamespacedName(options.ConnectionConfigMap)
-	configMapClient := k8sResourceClientSets.core.CoreV1().ConfigMaps(configMapNamespacedName.Namespace)
+	agentConfigSecretNamespacedName := parseNamespacedName(options.AgentConfigurationSecret)
 
 	connectionDataCache := cache.NewConnectionDataCache()
 
-	configProvider := confProvider.NewConfigProvider(configMapNamespacedName.Name, configMapClient)
+	configProvider := confProvider.NewConfigProvider(agentConfigSecretNamespacedName, secretsRepository)
 	clientsProvider := compass.NewClientsProvider(graphql.New, options.SkipCompassTLSVerify, options.QueryLogging)
 	connectionDataCache.AddSubscriber(clientsProvider.UpdateConnectionData)
 

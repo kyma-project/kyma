@@ -15,6 +15,7 @@ import (
 
 var (
 	apiRuleRes = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
+	function   = schema.GroupVersionResource{Group: "serverless.kyma-project.io", Version: "v1alpha1", Resource: "functions"}
 )
 
 type KymaClients struct {
@@ -25,10 +26,12 @@ type KymaClients struct {
 	ServiceCatalogClientset      *servicecatalogclientset.Clientset
 	ServiceBindingUsageClientset *sbuclientset.Clientset
 	ApiRules                     dynamic.ResourceInterface
+	Function                     dynamic.ResourceInterface
 }
 
 func InitKymaClients(config *rest.Config, testID string) KymaClients {
 	coreClientset := k8s.NewForConfigOrDie(config)
+	client := dynamic.NewForConfigOrDie(config)
 
 	return KymaClients{
 		AppOperatorClientset:         appoperatorclientset.NewForConfigOrDie(config),
@@ -37,7 +40,8 @@ func InitKymaClients(config *rest.Config, testID string) KymaClients {
 		Pods:                         coreClientset.CoreV1().Pods(testID),
 		ServiceCatalogClientset:      servicecatalogclientset.NewForConfigOrDie(config),
 		ServiceBindingUsageClientset: sbuclientset.NewForConfigOrDie(config),
-		ApiRules:                     dynamic.NewForConfigOrDie(config).Resource(apiRuleRes).Namespace(testID),
+		ApiRules:                     client.Resource(apiRuleRes).Namespace(testID),
+		Function:                     client.Resource(function).Namespace(testID),
 	}
 }
 

@@ -34,8 +34,8 @@ kcproxy:
 kiali:
   operator:
     image:
-      repository: quay.io/kiali/kiali-operator
-      tag: v1.17.0
+      repository: eu.gcr.io/kyma-project/incubator/develop/kiali-operator
+      tag: 1.18.0-cf9593a2
       pullPolicy: IfNotPresent
     resources:
       limits:
@@ -160,7 +160,7 @@ kiali:
     #      - "openshift.*"
     #      - "ibm.*"
     #      - "kiali-operator"
-    #      #label_selector:
+    #      label_selector: 
 
     ##########
     #  ---
@@ -213,7 +213,7 @@ kiali:
     # Kiali to be given access to all namespaces via a single cluster role (if using this special value of "**",
     # you are required to have already granted the operator permissions to create cluster roles and cluster role bindings).
     #    ---
-    #    accessible_namespaces: ["^((?!(istio-operator|kube.*|openshift.*|ibm.*|kiali-operator)).)*$"]
+      accessible_namespaces: "**"
     #
     # Additional custom yaml to add to the service definition. This is used mainly to customize the service type.
     # For example, if the deployment.service_type is set to "LoadBalancer" and you want to set the loadBalancerIP,
@@ -242,7 +242,7 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-      image_name: "quay.io/kiali/kiali"
+      image_name: "eu.gcr.io/kyma-project/incubator/develop/kiali"
     #
     # The Kubernetes pull policy for the Kiali deployment.
     # This is overridden to be "Always" if image_version is set to "latest".
@@ -266,7 +266,7 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-      image_version: "v1.17.0"
+      image_version: "1.18.0-cf9593a2"
     #
     # Determines if the Kiali endpoint should be exposed externally.
     # If true, an Ingress will be created if on Kubernetes or a Route if on OpenShift.
@@ -587,7 +587,7 @@ kiali:
 
     ##########
     #  ---
-    #  kubernetes_config:
+    kubernetes_config:
     #
     # The Burst value of the Kubernetes client.
     #    ---
@@ -635,7 +635,7 @@ kiali:
     #
     # The QPS value of the Kubernetes client.
     #    ---
-    #    qps: 175
+      qps: 50
     #
 
     ##########

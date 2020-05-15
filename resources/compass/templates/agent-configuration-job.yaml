@@ -26,7 +26,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 rules:
   - apiGroups: [""]
-    resources: [configmaps]
+    resources: [secrets]
     verbs: [create, get]
 ---
 apiVersion: batch/v1
@@ -193,7 +193,7 @@ spec:
                 TOKEN=$(echo ${TOKEN_RESPONSE} | jq -e '.data.result.token')
                 TOKEN="${TOKEN:1:${#TOKEN}-2}"
 
-                kubectl create configmap -n {{ .Release.Namespace }} compass-agent-configuration \
+                kubectl create secret -n {{ .Release.Namespace }} generic compass-agent-configuration \
                   --from-literal CONNECTOR_URL=$CONNECTOR_EXTERNAL_URL \
                   --from-literal TOKEN=$TOKEN \
                   --from-literal RUNTIME_ID=$RUNTIME_ID \
@@ -206,10 +206,10 @@ spec:
               echo "Waiting for access to API Server..."
               wait_for_access_to_api_server
 
-              echo "Checking if config map exists..."
+              echo "Checking if configuration Secret exists..."
 
               set +o errexit
-              kubectl get configmaps compass-agent-configuration -n {{ .Release.Namespace }} > /dev/null 2>&1
+              kubectl get secrets compass-agent-configuration -n {{ .Release.Namespace }} > /dev/null 2>&1
               if [[ $? -eq 0 ]]; then
                  echo "Compass agent already configured and paired."
                  kill_proxy_and_exit

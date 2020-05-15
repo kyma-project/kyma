@@ -523,6 +523,12 @@ func sendEvent(t *testing.T, adapterURI string, event cloudevents.Event, encodin
 	}
 	ctx := context.Background()
 
+	// add tracing Headers
+	ctx = cloudevents.ContextWithHeader(ctx, "X-B3-SPANDID", "SPANID")
+	ctx = cloudevents.ContextWithHeader(ctx, "X-B3-TRACEID", "TRACEID")
+	ctx = cloudevents.ContextWithHeader(ctx, "X-B3-SAMPLED", "SAMPLED")
+	ctx = cloudevents.ContextWithHeader(ctx, "X-B3-PARENTSPANID", "PARENSPANID")
+
 	t.Logf("sending event to http adapter, event: %s", event)
 	// NOTE: then using CE sdk to send an event we get error message and status code in one message: "error sending cloudevent: 400 Bad Request"
 	_, eventResponse, err := client.Send(ctx, event)

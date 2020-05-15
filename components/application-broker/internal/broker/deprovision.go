@@ -122,15 +122,7 @@ func (svc *DeprovisionService) runningInNamespaceByServiceAndPlanID(instance *in
 
 // we are the last, do not remove our self and trigger clean-up
 func (svc *DeprovisionService) doAsyncResourceCleanup(instance *internal.Instance, req *osb.DeprovisionRequest) (*osb.DeprovisionResponse, error) {
-	appSvcID := svc.appSvcIDSelector.SelectID(req)
-	app, err := svc.appSvcFinder.FindOneByServiceID(appSvcID)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while getting application with id %s from storage", appSvcID)
-	}
-
-	if app == nil {
-		return nil, errors.Wrapf(err, "application with id %s was not found in storage", appSvcID)
-	}
+	svcID := svc.appSvcIDSelector.SelectID(req)
 
 	operationID, err := svc.operationIDProvider()
 	if err != nil {
@@ -151,7 +143,7 @@ func (svc *DeprovisionService) doAsyncResourceCleanup(instance *internal.Instanc
 		return nil, errors.Wrapf(err, "while updating state of the stored instance [%s]", instance.ID)
 	}
 
-	go svc.do(instance, operationID, appSvcID, app.Name)
+	go svc.do(instance, operationID, svcID)
 
 	opKey := osb.OperationKey(operationID)
 	return &osb.DeprovisionResponse{
@@ -161,14 +153,14 @@ func (svc *DeprovisionService) doAsyncResourceCleanup(instance *internal.Instanc
 
 }
 
-func (svc *DeprovisionService) do(instance *internal.Instance, opID internal.OperationID, appSvcID internal.ApplicationServiceID, appName internal.ApplicationName) {
+func (svc *DeprovisionService) do(instance *internal.Instance, opID internal.OperationID, svcID internal.ApplicationServiceID) {
 	if svc.asyncHook != nil {
 		defer svc.asyncHook()
 	}
 
 	iID := instance.ID
 
-	if err := svc.cleanupTheWorld(appSvcID, appName, instance); err != nil {
+	if err := svc.cleanupTheWorld(svcID, instance); err != nil {
 		svc.log.Errorf(errors.Wrap(err, "while clean up created resources").Error())
 		svc.setState(iID, opID, internal.OperationStateFailed, "Cannot clean up created resources.")
 		return
@@ -192,7 +184,7 @@ func (svc *DeprovisionService) cleanupAlways(instance *internal.Instance) error 
 	return nil
 }
 
-func (svc *DeprovisionService) cleanupOnlyIfLast(appSvcID internal.ApplicationServiceID, appName internal.ApplicationName, instance *internal.Instance) error {
+func (svc *DeprovisionService) cleanupOnlyIfLast(svcID internal.ApplicationServiceID, instance *internal.Instance) error {
 	otherInstances, err := svc.instStorage.FindAll(svc.runningInNamespaceByServiceAndPlanID(instance))
 	if err != nil {
 		return errors.Wrap(err, "while checking if instance this was the last instance for the given plan and service ID")
@@ -207,29 +199,29 @@ func (svc *DeprovisionService) cleanupOnlyIfLast(appSvcID internal.ApplicationSe
 	}
 
 	svc.log.Infof("Executing clean-up process for resources which should be deleted because this is the last instance of the given plan and service ID [%+v]", instance)
-	if err := svc.deprovisionSubscription(appName, instance.Namespace); err != nil {
+	if err := svc.deprovisionSubscription(svcID, instance.Namespace); err != nil {
 		return errors.Wrap(err, "while removing Knative Subscription")
 	}
 
-	if err := svc.deprovisionEventActivation(appSvcID, instance.Namespace); err != nil {
+	if err := svc.deprovisionEventActivation(svcID, instance.Namespace); err != nil {
 		return errors.Wrap(err, "while removing Event Activation")
 	}
 	return nil
 }
 
-func (svc *DeprovisionService) cleanupTheWorld(appSvcID internal.ApplicationServiceID, appName internal.ApplicationName, instance *internal.Instance) error {
+func (svc *DeprovisionService) cleanupTheWorld(svcID internal.ApplicationServiceID, instance *internal.Instance) error {
 	if err := svc.cleanupAlways(instance); err != nil {
 		return err
 	}
 
-	if err := svc.cleanupOnlyIfLast(appSvcID, appName, instance); err != nil {
+	if err := svc.cleanupOnlyIfLast(svcID, instance); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (svc *DeprovisionService) deprovisionSubscription(appName internal.ApplicationName, ns internal.Namespace) error {
-	sub, err := subscriptionForApp(svc.knClient, string(appName), string(ns))
+func (svc *DeprovisionService) deprovisionSubscription(svcID internal.ApplicationServiceID, ns internal.Namespace) error {
+	sub, err := subscriptionForApp(svc.knClient, string(svcID), string(ns))
 	switch {
 	case apierrors.IsNotFound(err):
 		// Subscription missing, nothing to delete
@@ -265,10 +257,10 @@ func (svc *DeprovisionService) deprovisionEventActivation(id internal.Applicatio
 	return nil
 }
 
-func subscriptionForApp(cli knative.Client, appName, ns string) (*messagingv1alpha1.Subscription, error) {
+func subscriptionForApp(cli knative.Client, svcID, ns string) (*messagingv1alpha1.Subscription, error) {
 	labels := map[string]string{
-		brokerNamespaceLabelKey: ns,
-		applicationNameLabelKey: appName,
+		brokerNamespaceLabelKey:      ns,
+		applicationServiceIDLabelKey: svcID,
 	}
 	return cli.GetSubscriptionByLabels(integrationNamespace, labels)
 }

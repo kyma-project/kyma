@@ -5,3 +5,4 @@ keywords:
 - knative
 - eventing
 - kafka
+apiVersion: v1

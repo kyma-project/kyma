@@ -42,7 +42,7 @@ This ServiceClass has a **bindable** parameter set to `false` which means that a
 4. The Application sends an event to the Application Connector.
 5. When the Trigger receives the event, it triggers the Function based on the paramertes defined for a Trigger.
 
-For more details on event processing and delivery, see [this](/components/knative-eventing-mesh/#details-event-processing-and-delivery) document.
+For more details on event processing and delivery, see [this](/components/event-mesh/#details-event-processing-and-delivery) document.
 
 ![Event Service Class](./assets/006-AB-event-service-class.svg)
 

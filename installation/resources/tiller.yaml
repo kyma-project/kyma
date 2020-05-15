@@ -46,7 +46,6 @@ spec:
         name: tiller
     spec:
       serviceAccountName: tiller
-
       initContainers:
       - name: init-tiller
         image: eu.gcr.io/kyma-project/alpine-net:2fbe4fd3
@@ -58,6 +57,7 @@ spec:
           - bash
           - -c
           - |
+            set -e
             if [ -f "/etc/certs/ca.crt" ]; then
               echo "Tiller Certificate already exists, do nothing."
               exit 0
@@ -107,7 +107,7 @@ spec:
             openssl x509 -req -CA "${WORKING_DIR}/ca.cert.pem" -CAkey "${WORKING_DIR}/ca.key.pem" -CAcreateserial -in "${WORKING_DIR}/tiller.csr.pem" -out "${WORKING_DIR}/tiller.cert.pem" -days 365
 
             echo "---> Create secrets in k8s"
-            COMBO_YAML=$(cat << EOF
+            cat << EOF > /tmp/secret.yaml
             ---
             apiVersion: v1
             data:
@@ -125,11 +125,9 @@ spec:
               namespace: kube-system
             type: Opaque
             EOF
-            )
 
-            echo "${COMBO_YAML}" | kubectl apply -f -
+            timeout 60s bash -c 'until kubectl create -f /tmp/secret.yaml ; do sleep 2; done'
             echo "tiller-secret configured."
-
         volumeMounts:
         - mountPath: /etc/certs
           name: tiller-certs
@@ -158,14 +156,12 @@ spec:
             port: 44135
           initialDelaySeconds: 1
           timeoutSeconds: 1
-
         readinessProbe:
           httpGet:
             path: /readiness
             port: 44135
           initialDelaySeconds: 1
           timeoutSeconds: 1
-
         volumeMounts:
         - mountPath: /etc/certs
           name: tiller-certs

@@ -18,6 +18,8 @@ The Application Connectivity Validator verifies the subject of the client certif
 
 ## Connector Service
 
+>**CAUTION:** With [Compass](https://github.com/kyma-incubator/compass) being the target API for the Application Connectivity topics, this component's API has been deprecated. To learn how to install Compass and integrate with it, refer to the [Compass documentation](https://kyma-project.io/docs/components/compass/#installation-enable-compass-in-kyma) or to the [Director GraphQL schema](https://github.com/kyma-incubator/compass/blob/master/components/director/pkg/graphql/schema.graphql) directly. Backward compatibility is being preserved via the introduction of [Connectivity Adapter](https://github.com/kyma-incubator/compass/tree/master/components/connectivity-adapter). 
+
 The Connector Service:
 
 - Handles the exchange of client certificates for a given Application.
@@ -26,6 +28,8 @@ The Connector Service:
 
 ## Application Registry
 
+>**CAUTION:** With [Compass](https://github.com/kyma-incubator/compass) being the target API for the Application Connectivity topics, this component's API has been deprecated. To learn how to install Compass and integrate with it, refer to the [Compass documentation](https://kyma-project.io/docs/components/compass/#installation-enable-compass-in-kyma) or to the [Director GraphQL schema](https://github.com/kyma-incubator/compass/blob/master/components/director/pkg/graphql/schema.graphql) directly. Backward compatibility is being preserved via the introduction of [Connectivity Adapter](https://github.com/kyma-incubator/compass/tree/master/components/connectivity-adapter). 
+
 The Application Registry saves and reads the APIs and Event Catalog metadata of the connected external solution in the [Application](#custom-resource-application) custom resource.
 The system creates a new Kubernetes service for each registered API.
 
@@ -33,12 +37,12 @@ The system creates a new Kubernetes service for each registered API.
 
 ## Event Service
 
-The Event Service sends events to the Knative Eventing Mesh and enriches events with metadata that indicates the source of the event.
+The Event Service sends events to the Event Mesh and enriches events with metadata that indicates the source of the event.
 This allows routing events to Functions and services based on their source Application.
 
 ## Application
 
-An Application represents an external solution connected to Kyma. It handles the integration with other components, such as the Service Catalog or the Eventing Mesh.
+An Application represents an external solution connected to Kyma. It handles the integration with other components, such as the Service Catalog or the Event Mesh.
 Using the components of the Application Connector, the Application creates a coherent identity for a connected external solution and ensures its separation.
 All Applications are instances of the Application custom resource, which also stores all of the relevant metadata. You can bind an Application to many Kyma Namespaces and use the APIs and the Event Catalogs of the connected external solution within their context.
 

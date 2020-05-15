@@ -13,10 +13,13 @@ spec:
       app: {{ template "docker-registry.name" . }}
       release: {{ .Release.Name }}
   replicas: {{ .Values.replicaCount }}
-{{- if .Values.updateStrategy }}
+# {{- if .Values.updateStrategy }}
+#   strategy:
+# {{ toYaml .Values.updateStrategy | indent 4 }}
+# {{- end }}
   strategy:
-{{ toYaml .Values.updateStrategy | indent 4 }}
-{{- end }}
+    type: Recreate
+    rollingUpdate: null
   minReadySeconds: 5
   template:
     metadata:

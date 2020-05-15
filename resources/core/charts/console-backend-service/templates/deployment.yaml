@@ -85,7 +85,7 @@ spec:
           - name: APP_TRACING_SERVICE_SPAN_NAME
             value: {{ .Values.tracing.serviceSpanName }}
           - name: APP_SERVERLESS_USAGE_KIND
-            value: knative-service
+            value: serverless-function
         ports:
           - containerPort: {{ .Values.service.internalPort }}
             name: {{ .Values.service.internalPortName }}

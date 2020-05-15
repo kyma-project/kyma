@@ -11,7 +11,6 @@ import (
 	"k8s.io/client-go/dynamic"
 
 	"github.com/hashicorp/go-multierror"
-	apiRulev1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	rulev1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
@@ -21,6 +20,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	appsclient "k8s.io/client-go/kubernetes/typed/apps/v1"
 	coreclient "k8s.io/client-go/kubernetes/typed/core/v1"
+
+	apiRulev1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 )
 
 const (

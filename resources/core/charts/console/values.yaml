@@ -17,7 +17,7 @@ compass_mfs:
   image:
     dir: null
     pullPolicy: IfNotPresent
-    tag: 65153bec
+    tag: db566c22
   service:
     externalPort: 8888
     internalPort: 8888
@@ -27,7 +27,7 @@ console:
   image:
     dir: null
     pullPolicy: IfNotPresent
-    tag: a3891b26
+    tag: 02bd947b
   service:
     externalPort: 80
     internalPort: 8080
@@ -35,9 +35,8 @@ console:
   statusPort: 6080
 core_ui:
   image:
-    dir: null
     pullPolicy: IfNotPresent
-    tag: 1b1385bd
+    tag: 50c12447
   service:
     externalPort: 80
     internalPort: 80
@@ -51,10 +50,10 @@ test:
     enabled: true
     ui:
       limits:
-        cpu: 300m
+        cpu: 400m
         memory: 1.5Gi
       requests:
-        cpu: 300m
-        memory: 300Mi
+        cpu: 350m
+        memory: 900Mi
       service_catalog:
         enabled: true

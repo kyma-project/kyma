@@ -25,7 +25,7 @@ query { runtimeStatus(id: "{RUNTIME_ID}") {
         __typename ... on GCPConfig {
           bootDiskSizeGB name numberOfNodes kubernetesVersion projectName machineType zone region }
           ... on GardenerConfig { 
-          name workerCidr region diskType maxSurge nodeCount volumeSizeGB projectName machineType targetSecret 
+          name workerCidr region diskType maxSurge volumeSizeGB machineType targetSecret 
           autoScalerMin autoScalerMax provider maxUnavailable kubernetesVersion }
       }
       kymaConfig {

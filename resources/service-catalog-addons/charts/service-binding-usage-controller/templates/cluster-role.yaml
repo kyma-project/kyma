@@ -17,7 +17,7 @@ rules:
 - apiGroups: ["serving.knative.dev"]
   resources: ["services"]
   verbs: ["get", "list", "watch", "patch", "update"]
-- apiGroups: ["kubeless.io"]
+- apiGroups: ["serverless.kyma-project.io"]
   resources: ["functions"]
   verbs: ["get", "list", "watch", "patch", "update"]
 - apiGroups: ["servicecatalog.kyma-project.io"]

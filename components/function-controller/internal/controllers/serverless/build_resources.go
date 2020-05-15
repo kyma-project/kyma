@@ -2,22 +2,47 @@ package serverless
 
 import (
 	"fmt"
+	"strings"
 
-	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
+	"knative.dev/serving/pkg/apis/autoscaling"
+
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
+
+const (
+	servingKnativeVisibilityLabel      = "serving.knative.dev/visibility"
+	servingKnativeVisibilityLabelValue = "cluster-local"
+)
+
+func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
+	data := map[string]string{
+		configMapHandler:  configMapHandler,
+		configMapFunction: instance.Spec.Source,
+		configMapDeps:     r.sanitizeDependencies(instance.Spec.Deps),
+	}
+	labels := r.functionLabels(instance)
+
+	return corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels:       labels,
+			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
+			Namespace:    instance.GetNamespace(),
+		},
+		Data: data,
+	}
+}
 
 func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, configMapName string) batchv1.Job {
 	imageName := r.buildInternalImageAddress(instance)
 	one := int32(1)
 	zero := int32(0)
 
-	job := batchv1.Job{
+	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-build-", instance.GetName()),
 			Namespace:    instance.GetNamespace(),
@@ -116,32 +141,16 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 			},
 		},
 	}
-
-	return job
 }
 
-func (r *FunctionReconciler) buildService(log logr.Logger, instance *serverlessv1alpha1.Function, oldService *servingv1.Service) servingv1.Service {
+func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function) servingv1.Service {
 	imageName := r.buildExternalImageAddress(instance)
-	annotations := map[string]string{
-		"autoscaling.knative.dev/minScale": "1",
-		"autoscaling.knative.dev/maxScale": "1",
-	}
-	if instance.Spec.MinReplicas != nil {
-		annotations["autoscaling.knative.dev/minScale"] = fmt.Sprintf("%d", *instance.Spec.MinReplicas)
-	}
-	if instance.Spec.MaxReplicas != nil {
-		annotations["autoscaling.knative.dev/maxScale"] = fmt.Sprintf("%d", *instance.Spec.MaxReplicas)
-	}
-	serviceLabels := r.functionLabels(instance)
-	serviceLabels["serving.knative.dev/visibility"] = "cluster-local"
+	serviceLabels := r.serviceLabels(instance)
 
-	bindingAnnotation := ""
-	if oldService != nil {
-		bindingAnnotation = oldService.GetAnnotations()[serviceBindingUsagesAnnotation]
-	}
-	podLabels := r.servingPodLabels(log, instance, bindingAnnotation)
+	podAnnotations := r.servicePodAnnotations(instance)
+	podLabels := r.servicePodLabels(instance)
 
-	service := servingv1.Service{
+	return servingv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instance.GetName(),
 			Namespace: instance.GetNamespace(),
@@ -151,7 +160,7 @@ func (r *FunctionReconciler) buildService(log logr.Logger, instance *serverlessv
 			ConfigurationSpec: servingv1.ConfigurationSpec{
 				Template: servingv1.RevisionTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
-						Annotations: annotations,
+						Annotations: podAnnotations,
 						Labels:      podLabels,
 					},
 					Spec: servingv1.RevisionSpec{
@@ -172,6 +181,71 @@ func (r *FunctionReconciler) buildService(log logr.Logger, instance *serverlessv
 			},
 		},
 	}
+}
 
-	return service
+func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
+	imageTag := r.calculateImageTag(instance)
+	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.Address, instance.Namespace, instance.Name, imageTag)
+}
+
+func (r *FunctionReconciler) buildExternalImageAddress(instance *serverlessv1alpha1.Function) string {
+	imageTag := r.calculateImageTag(instance)
+	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.ExternalAddress, instance.Namespace, instance.Name, imageTag)
+}
+
+func (r *FunctionReconciler) sanitizeDependencies(dependencies string) string {
+	result := "{}"
+	if strings.Trim(dependencies, " ") != "" {
+		result = dependencies
+	}
+
+	return result
+}
+
+func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Function) map[string]string {
+	return r.mergeLabels(instance.GetLabels(), r.internalFunctionLabels(instance))
+}
+
+func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha1.Function) map[string]string {
+	labels := make(map[string]string, 3)
+
+	labels[serverlessv1alpha1.FunctionNameLabel] = instance.Name
+	labels[serverlessv1alpha1.FunctionManagedByLabel] = "function-controller"
+	labels[serverlessv1alpha1.FunctionUUIDLabel] = string(instance.GetUID())
+
+	return labels
+}
+
+func (r *FunctionReconciler) serviceLabels(instance *serverlessv1alpha1.Function) map[string]string {
+	serviceLabels := r.functionLabels(instance)
+	serviceLabels[servingKnativeVisibilityLabel] = servingKnativeVisibilityLabelValue
+	return serviceLabels
+}
+
+func (r *FunctionReconciler) servicePodAnnotations(instance *serverlessv1alpha1.Function) map[string]string {
+	annotations := map[string]string{
+		autoscaling.MinScaleAnnotationKey: "1",
+		autoscaling.MaxScaleAnnotationKey: "1",
+	}
+	if instance.Spec.MinReplicas != nil {
+		annotations[autoscaling.MinScaleAnnotationKey] = fmt.Sprintf("%d", *instance.Spec.MinReplicas)
+	}
+	if instance.Spec.MaxReplicas != nil {
+		annotations[autoscaling.MaxScaleAnnotationKey] = fmt.Sprintf("%d", *instance.Spec.MaxReplicas)
+	}
+	return annotations
+}
+
+func (r *FunctionReconciler) servicePodLabels(instance *serverlessv1alpha1.Function) map[string]string {
+	return r.mergeLabels(instance.Spec.Labels, r.internalFunctionLabels(instance))
+}
+
+func (r *FunctionReconciler) mergeLabels(labelsCollection ...map[string]string) map[string]string {
+	result := make(map[string]string, 0)
+	for _, labels := range labelsCollection {
+		for key, value := range labels {
+			result[key] = value
+		}
+	}
+	return result
 }
