@@ -49,7 +49,7 @@ global:
       version: "e2837b23"
     metris:
       dir:
-      version: "c1e271d6"
+      version: "d1b75eac"
     tests:
       director:
         dir:
