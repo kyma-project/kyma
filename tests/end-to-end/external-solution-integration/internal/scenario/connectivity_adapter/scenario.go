@@ -6,6 +6,7 @@ import (
 	"github.com/vrischmann/envconfig"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
 type Scenario struct {
@@ -31,4 +32,8 @@ func (s *Scenario) NewState() (*state, error) {
 		E2EState:         scenario.E2EState{Domain: s.domain, SkipSSLVerify: s.skipSSLVerify, AppName: s.testID, GatewaySubdomain: "adapter-gateway-mtls"},
 		CompassEnvConfig: config,
 	}, nil
+}
+
+func (s *Scenario) RunnerOpts() []step.RunnerOption {
+	return nil
 }

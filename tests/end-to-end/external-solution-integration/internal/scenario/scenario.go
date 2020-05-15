@@ -11,4 +11,5 @@ import (
 type Scenario interface {
 	AddFlags(set *pflag.FlagSet)
 	Steps(config *rest.Config) ([]step.Step, error)
+	RunnerOpts() []step.RunnerOption
 }

@@ -1,21 +1,11 @@
 package main
 
 import (
-	"github.com/avast/retry-go"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/compass_e2e"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/connectivity_adapter_e2e"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/e2e"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_2_phases_prepare"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_2_phases_test"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_e2e"
-
 	"os"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	k8s "k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -25,13 +15,11 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/compass"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/connectivity_adapter"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_evaluate"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_prepare"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/send_and_check_event"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
-
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
-
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 var scenarios = map[string]scenario.Scenario{
@@ -39,14 +27,8 @@ var scenarios = map[string]scenario.Scenario{
 	"compass-e2e":              &compass.Scenario{},
 	"e2e-event-mesh":           &event_mesh.Scenario{},
 	"connectivity-adapter-e2e": &connectivity_adapter.Scenario{},
-	"e2e":                      &e2e.E2EScenario{},
-	"event-only":               &e2e.SendEventAndCheckCounter{},
-	"compass-e2e":              &compass_e2e.CompassE2EScenario{},
-	"e2e-event-mesh":           &event_mesh_e2e.E2EEventMeshConfig{},
-	"e2e-prepare":              &event_mesh_2_phases_prepare.TwoPhasesEventMeshPrepareConfig{},
-	"e2e-test":                 &event_mesh_2_phases_test.TwoPhasesEventMeshTestConfig{},
-	"event-mesh":               &event_mesh_e2e.E2EEventMeshConfig{},
-	"connectivity-adapter-e2e": &connectivity_adapter_e2e.CompassConnectivityAdapterE2EConfig{},
+	"e2e-prepare":              &event_mesh_prepare.Scenario{},
+	"e2e-evaluate":             &event_mesh_evaluate.Scenario{},
 }
 
 var (
@@ -71,7 +53,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	runner = step.NewRunner()
+	runner = step.NewRunner(s.RunnerOpts()...)
 	setupLogging()
 	setupFlags(s)
 	waitForAPIServer()

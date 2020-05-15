@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
 // Scenario executes complete external solution integration test scenario
@@ -26,4 +27,8 @@ func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 
 func (s *Scenario) NewState() *state {
 	return &state{E2EState: scenario.E2EState{Domain: s.Domain, SkipSSLVerify: s.SkipSSLVerify, AppName: s.testID, GatewaySubdomain: "gateway"}}
+}
+
+func (s *Scenario) RunnerOpts() []step.RunnerOption {
+	return nil
 }
