@@ -61,7 +61,7 @@ func TestInstallStep(t *testing.T) {
 
 				mockHelmClient := &mockHelmClient{
 					failUpgradingRelease: true,
-					failRollback:   true,
+					failRollback:         true,
 				}
 
 				testUpgradeStep := getUpgradeStep(mockHelmClient)
@@ -173,13 +173,13 @@ func TestInstallStep(t *testing.T) {
 type mockHelmClient struct {
 	kymahelm.ClientInterface
 	failInstallingRelease  bool
-	failUpgradingRelease bool
+	failUpgradingRelease   bool
 	failDeletingRelease    bool
-	failRollback    bool
+	failRollback           bool
 	failIsReleaseDeletable bool
 	isReleaseDeletable     bool
 	deleteReleaseCalled    bool
-	rollbackReleaseCalled    bool
+	rollbackReleaseCalled  bool
 }
 
 func (hc *mockHelmClient) IsReleaseDeletable(rname string) (bool, error) {
@@ -206,7 +206,7 @@ func (hc *mockHelmClient) DeleteRelease(releaseName string) (*rls.UninstallRelea
 	return &rls.UninstallReleaseResponse{}, nil
 }
 
-func (hc *mockHelmClient) RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error){
+func (hc *mockHelmClient) RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error) {
 	hc.rollbackReleaseCalled = true
 	if hc.failRollback {
 		err := errors.New("failed to rollback release")
@@ -239,9 +239,9 @@ func (hc *mockHelmClient) UpgradeRelease(chartDir, releaseName, overrides string
 
 	return &rls.UpdateReleaseResponse{
 		Release: &release.Release{
-			Name: "testRelease",
+			Name:      "testRelease",
 			Namespace: "testNamespace",
-			Version: 14,
+			Version:   14,
 			Info: &release.Info{
 				Status: &release.Status{
 					Code: release.Status_DEPLOYED,
