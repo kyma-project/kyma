@@ -54,7 +54,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "84fa953c"
+    tag: "PR-8369"
     pullPolicy: IfNotPresent
   kubeRbacProxy:
     repository: "gcr.io/kubebuilder/kube-rbac-proxy"
@@ -114,10 +114,12 @@ containers:
         value: 5m
       functionRequeueDuration:
         value: 5m
+      functionBuildExecutorArgs:
+        value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildExecutorImage:
-        value: gcr.io/kaniko-project/executor:v0.17.1
+        value: gcr.io/kaniko-project/executor:v0.22.0
       functionBuildCredsInitImage:
-        value: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.10.1
+        value: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.12.1
       functionDockerAddress:
         # TODO: I don't know why {{ .Values.global.dockerServicePort }} doesn't work. It is rendered as {{\n  .Values.global.dockerServicePort }}
         # value: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}"
