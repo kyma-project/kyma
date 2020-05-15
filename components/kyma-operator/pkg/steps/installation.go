@@ -124,10 +124,14 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 		stepName := logPrefix + " component " + component.GetReleaseName()
 		_ = steps.statusManager.InProgress(stepName)
 
-		step := stepsFactory.NewStep(component)
+		step, err := stepsFactory.NewStep(component)
+		if err != nil {
+			removeLabelAndReturn(err)
+		}
+
 		steps.PrintStep(stepName)
 
-		err := retry.Do(
+		err = retry.Do(
 			func() error {
 				processErr := step.Run()
 				if steps.errorHandlers.CheckError("Step error: ", processErr) {
@@ -143,7 +147,7 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 			}),
 		)
 		if err != nil {
-			return removeLabelAndReturn(fmt.Errorf("Max number of retries reached during step: %s", stepName))
+			return removeLabelAndReturn(fmt.Errorf("max number of retries reached during step: %s", stepName))
 		}
 
 		log.Println(stepName + "...DONE!")
