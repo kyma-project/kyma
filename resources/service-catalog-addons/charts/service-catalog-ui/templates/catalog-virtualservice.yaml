@@ -1,6 +1,6 @@
 {{- if .Values.virtualservice.enabled }}
 {{- $serviceName := include "fullname" . -}}
-{{- $servicePort := .Values.catalog.service.externalPort -}}
+{{- $servicePort := .Values.service.externalPort -}}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -19,7 +19,7 @@ metadata:
 {{- end }}
 spec:
   hosts:
-  - {{ .Values.catalog.hostname }}.{{ .Values.global.ingress.domainName }}
+  - {{ .Values.virtualservice.hostname }}.{{ .Values.global.ingress.domainName }}
   gateways:
   - {{ .Values.global.istio.gateway.name }}
   http:

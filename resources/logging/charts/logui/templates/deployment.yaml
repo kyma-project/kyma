@@ -1,4 +1,3 @@
-{{- if .Values.loki.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -13,7 +12,7 @@ spec:
     matchLabels:
       app: {{ template "logui.name" . }}
       release: {{ .Release.Name }}
-  replicas: {{ .Values.logui.replicaCount }}
+  replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       labels:
@@ -24,10 +23,10 @@ spec:
     spec:
       containers:
         - name: {{ template "logui.name" . }}
-          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.logui.image.dir }}{{ .Values.logui.image.name }}:{{ .Values.logui.image.tag }}"
-          imagePullPolicy: {{ .Values.logui.image.pullPolicy }}
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.dir }}{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.logui.service.internalPort }}
+            - containerPort: {{ .Values.service.internalPort }}
           volumeMounts:
             - name: config
               mountPath: /var/public/config
@@ -38,4 +37,3 @@ spec:
             items:
             - key: config.js
               path: config.js
-{{- end }}

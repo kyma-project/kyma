@@ -1,4 +1,3 @@
-{{- if .Values.loki.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -10,10 +9,9 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   ports:
-    - port: {{ .Values.logui.service.externalPort }}
+    - port: {{ .Values.service.externalPort }}
       name: http2
-      targetPort: {{ .Values.logui.service.internalPort }}
+      targetPort: {{ .Values.service.internalPort }}
   selector:
     app: {{ template "logui.name" . }}
     release: {{ .Release.Name }}
-{{- end }}
