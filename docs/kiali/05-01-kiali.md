@@ -22,7 +22,7 @@ This table lists the configurable parameters, their descriptions, and default va
 | **deployment.resources.requests.memory** | Minimum amount of memory requested by the Kiali operator to use. | `20Mi` |
 | **deployment.resources.limits.cpu** | Maximum number of CPUs available for the Kiali operator to use. | `100m` |
 | **deployment.resources.limits.memory** | Maximum amount of memory available for the Kiali operator to use. | `100Mi` |
-| **deployment.kubernetes_config.qps** | Defines the allowed queries per second to adjust the API server throttling rate. | `50` |
+| **deployment.kubernetes_config.qps** | Defines the allowed queries per second to adjust the API server's throttling rate. | `50` |
 
 
 For details on Kiali configuration and customization, see the [Kiali CRD](https://github.com/kiali/kiali-operator/blob/master/deploy/kiali/kiali_cr.yaml) and the [values file](https://github.com/kyma-project/kyma/blob/master/resources/kiali/values.yaml).
