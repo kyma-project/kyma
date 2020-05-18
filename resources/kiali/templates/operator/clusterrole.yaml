@@ -226,7 +226,7 @@ rules:
   - security.istio.io
   resources: ["*"]
   verbs:
-{{- if .Values.kiali.spec.deployment.view_only_mode }}
+{{- if not .Values.kiali.spec.deployment.view_only_mode }}
   - create
   - delete
   - patch
@@ -238,7 +238,7 @@ rules:
   resources:
   - servicemeshpolicies
   verbs:
-{{- if .Values.kiali.spec.deployment.view_only_mode }}
+{{- if not .Values.kiali.spec.deployment.view_only_mode }}
   - create
   - delete
   - patch
@@ -250,7 +250,7 @@ rules:
   resources:
   - servicemeshrbacconfigs
   verbs:
-{{- if .Values.kiali.spec.deployment.view_only_mode }}
+{{- if not .Values.kiali.spec.deployment.view_only_mode }}
   - create
   - delete
   - patch
@@ -285,7 +285,7 @@ rules:
   resources:
   - experiments
   verbs:
-{{- if .Values.kiali.spec.deployment.view_only_mode }}
+{{- if not .Values.kiali.spec.deployment.view_only_mode }}
   - create
   - delete
   - patch
