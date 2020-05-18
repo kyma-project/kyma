@@ -135,6 +135,7 @@ func (hc *Client) InstallReleaseFromChart(chartdir, ns, releaseName, overrides s
 
 	hc.PrintOverrides(overrides, releaseName, "installation")
 
+	//TODO InstallTimeout it configurable
 	return hc.helm.InstallReleaseFromChart(
 		chart,
 		ns,
@@ -149,6 +150,7 @@ func (hc *Client) InstallReleaseFromChart(chartdir, ns, releaseName, overrides s
 func (hc *Client) InstallRelease(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error) {
 	hc.PrintOverrides(overrides, releasename, "installation")
 
+	//TODO InstallTimeout it configurable
 	return hc.helm.InstallRelease(
 		chartdir,
 		ns,
@@ -163,6 +165,7 @@ func (hc *Client) InstallRelease(chartdir, ns, releasename, overrides string) (*
 func (hc *Client) InstallReleaseWithoutWait(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error) {
 	hc.PrintOverrides(overrides, releasename, "installation")
 
+	//TODO InstallTimeout it configurable
 	return hc.helm.InstallRelease(
 		chartdir,
 		ns,
@@ -177,6 +180,7 @@ func (hc *Client) InstallReleaseWithoutWait(chartdir, ns, releasename, overrides
 func (hc *Client) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error) {
 	hc.PrintOverrides(overrides, releaseName, "update")
 
+	//TODO UpgradeTimeout it configurable
 	return hc.helm.UpdateRelease(
 		releaseName,
 		chartDir,
@@ -190,6 +194,7 @@ func (hc *Client) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.
 
 //RollbackRelease performs rollback to given revision
 func (hc *Client) RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error) {
+	//TODO RollbackTimeout it configurable
 	return hc.helm.RollbackRelease(
 		releaseName,
 		helm.RollbackWait(true),
@@ -201,6 +206,7 @@ func (hc *Client) RollbackRelease(releaseName string, revision int32) (*rls.Roll
 
 // DeleteRelease .
 func (hc *Client) DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error) {
+	//TODO DeleteTimeout it configurable
 	return hc.helm.DeleteRelease(
 		releaseName,
 		helm.DeletePurge(true),
