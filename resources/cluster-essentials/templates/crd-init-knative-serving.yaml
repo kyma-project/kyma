@@ -54,7 +54,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: job
-        image: "{{ .Values.job.image.repository }}:{{ .Values.job.image.tag }}"
+        image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
         terminationMessagePolicy: "FallbackToLogsOnError"
         volumeMounts:
         - name: crd-knative-serving
