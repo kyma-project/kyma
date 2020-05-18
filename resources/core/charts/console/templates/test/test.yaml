@@ -12,6 +12,8 @@ metadata:
 
 spec:
     disableConcurrency: false
+    skip:
+      {{ if .Values.global.isLocalEnv }}
     template:
         metadata:
           annotations:
