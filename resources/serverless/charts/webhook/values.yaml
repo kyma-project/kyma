@@ -1,0 +1,56 @@
+# Default values for webhook.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride:
+fullnameOverride:
+
+image:
+  repository: "wookieeteam/webhook"
+  tag: "0.2"
+  pullPolicy: IfNotPresent
+
+commonLabels:
+  app: "{{ template \"webhook.fullname\" . }}"
+  version: "{{ .Values.image.tag }}"
+  app.kubernetes.io/name: "{{ template \"webhook.fullname\" . }}"
+  app.kubernetes.io/instance: "{{ .Release.Name }}"
+  app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+  app.kubernetes.io/version: "{{ .Values.image.tag }}"
+  role: webhook
+
+deployment:
+  replicas: 1
+  labels: {}
+  annotations: {}
+  extraProperties: {}
+
+pod:
+  annotations:
+    sidecar.istio.io/inject: "false"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+
+service:
+  ports:
+    httpMetrics:
+      name: "http-metrics"
+      port: 9090
+      targetPort: 9090
+    httpProfiling:
+      name: "http-profiling"
+      port: 8008
+      targetPort: 8008
+    httpsWebhook:
+      name: "https-webhook"
+      port: 443
+      targetPort: 8443
+
+container:
+  allowPrivilegeEscalation: false
+  envs:
+    webhookServiceName:
+      value: "{{ template \"webhook.fullname\" . }}"
+    webhookSecretName:
+      value: "{{ template \"webhook.fullname\" . }}"
+    webhookPort:
+      value: "{{ .Values.service.ports.httpsWebhook.targetPort }}"

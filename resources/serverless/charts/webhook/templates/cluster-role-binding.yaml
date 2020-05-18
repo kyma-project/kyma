@@ -1,0 +1,12 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "webhook.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "webhook.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ template "webhook.fullname" . }}
+  apiGroup: rbac.authorization.k8s.io

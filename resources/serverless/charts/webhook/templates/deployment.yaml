@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "webhook.fullname" . }}-webhook
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 4 }}
+  {{- if .Values.deployment.annotations }}
+  annotations:
+    {{ include "tplValue" ( dict "value" .Values.deployment.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 6 }}
+  replicas: {{ .Values.deployment.replicas }}
+  template:
+    metadata:
+      annotations:
+      {{- if .Values.pod.annotations }}
+        {{ include "tplValue" ( dict "value" .Values.pod.annotations "context" . ) | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 8 }}
+    spec:
+      serviceAccountName: {{ template "webhook.fullname" . }}-webhook
+      containers:
+        - name: webhook
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          securityContext:
+            allowPrivilegeEscalation: {{ .Values.container.allowPrivilegeEscalation }}
+          ports:
+            - name: {{ .Values.service.ports.httpMetrics.name }}
+              containerPort: {{ .Values.service.ports.httpMetrics.targetPort }}
+            - name: {{ .Values.service.ports.httpProfiling.name }}
+              containerPort: {{ .Values.service.ports.httpProfiling.targetPort }}
+            - name: {{ .Values.service.ports.httpsWebhook.name }}
+              containerPort: {{ .Values.service.ports.httpsWebhook.targetPort }}
+          env:
+            - name: SYSTEM_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: WEBHOOK_SERVICE_NAME
+              {{ include "tplValue" ( dict "value" .Values.container.envs.webhookServiceName "context" . ) | nindent 14 }}
+            - name: WEBHOOK_SECRET_NAME
+              {{ include "tplValue" ( dict "value" .Values.container.envs.webhookSecretName "context" . ) | nindent 14 }}
+            - name: WEBHOOK_PORT
+              {{ include "tplValue" ( dict "value" .Values.container.envs.webhookPort "context" . ) | nindent 14 }}
