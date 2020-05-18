@@ -32,9 +32,7 @@ spec:
         command: ["/keycloak-gatekeeper"]
         args:
         - --discovery-url=https://dex.{{ .Values.global.ingress.domainName }}
-        {{- if .Values.global.isLocalEnv }}
         - --skip-openid-provider-tls-verify=true
-        {{- end }}
         - --client-id={{ .Values.kcproxy.clientId }}
         - --client-secret={{ .Values.kcproxy.clientSecret }}
         - --resources=uri=/*|methods=GET,POST,PUT,DELETE
