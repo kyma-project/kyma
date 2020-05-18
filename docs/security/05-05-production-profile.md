@@ -91,7 +91,7 @@ The Cloud SQL is a provider-supplied and maintained database, which requires a s
 
 | Parameter | Description | Example value |
 |----------|------| :---: |
-| **gcloud-sqlproxy.cloudsql.instance.instanceName** | Specifies the name of the database instance in GCP. This value must be only the final third of the full Instance Connection Name provided by the Google Cloud SQL Console and/or APIs. Provide only the name, which is the balance of the full string after the final colon (:) character in the string presented in the Cloud SQL Console under "Instance Connection Name". For example, Google's Console will present the "Instance Connection Name" value as "my_project:my_region:mydbinstance", enter only "mydbinstance" here. | `mydbinstance` |
+| **gcloud-sqlproxy.cloudsql.instance.instanceName** | Specifies the name of the database instance in GCP. This value is the last part of the string returned by the Cloud SQL Console for **Instance connection name** - the one after the final `:`. For example, if the value for **Instance connection name** is `my_project:my_region:mydbinstance`, use only `mydbinstance`. | `mydbinstance` |
 | **gcloud-sqlproxy.cloudsql.instance.project** | Specifies the name of the GCP project used. | `my-gcp-project` |
 | **gcloud-sqlproxy.cloudsql.instance.region** | Specifies the name of the GCP **region** used. Note, that it does not equal the GCP **zone**. | `europe-west4` |
 | **gcloud-sqlproxy.cloudsql.instance.port** | Specifies the port used by the database to handle connections. Database dependent. | postgres: `5432` mysql: `3306` |
