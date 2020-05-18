@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"strings"
 
 	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
@@ -145,8 +146,23 @@ func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, i
 }
 
 func (r *FunctionReconciler) equalJobs(existing batchv1.Job, expected batchv1.Job) bool {
-	// Compare image argument
-	return existing.Spec.Template.Spec.Containers[0].Args[0] == expected.Spec.Template.Spec.Containers[0].Args[0]
+	existingArgs := existing.Spec.Template.Spec.Containers[0].Args
+	expectedArgs := expected.Spec.Template.Spec.Containers[0].Args
+
+	// Compare destination argument as it contains image tag
+	existingDst := r.getArg(existingArgs, destinationArg)
+	expectedDst := r.getArg(expectedArgs, destinationArg)
+
+	return existingDst == expectedDst
+}
+
+func (r *FunctionReconciler) getArg(args []string, arg string) string {
+	for _, item := range args {
+		if strings.HasPrefix(item, arg) {
+			return item
+		}
+	}
+	return ""
 }
 
 func (r *FunctionReconciler) createJob(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, job batchv1.Job) (ctrl.Result, error) {
@@ -310,18 +326,23 @@ func (r *FunctionReconciler) isServiceInProgress(service *servingv1.Service) boo
 	return true
 }
 
+func equalResources(existing, expected corev1.ResourceRequirements) bool {
+	return existing.Requests.Memory().Equal(*expected.Requests.Memory()) &&
+		existing.Requests.Cpu().Equal(*expected.Requests.Cpu()) &&
+		existing.Limits.Memory().Equal(*expected.Limits.Memory()) &&
+		existing.Limits.Cpu().Equal(*expected.Limits.Cpu())
+}
+
 func (r *FunctionReconciler) equalServices(existing *servingv1.Service, expected servingv1.Service) bool {
 	return existing != nil &&
+		len(existing.Spec.Template.Spec.Containers) > 0 &&
 		len(existing.Spec.Template.Spec.Containers) == len(expected.Spec.Template.Spec.Containers) &&
 		existing.Spec.Template.Spec.Containers[0].Image == expected.Spec.Template.Spec.Containers[0].Image &&
 		r.envsEqual(existing.Spec.Template.Spec.Containers[0].Env, expected.Spec.Template.Spec.Containers[0].Env) &&
 		r.mapsEqual(existing.GetLabels(), expected.GetLabels()) &&
 		r.mapsEqual(existing.Spec.Template.GetLabels(), expected.Spec.Template.GetLabels()) &&
 		r.mapsEqual(existing.Spec.Template.GetAnnotations(), expected.Spec.Template.GetAnnotations()) &&
-		existing.Spec.Template.Spec.Containers[0].Resources.Limits[corev1.ResourceCPU] == expected.Spec.Template.Spec.Containers[0].Resources.Limits[corev1.ResourceCPU] &&
-		existing.Spec.Template.Spec.Containers[0].Resources.Limits[corev1.ResourceMemory] == expected.Spec.Template.Spec.Containers[0].Resources.Limits[corev1.ResourceMemory] &&
-		existing.Spec.Template.Spec.Containers[0].Resources.Requests[corev1.ResourceCPU] == expected.Spec.Template.Spec.Containers[0].Resources.Requests[corev1.ResourceCPU] &&
-		existing.Spec.Template.Spec.Containers[0].Resources.Requests[corev1.ResourceMemory] == expected.Spec.Template.Spec.Containers[0].Resources.Requests[corev1.ResourceMemory]
+		equalResources(existing.Spec.Template.Spec.Containers[0].Resources, expected.Spec.Template.Spec.Containers[0].Resources)
 }
 
 func (r *FunctionReconciler) mapsEqual(existing, expected map[string]string) bool {
@@ -330,7 +351,7 @@ func (r *FunctionReconciler) mapsEqual(existing, expected map[string]string) boo
 	}
 
 	for key, value := range existing {
-		if expected[key] != value {
+		if v, ok := expected[key]; !ok || v != value {
 			return false
 		}
 	}
@@ -345,7 +366,7 @@ func (r *FunctionReconciler) envsEqual(existing, expected []corev1.EnvVar) bool 
 	for key, value := range existing {
 		expectedValue := expected[key]
 
-		if expectedValue.Name != value.Name || expectedValue.Value != value.Value || expectedValue.ValueFrom != value.ValueFrom {
+		if expectedValue.Name != value.Name || expectedValue.Value != value.Value || expectedValue.ValueFrom != value.ValueFrom { // valueFrom check is by reference
 			return false
 		}
 	}

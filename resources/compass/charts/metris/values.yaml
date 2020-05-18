@@ -2,9 +2,9 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  # repository, tag and pullSecrets from global chart values override these
-  repository:
-  tag:
+  # these override the values from global chart
+  repository: ""
+  tag: ""
   pullSecrets: []
   pullPolicy: IfNotPresent
 
@@ -19,7 +19,8 @@ resources: {}
 securityContext:
   runAsUser: 1001
 
-podAnnotations: {}
+podAnnotations:
+  sidecar.istio.io/inject: "false"
 
 loglevel: info
 port: 8080

@@ -100,6 +100,7 @@ func (s installStep) Run() error {
 
 type upgradeStep struct {
 	installStep
+	deployedRevision int32
 }
 
 // Run method for upgradeStep triggers step upgrade via helm

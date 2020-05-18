@@ -36,7 +36,7 @@ You can deploy a Kyma cluster with Logging configured to use the production prof
   apiVersion: v1
   kind: ConfigMap
   metadata:
-    name: monitoring-overrides
+    name: logging-overrides
     namespace: kyma-installer
     labels:
       installer: overrides
@@ -61,7 +61,7 @@ You can deploy a Kyma cluster with Logging configured to use the production prof
   apiVersion: v1
   kind: ConfigMap
   metadata:
-    name: monitoring-overrides
+    name: logging-overrides
     namespace: kyma-installer
     labels:
       installer: overrides

@@ -9,15 +9,16 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
+	"knative.dev/serving/pkg/apis/autoscaling"
+
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 const (
-	autoscalingKnativeMinScaleAnn = "autoscaling.knative.dev/minScale"
-	autoscalingKnativeMaxScaleAnn = "autoscaling.knative.dev/maxScale"
-
 	servingKnativeVisibilityLabel      = "serving.knative.dev/visibility"
 	servingKnativeVisibilityLabelValue = "cluster-local"
+
+	destinationArg = "--destination"
 )
 
 func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
@@ -43,7 +44,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 	one := int32(1)
 	zero := int32(0)
 
-	job := batchv1.Job{
+	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-build-", instance.GetName()),
 			Namespace:    instance.GetNamespace(),
@@ -114,7 +115,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 						{
 							Name:  "executor",
 							Image: r.config.Build.ExecutorImage,
-							Args:  []string{fmt.Sprintf("--destination=%s", imageName), "--insecure", "--skip-tls-verify"},
+							Args:  append(r.config.Build.ExecutorArgs, fmt.Sprintf("%s=%s", destinationArg, imageName), "--context=dir:///workspace"),
 							Resources: corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceMemory: r.config.Build.LimitsMemoryValue,
@@ -126,8 +127,11 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 								},
 							},
 							VolumeMounts: []corev1.VolumeMount{
-								{Name: "sources", ReadOnly: true, MountPath: "/src"},
-								{Name: "runtime", ReadOnly: true, MountPath: "/workspace"},
+								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
+								// If COPY is not used, then the cache will not work
+								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/package.json", SubPath: "package.json"},
+								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/handler.js", SubPath: "handler.js"},
+								{Name: "runtime", ReadOnly: true, MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile"},
 								{Name: "tekton-home", ReadOnly: false, MountPath: "/tekton/home"},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
@@ -142,8 +146,6 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 			},
 		},
 	}
-
-	return job
 }
 
 func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function) servingv1.Service {
@@ -227,14 +229,14 @@ func (r *FunctionReconciler) serviceLabels(instance *serverlessv1alpha1.Function
 
 func (r *FunctionReconciler) servicePodAnnotations(instance *serverlessv1alpha1.Function) map[string]string {
 	annotations := map[string]string{
-		autoscalingKnativeMinScaleAnn: "1",
-		autoscalingKnativeMaxScaleAnn: "1",
+		autoscaling.MinScaleAnnotationKey: "1",
+		autoscaling.MaxScaleAnnotationKey: "1",
 	}
 	if instance.Spec.MinReplicas != nil {
-		annotations[autoscalingKnativeMinScaleAnn] = fmt.Sprintf("%d", *instance.Spec.MinReplicas)
+		annotations[autoscaling.MinScaleAnnotationKey] = fmt.Sprintf("%d", *instance.Spec.MinReplicas)
 	}
 	if instance.Spec.MaxReplicas != nil {
-		annotations[autoscalingKnativeMaxScaleAnn] = fmt.Sprintf("%d", *instance.Spec.MaxReplicas)
+		annotations[autoscaling.MaxScaleAnnotationKey] = fmt.Sprintf("%d", *instance.Spec.MaxReplicas)
 	}
 	return annotations
 }
