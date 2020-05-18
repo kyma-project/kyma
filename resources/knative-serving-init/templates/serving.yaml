@@ -29,6 +29,8 @@ spec:
   subresources:
     status: {}
   version: v1alpha1
+{{- end }}
+{{- end }}
 
 ---
 {{- if not (.Capabilities.APIVersions.Has "configurations.serving.knative.dev/v1alpha1") }}
