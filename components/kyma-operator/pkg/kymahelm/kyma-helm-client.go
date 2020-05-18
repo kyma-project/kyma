@@ -29,6 +29,7 @@ type ClientInterface interface {
 	UpgradeRelease(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error)
 	DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error)
 	PrintRelease(release *release.Release)
+	RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error)
 }
 
 // Client .
@@ -106,6 +107,7 @@ func (hc *Client) IsReleaseDeletable(rname string) (bool, error) {
 }
 
 func (hc *Client) ReleaseDeployedRevision(rname string) (int32, error) {
+	//TODO make it configurable
 	maxHistory := 10
 	var deployedRevision int32 = 0
 
@@ -133,6 +135,7 @@ func (hc *Client) InstallReleaseFromChart(chartdir, ns, releaseName, overrides s
 
 	hc.PrintOverrides(overrides, releaseName, "installation")
 
+	//TODO InstallTimeout it configurable
 	return hc.helm.InstallReleaseFromChart(
 		chart,
 		ns,
@@ -147,6 +150,7 @@ func (hc *Client) InstallReleaseFromChart(chartdir, ns, releaseName, overrides s
 func (hc *Client) InstallRelease(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error) {
 	hc.PrintOverrides(overrides, releasename, "installation")
 
+	//TODO InstallTimeout it configurable
 	return hc.helm.InstallRelease(
 		chartdir,
 		ns,
@@ -161,6 +165,7 @@ func (hc *Client) InstallRelease(chartdir, ns, releasename, overrides string) (*
 func (hc *Client) InstallReleaseWithoutWait(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error) {
 	hc.PrintOverrides(overrides, releasename, "installation")
 
+	//TODO InstallTimeout it configurable
 	return hc.helm.InstallRelease(
 		chartdir,
 		ns,
@@ -175,6 +180,7 @@ func (hc *Client) InstallReleaseWithoutWait(chartdir, ns, releasename, overrides
 func (hc *Client) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error) {
 	hc.PrintOverrides(overrides, releaseName, "update")
 
+	//TODO UpgradeTimeout it configurable
 	return hc.helm.UpdateRelease(
 		releaseName,
 		chartDir,
@@ -182,11 +188,25 @@ func (hc *Client) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.
 		helm.ReuseValues(false),
 		helm.UpgradeTimeout(3600),
 		helm.UpgradeWait(true),
+		helm.UpgradeCleanupOnFail(true),
 	)
+}
+
+//RollbackRelease performs rollback to given revision
+func (hc *Client) RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error) {
+	//TODO RollbackTimeout it configurable
+	return hc.helm.RollbackRelease(
+		releaseName,
+		helm.RollbackWait(true),
+		helm.RollbackVersion(revision),
+		helm.RollbackCleanupOnFail(true),
+		helm.RollbackRecreate(true),
+		helm.RollbackTimeout(3600))
 }
 
 // DeleteRelease .
 func (hc *Client) DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error) {
+	//TODO DeleteTimeout it configurable
 	return hc.helm.DeleteRelease(
 		releaseName,
 		helm.DeletePurge(true),
