@@ -1,11 +1,16 @@
 ---
 title: Architecture
 ---
-The following diagram provides an overview of the Kiali architecture in Kyma:
+
+The following diagram presents the overall Kiali architecture and the way the components interact with each other.
 
 ![Kiali architecture](assets/architecture.svg)
 
-1. Kiali is integrated into Kyma's authentication component `dex`, which grants access to the Kiali Dashboards and graphs to authorised users.
-2. Authenticated users can access the full Kiali UI and feature set from their browser by calling the Kiali service.
-3. The Kiali operator deploys the kiali backend based on the provided configuration.
-4. Kiali gathers information from service mesh by analyzing metrics from Prometheus and provide all its features (validation, graphs, config checks, etc...).
+1. Use the Kyma Console or direct URL to access Kiali.
+2. To ensure authentication, the Keycloak Gatekeeper checks if you have a valid token.
+3. If not, the Keycloak Gatekeeper redirects you to dex to log in.
+4. After a successful log in, you can access the Kiali service which serves the website. The service exposes an endpoint and acts as an entry point for the Kiali deployment.
+5. Kiali deployment is the central part of the solution. In order for it to work, the Kiali Operator reads the Kiali CR and configures the API server so it can deploy Kiali.
+5. Kiali collects the information on the cluster health from the following sources:
+ * API server which provides data on the cluster state.
+ * Service Mesh by analyzing metrics Prometheus scrapes from the Istio Pod.
