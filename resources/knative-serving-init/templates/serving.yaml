@@ -1,3 +1,5 @@
+{{- if not (.Capabilities.APIVersions.Has "certificates.networking.internal.knative.dev/v1alpha1") }}
+{{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -29,6 +31,8 @@ spec:
   version: v1alpha1
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "configurations.serving.knative.dev/v1alpha1") }}
+{{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -76,8 +80,12 @@ spec:
   - name: v1
     served: true
     storage: false
+{{- end }}
+{{- end }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "images.caching.internal.knative.dev/v1alpha1") }}
+{{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -99,8 +107,12 @@ spec:
   subresources:
     status: {}
   version: v1alpha1
+{{- end }}
+{{- end }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "ingresses.networking.internal.knative.dev/v1alpha1") }}
+{{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -133,8 +145,12 @@ spec:
   - name: v1alpha1
     served: true
     storage: true
+{{- end }}
+{{- end }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "metrics.autoscaling.internal.knative.dev/v1alpha1") }}
+{{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -162,8 +178,12 @@ spec:
   subresources:
     status: {}
   version: v1alpha1
+{{- end }}
+{{- end }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "podautoscalers.autoscaling.internal.knative.dev/v1alpha1") }}
+{{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -203,8 +223,12 @@ spec:
   - name: v1alpha1
     served: true
     storage: true
+{{- end }}
+{{- end }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "revisions.serving.knative.dev/v1alpha1") }}
+{{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -253,8 +277,12 @@ spec:
   - name: v1
     served: true
     storage: false
+{{- end }}
+{{- end }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "routes.serving.knative.dev/v1alpha1") }}
+{{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -298,8 +326,12 @@ spec:
   - name: v1
     served: true
     storage: false
+{{- end }}
+{{- end }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "services.serving.knative.dev/v1alpha1") }}
+{{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -351,8 +383,12 @@ spec:
   - name: v1
     served: true
     storage: false
+{{- end }}
+{{- end }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "serverlessservices.networking.internal.knative.dev/v1alpha1") }}
+{{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -394,3 +430,5 @@ spec:
   - name: v1alpha1
     served: true
     storage: true
+{{- end }}
+{{- end }}

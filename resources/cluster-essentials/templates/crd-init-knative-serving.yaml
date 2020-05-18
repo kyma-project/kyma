@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-crd-knative-serving
+  annotations:
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
+data:
+  certificates.networking.internal.knative.dev: |-
+{{.Files.Get "files/crd-certificates.networking.internal.knative.dev.yaml" | printf "%s" | indent 4}}
+  configurations.serving.knative.dev: |-
+{{.Files.Get "files/crd-configurations.serving.knative.dev.yaml" | printf "%s" | indent 4}}
+  images.caching.internal.knative.dev: |-
+{{.Files.Get "files/crd-images.caching.internal.knative.dev.yaml" | printf "%s" | indent 4}}
+  ingresses.networking.internal.knative.dev: |-
+{{.Files.Get "files/crd-ingresses.networking.internal.knative.dev.yaml" | printf "%s" | indent 4}}
+  metrics.autoscaling.internal.knative.dev: |-
+{{.Files.Get "files/crd-metrics.autoscaling.internal.knative.dev.yaml" | printf "%s" | indent 4}}
+  podautoscalers.autoscaling.internal.knative.dev: |-
+{{.Files.Get "files/crd-podautoscalers.autoscaling.internal.knative.dev.yaml" | printf "%s" | indent 4}}
+  revisions.serving.knative.dev: |-
+{{.Files.Get "files/crd-revisions.serving.knative.dev.yaml" | printf "%s" | indent 4}}
+  routes.serving.knative.dev: |-
+{{.Files.Get "files/crd-routes.serving.knative.dev.yaml" | printf "%s" | indent 4}}
+  serverlessservices.networking.internal.knative.dev: |-
+{{.Files.Get "files/crd-serverlessservices.networking.internal.knative.dev.yaml" | printf "%s" | indent 4}}
+  services.serving.knative.dev: |-
+{{.Files.Get "files/crd-services.serving.knative.dev.yaml" | printf "%s" | indent 4}}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-init-knative-serving
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded"
+    helm.sh/hook: "pre-upgrade, pre-install"
+    helm.sh/hook-weight: "10"
+  labels:
+    job: {{ .Release.Name }}-init-knative-serving
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: {{ .Release.Name }}-init-knative-serving
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        job: {{ .Release.Name }}-init-knative-serving
+    spec:
+      serviceAccountName: {{ .Release.Name }}-crd-init
+      restartPolicy: Never
+      containers:
+      - name: job
+        image: "{{ .Values.job.image.repository }}:{{ .Values.job.image.tag }}"
+        terminationMessagePolicy: "FallbackToLogsOnError"
+        volumeMounts:
+        - name: crd-knative-serving
+          mountPath: /etc/crd
+          readOnly: true
+        command:
+        - /bin/bash
+        - -c
+        - |-
+          set -e
+
+          crds=( certificates.networking.internal.knative.dev \
+            configurations.serving.knative.dev \
+            images.caching.internal.knative.dev \
+            ingresses.networking.internal.knative.dev \
+            metrics.autoscaling.internal.knative.dev \
+            podautoscalers.autoscaling.internal.knative.dev \
+            revisions.serving.knative.dev \
+            routes.serving.knative.dev \
+            serverlessservices.networking.internal.knative.dev \
+            services.serving.knative.dev \
+          )
+
+          for crd in "${crds[@]}"; do
+            kubectl get crd "$crd" \
+            || kubectl apply -f /etc/crd/"$crd"
+          done
+      volumes:
+      - name: crd-knative-serving
+        configMap:
+          name: {{ .Release.Name }}-crd-knative-serving
