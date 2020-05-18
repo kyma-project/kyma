@@ -3,9 +3,9 @@ title: Access Kiali
 type: Details
 ---
 
-Kiali can be easily accessed from the left menu on the [Kyma Console](/components/console/#overview-overview) by clicking on the `Service Mesh` item.
-Once authenticated, the main Kiali dashboard will show a summary of the service mesh status and the left side menu offers different features such as graphs or configuration validation:
+You can easily access Kiali from the [Kyma Console](/components/console/#overview-overview). To do so, click the **Service Mesh**  tab in the menu on the left.
+Once you are authenticated, the main Kiali dashboard will show a summary of the Service Mesh status and the left side menu will offer you features such as graphs or configuration validation:
 ![Kiali menu item](assets/overview.png)
 
-Graphs are very useful to review the topology of the service mesh:
+Use the graphs to review the topology of the Service Mesh:
 ![Kiali menu item](assets/graph.png)

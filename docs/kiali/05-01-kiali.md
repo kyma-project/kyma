@@ -18,10 +18,10 @@ This table lists the configurable parameters, their descriptions, and default va
 | **server.webRoot** | Defines the context root path for Kiali console, API endpoints, and readiness probes. | `/` |
 | **deployment.viewOnlyMode** | When set to `true`, Kiali is available in view-only mode, allowing you to view and retrieve management data for the Service Mesh. You cannot modify the Service Mesh.  | `true` |
 | **deployment.accessibleNamespaces** | Specifies the Namespaces Kiali can access to monitor the Service Mesh components deployed there. You can provide the names using regex expressions. The default value is `**`(two asterisks) meaning Kiali can access any Namespace. | `**` |
-| **deployment.resources.requests.cpu** | Defines the minimum CPU that the kiali operator will use. | `10m` |
-| **deployment.resources.requests.memory** | Defines the minimum amount of memory that the kiali operator will use. | `20Mi` |
-| **deployment.resources.limits.cpu** | Defines the maximum CPU that can be used by the kiali operator. | `100m` |
-| **deployment.resources.limits.memory** | Defines the maximum amount of memory that can be used by the kiali operator. | `100Mi` |
+| **deployment.resources.requests.cpu** | Minimum number of CPUs requested by the Kiali operator to use. | `10m` |
+| **deployment.resources.requests.memory** | Minimum amount of memory requested by the Kiali operator to use. | `20Mi` |
+| **deployment.resources.limits.cpu** | Maximum number of CPUs available for the Kiali operator to use. | `100m` |
+| **deployment.resources.limits.memory** | Maximum amount of memory available for the Kiali operator to use. | `100Mi` |
 | **deployment.kubernetes_config.qps** | Defines the allowed queries per second to adjust the API server throttling rate. | `50` |
 
 
