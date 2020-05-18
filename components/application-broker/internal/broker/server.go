@@ -13,6 +13,7 @@ import (
 
 	"github.com/gorilla/mux"
 	negronilogrus "github.com/meatballhat/negroni-logrus"
+	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/negroni"
@@ -25,10 +26,12 @@ type (
 
 	provisioner interface {
 		Provision(ctx context.Context, osbCtx osbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, *osb.HTTPStatusCodeError)
+		ProvisionProcess(request RestoreProvisionRequest) error
 	}
 
 	deprovisioner interface {
 		Deprovision(ctx context.Context, osbCtx osbContext, req *osb.DeprovisionRequest) (*osb.DeprovisionResponse, error)
+		DeprovisionProcess(req DeprovisionProcessRequest)
 	}
 
 	binder interface {
@@ -46,15 +49,16 @@ type (
 
 // Server implements HTTP server used to serve OSB API for application broker.
 type Server struct {
-	catalogGetter catalogGetter
-	provisioner   provisioner
-	deprovisioner deprovisioner
-	binder        binder
-	lastOpGetter  lastOpGetter
-	logger        *logrus.Entry
-	addr          string
-	brokerService *NsBrokerService
-	sanityChecker sanityChecker
+	catalogGetter       catalogGetter
+	provisioner         provisioner
+	deprovisioner       deprovisioner
+	binder              binder
+	lastOpGetter        lastOpGetter
+	logger              *logrus.Entry
+	addr                string
+	brokerService       *NsBrokerService
+	sanityChecker       sanityChecker
+	operationIDProvider func() (internal.OperationID, error)
 }
 
 // Addr returns address server is listening on.
@@ -258,6 +262,23 @@ func (srv *Server) provisionAction(w http.ResponseWriter, r *http.Request) {
 	logResp(logRespFields)
 
 	srv.writeResponse(w, http.StatusAccepted, egDTO)
+}
+
+func (srv *Server) ProvisionProcess(request RestoreProvisionRequest) error {
+	return srv.provisioner.ProvisionProcess(request)
+}
+
+func (srv *Server) DeprovisionProcess(request DeprovisionProcessRequest) {
+	srv.deprovisioner.DeprovisionProcess(request)
+}
+
+func (srv *Server) NewOperationID() (internal.OperationID, error) {
+	ID, err := srv.operationIDProvider()
+	if err != nil {
+		return "", errors.Wrap(err, "while creating new operation ID")
+	}
+
+	return ID, nil
 }
 
 func (srv *Server) deprovisionAction(w http.ResponseWriter, r *http.Request) {

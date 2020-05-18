@@ -3,21 +3,21 @@ package broker
 import (
 	"context"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal/servicecatalog"
-	"k8s.io/client-go/tools/cache"
-
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/kyma-project/kyma/components/application-broker/internal/director"
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
+	"github.com/kyma-project/kyma/components/application-broker/internal/servicecatalog"
 	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	listers "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/platform/idprovider"
+
 	gcli "github.com/machinebox/graphql"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 	istioCli "istio.io/client-go/pkg/clientset/versioned"
+	"k8s.io/client-go/tools/cache"
 )
 
 //go:generate mockery -name=instanceStorage -output=automock -outpkg=automock -case=underscore
@@ -149,7 +149,7 @@ func New(applicationFinder appFinder,
 	idp := func() (internal.OperationID, error) {
 		idRaw, err := idpRaw()
 		if err != nil {
-			return internal.OperationID(""), err
+			return "", err
 		}
 		return internal.OperationID(idRaw), nil
 	}
@@ -165,7 +165,7 @@ func New(applicationFinder appFinder,
 			conv:              conv,
 			appEnabledChecker: enabledChecker,
 		},
-		provisioner: NewProvisioner(instStorage, instStorage, stateService, opStorage, opStorage, accessChecker, applicationFinder,
+		provisioner: NewProvisioner(instStorage, stateService, opStorage, opStorage, accessChecker, applicationFinder,
 			eaClient, knClient, *istioClient, instStorage, idp, log, idSelector, directorSvc, validateProvisionReq),
 		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, applicationFinder,
 			knClient, eaClient, log, idSelector, directorSvc),
@@ -177,9 +177,10 @@ func New(applicationFinder appFinder,
 		lastOpGetter: &getLastOperationService{
 			getter: opStorage,
 		},
-		brokerService: brokerService,
-		sanityChecker: NewSanityChecker(mClient, log, livenessCheckStatus),
-		logger:        log.WithField("service", "broker:server"),
+		brokerService:       brokerService,
+		sanityChecker:       NewSanityChecker(mClient, log, livenessCheckStatus),
+		logger:              log.WithField("service", "broker:server"),
+		operationIDProvider: idp,
 	}
 }
 

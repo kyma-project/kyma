@@ -16,6 +16,12 @@ import (
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 )
 
+type DeprovisionProcessRequest struct {
+	Instance             *internal.Instance
+	OperationID          internal.OperationID
+	ApplicationServiceID internal.ApplicationServiceID
+}
+
 // DeprovisionService performs deprovision action
 type DeprovisionService struct {
 	instStorage         instanceStorage
@@ -151,6 +157,10 @@ func (svc *DeprovisionService) doAsyncResourceCleanup(instance *internal.Instanc
 		OperationKey: &opKey,
 	}, nil
 
+}
+
+func (svc *DeprovisionService) DeprovisionProcess(req DeprovisionProcessRequest) {
+	go svc.do(req.Instance, req.OperationID, req.ApplicationServiceID)
 }
 
 func (svc *DeprovisionService) do(instance *internal.Instance, opID internal.OperationID, svcID internal.ApplicationServiceID) {

@@ -17,6 +17,7 @@ import (
 
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 
@@ -56,9 +57,17 @@ const (
 	policyNameSuffix = "-broker"
 )
 
+type RestoreProvisionRequest struct {
+	Parameters           map[string]interface{}
+	InstanceID           internal.InstanceID
+	OperationID          internal.OperationID
+	Namespace            internal.Namespace
+	ApplicationServiceID internal.ApplicationServiceID
+}
+
 // NewProvisioner creates provisioner
-func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGetter,
-	instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater,
+func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter instanceStateGetter,
+	operationInserter operationInserter, operationUpdater operationUpdater,
 	accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder,
 	eaClient v1client.ApplicationconnectorV1alpha1Interface, knClient knative.Client,
 	istioClient istioversionedclient.Interface, iStateUpdater instanceStateUpdater,
@@ -66,7 +75,6 @@ func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGe
 	apiPkgCredsCreator apiPackageCredentialsCreator, validateReq func(req *osb.ProvisionRequest) *osb.HTTPStatusCodeError) *ProvisionService {
 	return &ProvisionService{
 		instanceInserter:         instanceInserter,
-		instanceGetter:           instanceGetter,
 		instanceStateGetter:      instanceStateGetter,
 		instanceStateUpdater:     iStateUpdater,
 		operationInserter:        operationInserter,
@@ -88,7 +96,6 @@ func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGe
 // ProvisionService performs provisioning action
 type ProvisionService struct {
 	instanceInserter         instanceInserter
-	instanceGetter           instanceGetter
 	instanceStateUpdater     instanceStateUpdater
 	operationInserter        operationInserter
 	operationUpdater         operationUpdater
@@ -187,6 +194,33 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 	go svc.do(req.Parameters, iID, opID, app.Name, app.CompassMetadata.ApplicationID, appSvcID, namespace, service.EventProvider, service.IsBindable(), service.DisplayName)
 
 	return resp, nil
+}
+
+// ProvisionProcess triggers provision process for other than broker (http) calls
+func (svc *ProvisionService) ProvisionProcess(req RestoreProvisionRequest) error {
+	var app *internal.Application
+	err := wait.Poll(500*time.Millisecond, 10*time.Second, func() (done bool, err error) {
+		app, err = svc.appSvcFinder.FindOneByServiceID(req.ApplicationServiceID)
+		if err != nil {
+			return false, errors.Wrap(err, "while finding application based on service ID")
+		}
+		if app == nil {
+			return false, nil
+		}
+		return true, nil
+	})
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for application with ID: %s", req.ApplicationServiceID)
+	}
+
+	service, err := getSvcByID(app.Services, req.ApplicationServiceID)
+	if err != nil {
+		return errors.Wrap(err, "while getting service")
+	}
+
+	go svc.do(req.Parameters, req.InstanceID, req.OperationID, app.Name, app.CompassMetadata.ApplicationID, req.ApplicationServiceID, req.Namespace, service.EventProvider, service.IsBindable(), service.DisplayName)
+
+	return nil
 }
 
 func (svc *ProvisionService) do(inputParams map[string]interface{}, iID internal.InstanceID, opID internal.OperationID, appName internal.ApplicationName, appID string, appSvcID internal.ApplicationServiceID, ns internal.Namespace, eventProvider, apiProvider bool, displayName string) {

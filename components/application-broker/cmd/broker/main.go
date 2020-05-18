@@ -102,15 +102,6 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	scInformerFactory := catalogInformers.NewSharedInformerFactory(scClientSet, informerResyncPeriod)
 	scInformersGroup := scInformerFactory.Servicecatalog().V1beta1()
 
-	// instance populator
-	instancePopulator := populator.NewInstances(scClientSet, sFact.Instance(), &populator.Converter{})
-	popCtx, popCancelFunc := context.WithTimeout(context.Background(), time.Minute)
-	defer popCancelFunc()
-	log.Info("Instance storage population...")
-	err = instancePopulator.Do(popCtx)
-	fatalOnError(err)
-	log.Info("Instance storage populated")
-
 	// Applications
 	appInformerFactory := appInformer.NewSharedInformerFactory(appClient, informerResyncPeriod)
 	appInformersGroup := appInformerFactory.Applicationconnector().V1alpha1()
@@ -168,6 +159,15 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	go appSyncCtrl.Run(stopCh)
 	go mappingCtrl.Run(stopCh)
 	go relistRequester.Run(stopCh)
+
+	// instance populator
+	instancePopulator := populator.NewInstances(scClientSet, sFact.Instance(), &populator.Converter{}, sFact.InstanceOperation(), srv, log)
+	popCtx, popCancelFunc := context.WithTimeout(context.Background(), time.Minute)
+	defer popCancelFunc()
+	log.Info("Instance storage population...")
+	err = instancePopulator.Do(popCtx)
+	fatalOnError(err)
+	log.Info("Instance storage populated")
 
 	return srv
 }
