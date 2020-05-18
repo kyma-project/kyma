@@ -6,5 +6,4 @@ Kyma uses [Kiali](https://www.kiali.io) to enable validation, observe the Istio 
 Kiali offers a set of dashboards and graphs that allow you to have the full Service Mesh at a glance and quickly identify problems and configuration issues.
 For more details about particular features, see the [official Kiali documentation](https://kiali.io/documentation/features/).
 
-
 >**NOTE:** Kiali is disabled by default in Kyma Lite (local installation). Read [this](/root/kyma/#configuration-custom-component-installation) document for instructions on how to enable it.
