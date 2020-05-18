@@ -1,5 +1,4 @@
-# TODO: Figure out more secure solution
-# Required because the Binding Usage Controller has Istio sidecar but Prometheus Operator doesn't
+# Required because Prometheus Operator doesn't have Istio Sidecar
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -9,4 +8,4 @@ spec:
     - mtls:
         mode: PERMISSIVE
   targets:
-    - name: {{ template "fullname" . }}
+    - name: {{ template "fullname" . }}-metrics

@@ -18,3 +18,23 @@ spec:
   selector:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
+---
+{{- if and .Values.global.metrics.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fullname" . }}-metrics
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.global.director.metricsPort }}
+      protocol: TCP
+      name: metrics
+  selector:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+{{- end }}
