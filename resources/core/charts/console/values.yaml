@@ -36,7 +36,7 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: 50c12447
+    tag: befe2f31
   service:
     externalPort: 80
     internalPort: 80
