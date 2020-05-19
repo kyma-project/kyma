@@ -3,18 +3,21 @@ package event_mesh
 import (
 	"time"
 
-	retrygo "github.com/avast/retry-go"
-
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
+	"github.com/sirupsen/logrus"
 )
 
-const retryAttemptsCount = 240
-const retryDelay = 1 * time.Second
+const retryAttemptsCount = 120
+const retryDelay = 2 * time.Second
 
-var opts = []retrygo.Option{
-	retrygo.Attempts(retryAttemptsCount),
-	retrygo.Delay(retryDelay),
+var opts = []retry.Option{
+	retry.Attempts(retryAttemptsCount),
+	retry.Delay(retryDelay),
+	retry.OnRetry(func(n uint, err error) {
+		logrus.WithField("component", "WrappedCounterPod").Debugf("OnRetry: attempts: %d, error: %v", n, err)
+	}),
 }
 
 // NewCheckCounterPod returns a new CheckCounterPod
