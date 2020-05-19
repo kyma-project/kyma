@@ -3,7 +3,7 @@ title: Create on-demand volume snapshots
 type: Tutorials
 ---
 
-These tutorials show how to create on-demand volume snapshots for particular providers. Read the instructions on [creating volume snapshots](/root/kyma#tutorials-create-volume-snapshots) for general information.
+These tutorials show how to create on-demand volume snapshots for particular providers. Read the instructions on [creating volume snapshots]#tutorials-create-volume-snapshots) for general information.
 
 ## Create a volume snapshot for AKS
 
