@@ -17,7 +17,7 @@ global:
       version: "d068b250"
     connectivity_adapter:
       dir:
-      version: "76738d5c"
+      version: "bed3d78a"
     pairing_adapter:
       dir:
       version: "d068b250"
