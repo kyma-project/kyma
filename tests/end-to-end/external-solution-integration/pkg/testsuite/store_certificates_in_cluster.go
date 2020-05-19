@@ -87,19 +87,19 @@ func (s StoreCertificatesInCluster) Run() error {
 	for i, cert := range certificates {
 		pemcert, err := CertificatesToPEM(cert)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		pemcerts[i] = pemcert
 	}
 	certJson, err := json.Marshal(pemcerts)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	if err := s.ds.Store(CertKey, string(certJson)); err != nil {
-		panic(err)
+		return err
 	}
 	if err := s.ds.Store(AppNameKey, s.appName); err != nil {
-		panic(err)
+		return err
 	}
 
 	return nil

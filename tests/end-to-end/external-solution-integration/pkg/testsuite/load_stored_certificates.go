@@ -51,7 +51,7 @@ func (s LoadStoredCertificates) Run() error {
 	for i, pemcert := range pemcerts {
 		cert, err := PEMToCertificate(pemcert)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		certs[i] = cert
 	}
