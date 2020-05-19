@@ -43,7 +43,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "110a710a"
+      version: "PR-1363" # TODO(marcobebway) use the final image
     external_services_mock:
       dir:
       version: "e2837b23"
