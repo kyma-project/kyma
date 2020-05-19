@@ -2,9 +2,9 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  # repository, tag and pullSecrets from global chart values override these
-  repository:
-  tag:
+  # these override the values from global chart
+  repository: ""
+  tag: ""
   pullSecrets: []
   pullPolicy: IfNotPresent
 

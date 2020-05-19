@@ -9,6 +9,7 @@ info:
 paths:
   /v1/health:
     get:
+      deprecated: true
       summary: 'Returns health status'
       tags:
       - health API
@@ -17,6 +18,7 @@ paths:
           description: 'The service is up.'
   /v1/applications/tokens:
     post:
+      deprecated: true
       parameters:
       - in: header
         name: Group
@@ -58,6 +60,7 @@ paths:
                 $ref: '#/components/schemas/appError'
   /v1/applications/certificates/revocations:
     post:
+      deprecated: true
       tags:
       - applications external API
       summary: 'Marks certificate as revoked.'
@@ -72,6 +75,7 @@ paths:
                 $ref: '#/components/schemas/appError'
   /v1/applications/signingRequests/info:
     get:
+      deprecated: true
       parameters:
       - in: query
         name: token
@@ -117,6 +121,7 @@ paths:
                 $ref: '#/components/schemas/appError'
   /v1/applications/management/info:
     get:
+      deprecated: true
       parameters:
       - in: header
         name: EventsHost
@@ -150,6 +155,7 @@ paths:
                 $ref: '#/components/schemas/appError'
   /v1/applications/certificates:
     post:
+      deprecated: true
       parameters:
       - in: query
         name: token
@@ -200,6 +206,7 @@ paths:
                 $ref: '#/components/schemas/appError'
   /v1/applications/certificates/renewals:
     post:
+      deprecated: true
       tags:
       - applications external API
       summary: 'Renews certificate using CSR.'
@@ -231,6 +238,7 @@ paths:
                 $ref: '#/components/schemas/appError'
   /v1/runtimes/tokens:
     post:
+      deprecated: true
       parameters:
       - in: header
         name: Group
@@ -261,6 +269,7 @@ paths:
                 $ref: '#/components/schemas/appError'
   /v1/runtimes/certificates/revocations:
     post:
+      deprecated: true
       tags:
       - runtimes external API
       summary: 'Marks certificate as revoked.'
@@ -275,6 +284,7 @@ paths:
                 $ref: '#/components/schemas/appError'
   /v1/runtimes/signingRequests/info:
     get:
+      deprecated: true
       parameters:
       - in: query
         name: token
@@ -306,6 +316,7 @@ paths:
                 $ref: '#/components/schemas/appError'
   /v1/runtimes/management/info:
     get:
+      deprecated: true
       tags:
       - runtimes external API
       summary: 'Returns information on available services.'
@@ -324,6 +335,7 @@ paths:
                 $ref: '#/components/schemas/appError'
   /v1/runtimes/certificates:
     post:
+      deprecated: true
       parameters:
       - in: query
         name: token
@@ -374,6 +386,7 @@ paths:
                 $ref: '#/components/schemas/appError'
   /v1/runtimes/certificates/renewals:
     post:
+      deprecated: true
       tags:
       - runtimes external API
       summary: 'Renews certificate using CSR.'

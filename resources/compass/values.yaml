@@ -23,7 +23,7 @@ global:
       version: "d068b250"
     director:
       dir:
-      version: "f7fd46e4"
+      version: "ba81ea7d"
     gateway:
       dir:
       version: "53b12181"
@@ -35,7 +35,7 @@ global:
       version: "778b2bb3"
     provisioner:
       dir:
-      version: "336a704a"
+      version: "4ef9ec63"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -43,13 +43,13 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "ae194203"
+      version: "a9b7becf"
     external_services_mock:
       dir:
       version: "e2837b23"
     metris:
       dir:
-      version: "c1e271d6"
+      version: "d1b75eac"
     tests:
       director:
         dir:
@@ -278,6 +278,9 @@ global:
       maxIdleConnections: 1
 
   enableCompassDefaultScenarioAssignment: true
+
+  metrics:
+    enabled: true
 
   externalServicesMock:
     enabled: false
