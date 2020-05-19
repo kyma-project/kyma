@@ -1,8 +1,9 @@
 ---
-title: VolumeSnapshot creation failed
+title: Cannot create a volume snapshot
 type: Troubleshooting
 ---
 
-If a PersistentVolumeClaim is not bound, the attempt to create a volume snapshot from that PersistentVolumeClaim will fail with no retries. An event will be logged to indicate that the PersistentVolumeClaim is not bound.
+If a PersistentVolumeClaim is not bound to a PersistentVolume, the attempt to create a volume snapshot from that PersistentVolumeClaim will fail with no retries. An event will be logged to indicate no binding between the PersistentVolumeClaim and the PersistentVolume.
 
-Note that this can happen if the PersistentVolumeClaim spec and the VolumeSnapshot spec are in the same YAML file. In this case, when the VolumeSnapshot object is created, the PersistentVolumeClaim object is created but volume creation is not complete and therefore the PersistentVolumeClaim is not yet bound. You must wait until the PersistentVolumeClaim is bound and then create the snapshot.
+This may happen if PersistentVolumeClaim and VolumeSnapshot specifications are in the same YAML file. As a result, the VolumeSnapshot object is and the PersistentVolumeClaim object are created at the same time, but the PersisitentVolume is not available yet and cannot be bound to the PersistentVolumeClaim. 
+To solve this issue, wait until the PersistentVolumeClaim is bound to the PersistentVolume and then create the snapshot.

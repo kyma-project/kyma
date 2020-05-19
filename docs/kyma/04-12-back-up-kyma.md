@@ -10,11 +10,11 @@ For example, Gardener uses etcd as the Kubernetes backing store for all cluster 
 
 ## On-demand volume snapshots
 
-Kubernetes provides VolumeSnapshot API resource that you can use to create a snapshot of a Kubernetes volume. You can use the snapshot to provision a new volume pre-populated with the snapshot data or to restore the existing volume to the state represented by the snapshot.
+Kubernetes provides the [VolumeSnapshot API resource](https://kubernetes.io/docs/concepts/storagebound persovolume-snapshots/) that you can use to create a snapshot of a Kubernetes volume. You can use the snapshot to provision a new volume pre-populated with the snapshot data or to restore the existing volume to the state represented by the snapshot.
 
-Volume snapshots are only supported by [Container Storage Interface (CSI) drivers](https://kubernetes-csi.github.io/docs/), but not all CSI drivers support it. For more details, see the [list of all available drivers](https://kubernetes-csi.github.io/docs/drivers.html).
+Volume snapshots are supported only by [Container Storage Interface (CSI) drivers](https://kubernetes-csi.github.io/docs/), but not all of them are compliant. For more details on compliant drivers, see the [full list of drivers](https://kubernetes-csi.github.io/docs/drivers.html).
 
-Follow this [tutorial](/root/kyma#tutorials-create-on-demand-volume-snapshots) to create on-demand volume snapshots for various providers. 
+Follow this [tutorial](/root/kyma#tutorials-create-volume-snapshots-providers) to create on-demand volume snapshots for various providers. 
 
 ## Periodic job for volume snapshots
 

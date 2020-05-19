@@ -3,47 +3,7 @@ title: Create on-demand volume snapshots
 type: Tutorials
 ---
 
-This set of tutorials shows how to create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) you can use to provision a new volume or restore an existing one. 
-
-Have a look at the example to see how to create a volume snapshot:
-
-1. Assume that you have a `pvc-to-backup` PersistentVolumeClaim which you have created using a CSI-enabled StorageClass. Trigger a snapshot by creating a VolumeSnapshot object:
-
->**NOTE:** You must use CSI-enabled StorageClass to create a PVC, otherwise it won't be backed up.
-
-```yaml
-apiVersion: snapshot.storage.k8s.io/v1beta1
-kind: VolumeSnapshot
-metadata:
-  name: volume-snapshot
-spec:
-  volumeSnapshotClassName: csi-snapshot-class
-  source:
-    persistentVolumeClaimName: pvc-to-backup
-```
-
-2. Recreate the PVC using the snapshot as the data source:
-
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: pvc-restored
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: csi-storage-class
-  resources:
-    requests:
-      storage: 10Gi
-  dataSource:
-    name: volume-snapshot
-    kind: VolumeSnapshot
-    apiGroup: snapshot.storage.k8s.io
-```
-
-This will create a new `pvc-restored` PVC with pre-populated data from the snapshot. 
-Follow the instructions to enable this feature for various providers.
+These tutorials show how to create on-demand volume snapshots for particular providers. Read the instructions on [creating volume snapshots](/root/kyma#tutorials-create-volume-snapshots) for general information.
 
 ## Create a volume snapshot for AKS
 
@@ -67,7 +27,7 @@ The minimum supported Kubernetes version is 1.14.
 1. [Enable the required feature gate on the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
 2. Check out [the repository for the Google Compute Engine Persistent Disk (GCE PD) CSI driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for the details on how to use volume snapshots on GKE.
 
-## Enable taking volume snaphots for Gardener providers
+## Create volume snapshots for Gardener providers
 
 <div tabs name="backup">
   <details>
@@ -77,7 +37,7 @@ The minimum supported Kubernetes version is 1.14.
 
 ### Prerequisites
 
-Gardener GCP uses CSI drivers by default as of Kubernetes 1.18, and it supports taking volume snapshots out of the box.
+Gardener GCP uses CSI drivers by default as of Kubernetes 1.18 and supports taking volume snapshots out of the box.
 
 ### Steps
 
@@ -103,7 +63,7 @@ metadata:
   name: snapshot
 spec:
   source:
-    persistentVolumeClaimName: <PVC_NAME>
+    persistentVolumeClaimName: {PVC_NAME}
 ```
 
 3. Wait until the **READYTOUSE** field has the `true` status to verify that the snapshot was taken successfully:
@@ -120,7 +80,7 @@ kubectl get volumesnapshot -w
 
 ### Prerequisites
 
-Gardener AWS uses CSI drivers by default as of Kubernetes 1.18, and it supports taking volume snapshots out of the box.
+Gardener AWS uses CSI drivers by default as of Kubernetes 1.18 and supports taking volume snapshots out of the box.
 
 ### Steps
 
@@ -146,7 +106,7 @@ metadata:
   name: snapshot
 spec:
   source:
-    persistentVolumeClaimName: <PVC_NAME>
+    persistentVolumeClaimName: {PVC_NAME}
 ```
 
 3. Wait until the **READYTOUSE** field receives the `true` status to verify that the snapshot was taken successfully:
