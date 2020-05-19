@@ -1968,3 +1968,6 @@ prometheus:
     ## https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#podmetricsendpoint
     ##
     # podMetricsEndpoints: []
+
+pushgateway:
+  enabled: true # TODO: Enable only on Compass pipeline

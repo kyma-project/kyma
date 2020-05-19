@@ -88,6 +88,8 @@ spec:
                 value: {{ .Values.global.tenantFetcher.fieldMapping.discriminatorField }}
               - name: APP_MAPPING_VALUE_DISCRIMINATOR
                 value: {{ .Values.global.tenantFetcher.fieldMapping.discriminatorValue }}
+              - name: APP_METRICS_PUSH_ENDPOINT
+                value: {{ .Values.metrics.pushEndpoint}}
             command:
               - "/bin/sh"
             args:
