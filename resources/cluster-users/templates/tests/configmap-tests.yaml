@@ -11,4 +11,8 @@ data:
   sar-test.sh: |-
 {{ tpl (.Files.Get "files/sar-test.sh" | printf "%s" | indent 4) . }}
 {{- end }}
+  library.sh: |-
+{{ tpl (.Files.Get "files/library.sh" | printf "%s" | indent 4) . }}
+  run.sh: |-
+{{ tpl (.Files.Get "files/run.sh" | printf "%s" | indent 4) . }}
 {{- end }}

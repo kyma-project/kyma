@@ -1,3 +1,7 @@
+{{- with .Values.tests.config.namespace.dynamicNamespace }}
+# Generate value once
+{{- $Namespace := tpl . $ }}
+{{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
@@ -27,13 +31,16 @@ subjects:
   name: {{ printf "%s@kyma.cx" .Values.tests.config.users.viewer }}
   apiGroup: rbac.authorization.k8s.io
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ $Namespace }}
+---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
   name: {{ .Chart.Name }}-test-namespace-developer
-  {{- with .Values.tests.config.namespace.dynamicNamespace }}
-  namespace: {{ tpl . $ }}
-  {{- end }}
+  namespace: {{ $Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
