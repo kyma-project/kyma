@@ -125,7 +125,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                   configuration: [
                     { key: "{CONFIG_PROPERTY_KEY}"
                       value: "{CONFIG_PROPERTY_VALUE}"
-                      secret: {true|false} # Specifies if the property is confidential
+                      secret: true|false # Specifies if the property is confidential
                     }
                   ]
                   sourceURL: "{CUSTOM_COMPONENT_SOURCE_URL}"
@@ -135,7 +135,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 { 
                   key: "{CONFIG_PROPERTY_KEY}"
                   value: "{CONFIG_PROPERTY_VALUE}"
-                  secret: {true|false} # Specifies if the property is confidential
+                  secret: true|false # Specifies if the property is confidential
                 }
               ]
             }
@@ -216,7 +216,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                   configuration: [
                     { key: "{CONFIG_PROPERTY_KEY}"
                       value: "{CONFIG_PROPERTY_VALUE}"
-                      secret: {true|false} # Specifies if the property is confidential
+                      secret: true|false # Specifies if the property is confidential
                     }
                   ]
                   sourceURL: "{CUSTOM_COMPONENT_SOURCE_URL}"
@@ -226,7 +226,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 { 
                   key: "{CONFIG_PROPERTY_KEY}"
                   value: "{CONFIG_PROPERTY_VALUE}"
-                  secret: {true|false} # Specifies if the property is confidential
+                  secret: true|false # Specifies if the property is confidential
                 }
               ]
             }
@@ -314,7 +314,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                   configuration: [
                     { key: "{CONFIG_PROPERTY_KEY}"
                       value: "{CONFIG_PROPERTY_VALUE}"
-                      secret: {true|false} # Specifies if the property is confidential
+                      secret: true|false # Specifies if the property is confidential
                     }
                   ]
                   sourceURL: "{CUSTOM_COMPONENT_SOURCE_URL}"
@@ -324,7 +324,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 { 
                   key: "{CONFIG_PROPERTY_KEY}"
                   value: "{CONFIG_PROPERTY_VALUE}"
-                  secret: {true|false} # Specifies if the property is confidential
+                  secret: true|false # Specifies if the property is confidential
                 }
               ]
             }
