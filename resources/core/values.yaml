@@ -46,7 +46,7 @@ global:
     version: 0e322dac
   e2e_external_solution:
     dir:
-    version: PR-8489
+    version: PR-8511
   disableLegacyConnectivity: false
 
 tests:
@@ -58,13 +58,4 @@ test:
   external_solution:
     event_mesh:
       enabled: true
-      testsuite: e2e-prepare
-      test-kind: 
-        - backup-before
-        - upgrade-before
-    event_mesh:
-      enabled: true
-      testsuite: e2e-prepare
-      test-kind: 
-        - backup-after
-        - upgrade-after
+      testsuite: e2e-event-mesh

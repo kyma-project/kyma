@@ -44,7 +44,7 @@ spec:
               echo 'TESTING start'
               sleep 10
               /e2e {{ $val.testsuite }} \
-              --domain {{ $.Values.domain }} \
+              --domain {{ $.Values.global.ingress.domainName }} \
               --testID {{ $val.testsuite }} \
               --skipSSLVerify
               {{- if $.Values.tests.application_connector_tests.connector_service.central }} --applicationTenant=tenant --applicationGroup=group {{- end }}
