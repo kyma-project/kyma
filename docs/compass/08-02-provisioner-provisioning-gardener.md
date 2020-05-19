@@ -99,13 +99,12 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
             }
             clusterConfig: {
               gardenerConfig: {
-                kubernetesVersion: "1.15.4"
+                kubernetesVersion: "1.15.11"
                 diskType: "pd-standard"
                 volumeSizeGB: 30
                 machineType: "n1-standard-4"
                 region: "europe-west4"
                 provider: "gcp"
-                seed: "gcp-eu1"
                 targetSecret: "{GARDENER_GCP_SECRET_NAME}"
                 workerCidr: "10.250.0.0/19"
                 autoScalerMin: 2
@@ -116,7 +115,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
               }
             }
             kymaConfig: {
-              version: "1.8.0"
+              version: "1.12.0"
               components: [
                 { component: "compass-runtime-agent", namespace: "compass-system" }
                 {
@@ -190,7 +189,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
             }
             clusterConfig: {
               gardenerConfig: {
-                kubernetesVersion: "1.15.4"
+                kubernetesVersion: "1.15.11"
                 diskType: "Standard_LRS"
                 volumeSizeGB: 35
                 machineType: "Standard_D2_v3"
@@ -203,11 +202,11 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 autoScalerMax: 4
                 maxSurge: 4
                 maxUnavailable: 1
-                providerSpecificConfig: { azureConfig: { vnetCidr: "10.250.0.0/19", zones : ["westeurope-1"] } }
+                providerSpecificConfig: { azureConfig: { vnetCidr: "10.250.0.0/19", zones : ["1", "2"] } }
               }
             }
             kymaConfig: {
-              version: "1.8.0"
+              version: "1.12.0"
               components: [
                 { component: "compass-runtime-agent", namespace: "compass-system" }
                 {
@@ -281,7 +280,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
             }
             clusterConfig: {
               gardenerConfig: {
-                kubernetesVersion: "1.15.4"
+                kubernetesVersion: "1.15.11"
                 diskType: "gp2"
                 volumeSizeGB: 35
                 machineType: "m4.2xlarge"
@@ -305,7 +304,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
               }
             }
             kymaConfig: {
-              version: "1.8.0"
+              version: "1.12.0"
               components: [
                 { component: "compass-runtime-agent", namespace: "compass-system" }
                 {
