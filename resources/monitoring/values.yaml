@@ -1970,4 +1970,4 @@ prometheus:
     # podMetricsEndpoints: []
 
 pushgateway:
-  enabled: true # TODO: Enable only on Compass pipeline
+  enabled: false
