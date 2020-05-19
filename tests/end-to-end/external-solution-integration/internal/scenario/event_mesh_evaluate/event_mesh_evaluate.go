@@ -5,7 +5,6 @@ import (
 
 	"github.com/avast/retry-go"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
 	coreClient "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
@@ -32,27 +31,26 @@ var (
 // Steps return scenario steps
 func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	coreClientset := coreClient.NewForConfigOrDie(config)
-	dynamic := dynamic.NewForConfigOrDie(config)
 	testService := testkit.NewTestService(
-		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.skipSSLVerify)),
-		coreClientset.AppsV1().Deployments(s.testID),
-		coreClientset.CoreV1().Services(s.testID),
-		dynamic.Resource(apiRuleRes).Namespace(s.testID),
-		s.domain,
-		s.testID,
+		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.SkipSSLVerify)),
+		nil,
+		nil,
+		nil,
+		s.Domain,
+		s.TestID,
 	)
 
 	// lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
 	state := s.NewState()
-	dataStore := testkit.NewDataStore(coreClientset, s.testID)
+	dataStore := testkit.NewDataStore(coreClientset, s.TestID)
 	state.SetDataStore(dataStore)
 
 	return []step.Step{
 		testsuite.NewReuseApplication(state),
 		testsuite.NewResetCounterPod(testService),
-		testsuite.NewSendEventToMesh(s.testID, helpers.FunctionPayload, state),
+		testsuite.NewSendEventToMesh(s.TestID, helpers.FunctionPayload, state),
 		testsuite.NewCheckCounterPod(testService, 1, retry_opts...),
-		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.FunctionPayload, state),
+		testsuite.NewSendEventToCompatibilityLayer(s.TestID, helpers.FunctionPayload, state),
 		testsuite.NewCheckCounterPod(testService, 2, retry_opts...),
 	}, nil
 }

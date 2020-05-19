@@ -48,49 +48,49 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	dynamic := dynamic.NewForConfigOrDie(config)
 
 	connector := testkit.NewConnectorClient(
-		s.testID,
-		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testID),
-		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.skipSSLVerify)),
+		s.TestID,
+		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.TestID),
+		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.SkipSSLVerify)),
 		log.New(),
 	)
 
 	testService := testkit.NewTestService(
-		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.skipSSLVerify)),
-		coreClientset.AppsV1().Deployments(s.testID),
-		coreClientset.CoreV1().Services(s.testID),
-		dynamic.Resource(apiRuleRes).Namespace(s.testID),
-		s.domain,
-		s.testID,
+		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.SkipSSLVerify)),
+		coreClientset.AppsV1().Deployments(s.TestID),
+		coreClientset.CoreV1().Services(s.TestID),
+		dynamic.Resource(apiRuleRes).Namespace(s.TestID),
+		s.Domain,
+		s.TestID,
 	)
 
-	functionEndpoint := helpers.InClusterEndpoint(s.testID, s.testID, helpers.FunctionPort)
+	functionEndpoint := helpers.InClusterEndpoint(s.TestID, s.TestID, helpers.FunctionPort)
 	state := s.NewState()
 
-	dataStore := testkit.NewDataStore(coreClientset, s.testID)
+	dataStore := testkit.NewDataStore(coreClientset, s.TestID)
 
 	state.SetDataStore(dataStore)
 
 	return []step.Step{
 		step.Parallel(
-			testsuite.NewCreateNamespace(s.testID, coreClientset.CoreV1().Namespaces()),
-			testsuite.NewCreateApplication(s.testID, s.testID, false, s.applicationTenant,
-				s.applicationGroup, appOperatorClientset.ApplicationconnectorV1alpha1().Applications(),
+			testsuite.NewCreateNamespace(s.TestID, coreClientset.CoreV1().Namespaces()),
+			testsuite.NewCreateApplication(s.TestID, s.TestID, false, s.ApplicationTenant,
+				s.ApplicationGroup, appOperatorClientset.ApplicationconnectorV1alpha1().Applications(),
 				httpSourceClientset.HTTPSources(kymaIntegrationNamespace)),
 		),
-		testsuite.NewCreateMapping(s.testID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
-		testsuite.NewDeployFunction(s.testID, helpers.FunctionPayload, helpers.FunctionPort, dynamic.Resource(function).Namespace(s.testID), true),
+		testsuite.NewCreateMapping(s.TestID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.TestID)),
+		testsuite.NewDeployFunction(s.TestID, helpers.FunctionPayload, helpers.FunctionPort, dynamic.Resource(function).Namespace(s.TestID), true),
 		testsuite.NewStartTestServer(testService),
 		testsuite.NewSleep(5 * time.Second),
-		testsuite.NewConnectApplication(connector, state, s.applicationTenant, s.applicationGroup),
-		testsuite.NewRegisterTestService(s.testID, testService, state),
-		testsuite.NewCreateLegacyServiceInstance(s.testID, s.testID, state.GetServiceClassID,
-			serviceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testID),
-			serviceCatalogClientset.ServicecatalogV1beta1().ServiceClasses(s.testID)),
-		testsuite.NewCreateServiceBinding(s.testID, s.testID, serviceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testID)),
-		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID,
-			serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID),
-			knativeEventingClientSet.EventingV1alpha1().Brokers(s.testID), knativeEventingClientSet.MessagingV1alpha1().Subscriptions(kymaIntegrationNamespace)),
+		testsuite.NewConnectApplication(connector, state, s.ApplicationTenant, s.ApplicationGroup),
+		testsuite.NewRegisterTestService(s.TestID, testService, state),
+		testsuite.NewCreateLegacyServiceInstance(s.TestID, s.TestID, state.GetServiceClassID,
+			serviceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.TestID),
+			serviceCatalogClientset.ServicecatalogV1beta1().ServiceClasses(s.TestID)),
+		testsuite.NewCreateServiceBinding(s.TestID, s.TestID, serviceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.TestID)),
+		testsuite.NewCreateServiceBindingUsage(s.TestID, s.TestID, s.TestID,
+			serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.TestID),
+			knativeEventingClientSet.EventingV1alpha1().Brokers(s.TestID), knativeEventingClientSet.MessagingV1alpha1().Subscriptions(kymaIntegrationNamespace)),
 		testsuite.NewSleep(5 * time.Second),
-		testsuite.NewCreateKnativeTrigger(s.testID, defaultBrokerName, functionEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
+		testsuite.NewCreateKnativeTrigger(s.TestID, defaultBrokerName, functionEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.TestID)),
 	}, nil
 }

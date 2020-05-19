@@ -5,12 +5,15 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_evaluate"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_prepare"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
 // E2EScenario executes complete external solution integration test scenario
 type Scenario struct {
+	prepare           event_mesh_prepare.Scenario
+	evaluate          event_mesh_evaluate.Scenario
 	domain            string
 	testID            string
 	skipSSLVerify     bool
@@ -22,19 +25,20 @@ type Scenario struct {
 // AddFlags adds CLI flags to given FlagSet
 func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 	pflag.StringVar(&s.domain, "domain", "kyma.local", "domain")
-	pflag.StringVar(&s.testID, "testID", "e2e-mesh-ns", "domain")
+	pflag.StringVar(&s.testID, "testID", "external-solution-test", "domain")
 	pflag.BoolVar(&s.skipSSLVerify, "skipSSLVerify", false, "Skip verification of service SSL certificates")
 	pflag.StringVar(&s.applicationTenant, "applicationTenant", "", "Application CR Tenant")
 	pflag.StringVar(&s.applicationGroup, "applicationGroup", "", "Application CR Group")
-	s.waitTime = time.Duration(*pflag.Int("waitTime", 10, "Wait time in seconds")) * time.Second
+	pflag.DurationVar(&s.waitTime, "waitTime", 10*time.Second, "Wait time")
+
 }
 
 func (s *Scenario) NewState() *state {
-	return &state{
-		E2EState: scenario.E2EState{Domain: s.domain, SkipSSLVerify: s.skipSSLVerify, AppName: s.testID, GatewaySubdomain: "gateway"},
-	}
+	return &state{}
 }
 
 func (s *Scenario) RunnerOpts() []step.RunnerOption {
-	return nil
+	runnerOpts := s.prepare.RunnerOpts()
+	runnerOpts = append(runnerOpts, s.evaluate.RunnerOpts()...)
+	return append(runnerOpts, step.WithCleanupDefault(step.CleanupModeYes))
 }

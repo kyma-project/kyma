@@ -9,25 +9,25 @@ import (
 
 // E2EScenario executes complete external solution integration test scenario
 type Scenario struct {
-	domain            string
-	testID            string
-	skipSSLVerify     bool
-	applicationTenant string
-	applicationGroup  string
+	Domain            string
+	TestID            string
+	SkipSSLVerify     bool
+	ApplicationTenant string
+	ApplicationGroup  string
 }
 
 // AddFlags adds CLI flags to given FlagSet
 func (s *Scenario) AddFlags(set *pflag.FlagSet) {
-	pflag.StringVar(&s.domain, "domain", "kyma.local", "domain")
-	pflag.StringVar(&s.testID, "testID", "external-solution-test", "domain")
-	pflag.BoolVar(&s.skipSSLVerify, "skipSSLVerify", false, "Skip verification of service SSL certificates")
-	pflag.StringVar(&s.applicationTenant, "applicationTenant", "", "Application CR Tenant")
-	pflag.StringVar(&s.applicationGroup, "applicationGroup", "", "Application CR Group")
+	pflag.StringVar(&s.Domain, "domain", "kyma.local", "domain")
+	pflag.StringVar(&s.TestID, "testID", "external-solution-test", "domain")
+	pflag.BoolVar(&s.SkipSSLVerify, "SkipSSLVerify", false, "Skip verification of service SSL certificates")
+	pflag.StringVar(&s.ApplicationTenant, "applicationTenant", "", "Application CR Tenant")
+	pflag.StringVar(&s.ApplicationGroup, "applicationGroup", "", "Application CR Group")
 }
 
 func (s *Scenario) NewState() *e2EEventMeshState {
 	return &e2EEventMeshState{
-		E2EState: scenario.E2EState{Domain: s.domain, SkipSSLVerify: s.skipSSLVerify, AppName: s.testID, GatewaySubdomain: "gateway"},
+		E2EState: scenario.E2EState{Domain: s.Domain, SkipSSLVerify: s.SkipSSLVerify, AppName: s.TestID, GatewaySubdomain: "gateway"},
 	}
 }
 
