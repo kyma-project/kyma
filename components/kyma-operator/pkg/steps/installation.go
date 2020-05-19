@@ -126,7 +126,7 @@ func (steps *InstallationSteps) processComponents(installationData *config.Insta
 
 		step, err := stepsFactory.NewStep(component)
 		if err != nil {
-			removeLabelAndReturn(err)
+			return removeLabelAndReturn(err)
 		}
 
 		steps.PrintStep(stepName)
