@@ -6,7 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 
 	core "k8s.io/api/core/v1"
-	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -26,14 +26,14 @@ func NewDataStore(coreClient *kubernetes.Clientset, namespace string) *DataStore
 
 func (ds DataStore) Store(key, val string) error {
 	found := true
-	cm, err := ds.coreClient.CoreV1().ConfigMaps(ds.namespace).Get(ds.name, meta.GetOptions{})
+	cm, err := ds.coreClient.CoreV1().ConfigMaps(ds.namespace).Get(ds.name, metav1.GetOptions{})
 	if err != nil {
 		if !errors.IsNotFound(err) {
 			return err
 		}
 		found = false
 		cm = &core.ConfigMap{
-			ObjectMeta: meta.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: ds.name,
 			},
 			Data: map[string]string{},
@@ -50,7 +50,7 @@ func (ds DataStore) Store(key, val string) error {
 }
 
 func (ds DataStore) Load(key string) (string, error) {
-	cm, err := ds.coreClient.CoreV1().ConfigMaps(ds.namespace).Get(ds.name, meta.GetOptions{})
+	cm, err := ds.coreClient.CoreV1().ConfigMaps(ds.namespace).Get(ds.name, metav1.GetOptions{})
 	if err != nil {
 		return "", err
 	}
@@ -58,4 +58,8 @@ func (ds DataStore) Load(key string) (string, error) {
 		return val, nil
 	}
 	return "", fmt.Errorf("key not found: %v", key)
+}
+
+func (ds DataStore) Destroy() error {
+	return ds.coreClient.CoreV1().ConfigMaps(ds.namespace).Delete(ds.name, &metav1.DeleteOptions{})
 }

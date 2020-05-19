@@ -26,8 +26,6 @@ import (
 const (
 	kymaIntegrationNamespace = "kyma-integration"
 	defaultBrokerName        = "default"
-	CertKey                  = "cert"
-	AppNameKey               = "appname"
 )
 
 var (
@@ -68,8 +66,6 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 
 	dataStore := testkit.NewDataStore(coreClientset, s.TestID)
 
-	state.SetDataStore(dataStore)
-
 	return []step.Step{
 		step.Parallel(
 			testsuite.NewCreateNamespace(s.TestID, coreClientset.CoreV1().Namespaces()),
@@ -92,5 +88,6 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 			knativeEventingClientSet.EventingV1alpha1().Brokers(s.TestID), knativeEventingClientSet.MessagingV1alpha1().Subscriptions(kymaIntegrationNamespace)),
 		testsuite.NewSleep(5 * time.Second),
 		testsuite.NewCreateKnativeTrigger(s.TestID, defaultBrokerName, functionEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.TestID)),
+		testsuite.NewStoreCertificatesInCluster(dataStore, s.TestID, state.GetCertificates),
 	}, nil
 }

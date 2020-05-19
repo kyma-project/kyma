@@ -43,10 +43,9 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	// lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
 	state := s.NewState()
 	dataStore := testkit.NewDataStore(coreClientset, s.TestID)
-	state.SetDataStore(dataStore)
 
 	return []step.Step{
-		testsuite.NewReuseApplication(state),
+		testsuite.NewLoadStoredCertificates(dataStore, state),
 		testsuite.NewResetCounterPod(testService),
 		testsuite.NewSendEventToMesh(s.TestID, helpers.FunctionPayload, state),
 		testsuite.NewCheckCounterPod(testService, 1, retry_opts...),
