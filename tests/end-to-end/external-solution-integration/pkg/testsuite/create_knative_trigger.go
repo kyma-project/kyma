@@ -6,7 +6,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	baseretry "github.com/avast/retry-go"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
@@ -22,10 +21,10 @@ import (
 const retryAttemptsCount = 60
 const retryDelay = 2 * time.Second
 
-var retryOpts = []baseretry.Option{
-	baseretry.Attempts(retryAttemptsCount),
-	baseretry.Delay(retryDelay),
-	baseretry.OnRetry(func(n uint, err error) {
+var retryOpts = []retry.Option{
+	retry.Attempts(retryAttemptsCount),
+	retry.Delay(retryDelay),
+	retry.OnRetry(func(n uint, err error) {
 		logrus.WithField("component", "CreateKnativeTrigger").Debugf("OnRetry: attempts: %d, error: %v", n, err)
 	}),
 }

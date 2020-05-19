@@ -3,21 +3,19 @@ package event_mesh
 import (
 	"time"
 
-	"github.com/sirupsen/logrus"
-
-	baseretry "github.com/avast/retry-go"
-
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
+	"github.com/sirupsen/logrus"
 )
 
 const retryAttemptsCount = 120
 const retryDelay = 2 * time.Second
 
-var opts = []baseretry.Option{
-	baseretry.Attempts(retryAttemptsCount),
-	baseretry.Delay(retryDelay),
-	baseretry.OnRetry(func(n uint, err error) {
+var opts = []retry.Option{
+	retry.Attempts(retryAttemptsCount),
+	retry.Delay(retryDelay),
+	retry.OnRetry(func(n uint, err error) {
 		logrus.WithField("component", "WrappedCounterPod").Debugf("OnRetry: attempts: %d, error: %v", n, err)
 	}),
 }

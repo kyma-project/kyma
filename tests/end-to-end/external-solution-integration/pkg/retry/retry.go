@@ -11,11 +11,20 @@ import (
 const retryAttemptsCount = 120
 const retryDelay = 1 * time.Second
 
+type Option = retry.Option
+
+var Attempts = retry.Attempts
+var Delay = retry.Delay
+var DelayType = retry.DelayType
+var OnRetry = retry.OnRetry
+var FixedDelay = retry.FixedDelay
+var BackOffDelay = retry.BackOffDelay
+
 var defaultOpts = []retry.Option{
-	retry.Attempts(retryAttemptsCount),
-	retry.Delay(retryDelay),
-	retry.DelayType(retry.FixedDelay),
-	retry.OnRetry(func(n uint, err error) {
+	Attempts(retryAttemptsCount),
+	Delay(retryDelay),
+	DelayType(FixedDelay),
+	OnRetry(func(n uint, err error) {
 		logrus.WithField("component", "RetryTest").Debugf("OnRetry: attempts: %d, error: %v", n, err)
 	}),
 }
