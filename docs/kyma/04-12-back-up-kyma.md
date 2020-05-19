@@ -2,25 +2,23 @@
 title: Back up Kyma
 type: Installation
 ---
-The user load on a Kyma cluster typically consists of various Kubernetes objects and volumes. Kyma relies on the managed Kubernetes cluster for periodic backups of the Kubernetes objects. That's why it does not require any manual setup to perform backups.
+The user load on a Kyma cluster consists of Kubernetes [objects](https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/) and [volumes](https://kubernetes.io/docs/concepts/storage/volumes/). Kyma relies on the managed Kubernetes cluster for periodic backups of Kubernetes objects, so you don't have to perform any manual steps.
 
-For example, Gardener uses `etcd` as the Kubernetes' backing store for all cluster data. This means all Kubernetes objects are stored on `etcd`. Gardener uses periodic jobs to take major and minor snapshots of the `etcd` database. A major snapshot including all the resources takes place every day, and each minor snapshot including only the changes takes place every five minutes. In case the `etcd` database experiences any problems, Gardener automatically restores the Kubernetes cluster using the latest snapshot.
+For example, Gardener uses etcd as the Kubernetes backing store for all cluster data. Gardener runs periodic jobs to take major and minor snapshots of the etcd database to include Kubernetes objects in the backup. A major snapshot including all the resources happens evert day, and  minor snapshot, including only the changes, happens every five minutes. If the etcd database experiences any problems, Gardener automatically restores the Kubernetes cluster using the latest snapshot.
 
-However, volumes are typically not a part of these backups. That's why it is recommended to take periodic backups of your volumes. You can do this using the VolumeSnapshot Kubernetes API resource. Read the following sections to learn how to use it.
+>**NOTE:** Kubernetes volumes are typically not a part of backups. That's why you should take periodic backups of your volumes using the VolumeSnapshot API resource.
 
 ## On-demand volume snapshots
 
-Kubernetes provides an API resource called VolumeSnapshot that you can use to take the snapshot of a volume on Kubernetes. You can then use the snapshot either to provision a new volume (pre-populated with the snapshot data) or to restore the existing volume to a previous state (represented by the snapshot).
+Kubernetes provides VolumeSnapshot API resource that you can use to create a snapshot of a Kubernetes volume. You can use the snapshot to provision a new volume pre-populated with the snapshot data or to restore the existing volume to the state represented by the snapshot.
 
-Volume snapshot support is only available for [CSI drivers](https://kubernetes-csi.github.io/docs/), however, not all CSI drivers support it. You can find a list of all the drivers [here](https://kubernetes-csi.github.io/docs/drivers.html).
+Volume snapshots are only supported by [Container Storage Interface (CSI) drivers](https://kubernetes-csi.github.io/docs/), but not all CSI drivers support it. For more details, see the [list of all available drivers](https://kubernetes-csi.github.io/docs/drivers.html).
 
-Follow this [tutorial](/root/kyma#tutorials-create-on-demand-volume-snapshots) to create on-demand volume snapshots for different providers. 
+Follow this [tutorial](/root/kyma#tutorials-create-on-demand-volume-snapshots) to create on-demand volume snapshots for various providers. 
 
 ## Periodic job for volume snapshots
 
-Users can create a CronJob to take snapshots of PersistentVolumes periodically.
-
-Have a look at a sample CronJob with the required Service Account and roles:
+You can create a CronJob to take periodic snapshots of PersistentVolumes. See a sample CronJob definition which includes the required ServiceAccount and roles:
 
 ```yaml
 ---

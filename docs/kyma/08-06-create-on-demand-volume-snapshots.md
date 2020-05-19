@@ -3,14 +3,13 @@ title: Create on-demand volume snapshots
 type: Tutorials
 ---
 
-This set of tutorials shows how to create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) you can then use to provision a new volume or restore an existing one. 
-
+This set of tutorials shows how to create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) you can use to provision a new volume or restore an existing one. 
 
 Have a look at the example to see how to create a volume snapshot:
 
-1. Assume that you have a `pvc-to-backup` PVC which you have created using a CSI-enabled StorageClass. Trigger a snapshot by creating a VolumeSnapshot object:
+1. Assume that you have a `pvc-to-backup` PersistentVolumeClaim which you have created using a CSI-enabled StorageClass. Trigger a snapshot by creating a VolumeSnapshot object:
 
-> **NOTE:** You must use CSI-enabled StorageClass to create a PVC, otherwise it won't be backed up.
+>**NOTE:** You must use CSI-enabled StorageClass to create a PVC, otherwise it won't be backed up.
 
 ```yaml
 apiVersion: snapshot.storage.k8s.io/v1beta1
@@ -23,7 +22,7 @@ spec:
     persistentVolumeClaimName: pvc-to-backup
 ```
 
-2. Recreate the PVC using the snapshot created before as the data source:
+2. Recreate the PVC using the snapshot as the data source:
 
 ```yaml
 apiVersion: v1
@@ -44,33 +43,28 @@ spec:
 ```
 
 This will create a new `pvc-restored` PVC with pre-populated data from the snapshot. 
-
 Follow the instructions to enable this feature for various providers.
 
 ## Create a volume snapshot for AKS
 
-Enable taking volume snaphots for AKS.
-
 ### Prerequisites
 
-Minimum Kubernetes version supported is 1.17.
+The minimum supported Kubernetes version is 1.17.
 
 ### Steps
 
 1. [Install the CSI driver](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
-
 2. [Create a volume snapshot](https://github.com/kubernetes-sigs/azuredisk-csi-driver/tree/master/deploy/example/snapshot).
 
 ## Create a volume snapshot for GKE
 
 ### Prerequisites
 
-Minimum Kubernetes version supported is 1.14.
+The minimum supported Kubernetes version is 1.14.
 
 ### Steps
 
 1. [Enable the required feature gate on the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
-
 2. Check out [the repository for the Google Compute Engine Persistent Disk (GCE PD) CSI driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for the details on how to use volume snapshots on GKE.
 
 ## Enable taking volume snaphots for Gardener providers
