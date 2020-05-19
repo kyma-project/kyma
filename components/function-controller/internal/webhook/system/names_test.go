@@ -17,7 +17,6 @@ func TestGetNamespace(t *testing.T) {
 		expectEnvVar: "test",
 	}}
 
-
 	for _, ts := range testcases {
 		if err := os.Setenv(SystemNamespaceEnvVar, ts.envVar); err != nil {
 			t.Fatalf("Failed to set ENV: %v", err)

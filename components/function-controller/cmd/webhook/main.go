@@ -26,10 +26,10 @@ var types = map[schema.GroupVersionKind]resourcesemantics.GenericCRD{
 }
 
 type config struct {
-	CurrentNamespace   string `envconfig:"default=kyma-system"`
+	SystemNamespace    string `envconfig:"default=kyma-system"`
 	WebhookServiceName string `envconfig:"default=serverless-webhook-svc"`
-	SecretName         string `envconfig:"default=serverless-webhook"`
-	Port               int    `envconfig:"default=8433"`
+	WebhookSecretName  string `envconfig:"default=serverless-webhook"`
+	WebhookPort        int    `envconfig:"default=8443"`
 }
 
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;update
@@ -38,18 +38,18 @@ type config struct {
 
 func main() {
 	cfg := &config{}
-	if err := envconfig.InitWithPrefix(cfg, "APP_WEBHOOK"); err != nil {
+	if err := envconfig.Init(cfg); err != nil {
 		panic(errors.New("while reading env variables"))
 	}
 
 	// Scope informers to the webhook's namespace instead of cluster-wide
-	ctx := injection.WithNamespaceScope(signals.NewContext(), cfg.CurrentNamespace)
+	ctx := injection.WithNamespaceScope(signals.NewContext(), cfg.SystemNamespace)
 
 	// Set up a signal context with our webhook options
 	ctx = webhook.WithOptions(ctx, webhook.Options{
 		ServiceName: cfg.WebhookServiceName,
-		Port:        cfg.Port,
-		SecretName:  cfg.SecretName,
+		Port:        cfg.WebhookPort,
+		SecretName:  cfg.WebhookSecretName,
 	})
 
 	restConfig := ctrl.GetConfigOrDie()

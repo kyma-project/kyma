@@ -24,7 +24,7 @@ GOBIN=$(shell go env GOBIN)
 endif
 
 verify:: mod-verify
-release: build-function-runtime-image push-function-runtime-image
+release: build-function-runtime-image push-function-runtime-image build-function-webhook push-function-webhook
 
 
 resolve-local:
@@ -101,6 +101,19 @@ endif
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
 	@echo "resources/serverless"
+
+######## function webhook
+
+FUNCTION_WEBHOOK_NAME = function-webhook
+FUNCTION_WEBHOOK_IMG_NAME = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(FUNCTION_WEBHOOK_NAME)
+
+.PHONY: build-function-webhook push-function-webhook
+build-function-webhook:
+	docker build -t $(FUNCTION_WEBHOOK_NAME) -f $(ROOT)/deploy/webhook/Dockerfile .
+
+push-function-webhook:
+	docker tag $(FUNCTION_WEBHOOK_NAME) $(FUNCTION_WEBHOOK_IMG_NAME):$(DOCKER_TAG)
+	docker push $(FUNCTION_WEBHOOK_IMG_NAME):$(DOCKER_TAG)
 
 ######## function runtime image
 
