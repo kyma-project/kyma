@@ -15,8 +15,3 @@ image:
   tag: "978664da"
   # Image pull policy
   pullPolicy: IfNotPresent
-
-rbacJob:
-  image:
-    repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20200310-5f52f407"
