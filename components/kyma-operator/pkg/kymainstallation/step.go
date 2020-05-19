@@ -75,16 +75,15 @@ func (s installStep) Run() error {
 			deleteWaitTime := 10
 
 			log.Println(fmt.Sprintf("Helm installation of %s failed. Deleting before retrying installation.", s.component.GetReleaseName()))
-			log.Println("Look at the proceeding logs to see the reason of failure")
 			_, err := s.helmClient.DeleteRelease(s.component.GetReleaseName())
 
 			if err != nil {
 				deleteErrMsg := fmt.Sprintf("Helm delete of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
-				log.Println(deleteErrMsg)
 				return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, deleteErrMsg))
 			}
 
 			//waiting for release to be deleted
+			//TODO implement waiting method
 			time.Sleep(time.Second * time.Duration(deleteWaitTime))
 
 			errorMsg = fmt.Sprintf("%s\nHelm delete of %s was successfull", installErrMsg, s.component.GetReleaseName())
@@ -123,7 +122,26 @@ func (s upgradeStep) Run() error {
 		releaseOverrides)
 
 	if upgradeErr != nil {
-		return errors.New("Helm upgrade error: " + upgradeErr.Error())
+		upgradeErrMsg := fmt.Sprintf("Helm upgrade error: %s", upgradeErr.Error())
+		errorMsg := upgradeErrMsg
+
+		rollbackWaitTime := 10
+
+		log.Println(fmt.Sprintf("Helm upgrade of %s failed. Performing rollback to last known deployed revision: %d.", s.component.GetReleaseName(), s.deployedRevision))
+		_, err := s.helmClient.RollbackRelease(s.component.GetReleaseName(), s.deployedRevision)
+
+		if err != nil {
+			rollbackErrMsg := fmt.Sprintf("Helm rollback of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
+			return errors.New(fmt.Sprintf("%s \n %s \n", upgradeErrMsg, rollbackErrMsg))
+		}
+
+		//waiting for release to rollback
+		//TODO implement waiting method
+		time.Sleep(time.Second * time.Duration(rollbackWaitTime))
+
+		errorMsg = fmt.Sprintf("%s\nHelm rollback of %s was successfull", upgradeErrMsg, s.component.GetReleaseName())
+
+		return errors.New(errorMsg)
 	}
 
 	s.helmClient.PrintRelease(upgradeResp.Release)
