@@ -169,7 +169,7 @@ func testTargetsAreHealthy() {
 
 func shouldIgnoreTarget(target promAPI.Labels) bool {
 	var jobsToBeIgnored = []string{
-		// TODO [sayanh]: These targets will be tested here: https://github.com/kyma-project/kyma/issues/6457
+		// Note: These targets will be tested here: https://github.com/kyma-project/kyma/issues/6457
 		"knative-eventing/knative-eventing-event-mesh-dashboard-broker",
 		"knative-eventing/knative-eventing-event-mesh-dashboard-httpsource",
 	}
