@@ -122,12 +122,15 @@ func (ts *TestService) IsReady() error {
 func (ts *TestService) Reset() error {
 	url := ts.GetTestServiceURL()
 	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		return err
+	}
 	resp, err := ts.HttpClient.Do(req)
 	if err != nil {
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("expected 200, got %s", resp.StatusCode)
+		return fmt.Errorf("expected 200, got %v", resp.StatusCode)
 	}
 	return nil
 }

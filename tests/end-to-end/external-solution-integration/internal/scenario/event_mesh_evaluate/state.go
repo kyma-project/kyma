@@ -11,8 +11,6 @@ import (
 
 type e2EEventMeshState struct {
 	scenario.E2EState
-	registryClient *testkit.RegistryClient
-	dataStore      *testkit.DataStore
 }
 
 // SetGatewayClientCerts allows to set application gateway client certificates so they can be used by later steps

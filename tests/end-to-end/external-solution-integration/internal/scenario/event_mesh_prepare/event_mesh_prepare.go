@@ -1,8 +1,6 @@
 package event_mesh_prepare
 
 import (
-	"time"
-
 	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -16,6 +14,7 @@ import (
 	connectionTokenHandlerClient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
 	serviceBindingUsageClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
@@ -73,11 +72,13 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 				s.ApplicationGroup, appOperatorClientset.ApplicationconnectorV1alpha1().Applications(),
 				httpSourceClientset.HTTPSources(kymaIntegrationNamespace)),
 		),
-		testsuite.NewCreateMapping(s.TestID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.TestID)),
-		testsuite.NewDeployFunction(s.TestID, helpers.FunctionPayload, helpers.FunctionPort, dynamic.Resource(function).Namespace(s.TestID), true),
-		testsuite.NewStartTestServer(testService),
-		testsuite.NewSleep(5 * time.Second),
-		testsuite.NewConnectApplication(connector, state, s.ApplicationTenant, s.ApplicationGroup),
+		step.Parallel(
+			testsuite.NewCreateMapping(s.TestID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.TestID)),
+			testsuite.NewDeployFunction(s.TestID, helpers.FunctionPayload, helpers.FunctionPort, dynamic.Resource(function).Namespace(s.TestID), true),
+			testsuite.NewStartTestServer(testService),
+			testsuite.NewConnectApplication(connector, state, s.ApplicationTenant, s.ApplicationGroup),
+		),
+		testsuite.NewStoreCertificatesInCluster(dataStore, s.TestID, state.GetCertificates),
 		testsuite.NewRegisterTestService(s.TestID, testService, state),
 		testsuite.NewCreateLegacyServiceInstance(s.TestID, s.TestID, state.GetServiceClassID,
 			serviceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.TestID),
@@ -86,8 +87,6 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		testsuite.NewCreateServiceBindingUsage(s.TestID, s.TestID, s.TestID,
 			serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.TestID),
 			knativeEventingClientSet.EventingV1alpha1().Brokers(s.TestID), knativeEventingClientSet.MessagingV1alpha1().Subscriptions(kymaIntegrationNamespace)),
-		testsuite.NewSleep(5 * time.Second),
 		testsuite.NewCreateKnativeTrigger(s.TestID, defaultBrokerName, functionEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.TestID)),
-		testsuite.NewStoreCertificatesInCluster(dataStore, s.TestID, state.GetCertificates),
 	}, nil
 }
