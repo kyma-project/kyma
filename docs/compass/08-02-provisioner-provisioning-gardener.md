@@ -195,7 +195,6 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 machineType: "Standard_D2_v3"
                 region: "westeurope"
                 provider: "azure"
-                seed: "az-eu1"
                 targetSecret: "{GARDENER_AZURE_SECRET_NAME}"
                 workerCidr: "10.250.0.0/19"
                 autoScalerMin: 2
@@ -286,7 +285,6 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 machineType: "m4.2xlarge"
                 region: "eu-west-1"
                 provider: "aws"
-                seed: "aws-eu1"
                 targetSecret: "{GARDENER_AWS_SECRET_NAME}"
                 workerCidr: "10.250.0.0/19"
                 autoScalerMin: 2
