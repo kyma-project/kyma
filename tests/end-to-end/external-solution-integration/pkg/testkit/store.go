@@ -35,8 +35,8 @@ func (ds DataStore) Store(key, val string) error {
 		cm = &core.ConfigMap{
 			ObjectMeta: meta.ObjectMeta{
 				Name: ds.name,
-		},
-			Data:       map[string]string{},
+			},
+			Data: map[string]string{},
 		}
 	}
 	data := &cm.Data

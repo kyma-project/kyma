@@ -16,6 +16,11 @@ func (r *Runner) Execute(steps []Step) error {
 		r.Cleanup(steps)
 	case CleanupModeYes:
 		err = r.Run(steps, false)
+	case CleanupModeOnErrorOnly:
+		err = r.Run(steps, true)
+		if err != nil {
+			r.Cleanup(steps)
+		}
 	}
 	return err
 }
@@ -35,6 +40,8 @@ const (
 	CleanupModeOnly CleanupMode = "only"
 	// Execute both steps and cleanup
 	CleanupModeYes CleanupMode = "yes"
+	// Execute steps. If steps fail then run cleanup. Keep resources in case of success
+	CleanupModeOnErrorOnly CleanupMode = "onerroronly"
 )
 
 // String implements pflag.Value.String

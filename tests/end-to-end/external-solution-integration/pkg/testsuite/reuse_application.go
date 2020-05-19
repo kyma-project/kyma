@@ -6,7 +6,7 @@ import (
 
 // ConnectApplication is a step which connects application with client certificates and saves connected httpClient in the state
 type ReuseApplication struct {
-	state     ReuseApplicationState
+	state ReuseApplicationState
 }
 
 // ConnectApplicationState allows ConnectApplication to save connected http.Client for further use by other steps
@@ -17,7 +17,7 @@ type ReuseApplicationState interface {
 // NewConnectApplication returns new ConnectApplication
 func NewReuseApplication(state ConnectApplicationState) *ReuseApplication {
 	return &ReuseApplication{
-		state:     state,
+		state: state,
 	}
 }
 
@@ -36,4 +36,3 @@ func (s ReuseApplication) Run() error {
 func (s ReuseApplication) Cleanup() error {
 	return nil
 }
-

@@ -18,7 +18,6 @@ type Scenario struct {
 
 // AddFlags adds CLI flags to given FlagSet
 func (s *Scenario) AddFlags(set *pflag.FlagSet) {
-
 	pflag.StringVar(&s.domain, "domain", "kyma.local", "domain")
 	pflag.StringVar(&s.testID, "testID", "external-solution-test", "domain")
 	pflag.BoolVar(&s.skipSSLVerify, "skipSSLVerify", false, "Skip verification of service SSL certificates")
@@ -34,6 +33,6 @@ func (s *Scenario) NewState() *e2EEventMeshState {
 
 func (s *Scenario) RunnerOpts() []step.RunnerOption {
 	return []step.RunnerOption{
-		step.WithCleanupDefault(step.CleanupModeNo),
+		step.WithCleanupDefault(step.CleanupModeOnErrorOnly),
 	}
 }
