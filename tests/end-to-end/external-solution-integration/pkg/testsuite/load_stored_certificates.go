@@ -29,7 +29,7 @@ func NewLoadStoredCertificates(ds *testkit.DataStore, state LoadStoredCertificat
 
 // Name returns name name of the step
 func (s LoadStoredCertificates) Name() string {
-	return "Reuse application"
+	return "Load Stored Certificates"
 }
 
 // Run executes the step
