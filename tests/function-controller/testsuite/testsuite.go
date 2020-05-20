@@ -16,6 +16,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 
@@ -97,6 +98,11 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		return nil, errors.Wrap(err, "while creating K8s Dynamic client")
 	}
 
+	clientset, err := kubernetes.NewForConfig(restConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "while creating k8s clientset")
+	}
+
 	namespaceName := fmt.Sprintf("%s-%d", cfg.NamespaceBaseName, rand.Uint32())
 
 	container := shared.Container{
@@ -117,7 +123,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	sb := servicebinding.New(cfg.ServiceBindingName, container)
 	sbu := servicebindingusage.New(cfg.ServiceBindingUsageName, cfg.UsageKindName, container)
 	revList := revision.New(cfg.FunctionName, container)
-	jobList := job.New(cfg.FunctionName, container)
+	jobList := job.New(cfg.FunctionName, clientset.BatchV1(), container)
 	ksrv := kservice.New(cfg.FunctionName, container)
 
 	return &TestSuite{

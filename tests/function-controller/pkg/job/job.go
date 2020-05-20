@@ -5,19 +5,17 @@ import (
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	batchv1 "k8s.io/api/batch/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
+	batchv1typed "k8s.io/client-go/kubernetes/typed/batch/v1"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
 	"github.com/pkg/errors"
 )
 
 type Job struct {
-	resCli             *resource.Resource
+	client             batchv1typed.JobInterface
 	namespace          string
 	waitTimeout        time.Duration
 	log                shared.Logger
@@ -25,13 +23,9 @@ type Job struct {
 	parentFunctionName string
 }
 
-func New(parentFunctionName string, c shared.Container) *Job {
+func New(parentFunctionName string, batchCli batchv1typed.BatchV1Interface, c shared.Container) *Job {
 	return &Job{
-		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
-			Group:    "",
-			Version:  "v1",
-			Resource: "jobs",
-		}, c.Namespace, c.Log, c.Verbose),
+		client:             batchCli.Jobs(c.Namespace),
 		parentFunctionName: parentFunctionName,
 		namespace:          c.Namespace,
 		waitTimeout:        c.WaitTimeout,
@@ -45,21 +39,11 @@ func (j Job) List() (*batchv1.JobList, error) {
 		serverlessv1alpha1.FunctionNameLabel: j.parentFunctionName,
 	}
 
-	u, err := j.resCli.List(selector)
+	jobList, err := j.client.List(metav1.ListOptions{
+		LabelSelector: labels.SelectorFromSet(selector).String(),
+	})
 	if err != nil {
 		return nil, errors.Wrapf(err, "while listing Jobs by label %s in namespace %s", labels.SelectorFromSet(selector).String(), j.namespace)
 	}
-
-	jobs, err := convertFromUnstructuredToJobList(u)
-	if err != nil {
-		return nil, err
-	}
-
-	return &jobs, nil
-}
-
-func convertFromUnstructuredToJobList(u *unstructured.UnstructuredList) (batchv1.JobList, error) {
-	jobList := batchv1.JobList{}
-	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.UnstructuredContent(), &jobList)
-	return jobList, err
+	return jobList, nil
 }
