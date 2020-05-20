@@ -36,8 +36,9 @@ func (s step) Status() (string, error) {
 
 type installStep struct {
 	step
-	sourceGetter kymasources.SourceGetter
-	overrideData overrides.OverrideData
+	sourceGetter      kymasources.SourceGetter
+	overrideData      overrides.OverrideData
+	deleteWaitTimeSec uint32
 }
 
 // Run method for installStep triggers step installation via helm
@@ -72,7 +73,6 @@ func (s installStep) Run() error {
 		}
 
 		if isDeletable {
-			deleteWaitTime := 10
 
 			log.Println(fmt.Sprintf("Helm installation of %s failed. Deleting before retrying installation.", s.component.GetReleaseName()))
 			_, err := s.helmClient.DeleteRelease(s.component.GetReleaseName())
@@ -84,7 +84,7 @@ func (s installStep) Run() error {
 
 			//waiting for release to be deleted
 			//TODO implement waiting method
-			time.Sleep(time.Second * time.Duration(deleteWaitTime))
+			time.Sleep(time.Second * time.Duration(s.deleteWaitTimeSec))
 
 			errorMsg = fmt.Sprintf("%s\nHelm delete of %s was successfull", installErrMsg, s.component.GetReleaseName())
 		}
@@ -99,7 +99,8 @@ func (s installStep) Run() error {
 
 type upgradeStep struct {
 	installStep
-	deployedRevision int32
+	deployedRevision    int32
+	rollbackWaitTimeSec uint32
 }
 
 // Run method for upgradeStep triggers step upgrade via helm
@@ -125,8 +126,6 @@ func (s upgradeStep) Run() error {
 		upgradeErrMsg := fmt.Sprintf("Helm upgrade error: %s", upgradeErr.Error())
 		errorMsg := upgradeErrMsg
 
-		rollbackWaitTime := 10
-
 		log.Println(fmt.Sprintf("Helm upgrade of %s failed. Performing rollback to last known deployed revision: %d.", s.component.GetReleaseName(), s.deployedRevision))
 		_, err := s.helmClient.RollbackRelease(s.component.GetReleaseName(), s.deployedRevision)
 
@@ -137,7 +136,7 @@ func (s upgradeStep) Run() error {
 
 		//waiting for release to rollback
 		//TODO implement waiting method
-		time.Sleep(time.Second * time.Duration(rollbackWaitTime))
+		time.Sleep(time.Second * time.Duration(s.rollbackWaitTimeSec))
 
 		errorMsg = fmt.Sprintf("%s\nHelm rollback of %s was successfull", upgradeErrMsg, s.component.GetReleaseName())
 

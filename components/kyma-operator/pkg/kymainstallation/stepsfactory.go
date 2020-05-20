@@ -12,6 +12,11 @@ import (
 	helm "k8s.io/helm/pkg/proto/hapi/release"
 )
 
+const (
+	defaultDeleteWaitTimeSec   = 10
+	defaultRollbackWaitTimeSec = 10
+)
+
 // StepFactoryCreator knows how to create an instance of the StepFactory
 type StepFactoryCreator interface {
 	NewInstallStepFactory(overrides.OverrideData, kymasources.LegacyKymaSourceConfig) (StepFactory, error)
@@ -131,9 +136,10 @@ func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) (Step, e
 	}
 
 	inststp := installStep{
-		step:         step,
-		sourceGetter: isf.sourceGetter,
-		overrideData: isf.overrideData,
+		step:              step,
+		sourceGetter:      isf.sourceGetter,
+		overrideData:      isf.overrideData,
+		deleteWaitTimeSec: defaultDeleteWaitTimeSec,
 	}
 
 	relStatus, exists := isf.installedReleases[component.GetReleaseName()]
@@ -147,8 +153,9 @@ func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) (Step, e
 
 		if isUpgrade {
 			return upgradeStep{
-				inststp,
-				relStatus.LastDeployedRevision,
+				installStep:         inststp,
+				deployedRevision:    relStatus.LastDeployedRevision,
+				rollbackWaitTimeSec: defaultRollbackWaitTimeSec,
 			}, nil
 		}
 	}
