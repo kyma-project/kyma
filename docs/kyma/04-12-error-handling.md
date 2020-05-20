@@ -12,12 +12,12 @@ If an error occurs while processing a component, Kyma Operator restores the init
 If an error occurs during component installation, Kyma Operator deletes the corresponding Helm release and retries the operation. If such a release does not exist, the deletion step is skipped.
 
 
-### Upgrade error
+## Upgrade error
 
 If an error occurs during component upgrade, Kyma Operator rolls back the corresponding Helm release to the last deployed revision and retries the operation. If the release history does not include a deployed revision, the controller returns an error and stops the process. 
 
 
-### Retry policy
+## Retry policy
  
 The retry policy is based on the configuration that specifies the intervals between consecutive attempts. The default configuration consists of 5 retries with the following time intervals between each attempt: 10s, 20s, 40s, 60s, 80s. After that, the installation is stopped and can be restarted manually by setting the `action: install` label on the Installation CR. 
 
