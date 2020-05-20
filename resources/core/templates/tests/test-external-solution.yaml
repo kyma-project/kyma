@@ -46,6 +46,7 @@ spec:
               /e2e {{ $val.testsuite }} \
               --domain {{ $.Values.global.ingress.domainName }} \
               --testID {{ $val.testsuite }} \
+              --waitTime 20s \
               --skipSSLVerify
               {{- if $.Values.tests.application_connector_tests.connector_service.central }} --applicationTenant=tenant --applicationGroup=group {{- end }}
               exit_code=$?
