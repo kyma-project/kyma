@@ -41,6 +41,7 @@ spec:
           - application
           - state
           type: object
+
 {{- end }}
 {{- end }}
 {{- end }}

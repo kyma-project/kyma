@@ -52,8 +52,11 @@ spec:
         - /bin/bash
         - -c
         - |-
-          kubectl annotate crd applications.applicationconnector.kyma-project.io helm.sh/hook- \
-          || kubectl apply -f /etc/crd/applications.applicationconnector.kyma-project.io
+          timeout 60s bash -c '\
+            until \
+              kubectl annotate crd applications.applicationconnector.kyma-project.io helm.sh/hook- \
+              || kubectl apply -f /etc/crd/applications.applicationconnector.kyma-project.io; \
+            do sleep 2; done'
       volumes:
       - name: crd-app-connector
         configMap:
@@ -96,21 +99,18 @@ spec:
         - -c
         - |-
           set -e
+          operation_timeout=60s
+          crds=( certificaterequests.applicationconnector.kyma-project.io \
+            tokenrequests.applicationconnector.kyma-project.io \
+            centralconnections.applicationconnector.kyma-project.io )
 
-          echo "processing certificaterequests.applicationconnector.kyma-project.io"
-          kubectl annotate crd certificaterequests.applicationconnector.kyma-project.io helm.sh/hook- \
-          || kubectl apply -f /etc/crd/certificaterequests.applicationconnector.kyma-project.io
-          echo "done processing certificaterequests.applicationconnector.kyma-project.io"
-
-          echo "processing tokenrequests.applicationconnector.kyma-project.io"
-          kubectl annotate crd tokenrequests.applicationconnector.kyma-project.io helm.sh/hook- \
-          || kubectl apply -f /etc/crd/tokenrequests.applicationconnector.kyma-project.io
-          echo "done processing tokenrequests.applicationconnector.kyma-project.io"
-
-          echo "processing centralconnections.applicationconnector.kyma-project.io"
-          kubectl annotate crd centralconnections.applicationconnector.kyma-project.io helm.sh/hook- \
-          || kubectl apply -f /etc/crd/centralconnections.applicationconnector.kyma-project.io
-          echo "done processing centralconnections.applicationconnector.kyma-project.io"
+          for crd in "${crds[@]}"; do
+            timeout "$operation_timeout" bash -c "\
+              until \
+                kubectl annotate crd $crd helm.sh/hook- \
+                || kubectl apply -f /etc/crd/$crd; \
+            do sleep 2; done"
+          done
       volumes:
       - name: crd-app-connector
         configMap:
