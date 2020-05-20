@@ -57,13 +57,15 @@ func CheckEvent(target string, retryOptions ...retry.Option) error {
 		}
 		client := http.Client{Transport: transport}
 		res, err := client.Get(target)
+
 		if err != nil {
-			return errors.Wrap(err, "HTTP GET failed in CheckEvent()")
+			return errors.Wrap(err, fmt.Sprintf("HTTP GET failed in CheckEvent() for target: %v", target))
 		}
 
 		if err := verifyStatusCode(res, 200); err != nil {
-			return errors.Wrap(err, "HTTP GET request returned non-200 in CheckEvent()")
+			return errors.Wrap(err, fmt.Sprintf("HTTP GET request returned non-200 in CheckEvent() for target: %v", target))
 		}
+
 		return nil
 	}, retryOptions...)
 
