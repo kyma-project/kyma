@@ -69,6 +69,8 @@ spec:
               value: {{ .Values.gardener.kubeconfigPath }}
             - name: APP_TEST_AZURE_EVENT_HUBS_ENABLED
               value: "true"
+            - name: APP_UPGRADE_TEST
+              value: "false"
           command: ["/bin/sh"]
           args: ["-c", "echo 'Starting e2e-provisioning test on Azure. Waiting 20s for api server...'; sleep 20; ./test.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
 
@@ -140,5 +142,7 @@ spec:
               value: {{ .Values.gardener.kubeconfigPath }}
             - name: APP_TEST_AZURE_EVENT_HUBS_ENABLED
               value: "true"
+            - name: APP_UPGRADE_TEST
+              value: "false"
           command: ["/bin/sh"]
           args: ["-c", "echo 'Starting e2e-provisioning cleanup test on Azure. Waiting 20s for api server...'; sleep 20; ./test.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
