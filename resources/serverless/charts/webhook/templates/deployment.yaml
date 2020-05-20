@@ -5,6 +5,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 4 }}
+    {{- if .Values.deployment.labels }}
+      {{ include "tplValue" ( dict "value" .Values.deployment.labels "context" . ) | nindent 4 }}
+    {{- end }}
   {{- if .Values.deployment.annotations }}
   annotations:
     {{ include "tplValue" ( dict "value" .Values.deployment.annotations "context" . ) | nindent 4 }}
@@ -14,6 +17,9 @@ spec:
     matchLabels:
       {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 6 }}
   replicas: {{ .Values.deployment.replicas }}
+  {{- if .Values.deployment.extraProperties }}
+    {{ include "tplValue" ( dict "value" .Values.deployment.extraProperties "context" . ) | nindent 2 }}
+  {{- end }}
   template:
     metadata:
       annotations:

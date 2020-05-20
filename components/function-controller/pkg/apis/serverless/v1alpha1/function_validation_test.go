@@ -1,15 +1,5 @@
 package v1alpha1
 
-//
-//import (
-//	"testing"
-//
-//	"github.com/onsi/gomega"
-//	corev1 "k8s.io/api/core/v1"
-//	"k8s.io/apimachinery/pkg/api/resource"
-//	"knative.dev/pkg/apis"
-//)
-//
 //func TestFunctionSpec_validateResources(t *testing.T) {
 //	tests := []struct {
 //		name      string

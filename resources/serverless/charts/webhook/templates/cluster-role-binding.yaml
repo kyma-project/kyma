@@ -2,6 +2,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: {{ template "webhook.fullname" . }}
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 4 }}
 subjects:
   - kind: ServiceAccount
     name: {{ template "webhook.fullname" . }}

@@ -21,8 +21,11 @@ func (spec *FunctionSpec) defaultReplicas() {
 		spec.MinReplicas = &one
 	}
 	if spec.MaxReplicas == nil {
-		one := int32(1)
-		spec.MaxReplicas = &one
+		newMax := int32(1)
+		if *spec.MinReplicas > newMax {
+			newMax = *spec.MinReplicas
+		}
+		spec.MaxReplicas = &newMax
 	}
 }
 
@@ -42,9 +45,17 @@ func (spec *FunctionSpec) defaultResources() {
 		spec.Resources.Limits = corev1.ResourceList{}
 	}
 	if resources.Limits.Memory().IsZero() {
-		spec.Resources.Limits[corev1.ResourceMemory] = resource.MustParse("128Mi")
+		newMemory := resource.MustParse("128Mi")
+		if spec.Resources.Requests.Memory().Cmp(newMemory) == 1 {
+			newMemory = *spec.Resources.Requests.Memory()
+		}
+		spec.Resources.Limits[corev1.ResourceMemory] = newMemory
 	}
 	if resources.Limits.Cpu().IsZero() {
-		spec.Resources.Limits[corev1.ResourceCPU] = resource.MustParse("100m")
+		newMemory := resource.MustParse("100m")
+		if spec.Resources.Requests.Cpu().Cmp(newMemory) == 1 {
+			newMemory = *spec.Resources.Requests.Cpu()
+		}
+		spec.Resources.Limits[corev1.ResourceCPU] = newMemory
 	}
 }

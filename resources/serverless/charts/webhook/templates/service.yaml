@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: {{ template "webhook.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 4 }}
 spec:
   ports:
     - name: {{ .Values.service.ports.httpMetrics.name }}
@@ -15,4 +17,4 @@ spec:
       port: {{ .Values.service.ports.httpsWebhook.port }}
       targetPort: {{ .Values.service.ports.httpsWebhook.targetPort }}
   selector:
-    app: {{ template "webhook.fullname" . }}
+    {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 4 }}

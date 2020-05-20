@@ -49,50 +49,63 @@ func (fn *Function) validateObjectMeta(fldPath string) (apisError *apis.FieldErr
 	return apisError
 }
 
-func (spec *FunctionSpec) validateSource(fldPath string) (err *apis.FieldError) {
+func (spec *FunctionSpec) validateSource(fldPath string) (apisError *apis.FieldError) {
 	if strings.TrimSpace(spec.Source) == "" {
-		err = apis.ErrMissingField(fldPath)
+		apisError = apisError.Also(apis.ErrMissingField(fldPath))
 	}
-	return err
+	return apisError
 }
 
-func (spec *FunctionSpec) validateDeps(fldPath string) (err *apis.FieldError) {
+func (spec *FunctionSpec) validateDeps(fldPath string) (apisError *apis.FieldError) {
 	if deps := strings.TrimSpace(spec.Deps); deps != "" && (deps[0] != '{' || deps[len(deps)-1] != '}') {
-		err = apis.ErrInvalidValue("deps should start with '{' and end with '}'", fldPath)
+		apisError = apisError.Also(apis.ErrInvalidValue("deps should start with '{' and end with '}'", fldPath))
 	}
-	return err
+	return apisError
 }
 
-func (spec *FunctionSpec) validateReplicas() *apis.FieldError {
-	maxReplicas := spec.MaxReplicas
-	minReplicas := spec.MinReplicas
-	if maxReplicas != nil && minReplicas != nil && *minReplicas > *maxReplicas {
-		return apis.ErrInvalidValue("maxReplicas is less than minReplicas", "maxReplicas")
-	} else if minReplicas != nil && *minReplicas <= 0 {
-		return apis.ErrInvalidValue("minReplicas is less than 0", "minReplicas")
-	} else if maxReplicas != nil && *maxReplicas <= 0 {
-		return apis.ErrInvalidValue("maxReplicas is less than 0", "maxReplicas")
+func (spec *FunctionSpec) validateEnv(fldPath string) (apisError *apis.FieldError) {
+	envs := spec.Env
+	for _, env := range envs {
+		for _, reservedEnv := range reservedEnvs {
+			if env.Name == reservedEnv {
+				apisError = apisError.Also(apis.ErrInvalidValue(
+					fmt.Sprintf("%s env name is reserved for the serverless domain", env.Name), fldPath))
+			}
+		}
 	}
-
-	return nil
+	return apisError
 }
 
-func (spec *FunctionSpec) validateResources() (err *apis.FieldError) {
+func (spec *FunctionSpec) validateResources() (apisError *apis.FieldError) {
 	requests := spec.Resources.Requests
 	limits := spec.Resources.Limits
 
 	if requests.Cpu().Cmp(*limits.Cpu()) == 1 {
 		newErr := apis.ErrInvalidValue(fmt.Sprintf("limits cpu(%s) should be higher than requests cpu(%s)",
 			limits.Cpu().String(), requests.Cpu().String()), "limits.cpu")
-		err = err.Also(newErr)
+		apisError = apisError.Also(newErr)
 	}
 	if requests.Memory().Cmp(*limits.Memory()) == 1 {
 		newErr := apis.ErrInvalidValue(fmt.Sprintf("limits memory(%s) should be higher than requests memory(%s)",
 			limits.Memory().String(), requests.Memory().String()), "limits.memory")
-		err = err.Also(newErr)
+		apisError = apisError.Also(newErr)
 	}
 
-	return err
+	return apisError
+}
+
+func (spec *FunctionSpec) validateReplicas() (apisError *apis.FieldError) {
+	maxReplicas := spec.MaxReplicas
+	minReplicas := spec.MinReplicas
+	if maxReplicas != nil && minReplicas != nil && *minReplicas > *maxReplicas {
+		apisError = apisError.Also(apis.ErrInvalidValue("maxReplicas is less than minReplicas", "maxReplicas"))
+	} else if minReplicas != nil && *minReplicas < 0 {
+		apisError = apisError.Also(apis.ErrInvalidValue("minReplicas is less than 0", "minReplicas"))
+	} else if maxReplicas != nil && *maxReplicas < 0 {
+		apisError = apisError.Also(apis.ErrInvalidValue("maxReplicas is less than 0", "maxReplicas"))
+	}
+
+	return apisError
 }
 
 func (spec *FunctionSpec) validateLabels(fldPath string) (apisError *apis.FieldError) {
@@ -104,17 +117,4 @@ func (spec *FunctionSpec) validateLabels(fldPath string) (apisError *apis.FieldE
 		apisError.Also(apis.ErrInvalidValue(err.Error(), fldPath))
 	}
 	return apisError
-}
-
-func (spec *FunctionSpec) validateEnv(fldPath string) (err *apis.FieldError) {
-	envs := spec.Env
-	for _, env := range envs {
-		for _, reservedEnv := range reservedEnvs {
-			if env.Name == reservedEnv {
-				err = err.Also(apis.ErrInvalidValue(
-					fmt.Sprintf("%s env name is reserved for the serverless domain", env.Name), fldPath))
-			}
-		}
-	}
-	return err
 }

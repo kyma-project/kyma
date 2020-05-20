@@ -12,11 +12,9 @@ image:
 
 commonLabels:
   app: "{{ template \"webhook.fullname\" . }}"
-  version: "{{ .Values.image.tag }}"
   app.kubernetes.io/name: "{{ template \"webhook.fullname\" . }}"
   app.kubernetes.io/instance: "{{ .Release.Name }}"
   app.kubernetes.io/managed-by: "{{ .Release.Service }}"
-  app.kubernetes.io/version: "{{ .Values.image.tag }}"
   role: webhook
 
 deployment:
