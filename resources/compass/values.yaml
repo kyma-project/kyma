@@ -23,7 +23,7 @@ global:
       version: "d068b250"
     director:
       dir:
-      version: "f7fd46e4"
+      version: "ba81ea7d"
     gateway:
       dir:
       version: "53b12181"
@@ -43,7 +43,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "110a710a"
+      version: "a9b7becf"
     external_services_mock:
       dir:
       version: "e2837b23"
@@ -278,6 +278,9 @@ global:
       maxIdleConnections: 1
 
   enableCompassDefaultScenarioAssignment: true
+
+  metrics:
+    enabled: true
 
   externalServicesMock:
     enabled: false

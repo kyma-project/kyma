@@ -38,7 +38,7 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: e60e910e
+    version: 30d17097
   console_backend_service_test:
     version: "009a1425"
   xip_patch:
@@ -46,7 +46,7 @@ global:
     version: 0e322dac
   e2e_external_solution:
     dir:
-    version: PR-8398
+    version: PR-8489
   disableLegacyConnectivity: false
 
 tests:
