@@ -77,7 +77,7 @@ func (r *namespaceResolver) ApplicationsField(ctx context.Context, obj *gqlschem
 	items, err := r.appRetriever.Application().ListInNamespace(obj.Name)
 	if err != nil {
 		if module.IsDisabledModuleError(err) {
-			return nil, err
+			return nil, nil
 		}
 
 		return nil, errors.Wrapf(err, "while listing %s for namespace %s", appPretty.Application, obj.Name)

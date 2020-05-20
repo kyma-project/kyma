@@ -23,7 +23,7 @@ spec:
           imagePullPolicy: {{ .Values.compassRuntimeAgent.image.pullPolicy }}
           envFrom:
           - secretRef:
-              name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
+              name: {{ .Values.compassRuntimeAgent.config.secret.name }}
               optional: true
           env:
             - name: DIRECTOR_URL

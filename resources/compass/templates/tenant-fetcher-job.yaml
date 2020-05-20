@@ -9,8 +9,14 @@ spec:
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 60 # Fix for https://github.com/kyma-incubator/compass/issues/1155
   jobTemplate:
+    metadata:
+      labels:
+        cronjob: tenant-fetcher
     spec:
       template:
+        metadata:
+          labels:
+            cronjob: tenant-fetcher
         spec:
           containers:
           - name: fetcher

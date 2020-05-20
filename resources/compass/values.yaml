@@ -17,13 +17,13 @@ global:
       version: "d068b250"
     connectivity_adapter:
       dir:
-      version: "76738d5c"
+      version: "bed3d78a"
     pairing_adapter:
       dir:
       version: "d068b250"
     director:
       dir:
-      version: "f7fd46e4"
+      version: "ba81ea7d"
     gateway:
       dir:
       version: "53b12181"
@@ -43,13 +43,13 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "5d560ed9"
+      version: "a9b7becf"
     external_services_mock:
       dir:
       version: "e2837b23"
     metris:
       dir:
-      version: "c1e271d6"
+      version: "d1b75eac"
     tests:
       director:
         dir:
@@ -62,7 +62,7 @@ global:
         version: "8fb2e53b"
       e2e_provisioning:
         dir:
-        version: "a8287494"
+        version: "db7c9132"
       connectivity_adapter:
         dir:
         version: "d068b250"
@@ -278,6 +278,9 @@ global:
       maxIdleConnections: 1
 
   enableCompassDefaultScenarioAssignment: true
+
+  metrics:
+    enabled: true
 
   externalServicesMock:
     enabled: false
