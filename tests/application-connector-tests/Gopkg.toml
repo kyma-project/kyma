@@ -1,7 +1,7 @@
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "70782d1888118ad2c76b978b49505bb5286e264c"
+  branch = "release-1.12"
 
 [[constraint]]
   name = "github.com/pkg/errors"
@@ -13,15 +13,15 @@
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.16.9"
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.16.9"
 
 [[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.16.9"
 
 [[override]]
   name="sigs.k8s.io/controller-runtime"
