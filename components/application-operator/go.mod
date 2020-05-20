@@ -15,10 +15,10 @@ require (
 	github.com/prometheus/common v0.6.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.5.1
-	helm.sh/helm/v3 v3.2.1
-	k8s.io/apimachinery v0.18.0
-	k8s.io/cli-runtime v0.18.0
-	k8s.io/client-go v0.18.0
+	helm.sh/helm/v3 v3.1.3
+	k8s.io/apimachinery v0.17.2
+	k8s.io/cli-runtime v0.17.2
+	k8s.io/client-go v0.17.2
 	k8s.io/klog v1.0.0
 	rsc.io/letsencrypt v0.0.3 // indirect
 	sigs.k8s.io/controller-runtime v0.5.0
