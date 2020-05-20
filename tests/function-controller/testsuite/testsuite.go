@@ -396,32 +396,32 @@ func (t *TestSuite) pollForAnswer(url, payloadStr, expected string) error {
 func (t *TestSuite) LogResources() {
 	fn, err := t.function.get()
 	if err != nil {
-		t.t.Logf("%v", err)
+		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
 	}
 
 	jobs, err := t.jobs.List()
 	if err != nil {
-		t.t.Logf("%v", err)
+		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
 	}
 
 	ksrv, err := t.kservice.Get()
 	if err != nil {
-		t.t.Logf("%v", err)
+		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
 	}
 
 	fnYaml, err := t.prettyYaml(fn)
 	if err != nil {
-		t.t.Logf("%v", err)
+		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
 	}
 
 	jobsYaml, err := t.prettyYaml(jobs)
 	if err != nil {
-		t.t.Logf("%v", err)
+		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
 	}
 
 	ksrvYaml, err := t.prettyYaml(ksrv)
 	if err != nil {
-		t.t.Logf("%v", err)
+		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
 	}
 
 	t.t.Logf(`Pretty printed resources:

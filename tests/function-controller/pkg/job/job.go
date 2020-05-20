@@ -35,15 +35,13 @@ func New(parentFunctionName string, batchCli batchv1typed.BatchV1Interface, c sh
 }
 
 func (j Job) List() (*batchv1.JobList, error) {
-	selector := map[string]string{
-		serverlessv1alpha1.FunctionNameLabel: j.parentFunctionName,
-	}
+	labelSelector := labels.SelectorFromSet(map[string]string{serverlessv1alpha1.FunctionNameLabel: j.parentFunctionName}).String()
 
 	jobList, err := j.client.List(metav1.ListOptions{
-		LabelSelector: labels.SelectorFromSet(selector).String(),
+		LabelSelector: labelSelector,
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "while listing Jobs by label %s in namespace %s", labels.SelectorFromSet(selector).String(), j.namespace)
+		return nil, errors.Wrapf(err, "while listing Jobs by label %s in namespace %s", labelSelector, j.namespace)
 	}
 	return jobList, nil
 }
