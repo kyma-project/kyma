@@ -45,8 +45,12 @@ Create the name of the service account to use
 
 
 {{/*
-Set DATA_SOURCE_URI environment variable
+Set DATA_SOURCE_URI environment variable MODIFIED
 */}}
 {{- define "prometheus-postgres-exporter.data_source_uri" -}}
+{{- if eq .Values.global.database.embedded.enabled false -}}
+{{ printf "%s:%s/%s?sslmode=%s" .Values.global.database.managedGCP.host .Values.global.database.managedGCP.hostPort .Values.global.database.managedGCP.director.name .Values.global.database.managedGCP.sslMode | quote }}
+{{- else -}}
 {{ printf "%s:%s/%s?sslmode=%s" .Values.config.datasource.host .Values.config.datasource.port .Values.config.datasource.database .Values.config.datasource.sslmode | quote }}
+{{- end }}
 {{- end }}

@@ -19,17 +19,17 @@ service:
 
 serviceMonitor:
   # When set true then use a ServiceMonitor to configure scraping
-  enabled: false
+  enabled: true # Modified
   # Set the namespace the ServiceMonitor should be deployed
-  # namespace: monitoring
+  namespace: compass-system
   # Set how frequently Prometheus should scrape
-  # interval: 30s
+  interval: 30s
   # Set path to cloudwatch-exporter telemtery-path
-  # telemetryPath: /metrics
+  telemetryPath: /metrics
   # Set labels for the ServiceMonitor, use this to define your scrape label for Prometheus Operator
-  # labels:
+  labels:
   # Set timeout for scrape
-  # timeout: 10s
+  timeout: 10s
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -62,18 +62,18 @@ securityContext: {}
 config:
   datasource:
     # Specify one of both datasource or datasourceSecret
-    host:
+    host: compass-postgresql
     user: postgres
     # Only one of password and passwordSecret can be specified
-    password: somepassword
+    password: # Modified
     # Specify passwordSecret if DB password is stored in secret.
-    passwordSecret: {}
+    passwordSecret: # Modified
     # Secret name
-    #  name:
+      name: compass-postgresql
     # Password key inside secret
-    #  key:
+      key: postgresql-director-password
     port: "5432"
-    database: ''
+    database: 'postgres' # Modified
     sslmode: disable
   datasourceSecret: {}
     # Specifies if datasource should be sourced from secret value in format: postgresql://login:password@hostname:port/dbname?sslmode=disable
@@ -293,6 +293,46 @@ config:
         - blk_write_time_seconds:
             usage: "COUNTER"
             description: "Total time the statement spent writing blocks, in milliseconds (if track_io_timing is enabled, otherwise zero)"
+
+    pg_compass_director_tenants_total:
+      query: "SELECT COUNT(ID) as quantity FROM business_tenant_mappings;"
+      master: true
+      metrics:
+        - quantity:
+            usage: "COUNTER"
+            description: "Quantity of total tenants in table"
+
+    pg_compass_director_tenants_active:
+      query: "SELECT COUNT(ID) as quantity FROM business_tenant_mappings WHERE status='Active';"
+      master: true
+      metrics:
+        - quantity:
+            usage: "COUNTER"
+            description: "Quantity of active tenants in table"
+
+    pg_compass_director_tenants_with_at_least_one_runtime_or_application:
+      query: "SELECT COUNT (DISTINCT tenant_id) FROM (SELECT tenant_id FROM runtimes UNION ALL SELECT tenant_id FROM applications) a;"
+      master: true
+      metrics:
+        - quantity:
+            usage: "COUNTER"
+            description: "Quantity of tenants which are assigned to at least one runtime or application"
+
+    pg_compass_director_applications:
+      query: "SELECT COUNT(ID) as quantity FROM applications;"
+      master: true
+      metrics:
+        - quantity:
+            usage: "COUNTER"
+            description: "Quantity of applications in table"
+
+    pg_compass_director_runtimes:
+      query: "SELECT COUNT(ID) as quantity FROM runtimes;"
+      master: true
+      metrics:
+        - quantity:
+            usage: "COUNTER"
+            description: "Quantity of runtimes in table"
 
 nodeSelector: {}
 

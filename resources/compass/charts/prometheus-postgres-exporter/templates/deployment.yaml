@@ -58,8 +58,13 @@ spec:
           {{- else }}
           - name: DATA_SOURCE_URI
             value: {{ template "prometheus-postgres-exporter.data_source_uri" . }}
+          {{- if eq .Values.global.database.embedded.enabled false }}
+          - name: DATA_SOURCE_USER
+            value: {{ .Values.global.database.managedGCP.director.user }}
+          {{- else }}
           - name: DATA_SOURCE_USER
             value: {{ .Values.config.datasource.user }}
+          {{- end }}
           - name: DATA_SOURCE_PASS
             valueFrom:
               secretKeyRef:
@@ -91,7 +96,18 @@ spec:
             - name: queries
               mountPath: /etc/config.yaml
               subPath: config.yaml
-{{- with .Values.extraContainers }}
+            {{if eq .Values.global.database.embedded.enabled false}}
+        - name: cloudsql-proxy
+          image: gcr.io/cloudsql-docker/gce-proxy:1.16
+          command: ["/cloud_sql_proxy",
+                    "-instances={{ .Values.global.database.managedGCP.instanceConnectionName }}=tcp:5432",
+                    "-credential_file=/secrets/cloudsql-instance-credentials/credentials.json"]
+          volumeMounts:
+            - name: cloudsql-instance-credentials
+              mountPath: /secrets/cloudsql-instance-credentials
+              readOnly: true
+      {{end}}
+      {{- with .Values.extraContainers }}
 {{ tpl . $ | indent 8 }}
 {{- end }}
       securityContext:
@@ -113,6 +129,11 @@ spec:
           defaultMode: 420
           name: {{ template "prometheus-postgres-exporter.fullname" . }}
         name: queries
+      {{if eq .Values.global.database.embedded.enabled false}}
+      - name: cloudsql-instance-credentials
+        secret:
+          secretName: cloudsql-instance-credentials
+      {{end}}
 {{- with .Values.extraVolumes }}
 {{ tpl . $ | indent 6 }}
 {{- end }}
