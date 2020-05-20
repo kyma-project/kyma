@@ -95,10 +95,14 @@ func checkCEBySourceTypeVersion(w http.ResponseWriter, r *http.Request) {
 			events = append(events, event)
 		}
 	}
+	log.Infof("Checking for source: %v, type: %v, version: %v  :: found: %v", eventsource, eventtype, eventversion, events)
+	if len(events) == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 	if err := json.NewEncoder(w).Encode(events); err != nil {
 		log.Errorf("Error during checkCEbySourceTypeVersion: %v", err)
 	}
-	log.Infof("Checking for source: %v, type: %v, version: %v  :: found: %v", eventsource, eventtype, eventversion, events)
 }
 
 func getAllCE(w http.ResponseWriter, r *http.Request) {
@@ -120,8 +124,14 @@ func checkCEbyUUID(w http.ResponseWriter, r *http.Request) {
 	defer mu.Unlock()
 	vars := mux.Vars(r)
 	uuid := vars["uuid"]
-	log.Infof("Checking for uuid: %v. found: %v", uuid, receivedCEs[uuid])
-	if err := json.NewEncoder(w).Encode(receivedCEs[uuid]); err != nil {
+	ce, exists := receivedCEs[uuid]
+	if !exists {
+		log.Infof("Checking for uuid: %v. found: []", uuid)
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	log.Infof("Checking for uuid: %v. found: %v", uuid, ce)
+	if err := json.NewEncoder(w).Encode(ce); err != nil {
 		log.Errorf("Error during checkCEbyUUID: %v", err)
 	}
 }
