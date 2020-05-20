@@ -167,7 +167,7 @@ spec:
             - name: APP_MANAGED_RUNTIME_COMPONENTS_YAML_PATH
               value: /config/additionalRuntimeComponents.yaml
             - name: APP_UPGRADE_TIMEOUT
-              value: "100m"
+              value: "{{ .Values.e2e.upgrade.timeout }}"
             - name: APP_PRE_UPGRADE_KYMA_VERSION
               value: {{ .Values.e2e.upgrade.preUpgradeVersion }}
             - name: APP_UPGRADE_KYMA_VERSION

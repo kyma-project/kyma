@@ -71,14 +71,6 @@ spec:
               value: "true"
             - name: APP_UPGRADE_TEST
               value: "false"
-            - name: APP_MANAGED_RUNTIME_COMPONENTS_YAML_PATH
-              value: /config/additionalRuntimeComponents.yaml
-            - name: APP_UPGRADE_TIMEOUT
-              value: "100m"
-            - name: APP_PRE_UPGRADE_KYMA_VERSION
-              value: {{ .Values.e2e.upgrade.preUpgradeVersion }}
-            - name: APP_UPGRADE_KYMA_VERSION
-              value: {{ .Values.e2e.upgrade.targetVersion }}
           command: ["/bin/sh"]
           args: ["-c", "echo 'Starting e2e-provisioning test on Azure. Waiting 20s for api server...'; sleep 20; ./test.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
 
@@ -152,13 +144,5 @@ spec:
               value: "true"
             - name: APP_UPGRADE_TEST
               value: "false"
-            - name: APP_MANAGED_RUNTIME_COMPONENTS_YAML_PATH
-              value: /config/additionalRuntimeComponents.yaml
-            - name: APP_UPGRADE_TIMEOUT
-              value: "100m"
-            - name: APP_PRE_UPGRADE_KYMA_VERSION
-              value: {{ .Values.e2e.upgrade.preUpgradeVersion }}
-            - name: APP_UPGRADE_KYMA_VERSION
-              value: {{ .Values.e2e.upgrade.targetVersion }}
           command: ["/bin/sh"]
           args: ["-c", "echo 'Starting e2e-provisioning cleanup test on Azure. Waiting 20s for api server...'; sleep 20; ./test.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
