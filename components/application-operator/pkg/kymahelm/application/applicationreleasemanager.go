@@ -112,14 +112,17 @@ func (r *releaseManager) prepareOverrides(application *v1alpha1.Application) (ma
 
 	var overridesMap map[string]interface{}
 	bytes, err := json.Marshal(overridesData)
-
-	if err == nil {
-		if err = json.Unmarshal(bytes, &overridesMap); err == nil {
-			return overridesMap, nil
-		}
+	if err != nil {
+		return nil, err
 	}
 
-	return map[string]interface{}{}, err
+	if err = json.Unmarshal(bytes, &overridesMap); err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"global": overridesMap,
+	}, nil
 }
 
 func (r *releaseManager) DeleteReleaseIfExists(name string) error {
