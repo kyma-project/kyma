@@ -53,7 +53,7 @@ type Config struct {
 	TestingAddonsURL       string
 	WorkingNamespace       string `envconfig:"default=e2e-upgrade-test"`
 	TestsInfoConfigMapName string `envconfig:"default=upgrade-tests-info"`
-	EventSubscriberImage   string `envconfig:"default=eu.gcr.io/kyma-project/event-subscriber-tools:f766b186"`
+	EventSubscriberImage   string
 }
 
 const (
