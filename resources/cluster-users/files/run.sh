@@ -1,8 +1,4 @@
-#!/bin/bash -e
-NAMESPACE_ADMIN_EMAIL=
-VIEW_EMAIL=
-DEVELOPER_EMAIL=
-ADMIN_EMAIL=admin@kyma.cx
+set -e
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source "${DIR}/library.sh"
@@ -11,9 +7,6 @@ source "${DIR}/library.sh"
 readonly VIEW_OPERATIONS=( "get" "list" )
 # resources/cluster-users/values.yaml clusterRoles.verbs.edit - clusterRoles.verbs.view
 readonly EDIT_OPERATIONS=( "create" "delete" "deletecollection" "patch" "update" "watch" )
-
-# users used in tests
-readonly USERS=( "${NAMESPACE_ADMIN_EMAIL}" "${VIEW_EMAIL}" "${DEVELOPER_EMAIL}" "${ADMIN_EMAIL}" )
 
 readonly K8S_RESOURCES=( "deployment" "pod" "secret" "cm" "serviceaccount" "role" )
 readonly ORY_RESOURCES=( "oauth2clients.hydra.ory.sh" "rules.oathkeeper.ory.sh" )
@@ -24,21 +17,35 @@ ERROR_LOGGING_GUARD="true"
 
 CreateBindings
 
-for USER in "${USERS[@]}"; do
-	# Get password for USER
-	LogInAsUser $USER $ADMIN_PASSWORD
-	export KUBECONFIG=${PWD}/kubeconfig-${USER}
-	# Run all tests for USER
-	testComponent $USER $NAMESPACE "yes" "yes" "${K8S_RESOURCES[@]}"
-	testComponent $USER $NAMESPACE "yes" "yes" "${ORY_RESOURCES[@]}"
-	testComponent $USER $NAMESPACE "yes" "yes" "${KYMA_RESOURCES[@]}"
-done
+echo "---> Run tests for ${ADMIN_EMAIL}"
+LogInAsUser $ADMIN_EMAIL $ADMIN_PASSWORD
+export KUBECONFIG=${PWD}/kubeconfig-${ADMIN_EMAIL}
+testComponent $USER $NAMESPACE "yes" "yes" "${K8S_RESOURCES[@]}"
+testComponent $USER $NAMESPACE "yes" "yes" "${ORY_RESOURCES[@]}"
+testComponent $USER $NAMESPACE "yes" "yes" "${KYMA_RESOURCES[@]}"
 
-# Create bindings
-# for USER in [X Y Z]
-	# Login as user X
-	# Test as user X
-# Cleanup
+echo "---> Run tests for ${DEVELOPER_EMAIL}"
+LogInAsUser $DEVELOPER_EMAIL $DEVELOPER_PASSWORD
+export KUBECONFIG=${PWD}/kubeconfig-${DEVELOPER_EMAIL}
+testComponent $USER $CUSTOM_NAMESPACE "yes" "yes" "${K8S_RESOURCES[@]}"
+testComponent $USER $CUSTOM_NAMESPACE "yes" "yes" "${ORY_RESOURCES[@]}"
+testComponent $USER $CUSTOM_NAMESPACE "yes" "yes" "${KYMA_RESOURCES[@]}"
+
+echo "---> Run tests for ${VIEW_EMAIL}"
+LogInAsUser $VIEW_EMAIL $VIEW_PASSWORD
+export KUBECONFIG=${PWD}/kubeconfig-${VIEW_EMAIL}
+testComponent $USER $NAMESPACE "yes" "no" "${K8S_RESOURCES[@]}"
+testComponent $USER $CUSTOM_NAMESPACE "yes" "no" "${K8S_RESOURCES[@]}"
+testComponent $USER $NAMESPACE "yes" "no" "${ORY_RESOURCES[@]}"
+testComponent $USER $NAMESPACE "yes" "no" "${KYMA_RESOURCES[@]}"
+testComponent $USER $CUSTOM_NAMESPACE "yes" "no" "${KYMA_RESOURCES[@]}"
+
+echo "---> Run tests for ${NAMESPACE_ADMIN_EMAIL}"
+LogInAsUser $NAMESPACE_ADMIN_EMAIL $NAMESPACE_ADMIN_PASSWORD
+export KUBECONFIG=${PWD}/kubeconfig-${NAMESPACE_ADMIN_EMAIL}
+testComponent $USER $CUSTOM_NAMESPACE "yes" "yes" "${K8S_RESOURCES[@]}"
+testComponent $USER $CUSTOM_NAMESPACE "yes" "yes" "${ORY_RESOURCES[@]}"
+testComponent $USER $CUSTOM_NAMESPACE "yes" "yes" "${KYMA_RESOURCES[@]}"
 
 echo "ALL TESTS PASSED"
 ERROR_LOGGING_GUARD="false"

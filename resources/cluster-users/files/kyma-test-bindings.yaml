@@ -1,4 +1,3 @@
-# Generate value once
 {{- $Namespace := tpl .Values.tests.config.namespace.dynamicNamespace $ -}}
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -12,7 +11,7 @@ roleRef:
   name: kyma-admin
 subjects:
 - kind: User
-  name: {{ printf "%s@kyma.cx" .Values.tests.config.users.admin }}
+  name: admin@kyma.cx
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -26,7 +25,7 @@ roleRef:
   name: kyma-view
 subjects:
 - kind: User
-  name: {{ printf "%s@kyma.cx" .Values.tests.config.users.viewer }}
+  name: read-only-user@kyma.cx
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: v1
@@ -45,5 +44,5 @@ roleRef:
   name: kyma-developer
 subjects:
 - kind: User
-  name: {{ printf "%s@kyma.cx" .Values.tests.config.users.NSAdmin }}
+  name: developer@kyma.cx
   apiGroup: rbac.authorization.k8s.io
