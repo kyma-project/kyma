@@ -90,5 +90,5 @@ tests:
     skipSslVerify: true
     image:
       dir:
-      version: 5df23264
+      version: PR-8532
       pullPolicy: IfNotPresent
