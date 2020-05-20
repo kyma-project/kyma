@@ -30,10 +30,12 @@ var (
 	}
 	emptyListReleaseResponse []*hapi_release5.Release
 
-	emptyOverrides              = map[string]interface{}{}
+	emptyOverrides              = map[string]interface{}{"global": map[string]interface{}{}}
 	overridesWithTenantAndGroup = map[string]interface{}{
-		"Tenant": tenant,
-		"Group":  group,
+		"global": map[string]interface{}{
+			"tenant": tenant,
+			"group":  group,
+		},
 	}
 )
 
