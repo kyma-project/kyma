@@ -10,7 +10,7 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   gateways:
-  - {{ .Values.global.istio.gateway.name }}
+  - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
   hosts:
   - kiali.{{ .Values.global.ingress.domainName }}
   http:
