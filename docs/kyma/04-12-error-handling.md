@@ -1,9 +1,7 @@
 ---
-title: Details
+title: Error handling
 type: Installation
 ---
-
-This section describes in details some of the installation mechanisms.
 
 
 Kyma Operator features a retry mechanism to handle temporary issues such as Tiller unavailability or a prolonged process of creating a resource path for custom resources in the Kubernetes API Server. 
