@@ -62,7 +62,6 @@ readonly KNATIVE_SERVING_KYMA_RESOURCES=(
   "images.caching.internal.knative.dev"
 )
 
-
 trap cleanup EXIT
 ERROR_LOGGING_GUARD="true"
 

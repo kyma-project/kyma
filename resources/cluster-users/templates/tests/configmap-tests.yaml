@@ -1,5 +1,6 @@
-{{- if .Values.tests.enabled -}}
-{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" -}}
+
+{{- $Namespace := tpl .Values.tests.config.namespace.dynamicNamespace $ }}
+{{- printf "%s" $Namespace }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -14,5 +15,3 @@ data:
 {{ tpl (.Files.Get "files/library.sh" | printf "%s" | indent 4) . }}
   run.sh: |-
 {{ tpl (.Files.Get "files/run.sh" | printf "%s" | indent 4) . }}
-{{- end -}}
-{{- end -}}

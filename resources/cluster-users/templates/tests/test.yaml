@@ -37,7 +37,7 @@ spec:
             - -c
             - |
               sleep 10
-              tail -f /dev/null
+              # tail -f /dev/null
               bash /etc/cluster-users/sar-test.sh
               exit_code=$?
               curl -XPOST http://127.0.0.1:15020/quitquitquit
@@ -89,11 +89,11 @@ spec:
                 name: test-namespace-admin-user
                 key: password
           - name: SYSTEM_NAMESPACE
-            value: kyma-system
+            value: {{ .Values.tests.config.systemNamespace }}
           - name: CUSTOM_NAMESPACE
             value: "test-namespace-{{ randAlphaNum 5 | lower }}"
           - name: NAMESPACE
-            value: {{ .Values.tests.config.namespace.namespace }}
+            value: {{ .Values.tests.config.testNamespace }}
           - name: IAM_KUBECONFIG_SVC_FQDN
             value: "https://configurations-generator.{{ .Values.global.ingress.domainName }}"
       restartPolicy: Never

@@ -34,12 +34,15 @@ function LogInAsUser() {
 
 function CreateBindings() {
     export DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    timeout ${GLOBAL_RETRY_TIMER} bash -c 'until kubectl create namespace "${CUSTOM_NAMESPACE}" ; do sleep 5; done'
+    timeout ${GLOBAL_RETRY_TIMER} bash -c 'until kubectl create rolebinding namespace-developer --clusterrole=kyma-developer --user=${DEVELOPER_EMAIL} -n ${CUSTOM_NAMESPACE} ; do sleep 5; done'
     timeout ${GLOBAL_RETRY_TIMER} bash -c 'until kubectl create -f "${DIR}/kyma-test-bindings.yaml" ; do sleep 5; done'
 }
 
 function DeleteBindings() {
     export DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
     timeout ${GLOBAL_RETRY_TIMER} bash -c 'until kubectl delete -f "${DIR}/kyma-test-bindings.yaml" ; do sleep 5; done'
+    timeout ${GLOBAL_RETRY_TIMER} bash -c 'until kubectl delete namespace "${CUSTOM_NAMESPACE}" ; do sleep 5; done'
 }
 
 function testPermissions() {
