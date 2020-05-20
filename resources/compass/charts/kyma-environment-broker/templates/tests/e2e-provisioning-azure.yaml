@@ -47,7 +47,7 @@ spec:
               value: {{ include "kyma-env-broker.fullname" . | quote }}
             - name: APP_BROKER_TOKEN_URL
               value: "https://oauth2.{{ .Values.global.ingress.domainName }}/oauth2/token"
-            - name: APP_RUNTIME_PROVISIONER_URL
+            - name: APP_PROVISIONER_URL
               value: "{{ .Values.provisioner.URL }}"
             - name: APP_RUNTIME_UUA_INSTANCE_NAME
               value: "uaa-issuer"
@@ -118,7 +118,7 @@ spec:
               value: {{ include "kyma-env-broker.fullname" . | quote }}
             - name: APP_BROKER_TOKEN_URL
               value: "https://oauth2.{{ .Values.global.ingress.domainName }}/oauth2/token"
-            - name: APP_RUNTIME_PROVISIONER_URL
+            - name: APP_PROVISIONER_URL
               value: "{{ .Values.provisioner.URL }}"
             - name: APP_RUNTIME_UUA_INSTANCE_NAME
               value: "uaa-issuer"

@@ -3,7 +3,7 @@ kind: TestDefinition
 metadata:
   name: e2e-upgrade-azure
   labels:
-  {{ include "kyma-env-broker.labels" . | indent 4 }}
+{{ include "kyma-env-broker.labels" . | indent 4 }}
 spec:
   disableConcurrency: false
   template:
@@ -94,7 +94,7 @@ kind: TestDefinition
 metadata:
   name: e2e-upgrade-azure-cleanup
   labels:
-  {{ include "kyma-env-broker.labels" . | indent 4 }}
+{{ include "kyma-env-broker.labels" . | indent 4 }}
 spec:
   disableConcurrency: false
   template:
