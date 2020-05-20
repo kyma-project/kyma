@@ -13,6 +13,7 @@ import (
 
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -21,6 +22,8 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/addons"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/job"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/kservice"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/namespace"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/revision"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebinding"
@@ -75,6 +78,8 @@ type TestSuite struct {
 	servicebinding      *servicebinding.ServiceBinding
 	servicebindingusage *servicebindingusage.ServiceBindingUsage
 	revisions           *revision.Revision
+	jobs                *job.Job
+	kservice            *kservice.KService
 	t                   *testing.T
 	g                   *gomega.GomegaWithT
 	dynamicCli          dynamic.Interface
@@ -112,6 +117,8 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	sb := servicebinding.New(cfg.ServiceBindingName, container)
 	sbu := servicebindingusage.New(cfg.ServiceBindingUsageName, cfg.UsageKindName, container)
 	revList := revision.New(cfg.FunctionName, container)
+	jobList := job.New(cfg.FunctionName, container)
+	ksrv := kservice.New(cfg.FunctionName, container)
 
 	return &TestSuite{
 		namespace:           ns,
@@ -124,6 +131,8 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		servicebinding:      sb,
 		servicebindingusage: sbu,
 		revisions:           revList,
+		jobs:                jobList,
+		kservice:            ksrv,
 		t:                   t,
 		g:                   g,
 		dynamicCli:          dynamicCli,
@@ -376,4 +385,55 @@ func (t *TestSuite) pollForAnswer(url, payloadStr, expected string) error {
 			t.t.Logf("Got: %q, correct...", body)
 			return true, nil
 		}, done)
+}
+
+func (t *TestSuite) LogResources() {
+	fn, err := t.function.get()
+	if err != nil {
+		t.t.Logf("%v", err)
+	}
+
+	jobs, err := t.jobs.List()
+	if err != nil {
+		t.t.Logf("%v", err)
+	}
+
+	ksrv, err := t.kservice.Get()
+	if err != nil {
+		t.t.Logf("%v", err)
+	}
+
+	fnYaml, err := t.prettyYaml(fn)
+	if err != nil {
+		t.t.Logf("%v", err)
+	}
+
+	jobsYaml, err := t.prettyYaml(jobs)
+	if err != nil {
+		t.t.Logf("%v", err)
+	}
+
+	ksrvYaml, err := t.prettyYaml(ksrv)
+	if err != nil {
+		t.t.Logf("%v", err)
+	}
+
+	t.t.Logf(`Pretty printed resources:
+---
+%s
+---
+%s
+---
+%s
+---
+`, fnYaml, jobsYaml, ksrvYaml)
+}
+
+func (t *TestSuite) prettyYaml(resource interface{}) (string, error) {
+	out, err := yaml.Marshal(resource)
+	if err != nil {
+		return "", err
+	}
+
+	return string(out), nil
 }
