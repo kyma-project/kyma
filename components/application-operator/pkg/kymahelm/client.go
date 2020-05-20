@@ -76,12 +76,7 @@ func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName string, 
 	client.Timeout = time.Duration(hc.installationTimeout)
 	client.Namespace = hc.namespace
 
-	fullPath, err := client.ChartPathOptions.LocateChart(chartDir, hc.settings)
-	if err != nil {
-		return nil, err
-	}
-
-	chartRequested, err := loader.Load(fullPath)
+	chartRequested, err := loader.Load(chartDir)
 	if err != nil {
 		return nil, err
 	}
@@ -93,6 +88,9 @@ func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName string, 
 	//}
 
 	response, err := client.Run(chartRequested, overrides)
+	if err != nil {
+		return nil, err
+	}
 
 	return response, nil
 
@@ -192,10 +190,12 @@ func (hc *helmClient) actionConfigInit() (*action.Configuration, error) {
 	//kubeConfig.ToRESTMapper()
 	//hc.settings.RESTClientGetter()
 
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		return nil, err
-	}
+	config := hc.config
+
+	//config, err := rest.InClusterConfig()
+	//if err != nil {
+	//	return nil, err
+	//}
 	// Create the ConfigFlags struct instance with initialized values from ServiceAccount
 	// how to use existing rest.Config from manager ?????
 	//var kubeConfig *genericclioptions.ConfigFlags
@@ -206,7 +206,7 @@ func (hc *helmClient) actionConfigInit() (*action.Configuration, error) {
 	kubeConfig.Namespace = &hc.namespace
 
 	actionConfig := new(action.Configuration)
-	err = actionConfig.Init(kubeConfig, hc.namespace, hc.helmdriver, klog.Infof)
+	err := actionConfig.Init(kubeConfig, hc.namespace, hc.helmdriver, klog.Infof)
 	if err != nil {
 		return actionConfig, err
 	}

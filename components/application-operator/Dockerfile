@@ -2,6 +2,11 @@ FROM golang:1.13-alpine as builder
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/application-operator
 
+COPY go.mod .
+COPY go.sum .
+
+RUN go mod download
+
 WORKDIR $DOCK_PKG_DIR
 COPY . $DOCK_PKG_DIR
 COPY ./licenses/ /app/licenses

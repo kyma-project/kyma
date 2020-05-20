@@ -15,14 +15,14 @@ const (
 )
 
 type OverridesData struct {
-	DomainName                            string `json:"DomainName,omitempty"`
-	ApplicationGatewayImage               string `json:"ApplicationGatewayImage,omitempty"`
-	ApplicationGatewayTestsImage          string `json:"ApplicationGatewayTestsImage,omitempty"`
-	EventServiceImage                     string `json:"EventServiceImage,omitempty"`
-	EventServiceTestsImage                string `json:"EventServiceTestsImage,omitempty"`
-	ApplicationConnectivityValidatorImage string `json:"ApplicationConnectivityValidatorImage,omitempty"`
-	Tenant                                string `json:"Tenant,omitempty"`
-	Group                                 string `json:"Group,omitempty"`
-	GatewayOncePerNamespace               bool   `json:"GatewayOncePerNamespace,omitempty"`
-	StrictMode                            string `json:"StrictMode,omitempty"`
+	DomainName                            string `json:"domainName,omitempty"`
+	ApplicationGatewayImage               string `json:"applicationGatewayImage,omitempty"`
+	ApplicationGatewayTestsImage          string `json:"applicationGatewayTestsImage,omitempty"`
+	EventServiceImage                     string `json:"eventServiceImage,omitempty"`
+	EventServiceTestsImage                string `json:"eventServiceTestsImage,omitempty"`
+	ApplicationConnectivityValidatorImage string `json:"applicationConnectivityValidatorImage,omitempty"`
+	Tenant                                string `json:"tenant,omitempty"`
+	Group                                 string `json:"group,omitempty"`
+	GatewayOncePerNamespace               bool   `json:"gatewayOncePerNamespace,omitempty"`
+	StrictMode                            string `json:"strictMode,omitempty"`
 }
