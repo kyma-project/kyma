@@ -151,6 +151,10 @@ func (t *TestSuite) Run() {
 	ns, err := t.namespace.Create()
 	failOnError(t.g, err)
 
+	t.t.Log("Creating function without body ready to rejection by the webhook")
+	err = t.function.Create(&functionData{})
+	t.g.Expect(err).NotTo(gomega.BeNil())
+
 	t.t.Log("Creating function...")
 	functionDetails := t.getFunction(helloWorld)
 	err = t.function.Create(functionDetails)
