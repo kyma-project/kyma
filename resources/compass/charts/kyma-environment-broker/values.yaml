@@ -121,6 +121,10 @@ edp:
   secretName: "edp-creds"
 
 e2e:
+  provisioning:
+    timeout: "105m"
+  deprovisioning:
+    timeout: "90m"
   tenant:
     id: "d9994f8f-7e46-42a8-b2c1-1bfff8d2fe05"
   azure:
