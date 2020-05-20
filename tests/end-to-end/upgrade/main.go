@@ -53,6 +53,7 @@ type Config struct {
 	TestingAddonsURL       string
 	WorkingNamespace       string `envconfig:"default=e2e-upgrade-test"`
 	TestsInfoConfigMapName string `envconfig:"default=upgrade-tests-info"`
+	EventSubscriberImage   string `envconfig:"default=eu.gcr.io/kyma-project/event-subscriber-tools:f766b186"`
 }
 
 const (
@@ -143,8 +144,8 @@ func main() {
 		"ApiGatewayUpgradeTest":           apigateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
 		"ApplicationOperatorUpgradeTest":  applicationoperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
-		"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli),
-		//"LoggingUpgradeTest":            logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
+		"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli, cfg.EventSubscriberImage),
+		// "LoggingUpgradeTest":            logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
 	}
 	tRegistry, err := runner.NewConfigMapTestRegistry(k8sCli, cfg.WorkingNamespace, cfg.TestsInfoConfigMapName)
 	fatalOnError(err, "while creating Test Registry")
