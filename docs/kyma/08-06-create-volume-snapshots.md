@@ -5,7 +5,7 @@ type: Tutorials
 
 This tutorial shows how to create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) you can use to provision a new volume or restore an existing one. 
 
-### Steps
+## Steps
 
 Perform the steps:
 
@@ -46,3 +46,94 @@ spec:
 
 This will create a new `pvc-restored` PVC with pre-populated data from the snapshot. 
 
+You can also create a CronJob to handle taking volume snapshots periodically. A sample CronJob definition which includes the required ServiceAccount and roles would look like this:
+
+```yaml
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: volume-snapshotter
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: volume-snapshotter
+  namespace: {NAMESPACE}
+rules:
+- apiGroups: ["snapshot.storage.k8s.io"]
+  resources: ["volumesnapshots"]
+  verbs: ["create", "get", "list", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: volume-snapshotter
+  namespace: {NAMESPACE}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: volume-snapshotter
+subjects:
+- kind: ServiceAccount
+  name: volume-snapshotter
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: volume-snapshotter
+  namespace: {NAMESPACE}
+spec:
+  schedule: "@hourly" #Run once an hour, beginning of hour
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: volume-snapshotter
+          containers:
+          - name: job
+            image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
+            command:
+              - /bin/bash
+              - -c
+              - |
+                # Create volume snapshot with random name.
+                RANDOM_ID=$(openssl rand -hex 4)
+
+                cat <<EOF | kubectl apply -f -
+                apiVersion: snapshot.storage.k8s.io/v1beta1
+                kind: VolumeSnapshot
+                metadata:
+                  name: volume-snapshot-${RANDOM_ID}
+                  namespace: <NAMESPACE>
+                  labels:
+                    "job": "volume-snapshotter"
+                    "name": "volume-snapshot-${RANDOM_ID}"
+                spec:
+                  volumeSnapshotClassName: <SNAPSHOT_CLASS_NAME>
+                  source:
+                    persistentVolumeClaimName: <PVC_NAME>
+                EOF
+
+                # Wait until volume snapshot is ready to use.
+                attempts=3
+                retryTimeInSec="30"
+                for ((i=1; i<=attempts; i++)); do
+                    STATUS=$(kubectl get volumesnapshot volume-snapshot-${RANDOM_ID} -n <NAMESPACE> -o jsonpath='{.status.readyToUse}')
+                    if [ "${STATUS}" == "true" ]; then
+                        echo "Volume snapshot is ready to use."
+                        break
+                    fi
+
+                    if [[ "${i}" -lt "${attempts}" ]]; then
+                        echo "Volume snapshot is not yet ready to use, let's wait ${retryTimeInSec} seconds and retry. Attempts ${i} of ${attempts}."
+                    else
+                        echo "Volume snapshot is still not ready to use after ${attempts} attempts, giving up."
+                        exit 1
+                    fi
+                    sleep ${retryTimeInSec}
+                done
+
+                # Delete old volume snapshots.
+                kubectl delete volumesnapshot -n {NAMESPACE} -l job=volume-snapshotter,name!=volume-snapshot-${RANDOM_ID}
+```
