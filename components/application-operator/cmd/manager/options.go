@@ -10,10 +10,6 @@ type options struct {
 	appMapName                            string
 	domainName                            string
 	namespace                             string
-	tillerUrl                             string
-	helmTLSKeyFile                        string
-	helmTLSCertificateFile                string
-	tillerTLSSkipVerify                   bool
 	syncPeriod                            int
 	installationTimeout                   int64
 	applicationGatewayImage               string
