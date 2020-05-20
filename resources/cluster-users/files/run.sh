@@ -8,9 +8,60 @@ readonly VIEW_OPERATIONS=( "get" "list" )
 # resources/cluster-users/values.yaml clusterRoles.verbs.edit - clusterRoles.verbs.view
 readonly EDIT_OPERATIONS=( "create" "delete" "deletecollection" "patch" "update" "watch" )
 
-readonly K8S_RESOURCES=( "deployment" "pod" "secret" "cm" "serviceaccount" "role" )
-readonly ORY_RESOURCES=( "oauth2clients.hydra.ory.sh" "rules.oathkeeper.ory.sh" )
-readonly KYMA_RESOURCES=( "installations.installer.kyma-project.io" "apirules.gateway.kyma-project.io" "applications.applicationconnector.kyma-project.io" )
+readonly K8S_RESOURCES=(
+  "deployment"
+  "pod"
+  "secret"
+  "confgimap"
+  "serviceaccount"
+  "role"
+  "rolebinding"
+)
+readonly K8S_RESOURCES_CLUSTER_SCOPE=(
+  "namespace"
+  "nodes"
+  "clusterrole"
+  "clusterrolebinding"
+  "crd"
+)
+
+readonly ORY_RESOURCES=(
+  "oauth2clients.hydra.ory.sh"
+  "rule.oathkeeper.ory.sh"
+)
+
+readonly KYMA_RESOURCES=(
+  "installations.installer.kyma-project.io"
+  "apirules.gateway.kyma-project.io"
+  "applicationmappings.applicationconnector.kyma-project.io"
+  "addonsconfigurations.addons.kyma-project.io"
+  "servicebindingusages.servicecatalog.kyma-project.io"
+  "assetgroup.rafter.kyma-project.io"
+  "asset.rafter.kyma-project.io"
+  "bucket.rafter.kyma-project.io"
+)
+readonly KYMA_RESOURCES_CLUSTER_SCOPE=(
+  "applications.applicationconnector.kyma-project.io"
+  "usagekinds.servicecatalog.kyma-project.io"
+  "clusterassetgroup.rafter.kyma-project.io"
+  "clusterasset.rafter.kyma-project.io"
+  "clusterbucket.rafter.kyma-project.io"
+)
+
+readonly SERVICE_CATALOG_RESOURCES=(
+  "serviceinstances.servicecatalog.k8s.io"
+  "servicebindings.servicecatalog.k8s.io"
+)
+
+readonly KNATIVE_SERVING_KYMA_RESOURCES=(
+  "services.serving.knative.dev"
+  "routes.serving.knative.dev"
+  "revisions.serving.knative.dev"
+  "configurations.serving.knative.dev"
+  "podautoscalers.autoscaling.internal.knative.dev"
+  "images.caching.internal.knative.dev"
+)
+
 
 trap cleanup EXIT
 ERROR_LOGGING_GUARD="true"
