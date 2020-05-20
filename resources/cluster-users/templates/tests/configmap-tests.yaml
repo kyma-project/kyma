@@ -1,5 +1,5 @@
-{{- if .Values.tests.enabled}}
-{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+{{- if .Values.tests.enabled -}}
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,9 +10,9 @@ data:
 {{ tpl (.Files.Get "files/kyma-test-bindings.yaml" | printf "%s" | indent 4) . }}
   sar-test.sh: |-
 {{ tpl (.Files.Get "files/sar-test.sh" | printf "%s" | indent 4) . }}
-{{- end }}
   library.sh: |-
 {{ tpl (.Files.Get "files/library.sh" | printf "%s" | indent 4) . }}
   run.sh: |-
 {{ tpl (.Files.Get "files/run.sh" | printf "%s" | indent 4) . }}
-{{- end }}
+{{- end -}}
+{{- end -}}

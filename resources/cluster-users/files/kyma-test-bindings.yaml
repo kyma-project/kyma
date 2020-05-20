@@ -1,7 +1,5 @@
-{{- with .Values.tests.config.namespace.dynamicNamespace }}
 # Generate value once
-{{- $Namespace := tpl . $ }}
-{{- end }}
+{{- $Namespace := tpl .Values.tests.config.namespace.dynamicNamespace $ -}}
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
