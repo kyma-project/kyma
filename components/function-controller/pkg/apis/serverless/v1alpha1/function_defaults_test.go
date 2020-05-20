@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	"context"
 	"testing"
 
 	"github.com/onsi/gomega"
@@ -17,6 +16,36 @@ func TestSetDefaults(t *testing.T) {
 		givenFunc    *Function
 		expectedFunc Function
 	}{
+		"Should do nothing": {
+			givenFunc: &Function{
+				Spec: FunctionSpec{Resources: corev1.ResourceRequirements{
+					Limits: corev1.ResourceList{
+						corev1.ResourceCPU:    resource.MustParse("150m"),
+						corev1.ResourceMemory: resource.MustParse("158Mi"),
+					},
+					Requests: corev1.ResourceList{
+						corev1.ResourceCPU:    resource.MustParse("90m"),
+						corev1.ResourceMemory: resource.MustParse("84Mi"),
+					},
+				},
+					MinReplicas: &two,
+					MaxReplicas: &two},
+			},
+			expectedFunc: Function{
+				Spec: FunctionSpec{Resources: corev1.ResourceRequirements{
+					Limits: corev1.ResourceList{
+						corev1.ResourceCPU:    resource.MustParse("150m"),
+						corev1.ResourceMemory: resource.MustParse("158Mi"),
+					},
+					Requests: corev1.ResourceList{
+						corev1.ResourceCPU:    resource.MustParse("90m"),
+						corev1.ResourceMemory: resource.MustParse("84Mi"),
+					},
+				},
+					MinReplicas: &two,
+					MaxReplicas: &two},
+			},
+		},
 		"Should return default webhook": {
 			givenFunc: &Function{},
 			expectedFunc: Function{
@@ -69,10 +98,9 @@ func TestSetDefaults(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			// given
 			g := gomega.NewWithT(t)
-			ctx := context.TODO()
 
 			// when
-			testData.givenFunc.SetDefaults(ctx)
+			testData.givenFunc.SetDefaults(nil)
 
 			// then
 			g.Expect(*testData.givenFunc).To(gomega.Equal(testData.expectedFunc))
