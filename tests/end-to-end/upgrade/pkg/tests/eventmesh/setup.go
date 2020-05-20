@@ -81,7 +81,7 @@ func (f *eventMeshFlow) CreateServiceInstance() error {
 func (f *eventMeshFlow) CreateTrigger() error {
 	return helpers.CreateTrigger(f.eventingCli, f.subscriptionName, f.namespace,
 		helpers.WithFilter(f.eventTypeVersion, f.eventType, f.applicationName),
-		helpers.WithURISubscriber(fmt.Sprintf("http://%s.%s.svc.cluster.local:9000/v3/events", f.subscriberName, f.namespace)))
+		helpers.WithURISubscriber(fmt.Sprintf("http://%s.%s.svc.cluster.local:9000/ce", f.subscriberName, f.namespace)))
 }
 
 func (f *eventMeshFlow) CheckEvent() error {
