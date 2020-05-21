@@ -5,27 +5,39 @@ type: Tutorials
 
 These tutorials show how to create on-demand volume snapshots for cloud providers. Before you proceed with the tutorial, read the general instructions on [creating volume snapshots](#tutorials-create-volume-snapshots).
 
-## Create a volume snapshot for AKS
 
-### Prerequisites
+<div tabs name="backup-providers">
+  <details>
+  <summary label="AKS">
+  Create a volume snapshot for AKS
+  </summary>
+
+## Prerequisites
 
 The minimum supported Kubernetes version is 1.17.
 
-### Steps
+## Steps
 
 1. [Install the CSI driver](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
 2. [Create a volume snapshot](https://github.com/kubernetes-sigs/azuredisk-csi-driver/tree/master/deploy/example/snapshot).
 
-## Create a volume snapshot for GKE
+  </details>
+  <details>
+  <summary label="GKE">
+  Create a volume snapshot for GKE
+  </summary>
 
-### Prerequisites
+## Prerequisites
 
 The minimum supported Kubernetes version is 1.14.
 
-### Steps
+## Steps
 
 1. [Enable the required feature gate on the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
 2. Check out [the repository for the Google Compute Engine Persistent Disk (GCE PD) CSI driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for details on how to use volume snapshots on GKE.
+
+  </details>
+</div>
 
 ## Create volume snapshots for Gardener providers
 
