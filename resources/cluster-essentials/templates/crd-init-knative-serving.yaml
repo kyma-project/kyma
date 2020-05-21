@@ -78,9 +78,13 @@ spec:
             services.serving.knative.dev \
           )
 
+          operation_timeout=60s
           for crd in "${crds[@]}"; do
-            kubectl get crd "$crd" \
-            || kubectl apply -f /etc/crd/"$crd"
+            timeout "$operation_timeout" bash -c "\
+              until \
+                kubectl get crd $crd \
+                || kubectl apply -f /etc/crd/$crd; \
+              do sleep 2; done"
           done
       volumes:
       - name: crd-knative-serving
