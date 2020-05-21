@@ -33,11 +33,3 @@ In case Knative Service get stuck with RevisionMissing reason and updates on Fun
 ```bash
 kubectl delete services.serving.knative.dev {NAME} -n {NAMESPACE}
 ```
-
-
-
-
-kubectl patch function gddg -n default --type=merge -p "{'metadata':{'annotations':{'servicebindingusages\.servicecatalog\.kyma-project\.io/tracing-information':'$SBU_ANNOTATION'}}}"
-
-if [[ -n "${SBU_ANNOTATION}" ]]; then; kubectl annotate function gddg -n default "servicebindingusages.servicecatalog.kyma-project.io/tracing-information=${SBU_ANNOTATION}" --overwrite; fi
-kubectl annotate function gddg -n default "servicebindingusages.servicecatalog.kyma-project.io/tracing-information=${SBU_ANNOTATION}"  --overwrite
