@@ -1,0 +1,411 @@
+{{- if eq .Values.global.metrics.enabled true -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}-business-dashboard
+  namespace: kyma-system
+  labels:
+    grafana_dashboard: "1"
+    app: monitoring-grafana
+data:
+  compass-director-business-dashboard.json: |-
+    {
+      "annotations": {
+        "list": [
+        {
+          "$$hashKey": "object:1944",
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+        ]
+      },
+      "description": "Business metrics for Compass Director component",
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "links": [],
+      "panels": [
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "Prometheus",
+        "editable": true,
+        "error": false,
+        "fill": 1,
+        "fillGradient": 0,
+        "grid": {
+          "threshold1Color": "rgba(216, 200, 27, 0.27)",
+          "threshold2Color": "rgba(234, 112, 112, 0.22)"
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "hiddenSeries": false,
+        "id": 2,
+        "isNew": false,
+        "legend": {
+          "alignAsTable": true,
+          "avg": false,
+          "current": true,
+          "hideEmpty": false,
+          "hideZero": false,
+          "max": false,
+          "min": false,
+          "rightSide": false,
+          "show": true,
+          "total": false,
+          "values": true
+        },
+        "lines": true,
+        "linewidth": 2,
+        "links": [],
+        "nullPointMode": "connected",
+        "options": {
+          "dataLinks": []
+        },
+        "paceLength": 10,
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+        {
+          "expr": "compass_director_tenants_total_quantity",
+          "format": "time_series",
+          "instant": false,
+          "interval": "10s",
+          "intervalFactor": 1,
+          "legendFormat": "Total tenants",
+          "metric": "container_memory_usage_bytes",
+          "refId": "A",
+          "step": 15
+        },
+        {
+          "expr": "compass_director_tenants_active_total_quantity",
+          "format": "time_series",
+          "instant": false,
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Active tenants",
+          "metric": "kube_pod_container_resource_requests_memory_bytes",
+          "refId": "B",
+          "step": 20
+        },
+        {
+          "expr": "compass_director_tenants_total_quantity-compass_director_tenants_active_total_quantity",
+          "format": "time_series",
+          "instant": false,
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Inactive tenants",
+          "metric": "kube_pod_container_resource_limits_memory_bytes",
+          "refId": "C",
+          "step": 20
+        },
+        {
+          "expr": "compass_director_used_tenants_count",
+          "format": "time_series",
+          "instant": false,
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Tenants with at least one runtime or application",
+          "metric": "kube_pod_container_resource_limits_memory_bytes",
+          "refId": "D",
+          "step": 20
+        }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Tenants",
+        "tooltip": {
+          "msResolution": true,
+          "shared": true,
+          "sort": 0,
+          "value_type": "cumulative"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+        {
+          "$$hashKey": "object:1242",
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:1243",
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "Prometheus",
+        "editable": true,
+        "error": false,
+        "fill": 1,
+        "fillGradient": 0,
+        "grid": {
+          "threshold1Color": "rgba(216, 200, 27, 0.27)",
+          "threshold2Color": "rgba(234, 112, 112, 0.22)"
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        },
+        "hiddenSeries": false,
+        "id": 4,
+        "isNew": false,
+        "legend": {
+          "alignAsTable": true,
+          "avg": false,
+          "current": true,
+          "hideEmpty": false,
+          "hideZero": false,
+          "max": false,
+          "min": false,
+          "rightSide": false,
+          "show": true,
+          "total": false,
+          "values": true
+        },
+        "lines": true,
+        "linewidth": 2,
+        "links": [],
+        "nullPointMode": "connected",
+        "options": {
+          "dataLinks": []
+        },
+        "paceLength": 10,
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+        {
+          "expr": "compass_director_applications_total_quantity",
+          "format": "time_series",
+          "instant": false,
+          "interval": "10s",
+          "intervalFactor": 1,
+          "legendFormat": "Number of applications",
+          "metric": "container_memory_usage_bytes",
+          "refId": "A",
+          "step": 15
+        }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Applications",
+        "tooltip": {
+          "msResolution": true,
+          "shared": true,
+          "sort": 0,
+          "value_type": "cumulative"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+        {
+          "$$hashKey": "object:1242",
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:1243",
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "Prometheus",
+        "editable": true,
+        "error": false,
+        "fill": 1,
+        "fillGradient": 0,
+        "grid": {
+          "threshold1Color": "rgba(216, 200, 27, 0.27)",
+          "threshold2Color": "rgba(234, 112, 112, 0.22)"
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        },
+        "hiddenSeries": false,
+        "id": 6,
+        "isNew": false,
+        "legend": {
+          "alignAsTable": true,
+          "avg": false,
+          "current": true,
+          "hideEmpty": false,
+          "hideZero": false,
+          "max": false,
+          "min": false,
+          "rightSide": false,
+          "show": true,
+          "total": false,
+          "values": true
+        },
+        "lines": true,
+        "linewidth": 2,
+        "links": [],
+        "nullPointMode": "connected",
+        "options": {
+          "dataLinks": []
+        },
+        "paceLength": 10,
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+        {
+          "expr": "compass_director_runtimes_total_quantity",
+          "format": "time_series",
+          "instant": false,
+          "interval": "10s",
+          "intervalFactor": 1,
+          "legendFormat": "Number of runtimes",
+          "metric": "container_memory_usage_bytes",
+          "refId": "A",
+          "step": 15
+        }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Runtimes",
+        "tooltip": {
+          "msResolution": true,
+          "shared": true,
+          "sort": 0,
+          "value_type": "cumulative"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+        {
+          "$$hashKey": "object:1242",
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:1243",
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      }
+      ],
+      "schemaVersion": 22,
+      "style": "dark",
+      "tags": [
+        "compass",
+        "kyma"
+      ],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-6h",
+        "to": "now"
+      },
+      "timepicker": {
+        "refresh_intervals": [
+          "5s",
+          "10s",
+          "30s",
+          "1m",
+          "5m",
+          "15m",
+          "30m",
+          "1h",
+          "2h",
+          "1d"
+        ]
+      },
+      "timezone": "",
+      "title": "Compass / Director - Business Metrics",
+      "uid": "MfH0JjgGz",
+      "variables": {
+        "list": []
+      },
+      "version": 1
+    }
+{{- end -}}

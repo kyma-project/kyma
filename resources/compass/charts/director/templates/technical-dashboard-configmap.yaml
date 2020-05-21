@@ -2,18 +2,18 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "fullname" . }}-dashboard
+  name: {{ template "fullname" . }}-technical-dashboard
   namespace: kyma-system
   labels:
     grafana_dashboard: "1"
     app: monitoring-grafana
 data:
-  compass-director-dashboard.json: |-
+  compass-director-technical-dashboard.json: |-
     {
       "annotations": {
         "list": [
         {
-          "$$hashKey": "object:1151",
+          "$$hashKey": "object:460",
           "builtIn": 1,
           "datasource": "-- Grafana --",
           "enable": true,
@@ -28,7 +28,6 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 42,
       "links": [],
       "panels": [
       {
@@ -42,7 +41,7 @@ data:
         },
         "id": 2,
         "panels": [],
-        "title": "Director - Technical metrics",
+        "title": "Resources",
         "type": "row"
       },
       {
@@ -61,7 +60,7 @@ data:
         },
         "gridPos": {
           "h": 8,
-          "w": 12,
+          "w": 8,
           "x": 0,
           "y": 1
         },
@@ -186,8 +185,8 @@ data:
         },
         "gridPos": {
           "h": 8,
-          "w": 12,
-          "x": 12,
+          "w": 8,
+          "x": 8,
           "y": 1
         },
         "hiddenSeries": false,
@@ -305,10 +304,10 @@ data:
         "fillGradient": 0,
         "grid": {},
         "gridPos": {
-          "h": 7,
-          "w": 12,
-          "x": 0,
-          "y": 9
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 1
         },
         "hiddenSeries": false,
         "id": 15,
@@ -433,9 +432,9 @@ data:
         "fill": 1,
         "fillGradient": 0,
         "gridPos": {
-          "h": 7,
-          "w": 12,
-          "x": 12,
+          "h": 6,
+          "w": 6,
+          "x": 0,
           "y": 9
         },
         "hiddenSeries": false,
@@ -524,10 +523,10 @@ data:
         "fill": 1,
         "fillGradient": 0,
         "gridPos": {
-          "h": 7,
-          "w": 8,
-          "x": 0,
-          "y": 16
+          "h": 6,
+          "w": 6,
+          "x": 6,
+          "y": 9
         },
         "hiddenSeries": false,
         "id": 21,
@@ -612,16 +611,107 @@ data:
         "dashLength": 10,
         "dashes": false,
         "datasource": "Prometheus",
+        "fill": 1,
+        "fillGradient": 0,
+        "gridPos": {
+          "h": 6,
+          "w": 6,
+          "x": 12,
+          "y": 9
+        },
+        "hiddenSeries": false,
+        "id": 17,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "options": {
+          "dataLinks": []
+        },
+        "paceLength": 10,
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+        {
+          "expr": "go_threads{service=\"compass-director\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{`{{pod}}`}}",
+          "refId": "A"
+        }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Gothreads",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "Prometheus",
         "editable": true,
         "error": false,
         "fill": 1,
         "fillGradient": 0,
         "grid": {},
         "gridPos": {
-          "h": 7,
-          "w": 8,
-          "x": 8,
-          "y": 16
+          "h": 6,
+          "w": 6,
+          "x": 18,
+          "y": 9
         },
         "hiddenSeries": false,
         "id": 19,
@@ -706,38 +796,145 @@ data:
         }
       },
       {
+        "collapsed": false,
+        "datasource": null,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 15
+        },
+        "id": 36,
+        "panels": [],
+        "title": "Request handling",
+        "type": "row"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorPostfix": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "Prometheus",
+        "description": "",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 4,
+          "x": 0,
+          "y": 16
+        },
+        "id": 34,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "pluginVersion": "6.5.0",
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false,
+          "ymax": null,
+          "ymin": null
+        },
+        "tableColumn": "",
+        "targets": [
+        {
+          "expr": "SUM(compass_director_graphql_request_total)",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "{{`{{code}}`}}",
+          "refId": "A",
+          "step": 4
+        }
+        ],
+        "thresholds": "",
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "GraphQL processed request count",
+        "type": "singlestat",
+        "valueFontSize": "100%",
+        "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+        ],
+        "valueName": "current"
+      },
+      {
         "aliasColors": {},
         "bars": false,
         "dashLength": 10,
         "dashes": false,
         "datasource": "Prometheus",
+        "description": "",
         "fill": 1,
         "fillGradient": 0,
         "gridPos": {
           "h": 7,
-          "w": 8,
-          "x": 16,
+          "w": 20,
+          "x": 4,
           "y": 16
         },
         "hiddenSeries": false,
-        "id": 17,
+        "id": 33,
         "legend": {
-          "avg": false,
+          "alignAsTable": true,
+          "avg": true,
           "current": false,
+          "hideEmpty": true,
+          "hideZero": false,
           "max": false,
           "min": false,
+          "rightSide": true,
           "show": true,
           "total": false,
-          "values": false
+          "values": true
         },
         "lines": true,
         "linewidth": 1,
         "links": [],
-        "nullPointMode": "null",
+        "nullPointMode": "null as zero",
         "options": {
           "dataLinks": []
         },
-        "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
         "points": false,
@@ -748,18 +945,47 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "go_threads{service=\"compass-director\"}",
+          "expr": "histogram_quantile(0.50, sum(irate(compass_director_graphql_request_duration_seconds_bucket[1m])) by (le))",
           "format": "time_series",
+          "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{`{{pod}}`}}",
-          "refId": "A"
+          "legendFormat": "50th percentile",
+          "refId": "D",
+          "step": 2
+        },
+        {
+          "expr": "histogram_quantile(0.90, sum(irate(compass_director_graphql_request_duration_seconds_bucket[1m])) by (le))",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "90th percentile",
+          "refId": "A",
+          "step": 2
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(irate(compass_director_graphql_request_duration_seconds_bucket[1m])) by (le))",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "95th percentile",
+          "refId": "B",
+          "step": 2
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(irate(compass_director_graphql_request_duration_seconds_bucket[1m])) by (le))",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "99th percentile",
+          "refId": "C",
+          "step": 2
         }
         ],
         "thresholds": [],
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "Gothreads",
+        "title": "GraphQL Request Handling Duration",
         "tooltip": {
           "shared": true,
           "sort": 0,
@@ -775,11 +1001,11 @@ data:
         },
         "yaxes": [
         {
-          "format": "short",
+          "format": "s",
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -788,7 +1014,7 @@ data:
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         }
         ],
         "yaxis": {
@@ -910,7 +1136,7 @@ data:
           "y": 23
         },
         "hiddenSeries": false,
-        "id": 11,
+        "id": 23,
         "legend": {
           "avg": false,
           "current": false,
@@ -919,6 +1145,451 @@ data:
           "show": true,
           "total": false,
           "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null as zero",
+        "options": {
+          "dataLinks": []
+        },
+        "paceLength": 10,
+        "percentage": false,
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": true,
+        "targets": [
+        {
+          "expr": "go_sql_stats_connections_in_use{db_name=\"director\"}",
+          "format": "time_series",
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "In use",
+          "refId": "A"
+        },
+        {
+          "expr": "go_sql_stats_connections_idle{db_name=\"director\"}",
+          "format": "time_series",
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "Idle",
+          "refId": "B"
+        },
+        {
+          "expr": "go_sql_stats_connections_max_open{db_name=\"director\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Maximum",
+          "refId": "C"
+        }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "DB connections",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+        {
+          "decimals": 0,
+          "format": "short",
+          "label": "Average Queue Length",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "collapsed": false,
+        "datasource": null,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 30
+        },
+        "id": 40,
+        "panels": [],
+        "title": "Tenant Fetcher",
+        "type": "row"
+      },
+      {
+        "aliasColors": {},
+        "bars": true,
+        "cacheTimeout": null,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "Prometheus",
+        "decimals": 0,
+        "description": "",
+        "fill": 1,
+        "fillGradient": 0,
+        "gridPos": {
+          "h": 8,
+          "w": 9,
+          "x": 0,
+          "y": 31
+        },
+        "hiddenSeries": false,
+        "id": 41,
+        "legend": {
+          "alignAsTable": true,
+          "avg": false,
+          "current": true,
+          "max": false,
+          "min": false,
+          "rightSide": true,
+          "show": true,
+          "total": false,
+          "values": true
+        },
+        "lines": false,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "options": {
+          "dataLinks": []
+        },
+        "percentage": false,
+        "pluginVersion": "6.5.0",
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+        {
+          "expr": "count(kube_job_complete{condition=\"true\", job_name=~\"compass-tenant-fetcher-.*\"})",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "Succeeded",
+          "refId": "A",
+          "step": 4
+        },
+        {
+          "expr": "count(kube_job_failed{condition=\"true\", job_name=~\"compass-tenant-fetcher-.*\"})",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 2,
+          "legendFormat": "Failed",
+          "refId": "B",
+          "step": 4
+        }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Tenant Fetcher job completions",
+        "tooltip": {
+          "shared": false,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "series",
+          "name": null,
+          "show": true,
+          "values": [
+            "current"
+          ]
+        },
+        "yaxes": [
+        {
+          "decimals": 0,
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "decimals": 0,
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "Prometheus",
+        "description": "",
+        "fill": 1,
+        "fillGradient": 0,
+        "gridPos": {
+          "h": 8,
+          "w": 15,
+          "x": 9,
+          "y": 31
+        },
+        "hiddenSeries": false,
+        "id": 42,
+        "legend": {
+          "alignAsTable": true,
+          "avg": true,
+          "current": false,
+          "hideEmpty": true,
+          "hideZero": false,
+          "max": false,
+          "min": false,
+          "rightSide": false,
+          "show": true,
+          "total": false,
+          "values": true
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null as zero",
+        "options": {
+          "dataLinks": []
+        },
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+        {
+          "expr": "avg(kube_job_status_completion_time{job_name=~\"compass-tenant-fetcher-.*\"} - kube_job_status_start_time{job_name=~\"compass-tenant-fetcher-.*\"})",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "Average duration",
+          "refId": "D",
+          "step": 2
+        }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Tenant Fetcher Job Average Duration",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+        {
+          "format": "s",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "collapsed": false,
+        "datasource": null,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 39
+        },
+        "id": 29,
+        "panels": [],
+        "title": "External services (dependencies)",
+        "type": "row"
+      },
+      {
+        "aliasColors": {},
+        "bars": true,
+        "cacheTimeout": null,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "Prometheus",
+        "decimals": 0,
+        "description": "",
+        "fill": 1,
+        "fillGradient": 0,
+        "gridPos": {
+          "h": 8,
+          "w": 9,
+          "x": 0,
+          "y": 40
+        },
+        "hiddenSeries": false,
+        "id": 31,
+        "legend": {
+          "alignAsTable": true,
+          "avg": false,
+          "current": true,
+          "max": false,
+          "min": false,
+          "rightSide": true,
+          "show": true,
+          "total": false,
+          "values": true
+        },
+        "lines": false,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "options": {
+          "dataLinks": []
+        },
+        "percentage": false,
+        "pluginVersion": "6.5.0",
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+        {
+          "expr": "SUM(compass_director_hydra_request_total) by (code)",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "{{`{{code}}`}}",
+          "refId": "A",
+          "step": 4
+        }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Hydra request count by status code",
+        "tooltip": {
+          "shared": false,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "series",
+          "name": null,
+          "show": true,
+          "values": [
+            "current"
+          ]
+        },
+        "yaxes": [
+        {
+          "decimals": 0,
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "decimals": 0,
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "Prometheus",
+        "fill": 1,
+        "fillGradient": 0,
+        "gridPos": {
+          "h": 8,
+          "w": 15,
+          "x": 9,
+          "y": 40
+        },
+        "hiddenSeries": false,
+        "id": 38,
+        "legend": {
+          "avg": true,
+          "current": false,
+          "max": false,
+          "min": false,
+          "rightSide": true,
+          "show": true,
+          "total": false,
+          "values": true
         },
         "lines": true,
         "linewidth": 1,
@@ -938,10 +1609,10 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "sum by (code) (rate(http_requests_total{service=\"compass-director\"}[1m]))",
+          "expr": "sum by (code) (rate(compass_director_hydra_request_total[5m]))",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{`{{code}}`}}",
+          "legendFormat": "{{`{{ code }}`}}",
           "refId": "A"
         }
         ],
@@ -949,7 +1620,7 @@ data:
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "Request rate by status code",
+        "title": "Hydra request rate by status code",
         "tooltip": {
           "shared": true,
           "sort": 0,
@@ -985,362 +1656,6 @@ data:
           "align": false,
           "alignLevel": null
         }
-      },
-      {
-        "collapsed": false,
-        "datasource": null,
-        "gridPos": {
-          "h": 1,
-          "w": 24,
-          "x": 0,
-          "y": 30
-        },
-        "id": 4,
-        "panels": [],
-        "title": "Director - Business metrics",
-        "type": "row"
-      },
-      {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "Prometheus",
-        "editable": true,
-        "error": false,
-        "fill": 1,
-        "fillGradient": 0,
-        "grid": {
-          "threshold1Color": "rgba(216, 200, 27, 0.27)",
-          "threshold2Color": "rgba(234, 112, 112, 0.22)"
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 0,
-          "y": 31
-        },
-        "hiddenSeries": false,
-        "id": 22,
-        "isNew": false,
-        "legend": {
-          "alignAsTable": true,
-          "avg": false,
-          "current": true,
-          "hideEmpty": false,
-          "hideZero": false,
-          "max": false,
-          "min": false,
-          "rightSide": false,
-          "show": true,
-          "total": false,
-          "values": true
-        },
-        "lines": true,
-        "linewidth": 2,
-        "links": [],
-        "nullPointMode": "connected",
-        "options": {
-          "dataLinks": []
-        },
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 5,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-        {
-          "expr": "pg_compass_director_tenants_total_quantity",
-          "format": "time_series",
-          "instant": false,
-          "interval": "10s",
-          "intervalFactor": 1,
-          "legendFormat": "Total tenants",
-          "metric": "container_memory_usage_bytes",
-          "refId": "A",
-          "step": 15
-        },
-        {
-          "expr": "pg_compass_director_tenants_active_quantity",
-          "format": "time_series",
-          "instant": false,
-          "interval": "10s",
-          "intervalFactor": 2,
-          "legendFormat": "Active tenants",
-          "metric": "kube_pod_container_resource_requests_memory_bytes",
-          "refId": "B",
-          "step": 20
-        },
-        {
-          "expr": "pg_compass_director_tenants_total_quantity-pg_compass_director_tenants_active_quantity",
-          "format": "time_series",
-          "instant": false,
-          "interval": "10s",
-          "intervalFactor": 2,
-          "legendFormat": "Inactive tenants",
-          "metric": "kube_pod_container_resource_limits_memory_bytes",
-          "refId": "C",
-          "step": 20
-        },
-        {
-          "expr": "pg_compass_director_tenants_with_at_least_one_runtime_or_application_count",
-          "format": "time_series",
-          "instant": false,
-          "interval": "10s",
-          "intervalFactor": 2,
-          "legendFormat": "Tenants with at least one runtime or application",
-          "metric": "kube_pod_container_resource_limits_memory_bytes",
-          "refId": "D",
-          "step": 20
-        }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Tenants",
-        "tooltip": {
-          "msResolution": true,
-          "shared": true,
-          "sort": 0,
-          "value_type": "cumulative"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-        {
-          "$$hashKey": "object:1242",
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1243",
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "Prometheus",
-        "editable": true,
-        "error": false,
-        "fill": 1,
-        "fillGradient": 0,
-        "grid": {
-          "threshold1Color": "rgba(216, 200, 27, 0.27)",
-          "threshold2Color": "rgba(234, 112, 112, 0.22)"
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 12,
-          "y": 31
-        },
-        "hiddenSeries": false,
-        "id": 23,
-        "isNew": false,
-        "legend": {
-          "alignAsTable": true,
-          "avg": false,
-          "current": true,
-          "hideEmpty": false,
-          "hideZero": false,
-          "max": false,
-          "min": false,
-          "rightSide": false,
-          "show": true,
-          "total": false,
-          "values": true
-        },
-        "lines": true,
-        "linewidth": 2,
-        "links": [],
-        "nullPointMode": "connected",
-        "options": {
-          "dataLinks": []
-        },
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 5,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-        {
-          "expr": "pg_compass_director_applications_quantity",
-          "format": "time_series",
-          "instant": false,
-          "interval": "10s",
-          "intervalFactor": 1,
-          "legendFormat": "Number of applications",
-          "metric": "container_memory_usage_bytes",
-          "refId": "A",
-          "step": 15
-        }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Applications",
-        "tooltip": {
-          "msResolution": true,
-          "shared": true,
-          "sort": 0,
-          "value_type": "cumulative"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-        {
-          "$$hashKey": "object:1242",
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1243",
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "Prometheus",
-        "editable": true,
-        "error": false,
-        "fill": 1,
-        "fillGradient": 0,
-        "grid": {
-          "threshold1Color": "rgba(216, 200, 27, 0.27)",
-          "threshold2Color": "rgba(234, 112, 112, 0.22)"
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 0,
-          "y": 39
-        },
-        "hiddenSeries": false,
-        "id": 24,
-        "isNew": false,
-        "legend": {
-          "alignAsTable": true,
-          "avg": false,
-          "current": true,
-          "hideEmpty": false,
-          "hideZero": false,
-          "max": false,
-          "min": false,
-          "rightSide": false,
-          "show": true,
-          "total": false,
-          "values": true
-        },
-        "lines": true,
-        "linewidth": 2,
-        "links": [],
-        "nullPointMode": "connected",
-        "options": {
-          "dataLinks": []
-        },
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 5,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-        {
-          "expr": "pg_compass_director_runtimes_quantity",
-          "format": "time_series",
-          "instant": false,
-          "interval": "10s",
-          "intervalFactor": 1,
-          "legendFormat": "Number of runtimes",
-          "metric": "container_memory_usage_bytes",
-          "refId": "A",
-          "step": 15
-        }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Runtimes",
-        "tooltip": {
-          "msResolution": true,
-          "shared": true,
-          "sort": 0,
-          "value_type": "cumulative"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-        {
-          "$$hashKey": "object:1242",
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1243",
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
       }
       ],
       "refresh": false,
@@ -1354,7 +1669,7 @@ data:
         "list": []
       },
       "time": {
-        "from": "now-6h",
+        "from": "now-5m",
         "to": "now"
       },
       "timepicker": {
@@ -1372,11 +1687,11 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Compass / Director",
+      "title": "Compass / Director - Technical Metrics",
       "uid": "RsjU_VRGz",
       "variables": {
         "list": []
       },
       "version": 1
     }
-{{- end}}
+{{- end }}

@@ -294,7 +294,7 @@ config:
             usage: "COUNTER"
             description: "Total time the statement spent writing blocks, in milliseconds (if track_io_timing is enabled, otherwise zero)"
 
-    pg_compass_director_tenants_total:
+    compass_director_tenants_total:
       query: "SELECT COUNT(ID) as quantity FROM business_tenant_mappings;"
       master: true
       metrics:
@@ -302,7 +302,7 @@ config:
             usage: "COUNTER"
             description: "Quantity of total tenants in table"
 
-    pg_compass_director_tenants_active:
+    compass_director_tenants_active_total:
       query: "SELECT COUNT(ID) as quantity FROM business_tenant_mappings WHERE status='Active';"
       master: true
       metrics:
@@ -310,29 +310,29 @@ config:
             usage: "COUNTER"
             description: "Quantity of active tenants in table"
 
-    pg_compass_director_tenants_with_at_least_one_runtime_or_application:
-      query: "SELECT COUNT (DISTINCT tenant_id) FROM (SELECT tenant_id FROM runtimes UNION ALL SELECT tenant_id FROM applications) a;"
+    compass_director_used_tenants:
+      query: "SELECT COUNT (DISTINCT tenants.tenant_id) FROM (SELECT tenant_id FROM runtimes UNION ALL SELECT tenant_id FROM applications) tenants;"
       master: true
       metrics:
         - quantity:
             usage: "COUNTER"
             description: "Quantity of tenants which are assigned to at least one runtime or application"
 
-    pg_compass_director_applications:
+    compass_director_applications_total:
       query: "SELECT COUNT(ID) as quantity FROM applications;"
       master: true
       metrics:
         - quantity:
             usage: "COUNTER"
-            description: "Quantity of applications in table"
+            description: "Total number of applications in table"
 
-    pg_compass_director_runtimes:
+    compass_director_runtimes_total:
       query: "SELECT COUNT(ID) as quantity FROM runtimes;"
       master: true
       metrics:
         - quantity:
             usage: "COUNTER"
-            description: "Quantity of runtimes in table"
+            description: "Total number of runtimes in table"
 
 nodeSelector: {}
 
