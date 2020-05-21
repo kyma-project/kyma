@@ -25,6 +25,7 @@ gardener:
   auditLogsPolicyConfigMap: ""
   manageSecrets: true
   clusterCreationTimeout: 2h
+  clusterDeletionTimeout: 30m
   waitingForClusterDeletionTimeout: 4h
 
 provisioner: "gardener"

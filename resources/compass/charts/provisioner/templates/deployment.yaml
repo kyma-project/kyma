@@ -93,6 +93,8 @@ spec:
               value: "{{ .Values.runtimeAgent.connectionTimeout }}"
             - name: APP_PROVISIONING_TIMEOUT_CLUSTER_CREATION
               value: "{{ .Values.gardener.clusterCreationTimeout }}"
+            - name: APP_DEPROVISIONING_TIMEOUT_CLUSTER_DELETION
+              value: "{{ .Values.gardener.clusterDeletionTimeout }}"
             - name: APP_DEPROVISIONING_TIMEOUT_WAITING_FOR_CLUSTER_DELETION
               value: "{{ .Values.gardener.waitingForClusterDeletionTimeout }}"
             - name: APP_GARDENER_PROJECT
