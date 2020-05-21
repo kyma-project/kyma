@@ -30,6 +30,6 @@ In case Knative Service get stuck with RevisionMissing reason and updates on Fun
 
 1. Delete Knative Service:
 
-```bash
-kubectl delete services.serving.knative.dev {NAME} -n {NAMESPACE}
-```
+    ```bash
+    kubectl delete services.serving.knative.dev {NAME} -n {NAMESPACE}
+    ```
