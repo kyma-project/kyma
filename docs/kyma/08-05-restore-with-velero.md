@@ -1,5 +1,5 @@
 ---
-title: Create backup using Velero
+title: Restore resources using Velero
 type: Tutorials
 ---
 
