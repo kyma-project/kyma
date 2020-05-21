@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export GLOBAL_RETRY_TIMER=30s
+export GLOBAL_RETRY_TIMER=15
 
 function LogInAsUser() {
     # export local envs to make then avaliable in the internal shells
@@ -56,13 +56,15 @@ function testPermissions() {
         TEST_NS="-n${TEST_NS}"
     fi
 
-    set +e
-    TEST=$(timeout ${GLOBAL_RETRY_TIMER} bash -c 'until kubectl auth can-i "${OPERATION}" "${RESOURCE}" "${TEST_NS}" ; do sleep 5; done')
-    set -e
-    if [[ "${TEST}" == "${EXPECTED}" ]]; then
-        echo "----> PASSED"
-        return 0
-    fi
+    SECONDS=0
+    until [[ ${SECONDS} -ge ${GLOBAL_RETRY_TIMER} ]]; do
+        TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" "${TEST_NS}" --as read-only-user@kyma.cx)
+        if [[ "${TEST}" == "${EXPECTED}" ]]; then
+            echo "----> PASSED"
+            return 0
+        fi
+        sleep 5
+    done
 
     echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
     return 1
