@@ -17,7 +17,7 @@ global:
       version: "d068b250"
     connectivity_adapter:
       dir:
-      version: "76738d5c"
+      version: "bed3d78a"
     pairing_adapter:
       dir:
       version: "d068b250"
@@ -35,7 +35,7 @@ global:
       version: "778b2bb3"
     provisioner:
       dir:
-      version: "4ef9ec63"
+      version: "bfb6a9d7"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -62,7 +62,7 @@ global:
         version: "8fb2e53b"
       e2e_provisioning:
         dir:
-        version: "a8287494"
+        version: "e0b2be21"
       connectivity_adapter:
         dir:
         version: "d068b250"

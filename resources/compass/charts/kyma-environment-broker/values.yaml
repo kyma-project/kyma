@@ -127,3 +127,7 @@ e2e:
     configName: "e2e-runtime-config-azure"
   gcp:
     configName: "e2e-runtime-config-gcp"
+  upgrade:
+    timeout: "100m"
+    preUpgradeVersion: ""
+    targetVersion: "master-156dc1a5"

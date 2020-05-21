@@ -14,8 +14,8 @@ This tutorial is based on an existing Function. To create one, follow the [Creat
 You must also have:
 
 - An Application bound to a specific Namespace. Read the tutorials to learn how to [create](/components/application-connector#tutorials-create-a-new-application) an Application and [bind](/components/application-connector#tutorials-bind-an-application-to-a-namespace) it to a Namespace.
-- An event service (an API of [AsyncAPI](https://www.asyncapi.com/) type) registered in the desired Application. Learn [here](components/application-connector/#tutorials-register-a-service) how to do it.
-- A Service Instance created for the registered service to expose events in a specific Namespace. See [this](/components/application-connector/#tutorials-bind-a-service-to-a-namespace) tutorial for details.
+- An event service (an API of [AsyncAPI](https://www.asyncapi.com/) type) registered in the desired Application. Learn [here](/components/application-connector#tutorials-register-a-service) how to do it.
+- A Service Instance created for the registered service to expose events in a specific Namespace. See [this](/components/application-connector#tutorials-bind-a-service-to-a-namespace) tutorial for details.
 
 ## Steps
 
