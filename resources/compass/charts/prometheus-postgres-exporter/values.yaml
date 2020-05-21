@@ -300,7 +300,7 @@ config:
       metrics:
         - quantity:
             usage: "COUNTER"
-            description: "Quantity of total tenants in table"
+            description: "Total number of tenants in table"
 
     compass_director_tenants_active_total:
       query: "SELECT COUNT(ID) as quantity FROM business_tenant_mappings WHERE status='Active';"
@@ -308,7 +308,7 @@ config:
       metrics:
         - quantity:
             usage: "COUNTER"
-            description: "Quantity of active tenants in table"
+            description: "Number of active tenants in table"
 
     compass_director_used_tenants:
       query: "SELECT COUNT (DISTINCT tenants.tenant_id) FROM (SELECT tenant_id FROM runtimes UNION ALL SELECT tenant_id FROM applications) tenants;"
@@ -316,7 +316,7 @@ config:
       metrics:
         - quantity:
             usage: "COUNTER"
-            description: "Quantity of tenants which are assigned to at least one runtime or application"
+            description: "Number of tenants which are assigned to at least one runtime or application"
 
     compass_director_applications_total:
       query: "SELECT COUNT(ID) as quantity FROM applications;"
