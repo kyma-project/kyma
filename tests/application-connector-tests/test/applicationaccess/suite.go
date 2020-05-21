@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	applicationInstallationTimeout = 240 * time.Second
+	applicationInstallationTimeout = 300 * time.Second
 	csrInfoURLRetrievalTimeout     = 120 * time.Second
 	defaultCheckInterval           = time.Second * 2
 
