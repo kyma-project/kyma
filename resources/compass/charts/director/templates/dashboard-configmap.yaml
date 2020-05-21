@@ -848,10 +848,12 @@ data:
           "mappingType": 1,
           "mappingTypes": [
             {
+              "$$hashKey": "object:2365",
               "name": "value to text",
               "value": 1
             },
             {
+              "$$hashKey": "object:2366",
               "name": "range to text",
               "value": 2
             }
@@ -873,20 +875,21 @@ data:
           ],
           "sparkline": {
             "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
+            "full": true,
             "lineColor": "rgb(31, 120, 193)",
-            "show": false,
+            "show": true,
             "ymax": null,
             "ymin": null
           },
           "tableColumn": "",
           "targets": [
             {
-              "expr": "SUM(compass_director_graphql_request_total)",
+              "expr": "compass_director_graphql_request_total",
               "format": "time_series",
+              "instant": false,
               "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "{{`{{code}}`}}",
+              "legendFormat": "",
               "refId": "A",
               "step": 4
             }
@@ -894,17 +897,18 @@ data:
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "GraphQL processed request count",
+          "title": "Last processed GraphQL requests",
           "type": "singlestat",
           "valueFontSize": "100%",
           "valueMaps": [
             {
+              "$$hashKey": "object:2368",
               "op": "=",
               "text": "N/A",
               "value": "null"
             }
           ],
-          "valueName": "current"
+          "valueName": "diff"
         },
         {
           "aliasColors": {},
@@ -1371,13 +1375,13 @@ data:
           "legend": {
             "alignAsTable": true,
             "avg": false,
-            "current": true,
+            "current": false,
             "hideZero": false,
             "max": false,
             "min": false,
             "rightSide": false,
-            "show": true,
-            "total": false,
+            "show": false,
+            "total": true,
             "values": true
           },
           "lines": false,
@@ -1398,7 +1402,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(compass_tenantfetcher_eventing_request_total) by (code, desc)",
+              "expr": "compass_tenantfetcher_eventing_requests_total",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -1411,7 +1415,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Tenant Fetcher eventing requests count by status code",
+          "title": "Last Tenant Fetcher eventing requests by status code",
           "tooltip": {
             "shared": false,
             "sort": 0,
@@ -1424,7 +1428,7 @@ data:
             "name": null,
             "show": true,
             "values": [
-              "current"
+              "total"
             ]
           },
           "yaxes": [
@@ -1474,7 +1478,7 @@ data:
           "legend": {
             "alignAsTable": true,
             "avg": false,
-            "current": false,
+            "current": true,
             "hideEmpty": true,
             "hideZero": false,
             "max": false,
@@ -1482,7 +1486,7 @@ data:
             "rightSide": false,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -1501,7 +1505,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(compass_tenantfetcher_eventing_requests_total[5m]) * 60) by (code, desc)",
+              "expr": "compass_tenantfetcher_eventing_requests_total",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1515,7 +1519,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Tenant Fetcher Eventing Requests By Status Code [req/min]",
+          "title": "Tenant Fetcher Eventing Requests By Status Code",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1532,7 +1536,7 @@ data:
           "yaxes": [
             {
               "$$hashKey": "object:138",
-              "format": "req/min",
+              "format": "none",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -1569,106 +1573,55 @@ data:
           "type": "row"
         },
         {
-          "aliasColors": {},
-          "bars": true,
-          "cacheTimeout": null,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "Prometheus",
-          "decimals": 0,
-          "description": "",
-          "fill": 1,
-          "fillGradient": 0,
+          "datasource": null,
           "gridPos": {
             "h": 8,
             "w": 9,
             "x": 0,
             "y": 48
           },
-          "hiddenSeries": false,
-          "id": 31,
-          "legend": {
-            "alignAsTable": true,
-            "avg": false,
-            "current": true,
-            "max": false,
-            "min": false,
-            "rightSide": true,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": false,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
+          "id": 46,
           "options": {
-            "dataLinks": []
+            "displayMode": "basic",
+            "fieldOptions": {
+              "calcs": [
+                "diff"
+              ],
+              "defaults": {
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "blue",
+                      "value": null
+                    }
+                  ]
+                },
+                "title": "${__series.name}"
+              },
+              "overrides": [],
+              "values": false
+            },
+            "orientation": "horizontal",
+            "showUnfilled": false
           },
-          "percentage": false,
-          "pluginVersion": "6.5.0",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "pluginVersion": "6.7.3",
           "targets": [
             {
-              "expr": "SUM(compass_director_hydra_request_total) by (code)",
+              "expr": "compass_director_hydra_request_total",
               "format": "time_series",
+              "instant": false,
               "interval": "",
-              "intervalFactor": 2,
-              "legendFormat": "{{`{{code}}`}}",
-              "refId": "A",
-              "step": 4
+              "intervalFactor": 1,
+              "legendFormat": "{{`{{ code }}`}}",
+              "refId": "A"
             }
           ],
-          "thresholds": [],
           "timeFrom": null,
-          "timeRegions": [],
           "timeShift": null,
-          "title": "Hydra request count by status code",
-          "tooltip": {
-            "shared": false,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "series",
-            "name": null,
-            "show": true,
-            "values": [
-              "current"
-            ]
-          },
-          "yaxes": [
-            {
-              "decimals": 0,
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "decimals": 0,
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+          "title": "Last Hydra requests by status code",
+          "type": "bargauge"
         },
         {
           "aliasColors": {},
@@ -1814,6 +1767,6 @@ data:
       "variables": {
         "list": []
       },
-      "version": 2
+      "version": 1
     }
   {{- end }}
