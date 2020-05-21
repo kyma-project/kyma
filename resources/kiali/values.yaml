@@ -7,6 +7,7 @@ global:
   istio:
     gateway:
       name: kyma-gateway
+      namespace: kyma-system
   containerRegistry:
     path: eu.gcr.io/kyma-project
   alpine_net:
