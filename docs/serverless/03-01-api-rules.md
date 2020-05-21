@@ -13,6 +13,8 @@ To expose a Function outside the cluster, you must create an [APIRule custom res
 
 1. Create the APIRule CR where you specify the Function to expose, define a [Oathkeeper Access Rule](/components/api-gateway/#details-available-security-options) to secure it, and list which HTTP request methods you want to enable for it.
 
+> **CAUTION:** If you decide to expose your Function through an unsecured endpoint, use the `noop` **handler** for the **accessStrategy** you define in the APIRule CR. The `allow` value for the **handler** is not supported in the current Serverless implementation.
+
 2. The API Gateway Controller detects a new APIRule CR and reads its definition.
 
 3. The API Gateway Controller creates an Istio Virtual Service and Access Rules according to details specified in the CR. Such a Function service is available under the `{host-name}.{domain}` endpoint, such as `my-function.kyma.local`.
