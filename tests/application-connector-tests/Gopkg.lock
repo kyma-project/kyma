@@ -26,7 +26,7 @@
   version = "v5.0.0"
 
 [[projects]]
-  digest = "1:5a3fb250bca8aad8dd661d6c573172bca7a194f7fc78bf47d9609f1fed6353e4"
+  digest = "1:85494ed429202dcb0484f6cfb9b4eeb0cdc6f2214c50afc6985fbc7f03a564fa"
   name = "github.com/gogo/protobuf"
   packages = [
     "jsonpb",
@@ -36,8 +36,8 @@
     "types",
   ]
   pruneopts = "NUT"
-  revision = "ba06b47c162d49f2af050fb4c75bcbc86a159d5c"
-  version = "v1.2.1"
+  revision = "5628607bb4c51c3157aacc3a50f0ab707582b805"
+  version = "v1.3.1"
 
 [[projects]]
   digest = "1:2d0636a8c490d2272dd725db26f74a537111b99b9dbdda0d8b98febe63702aa4"
