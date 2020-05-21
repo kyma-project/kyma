@@ -20,6 +20,7 @@ In case Knative Service get stuck with RevisionMissing reason and updates on Fun
     ```bash
     kubectl delete services.serving.knative.dev {NAME} -n {NAMESPACE}
     ```
+
 3. Add Service Binding Usage annotation to the new Knative Service that has been created:
     
     ```bash
