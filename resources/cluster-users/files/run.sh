@@ -12,7 +12,7 @@ readonly K8S_RESOURCES=(
   "deployment"
   "pod"
   "secret"
-  "confgimap"
+  "configmap"
   "serviceaccount"
   "role"
   "rolebinding"

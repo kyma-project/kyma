@@ -9,7 +9,7 @@ tests:
     users:
       admin: admin-user
       developer: test-developer-user
-      viewer: test-read-only-user
+      view: test-read-only-user
       NSAdmin: test-namespace-admin-user
 
 bindings:
