@@ -23,12 +23,15 @@ spec:
           mountPath: /etc/ory/crd
           readOnly: true
         command:
-        - /bin/bash
+        - timeout
+        - 60s
+        - bash
         - -c
         - |-
-          set -e
-          kubectl get crd rules.oathkeeper.ory.sh \
-          || kubectl apply -f /etc/ory/crd/rules.yaml
+          until \
+            kubectl get crd rules.oathkeeper.ory.sh \
+            || kubectl apply -f /etc/ory/crd/rules.yaml; \
+          do sleep 2; done
       volumes:
       - name: crd-rules
         configMap:

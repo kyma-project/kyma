@@ -23,12 +23,15 @@ spec:
           mountPath: /etc/crd
           readOnly: true
         command:
-        - /bin/bash
+        - timeout
+        - 60s
+        - bash
         - -c
         - |-
-          set -e
-          kubectl get crd oauth2clients.hydra.ory.sh \
-          || kubectl apply -f /etc/crd/oauth2clients.yaml
+          until \
+            kubectl get crd oauth2clients.hydra.ory.sh \
+            || kubectl apply -f /etc/crd/oauth2clients.yaml; \
+          do sleep 2; done
       volumes:
       - name: crd-oauth2clients
         configMap:
