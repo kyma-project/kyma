@@ -23,7 +23,7 @@ global:
       version: "d068b250"
     director:
       dir:
-      version: "PR-1368" # TODO: Replace with final image
+      version: "55de0e4f"
     gateway:
       dir:
       version: "53b12181"
