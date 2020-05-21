@@ -3,13 +3,13 @@ title: Create on-demand volume snapshots
 type: Tutorials
 ---
 
-This tutorial shows how to create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) you can use to provision a new volume or restore an existing one. 
+This tutorial shows how to create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) you can use to provision a new volume or restore the existing one. 
 
 ## Steps
 
 Perform the steps:
 
-1. Assume that you have a `pvc-to-backup` PersistentVolumeClaim which you have created using a CSI-enabled StorageClass. Trigger a snapshot by creating a VolumeSnapshot object:
+1. Assume that you have the `pvc-to-backup` PersistentVolumeClaim which you have created using a CSI-enabled StorageClass. Trigger a snapshot by creating a VolumeSnapshot object:
 
 >**NOTE:** You must use CSI-enabled StorageClass to create a PVC, otherwise it won't be backed up.
 
@@ -105,21 +105,21 @@ spec:
                 kind: VolumeSnapshot
                 metadata:
                   name: volume-snapshot-${RANDOM_ID}
-                  namespace: <NAMESPACE>
+                  namespace: {NAMESPACE}
                   labels:
                     "job": "volume-snapshotter"
                     "name": "volume-snapshot-${RANDOM_ID}"
                 spec:
-                  volumeSnapshotClassName: <SNAPSHOT_CLASS_NAME>
+                  volumeSnapshotClassName: {SNAPSHOT_CLASS_NAME}
                   source:
-                    persistentVolumeClaimName: <PVC_NAME>
+                    persistentVolumeClaimName: {PVC_NAME}
                 EOF
 
                 # Wait until volume snapshot is ready to use.
                 attempts=3
                 retryTimeInSec="30"
                 for ((i=1; i<=attempts; i++)); do
-                    STATUS=$(kubectl get volumesnapshot volume-snapshot-${RANDOM_ID} -n <NAMESPACE> -o jsonpath='{.status.readyToUse}')
+                    STATUS=$(kubectl get volumesnapshot volume-snapshot-${RANDOM_ID} -n {NAMESPACE} -o jsonpath='{.status.readyToUse}')
                     if [ "${STATUS}" == "true" ]; then
                         echo "Volume snapshot is ready to use."
                         break
