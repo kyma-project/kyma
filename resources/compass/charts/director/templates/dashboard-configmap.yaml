@@ -1501,7 +1501,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(compass_tenantfetcher_eventing_request_total) by (code, desc)",
+              "expr": "sum(rate(compass_tenantfetcher_eventing_requests_total[5m]) * 60) by (code, desc)",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1515,7 +1515,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Tenant Fetcher Eventing Requests Count By Status Code",
+          "title": "Tenant Fetcher Eventing Requests By Status Code [req/min]",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1532,9 +1532,9 @@ data:
           "yaxes": [
             {
               "$$hashKey": "object:138",
-              "format": "none",
+              "format": "req/min",
               "label": null,
-              "logBase": 1024,
+              "logBase": 1,
               "max": null,
               "min": "0",
               "show": true
@@ -1714,7 +1714,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (code) (rate(compass_director_hydra_request_total[5m]))",
+              "expr": "sum by (code) (rate(compass_director_hydra_request_total[5m]) * 60)",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -1726,7 +1726,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Hydra request rate by status code",
+          "title": "Hydra request rate by status code [req/min]",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1743,7 +1743,7 @@ data:
           "yaxes": [
             {
               "$$hashKey": "object:565",
-              "format": "reqps",
+              "format": "req/min",
               "label": null,
               "logBase": 1,
               "max": null,
