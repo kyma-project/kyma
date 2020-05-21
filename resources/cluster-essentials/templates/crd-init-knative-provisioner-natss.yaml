@@ -43,11 +43,15 @@ spec:
           mountPath: /etc/crd
           readOnly: true
         command:
-        - /bin/bash
+        - timeout
+        - 60s
+        - bash
         - -c
         - |-
-          kubectl get crd natsschannels.messaging.knative.dev \
-          || kubectl apply -f /etc/crd/natsschannels.messaging.knative.dev
+          until \
+            kubectl get crd natsschannels.messaging.knative.dev \
+            || kubectl apply -f /etc/crd/natsschannels.messaging.knative.dev; \
+          do sleep 2; done        
       volumes:
       - name: crd-app-connector
         configMap:
