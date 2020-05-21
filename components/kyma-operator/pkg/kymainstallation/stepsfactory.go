@@ -1,14 +1,20 @@
 package kymainstallation
 
 import (
-	"errors"
 	"log"
+
+	errors "github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 	helm "k8s.io/helm/pkg/proto/hapi/release"
+)
+
+const (
+	defaultDeleteWaitTimeSec   = 10
+	defaultRollbackWaitTimeSec = 10
 )
 
 // StepFactoryCreator knows how to create an instance of the StepFactory
@@ -19,12 +25,12 @@ type StepFactoryCreator interface {
 
 // StepFactory defines the contract for obtaining an instance of an installation/uninstallation Step
 type StepFactory interface {
-	NewStep(component v1alpha1.KymaComponent) Step
+	NewStep(component v1alpha1.KymaComponent) (Step, error)
 }
 
 type stepFactory struct {
 	helmClient        kymahelm.ClientInterface
-	installedReleases map[string]int32
+	installedReleases map[string]kymahelm.ReleaseStatus
 }
 
 // StepFactory implementation for installation operation
@@ -57,9 +63,9 @@ func NewStepFactoryCreator(helmClient kymahelm.ClientInterface, kymaPackages kym
 	}
 }
 
-func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]int32, error) {
+func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]kymahelm.ReleaseStatus, error) {
 
-	existingReleases := make(map[string]int32)
+	existingReleases := make(map[string]kymahelm.ReleaseStatus)
 
 	list, err := sfc.helmClient.ListReleases()
 	if err != nil {
@@ -81,8 +87,13 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]int32, error) 
 					return nil, errors.New("Helm error: " + err.Error())
 				}
 			}
-			existingReleases[release.Name] = lastDeployedRev
+
 			log.Printf("%s status: %s, last deployed revision: %d", release.Name, statusCode, lastDeployedRev)
+			existingReleases[release.Name] = kymahelm.ReleaseStatus{
+				StatusCode:           statusCode,
+				CurrentRevision:      release.Version,
+				LastDeployedRevision: lastDeployedRev,
+			}
 		}
 	}
 	return existingReleases, nil
@@ -118,46 +129,56 @@ func (sfc *stepFactoryCreator) NewUninstallStepFactory() (StepFactory, error) {
 }
 
 // NewStep method returns instance of the installation/upgrade step based on component details
-func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
+func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) (Step, error) {
 	step := step{
 		helmClient: isf.helmClient,
 		component:  component,
 	}
 
 	inststp := installStep{
-		step:         step,
-		sourceGetter: isf.sourceGetter,
-		overrideData: isf.overrideData,
+		step:              step,
+		sourceGetter:      isf.sourceGetter,
+		overrideData:      isf.overrideData,
+		deleteWaitTimeSec: defaultDeleteWaitTimeSec,
 	}
 
-	revision, exists := isf.installedReleases[component.GetReleaseName()]
+	relStatus, exists := isf.installedReleases[component.GetReleaseName()]
 
-	if exists && revision > 0 {
-		return upgradeStep{
-			inststp,
-			isf.installedReleases[component.GetReleaseName()],
+	if exists {
+
+		isUpgrade, err := relStatus.IsUpgradeStep()
+		if err != nil {
+			return nil, errors.Wrapf(err, "unable to process release %s", component.GetReleaseName())
+		}
+
+		if isUpgrade {
+			return upgradeStep{
+				installStep:         inststp,
+				deployedRevision:    relStatus.LastDeployedRevision,
+				rollbackWaitTimeSec: defaultRollbackWaitTimeSec,
+			}, nil
 		}
 	}
 
-	return inststp
+	return inststp, nil
 }
 
 // NewStep method returns instance of the uninstallation step based on component details
-func (usf uninstallStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
+func (usf uninstallStepFactory) NewStep(component v1alpha1.KymaComponent) (Step, error) {
 	step := step{
 		helmClient: usf.helmClient,
 		component:  component,
 	}
 
-	revision, exists := usf.installedReleases[component.GetReleaseName()]
+	_, exists := usf.installedReleases[component.GetReleaseName()]
 
-	if exists && revision > 0 {
+	if exists {
 		return uninstallStep{
 			step,
-		}
+		}, nil
 	}
 
 	return noStep{
 		step,
-	}
+	}, nil
 }
