@@ -103,6 +103,82 @@ function testComponent() {
     done
 }
 
+function testComponentClusterScoped() {
+    local -r userEmail="${1}"
+    local -r viewAllowed="${2}"
+    local -r editAllowed="${3}"
+    shift 3
+    local -r resources=("$@")
+
+    local viewText=""
+    if [[ "${viewAllowed}" == "no" ]]; then
+        viewText=" NOT"
+    fi
+
+    local editText=""
+    if [[ "${editAllowed}" == "no" ]]; then
+        editText=" NOT"
+    fi
+
+    readonly viewText editText
+    # View
+    for resource in "${resources[@]}"; do
+        for operation in "${VIEW_OPERATIONS[@]}"; do
+            echo "--> ${userEmail} should${viewText} be able to ${operation} ${resource} CR"
+            testPermissionsClusterScoped "${operation}" "${resource}" "${viewAllowed}"
+        done
+    done
+    # Edit
+    for resource in "${resources[@]}"; do
+        for operation in "${EDIT_OPERATIONS[@]}"; do
+            echo "--> ${userEmail} should${editText} be able to ${operation} ${resource} CR"
+            testPermissionsClusterScoped "${operation}" "${resource}" "${editAllowed}"
+        done
+    done
+}
+
+function testDescribe() {
+	local RESOURCE="$1"
+	local TEST_NS="$2"
+	local EXPECTED="$3"
+
+	if [[ "${TEST_NS}" != "--all-namespaces" ]]; then
+		TEST_NS="-n${TEST_NS}"
+	fi
+
+	sleep 0.1
+
+	local result=1
+	set +e
+	kubectl describe "${RESOURCE}" "${TEST_NS}" > /dev/null
+	result=$?
+	set -e
+
+	local IS_OK="false"
+
+	if [[ "${EXPECTED}" == "yes" ]] && [[ ${result} -eq 0 ]]; then
+		IS_OK="true"
+	fi
+	if [[ "${EXPECTED}" == "no" ]] && [[ ${result} -ne 0 ]]; then
+		IS_OK="true"
+	fi
+
+	if [[ "${IS_OK}" == "true" ]]; then
+			echo "----> PASSED"
+			return 0
+	fi
+
+	echo "----> |FAIL| Expected: ${EXPECTED}, Actual: ${TEST}"
+	return 1
+}
+
+function testDescribeClusterScoped() {
+	local RESOURCE="$1"
+	local EXPECTED="$2"
+
+	testDescribe "${RESOURCE}" --all-namespaces "${EXPECTED}"
+}
+
 function cleanup() {
     unset KUBECONFIG
     DeleteBindings
