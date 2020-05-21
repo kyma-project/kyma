@@ -24,9 +24,9 @@ spec:
               readOnly: true
           env:
             - name: APP_PROVISION_TIMEOUT
-              value: "105m"
+              value: "{{ .Values.e2e.provisioning.timeout }}"
             - name: APP_DEPROVISION_TIMEOUT
-              value: "45m"
+              value: "{{ .Values.e2e.deprovisioning.timeout }}"
             - name: APP_SKIP_CERT_VERIFICATION
               value: "true"
             - name: APP_TENANT_ID
@@ -101,9 +101,9 @@ spec:
               readOnly: true
           env:
             - name: APP_PROVISION_TIMEOUT
-              value: "105m"
+              value: "{{ .Values.e2e.provisioning.timeout }}"
             - name: APP_DEPROVISION_TIMEOUT
-              value: "45m"
+              value: "{{ .Values.e2e.deprovisioning.timeout }}"
             - name: APP_SKIP_CERT_VERIFICATION
               value: "true"
             - name: APP_TENANT_ID
