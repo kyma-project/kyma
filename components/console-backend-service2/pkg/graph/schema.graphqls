@@ -1,0 +1,19 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+directive @goModel(model: String, models: [String!]) on OBJECT
+  | INPUT_OBJECT
+  | SCALAR
+  | ENUM
+  | INTERFACE
+  | UNION
+
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
+  | FIELD_DEFINITION
+
+scalar Labels @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/model.Labels")
+
+type Query {
+  namespaces: [Namespace!]!
+}

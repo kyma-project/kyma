@@ -1,0 +1,9 @@
+type Namespace {
+    name: String!
+    labels: Labels
+    status: String!
+    isSystemNamespace: Boolean!
+
+    # Depends on application module
+    applications: [Application!] @goField(forceResolver: true)
+}
