@@ -43,11 +43,15 @@ spec:
           mountPath: /etc/crd
           readOnly: true
         command:
-        - /bin/bash
+        - timeout
+        - 60s
+        - bash
         - -c
         - |-
+          until \
           kubectl annotate crd compassconnections.compass.kyma-project.io helm.sh/hook- \
-          || kubectl apply -f /etc/crd/compassconnections.compass.kyma-project.io
+          || kubectl apply -f /etc/crd/compassconnections.compass.kyma-project.io; \
+          do sleep 2; done
       volumes:
       - name: crd-compass-rt
         configMap:
