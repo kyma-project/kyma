@@ -43,12 +43,12 @@ spec:
           mountPath: /etc/crd
           readOnly: true
         command:
-        - /bin/bash
+        - timeout
+        - 60s
+        - bash
         - -c
         - |-
-          kubectl get crd httpsources.sources.kyma-project.io \
-          || kubectl apply -f /etc/crd/httpsources.sources.kyma-project.io
-      volumes:
-      - name: crd-event-sources
-        configMap:
-          name: {{ .Release.Name }}-crd-event-sources
+          until \
+            kubectl get crd httpsources.sources.kyma-project.io \
+            || kubectl apply -f /etc/crd/httpsources.sources.kyma-project.io; \
+          do sleep 2; done
