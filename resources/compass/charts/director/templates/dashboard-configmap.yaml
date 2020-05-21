@@ -1534,7 +1534,7 @@ data:
               "$$hashKey": "object:138",
               "format": "none",
               "label": null,
-              "logBase": 1,
+              "logBase": 1024,
               "max": null,
               "min": "0",
               "show": true
