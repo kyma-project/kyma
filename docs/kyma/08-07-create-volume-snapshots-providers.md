@@ -1,9 +1,9 @@
 ---
-title: Create on-demand volume snapshots
+title: Create on-demand volume snapshots for cloud providers
 type: Tutorials
 ---
 
-These tutorials show how to create on-demand volume snapshots for particular providers. Read the instructions on [creating volume snapshots]#tutorials-create-volume-snapshots) for general information.
+These tutorials show how to create on-demand volume snapshots for cloud providers. Before you proceed with the tutorial, read the general instructions on [creating volume snapshots](#tutorials-create-volume-snapshots).
 
 ## Create a volume snapshot for AKS
 
@@ -37,7 +37,7 @@ The minimum supported Kubernetes version is 1.14.
 
 ### Prerequisites
 
-Gardener GCP uses CSI drivers by default as of Kubernetes 1.18 and supports taking volume snapshots out of the box.
+As of Kubernetes version 1.18, Gardener GCP uses CSI drivers by default and supports taking volume snapshots out of the box.
 
 ### Steps
 
@@ -80,7 +80,7 @@ kubectl get volumesnapshot -w
 
 ### Prerequisites
 
-Gardener AWS uses CSI drivers by default as of Kubernetes 1.18 and supports taking volume snapshots out of the box.
+As of Kubernetes version 1.18, Gardener AWS uses CSI drivers by default and supports taking volume snapshots out of the box.
 
 ### Steps
 

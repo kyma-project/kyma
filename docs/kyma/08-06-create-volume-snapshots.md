@@ -46,7 +46,7 @@ spec:
 
 This will create a new `pvc-restored` PVC with pre-populated data from the snapshot. 
 
-You can also create a CronJob to handle taking volume snapshots periodically. A sample CronJob definition which includes the required ServiceAccount and roles would look like this:
+You can also create a CronJob to handle taking volume snapshots periodically. A sample CronJob definition which includes the required ServiceAccount and roles looks as follows:
 
 ```yaml
 ---
