@@ -126,8 +126,8 @@ func (s upgradeStep) Run() error {
 		upgradeErrMsg := fmt.Sprintf("Helm upgrade error: %s", upgradeErr.Error())
 		errorMsg := upgradeErrMsg
 
-		log.Println(fmt.Sprintf("Helm upgrade of %s failed. Performing rollback to last known deployed revision: %d.", s.component.GetReleaseName(), s.deployedRevision))
-		_, err := s.helmClient.RollbackRelease(s.component.GetReleaseName(), s.deployedRevision)
+		log.Println(fmt.Sprintf("Helm upgrade of %s failed. Performing rollback to last known deployed revision.", s.component.GetReleaseName()))
+		_, err := s.helmClient.RollbackRelease(s.component.GetReleaseName(), 0)
 
 		if err != nil {
 			rollbackErrMsg := fmt.Sprintf("Helm rollback of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
