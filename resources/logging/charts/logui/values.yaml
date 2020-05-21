@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   name: log-ui
-  tag: "PR-1793"
+  tag: "183e544a"
   dir:
   pullPolicy: Always
 service:
