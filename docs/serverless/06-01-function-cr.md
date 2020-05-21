@@ -69,7 +69,7 @@ spec:
         type: ConfigurationReady
 ```
 
-> **CATION:** When you create a Function, the exported object in the Function's body must have `main` as the handler name.
+> **CAUTION:** When you create a Function, the exported object in the Function's body must have `main` as the handler name.
 
 ## Custom resource properties
 
