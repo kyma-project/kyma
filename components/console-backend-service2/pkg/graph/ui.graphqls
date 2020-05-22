@@ -1,4 +1,4 @@
-type UiQuery {
+extend type Query {
     backendModules: [BackendModule!]!
 }
 

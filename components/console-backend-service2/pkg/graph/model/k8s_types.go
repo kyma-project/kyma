@@ -9,13 +9,10 @@ import (
 
 //go:generate genny -in=k8s_types.genny -out=k8s_types_gen.go gen "Value=Namespace,Application,ApplicationMapping,Pod,BackendModule"
 
-type CoreQuery struct{}
 type Pod corev1.Pod
 type Namespace corev1.Namespace
 
-type ApplicationConnectorQuery struct{}
 type Application applicationoperatorv1alpha1.Application
 type ApplicationMapping applicationbrokerv1alpha1.ApplicationMapping
 
-type UiQuery struct{}
 type BackendModule uiv1alpha1.BackendModule

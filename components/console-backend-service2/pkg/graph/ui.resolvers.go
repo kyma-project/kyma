@@ -6,17 +6,11 @@ package graph
 import (
 	"context"
 
-	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/generated"
 	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/model"
 )
 
-func (r *uiQueryResolver) BackendModules(ctx context.Context, obj *model.UiQuery) ([]*model.BackendModule, error) {
+func (r *queryResolver) BackendModules(ctx context.Context) ([]*model.BackendModule, error) {
 	list := model.BackendModuleList{}
 	err := r.UiServices.BackendModules.List(&list)
 	return list, err
 }
-
-// UiQuery returns generated.UiQueryResolver implementation.
-func (r *Resolver) UiQuery() generated.UiQueryResolver { return &uiQueryResolver{r} }
-
-type uiQueryResolver struct{ *Resolver }

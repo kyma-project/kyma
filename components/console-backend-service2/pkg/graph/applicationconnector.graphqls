@@ -9,9 +9,10 @@ type Application implements Resource {
 
 type ApplicationMapping implements Resource {
     metadata: ObjectMeta! @goField(name: "ObjectMeta")
+    application: Application!
 }
 
-type ApplicationConnectorQuery {
+extend type Query {
     applications: [Application!]!
     application(name: String!): Application
     mappings(namespace: String!): [ApplicationMapping!]!

@@ -22,6 +22,7 @@ resolver:
   layout: follow-schema
   dir: pkg/graph
   package: graph
+  filename: pkg/graph/a_root_resolver.go
 
 # Optional: turn on use `gqlgen:"fieldName"` tags in your models
 # struct_tag: json
