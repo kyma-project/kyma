@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -15,6 +16,8 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	v11 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -50,21 +53,32 @@ type ComplexityRoot struct {
 	Namespace struct {
 		Applications      func(childComplexity int) int
 		IsSystemNamespace func(childComplexity int) int
-		Labels            func(childComplexity int) int
-		Name              func(childComplexity int) int
+		ObjectMeta        func(childComplexity int) int
 		Status            func(childComplexity int) int
 	}
 
+	NamespaceStatus struct {
+		Phase func(childComplexity int) int
+	}
+
+	ObjectMeta struct {
+		Labels func(childComplexity int) int
+		Name   func(childComplexity int) int
+	}
+
 	Query struct {
-		Namespaces func(childComplexity int) int
+		Applications func(childComplexity int) int
+		Namespaces   func(childComplexity int) int
 	}
 }
 
 type NamespaceResolver interface {
+	IsSystemNamespace(ctx context.Context, obj *model.Namespace) (bool, error)
 	Applications(ctx context.Context, obj *model.Namespace) ([]*model.Application, error)
 }
 type QueryResolver interface {
 	Namespaces(ctx context.Context) ([]*model.Namespace, error)
+	Applications(ctx context.Context) ([]*model.Application, error)
 }
 
 type executableSchema struct {
@@ -103,19 +117,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Namespace.IsSystemNamespace(childComplexity), true
 
-	case "Namespace.labels":
-		if e.complexity.Namespace.Labels == nil {
+	case "Namespace.metadata":
+		if e.complexity.Namespace.ObjectMeta == nil {
 			break
 		}
 
-		return e.complexity.Namespace.Labels(childComplexity), true
-
-	case "Namespace.name":
-		if e.complexity.Namespace.Name == nil {
-			break
-		}
-
-		return e.complexity.Namespace.Name(childComplexity), true
+		return e.complexity.Namespace.ObjectMeta(childComplexity), true
 
 	case "Namespace.status":
 		if e.complexity.Namespace.Status == nil {
@@ -123,6 +130,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Namespace.Status(childComplexity), true
+
+	case "NamespaceStatus.phase":
+		if e.complexity.NamespaceStatus.Phase == nil {
+			break
+		}
+
+		return e.complexity.NamespaceStatus.Phase(childComplexity), true
+
+	case "ObjectMeta.labels":
+		if e.complexity.ObjectMeta.Labels == nil {
+			break
+		}
+
+		return e.complexity.ObjectMeta.Labels(childComplexity), true
+
+	case "ObjectMeta.name":
+		if e.complexity.ObjectMeta.Name == nil {
+			break
+		}
+
+		return e.complexity.ObjectMeta.Name(childComplexity), true
+
+	case "Query.applications":
+		if e.complexity.Query.Applications == nil {
+			break
+		}
+
+		return e.complexity.Query.Applications(childComplexity), true
 
 	case "Query.namespaces":
 		if e.complexity.Query.Namespaces == nil {
@@ -184,14 +219,22 @@ var sources = []*ast.Source{
 	&ast.Source{Name: "pkg/graph/applicationconnector.graphqls", Input: `type Application {
     name: String!
 }`, BuiltIn: false},
-	&ast.Source{Name: "pkg/graph/k8s.graphqls", Input: `type Namespace {
-    name: String!
-    labels: Labels
-    status: String!
-    isSystemNamespace: Boolean!
+	&ast.Source{Name: "pkg/graph/k8s.graphqls", Input: `enum NamespacePhase @goModel(model: "k8s.io/api/core/v1.NamespacePhase") {
+    ACTIVE,
+    TERMINATING
+}
 
-    # Depends on application module
-    applications: [Application!] @goField(forceResolver: true)
+
+type Namespace implements Resource {
+    metadata: ObjectMeta! @goField(name: "ObjectMeta")
+
+    isSystemNamespace: Boolean!
+    applications: [Application!]
+    status: NamespaceStatus
+}
+
+type NamespaceStatus @goModel(model: "k8s.io/api/core/v1.NamespaceStatus") {
+    phase: NamespacePhase!
 }`, BuiltIn: false},
 	&ast.Source{Name: "pkg/graph/schema.graphqls", Input: `# GraphQL schema example
 #
@@ -209,8 +252,17 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
 
 scalar Labels @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/model.Labels")
 
+interface Resource {
+  metadata: ObjectMeta
+}
+type ObjectMeta @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta") {
+  name: String!
+  labels: Labels
+}
+
 type Query {
   namespaces: [Namespace!]!
+  applications: [Application!]
 }
 `, BuiltIn: false},
 }
@@ -304,7 +356,7 @@ func (ec *executionContext) _Application_name(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_name(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_metadata(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -321,7 +373,7 @@ func (ec *executionContext) _Namespace_name(ctx context.Context, field graphql.C
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
+		return obj.ObjectMeta, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -333,74 +385,9 @@ func (ec *executionContext) _Namespace_name(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(v1.ObjectMeta)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Namespace_labels(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Namespace",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Labels, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(model.Labels)
-	fc.Result = res
-	return ec.marshalOLabels2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐLabels(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Namespace_status(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Namespace",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Status, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNObjectMeta2k8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐObjectMeta(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Namespace_isSystemNamespace(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
@@ -414,13 +401,13 @@ func (ec *executionContext) _Namespace_isSystemNamespace(ctx context.Context, fi
 		Object:   "Namespace",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.IsSystemNamespace, nil
+		return ec.resolvers.Namespace().IsSystemNamespace(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -468,6 +455,136 @@ func (ec *executionContext) _Namespace_applications(ctx context.Context, field g
 	return ec.marshalOApplication2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplicationᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Namespace_status(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Namespace",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(v11.NamespaceStatus)
+	fc.Result = res
+	return ec.marshalONamespaceStatus2k8sᚗioᚋapiᚋcoreᚋv1ᚐNamespaceStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _NamespaceStatus_phase(ctx context.Context, field graphql.CollectedField, obj *v11.NamespaceStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "NamespaceStatus",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Phase, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v11.NamespacePhase)
+	fc.Result = res
+	return ec.marshalNNamespacePhase2k8sᚗioᚋapiᚋcoreᚋv1ᚐNamespacePhase(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ObjectMeta_name(ctx context.Context, field graphql.CollectedField, obj *v1.ObjectMeta) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ObjectMeta",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ObjectMeta_labels(ctx context.Context, field graphql.CollectedField, obj *v1.ObjectMeta) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ObjectMeta",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Labels, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(map[string]string)
+	fc.Result = res
+	return ec.marshalOLabels2map(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_namespaces(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -500,6 +617,37 @@ func (ec *executionContext) _Query_namespaces(ctx context.Context, field graphql
 	res := resTmp.([]*model.Namespace)
 	fc.Result = res
 	return ec.marshalNNamespace2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐNamespaceᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_applications(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Applications(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Application)
+	fc.Result = res
+	return ec.marshalOApplication2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplicationᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1630,6 +1778,22 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _Resource(ctx context.Context, sel ast.SelectionSet, obj model.Resource) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.Namespace:
+		return ec._Namespace(ctx, sel, &obj)
+	case *model.Namespace:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Namespace(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
@@ -1661,7 +1825,7 @@ func (ec *executionContext) _Application(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
-var namespaceImplementors = []string{"Namespace"}
+var namespaceImplementors = []string{"Namespace", "Resource"}
 
 func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet, obj *model.Namespace) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, namespaceImplementors)
@@ -1672,23 +1836,25 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Namespace")
-		case "name":
-			out.Values[i] = ec._Namespace_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "labels":
-			out.Values[i] = ec._Namespace_labels(ctx, field, obj)
-		case "status":
-			out.Values[i] = ec._Namespace_status(ctx, field, obj)
+		case "metadata":
+			out.Values[i] = ec._Namespace_metadata(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "isSystemNamespace":
-			out.Values[i] = ec._Namespace_isSystemNamespace(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Namespace_isSystemNamespace(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "applications":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -1700,6 +1866,64 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 				res = ec._Namespace_applications(ctx, field, obj)
 				return res
 			})
+		case "status":
+			out.Values[i] = ec._Namespace_status(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var namespaceStatusImplementors = []string{"NamespaceStatus"}
+
+func (ec *executionContext) _NamespaceStatus(ctx context.Context, sel ast.SelectionSet, obj *v11.NamespaceStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, namespaceStatusImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("NamespaceStatus")
+		case "phase":
+			out.Values[i] = ec._NamespaceStatus_phase(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var objectMetaImplementors = []string{"ObjectMeta"}
+
+func (ec *executionContext) _ObjectMeta(ctx context.Context, sel ast.SelectionSet, obj *v1.ObjectMeta) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, objectMetaImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ObjectMeta")
+		case "name":
+			out.Values[i] = ec._ObjectMeta_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "labels":
+			out.Values[i] = ec._ObjectMeta_labels(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1738,6 +1962,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
+				return res
+			})
+		case "applications":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_applications(ctx, field)
 				return res
 			})
 		case "__type":
@@ -2079,6 +2314,25 @@ func (ec *executionContext) marshalNNamespace2ᚖgithubᚗcomᚋkymaᚑproject�
 	return ec._Namespace(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNNamespacePhase2k8sᚗioᚋapiᚋcoreᚋv1ᚐNamespacePhase(ctx context.Context, v interface{}) (v11.NamespacePhase, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	return v11.NamespacePhase(tmp), err
+}
+
+func (ec *executionContext) marshalNNamespacePhase2k8sᚗioᚋapiᚋcoreᚋv1ᚐNamespacePhase(ctx context.Context, sel ast.SelectionSet, v v11.NamespacePhase) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) marshalNObjectMeta2k8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐObjectMeta(ctx context.Context, sel ast.SelectionSet, v v1.ObjectMeta) graphql.Marshaler {
+	return ec._ObjectMeta(ctx, sel, &v)
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
@@ -2382,18 +2636,22 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
-func (ec *executionContext) unmarshalOLabels2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐLabels(ctx context.Context, v interface{}) (model.Labels, error) {
+func (ec *executionContext) unmarshalOLabels2map(ctx context.Context, v interface{}) (map[string]string, error) {
 	if v == nil {
 		return nil, nil
 	}
 	return model.UnmarshalLabels(v)
 }
 
-func (ec *executionContext) marshalOLabels2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐLabels(ctx context.Context, sel ast.SelectionSet, v model.Labels) graphql.Marshaler {
+func (ec *executionContext) marshalOLabels2map(ctx context.Context, sel ast.SelectionSet, v map[string]string) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return model.MarshalLabels(v)
+}
+
+func (ec *executionContext) marshalONamespaceStatus2k8sᚗioᚋapiᚋcoreᚋv1ᚐNamespaceStatus(ctx context.Context, sel ast.SelectionSet, v v11.NamespaceStatus) graphql.Marshaler {
+	return ec._NamespaceStatus(ctx, sel, &v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

@@ -2,14 +2,6 @@
 
 package model
 
-type Application struct {
-	Name string `json:"name"`
-}
-
-type Namespace struct {
-	Name              string         `json:"name"`
-	Labels            Labels         `json:"labels"`
-	Status            string         `json:"status"`
-	IsSystemNamespace bool           `json:"isSystemNamespace"`
-	Applications      []*Application `json:"applications"`
+type Resource interface {
+	IsResource()
 }

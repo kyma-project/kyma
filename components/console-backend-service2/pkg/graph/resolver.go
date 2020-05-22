@@ -6,6 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+//go:generate genny -in=model/k8s_types.genny -out=model/k8s_types_gen.go gen "Value=Namespace,Application"
 //go:generate go run github.com/99designs/gqlgen
 
 // This file will not be regenerated automatically.

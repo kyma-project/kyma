@@ -1,0 +1,16 @@
+package model
+
+import (
+	"github.com/cheekybits/genny/generic"
+)
+
+type Value generic.Type
+type ValueList []*Value
+
+func (l *ValueList) Append() interface{} {
+	converted := &Value{}
+	*l = append(*l, converted)
+	return converted
+}
+func (Value) IsResource() {}
+

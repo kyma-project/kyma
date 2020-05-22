@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/generated"
 	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/model"
@@ -14,6 +15,10 @@ func (r *queryResolver) Namespaces(ctx context.Context) ([]*model.Namespace, err
 	nss := model.NamespaceList{}
 	err := r.namespaces.List(&nss)
 	return nss, err
+}
+
+func (r *queryResolver) Applications(ctx context.Context) ([]*model.Application, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Query returns generated.QueryResolver implementation.

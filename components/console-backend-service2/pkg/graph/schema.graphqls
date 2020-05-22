@@ -14,6 +14,15 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
 
 scalar Labels @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/model.Labels")
 
+interface Resource {
+  metadata: ObjectMeta
+}
+type ObjectMeta @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta") {
+  name: String!
+  labels: Labels
+}
+
 type Query {
   namespaces: [Namespace!]!
+  applications: [Application!]
 }

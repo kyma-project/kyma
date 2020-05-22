@@ -1,9 +1,17 @@
-type Namespace {
-    name: String!
-    labels: Labels
-    status: String!
-    isSystemNamespace: Boolean!
+enum NamespacePhase @goModel(model: "k8s.io/api/core/v1.NamespacePhase") {
+    ACTIVE,
+    TERMINATING
+}
 
-    # Depends on application module
-    applications: [Application!] @goField(forceResolver: true)
+
+type Namespace implements Resource {
+    metadata: ObjectMeta! @goField(name: "ObjectMeta")
+
+    isSystemNamespace: Boolean!
+    applications: [Application!]
+    status: NamespaceStatus
+}
+
+type NamespaceStatus @goModel(model: "k8s.io/api/core/v1.NamespaceStatus") {
+    phase: NamespacePhase!
 }
