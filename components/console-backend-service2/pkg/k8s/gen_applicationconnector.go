@@ -1,4 +1,5 @@
-// This file is generated using gen.go.
+
+// This file is generated using gen.go. 
 
 package k8s
 
@@ -8,13 +9,13 @@ import (
 )
 
 type ApplicationConnectorServices struct {
-	Applications        *resource.Service
+	Applications *resource.Service
 	ApplicationMappings *resource.Service
 }
 
 func NewApplicationConnectorServices(serviceFactory *resource.ServiceFactory) *ApplicationConnectorServices {
 	return &ApplicationConnectorServices{
-		Applications:        serviceFactory.ForResource(types.SchemeGroupVersion.WithResource("applications")),
+		Applications: serviceFactory.ForResource(types.SchemeGroupVersion.WithResource("applications")),
 		ApplicationMappings: serviceFactory.ForResource(types.SchemeGroupVersion.WithResource("applicationmappings")),
 	}
 }

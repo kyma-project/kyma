@@ -40,20 +40,20 @@ func (r *namespaceResolver) IsSystemNamespace(ctx context.Context, obj *model.Na
 }
 
 func (r *namespaceResolver) Applications(ctx context.Context, obj *model.Namespace) ([]*model.Application, error) {
-	mappings := model.ApplicationMappingList{}
-	err := r.ApplicationMappings.ListInNamespace(obj.Name, &mappings)
+	mappings, err := r.ApplicationConnectorQuery().Mappings(ctx, nil, obj.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	result := &model.ApplicationList{}
+	list := model.ApplicationList{}
 	for _, mapping := range mappings {
-		err := r.ApplicationConnectorServices.Applications.Get(mapping.GetName(), result.Append())
+		application, err := r.ApplicationConnectorQuery().Application(ctx, nil, mapping.Name)
 		if err != nil {
 			return nil, err
 		}
+		list = append(list, application)
 	}
-	return *result, nil
+	return list, nil
 }
 
 // CoreQuery returns generated.CoreQueryResolver implementation.

@@ -56,7 +56,13 @@ type ComplexityRoot struct {
 	}
 
 	ApplicationConnectorQuery struct {
+		Application  func(childComplexity int, name string) int
 		Applications func(childComplexity int) int
+		Mappings     func(childComplexity int, namespace string) int
+	}
+
+	ApplicationMapping struct {
+		ObjectMeta func(childComplexity int) int
 	}
 
 	ApplicationSpec struct {
@@ -108,6 +114,8 @@ type ComplexityRoot struct {
 
 type ApplicationConnectorQueryResolver interface {
 	Applications(ctx context.Context, obj *model.ApplicationConnectorQuery) ([]*model.Application, error)
+	Application(ctx context.Context, obj *model.ApplicationConnectorQuery, name string) (*model.Application, error)
+	Mappings(ctx context.Context, obj *model.ApplicationConnectorQuery, namespace string) ([]*model.ApplicationMapping, error)
 }
 type CoreQueryResolver interface {
 	Namespaces(ctx context.Context, obj *model.CoreQuery) ([]*model.Namespace, error)
@@ -157,12 +165,43 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Application.Spec(childComplexity), true
 
+	case "ApplicationConnectorQuery.application":
+		if e.complexity.ApplicationConnectorQuery.Application == nil {
+			break
+		}
+
+		args, err := ec.field_ApplicationConnectorQuery_application_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.ApplicationConnectorQuery.Application(childComplexity, args["name"].(string)), true
+
 	case "ApplicationConnectorQuery.applications":
 		if e.complexity.ApplicationConnectorQuery.Applications == nil {
 			break
 		}
 
 		return e.complexity.ApplicationConnectorQuery.Applications(childComplexity), true
+
+	case "ApplicationConnectorQuery.mappings":
+		if e.complexity.ApplicationConnectorQuery.Mappings == nil {
+			break
+		}
+
+		args, err := ec.field_ApplicationConnectorQuery_mappings_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.ApplicationConnectorQuery.Mappings(childComplexity, args["namespace"].(string)), true
+
+	case "ApplicationMapping.metadata":
+		if e.complexity.ApplicationMapping.ObjectMeta == nil {
+			break
+		}
+
+		return e.complexity.ApplicationMapping.ObjectMeta(childComplexity), true
 
 	case "ApplicationSpec.description":
 		if e.complexity.ApplicationSpec.Description == nil {
@@ -371,8 +410,14 @@ type Application implements Resource {
     spec: ApplicationSpec
 }
 
+type ApplicationMapping implements Resource {
+    metadata: ObjectMeta! @goField(name: "ObjectMeta")
+}
+
 type ApplicationConnectorQuery {
     applications: [Application!]!
+    application(name: String!): Application
+    mappings(namespace: String!): [ApplicationMapping!]!
 }`, BuiltIn: false},
 	&ast.Source{Name: "pkg/graph/core.graphqls", Input: `enum NamespacePhase @goModel(model: "k8s.io/api/core/v1.NamespacePhase") {
     ACTIVE,
@@ -446,6 +491,34 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_ApplicationConnectorQuery_application_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_ApplicationConnectorQuery_mappings_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_CoreQuery_namespace_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -644,6 +717,119 @@ func (ec *executionContext) _ApplicationConnectorQuery_applications(ctx context.
 	res := resTmp.([]*model.Application)
 	fc.Result = res
 	return ec.marshalNApplication2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplicationᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ApplicationConnectorQuery_application(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationConnectorQuery) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ApplicationConnectorQuery",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_ApplicationConnectorQuery_application_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ApplicationConnectorQuery().Application(rctx, obj, args["name"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Application)
+	fc.Result = res
+	return ec.marshalOApplication2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplication(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ApplicationConnectorQuery_mappings(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationConnectorQuery) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ApplicationConnectorQuery",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_ApplicationConnectorQuery_mappings_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ApplicationConnectorQuery().Mappings(rctx, obj, args["namespace"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ApplicationMapping)
+	fc.Result = res
+	return ec.marshalNApplicationMapping2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplicationMappingᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ApplicationMapping_metadata(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationMapping) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ApplicationMapping",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ObjectMeta, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1.ObjectMeta)
+	fc.Result = res
+	return ec.marshalNObjectMeta2k8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐObjectMeta(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ApplicationSpec_description(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.ApplicationSpec) (ret graphql.Marshaler) {
@@ -2428,6 +2614,13 @@ func (ec *executionContext) _Resource(ctx context.Context, sel ast.SelectionSet,
 			return graphql.Null
 		}
 		return ec._Application(ctx, sel, obj)
+	case model.ApplicationMapping:
+		return ec._ApplicationMapping(ctx, sel, &obj)
+	case *model.ApplicationMapping:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._ApplicationMapping(ctx, sel, obj)
 	case model.Namespace:
 		return ec._Namespace(ctx, sel, &obj)
 	case *model.Namespace:
@@ -2512,6 +2705,58 @@ func (ec *executionContext) _ApplicationConnectorQuery(ctx context.Context, sel 
 				}
 				return res
 			})
+		case "application":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ApplicationConnectorQuery_application(ctx, field, obj)
+				return res
+			})
+		case "mappings":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ApplicationConnectorQuery_mappings(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var applicationMappingImplementors = []string{"ApplicationMapping", "Resource"}
+
+func (ec *executionContext) _ApplicationMapping(ctx context.Context, sel ast.SelectionSet, obj *model.ApplicationMapping) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, applicationMappingImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ApplicationMapping")
+		case "metadata":
+			out.Values[i] = ec._ApplicationMapping_metadata(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3186,6 +3431,57 @@ func (ec *executionContext) marshalNApplication2ᚖgithubᚗcomᚋkymaᚑproject
 	return ec._Application(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNApplicationMapping2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplicationMapping(ctx context.Context, sel ast.SelectionSet, v model.ApplicationMapping) graphql.Marshaler {
+	return ec._ApplicationMapping(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNApplicationMapping2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplicationMappingᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ApplicationMapping) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNApplicationMapping2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplicationMapping(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNApplicationMapping2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplicationMapping(ctx context.Context, sel ast.SelectionSet, v *model.ApplicationMapping) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ApplicationMapping(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNBackendModule2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐBackendModule(ctx context.Context, sel ast.SelectionSet, v model.BackendModule) graphql.Marshaler {
 	return ec._BackendModule(ctx, sel, &v)
 }
@@ -3640,6 +3936,10 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
+func (ec *executionContext) marshalOApplication2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplication(ctx context.Context, sel ast.SelectionSet, v model.Application) graphql.Marshaler {
+	return ec._Application(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalOApplication2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplicationᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Application) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -3678,6 +3978,13 @@ func (ec *executionContext) marshalOApplication2ᚕᚖgithubᚗcomᚋkymaᚑproj
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) marshalOApplication2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplication(ctx context.Context, sel ast.SelectionSet, v *model.Application) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Application(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOApplicationConnectorQuery2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplicationConnectorQuery(ctx context.Context, sel ast.SelectionSet, v model.ApplicationConnectorQuery) graphql.Marshaler {

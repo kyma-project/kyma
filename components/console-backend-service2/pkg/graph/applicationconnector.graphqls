@@ -7,6 +7,12 @@ type Application implements Resource {
     spec: ApplicationSpec
 }
 
+type ApplicationMapping implements Resource {
+    metadata: ObjectMeta! @goField(name: "ObjectMeta")
+}
+
 type ApplicationConnectorQuery {
     applications: [Application!]!
+    application(name: String!): Application
+    mappings(namespace: String!): [ApplicationMapping!]!
 }

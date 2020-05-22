@@ -12,6 +12,8 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
+var NotFound = fmt.Errorf("resource not found")
+
 type ServiceFactory struct {
 	Client          dynamic.Interface
 	InformerFactory dynamicinformer.DynamicSharedInformerFactory
@@ -46,7 +48,7 @@ func (f *ServiceFactory) ForResource(gvr schema.GroupVersionResource) *Service {
 	}
 }
 
-func (s *Service) ListInIndex(index, key string, result Appendable) error {
+func (s *Service) ListByIndex(index, key string, result Appendable) error {
 	items, err := s.informer.GetIndexer().ByIndex(index, key)
 	if err != nil {
 		return err
@@ -64,21 +66,20 @@ func (s *Service) ListInIndex(index, key string, result Appendable) error {
 }
 
 func (s *Service) ListInNamespace(namespace string, result Appendable) error {
-	return s.ListInIndex(cache.NamespaceIndex, namespace, result)
+	return s.ListByIndex(cache.NamespaceIndex, namespace, result)
 }
 
 func (s *Service) List(result Appendable) error {
 	return s.ListInNamespace("", result)
 }
 
-func (s *Service) GetInNamespace(name, namespace string, result interface{}) error {
-	key := fmt.Sprintf("%s/%s", namespace, name)
+func (s *Service) GetByKey(key string, result interface{}) error {
 	item, exists, err := s.informer.GetStore().GetByKey(key)
 	if err != nil {
 		return err
 	}
 	if !exists {
-		return nil
+		return NotFound
 	}
 
 	err = FromUnstructured(item.(*unstructured.Unstructured), result)
@@ -89,6 +90,11 @@ func (s *Service) GetInNamespace(name, namespace string, result interface{}) err
 	return nil
 }
 
+func (s *Service) GetInNamespace(name, namespace string, result interface{}) error {
+	key := fmt.Sprintf("%s/%s", namespace, name)
+	return s.GetByKey(key, result)
+}
+
 func (s *Service) Get(name string, result interface{}) error {
-	return s.GetInNamespace(name, "", result)
+	return s.GetByKey(name, result)
 }
