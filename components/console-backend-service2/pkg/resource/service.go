@@ -68,17 +68,7 @@ func (s *Service) ListInNamespace(namespace string, result Appendable) error {
 }
 
 func (s *Service) List(result Appendable) error {
-	items := s.informer.GetStore().List()
-
-	for _, item := range items {
-		converted := result.Append()
-		err := FromUnstructured(item.(*unstructured.Unstructured), converted)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return s.ListInNamespace("", result)
 }
 
 func (s *Service) GetInNamespace(name, namespace string, result interface{}) error {

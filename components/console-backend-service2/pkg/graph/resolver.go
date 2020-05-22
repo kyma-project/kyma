@@ -1,12 +1,12 @@
 package graph
 
 import (
+	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/apis/ui/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/resource"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-//go:generate genny -in=model/k8s_types.genny -out=model/k8s_types_gen.go gen "Value=Namespace,Application,ApplicationMapping,Pod"
+//go:generate genny -in=model/k8s_types.genny -out=model/k8s_types_gen.go gen "Value=Namespace,Application,ApplicationMapping,Pod,BackendModule"
 //go:generate go run github.com/99designs/gqlgen
 
 // This file will not be regenerated automatically.
@@ -15,26 +15,16 @@ import (
 
 type Resolver struct {
 	*k8s.ApplicationConnectorServices
-	namespaces *resource.Service
-	pods       *resource.Service
+	*k8s.CoreServices
+	backendModules *resource.Service
 }
 
 func NewResolver(serviceFactory *resource.ServiceFactory) *Resolver {
-	namespaces := serviceFactory.ForResource(schema.GroupVersionResource{
-		Group:    "",
-		Version:  "v1",
-		Resource: "namespaces",
-	})
-
-	pods := serviceFactory.ForResource(schema.GroupVersionResource{
-		Group:    "",
-		Version:  "v1",
-		Resource: "pods",
-	})
+	backendModules := serviceFactory.ForResource(v1alpha1.SchemeGroupVersion.WithResource("backendmodules"))
 
 	return &Resolver{
-		namespaces:                   namespaces,
-		pods:                         pods,
+		CoreServices:                 k8s.NewCoreServices(serviceFactory),
+		backendModules:               backendModules,
 		ApplicationConnectorServices: k8s.NewApplicationConnectorServices(serviceFactory),
 	}
 }

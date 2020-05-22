@@ -13,25 +13,25 @@ import (
 
 func (r *coreQueryResolver) Namespaces(ctx context.Context, obj *model.CoreQuery) ([]*model.Namespace, error) {
 	nss := model.NamespaceList{}
-	err := r.namespaces.List(&nss)
+	err := r.CoreServices.Namespaces.List(&nss)
 	return nss, err
 }
 
 func (r *coreQueryResolver) Namespace(ctx context.Context, obj *model.CoreQuery, name string) (*model.Namespace, error) {
 	ns := &model.Namespace{}
-	err := r.namespaces.Get(name, ns)
+	err := r.CoreServices.Namespaces.Get(name, ns)
 	return ns, err
 }
 
 func (r *coreQueryResolver) Pods(ctx context.Context, obj *model.CoreQuery, namespace string) ([]*model.Pod, error) {
 	pods := model.PodList{}
-	err := r.pods.ListInNamespace(namespace, &pods)
+	err := r.CoreServices.Pods.ListInNamespace(namespace, &pods)
 	return pods, err
 }
 
 func (r *coreQueryResolver) Pod(ctx context.Context, obj *model.CoreQuery, namespace string, name string) (*model.Pod, error) {
 	ns := &model.Pod{}
-	err := r.pods.Get(name, ns)
+	err := r.CoreServices.Pods.GetInNamespace(name, namespace, ns)
 	return ns, err
 }
 

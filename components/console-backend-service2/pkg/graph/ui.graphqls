@@ -1,0 +1,7 @@
+type UiQuery {
+    backendModules: [BackendModule!]!
+}
+
+type BackendModule implements Resource{
+    metadata: ObjectMeta! @goField(name: "ObjectMeta")
+}

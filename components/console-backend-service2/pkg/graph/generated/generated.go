@@ -43,6 +43,7 @@ type ResolverRoot interface {
 	CoreQuery() CoreQueryResolver
 	Namespace() NamespaceResolver
 	Query() QueryResolver
+	UiQuery() UiQueryResolver
 }
 
 type DirectiveRoot struct {
@@ -60,6 +61,10 @@ type ComplexityRoot struct {
 
 	ApplicationSpec struct {
 		Description func(childComplexity int) int
+	}
+
+	BackendModule struct {
+		ObjectMeta func(childComplexity int) int
 	}
 
 	CoreQuery struct {
@@ -93,6 +98,11 @@ type ComplexityRoot struct {
 	Query struct {
 		ApplicationConnector func(childComplexity int) int
 		Core                 func(childComplexity int) int
+		UI                   func(childComplexity int) int
+	}
+
+	UIQuery struct {
+		BackendModules func(childComplexity int) int
 	}
 }
 
@@ -111,7 +121,11 @@ type NamespaceResolver interface {
 }
 type QueryResolver interface {
 	Core(ctx context.Context) (*model.CoreQuery, error)
+	UI(ctx context.Context) (*model.UiQuery, error)
 	ApplicationConnector(ctx context.Context) (*model.ApplicationConnectorQuery, error)
+}
+type UiQueryResolver interface {
+	BackendModules(ctx context.Context, obj *model.UiQuery) ([]*model.BackendModule, error)
 }
 
 type executableSchema struct {
@@ -156,6 +170,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ApplicationSpec.Description(childComplexity), true
+
+	case "BackendModule.metadata":
+		if e.complexity.BackendModule.ObjectMeta == nil {
+			break
+		}
+
+		return e.complexity.BackendModule.ObjectMeta(childComplexity), true
 
 	case "CoreQuery.namespace":
 		if e.complexity.CoreQuery.Namespace == nil {
@@ -277,6 +298,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Core(childComplexity), true
 
+	case "Query.ui":
+		if e.complexity.Query.UI == nil {
+			break
+		}
+
+		return e.complexity.Query.UI(childComplexity), true
+
+	case "UiQuery.backendModules":
+		if e.complexity.UIQuery.BackendModules == nil {
+			break
+		}
+
+		return e.complexity.UIQuery.BackendModules(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -393,9 +428,18 @@ type ObjectMeta @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta
 
 type Query {
   core: CoreQuery!
+  ui: UiQuery!
   applicationConnector: ApplicationConnectorQuery
+
 }
 `, BuiltIn: false},
+	&ast.Source{Name: "pkg/graph/ui.graphqls", Input: `type UiQuery {
+    backendModules: [BackendModule!]!
+}
+
+type BackendModule implements Resource{
+    metadata: ObjectMeta! @goField(name: "ObjectMeta")
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -631,6 +675,40 @@ func (ec *executionContext) _ApplicationSpec_description(ctx context.Context, fi
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _BackendModule_metadata(ctx context.Context, field graphql.CollectedField, obj *model.BackendModule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "BackendModule",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ObjectMeta, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1.ObjectMeta)
+	fc.Result = res
+	return ec.marshalNObjectMeta2k8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐObjectMeta(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CoreQuery_namespaces(ctx context.Context, field graphql.CollectedField, obj *model.CoreQuery) (ret graphql.Marshaler) {
@@ -1112,6 +1190,40 @@ func (ec *executionContext) _Query_core(ctx context.Context, field graphql.Colle
 	return ec.marshalNCoreQuery2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐCoreQuery(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_ui(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().UI(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.UiQuery)
+	fc.Result = res
+	return ec.marshalNUiQuery2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐUiQuery(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_applicationConnector(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1210,6 +1322,40 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	res := resTmp.(*introspection.Schema)
 	fc.Result = res
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UiQuery_backendModules(ctx context.Context, field graphql.CollectedField, obj *model.UiQuery) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "UiQuery",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.UiQuery().BackendModules(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.BackendModule)
+	fc.Result = res
+	return ec.marshalNBackendModule2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐBackendModuleᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -2296,6 +2442,13 @@ func (ec *executionContext) _Resource(ctx context.Context, sel ast.SelectionSet,
 			return graphql.Null
 		}
 		return ec._Pod(ctx, sel, obj)
+	case model.BackendModule:
+		return ec._BackendModule(ctx, sel, &obj)
+	case *model.BackendModule:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._BackendModule(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -2383,6 +2536,33 @@ func (ec *executionContext) _ApplicationSpec(ctx context.Context, sel ast.Select
 			out.Values[i] = graphql.MarshalString("ApplicationSpec")
 		case "description":
 			out.Values[i] = ec._ApplicationSpec_description(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var backendModuleImplementors = []string{"BackendModule", "Resource"}
+
+func (ec *executionContext) _BackendModule(ctx context.Context, sel ast.SelectionSet, obj *model.BackendModule) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, backendModuleImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("BackendModule")
+		case "metadata":
+			out.Values[i] = ec._BackendModule_metadata(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2634,6 +2814,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "ui":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_ui(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "applicationConnector":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -2649,6 +2843,42 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var uiQueryImplementors = []string{"UiQuery"}
+
+func (ec *executionContext) _UiQuery(ctx context.Context, sel ast.SelectionSet, obj *model.UiQuery) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, uiQueryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UiQuery")
+		case "backendModules":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UiQuery_backendModules(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2956,6 +3186,57 @@ func (ec *executionContext) marshalNApplication2ᚖgithubᚗcomᚋkymaᚑproject
 	return ec._Application(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNBackendModule2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐBackendModule(ctx context.Context, sel ast.SelectionSet, v model.BackendModule) graphql.Marshaler {
+	return ec._BackendModule(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNBackendModule2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐBackendModuleᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.BackendModule) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNBackendModule2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐBackendModule(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNBackendModule2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐBackendModule(ctx context.Context, sel ast.SelectionSet, v *model.BackendModule) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._BackendModule(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
@@ -3117,6 +3398,20 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNUiQuery2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐUiQuery(ctx context.Context, sel ast.SelectionSet, v model.UiQuery) graphql.Marshaler {
+	return ec._UiQuery(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUiQuery2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐUiQuery(ctx context.Context, sel ast.SelectionSet, v *model.UiQuery) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._UiQuery(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

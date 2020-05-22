@@ -39,3 +39,12 @@ func (l *PodList) Append() interface{} {
 	return converted
 }
 func (Pod) IsResource() {}
+
+type BackendModuleList []*BackendModule
+
+func (l *BackendModuleList) Append() interface{} {
+	converted := &BackendModule{}
+	*l = append(*l, converted)
+	return converted
+}
+func (BackendModule) IsResource() {}
