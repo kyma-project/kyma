@@ -1,3 +1,5 @@
+// This file is generated using gen.go.
+
 package k8s
 
 import (

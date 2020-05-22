@@ -51,7 +51,10 @@ func main() {
 
 var packageTemplate = template.Must(template.New("").Funcs(template.FuncMap{
 	"lower": strings.ToLower,
-}).Parse(`package k8s
+}).Parse(`
+// This file is generated using gen.go. 
+
+package k8s
 
 import (
 	types "{{ .TypesPackage }}"
