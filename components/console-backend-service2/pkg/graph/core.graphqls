@@ -18,3 +18,10 @@ type Namespace implements Resource {
 type Pod implements Resource {
     metadata: ObjectMeta! @goField(name: "ObjectMeta")
 }
+
+type CoreQuery {
+    namespaces: [Namespace!]!
+    namespace(name: String!): Namespace
+    pods(namespace: String!): [Pod!]!
+    pod(namespace: String!, name: String!): Pod
+}

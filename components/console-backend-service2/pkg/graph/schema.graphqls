@@ -24,8 +24,6 @@ type ObjectMeta @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta
 }
 
 type Query {
-  namespaces: [Namespace!]!
-  pods(namespace: String!): [Pod!]!
-
+  core: CoreQuery!
   applications: [Application!]
 }

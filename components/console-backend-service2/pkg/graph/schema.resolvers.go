@@ -11,16 +11,8 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/model"
 )
 
-func (r *queryResolver) Namespaces(ctx context.Context) ([]*model.Namespace, error) {
-	nss := model.NamespaceList{}
-	err := r.namespaces.List(&nss)
-	return nss, err
-}
-
-func (r *queryResolver) Pods(ctx context.Context, namespace string) ([]*model.Pod, error) {
-	pods := model.PodList{}
-	err := r.pods.ListInNamespace(namespace, &pods)
-	return pods, err
+func (r *queryResolver) Core(ctx context.Context) (*model.CoreQuery, error) {
+	return &model.CoreQuery{}, nil
 }
 
 func (r *queryResolver) Applications(ctx context.Context) ([]*model.Application, error) {

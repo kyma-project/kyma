@@ -5,13 +5,38 @@ package graph
 
 import (
 	"context"
+	"strings"
 
 	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/generated"
 	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/model"
 )
 
+func (r *coreQueryResolver) Namespaces(ctx context.Context, obj *model.CoreQuery) ([]*model.Namespace, error) {
+	nss := model.NamespaceList{}
+	err := r.namespaces.List(&nss)
+	return nss, err
+}
+
+func (r *coreQueryResolver) Namespace(ctx context.Context, obj *model.CoreQuery, name string) (*model.Namespace, error) {
+	ns := &model.Namespace{}
+	err := r.namespaces.Get(name, ns)
+	return ns, err
+}
+
+func (r *coreQueryResolver) Pods(ctx context.Context, obj *model.CoreQuery, namespace string) ([]*model.Pod, error) {
+	pods := model.PodList{}
+	err := r.pods.ListInNamespace(namespace, &pods)
+	return pods, err
+}
+
+func (r *coreQueryResolver) Pod(ctx context.Context, obj *model.CoreQuery, namespace string, name string) (*model.Pod, error) {
+	ns := &model.Pod{}
+	err := r.pods.Get(name, ns)
+	return ns, err
+}
+
 func (r *namespaceResolver) IsSystemNamespace(ctx context.Context, obj *model.Namespace) (bool, error) {
-	return false, nil
+	return strings.HasSuffix(obj.Name, "-system"), nil
 }
 
 func (r *namespaceResolver) Applications(ctx context.Context, obj *model.Namespace) ([]*model.Application, error) {
@@ -31,7 +56,11 @@ func (r *namespaceResolver) Applications(ctx context.Context, obj *model.Namespa
 	return *result, nil
 }
 
+// CoreQuery returns generated.CoreQueryResolver implementation.
+func (r *Resolver) CoreQuery() generated.CoreQueryResolver { return &coreQueryResolver{r} }
+
 // Namespace returns generated.NamespaceResolver implementation.
 func (r *Resolver) Namespace() generated.NamespaceResolver { return &namespaceResolver{r} }
 
+type coreQueryResolver struct{ *Resolver }
 type namespaceResolver struct{ *Resolver }
