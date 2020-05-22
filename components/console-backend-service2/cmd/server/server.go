@@ -28,7 +28,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	serviceFactory, err := resource.NewServiceFactoryForConfig(config, time.Minute * 10)
+	serviceFactory, err := resource.NewServiceFactoryForConfig(config, time.Minute*10)
 	if err != nil {
 		panic(err)
 	}

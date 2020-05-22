@@ -30,7 +30,7 @@ resolver:
 # omit_slice_element_pointers: false
 
 # Optional: set to speed up generation time by not performing a final validation pass.
-# skip_validation: true
+skip_validation: true
 
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.

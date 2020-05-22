@@ -12,7 +12,7 @@ import (
 
 func (r *uiQueryResolver) BackendModules(ctx context.Context, obj *model.UiQuery) ([]*model.BackendModule, error) {
 	list := model.BackendModuleList{}
-	err := r.backendModules.List(&list)
+	err := r.UiServices.BackendModules.List(&list)
 	return list, err
 }
 

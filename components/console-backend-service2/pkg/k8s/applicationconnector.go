@@ -6,13 +6,13 @@ import (
 )
 
 type ApplicationConnectorServices struct {
-	ApplicationMappings *resource.Service
 	Applications        *resource.Service
+	ApplicationMappings *resource.Service
 }
 
 func NewApplicationConnectorServices(serviceFactory *resource.ServiceFactory) *ApplicationConnectorServices {
 	return &ApplicationConnectorServices{
-		ApplicationMappings: serviceFactory.ForResource(types.SchemeGroupVersion.WithResource("applicationmappings")),
 		Applications:        serviceFactory.ForResource(types.SchemeGroupVersion.WithResource("applications")),
+		ApplicationMappings: serviceFactory.ForResource(types.SchemeGroupVersion.WithResource("applicationmappings")),
 	}
 }

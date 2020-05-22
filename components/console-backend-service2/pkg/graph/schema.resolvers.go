@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+
 	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/generated"
 	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/model"
 )
