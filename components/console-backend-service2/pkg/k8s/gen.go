@@ -4,6 +4,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"strings"
 	"text/template"
@@ -36,7 +37,7 @@ func main() {
 		panic(err)
 	}
 
-	f, err := os.Create(strings.ToLower(cfg.Group) + ".go")
+	f, err := os.Create(fmt.Sprintf("gen_%s.go", strings.ToLower(cfg.Group)))
 	if err != nil {
 		panic(err)
 	}
@@ -50,8 +51,7 @@ func main() {
 
 var packageTemplate = template.Must(template.New("").Funcs(template.FuncMap{
 	"lower": strings.ToLower,
-}).Parse(`
-package k8s
+}).Parse(`package k8s
 
 import (
 	types "{{ .TypesPackage }}"
@@ -70,5 +70,4 @@ func New{{ .Group }}Services(serviceFactory *resource.ServiceFactory) *{{ .Group
 		{{ . }}: serviceFactory.ForResource(types.SchemeGroupVersion.WithResource("{{ . | lower }}")),
 {{- end }}
 	}
-}
-`))
+}`))
