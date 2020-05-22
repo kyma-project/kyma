@@ -1,7 +1,7 @@
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: e2e-provisioning
+  name: e2e-upgrade-azure
   labels:
 {{ include "kyma-env-broker.labels" . | indent 4 }}
 spec:
@@ -14,6 +14,9 @@ spec:
           secret:
             defaultMode: 420
             secretName: {{ .Values.gardener.secretName }}
+        - name: config-volume
+          configMap:
+            name: {{ include "kyma-env-broker.fullname" . }}
       containers:
         - name: tests
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.e2e_provisioning.dir }}e2e-provisioning-test:{{ .Values.global.images.tests.e2e_provisioning.version }}
@@ -22,11 +25,14 @@ spec:
             - mountPath: /gardener/kubeconfig
               name: gardener-kubeconfig
               readOnly: true
+            - name: config-volume
+              configMap:
+                name: {{ include "kyma-env-broker.fullname" . }}
           env:
             - name: APP_PROVISION_TIMEOUT
-              value: "{{ .Values.e2e.provisioning.timeout }}"
+              value: "105m"
             - name: APP_DEPROVISION_TIMEOUT
-              value: "{{ .Values.e2e.deprovisioning.timeout }}"
+              value: "45m"
             - name: APP_SKIP_CERT_VERIFICATION
               value: "true"
             - name: APP_TENANT_ID
@@ -42,7 +48,7 @@ spec:
             - name: APP_BROKER_URL
               value: 'https://{{ .Values.host }}.{{ .Values.global.ingress.domainName }}'
             - name: APP_BROKER_PROVISION_GCP
-              value: "true"
+              value: "false"
             - name: APP_BROKER_CLIENT_NAME
               value: {{ include "kyma-env-broker.fullname" . | quote }}
             - name: APP_BROKER_TOKEN_URL
@@ -54,7 +60,7 @@ spec:
             - name: APP_RUNTIME_UUA_INSTANCE_NAMESPACE
               value: "kyma-system"
             - name: APP_CONFIG_NAME
-              value: "{{ .Values.e2e.gcp.configName }}"
+              value: "{{ .Values.e2e.azure.configName }}"
             - name: APP_DEPLOY_NAMESPACE
               value: "compass-system"
             - name: APP_DIRECTOR_URL
@@ -70,14 +76,23 @@ spec:
             - name: APP_TEST_AZURE_EVENT_HUBS_ENABLED
               value: "true"
             - name: APP_UPGRADE_TEST
-              value: "false"
+              value: "true"
+            - name: APP_MANAGED_RUNTIME_COMPONENTS_YAML_PATH
+              value: /config/additionalRuntimeComponents.yaml
+            - name: APP_UPGRADE_TIMEOUT
+              value: "100m"
+            - name: APP_PRE_UPGRADE_KYMA_VERSION
+              value: {{ .Values.e2e.upgrade.preUpgradeVersion }}
+            - name: APP_UPGRADE_KYMA_VERSION
+              value: {{ .Values.e2e.upgrade.targetVersion }}
           command: ["/bin/sh"]
-          args: ["-c", "echo 'Starting e2e-provisioning test on GCP. Waiting 20s for api server...'; sleep 20; ./test.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
+          args: ["-c", "echo 'Starting e2e-upgrade test on Azure. Waiting 20s for api server...'; sleep 20; ./test.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
+
 ---
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: e2e-provisioning-cleanup
+  name: e2e-upgrade-azure-cleanup
   labels:
 {{ include "kyma-env-broker.labels" . | indent 4 }}
 spec:
@@ -90,6 +105,9 @@ spec:
           secret:
             defaultMode: 420
             secretName: {{ .Values.gardener.secretName }}
+        - name: config-volume
+          configMap:
+            name: {{ include "kyma-env-broker.fullname" . }}
       containers:
         - name: tests
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.e2e_provisioning.dir }}e2e-provisioning-test:{{ .Values.global.images.tests.e2e_provisioning.version }}
@@ -98,11 +116,14 @@ spec:
             - mountPath: /gardener/kubeconfig
               name: gardener-kubeconfig
               readOnly: true
+            - mountPath: /config
+              name: config-volume
+              readOnly: true
           env:
             - name: APP_PROVISION_TIMEOUT
-              value: "{{ .Values.e2e.provisioning.timeout }}"
+              value: "105m"
             - name: APP_DEPROVISION_TIMEOUT
-              value: "{{ .Values.e2e.deprovisioning.timeout }}"
+              value: "45m"
             - name: APP_SKIP_CERT_VERIFICATION
               value: "true"
             - name: APP_TENANT_ID
@@ -114,7 +135,7 @@ spec:
             - name: APP_BROKER_URL
               value: 'https://{{ .Values.host }}.{{ .Values.global.ingress.domainName }}'
             - name: APP_BROKER_PROVISION_GCP
-              value: "true"
+              value: "false"
             - name: APP_BROKER_CLIENT_NAME
               value: {{ include "kyma-env-broker.fullname" . | quote }}
             - name: APP_BROKER_TOKEN_URL
@@ -126,7 +147,7 @@ spec:
             - name: APP_RUNTIME_UUA_INSTANCE_NAMESPACE
               value: "kyma-system"
             - name: APP_CONFIG_NAME
-              value: "{{ .Values.e2e.gcp.configName }}"
+              value: "{{ .Values.e2e.azure.configName }}"
             - name: APP_DEPLOY_NAMESPACE
               value: "compass-system"
             - name: APP_DIRECTOR_URL
@@ -142,6 +163,14 @@ spec:
             - name: APP_TEST_AZURE_EVENT_HUBS_ENABLED
               value: "true"
             - name: APP_UPGRADE_TEST
-              value: "false"
+              value: "true"
+            - name: APP_MANAGED_RUNTIME_COMPONENTS_YAML_PATH
+              value: /config/additionalRuntimeComponents.yaml
+            - name: APP_UPGRADE_TIMEOUT
+              value: "{{ .Values.e2e.upgrade.timeout }}"
+            - name: APP_PRE_UPGRADE_KYMA_VERSION
+              value: {{ .Values.e2e.upgrade.preUpgradeVersion }}
+            - name: APP_UPGRADE_KYMA_VERSION
+              value: {{ .Values.e2e.upgrade.targetVersion }}
           command: ["/bin/sh"]
-          args: ["-c", "echo 'Starting e2e-provisioning cleanup test on GCP. Waiting 20s for api server...'; sleep 20; ./test.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
+          args: ["-c", "echo 'Starting e2e-upgrade cleanup test on Azure. Waiting 20s for api server...'; sleep 20; ./test.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
