@@ -14,6 +14,10 @@ import (
 
 var NotFound = fmt.Errorf("resource not found")
 
+type Appendable interface {
+	Append() interface{}
+}
+
 type ServiceFactory struct {
 	Client          dynamic.Interface
 	InformerFactory dynamicinformer.DynamicSharedInformerFactory
