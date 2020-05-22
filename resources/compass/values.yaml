@@ -23,7 +23,7 @@ global:
       version: "d068b250"
     director:
       dir:
-      version: "ba81ea7d"
+      version: "55de0e4f"
     gateway:
       dir:
       version: "53b12181"
@@ -281,6 +281,7 @@ global:
 
   metrics:
     enabled: true
+    pushEndpoint: http://monitoring-prometheus-pushgateway.kyma-system.svc.cluster.local:9091
 
   externalServicesMock:
     enabled: false
