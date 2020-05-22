@@ -5,7 +5,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/generated"
 	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/model"
@@ -15,8 +14,8 @@ func (r *queryResolver) Core(ctx context.Context) (*model.CoreQuery, error) {
 	return &model.CoreQuery{}, nil
 }
 
-func (r *queryResolver) Applications(ctx context.Context) ([]*model.Application, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) ApplicationConnector(ctx context.Context) (*model.ApplicationConnectorQuery, error) {
+	return &model.ApplicationConnectorQuery{}, nil
 }
 
 // Query returns generated.QueryResolver implementation.

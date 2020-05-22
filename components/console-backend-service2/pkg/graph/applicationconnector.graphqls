@@ -6,3 +6,7 @@ type Application implements Resource {
     metadata: ObjectMeta! @goField(name: "ObjectMeta")
     spec: ApplicationSpec
 }
+
+type ApplicationConnectorQuery {
+    applications: [Application!]!
+}

@@ -8,5 +8,6 @@ type CoreQuery struct{}
 type Pod corev1.Pod
 type Namespace corev1.Namespace
 
+type ApplicationConnectorQuery struct{}
 type Application applicationoperatorv1alpha1.Application
 type ApplicationMapping applicationbrokerv1alpha1.ApplicationMapping

@@ -39,6 +39,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	ApplicationConnectorQuery() ApplicationConnectorQueryResolver
 	CoreQuery() CoreQueryResolver
 	Namespace() NamespaceResolver
 	Query() QueryResolver
@@ -51,6 +52,10 @@ type ComplexityRoot struct {
 	Application struct {
 		ObjectMeta func(childComplexity int) int
 		Spec       func(childComplexity int) int
+	}
+
+	ApplicationConnectorQuery struct {
+		Applications func(childComplexity int) int
 	}
 
 	ApplicationSpec struct {
@@ -86,11 +91,14 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Applications func(childComplexity int) int
-		Core         func(childComplexity int) int
+		ApplicationConnector func(childComplexity int) int
+		Core                 func(childComplexity int) int
 	}
 }
 
+type ApplicationConnectorQueryResolver interface {
+	Applications(ctx context.Context, obj *model.ApplicationConnectorQuery) ([]*model.Application, error)
+}
 type CoreQueryResolver interface {
 	Namespaces(ctx context.Context, obj *model.CoreQuery) ([]*model.Namespace, error)
 	Namespace(ctx context.Context, obj *model.CoreQuery, name string) (*model.Namespace, error)
@@ -103,7 +111,7 @@ type NamespaceResolver interface {
 }
 type QueryResolver interface {
 	Core(ctx context.Context) (*model.CoreQuery, error)
-	Applications(ctx context.Context) ([]*model.Application, error)
+	ApplicationConnector(ctx context.Context) (*model.ApplicationConnectorQuery, error)
 }
 
 type executableSchema struct {
@@ -134,6 +142,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Application.Spec(childComplexity), true
+
+	case "ApplicationConnectorQuery.applications":
+		if e.complexity.ApplicationConnectorQuery.Applications == nil {
+			break
+		}
+
+		return e.complexity.ApplicationConnectorQuery.Applications(childComplexity), true
 
 	case "ApplicationSpec.description":
 		if e.complexity.ApplicationSpec.Description == nil {
@@ -248,12 +263,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Pod.ObjectMeta(childComplexity), true
 
-	case "Query.applications":
-		if e.complexity.Query.Applications == nil {
+	case "Query.applicationConnector":
+		if e.complexity.Query.ApplicationConnector == nil {
 			break
 		}
 
-		return e.complexity.Query.Applications(childComplexity), true
+		return e.complexity.Query.ApplicationConnector(childComplexity), true
 
 	case "Query.core":
 		if e.complexity.Query.Core == nil {
@@ -319,6 +334,10 @@ var sources = []*ast.Source{
 type Application implements Resource {
     metadata: ObjectMeta! @goField(name: "ObjectMeta")
     spec: ApplicationSpec
+}
+
+type ApplicationConnectorQuery {
+    applications: [Application!]!
 }`, BuiltIn: false},
 	&ast.Source{Name: "pkg/graph/core.graphqls", Input: `enum NamespacePhase @goModel(model: "k8s.io/api/core/v1.NamespacePhase") {
     ACTIVE,
@@ -374,7 +393,7 @@ type ObjectMeta @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta
 
 type Query {
   core: CoreQuery!
-  applications: [Application!]
+  applicationConnector: ApplicationConnectorQuery
 }
 `, BuiltIn: false},
 }
@@ -547,6 +566,40 @@ func (ec *executionContext) _Application_spec(ctx context.Context, field graphql
 	res := resTmp.(v1alpha1.ApplicationSpec)
 	fc.Result = res
 	return ec.marshalOApplicationSpec2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋapplicationᚑoperatorᚋpkgᚋapisᚋapplicationconnectorᚋv1alpha1ᚐApplicationSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ApplicationConnectorQuery_applications(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationConnectorQuery) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ApplicationConnectorQuery",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ApplicationConnectorQuery().Applications(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Application)
+	fc.Result = res
+	return ec.marshalNApplication2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplicationᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ApplicationSpec_description(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.ApplicationSpec) (ret graphql.Marshaler) {
@@ -1059,7 +1112,7 @@ func (ec *executionContext) _Query_core(ctx context.Context, field graphql.Colle
 	return ec.marshalNCoreQuery2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐCoreQuery(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_applications(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_applicationConnector(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1076,7 +1129,7 @@ func (ec *executionContext) _Query_applications(ctx context.Context, field graph
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Applications(rctx)
+		return ec.resolvers.Query().ApplicationConnector(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1085,9 +1138,9 @@ func (ec *executionContext) _Query_applications(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Application)
+	res := resTmp.(*model.ApplicationConnectorQuery)
 	fc.Result = res
-	return ec.marshalOApplication2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplicationᚄ(ctx, field.Selections, res)
+	return ec.marshalOApplicationConnectorQuery2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplicationConnectorQuery(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2281,6 +2334,42 @@ func (ec *executionContext) _Application(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+var applicationConnectorQueryImplementors = []string{"ApplicationConnectorQuery"}
+
+func (ec *executionContext) _ApplicationConnectorQuery(ctx context.Context, sel ast.SelectionSet, obj *model.ApplicationConnectorQuery) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, applicationConnectorQueryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ApplicationConnectorQuery")
+		case "applications":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ApplicationConnectorQuery_applications(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var applicationSpecImplementors = []string{"ApplicationSpec"}
 
 func (ec *executionContext) _ApplicationSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.ApplicationSpec) graphql.Marshaler {
@@ -2545,7 +2634,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "applications":
+		case "applicationConnector":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -2553,7 +2642,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_applications(ctx, field)
+				res = ec._Query_applicationConnector(ctx, field)
 				return res
 			})
 		case "__type":
@@ -2818,6 +2907,43 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 func (ec *executionContext) marshalNApplication2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplication(ctx context.Context, sel ast.SelectionSet, v model.Application) graphql.Marshaler {
 	return ec._Application(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNApplication2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplicationᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Application) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNApplication2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplication(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalNApplication2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplication(ctx context.Context, sel ast.SelectionSet, v *model.Application) graphql.Marshaler {
@@ -3257,6 +3383,17 @@ func (ec *executionContext) marshalOApplication2ᚕᚖgithubᚗcomᚋkymaᚑproj
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) marshalOApplicationConnectorQuery2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplicationConnectorQuery(ctx context.Context, sel ast.SelectionSet, v model.ApplicationConnectorQuery) graphql.Marshaler {
+	return ec._ApplicationConnectorQuery(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOApplicationConnectorQuery2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐApplicationConnectorQuery(ctx context.Context, sel ast.SelectionSet, v *model.ApplicationConnectorQuery) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ApplicationConnectorQuery(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOApplicationSpec2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋapplicationᚑoperatorᚋpkgᚋapisᚋapplicationconnectorᚋv1alpha1ᚐApplicationSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha1.ApplicationSpec) graphql.Marshaler {
