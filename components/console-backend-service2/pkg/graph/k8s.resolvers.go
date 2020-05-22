@@ -5,11 +5,9 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/generated"
 	"github.com/kyma-project/kyma/components/console-backend-service2/pkg/graph/model"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func (r *namespaceResolver) IsSystemNamespace(ctx context.Context, obj *model.Namespace) (bool, error) {
@@ -17,14 +15,15 @@ func (r *namespaceResolver) IsSystemNamespace(ctx context.Context, obj *model.Na
 }
 
 func (r *namespaceResolver) Applications(ctx context.Context, obj *model.Namespace) ([]*model.Application, error) {
-	mapps, err := r.ApplicationMappings.Client.Namespace(obj.Name).List(v1.ListOptions{})
+	mappings := model.ApplicationMappingList{}
+	err := r.ApplicationMappings.ListInNamespace(obj.Name, &mappings)
 	if err != nil {
 		return nil, err
 	}
 
 	result := &model.ApplicationList{}
-	for _, mapp := range mapps.Items {
-		err := r.ApplicationConnectorServices.Applications.Get(mapp.GetName(), result.Append())
+	for _, mapping := range mappings {
+		err := r.ApplicationConnectorServices.Applications.Get(mapping.GetName(), result.Append())
 		if err != nil {
 			return nil, err
 		}
@@ -36,13 +35,3 @@ func (r *namespaceResolver) Applications(ctx context.Context, obj *model.Namespa
 func (r *Resolver) Namespace() generated.NamespaceResolver { return &namespaceResolver{r} }
 
 type namespaceResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *namespaceResolver) Metadata(ctx context.Context, obj *model.Namespace) (*v1.ObjectMeta, error) {
-	panic(fmt.Errorf("not implemented"))
-}

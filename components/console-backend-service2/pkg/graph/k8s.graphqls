@@ -3,6 +3,9 @@ enum NamespacePhase @goModel(model: "k8s.io/api/core/v1.NamespacePhase") {
     TERMINATING
 }
 
+type NamespaceStatus @goModel(model: "k8s.io/api/core/v1.NamespaceStatus") {
+    phase: NamespacePhase!
+}
 
 type Namespace implements Resource {
     metadata: ObjectMeta! @goField(name: "ObjectMeta")
@@ -12,6 +15,6 @@ type Namespace implements Resource {
     status: NamespaceStatus
 }
 
-type NamespaceStatus @goModel(model: "k8s.io/api/core/v1.NamespaceStatus") {
-    phase: NamespacePhase!
+type Pod implements Resource {
+    metadata: ObjectMeta! @goField(name: "ObjectMeta")
 }

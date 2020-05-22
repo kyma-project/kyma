@@ -5,8 +5,11 @@ go 1.13
 require (
 	github.com/99designs/gqlgen v0.11.3
 	github.com/alecthomas/jsonschema v0.0.0-20200514014646-0366d1034a17 // indirect
+	github.com/canthefason/go-watcher v0.2.4 // indirect
 	github.com/cheekybits/genny v1.0.0 // indirect
 	github.com/evanphx/json-patch v4.5.0+incompatible // indirect
+	github.com/fatih/color v1.9.0 // indirect
+	github.com/githubnemo/CompileDaemon v1.2.1 // indirect
 	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
 	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/googleapis/gnostic v0.3.1 // indirect

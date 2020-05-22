@@ -35,6 +35,8 @@ func main() {
 
 	resolver := graph.NewResolver(serviceFactory)
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
+	serviceFactory.InformerFactory.Start(make(chan struct{}))
+	serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)

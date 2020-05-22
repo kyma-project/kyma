@@ -17,6 +17,12 @@ func (r *queryResolver) Namespaces(ctx context.Context) ([]*model.Namespace, err
 	return nss, err
 }
 
+func (r *queryResolver) Pods(ctx context.Context, namespace string) ([]*model.Pod, error) {
+	pods := model.PodList{}
+	err := r.pods.ListInNamespace(namespace, &pods)
+	return pods, err
+}
+
 func (r *queryResolver) Applications(ctx context.Context) ([]*model.Application, error) {
 	panic(fmt.Errorf("not implemented"))
 }

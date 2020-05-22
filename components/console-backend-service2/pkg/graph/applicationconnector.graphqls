@@ -1,3 +1,8 @@
-type Application {
-    name: String!
+type ApplicationSpec @goModel(model: "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1.ApplicationSpec") {
+    description: String
+}
+
+type Application implements Resource {
+    metadata: ObjectMeta! @goField(name: "ObjectMeta")
+    spec: ApplicationSpec
 }

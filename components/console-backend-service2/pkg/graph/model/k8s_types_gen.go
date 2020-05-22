@@ -21,3 +21,21 @@ func (l *ApplicationList) Append() interface{} {
 	return converted
 }
 func (Application) IsResource() {}
+
+type ApplicationMappingList []*ApplicationMapping
+
+func (l *ApplicationMappingList) Append() interface{} {
+	converted := &ApplicationMapping{}
+	*l = append(*l, converted)
+	return converted
+}
+func (ApplicationMapping) IsResource() {}
+
+type PodList []*Pod
+
+func (l *PodList) Append() interface{} {
+	converted := &Pod{}
+	*l = append(*l, converted)
+	return converted
+}
+func (Pod) IsResource() {}

@@ -6,7 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-//go:generate genny -in=model/k8s_types.genny -out=model/k8s_types_gen.go gen "Value=Namespace,Application"
+//go:generate genny -in=model/k8s_types.genny -out=model/k8s_types_gen.go gen "Value=Namespace,Application,ApplicationMapping,Pod"
 //go:generate go run github.com/99designs/gqlgen
 
 // This file will not be regenerated automatically.
@@ -15,7 +15,8 @@ import (
 
 type Resolver struct {
 	*k8s.ApplicationConnectorServices
-	namespaces          *resource.Service
+	namespaces *resource.Service
+	pods       *resource.Service
 }
 
 func NewResolver(serviceFactory *resource.ServiceFactory) *Resolver {
@@ -25,8 +26,15 @@ func NewResolver(serviceFactory *resource.ServiceFactory) *Resolver {
 		Resource: "namespaces",
 	})
 
+	pods := serviceFactory.ForResource(schema.GroupVersionResource{
+		Group:    "",
+		Version:  "v1",
+		Resource: "pods",
+	})
+
 	return &Resolver{
-		namespaces: namespaces,
+		namespaces:                   namespaces,
+		pods:                         pods,
 		ApplicationConnectorServices: k8s.NewApplicationConnectorServices(serviceFactory),
 	}
 }
