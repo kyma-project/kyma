@@ -1,19 +1,18 @@
-{{- if eq .Values.global.metrics.enabled true -}}
+{{- if and .Values.global.metrics.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "fullname" . }}-technical-dashboard
+  name: {{ template "fullname" . }}-dashboard
   namespace: kyma-system
   labels:
     grafana_dashboard: "1"
     app: monitoring-grafana
 data:
-  compass-director-technical-dashboard.json: |-
+  compass-director-dashboard.json: |-
     {
       "annotations": {
         "list": [
         {
-          "$$hashKey": "object:460",
           "builtIn": 1,
           "datasource": "-- Grafana --",
           "enable": true,
@@ -28,6 +27,7 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
+      "id": 55,
       "links": [],
       "panels": [
       {
@@ -852,6 +852,7 @@ data:
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "pluginVersion": "6.5.0",
         "postfix": "",
         "postfixFontSize": "50%",
@@ -1656,10 +1657,24 @@ data:
           "align": false,
           "alignLevel": null
         }
+      },
+      {
+        "collapsed": false,
+        "datasource": null,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 48
+        },
+        "id": 4,
+        "panels": [],
+        "title": "Business metrics",
+        "type": "row"
       }
       ],
       "refresh": false,
-      "schemaVersion": 22,
+      "schemaVersion": 21,
       "style": "dark",
       "tags": [
         "kyma",
@@ -1687,11 +1702,8 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Compass / Director - Technical Metrics",
+      "title": "Compass / Director",
       "uid": "RsjU_VRGz",
-      "variables": {
-        "list": []
-      },
-      "version": 1
+      "version": 67
     }
 {{- end }}
