@@ -53,7 +53,7 @@ global:
     tests:
       director:
         dir:
-        version: "e2837b23"
+        version: "7ba46e80"
       connector:
         dir:
         version: "d068b250"
@@ -224,7 +224,7 @@ global:
     host: ory-oathkeeper-proxy.kyma-system.svc.cluster.local
     port: 4455
     idTokenConfig:
-      claims: '{"scopes": "{{ print .Extra.scope }}", "tenant": "{{ print .Extra.tenant }}", "consumerID": "{{ print .Extra.consumerID}}", "consumerType": "{{ print .Extra.consumerType }}"}'
+      claims: '{"scopes": "{{ print .Extra.scope }}", "tenant": "{{ print .Extra.tenant }}", "externalTenant": "{{ print .Extra.externalTenant }}", "consumerID": "{{ print .Extra.consumerID}}", "consumerType": "{{ print .Extra.consumerType }}"}'
     mutators:
       runtimeMappingService:
         config:
