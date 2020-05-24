@@ -1,7 +1,11 @@
 package v1alpha1
 
 import (
+	"context"
+	"os"
 	"testing"
+
+	"github.com/vrischmann/envconfig"
 
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -11,22 +15,39 @@ import (
 
 func TestFunctionSpec_validateResources(t *testing.T) {
 	minusOne := int32(-1)
+	zero := int32(0)
 	one := int32(1)
+	os.Setenv("RESERVED_ENVS", "K_CONFIGURATION")
+	os.Setenv("MIN_REPLICAS_VALUE", "1")
+
 	for testName, testData := range map[string]struct {
-		givenFunc     *Function
-		expectedError gomega.OmegaMatcher
+		givenFunc              Function
+		expectedError          gomega.OmegaMatcher
+		specifiedExpectedError gomega.OmegaMatcher
 	}{
 		"Should be ok": {
-			givenFunc: &Function{
+			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					Source: "test-source",
+					Source:      "test-source",
+					MinReplicas: &one,
+					MaxReplicas: &one,
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("100m"),
+							corev1.ResourceMemory: resource.MustParse("128Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("50m"),
+							corev1.ResourceMemory: resource.MustParse("64Mi"),
+						},
+					},
 				},
 			},
 			expectedError: gomega.BeNil(),
 		},
 		"Should validate all fields without error": {
-			givenFunc: &Function{
+			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source: "test-source",
@@ -62,11 +83,22 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			expectedError: gomega.BeNil(),
 		},
 		"Should return errors on empty function": {
-			givenFunc:     &Function{},
+			givenFunc:     Function{},
 			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"metadata.name",
+				),
+				gomega.ContainSubstring(
+					"metadata.namespace",
+				),
+				gomega.ContainSubstring(
+					"spec.source",
+				),
+			),
 		},
 		"Should return error on deps validation": {
-			givenFunc: &Function{
+			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source: "test-source",
@@ -74,9 +106,14 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				},
 			},
 			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"spec.deps",
+				),
+			),
 		},
 		"Should return error on env validation": {
-			givenFunc: &Function{
+			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source: "test-source",
@@ -93,9 +130,14 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				},
 			},
 			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"spec.env",
+				),
+			),
 		},
 		"Should return error on labels validation": {
-			givenFunc: &Function{
+			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source: "test-source",
@@ -106,9 +148,14 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				},
 			},
 			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"spec.labels",
+				),
+			),
 		},
 		"Should return error on replicas validation": {
-			givenFunc: &Function{
+			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source:      "test-source",
@@ -117,9 +164,14 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				},
 			},
 			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"spec.maxReplicas",
+				),
+			),
 		},
 		"Should return error on resources validation": {
-			givenFunc: &Function{
+			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source: "test-source",
@@ -136,17 +188,60 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				},
 			},
 			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"spec.resources.limits.cpu",
+				),
+				gomega.ContainSubstring(
+					"spec.resources.limits.memory",
+				),
+			),
+		},
+		"should return errors because of minimal config values": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Source:      "test-source",
+					MinReplicas: &zero,
+					MaxReplicas: &zero,
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("10m"),
+							corev1.ResourceMemory: resource.MustParse("10Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("5m"),
+							corev1.ResourceMemory: resource.MustParse("6Mi"),
+						},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring("spec.minReplicas"),
+				gomega.ContainSubstring("spec.maxReplicas"),
+				gomega.ContainSubstring("spec.resources.requests.cpu"),
+				gomega.ContainSubstring("spec.resources.requests.memory"),
+				gomega.ContainSubstring("spec.resources.limits.cpu"),
+				gomega.ContainSubstring("spec.resources.limits.memory"),
+			),
 		},
 	} {
 		t.Run(testName, func(t *testing.T) {
 			// given
 			g := gomega.NewWithT(t)
+			config := &ValidationConfig{}
+			envconfig.Init(config)
+			ctx := context.WithValue(nil, ValidationConfigKey, *config)
 
 			// when
-			errs := testData.givenFunc.Validate(nil)
+			errs := testData.givenFunc.Validate(ctx)
 
 			//then
 			g.Expect(errs).To(testData.expectedError)
+			if testData.specifiedExpectedError != nil {
+				g.Expect(errs.Error()).To(testData.specifiedExpectedError)
+			}
 		})
 	}
 }

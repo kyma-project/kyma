@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"errors"
+
+	"github.com/pkg/errors"
 
 	"github.com/vrischmann/envconfig"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -27,7 +28,7 @@ var types = map[schema.GroupVersionKind]resourcesemantics.GenericCRD{
 
 type config struct {
 	SystemNamespace    string `envconfig:"default=kyma-system"`
-	WebhookServiceName string `envconfig:"default=serverless-webhook-svc"`
+	WebhookServiceName string `envconfig:"default=serverless-webhook"`
 	WebhookSecretName  string `envconfig:"default=serverless-webhook"`
 	WebhookPort        int    `envconfig:"default=8443"`
 }
@@ -39,7 +40,7 @@ type config struct {
 func main() {
 	cfg := &config{}
 	if err := envconfig.Init(cfg); err != nil {
-		panic(errors.New("while reading env variables"))
+		panic(errors.Wrap(err, "while reading env variables"))
 	}
 
 	// Scope informers to the webhook's namespace instead of cluster-wide
@@ -63,6 +64,11 @@ func main() {
 }
 
 func NewDefaultingAdmissionController(ctx context.Context, _ configmap.Watcher) *controller.Impl {
+	cfg := &serverlessv1alhpa1.DefaultingConfig{}
+	if err := envconfig.InitWithPrefix(cfg, "WEBHOOK_DEFAULTING"); err != nil {
+		panic(errors.Wrap(err, "while reading env defaulting variables"))
+	}
+
 	return defaulting.NewAdmissionController(ctx,
 
 		// Name of the resource webhook.
@@ -76,7 +82,7 @@ func NewDefaultingAdmissionController(ctx context.Context, _ configmap.Watcher) 
 
 		// A function that infuses the context passed to Validate/SetDefaults with custom metadata.
 		func(ctx context.Context) context.Context {
-			return ctx
+			return context.WithValue(ctx, serverlessv1alhpa1.DefaultingConfigKey, *cfg)
 		},
 
 		// Whether to disallow unknown fields.
@@ -85,6 +91,11 @@ func NewDefaultingAdmissionController(ctx context.Context, _ configmap.Watcher) 
 }
 
 func NewValidationAdmissionController(ctx context.Context, _ configmap.Watcher) *controller.Impl {
+	cfg := &serverlessv1alhpa1.ValidationConfig{}
+	if err := envconfig.InitWithPrefix(cfg, "WEBHOOK_VALIDATION"); err != nil {
+		panic(errors.Wrap(err, "while reading env defaulting variables"))
+	}
+
 	return validation.NewAdmissionController(ctx,
 
 		// Name of the resource webhook.
@@ -98,7 +109,7 @@ func NewValidationAdmissionController(ctx context.Context, _ configmap.Watcher) 
 
 		// A function that infuses the context passed to Validate/SetDefaults with custom metadata.
 		func(ctx context.Context) context.Context {
-			return ctx
+			return context.WithValue(ctx, serverlessv1alhpa1.ValidationConfigKey, *cfg)
 		},
 
 		// Whether to disallow unknown fields.

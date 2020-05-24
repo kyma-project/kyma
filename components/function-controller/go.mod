@@ -20,6 +20,7 @@ require (
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.8.1
 	github.com/openzipkin/zipkin-go v0.2.2 // indirect
+	github.com/pkg/errors v0.8.1
 	github.com/prometheus/client_golang v1.2.1 // indirect
 	github.com/prometheus/procfs v0.0.8 // indirect
 	github.com/stretchr/testify v1.5.1

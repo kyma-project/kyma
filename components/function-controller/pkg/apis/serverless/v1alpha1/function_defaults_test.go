@@ -1,7 +1,10 @@
 package v1alpha1
 
 import (
+	"context"
 	"testing"
+
+	"github.com/vrischmann/envconfig"
 
 	"github.com/onsi/gomega"
 
@@ -10,14 +13,15 @@ import (
 )
 
 func TestSetDefaults(t *testing.T) {
+	zero := int32(0)
 	one := int32(1)
 	two := int32(2)
 	for testName, testData := range map[string]struct {
-		givenFunc    *Function
+		givenFunc    Function
 		expectedFunc Function
 	}{
 		"Should do nothing": {
-			givenFunc: &Function{
+			givenFunc: Function{
 				Spec: FunctionSpec{Resources: corev1.ResourceRequirements{
 					Limits: corev1.ResourceList{
 						corev1.ResourceCPU:    resource.MustParse("150m"),
@@ -47,7 +51,7 @@ func TestSetDefaults(t *testing.T) {
 			},
 		},
 		"Should return default webhook": {
-			givenFunc: &Function{},
+			givenFunc: Function{},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
 					Resources: corev1.ResourceRequirements{
@@ -66,7 +70,7 @@ func TestSetDefaults(t *testing.T) {
 			},
 		},
 		"Should fill missing fields": {
-			givenFunc: &Function{
+			givenFunc: Function{
 				Spec: FunctionSpec{
 					Resources: corev1.ResourceRequirements{
 						Requests: corev1.ResourceList{
@@ -94,16 +98,48 @@ func TestSetDefaults(t *testing.T) {
 				},
 			},
 		},
+		"should consider maxReplicas and limits": {
+			givenFunc: Function{
+				Spec: FunctionSpec{
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("15m"),
+							corev1.ResourceMemory: resource.MustParse("15Mi"),
+						},
+					},
+					MaxReplicas: &zero,
+				},
+			},
+			expectedFunc: Function{
+				Spec: FunctionSpec{
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("15m"),
+							corev1.ResourceMemory: resource.MustParse("15Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("15m"),
+							corev1.ResourceMemory: resource.MustParse("15Mi"),
+						},
+					},
+					MinReplicas: &zero,
+					MaxReplicas: &zero,
+				},
+			},
+		},
 	} {
 		t.Run(testName, func(t *testing.T) {
 			// given
 			g := gomega.NewWithT(t)
+			config := &DefaultingConfig{}
+			envconfig.Init(config)
+			ctx := context.WithValue(nil, DefaultingConfigKey, *config)
 
 			// when
-			testData.givenFunc.SetDefaults(nil)
+			testData.givenFunc.SetDefaults(ctx)
 
 			// then
-			g.Expect(*testData.givenFunc).To(gomega.Equal(testData.expectedFunc))
+			g.Expect(testData.givenFunc).To(gomega.Equal(testData.expectedFunc))
 		})
 	}
 }
