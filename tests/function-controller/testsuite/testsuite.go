@@ -164,6 +164,12 @@ func (t *TestSuite) Run() {
 	err = t.function.WaitForStatusRunning()
 	failOnError(t.g, err)
 
+	t.t.Log("Checking function after defaulting and validation")
+	function, err := t.function.get()
+	failOnError(t.g, err)
+	err = t.checkDefaultedFunction(function)
+	failOnError(t.g, err)
+
 	t.t.Log("Creating addons configuration...")
 	err = t.addonsConfig.Create(addonsConfigUrl)
 	failOnError(t.g, err)
