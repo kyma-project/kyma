@@ -14,6 +14,7 @@ rules:
       - get
       - list
       - watch
+      - update
   - apiGroups:
       - admissionregistration.k8s.io
     resources:
@@ -22,3 +23,5 @@ rules:
     verbs:
       - get
       - update
+      - list
+      - watch
