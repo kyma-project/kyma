@@ -40,6 +40,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	ApplicationMapping() ApplicationMappingResolver
+	Mutation() MutationResolver
 	Namespace() NamespaceResolver
 	Query() QueryResolver
 }
@@ -64,6 +65,10 @@ type ComplexityRoot struct {
 
 	BackendModule struct {
 		ObjectMeta func(childComplexity int) int
+	}
+
+	Mutation struct {
+		CreateNamespace func(childComplexity int, in *model.NamespaceInput) int
 	}
 
 	Namespace struct {
@@ -102,6 +107,9 @@ type ComplexityRoot struct {
 
 type ApplicationMappingResolver interface {
 	Application(ctx context.Context, obj *model.ApplicationMapping) (*model.Application, error)
+}
+type MutationResolver interface {
+	CreateNamespace(ctx context.Context, in *model.NamespaceInput) (*model.Namespace, error)
 }
 type NamespaceResolver interface {
 	IsSystemNamespace(ctx context.Context, obj *model.Namespace) (bool, error)
@@ -176,6 +184,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.BackendModule.ObjectMeta(childComplexity), true
+
+	case "Mutation.createNamespace":
+		if e.complexity.Mutation.CreateNamespace == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createNamespace_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateNamespace(childComplexity, args["in"].(*model.NamespaceInput)), true
 
 	case "Namespace.applicationMappings":
 		if e.complexity.Namespace.ApplicationMappings == nil {
@@ -352,6 +372,20 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				Data: buf.Bytes(),
 			}
 		}
+	case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first {
+				return nil
+			}
+			first = false
+			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
 
 	default:
 		return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
@@ -406,6 +440,10 @@ type NamespaceStatus @goModel(model: "k8s.io/api/core/v1.NamespaceStatus") {
     phase: NamespacePhase!
 }
 
+input NamespaceInput {
+    metadata: ObjectMetaInput! @goField(name: "ObjectMeta")
+}
+
 type Namespace implements Resource {
     metadata: ObjectMeta! @goField(name: "ObjectMeta")
 
@@ -423,6 +461,10 @@ extend type Query {
     namespace(name: String!): Namespace
     pods(namespace: String!): [Pod!]!
     pod(namespace: String!, name: String!): Pod
+}
+
+extend type Mutation {
+    createNamespace(in: NamespaceInput): Namespace
 }`, BuiltIn: false},
 	&ast.Source{Name: "pkg/graph/schema.graphqls", Input: `# GraphQL schema example
 #
@@ -443,7 +485,14 @@ scalar Labels @goModel(model: "github.com/kyma-project/kyma/components/console-b
 interface Resource {
   metadata: ObjectMeta
 }
+
 type ObjectMeta @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta") {
+  name: String!
+  labels: Labels
+  namespace: String
+}
+
+input ObjectMetaInput @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta") {
   name: String!
   labels: Labels
   namespace: String
@@ -466,6 +515,20 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createNamespace_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.NamespaceInput
+	if tmp, ok := rawArgs["in"]; ok {
+		arg0, err = ec.unmarshalONamespaceInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐNamespaceInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["in"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -791,6 +854,44 @@ func (ec *executionContext) _BackendModule_metadata(ctx context.Context, field g
 	res := resTmp.(v1.ObjectMeta)
 	fc.Result = res
 	return ec.marshalNObjectMeta2k8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐObjectMeta(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createNamespace(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createNamespace_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateNamespace(rctx, args["in"].(*model.NamespaceInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Namespace)
+	fc.Result = res
+	return ec.marshalONamespace2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐNamespace(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Namespace_metadata(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
@@ -2540,6 +2641,54 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputNamespaceInput(ctx context.Context, obj interface{}) (model.NamespaceInput, error) {
+	var it model.NamespaceInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "metadata":
+			var err error
+			it.ObjectMeta, err = ec.unmarshalNObjectMetaInput2k8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐObjectMeta(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputObjectMetaInput(ctx context.Context, obj interface{}) (v1.ObjectMeta, error) {
+	var it v1.ObjectMeta
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "labels":
+			var err error
+			it.Labels, err = ec.unmarshalOLabels2map(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "namespace":
+			var err error
+			it.Namespace, err = ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2702,6 +2851,34 @@ func (ec *executionContext) _BackendModule(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var mutationImplementors = []string{"Mutation"}
+
+func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
+
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Mutation",
+	})
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Mutation")
+		case "createNamespace":
+			out.Values[i] = ec._Mutation_createNamespace(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3478,6 +3655,10 @@ func (ec *executionContext) marshalNObjectMeta2k8sᚗioᚋapimachineryᚋpkgᚋa
 	return ec._ObjectMeta(ctx, sel, &v)
 }
 
+func (ec *executionContext) unmarshalNObjectMetaInput2k8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐObjectMeta(ctx context.Context, v interface{}) (v1.ObjectMeta, error) {
+	return ec.unmarshalInputObjectMetaInput(ctx, v)
+}
+
 func (ec *executionContext) marshalNPod2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐPod(ctx context.Context, sel ast.SelectionSet, v model.Pod) graphql.Marshaler {
 	return ec._Pod(ctx, sel, &v)
 }
@@ -3870,6 +4051,18 @@ func (ec *executionContext) marshalONamespace2ᚖgithubᚗcomᚋkymaᚑproject�
 		return graphql.Null
 	}
 	return ec._Namespace(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalONamespaceInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐNamespaceInput(ctx context.Context, v interface{}) (model.NamespaceInput, error) {
+	return ec.unmarshalInputNamespaceInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalONamespaceInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐNamespaceInput(ctx context.Context, v interface{}) (*model.NamespaceInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalONamespaceInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice2ᚋpkgᚋgraphᚋmodelᚐNamespaceInput(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) marshalONamespaceStatus2k8sᚗioᚋapiᚋcoreᚋv1ᚐNamespaceStatus(ctx context.Context, sel ast.SelectionSet, v v11.NamespaceStatus) graphql.Marshaler {

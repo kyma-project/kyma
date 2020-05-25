@@ -2,6 +2,7 @@ package resource
 
 import (
 	"fmt"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"time"
 
@@ -101,4 +102,18 @@ func (s *Service) GetInNamespace(name, namespace string, result interface{}) err
 
 func (s *Service) Get(name string, result interface{}) error {
 	return s.GetByKey(name, result)
+}
+
+func (s *Service) Create(obj interface{}, result interface{}) error {
+	u, err := ToUnstructured(obj)
+	if err != nil {
+		return err
+	}
+
+	created, err := s.client.Create(u, v1.CreateOptions{})
+	if err != nil {
+		return err
+	}
+
+	return FromUnstructured(created, result)
 }

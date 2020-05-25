@@ -11,6 +11,7 @@ import (
 
 type Pod corev1.Pod
 type Namespace corev1.Namespace
+type NamespaceInput corev1.Namespace
 
 type Application applicationoperatorv1alpha1.Application
 type ApplicationMapping applicationbrokerv1alpha1.ApplicationMapping

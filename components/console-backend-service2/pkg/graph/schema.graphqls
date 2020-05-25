@@ -16,8 +16,17 @@ scalar Labels @goModel(model: "github.com/kyma-project/kyma/components/console-b
 
 interface Resource {
   metadata: ObjectMeta
+  name: String,
+  namespace: String
 }
+
 type ObjectMeta @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta") {
+  name: String!
+  labels: Labels
+  namespace: String
+}
+
+input ObjectMetaInput @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta") {
   name: String!
   labels: Labels
   namespace: String

@@ -7,6 +7,10 @@ type NamespaceStatus @goModel(model: "k8s.io/api/core/v1.NamespaceStatus") {
     phase: NamespacePhase!
 }
 
+input NamespaceInput {
+    metadata: ObjectMetaInput! @goField(name: "ObjectMeta")
+}
+
 type Namespace implements Resource {
     metadata: ObjectMeta! @goField(name: "ObjectMeta")
 
@@ -24,4 +28,8 @@ extend type Query {
     namespace(name: String!): Namespace
     pods(namespace: String!): [Pod!]!
     pod(namespace: String!, name: String!): Pod
+}
+
+extend type Mutation {
+    createNamespace(in: NamespaceInput): Namespace
 }
