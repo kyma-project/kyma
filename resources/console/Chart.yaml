@@ -1,0 +1,7 @@
+name: console
+version: 0.0.1
+description: Kyma UI
+keywords:
+- console
+- UI
+apiVersion: v1

@@ -1,0 +1,5 @@
+dependencies:
+  - name: console
+    condition: console.enabled
+  - name: console-backend-service
+    condition: console-backend-service.enabled
