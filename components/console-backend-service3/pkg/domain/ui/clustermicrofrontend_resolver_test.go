@@ -54,7 +54,7 @@ func TestClusterMicroFrontendResolver_ClusterMicroFrontendsQuery(t *testing.T) {
 			},
 		}
 
-		expectedItem := model.ClusterMicroFrontend{
+		expectedItem := &model.ClusterMicroFrontend{
 			Name:        name,
 			Version:     version,
 			Category:    category,
@@ -71,7 +71,7 @@ func TestClusterMicroFrontendResolver_ClusterMicroFrontendsQuery(t *testing.T) {
 			},
 		}
 
-		expectedItems := []model.ClusterMicroFrontend{
+		expectedItems := []*model.ClusterMicroFrontend{
 			expectedItem, expectedItem,
 		}
 
