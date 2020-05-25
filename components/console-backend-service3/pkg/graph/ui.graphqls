@@ -18,7 +18,7 @@ type NavigationNode {
     viewUrl: String!
     showInNavigation: Boolean!
     order: Int!
-    settings: Map!
+    settings: Map
     externalLink: String!
     requiredPermissions: [RequiredPermission!]!
 }
