@@ -23,7 +23,7 @@ global:
       version: "d068b250"
     director:
       dir:
-      version: "ba81ea7d"
+      version: "289fe304"
     gateway:
       dir:
       version: "53b12181"
@@ -35,7 +35,7 @@ global:
       version: "778b2bb3"
     provisioner:
       dir:
-      version: "4ef9ec63"
+      version: "bfb6a9d7"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -43,7 +43,7 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "a9b7becf"
+      version: "341946c1"
     external_services_mock:
       dir:
       version: "e2837b23"
@@ -53,7 +53,7 @@ global:
     tests:
       director:
         dir:
-        version: "e2837b23"
+        version: "7ba46e80"
       connector:
         dir:
         version: "d068b250"
@@ -62,7 +62,7 @@ global:
         version: "8fb2e53b"
       e2e_provisioning:
         dir:
-        version: "db7c9132"
+        version: "e0b2be21"
       connectivity_adapter:
         dir:
         version: "d068b250"
@@ -224,7 +224,7 @@ global:
     host: ory-oathkeeper-proxy.kyma-system.svc.cluster.local
     port: 4455
     idTokenConfig:
-      claims: '{"scopes": "{{ print .Extra.scope }}", "tenant": "{{ print .Extra.tenant }}", "consumerID": "{{ print .Extra.consumerID}}", "consumerType": "{{ print .Extra.consumerType }}"}'
+      claims: '{"scopes": "{{ print .Extra.scope }}", "tenant": "{{ print .Extra.tenant }}", "externalTenant": "{{ print .Extra.externalTenant }}", "consumerID": "{{ print .Extra.consumerID}}", "consumerType": "{{ print .Extra.consumerType }}"}'
     mutators:
       runtimeMappingService:
         config:
@@ -281,6 +281,7 @@ global:
 
   metrics:
     enabled: true
+    pushEndpoint: http://monitoring-prometheus-pushgateway.kyma-system.svc.cluster.local:9091
 
   externalServicesMock:
     enabled: false

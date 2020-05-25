@@ -34,7 +34,7 @@ kymaRelease:
     enabled: true
 
 installation:
-  timeout: 24h
+  timeout: 22h
 
 runtimeAgent:
   configurationTimeout: 1h
