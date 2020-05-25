@@ -6,6 +6,16 @@ type BackendModule struct {
 	Name string `json:"name"`
 }
 
+type ClusterMicroFrontend struct {
+	Name            string            `json:"name"`
+	Version         string            `json:"version"`
+	Category        string            `json:"category"`
+	ViewBaseURL     string            `json:"viewBaseUrl"`
+	Placement       string            `json:"placement"`
+	PreloadURL      string            `json:"preloadUrl"`
+	NavigationNodes []*NavigationNode `json:"navigationNodes"`
+}
+
 type MicroFrontend struct {
 	Name            string            `json:"name"`
 	Version         string            `json:"version"`

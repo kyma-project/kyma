@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph/model"
 )
@@ -15,4 +16,8 @@ func (r *queryResolver) BackendModules(ctx context.Context) ([]*model.BackendMod
 
 func (r *queryResolver) MicroFrontends(ctx context.Context, namespace string) ([]*model.MicroFrontend, error) {
 	return r.ui.MicroFrontendsQuery(ctx, namespace)
+}
+
+func (r *queryResolver) ClusterMicroFrontends(ctx context.Context) ([]*model.ClusterMicroFrontend, error) {
+	panic(fmt.Errorf("not implemented"))
 }

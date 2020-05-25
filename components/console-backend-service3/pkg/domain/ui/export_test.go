@@ -12,11 +12,7 @@ func NewMicroFrontendResolver(sf *resource.ServiceFactory) *microFrontendResolve
 	return newMicroFrontendResolver(sf)
 }
 
-//
-//func NewClusterMicroFrontendResolver(clusterMicroFrontendLister clusterMicroFrontendLister) *clusterMicroFrontendResolver {
-//	return newClusterMicroFrontendResolver(clusterMicroFrontendLister)
-//}
-//
-//func (r *clusterMicroFrontendResolver) SetClusterMicroFrontendConverter(converter gqlClusterMicroFrontendConverter) {
-//	r.clusterMicroFrontendConverter = converter
-//}
+
+func NewClusterMicroFrontendResolver(sf *resource.ServiceFactory) *clusterMicroFrontendResolver {
+	return newClusterMicroFrontendResolver(sf)
+}

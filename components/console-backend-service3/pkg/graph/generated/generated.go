@@ -48,6 +48,16 @@ type ComplexityRoot struct {
 		Name func(childComplexity int) int
 	}
 
+	ClusterMicroFrontend struct {
+		Category        func(childComplexity int) int
+		Name            func(childComplexity int) int
+		NavigationNodes func(childComplexity int) int
+		Placement       func(childComplexity int) int
+		PreloadURL      func(childComplexity int) int
+		Version         func(childComplexity int) int
+		ViewBaseURL     func(childComplexity int) int
+	}
+
 	MicroFrontend struct {
 		Category        func(childComplexity int) int
 		Name            func(childComplexity int) int
@@ -68,9 +78,10 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		BackendModules func(childComplexity int) int
-		MicroFrontends func(childComplexity int, namespace string) int
-		Version        func(childComplexity int) int
+		BackendModules        func(childComplexity int) int
+		ClusterMicroFrontends func(childComplexity int) int
+		MicroFrontends        func(childComplexity int, namespace string) int
+		Version               func(childComplexity int) int
 	}
 
 	RequiredPermission struct {
@@ -84,6 +95,7 @@ type QueryResolver interface {
 	Version(ctx context.Context) (*string, error)
 	BackendModules(ctx context.Context) ([]*model.BackendModule, error)
 	MicroFrontends(ctx context.Context, namespace string) ([]*model.MicroFrontend, error)
+	ClusterMicroFrontends(ctx context.Context) ([]*model.ClusterMicroFrontend, error)
 }
 
 type executableSchema struct {
@@ -107,6 +119,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.BackendModule.Name(childComplexity), true
+
+	case "ClusterMicroFrontend.category":
+		if e.complexity.ClusterMicroFrontend.Category == nil {
+			break
+		}
+
+		return e.complexity.ClusterMicroFrontend.Category(childComplexity), true
+
+	case "ClusterMicroFrontend.name":
+		if e.complexity.ClusterMicroFrontend.Name == nil {
+			break
+		}
+
+		return e.complexity.ClusterMicroFrontend.Name(childComplexity), true
+
+	case "ClusterMicroFrontend.navigationNodes":
+		if e.complexity.ClusterMicroFrontend.NavigationNodes == nil {
+			break
+		}
+
+		return e.complexity.ClusterMicroFrontend.NavigationNodes(childComplexity), true
+
+	case "ClusterMicroFrontend.placement":
+		if e.complexity.ClusterMicroFrontend.Placement == nil {
+			break
+		}
+
+		return e.complexity.ClusterMicroFrontend.Placement(childComplexity), true
+
+	case "ClusterMicroFrontend.preloadUrl":
+		if e.complexity.ClusterMicroFrontend.PreloadURL == nil {
+			break
+		}
+
+		return e.complexity.ClusterMicroFrontend.PreloadURL(childComplexity), true
+
+	case "ClusterMicroFrontend.version":
+		if e.complexity.ClusterMicroFrontend.Version == nil {
+			break
+		}
+
+		return e.complexity.ClusterMicroFrontend.Version(childComplexity), true
+
+	case "ClusterMicroFrontend.viewBaseUrl":
+		if e.complexity.ClusterMicroFrontend.ViewBaseURL == nil {
+			break
+		}
+
+		return e.complexity.ClusterMicroFrontend.ViewBaseURL(childComplexity), true
 
 	case "MicroFrontend.category":
 		if e.complexity.MicroFrontend.Category == nil {
@@ -205,6 +266,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.BackendModules(childComplexity), true
+
+	case "Query.clusterMicroFrontends":
+		if e.complexity.Query.ClusterMicroFrontends == nil {
+			break
+		}
+
+		return e.complexity.Query.ClusterMicroFrontends(childComplexity), true
 
 	case "Query.microFrontends":
 		if e.complexity.Query.MicroFrontends == nil {
@@ -331,6 +399,16 @@ type MicroFrontend {
     navigationNodes: [NavigationNode!]!
 }
 
+type ClusterMicroFrontend {
+    name: String!
+    version: String!
+    category: String!
+    viewBaseUrl: String!
+    placement: String!
+    preloadUrl: String!
+    navigationNodes: [NavigationNode!]!
+}
+
 type NavigationNode {
     label: String!
     navigationPath: String!
@@ -351,6 +429,7 @@ type RequiredPermission {
 extend type Query {
     backendModules: [BackendModule!]! @HasAccess(attributes: {resource: "backendmodules", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
     microFrontends(namespace: String!): [MicroFrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    clusterMicroFrontends: [ClusterMicroFrontend!]! @HasAccess(attributes: {resource: "clustermicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -469,6 +548,244 @@ func (ec *executionContext) _BackendModule_name(ctx context.Context, field graph
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ClusterMicroFrontend_name(ctx context.Context, field graphql.CollectedField, obj *model.ClusterMicroFrontend) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ClusterMicroFrontend",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ClusterMicroFrontend_version(ctx context.Context, field graphql.CollectedField, obj *model.ClusterMicroFrontend) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ClusterMicroFrontend",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Version, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ClusterMicroFrontend_category(ctx context.Context, field graphql.CollectedField, obj *model.ClusterMicroFrontend) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ClusterMicroFrontend",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Category, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ClusterMicroFrontend_viewBaseUrl(ctx context.Context, field graphql.CollectedField, obj *model.ClusterMicroFrontend) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ClusterMicroFrontend",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ViewBaseURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ClusterMicroFrontend_placement(ctx context.Context, field graphql.CollectedField, obj *model.ClusterMicroFrontend) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ClusterMicroFrontend",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Placement, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ClusterMicroFrontend_preloadUrl(ctx context.Context, field graphql.CollectedField, obj *model.ClusterMicroFrontend) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ClusterMicroFrontend",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PreloadURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ClusterMicroFrontend_navigationNodes(ctx context.Context, field graphql.CollectedField, obj *model.ClusterMicroFrontend) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ClusterMicroFrontend",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NavigationNodes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.NavigationNode)
+	fc.Result = res
+	return ec.marshalNNavigationNode2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐNavigationNodeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _MicroFrontend_name(ctx context.Context, field graphql.CollectedField, obj *model.MicroFrontend) (ret graphql.Marshaler) {
@@ -1062,6 +1379,64 @@ func (ec *executionContext) _Query_microFrontends(ctx context.Context, field gra
 	res := resTmp.([]*model.MicroFrontend)
 	fc.Result = res
 	return ec.marshalNMicroFrontend2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐMicroFrontendᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_clusterMicroFrontends(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().ClusterMicroFrontends(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "ui.kyma-project.io", "apiVersion": "v1alpha1", "resource": "clustermicrofrontends", "verb": "list"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*model.ClusterMicroFrontend); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph/model.ClusterMicroFrontend`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ClusterMicroFrontend)
+	fc.Result = res
+	return ec.marshalNClusterMicroFrontend2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐClusterMicroFrontendᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2391,6 +2766,63 @@ func (ec *executionContext) _BackendModule(ctx context.Context, sel ast.Selectio
 	return out
 }
 
+var clusterMicroFrontendImplementors = []string{"ClusterMicroFrontend"}
+
+func (ec *executionContext) _ClusterMicroFrontend(ctx context.Context, sel ast.SelectionSet, obj *model.ClusterMicroFrontend) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, clusterMicroFrontendImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ClusterMicroFrontend")
+		case "name":
+			out.Values[i] = ec._ClusterMicroFrontend_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "version":
+			out.Values[i] = ec._ClusterMicroFrontend_version(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "category":
+			out.Values[i] = ec._ClusterMicroFrontend_category(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "viewBaseUrl":
+			out.Values[i] = ec._ClusterMicroFrontend_viewBaseUrl(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "placement":
+			out.Values[i] = ec._ClusterMicroFrontend_placement(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "preloadUrl":
+			out.Values[i] = ec._ClusterMicroFrontend_preloadUrl(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "navigationNodes":
+			out.Values[i] = ec._ClusterMicroFrontend_navigationNodes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var microFrontendImplementors = []string{"MicroFrontend"}
 
 func (ec *executionContext) _MicroFrontend(ctx context.Context, sel ast.SelectionSet, obj *model.MicroFrontend) graphql.Marshaler {
@@ -2546,6 +2978,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_microFrontends(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "clusterMicroFrontends":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_clusterMicroFrontends(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -2911,6 +3357,57 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNClusterMicroFrontend2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐClusterMicroFrontend(ctx context.Context, sel ast.SelectionSet, v model.ClusterMicroFrontend) graphql.Marshaler {
+	return ec._ClusterMicroFrontend(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNClusterMicroFrontend2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐClusterMicroFrontendᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ClusterMicroFrontend) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNClusterMicroFrontend2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐClusterMicroFrontend(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNClusterMicroFrontend2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐClusterMicroFrontend(ctx context.Context, sel ast.SelectionSet, v *model.ClusterMicroFrontend) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ClusterMicroFrontend(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
