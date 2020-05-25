@@ -33,15 +33,15 @@ func WaitForInformerFactoryStartAtMost(t *testing.T, timeout time.Duration, info
 	syncedDone := make(chan struct{})
 
 	go func() {
+		informer.Start(stop)
 		informer.WaitForCacheSync(stop)
 		close(syncedDone)
 	}()
 
-	go informer.Start(stop)
-
 	select {
 	case <-time.After(timeout):
 		close(stop)
+		panic("Wait timeout")
 	case <-syncedDone:
 	}
 }

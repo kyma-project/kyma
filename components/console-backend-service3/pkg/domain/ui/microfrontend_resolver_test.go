@@ -73,7 +73,7 @@ func TestMicroFrontendResolver_MicroFrontendsQuery(t *testing.T) {
 		require.NoError(t, err)
 
 		resolver := ui.NewMicroFrontendResolver(sf)
-		testingUtils.WaitForInformerFactoryStartAtMost(t, time.Second, sf.InformerFactory)
+		testingUtils.WaitForInformerFactoryStartAtMost(t, 10*time.Second, sf.InformerFactory)
 
 		result, err := resolver.MicroFrontendsQuery(nil, namespace)
 

@@ -72,7 +72,7 @@ func TestClusterMicroFrontendResolver_ClusterMicroFrontendsQuery(t *testing.T) {
 		}
 
 		expectedItems := []*model.ClusterMicroFrontend{
-			expectedItem, expectedItem,
+			expectedItem,
 		}
 
 		sf, err := fake.NewFakeServiceFactory(v1alpha1.AddToScheme, item)
@@ -82,7 +82,6 @@ func TestClusterMicroFrontendResolver_ClusterMicroFrontendsQuery(t *testing.T) {
 		testingUtils.WaitForInformerFactoryStartAtMost(t, time.Second, sf.InformerFactory)
 
 		result, err := resolver.ClusterMicroFrontendsQuery(nil)
-
 
 		require.NoError(t, err)
 		assert.Equal(t, expectedItems, result)
