@@ -1,10 +1,8 @@
-{{- if not (.Capabilities.APIVersions.Has "rafter.kyma-project.io/v1beta1/ClusterBucket") }}
-{{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   creationTimestamp: null
-  name: clusterbuckets.rafter.kyma-project.io
+  name: buckets.rafter.kyma-project.io
 spec:
   additionalPrinterColumns:
   - JSONPath: .status.phase
@@ -18,14 +16,14 @@ spec:
     type: date
   group: rafter.kyma-project.io
   names:
-    kind: ClusterBucket
-    plural: clusterbuckets
-  scope: Cluster
+    kind: Bucket
+    plural: buckets
+  scope: ""
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: ClusterBucket is the Schema for the clusterbuckets API
+      description: Bucket is the Schema for the buckets API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -40,7 +38,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: ClusterBucketSpec defines the desired state of ClusterBucket
+          description: BucketSpec defines the desired state of Bucket
           properties:
             policy:
               enum:
@@ -65,7 +63,7 @@ spec:
               type: string
           type: object
         status:
-          description: ClusterBucketStatus defines the observed state of ClusterBucket
+          description: BucketStatus defines the observed state of Bucket
           properties:
             lastHeartbeatTime:
               format: date-time
@@ -97,5 +95,3 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-{{- end }}
-{{- end }}

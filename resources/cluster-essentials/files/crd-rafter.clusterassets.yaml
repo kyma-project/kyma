@@ -1,10 +1,8 @@
-{{- if not (.Capabilities.APIVersions.Has "rafter.kyma-project.io/v1beta1/Asset") }}
-{{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   creationTimestamp: null
-  name: assets.rafter.kyma-project.io
+  name: clusterassets.rafter.kyma-project.io
 spec:
   additionalPrinterColumns:
   - JSONPath: .status.phase
@@ -18,14 +16,14 @@ spec:
     type: date
   group: rafter.kyma-project.io
   names:
-    kind: Asset
-    plural: assets
-  scope: ""
+    kind: ClusterAsset
+    plural: clusterassets
+  scope: Cluster
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: Asset is the Schema for the assets API
+      description: ClusterAsset is the Schema for the clusterassets API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -40,7 +38,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: AssetSpec defines the desired state of Asset
+          description: ClusterAssetSpec defines the desired state of ClusterAsset
           properties:
             bucketRef:
               properties:
@@ -125,7 +123,7 @@ spec:
           - source
           type: object
         status:
-          description: AssetStatus defines the observed state of Asset
+          description: ClusterAssetStatus defines the observed state of ClusterAsset
           properties:
             assetRef:
               properties:
@@ -173,5 +171,3 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-{{- end }}
-{{- end }}

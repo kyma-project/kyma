@@ -1,3 +1,5 @@
+{{- if not (.Capabilities.APIVersions.Has "rafter.kyma-project.io/v1beta1/ClusterAssetGroup") }}
+{{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -114,3 +116,5 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
+{{- end }}
+{{- end }}
