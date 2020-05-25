@@ -17,3 +17,4 @@ data:
     COPY /src/handler.js $KUBELESS_INSTALL_VOLUME/handler.js
 
     USER 1000
+
