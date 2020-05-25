@@ -36,6 +36,7 @@ data:
         "dashLength": 10,
         "dashes": false,
         "datasource": "Prometheus",
+        "decimals": 0,
         "editable": true,
         "error": false,
         "fill": 1,
@@ -150,14 +151,17 @@ data:
         "yaxes": [
         {
           "$$hashKey": "object:1242",
+          "decimals": 0,
           "format": "short",
           "logBase": 1,
           "show": true
         },
         {
           "$$hashKey": "object:1243",
-          "format": "short",
+          "decimals": null,
+          "format": "none",
           "logBase": 1,
+          "max": null,
           "show": true
         }
         ],
@@ -172,6 +176,7 @@ data:
         "dashLength": 10,
         "dashes": false,
         "datasource": "Prometheus",
+        "decimals": 0,
         "editable": true,
         "error": false,
         "fill": 1,
@@ -253,12 +258,15 @@ data:
         "yaxes": [
         {
           "$$hashKey": "object:1242",
+          "decimals": 0,
           "format": "short",
           "logBase": 1,
+          "min": null,
           "show": true
         },
         {
           "$$hashKey": "object:1243",
+          "decimals": 0,
           "format": "short",
           "logBase": 1,
           "show": true
@@ -275,6 +283,7 @@ data:
         "dashLength": 10,
         "dashes": false,
         "datasource": "Prometheus",
+        "decimals": 0,
         "editable": true,
         "error": false,
         "fill": 1,
@@ -356,12 +365,14 @@ data:
         "yaxes": [
         {
           "$$hashKey": "object:1242",
+          "decimals": 0,
           "format": "short",
           "logBase": 1,
           "show": true
         },
         {
           "$$hashKey": "object:1243",
+          "decimals": 0,
           "format": "short",
           "logBase": 1,
           "show": true
