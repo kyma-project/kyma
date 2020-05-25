@@ -2,13 +2,17 @@ package main
 
 import (
 	"context"
+	"flag"
+	"fmt"
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph/model"
+	"github.com/pkg/errors"
+	"github.com/vrischmann/envconfig"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -18,20 +22,32 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-const defaultPort = "8080"
+type config struct {
+	Host                 string        `envconfig:"default=127.0.0.1"`
+	Port                 int           `envconfig:"default=3000"`
+	AllowedOrigins       []string      `envconfig:"optional"`
+	Verbose              bool          `envconfig:"default=false"`
+	KubeconfigPath       string        `envconfig:"optional"`
+	SystemNamespaces     []string      `envconfig:"default=istio-system;knative-eventing;knative-serving;kube-public;kube-system;kyma-installer;kyma-integration;kyma-system;natss;compass-system"`
+	InformerResyncPeriod time.Duration `envconfig:"default=10m"`
+	ServerTimeout        time.Duration `envconfig:"default=10s"`
+	Burst                int           `envconfig:"default=2"`
+}
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
-	}
 
-	config, err := newRestClientConfig("/Users/i355395/.kube/config", 2)
+	cfg, _, err := loadConfig("APP")
+	if err != nil {
+		panic(err)
+	}
+	parseFlags(cfg)
+
+	restClientConfig, err := newRestClientConfig(cfg.KubeconfigPath, 2)
 	if err != nil {
 		panic(err)
 	}
 
-	resolver, err := graph.NewResolver(config, 10 * time.Minute)
+	resolver, err := graph.NewResolver(restClientConfig, 10*time.Minute)
 	if err != nil {
 		panic(err)
 	}
@@ -45,8 +61,9 @@ func main() {
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	bind := fmt.Sprintf("%s:%v", cfg.Host,cfg.Port)
+	log.Printf("connect to http://%s/ for GraphQL playground", bind)
+	log.Fatal(http.ListenAndServe(bind, nil))
 }
 
 func newRestClientConfig(kubeconfigPath string, burst int) (*restclient.Config, error) {
@@ -65,4 +82,26 @@ func newRestClientConfig(kubeconfigPath string, burst int) (*restclient.Config, 
 	config.Burst = burst
 	config.UserAgent = "console-backend-service"
 	return config, nil
+}
+
+func loadConfig(prefix string) (config, bool, error) {
+	cfg := config{}
+	err := envconfig.InitWithPrefix(&cfg, prefix)
+	if err != nil {
+		return cfg, false, err
+	}
+
+	developmentMode := cfg.KubeconfigPath != ""
+
+	return cfg, developmentMode, nil
+}
+
+func parseFlags(cfg config) {
+	if cfg.Verbose {
+		err := flag.Set("stderrthreshold", "INFO")
+		if err != nil {
+			glog.Error(errors.Wrap(err, "while parsing flags"))
+		}
+	}
+	flag.Parse()
 }
