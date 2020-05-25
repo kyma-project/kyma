@@ -5,11 +5,10 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph/model"
 )
 
 func (r *queryResolver) BackendModules(ctx context.Context) ([]*model.BackendModule, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.ui.Resolver.BackendModulesQuery(ctx)
 }

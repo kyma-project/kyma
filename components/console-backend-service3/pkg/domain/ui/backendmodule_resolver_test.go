@@ -25,7 +25,7 @@ func TestBackendModuleResolver_BackendModulesQuery(t *testing.T) {
 				Name: "Test",
 			},
 		}
-		expected := []model.BackendModule{
+		expected := []*model.BackendModule{
 			{
 				Name: "Test",
 			},
@@ -51,7 +51,7 @@ func TestBackendModuleResolver_BackendModulesQuery(t *testing.T) {
 		require.NoError(t, err)
 
 		resolver := ui.NewBackendModuleResolver(sf)
-		var expected []model.BackendModule
+		var expected []*model.BackendModule
 
 		result, err := resolver.BackendModulesQuery(nil)
 

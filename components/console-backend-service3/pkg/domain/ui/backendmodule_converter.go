@@ -26,8 +26,8 @@ func (c *BackendModuleConverter) ToGQL(in *v1alpha1.BackendModule) (*model.Backe
 	return &module, nil
 }
 
-func (c *BackendModuleConverter) ToGQLs(in []*v1alpha1.BackendModule) ([]model.BackendModule, error) {
-	var result []model.BackendModule
+func (c *BackendModuleConverter) ToGQLs(in []*v1alpha1.BackendModule) ([]*model.BackendModule, error) {
+	var result []*model.BackendModule
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -35,7 +35,7 @@ func (c *BackendModuleConverter) ToGQLs(in []*v1alpha1.BackendModule) ([]model.B
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

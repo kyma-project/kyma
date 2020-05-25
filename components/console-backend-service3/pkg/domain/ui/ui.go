@@ -17,7 +17,7 @@ type Resolver struct {
 	//*microFrontendResolver
 	//*clusterMicroFrontendResolver
 
-	ServiceFactory *resource.ServiceFactory
+	serviceFactory *resource.ServiceFactory
 }
 
 func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Container, error) {
@@ -47,6 +47,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Containe
 	return &Container{
 		Resolver: &Resolver{
 			backendModuleResolver: newBackendModuleResolver(sf),
+			serviceFactory:        sf,
 			//informerFactory:              informerFactory,
 			//microFrontendResolver:        newMicroFrontendResolver(microFrontendService),
 			//clusterMicroFrontendResolver: newClusterMicroFrontendResolver(clusterMicroFrontendService),
@@ -59,6 +60,6 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Containe
 }
 
 func (r *Resolver) WaitForCacheSync(stopCh <-chan struct{}) {
-	r.ServiceFactory.InformerFactory.Start(stopCh)
-	r.ServiceFactory.InformerFactory.WaitForCacheSync(stopCh)
+	r.serviceFactory.InformerFactory.Start(stopCh)
+	r.serviceFactory.InformerFactory.WaitForCacheSync(stopCh)
 }
