@@ -1,8 +1,6 @@
 package kymahelm
 
 import (
-	"time"
-
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
@@ -10,6 +8,7 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog"
+	"time"
 )
 
 //go:generate mockery -name HelmClient
