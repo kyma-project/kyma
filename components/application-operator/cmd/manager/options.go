@@ -30,6 +30,7 @@ func parseArgs() *options {
 	syncPeriod := flag.Int("syncPeriod", 30, "Time period between resyncing existing resources")
 	installationTimeout := flag.Int64("installationTimeout", 240, "Time after the release installation will time out")
 
+	helmDriver := flag.String("helmDriver", "configmap", "Toggles Helm 3 configuration storage between configMap and secret")
 	applicationGatewayImage := flag.String("applicationGatewayImage", "", "The image of the Application Gateway to use")
 	applicationGatewayTestsImage := flag.String("applicationGatewayTestsImage", "", "The image of the Application Gateway Tests to use")
 	eventServiceImage := flag.String("eventServiceImage", "", "The image of the Event Service to use")
@@ -38,7 +39,6 @@ func parseArgs() *options {
 	gatewayOncePerNamespace := flag.Bool("gatewayOncePerNamespace", false, "Specifies if Gateway should be deployed once per Namespace based on ServiceInstance or for every Application")
 	strictMode := flag.String("strictMode", "disabled", "Toggles Istio authorization policy for Validator and HTTP source adapter")
 	healthPort := flag.String("healthPort", "8090", "Port for healthcheck server")
-	helmDriver := flag.String("helmDriver", "configmap", "Toggles Helm 3 configuration storage between configMap and secret")
 
 	flag.Parse()
 
@@ -62,9 +62,9 @@ func parseArgs() *options {
 
 func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --domainName=%s --namespace=%s"+
-		"--syncPeriod=%d --installationTimeout=%d --helmDriver=%s"+
-		"--applicationGatewayImage=%s --applicationGatewayTestsImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s"+
-		"--applicationConnectivityValidatorImage=%s --gatewayOncePerNamespace=%v --strictMode=%s --healthPort=%s",
+		" --syncPeriod=%d --installationTimeout=%d --helmDriver=%s"+
+		" --applicationGatewayImage=%s --applicationGatewayTestsImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s"+
+		" --applicationConnectivityValidatorImage=%s --gatewayOncePerNamespace=%v --strictMode=%s --healthPort=%s ",
 		o.appName, o.domainName, o.namespace,
 		o.syncPeriod, o.installationTimeout, o.helmDriver,
 		o.applicationGatewayImage, o.applicationGatewayTestsImage, o.eventServiceImage, o.eventServiceTestsImage,

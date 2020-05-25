@@ -31,10 +31,7 @@ spec:
         - "--appName={{ .Values.controller.args.appName }}"
         - "--domainName={{ .Values.global.ingress.domainName }}"
         - "--namespace={{ .Values.global.namespace }}"
-        - "--tillerUrl={{ .Values.controller.args.tillerUrl }}"
-        - "--helmTLSKeyFile={{ .Values.controller.args.helmTLSKeyFile }}"
-        - "--helmTLSCertificateFile={{ .Values.controller.args.helmTLSCertificateFile }}"
-        - "--tillerTLSSkipVerify={{ .Values.controller.args.tillerTLSInsecure }}"
+        - "--helmDriver={{ .Values.controller.args.helmDriver }}"
         - "--applicationGatewayImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway.dir }}application-gateway:{{ .Values.global.application_gateway.version }}"
         - "--applicationGatewayTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway_tests.dir }}application-gateway-tests:c608dbf3" # Use hardcoded value of tests image as this is the last version that operate without API packages. The approach with API packages was changed and tests are no longer deployed with the Gateway. TODO: should be removed after full transition to API packages
         - "--eventServiceImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_service.dir }}event-service:{{ .Values.global.event_service.version }}"

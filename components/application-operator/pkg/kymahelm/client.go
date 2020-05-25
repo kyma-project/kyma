@@ -22,7 +22,7 @@ type HelmClient interface {
 }
 
 type helmClient struct {
-	namespace           string // "Namespace in which the Application chart will be installed" default ""kyma-integration"
+	namespace           string
 	installationTimeout int64
 	settings            *cli.EnvSettings
 	config              *rest.Config
@@ -81,27 +81,12 @@ func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName string, 
 		return nil, err
 	}
 
-	//if req := chartRequested.Metadata.Dependencies; req != nil {
-	//	if err := action.CheckDependencies(chartRequested, req); err != nil {
-	//		return nil, err
-	//	}
-	//}
-
 	response, err := client.Run(chartRequested, overrides)
 	if err != nil {
 		return nil, err
 	}
 
 	return response, nil
-
-	//return hc.helm.InstallRelease(
-	//	chartDir,
-	//	ns,
-	//	helm.ReleaseName(string(releaseName)),
-	//	helm.ValueOverrides([]byte(overrides)), //Without it default "values.yaml" file is ignored!
-	//	helm.InstallWait(true),
-	//	helm.InstallTimeout(hc.installationTimeout),
-	//)
 }
 
 func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName string, overrides map[string]interface{}) (*release.Release, error) {
@@ -115,40 +100,17 @@ func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName string, overr
 	client.Timeout = time.Duration(hc.installationTimeout)
 	client.Namespace = hc.namespace
 
-	fullPath, err := client.ChartPathOptions.LocateChart(chartDir, hc.settings)
+	chartRequested, err := loader.Load(chartDir)
 	if err != nil {
 		return nil, err
 	}
-
-	chartRequested, err := loader.Load(fullPath)
-	if err != nil {
-		return nil, err
-	}
-
-	//if req := chartRequested.Metadata.Dependencies; req != nil {
-	//	if err := action.CheckDependencies(chartRequested, req); err != nil {
-	//		return nil, err
-	//	}
-	//}
 
 	response, err := client.Run(releaseName, chartRequested, overrides)
 
 	return response, nil
-
-	//return hc.helm.UpdateRelease(
-	//	releaseName,
-	//	chartDir,
-	//	helm.UpgradeTimeout(hc.installationTimeout),
-	//	helm.UpdateValueOverrides([]byte(overrides)),
-	//)
 }
 
 func (hc *helmClient) DeleteRelease(releaseName string) (*release.UninstallReleaseResponse, error) {
-	//return hc.helm.DeleteRelease(
-	//	releaseName,
-	//	helm.DeletePurge(true),
-	//	helm.DeleteTimeout(hc.installationTimeout),
-	//)
 
 	actionConfig, err := hc.actionConfigInit()
 	if err != nil {
@@ -181,24 +143,8 @@ func (hc *helmClient) ReleaseStatus(releaseName string) (*release.Release, error
 
 func (hc *helmClient) actionConfigInit() (*action.Configuration, error) {
 
-	//type MyRESTClientGetter interface {
-	//	ToRESTConfig() (*rest.Config, error)
-	//	ToDiscoveryClient() (discovery.CachedDiscoveryInterface, error)
-	//	ToRESTMapper() (meta.RESTMapper, error)
-	//}
-	//kubeConfig.ToRawKubeConfigLoader()
-	//kubeConfig.ToRESTMapper()
-	//hc.settings.RESTClientGetter()
-
 	config := hc.config
 
-	//config, err := rest.InClusterConfig()
-	//if err != nil {
-	//	return nil, err
-	//}
-	// Create the ConfigFlags struct instance with initialized values from ServiceAccount
-	// how to use existing rest.Config from manager ?????
-	//var kubeConfig *genericclioptions.ConfigFlags
 	kubeConfig := genericclioptions.NewConfigFlags(false)
 	kubeConfig.APIServer = &config.Host
 	kubeConfig.BearerToken = &config.BearerToken
