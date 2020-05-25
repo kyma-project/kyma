@@ -7,11 +7,6 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-type Container struct {
-	Resolver       *Resolver
-
-}
-
 type Resolver struct {
 	*backendModuleResolver
 	//*microFrontendResolver
@@ -20,7 +15,7 @@ type Resolver struct {
 	serviceFactory *resource.ServiceFactory
 }
 
-func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Container, error) {
+func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Resolver, error) {
 	sf, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod)
 	if err != nil {
 		return nil, err
@@ -44,15 +39,13 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Containe
 	//microFrontendService := newMicroFrontendService(microFrontendInformer)
 	//clusterMicroFrontendService := newClusterMicroFrontendService(clusterMicroFrontendInformer)
 
-	return &Container{
-		Resolver: &Resolver{
-			backendModuleResolver: newBackendModuleResolver(sf),
-			serviceFactory:        sf,
-			//informerFactory:              informerFactory,
-			//microFrontendResolver:        newMicroFrontendResolver(microFrontendService),
-			//clusterMicroFrontendResolver: newClusterMicroFrontendResolver(clusterMicroFrontendService),
-			//microFrontendInformerFactory: microFrontendInformerFactory,
-		},
+	return &Resolver{
+		backendModuleResolver: newBackendModuleResolver(sf),
+		serviceFactory:        sf,
+		//informerFactory:              informerFactory,
+		//microFrontendResolver:        newMicroFrontendResolver(microFrontendService),
+		//clusterMicroFrontendResolver: newClusterMicroFrontendResolver(clusterMicroFrontendService),
+		//microFrontendInformerFactory: microFrontendInformerFactory,
 		//BackendModuleInformer:        backendModuleInformer,
 		//MicroFrontendInformer:        microFrontendInformer,
 		//ClusterMicroFrontendInformer: clusterMicroFrontendInformer,

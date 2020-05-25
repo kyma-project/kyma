@@ -10,5 +10,5 @@ import (
 )
 
 func (r *queryResolver) BackendModules(ctx context.Context) ([]*model.BackendModule, error) {
-	return r.ui.Resolver.BackendModulesQuery(ctx)
+	return r.ui.BackendModulesQuery(ctx)
 }

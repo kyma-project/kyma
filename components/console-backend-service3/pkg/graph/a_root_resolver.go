@@ -13,7 +13,7 @@ import (
 //go:generate go run github.com/99designs/gqlgen
 
 type Resolver struct{
-	ui  *ui.Container
+	ui  *ui.Resolver
 }
 
 func NewResolver(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Resolver, error){
@@ -27,6 +27,6 @@ func NewResolver(restConfig *rest.Config, informerResyncPeriod time.Duration) (*
 }
 
 func (r *Resolver) WaitForCacheSync(stopCh <-chan struct{}) {
-	r.ui.Resolver.WaitForCacheSync(stopCh)
+	r.ui.WaitForCacheSync(stopCh)
 }
 
