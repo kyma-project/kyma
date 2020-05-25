@@ -5,3 +5,7 @@ extend type Query {
 type BackendModule {
     name: String!
 }
+
+type MicroFrontend {
+    name: String!
+}

@@ -38,15 +38,15 @@ func (_m *gqlBackendModuleConverter) ToGQL(in *v1alpha1.BackendModule) (*model.B
 }
 
 // ToGQLs provides a mock function with given fields: in
-func (_m *gqlBackendModuleConverter) ToGQLs(in []*v1alpha1.BackendModule) ([]model.BackendModule, error) {
+func (_m *gqlBackendModuleConverter) ToGQLs(in []*v1alpha1.BackendModule) ([]*model.BackendModule, error) {
 	ret := _m.Called(in)
 
-	var r0 []model.BackendModule
-	if rf, ok := ret.Get(0).(func([]*v1alpha1.BackendModule) []model.BackendModule); ok {
+	var r0 []*model.BackendModule
+	if rf, ok := ret.Get(0).(func([]*v1alpha1.BackendModule) []*model.BackendModule); ok {
 		r0 = rf(in)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]model.BackendModule)
+			r0 = ret.Get(0).([]*model.BackendModule)
 		}
 	}
 

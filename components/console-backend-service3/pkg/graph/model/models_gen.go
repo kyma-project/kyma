@@ -6,6 +6,10 @@ type BackendModule struct {
 	Name string `json:"name"`
 }
 
+type MicroFrontend struct {
+	Name string `json:"name"`
+}
+
 type ResourceAttributes struct {
 	Verb            string  `json:"verb"`
 	APIGroup        *string `json:"apiGroup"`
