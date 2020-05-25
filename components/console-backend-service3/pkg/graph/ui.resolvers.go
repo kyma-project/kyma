@@ -12,3 +12,7 @@ import (
 func (r *queryResolver) BackendModules(ctx context.Context) ([]*model.BackendModule, error) {
 	return r.ui.BackendModulesQuery(ctx)
 }
+
+func (r *queryResolver) MicroFrontends(ctx context.Context, namespace string) ([]*model.MicroFrontend, error) {
+	return r.ui.MicroFrontendsQuery(ctx, namespace)
+}

@@ -7,7 +7,28 @@ type BackendModule struct {
 }
 
 type MicroFrontend struct {
-	Name string `json:"name"`
+	Name            string            `json:"name"`
+	Version         string            `json:"version"`
+	Category        string            `json:"category"`
+	ViewBaseURL     string            `json:"viewBaseUrl"`
+	NavigationNodes []*NavigationNode `json:"navigationNodes"`
+}
+
+type NavigationNode struct {
+	Label               string                 `json:"label"`
+	NavigationPath      string                 `json:"navigationPath"`
+	ViewURL             string                 `json:"viewUrl"`
+	ShowInNavigation    bool                   `json:"showInNavigation"`
+	Order               int                    `json:"order"`
+	Settings            map[string]interface{} `json:"settings"`
+	ExternalLink        string                 `json:"externalLink"`
+	RequiredPermissions []*RequiredPermission  `json:"requiredPermissions"`
+}
+
+type RequiredPermission struct {
+	Verbs    []string `json:"verbs"`
+	APIGroup string   `json:"apiGroup"`
+	Resource string   `json:"resource"`
 }
 
 type ResourceAttributes struct {

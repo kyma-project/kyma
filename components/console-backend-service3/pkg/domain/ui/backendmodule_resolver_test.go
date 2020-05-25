@@ -34,10 +34,7 @@ func TestBackendModuleResolver_BackendModulesQuery(t *testing.T) {
 		sf, err := fake.NewFakeServiceFactory(uiv1alpha1.AddToScheme, resource)
 		require.NoError(t, err)
 
-		converter := &ui.BackendModuleConverter{}
-
 		resolver := ui.NewBackendModuleResolver(sf)
-		resolver.SetInstanceConverter(converter)
 		testingUtils.WaitForInformerFactoryStartAtMost(t, time.Second, sf.InformerFactory)
 
 		result, err := resolver.BackendModulesQuery(nil)

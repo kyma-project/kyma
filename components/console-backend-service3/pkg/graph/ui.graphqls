@@ -1,6 +1,4 @@
-extend type Query {
-    backendModules: [BackendModule!]! @HasAccess(attributes: {resource: "backendmodules", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
-}
+scalar Map
 
 type BackendModule {
     name: String!
@@ -8,4 +6,30 @@ type BackendModule {
 
 type MicroFrontend {
     name: String!
+    version: String!
+    category: String!
+    viewBaseUrl: String!
+    navigationNodes: [NavigationNode!]!
+}
+
+type NavigationNode {
+    label: String!
+    navigationPath: String!
+    viewUrl: String!
+    showInNavigation: Boolean!
+    order: Int!
+    settings: Map!
+    externalLink: String!
+    requiredPermissions: [RequiredPermission!]!
+}
+
+type RequiredPermission {
+    verbs: [String!]!
+    apiGroup: String!
+    resource: String!
+}
+
+extend type Query {
+    backendModules: [BackendModule!]! @HasAccess(attributes: {resource: "backendmodules", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    microFrontends(namespace: String!): [MicroFrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
 }

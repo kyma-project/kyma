@@ -12,21 +12,15 @@ import (
 	"github.com/pkg/errors"
 )
 
-//go:generate mockery -name=gqlBackendModuleConverter -output=automock -outpkg=automock -case=underscore
-type gqlBackendModuleConverter interface {
-	ToGQL(in *v1alpha1.BackendModule) (*gqlschema.BackendModule, error)
-	ToGQLs(in []*v1alpha1.BackendModule) ([]*gqlschema.BackendModule, error)
-}
-
 type backendModuleResolver struct {
 	service   *resource.Service
-	converter gqlBackendModuleConverter
+	converter BackendModuleConverter
 }
 
 func newBackendModuleResolver(sf *resource.ServiceFactory) *backendModuleResolver {
 	return &backendModuleResolver{
 		service:   sf.ForResource(v1alpha1.SchemeGroupVersion.WithResource("backendmodules")),
-		converter: &BackendModuleConverter{},
+		converter: BackendModuleConverter{},
 	}
 }
 

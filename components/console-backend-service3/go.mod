@@ -9,6 +9,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/stretchr/testify v1.4.0
+	github.com/vektah/gqlparser v1.3.1 // indirect
 	github.com/vektah/gqlparser/v2 v2.0.1
 	github.com/vrischmann/envconfig v1.2.0
 	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b // indirect

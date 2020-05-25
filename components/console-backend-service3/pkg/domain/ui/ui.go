@@ -9,7 +9,7 @@ import (
 
 type Resolver struct {
 	*backendModuleResolver
-	//*microFrontendResolver
+	*microFrontendResolver
 	//*clusterMicroFrontendResolver
 
 	serviceFactory *resource.ServiceFactory
@@ -41,6 +41,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Resolver
 
 	return &Resolver{
 		backendModuleResolver: newBackendModuleResolver(sf),
+		microFrontendResolver: newMicroFrontendResolver(sf),
 		serviceFactory:        sf,
 		//informerFactory:              informerFactory,
 		//microFrontendResolver:        newMicroFrontendResolver(microFrontendService),
