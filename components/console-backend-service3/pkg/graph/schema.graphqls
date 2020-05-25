@@ -2,27 +2,20 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
-}
+directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
 
-type User {
-  id: ID!
-  name: String!
+input ResourceAttributes {
+  verb: String!
+  apiGroup: String
+  apiVersion: String
+  resource: String
+  resourceArg: String
+  subresource: String! = ""
+  nameArg: String
+  namespaceArg: String
+  isChildResolver: Boolean! = false
 }
 
 type Query {
-  todos: [Todo!]!
-}
-
-input NewTodo {
-  text: String!
-  userId: String!
-}
-
-type Mutation {
-  createTodo(input: NewTodo!): Todo!
+  version: String
 }

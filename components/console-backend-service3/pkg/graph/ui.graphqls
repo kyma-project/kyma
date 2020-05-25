@@ -1,0 +1,7 @@
+extend type Query {
+    backendModules: [BackendModule!]! @HasAccess(attributes: {resource: "backendmodules", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+}
+
+type BackendModule {
+    name: String!
+}
