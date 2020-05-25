@@ -86,7 +86,7 @@ spec:
             - name: APP_UPGRADE_KYMA_VERSION
               value: {{ .Values.e2e.upgrade.targetVersion }}
           command: ["/bin/sh"]
-          args: ["-c", "echo 'Starting e2e-upgrade test on Azure. Waiting 20s for api server...'; sleep 20; ./test.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
+          args: ["-c", "echo 'Starting e2e-upgrade test on Azure. Waiting 20s for api server...'; sleep 20; ./test.test -test.run Test_E2E_Upgrade; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
 
 ---
 apiVersion: "testing.kyma-project.io/v1alpha1"
@@ -173,4 +173,4 @@ spec:
             - name: APP_UPGRADE_KYMA_VERSION
               value: {{ .Values.e2e.upgrade.targetVersion }}
           command: ["/bin/sh"]
-          args: ["-c", "echo 'Starting e2e-upgrade cleanup test on Azure. Waiting 20s for api server...'; sleep 20; ./test.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
+          args: ["-c", "echo 'Starting e2e-upgrade cleanup test on Azure. Waiting 20s for api server...'; sleep 20; ./test.test -test.run Test_E2E_Upgrade; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
