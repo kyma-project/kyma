@@ -1,16 +1,15 @@
 ---
-title: Taking backup using Velero
+title: Restore resources using Velero
 type: Tutorials
 ---
 
 This tutorial shows how to use Velero to perform a partial restore of individual applications running on Kyma. Follow the guidelines to back up your Kubernetes resources and volumes so that you can restore them on a different cluster.
 
-> **NOTE:**  Be aware that a full restore of a Kyma cluster is not supported. You should start with an existing Kyma installation and restore specific resources individually.
-
+> **NOTE:** Be aware that a full restore of a Kyma cluster is not supported. Start with the existing Kyma installation and restore specific resources individually.
 
 ## Prerequisites
 
-Download and install the [Velero CLI](https://github.com/vmware-tanzu/velero/releases).
+Download and install [Velero CLI](https://github.com/vmware-tanzu/velero/releases).
 
 ## Steps
 
@@ -34,7 +33,7 @@ Follow these steps to install Velero and back up your Kyma cluster.
           --wait
       ```
 
-      >**NOTE:** For details on configuring and installing Velero on GCP, see [this](https://github.com/vmware-tanzu/velero-plugin-for-gcp/blob/master/README.md) document.
+      >**NOTE:** For details on configuring and installing Velero on GCP, read more about the [Velero plugin for GCP](https://github.com/vmware-tanzu/velero-plugin-for-gcp/blob/master/README.md).
 
       </details>
       <details>
@@ -54,9 +53,9 @@ Follow these steps to install Velero and back up your Kyma cluster.
           --wait
       ```
 
-      >**NOTE:** For details on configuring and installing Velero on Azure, see [this](https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure/blob/master/README.md) document.
+      >**NOTE:** For details on configuring and installing Velero on Azure, read more about the [Velero plugin for Azure](https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure/blob/master/README.md).
 
-      >**CAUTION:** If you are using AKS, set the **AZURE_RESOURCE_GROUP** to the name of the auto-generated resource group created when you provision your cluster on Azure since this resource group contains your cluster's virtual machines/disks.
+      >**CAUTION:** If you use AKS, set the **AZURE_RESOURCE_GROUP** to the name of the auto-generated resource group. This resource group is created when you provision your cluster on Azure. It contains your cluster's virtual machines/disks.
 
       </details>
     </div>
