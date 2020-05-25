@@ -30,8 +30,6 @@ controller-manager:
     tag: 1a89277a
     pullPolicy: IfNotPresent
 
-  installCRDs: false
-
   pod:
     annotations:
       sidecar.istio.io/inject: "false"

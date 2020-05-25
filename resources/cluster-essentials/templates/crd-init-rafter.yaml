@@ -1,0 +1,75 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-crd-rafter
+  annotations:
+    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-weight": "10"
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ .Release.Name }}-crd-init
+      containers:
+      - name: {{ .Release.Name }}-crd-rafter
+        image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+        volumeMounts:
+        - name: crd-rafter
+          mountPath: /etc/crd
+          readOnly: true
+        command:
+        - /bin/bash
+        - -c
+        - |-
+          set -e
+
+          crds=( \
+            assetgroups.rafter.kyma-project.io \
+            assets.rafter.kyma-project.io \
+            buckets.rafter.kyma-project.io \
+            clusterassetgroups.rafter.kyma-project.io \
+            clusterassets.rafter.kyma-project.io \
+            clusterbuckets.rafter.kyma-project.io \
+          )
+
+          operation_timeout=60s
+          for crd in "${crds[@]}"; do
+            timeout "$operation_timeout" bash -c "\
+              until \
+                kubectl get crd $crd \
+                || kubectl apply -f /etc/crd/$crd; \
+              do sleep 2; done"
+          done
+      volumes:
+      - name: crd-rafter
+        configMap:
+          name: {{ .Release.Name }}-crd-rafter
+      restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-crd-rafter
+  annotations:
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+data:
+  assetgroups.rafter.kyma-project.io: |-
+{{.Files.Get "files/crd-rafter.assetgroups.yaml" | printf "%s" | indent 4}}
+  assets.rafter.kyma-project.io: |-
+{{.Files.Get "files/crd-rafter.assets.yaml" | printf "%s" | indent 4}}
+  buckets.rafter.kyma-project.io: |-
+{{.Files.Get "files/crd-rafter.buckets.yaml" | printf "%s" | indent 4}}
+  clusterassetgroups.rafter.kyma-project.io: |-
+{{.Files.Get "files/crd-rafter.clusterassetgroups.yaml" | printf "%s" | indent 4}}
+  clusterassets.rafter.kyma-project.io: |-
+{{.Files.Get "files/crd-rafter.clusterassets.yaml" | printf "%s" | indent 4}}
+  clusterbuckets.rafter.kyma-project.io: |-
+{{.Files.Get "files/crd-rafter.clusterbuckets.yaml" | printf "%s" | indent 4}}
