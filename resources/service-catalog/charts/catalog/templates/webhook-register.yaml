@@ -7,7 +7,6 @@ apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
   name: {{ template "fullname" . }}-webhook
-  namespace: "{{ .Release.Namespace }}"
 webhooks:
 - name: mutating.clusterservicebrokers.servicecatalog.k8s.io
   clientConfig:
@@ -118,7 +117,6 @@ apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: {{ template "fullname" . }}-validating-webhook
-  namespace: "{{ .Release.Namespace }}"
 webhooks:
 - name: validating.status.servicebindings.servicecatalog.k8s.io
   clientConfig:
