@@ -25,6 +25,9 @@ rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications"]
     verbs: ["get", "list", "create", "delete"]
+  - apiGroups: ["sources.kyma-project.io"]
+    resources: ["httpsources"]
+    verbs: ["get", "list"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
