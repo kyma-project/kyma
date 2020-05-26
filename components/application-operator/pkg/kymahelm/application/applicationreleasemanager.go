@@ -53,7 +53,7 @@ func (r *releaseManager) InstallChart(application *v1alpha1.Application) (hapi_4
 		return hapi_4.StatusFailed, "", errors.Wrapf(err, "Error parsing overrides for %s Application", application.Name)
 	}
 
-	installResponse, err := r.helmClient.InstallReleaseFromChart(applicationChartDirectory, r.namespace, application.Name, overrides)
+	installResponse, err := r.helmClient.InstallReleaseFromChart(applicationChartDirectory, application.Name, r.namespace, overrides)
 	if err != nil {
 		return hapi_4.StatusFailed, "", err
 	}
@@ -94,7 +94,7 @@ func (r *releaseManager) upgradeChart(application *v1alpha1.Application) (hapi_4
 	}
 
 	log.Infof("Upgrading release %s", application.Name)
-	upgradeResponse, err := r.helmClient.UpdateReleaseFromChart(applicationChartDirectory, application.Name, overrides)
+	upgradeResponse, err := r.helmClient.UpdateReleaseFromChart(applicationChartDirectory, application.Name, r.namespace, overrides)
 	if err != nil {
 		return hapi_4.StatusFailed, "", err
 	}
@@ -132,7 +132,7 @@ func (r *releaseManager) DeleteReleaseIfExists(name string) error {
 	}
 
 	if releaseExist {
-		_, err := r.helmClient.DeleteRelease(name)
+		_, err := r.helmClient.DeleteRelease(name, r.namespace)
 		if err != nil {
 			return err
 		}
@@ -162,7 +162,7 @@ func (r *releaseManager) checkExistence(name string) (bool, error) {
 
 func (r *releaseManager) CheckReleaseStatus(name string) (hapi_4.Status, string, error) {
 
-	status, err := r.helmClient.ReleaseStatus(name)
+	status, err := r.helmClient.ReleaseStatus(name, r.namespace)
 	if err != nil {
 		return hapi_4.StatusFailed, "", err
 	}

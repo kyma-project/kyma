@@ -57,7 +57,7 @@ func (g *gatewayManager) InstallGateway(namespace string) error {
 
 	name := getGatewayReleaseName(namespace)
 
-	_, err = g.helmClient.InstallReleaseFromChart(gatewayChartDirectory, namespace, name, overrides)
+	_, err = g.helmClient.InstallReleaseFromChart(gatewayChartDirectory, name, namespace, overrides)
 	if err != nil {
 		return errors.Errorf("Error installing Gateway: %s", err.Error())
 	}
@@ -71,13 +71,13 @@ func (g *gatewayManager) DeleteGateway(namespace string) error {
 		return errors.Errorf("Error deleting Gateway: %s", err.Error())
 	}
 	if releaseExist {
-		return g.deleteGateway(gateway)
+		return g.deleteGateway(gateway, namespace)
 	}
 	return nil
 }
 
-func (g *gatewayManager) deleteGateway(gateway string) error {
-	_, err := g.helmClient.DeleteRelease(gateway)
+func (g *gatewayManager) deleteGateway(gateway string, namespace string) error {
+	_, err := g.helmClient.DeleteRelease(gateway, namespace)
 	if err != nil {
 		return errors.Errorf("Error deleting Gateway: %s", err.Error())
 	}
@@ -136,13 +136,13 @@ func (g *gatewayManager) updateGateways(namespaces []string) {
 		if exists {
 			if status == release.StatusFailed {
 				log.Infof("Deleting Gateway %s in failed status", namespace)
-				err := g.deleteGateway(gateway)
+				err := g.deleteGateway(gateway, namespace)
 				if err != nil {
 					log.Errorf("Error deleting Gateway %s: %s", namespace, err.Error())
 				}
 				continue
 			}
-			err = g.upgradeGateway(gateway)
+			err = g.upgradeGateway(gateway, namespace)
 			if err != nil {
 				log.Errorf("Error upgrading Gateway %s: %s", namespace, err.Error())
 			}
@@ -168,14 +168,14 @@ func (g *gatewayManager) gatewayExists(name, namespace string) (bool, release.St
 	return false, release.StatusUnknown, nil
 }
 
-func (g *gatewayManager) upgradeGateway(gateway string) error {
+func (g *gatewayManager) upgradeGateway(gateway string, namespace string) error {
 	overrides, err := g.getOverrides()
 
 	if err != nil {
 		return errors.Errorf("Error parsing overrides: %s", err.Error())
 	}
 
-	_, err = g.helmClient.UpdateReleaseFromChart(gatewayChartDirectory, gateway, overrides)
+	_, err = g.helmClient.UpdateReleaseFromChart(gatewayChartDirectory, gateway, namespace, overrides)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("Failed to update %s Gateway", gateway))
 	}

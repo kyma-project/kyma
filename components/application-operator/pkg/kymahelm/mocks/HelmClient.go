@@ -12,13 +12,13 @@ type HelmClient struct {
 	mock.Mock
 }
 
-// DeleteRelease provides a mock function with given fields: releaseName
-func (_m *HelmClient) DeleteRelease(releaseName string) (*release.UninstallReleaseResponse, error) {
-	ret := _m.Called(releaseName)
+// DeleteRelease provides a mock function with given fields: releaseName, namespace
+func (_m *HelmClient) DeleteRelease(releaseName string, namespace string) (*release.UninstallReleaseResponse, error) {
+	ret := _m.Called(releaseName, namespace)
 
 	var r0 *release.UninstallReleaseResponse
-	if rf, ok := ret.Get(0).(func(string) *release.UninstallReleaseResponse); ok {
-		r0 = rf(releaseName)
+	if rf, ok := ret.Get(0).(func(string, string) *release.UninstallReleaseResponse); ok {
+		r0 = rf(releaseName, namespace)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*release.UninstallReleaseResponse)
@@ -26,8 +26,8 @@ func (_m *HelmClient) DeleteRelease(releaseName string) (*release.UninstallRelea
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(releaseName)
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(releaseName, namespace)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -35,13 +35,13 @@ func (_m *HelmClient) DeleteRelease(releaseName string) (*release.UninstallRelea
 	return r0, r1
 }
 
-// InstallReleaseFromChart provides a mock function with given fields: chartDir, ns, releaseName, overrides
-func (_m *HelmClient) InstallReleaseFromChart(chartDir string, ns string, releaseName string, overrides map[string]interface{}) (*release.Release, error) {
-	ret := _m.Called(chartDir, ns, releaseName, overrides)
+// InstallReleaseFromChart provides a mock function with given fields: chartDir, releaseName, namespace, overrides
+func (_m *HelmClient) InstallReleaseFromChart(chartDir string, releaseName string, namespace string, overrides map[string]interface{}) (*release.Release, error) {
+	ret := _m.Called(chartDir, releaseName, namespace, overrides)
 
 	var r0 *release.Release
 	if rf, ok := ret.Get(0).(func(string, string, string, map[string]interface{}) *release.Release); ok {
-		r0 = rf(chartDir, ns, releaseName, overrides)
+		r0 = rf(chartDir, releaseName, namespace, overrides)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*release.Release)
@@ -50,7 +50,7 @@ func (_m *HelmClient) InstallReleaseFromChart(chartDir string, ns string, releas
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string, string, map[string]interface{}) error); ok {
-		r1 = rf(chartDir, ns, releaseName, overrides)
+		r1 = rf(chartDir, releaseName, namespace, overrides)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -81,13 +81,13 @@ func (_m *HelmClient) ListReleases(namespace string) ([]*release.Release, error)
 	return r0, r1
 }
 
-// ReleaseStatus provides a mock function with given fields: rlsName
-func (_m *HelmClient) ReleaseStatus(rlsName string) (*release.Release, error) {
-	ret := _m.Called(rlsName)
+// ReleaseStatus provides a mock function with given fields: rlsName, namespace
+func (_m *HelmClient) ReleaseStatus(rlsName string, namespace string) (*release.Release, error) {
+	ret := _m.Called(rlsName, namespace)
 
 	var r0 *release.Release
-	if rf, ok := ret.Get(0).(func(string) *release.Release); ok {
-		r0 = rf(rlsName)
+	if rf, ok := ret.Get(0).(func(string, string) *release.Release); ok {
+		r0 = rf(rlsName, namespace)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*release.Release)
@@ -95,8 +95,8 @@ func (_m *HelmClient) ReleaseStatus(rlsName string) (*release.Release, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(rlsName)
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(rlsName, namespace)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -104,13 +104,13 @@ func (_m *HelmClient) ReleaseStatus(rlsName string) (*release.Release, error) {
 	return r0, r1
 }
 
-// UpdateReleaseFromChart provides a mock function with given fields: chartDir, releaseName, overrides
-func (_m *HelmClient) UpdateReleaseFromChart(chartDir string, releaseName string, overrides map[string]interface{}) (*release.Release, error) {
-	ret := _m.Called(chartDir, releaseName, overrides)
+// UpdateReleaseFromChart provides a mock function with given fields: chartDir, releaseName, namespace, overrides
+func (_m *HelmClient) UpdateReleaseFromChart(chartDir string, releaseName string, namespace string, overrides map[string]interface{}) (*release.Release, error) {
+	ret := _m.Called(chartDir, releaseName, namespace, overrides)
 
 	var r0 *release.Release
-	if rf, ok := ret.Get(0).(func(string, string, map[string]interface{}) *release.Release); ok {
-		r0 = rf(chartDir, releaseName, overrides)
+	if rf, ok := ret.Get(0).(func(string, string, string, map[string]interface{}) *release.Release); ok {
+		r0 = rf(chartDir, releaseName, namespace, overrides)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*release.Release)
@@ -118,8 +118,8 @@ func (_m *HelmClient) UpdateReleaseFromChart(chartDir string, releaseName string
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, map[string]interface{}) error); ok {
-		r1 = rf(chartDir, releaseName, overrides)
+	if rf, ok := ret.Get(1).(func(string, string, string, map[string]interface{}) error); ok {
+		r1 = rf(chartDir, releaseName, namespace, overrides)
 	} else {
 		r1 = ret.Error(1)
 	}

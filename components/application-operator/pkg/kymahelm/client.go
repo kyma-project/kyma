@@ -15,39 +15,38 @@ import (
 //go:generate mockery -name HelmClient
 type HelmClient interface {
 	ListReleases(namespace string) ([]*release.Release, error)
-	InstallReleaseFromChart(chartDir, ns, releaseName string, overrides map[string]interface{}) (*release.Release, error)
-	UpdateReleaseFromChart(chartDir, releaseName string, overrides map[string]interface{}) (*release.Release, error)
-	DeleteRelease(releaseName string) (*release.UninstallReleaseResponse, error)
-	ReleaseStatus(rlsName string) (*release.Release, error)
+	InstallReleaseFromChart(chartDir, releaseName string, namespace string, overrides map[string]interface{}) (*release.Release, error)
+	UpdateReleaseFromChart(chartDir, releaseName string, namespace string, overrides map[string]interface{}) (*release.Release, error)
+	DeleteRelease(releaseName string, namespace string) (*release.UninstallReleaseResponse, error)
+	ReleaseStatus(releaseName string, namespace string) (*release.Release, error)
 }
 
 type helmClient struct {
-	namespace           string
 	installationTimeout int64
 	settings            *cli.EnvSettings
 	config              *rest.Config
 	helmdriver          string
 }
 
-func NewClient(namespace string, config *rest.Config, driver string, installationTimeout int64) (HelmClient, error) {
+func NewClient(config *rest.Config, driver string, installationTimeout int64) (HelmClient, error) {
 
 	return &helmClient{
 		config:              config,
 		helmdriver:          driver,
 		settings:            cli.New(),
-		namespace:           namespace,
 		installationTimeout: installationTimeout,
 	}, nil
 }
 
 func (hc *helmClient) ListReleases(namespace string) ([]*release.Release, error) {
 
-	actionConfig, err := hc.actionConfigInit()
+	actionConfig, err := hc.actionConfigInit(namespace)
 	if err != nil {
 		return nil, err
 	}
 
 	client := action.NewList(actionConfig)
+
 	client.Deployed = true
 	client.Uninstalled = true
 	client.Superseded = true
@@ -64,17 +63,17 @@ func (hc *helmClient) ListReleases(namespace string) ([]*release.Release, error)
 	return results, nil
 }
 
-func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName string, overrides map[string]interface{}) (*release.Release, error) {
+func (hc *helmClient) InstallReleaseFromChart(chartDir, releaseName string, namespace string, overrides map[string]interface{}) (*release.Release, error) {
 
-	actionConfig, err := hc.actionConfigInit()
+	actionConfig, err := hc.actionConfigInit(namespace)
 	if err != nil {
 		return nil, err
 	}
 	client := action.NewInstall(actionConfig)
 
 	client.ReleaseName = releaseName
+	client.Namespace = namespace
 	client.Timeout = time.Duration(hc.installationTimeout)
-	client.Namespace = hc.namespace
 
 	chartRequested, err := loader.Load(chartDir)
 	if err != nil {
@@ -89,16 +88,16 @@ func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName string, 
 	return response, nil
 }
 
-func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName string, overrides map[string]interface{}) (*release.Release, error) {
+func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName string, namespace string, overrides map[string]interface{}) (*release.Release, error) {
 
-	actionConfig, err := hc.actionConfigInit()
+	actionConfig, err := hc.actionConfigInit(namespace)
 	if err != nil {
 		return nil, err
 	}
 	client := action.NewUpgrade(actionConfig)
 
+	client.Namespace = namespace
 	client.Timeout = time.Duration(hc.installationTimeout)
-	client.Namespace = hc.namespace
 
 	chartRequested, err := loader.Load(chartDir)
 	if err != nil {
@@ -110,13 +109,16 @@ func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName string, overr
 	return response, nil
 }
 
-func (hc *helmClient) DeleteRelease(releaseName string) (*release.UninstallReleaseResponse, error) {
+func (hc *helmClient) DeleteRelease(releaseName string, namespace string) (*release.UninstallReleaseResponse, error) {
 
-	actionConfig, err := hc.actionConfigInit()
+	actionConfig, err := hc.actionConfigInit(namespace)
 	if err != nil {
 		return nil, err
 	}
+
 	client := action.NewUninstall(actionConfig)
+	client.Timeout = time.Duration(hc.installationTimeout)
+
 	response, err := client.Run(releaseName)
 	if err != nil {
 		return nil, err
@@ -125,9 +127,9 @@ func (hc *helmClient) DeleteRelease(releaseName string) (*release.UninstallRelea
 	return response, nil
 }
 
-func (hc *helmClient) ReleaseStatus(releaseName string) (*release.Release, error) {
+func (hc *helmClient) ReleaseStatus(releaseName string, namespace string) (*release.Release, error) {
 
-	actionConfig, err := hc.actionConfigInit()
+	actionConfig, err := hc.actionConfigInit(namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +143,7 @@ func (hc *helmClient) ReleaseStatus(releaseName string) (*release.Release, error
 	return release, nil
 }
 
-func (hc *helmClient) actionConfigInit() (*action.Configuration, error) {
+func (hc *helmClient) actionConfigInit(namespace string) (*action.Configuration, error) {
 
 	config := hc.config
 
@@ -149,10 +151,9 @@ func (hc *helmClient) actionConfigInit() (*action.Configuration, error) {
 	kubeConfig.APIServer = &config.Host
 	kubeConfig.BearerToken = &config.BearerToken
 	kubeConfig.CAFile = &config.CAFile
-	kubeConfig.Namespace = &hc.namespace
 
 	actionConfig := new(action.Configuration)
-	err := actionConfig.Init(kubeConfig, hc.namespace, hc.helmdriver, klog.Infof)
+	err := actionConfig.Init(kubeConfig, namespace, hc.helmdriver, klog.Infof)
 	if err != nil {
 		return actionConfig, err
 	}

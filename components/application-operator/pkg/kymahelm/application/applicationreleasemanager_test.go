@@ -56,7 +56,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 		}
 
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, emptyOverrides).Return(installationResponse, nil)
+		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, appName, namespace, emptyOverrides).Return(installationResponse, nil)
 
 		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
@@ -85,7 +85,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 		}
 
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, overridesWithTenantAndGroup).Return(installationResponse, nil)
+		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, appName, namespace, overridesWithTenantAndGroup).Return(installationResponse, nil)
 
 		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
@@ -102,7 +102,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 	t.Run("should return error when failed to install release", func(t *testing.T) {
 		// given
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, emptyOverrides).Return(nil, errors.New("Error"))
+		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, appName, namespace, emptyOverrides).Return(nil, errors.New("Error"))
 
 		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
@@ -120,7 +120,7 @@ func TestReleaseManager_DeleteReleaseIfExists(t *testing.T) {
 	t.Run("should delete release", func(t *testing.T) {
 		// given
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("DeleteRelease", appName).Return(nil, nil)
+		helmClient.On("DeleteRelease", appName, namespace).Return(nil, nil)
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil)
 
 		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
@@ -151,7 +151,7 @@ func TestReleaseManager_DeleteReleaseIfExists(t *testing.T) {
 	t.Run("should return error when failed to delete release", func(t *testing.T) {
 		// given
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("DeleteRelease", appName).Return(nil, errors.New("Error"))
+		helmClient.On("DeleteRelease", appName, namespace).Return(nil, errors.New("Error"))
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil)
 
 		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
@@ -260,8 +260,8 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 		appClient.On("List", mock.AnythingOfType("ListOptions")).Return(applicationList, nil)
 
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", emptyOverrides).Return(updateResponse, nil)
-		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-2", emptyOverrides).Return(updateResponse, nil)
+		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", namespace, emptyOverrides).Return(updateResponse, nil)
+		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-2", namespace, emptyOverrides).Return(updateResponse, nil)
 
 		releaseManager := NewApplicationReleaseManager(helmClient, appClient, OverridesData{}, namespace)
 
@@ -310,7 +310,7 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 		appClient.On("Update", updatedApplication).Return(&applicationList.Items[0], nil)
 
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", emptyOverrides).Return(updateResponse, errors.New("Error"))
+		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", namespace, emptyOverrides).Return(updateResponse, errors.New("Error"))
 
 		releaseManager := NewApplicationReleaseManager(helmClient, appClient, OverridesData{}, namespace)
 

@@ -40,7 +40,7 @@ func TestGatewayManager_InstallGateway(t *testing.T) {
 		installationResponse := &release.Release{}
 
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("InstallReleaseFromChart", gatewayChartDirectory, namespace, gatewayName, expectedOverrides).Return(installationResponse, nil)
+		helmClient.On("InstallReleaseFromChart", gatewayChartDirectory, gatewayName, namespace, expectedOverrides).Return(installationResponse, nil)
 
 		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil)
 
@@ -57,7 +57,7 @@ func TestGatewayManager_InstallGateway(t *testing.T) {
 		installationResponse := &release.Release{}
 
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("InstallReleaseFromChart", gatewayChartDirectory, namespace, gatewayName, expectedOverrides).
+		helmClient.On("InstallReleaseFromChart", gatewayChartDirectory, gatewayName, namespace, expectedOverrides).
 			Return(installationResponse, errors.New("all your base are belong to us"))
 
 		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil)
@@ -75,7 +75,7 @@ func TestGatewayManager_DeleteGateway(t *testing.T) {
 	t.Run("Should delete gateway", func(t *testing.T) {
 		// given
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("DeleteRelease", gatewayName).Return(nil, nil)
+		helmClient.On("DeleteRelease", gatewayName, namespace).Return(nil, nil)
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil)
 
 		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil)
@@ -106,7 +106,7 @@ func TestGatewayManager_DeleteGateway(t *testing.T) {
 	t.Run("Should return error when deleteting gateway fails", func(t *testing.T) {
 		// given
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("DeleteRelease", gatewayName).Return(nil, errors.New("oh no"))
+		helmClient.On("DeleteRelease", gatewayName, namespace).Return(nil, errors.New("oh no"))
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil)
 
 		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, nil)
@@ -204,7 +204,7 @@ func TestGatewayManager_UpgradeGateways(t *testing.T) {
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil).Once()
-		helmClient.On("UpdateReleaseFromChart", gatewayChartDirectory, gatewayName, expectedOverrides).Return(response, nil).Once()
+		helmClient.On("UpdateReleaseFromChart", gatewayChartDirectory, gatewayName, namespace, expectedOverrides).Return(response, nil).Once()
 
 		scClient := &mocks.ServiceInstanceClient{}
 		scClient.On("List", metav1.ListOptions{}).Return(serviceInstanceList, nil)
@@ -250,7 +250,7 @@ func TestGatewayManager_UpgradeGateways(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil).Once()
 		helmClient.On("ListReleases", secondNamespace).Return(secondNotEmptyListReleaseResponse, nil).Once()
-		helmClient.On("UpdateReleaseFromChart", gatewayChartDirectory, mock.AnythingOfType("string"), expectedOverrides).Return(response, nil).Twice()
+		helmClient.On("UpdateReleaseFromChart", gatewayChartDirectory, mock.AnythingOfType("string"), mock.AnythingOfType("string"), expectedOverrides).Return(response, nil).Twice()
 
 		scClient := &mocks.ServiceInstanceClient{}
 		scClient.On("List", metav1.ListOptions{}).Return(serviceInstanceList, nil)

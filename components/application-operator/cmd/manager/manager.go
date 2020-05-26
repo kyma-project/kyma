@@ -69,7 +69,7 @@ func main() {
 
 	log.Printf("Preparing Helm Client.")
 
-	helmClient, err := kymahelm.NewClient(options.namespace, cfg, options.helmDriver, options.installationTimeout)
+	helmClient, err := kymahelm.NewClient(cfg, options.helmDriver, options.installationTimeout)
 
 	if err != nil {
 		log.Fatal(err)
