@@ -39,7 +39,7 @@ spec:
           serviceAccountName: {{ .Chart.Name }}-tests
           containers:
             - name: tests
-              image: {{ .Values.global.containerRegistry.path }}{{ .Values.global.ui_acceptance_tests.dir }}/ui-tests:{{ .Values.global.ui_acceptance_tests.version }}
+              image: {{ .Values.global.containerRegistry.path }}/ui-tests:{{ .Values.global.ui_acceptance_tests.version }}
               imagePullPolicy: IfNotPresent
               resources:
                  requests:
@@ -61,10 +61,14 @@ spec:
                     secretKeyRef:
                       name: admin-user
                       key: password
-                - name: API_PACKAGES_ENABLED
+                - name: DISABLE_LEGACY_CONNECTIVITY
                   value: {{ .Values.global.disableLegacyConnectivity | quote }}
                 - name: CATALOG_ENABLED
                   value: {{ .Values.test.acceptance.ui.service_catalog.enabled | quote }}
+                - name: LOGGING_ENABLED
+                  value: {{ .Values.test.acceptance.ui.logging.enabled | quote }}
+                - name: FUNCTIONS_ENABLED
+                  value: {{ .Values.test.acceptance.ui.functions.enabled | quote }}
               command:
                 - "/bin/sh"
               args:
