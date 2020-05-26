@@ -13,14 +13,18 @@ import (
 
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/addons"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/job"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/kservice"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/namespace"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/revision"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebinding"
@@ -75,6 +79,8 @@ type TestSuite struct {
 	servicebinding      *servicebinding.ServiceBinding
 	servicebindingusage *servicebindingusage.ServiceBindingUsage
 	revisions           *revision.Revision
+	jobs                *job.Job
+	kservice            *kservice.KService
 	t                   *testing.T
 	g                   *gomega.GomegaWithT
 	dynamicCli          dynamic.Interface
@@ -90,6 +96,11 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	dynamicCli, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating K8s Dynamic client")
+	}
+
+	clientset, err := kubernetes.NewForConfig(restConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "while creating k8s clientset")
 	}
 
 	namespaceName := fmt.Sprintf("%s-%d", cfg.NamespaceBaseName, rand.Uint32())
@@ -112,6 +123,8 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	sb := servicebinding.New(cfg.ServiceBindingName, container)
 	sbu := servicebindingusage.New(cfg.ServiceBindingUsageName, cfg.UsageKindName, container)
 	revList := revision.New(cfg.FunctionName, container)
+	jobList := job.New(cfg.FunctionName, clientset.BatchV1(), container)
+	ksrv := kservice.New(cfg.FunctionName, container)
 
 	return &TestSuite{
 		namespace:           ns,
@@ -124,6 +137,8 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		servicebinding:      sb,
 		servicebindingusage: sbu,
 		revisions:           revList,
+		jobs:                jobList,
+		kservice:            ksrv,
 		t:                   t,
 		g:                   g,
 		dynamicCli:          dynamicCli,
@@ -376,4 +391,55 @@ func (t *TestSuite) pollForAnswer(url, payloadStr, expected string) error {
 			t.t.Logf("Got: %q, correct...", body)
 			return true, nil
 		}, done)
+}
+
+func (t *TestSuite) LogResources() {
+	fn, err := t.function.get()
+	if err != nil {
+		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
+	}
+
+	jobs, err := t.jobs.List()
+	if err != nil {
+		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
+	}
+
+	ksrv, err := t.kservice.Get()
+	if err != nil {
+		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
+	}
+
+	fnYaml, err := t.prettyYaml(fn)
+	if err != nil {
+		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
+	}
+
+	jobsYaml, err := t.prettyYaml(jobs)
+	if err != nil {
+		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
+	}
+
+	ksrvYaml, err := t.prettyYaml(ksrv)
+	if err != nil {
+		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
+	}
+
+	t.t.Logf(`Pretty printed resources:
+---
+%s
+---
+%s
+---
+%s
+---
+`, fnYaml, jobsYaml, ksrvYaml)
+}
+
+func (t *TestSuite) prettyYaml(resource interface{}) (string, error) {
+	out, err := yaml.Marshal(resource)
+	if err != nil {
+		return "", err
+	}
+
+	return string(out), nil
 }
