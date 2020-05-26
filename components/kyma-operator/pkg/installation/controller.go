@@ -45,6 +45,11 @@ const (
 	MessageResourceSynced = "Installation synced successfully"
 )
 
+type KymaOperation interface {
+	InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData) error
+	UninstallKyma(installationData *config.InstallationData) error
+}
+
 // Controller .
 type Controller struct {
 	kubeClientset      *kubernetes.Clientset
@@ -53,10 +58,11 @@ type Controller struct {
 	queue              workqueue.RateLimitingInterface
 	recorder           record.EventRecorder
 	errorHandlers      internalerrors.ErrorHandlersInterface
-	kymaSteps          *steps.InstallationSteps
-	conditionManager   conditionmanager.Interface
-	finalizerManager   *finalizer.Manager
-	internalClientset  *internalClientset.Clientset
+	//kymaSteps          *steps.InstallationSteps //TODO: Replaced with KymaOperation
+	kymaOperation     KymaOperation
+	conditionManager  conditionmanager.Interface
+	finalizerManager  *finalizer.Manager
+	internalClientset *internalClientset.Clientset
 }
 
 // NewController .
@@ -79,10 +85,11 @@ func NewController(kubeClientset *kubernetes.Clientset, kubeInformerFactory kube
 		queue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "kymaOperatorQueue"),
 		recorder:           recorder,
 		errorHandlers:      &internalerrors.ErrorHandlers{},
-		kymaSteps:          installationSteps,
-		conditionManager:   conditionManager,
-		finalizerManager:   finalizerManager,
-		internalClientset:  internalClientset,
+		//kymaSteps:          installationSteps, //TODO: Replaced by KymaOperation
+		kymaOperation:     nil, //TODO: Implement
+		conditionManager:  conditionManager,
+		finalizerManager:  finalizerManager,
+		internalClientset: internalClientset,
 	}
 
 	installationInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -182,7 +189,7 @@ func (c *Controller) syncHandler(key string) error {
 			return err
 		}
 
-		err = c.kymaSteps.InstallKyma(installationData, overrideProvider)
+		err = c.kymaOperation.InstallKyma(installationData, overrideProvider)
 		if c.errorHandlers.CheckError("Error during install/update: ", err) {
 			_ = c.conditionManager.InstallError()
 			return err
@@ -200,7 +207,7 @@ func (c *Controller) syncHandler(key string) error {
 			return err
 		}
 
-		err = c.kymaSteps.UninstallKyma(installationData)
+		err = c.kymaOperation.UninstallKyma(installationData)
 		if c.errorHandlers.CheckError("Uninstall error: ", err) {
 			_ = c.conditionManager.UninstallError()
 			return err
