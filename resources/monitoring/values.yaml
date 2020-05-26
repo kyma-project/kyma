@@ -11,7 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: 6bf39e9f
+    version: 7e73540b
     tests:
       enabled: true
 
@@ -1968,3 +1968,6 @@ prometheus:
     ## https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#podmetricsendpoint
     ##
     # podMetricsEndpoints: []
+
+pushgateway:
+  enabled: false

@@ -8,16 +8,18 @@ cluster:
   orgId: my-org-123
   orgName: My Organization
   runtimeAdminGroupName: runtimeAdmin
-  scope: audience:server:client_id:kyma-client audience:server:client_id:console openid
+  scope:
+    audience:server:client_id:kyma-client audience:server:client_id:console openid
     profile email groups
-  systemNamespaces: istio-system knative-eventing knative-serving kube-public kube-system
+  systemNamespaces:
+    istio-system knative-eventing knative-serving kube-public kube-system
     kyma-installer kyma-integration kyma-system natss compass-system kube-node-lease
     kubernetes-dashboard
 compass_mfs:
   image:
     dir: null
     pullPolicy: IfNotPresent
-    tag: db566c22
+    tag: 183e544a
   service:
     externalPort: 8888
     internalPort: 8888
@@ -25,9 +27,8 @@ compass_mfs:
   statusPort: 6082
 console:
   image:
-    dir: null
     pullPolicy: IfNotPresent
-    tag: 02bd947b
+    tag: b27021e2
   service:
     externalPort: 80
     internalPort: 8080
@@ -49,6 +50,7 @@ test:
   acceptance:
     enabled: true
     ui:
+      # tests uses chromium that require more memory
       limits:
         cpu: 400m
         memory: 1.5Gi
@@ -56,4 +58,8 @@ test:
         cpu: 350m
         memory: 900Mi
       service_catalog:
+        enabled: true
+      logging:
+        enabled: false
+      functions:
         enabled: true

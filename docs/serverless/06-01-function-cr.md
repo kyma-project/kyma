@@ -69,6 +69,8 @@ spec:
         type: ConfigurationReady
 ```
 
+> **CAUTION:** When you create a Function, the exported object in the Function's body must have `main` as the handler name.
+
 ## Custom resource properties
 
 This table lists all the possible properties of a given resource together with their descriptions:

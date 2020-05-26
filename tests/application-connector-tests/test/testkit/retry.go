@@ -11,8 +11,8 @@ type RetryConfig struct {
 	Factor     float64
 }
 
-var DefaultRetryConfig RetryConfig = RetryConfig{
-	MaxRetries: 5,
+var DefaultRetryConfig = RetryConfig{
+	MaxRetries: 8,
 	Duration:   2 * time.Second,
 	Factor:     1.5,
 }

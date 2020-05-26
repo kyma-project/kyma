@@ -27,7 +27,6 @@ type AddonConfiguration struct {
 }
 
 func New(name string, c shared.Container) *AddonConfiguration {
-
 	return &AddonConfiguration{
 		resCli:      resource.New(c.DynamicCli, v1alpha1.SchemeGroupVersion.WithResource("addonsconfigurations"), c.Namespace, c.Log, c.Verbose),
 		name:        name,
