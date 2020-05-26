@@ -7,9 +7,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway/automock"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/domain/apigateway/automock"
+	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/gqlerror"
+	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph/model"
 	rulev1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -36,7 +36,7 @@ func TestApiRuleResolver_APIRulesQuery(t *testing.T) {
 	t.Run("Should return a list of APIRules for namespace", func(t *testing.T) {
 		apiRules := []*v1alpha1.APIRule{fixTestApiRule(name, namespace, hostname1, serviceName1, servicePort1, gateway1), fixTestApiRule("test-2", namespace, hostname2, serviceName2, servicePort2, gateway2)}
 
-		expected := []gqlschema.APIRule{testApiRuleToGQL(name, hostname1, serviceName1, servicePort1, gateway1), testApiRuleToGQL("test-2", hostname2, serviceName2, servicePort2, gateway2)}
+		expected := []model.APIRule{testApiRuleToGQL(name, hostname1, serviceName1, servicePort1, gateway1), testApiRuleToGQL("test-2", hostname2, serviceName2, servicePort2, gateway2)}
 
 		var empty *string = nil
 
@@ -100,7 +100,7 @@ func TestApiRuleResolver_APIRuleQuery(t *testing.T) {
 
 		service.AssertExpectations(t)
 		require.NoError(t, err)
-		assert.Equal(t, (*gqlschema.APIRule)(nil), result)
+		assert.Equal(t, (*model.APIRule)(nil), result)
 	})
 
 	t.Run("Should return an error", func(t *testing.T) {
@@ -278,23 +278,23 @@ func fixTestApiRule(ruleName string, namespace string, hostName string, serviceN
 	}
 }
 
-func testApiRuleToGQL(ruleName string, hostName string, serviceName string, servicePort uint32, gateway string) gqlschema.APIRule {
-	return gqlschema.APIRule{
+func testApiRuleToGQL(ruleName string, hostName string, serviceName string, servicePort uint32, gateway string) model.APIRule {
+	return model.APIRule{
 		Name: ruleName,
-		Service: gqlschema.APIRuleService{
+		Service: &model.APIRuleService{
 			Host: hostName,
 			Port: int(servicePort),
 			Name: serviceName,
 		},
 		Gateway: gateway,
-		Rules: []gqlschema.Rule{
+		Rules: []*model.Rule{
 			{
 				Path:    "*",
 				Methods: []string{"GET"},
-				AccessStrategies: []gqlschema.APIRuleConfig{
+				AccessStrategies: []*model.APIRuleConfig{
 					{
 						Name:   "allow",
-						Config: gqlschema.JSON{},
+						Config: map[string]interface{}{},
 					},
 				},
 			},
@@ -302,20 +302,20 @@ func testApiRuleToGQL(ruleName string, hostName string, serviceName string, serv
 	}
 }
 
-func apiRuleInputParams(hostName string, serviceName string, servicePort uint32, gateway string) gqlschema.APIRuleInput {
-	return gqlschema.APIRuleInput{
+func apiRuleInputParams(hostName string, serviceName string, servicePort uint32, gateway string) model.APIRuleInput {
+	return model.APIRuleInput{
 		Host:        hostName,
 		ServiceName: serviceName,
 		ServicePort: int(servicePort),
 		Gateway:     gateway,
-		Rules: []gqlschema.RuleInput{
+		Rules: []*model.RuleInput{
 			{
 				Path:    "*",
 				Methods: []string{"GET"},
-				AccessStrategies: []gqlschema.APIRuleConfigInput{
+				AccessStrategies: []*model.APIRuleConfigInput{
 					{
 						Name:   "allow",
-						Config: gqlschema.JSON{},
+						Config: map[string]interface{}{},
 					},
 				},
 			},

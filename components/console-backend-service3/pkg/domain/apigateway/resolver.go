@@ -27,9 +27,9 @@ type apiRuleSvc interface {
 
 //go:generate mockery -name=apiRuleConv -output=automock -outpkg=automock -case=underscore
 type apiRuleConv interface {
-	ToGQL(in *v1alpha1.APIRule) (*gqlschema.APIRule, error)
-	ToGQLs(in []*v1alpha1.APIRule) ([]gqlschema.APIRule, error)
-	ToApiRule(name string, namespace string, in gqlschema.APIRuleInput) *v1alpha1.APIRule
+	ToGQL(in *v1alpha1.APIRule) (*model.APIRule, error)
+	ToGQLs(in []*v1alpha1.APIRule) ([]model.APIRule, error)
+	ToApiRule(name string, namespace string, in model.APIRuleInput) *v1alpha1.APIRule
 }
 
 type apiRuleResolver struct {
@@ -44,11 +44,11 @@ func newApiRuleResolver(svc apiRuleSvc) (*apiRuleResolver, error) {
 
 	return &apiRuleResolver{
 		apiRuleSvc: svc,
-		apiRuleCon: &apiRuleConverter{},
+		apiRuleCon: apiRuleConverter{},
 	}, nil
 }
 
-func (ar *apiRuleResolver) APIRulesQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.APIRule, error) {
+func (ar *apiRuleResolver) APIRulesQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]model.APIRule, error) {
 	apiRulessObj, err := ar.apiRuleSvc.List(namespace, serviceName, hostname)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s for service name %v, hostname %v", pretty.APIRules, serviceName, hostname))
@@ -61,7 +61,7 @@ func (ar *apiRuleResolver) APIRulesQuery(ctx context.Context, namespace string, 
 	return apis, nil
 }
 
-func (ar *apiRuleResolver) APIRuleQuery(ctx context.Context, name string, namespace string) (*gqlschema.APIRule, error) {
+func (ar *apiRuleResolver) APIRuleQuery(ctx context.Context, name string, namespace string) (*model.APIRule, error) {
 	apiRuleObj, err := ar.apiRuleSvc.Find(name, namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s `%s` in namespace `%s`", pretty.APIRule, name, namespace))
@@ -79,20 +79,20 @@ func (ar *apiRuleResolver) APIRuleQuery(ctx context.Context, name string, namesp
 	return apiRule, nil
 }
 
-func (ar *apiRuleResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error) {
+func (ar *apiRuleResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params model.APIRuleInput) (*model.APIRule, error) {
 	apiRuleObject := ar.apiRuleCon.ToApiRule(name, namespace, params)
 
 	apiRule, err := ar.apiRuleSvc.Create(apiRuleObject)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s `%s` in namespace `%s`", pretty.APIRule, name, namespace))
-		return &gqlschema.APIRule{}, gqlerror.New(err, pretty.APIRules, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+		return &model.APIRule{}, gqlerror.New(err, pretty.APIRules, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	return ar.apiRuleCon.ToGQL(apiRule)
 }
 
-func (ar *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiRuleEvent, error) {
-	channel := make(chan gqlschema.ApiRuleEvent, 1)
+func (ar *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan model.ApiRuleEvent, error) {
+	channel := make(chan model.ApiRuleEvent, 1)
 	filter := func(apiRule *v1alpha1.APIRule) bool {
 		if serviceName == nil {
 			return apiRule != nil && apiRule.Namespace == namespace
@@ -112,19 +112,19 @@ func (ar *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespa
 	return channel, nil
 }
 
-func (ar *apiRuleResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error) {
+func (ar *apiRuleResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, params model.APIRuleInput) (*model.APIRule, error) {
 	apiRuleObject := ar.apiRuleCon.ToApiRule(name, namespace, params)
 
 	apiRule, err := ar.apiRuleSvc.Update(apiRuleObject)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while editing %s `%s` in namespace `%s`", pretty.APIRule, name, namespace))
-		return &gqlschema.APIRule{}, gqlerror.New(err, pretty.APIRules, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+		return &model.APIRule{}, gqlerror.New(err, pretty.APIRules, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	return ar.apiRuleCon.ToGQL(apiRule)
 }
 
-func (ar *apiRuleResolver) DeleteAPIRule(ctx context.Context, name string, namespace string) (*gqlschema.APIRule, error) {
+func (ar *apiRuleResolver) DeleteAPIRule(ctx context.Context, name string, namespace string) (*model.APIRule, error) {
 	apiRuleObj, err := ar.apiRuleSvc.Find(name, namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s `%s` in namespace `%s`", pretty.APIRule, name, namespace))
