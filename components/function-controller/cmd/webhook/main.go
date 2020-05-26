@@ -33,14 +33,20 @@ type config struct {
 	WebhookPort        int    `envconfig:"default=8443"`
 }
 
-// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;update
-// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch
-// +kubebuilder:rbac:groups=admissionregistration.k8s.io,resources=mutatingwebhookconfigurations;validatingwebhookconfigurations,verbs=get;list;watch;create;update;patch;delete
-
 func main() {
 	cfg := &config{}
 	if err := envconfig.Init(cfg); err != nil {
 		panic(errors.Wrap(err, "while reading env variables"))
+	}
+
+	defaultingCfg := &serverlessv1alhpa1.DefaultingConfig{}
+	if err := envconfig.InitWithPrefix(defaultingCfg, "WEBHOOK_DEFAULTING"); err != nil {
+		panic(errors.Wrap(err, "while reading env defaulting variables"))
+	}
+
+	validationCfg := &serverlessv1alhpa1.ValidationConfig{}
+	if err := envconfig.InitWithPrefix(validationCfg, "WEBHOOK_VALIDATION"); err != nil {
+		panic(errors.Wrap(err, "while reading env defaulting variables"))
 	}
 
 	// Scope informers to the webhook's namespace instead of cluster-wide
@@ -58,61 +64,55 @@ func main() {
 	sharedmain.WebhookMainWithConfig(ctx, "serverless-webhook",
 		restConfig,
 		certificates.NewController,
-		NewDefaultingAdmissionController,
-		NewValidationAdmissionController,
+		NewDefaultingAdmissionController(defaultingCfg),
+		NewValidationAdmissionController(validationCfg),
 	)
 }
 
-func NewDefaultingAdmissionController(ctx context.Context, _ configmap.Watcher) *controller.Impl {
-	cfg := &serverlessv1alhpa1.DefaultingConfig{}
-	if err := envconfig.InitWithPrefix(cfg, "WEBHOOK_DEFAULTING"); err != nil {
-		panic(errors.Wrap(err, "while reading env defaulting variables"))
+func NewDefaultingAdmissionController(cfg *serverlessv1alhpa1.DefaultingConfig) func(ctx context.Context, _ configmap.Watcher) *controller.Impl {
+	return func(ctx context.Context, _ configmap.Watcher) *controller.Impl {
+		return defaulting.NewAdmissionController(ctx,
+
+			// Name of the resource webhook.
+			"defaulting.webhook.serverless.kyma-project.io",
+
+			// The path on which to serve the webhook.
+			"/defaulting",
+
+			// The resources to validate and default.
+			types,
+
+			// A function that infuses the context passed to Validate/SetDefaults with custom metadata.
+			func(ctx context.Context) context.Context {
+				return context.WithValue(ctx, serverlessv1alhpa1.DefaultingConfigKey, *cfg)
+			},
+
+			// Whether to disallow unknown fields.
+			true,
+		)
 	}
-
-	return defaulting.NewAdmissionController(ctx,
-
-		// Name of the resource webhook.
-		"defaulting.webhook.serverless.kyma-project.io",
-
-		// The path on which to serve the webhook.
-		"/defaulting",
-
-		// The resources to validate and default.
-		types,
-
-		// A function that infuses the context passed to Validate/SetDefaults with custom metadata.
-		func(ctx context.Context) context.Context {
-			return context.WithValue(ctx, serverlessv1alhpa1.DefaultingConfigKey, *cfg)
-		},
-
-		// Whether to disallow unknown fields.
-		true,
-	)
 }
 
-func NewValidationAdmissionController(ctx context.Context, _ configmap.Watcher) *controller.Impl {
-	cfg := &serverlessv1alhpa1.ValidationConfig{}
-	if err := envconfig.InitWithPrefix(cfg, "WEBHOOK_VALIDATION"); err != nil {
-		panic(errors.Wrap(err, "while reading env defaulting variables"))
+func NewValidationAdmissionController(cfg *serverlessv1alhpa1.ValidationConfig) func(ctx context.Context, _ configmap.Watcher) *controller.Impl {
+	return func(ctx context.Context, _ configmap.Watcher) *controller.Impl {
+		return validation.NewAdmissionController(ctx,
+
+			// Name of the resource webhook.
+			"validation.webhook.serverless.kyma-project.io",
+
+			// The path on which to serve the webhook.
+			"/resource-validation",
+
+			// The resources to validate and default.
+			types,
+
+			// A function that infuses the context passed to Validate/SetDefaults with custom metadata.
+			func(ctx context.Context) context.Context {
+				return context.WithValue(ctx, serverlessv1alhpa1.ValidationConfigKey, *cfg)
+			},
+
+			// Whether to disallow unknown fields.
+			true,
+		)
 	}
-
-	return validation.NewAdmissionController(ctx,
-
-		// Name of the resource webhook.
-		"validation.webhook.serverless.kyma-project.io",
-
-		// The path on which to serve the webhook.
-		"/resource-validation",
-
-		// The resources to validate and default.
-		types,
-
-		// A function that infuses the context passed to Validate/SetDefaults with custom metadata.
-		func(ctx context.Context) context.Context {
-			return context.WithValue(ctx, serverlessv1alhpa1.ValidationConfigKey, *cfg)
-		},
-
-		// Whether to disallow unknown fields.
-		true,
-	)
 }

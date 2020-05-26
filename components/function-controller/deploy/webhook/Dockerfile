@@ -21,8 +21,6 @@ COPY . ${BASE_APP_DIR}/
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o webhook-server cmd/webhook/main.go
 
-# Use distroless as minimal base image to package the manager binary
-# Refer to https://github.com/GoogleContainerTools/distroless for more details
 FROM alpine:3.11
 WORKDIR /
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/function-controller/webhook-server .
