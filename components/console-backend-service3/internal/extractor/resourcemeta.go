@@ -1,7 +1,7 @@
 package extractor
 
 import (
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
+	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/apierror"
 
 	"github.com/pkg/errors"
 	"k8s.io/client-go/discovery"
@@ -39,7 +39,7 @@ func ExtractResourceMeta(in map[string]interface{}) (ResourceMeta, error) {
 		errs = append(errs, apierror.NewMissingField("metadata"))
 	}
 	if len(errs) > 0 {
-		return ResourceMeta{}, apierror.NewInvalid("Resource", errs)
+		return ResourceMeta{}, apierror.NewInvalid(nil, errs)
 	}
 
 	return ResourceMeta{
@@ -65,7 +65,7 @@ func GetPluralNameFromKind(kind, apiVersion string, client discovery.DiscoveryIn
 	}
 
 	if plural == "" {
-		return "", apierror.NewInvalid(pretty.Resource, apierror.ErrorFieldAggregate{apierror.NewInvalidField("kind", kind, "resource plural name for specified kind not found")})
+		return "", apierror.NewInvalid(nil, apierror.ErrorFieldAggregate{apierror.NewInvalidField("kind", kind, "resource plural name for specified kind not found")})
 	}
 
 	return plural, nil

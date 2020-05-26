@@ -4,25 +4,26 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/golang/glog"
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph/model"
+	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
+	"github.com/rs/cors"
 	"github.com/vrischmann/envconfig"
+	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql/handler"
+	graphqlhandler "github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/kyma-project/kyma/components/console-backend-service3/internal/authn"
+	"github.com/kyma-project/kyma/components/console-backend-service3/internal/authz"
 	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph"
 	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph/generated"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	authenticatorpkg "k8s.io/apiserver/pkg/authentication/authenticator"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/authn"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/authz"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 type config struct {
@@ -35,11 +36,13 @@ type config struct {
 	InformerResyncPeriod time.Duration `envconfig:"default=10m"`
 	ServerTimeout        time.Duration `envconfig:"default=10s"`
 	Burst                int           `envconfig:"default=2"`
+	OIDC                 authn.OIDCConfig
+	SARCacheConfig       authz.SARCacheConfig
 }
 
 func main() {
 
-	cfg, developmentMode, err := loadConfig("APP")
+	cfg, _, err := loadConfig("APP")
 	if err != nil {
 		panic(err)
 	}
@@ -54,27 +57,33 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	resolver.WaitForCacheSync(make(chan struct{}))
+	stopCh := make(chan struct{})
+	resolver.WaitForCacheSync(stopCh)
+
+
+	kubeClient, err := kubernetes.NewForConfig(restClientConfig)
+	exitOnError(err, "Failed to instantiate Kubernetes client")
+
 	srvConfig := generated.Config{Resolvers: resolver}
-	srvConfig.Directives.HasAccess = func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes model.ResourceAttributes) (res interface{}, err error) {
-		return next(ctx)
-	}
+
 
 	var authenticator authenticatorpkg.Request
-	if !developmentMode {
+
 		authenticator, err = authn.NewOIDCAuthenticator(&cfg.OIDC)
 		exitOnError(err, "Error while creating OIDC authenticator")
-		sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
+		sarClient := kubeClient.AuthorizationV1().SubjectAccessReviews()
 		authorizer, err := authz.NewAuthorizer(sarClient, cfg.SARCacheConfig)
 		exitOnError(err, "Failed to create authorizer")
 
-		gqlCfg.Directives.HasAccess = authz.NewRBACDirective(authorizer, kubeClient.Discovery())
-	}
-	
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(srvConfig))
+		srvConfig.Directives.HasAccess = authz.NewRBACDirective(authorizer, kubeClient.Discovery())
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+
+	//srv := graphqlhandler.NewDefaultServer(generated.NewExecutableSchema(srvConfig))
+
+	//http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	//http.Handle("/query", srv)
+
+	runServer(stopCh, cfg, srvConfig, authenticator)
 
 	bind := fmt.Sprintf("%s:%v", cfg.Host,cfg.Port)
 	log.Printf("connect to http://%s/ for GraphQL playground", bind)
@@ -119,4 +128,58 @@ func parseFlags(cfg config) {
 		}
 	}
 	flag.Parse()
+}
+
+func exitOnError(err error, context string) {
+	if err != nil {
+		wrappedError := errors.Wrap(err, context)
+		glog.Fatal(wrappedError)
+	}
+}
+
+func runServer(stop <-chan struct{}, cfg config, srvConfig generated.Config, authenticator authenticatorpkg.Request) {
+	var allowedOrigins []string
+	if len(cfg.AllowedOrigins) == 0 {
+		allowedOrigins = []string{"*"}
+	} else {
+		allowedOrigins = cfg.AllowedOrigins
+	}
+
+	router := mux.NewRouter()
+
+	if authenticator != nil {
+		router.Use(authn.AuthMiddleware(authenticator))
+	}
+
+	graphqlserver := graphqlhandler.NewDefaultServer(generated.NewExecutableSchema(srvConfig))
+
+	router.HandleFunc("/", playground.Handler("GraphQL playground", "/query"))
+	router.Handle("/query", graphqlserver)
+
+	serverHandler := cors.New(cors.Options{
+		AllowedOrigins: allowedOrigins,
+		AllowedMethods: []string{
+			"POST", "GET", "OPTIONS",
+		},
+		AllowCredentials:   true,
+		AllowedHeaders:     []string{"*"},
+		OptionsPassthrough: false,
+	}).Handler(router)
+
+	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	srv := &http.Server{Addr: addr, Handler: serverHandler}
+
+	glog.Infof("Listening on %s", addr)
+
+	go func() {
+		<-stop
+		// Interrupt signal received - shut down the server
+		if err := srv.Shutdown(context.Background()); err != nil {
+			glog.Errorf("HTTP server Shutdown: %v", err)
+		}
+	}()
+
+	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+		glog.Errorf("HTTP server ListenAndServe: %v", err)
+	}
 }

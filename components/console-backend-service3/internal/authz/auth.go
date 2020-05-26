@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	extractor "github.com/kyma-project/kyma/components/console-backend-service/internal/extractor"
+	extractor "github.com/kyma-project/kyma/components/console-backend-service3/internal/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph/model"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -15,7 +15,7 @@ import (
 	"k8s.io/apiserver/pkg/authorization/authorizer"
 	"k8s.io/apiserver/pkg/authorization/authorizerfactory"
 	"k8s.io/client-go/discovery"
-	authorizationclient "k8s.io/client-go/kubernetes/typed/authorization/v1beta1"
+	authorizationclient "k8s.io/client-go/kubernetes/typed/authorization/v1"
 )
 
 type Authorizer struct {
@@ -52,7 +52,7 @@ type extractedAttributes struct {
 
 // PrepareAttributes prepares attributes for authorization
 func PrepareAttributes(ctx context.Context, u user.Info, attributes model.ResourceAttributes, obj interface{}, client discovery.DiscoveryInterface) (authorizer.Attributes, error) {
-	resolverCtx := graphql.GetResolverContext(ctx)
+	resolverCtx := graphql.GetFieldContext(ctx)
 
 	// make sure resource information is taken either from directive or from field
 	err := validateAttributes(attributes)
