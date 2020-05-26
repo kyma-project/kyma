@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	cloudevents "github.com/cloudevents/sdk-go"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/example_schema"
@@ -44,6 +46,7 @@ func (s *SendEventToMesh) Run() error {
 	}
 
 	_, _, err = s.state.GetEventSender().SendCloudEventToMesh(ctx, event)
+	logrus.WithField("component", "SendEventToMesh").Debugf("SendCloudEventToMesh: eventID: %v; error: %v", event.ID(), err)
 	return err
 }
 

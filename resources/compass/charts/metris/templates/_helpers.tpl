@@ -38,36 +38,40 @@ heritage: {{ .Release.Service | quote }}
 
 
 {{- define "metris.imagePullSecrets" -}}
-{{- if .Values.global }}
+{{- if .Values.image.pullSecrets }}
+imagePullSecrets:
+{{- range .Values.image.pullSecrets }}
+  - name: {{ . }}
+{{- end }}
+{{- else if .Values.global }}
 {{- if .Values.global.imagePullSecrets }}
 imagePullSecrets:
 {{- range .Values.global.imagePullSecrets }}
   - name: {{ . }}
 {{- end }}
-{{- else if .Values.image.pullSecrets }}
-imagePullSecrets:
-{{- range .Values.image.pullSecrets }}
-  - name: {{ . }}
-{{- end }}
 {{- end -}}
-{{- else if .Values.image.pullSecrets }}
-imagePullSecrets:
-{{- range .Values.image.pullSecrets }}
-  - name: {{ . }}
-{{- end }}
 {{- end -}}
 {{- end -}}
 
 
 {{- define "metris.image" -}}
-{{- $repository := .Values.image.repository -}}
-{{- $tag := .Values.image.tag | toString -}}
+{{- $repository := "" -}}
+{{- $tag := "" -}}
 {{- if .Values.global -}}
-{{- if .Values.global.images -}}
-  {{- if .Values.global.images.containerRegistry -}}
-    {{- $repository = printf "%s/%smetris" .Values.global.images.containerRegistry.path (default "" .Values.global.images.metris.dir) -}}
-    {{- $tag = .Values.global.images.metris.version | toString -}}
+  {{- if .Values.global.images -}}
+    {{- if .Values.global.images.containerRegistry -}}
+      {{- $repository = printf "%s/%smetris" .Values.global.images.containerRegistry.path (default "" .Values.global.images.metris.dir) -}}
+      {{- $tag = .Values.global.images.metris.version | toString -}}
+    {{- end -}}
   {{- end -}}
+{{- end -}}
+
+{{- if .Values.image -}}
+{{- if .Values.image.repository -}}
+{{- $repository = .Values.image.repository -}}
+{{- end -}}
+{{- if .Values.image.tag -}}
+{{- $tag = .Values.image.tag | toString -}}
 {{- end -}}
 {{- end -}}
 {{- printf "%s:%s" $repository $tag -}}

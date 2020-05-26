@@ -68,7 +68,7 @@ An example response for a successful request looks like this:
       "runtimeConfiguration": {
         "clusterConfig": {CLUSTER_CONFIG},
         "kymaConfig": {
-          "version": "1.8.0",
+          "version": "1.12.0",
           "components": [{COMPONENTS_LIST}]
         },
         "kubeconfig": {KUBECONFIG}

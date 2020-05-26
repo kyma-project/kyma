@@ -2,6 +2,9 @@ package testsuite
 
 import (
 	"fmt"
+	"time"
+
+	retrygo "github.com/avast/retry-go"
 
 	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	scv1beta1 "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -74,7 +77,8 @@ func (s *CreateServiceInstance) Run() error {
 	if err != nil {
 		return err
 	}
-	return retry.Do(s.isServiceInstanceCreated)
+
+	return retry.Do(s.isServiceInstanceCreated, retrygo.Attempts(180), retrygo.Delay(time.Second))
 }
 
 func (s *CreateServiceInstance) findServiceClassExternalName(serviceClassID string) (string, error) {
