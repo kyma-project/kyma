@@ -31,7 +31,7 @@ var (
 	}
 
 	emptyListReleaseResponse []*release.Release
-	expectedOverrides        = map[string]interface{}{}
+	expectedOverrides        = map[string]interface{}{"global": map[string]interface{}{}}
 )
 
 func TestGatewayManager_InstallGateway(t *testing.T) {
