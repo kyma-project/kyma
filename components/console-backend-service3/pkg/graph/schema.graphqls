@@ -4,6 +4,8 @@
 
 directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
 
+scalar Map
+
 enum EventType {
   ADD,
   UPDATE,
