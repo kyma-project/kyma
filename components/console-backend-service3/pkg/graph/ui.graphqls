@@ -51,5 +51,5 @@ extend type Query {
 }
 
 extend type Subscription {
-    backendModules: BackendModuleEvent!
+    backendModules: BackendModuleEvent! @HasAccess(attributes: {resource: "backendmodules", verb: "watch", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
 }

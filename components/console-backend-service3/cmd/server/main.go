@@ -20,6 +20,9 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph"
 	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph/generated"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	authenticatorpkg "k8s.io/apiserver/pkg/authentication/authenticator"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/authn"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/authz"
 )
 
 type config struct {
@@ -36,7 +39,7 @@ type config struct {
 
 func main() {
 
-	cfg, _, err := loadConfig("APP")
+	cfg, developmentMode, err := loadConfig("APP")
 	if err != nil {
 		panic(err)
 	}
@@ -56,6 +59,18 @@ func main() {
 	srvConfig.Directives.HasAccess = func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes model.ResourceAttributes) (res interface{}, err error) {
 		return next(ctx)
 	}
+
+	var authenticator authenticatorpkg.Request
+	if !developmentMode {
+		authenticator, err = authn.NewOIDCAuthenticator(&cfg.OIDC)
+		exitOnError(err, "Error while creating OIDC authenticator")
+		sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
+		authorizer, err := authz.NewAuthorizer(sarClient, cfg.SARCacheConfig)
+		exitOnError(err, "Failed to create authorizer")
+
+		gqlCfg.Directives.HasAccess = authz.NewRBACDirective(authorizer, kubeClient.Discovery())
+	}
+	
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(srvConfig))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))

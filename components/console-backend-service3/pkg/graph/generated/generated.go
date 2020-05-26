@@ -513,7 +513,7 @@ extend type Query {
 }
 
 extend type Subscription {
-    backendModules: BackendModuleEvent!
+    backendModules: BackendModuleEvent! @HasAccess(attributes: {resource: "backendmodules", verb: "watch", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -1813,8 +1813,32 @@ func (ec *executionContext) _Subscription_backendModules(ctx context.Context, fi
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Subscription().BackendModules(rctx)
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Subscription().BackendModules(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "ui.kyma-project.io", "apiVersion": "v1alpha1", "resource": "backendmodules", "verb": "watch"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(<-chan *model.BackendModuleEvent); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph/model.BackendModuleEvent`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
