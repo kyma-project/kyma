@@ -11,7 +11,8 @@ spec:
   selector:
     matchLabels:
       control-plane: controller-manager
-{{ include "api-gateway.labels" . | indent 6 }}
+      app.kubernetes.io/name: {{ include "api-gateway.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:

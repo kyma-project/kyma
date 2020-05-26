@@ -12,7 +12,8 @@ spec:
     - name: metrics
       port: {{ .Values.config.ports.metrics }}
   selector:
-{{ include "api-gateway.labels" . | indent 4 }}
+    app.kubernetes.io/name: {{ include "api-gateway.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
