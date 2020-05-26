@@ -33,6 +33,7 @@ func TestFunctionController(t *testing.T) {
 	failOnError(g, err)
 
 	defer testSuite.Cleanup()
+	defer testSuite.LogResources()
 	testSuite.Run()
 }
 
