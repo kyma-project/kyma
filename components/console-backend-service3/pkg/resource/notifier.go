@@ -5,23 +5,18 @@ import (
 )
 
 //go:generate mockery -name=Listener -output=automock -outpkg=automock -case=underscore
-type Listener interface {
-	OnAdd(object interface{})
-	OnUpdate(newObject, oldObject interface{})
-	OnDelete(object interface{})
-}
 
 type Notifier struct {
 	sync.RWMutex
 	// TODO: change to map for better performance
-	listeners []Listener
+	listeners []*Listener
 }
 
 func NewNotifier() *Notifier {
 	return &Notifier{}
 }
 
-func (n *Notifier) AddListener(listener Listener) {
+func (n *Notifier) AddListener(listener *Listener) {
 	if listener == nil {
 		return
 	}
@@ -32,7 +27,7 @@ func (n *Notifier) AddListener(listener Listener) {
 	n.listeners = append(n.listeners, listener)
 }
 
-func (n *Notifier) DeleteListener(listener Listener) {
+func (n *Notifier) DeleteListener(listener *Listener) {
 	if listener == nil {
 		return
 	}

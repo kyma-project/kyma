@@ -34,11 +34,7 @@ func (r *backendModuleResolver) BackendModulesQuery(ctx context.Context) ([]*mod
 		return nil, gqlerror.New(err, pretty.BackendModules)
 	}
 
-	result, err := r.converter.ToGQLs(items)
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s", pretty.BackendModules))
-		return nil, gqlerror.New(err, pretty.BackendModules)
-	}
+	result := r.converter.ToGQLs(items)
 
 	return result, nil
 }
@@ -46,9 +42,7 @@ func (r *backendModuleResolver) BackendModulesQuery(ctx context.Context) ([]*mod
 func (r *backendModuleResolver) BackendModulesEvents(ctx context.Context) (<-chan *model.BackendModuleEvent, error) {
 	channel := make(chan *model.BackendModuleEvent, 1)
 
-	listener := NewBackendModuleListener(channel, func(_ *v1alpha1.BackendModule) bool {
-		return true
-	})
+	listener := resource.NewListener(NewBackendModuleEventHandler(channel))
 	r.service.AddListener(listener)
 	go func() {
 		defer close(channel)

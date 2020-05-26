@@ -123,10 +123,10 @@ func (s *Service) Create(obj interface{}, result interface{}) error {
 	return FromUnstructured(created, result)
 }
 
-func (s *Service) AddListener(listener Listener) {
+func (s *Service) AddListener(listener *Listener) {
 	s.notifier.AddListener(listener)
 }
 
-func (s *Service) DeleteListener(listener Listener) {
+func (s *Service) DeleteListener(listener *Listener) {
 	s.notifier.DeleteListener(listener)
 }

@@ -14,29 +14,22 @@ func(l *BackendModuleList) Append() interface{} {
 	return converted
 }
 
-func (c *BackendModuleConverter) ToGQL(in *v1alpha1.BackendModule) (*model.BackendModule, error) {
-	if in == nil {
-		return nil, nil
-	}
-
+func (c BackendModuleConverter) ToGQL(in *v1alpha1.BackendModule) *model.BackendModule {
 	module := model.BackendModule{
 		Name: in.Name,
 	}
 
-	return &module, nil
+	return &module
 }
 
-func (c *BackendModuleConverter) ToGQLs(in []*v1alpha1.BackendModule) ([]*model.BackendModule, error) {
+func (c BackendModuleConverter) ToGQLs(in []*v1alpha1.BackendModule) []*model.BackendModule {
 	var result []*model.BackendModule
 	for _, u := range in {
-		converted, err := c.ToGQL(u)
-		if err != nil {
-			return nil, err
-		}
+		converted := c.ToGQL(u)
 
 		if converted != nil {
 			result = append(result, converted)
 		}
 	}
-	return result, nil
+	return result
 }

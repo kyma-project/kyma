@@ -2,6 +2,7 @@ package ui_test
 
 import (
 	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/apis/ui/v1alpha1"
+	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/resource"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/domain/ui"
@@ -12,43 +13,43 @@ import (
 func TestPodListener_OnAdd(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// given
-		gqlPod := new(model.BackendModule)
-		module := new(v1alpha1.BackendModule)
+		modelObj := new(model.BackendModule)
+		k8sObj := new(v1alpha1.BackendModule)
 
 		channel := make(chan *model.BackendModuleEvent, 1)
-		podListener := ui.NewBackendModuleListener(channel, filterPodTrue)
+		listener := resource.NewListener(ui.NewBackendModuleEventHandler(channel))
 
 		// when
-		podListener.OnAdd(module)
+		listener.OnAdd(k8sObj)
 		result := <-channel
 
 		// then
 		assert.Equal(t, model.EventTypeAdd, result.Type)
-		assert.Equal(t, *gqlPod, result.Resource)
+		assert.Equal(t, *modelObj, result.Resource)
 	})
 
 	t.Run("Filtered out", func(t *testing.T) {
 		// given
-		podListener := ui.NewBackendModuleListener(nil, filterPodTrue)
+		listener := resource.NewListener(ui.NewBackendModuleEventHandler(nil))
 
 		// when
-		podListener.OnAdd(new(v1alpha1.BackendModule))
+		listener.OnAdd(new(v1alpha1.BackendModule))
 	})
 
 	t.Run("Nil", func(t *testing.T) {
 		// given
-		podListener := ui.NewBackendModuleListener(nil, filterPodTrue)
+		listener := resource.NewListener(ui.NewBackendModuleEventHandler(nil))
 
 		// when
-		podListener.OnAdd(nil)
+		listener.OnAdd(nil)
 	})
 
 	t.Run("Invalid type", func(t *testing.T) {
 		// given
-		podListener := ui.NewBackendModuleListener(nil, filterPodTrue)
+		listener := resource.NewListener(ui.NewBackendModuleEventHandler(nil))
 
 		// when
-		podListener.OnAdd(new(struct{}))
+		listener.OnAdd(new(struct{}))
 	})
 }
 
@@ -59,10 +60,10 @@ func TestPodListener_OnDelete(t *testing.T) {
 		pod := new(v1alpha1.BackendModule)
 		channel := make(chan *model.BackendModuleEvent, 1)
 
-		podListener := ui.NewBackendModuleListener(channel, filterPodTrue)
+		listener := resource.NewListener(ui.NewBackendModuleEventHandler(channel))
 
 		// when
-		podListener.OnDelete(pod)
+		listener.OnDelete(pod)
 		result := <-channel
 
 		// then
@@ -71,28 +72,20 @@ func TestPodListener_OnDelete(t *testing.T) {
 
 	})
 
-	t.Run("Filtered out", func(t *testing.T) {
-		// given
-		podListener := ui.NewBackendModuleListener(nil, filterPodFalse)
-
-		// when
-		podListener.OnDelete(new(v1alpha1.BackendModule))
-	})
-
 	t.Run("Nil", func(t *testing.T) {
 		// given
-		podListener := ui.NewBackendModuleListener(nil, filterPodTrue)
+		listener := resource.NewListener(ui.NewBackendModuleEventHandler(nil))
 
 		// when
-		podListener.OnDelete(nil)
+		listener.OnDelete(nil)
 	})
 
 	t.Run("Invalid type", func(t *testing.T) {
 		// given
-		podListener := ui.NewBackendModuleListener(nil, filterPodTrue)
+		listener := resource.NewListener(ui.NewBackendModuleEventHandler(nil))
 
 		// when
-		podListener.OnDelete(new(struct{}))
+		listener.OnDelete(new(struct{}))
 	})
 }
 
@@ -103,10 +96,10 @@ func TestPodListener_OnUpdate(t *testing.T) {
 		pod := new(v1alpha1.BackendModule)
 
 		channel := make(chan *model.BackendModuleEvent, 1)
-		podListener := ui.NewBackendModuleListener(channel, filterPodTrue)
+		listener := resource.NewListener(ui.NewBackendModuleEventHandler(channel))
 
 		// when
-		podListener.OnUpdate(pod, pod)
+		listener.OnUpdate(pod, pod)
 		result := <-channel
 
 		// then
@@ -115,35 +108,19 @@ func TestPodListener_OnUpdate(t *testing.T) {
 
 	})
 
-	t.Run("Filtered out", func(t *testing.T) {
-		// given
-		podListener := ui.NewBackendModuleListener(nil, filterPodFalse)
-
-		// when
-		podListener.OnUpdate(new(v1alpha1.BackendModule), new(v1alpha1.BackendModule))
-	})
-
 	t.Run("Nil", func(t *testing.T) {
 		// given
-		podListener := ui.NewBackendModuleListener(nil, filterPodTrue)
+		listener := resource.NewListener(ui.NewBackendModuleEventHandler(nil))
 
 		// when
-		podListener.OnUpdate(nil, nil)
+		listener.OnUpdate(nil, nil)
 	})
 
 	t.Run("Invalid type", func(t *testing.T) {
 		// given
-		podListener := ui.NewBackendModuleListener(nil, filterPodTrue)
+		listener := resource.NewListener(ui.NewBackendModuleEventHandler(nil))
 
 		// when
-		podListener.OnUpdate(new(struct{}), new(struct{}))
+		listener.OnUpdate(new(struct{}), new(struct{}))
 	})
-}
-
-func filterPodTrue(o *v1alpha1.BackendModule) bool {
-	return true
-}
-
-func filterPodFalse(o *v1alpha1.BackendModule) bool {
-	return false
 }
