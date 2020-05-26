@@ -20,3 +20,7 @@ func (r *queryResolver) MicroFrontends(ctx context.Context, namespace string) ([
 func (r *queryResolver) ClusterMicroFrontends(ctx context.Context) ([]*model.ClusterMicroFrontend, error) {
 	return r.ui.ClusterMicroFrontendsQuery(ctx)
 }
+
+func (r *subscriptionResolver) BackendModules(ctx context.Context) (<-chan *model.BackendModuleEvent, error) {
+	return r.ui.BackendModulesEvents(ctx)
+}

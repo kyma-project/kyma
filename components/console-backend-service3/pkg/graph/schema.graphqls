@@ -4,6 +4,16 @@
 
 directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
 
+enum EventType {
+  ADD,
+  UPDATE,
+  DELETE
+}
+
+interface Event {
+  type: EventType
+}
+
 input ResourceAttributes {
   verb: String!
   apiGroup: String
@@ -18,4 +28,8 @@ input ResourceAttributes {
 
 type Query {
   version: String
+}
+
+type Subscription {
+  dummy: String
 }

@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -37,6 +38,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Query() QueryResolver
+	Subscription() SubscriptionResolver
 }
 
 type DirectiveRoot struct {
@@ -46,6 +48,11 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	BackendModule struct {
 		Name func(childComplexity int) int
+	}
+
+	BackendModuleEvent struct {
+		Resource func(childComplexity int) int
+		Type     func(childComplexity int) int
 	}
 
 	ClusterMicroFrontend struct {
@@ -89,6 +96,11 @@ type ComplexityRoot struct {
 		Resource func(childComplexity int) int
 		Verbs    func(childComplexity int) int
 	}
+
+	Subscription struct {
+		BackendModules func(childComplexity int) int
+		Dummy          func(childComplexity int) int
+	}
 }
 
 type QueryResolver interface {
@@ -96,6 +108,10 @@ type QueryResolver interface {
 	BackendModules(ctx context.Context) ([]*model.BackendModule, error)
 	MicroFrontends(ctx context.Context, namespace string) ([]*model.MicroFrontend, error)
 	ClusterMicroFrontends(ctx context.Context) ([]*model.ClusterMicroFrontend, error)
+}
+type SubscriptionResolver interface {
+	Dummy(ctx context.Context) (<-chan *string, error)
+	BackendModules(ctx context.Context) (<-chan *model.BackendModuleEvent, error)
 }
 
 type executableSchema struct {
@@ -119,6 +135,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.BackendModule.Name(childComplexity), true
+
+	case "BackendModuleEvent.resource":
+		if e.complexity.BackendModuleEvent.Resource == nil {
+			break
+		}
+
+		return e.complexity.BackendModuleEvent.Resource(childComplexity), true
+
+	case "BackendModuleEvent.type":
+		if e.complexity.BackendModuleEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.BackendModuleEvent.Type(childComplexity), true
 
 	case "ClusterMicroFrontend.category":
 		if e.complexity.ClusterMicroFrontend.Category == nil {
@@ -314,6 +344,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RequiredPermission.Verbs(childComplexity), true
 
+	case "Subscription.backendModules":
+		if e.complexity.Subscription.BackendModules == nil {
+			break
+		}
+
+		return e.complexity.Subscription.BackendModules(childComplexity), true
+
+	case "Subscription.dummy":
+		if e.complexity.Subscription.Dummy == nil {
+			break
+		}
+
+		return e.complexity.Subscription.Dummy(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -332,6 +376,23 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			first = false
 			data := ec._Query(ctx, rc.Operation.SelectionSet)
 			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
+	case ast.Subscription:
+		next := ec._Subscription(ctx, rc.Operation.SelectionSet)
+
+		var buf bytes.Buffer
+		return func(ctx context.Context) *graphql.Response {
+			buf.Reset()
+			data := next()
+
+			if data == nil {
+				return nil
+			}
 			data.MarshalGQL(&buf)
 
 			return &graphql.Response{
@@ -370,6 +431,16 @@ var sources = []*ast.Source{
 
 directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
 
+enum EventType {
+  ADD,
+  UPDATE,
+  DELETE
+}
+
+interface Event {
+  type: EventType
+}
+
 input ResourceAttributes {
   verb: String!
   apiGroup: String
@@ -384,6 +455,10 @@ input ResourceAttributes {
 
 type Query {
   version: String
+}
+
+type Subscription {
+  dummy: String
 }`, BuiltIn: false},
 	&ast.Source{Name: "pkg/graph/ui.graphqls", Input: `scalar Map
 
@@ -426,10 +501,19 @@ type RequiredPermission {
     resource: String!
 }
 
+type BackendModuleEvent implements Event {
+    type: EventType
+    resource: BackendModule
+}
+
 extend type Query {
     backendModules: [BackendModule!]! @HasAccess(attributes: {resource: "backendmodules", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
     microFrontends(namespace: String!): [MicroFrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
     clusterMicroFrontends: [ClusterMicroFrontend!]! @HasAccess(attributes: {resource: "clustermicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+}
+
+extend type Subscription {
+    backendModules: BackendModuleEvent!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -548,6 +632,68 @@ func (ec *executionContext) _BackendModule_name(ctx context.Context, field graph
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _BackendModuleEvent_type(ctx context.Context, field graphql.CollectedField, obj *model.BackendModuleEvent) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "BackendModuleEvent",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.EventType)
+	fc.Result = res
+	return ec.marshalOEventType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐEventType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _BackendModuleEvent_resource(ctx context.Context, field graphql.CollectedField, obj *model.BackendModuleEvent) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "BackendModuleEvent",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Resource, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.BackendModule)
+	fc.Result = res
+	return ec.marshalOBackendModule2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐBackendModule(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ClusterMicroFrontend_name(ctx context.Context, field graphql.CollectedField, obj *model.ClusterMicroFrontend) (ret graphql.Marshaler) {
@@ -1608,6 +1754,91 @@ func (ec *executionContext) _RequiredPermission_resource(ctx context.Context, fi
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Subscription_dummy(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().Dummy(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *string)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalOString2ᚖstring(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) _Subscription_backendModules(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().BackendModules(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *model.BackendModuleEvent)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNBackendModuleEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐBackendModuleEvent(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -2735,6 +2966,22 @@ func (ec *executionContext) unmarshalInputResourceAttributes(ctx context.Context
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, obj model.Event) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.BackendModuleEvent:
+		return ec._BackendModuleEvent(ctx, sel, &obj)
+	case *model.BackendModuleEvent:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._BackendModuleEvent(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
@@ -2755,6 +3002,32 @@ func (ec *executionContext) _BackendModule(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var backendModuleEventImplementors = []string{"BackendModuleEvent", "Event"}
+
+func (ec *executionContext) _BackendModuleEvent(ctx context.Context, sel ast.SelectionSet, obj *model.BackendModuleEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, backendModuleEventImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("BackendModuleEvent")
+		case "type":
+			out.Values[i] = ec._BackendModuleEvent_type(ctx, field, obj)
+		case "resource":
+			out.Values[i] = ec._BackendModuleEvent_resource(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3047,6 +3320,28 @@ func (ec *executionContext) _RequiredPermission(ctx context.Context, sel ast.Sel
 		return graphql.Null
 	}
 	return out
+}
+
+var subscriptionImplementors = []string{"Subscription"}
+
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Subscription",
+	})
+	if len(fields) != 1 {
+		ec.Errorf(ctx, "must subscribe to exactly one stream")
+		return nil
+	}
+
+	switch fields[0].Name {
+	case "dummy":
+		return ec._Subscription_dummy(ctx, fields[0])
+	case "backendModules":
+		return ec._Subscription_backendModules(ctx, fields[0])
+	default:
+		panic("unknown field " + strconv.Quote(fields[0].Name))
+	}
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
@@ -3343,6 +3638,20 @@ func (ec *executionContext) marshalNBackendModule2ᚖgithubᚗcomᚋkymaᚑproje
 		return graphql.Null
 	}
 	return ec._BackendModule(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNBackendModuleEvent2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐBackendModuleEvent(ctx context.Context, sel ast.SelectionSet, v model.BackendModuleEvent) graphql.Marshaler {
+	return ec._BackendModuleEvent(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNBackendModuleEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐBackendModuleEvent(ctx context.Context, sel ast.SelectionSet, v *model.BackendModuleEvent) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._BackendModuleEvent(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
@@ -3850,6 +4159,17 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
+func (ec *executionContext) marshalOBackendModule2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐBackendModule(ctx context.Context, sel ast.SelectionSet, v model.BackendModule) graphql.Marshaler {
+	return ec._BackendModule(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOBackendModule2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐBackendModule(ctx context.Context, sel ast.SelectionSet, v *model.BackendModule) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._BackendModule(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
@@ -3871,6 +4191,30 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
+}
+
+func (ec *executionContext) unmarshalOEventType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐEventType(ctx context.Context, v interface{}) (model.EventType, error) {
+	var res model.EventType
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalOEventType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐEventType(ctx context.Context, sel ast.SelectionSet, v model.EventType) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalOEventType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐEventType(ctx context.Context, v interface{}) (*model.EventType, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOEventType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐEventType(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOEventType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑservice3ᚋpkgᚋgraphᚋmodelᚐEventType(ctx context.Context, sel ast.SelectionSet, v *model.EventType) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOMap2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {

@@ -2,9 +2,26 @@
 
 package model
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
+type Event interface {
+	IsEvent()
+}
+
 type BackendModule struct {
 	Name string `json:"name"`
 }
+
+type BackendModuleEvent struct {
+	Type     *EventType     `json:"type"`
+	Resource *BackendModule `json:"resource"`
+}
+
+func (BackendModuleEvent) IsEvent() {}
 
 type ClusterMicroFrontend struct {
 	Name            string            `json:"name"`
@@ -51,4 +68,47 @@ type ResourceAttributes struct {
 	NameArg         *string `json:"nameArg"`
 	NamespaceArg    *string `json:"namespaceArg"`
 	IsChildResolver bool    `json:"isChildResolver"`
+}
+
+type EventType string
+
+const (
+	EventTypeAdd    EventType = "ADD"
+	EventTypeUpdate EventType = "UPDATE"
+	EventTypeDelete EventType = "DELETE"
+)
+
+var AllEventType = []EventType{
+	EventTypeAdd,
+	EventTypeUpdate,
+	EventTypeDelete,
+}
+
+func (e EventType) IsValid() bool {
+	switch e {
+	case EventTypeAdd, EventTypeUpdate, EventTypeDelete:
+		return true
+	}
+	return false
+}
+
+func (e EventType) String() string {
+	return string(e)
+}
+
+func (e *EventType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EventType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EventType", str)
+	}
+	return nil
+}
+
+func (e EventType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

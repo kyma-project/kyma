@@ -44,12 +44,17 @@ func NewServiceFactory(client dynamic.Interface, informerFactory dynamicinformer
 type Service struct {
 	client   dynamic.NamespaceableResourceInterface
 	informer cache.SharedIndexInformer
+	notifier *Notifier
 }
 
 func (f *ServiceFactory) ForResource(gvr schema.GroupVersionResource) *Service {
+	notifier := NewNotifier()
+	informer := f.InformerFactory.ForResource(gvr).Informer()
+	informer.AddEventHandler(notifier)
 	return &Service{
 		client:   f.Client.Resource(gvr),
-		informer: f.InformerFactory.ForResource(gvr).Informer(),
+		informer: informer,
+		notifier: notifier,
 	}
 }
 
@@ -116,4 +121,12 @@ func (s *Service) Create(obj interface{}, result interface{}) error {
 	}
 
 	return FromUnstructured(created, result)
+}
+
+func (s *Service) AddListener(listener Listener) {
+	s.notifier.AddListener(listener)
+}
+
+func (s *Service) DeleteListener(listener Listener) {
+	s.notifier.DeleteListener(listener)
 }

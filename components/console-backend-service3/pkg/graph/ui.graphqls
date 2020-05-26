@@ -39,8 +39,17 @@ type RequiredPermission {
     resource: String!
 }
 
+type BackendModuleEvent implements Event {
+    type: EventType
+    resource: BackendModule
+}
+
 extend type Query {
     backendModules: [BackendModule!]! @HasAccess(attributes: {resource: "backendmodules", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
     microFrontends(namespace: String!): [MicroFrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
     clusterMicroFrontends: [ClusterMicroFrontend!]! @HasAccess(attributes: {resource: "clustermicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+}
+
+extend type Subscription {
+    backendModules: BackendModuleEvent!
 }
