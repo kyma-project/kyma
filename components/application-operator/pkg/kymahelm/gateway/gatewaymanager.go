@@ -189,13 +189,13 @@ func (g *gatewayManager) getOverrides() (map[string]interface{}, error) {
 	var overridesMap map[string]interface{}
 	bytes, err := json.Marshal(overridesData)
 
-	if err == nil {
-		if err = json.Unmarshal(bytes, &overridesMap); err == nil {
-			return overridesMap, nil
-		}
+	if err = json.Unmarshal(bytes, &overridesMap); err != nil {
+		return nil, err
 	}
 
-	return map[string]interface{}{}, err
+	return map[string]interface{}{
+		"global": overridesMap,
+	}, nil
 }
 
 func appendNamespace(namespaces []string, namespace string) []string {
