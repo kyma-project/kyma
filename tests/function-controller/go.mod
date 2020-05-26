@@ -12,7 +12,7 @@ require (
 	github.com/kubernetes-incubator/service-catalog v0.2.2
 	github.com/kubernetes-sigs/service-catalog v0.2.2 // indirect
 	github.com/kyma-project/helm-broker v1.0.0
-	github.com/kyma-project/kyma/components/function-controller v0.0.0-20200526093810-45c748b13083
+	github.com/kyma-project/kyma/components/function-controller v0.0.0-20200507074609-9796320d6479
 	github.com/onsi/gomega v1.9.0
 	github.com/pkg/errors v0.9.1
 	github.com/vrischmann/envconfig v1.2.0

@@ -287,8 +287,8 @@ github.com/kubernetes-sigs/service-catalog v0.2.2 h1:V/NrjGRWD37hkyvIwiS1Ekz/n7k
 github.com/kubernetes-sigs/service-catalog v0.2.2/go.mod h1:fmRsWJ38Od93DQ7cOXR9mMSSwmjyDS1EAomWxBlumuo=
 github.com/kyma-project/helm-broker v1.0.0 h1:g1/9hqMsyn7lcggeVWbrm353t2sDiPLny3cTOb37Lc0=
 github.com/kyma-project/helm-broker v1.0.0/go.mod h1:VFnkD5ddzF9s8qcY12DRzYOznJJlpMbSRWGRgM4P1XA=
-github.com/kyma-project/kyma/components/function-controller v0.0.0-20200526093810-45c748b13083 h1:7uuT7T9Gr3mqClSeeC0TcLxnwD5MDUaD8zA7IZZpS/Y=
-github.com/kyma-project/kyma/components/function-controller v0.0.0-20200526093810-45c748b13083/go.mod h1:LDW/m+aG1DCf7+uMK91VFm9sX02Y8Rn8gJ/aUX0vIls=
+github.com/kyma-project/kyma/components/function-controller v0.0.0-20200507074609-9796320d6479 h1:/ZoA9bu5vWyx/7xtSGg1gRm5vWaHd5uaM38YKfJ3xBA=
+github.com/kyma-project/kyma/components/function-controller v0.0.0-20200507074609-9796320d6479/go.mod h1:LDW/m+aG1DCf7+uMK91VFm9sX02Y8Rn8gJ/aUX0vIls=
 github.com/lyft/protoc-gen-validate v0.0.13/go.mod h1:XbGvPuh87YZc5TdIa2/I4pLk0QoUACkjt2znoq26NVQ=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/mailru/easyjson v0.0.0-20160728113105-d5b7844b561a/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
