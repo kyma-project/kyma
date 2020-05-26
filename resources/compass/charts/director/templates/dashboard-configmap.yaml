@@ -100,7 +100,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "compass_director_tenants_total_quantity",
+              "expr": "sum(compass_director_tenants_total_quantity)",
               "format": "time_series",
               "instant": false,
               "interval": "10s",
@@ -111,7 +111,7 @@ data:
               "step": 15
             },
             {
-              "expr": "compass_director_tenants_active_total_quantity",
+              "expr": "sum(compass_director_tenants_active_total_quantity)",
               "format": "time_series",
               "instant": false,
               "interval": "10s",
@@ -122,7 +122,7 @@ data:
               "step": 20
             },
             {
-              "expr": "compass_director_tenants_total_quantity-compass_director_tenants_active_total_quantity",
+              "expr": "sum(compass_director_tenants_total_quantity-compass_director_tenants_active_total_quantity)",
               "format": "time_series",
               "instant": false,
               "interval": "10s",
@@ -133,7 +133,7 @@ data:
               "step": 20
             },
             {
-              "expr": "compass_director_used_tenants_count",
+              "expr": "sum(compass_director_used_tenants_count)",
               "format": "time_series",
               "instant": false,
               "interval": "10s",
@@ -167,7 +167,7 @@ data:
             {
               "$$hashKey": "object:1242",
               "decimals": 0,
-              "format": "short",
+              "format": "none",
               "logBase": 1,
               "min": "0",
               "show": true
@@ -242,7 +242,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "compass_director_applications_total_quantity",
+              "expr": "sum(compass_director_applications_total_quantity)",
               "format": "time_series",
               "instant": false,
               "interval": "10s",
@@ -276,7 +276,7 @@ data:
             {
               "$$hashKey": "object:1242",
               "decimals": 0,
-              "format": "short",
+              "format": "none",
               "logBase": 1,
               "min": "0",
               "show": true
@@ -284,7 +284,7 @@ data:
             {
               "$$hashKey": "object:1243",
               "decimals": 0,
-              "format": "short",
+              "format": "none",
               "logBase": 1,
               "min": "0",
               "show": true
@@ -350,7 +350,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "compass_director_runtimes_total_quantity",
+              "expr": "sum(compass_director_runtimes_total_quantity)",
               "format": "time_series",
               "instant": false,
               "interval": "10s",
@@ -384,7 +384,7 @@ data:
             {
               "$$hashKey": "object:1242",
               "decimals": 0,
-              "format": "short",
+              "format": "none",
               "logBase": 1,
               "min": "0",
               "show": true
@@ -392,7 +392,7 @@ data:
             {
               "$$hashKey": "object:1243",
               "decimals": 0,
-              "format": "short",
+              "format": "none",
               "logBase": 1,
               "min": "0",
               "show": true
