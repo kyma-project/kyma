@@ -19,15 +19,19 @@ const (
 
 // StepFactoryCreator knows how to create an instance of the StepFactory
 type StepFactoryCreator interface {
-	NewInstallStepFactory(overrides.OverrideData, kymasources.LegacyKymaSourceConfig) (StepFactory, error)
-	NewUninstallStepFactory() (StepFactory, error)
+	NewInstallStepFactory(overrides.OverrideData, kymasources.LegacyKymaSourceConfig) (InstallStepFactory, error)
+	NewUninstallStepFactory() (UninstallStepFactory, error)
 }
 
 type StepList []Step
 
 // StepFactory defines the contract for obtaining an instance of an installation/uninstallation Step
-type StepFactory interface {
-	GetSteps() (StepList, error)
+type InstallStepFactory interface {
+	InstallStepList() (StepList, error)
+}
+
+type UninstallStepFactory interface {
+	UninstallStepList() (StepList, error)
 }
 
 type stepFactory struct {
@@ -102,7 +106,7 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]kymahelm.Relea
 }
 
 // NewInstallStepFactory returns implementation of StepFactory interface used to install or upgrade Kyma
-func (sfc *stepFactoryCreator) NewInstallStepFactory(overrideData overrides.OverrideData, legacySourceConfig kymasources.LegacyKymaSourceConfig) (StepFactory, error) {
+func (sfc *stepFactoryCreator) NewInstallStepFactory(overrideData overrides.OverrideData, legacySourceConfig kymasources.LegacyKymaSourceConfig) (InstallStepFactory, error) {
 
 	installedReleases, err := sfc.getInstalledReleases()
 	if err != nil {
@@ -118,7 +122,7 @@ func (sfc *stepFactoryCreator) NewInstallStepFactory(overrideData overrides.Over
 }
 
 // NewUninstallStepFactory returns implementation of StepFactory interface used to uninstall Kyma
-func (sfc *stepFactoryCreator) NewUninstallStepFactory() (StepFactory, error) {
+func (sfc *stepFactoryCreator) NewUninstallStepFactory() (UninstallStepFactory, error) {
 
 	installedReleases, err := sfc.getInstalledReleases()
 	if err != nil {
@@ -130,7 +134,7 @@ func (sfc *stepFactoryCreator) NewUninstallStepFactory() (StepFactory, error) {
 	}, nil
 }
 
-func (isf installStepFactory) GetSteps() (StepList, error) {
+func (isf installStepFactory) InstallStepList() (StepList, error) {
 	//TODO: implement
 	return nil, nil
 }
@@ -170,7 +174,7 @@ func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) (Step, e
 	return inststp, nil
 }
 
-func (isf uninstallStepFactory) GetSteps() (StepList, error) {
+func (isf uninstallStepFactory) UninstallStepList() (StepList, error) {
 	//TODO: implement
 	return nil, nil
 }

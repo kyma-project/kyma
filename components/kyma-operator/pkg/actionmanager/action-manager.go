@@ -10,10 +10,12 @@ import (
 	"k8s.io/client-go/util/retry"
 )
 
+const labelName = "action"
+
 // ActionManager .
 type ActionManager interface {
 	// RemoveActionLabel .
-	RemoveActionLabel(name string, namespace string, labelName string) error
+	RemoveActionLabel(name string, namespace string) error
 }
 
 //KymaActionManager .
@@ -31,7 +33,8 @@ func NewKymaActionManager(internalClientset *clientset.Clientset, installationLi
 }
 
 //RemoveActionLabel .
-func (am *KymaActionManager) RemoveActionLabel(name string, namespace string, labelName string) error {
+func (am *KymaActionManager) RemoveActionLabel(name string, namespace string) error {
+
 	retryErr := retry.OnError(retry.DefaultRetry, func(err error) bool {
 		return true // retry on every kind of error
 	}, func() error {
