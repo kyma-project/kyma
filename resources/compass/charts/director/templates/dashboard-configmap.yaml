@@ -1429,7 +1429,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "compass_tenantfetcher_eventing_requests_total",
+              "expr": "sum(compass_tenantfetcher_eventing_requests_total) by (code, desc)",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -1532,7 +1532,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "compass_tenantfetcher_eventing_requests_total",
+              "expr": "sum(compass_tenantfetcher_eventing_requests_total) by (code, desc)",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1811,7 +1811,7 @@ data:
         "list": []
       },
       "time": {
-        "from": "now-5m",
+        "from": "now-30m",
         "to": "now"
       },
       "timepicker": {
@@ -1834,6 +1834,6 @@ data:
       "variables": {
         "list": []
       },
-      "version": 2
+      "version": 1
     }
 {{- end }}

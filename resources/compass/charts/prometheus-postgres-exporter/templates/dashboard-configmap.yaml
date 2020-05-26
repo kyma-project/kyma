@@ -2951,7 +2951,9 @@ data:
       "tags": [
         "postgres",
         "db",
-        "stats"
+        "stats",
+        "kyma",
+        "compass"
       ],
       "templating": {
         "list": [
@@ -3182,7 +3184,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Compass PostgreSQL Database",
+      "title": "Compass / Database",
       "uid": "000000039",
       "variables": {
         "list": []
