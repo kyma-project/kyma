@@ -110,6 +110,24 @@ func main() {
 
 	installationFinalizerManager := finalizer.NewManager(consts.InstFinalizer)
 
+	log.Println("waiting for 15 seconds from now....")
+	time.Sleep(5 * time.Second)
+	log.Println("10 seconds left...")
+	time.Sleep(5 * time.Second)
+	log.Println("5 seconds left...")
+	time.Sleep(5 * time.Second)
+	log.Println("waiting for completion of rollback of release \"dex\"")
+	success, err := helmClient.WaitForReleaseRollback("dex")
+	if err != nil {
+		log.Fatalf("Error: %s", err.Error())
+	}
+
+	if !success {
+		log.Fatal("Timeout occured")
+	}
+
+	panic("padu")
+
 	//////////////////////////////////////////
 	//SETUP BUSINESS DOMAIN MODULES
 	//////////////////////////////////////////

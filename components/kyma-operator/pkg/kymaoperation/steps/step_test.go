@@ -53,7 +53,7 @@ func TestSteps(t *testing.T) {
 			Convey("rollback failed upgrade", func() {
 				//given
 				upgradeError := fmt.Sprintf("Helm upgrade error: %s", "failed to upgrade release")
-				expectedError := fmt.Sprintf("%s\nHelm rollback of %s was successfull", upgradeError, testReleaseName)
+				expectedError := fmt.Sprintf("%s\nHelm rollback of release \"%s\" was successfull", upgradeError, testReleaseName)
 
 				mockHelmClient := &mockHelmClient{
 					failUpgradingRelease: true,
@@ -71,7 +71,7 @@ func TestSteps(t *testing.T) {
 			Convey("return an error when release rollback fails", func() {
 				//given
 				upgradeError := fmt.Sprintf("Helm upgrade error: %s", "failed to upgrade release")
-				rollbackError := fmt.Sprintf("Helm rollback of %s failed with an error: %s", testReleaseName, "failed to rollback release")
+				rollbackError := fmt.Sprintf("Helm rollback of release \"%s\" failed with an error: %s", testReleaseName, "failed to rollback release")
 				expectedError := fmt.Sprintf("%s \n %s \n", upgradeError, rollbackError)
 
 				mockHelmClient := &mockHelmClient{
@@ -118,7 +118,7 @@ func TestSteps(t *testing.T) {
 			Convey("delete failed release if it is deletable", func() {
 				//given
 				installError := fmt.Sprintf("Helm install error: %s", "failed to install release")
-				expectedError := fmt.Sprintf("%s\nHelm delete of %s was successfull", installError, testReleaseName)
+				expectedError := fmt.Sprintf("%s\nHelm delete of release \"%s\" was successfull", installError, testReleaseName)
 
 				mockHelmClient := &mockHelmClient{
 					failInstallingRelease: true,
@@ -155,7 +155,7 @@ func TestSteps(t *testing.T) {
 			Convey("return an error when getting the release status fails", func() {
 				//given
 				installError := fmt.Sprintf("Helm install error: %s", "failed to install release")
-				isDeletableError := fmt.Sprintf("Checking status of %s failed with an error: %s", testReleaseName, "failed to get release status")
+				isDeletableError := fmt.Sprintf("Checking status of release \"%s\" failed with an error: %s", testReleaseName, "failed to get release status")
 				expectedError := fmt.Sprintf("%s \n %s \n", installError, isDeletableError)
 
 				mockHelmClient := &mockHelmClient{
@@ -173,7 +173,7 @@ func TestSteps(t *testing.T) {
 			Convey("return an error when release deletion fails", func() {
 				//given
 				installError := fmt.Sprintf("Helm install error: %s", "failed to install release")
-				deletingError := fmt.Sprintf("Helm delete of %s failed with an error: %s", testReleaseName, "failed to delete release")
+				deletingError := fmt.Sprintf("Helm delete of release \"%s\" failed with an error: %s", testReleaseName, "failed to delete release")
 				expectedError := fmt.Sprintf("%s \n %s \n", installError, deletingError)
 
 				mockHelmClient := &mockHelmClient{
@@ -313,6 +313,14 @@ func (hc *mockHelmClient) UpgradeRelease(chartDir, releaseName, overrides string
 }
 
 func (hc *mockHelmClient) PrintRelease(release *release.Release) {}
+
+func (hc *mockHelmClient) WaitForReleaseDelete(releaseName string) (bool, error) {
+	return true, nil
+}
+
+func (hc *mockHelmClient) WaitForReleaseRollback(releaseName string) (bool, error) {
+	return true, nil
+}
 
 // SourceGetter Mock
 
