@@ -12,6 +12,54 @@ type Event interface {
 	IsEvent()
 }
 
+type APIRule struct {
+	Name    string           `json:"name"`
+	Service *APIRuleService  `json:"service"`
+	Gateway string           `json:"gateway"`
+	Rules   []*Rule          `json:"rules"`
+	Status  *APIRuleStatuses `json:"status"`
+}
+
+type APIRuleConfig struct {
+	Name   string                 `json:"name"`
+	Config map[string]interface{} `json:"config"`
+}
+
+type APIRuleConfigInput struct {
+	Name   string                 `json:"name"`
+	Config map[string]interface{} `json:"config"`
+}
+
+type APIRuleInput struct {
+	Host        string       `json:"host"`
+	ServiceName string       `json:"serviceName"`
+	ServicePort int          `json:"servicePort"`
+	Gateway     string       `json:"gateway"`
+	Rules       []*RuleInput `json:"rules"`
+}
+
+type APIRuleService struct {
+	Host string `json:"host"`
+	Name string `json:"name"`
+	Port int    `json:"port"`
+}
+
+type APIRuleStatus struct {
+	Code string  `json:"code"`
+	Desc *string `json:"desc"`
+}
+
+type APIRuleStatuses struct {
+	APIRuleStatus        *APIRuleStatus `json:"apiRuleStatus"`
+	AccessRuleStatus     *APIRuleStatus `json:"accessRuleStatus"`
+	VirtualServiceStatus *APIRuleStatus `json:"virtualServiceStatus"`
+}
+
+type APIRuleEvent struct {
+	Type    EventType `json:"type"`
+	APIRule *APIRule  `json:"apiRule"`
+}
+
 type BackendModule struct {
 	Name string `json:"name"`
 }
@@ -68,6 +116,20 @@ type ResourceAttributes struct {
 	NameArg         *string `json:"nameArg"`
 	NamespaceArg    *string `json:"namespaceArg"`
 	IsChildResolver bool    `json:"isChildResolver"`
+}
+
+type Rule struct {
+	Path             string           `json:"path"`
+	Methods          []string         `json:"methods"`
+	AccessStrategies []*APIRuleConfig `json:"accessStrategies"`
+	Mutators         []*APIRuleConfig `json:"mutators"`
+}
+
+type RuleInput struct {
+	Path             string                `json:"path"`
+	Methods          []string              `json:"methods"`
+	AccessStrategies []*APIRuleConfigInput `json:"accessStrategies"`
+	Mutators         []*APIRuleConfigInput `json:"mutators"`
 }
 
 type EventType string

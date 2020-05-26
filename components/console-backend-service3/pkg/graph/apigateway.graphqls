@@ -1,0 +1,68 @@
+# API Gateway Controller
+
+type ApiRuleEvent {
+    type: EventType!
+    apiRule: APIRule!
+}
+
+type APIRule {
+    name: String!
+    service: APIRuleService!
+    gateway: String!
+    rules: [Rule!]!
+    status: APIRuleStatuses!
+}
+
+type APIRuleService{
+    host: String!
+    name: String!
+    port: Int!
+}
+
+type Rule {
+    path: String!
+    methods: [String!]!
+    accessStrategies: [APIRuleConfig!]!
+    mutators: [APIRuleConfig!]
+}
+
+type APIRuleConfig {
+    name: String!
+    config: Map!
+}
+
+type APIRuleStatuses {
+    apiRuleStatus: APIRuleStatus
+    accessRuleStatus: APIRuleStatus
+    virtualServiceStatus: APIRuleStatus
+}
+
+type APIRuleStatus {
+    code: String!
+    desc: String
+}
+
+input APIRuleInput {
+    host: String!
+    serviceName: String!
+    servicePort: Int!
+    gateway: String!
+    rules: [RuleInput!]!
+}
+
+input RuleInput {
+    path: String!
+    methods: [String!]!
+    accessStrategies: [APIRuleConfigInput!]!
+    mutators: [APIRuleConfigInput!]
+}
+
+input APIRuleConfigInput {
+    name: String!
+    config: Map!
+}
+
+extend type Query {
+    APIRules(namespace: String!, serviceName: String, hostname: String): [APIRule!]! @HasAccess(attributes: {resource: "apirules", verb: "list", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    APIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "get", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+}
