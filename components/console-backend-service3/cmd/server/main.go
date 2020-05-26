@@ -12,7 +12,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"log"
 	"net/http"
 	"time"
 
@@ -69,25 +68,15 @@ func main() {
 
 	var authenticator authenticatorpkg.Request
 
-		authenticator, err = authn.NewOIDCAuthenticator(&cfg.OIDC)
-		exitOnError(err, "Error while creating OIDC authenticator")
-		sarClient := kubeClient.AuthorizationV1().SubjectAccessReviews()
-		authorizer, err := authz.NewAuthorizer(sarClient, cfg.SARCacheConfig)
-		exitOnError(err, "Failed to create authorizer")
+	authenticator, err = authn.NewOIDCAuthenticator(&cfg.OIDC)
+	exitOnError(err, "Error while creating OIDC authenticator")
+	sarClient := kubeClient.AuthorizationV1().SubjectAccessReviews()
+	authorizer, err := authz.NewAuthorizer(sarClient, cfg.SARCacheConfig)
+	exitOnError(err, "Failed to create authorizer")
 
-		srvConfig.Directives.HasAccess = authz.NewRBACDirective(authorizer, kubeClient.Discovery())
-
-
-	//srv := graphqlhandler.NewDefaultServer(generated.NewExecutableSchema(srvConfig))
-
-	//http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	//http.Handle("/query", srv)
+	srvConfig.Directives.HasAccess = authz.NewRBACDirective(authorizer, kubeClient.Discovery())
 
 	runServer(stopCh, cfg, srvConfig, authenticator)
-
-	bind := fmt.Sprintf("%s:%v", cfg.Host,cfg.Port)
-	log.Printf("connect to http://%s/ for GraphQL playground", bind)
-	log.Fatal(http.ListenAndServe(bind, nil))
 }
 
 func newRestClientConfig(kubeconfigPath string, burst int) (*restclient.Config, error) {
@@ -169,7 +158,7 @@ func runServer(stop <-chan struct{}, cfg config, srvConfig generated.Config, aut
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	srv := &http.Server{Addr: addr, Handler: serverHandler}
 
-	glog.Infof("Listening on %s", addr)
+	glog.Infof("connect to http://%s/ for GraphQL playground", addr)
 
 	go func() {
 		<-stop
