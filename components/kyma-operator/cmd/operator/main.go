@@ -58,20 +58,10 @@ func main() {
 	backoffIntervalsRaw := flag.String("backoffIntervals", "10,20,40,60,80", "Number of seconds to wait before subsequent retries")
 	overrideLogFile := flag.String("overrideLogFile", STDOUT, "Log File to Print Installation overrides. (Default: /dev/stdout)")
 	overrideLogFormat := flag.String("overrideLogFormat", "text", "Installation Override Log format (Accepted values: text or json)")
-	helmMaxHistoryStr := flag.String("helmMaxHistory", "10", "Max number of releases returned by Helm release history query")
-	helmTimeoutStr := flag.String("helmTimeout", "3600", "Number of seconds on Helm operations")
+	helmMaxHistory := flag.Int("helmMaxHistory", 10, "Max number of releases returned by Helm release history query")
+	helmTimeout := flag.Int("helmTimeout", 3600, "Number of seconds on Helm operations")
 
 	flag.Parse()
-
-	helmMaxHistory, err := strconv.Atoi(*helmMaxHistoryStr)
-	if err != nil {
-		log.Fatalf("Unable to parse Helm max history value. Error: %v", err)
-	}
-
-	helmTimeout, err := strconv.Atoi(*helmTimeoutStr)
-	if err != nil {
-		log.Fatalf("Unable to parse Helm timeout value. Error: %v", err)
-	}
 
 	backoffIntervals, err := parseBackoffIntervals(*backoffIntervalsRaw)
 	if err != nil {
@@ -98,7 +88,7 @@ func main() {
 		log.Fatalf("Unable to create logrus Instance. Error: %v", err)
 	}
 
-	helmClient, err := kymahelm.NewClient(*helmHost, *tlsKey, *tlsCrt, *TLSInsecureSkipVerify, overridesLogger, int32(helmMaxHistory), int64(helmTimeout))
+	helmClient, err := kymahelm.NewClient(*helmHost, *tlsKey, *tlsCrt, *TLSInsecureSkipVerify, overridesLogger, int32(*helmMaxHistory), int64(*helmTimeout))
 	if err != nil {
 		log.Fatalf("Unable create helm client. Error: %v", err)
 	}
