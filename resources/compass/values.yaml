@@ -92,6 +92,8 @@ global:
     script:
       configMapName: "auditlog-script"
 
+  enableCompassDefaultScenarioAssignment: true
+
   tenantConfig:
     useDefaultTenants: true
     dbPool:
@@ -276,8 +278,6 @@ global:
     dbPool:
       maxOpenConnections: 1
       maxIdleConnections: 1
-
-  enableCompassDefaultScenarioAssignment: true
 
   metrics:
     enabled: true
