@@ -9,7 +9,9 @@ metadata:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
   annotations:
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'runtime/default'
     apparmor.security.beta.kubernetes.io/allowedProfileNames: 'runtime/default'
+    seccomp.security.alpha.kubernetes.io/defaultProfileName:  'runtime/default'
     apparmor.security.beta.kubernetes.io/defaultProfileName:  'runtime/default'
 spec:
   privileged: false
