@@ -35,4 +35,4 @@ spec:
   targets:
     - name: {{ .Chart.Name }}-metrics
 
-{{- end}}
+{{- end }}

@@ -11,7 +11,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      k8s-app: {{ .Chart.Name}}-metrics
+      k8s-app: {{ .Chart.Name }}-metrics
   targetLabels:
     - k8s-app
   endpoints:

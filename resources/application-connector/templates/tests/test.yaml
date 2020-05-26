@@ -33,9 +33,9 @@ spec:
           - name: NAMESPACE
             value: {{ .Values.global.namespace }}
           - name: SKIP_SSL_VERIFY
-            value: "{{ .Values.tests.application_connector_tests.skipSslVerify }}"
+            value: {{ .Values.tests.application_connector_tests.skipSslVerify | quote }}
           - name: CENTRAL
-            value: "{{ .Values.tests.application_connector_tests.connector_service.central }}"
+            value: {{ .Values.tests.application_connector_tests.connector_service.central | quote }}
       restartPolicy: Never
 {{- end }}
 {{- end }}
