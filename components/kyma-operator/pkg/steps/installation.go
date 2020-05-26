@@ -58,14 +58,18 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 		return factoryErr
 	}
 
-	stepList, err := stepsFactory.GetSteps()
-
 	removeLabelAndReturn := func(err error) error {
 		removeLabelError := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
 		if steps.errorHandlers.CheckError("Error on removing label: ", removeLabelError) {
 			err = fmt.Errorf("%v; Error on removing label: %v", err, removeLabelError)
 		}
 		return err
+	}
+
+	stepList, err := stepsFactory.GetSteps()
+
+	if err != nil {
+		return removeLabelAndReturn(err)
 	}
 
 	err = steps.processComponents(removeLabelAndReturn, installationData, stepList)
@@ -95,14 +99,17 @@ func (steps *InstallationSteps) UninstallKyma(installationData *config.Installat
 		return factoryErr
 	}
 
-	stepList, err := stepsFactory.GetSteps()
-
 	removeLabelAndReturn := func(err error) error {
 		removeLabelError := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
 		if steps.errorHandlers.CheckError("Error on removing label: ", removeLabelError) {
 			err = fmt.Errorf("%v; Error on removing label: %v", err, removeLabelError)
 		}
 		return err
+	}
+
+	stepList, err := stepsFactory.GetSteps()
+	if err != nil {
+		return removeLabelAndReturn(err)
 	}
 
 	err = steps.processComponents(removeLabelAndReturn, installationData, stepList)
@@ -133,8 +140,7 @@ func (steps *InstallationSteps) processComponents(removeLabelAndReturn func(err 
 
 	for _, step := range stepList {
 
-		component := step
-		stepName := logPrefix + " component " + component.GetReleaseName()
+		stepName := logPrefix + " component " + step.GetReleaseName()
 		_ = steps.statusManager.InProgress(stepName)
 
 		/*
@@ -151,7 +157,7 @@ func (steps *InstallationSteps) processComponents(removeLabelAndReturn func(err 
 			func() error {
 				processErr := step.Run()
 				if steps.errorHandlers.CheckError("Step error: ", processErr) {
-					_ = steps.statusManager.Error(component.GetReleaseName(), stepName, processErr)
+					_ = steps.statusManager.Error(step.GetReleaseName(), stepName, processErr)
 					return processErr
 				}
 				return nil
@@ -162,6 +168,7 @@ func (steps *InstallationSteps) processComponents(removeLabelAndReturn func(err 
 				return time.Duration(steps.backoffIntervals[attempt]) * time.Second
 			}),
 		)
+
 		if err != nil {
 			return removeLabelAndReturn(fmt.Errorf("max number of retries reached during step: %s", stepName))
 		}
