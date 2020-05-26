@@ -10,7 +10,6 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
 	internalerrors "github.com/kyma-project/kyma/components/kyma-operator/pkg/errors"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymainstallation"
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 	serviceCatalog "github.com/kyma-project/kyma/components/kyma-operator/pkg/servicecatalog"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/statusmanager"
@@ -47,12 +46,7 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 
 	_ = steps.statusManager.InProgress("Verify installed components")
 
-	legacyKymaSourceConfig := kymasources.LegacyKymaSourceConfig{
-		KymaURL:     installationData.URL,
-		KymaVersion: installationData.KymaVersion,
-	}
-
-	stepsFactory, factoryErr := steps.stepFactoryCreator.NewInstallStepFactory(overrideData, legacyKymaSourceConfig)
+	stepsFactory, factoryErr := steps.stepFactoryCreator.NewInstallStepFactory(installationData, overrideData)
 	if factoryErr != nil {
 		_ = steps.statusManager.Error("Kyma Operator", "Verify installed components", factoryErr)
 		return factoryErr
@@ -87,7 +81,7 @@ func (steps *InstallationSteps) UninstallKyma(installationData *config.Installat
 
 	_ = steps.statusManager.InProgress("Verify components to uninstall")
 
-	stepsFactory, factoryErr := steps.stepFactoryCreator.NewUninstallStepFactory()
+	stepsFactory, factoryErr := steps.stepFactoryCreator.NewUninstallStepFactory(installationData)
 	if factoryErr != nil {
 		_ = steps.statusManager.Error("Kyma Operator", "Verify components to uninstall", factoryErr)
 		return factoryErr

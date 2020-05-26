@@ -6,6 +6,7 @@ import (
 	errors "github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
@@ -19,8 +20,8 @@ const (
 
 // StepFactoryCreator knows how to create an instance of the StepFactory
 type StepFactoryCreator interface {
-	NewInstallStepFactory(overrides.OverrideData, kymasources.LegacyKymaSourceConfig) (InstallStepFactory, error)
-	NewUninstallStepFactory() (UninstallStepFactory, error)
+	NewInstallStepFactory(*config.InstallationData, overrides.OverrideData) (InstallStepFactory, error)
+	NewUninstallStepFactory(*config.InstallationData) (UninstallStepFactory, error)
 }
 
 type StepList []Step
@@ -106,14 +107,19 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]kymahelm.Relea
 }
 
 // NewInstallStepFactory returns implementation of StepFactory interface used to install or upgrade Kyma
-func (sfc *stepFactoryCreator) NewInstallStepFactory(overrideData overrides.OverrideData, legacySourceConfig kymasources.LegacyKymaSourceConfig) (InstallStepFactory, error) {
+func (sfc *stepFactoryCreator) NewInstallStepFactory(installationData *config.InstallationData, overrideData overrides.OverrideData) (InstallStepFactory, error) {
+
+	legacyKymaSourceConfig := kymasources.LegacyKymaSourceConfig{
+		KymaURL:     installationData.URL,
+		KymaVersion: installationData.KymaVersion,
+	}
 
 	installedReleases, err := sfc.getInstalledReleases()
 	if err != nil {
 		return nil, err
 	}
 
-	sourceGetter := kymasources.NewSourceGetterCreator(sfc.kymaPackages, sfc.fsWrapper, sfc.kymaDir).NewGetterFor(legacySourceConfig)
+	sourceGetter := kymasources.NewSourceGetterCreator(sfc.kymaPackages, sfc.fsWrapper, sfc.kymaDir).NewGetterFor(legacyKymaSourceConfig)
 	return installStepFactory{
 		stepFactory{sfc.helmClient, installedReleases},
 		sourceGetter,
@@ -122,7 +128,7 @@ func (sfc *stepFactoryCreator) NewInstallStepFactory(overrideData overrides.Over
 }
 
 // NewUninstallStepFactory returns implementation of StepFactory interface used to uninstall Kyma
-func (sfc *stepFactoryCreator) NewUninstallStepFactory() (UninstallStepFactory, error) {
+func (sfc *stepFactoryCreator) NewUninstallStepFactory(installationData *config.InstallationData) (UninstallStepFactory, error) {
 
 	installedReleases, err := sfc.getInstalledReleases()
 	if err != nil {
