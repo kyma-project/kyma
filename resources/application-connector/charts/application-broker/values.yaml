@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   pullPolicy: IfNotPresent
 
-# The REB informs the Service Catalog that its available services changed and should be relisted.
+# The AB informs the Service Catalog that its available services changed and should be relisted.
 # Due to performance reason, many actions (like adding, updating, or deleting Applications)
 # which happen during the period defined in `brokerRelistDurationWindow`
 # result in a single Service Catalog relist trigger.

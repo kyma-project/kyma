@@ -20,7 +20,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}-gateway-tests
       containers:
         - name: tests
-          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway_tests.dir }}application-gateway-tests:{{ .Values.global.application_gateway_tests.version }}
+          image: {{ .Values.global.containerRegistry.path }}/application-gateway-tests:{{ .Values.global.application_gateway_tests.version }}
           imagePullPolicy: {{ .Values.tests.pullPolicy }}
           env:
             - name: GATEWAY_NAMESPACE

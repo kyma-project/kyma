@@ -66,7 +66,7 @@ spec:
           image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200312-fc2a4147
           env:
             - name: API_PACKAGES_SUPPORT
-              value: "{{ .Values.global.disableLegacyConnectivity }}"
+              value: {{ .Values.global.disableLegacyConnectivity | quote }}
           command:
             - /bin/bash
             - -c

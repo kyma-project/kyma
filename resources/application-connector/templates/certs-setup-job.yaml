@@ -19,7 +19,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: {{ .Chart.Name }}-certs-setup-job
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_connectivity_certs_setup_job.dir }}application-connectivity-certs-setup-job:{{ .Values.global.application_connectivity_certs_setup_job.version }}"
+        image: "{{ .Values.global.containerRegistry.path }}/application-connectivity-certs-setup-job:{{ .Values.global.application_connectivity_certs_setup_job.version }}"
         args:
           - "/appconnectivitycertssetupjob"
           - "--connectorCertificateSecret={{ .Values.application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.namespace }}/{{ .Values.application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.name }}"

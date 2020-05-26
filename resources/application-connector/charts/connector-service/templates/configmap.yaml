@@ -11,4 +11,4 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
 
-{{- end}}
+{{- end }}

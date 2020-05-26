@@ -4,9 +4,9 @@ metadata:
   name: {{ template "fullname" . }}
   labels:
     app: {{ template "name" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   rules:
   - services: ["application-broker.kyma-integration.svc.cluster.local"]
@@ -19,9 +19,9 @@ metadata:
   name: {{ template "fullname" . }}
   labels:
     app: {{ template "name" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   subjects:
   - user: "cluster.local/ns/kyma-system/sa/service-catalog-controller-manager"

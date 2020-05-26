@@ -4,7 +4,7 @@ metadata:
   name: {{ .Chart.Name }}
   namespace: {{ .Values.global.namespace }}
   annotations:
-    "auth.istio.io/{{.Values.service.externalPort}}": NONE
+    "auth.istio.io/{{ .Values.service.externalPort }}": NONE
   labels:
     app: {{ .Chart.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
