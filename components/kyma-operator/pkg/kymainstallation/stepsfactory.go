@@ -23,9 +23,11 @@ type StepFactoryCreator interface {
 	NewUninstallStepFactory() (StepFactory, error)
 }
 
+type StepList []Step
+
 // StepFactory defines the contract for obtaining an instance of an installation/uninstallation Step
 type StepFactory interface {
-	NewStep(component v1alpha1.KymaComponent) (Step, error)
+	GetSteps() (StepList, error)
 }
 
 type stepFactory struct {
@@ -128,6 +130,11 @@ func (sfc *stepFactoryCreator) NewUninstallStepFactory() (StepFactory, error) {
 	}, nil
 }
 
+func (isf installStepFactory) GetSteps() (StepList, error) {
+	//TODO: implement
+	return nil, nil
+}
+
 // NewStep method returns instance of the installation/upgrade step based on component details
 func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) (Step, error) {
 	step := step{
@@ -161,6 +168,11 @@ func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) (Step, e
 	}
 
 	return inststp, nil
+}
+
+func (isf uninstallStepFactory) GetSteps() (StepList, error) {
+	//TODO: implement
+	return nil, nil
 }
 
 // NewStep method returns instance of the uninstallation step based on component details

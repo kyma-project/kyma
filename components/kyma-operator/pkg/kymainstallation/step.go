@@ -14,9 +14,10 @@ import (
 type Step interface {
 	Run() error
 	ToString() string
+	GetReleaseName() string
 }
 
-// Helm methods common to all steps
+// Helm functions common to all steps
 type HelmClient interface {
 	IsReleaseDeletable(rname string) (bool, error)
 	InstallRelease(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error)
@@ -36,6 +37,11 @@ func (s step) ToString() string {
 	return fmt.Sprintf("Component: %s, Release: %s, Namespace: %s", s.component.Name, s.component.GetReleaseName(), s.component.Namespace)
 }
 
+func (s step) GetReleaseName() string {
+	return s.component.GetReleaseName()
+}
+
+// Used to support the contract in case there's no action to do (e.g. uninstalling a non-existing release)
 type noStep struct {
 	step
 }

@@ -58,7 +58,17 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 		return factoryErr
 	}
 
-	err := steps.processComponents(installationData, stepsFactory)
+	stepList, err := stepsFactory.GetSteps()
+
+	removeLabelAndReturn := func(err error) error {
+		removeLabelError := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
+		if steps.errorHandlers.CheckError("Error on removing label: ", removeLabelError) {
+			err = fmt.Errorf("%v; Error on removing label: %v", err, removeLabelError)
+		}
+		return err
+	}
+
+	err = steps.processComponents(removeLabelAndReturn, installationData, stepList)
 	if err != nil {
 		return err
 	}
@@ -85,7 +95,17 @@ func (steps *InstallationSteps) UninstallKyma(installationData *config.Installat
 		return factoryErr
 	}
 
-	err = steps.processComponents(installationData, stepsFactory)
+	stepList, err := stepsFactory.GetSteps()
+
+	removeLabelAndReturn := func(err error) error {
+		removeLabelError := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
+		if steps.errorHandlers.CheckError("Error on removing label: ", removeLabelError) {
+			err = fmt.Errorf("%v; Error on removing label: %v", err, removeLabelError)
+		}
+		return err
+	}
+
+	err = steps.processComponents(removeLabelAndReturn, installationData, stepList)
 	if steps.errorHandlers.CheckError("uninstall error: ", err) {
 		return err
 	}
@@ -105,33 +125,29 @@ func (steps *InstallationSteps) PrintStep(stepName string) {
 	log.Println("---------------------------")
 }
 
-func (steps *InstallationSteps) processComponents(installationData *config.InstallationData, stepsFactory kymainstallation.StepFactory) error {
+func (steps *InstallationSteps) processComponents(removeLabelAndReturn func(err error) error, installationData *config.InstallationData, stepList kymainstallation.StepList) error {
 
 	log.Println("Processing Kyma components")
 
-	removeLabelAndReturn := func(err error) error {
-		removeLabelError := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
-		if steps.errorHandlers.CheckError("Error on removing label: ", removeLabelError) {
-			err = fmt.Errorf("%v; Error on removing label: %v", err, removeLabelError)
-		}
-		return err
-	}
-
 	logPrefix := installationData.Action
 
-	for _, component := range installationData.Components {
+	for _, step := range stepList {
 
+		component := step
 		stepName := logPrefix + " component " + component.GetReleaseName()
 		_ = steps.statusManager.InProgress(stepName)
 
-		step, err := stepsFactory.NewStep(component)
-		if err != nil {
-			return removeLabelAndReturn(err)
-		}
+		/*
+		   //We prepare entire list of steps upfront
+		   			step, err := stepsFactory.NewStep(component)
+		   			if err != nil {
+		   				return removeLabelAndReturn(err)
+		   			}
+		*/
 
 		steps.PrintStep(stepName)
 
-		err = retry.Do(
+		err := retry.Do(
 			func() error {
 				processErr := step.Run()
 				if steps.errorHandlers.CheckError("Step error: ", processErr) {
