@@ -4,7 +4,7 @@ if [ -f "/etc/istio/overrides.yaml" ]; then
   yq merge -a -x /etc/istio/config.yaml /etc/istio/overrides.yaml > /etc/combo.yaml
 
   istioctl manifest generate -f /etc/combo.yaml | kubectl delete -f -
-  kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}"
+  kubectl delete cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}"
 else
   #Old way: apply single-value Helm overrides using `istioctl --set "key=val"`
   overrides=$(kubectl get cm --all-namespaces -l "installer=overrides,component=istio" -o go-template --template='{{ range .items }}{{ range $key, $value := .data }}{{ if ne $key "kyma_istio_control_plane" }}{{ printf "%s: %s\n" $key . }}{{ end }}{{ end }}{{ end }}' )
