@@ -25,13 +25,13 @@ type UninstallStepsProvider interface {
 
 //InstallationSteps .
 type InstallationSteps struct {
-	serviceCatalog         serviceCatalog.ClientInterface
-	errorHandlers          internalerrors.ErrorHandlersInterface
-	statusManager          statusmanager.StatusManager
-	actionManager          actionmanager.ActionManager
-	installStepsProvider   InstallStepsProvider
-	uninstallStepsProvider UninstallStepsProvider
-	backoffIntervals       []uint
+	serviceCatalog        serviceCatalog.ClientInterface
+	errorHandlers         internalerrors.ErrorHandlersInterface
+	statusManager         statusmanager.StatusManager
+	actionManager         actionmanager.ActionManager
+	installStepsFactory   InstallStepsProvider
+	uninstallStepsFactory UninstallStepsProvider
+	backoffIntervals      []uint
 }
 
 // New .
@@ -39,13 +39,13 @@ func New(serviceCatalog serviceCatalog.ClientInterface,
 	statusManager statusmanager.StatusManager, actionManager actionmanager.ActionManager,
 	stepFactoryCreator kymainstallation.StepFactoryCreator, backoffIntervals []uint) *InstallationSteps {
 	steps := &InstallationSteps{
-		serviceCatalog:         serviceCatalog,
-		errorHandlers:          &internalerrors.ErrorHandlers{},
-		statusManager:          statusManager,
-		actionManager:          actionManager,
-		installStepsProvider:   nil, //TODO: Implement
-		uninstallStepsProvider: nil, //TODO: Implement
-		backoffIntervals:       backoffIntervals,
+		serviceCatalog:        serviceCatalog,
+		errorHandlers:         &internalerrors.ErrorHandlers{},
+		statusManager:         statusManager,
+		actionManager:         actionManager,
+		installStepsFactory:   nil, //TODO: Implement
+		uninstallStepsFactory: nil, //TODO: Implement
+		backoffIntervals:      backoffIntervals,
 	}
 
 	return steps
@@ -54,17 +54,17 @@ func New(serviceCatalog serviceCatalog.ClientInterface,
 //InstallKyma .
 func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 
-	_ = steps.statusManager.InProgress("Verify installed components")
-
-	stepsFactory, factoryErr := steps.installStepsProvider.For(installationData, overrideData)
-	if factoryErr != nil {
-		_ = steps.statusManager.Error("Kyma Operator", "Verify installed components", factoryErr)
-		return factoryErr
-	}
-
 	removeLabelAndReturn := steps.removeLabelOnError(installationData.Context.Name, installationData.Context.Namespace)
 
-	stepList, err := stepsFactory.InstallStepList()
+	_ = steps.statusManager.InProgress("Verify installed components")
+
+	installStepsFactory, err := steps.installStepsFactory.For(installationData, overrideData)
+	if err != nil {
+		_ = steps.statusManager.Error("Kyma Operator", "Verifying installed components", err)
+		return err
+	}
+
+	stepList, err := installStepsFactory.InstallStepList()
 
 	if err != nil {
 		return removeLabelAndReturn(err)
@@ -86,20 +86,22 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 //UninstallKyma .
 func (steps *InstallationSteps) UninstallKyma(installationData *config.InstallationData) error {
 
+	removeLabelAndReturn := steps.removeLabelOnError(installationData.Context.Name, installationData.Context.Namespace)
+
 	err := steps.DeprovisionAzureResources(DefaultDeprovisionConfig(), installationData.Context)
 	steps.errorHandlers.LogError("An error during deprovisioning: ", err)
 
 	_ = steps.statusManager.InProgress("Verify components to uninstall")
 
-	stepsFactory, factoryErr := steps.uninstallStepsProvider.For(installationData)
-	if factoryErr != nil {
-		_ = steps.statusManager.Error("Kyma Operator", "Verify components to uninstall", factoryErr)
-		return factoryErr
+	uninstallStepsFactory, err := steps.uninstallStepsFactory.For(installationData)
+
+	if err != nil {
+		_ = steps.statusManager.Error("Kyma Operator", "Verify components to uninstall", err)
+		return err
 	}
 
-	removeLabelAndReturn := steps.removeLabelOnError(installationData.Context.Name, installationData.Context.Namespace)
+	stepList, err := uninstallStepsFactory.UninstallStepList()
 
-	stepList, err := stepsFactory.UninstallStepList()
 	if err != nil {
 		return removeLabelAndReturn(err)
 	}
