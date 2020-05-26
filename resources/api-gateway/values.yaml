@@ -67,6 +67,10 @@ config:
   tolerations: []
   annotations: {}
 
+  # Port configuration
+  ports:
+    metrics: 8080
+
 # Configure node affinity
 affinity: {}
 
