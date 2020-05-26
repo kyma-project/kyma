@@ -22,20 +22,11 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 rules:
   - apiGroups: [""]
-    resources: ["namespaces", "configmaps"]
-    verbs: ["create", "get", "delete", "list"]
-  - apiGroups: [""]
-    resources: ["services"]
-    verbs: ["list", "create"]
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
-    verbs: ["list", "create", "get"]
-  - apiGroups: ["servicecatalog.k8s.io"]
-    resources: ["clusterserviceclasses", "clusterserviceplans"]
-    verbs: ["watch", "list", "get"]
+    resources: ["namespaces"]
+    verbs: ["list"]
   - apiGroups: ["ui.kyma-project.io"]
     resources: ["backendmodules"]
-    verbs: ["list", "get"]
+    verbs: ["list"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
