@@ -15,7 +15,7 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/conditionmanager"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/consts"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/finalizer"
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/installation"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/k8s"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymaoperation/actions"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
@@ -128,7 +128,7 @@ func main() {
 	stepFactoryCreator := actions.NewStepFactoryCreator(helmClient, &sgls)
 	opExecutor := kymaoperation.NewExecutor(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator, backoffIntervals)
 
-	installationController := installation.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, opExecutor, conditionManager, installationFinalizerManager, internalClient)
+	installationController := k8s.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, opExecutor, conditionManager, installationFinalizerManager, internalClient)
 
 	//////////////////////////////////////////
 	//STARTING THE THING

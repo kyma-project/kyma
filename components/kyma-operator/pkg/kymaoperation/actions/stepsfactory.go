@@ -28,12 +28,14 @@ type SourceGetterLegacySupport interface {
 	SourceGetterFor(kymaURL, kymaVersion string) SourceGetter
 }
 
-//TODO: Duplicated interface, see kymasources package
-// Source Getter Allows to fetch component sources.
+//TODO: Duplicated interface, see kymasources.SourceGetter
+// SourceGetter defines contract for fetching component sources.
 type SourceGetter interface {
+	// SrcDirFor returns a local filesystem directory path to the component sources.
 	SrcDirFor(component v1alpha1.KymaComponent) (string, error)
 }
 
+//StepList is a list of steps corresponding to a list of components as defined by Installation CR
 type StepList []Step
 
 // StepFactory defines the contract for obtaining an instance of an installation/uninstallation Step
@@ -48,6 +50,7 @@ type UninstallStepFactory interface {
 type stepFactory struct {
 	helmClient        kymahelm.ClientInterface
 	installedReleases map[string]kymahelm.ReleaseStatus
+	installationData  *config.InstallationData
 }
 
 // StepFactory implementation for installation operation
@@ -66,11 +69,6 @@ type uninstallStepFactory struct {
 type stepFactoryCreator struct {
 	helmClient          kymahelm.ClientInterface
 	sourceGetterSupport SourceGetterLegacySupport
-	/*
-		kymaPackages kymasources.KymaPackages
-		fsWrapper    kymasources.FilesystemWrapper
-		kymaDir      string
-	*/
 }
 
 // NewStepFactoryCreator returns a new StepFactoryCreator instance.
@@ -126,9 +124,8 @@ func (sfc *stepFactoryCreator) NewInstallStepFactory(installationData *config.In
 	}
 
 	sourceGetter := sfc.sourceGetterSupport.SourceGetterFor(installationData.URL, installationData.KymaVersion)
-	//kymasources.NewSourceGetterCreator(sfc.kymaPackages, sfc.fsWrapper, sfc.kymaDir).NewGetterFor(legacyKymaSourceConfig)
 	return installStepFactory{
-		stepFactory{sfc.helmClient, installedReleases},
+		stepFactory{sfc.helmClient, installedReleases, installationData},
 		sourceGetter,
 		overrideData,
 	}, nil
@@ -143,17 +140,32 @@ func (sfc *stepFactoryCreator) NewUninstallStepFactory(installationData *config.
 	}
 
 	return &uninstallStepFactory{
-		stepFactory{sfc.helmClient, installedReleases},
+		stepFactory{sfc.helmClient, installedReleases, installationData},
 	}, nil
 }
 
-func (isf installStepFactory) InstallStepList() (StepList, error) {
-	//TODO: implement
-	return nil, nil
+// stepList iterates over configured components and returns a list of coressponding steps.
+func (sf stepFactory) stepList(newStepFn func(component v1alpha1.KymaComponent) (Step, error)) (StepList, error) {
+	res := StepList{}
+	for _, component := range sf.installationData.Components {
+
+		step, err := newStepFn(component)
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, step)
+	}
+
+	return res, nil
 }
 
-// NewStep method returns instance of the installation/upgrade step based on component details
-func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) (Step, error) {
+func (isf installStepFactory) InstallStepList() (StepList, error) {
+	return isf.stepFactory.stepList(isf.newStep)
+}
+
+// newStep method returns instance of the installation/upgrade step based on component details
+func (isf installStepFactory) newStep(component v1alpha1.KymaComponent) (Step, error) {
 	step := step{
 		helmClient: isf.helmClient,
 		component:  component,
@@ -187,13 +199,12 @@ func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) (Step, e
 	return inststp, nil
 }
 
-func (isf uninstallStepFactory) UninstallStepList() (StepList, error) {
-	//TODO: implement
-	return nil, nil
+func (usf uninstallStepFactory) UninstallStepList() (StepList, error) {
+	return usf.stepFactory.stepList(usf.newStep)
 }
 
 // NewStep method returns instance of the uninstallation step based on component details
-func (usf uninstallStepFactory) NewStep(component v1alpha1.KymaComponent) (Step, error) {
+func (usf uninstallStepFactory) newStep(component v1alpha1.KymaComponent) (Step, error) {
 	step := step{
 		helmClient: usf.helmClient,
 		component:  component,

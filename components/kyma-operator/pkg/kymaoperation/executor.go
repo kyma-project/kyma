@@ -25,13 +25,13 @@ type UninstallStepsProvider interface {
 
 //Executor TODO: Document .
 type Executor struct {
-	serviceCatalog        serviceCatalog.ClientInterface
-	errorHandlers         internalerrors.ErrorHandlersInterface
-	statusManager         statusmanager.StatusManager
-	actionManager         actionmanager.ActionManager
-	installStepsFactory   InstallStepsProvider
-	uninstallStepsFactory UninstallStepsProvider
-	backoffIntervals      []uint
+	serviceCatalog         serviceCatalog.ClientInterface
+	errorHandlers          internalerrors.ErrorHandlersInterface
+	statusManager          statusmanager.StatusManager
+	actionManager          actionmanager.ActionManager
+	installStepsProvider   InstallStepsProvider
+	uninstallStepsProvider UninstallStepsProvider
+	backoffIntervals       []uint
 }
 
 // New .
@@ -39,13 +39,13 @@ func NewExecutor(serviceCatalog serviceCatalog.ClientInterface,
 	statusManager statusmanager.StatusManager, actionManager actionmanager.ActionManager,
 	stepFactoryCreator actions.StepFactoryCreator, backoffIntervals []uint) *Executor {
 	steps := &Executor{
-		serviceCatalog:        serviceCatalog,
-		errorHandlers:         &internalerrors.ErrorHandlers{},
-		statusManager:         statusManager,
-		actionManager:         actionManager,
-		installStepsFactory:   nil, //TODO: Implement
-		uninstallStepsFactory: nil, //TODO: Implement
-		backoffIntervals:      backoffIntervals,
+		serviceCatalog:         serviceCatalog,
+		errorHandlers:          &internalerrors.ErrorHandlers{},
+		statusManager:          statusManager,
+		actionManager:          actionManager,
+		installStepsProvider:   nil, //TODO: Implement
+		uninstallStepsProvider: nil, //TODO: Implement
+		backoffIntervals:       backoffIntervals,
 	}
 
 	return steps
@@ -58,13 +58,13 @@ func (steps *Executor) InstallKyma(installationData *config.InstallationData, ov
 
 	_ = steps.statusManager.InProgress("Verify installed components")
 
-	installStepsFactory, err := steps.installStepsFactory.For(installationData, overrideData)
+	installStepsProvider, err := steps.installStepsProvider.For(installationData, overrideData)
 	if err != nil {
 		_ = steps.statusManager.Error("Kyma Operator", "Verifying installed components", err)
 		return err
 	}
 
-	stepList, err := installStepsFactory.InstallStepList()
+	stepList, err := installStepsProvider.InstallStepList()
 
 	if err != nil {
 		return removeLabelAndReturn(err)
@@ -93,14 +93,14 @@ func (steps *Executor) UninstallKyma(installationData *config.InstallationData) 
 
 	_ = steps.statusManager.InProgress("Verify components to uninstall")
 
-	uninstallStepsFactory, err := steps.uninstallStepsFactory.For(installationData)
+	uninstallStepsProvider, err := steps.uninstallStepsProvider.For(installationData)
 
 	if err != nil {
 		_ = steps.statusManager.Error("Kyma Operator", "Verify components to uninstall", err)
 		return err
 	}
 
-	stepList, err := uninstallStepsFactory.UninstallStepList()
+	stepList, err := uninstallStepsProvider.UninstallStepList()
 
 	if err != nil {
 		return removeLabelAndReturn(err)

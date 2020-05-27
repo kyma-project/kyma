@@ -80,7 +80,7 @@ func TestStepsFactory(t *testing.T) {
 		})
 	})
 
-	Convey("installStepFactory.NewStep", t, func() {
+	Convey("installStepFactory.newStep", t, func() {
 		Convey("should return install step for non-existing release", func() {
 			//given
 			isf := installStepFactory{
@@ -91,7 +91,7 @@ func TestStepsFactory(t *testing.T) {
 			component := fakeComponent()
 
 			//when
-			res, err := isf.NewStep(component)
+			res, err := isf.newStep(component)
 
 			//then
 			So(err, ShouldBeNil)
@@ -117,7 +117,7 @@ func TestStepsFactory(t *testing.T) {
 			}
 
 			//when
-			res, err := isf.NewStep(component)
+			res, err := isf.newStep(component)
 
 			//then
 			So(err, ShouldBeNil)
@@ -125,7 +125,7 @@ func TestStepsFactory(t *testing.T) {
 			So(res, ShouldHaveSameTypeAs, upgradeStep{})
 		})
 	})
-	Convey("uninstallStepFactory.NewStep", t, func() {
+	Convey("uninstallStepFactory.newStep", t, func() {
 		Convey("should return nostep for non-existing component", func() {
 			//given
 
@@ -138,7 +138,7 @@ func TestStepsFactory(t *testing.T) {
 			}
 
 			//when
-			res, err := usf.NewStep(component)
+			res, err := usf.newStep(component)
 
 			//then
 			So(err, ShouldBeNil)
@@ -164,7 +164,7 @@ func TestStepsFactory(t *testing.T) {
 			}
 
 			//when
-			res, err := usf.NewStep(component)
+			res, err := usf.newStep(component)
 
 			//then
 			So(err, ShouldBeNil)
