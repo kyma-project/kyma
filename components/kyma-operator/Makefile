@@ -28,11 +28,9 @@ mod-verify-local:
 	GO111MODULE=on go mod verify
 
 test-local:
-	@echo "skip"
-	
-#	GO111MODULE=on go test -coverprofile=/tmp/artifacts/cover.out ./...
-#	@echo -n "Total coverage: "
-#	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
+	GO111MODULE=on go test -coverprofile=/tmp/artifacts/cover.out ./...
+	@echo -n "Total coverage: "
+	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
 
 $(eval $(call buildpack-mount,resolve))
 $(eval $(call buildpack-mount,mod-verify))
