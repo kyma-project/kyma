@@ -18,7 +18,7 @@ spec:
       labels:
         control-plane: controller-manager
 {{ include "api-gateway.labels" . | indent 8 }}
-      {{- with .Values.annotations }}
+      {{- with .Values.config.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
