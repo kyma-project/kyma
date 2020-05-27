@@ -1,8 +1,9 @@
 package broker
 
 import (
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"testing"
+
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 
