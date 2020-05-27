@@ -13,10 +13,10 @@ import (
 // Scenario executes complete external solution integration test scenario
 // using Compass for Application registration and connectivity
 type Scenario struct {
-	domain        string
-	testID        string
-	skipSSLVerify bool
-	waitTime      time.Duration
+	domain         string
+	testID         string
+	skipSSLVerify  bool
+	eventSendDelay time.Duration
 }
 
 // AddFlags adds CLI flags to given FlagSet
@@ -24,7 +24,7 @@ func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 	pflag.StringVar(&s.domain, "domain", "kyma.local", "domain")
 	pflag.StringVar(&s.testID, "testID", "compass-e2e-test", "domain")
 	pflag.BoolVar(&s.skipSSLVerify, "skipSSLVerify", false, "Skip verification of service SSL certificates")
-	pflag.DurationVar(&s.waitTime, "waitTime", time.Duration(10)*time.Second, "Wait time in seconds, e.g. 5s")
+	pflag.DurationVar(&s.eventSendDelay, "eventSendDelay", time.Duration(10)*time.Second, "Wait time in seconds before sending the first event, e.g. 5s")
 }
 
 func (s *Scenario) NewState() (*state, error) {

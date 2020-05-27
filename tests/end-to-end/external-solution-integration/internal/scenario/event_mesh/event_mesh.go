@@ -90,7 +90,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 			serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID),
 			knativeEventingClientSet.EventingV1alpha1().Brokers(s.testID), knativeEventingClientSet.MessagingV1alpha1().Subscriptions(kymaIntegrationNamespace)),
 		testsuite.NewCreateKnativeTrigger(s.testID, defaultBrokerName, functionEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
-		testsuite.NewSleep(s.waitTime),
+		testsuite.NewSleep(s.eventSendDelay),
 		testsuite.NewSendEventToMesh(s.testID, helpers.FunctionPayload, state),
 		NewWrappedCounterPod(testService, 1),
 		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.FunctionPayload, state),
