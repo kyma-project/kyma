@@ -210,7 +210,7 @@ func TestProvisionProcess(t *testing.T) {
 	}
 
 	// WHEN
-	err := provisioner.ProvisionProcess(RestoreProvisionRequest{
+	err := provisioner.ProvisionReprocess(RestoreProvisionRequest{
 		Parameters:           nil,
 		InstanceID:           fixInstanceID(),
 		OperationID:          fixOperationID(),

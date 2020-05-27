@@ -196,13 +196,14 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 	return resp, nil
 }
 
-// ProvisionProcess triggers provision process for other than broker (http) calls
-func (svc *ProvisionService) ProvisionProcess(req RestoreProvisionRequest) error {
+// ProvisionReprocess triggers provision process for other than broker (http) calls
+func (svc *ProvisionService) ProvisionReprocess(req RestoreProvisionRequest) error {
 	var app *internal.Application
-	err := wait.Poll(500*time.Millisecond, 10*time.Second, func() (done bool, err error) {
+	err := wait.PollImmediate(500*time.Millisecond, 10*time.Second, func() (done bool, err error) {
 		app, err = svc.appSvcFinder.FindOneByServiceID(req.ApplicationServiceID)
 		if err != nil {
-			return false, errors.Wrap(err, "while finding application based on service ID")
+			svc.log.Warnf("cannot find application based on service ID %s: %s", req.ApplicationServiceID, err)
+			return false, nil
 		}
 		if app == nil {
 			return false, nil

@@ -26,12 +26,12 @@ type (
 
 	provisioner interface {
 		Provision(ctx context.Context, osbCtx osbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, *osb.HTTPStatusCodeError)
-		ProvisionProcess(request RestoreProvisionRequest) error
+		ProvisionReprocess(request RestoreProvisionRequest) error
 	}
 
 	deprovisioner interface {
 		Deprovision(ctx context.Context, osbCtx osbContext, req *osb.DeprovisionRequest) (*osb.DeprovisionResponse, error)
-		DeprovisionProcess(req DeprovisionProcessRequest)
+		DeprovisionReprocess(req DeprovisionProcessRequest)
 	}
 
 	binder interface {
@@ -265,11 +265,11 @@ func (srv *Server) provisionAction(w http.ResponseWriter, r *http.Request) {
 }
 
 func (srv *Server) ProvisionProcess(request RestoreProvisionRequest) error {
-	return srv.provisioner.ProvisionProcess(request)
+	return srv.provisioner.ProvisionReprocess(request)
 }
 
 func (srv *Server) DeprovisionProcess(request DeprovisionProcessRequest) {
-	srv.deprovisioner.DeprovisionProcess(request)
+	srv.deprovisioner.DeprovisionReprocess(request)
 }
 
 func (srv *Server) NewOperationID() (internal.OperationID, error) {

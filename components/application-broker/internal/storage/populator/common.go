@@ -27,6 +27,11 @@ type brokerProcesses interface {
 	NewOperationID() (internal.OperationID, error)
 }
 
+//go:generate mockery -name=applicationServiceIDSelector -output=automock -outpkg=automock -case=underscore
+type applicationServiceIDSelector interface {
+	SelectApplicationServiceID(string, string) internal.ApplicationServiceID
+}
+
 //go:generate mockery -name=instanceConverter -output=automock -outpkg=automock -case=underscore
 type instanceConverter interface {
 	MapServiceInstance(in *v1beta1.ServiceInstance) *internal.Instance

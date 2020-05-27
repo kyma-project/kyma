@@ -1,7 +1,6 @@
 package populator
 
 import (
-	"context"
 	"encoding/json"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
@@ -10,14 +9,11 @@ import (
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
-	scv1beta "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions/servicecatalog/v1beta1"
-	listersv1beta "github.com/kubernetes-sigs/service-catalog/pkg/client/listers_generated/servicecatalog/v1beta1"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/tools/cache"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -34,6 +30,7 @@ type Instances struct {
 	opInserter  operationInserter
 	scClientSet clientset.Interface
 	broker      brokerProcesses
+	idSelector  applicationServiceIDSelector
 	log         logrus.FieldLogger
 }
 
@@ -44,6 +41,7 @@ func NewInstances(
 	converter instanceConverter,
 	operationInserter operationInserter,
 	broker brokerProcesses,
+	idSelector applicationServiceIDSelector,
 	log logrus.FieldLogger) *Instances {
 	return &Instances{
 		scClientSet: scClientSet,
@@ -51,55 +49,44 @@ func NewInstances(
 		converter:   converter,
 		opInserter:  operationInserter,
 		broker:      broker,
+		idSelector:  idSelector,
 		log:         log,
 	}
 }
 
 // Do populates Instance Storage
-func (p *Instances) Do(ctx context.Context) error {
-	siInformer := scv1beta.NewServiceInstanceInformer(p.scClientSet, v1.NamespaceAll, informerResyncPeriod, nil)
-	scInformer := scv1beta.NewServiceClassInformer(p.scClientSet, v1.NamespaceAll, informerResyncPeriod, nil)
+func (p *Instances) Do() error {
+	p.log.Info("Instance storage population...")
 
-	go siInformer.Run(ctx.Done())
-	go scInformer.Run(ctx.Done())
-
-	if !cache.WaitForCacheSync(ctx.Done(), siInformer.HasSynced) {
-		return errors.New("cannot synchronize service instance cache")
-	}
-
-	if !cache.WaitForCacheSync(ctx.Done(), scInformer.HasSynced) {
-		return errors.New("cannot synchronize service class cache")
-	}
-
-	scLister := listersv1beta.NewServiceClassLister(scInformer.GetIndexer())
-	serviceClasses, err := scLister.List(labels.Everything())
+	serviceClasses, err := p.scClientSet.ServicecatalogV1beta1().ServiceClasses(v1.NamespaceAll).List(metav1.ListOptions{})
 	if err != nil {
 		return errors.Wrap(err, "while listing service classes")
 	}
 
-	abClassNames := make(map[string]struct{})
-	for _, sc := range serviceClasses {
+	abClassNames := make(map[string]bool)
+	for _, sc := range serviceClasses.Items {
 		if sc.Spec.ServiceBrokerName == nsbroker.NamespacedBrokerName {
-			abClassNames[sc.Name] = struct{}{}
+			abClassNames[sc.Name] = true
 		}
 	}
 
-	siLister := listersv1beta.NewServiceInstanceLister(siInformer.GetIndexer())
-	serviceInstances, err := siLister.List(labels.Everything())
+	serviceInstances, err := p.scClientSet.ServicecatalogV1beta1().ServiceInstances(v1.NamespaceAll).List(metav1.ListOptions{})
 	if err != nil {
 		return errors.Wrap(err, "while listing service instances")
 	}
 
-	for _, si := range serviceInstances {
+	for _, si := range serviceInstances.Items {
 		if si.Spec.ServiceClassRef != nil {
 			if _, ex := abClassNames[si.Spec.ServiceClassRef.Name]; ex {
 				p.log.Infof("process ServiceInstance (%s)", si.Spec.ExternalID)
-				if err := p.restoreInstanceData(si); err != nil {
+				if err := p.restoreInstanceData(&si); err != nil {
 					return errors.Wrap(err, "while saving service instance data")
 				}
 			}
 		}
 	}
+
+	p.log.Info("Instance storage populated")
 	return nil
 }
 
@@ -129,7 +116,7 @@ func (p *Instances) restoreInstanceData(si *v1beta1.ServiceInstance) error {
 			InstanceID:           internal.InstanceID(si.Spec.ExternalID),
 			OperationID:          internal.OperationID(*si.Status.LastOperation),
 			Namespace:            internal.Namespace(si.Namespace),
-			ApplicationServiceID: internal.ApplicationServiceID(si.Spec.ServiceClassRef.Name),
+			ApplicationServiceID: p.idSelector.SelectApplicationServiceID(si.Spec.ServiceClassRef.Name, si.Spec.ServicePlanRef.Name),
 		})
 		if err != nil {
 			return errors.Wrap(err, "while triggering provisioning process")
@@ -153,10 +140,10 @@ func (p *Instances) restoreInstanceData(si *v1beta1.ServiceInstance) error {
 		p.broker.DeprovisionProcess(broker.DeprovisionProcessRequest{
 			Instance:             p.converter.MapServiceInstance(si),
 			OperationID:          opID,
-			ApplicationServiceID: internal.ApplicationServiceID(si.Spec.ServiceClassRef.Name),
+			ApplicationServiceID: p.idSelector.SelectApplicationServiceID(si.Spec.ServiceClassRef.Name, si.Spec.ServicePlanRef.Name),
 		})
 	default:
-		p.log.Infof("ServiceInstance will to be populated, unsupported mode (%s - last state: %s)",
+		p.log.Infof("ServiceInstance will not be populated, unsupported mode (%s - last state: %s)",
 			si.Status.CurrentOperation,
 			si.Status.LastConditionState)
 	}
@@ -184,6 +171,8 @@ func (p *Instances) specifyRestoreMode(instance *v1beta1.ServiceInstance) string
 		return deprovisionCallFailedMode
 	}
 
+	// if AppBroker restarts after SC receives a response with operation ID,
+	// field 'status.LastOperation' should contain mentioned operation ID
 	if instance.Status.LastOperation == nil {
 		return ""
 	}

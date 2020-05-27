@@ -128,13 +128,16 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 		nsInformer, scInformersGroup.ServiceInstances().Informer(), k8sClient.CoreV1().Namespaces(), sFact.Application(),
 		nsBrokerFacade, nsBrokerSyncer, siFacade, log, livenessCheckStatus, cfg.APIPackagesSupport)
 
+	// create ApplicationServiceID selector
+	idSelector := broker.NewIDSelector(cfg.APIPackagesSupport)
+
 	// create broker
 	srv := broker.New(sFact.Application(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
 		mClient.ApplicationconnectorV1alpha1(),
 		mInformersGroup.ApplicationMappings().Lister(), brokerService,
 		&mClient, knClient, &istioClient, log, livenessCheckStatus,
 		cfg.APIPackagesSupport, cfg.Director.Service, cfg.Director.ProxyURL,
-		scInformersGroup.ServiceBindings().Informer(), cfg.GatewayBaseURLFormat)
+		scInformersGroup.ServiceBindings().Informer(), cfg.GatewayBaseURLFormat, idSelector)
 
 	// start informers
 	scInformerFactory.Start(stopCh)
@@ -161,13 +164,9 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	go relistRequester.Run(stopCh)
 
 	// instance populator
-	instancePopulator := populator.NewInstances(scClientSet, sFact.Instance(), &populator.Converter{}, sFact.InstanceOperation(), srv, log)
-	popCtx, popCancelFunc := context.WithTimeout(context.Background(), time.Minute)
-	defer popCancelFunc()
-	log.Info("Instance storage population...")
-	err = instancePopulator.Do(popCtx)
+	instancePopulator := populator.NewInstances(scClientSet, sFact.Instance(), &populator.Converter{}, sFact.InstanceOperation(), srv, idSelector, log)
+	err = instancePopulator.Do()
 	fatalOnError(err)
-	log.Info("Instance storage populated")
 
 	return srv
 }

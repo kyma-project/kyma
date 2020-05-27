@@ -1,7 +1,6 @@
 package populator_test
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -36,6 +35,7 @@ func TestPopulateInstances(t *testing.T) {
 		instanceLastConditionState string
 		instanceStatus             scv1beta1.ConditionStatus
 		instanceCurrentOperation   scv1beta1.ServiceInstanceOperation
+		apiPackagesSupport         bool
 		executeProvisionProcess    bool
 		executeInstanceInsert      bool
 		executeNewOperationID      bool
@@ -87,6 +87,7 @@ func TestPopulateInstances(t *testing.T) {
 			instanceLastConditionState: "DeprovisionCallFailed",
 			instanceStatus:             scv1beta1.ConditionFalse,
 			instanceCurrentOperation:   scv1beta1.ServiceInstanceOperationDeprovision,
+			apiPackagesSupport:         true,
 			executeNewOperationID:      true,
 			executeDeprovisionProcess:  true,
 			executeMapServiceInstance:  true,
@@ -144,6 +145,9 @@ func TestPopulateInstances(t *testing.T) {
 			mockBroker := &automock.BrokerProcesses{}
 			defer mockBroker.AssertExpectations(t)
 
+			mockIDSelector := &automock.ApplicationServiceIDSelector{}
+			defer mockIDSelector.AssertExpectations(t)
+
 			if tc.executeMapServiceInstance {
 				mockConverter.On("MapServiceInstance", instance).Return(expectedServiceInstanceFromNsBroker(instance))
 			}
@@ -154,13 +158,23 @@ func TestPopulateInstances(t *testing.T) {
 				}
 			}
 
+			var expectedApplicationID internal.ApplicationServiceID
+			if tc.executeProvisionProcess || tc.executeDeprovisionProcess {
+				if tc.apiPackagesSupport {
+					expectedApplicationID = instanceApplicationPlan
+				} else {
+					expectedApplicationID = instanceApplicationID
+				}
+				mockIDSelector.On("SelectApplicationServiceID", instanceApplicationID, instanceApplicationPlan).Return(expectedApplicationID).Once()
+			}
+
 			if tc.executeProvisionProcess {
 				mockBroker.On("ProvisionProcess", broker.RestoreProvisionRequest{
 					Parameters:           nil,
 					InstanceID:           instanceApplicationID,
 					OperationID:          internal.OperationID(lastOperation),
 					Namespace:            instanceNamespace,
-					ApplicationServiceID: instanceApplicationID,
+					ApplicationServiceID: expectedApplicationID,
 				}).Return(nil).Once()
 
 				tc.operations[0].operationID = internal.OperationID(lastOperation)
@@ -186,7 +200,7 @@ func TestPopulateInstances(t *testing.T) {
 						State:         internal.InstanceStateFailed,
 					},
 					OperationID:          tc.operations[len(tc.operations)-1].operationID,
-					ApplicationServiceID: instanceApplicationID,
+					ApplicationServiceID: expectedApplicationID,
 				}).Once()
 			}
 
@@ -199,10 +213,10 @@ func TestPopulateInstances(t *testing.T) {
 					Return(nil).Once()
 			}
 
-			sut := populator.NewInstances(mockClientSet, mockInserter, mockConverter, mockOperationInserter, mockBroker, logrus.New())
+			sut := populator.NewInstances(mockClientSet, mockInserter, mockConverter, mockOperationInserter, mockBroker, mockIDSelector, logrus.New())
 
 			// WHEN
-			actualErr := sut.Do(context.Background())
+			actualErr := sut.Do()
 
 			// THEN
 			assert.NoError(t, actualErr)
@@ -229,14 +243,17 @@ func TestPopulateInstancesErrorOnInsert(t *testing.T) {
 	mockBroker := &automock.BrokerProcesses{}
 	defer mockBroker.AssertExpectations(t)
 
+	mockIDSelector := &automock.ApplicationServiceIDSelector{}
+	defer mockIDSelector.AssertExpectations(t)
+
 	mockConverter.On("MapServiceInstance", mock.Anything).Return(&internal.Instance{})
-	sut := populator.NewInstances(mockClientSet, mockInserter, mockConverter, mockOperationInserter, mockBroker, logrus.New())
+	sut := populator.NewInstances(mockClientSet, mockInserter, mockConverter, mockOperationInserter, mockBroker, mockIDSelector, logrus.New())
 
 	mockBroker.On("NewOperationID").Return(internal.OperationID(""), nil).Once()
 	mockOperationInserter.On("Insert", mock.AnythingOfType("*internal.InstanceOperation")).Return(nil).Once()
 
 	// WHEN
-	actualErr := sut.Do(context.Background())
+	actualErr := sut.Do()
 
 	// THEN
 	assert.EqualError(t, actualErr, "while saving service instance data: while inserting service instance: some error")

@@ -125,6 +125,10 @@ type (
 	ServiceBindingFetcher interface {
 		GetServiceBindingSecretName(ns, externalID string) (string, error)
 	}
+
+	appSvcIDSelector interface {
+		SelectID(req interface{}) internal.ApplicationServiceID
+	}
 )
 
 // New creates instance of broker server.
@@ -143,6 +147,7 @@ func New(applicationFinder appFinder,
 	apiPackagesSupport bool,
 	service director.ServiceConfig, directorProxyURL string,
 	sbInformer cache.SharedIndexInformer, gatewayBaseURL string,
+	idSelector appSvcIDSelector,
 ) *Server {
 
 	idpRaw := idprovider.New()
@@ -156,7 +161,7 @@ func New(applicationFinder appFinder,
 
 	enabledChecker := access.NewApplicationMappingService(emLister)
 
-	directorSvc, conv, getBindingCredentials, idSelector, validateProvisionReq := getImplementationBasedOnVersion(sbInformer, service, directorProxyURL, gatewayBaseURL, apiPackagesSupport)
+	directorSvc, conv, getBindingCredentials, validateProvisionReq := getImplementationBasedOnVersion(sbInformer, service, directorProxyURL, gatewayBaseURL, apiPackagesSupport)
 
 	stateService := &instanceStateService{operationCollectionGetter: opStorage}
 	return &Server{
@@ -184,45 +189,17 @@ func New(applicationFinder appFinder,
 	}
 }
 
-func getImplementationBasedOnVersion(sbInformer cache.SharedIndexInformer, service director.ServiceConfig, directorProxyURL string, gatewayBaseURL string, apiPackagesSupport bool) (DirectorService, converter, getCredentialFn, *IDSelector, func(req *osb.ProvisionRequest) *osb.HTTPStatusCodeError) {
+func getImplementationBasedOnVersion(sbInformer cache.SharedIndexInformer, service director.ServiceConfig, directorProxyURL string, gatewayBaseURL string, apiPackagesSupport bool) (DirectorService, converter, getCredentialFn, func(req *osb.ProvisionRequest) *osb.HTTPStatusCodeError) {
 	if apiPackagesSupport {
 		sbFetcher := servicecatalog.NewServiceBindingFetcher(sbInformer)
 		directorCli := director.NewQGLClient(gcli.NewClient(directorProxyURL))
 		directorSvc := director.NewService(directorCli, service)
 		credRenderer := NewBindingCredentialsRenderer(directorSvc, gatewayBaseURL, sbFetcher)
 
-		return directorSvc, &appToServiceConverterV2{}, credRenderer.GetBindingCredentialsV2, &IDSelector{apiPackagesSupport: apiPackagesSupport}, validateProvisionRequestV2
+		return directorSvc, &appToServiceConverterV2{}, credRenderer.GetBindingCredentialsV2, validateProvisionRequestV2
 	} else {
 		directorSvc := director.NewNothingDoerService()
 		credRenderer := BindingCredentialsRenderer{}
-		return directorSvc, &appToServiceConverter{}, credRenderer.GetBindingCredentialsV1, &IDSelector{apiPackagesSupport: apiPackagesSupport}, validateProvisionRequestV1
+		return directorSvc, &appToServiceConverter{}, credRenderer.GetBindingCredentialsV1, validateProvisionRequestV1
 	}
-}
-
-type appSvcIDSelector interface {
-	SelectID(req interface{}) internal.ApplicationServiceID
-}
-
-type IDSelector struct {
-	apiPackagesSupport bool
-}
-
-func (s *IDSelector) SelectID(req interface{}) internal.ApplicationServiceID {
-	var svcID, planID string
-	switch d := req.(type) {
-	case *osb.BindRequest:
-		svcID, planID = d.ServiceID, d.PlanID
-	case *osb.ProvisionRequest:
-		svcID, planID = d.ServiceID, d.PlanID
-	case *osb.DeprovisionRequest:
-		svcID, planID = d.ServiceID, d.PlanID
-	}
-
-	// In new approach ApplicationServiceID == req Plan ID
-	if s.apiPackagesSupport {
-		return internal.ApplicationServiceID(planID)
-	}
-
-	// In old approach ApplicationServiceID == req Service ID == Class ID
-	return internal.ApplicationServiceID(svcID)
 }

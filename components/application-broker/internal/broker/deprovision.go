@@ -159,7 +159,7 @@ func (svc *DeprovisionService) doAsyncResourceCleanup(instance *internal.Instanc
 
 }
 
-func (svc *DeprovisionService) DeprovisionProcess(req DeprovisionProcessRequest) {
+func (svc *DeprovisionService) DeprovisionReprocess(req DeprovisionProcessRequest) {
 	go svc.do(req.Instance, req.OperationID, req.ApplicationServiceID)
 }
 
