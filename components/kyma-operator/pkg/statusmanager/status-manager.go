@@ -1,13 +1,14 @@
 package statusmanager
 
 import (
+	"context"
+
 	installationv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	installationClientset "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned"
 	listers "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/listers/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/consts"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
-	"context"
 )
 
 // StatusManager .

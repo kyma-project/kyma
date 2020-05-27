@@ -1,10 +1,11 @@
 package servicecatalog
 
 import (
+	"context"
+
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
-	"context"
 )
 
 // ClientInterface exposes functions to interact with ServiceCatalog

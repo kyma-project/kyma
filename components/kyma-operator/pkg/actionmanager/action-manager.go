@@ -1,13 +1,13 @@
 package actionmanager
 
 import (
-	"log"
 	"context"
+	"log"
 
 	clientset "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned"
 	listers "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/listers/installer/v1alpha1"
-	"k8s.io/client-go/util/retry"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/util/retry"
 )
 
 // ActionManager .
