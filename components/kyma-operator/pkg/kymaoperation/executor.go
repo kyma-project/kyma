@@ -15,7 +15,7 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/statusmanager"
 )
 
-// StepsProvider knows how to create an instance of the StepFactory
+//StepsProvider knows how to create an instance of the StepFactory
 type StepsProvider interface {
 	ForInstallation(*config.InstallationData, overrides.OverrideData) (actions.StepLister, error)
 	ForUninstallation(*config.InstallationData) (actions.StepLister, error)
@@ -31,11 +31,11 @@ type Executor struct {
 	backoffIntervals []uint
 }
 
-// New .
+//NewExecutor creates a new instance of executor
 func NewExecutor(serviceCatalog serviceCatalog.ClientInterface,
 	statusManager statusmanager.StatusManager, actionManager actionmanager.ActionManager,
 	stepsProvider StepsProvider, backoffIntervals []uint) *Executor {
-	steps := &Executor{
+	res := &Executor{
 		serviceCatalog:   serviceCatalog,
 		errorHandlers:    &internalerrors.ErrorHandlers{},
 		statusManager:    statusManager,
@@ -44,19 +44,19 @@ func NewExecutor(serviceCatalog serviceCatalog.ClientInterface,
 		backoffIntervals: backoffIntervals,
 	}
 
-	return steps
+	return res
 }
 
-//InstallKyma .
-func (steps *Executor) InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
+// InstallKyma is a top-level method used for Kyma installation
+func (extr *Executor) InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 
-	removeLabelAndReturn := steps.removeLabelOnError(installationData.Context.Name, installationData.Context.Namespace)
+	removeLabelAndReturn := extr.removeLabelOnError(installationData.Context.Name, installationData.Context.Namespace)
 
-	_ = steps.statusManager.InProgress("Verify installed components")
+	_ = extr.statusManager.InProgress("Verify installed components")
 
-	installStepsProvider, err := steps.stepsProvider.ForInstallation(installationData, overrideData)
+	installStepsProvider, err := extr.stepsProvider.ForInstallation(installationData, overrideData)
 	if err != nil {
-		_ = steps.statusManager.Error("Kyma Operator", "Verifying installed components", err)
+		_ = extr.statusManager.Error("Kyma Operator", "Verifying installed components", err)
 		return err
 	}
 
@@ -66,12 +66,12 @@ func (steps *Executor) InstallKyma(installationData *config.InstallationData, ov
 		return removeLabelAndReturn(err)
 	}
 
-	err = steps.processComponents(removeLabelAndReturn, installationData.Action, stepList)
+	err = extr.processComponents(removeLabelAndReturn, installationData.Action, stepList)
 	if err != nil {
 		return err
 	}
 
-	err = steps.statusManager.InstallDone(installationData.URL, installationData.KymaVersion)
+	err = extr.statusManager.InstallDone(installationData.URL, installationData.KymaVersion)
 	if err != nil {
 		return err
 	}
@@ -79,20 +79,20 @@ func (steps *Executor) InstallKyma(installationData *config.InstallationData, ov
 	return nil
 }
 
-//UninstallKyma .
-func (steps *Executor) UninstallKyma(installationData *config.InstallationData) error {
+//UninstallKyma is a top-level method used for Kyma uninstallation
+func (extr *Executor) UninstallKyma(installationData *config.InstallationData) error {
 
-	removeLabelAndReturn := steps.removeLabelOnError(installationData.Context.Name, installationData.Context.Namespace)
+	removeLabelAndReturn := extr.removeLabelOnError(installationData.Context.Name, installationData.Context.Namespace)
 
-	err := steps.DeprovisionAzureResources(DefaultDeprovisionConfig(), installationData.Context)
-	steps.errorHandlers.LogError("An error during deprovisioning: ", err)
+	err := extr.DeprovisionAzureResources(DefaultDeprovisionConfig(), installationData.Context)
+	extr.errorHandlers.LogError("An error during deprovisioning: ", err)
 
-	_ = steps.statusManager.InProgress("Verify components to uninstall")
+	_ = extr.statusManager.InProgress("Verify components to uninstall")
 
-	uninstallStepsProvider, err := steps.stepsProvider.ForUninstallation(installationData)
+	uninstallStepsProvider, err := extr.stepsProvider.ForUninstallation(installationData)
 
 	if err != nil {
-		_ = steps.statusManager.Error("Kyma Operator", "Verify components to uninstall", err)
+		_ = extr.statusManager.Error("Kyma Operator", "Verify components to uninstall", err)
 		return err
 	}
 
@@ -102,12 +102,12 @@ func (steps *Executor) UninstallKyma(installationData *config.InstallationData) 
 		return removeLabelAndReturn(err)
 	}
 
-	err = steps.processComponents(removeLabelAndReturn, installationData.Action, stepList)
-	if steps.errorHandlers.CheckError("uninstall error: ", err) {
+	err = extr.processComponents(removeLabelAndReturn, installationData.Action, stepList)
+	if extr.errorHandlers.CheckError("uninstall error: ", err) {
 		return err
 	}
 
-	err = steps.statusManager.UninstallDone()
+	err = extr.statusManager.UninstallDone()
 	if err != nil {
 		return err
 	}
@@ -116,13 +116,13 @@ func (steps *Executor) UninstallKyma(installationData *config.InstallationData) 
 }
 
 //PrintStep .
-func (steps *Executor) PrintStep(stepName string) {
+func (extr *Executor) PrintStep(stepName string) {
 	log.Println("---------------------------")
 	log.Println(stepName)
 	log.Println("---------------------------")
 }
 
-func (steps *Executor) processComponents(removeLabelAndReturn func(err error) error, action string, stepList actions.StepList) error {
+func (extr *Executor) processComponents(removeLabelAndReturn func(err error) error, action string, stepList actions.StepList) error {
 
 	log.Println("Processing Kyma components")
 
@@ -131,31 +131,23 @@ func (steps *Executor) processComponents(removeLabelAndReturn func(err error) er
 	for _, step := range stepList {
 
 		stepName := logPrefix + " component " + step.GetReleaseName()
-		_ = steps.statusManager.InProgress(stepName)
+		_ = extr.statusManager.InProgress(stepName)
 
-		/*
-		   //We prepare entire list of steps upfront
-		   			step, err := stepsFactory.NewStep(component)
-		   			if err != nil {
-		   				return removeLabelAndReturn(err)
-		   			}
-		*/
-
-		steps.PrintStep(stepName)
+		extr.PrintStep(stepName)
 
 		err := retry.Do(
 			func() error {
 				processErr := step.Run()
-				if steps.errorHandlers.CheckError("Step error: ", processErr) {
-					_ = steps.statusManager.Error(step.GetReleaseName(), stepName, processErr)
+				if extr.errorHandlers.CheckError("Step error: ", processErr) {
+					_ = extr.statusManager.Error(step.GetReleaseName(), stepName, processErr)
 					return processErr
 				}
 				return nil
 			},
-			retry.Attempts(uint(len(steps.backoffIntervals))+1),
+			retry.Attempts(uint(len(extr.backoffIntervals))+1),
 			retry.DelayType(func(attempt uint, config *retry.Config) time.Duration {
-				log.Printf("Warning: Retry number %d (sleeping for %d[s]).\n", attempt+1, steps.backoffIntervals[attempt])
-				return time.Duration(steps.backoffIntervals[attempt]) * time.Second
+				log.Printf("Warning: Retry number %d (sleeping for %d[s]).\n", attempt+1, extr.backoffIntervals[attempt])
+				return time.Duration(extr.backoffIntervals[attempt]) * time.Second
 			}),
 		)
 
@@ -171,10 +163,10 @@ func (steps *Executor) processComponents(removeLabelAndReturn func(err error) er
 	return removeLabelAndReturn(nil)
 }
 
-func (steps *Executor) removeLabelOnError(installationCrName, installationCrNamespace string) func(err error) error {
+func (extr *Executor) removeLabelOnError(installationCrName, installationCrNamespace string) func(err error) error {
 	return func(err error) error {
-		removeLabelError := steps.actionManager.RemoveActionLabel(installationCrName, installationCrNamespace)
-		if steps.errorHandlers.CheckError("Error on removing label: ", removeLabelError) {
+		removeLabelError := extr.actionManager.RemoveActionLabel(installationCrName, installationCrNamespace)
+		if extr.errorHandlers.CheckError("Error on removing label: ", removeLabelError) {
 			err = fmt.Errorf("%v; Error on removing label: %v", err, removeLabelError)
 		}
 		return err
