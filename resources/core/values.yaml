@@ -42,7 +42,7 @@ global:
     version: "d4ff1c8c"
   xip_patch:
     dir:
-    version: 0e322dac
+    version: PR-8619
   e2e_external_solution:
     dir:
     version: e1bc4644
