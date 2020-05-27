@@ -3,6 +3,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: {{.Release.Name }}-tests
+  namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: test-success
     sidecar.istio.io/inject: "false"
