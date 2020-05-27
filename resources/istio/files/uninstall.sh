@@ -57,5 +57,3 @@ else
   istioctl manifest generate -f /etc/istio/config.yaml  ${overrides_transformed} | kubectl delete -f -
 fi
 
-echo "delete custom kyma manifests"
-kubectl delete -f /etc/manifests
