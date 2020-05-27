@@ -29,9 +29,9 @@ spec:
         - name: APP_CERTIFICATE_DATA_HEADER
           value: {{ .Values.global.connector.certificateDataHeader }}
         - name: APP_REVOCATION_CONFIG_MAP_NAMESPACE
-          value: "{{ .Release.Namespace }}"
+          value: {{ .Release.Namespace }}
         - name: APP_REVOCATION_CONFIG_MAP_NAME
-          value: "{{ .Values.global.connector.revocation.configmap.name }}"
+          value: {{ .Values.global.connector.revocation.configmap.name | quote }}
         command:
         - "/bin/sh"
         args:

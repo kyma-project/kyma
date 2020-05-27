@@ -13,7 +13,6 @@ rules:
   resources: ["configmaps"]
   resourceNames: ["{{ .Values.global.connector.revocation.configmap.name }}"]
   verbs: ["get", "update"]
-
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -32,5 +31,4 @@ roleRef:
   kind: Role
   name: {{ template "fullname" . }}-{{ .Values.global.connector.revocation.configmap.name }}-tests
   apiGroup: rbac.authorization.k8s.io
-
 ---
