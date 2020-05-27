@@ -17,14 +17,14 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/finalizer"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/installation"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymainstallation"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymaoperation/actions"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/servicecatalog"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/toolkit"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/statusmanager"
 
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/steps"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymaoperation"
 
 	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
@@ -109,8 +109,8 @@ func main() {
 	fsWrapper := kymasources.NewFilesystemWrapper()
 
 	kymaPackages := kymasources.NewKymaPackages(fsWrapper, kymaCommandExecutor, *kymaDir)
-	stepFactoryCreator := kymainstallation.NewStepFactoryCreator(helmClient, kymaPackages, fsWrapper, *kymaDir)
-	installationSteps := steps.New(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator, backoffIntervals)
+	stepFactoryCreator := actions.NewStepFactoryCreator(helmClient, kymaPackages, fsWrapper, *kymaDir)
+	installationSteps := kymaoperation.New(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator, backoffIntervals)
 
 	installationController := installation.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, installationSteps, conditionManager, installationFinalizerManager, internalClient)
 
