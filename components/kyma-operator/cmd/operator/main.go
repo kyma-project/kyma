@@ -110,9 +110,9 @@ func main() {
 
 	kymaPackages := kymasources.NewKymaPackages(fsWrapper, kymaCommandExecutor, *kymaDir)
 	stepFactoryCreator := actions.NewStepFactoryCreator(helmClient, kymaPackages, fsWrapper, *kymaDir)
-	installationSteps := kymaoperation.New(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator, backoffIntervals)
+	opExecutor := kymaoperation.NewExecutor(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator, backoffIntervals)
 
-	installationController := installation.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, installationSteps, conditionManager, installationFinalizerManager, internalClient)
+	installationController := installation.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, opExecutor, conditionManager, installationFinalizerManager, internalClient)
 
 	kubeInformerFactory.Start(stop)
 	internalInformerFactory.Start(stop)

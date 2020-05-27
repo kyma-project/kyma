@@ -35,7 +35,7 @@ type Executor struct {
 }
 
 // New .
-func New(serviceCatalog serviceCatalog.ClientInterface,
+func NewExecutor(serviceCatalog serviceCatalog.ClientInterface,
 	statusManager statusmanager.StatusManager, actionManager actionmanager.ActionManager,
 	stepFactoryCreator actions.StepFactoryCreator, backoffIntervals []uint) *Executor {
 	steps := &Executor{
