@@ -97,7 +97,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: delete-crd-knative-serving-crds
-        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200312-fc2a4147
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
         imagePullPolicy: IfNotPresent
         command:
         - /bin/sh
