@@ -319,7 +319,6 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 		appClient.On("List", mock.AnythingOfType("ListOptions")).Return(applicationList, nil)
 		appClient.On("Update", updatedApplication).Return(&applicationList.Items[0], nil)
 
-
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", namespace, emptyOverrides).Return(updateResponse, errors.New("Error"))
 		helmClient.On("ListReleases", namespace).Return(helmListReleaseResponse, nil)
