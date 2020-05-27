@@ -33,7 +33,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
 	internalerrors "github.com/kyma-project/kyma/components/kyma-operator/pkg/errors"
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/steps"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymaoperation"
 )
 
 const (
@@ -67,7 +67,7 @@ type Controller struct {
 
 // NewController .
 func NewController(kubeClientset *kubernetes.Clientset, kubeInformerFactory kubeinformers.SharedInformerFactory,
-	internalInformerFactory informers.SharedInformerFactory, installationSteps *steps.InstallationSteps,
+	internalInformerFactory informers.SharedInformerFactory, installationSteps *kymaoperation.InstallationSteps,
 	conditionManager conditionmanager.Interface, finalizerManager *finalizer.Manager, internalClientset *internalClientset.Clientset) *Controller {
 
 	installationInformer := internalInformerFactory.Installer().V1alpha1().Installations()

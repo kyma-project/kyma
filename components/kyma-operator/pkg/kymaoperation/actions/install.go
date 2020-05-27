@@ -1,4 +1,4 @@
-package kymainstallation
+package actions
 
 import (
 	"errors"
