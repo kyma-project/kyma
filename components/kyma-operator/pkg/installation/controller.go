@@ -3,8 +3,10 @@ package installation
 import (
 	"log"
 	"time"
+	"context"
 
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	kubeerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -231,7 +233,7 @@ func (c *Controller) deleteFinalizer(installation *v1alpha1.Installation) error 
 		installationCopy := instObj.DeepCopy()
 
 		c.finalizerManager.RemoveFinalizer(installationCopy)
-		_, updateErr := c.internalClientset.InstallerV1alpha1().Installations(installation.Namespace).Update(installationCopy)
+		_, updateErr := c.internalClientset.InstallerV1alpha1().Installations(installation.Namespace).Update(context.TODO(), installationCopy, v1.UpdateOptions{})
 		return updateErr
 	})
 

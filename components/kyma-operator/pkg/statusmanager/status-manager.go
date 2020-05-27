@@ -5,7 +5,9 @@ import (
 	installationClientset "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned"
 	listers "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/listers/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/consts"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
+	"context"
 )
 
 // StatusManager .
@@ -101,7 +103,7 @@ func (sm *statusManager) updateFunc(updater statusUpdater) error {
 		installationCopy := instObj.DeepCopy()
 		updater(&installationCopy.Status)
 
-		_, updateErr := sm.client.InstallerV1alpha1().Installations(consts.InstNamespace).Update(installationCopy)
+		_, updateErr := sm.client.InstallerV1alpha1().Installations(consts.InstNamespace).Update(context.TODO(), installationCopy, v1.UpdateOptions{})
 		return updateErr
 	})
 

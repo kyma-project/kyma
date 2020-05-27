@@ -2,10 +2,12 @@ package actionmanager
 
 import (
 	"log"
+	"context"
 
 	clientset "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned"
 	listers "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/listers/installer/v1alpha1"
 	"k8s.io/client-go/util/retry"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ActionManager .
@@ -44,7 +46,7 @@ func (am *KymaActionManager) RemoveActionLabel(name string, namespace string, la
 		delete(labels, labelName)
 		installationCopy.SetLabels(labels)
 
-		_, updateErr := am.internalClientset.InstallerV1alpha1().Installations(namespace).Update(installationCopy)
+		_, updateErr := am.internalClientset.InstallerV1alpha1().Installations(namespace).Update(context.TODO(), installationCopy, v1.UpdateOptions{})
 		return updateErr
 	})
 
