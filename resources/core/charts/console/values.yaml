@@ -37,7 +37,11 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
+<<<<<<< HEAD
     tag: 9d6dae07
+=======
+    tag: PR-1808
+>>>>>>> Make more strict function validation in UI
   service:
     externalPort: 80
     internalPort: 80
