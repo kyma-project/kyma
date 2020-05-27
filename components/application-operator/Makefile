@@ -5,7 +5,7 @@ SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 override ENTRYPOINT = cmd/manager/manager.go
 
-include $(SCRIPTS_DIR)/generic-make-go.mk
+include $(SCRIPTS_DIR)/go-module.mk
 
 VERIFY_IGNORE := /vendor\|/mocks
 
