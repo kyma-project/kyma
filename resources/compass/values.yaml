@@ -35,7 +35,7 @@ global:
       version: "778b2bb3"
     provisioner:
       dir:
-      version: "bfb6a9d7"
+      version: "641730c8"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -91,6 +91,8 @@ global:
     secretName: "compass-gateway-auditlog-secret"
     script:
       configMapName: "auditlog-script"
+
+  enableCompassDefaultScenarioAssignment: true
 
   tenantConfig:
     useDefaultTenants: true
@@ -276,8 +278,6 @@ global:
     dbPool:
       maxOpenConnections: 1
       maxIdleConnections: 1
-
-  enableCompassDefaultScenarioAssignment: true
 
   metrics:
     enabled: true
