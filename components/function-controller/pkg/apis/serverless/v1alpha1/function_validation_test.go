@@ -206,7 +206,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 					MaxReplicas: &zero,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("10m"),
+							corev1.ResourceCPU:    resource.MustParse("9m"),
 							corev1.ResourceMemory: resource.MustParse("10Mi"),
 						},
 						Requests: corev1.ResourceList{
