@@ -124,6 +124,7 @@ func main() {
 		kymaDir:      *kymaDir,
 	}
 
+	//TODO: Rethink the approach. actions is now package nested in kymaoperation, yet it is set up here. Maybe it should be completely managed inside kymaoperation (no uses ouside of kymaoperation)?
 	stepFactoryCreator := actions.NewStepFactoryCreator(helmClient, &sgls)
 	opExecutor := kymaoperation.NewExecutor(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator, backoffIntervals)
 
@@ -207,6 +208,7 @@ type sourceGetterLegacySupport struct {
 	kymaDir      string
 }
 
+//SourceGetterFor is a "patch" method that allows to inject kymaURL and kymaVersion into process in order to fetch a SourceGetter
 func (sgls *sourceGetterLegacySupport) SourceGetterFor(kymaURL, kymaVersion string) actions.SourceGetter {
 
 	legacyKymaSourceConfig := kymasources.LegacyKymaSourceConfig{
