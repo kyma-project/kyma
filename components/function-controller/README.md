@@ -51,8 +51,8 @@ To develop the component, use the formulae declared in the [generic](/common/mak
 | **WEBHOOK_SERVICE_NAME**                  | Name of the Service Account which is used by the webhook server                                 | `serverless-webhook` |
 | **WEBHOOK_SECRET_NAME**                   | Name of the Secret which contains the certificate is used to register the webhook server        | `serverless-webhook` |
 | **WEBHOOK_PORT**                          | Port on which the webhook server are exposed                                                    | `8443`               |
-| **WEBHOOK_VALIDATION_MIN_REQUEST_CPU**    | Minimum amount of requested the limits and requests CPU to pass through the validation          | `50m`                |
-| **WEBHOOK_VALIDATION_MIN_REQUEST_MEMORY** | Minimum amount of requested the limits and requests memory to pass through the validation       | `64Mi`               |
+| **WEBHOOK_VALIDATION_MIN_REQUEST_CPU**    | Minimum amount of requested the limits and requests CPU to pass through the validation          | `10m`                |
+| **WEBHOOK_VALIDATION_MIN_REQUEST_MEMORY** | Minimum amount of requested the limits and requests memory to pass through the validation       | `16Mi`               |
 | **WEBHOOK_VALIDATION_MIN_REPLICAS_VALUE** | Minimum amount of replicas to pass through the validation                                       | `0`                  |
 | **WEBHOOK_VALIDATION_RESERVED_ENVS**      | List of reserved envs                                                                           | `{}`                 |
 | **WEBHOOK_DEFAULTING_REQUEST_CPU**        | Value of the request CPU which webhook should set if origin equals null                         | `50m`                |

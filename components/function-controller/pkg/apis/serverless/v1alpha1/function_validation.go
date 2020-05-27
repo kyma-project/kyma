@@ -17,8 +17,8 @@ import (
 const ValidationConfigKey = "validation-config"
 
 type ValidationConfig struct {
-	MinRequestCpu    string   `envconfig:"default=50m"`
-	MinRequestMemory string   `envconfig:"default=64Mi"`
+	MinRequestCpu    string   `envconfig:"default=10m"`
+	MinRequestMemory string   `envconfig:"default=16Mi"`
 	MinReplicasValue int32    `envconfig:"default=0"`
 	ReservedEnvs     []string `envconfig:"default={}"`
 }
