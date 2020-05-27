@@ -73,6 +73,10 @@ func main() {
 		log.Fatalf("Unable to build kubernetes configuration. Error: %v", err)
 	}
 
+	//////////////////////////////////////////
+	//SETUP K8s DEPENDENCIES
+	//////////////////////////////////////////
+
 	kubeClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Fatalf("Unable to create kubernetes client. Error: %v", err)
@@ -106,13 +110,28 @@ func main() {
 
 	installationFinalizerManager := finalizer.NewManager(consts.InstFinalizer)
 
+	//////////////////////////////////////////
+	//SETUP BUSINESS DOMAIN MODULES
+	//////////////////////////////////////////
+
 	fsWrapper := kymasources.NewFilesystemWrapper()
 
 	kymaPackages := kymasources.NewKymaPackages(fsWrapper, kymaCommandExecutor, *kymaDir)
-	stepFactoryCreator := actions.NewStepFactoryCreator(helmClient, kymaPackages, fsWrapper, *kymaDir)
+
+	sgls := sourceGetterLegacySupport{
+		kymaPackages: kymaPackages,
+		fsWrapper:    fsWrapper,
+		kymaDir:      *kymaDir,
+	}
+
+	stepFactoryCreator := actions.NewStepFactoryCreator(helmClient, &sgls)
 	opExecutor := kymaoperation.NewExecutor(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator, backoffIntervals)
 
 	installationController := installation.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, opExecutor, conditionManager, installationFinalizerManager, internalClient)
+
+	//////////////////////////////////////////
+	//STARTING THE THING
+	//////////////////////////////////////////
 
 	kubeInformerFactory.Start(stop)
 	internalInformerFactory.Start(stop)
@@ -179,4 +198,21 @@ func getLogrusFormatter(format string) logrus.Formatter {
 		return new(logrus.JSONFormatter)
 	}
 	return new(logrus.TextFormatter)
+}
+
+//TODO: Remove ASAP. See kymasources.SourceGetterCreator
+type sourceGetterLegacySupport struct {
+	kymaPackages kymasources.KymaPackages
+	fsWrapper    kymasources.FilesystemWrapper
+	kymaDir      string
+}
+
+func (sgls *sourceGetterLegacySupport) SourceGetterFor(kymaURL, kymaVersion string) actions.SourceGetter {
+
+	legacyKymaSourceConfig := kymasources.LegacyKymaSourceConfig{
+		KymaURL:     kymaURL,
+		KymaVersion: kymaVersion,
+	}
+
+	return kymasources.NewSourceGetterCreator(sgls.kymaPackages, sgls.fsWrapper, sgls.kymaDir).NewGetterFor(legacyKymaSourceConfig)
 }

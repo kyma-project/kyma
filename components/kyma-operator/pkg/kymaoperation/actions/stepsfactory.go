@@ -8,7 +8,6 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 	helm "k8s.io/helm/pkg/proto/hapi/release"
 )
@@ -22,6 +21,17 @@ const (
 type StepFactoryCreator interface {
 	NewInstallStepFactory(*config.InstallationData, overrides.OverrideData) (InstallStepFactory, error)
 	NewUninstallStepFactory(*config.InstallationData) (UninstallStepFactory, error)
+}
+
+// SourceGetterLegacySupport exist only to support legacy, now deprecated, mechanism of fetching installation sources. Remove as soon as possible.
+type SourceGetterLegacySupport interface {
+	SourceGetterFor(kymaURL, kymaVersion string) SourceGetter
+}
+
+//TODO: Duplicated interface, see kymasources package
+// Source Getter Allows to fetch component sources.
+type SourceGetter interface {
+	SrcDirFor(component v1alpha1.KymaComponent) (string, error)
 }
 
 type StepList []Step
@@ -43,7 +53,7 @@ type stepFactory struct {
 // StepFactory implementation for installation operation
 type installStepFactory struct {
 	stepFactory
-	sourceGetter kymasources.SourceGetter
+	sourceGetter SourceGetter
 	overrideData overrides.OverrideData
 }
 
@@ -54,19 +64,20 @@ type uninstallStepFactory struct {
 
 // stepFactoryCreator is used to create StepFactory instances for installation or uninstallation.
 type stepFactoryCreator struct {
-	helmClient   kymahelm.ClientInterface
-	kymaPackages kymasources.KymaPackages
-	fsWrapper    kymasources.FilesystemWrapper
-	kymaDir      string
+	helmClient          kymahelm.ClientInterface
+	sourceGetterSupport SourceGetterLegacySupport
+	/*
+		kymaPackages kymasources.KymaPackages
+		fsWrapper    kymasources.FilesystemWrapper
+		kymaDir      string
+	*/
 }
 
 // NewStepFactoryCreator returns a new StepFactoryCreator instance.
-func NewStepFactoryCreator(helmClient kymahelm.ClientInterface, kymaPackages kymasources.KymaPackages, fsWrapper kymasources.FilesystemWrapper, rootDir string) StepFactoryCreator {
+func NewStepFactoryCreator(helmClient kymahelm.ClientInterface, sgls SourceGetterLegacySupport) StepFactoryCreator {
 	return &stepFactoryCreator{
-		helmClient,
-		kymaPackages,
-		fsWrapper,
-		rootDir,
+		helmClient:          helmClient,
+		sourceGetterSupport: sgls,
 	}
 }
 
@@ -109,17 +120,13 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]kymahelm.Relea
 // NewInstallStepFactory returns implementation of StepFactory interface used to install or upgrade Kyma
 func (sfc *stepFactoryCreator) NewInstallStepFactory(installationData *config.InstallationData, overrideData overrides.OverrideData) (InstallStepFactory, error) {
 
-	legacyKymaSourceConfig := kymasources.LegacyKymaSourceConfig{
-		KymaURL:     installationData.URL,
-		KymaVersion: installationData.KymaVersion,
-	}
-
 	installedReleases, err := sfc.getInstalledReleases()
 	if err != nil {
 		return nil, err
 	}
 
-	sourceGetter := kymasources.NewSourceGetterCreator(sfc.kymaPackages, sfc.fsWrapper, sfc.kymaDir).NewGetterFor(legacyKymaSourceConfig)
+	sourceGetter := sfc.sourceGetterSupport.SourceGetterFor(installationData.URL, installationData.KymaVersion)
+	//kymasources.NewSourceGetterCreator(sfc.kymaPackages, sfc.fsWrapper, sfc.kymaDir).NewGetterFor(legacyKymaSourceConfig)
 	return installStepFactory{
 		stepFactory{sfc.helmClient, installedReleases},
 		sourceGetter,
