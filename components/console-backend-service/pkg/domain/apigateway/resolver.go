@@ -6,11 +6,11 @@ import (
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
 	"github.com/golang/glog"
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/domain/apigateway/listener"
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/domain/apigateway/pretty"
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/gqlerror"
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph/model"
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/resource"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/domain/apigateway/listener"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/domain/apigateway/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/gqlerror"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/graph/model"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	"github.com/pkg/errors"
 )
 

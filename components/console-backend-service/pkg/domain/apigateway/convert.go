@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/domain/apigateway/pretty"
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph/model"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/domain/apigateway/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/graph/model"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"

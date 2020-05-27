@@ -3,8 +3,8 @@ package module
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/module/automock"
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/apis/ui/v1alpha1"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/module/automock"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/apis/ui/v1alpha1"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

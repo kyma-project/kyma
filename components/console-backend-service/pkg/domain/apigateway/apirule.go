@@ -3,11 +3,11 @@ package apigateway
 import (
 	"context"
 
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/resource"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/domain/apigateway/disabled"
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph/model"
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/module"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/domain/apigateway/disabled"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/graph/model"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/module"
 )
 
 type PluggableResolver struct {

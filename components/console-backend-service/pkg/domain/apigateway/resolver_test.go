@@ -7,9 +7,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/domain/apigateway/automock"
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/gqlerror"
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph/model"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/domain/apigateway/automock"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/gqlerror"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/graph/model"
 	rulev1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -2,7 +2,7 @@ package module
 
 import (
 	"github.com/golang/glog"
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/apis/ui/v1alpha1"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/apis/ui/v1alpha1"
 )
 
 type eventHandler struct {

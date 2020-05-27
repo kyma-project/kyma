@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/module"
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/module/automock"
-	testingUtils "github.com/kyma-project/kyma/components/console-backend-service3/internal/testing"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/module"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/module/automock"
+	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/apis/ui/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/client/informers/externalversions"

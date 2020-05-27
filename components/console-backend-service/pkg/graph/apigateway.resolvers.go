@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/console-backend-service3/pkg/graph/model"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/graph/model"
 )
 
 func (r *queryResolver) APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*model.APIRule, error) {
