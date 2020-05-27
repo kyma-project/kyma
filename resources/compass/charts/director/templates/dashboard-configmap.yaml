@@ -40,6 +40,378 @@ data:
             "x": 0,
             "y": 0
           },
+          "id": 4,
+          "panels": [],
+          "title": "Business metrics",
+          "type": "row"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "decimals": 0,
+          "editable": true,
+          "error": false,
+          "fill": 1,
+          "fillGradient": 0,
+          "grid": {
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2Color": "rgba(234, 112, 112, 0.22)"
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 0,
+            "y": 1
+          },
+          "hiddenSeries": false,
+          "id": 48,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "hideEmpty": false,
+            "hideZero": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 2,
+          "links": [],
+          "nullPointMode": "connected",
+          "options": {
+            "dataLinks": []
+          },
+          "paceLength": 10,
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(compass_director_tenants_total_quantity)",
+              "format": "time_series",
+              "instant": false,
+              "interval": "10s",
+              "intervalFactor": 1,
+              "legendFormat": "Total tenants",
+              "metric": "container_memory_usage_bytes",
+              "refId": "A",
+              "step": 15
+            },
+            {
+              "expr": "sum(compass_director_tenants_active_total_quantity)",
+              "format": "time_series",
+              "instant": false,
+              "interval": "10s",
+              "intervalFactor": 2,
+              "legendFormat": "Active tenants",
+              "metric": "kube_pod_container_resource_requests_memory_bytes",
+              "refId": "B",
+              "step": 20
+            },
+            {
+              "expr": "sum(compass_director_tenants_total_quantity-compass_director_tenants_active_total_quantity)",
+              "format": "time_series",
+              "instant": false,
+              "interval": "10s",
+              "intervalFactor": 2,
+              "legendFormat": "Inactive tenants",
+              "metric": "kube_pod_container_resource_limits_memory_bytes",
+              "refId": "C",
+              "step": 20
+            },
+            {
+              "expr": "sum(compass_director_used_tenants_count)",
+              "format": "time_series",
+              "instant": false,
+              "interval": "10s",
+              "intervalFactor": 2,
+              "legendFormat": "Tenants with at least one runtime or application",
+              "metric": "kube_pod_container_resource_limits_memory_bytes",
+              "refId": "D",
+              "step": 20
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Tenants",
+          "tooltip": {
+            "msResolution": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:1242",
+              "decimals": 0,
+              "format": "none",
+              "logBase": 1,
+              "min": "0",
+              "show": true
+            },
+            {
+              "$$hashKey": "object:1243",
+              "decimals": null,
+              "format": "none",
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "decimals": 0,
+          "editable": true,
+          "error": false,
+          "fill": 1,
+          "fillGradient": 0,
+          "grid": {
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2Color": "rgba(234, 112, 112, 0.22)"
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 8,
+            "y": 1
+          },
+          "hiddenSeries": false,
+          "id": 50,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "hideEmpty": false,
+            "hideZero": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 2,
+          "links": [],
+          "nullPointMode": "connected",
+          "options": {
+            "dataLinks": []
+          },
+          "paceLength": 10,
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(compass_director_applications_total_quantity)",
+              "format": "time_series",
+              "instant": false,
+              "interval": "10s",
+              "intervalFactor": 1,
+              "legendFormat": "Number of applications",
+              "metric": "container_memory_usage_bytes",
+              "refId": "A",
+              "step": 15
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Applications",
+          "tooltip": {
+            "msResolution": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:1242",
+              "decimals": 0,
+              "format": "none",
+              "logBase": 1,
+              "min": "0",
+              "show": true
+            },
+            {
+              "$$hashKey": "object:1243",
+              "decimals": 0,
+              "format": "none",
+              "logBase": 1,
+              "min": "0",
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "decimals": 0,
+          "editable": true,
+          "error": false,
+          "fill": 1,
+          "fillGradient": 0,
+          "grid": {
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2Color": "rgba(234, 112, 112, 0.22)"
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 16,
+            "y": 1
+          },
+          "hiddenSeries": false,
+          "id": 52,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "hideEmpty": false,
+            "hideZero": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 2,
+          "links": [],
+          "nullPointMode": "connected",
+          "options": {
+            "dataLinks": []
+          },
+          "paceLength": 10,
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(compass_director_runtimes_total_quantity)",
+              "format": "time_series",
+              "instant": false,
+              "interval": "10s",
+              "intervalFactor": 1,
+              "legendFormat": "Number of runtimes",
+              "metric": "container_memory_usage_bytes",
+              "refId": "A",
+              "step": 15
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Runtimes",
+          "tooltip": {
+            "msResolution": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:1242",
+              "decimals": 0,
+              "format": "none",
+              "logBase": 1,
+              "min": "0",
+              "show": true
+            },
+            {
+              "$$hashKey": "object:1243",
+              "decimals": 0,
+              "format": "none",
+              "logBase": 1,
+              "min": "0",
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 8
+          },
           "id": 2,
           "panels": [],
           "title": "Resources",
@@ -63,7 +435,7 @@ data:
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 1
+            "y": 9
           },
           "hiddenSeries": false,
           "id": 6,
@@ -190,7 +562,7 @@ data:
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 1
+            "y": 9
           },
           "hiddenSeries": false,
           "id": 7,
@@ -312,7 +684,7 @@ data:
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 1
+            "y": 9
           },
           "hiddenSeries": false,
           "id": 15,
@@ -448,7 +820,7 @@ data:
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 9
+            "y": 17
           },
           "hiddenSeries": false,
           "id": 13,
@@ -540,7 +912,7 @@ data:
             "h": 6,
             "w": 6,
             "x": 6,
-            "y": 9
+            "y": 17
           },
           "hiddenSeries": false,
           "id": 21,
@@ -632,7 +1004,7 @@ data:
             "h": 6,
             "w": 6,
             "x": 12,
-            "y": 9
+            "y": 17
           },
           "hiddenSeries": false,
           "id": 17,
@@ -727,7 +1099,7 @@ data:
             "h": 6,
             "w": 6,
             "x": 18,
-            "y": 9
+            "y": 17
           },
           "hiddenSeries": false,
           "id": 19,
@@ -819,7 +1191,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 15
+            "y": 23
           },
           "id": 36,
           "panels": [],
@@ -840,7 +1212,7 @@ data:
             "h": 7,
             "w": 10,
             "x": 0,
-            "y": 16
+            "y": 24
           },
           "hiddenSeries": false,
           "id": 34,
@@ -939,7 +1311,7 @@ data:
             "h": 7,
             "w": 14,
             "x": 10,
-            "y": 16
+            "y": 24
           },
           "hiddenSeries": false,
           "id": 33,
@@ -1068,7 +1440,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 23
+            "y": 31
           },
           "hiddenSeries": false,
           "id": 9,
@@ -1163,7 +1535,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 23
+            "y": 31
           },
           "hiddenSeries": false,
           "id": 23,
@@ -1273,7 +1645,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 30
+            "y": 38
           },
           "id": 40,
           "panels": [],
@@ -1293,7 +1665,7 @@ data:
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 31
+            "y": 39
           },
           "hiddenSeries": false,
           "id": 42,
@@ -1395,7 +1767,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 39
+            "y": 47
           },
           "hiddenSeries": false,
           "id": 43,
@@ -1429,7 +1801,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "compass_tenantfetcher_eventing_requests_total",
+              "expr": "sum(compass_tenantfetcher_eventing_requests_total) by (code, desc)",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -1498,7 +1870,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 39
+            "y": 47
           },
           "hiddenSeries": false,
           "id": 44,
@@ -1532,7 +1904,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "compass_tenantfetcher_eventing_requests_total",
+              "expr": "sum(compass_tenantfetcher_eventing_requests_total) by (code, desc)",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1592,7 +1964,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 47
+            "y": 55
           },
           "id": 29,
           "panels": [],
@@ -1607,7 +1979,7 @@ data:
             "h": 8,
             "w": 6,
             "x": 0,
-            "y": 48
+            "y": 56
           },
           "id": 46,
           "links": [],
@@ -1702,7 +2074,7 @@ data:
             "h": 8,
             "w": 18,
             "x": 6,
-            "y": 48
+            "y": 56
           },
           "hiddenSeries": false,
           "id": 38,
@@ -1784,23 +2156,9 @@ data:
             "align": false,
             "alignLevel": null
           }
-        },
-        {
-          "collapsed": false,
-          "datasource": null,
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 56
-          },
-          "id": 4,
-          "panels": [],
-          "title": "Business metrics",
-          "type": "row"
         }
       ],
-      "refresh": "5s",
+      "refresh": "",
       "schemaVersion": 22,
       "style": "dark",
       "tags": [
@@ -1811,7 +2169,7 @@ data:
         "list": []
       },
       "time": {
-        "from": "now-5m",
+        "from": "now-30m",
         "to": "now"
       },
       "timepicker": {
@@ -1834,6 +2192,6 @@ data:
       "variables": {
         "list": []
       },
-      "version": 2
+      "version": 1
     }
 {{- end }}
