@@ -105,8 +105,11 @@ func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName string, names
 	}
 
 	response, err := client.Run(releaseName, chartRequested, overrides)
+	if err != nil {
+		return nil, err
+	}
 
-	return response, nil
+	return response, err
 }
 
 func (hc *helmClient) DeleteRelease(releaseName string, namespace string) (*release.UninstallReleaseResponse, error) {

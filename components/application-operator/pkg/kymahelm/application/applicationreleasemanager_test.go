@@ -256,12 +256,18 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 			},
 		}
 
+		helmListReleaseResponse := []*hapi_release5.Release{
+			{Name: "app-1"},
+			{Name: "app-2"},
+		}
+
 		appClient := &mocks.ApplicationClient{}
 		appClient.On("List", mock.AnythingOfType("ListOptions")).Return(applicationList, nil)
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", namespace, emptyOverrides).Return(updateResponse, nil)
 		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-2", namespace, emptyOverrides).Return(updateResponse, nil)
+		helmClient.On("ListReleases", namespace).Return(helmListReleaseResponse, nil)
 
 		releaseManager := NewApplicationReleaseManager(helmClient, appClient, OverridesData{}, namespace)
 
@@ -305,12 +311,18 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 			},
 		}
 
+		helmListReleaseResponse := []*hapi_release5.Release{
+			{Name: "app-1"},
+		}
+
 		appClient := &mocks.ApplicationClient{}
 		appClient.On("List", mock.AnythingOfType("ListOptions")).Return(applicationList, nil)
 		appClient.On("Update", updatedApplication).Return(&applicationList.Items[0], nil)
 
+
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", namespace, emptyOverrides).Return(updateResponse, errors.New("Error"))
+		helmClient.On("ListReleases", namespace).Return(helmListReleaseResponse, nil)
 
 		releaseManager := NewApplicationReleaseManager(helmClient, appClient, OverridesData{}, namespace)
 

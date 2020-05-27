@@ -88,6 +88,16 @@ func (r *releaseManager) UpgradeApplicationReleases() error {
 }
 
 func (r *releaseManager) upgradeChart(application *v1alpha1.Application) (hapi_4.Status, string, error) {
+
+	releaseExist, err := r.checkExistence(application.Name)
+	if err != nil {
+		return hapi_4.StatusFailed, "", err
+	}
+
+	if releaseExist == false {
+		return hapi_4.StatusUnknown, "", errors.Wrapf(err, "Application %s is missing", application.Name)
+	}
+
 	overrides, err := r.prepareOverrides(application)
 	if err != nil {
 		return hapi_4.StatusFailed, "", errors.Wrapf(err, "Error parsing overrides for %s Application", application.Name)
