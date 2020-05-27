@@ -1,4 +1,4 @@
-{{- if and (.Capabilities.APIVersions.Has "monitoring.coreos.com/v1") (.Capabilities.APIVersions.Has "authentication.istio.io/v1alpha1") }}
+{{- if and (.Capabilities.APIVersions.Has "monitoring.coreos.com/v1") (.Capabilities.APIVersions.Has "networking.istio.io/v1alpha3") }}
 ---
 # Dedicated Service for metrics endpoint
 apiVersion: v1
@@ -36,16 +36,13 @@ spec:
     matchLabels:
 {{ include "api-gateway.labels" . | indent 6 }}
 ---
-apiVersion: authentication.istio.io/v1alpha1
-kind: Policy
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
 metadata:
   name: {{ include "api-gateway.name" . }}-metrics
 spec:
-  peers:
-  - mtls:
-      mode: PERMISSIVE
-  targets:
-  - name: {{ include "api-gateway.name" . }}-metrics
-    ports:
-      - name: metrics
+  host: {{ include "api-gateway.name" . }}-metrics.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
 {{- end }}
