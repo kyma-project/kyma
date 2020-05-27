@@ -1,4 +1,4 @@
-package actions
+package steps
 
 import "errors"
 

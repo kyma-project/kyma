@@ -9,7 +9,7 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/actionmanager"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
 	internalerrors "github.com/kyma-project/kyma/components/kyma-operator/pkg/errors"
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymaoperation/actions"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymaoperation/steps"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 	serviceCatalog "github.com/kyma-project/kyma/components/kyma-operator/pkg/servicecatalog"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/statusmanager"
@@ -17,8 +17,8 @@ import (
 
 //StepsProvider knows how to create an instance of the StepFactory
 type StepsProvider interface {
-	ForInstallation(*config.InstallationData, overrides.OverrideData) (actions.StepLister, error)
-	ForUninstallation(*config.InstallationData) (actions.StepLister, error)
+	ForInstallation(*config.InstallationData, overrides.OverrideData) (steps.StepLister, error)
+	ForUninstallation(*config.InstallationData) (steps.StepLister, error)
 }
 
 //Executor exposes top-level interfaxce for installation/uninstallation of Kyma
@@ -122,7 +122,7 @@ func (extr *Executor) PrintStep(stepName string) {
 	log.Println("---------------------------")
 }
 
-func (extr *Executor) processComponents(removeLabelAndReturn func(err error) error, action string, stepList actions.StepList) error {
+func (extr *Executor) processComponents(removeLabelAndReturn func(err error) error, action string, stepList steps.StepList) error {
 
 	log.Println("Processing Kyma components")
 

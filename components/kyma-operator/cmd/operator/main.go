@@ -17,7 +17,7 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/finalizer"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/k8s"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymaoperation/actions"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymaoperation/steps"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/servicecatalog"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/toolkit"
@@ -124,8 +124,8 @@ func main() {
 		kymaDir:      *kymaDir,
 	}
 
-	//TODO: Rethink the approach. actions is now package nested in kymaoperation, yet it is set up here. Maybe it should be completely managed inside kymaoperation (no uses ouside of kymaoperation)?
-	stepFactoryCreator := actions.NewStepFactoryCreator(helmClient, &sgls)
+	//TODO: Rethink the approach. steps is now package nested in kymaoperation, yet it is set up here. Maybe it should be completely managed inside kymaoperation (no uses ouside of kymaoperation)?
+	stepFactoryCreator := steps.NewStepFactoryCreator(helmClient, &sgls)
 	opExecutor := kymaoperation.NewExecutor(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator, backoffIntervals)
 
 	installationController := k8s.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, opExecutor, conditionManager, installationFinalizerManager, internalClient)
@@ -209,7 +209,7 @@ type sourceGetterLegacySupport struct {
 }
 
 //SourceGetterFor is a "patch" method that allows to inject kymaURL and kymaVersion into process in order to fetch a SourceGetter
-func (sgls *sourceGetterLegacySupport) SourceGetterFor(kymaURL, kymaVersion string) actions.SourceGetter {
+func (sgls *sourceGetterLegacySupport) SourceGetterFor(kymaURL, kymaVersion string) steps.SourceGetter {
 
 	legacyKymaSourceConfig := kymasources.LegacyKymaSourceConfig{
 		KymaURL:     kymaURL,
