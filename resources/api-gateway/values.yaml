@@ -65,7 +65,12 @@ config:
 
   # Configure node tolerations.
   tolerations: []
-  annotations: {}
+  annotations:
+    sidecar.istio.io/inject: "false"
+
+  # Port configuration
+  ports:
+    metrics: 8080
 
 # Configure node affinity
 affinity: {}
