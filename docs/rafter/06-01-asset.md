@@ -55,7 +55,7 @@ status:
   lastHeartbeatTime: "2018-01-03T07:38:24Z"
   observedGeneration: 1
   assetRef:
-    baseUrl: https://{STORAGE_ADDRESS}/test-sample-1b19rnbuc6ir8/asset-sample
+    baseUrl: https://{STORAGE_ADDRESS}/my-bucket-1b19rnbuc6ir8/my-package-assets
     files:
     - metadata:
         title: Overview
