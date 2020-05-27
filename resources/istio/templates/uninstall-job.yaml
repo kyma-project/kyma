@@ -25,9 +25,6 @@ spec:
           - name: config
             mountPath: /etc/istio/
             readOnly: true
-          - name: manifests
-            mountPath: /etc/manifests
-            readOnly: true
           env:
           - name: NAMESPACE
             value: "{{ .Release.Namespace }}"
@@ -37,8 +34,5 @@ spec:
       - name: config
         configMap:
           name: kyma-istio-control-plane-config
-      - name: manifests
-        configMap:
-          name: kyma-extra-manifests
       restartPolicy: Never
       serviceAccountName: istio-job
