@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+readonly SERVING_API_VERSION="serving.knative.dev/v1"
+
+readonly FUNCTIONS_RESOURCE_TYPE="functions.serverless.kyma-project.io"
+readonly KSERVICE_RESOURCE_TYPE="services.serving.knative.dev"
+readonly TRIGGERS_RESOURCE_TYPE="triggers.eventing.knative.dev"
+
+readonly MANAGED_BY_LABEL_KEY="serverless.kyma-project.io/managed-by"
+readonly MANAGED_BY_LABEL_VALUE="function-controller"
+
+# patchTriggers patches all Triggers connected to KNative Services in all namespaces to pure k8s Service resource
+#
+patchTriggers() {
+  local -r functions=$(kubectl get ${FUNCTIONS_RESOURCE_TYPE} --all-namespaces -ojson | jq -c ".items[] | {namespace: .metadata.namespace, name: .metadata.name}")
+  if [[ -z ${functions} ]]; then
+    echo "There are not any Functions. Skipping... :("
+    return 0
+  fi
+
+  local -r triggers=$(kubectl get ${TRIGGERS_RESOURCE_TYPE} --all-namespaces -ojson | jq -c ".items[] | select( .spec.subscriber.ref.apiVersion == \"${SERVING_API_VERSION}\" )")
+  if [[ -z ${triggers} ]]; then
+    echo "There are not any Triggers. Skipping... :("
+    return 0
+  fi
+
+  IFS=$'\n'
+  for trigger in ${triggers}
+  do
+    local -r subscriberName="$(echo ${trigger} | jq -r '.spec.subscriber.ref.name')"
+    local -r subscriberNamespace="$(echo ${trigger} | jq -r '.spec.subscriber.ref.namespace')"
+
+    IFS=$'\n'
+    for function in ${functions}
+    do
+      local -r functionName="$(echo ${function} | jq -r '.name')"
+      local -r functionNamespace="$(echo ${function} | jq -r '.namespace')"
+
+      if [ "${subscriberName}" == "${functionName}" && "${subscriberNamespace}" == "${functionNamespace}" ]; then
+        patchSingleTrigger "${trigger}"
+      if 
+    done
+  done
+}
+
+# patchSingleTrigger patches single Trigger to new subscriber
+#
+# Arguments:
+#   $1 - Trigger resource
+patchSingleTrigger() {
+  local -r trigger="${1}"
+
+  local -r triggerName="$(echo ${trigger} | jq -r '.metadata.name')"
+  local -r triggerNamespace="$(echo ${trigger} | jq -r '.metadata.namespace')"
+
+  local -r subscriberName="$(echo ${trigger} | jq -r '.spec.subscriber.ref.name')"
+  local -r subscriberNamespace="$(echo ${trigger} | jq -r '.spec.subscriber.ref.namespace')"
+
+  kubectl patch triggers -n "${triggerNamespace}" "${triggerName}" \
+    --patch "{\"spec\": {\"subscriber\": {\"ref\": {\"apiVersion\": \"v1\", \"kind\": \"Service\", \"name\": \"${subscriberName}\", \"namespace\": \"${subscriberNamespace}\"}}}}" \
+    --type=merge
+}
+
+# deleteKServices deletes all KServices managed/created by function-controller
+#
+deleteKServices() {
+  kubectl delete ${KSERVICE_RESOURCE_TYPE} \
+    --all-namespaces \
+    -l "${MANAGED_BY_LABEL_KEY}"="${MANAGED_BY_LABEL_VALUE}"
+}
+
+main() {
+  patchTriggers
+  deleteKServices || 0
+}
+main
