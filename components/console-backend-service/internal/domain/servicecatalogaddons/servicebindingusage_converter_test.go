@@ -154,7 +154,7 @@ func TestBindingUsageConversionInput(t *testing.T) {
 	}{
 		"only kind is provided": {
 			givenSBUInput: &gqlschema.CreateServiceBindingUsageInput{
-				UsedBy: gqlschema.LocalObjectReferenceInput{
+				UsedBy: &gqlschema.LocalObjectReferenceInput{
 					Kind: "Function",
 				},
 			},
@@ -177,10 +177,10 @@ func TestBindingUsageConversionInput(t *testing.T) {
 		"with env prefix": {
 			givenSBUInput: &gqlschema.CreateServiceBindingUsageInput{
 				Name: ptr("usage"),
-				ServiceBindingRef: gqlschema.ServiceBindingRefInput{
+				ServiceBindingRef: &gqlschema.ServiceBindingRefInput{
 					Name: "redis-binding",
 				},
-				UsedBy: gqlschema.LocalObjectReferenceInput{
+				UsedBy: &gqlschema.LocalObjectReferenceInput{
 					Name: "app",
 					Kind: "Deployment",
 				},
@@ -213,10 +213,10 @@ func TestBindingUsageConversionInput(t *testing.T) {
 		"without env prefix": {
 			givenSBUInput: &gqlschema.CreateServiceBindingUsageInput{
 				Name: ptr("usage"),
-				ServiceBindingRef: gqlschema.ServiceBindingRefInput{
+				ServiceBindingRef: &gqlschema.ServiceBindingRefInput{
 					Name: "redis-binding",
 				},
-				UsedBy: gqlschema.LocalObjectReferenceInput{
+				UsedBy: &gqlschema.LocalObjectReferenceInput{
 					Name: "app",
 					Kind: "Deployment",
 				},

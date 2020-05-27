@@ -35,7 +35,7 @@ func TestFunctionConverter_ToGQL(t *testing.T) {
 		function := &v1alpha1.Function{}
 
 		expected := gqlschema.Function{
-			Status: gqlschema.FunctionStatus{
+			Status: &gqlschema.FunctionStatus{
 				Phase: gqlschema.FunctionPhaseTypeInitializing,
 			},
 		}
@@ -71,7 +71,7 @@ func TestFunctionConverter_ToGQLs(t *testing.T) {
 
 		gqlFunction1 := fixGQLFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedLabels)
 		gqlFunction2 := fixGQLFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedLabels)
-		gqlFunctions := []gqlschema.Function{gqlFunction1, gqlFunction2}
+		gqlFunctions := []*gqlschema.Function{gqlFunction1, gqlFunction2}
 
 		converter := newFunctionConverter()
 		result, err := converter.ToGQLs(functions)
@@ -107,7 +107,7 @@ func TestFunctionConverter_ToFunction(t *testing.T) {
 
 		function := fixFunction(expectedName, expectedNamespace, "", expectedSource, expectedDependencies, expectedLabels)
 		gqlMutationInput := fixGQLMutationInput(expectedSource, expectedDependencies, expectedLabels)
-		gqlMutationInput.Env = []gqlschema.FunctionEnvInput{
+		gqlMutationInput.Env = []*gqlschema.FunctionEnvInput{
 			{
 				Name:  "foo",
 				Value: "bar",
@@ -115,7 +115,7 @@ func TestFunctionConverter_ToFunction(t *testing.T) {
 		}
 
 		converter := newFunctionConverter()
-		result, err := converter.ToFunction(expectedName, expectedNamespace, gqlMutationInput)
+		result, err := converter.ToFunction(expectedName, expectedNamespace, *gqlMutationInput)
 
 		require.NoError(t, err)
 		assert.Equal(t, function, result)
@@ -158,7 +158,7 @@ func TestFunctionConverter_Env(t *testing.T) {
 			},
 		},
 	}
-	gqlEnv := []gqlschema.FunctionEnv{
+	gqlEnv := []*gqlschema.FunctionEnv{
 		{
 			Name:  "foo",
 			Value: "bar",
@@ -185,7 +185,7 @@ func TestFunctionConverter_Env(t *testing.T) {
 			},
 		},
 	}
-	gqlEnvInput := []gqlschema.FunctionEnvInput{
+	gqlEnvInput := []*gqlschema.FunctionEnvInput{
 		{
 			Name:  "foo",
 			Value: "bar",
@@ -220,7 +220,7 @@ func TestFunctionConverter_Env(t *testing.T) {
 
 	t.Run("Empty - toGQLEnv", func(t *testing.T) {
 		result := converter.toGQLEnv([]v1.EnvVar{})
-		assert.ElementsMatch(t, []gqlschema.FunctionEnv{}, result)
+		assert.ElementsMatch(t, []*gqlschema.FunctionEnv{}, result)
 	})
 
 	t.Run("Success - fromGQLEnv", func(t *testing.T) {
@@ -229,7 +229,7 @@ func TestFunctionConverter_Env(t *testing.T) {
 	})
 
 	t.Run("Empty - fromGQLEnv", func(t *testing.T) {
-		result := converter.fromGQLEnv([]gqlschema.FunctionEnvInput{})
+		result := converter.fromGQLEnv([]*gqlschema.FunctionEnvInput{})
 		assert.ElementsMatch(t, []v1.EnvVar{}, result)
 	})
 }
@@ -241,11 +241,11 @@ func TestFunctionConverter_Replicas(t *testing.T) {
 	int32Min := int32(min)
 	int32Max := int32(max)
 
-	gqlReplicas := gqlschema.FunctionReplicas{
+	gqlReplicas := &gqlschema.FunctionReplicas{
 		Min: &min,
 		Max: &max,
 	}
-	gqlReplicasInput := gqlschema.FunctionReplicasInput{
+	gqlReplicasInput := &gqlschema.FunctionReplicasInput{
 		Min: &min,
 		Max: &max,
 	}
@@ -267,7 +267,7 @@ func TestFunctionConverter_Replicas(t *testing.T) {
 	})
 
 	t.Run("Empty - fromGQLReplicas", func(t *testing.T) {
-		k8sMin, k8sMax := converter.fromGQLReplicas(gqlschema.FunctionReplicasInput{})
+		k8sMin, k8sMax := converter.fromGQLReplicas(&gqlschema.FunctionReplicasInput{})
 		assert.Nil(t, k8sMin)
 		assert.Nil(t, k8sMax)
 	})
@@ -285,7 +285,7 @@ func TestFunctionConverter_Resources(t *testing.T) {
 		}
 		gqlCPU := "3006477108"
 		gqlResources := gqlschema.FunctionResources{
-			Requests: gqlschema.ResourceValues{
+			Requests: &gqlschema.ResourceValues{
 				CPU: &gqlCPU,
 			},
 		}
@@ -301,8 +301,8 @@ func TestFunctionConverter_Resources(t *testing.T) {
 
 	t.Run("Success - fromGQLResources", func(t *testing.T) {
 		gqlCPU := "3006477108"
-		gqlResources := gqlschema.FunctionResourcesInput{
-			Requests: gqlschema.ResourceValuesInput{
+		gqlResources := &gqlschema.FunctionResourcesInput{
+			Requests: &gqlschema.ResourceValuesInput{
 				CPU: &gqlCPU,
 			},
 		}
@@ -322,8 +322,8 @@ func TestFunctionConverter_Resources(t *testing.T) {
 
 	t.Run("Error - fromGQLResources", func(t *testing.T) {
 		gqlCPU := "pico-bello"
-		gqlResources := gqlschema.FunctionResourcesInput{
-			Requests: gqlschema.ResourceValuesInput{
+		gqlResources := &gqlschema.FunctionResourcesInput{
+			Requests: &gqlschema.ResourceValuesInput{
 				CPU: &gqlCPU,
 			},
 		}
@@ -334,7 +334,7 @@ func TestFunctionConverter_Resources(t *testing.T) {
 	})
 
 	t.Run("Empty - fromGQLResources", func(t *testing.T) {
-		result, errs := converter.fromGQLResources(gqlschema.FunctionResourcesInput{})
+		result, errs := converter.fromGQLResources(&gqlschema.FunctionResourcesInput{})
 		assert.Len(t, errs, 0)
 		assert.Equal(t, v1.ResourceRequirements{}, result)
 	})

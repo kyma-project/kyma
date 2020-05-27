@@ -44,7 +44,7 @@ func TestClusterAddonsConfigurationResolver_CreateAddonsConfiguration(t *testing
 	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(nil, addonsCfgMutation, nil)
 
 	// when
-	res, err := resolver.CreateClusterAddonsConfiguration(context.Background(), addonName, nil, []string{}, &gqlschema.Labels{})
+	res, err := resolver.CreateClusterAddonsConfiguration(context.Background(), addonName, nil, []string{}, gqlschema.Labels{})
 
 	// then
 	require.NoError(t, err)
@@ -62,7 +62,7 @@ func TestClusterAddonsConfigurationResolver_UpdateAddonsConfiguration(t *testing
 	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(nil, addonsCfgMutation, nil)
 
 	// when
-	cfgs, err := resolver.UpdateClusterAddonsConfiguration(context.Background(), addonName, nil, []string{}, &gqlschema.Labels{})
+	cfgs, err := resolver.UpdateClusterAddonsConfiguration(context.Background(), addonName, nil, []string{}, gqlschema.Labels{})
 
 	// then
 	require.NoError(t, err)
@@ -135,7 +135,7 @@ func TestClusterAddonsConfigurationResolver_AddAddonsConfigurationRepository(t *
 	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
 
 	// when
-	cfgs, err := resolver.AddClusterAddonsConfigurationRepositories(context.Background(), addonName, []gqlschema.AddonsConfigurationRepositoryInput{{URL: "app.gg"}})
+	cfgs, err := resolver.AddClusterAddonsConfigurationRepositories(context.Background(), addonName, []*gqlschema.AddonsConfigurationRepositoryInput{{URL: "app.gg"}})
 
 	// then
 	require.NoError(t, err)

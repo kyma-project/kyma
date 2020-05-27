@@ -42,8 +42,8 @@ func (c *podConverter) ToGQL(in *v1.Pod) (*gqlschema.Pod, error) {
 	}, nil
 }
 
-func (c *podConverter) ToGQLs(in []*v1.Pod) ([]gqlschema.Pod, error) {
-	var result []gqlschema.Pod
+func (c *podConverter) ToGQLs(in []*v1.Pod) ([]*gqlschema.Pod, error) {
+	var result []*gqlschema.Pod
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -51,7 +51,7 @@ func (c *podConverter) ToGQLs(in []*v1.Pod) ([]gqlschema.Pod, error) {
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

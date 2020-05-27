@@ -455,10 +455,10 @@ func fixCreateServiceBindingUsageInput() *gqlschema.CreateServiceBindingUsageInp
 	name := "sbu-name"
 	return &gqlschema.CreateServiceBindingUsageInput{
 		Name: &name,
-		ServiceBindingRef: gqlschema.ServiceBindingRefInput{
+		ServiceBindingRef: &gqlschema.ServiceBindingRefInput{
 			Name: "binding-name",
 		},
-		UsedBy: gqlschema.LocalObjectReferenceInput{
+		UsedBy: &gqlschema.LocalObjectReferenceInput{
 			Kind: "Deployment",
 			Name: "sample-deployment",
 		},

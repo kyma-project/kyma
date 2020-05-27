@@ -18,7 +18,7 @@ func TestSecretListener_OnAdd(t *testing.T) {
 		secret := new(v1.Secret)
 		converter := automock.NewGQLSecretConverter()
 
-		channel := make(chan gqlschema.SecretEvent, 1)
+		channel := make(chan *gqlschema.SecretEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", secret).Return(gqlSecret, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -91,7 +91,7 @@ func TestSecretListener_OnDelete(t *testing.T) {
 		secret := new(v1.Secret)
 		converter := automock.NewGQLSecretConverter()
 
-		channel := make(chan gqlschema.SecretEvent, 1)
+		channel := make(chan *gqlschema.SecretEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", secret).Return(gqlSecret, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -165,7 +165,7 @@ func TestSecretListener_OnUpdate(t *testing.T) {
 		secret := new(v1.Secret)
 		converter := automock.NewGQLSecretConverter()
 
-		channel := make(chan gqlschema.SecretEvent, 1)
+		channel := make(chan *gqlschema.SecretEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", secret).Return(gqlSecret, nil).Once()
 		defer converter.AssertExpectations(t)

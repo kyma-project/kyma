@@ -68,7 +68,7 @@ func TestTriggerConverter_ToGQL(t *testing.T) {
 				FilterAttributes: gqlschema.JSON{
 					"test1": "alpha", "test2": "beta",
 				},
-				Subscriber: gqlschema.Subscriber{
+				Subscriber: &gqlschema.Subscriber{
 					Ref: &gqlschema.SubscriberRef{
 						APIVersion: "TestAPIVersion",
 						Kind:       "TestKind",
@@ -76,7 +76,7 @@ func TestTriggerConverter_ToGQL(t *testing.T) {
 						Namespace:  "TestNamespace",
 					},
 				},
-				Status: gqlschema.TriggerStatus{
+				Status: &gqlschema.TriggerStatus{
 					Status: gqlschema.TriggerStatusTypeReady,
 				},
 			},
@@ -129,10 +129,10 @@ func TestTriggerConverter_ToGQL(t *testing.T) {
 				FilterAttributes: gqlschema.JSON{
 					"test1": "alpha", "test2": "beta",
 				},
-				Subscriber: gqlschema.Subscriber{
+				Subscriber: &gqlschema.Subscriber{
 					URI: &rawURL,
 				},
-				Status: gqlschema.TriggerStatus{
+				Status: &gqlschema.TriggerStatus{
 					Status: gqlschema.TriggerStatusTypeFailed,
 					Reason: []string{"test error", "test error"},
 				},
@@ -178,10 +178,10 @@ func TestTriggerConverter_ToGQL(t *testing.T) {
 				Name:      "TestName",
 				Namespace: "TestNamespace",
 				Broker:    "default",
-				Subscriber: gqlschema.Subscriber{
+				Subscriber: &gqlschema.Subscriber{
 					URI: &rawURL,
 				},
-				Status: gqlschema.TriggerStatus{
+				Status: &gqlschema.TriggerStatus{
 					Status: gqlschema.TriggerStatusTypeFailed,
 					Reason: []string{"test unknown", "test error"},
 				},
@@ -223,10 +223,10 @@ func TestTriggerConverter_ToGQL(t *testing.T) {
 				Name:      "TestName",
 				Namespace: "TestNamespace",
 				Broker:    "default",
-				Subscriber: gqlschema.Subscriber{
+				Subscriber: &gqlschema.Subscriber{
 					URI: &rawURL,
 				},
-				Status: gqlschema.TriggerStatus{
+				Status: &gqlschema.TriggerStatus{
 					Status: gqlschema.TriggerStatusTypeUnknown,
 					Reason: []string{"test unknown"},
 				},
@@ -376,7 +376,7 @@ func TestTriggerConverter_ToGQLs(t *testing.T) {
 					FilterAttributes: gqlschema.JSON{
 						"test1": "alpha", "test2": "beta",
 					},
-					Subscriber: gqlschema.Subscriber{
+					Subscriber: &gqlschema.Subscriber{
 						Ref: &gqlschema.SubscriberRef{
 							APIVersion: "TestAPIVersion",
 							Kind:       "TestKind",
@@ -384,7 +384,7 @@ func TestTriggerConverter_ToGQLs(t *testing.T) {
 							Namespace:  "TestNamespace",
 						},
 					},
-					Status: gqlschema.TriggerStatus{
+					Status: &gqlschema.TriggerStatus{
 						Status: gqlschema.TriggerStatusTypeReady,
 					},
 				},
@@ -395,10 +395,10 @@ func TestTriggerConverter_ToGQLs(t *testing.T) {
 					FilterAttributes: gqlschema.JSON{
 						"test1": "alpha", "test2": "beta",
 					},
-					Subscriber: gqlschema.Subscriber{
+					Subscriber: &gqlschema.Subscriber{
 						URI: &rawURL,
 					},
-					Status: gqlschema.TriggerStatus{
+					Status: &gqlschema.TriggerStatus{
 						Status: gqlschema.TriggerStatusTypeFailed,
 						Reason: []string{"test error", "test error"},
 					},
@@ -439,7 +439,7 @@ func TestTriggerConverter_ToTrigger(t *testing.T) {
 
 	for testName, testData := range map[string]struct {
 		toConvert  gqlschema.TriggerCreateInput
-		ownerRef   []gqlschema.OwnerReference
+		ownerRef   []*gqlschema.OwnerReference
 		expected   *v1alpha1.Trigger
 		errMatcher types.GomegaMatcher
 	}{
@@ -448,10 +448,10 @@ func TestTriggerConverter_ToTrigger(t *testing.T) {
 				Name:      &triggerName,
 				Namespace: "TestNamespace",
 				Broker:    "default",
-				FilterAttributes: &gqlschema.JSON{
+				FilterAttributes: gqlschema.JSON{
 					"test1": "alpha", "test2": "beta",
 				},
-				Subscriber: gqlschema.SubscriberInput{
+				Subscriber: &gqlschema.SubscriberInput{
 					Ref: &gqlschema.SubscriberRefInput{
 						Kind:       "TestKind",
 						Namespace:  "TestNamespace",
@@ -460,7 +460,7 @@ func TestTriggerConverter_ToTrigger(t *testing.T) {
 					},
 				},
 			},
-			ownerRef: []gqlschema.OwnerReference{},
+			ownerRef: []*gqlschema.OwnerReference{},
 			expected: &v1alpha1.Trigger{
 				TypeMeta: v1.TypeMeta{
 					Kind:       "Trigger",
@@ -495,14 +495,14 @@ func TestTriggerConverter_ToTrigger(t *testing.T) {
 				Name:      &triggerName,
 				Namespace: "TestNamespace",
 				Broker:    "default",
-				Subscriber: gqlschema.SubscriberInput{
+				Subscriber: &gqlschema.SubscriberInput{
 					URI: &rawURL,
 				},
-				FilterAttributes: &gqlschema.JSON{
+				FilterAttributes: gqlschema.JSON{
 					"test1": "alpha", "test2": "beta",
 				},
 			},
-			ownerRef: []gqlschema.OwnerReference{},
+			ownerRef: []*gqlschema.OwnerReference{},
 			expected: &v1alpha1.Trigger{
 				TypeMeta: v1.TypeMeta{
 					Kind:       "Trigger",
@@ -538,7 +538,7 @@ func TestTriggerConverter_ToTrigger(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 
 			//when
-			converted, err := converter.ToTrigger(testData.toConvert, testData.ownerRef)
+			converted, err := converter.ToTrigger(&testData.toConvert, testData.ownerRef)
 
 			//then
 			g.Expect(err).To(testData.errMatcher)
@@ -554,21 +554,21 @@ func TestTriggerConverter_ToTriggers(t *testing.T) {
 	url, _ := apis.ParseURL(rawURL)
 
 	for testName, testData := range map[string]struct {
-		toConvert  []gqlschema.TriggerCreateInput
-		ownerRef   []gqlschema.OwnerReference
+		toConvert  []*gqlschema.TriggerCreateInput
+		ownerRef   []*gqlschema.OwnerReference
 		expected   []*v1alpha1.Trigger
 		errMatcher types.GomegaMatcher
 	}{
 		"All properties are given": {
-			toConvert: []gqlschema.TriggerCreateInput{
+			toConvert: []*gqlschema.TriggerCreateInput{
 				{
 					Name:      &triggerName,
 					Namespace: "TestNamespace",
 					Broker:    "default",
-					FilterAttributes: &gqlschema.JSON{
+					FilterAttributes: gqlschema.JSON{
 						"test1": "alpha", "test2": "beta",
 					},
-					Subscriber: gqlschema.SubscriberInput{
+					Subscriber: &gqlschema.SubscriberInput{
 						Ref: &gqlschema.SubscriberRefInput{
 							Kind:       "TestKind",
 							Namespace:  "TestNamespace",
@@ -581,15 +581,15 @@ func TestTriggerConverter_ToTriggers(t *testing.T) {
 					Name:      &triggerName,
 					Namespace: "TestNamespace",
 					Broker:    "default",
-					Subscriber: gqlschema.SubscriberInput{
+					Subscriber: &gqlschema.SubscriberInput{
 						URI: &rawURL,
 					},
-					FilterAttributes: &gqlschema.JSON{
+					FilterAttributes: gqlschema.JSON{
 						"test1": "alpha", "test2": "beta",
 					},
 				},
 			},
-			ownerRef: []gqlschema.OwnerReference{
+			ownerRef: []*gqlschema.OwnerReference{
 				{
 					APIVersion:         "TestAPIVersion",
 					Kind:               "TestKind",
@@ -689,7 +689,7 @@ func TestTriggerConverter_ToTriggers(t *testing.T) {
 			errMatcher: gomega.BeNil(),
 		},
 		"Empty": {
-			toConvert:  []gqlschema.TriggerCreateInput{},
+			toConvert:  []*gqlschema.TriggerCreateInput{},
 			expected:   []*v1alpha1.Trigger{},
 			errMatcher: gomega.BeNil(),
 		},

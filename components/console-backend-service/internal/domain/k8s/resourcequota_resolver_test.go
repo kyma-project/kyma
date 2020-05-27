@@ -50,19 +50,19 @@ func TestResourceQuotaResolver_CreateResourceQuota(t *testing.T) {
 	)
 
 	resourceQuotaInputGQL := gqlschema.ResourceQuotaInput{
-		Limits: gqlschema.ResourceValuesInput{
+		Limits: &gqlschema.ResourceValuesInput{
 			Memory: ptrStr(resourceLimitsMemory),
 		},
-		Requests: gqlschema.ResourceValuesInput{
+		Requests: &gqlschema.ResourceValuesInput{
 			Memory: ptrStr(resourceRequestsMemory),
 		},
 	}
 	resourceQuotaGQL := gqlschema.ResourceQuota{
 		Name: name,
-		Limits: gqlschema.ResourceValues{
+		Limits: &gqlschema.ResourceValues{
 			Memory: ptrStr(resourceLimitsMemory),
 		},
-		Requests: gqlschema.ResourceValues{
+		Requests: &gqlschema.ResourceValues{
 			Memory: ptrStr(resourceRequestsMemory),
 		},
 	}

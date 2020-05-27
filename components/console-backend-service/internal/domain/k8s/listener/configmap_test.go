@@ -18,7 +18,7 @@ func TestConfigMapListener_OnAdd(t *testing.T) {
 		configMap := new(v1.ConfigMap)
 		converter := automock.NewGQLConfigMapConverter()
 
-		channel := make(chan gqlschema.ConfigMapEvent, 1)
+		channel := make(chan *gqlschema.ConfigMapEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", configMap).Return(gqlConfigMap, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -91,7 +91,7 @@ func TestConfigMapListener_OnDelete(t *testing.T) {
 		configMap := new(v1.ConfigMap)
 		converter := automock.NewGQLConfigMapConverter()
 
-		channel := make(chan gqlschema.ConfigMapEvent, 1)
+		channel := make(chan *gqlschema.ConfigMapEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", configMap).Return(gqlConfigMap, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -165,7 +165,7 @@ func TestConfigMapListener_OnUpdate(t *testing.T) {
 		configMap := new(v1.ConfigMap)
 		converter := automock.NewGQLConfigMapConverter()
 
-		channel := make(chan gqlschema.ConfigMapEvent, 1)
+		channel := make(chan *gqlschema.ConfigMapEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", configMap).Return(gqlConfigMap, nil).Once()
 		defer converter.AssertExpectations(t)

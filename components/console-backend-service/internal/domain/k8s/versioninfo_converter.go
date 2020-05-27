@@ -10,13 +10,13 @@ import (
 
 type versionInfoConverter struct{}
 
-func (c *versionInfoConverter) ToGQL(in *v1.Deployment) gqlschema.VersionInfo {
+func (c *versionInfoConverter) ToGQL(in *v1.Deployment) *gqlschema.VersionInfo {
 	deploymentImage := in.Spec.Template.Spec.Containers[0].Image
 	deploymentImageSeparated := strings.FieldsFunc(deploymentImage, split)
 
 	source := deploymentImageSeparated[0]
 	if source != "eu.gcr.io" {
-		return gqlschema.VersionInfo{
+		return &gqlschema.VersionInfo{
 			KymaVersion: &deploymentImage,
 		}
 	}
@@ -25,12 +25,12 @@ func (c *versionInfoConverter) ToGQL(in *v1.Deployment) gqlschema.VersionInfo {
 	_, err := semver.Parse(version)
 	if err != nil && strings.HasPrefix(version, "PR-") {
 		pullRequestVersion := strings.Join([]string{"pull request", version}, " ")
-		return gqlschema.VersionInfo{
+		return &gqlschema.VersionInfo{
 			KymaVersion: &pullRequestVersion,
 		}
 	}
 
-	return gqlschema.VersionInfo{
+	return &gqlschema.VersionInfo{
 		KymaVersion: &version,
 	}
 }

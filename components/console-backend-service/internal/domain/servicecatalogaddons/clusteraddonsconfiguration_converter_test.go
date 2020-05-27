@@ -67,20 +67,20 @@ func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
 					"ion": "al",
 				},
 				Urls: []string{url},
-				Repositories: []gqlschema.AddonsConfigurationRepository{
+				Repositories: []*gqlschema.AddonsConfigurationRepository{
 					{
 						URL: url,
 					},
 				},
-				Status: gqlschema.AddonsConfigurationStatus{
+				Status: &gqlschema.AddonsConfigurationStatus{
 					Phase: string(v1alpha1.AddonsConfigurationReady),
-					Repositories: []gqlschema.AddonsConfigurationStatusRepository{
+					Repositories: []*gqlschema.AddonsConfigurationStatusRepository{
 						{
 							Status:  "Failed",
 							URL:     "rul",
 							Reason:  "reason",
 							Message: "fix",
-							Addons: []gqlschema.AddonsConfigurationStatusAddons{
+							Addons: []*gqlschema.AddonsConfigurationStatusAddons{
 								{
 									Status:  "Failed",
 									Message: "test",
@@ -156,7 +156,7 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 						"test": "test",
 					},
 					Urls: []string{url},
-					Repositories: []gqlschema.AddonsConfigurationRepository{
+					Repositories: []*gqlschema.AddonsConfigurationRepository{
 						{
 							URL: url,
 							SecretRef: &gqlschema.ResourceRef{
@@ -172,7 +172,7 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 						"test2": "test2",
 					},
 					Urls: []string{url},
-					Repositories: []gqlschema.AddonsConfigurationRepository{
+					Repositories: []*gqlschema.AddonsConfigurationRepository{
 						{
 							URL: url,
 						},

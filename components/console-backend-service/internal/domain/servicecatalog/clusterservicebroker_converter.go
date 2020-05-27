@@ -29,8 +29,8 @@ func (c *clusterServiceBrokerConverter) ToGQL(item *v1beta1.ClusterServiceBroker
 	return &broker, nil
 }
 
-func (c *clusterServiceBrokerConverter) ToGQLs(in []*v1beta1.ClusterServiceBroker) ([]gqlschema.ClusterServiceBroker, error) {
-	var result []gqlschema.ClusterServiceBroker
+func (c *clusterServiceBrokerConverter) ToGQLs(in []*v1beta1.ClusterServiceBroker) ([]*gqlschema.ClusterServiceBroker, error) {
+	var result []*gqlschema.ClusterServiceBroker
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -38,7 +38,7 @@ func (c *clusterServiceBrokerConverter) ToGQLs(in []*v1beta1.ClusterServiceBroke
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

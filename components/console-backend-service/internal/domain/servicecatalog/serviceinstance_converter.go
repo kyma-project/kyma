@@ -76,8 +76,8 @@ func (c *serviceInstanceConverter) ToGQL(in *v1beta1.ServiceInstance) (*gqlschem
 	return &instance, nil
 }
 
-func (c *serviceInstanceConverter) ToGQLs(in []*v1beta1.ServiceInstance) ([]gqlschema.ServiceInstance, error) {
-	var result []gqlschema.ServiceInstance
+func (c *serviceInstanceConverter) ToGQLs(in []*v1beta1.ServiceInstance) ([]*gqlschema.ServiceInstance, error) {
+	var result []*gqlschema.ServiceInstance
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -85,7 +85,7 @@ func (c *serviceInstanceConverter) ToGQLs(in []*v1beta1.ServiceInstance) ([]gqls
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil
@@ -98,7 +98,7 @@ func (c *serviceInstanceConverter) GQLCreateInputToInstanceCreateParameters(in *
 
 	var parameterSchema map[string]interface{}
 	if in.ParameterSchema != nil {
-		parameterSchema = *in.ParameterSchema
+		parameterSchema = in.ParameterSchema
 	}
 
 	var labels []string

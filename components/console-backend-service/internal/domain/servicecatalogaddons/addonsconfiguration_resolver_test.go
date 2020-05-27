@@ -45,7 +45,7 @@ func TestAddonsConfigurationResolver_CreateAddonsConfiguration(t *testing.T) {
 	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(nil, addonsCfgMutation, nil)
 
 	// when
-	res, err := resolver.CreateAddonsConfiguration(context.Background(), fixNS, fixNS, nil, []string{}, &gqlschema.Labels{})
+	res, err := resolver.CreateAddonsConfiguration(context.Background(), fixNS, fixNS, nil, []string{}, gqlschema.Labels{})
 
 	// then
 	require.NoError(t, err)
@@ -63,7 +63,7 @@ func TestAddonsConfigurationResolver_UpdateAddonsConfiguration(t *testing.T) {
 	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(nil, addonsCfgMutation, nil)
 
 	// when
-	cfgs, err := resolver.UpdateAddonsConfiguration(context.Background(), addonName, addonName, nil, []string{}, &gqlschema.Labels{})
+	cfgs, err := resolver.UpdateAddonsConfiguration(context.Background(), addonName, addonName, nil, []string{}, gqlschema.Labels{})
 
 	// then
 	require.NoError(t, err)
@@ -136,7 +136,7 @@ func TestAddonsConfigurationResolver_AddAddonsConfigurationRepository(t *testing
 	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
 
 	// when
-	cfgs, err := resolver.AddAddonsConfigurationRepositories(context.Background(), addonName, addonName, []gqlschema.AddonsConfigurationRepositoryInput{{URL: url}})
+	cfgs, err := resolver.AddAddonsConfigurationRepositories(context.Background(), addonName, addonName, []*gqlschema.AddonsConfigurationRepositoryInput{{URL: url}})
 
 	// then
 	require.NoError(t, err)
@@ -187,7 +187,7 @@ func fixGQLAddonsConfiguration(name string) *gqlschema.AddonsConfiguration {
 		Urls: []string{
 			url,
 		},
-		Repositories: []gqlschema.AddonsConfigurationRepository{
+		Repositories: []*gqlschema.AddonsConfigurationRepository{
 			{
 				URL: url,
 			},

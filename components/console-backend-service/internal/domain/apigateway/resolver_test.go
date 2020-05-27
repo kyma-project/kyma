@@ -281,17 +281,17 @@ func fixTestApiRule(ruleName string, namespace string, hostName string, serviceN
 func testApiRuleToGQL(ruleName string, hostName string, serviceName string, servicePort uint32, gateway string) gqlschema.APIRule {
 	return gqlschema.APIRule{
 		Name: ruleName,
-		Service: gqlschema.APIRuleService{
+		Service: &gqlschema.APIRuleService{
 			Host: hostName,
 			Port: int(servicePort),
 			Name: serviceName,
 		},
 		Gateway: gateway,
-		Rules: []gqlschema.Rule{
+		Rules: []*gqlschema.Rule{
 			{
 				Path:    "*",
 				Methods: []string{"GET"},
-				AccessStrategies: []gqlschema.APIRuleConfig{
+				AccessStrategies: []*gqlschema.APIRuleConfig{
 					{
 						Name:   "allow",
 						Config: gqlschema.JSON{},
@@ -308,11 +308,11 @@ func apiRuleInputParams(hostName string, serviceName string, servicePort uint32,
 		ServiceName: serviceName,
 		ServicePort: int(servicePort),
 		Gateway:     gateway,
-		Rules: []gqlschema.RuleInput{
+		Rules: []*gqlschema.RuleInput{
 			{
 				Path:    "*",
 				Methods: []string{"GET"},
-				AccessStrategies: []gqlschema.APIRuleConfigInput{
+				AccessStrategies: []*gqlschema.APIRuleConfigInput{
 					{
 						Name:   "allow",
 						Config: gqlschema.JSON{},

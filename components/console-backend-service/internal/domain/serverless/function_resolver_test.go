@@ -86,7 +86,7 @@ func TestFunctionResolver_FunctionsQuery(t *testing.T) {
 		gqlFunction1 := fixGQLFunction("1", "a", "1", "content", "dependencies", labels)
 		gqlFunction2 := fixGQLFunction("2", "a", "1", "content", "dependencies", labels)
 		functions := []*v1alpha1.Function{function1, function2}
-		expected := []gqlschema.Function{gqlFunction1, gqlFunction2}
+		expected := []*gqlschema.Function{gqlFunction1, gqlFunction2}
 
 		svc := automock.NewFunctionService()
 		svc.On("List", "a").Return(functions, nil).Once()
@@ -156,7 +156,7 @@ func TestFunctionResolver_CreateFunction(t *testing.T) {
 
 		resolver := newFunctionResolver(svc, converter, nil, nil)
 
-		result, err := resolver.CreateFunction(nil, "1", "a", mutationInput)
+		result, err := resolver.CreateFunction(nil, "1", "a", *mutationInput)
 		require.NoError(t, err)
 		assert.Equal(t, &gqlFunction, result)
 	})
@@ -177,7 +177,7 @@ func TestFunctionResolver_CreateFunction(t *testing.T) {
 
 		resolver := newFunctionResolver(svc, converter, nil, nil)
 
-		result, err := resolver.CreateFunction(nil, "1", "a", mutationInput)
+		result, err := resolver.CreateFunction(nil, "1", "a", *mutationInput)
 		require.Error(t, err)
 		require.Nil(t, result)
 		assert.True(t, gqlerror.IsInternal(err))
@@ -202,7 +202,7 @@ func TestFunctionResolver_UpdateFunction(t *testing.T) {
 
 		resolver := newFunctionResolver(svc, converter, nil, nil)
 
-		result, err := resolver.UpdateFunction(nil, "1", "a", mutationInput)
+		result, err := resolver.UpdateFunction(nil, "1", "a", *mutationInput)
 		require.NoError(t, err)
 		assert.Equal(t, &gqlFunction, result)
 	})
@@ -223,7 +223,7 @@ func TestFunctionResolver_UpdateFunction(t *testing.T) {
 
 		resolver := newFunctionResolver(svc, converter, nil, nil)
 
-		result, err := resolver.UpdateFunction(nil, "1", "a", mutationInput)
+		result, err := resolver.UpdateFunction(nil, "1", "a", *mutationInput)
 		require.Error(t, err)
 		require.Nil(t, result)
 		assert.True(t, gqlerror.IsInternal(err))
@@ -249,7 +249,7 @@ func TestFunctionResolver_DeleteFunction(t *testing.T) {
 
 		resolver := newFunctionResolver(svc, nil, &Config{UsageKind: usageKind}, retriever)
 
-		result, err := resolver.DeleteFunction(nil, "a", mutationInput)
+		result, err := resolver.DeleteFunction(nil, "a", *mutationInput)
 		require.NoError(t, err)
 		assert.Equal(t, &mutation, result)
 	})
@@ -264,7 +264,7 @@ func TestFunctionResolver_DeleteFunction(t *testing.T) {
 
 		resolver := newFunctionResolver(svc, nil, nil, nil)
 
-		result, err := resolver.DeleteFunction(nil, "a", mutationInput)
+		result, err := resolver.DeleteFunction(nil, "a", *mutationInput)
 		require.Error(t, err)
 		require.Nil(t, result)
 	})
@@ -275,7 +275,7 @@ func TestFunctionResolver_DeleteManyFunction(t *testing.T) {
 		usageKind := "lambda"
 		mutationInput1 := fixGQLMetadataInput("1", "a")
 		mutationInput2 := fixGQLMetadataInput("2", "a")
-		resources := []gqlschema.FunctionMetadataInput{mutationInput1, mutationInput2}
+		resources := []*gqlschema.FunctionMetadataInput{mutationInput1, mutationInput2}
 
 		mutation1 := fixGQLMetadata("1", "a")
 		mutation2 := fixGQLMetadata("2", "a")
@@ -305,7 +305,7 @@ func TestFunctionResolver_DeleteManyFunction(t *testing.T) {
 		expected := errors.New("Error")
 		mutationInput1 := fixGQLMetadataInput("1", "a")
 		mutationInput2 := fixGQLMetadataInput("2", "a")
-		resources := []gqlschema.FunctionMetadataInput{mutationInput1, mutationInput2}
+		resources := []*gqlschema.FunctionMetadataInput{mutationInput1, mutationInput2}
 
 		svc := automock.NewFunctionService()
 		svc.On("Delete", mutationInput1).Return(expected).Once()
@@ -362,8 +362,8 @@ func fixFakeFunctionService(t *testing.T, objects ...runtime.Object) *functionSe
 	return service
 }
 
-func fixGQLMetadataInput(name, namespace string) gqlschema.FunctionMetadataInput {
-	return gqlschema.FunctionMetadataInput{
+func fixGQLMetadataInput(name, namespace string) *gqlschema.FunctionMetadataInput {
+	return &gqlschema.FunctionMetadataInput{
 		Name:      name,
 		Namespace: namespace,
 	}
@@ -376,31 +376,31 @@ func fixGQLMetadata(name, namespace string) gqlschema.FunctionMetadata {
 	}
 }
 
-func fixGQLMutationInput(source, dependencies string, labels map[string]string) gqlschema.FunctionMutationInput {
-	return gqlschema.FunctionMutationInput{
+func fixGQLMutationInput(source, dependencies string, labels map[string]string) *gqlschema.FunctionMutationInput {
+	return &gqlschema.FunctionMutationInput{
 		Labels:       labels,
 		Source:       source,
 		Dependencies: dependencies,
 	}
 }
 
-func fixGQLFunction(name, namespace, uid, source, dependencies string, labels map[string]string) gqlschema.Function {
-	return gqlschema.Function{
+func fixGQLFunction(name, namespace, uid, source, dependencies string, labels map[string]string) *gqlschema.Function {
+	return &gqlschema.Function{
 		Name:         name,
 		Namespace:    namespace,
 		UID:          uid,
 		Labels:       labels,
 		Source:       source,
 		Dependencies: dependencies,
-		Env: []gqlschema.FunctionEnv{
+		Env: []*gqlschema.FunctionEnv{
 			{
 				Name:  "foo",
 				Value: "bar",
 			},
 		},
-		Replicas:  gqlschema.FunctionReplicas{},
-		Resources: gqlschema.FunctionResources{},
-		Status: gqlschema.FunctionStatus{
+		Replicas:  &gqlschema.FunctionReplicas{},
+		Resources: &gqlschema.FunctionResources{},
+		Status: &gqlschema.FunctionStatus{
 			Phase: gqlschema.FunctionPhaseTypeInitializing,
 		},
 	}

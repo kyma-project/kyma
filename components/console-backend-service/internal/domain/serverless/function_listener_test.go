@@ -16,7 +16,7 @@ func TestFunctionListener_OnAdd(t *testing.T) {
 		function := new(v1alpha1.Function)
 		converter := automock.NewGQLFunctionConverter()
 
-		channel := make(chan gqlschema.FunctionEvent, 1)
+		channel := make(chan *gqlschema.FunctionEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", function).Return(gqlFunction, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -76,7 +76,7 @@ func TestFunctionListener_OnDelete(t *testing.T) {
 		function := new(v1alpha1.Function)
 		converter := automock.NewGQLFunctionConverter()
 
-		channel := make(chan gqlschema.FunctionEvent, 1)
+		channel := make(chan *gqlschema.FunctionEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", function).Return(gqlFunction, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -136,7 +136,7 @@ func TestFunctionListener_OnUpdate(t *testing.T) {
 		function := new(v1alpha1.Function)
 		converter := automock.NewGQLFunctionConverter()
 
-		channel := make(chan gqlschema.FunctionEvent, 1)
+		channel := make(chan *gqlschema.FunctionEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", function).Return(gqlFunction, nil).Once()
 		defer converter.AssertExpectations(t)

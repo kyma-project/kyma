@@ -17,7 +17,7 @@ func TestClusterAssetGroup_OnAdd(t *testing.T) {
 		clusterAssetGroup := new(v1beta1.ClusterAssetGroup)
 		converter := automock.NewGqlClusterAssetGroupConverter()
 
-		channel := make(chan gqlschema.ClusterAssetGroupEvent, 1)
+		channel := make(chan *gqlschema.ClusterAssetGroupEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", clusterAssetGroup).Return(gqlClusterAssetGroup, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -77,7 +77,7 @@ func TestClusterAssetGroup_OnDelete(t *testing.T) {
 		clusterAssetGroup := new(v1beta1.ClusterAssetGroup)
 		converter := automock.NewGqlClusterAssetGroupConverter()
 
-		channel := make(chan gqlschema.ClusterAssetGroupEvent, 1)
+		channel := make(chan *gqlschema.ClusterAssetGroupEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", clusterAssetGroup).Return(gqlClusterAssetGroup, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -138,7 +138,7 @@ func TestClusterAssetGroup_OnUpdate(t *testing.T) {
 		clusterAssetGroup := new(v1beta1.ClusterAssetGroup)
 		converter := automock.NewGqlClusterAssetGroupConverter()
 
-		channel := make(chan gqlschema.ClusterAssetGroupEvent, 1)
+		channel := make(chan *gqlschema.ClusterAssetGroupEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", clusterAssetGroup).Return(gqlAssetGroup, nil).Once()
 		defer converter.AssertExpectations(t)

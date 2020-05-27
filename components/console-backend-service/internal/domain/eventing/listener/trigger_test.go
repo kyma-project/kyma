@@ -19,7 +19,7 @@ func TestTrigger_OnAdd(t *testing.T) {
 		trigger := new(v1alpha1.Trigger)
 		converter := new(automock.Converter)
 
-		channel := make(chan gqlschema.TriggerEvent, 1)
+		channel := make(chan *gqlschema.TriggerEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", trigger).Return(gqlTrigger, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -84,7 +84,7 @@ func TestTrigger_OnDelete(t *testing.T) {
 		trigger := new(v1alpha1.Trigger)
 		converter := new(automock.Converter)
 
-		channel := make(chan gqlschema.TriggerEvent, 1)
+		channel := make(chan *gqlschema.TriggerEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", trigger).Return(gqlTrigger, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -150,7 +150,7 @@ func TestTrigger_OnUpdate(t *testing.T) {
 		trigger := new(v1alpha1.Trigger)
 		converter := new(automock.Converter)
 
-		channel := make(chan gqlschema.TriggerEvent, 1)
+		channel := make(chan *gqlschema.TriggerEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", trigger).Return(gqlTrigger, nil).Once()
 		defer converter.AssertExpectations(t)

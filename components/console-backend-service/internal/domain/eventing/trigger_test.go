@@ -102,7 +102,7 @@ func TestTriggerResolver_CreateTrigger(t *testing.T) {
 	triggerName := "TestName"
 	for testName, testData := range map[string]struct {
 		trigger        gqlschema.TriggerCreateInput
-		ownerRef       []gqlschema.OwnerReference
+		ownerRef       []*gqlschema.OwnerReference
 		triggerMatcher types.GomegaMatcher
 		errorMatcher   types.GomegaMatcher
 
@@ -118,7 +118,7 @@ func TestTriggerResolver_CreateTrigger(t *testing.T) {
 			trigger: gqlschema.TriggerCreateInput{
 				Name: &triggerName,
 			},
-			ownerRef:           []gqlschema.OwnerReference{},
+			ownerRef:           []*gqlschema.OwnerReference{},
 			toTrigger:          &v1alpha1.Trigger{},
 			toTriggerError:     nil,
 			createTrigger:      &v1alpha1.Trigger{},
@@ -132,7 +132,7 @@ func TestTriggerResolver_CreateTrigger(t *testing.T) {
 			trigger: gqlschema.TriggerCreateInput{
 				Name: &triggerName,
 			},
-			ownerRef:           []gqlschema.OwnerReference{},
+			ownerRef:           []*gqlschema.OwnerReference{},
 			toTrigger:          &v1alpha1.Trigger{},
 			toTriggerError:     errors.New(""),
 			createTrigger:      &v1alpha1.Trigger{},
@@ -146,7 +146,7 @@ func TestTriggerResolver_CreateTrigger(t *testing.T) {
 			trigger: gqlschema.TriggerCreateInput{
 				Name: &triggerName,
 			},
-			ownerRef:           []gqlschema.OwnerReference{},
+			ownerRef:           []*gqlschema.OwnerReference{},
 			toTrigger:          &v1alpha1.Trigger{},
 			toTriggerError:     nil,
 			createTrigger:      &v1alpha1.Trigger{},
@@ -160,7 +160,7 @@ func TestTriggerResolver_CreateTrigger(t *testing.T) {
 			trigger: gqlschema.TriggerCreateInput{
 				Name: &triggerName,
 			},
-			ownerRef:           []gqlschema.OwnerReference{},
+			ownerRef:           []*gqlschema.OwnerReference{},
 			toTrigger:          &v1alpha1.Trigger{},
 			toTriggerError:     nil,
 			createTrigger:      &v1alpha1.Trigger{},
@@ -202,8 +202,8 @@ func TestTriggerResolver_CreateTrigger(t *testing.T) {
 
 func TestTriggerResolver_CreateTriggers(t *testing.T) {
 	for testName, testData := range map[string]struct {
-		triggers       []gqlschema.TriggerCreateInput
-		ownerRef       []gqlschema.OwnerReference
+		triggers       []*gqlschema.TriggerCreateInput
+		ownerRef       []*gqlschema.OwnerReference
 		triggerMatcher types.GomegaMatcher
 		errorMatcher   types.GomegaMatcher
 
@@ -216,8 +216,8 @@ func TestTriggerResolver_CreateTriggers(t *testing.T) {
 		toGQLError         error
 	}{
 		"Success": {
-			triggers:           []gqlschema.TriggerCreateInput{},
-			ownerRef:           []gqlschema.OwnerReference{},
+			triggers:           []*gqlschema.TriggerCreateInput{},
+			ownerRef:           []*gqlschema.OwnerReference{},
 			toTriggers:         []*v1alpha1.Trigger{},
 			toTriggerError:     nil,
 			createTriggers:     []*v1alpha1.Trigger{},
@@ -228,8 +228,8 @@ func TestTriggerResolver_CreateTriggers(t *testing.T) {
 			errorMatcher:       gomega.BeNil(),
 		},
 		"ToTriggers error": {
-			triggers:           []gqlschema.TriggerCreateInput{},
-			ownerRef:           []gqlschema.OwnerReference{},
+			triggers:           []*gqlschema.TriggerCreateInput{},
+			ownerRef:           []*gqlschema.OwnerReference{},
 			toTriggers:         []*v1alpha1.Trigger{},
 			toTriggerError:     errors.New(""),
 			createTriggers:     []*v1alpha1.Trigger{},
@@ -240,8 +240,8 @@ func TestTriggerResolver_CreateTriggers(t *testing.T) {
 			errorMatcher:       gomega.HaveOccurred(),
 		},
 		"CreateMany error": {
-			triggers:           []gqlschema.TriggerCreateInput{},
-			ownerRef:           []gqlschema.OwnerReference{},
+			triggers:           []*gqlschema.TriggerCreateInput{},
+			ownerRef:           []*gqlschema.OwnerReference{},
 			toTriggers:         []*v1alpha1.Trigger{},
 			toTriggerError:     nil,
 			createTriggers:     []*v1alpha1.Trigger{},
@@ -252,8 +252,8 @@ func TestTriggerResolver_CreateTriggers(t *testing.T) {
 			errorMatcher:       gomega.HaveOccurred(),
 		},
 		"ToGQLs error": {
-			triggers:           []gqlschema.TriggerCreateInput{},
-			ownerRef:           []gqlschema.OwnerReference{},
+			triggers:           []*gqlschema.TriggerCreateInput{},
+			ownerRef:           []*gqlschema.OwnerReference{},
 			toTriggers:         []*v1alpha1.Trigger{},
 			toTriggerError:     nil,
 			createTriggers:     []*v1alpha1.Trigger{},
@@ -340,7 +340,7 @@ func TestTriggerResolver_DeleteTrigger(t *testing.T) {
 
 func TestTriggerResolver_DeleteManyTriggers(t *testing.T) {
 	for testName, testData := range map[string]struct {
-		triggers       []gqlschema.TriggerMetadataInput
+		triggers       []*gqlschema.TriggerMetadataInput
 		triggerMatcher types.GomegaMatcher
 		errorMatcher   types.GomegaMatcher
 
@@ -348,7 +348,7 @@ func TestTriggerResolver_DeleteManyTriggers(t *testing.T) {
 		deleteTriggerError error
 	}{
 		"Success": {
-			triggers: []gqlschema.TriggerMetadataInput{
+			triggers: []*gqlschema.TriggerMetadataInput{
 				{Name: "a1", Namespace: "a"}, {Name: "a2", Namespace: "a"},
 			},
 			deleteTriggerError: nil,
@@ -356,7 +356,7 @@ func TestTriggerResolver_DeleteManyTriggers(t *testing.T) {
 			errorMatcher:       gomega.BeNil(),
 		},
 		"Error": {
-			triggers: []gqlschema.TriggerMetadataInput{
+			triggers: []*gqlschema.TriggerMetadataInput{
 				{Name: "a1", Namespace: "a"}, {Name: "a2", Namespace: "a"},
 			},
 			deleteTriggerError: errors.New(""),

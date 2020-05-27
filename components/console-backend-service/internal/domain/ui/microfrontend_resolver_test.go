@@ -53,8 +53,8 @@ func TestMicroFrontendResolver_MicroFrontendsQuery(t *testing.T) {
 			Version:     version,
 			Category:    category,
 			ViewBaseURL: viewBaseUrl,
-			NavigationNodes: []gqlschema.NavigationNode{
-				gqlschema.NavigationNode{
+			NavigationNodes: []*gqlschema.NavigationNode{
+				{
 					Label:            "test-mf",
 					NavigationPath:   "test-path",
 					ViewURL:          "/test/viewUrl",

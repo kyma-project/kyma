@@ -38,8 +38,8 @@ func (c *replicaSetConverter) ToGQL(in *apps.ReplicaSet) (*gqlschema.ReplicaSet,
 	}, nil
 }
 
-func (c *replicaSetConverter) ToGQLs(in []*apps.ReplicaSet) ([]gqlschema.ReplicaSet, error) {
-	var result []gqlschema.ReplicaSet
+func (c *replicaSetConverter) ToGQLs(in []*apps.ReplicaSet) ([]*gqlschema.ReplicaSet, error) {
+	var result []*gqlschema.ReplicaSet
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -47,7 +47,7 @@ func (c *replicaSetConverter) ToGQLs(in []*apps.ReplicaSet) ([]gqlschema.Replica
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

@@ -54,8 +54,8 @@ func (c *clusterServiceClassConverter) ToGQL(in *v1beta1.ClusterServiceClass) (*
 	return &class, nil
 }
 
-func (c *clusterServiceClassConverter) ToGQLs(in []*v1beta1.ClusterServiceClass) ([]gqlschema.ClusterServiceClass, error) {
-	var result []gqlschema.ClusterServiceClass
+func (c *clusterServiceClassConverter) ToGQLs(in []*v1beta1.ClusterServiceClass) ([]*gqlschema.ClusterServiceClass, error) {
+	var result []*gqlschema.ClusterServiceClass
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -63,7 +63,7 @@ func (c *clusterServiceClassConverter) ToGQLs(in []*v1beta1.ClusterServiceClass)
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

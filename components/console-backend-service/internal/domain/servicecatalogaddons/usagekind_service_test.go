@@ -78,7 +78,7 @@ func TestUsageKindService_ListResources(t *testing.T) {
 			{
 				Kind:        usageKind.Name,
 				DisplayName: usageKind.Spec.DisplayName,
-				Resources: []gqlschema.UsageKindResource{
+				Resources: []*gqlschema.UsageKindResource{
 					{
 						Name:      "test",
 						Namespace: "test",

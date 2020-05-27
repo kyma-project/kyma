@@ -15,12 +15,12 @@ type gqlServiceBrokerConverter interface {
 }
 
 type ServiceBroker struct {
-	channel   chan<- gqlschema.ServiceBrokerEvent
+	channel   chan<- *gqlschema.ServiceBrokerEvent
 	filter    func(entity *api.ServiceBroker) bool
 	converter gqlServiceBrokerConverter
 }
 
-func NewServiceBroker(channel chan<- gqlschema.ServiceBrokerEvent, filter func(entity *api.ServiceBroker) bool, converter gqlServiceBrokerConverter) *ServiceBroker {
+func NewServiceBroker(channel chan<- *gqlschema.ServiceBrokerEvent, filter func(entity *api.ServiceBroker) bool, converter gqlServiceBrokerConverter) *ServiceBroker {
 	return &ServiceBroker{
 		channel:   channel,
 		filter:    filter,
@@ -62,9 +62,9 @@ func (l *ServiceBroker) notify(eventType gqlschema.SubscriptionEventType, entity
 		return
 	}
 
-	event := gqlschema.ServiceBrokerEvent{
+	event := &gqlschema.ServiceBrokerEvent{
 		Type:          eventType,
-		ServiceBroker: *gqlServiceBroker,
+		ServiceBroker: gqlServiceBroker,
 	}
 
 	l.channel <- event

@@ -42,7 +42,7 @@ func TestMicroFrontendConverter_ToGQL(t *testing.T) {
 			Version:     version,
 			Category:    category,
 			ViewBaseURL: viewBaseUrl,
-			NavigationNodes: []gqlschema.NavigationNode{
+			NavigationNodes: []*gqlschema.NavigationNode{
 				expectedNavigationNode,
 			},
 		}
@@ -101,7 +101,7 @@ func TestMicroFrontendConverter_ToGQLs(t *testing.T) {
 		Version:     version,
 		Category:    category,
 		ViewBaseURL: viewBaseUrl,
-		NavigationNodes: []gqlschema.NavigationNode{
+		NavigationNodes: []*gqlschema.NavigationNode{
 			expectedNavigationNode,
 		},
 	}

@@ -57,8 +57,8 @@ func TestClusterMicroFrontendResolver_ClusterMicroFrontendsQuery(t *testing.T) {
 			ViewBaseURL: viewBaseUrl,
 			PreloadURL:  preloadUrl,
 			Placement:   placement,
-			NavigationNodes: []gqlschema.NavigationNode{
-				gqlschema.NavigationNode{
+			NavigationNodes: []*gqlschema.NavigationNode{
+				{
 					Label:            "test-mf",
 					NavigationPath:   "test-path",
 					ViewURL:          "/test/viewUrl",

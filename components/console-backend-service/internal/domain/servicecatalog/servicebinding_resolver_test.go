@@ -53,7 +53,7 @@ func TestServiceBindingResolver_CreateServiceBindingMutation(t *testing.T) {
 		defer svc.AssertExpectations(t)
 		resolver := servicecatalog.NewServiceBindingResolver(svc)
 
-		result, err := resolver.CreateServiceBindingMutation(nil, ptr("generated-name"), "redis", "production", &params)
+		result, err := resolver.CreateServiceBindingMutation(nil, ptr("generated-name"), "redis", "production", params)
 
 		require.NoError(t, err)
 		assert.Equal(t, fixCreateServiceBindingOutput(), result)
@@ -181,11 +181,11 @@ func TestServiceBindingResolver_ServiceBindingsToInstanceQuery(t *testing.T) {
 
 		require.NoError(t, err)
 		assert.Equal(t, &gqlschema.ServiceBindings{
-			Items: []gqlschema.ServiceBinding{
-				*fixServiceBindingGQLToRedis(),
-				*fixServiceBindingGQLToRedis(),
+			Items: []*gqlschema.ServiceBinding{
+				fixServiceBindingGQLToRedis(),
+				fixServiceBindingGQLToRedis(),
 			},
-			Stats: gqlschema.ServiceBindingsStats{
+			Stats: &gqlschema.ServiceBindingsStats{
 				Pending: 2,
 			},
 		}, result)

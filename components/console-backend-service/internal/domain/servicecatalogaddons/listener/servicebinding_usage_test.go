@@ -18,7 +18,7 @@ func TestBindingUsage_OnAdd(t *testing.T) {
 		bindingUsage := new(api.ServiceBindingUsage)
 		converter := automock.NewGQLBindingUsageConverter()
 
-		channel := make(chan gqlschema.ServiceBindingUsageEvent, 1)
+		channel := make(chan *gqlschema.ServiceBindingUsageEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", bindingUsage).Return(gqlBindingUsage, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -91,7 +91,7 @@ func TestBindingUsage_OnDelete(t *testing.T) {
 		bindingUsage := new(api.ServiceBindingUsage)
 		converter := automock.NewGQLBindingUsageConverter()
 
-		channel := make(chan gqlschema.ServiceBindingUsageEvent, 1)
+		channel := make(chan *gqlschema.ServiceBindingUsageEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", bindingUsage).Return(gqlBindingUsage, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -165,7 +165,7 @@ func TestBindingUsage_OnUpdate(t *testing.T) {
 		bindingUsage := new(api.ServiceBindingUsage)
 		converter := automock.NewGQLBindingUsageConverter()
 
-		channel := make(chan gqlschema.ServiceBindingUsageEvent, 1)
+		channel := make(chan *gqlschema.ServiceBindingUsageEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", bindingUsage).Return(gqlBindingUsage, nil).Once()
 		defer converter.AssertExpectations(t)

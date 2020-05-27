@@ -17,7 +17,7 @@ func TestClusterAddonsConfiguration_OnAdd(t *testing.T) {
 		cfg := new(v1alpha1.ClusterAddonsConfiguration)
 		converter := automock.NewGQLClusterAddonsConfigurationConverter()
 
-		channel := make(chan gqlschema.ClusterAddonsConfigurationEvent, 1)
+		channel := make(chan *gqlschema.ClusterAddonsConfigurationEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", cfg).Return(gqlAddonsConfiguration, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -78,7 +78,7 @@ func TestClusterAddonsConfiguration_OnDelete(t *testing.T) {
 		serviceBroker := new(v1alpha1.ClusterAddonsConfiguration)
 		converter := automock.NewGQLClusterAddonsConfigurationConverter()
 
-		channel := make(chan gqlschema.ClusterAddonsConfigurationEvent, 1)
+		channel := make(chan *gqlschema.ClusterAddonsConfigurationEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", serviceBroker).Return(gqlClusterServiceBroker, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -140,7 +140,7 @@ func TestClusterAddonsConfiguration_OnUpdate(t *testing.T) {
 		cfg := new(v1alpha1.ClusterAddonsConfiguration)
 		converter := automock.NewGQLClusterAddonsConfigurationConverter()
 
-		channel := make(chan gqlschema.ClusterAddonsConfigurationEvent, 1)
+		channel := make(chan *gqlschema.ClusterAddonsConfigurationEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", cfg).Return(gqlClusterServiceBroker, nil).Once()
 		defer converter.AssertExpectations(t)

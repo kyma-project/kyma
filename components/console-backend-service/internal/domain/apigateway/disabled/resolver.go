@@ -19,8 +19,8 @@ func NewResolver(err error) *Resolver {
 }
 
 // APIRuleEventSubscription provides a failing mock function with given fields: ctx, namespace, serviceName
-func (_m *Resolver) APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiRuleEvent, error) {
-	var r0 <-chan gqlschema.ApiRuleEvent
+func (_m *Resolver) APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan *gqlschema.ApiRuleEvent, error) {
+	var r0 <-chan *gqlschema.ApiRuleEvent
 	var r1 error
 	r1 = _m.err
 
@@ -37,8 +37,8 @@ func (_m *Resolver) APIRuleQuery(ctx context.Context, name string, namespace str
 }
 
 // APIRulesQuery provides a failing mock function with given fields: ctx, namespace, serviceName, hostname
-func (_m *Resolver) APIRulesQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.APIRule, error) {
-	var r0 []gqlschema.APIRule
+func (_m *Resolver) APIRulesQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*gqlschema.APIRule, error) {
+	var r0 []*gqlschema.APIRule
 	var r1 error
 	r1 = _m.err
 

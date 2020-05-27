@@ -53,8 +53,8 @@ func (p *clusterServicePlanConverter) ToGQL(item *v1beta1.ClusterServicePlan) (*
 	return &plan, nil
 }
 
-func (c *clusterServicePlanConverter) ToGQLs(in []*v1beta1.ClusterServicePlan) ([]gqlschema.ClusterServicePlan, error) {
-	var result []gqlschema.ClusterServicePlan
+func (c *clusterServicePlanConverter) ToGQLs(in []*v1beta1.ClusterServicePlan) ([]*gqlschema.ClusterServicePlan, error) {
+	var result []*gqlschema.ClusterServicePlan
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -62,7 +62,7 @@ func (c *clusterServicePlanConverter) ToGQLs(in []*v1beta1.ClusterServicePlan) (
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

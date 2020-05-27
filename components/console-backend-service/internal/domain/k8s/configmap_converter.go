@@ -34,8 +34,8 @@ func (c *configMapConverter) ToGQL(in *v1.ConfigMap) (*gqlschema.ConfigMap, erro
 	}, nil
 }
 
-func (c *configMapConverter) ToGQLs(in []*v1.ConfigMap) ([]gqlschema.ConfigMap, error) {
-	var result []gqlschema.ConfigMap
+func (c *configMapConverter) ToGQLs(in []*v1.ConfigMap) ([]*gqlschema.ConfigMap, error) {
+	var result []*gqlschema.ConfigMap
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -43,7 +43,7 @@ func (c *configMapConverter) ToGQLs(in []*v1.ConfigMap) ([]gqlschema.ConfigMap, 
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

@@ -29,13 +29,13 @@ func (c *namespaceConverter) ToGQL(in *v1.Namespace) *gqlschema.Namespace {
 	}
 }
 
-func (c *namespaceConverter) ToGQLs(in []*v1.Namespace) []gqlschema.Namespace {
-	var result []gqlschema.Namespace
+func (c *namespaceConverter) ToGQLs(in []*v1.Namespace) []*gqlschema.Namespace {
+	var result []*gqlschema.Namespace
 	for _, u := range in {
 		converted := c.ToGQL(u)
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result

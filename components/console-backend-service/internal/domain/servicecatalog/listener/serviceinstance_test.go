@@ -18,7 +18,7 @@ func TestInstanceListener_OnAdd(t *testing.T) {
 		instance := new(v1beta1.ServiceInstance)
 		converter := automock.NewGQLInstanceConverter()
 
-		channel := make(chan gqlschema.ServiceInstanceEvent, 1)
+		channel := make(chan *gqlschema.ServiceInstanceEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", instance).Return(gqlInstance, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -91,7 +91,7 @@ func TestInstanceListener_OnDelete(t *testing.T) {
 		instance := new(v1beta1.ServiceInstance)
 		converter := automock.NewGQLInstanceConverter()
 
-		channel := make(chan gqlschema.ServiceInstanceEvent, 1)
+		channel := make(chan *gqlschema.ServiceInstanceEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", instance).Return(gqlInstance, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -165,7 +165,7 @@ func TestInstanceListener_OnUpdate(t *testing.T) {
 		instance := new(v1beta1.ServiceInstance)
 		converter := automock.NewGQLInstanceConverter()
 
-		channel := make(chan gqlschema.ServiceInstanceEvent, 1)
+		channel := make(chan *gqlschema.ServiceInstanceEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", instance).Return(gqlInstance, nil).Once()
 		defer converter.AssertExpectations(t)

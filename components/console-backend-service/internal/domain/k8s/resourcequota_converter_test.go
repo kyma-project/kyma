@@ -65,11 +65,11 @@ func TestResourceQuotaConverter_ToGQL(t *testing.T) {
 			expected: &gqlschema.ResourceQuota{
 				Name: "mem-default",
 				Pods: ptrStr("10"),
-				Limits: gqlschema.ResourceValues{
+				Limits: &gqlschema.ResourceValues{
 					CPU:    ptrStr("900m"),
 					Memory: ptrStr("1Gi"),
 				},
-				Requests: gqlschema.ResourceValues{
+				Requests: &gqlschema.ResourceValues{
 					CPU:    ptrStr("500m"),
 					Memory: ptrStr("512Mi"),
 				},

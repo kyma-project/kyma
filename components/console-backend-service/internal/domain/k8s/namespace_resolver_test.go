@@ -197,7 +197,7 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 		podSvc := automock.NewPodSvc()
 		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
 
-		result, err := resolver.CreateNamespace(nil, name, &labels)
+		result, err := resolver.CreateNamespace(nil, name, labels)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -214,7 +214,7 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 		podSvc := automock.NewPodSvc()
 		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
 
-		result, err := resolver.CreateNamespace(nil, name, &labels)
+		result, err := resolver.CreateNamespace(nil, name, labels)
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))

@@ -54,8 +54,8 @@ func (c *serviceBindingConverter) ToGQLs(in []*api.ServiceBinding) (gqlschema.Se
 			return gqlschema.ServiceBindings{}, errors.Wrapf(err, "while converting service binding [name: %s][namespace: %s]", item.Name, item.Namespace)
 		}
 		if converted != nil {
-			c.addStat(converted.Status.Type, &result.Stats)
-			result.Items = append(result.Items, *converted)
+			c.addStat(converted.Status.Type, result.Stats)
+			result.Items = append(result.Items, converted)
 		}
 	}
 	return result, nil

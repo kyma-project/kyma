@@ -33,7 +33,7 @@ func fixBindableResourcesOutputItems() []gqlschema.BindableResourcesOutputItem {
 		{
 			Kind:        "deployment",
 			DisplayName: "Deployments",
-			Resources:   []gqlschema.UsageKindResource{},
+			Resources:   []*gqlschema.UsageKindResource{},
 		},
 	}
 }

@@ -18,7 +18,7 @@ func TestClusterServiceBrokerListener_OnAdd(t *testing.T) {
 		serviceBroker := new(v1beta1.ClusterServiceBroker)
 		converter := automock.NewGQLClusterServiceBrokerConverter()
 
-		channel := make(chan gqlschema.ClusterServiceBrokerEvent, 1)
+		channel := make(chan *gqlschema.ClusterServiceBrokerEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", serviceBroker).Return(gqlClusterServiceBroker, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -91,7 +91,7 @@ func TestClusterServiceBrokerListener_OnDelete(t *testing.T) {
 		serviceBroker := new(v1beta1.ClusterServiceBroker)
 		converter := automock.NewGQLClusterServiceBrokerConverter()
 
-		channel := make(chan gqlschema.ClusterServiceBrokerEvent, 1)
+		channel := make(chan *gqlschema.ClusterServiceBrokerEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", serviceBroker).Return(gqlClusterServiceBroker, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -165,7 +165,7 @@ func TestClusterServiceBrokerListener_OnUpdate(t *testing.T) {
 		serviceBroker := new(v1beta1.ClusterServiceBroker)
 		converter := automock.NewGQLClusterServiceBrokerConverter()
 
-		channel := make(chan gqlschema.ClusterServiceBrokerEvent, 1)
+		channel := make(chan *gqlschema.ClusterServiceBrokerEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", serviceBroker).Return(gqlClusterServiceBroker, nil).Once()
 		defer converter.AssertExpectations(t)

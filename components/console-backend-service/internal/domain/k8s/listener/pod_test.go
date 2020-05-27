@@ -18,7 +18,7 @@ func TestPodListener_OnAdd(t *testing.T) {
 		pod := new(v1.Pod)
 		converter := automock.NewGQLPodConverter()
 
-		channel := make(chan gqlschema.PodEvent, 1)
+		channel := make(chan *gqlschema.PodEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", pod).Return(gqlPod, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -91,7 +91,7 @@ func TestPodListener_OnDelete(t *testing.T) {
 		pod := new(v1.Pod)
 		converter := automock.NewGQLPodConverter()
 
-		channel := make(chan gqlschema.PodEvent, 1)
+		channel := make(chan *gqlschema.PodEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", pod).Return(gqlPod, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -165,7 +165,7 @@ func TestPodListener_OnUpdate(t *testing.T) {
 		pod := new(v1.Pod)
 		converter := automock.NewGQLPodConverter()
 
-		channel := make(chan gqlschema.PodEvent, 1)
+		channel := make(chan *gqlschema.PodEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", pod).Return(gqlPod, nil).Once()
 		defer converter.AssertExpectations(t)
