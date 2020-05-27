@@ -15,37 +15,33 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/statusmanager"
 )
 
-type InstallStepsProvider interface {
-	For(installationData *config.InstallationData, overrideData overrides.OverrideData) (actions.InstallStepFactory, error)
+// StepsProvider knows how to create an instance of the StepFactory
+type StepsProvider interface {
+	ForInstallation(*config.InstallationData, overrides.OverrideData) (actions.StepLister, error)
+	ForUninstallation(*config.InstallationData) (actions.StepLister, error)
 }
 
-type UninstallStepsProvider interface {
-	For(installationData *config.InstallationData) (actions.UninstallStepFactory, error)
-}
-
-//Executor TODO: Document .
+//Executor exposes top-level interfaxce for installation/uninstallation of Kyma
 type Executor struct {
-	serviceCatalog         serviceCatalog.ClientInterface
-	errorHandlers          internalerrors.ErrorHandlersInterface
-	statusManager          statusmanager.StatusManager
-	actionManager          actionmanager.ActionManager
-	installStepsProvider   InstallStepsProvider
-	uninstallStepsProvider UninstallStepsProvider
-	backoffIntervals       []uint
+	serviceCatalog   serviceCatalog.ClientInterface
+	errorHandlers    internalerrors.ErrorHandlersInterface
+	statusManager    statusmanager.StatusManager
+	actionManager    actionmanager.ActionManager
+	stepsProvider    StepsProvider
+	backoffIntervals []uint
 }
 
 // New .
 func NewExecutor(serviceCatalog serviceCatalog.ClientInterface,
 	statusManager statusmanager.StatusManager, actionManager actionmanager.ActionManager,
-	stepFactoryCreator actions.StepFactoryCreator, backoffIntervals []uint) *Executor {
+	stepsProvider StepsProvider, backoffIntervals []uint) *Executor {
 	steps := &Executor{
-		serviceCatalog:         serviceCatalog,
-		errorHandlers:          &internalerrors.ErrorHandlers{},
-		statusManager:          statusManager,
-		actionManager:          actionManager,
-		installStepsProvider:   nil, //TODO: Implement
-		uninstallStepsProvider: nil, //TODO: Implement
-		backoffIntervals:       backoffIntervals,
+		serviceCatalog:   serviceCatalog,
+		errorHandlers:    &internalerrors.ErrorHandlers{},
+		statusManager:    statusManager,
+		actionManager:    actionManager,
+		stepsProvider:    stepsProvider,
+		backoffIntervals: backoffIntervals,
 	}
 
 	return steps
@@ -58,13 +54,13 @@ func (steps *Executor) InstallKyma(installationData *config.InstallationData, ov
 
 	_ = steps.statusManager.InProgress("Verify installed components")
 
-	installStepsProvider, err := steps.installStepsProvider.For(installationData, overrideData)
+	installStepsProvider, err := steps.stepsProvider.ForInstallation(installationData, overrideData)
 	if err != nil {
 		_ = steps.statusManager.Error("Kyma Operator", "Verifying installed components", err)
 		return err
 	}
 
-	stepList, err := installStepsProvider.InstallStepList()
+	stepList, err := installStepsProvider.StepList()
 
 	if err != nil {
 		return removeLabelAndReturn(err)
@@ -93,14 +89,14 @@ func (steps *Executor) UninstallKyma(installationData *config.InstallationData) 
 
 	_ = steps.statusManager.InProgress("Verify components to uninstall")
 
-	uninstallStepsProvider, err := steps.uninstallStepsProvider.For(installationData)
+	uninstallStepsProvider, err := steps.stepsProvider.ForUninstallation(installationData)
 
 	if err != nil {
 		_ = steps.statusManager.Error("Kyma Operator", "Verify components to uninstall", err)
 		return err
 	}
 
-	stepList, err := uninstallStepsProvider.UninstallStepList()
+	stepList, err := uninstallStepsProvider.StepList()
 
 	if err != nil {
 		return removeLabelAndReturn(err)
