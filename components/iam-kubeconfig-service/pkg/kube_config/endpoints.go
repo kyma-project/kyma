@@ -40,6 +40,5 @@ func (e *Endpoints) GetKubeConfig(w http.ResponseWriter, req *http.Request) {
 }
 
 func (e *Endpoints) GetHealthStatus(w http.ResponseWriter, req *http.Request) {
-	//TODO: perform a check
 	w.WriteHeader(http.StatusOK)
 }
