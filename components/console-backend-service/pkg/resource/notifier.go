@@ -5,31 +5,18 @@ import (
 )
 
 //go:generate mockery -name=Listener -output=automock -outpkg=automock -case=underscore
-type Listener interface {
-	OnAdd(object interface{})
-	OnUpdate(newObject, oldObject interface{})
-	OnDelete(object interface{})
-}
 
-type Notifier interface {
-	OnAdd(object interface{})
-	OnUpdate(newObject, oldObject interface{})
-	OnDelete(object interface{})
-	AddListener(observer Listener)
-	DeleteListener(observer Listener)
-}
-
-type notifier struct {
+type Notifier struct {
 	sync.RWMutex
 	// TODO: change to map for better performance
-	listeners []Listener
+	listeners []*Listener
 }
 
-func NewNotifier() Notifier {
-	return new(notifier)
+func NewNotifier() *Notifier {
+	return &Notifier{}
 }
 
-func (n *notifier) AddListener(listener Listener) {
+func (n *Notifier) AddListener(listener *Listener) {
 	if listener == nil {
 		return
 	}
@@ -40,7 +27,7 @@ func (n *notifier) AddListener(listener Listener) {
 	n.listeners = append(n.listeners, listener)
 }
 
-func (n *notifier) DeleteListener(listener Listener) {
+func (n *Notifier) DeleteListener(listener *Listener) {
 	if listener == nil {
 		return
 	}
@@ -58,7 +45,7 @@ func (n *notifier) DeleteListener(listener Listener) {
 	n.listeners = filtered
 }
 
-func (n *notifier) OnAdd(obj interface{}) {
+func (n *Notifier) OnAdd(obj interface{}) {
 	n.RLock()
 	defer n.RUnlock()
 
@@ -67,7 +54,7 @@ func (n *notifier) OnAdd(obj interface{}) {
 	}
 }
 
-func (n *notifier) OnUpdate(oldObj, newObj interface{}) {
+func (n *Notifier) OnUpdate(oldObj, newObj interface{}) {
 	n.RLock()
 	defer n.RUnlock()
 
@@ -76,7 +63,7 @@ func (n *notifier) OnUpdate(oldObj, newObj interface{}) {
 	}
 }
 
-func (n *notifier) OnDelete(obj interface{}) {
+func (n *Notifier) OnDelete(obj interface{}) {
 	n.RLock()
 	defer n.RUnlock()
 

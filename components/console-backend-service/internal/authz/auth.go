@@ -7,7 +7,7 @@ import (
 	"time"
 
 	extractor "github.com/kyma-project/kyma/components/console-backend-service/internal/extractor"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/graph/model"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/pkg/errors"
@@ -15,7 +15,7 @@ import (
 	"k8s.io/apiserver/pkg/authorization/authorizer"
 	"k8s.io/apiserver/pkg/authorization/authorizerfactory"
 	"k8s.io/client-go/discovery"
-	authorizationclient "k8s.io/client-go/kubernetes/typed/authorization/v1beta1"
+	authorizationclient "k8s.io/client-go/kubernetes/typed/authorization/v1"
 )
 
 type Authorizer struct {
@@ -51,8 +51,8 @@ type extractedAttributes struct {
 }
 
 // PrepareAttributes prepares attributes for authorization
-func PrepareAttributes(ctx context.Context, u user.Info, attributes gqlschema.ResourceAttributes, obj interface{}, client discovery.DiscoveryInterface) (authorizer.Attributes, error) {
-	resolverCtx := graphql.GetResolverContext(ctx)
+func PrepareAttributes(ctx context.Context, u user.Info, attributes model.ResourceAttributes, obj interface{}, client discovery.DiscoveryInterface) (authorizer.Attributes, error) {
+	resolverCtx := graphql.GetFieldContext(ctx)
 
 	// make sure resource information is taken either from directive or from field
 	err := validateAttributes(attributes)
@@ -89,7 +89,7 @@ func PrepareAttributes(ctx context.Context, u user.Info, attributes gqlschema.Re
 	}, nil
 }
 
-func validateAttributes(attributes gqlschema.ResourceAttributes) error {
+func validateAttributes(attributes model.ResourceAttributes) error {
 	if attributes.ResourceArg != nil {
 		if attributes.Resource != nil || attributes.APIVersion != nil || attributes.APIGroup != nil {
 			return errors.New("resource information shouldn't be both passed directly and extracted from field at the same time")
@@ -106,7 +106,7 @@ func validateAttributes(attributes gqlschema.ResourceAttributes) error {
 	return nil
 }
 
-func extractAttributesFromChildResolver(obj interface{}, attributes gqlschema.ResourceAttributes) (extractedAttributes, error) {
+func extractAttributesFromChildResolver(obj interface{}, attributes model.ResourceAttributes) (extractedAttributes, error) {
 	var extracted extractedAttributes
 
 	val := reflect.Indirect(reflect.ValueOf(obj))
@@ -145,7 +145,7 @@ func extractAttributesFromChildResolver(obj interface{}, attributes gqlschema.Re
 	return extracted, nil
 }
 
-func extractAttributes(attributes gqlschema.ResourceAttributes, resolverCtx *graphql.ResolverContext, client discovery.DiscoveryInterface) (extractedAttributes, error) {
+func extractAttributes(attributes model.ResourceAttributes, resolverCtx *graphql.ResolverContext, client discovery.DiscoveryInterface) (extractedAttributes, error) {
 	var extracted extractedAttributes
 
 	if attributes.NameArg != nil {
@@ -165,7 +165,7 @@ func extractAttributes(attributes gqlschema.ResourceAttributes, resolverCtx *gra
 	}
 
 	if attributes.ResourceArg != nil {
-		resourceJSON, ok := resolverCtx.Args[*attributes.ResourceArg].(gqlschema.JSON)
+		resourceJSON, ok := resolverCtx.Args[*attributes.ResourceArg].(map[string]interface{})
 		if !ok {
 			return extractedAttributes{}, errors.New("resource in arguments found, but can't be converted to JSON")
 		}

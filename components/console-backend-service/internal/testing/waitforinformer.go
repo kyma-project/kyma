@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"k8s.io/client-go/dynamic/dynamicinformer"
 	"testing"
 	"time"
 
@@ -23,6 +24,24 @@ func WaitForInformerStartAtMost(t *testing.T, timeout time.Duration, informer ca
 	select {
 	case <-time.After(timeout):
 		close(stop)
+	case <-syncedDone:
+	}
+}
+
+func WaitForInformerFactoryStartAtMost(t *testing.T, timeout time.Duration, informer dynamicinformer.DynamicSharedInformerFactory) {
+	stop := make(chan struct{})
+	syncedDone := make(chan struct{})
+
+	go func() {
+		informer.Start(stop)
+		informer.WaitForCacheSync(stop)
+		close(syncedDone)
+	}()
+
+	select {
+	case <-time.After(timeout):
+		close(stop)
+		panic("Wait timeout")
 	case <-syncedDone:
 	}
 }
