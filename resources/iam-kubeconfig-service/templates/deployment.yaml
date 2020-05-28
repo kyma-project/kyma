@@ -43,6 +43,13 @@ spec:
         ports:
           - name: http
             containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 9000
+          initialDelaySeconds: 45
+          periodSeconds: 10
+          failureThreshold: 10
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         volumeMounts:
