@@ -2,12 +2,11 @@ package kymahelm
 
 import (
 	"github.com/sirupsen/logrus"
+	"helm.sh/helm/v3/pkg/action"
 	"log"
 
 	"k8s.io/helm/pkg/helm"
-	"k8s.io/helm/pkg/tlsutil"
 )
-
 
 // ClientInterface .
 type ClientInterface interface {
@@ -26,6 +25,7 @@ type ClientInterface interface {
 
 // Client .
 type Client struct {
+	cfg             *action.Configuration
 	helm            *helm.Client
 	overridesLogger *logrus.Logger
 	maxHistory      int32
@@ -33,29 +33,34 @@ type Client struct {
 }
 
 // NewClient .
-func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify bool, overridesLogger *logrus.Logger, maxHistory int32, timeout int64) (*Client, error) {
-	tlsopts := tlsutil.Options{
-		KeyFile:            TLSKey,
-		CertFile:           TLSCert,
-		InsecureSkipVerify: TLSInsecureSkipVerify,
-	}
-	tlscfg, err := tlsutil.ClientConfig(tlsopts)
+func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify bool, overridesLogger *logrus.Logger, maxHistory int32, timeout int64) (*Client, error) { //keeping the signature; todo: remove unused params,  change int32 -> int, don't return error
 	return &Client{
-		helm:            helm.NewClient(helm.Host(host), helm.WithTLS(tlscfg), helm.ConnectTimeout(30)),
+		cfg:             nil, //todo: pass in params
 		overridesLogger: overridesLogger,
 		maxHistory:      maxHistory,
 		timeout:         timeout,
-	}, err
+	}, nil
 }
 
 // ListReleases lists all releases except for the superseded ones
 func (hc *Client) ListReleases() ([]*Release, error) {
 
-	var releases []*Release
+	lister := action.NewList(hc.cfg)
+	lister.All = true
+	//todo: sorter?
 
-	// Helm3 list releases
+	releases, err := lister.Run()
+	if err != nil {
+		return nil, err
+	}
 
-	return releases, nil
+	var kymaReleases []*Release
+
+	for _, hr := range releases {
+		kymaReleases = append(kymaReleases, helmReleaseToKymaRelease(hr))
+	}
+
+	return kymaReleases, nil
 }
 
 //ReleaseStatus returns roughly-formatted Release status (columns are separated with blanks but not adjusted)
