@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200309-9a88ce97
+FROM eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
 
 RUN apk add --no-cache jq apache2-utils
 
