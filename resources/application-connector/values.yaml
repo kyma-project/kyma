@@ -9,6 +9,12 @@ global:
   isLocalEnv: false
   namespace: kyma-integration
   strictMode: disabled
+  ingress:
+    domainName: "TBD"
+  helm:
+    tls:
+      crt: "TBD"
+      key: "TBD"
   istio:
     namespace: istio-system
     tls:
