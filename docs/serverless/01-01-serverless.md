@@ -8,3 +8,5 @@ Similarly to cloud providers, Kyma offers a service (known as "functions-as-a-se
 
 - Configure it to be triggered by events coming from external sources to which you subscribe.
 - Expose it to an external endpoint (HTTPS).
+
+test
