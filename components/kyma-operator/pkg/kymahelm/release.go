@@ -3,29 +3,30 @@ package kymahelm
 import (
 	"errors"
 	"fmt"
+	"helm.sh/helm/v3/pkg/release"
 )
 
-type Status_Code int32
+type Status string
 
 const (
-	// Status_UNKNOWN indicates that a release is in an uncertain state.
-	Status_UNKNOWN Status_Code = 0
-	// Status_DEPLOYED indicates that the release has been pushed to Kubernetes.
-	Status_DEPLOYED Status_Code = 1
-	// Status_DELETED indicates that a release has been deleted from Kubernetes.
-	Status_DELETED Status_Code = 2
-	// Status_SUPERSEDED indicates that this release object is outdated and a newer one exists.
-	Status_SUPERSEDED Status_Code = 3
-	// Status_FAILED indicates that the release was not successfully deployed.
-	Status_FAILED Status_Code = 4
-	// Status_DELETING indicates that a delete operation is underway.
-	Status_DELETING Status_Code = 5
-	// Status_PENDING_INSTALL indicates that an install operation is underway.
-	Status_PENDING_INSTALL Status_Code = 6
-	// Status_PENDING_UPGRADE indicates that an upgrade operation is underway.
-	Status_PENDING_UPGRADE Status_Code = 7
-	// Status_PENDING_ROLLBACK indicates that a rollback operation is underway.
-	Status_PENDING_ROLLBACK Status_Code = 8
+	// StatusUnknown indicates that a release is in an uncertain state.
+	StatusUnknown Status = "unknown"
+	// StatusDeployed indicates that the release has been pushed to Kubernetes.
+	StatusDeployed Status = "deployed"
+	// StatusUninstalled indicates that a release has been uninstalled from Kubernetes.
+	StatusUninstalled Status = "uninstalled"
+	// StatusSuperseded indicates that this release object is outdated and a newer one exists.
+	StatusSuperseded Status = "superseded"
+	// StatusFailed indicates that the release was not successfully deployed.
+	StatusFailed Status = "failed"
+	// StatusUninstalling indicates that a uninstall operation is underway.
+	StatusUninstalling Status = "uninstalling"
+	// StatusPendingInstall indicates that an install operation is underway.
+	StatusPendingInstall Status = "pending-install"
+	// StatusPendingUpgrade indicates that an upgrade operation is underway.
+	StatusPendingUpgrade Status = "pending-upgrade"
+	// StatusPendingRollback indicates that an rollback operation is underway.
+	StatusPendingRollback Status = "pending-rollback"
 )
 
 //Release is an insternal representation of a Helm release
@@ -43,26 +44,41 @@ type ReleaseMeta struct {
 
 // ReleaseStatus is an internal representation of Helm's release status
 type ReleaseStatus struct {
-	StatusCode           Status_Code
-	CurrentRevision      int32
-	LastDeployedRevision int32
+	StatusCode           Status
+	CurrentRevision      int
+	LastDeployedRevision int
 }
 
 // UninstallReleaseResponse is an internal representation of Helm's uninstall release response
 type UninstallReleaseStatus struct {
 }
 
+func helmReleaseToKymaRelease(hr *release.Release, lastDeployedRev int) *Release { //todo: remove this comment; last deployed rev fetched from history
+	return &Release{
+		&ReleaseMeta{
+			Name:        hr.Name,
+			Namespace:   hr.Namespace,
+			Description: hr.Info.Description,
+		},
+		&ReleaseStatus{
+			StatusCode:           Status(hr.Info.Status),
+			CurrentRevision:      hr.Version,
+			LastDeployedRevision: lastDeployedRev,
+		},
+	}
+}
+
 func (rs *ReleaseStatus) IsUpgradeStep() (bool, error) {
 
 	switch rs.StatusCode {
 
-	case Status_PENDING_INSTALL:
+	case StatusPendingInstall:
 		return false, nil
 
-	case Status_DEPLOYED, Status_PENDING_UPGRADE, Status_PENDING_ROLLBACK:
+	case StatusDeployed, StatusPendingUpgrade, StatusPendingRollback:
 		return true, nil
 
-	case Status_FAILED, Status_UNKNOWN, Status_DELETED, Status_DELETING:
+	case StatusFailed, StatusUnknown, StatusUninstalled, StatusUninstalling:
 
 		if rs.hasMultipleRevisions() {
 
