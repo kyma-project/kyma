@@ -45,17 +45,17 @@ func (hc *helmClient) ListReleases(namespace string) ([]*release.Release, error)
 		return nil, err
 	}
 
-	client := action.NewList(actionConfig)
+	listAction := action.NewList(actionConfig)
 
-	client.Deployed = true
-	client.Uninstalled = true
-	client.Superseded = true
-	client.Uninstalling = true
-	client.Deployed = true
-	client.Failed = true
-	client.Pending = true
+	listAction.Deployed = true
+	listAction.Uninstalled = true
+	listAction.Superseded = true
+	listAction.Uninstalling = true
+	listAction.Deployed = true
+	listAction.Failed = true
+	listAction.Pending = true
 
-	results, err := client.Run()
+	results, err := listAction.Run()
 	if err != nil {
 		return nil, err
 	}
@@ -69,18 +69,19 @@ func (hc *helmClient) InstallReleaseFromChart(chartDir, releaseName string, name
 	if err != nil {
 		return nil, err
 	}
-	client := action.NewInstall(actionConfig)
 
-	client.ReleaseName = releaseName
-	client.Namespace = namespace
-	client.Timeout = time.Duration(hc.installationTimeout)
+	installAction := action.NewInstall(actionConfig)
+
+	installAction.ReleaseName = releaseName
+	installAction.Namespace = namespace
+	installAction.Timeout = time.Duration(hc.installationTimeout)
 
 	chartRequested, err := loader.Load(chartDir)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.Run(chartRequested, overrides)
+	response, err := installAction.Run(chartRequested, overrides)
 	if err != nil {
 		return nil, err
 	}
@@ -94,17 +95,18 @@ func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName string, names
 	if err != nil {
 		return nil, err
 	}
-	client := action.NewUpgrade(actionConfig)
 
-	client.Namespace = namespace
-	client.Timeout = time.Duration(hc.installationTimeout)
+	upgradeAction := action.NewUpgrade(actionConfig)
+
+	upgradeAction.Namespace = namespace
+	upgradeAction.Timeout = time.Duration(hc.installationTimeout)
 
 	chartRequested, err := loader.Load(chartDir)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.Run(releaseName, chartRequested, overrides)
+	response, err := upgradeAction.Run(releaseName, chartRequested, overrides)
 	if err != nil {
 		return nil, err
 	}
@@ -119,10 +121,10 @@ func (hc *helmClient) DeleteRelease(releaseName string, namespace string) (*rele
 		return nil, err
 	}
 
-	client := action.NewUninstall(actionConfig)
-	client.Timeout = time.Duration(hc.installationTimeout)
+	uninstallAction := action.NewUninstall(actionConfig)
+	uninstallAction.Timeout = time.Duration(hc.installationTimeout)
 
-	response, err := client.Run(releaseName)
+	response, err := uninstallAction.Run(releaseName)
 	if err != nil {
 		return nil, err
 	}
@@ -137,8 +139,8 @@ func (hc *helmClient) ReleaseStatus(releaseName string, namespace string) (*rele
 		return nil, err
 	}
 
-	client := action.NewStatus(actionConfig)
-	release, err := client.Run(releaseName)
+	statusAction := action.NewStatus(actionConfig)
+	release, err := statusAction.Run(releaseName)
 	if err != nil {
 		return nil, err
 	}
