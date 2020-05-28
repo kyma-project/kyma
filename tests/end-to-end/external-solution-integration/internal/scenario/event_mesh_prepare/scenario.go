@@ -14,6 +14,7 @@ type Scenario struct {
 	SkipSSLVerify     bool
 	ApplicationTenant string
 	ApplicationGroup  string
+	TestServiceImage  string
 }
 
 // AddFlags adds CLI flags to given FlagSet
@@ -23,6 +24,7 @@ func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 	pflag.BoolVar(&s.SkipSSLVerify, "SkipSSLVerify", false, "Skip verification of service SSL certificates")
 	pflag.StringVar(&s.ApplicationTenant, "applicationTenant", "", "Application CR Tenant")
 	pflag.StringVar(&s.ApplicationGroup, "applicationGroup", "", "Application CR Group")
+	pflag.StringVar(&s.TestServiceImage, "testServiceImage", "eu.gcr.io/kyma-project/event-subscriber-tools:PR-8483", "TestServiceImage")
 }
 
 func (s *Scenario) NewState() *e2EEventMeshState {

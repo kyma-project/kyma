@@ -28,7 +28,6 @@ import (
 const (
 	testServiceNamePrefix   = "ctr-svc"
 	testServicePort         = 8090
-	testServiceImage        = "eu.gcr.io/kyma-project/event-subscriber-tools:PR-8483"
 	labelKey                = "component"
 	healthEndpointFormat    = "https://%s.%s/health"
 	endpointFormat          = "https://%s.%s"
@@ -37,16 +36,17 @@ const (
 )
 
 type TestService struct {
-	apiRules        dynamic.ResourceInterface
-	deployments     appsclient.DeploymentInterface
-	services        coreclient.ServiceInterface
-	HttpClient      *http.Client
-	domain          string
-	namespace       string
-	testServiceName string
+	apiRules         dynamic.ResourceInterface
+	deployments      appsclient.DeploymentInterface
+	services         coreclient.ServiceInterface
+	HttpClient       *http.Client
+	domain           string
+	namespace        string
+	testServiceImage string
+	testServiceName  string
 }
 
-func NewTestService(httpClient *http.Client, deployments appsclient.DeploymentInterface, services coreclient.ServiceInterface, apiRules dynamic.ResourceInterface, domain, namespace string) *TestService {
+func NewTestService(httpClient *http.Client, deployments appsclient.DeploymentInterface, services coreclient.ServiceInterface, apiRules dynamic.ResourceInterface, domain, namespace, testServiceImage string) *TestService {
 	return &TestService{
 		HttpClient:      httpClient,
 		domain:          domain,
@@ -193,7 +193,7 @@ func (ts *TestService) createDeployment() error {
 					Containers: []v1.Container{
 						{
 							Name:    ts.testServiceName,
-							Image:   testServiceImage,
+							Image:   ts.testServiceImage,
 							Command: []string{"/event-subscriber"},
 							Args: []string{
 								"--port",

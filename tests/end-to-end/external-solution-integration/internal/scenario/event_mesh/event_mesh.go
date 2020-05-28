@@ -16,6 +16,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		SkipSSLVerify:     s.skipSSLVerify,
 		ApplicationTenant: s.applicationTenant,
 		ApplicationGroup:  s.applicationGroup,
+		TestServiceImage:  s.testServiceImage,
 	}
 	s.evaluate = event_mesh_evaluate.Scenario{
 		Domain:        s.domain,

@@ -46,6 +46,9 @@ global:
   e2e_external_solution:
     dir:
     version: PR-8511
+  e2e_external_solution_test_service:
+    dir:
+    version: PR-8483
   disableLegacyConnectivity: false
 
 tests:

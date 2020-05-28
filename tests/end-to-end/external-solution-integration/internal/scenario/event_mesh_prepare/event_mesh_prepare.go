@@ -58,6 +58,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		dynamic.Resource(apiRuleRes).Namespace(s.TestID),
 		s.Domain,
 		s.TestID,
+		s.TestServiceImage,
 	)
 
 	functionEndpoint := helpers.InClusterEndpoint(s.TestID, s.TestID, helpers.FunctionPort)

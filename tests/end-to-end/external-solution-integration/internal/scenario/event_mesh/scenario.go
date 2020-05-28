@@ -18,6 +18,7 @@ type Scenario struct {
 	applicationTenant string
 	applicationGroup  string
 	logLevel          string
+	testServiceImage  string
 }
 
 // AddFlags adds CLI flags to given FlagSet
@@ -28,6 +29,7 @@ func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 	pflag.StringVar(&s.applicationTenant, "applicationTenant", "", "Application CR Tenant")
 	pflag.StringVar(&s.applicationGroup, "applicationGroup", "", "Application CR Group")
 	pflag.StringVar(&s.logLevel, "logLevel", "info", "Set log level: panic, fatal, error, warn, info, debug, trace")
+	pflag.StringVar(&s.testServiceImage, "testServiceImage", "eu.gcr.io/kyma-project/event-subscriber-tools:PR-8483", "TestServiceImage")
 }
 
 func (s *Scenario) NewState() *state {

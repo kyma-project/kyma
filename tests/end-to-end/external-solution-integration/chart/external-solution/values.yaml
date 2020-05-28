@@ -5,3 +5,7 @@ image:
   dir:
   version: PR-8511
   pullPolicy: "Always"
+
+testServiceImage:
+  dir:
+  version: PR-8483
