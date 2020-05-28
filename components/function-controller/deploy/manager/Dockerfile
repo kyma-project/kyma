@@ -20,7 +20,7 @@ RUN go mod download
 #
 COPY . ${BASE_APP_DIR}/
 
-RUN go build -a -o manager cmd/manager/main.go \
+RUN go build -ldflags "-s -w" -a -o manager cmd/manager/main.go \
     && mkdir /app \
     && mv ./manager /app/manager \
     && if [ -f ${BASE_APP_DIR}/licenses ]; then mv ${BASE_APP_DIR}/licenses /app/licenses; fi
