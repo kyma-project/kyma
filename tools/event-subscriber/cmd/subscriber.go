@@ -105,7 +105,7 @@ func (s *SubscriberState) checkCEBySourceTypeVersion(w http.ResponseWriter, r *h
 			events = append(events, event)
 		}
 	}
-	log.Infof("Checking for source: %v, type: %v, version: %v  :: found: %v", eventsource, eventtype, eventversion, events)
+	log.Infof("Checking for source: %v, type: %v, version: %v :: found: %v", eventsource, eventtype, eventversion, events)
 	if len(events) == 0 {
 		w.WriteHeader(http.StatusNoContent)
 	}
