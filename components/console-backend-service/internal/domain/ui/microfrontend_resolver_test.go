@@ -48,7 +48,7 @@ func TestMicroFrontendResolver_MicroFrontendsQuery(t *testing.T) {
 			item, item,
 		}
 
-		expectedItem := gqlschema.MicroFrontend{
+		expectedItem := &gqlschema.MicroFrontend{
 			Name:        name,
 			Version:     version,
 			Category:    category,
@@ -63,7 +63,7 @@ func TestMicroFrontendResolver_MicroFrontendsQuery(t *testing.T) {
 			},
 		}
 
-		expectedItems := []gqlschema.MicroFrontend{
+		expectedItems := []*gqlschema.MicroFrontend{
 			expectedItem, expectedItem,
 		}
 
@@ -92,7 +92,7 @@ func TestMicroFrontendResolver_MicroFrontendsQuery(t *testing.T) {
 		resourceGetter.On("List", namespace).Return(items, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 		resolver := ui.NewMicroFrontendResolver(resourceGetter)
-		var expected []gqlschema.MicroFrontend
+		var expected []*gqlschema.MicroFrontend
 
 		result, err := resolver.MicroFrontendsQuery(nil, namespace)
 

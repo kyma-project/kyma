@@ -54,7 +54,7 @@ func (c *triggerConverter) ToGQL(in *v1alpha1.Trigger) (*gqlschema.Trigger, erro
 }
 
 func (c *triggerConverter) ToGQLs(in []*v1alpha1.Trigger) ([]*gqlschema.Trigger, error) {
-	var triggers []*gqlschema.Trigger
+	triggers := make([]*gqlschema.Trigger, 0, len(in))
 	for _, trigger := range in {
 		item, err := c.ToGQL(trigger)
 		if err != nil {

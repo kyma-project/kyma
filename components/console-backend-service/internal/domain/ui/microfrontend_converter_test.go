@@ -50,7 +50,7 @@ func TestMicroFrontendConverter_ToGQL(t *testing.T) {
 		result, err := converter.ToGQL(&item)
 
 		assert.Nil(t, err)
-		assert.Equal(t, &expected, result)
+		assert.Equal(t, expected, result)
 	})
 
 	t.Run("Empty", func(t *testing.T) {

@@ -212,7 +212,7 @@ func TestTriggerResolver_CreateTriggers(t *testing.T) {
 		toTriggerError     error
 		createTriggers     []*v1alpha1.Trigger
 		createTriggerError error
-		toGQLs             []gqlschema.Trigger
+		toGQLs             []*gqlschema.Trigger
 		toGQLError         error
 	}{
 		"Success": {
@@ -222,7 +222,7 @@ func TestTriggerResolver_CreateTriggers(t *testing.T) {
 			toTriggerError:     nil,
 			createTriggers:     []*v1alpha1.Trigger{},
 			createTriggerError: nil,
-			toGQLs:             []gqlschema.Trigger{},
+			toGQLs:             []*gqlschema.Trigger{},
 			toGQLError:         nil,
 			triggerMatcher:     gomega.Not(gomega.BeNil()),
 			errorMatcher:       gomega.BeNil(),
@@ -234,7 +234,7 @@ func TestTriggerResolver_CreateTriggers(t *testing.T) {
 			toTriggerError:     errors.New(""),
 			createTriggers:     []*v1alpha1.Trigger{},
 			createTriggerError: nil,
-			toGQLs:             []gqlschema.Trigger{},
+			toGQLs:             []*gqlschema.Trigger{},
 			toGQLError:         nil,
 			triggerMatcher:     gomega.BeNil(),
 			errorMatcher:       gomega.HaveOccurred(),
@@ -246,7 +246,7 @@ func TestTriggerResolver_CreateTriggers(t *testing.T) {
 			toTriggerError:     nil,
 			createTriggers:     []*v1alpha1.Trigger{},
 			createTriggerError: errors.New(""),
-			toGQLs:             []gqlschema.Trigger{},
+			toGQLs:             []*gqlschema.Trigger{},
 			toGQLError:         nil,
 			triggerMatcher:     gomega.BeNil(),
 			errorMatcher:       gomega.HaveOccurred(),
@@ -258,7 +258,7 @@ func TestTriggerResolver_CreateTriggers(t *testing.T) {
 			toTriggerError:     nil,
 			createTriggers:     []*v1alpha1.Trigger{},
 			createTriggerError: nil,
-			toGQLs:             []gqlschema.Trigger{},
+			toGQLs:             []*gqlschema.Trigger{},
 			toGQLError:         errors.New(""),
 			triggerMatcher:     gomega.BeNil(),
 			errorMatcher:       gomega.HaveOccurred(),

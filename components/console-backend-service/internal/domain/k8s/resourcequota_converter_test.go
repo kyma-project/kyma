@@ -25,7 +25,7 @@ func TestResourceQuotaConverter_ToGQLs(t *testing.T) {
 	})
 
 	// THEN
-	assert.Equal(t, []gqlschema.ResourceQuota{
+	assert.Equal(t, []*gqlschema.ResourceQuota{
 		{Name: "mem-default"},
 	}, result)
 }

@@ -40,7 +40,7 @@ func TestLimitRangeConverter_ToGQL(t *testing.T) {
 				Spec: v1.LimitRangeSpec{
 					Limits: []v1.LimitRangeItem{
 						{
-							Max: v1.ResourceList{},
+							Max: nil,
 						},
 					},
 				},
@@ -48,12 +48,6 @@ func TestLimitRangeConverter_ToGQL(t *testing.T) {
 			expected: &gqlschema.LimitRange{
 				Name: fixLimitRangeName(),
 				Limits: []*gqlschema.LimitRangeItem{
-					{
-						Max: &gqlschema.ResourceType{
-							Memory: nil,
-							CPU:    nil,
-						},
-					},
 				},
 			},
 		},
@@ -80,8 +74,8 @@ func TestLimitRangeConverter_ToGQLs(t *testing.T) {
 	gql := conv.ToGQLs(fixLimitRanges())
 
 	// THEN
-	assert.Equal(t, []gqlschema.LimitRange{
-		*fixGQLLimitRange(),
+	assert.Equal(t, []*gqlschema.LimitRange{
+		fixGQLLimitRange(),
 	}, gql)
 }
 

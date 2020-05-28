@@ -102,7 +102,7 @@ func TestClusterMicroFrontendConverter_ToGQLs(t *testing.T) {
 	}
 
 	expectedNavigationNode := fixGqlNavigationNode()
-	expected := gqlschema.ClusterMicroFrontend{
+	expected := &gqlschema.ClusterMicroFrontend{
 		Name:        name,
 		Version:     version,
 		Category:    category,

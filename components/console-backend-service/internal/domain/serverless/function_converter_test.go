@@ -284,7 +284,7 @@ func TestFunctionConverter_Resources(t *testing.T) {
 			},
 		}
 		gqlCPU := "3006477108"
-		gqlResources := gqlschema.FunctionResources{
+		gqlResources := &gqlschema.FunctionResources{
 			Requests: &gqlschema.ResourceValues{
 				CPU: &gqlCPU,
 			},
@@ -422,7 +422,7 @@ func TestFunctionConverter_Status(t *testing.T) {
 
 		// Config Failed
 		reason := gqlschema.FunctionReasonTypeConfig
-		expected := gqlschema.FunctionStatus{
+		expected := &gqlschema.FunctionStatus{
 			Phase:   gqlschema.FunctionPhaseTypeFailed,
 			Reason:  &reason,
 			Message: &errorMessage,
@@ -474,7 +474,7 @@ func TestFunctionConverter_Status(t *testing.T) {
 
 		// Config Failed
 		reason := gqlschema.FunctionReasonTypeConfig
-		expected := gqlschema.FunctionStatus{
+		expected := &gqlschema.FunctionStatus{
 			Phase:   gqlschema.FunctionPhaseTypeNewRevisionError,
 			Reason:  &reason,
 			Message: &errorMessage,

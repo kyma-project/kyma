@@ -148,6 +148,10 @@ func (c *functionConverter) toGQLEnv(env []v1.EnvVar) []*gqlschema.FunctionEnv {
 }
 
 func (c *functionConverter) toGQLReplicas(minReplicas, maxReplicas *int32) *gqlschema.FunctionReplicas {
+	if minReplicas == nil && maxReplicas == nil {
+		return nil
+	}
+
 	intPtr := func(ptrValue *int32) *int {
 		var ptr *int
 		if ptrValue != nil {
@@ -236,6 +240,9 @@ func (c *functionConverter) fromGQLEnv(env []*gqlschema.FunctionEnvInput) []v1.E
 }
 
 func (c *functionConverter) fromGQLReplicas(replicas *gqlschema.FunctionReplicasInput) (*int32, *int32) {
+	if replicas == nil {
+		return nil, nil
+	}
 	intPtr := func(ptrValue *int) *int32 {
 		var ptr *int32
 		if ptrValue != nil {
@@ -249,7 +256,14 @@ func (c *functionConverter) fromGQLReplicas(replicas *gqlschema.FunctionReplicas
 }
 
 func (c *functionConverter) fromGQLResources(resources *gqlschema.FunctionResourcesInput) (v1.ResourceRequirements, apierror.ErrorFieldAggregate) {
+	if resources == nil {
+		return v1.ResourceRequirements{}, nil
+	}
 	createResourceList := func(values *gqlschema.ResourceValuesInput, pathPrefix string) (v1.ResourceList, apierror.ErrorFieldAggregate) {
+		if values == nil {
+			return nil, nil
+		}
+
 		var resourcesList v1.ResourceList
 		var errs apierror.ErrorFieldAggregate
 
@@ -285,6 +299,7 @@ func (c *functionConverter) fromGQLResources(resources *gqlschema.FunctionResour
 
 		return resourcesList, errs
 	}
+
 
 	resourcesReq := v1.ResourceRequirements{}
 	var errs apierror.ErrorFieldAggregate

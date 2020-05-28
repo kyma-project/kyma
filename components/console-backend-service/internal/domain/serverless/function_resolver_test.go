@@ -33,14 +33,14 @@ func TestFunctionResolver_FunctionQuery(t *testing.T) {
 		defer svc.AssertExpectations(t)
 
 		converter := automock.NewGQLFunctionConverter()
-		converter.On("ToGQL", function).Return(&gqlFunction, nil)
+		converter.On("ToGQL", function).Return(gqlFunction, nil)
 		defer converter.AssertExpectations(t)
 
 		resolver := newFunctionResolver(svc, converter, nil, nil)
 
 		result, err := resolver.FunctionQuery(nil, "1", "a")
 		require.NoError(t, err)
-		assert.Equal(t, &gqlFunction, result)
+		assert.Equal(t, gqlFunction, result)
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
@@ -105,7 +105,7 @@ func TestFunctionResolver_FunctionsQuery(t *testing.T) {
 
 	t.Run("NotFound", func(t *testing.T) {
 		var resources []*v1alpha1.Function
-		var expected []gqlschema.Function
+		var expected []*gqlschema.Function
 
 		svc := automock.NewFunctionService()
 		svc.On("List", "a").Return(resources, nil).Once()
@@ -150,15 +150,15 @@ func TestFunctionResolver_CreateFunction(t *testing.T) {
 		defer svc.AssertExpectations(t)
 
 		converter := automock.NewGQLFunctionConverter()
-		converter.On("ToFunction", "1", "a", mutationInput).Return(function, nil)
-		converter.On("ToGQL", function).Return(&gqlFunction, nil)
+		converter.On("ToFunction", "1", "a", *mutationInput).Return(function, nil)
+		converter.On("ToGQL", function).Return(gqlFunction, nil)
 		defer converter.AssertExpectations(t)
 
 		resolver := newFunctionResolver(svc, converter, nil, nil)
 
 		result, err := resolver.CreateFunction(nil, "1", "a", *mutationInput)
 		require.NoError(t, err)
-		assert.Equal(t, &gqlFunction, result)
+		assert.Equal(t, gqlFunction, result)
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -172,7 +172,7 @@ func TestFunctionResolver_CreateFunction(t *testing.T) {
 		defer svc.AssertExpectations(t)
 
 		converter := automock.NewGQLFunctionConverter()
-		converter.On("ToFunction", "1", "a", mutationInput).Return(function, nil)
+		converter.On("ToFunction", "1", "a", *mutationInput).Return(function, nil)
 		defer converter.AssertExpectations(t)
 
 		resolver := newFunctionResolver(svc, converter, nil, nil)
@@ -196,15 +196,15 @@ func TestFunctionResolver_UpdateFunction(t *testing.T) {
 		defer svc.AssertExpectations(t)
 
 		converter := automock.NewGQLFunctionConverter()
-		converter.On("ToFunction", "1", "a", mutationInput).Return(function, nil)
-		converter.On("ToGQL", function).Return(&gqlFunction, nil)
+		converter.On("ToFunction", "1", "a", *mutationInput).Return(function, nil)
+		converter.On("ToGQL", function).Return(gqlFunction, nil)
 		defer converter.AssertExpectations(t)
 
 		resolver := newFunctionResolver(svc, converter, nil, nil)
 
 		result, err := resolver.UpdateFunction(nil, "1", "a", *mutationInput)
 		require.NoError(t, err)
-		assert.Equal(t, &gqlFunction, result)
+		assert.Equal(t, gqlFunction, result)
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -218,7 +218,7 @@ func TestFunctionResolver_UpdateFunction(t *testing.T) {
 		defer svc.AssertExpectations(t)
 
 		converter := automock.NewGQLFunctionConverter()
-		converter.On("ToFunction", "1", "a", mutationInput).Return(function, nil)
+		converter.On("ToFunction", "1", "a", *mutationInput).Return(function, nil)
 		defer converter.AssertExpectations(t)
 
 		resolver := newFunctionResolver(svc, converter, nil, nil)
@@ -237,7 +237,7 @@ func TestFunctionResolver_DeleteFunction(t *testing.T) {
 		mutation := fixGQLMetadata("1", "a")
 
 		svc := automock.NewFunctionService()
-		svc.On("Delete", mutationInput).Return(nil).Once()
+		svc.On("Delete", *mutationInput).Return(nil).Once()
 		defer svc.AssertExpectations(t)
 
 		resourceLister := new(shared.ServiceBindingUsageLister)
@@ -251,7 +251,7 @@ func TestFunctionResolver_DeleteFunction(t *testing.T) {
 
 		result, err := resolver.DeleteFunction(nil, "a", *mutationInput)
 		require.NoError(t, err)
-		assert.Equal(t, &mutation, result)
+		assert.Equal(t, mutation, result)
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -259,7 +259,7 @@ func TestFunctionResolver_DeleteFunction(t *testing.T) {
 		mutationInput := fixGQLMetadataInput("1", "a")
 
 		svc := automock.NewFunctionService()
-		svc.On("Delete", mutationInput).Return(expected).Once()
+		svc.On("Delete", *mutationInput).Return(expected).Once()
 		defer svc.AssertExpectations(t)
 
 		resolver := newFunctionResolver(svc, nil, nil, nil)
@@ -398,8 +398,6 @@ func fixGQLFunction(name, namespace, uid, source, dependencies string, labels ma
 				Value: "bar",
 			},
 		},
-		Replicas:  &gqlschema.FunctionReplicas{},
-		Resources: &gqlschema.FunctionResources{},
 		Status: &gqlschema.FunctionStatus{
 			Phase: gqlschema.FunctionPhaseTypeInitializing,
 		},

@@ -20,7 +20,9 @@ func TestAddonsConfigurationConverter_ToGQL(t *testing.T) {
 	}{
 		"empty": {
 			givenAddon:           &v1alpha1.AddonsConfiguration{},
-			expectedAddonsConfig: &gqlschema.AddonsConfiguration{},
+			expectedAddonsConfig: &gqlschema.AddonsConfiguration{
+				Status: &gqlschema.AddonsConfigurationStatus{},
+			},
 		},
 		"full": {
 			givenAddon: &v1alpha1.AddonsConfiguration{

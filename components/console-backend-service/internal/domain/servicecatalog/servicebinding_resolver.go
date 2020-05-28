@@ -101,7 +101,7 @@ func (r *serviceBindingResolver) ServiceBindingsToInstanceQuery(ctx context.Cont
 		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(instanceName), gqlerror.WithNamespace(namespace))
 	}
 
-	return &out, nil
+	return out, nil
 }
 
 func (r *serviceBindingResolver) ServiceBindingEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.ServiceBindingEvent, error) {

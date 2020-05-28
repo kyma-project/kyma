@@ -8,10 +8,6 @@ import (
 type resourceQuotaConverter struct{}
 
 func (c *resourceQuotaConverter) ToGQL(in *v1.ResourceQuota) *gqlschema.ResourceQuota {
-	if in == nil {
-		return nil
-	}
-
 	out := &gqlschema.ResourceQuota{
 		Name: in.Name,
 		Pods: c.extractValue(in, v1.ResourcePods),

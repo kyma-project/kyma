@@ -26,7 +26,7 @@ func TestLimitRangeResolver_LimitRangeQuery(t *testing.T) {
 
 	// THEN
 	require.NoError(t, err)
-	assert.Contains(t, result, *fixGQLLimitRange())
+	assert.Contains(t, result, fixGQLLimitRange())
 	assert.Len(t, result, 1)
 }
 

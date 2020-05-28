@@ -39,9 +39,9 @@ func TestServiceBindingConverter_ToGQLs(t *testing.T) {
 		bindings := []*api.ServiceBinding{
 			fixBinding(api.ServiceBindingConditionReady),
 			fixBinding(api.ServiceBindingConditionFailed),
-			fixBinding(api.ServiceBindingConditionType("")),
+			fixBinding(""),
 		}
-		expected := gqlschema.ServiceBindings{
+		expected := &gqlschema.ServiceBindings{
 			Items: []*gqlschema.ServiceBinding{
 				{
 					Name:                "service-binding",
@@ -104,7 +104,7 @@ func TestServiceBindingConverter_ToGQLs(t *testing.T) {
 			fixBinding(api.ServiceBindingConditionReady),
 			nil,
 		}
-		expected := gqlschema.ServiceBindings{
+		expected := &gqlschema.ServiceBindings{
 			Items: []*gqlschema.ServiceBinding{
 				{
 					Name:                "service-binding",

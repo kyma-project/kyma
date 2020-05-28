@@ -111,17 +111,21 @@ func (c *serviceInstanceConverter) GQLCreateInputToInstanceCreateParameters(in *
 		Namespace: namespace,
 		Labels:    labels,
 		Schema:    parameterSchema,
-		ClassRef: instanceCreateResourceRef{
-			ExternalName: in.ClassRef.ExternalName,
-			ClusterWide:  in.ClassRef.ClusterWide,
-		},
-		PlanRef: instanceCreateResourceRef{
-			ExternalName: in.PlanRef.ExternalName,
-			ClusterWide:  in.PlanRef.ClusterWide,
-		},
+		ClassRef:  refFromGql(in.ClassRef),
+		PlanRef:   refFromGql(in.PlanRef),
 	}
 
 	return &parameters
+}
+
+func refFromGql(ref *gqlschema.ServiceInstanceCreateInputResourceRef) instanceCreateResourceRef {
+	if ref == nil {
+		return instanceCreateResourceRef{}
+	}
+	return instanceCreateResourceRef{
+		ExternalName: ref.ExternalName,
+		ClusterWide:  ref.ClusterWide,
+	}
 }
 
 func (c *serviceInstanceConverter) ServiceStatusTypeToGQLStatusType(in status.ServiceInstanceStatusType) gqlschema.InstanceStatusType {

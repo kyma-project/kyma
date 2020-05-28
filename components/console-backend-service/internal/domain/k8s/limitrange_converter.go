@@ -46,15 +46,15 @@ func (lr *limitRangeConverter) limitsToGQL(item v1.LimitRangeItem) *gqlschema.Li
 }
 
 func (lr *limitRangeConverter) extractResourceValues(item v1.ResourceList) *gqlschema.ResourceType {
+	if item == nil {
+		return nil
+	}
 	rt := &gqlschema.ResourceType{}
 	if item, ok := item[v1.ResourceCPU]; ok {
 		rt.CPU = lr.stringPtr(item.String())
 	}
 	if item, ok := item[v1.ResourceMemory]; ok {
 		rt.Memory = lr.stringPtr(item.String())
-	}
-	if rt.CPU == nil && rt.Memory == nil {
-		return nil
 	}
 
 	return rt

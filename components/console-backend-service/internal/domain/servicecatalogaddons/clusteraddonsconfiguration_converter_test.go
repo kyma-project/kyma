@@ -21,7 +21,7 @@ func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
 	}{
 		"empty": {
 			givenAddon:           &v1alpha1.ClusterAddonsConfiguration{},
-			expectedAddonsConfig: &gqlschema.AddonsConfiguration{},
+			expectedAddonsConfig: &gqlschema.AddonsConfiguration{Status: &gqlschema.AddonsConfigurationStatus{}},
 		},
 		"full": {
 			givenAddon: &v1alpha1.ClusterAddonsConfiguration{
@@ -105,11 +105,11 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 
 	for tn, tc := range map[string]struct {
 		givenAddons          []*v1alpha1.ClusterAddonsConfiguration
-		expectedAddonsConfig []gqlschema.AddonsConfiguration
+		expectedAddonsConfig []*gqlschema.AddonsConfiguration
 	}{
 		"empty": {
 			givenAddons:          []*v1alpha1.ClusterAddonsConfiguration{},
-			expectedAddonsConfig: []gqlschema.AddonsConfiguration(nil),
+			expectedAddonsConfig: []*gqlschema.AddonsConfiguration(nil),
 		},
 		"full": {
 			givenAddons: []*v1alpha1.ClusterAddonsConfiguration{
@@ -149,7 +149,7 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 						},
 					}},
 			},
-			expectedAddonsConfig: []gqlschema.AddonsConfiguration{
+			expectedAddonsConfig: []*gqlschema.AddonsConfiguration{
 				{
 					Name: "test",
 					Labels: gqlschema.Labels{

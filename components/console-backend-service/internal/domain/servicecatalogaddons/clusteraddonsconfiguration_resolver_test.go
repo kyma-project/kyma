@@ -29,7 +29,7 @@ func TestClusterAddonsConfigurationResolver_AddonsConfigurationsQuery(t *testing
 
 	// then
 	require.NoError(t, err)
-	assert.Equal(t, []gqlschema.AddonsConfiguration{*fixGQLAddonsConfiguration("test")}, res)
+	assert.Equal(t, []*gqlschema.AddonsConfiguration{fixGQLAddonsConfiguration("test")}, res)
 }
 
 func TestClusterAddonsConfigurationResolver_CreateAddonsConfiguration(t *testing.T) {
@@ -38,7 +38,7 @@ func TestClusterAddonsConfigurationResolver_CreateAddonsConfiguration(t *testing
 	addonsCfgMutation := automock.NewClusterAddonsCfgMutations()
 	defer addonsCfgMutation.AssertExpectations(t)
 
-	addonsCfgMutation.On("Create", addonName, []gqlschema.AddonsConfigurationRepositoryInput{}, &gqlschema.Labels{}).
+	addonsCfgMutation.On("Create", addonName, []*gqlschema.AddonsConfigurationRepositoryInput{}, gqlschema.Labels{}).
 		Return(fixClusterAddonsConfiguration(addonName), nil).Once()
 
 	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(nil, addonsCfgMutation, nil)
@@ -56,7 +56,7 @@ func TestClusterAddonsConfigurationResolver_UpdateAddonsConfiguration(t *testing
 	const addonName = "test"
 	addonsCfgMutation := automock.NewClusterAddonsCfgMutations()
 	defer addonsCfgMutation.AssertExpectations(t)
-	addonsCfgMutation.On("Update", addonName, []gqlschema.AddonsConfigurationRepositoryInput{}, &gqlschema.Labels{}).
+	addonsCfgMutation.On("Update", addonName, []*gqlschema.AddonsConfigurationRepositoryInput{}, gqlschema.Labels{}).
 		Return(fixClusterAddonsConfiguration(addonName), nil).Once()
 
 	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(nil, addonsCfgMutation, nil)
@@ -93,7 +93,7 @@ func TestClusterAddonsConfigurationResolver_AddAddonsConfigurationURLs(t *testin
 	const addonName = "test"
 	addonsCfgUpdater := automock.NewClusterAddonsCfgUpdater()
 	defer addonsCfgUpdater.AssertExpectations(t)
-	addonsCfgUpdater.On("AddRepos", addonName, []gqlschema.AddonsConfigurationRepositoryInput{{URL: "app.gg"}}).
+	addonsCfgUpdater.On("AddRepos", addonName, []*gqlschema.AddonsConfigurationRepositoryInput{{URL: "app.gg"}}).
 		Return(fixClusterAddonsConfiguration(addonName), nil).Once()
 
 	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
@@ -129,7 +129,7 @@ func TestClusterAddonsConfigurationResolver_AddAddonsConfigurationRepository(t *
 	const addonName = "test"
 	addonsCfgUpdater := automock.NewClusterAddonsCfgUpdater()
 	defer addonsCfgUpdater.AssertExpectations(t)
-	addonsCfgUpdater.On("AddRepos", addonName, []gqlschema.AddonsConfigurationRepositoryInput{{URL: "app.gg"}}).
+	addonsCfgUpdater.On("AddRepos", addonName, []*gqlschema.AddonsConfigurationRepositoryInput{{URL: "app.gg"}}).
 		Return(fixClusterAddonsConfiguration(addonName), nil).Once()
 
 	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
