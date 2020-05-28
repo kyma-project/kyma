@@ -53,7 +53,7 @@ type ReleaseStatus struct {
 type UninstallReleaseStatus struct {
 }
 
-func helmReleaseToKymaRelease(hr *release.Release, lastDeployedRev int) *Release { //todo: remove this comment; last deployed rev fetched from history
+func helmReleaseToKymaRelease(hr *release.Release) *Release {
 	return &Release{
 		&ReleaseMeta{
 			Name:        hr.Name,
@@ -61,9 +61,8 @@ func helmReleaseToKymaRelease(hr *release.Release, lastDeployedRev int) *Release
 			Description: hr.Info.Description,
 		},
 		&ReleaseStatus{
-			StatusCode:           Status(hr.Info.Status),
-			CurrentRevision:      hr.Version,
-			LastDeployedRevision: lastDeployedRev,
+			StatusCode:      Status(hr.Info.Status),
+			CurrentRevision: hr.Version,
 		},
 	}
 }
