@@ -26,7 +26,7 @@ type Manager interface {
 }
 
 type repository struct {
-	reManager Manager
+	appManager Manager
 }
 
 // ServiceAPI stores information needed to call an API
@@ -89,8 +89,8 @@ type ServiceRepository interface {
 }
 
 // NewServiceRepository creates a new ApplicationServiceRepository
-func NewServiceRepository(reManager Manager) ServiceRepository {
-	return &repository{reManager: reManager}
+func NewServiceRepository(appManager Manager) ServiceRepository {
+	return &repository{appManager: appManager}
 }
 
 // Create adds a new Service in Application
@@ -117,12 +117,12 @@ func (r *repository) Create(application string, service Service) apperrors.AppEr
 
 // Get reads Service from Application by service id
 func (r *repository) Get(application, id string) (Service, apperrors.AppError) {
-	re, err := r.getApplication(application)
+	app, err := r.getApplication(application)
 	if err != nil {
 		return Service{}, err
 	}
 
-	for _, service := range re.Spec.Services {
+	for _, service := range app.Spec.Services {
 		if service.ID == id {
 			return convertFromK8sType(service)
 		}
@@ -133,13 +133,13 @@ func (r *repository) Get(application, id string) (Service, apperrors.AppError) {
 
 // GetAll gets slice of services defined in Application
 func (r *repository) GetAll(application string) ([]Service, apperrors.AppError) {
-	re, err := r.getApplication(application)
+	app, err := r.getApplication(application)
 	if err != nil {
 		return nil, err
 	}
 
-	services := make([]Service, len(re.Spec.Services))
-	for i, service := range re.Spec.Services {
+	services := make([]Service, len(app.Spec.Services))
+	for i, service := range app.Spec.Services {
 		s, err := convertFromK8sType(service)
 		if err != nil {
 			return nil, err
@@ -152,19 +152,19 @@ func (r *repository) GetAll(application string) ([]Service, apperrors.AppError) 
 
 // Update updates a given service defined in Application
 func (r *repository) Update(application string, service Service) apperrors.AppError {
-	re, err := r.getApplication(application)
+	app, err := r.getApplication(application)
 	if err != nil {
 		return err
 	}
 
-	err = ensureServiceExists(service.ID, re)
+	err = ensureServiceExists(service.ID, app)
 	if err != nil {
 		return err
 	}
 
-	replaceService(service.ID, re, convertToK8sType(service))
+	replaceService(service.ID, app, convertToK8sType(service))
 
-	e := r.updateApplication(re)
+	e := r.updateApplication(app)
 	if e != nil {
 		return apperrors.Internal(fmt.Sprintf("Updating service failed, %s", e.Error()))
 	}
@@ -174,18 +174,18 @@ func (r *repository) Update(application string, service Service) apperrors.AppEr
 
 // Delete deletes a given service defined in Application
 func (r *repository) Delete(application, id string) apperrors.AppError {
-	re, err := r.getApplication(application)
+	app, err := r.getApplication(application)
 	if err != nil {
 		return err
 	}
 
-	if !serviceExists(id, re) {
+	if !serviceExists(id, app) {
 		return nil
 	}
 
-	removeService(id, re)
+	removeService(id, app)
 
-	e := r.updateApplication(re)
+	e := r.updateApplication(app)
 	if e != nil {
 		return apperrors.Internal(fmt.Sprintf("Deleting service failed, %s", e.Error()))
 	}
@@ -194,7 +194,7 @@ func (r *repository) Delete(application, id string) apperrors.AppError {
 }
 
 func (r *repository) getApplication(application string) (*v1alpha1.Application, apperrors.AppError) {
-	re, err := r.reManager.Get(application, v1.GetOptions{})
+	app, err := r.appManager.Get(application, v1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			message := fmt.Sprintf("Application %s not found", application)
@@ -205,12 +205,12 @@ func (r *repository) getApplication(application string) (*v1alpha1.Application, 
 		return nil, apperrors.Internal(message)
 	}
 
-	return re, nil
+	return app, nil
 }
 
-func (r *repository) updateApplication(re *v1alpha1.Application) error {
+func (r *repository) updateApplication(app *v1alpha1.Application) error {
 	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-		_, e := r.reManager.Update(re)
+		_, e := r.appManager.Update(app)
 		return e
 	})
 }
