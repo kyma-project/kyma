@@ -11,7 +11,7 @@ import (
 // ClientInterface .
 type ClientInterface interface {
 	ListReleases() ([]*Release, error)
-	ReleaseStatus(rname string) (string, error)
+	ReleaseStatus(name string) (string, error)
 	IsReleaseDeletable(rname string) (bool, error)
 	ReleaseDeployedRevision(rname string) (int32, error)
 	InstallReleaseFromChart(chartdir, ns, releaseName, overrides string) (*Release, error)
@@ -64,11 +64,17 @@ func (hc *Client) ListReleases() ([]*Release, error) {
 }
 
 //ReleaseStatus returns roughly-formatted Release status (columns are separated with blanks but not adjusted)
-func (hc *Client) ReleaseStatus(rname string) (string, error) {
+func (hc *Client) ReleaseStatus(name string) (string, error) {
 
-	// Helm3 get status
+	status := action.NewStatus(hc.cfg)
+	//status.Version = 0 // default: 0 -> get last
 
-	return "", nil
+	rel, err := status.Run(name)
+	if err != nil {
+		return "", err
+	}
+
+	return rel.Info.Status.String(), nil
 }
 
 //IsReleaseDeletable returns true for release that can be deleted
