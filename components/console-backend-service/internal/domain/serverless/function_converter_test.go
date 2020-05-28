@@ -28,7 +28,7 @@ func TestFunctionConverter_ToGQL(t *testing.T) {
 		result, err := converter.ToGQL(function)
 
 		require.NoError(t, err)
-		assert.Equal(t, &gqlFunction, result)
+		assert.Equal(t, gqlFunction, result)
 	})
 
 	t.Run("Empty", func(t *testing.T) {
@@ -85,7 +85,7 @@ func TestFunctionConverter_ToGQLs(t *testing.T) {
 		result, err := converter.ToGQLs([]*v1alpha1.Function{})
 
 		require.NoError(t, err)
-		assert.Equal(t, []gqlschema.Function(nil), result)
+		assert.Equal(t, []*gqlschema.Function(nil), result)
 	})
 
 	t.Run("Nil", func(t *testing.T) {

@@ -30,7 +30,7 @@ func TestSecretListener_OnAdd(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeAdd, result.Type)
-		assert.Equal(t, *gqlSecret, result.Secret)
+		assert.Equal(t, gqlSecret, result.Secret)
 	})
 
 	t.Run("Filtered out", func(t *testing.T) {
@@ -103,7 +103,7 @@ func TestSecretListener_OnDelete(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeDelete, result.Type)
-		assert.Equal(t, *gqlSecret, result.Secret)
+		assert.Equal(t, gqlSecret, result.Secret)
 
 	})
 
@@ -177,7 +177,7 @@ func TestSecretListener_OnUpdate(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeUpdate, result.Type)
-		assert.Equal(t, *gqlSecret, result.Secret)
+		assert.Equal(t, gqlSecret, result.Secret)
 
 	})
 

@@ -257,7 +257,7 @@ func TestConnectorServiceQuerySuccess(t *testing.T) {
 	var (
 		fixAppName = "app-name"
 		fixURL     = "http://some-url-with-token"
-		fixGQLObj  = gqlschema.ConnectorService{
+		fixGQLObj  = &gqlschema.ConnectorService{
 			URL: "http://some-url-with-token",
 		}
 	)

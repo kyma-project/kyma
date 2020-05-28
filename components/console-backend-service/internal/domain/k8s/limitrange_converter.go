@@ -53,6 +53,9 @@ func (lr *limitRangeConverter) extractResourceValues(item v1.ResourceList) *gqls
 	if item, ok := item[v1.ResourceMemory]; ok {
 		rt.Memory = lr.stringPtr(item.String())
 	}
+	if rt.CPU == nil && rt.Memory == nil {
+		return nil
+	}
 
 	return rt
 }

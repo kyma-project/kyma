@@ -178,6 +178,10 @@ func (c *functionConverter) toGQLResources(resources v1.ResourceRequirements) *g
 		return rv
 	}
 
+	if resources.Requests == nil && resources.Limits == nil {
+		return nil
+	}
+
 	gqlResources := &gqlschema.FunctionResources{}
 	if resources.Requests != nil {
 		gqlResources.Requests = extractResourceValues(resources.Requests)

@@ -29,7 +29,7 @@ func TestClusterAsset_OnAdd(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeAdd, result.Type)
-		assert.Equal(t, *gqlClusterAsset, result.ClusterAsset)
+		assert.Equal(t, gqlClusterAsset, result.ClusterAsset)
 	})
 
 	t.Run("Filtered out", func(t *testing.T) {
@@ -89,7 +89,7 @@ func TestClusterAsset_OnDelete(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeDelete, result.Type)
-		assert.Equal(t, *gqlClusterAsset, result.ClusterAsset)
+		assert.Equal(t, gqlClusterAsset, result.ClusterAsset)
 
 	})
 
@@ -150,7 +150,7 @@ func TestClusterAsset_OnUpdate(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeUpdate, result.Type)
-		assert.Equal(t, *gqlClusterAsset, result.ClusterAsset)
+		assert.Equal(t, gqlClusterAsset, result.ClusterAsset)
 
 	})
 

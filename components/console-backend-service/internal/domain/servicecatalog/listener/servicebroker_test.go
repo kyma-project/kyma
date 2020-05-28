@@ -30,7 +30,7 @@ func TestServiceBrokerListener_OnAdd(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeAdd, result.Type)
-		assert.Equal(t, *gqlServiceBroker, result.ServiceBroker)
+		assert.Equal(t, gqlServiceBroker, result.ServiceBroker)
 	})
 
 	t.Run("Filtered out", func(t *testing.T) {
@@ -103,7 +103,7 @@ func TestServiceBrokerListener_OnDelete(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeDelete, result.Type)
-		assert.Equal(t, *gqlServiceBroker, result.ServiceBroker)
+		assert.Equal(t, gqlServiceBroker, result.ServiceBroker)
 
 	})
 
@@ -177,7 +177,7 @@ func TestServiceBrokerListener_OnUpdate(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeUpdate, result.Type)
-		assert.Equal(t, *gqlServiceBroker, result.ServiceBroker)
+		assert.Equal(t, gqlServiceBroker, result.ServiceBroker)
 
 	})
 

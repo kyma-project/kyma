@@ -32,7 +32,7 @@ func TestTrigger_OnAdd(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeAdd, result.Type)
-		assert.Equal(t, *gqlTrigger, result.Trigger)
+		assert.Equal(t, gqlTrigger, result.Trigger)
 	})
 
 	t.Run("Filtered out", func(t *testing.T) {
@@ -97,7 +97,7 @@ func TestTrigger_OnDelete(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeDelete, result.Type)
-		assert.Equal(t, *gqlTrigger, result.Trigger)
+		assert.Equal(t, gqlTrigger, result.Trigger)
 
 	})
 
@@ -146,7 +146,7 @@ func TestTrigger_OnDelete(t *testing.T) {
 func TestTrigger_OnUpdate(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// given
-		gqlTrigger := new(gqlschema.Trigger)
+		gqlTrigger := &gqlschema.Trigger{}
 		trigger := new(v1alpha1.Trigger)
 		converter := new(automock.Converter)
 
@@ -163,7 +163,7 @@ func TestTrigger_OnUpdate(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeUpdate, result.Type)
-		assert.Equal(t, *gqlTrigger, result.Trigger)
+		assert.Equal(t, gqlTrigger, result.Trigger)
 
 	})
 

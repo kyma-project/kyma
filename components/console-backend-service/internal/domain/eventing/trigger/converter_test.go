@@ -287,7 +287,7 @@ func TestTriggerConverter_ToGQLs(t *testing.T) {
 
 	for testName, testData := range map[string]struct {
 		toConvert  []*v1alpha1.Trigger
-		expected   []gqlschema.Trigger
+		expected   []*gqlschema.Trigger
 		errMatcher types.GomegaMatcher
 	}{
 		"All properties are given": {
@@ -368,7 +368,7 @@ func TestTriggerConverter_ToGQLs(t *testing.T) {
 					},
 				},
 			},
-			expected: []gqlschema.Trigger{
+			expected: []*gqlschema.Trigger{
 				{
 					Name:      "TestName",
 					Namespace: "TestNamespace",
@@ -408,12 +408,12 @@ func TestTriggerConverter_ToGQLs(t *testing.T) {
 		},
 		"Empty": {
 			toConvert:  []*v1alpha1.Trigger{},
-			expected:   []gqlschema.Trigger{},
+			expected:   []*gqlschema.Trigger{},
 			errMatcher: gomega.BeNil(),
 		},
 		"Nil": {
 			toConvert:  nil,
-			expected:   []gqlschema.Trigger{},
+			expected:   []*gqlschema.Trigger{},
 			errMatcher: gomega.BeNil(),
 		},
 	} {

@@ -28,7 +28,7 @@ func TestTriggerResolver_TriggersQuery(t *testing.T) {
 		//Mocks
 		list       []*v1alpha1.Trigger
 		listError  error
-		toGQL      []gqlschema.Trigger
+		toGQL      []*gqlschema.Trigger
 		toGQLError error
 	}{
 		"Success with subscriber": {
@@ -36,7 +36,7 @@ func TestTriggerResolver_TriggersQuery(t *testing.T) {
 			subscriber:     &gqlschema.SubscriberInput{},
 			list:           []*v1alpha1.Trigger{},
 			listError:      nil,
-			toGQL:          []gqlschema.Trigger{},
+			toGQL:          []*gqlschema.Trigger{},
 			toGQLError:     nil,
 			triggerMatcher: gomega.Not(gomega.BeNil()),
 			errorMatcher:   gomega.BeNil(),
@@ -46,7 +46,7 @@ func TestTriggerResolver_TriggersQuery(t *testing.T) {
 			subscriber:     nil,
 			list:           []*v1alpha1.Trigger{},
 			listError:      nil,
-			toGQL:          []gqlschema.Trigger{},
+			toGQL:          []*gqlschema.Trigger{},
 			toGQLError:     nil,
 			triggerMatcher: gomega.Not(gomega.BeNil()),
 			errorMatcher:   gomega.BeNil(),
@@ -56,7 +56,7 @@ func TestTriggerResolver_TriggersQuery(t *testing.T) {
 			subscriber:     nil,
 			list:           nil,
 			listError:      errors.New(""),
-			toGQL:          []gqlschema.Trigger{},
+			toGQL:          []*gqlschema.Trigger{},
 			toGQLError:     nil,
 			triggerMatcher: gomega.HaveLen(0),
 			errorMatcher:   gomega.HaveOccurred(),
@@ -66,7 +66,7 @@ func TestTriggerResolver_TriggersQuery(t *testing.T) {
 			subscriber:     nil,
 			list:           []*v1alpha1.Trigger{},
 			listError:      nil,
-			toGQL:          []gqlschema.Trigger{},
+			toGQL:          []*gqlschema.Trigger{},
 			toGQLError:     errors.New(""),
 			triggerMatcher: gomega.HaveLen(0),
 			errorMatcher:   gomega.HaveOccurred(),
@@ -180,7 +180,7 @@ func TestTriggerResolver_CreateTrigger(t *testing.T) {
 			converter := &automock.GQLConverter{}
 			extractor := extractor.TriggerUnstructuredExtractor{}
 			converter.On(
-				"ToTrigger", testData.trigger, testData.ownerRef,
+				"ToTrigger", &testData.trigger, testData.ownerRef,
 			).Return(testData.toTrigger, testData.toTriggerError)
 			service.On(
 				"Create", testData.toTrigger,

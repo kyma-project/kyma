@@ -37,7 +37,7 @@ func TestMicroFrontendConverter_ToGQL(t *testing.T) {
 		}
 
 		expectedNavigationNode := fixGqlNavigationNode()
-		expected := gqlschema.MicroFrontend{
+		expected := &gqlschema.MicroFrontend{
 			Name:        name,
 			Version:     version,
 			Category:    category,
@@ -96,7 +96,7 @@ func TestMicroFrontendConverter_ToGQLs(t *testing.T) {
 	}
 
 	expectedNavigationNode := fixGqlNavigationNode()
-	expected := gqlschema.MicroFrontend{
+	expected := &gqlschema.MicroFrontend{
 		Name:        name,
 		Version:     version,
 		Category:    category,

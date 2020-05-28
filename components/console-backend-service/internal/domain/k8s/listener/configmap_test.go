@@ -30,7 +30,7 @@ func TestConfigMapListener_OnAdd(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeAdd, result.Type)
-		assert.Equal(t, *gqlConfigMap, result.ConfigMap)
+		assert.Equal(t, gqlConfigMap, result.ConfigMap)
 	})
 
 	t.Run("Filtered out", func(t *testing.T) {
@@ -103,7 +103,7 @@ func TestConfigMapListener_OnDelete(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeDelete, result.Type)
-		assert.Equal(t, *gqlConfigMap, result.ConfigMap)
+		assert.Equal(t, gqlConfigMap, result.ConfigMap)
 
 	})
 
@@ -177,7 +177,7 @@ func TestConfigMapListener_OnUpdate(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeUpdate, result.Type)
-		assert.Equal(t, *gqlConfigMap, result.ConfigMap)
+		assert.Equal(t, gqlConfigMap, result.ConfigMap)
 
 	})
 
