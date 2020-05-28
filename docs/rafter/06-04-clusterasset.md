@@ -102,9 +102,9 @@ This table lists all possible parameters of a given resource together with their
 | **status.lastHeartbeatTime** | Not applicable | Specifies when was the last time when the ClusterAsset Controller processed the ClusterAsset CR. |
 | **status.observedGeneration** | Not applicable | Specifies the most recent ClusterAsset CR generation that the ClusterAsset Controller observed. |
 | **status.assetRef** | Not applicable | Provides details on the location of the assets stored in the bucket.   |
-| **status.assetRef.files** | Not applicable | Provides the relative path to the given asset in the storage bucket with metadata. |
-| **status.assetRef.files.metadata** | Not applicable | Metadata extracted from asset. |
-| **status.assetRef.files.name** | Not applicable | The relative path to the given asset in the storage bucket. |
+| **status.assetRef.files** | Not applicable | Provides asset metadata and the relative path to the given asset in the storage bucket with metadata. |
+| **status.assetRef.files.metadata** | Not applicable | Lists metadata extracted from the asset. |
+| **status.assetRef.files.name** | Not applicable | Specifies the relative path to the given asset in the storage bucket. |
 | **status.assetRef.baseUrl** | Not applicable | Specifies the absolute path to the location of the assets in the storage bucket.   |
 
 
