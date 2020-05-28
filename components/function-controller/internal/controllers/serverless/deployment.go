@@ -137,3 +137,10 @@ func (r *FunctionReconciler) isDeploymentReady(deployment appsv1.Deployment) boo
 
 	return false
 }
+
+func equalResources(existing, expected corev1.ResourceRequirements) bool {
+	return existing.Requests.Memory().Equal(*expected.Requests.Memory()) &&
+		existing.Requests.Cpu().Equal(*expected.Requests.Cpu()) &&
+		existing.Limits.Memory().Equal(*expected.Limits.Memory()) &&
+		existing.Limits.Cpu().Equal(*expected.Limits.Cpu())
+}

@@ -30,13 +30,6 @@ var (
 	}
 )
 
-func equalResources(existing, expected corev1.ResourceRequirements) bool {
-	return existing.Requests.Memory().Equal(*expected.Requests.Memory()) &&
-		existing.Requests.Cpu().Equal(*expected.Requests.Cpu()) &&
-		existing.Limits.Memory().Equal(*expected.Limits.Memory()) &&
-		existing.Limits.Cpu().Equal(*expected.Limits.Cpu())
-}
-
 func (r *FunctionReconciler) mapsEqual(existing, expected map[string]string) bool {
 	if len(existing) != len(expected) {
 		return false

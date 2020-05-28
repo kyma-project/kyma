@@ -53,13 +53,8 @@ func (r *FunctionReconciler) equalServices(existing corev1.Service, expected cor
 		r.mapsEqual(existing.Labels, expected.Labels) &&
 		len(existing.Spec.Ports) == len(expected.Spec.Ports) &&
 		len(expected.Spec.Ports) > 0 &&
-		r.servicePortsEqual(existing.Spec.Ports[0], expected.Spec.Ports[0])
-}
-
-func (r *FunctionReconciler) servicePortsEqual(existing corev1.ServicePort, expected corev1.ServicePort) bool {
-	return existing.Port == expected.Port &&
-		existing.Name == expected.Name &&
-		existing.TargetPort.String() == expected.TargetPort.String()
+		len(existing.Spec.Ports) > 0 &&
+		existing.Spec.Ports[0].String() == expected.Spec.Ports[0].String()
 }
 
 func (r *FunctionReconciler) createService(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, service corev1.Service) (ctrl.Result, error) {

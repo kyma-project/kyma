@@ -149,9 +149,6 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 	imageName := r.buildExternalImageAddress(instance)
 	deploymentLabels := r.functionLabels(instance)
 
-	// TODO discuss which labels should go where
-
-	// podAnnotations := r.servicePodAnnotations(instance)
 	podLabels := r.servicePodLabels(instance)
 
 	return appsv1.Deployment{
@@ -163,7 +160,7 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 		Spec: appsv1.DeploymentSpec{
 			Replicas: instance.Spec.MinReplicas,
 			Selector: &metav1.LabelSelector{
-				MatchLabels: podLabels,
+				MatchLabels: deploymentLabels,
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
@@ -188,11 +185,6 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 
 func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function) corev1.Service {
 	deploymentLabels := r.functionLabels(instance)
-
-	// TODO discuss which labels should go where
-
-	podLabels := r.servicePodLabels(instance)
-
 	return corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instance.GetName(),
@@ -205,7 +197,7 @@ func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function)
 				TargetPort: intstr.FromInt(80),
 				Port:       80,
 			}},
-			Selector: podLabels,
+			Selector: deploymentLabels,
 		},
 	}
 }
