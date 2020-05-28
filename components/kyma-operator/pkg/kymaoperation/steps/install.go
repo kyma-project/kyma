@@ -42,9 +42,9 @@ func (s installStep) Run() error {
 
 		isDeletable, err := s.helmClient.IsReleaseDeletable(s.component.GetReleaseName())
 		if err != nil {
-			statusErrMsg = fmt.Sprintf("Checking status of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
+			statusErrMsg := fmt.Sprintf("Checking status of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
 			log.Println(statusErrMsg)
-			return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, statusErrorMsg))
+			return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, statusErrMsg))
 		}
 
 		if isDeletable {
