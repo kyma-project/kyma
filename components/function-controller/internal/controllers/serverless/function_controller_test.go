@@ -6,11 +6,11 @@ import (
 	"testing"
 
 	"github.com/onsi/gomega"
+	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8sresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
@@ -26,7 +26,7 @@ func newFixFunction(namespace, name string) *serverlessv1alpha1.Function {
 			Namespace: namespace,
 		},
 		Spec: serverlessv1alpha1.FunctionSpec{
-			Source: "module.exports = {main: function(event, context) {return 'Hello World. Epstein didnt kill himself.'}}",
+			Source: "module.exports = {main: function(event, context) {return 'Hello World.'}}",
 			Deps:   "   ",
 			Env: []corev1.EnvVar{
 				{
@@ -573,8 +573,8 @@ func Test_equalResources(t *testing.T) {
 
 func TestFunctionReconciler_equalServices(t *testing.T) {
 	type args struct {
-		existing *servingv1.Service
-		expected servingv1.Service
+		existing appsv1.Deployment
+		expected appsv1.Deployment
 	}
 	tests := []struct {
 		name string
@@ -584,88 +584,84 @@ func TestFunctionReconciler_equalServices(t *testing.T) {
 		{
 			name: "simple case - false on empty structs",
 			args: args{
-				existing: &servingv1.Service{},
-				expected: servingv1.Service{},
+				existing: appsv1.Deployment{},
+				expected: appsv1.Deployment{},
 			},
 			want: false, // yes, false, as we can't compare services without spec.template.containers, it makes no sense
 		},
 		{
 			name: "simple case",
 			args: args{
-				existing: &servingv1.Service{
+				existing: appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: map[string]string{
 							"label-key": "label-value",
 						},
 					},
-					Spec: servingv1.ServiceSpec{
-						ConfigurationSpec: servingv1.ConfigurationSpec{
-							Template: servingv1.RevisionTemplateSpec{
-								ObjectMeta: metav1.ObjectMeta{
-									Labels: map[string]string{
-										"some-template-label-key": "some-template-label-val",
-									},
+					Spec: appsv1.DeploymentSpec{
+
+						Template: corev1.PodTemplateSpec{
+							ObjectMeta: metav1.ObjectMeta{
+								Labels: map[string]string{
+									"some-template-label-key": "some-template-label-val",
 								},
-								Spec: servingv1.RevisionSpec{
-									PodSpec: corev1.PodSpec{Containers: []corev1.Container{
-										{
-											Image: "container-image1",
-											Env: []corev1.EnvVar{{
-												Name:  "env-name1",
-												Value: "env-value1",
-											}},
-											Resources: corev1.ResourceRequirements{
-												Limits: map[corev1.ResourceName]k8sresource.Quantity{
-													corev1.ResourceCPU:    k8sresource.MustParse("50m"),
-													corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
-												},
-												Requests: map[corev1.ResourceName]k8sresource.Quantity{
-													corev1.ResourceCPU:    k8sresource.MustParse("20m"),
-													corev1.ResourceMemory: k8sresource.MustParse("20Mi"),
-												},
+							},
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{
+									{
+										Image: "container-image1",
+										Env: []corev1.EnvVar{{
+											Name:  "env-name1",
+											Value: "env-value1",
+										}},
+										Resources: corev1.ResourceRequirements{
+											Limits: map[corev1.ResourceName]k8sresource.Quantity{
+												corev1.ResourceCPU:    k8sresource.MustParse("50m"),
+												corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
+											},
+											Requests: map[corev1.ResourceName]k8sresource.Quantity{
+												corev1.ResourceCPU:    k8sresource.MustParse("20m"),
+												corev1.ResourceMemory: k8sresource.MustParse("20Mi"),
 											},
 										},
-									},
 									},
 								},
 							},
 						},
 					},
 				},
-				expected: servingv1.Service{
+				expected: appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: map[string]string{
 							"label-key": "label-value",
 						},
 					},
-					Spec: servingv1.ServiceSpec{
-						ConfigurationSpec: servingv1.ConfigurationSpec{
-							Template: servingv1.RevisionTemplateSpec{
-								ObjectMeta: metav1.ObjectMeta{
-									Labels: map[string]string{
-										"some-template-label-key": "some-template-label-val",
-									},
+					Spec: appsv1.DeploymentSpec{
+
+						Template: corev1.PodTemplateSpec{
+							ObjectMeta: metav1.ObjectMeta{
+								Labels: map[string]string{
+									"some-template-label-key": "some-template-label-val",
 								},
-								Spec: servingv1.RevisionSpec{
-									PodSpec: corev1.PodSpec{Containers: []corev1.Container{
-										{
-											Image: "container-image1",
-											Env: []corev1.EnvVar{{
-												Name:  "env-name1",
-												Value: "env-value1",
-											}},
-											Resources: corev1.ResourceRequirements{
-												Limits: map[corev1.ResourceName]k8sresource.Quantity{
-													corev1.ResourceCPU:    k8sresource.MustParse("50m"),
-													corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
-												},
-												Requests: map[corev1.ResourceName]k8sresource.Quantity{
-													corev1.ResourceCPU:    k8sresource.MustParse("20m"),
-													corev1.ResourceMemory: k8sresource.MustParse("20Mi"),
-												},
+							},
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{
+									{
+										Image: "container-image1",
+										Env: []corev1.EnvVar{{
+											Name:  "env-name1",
+											Value: "env-value1",
+										}},
+										Resources: corev1.ResourceRequirements{
+											Limits: map[corev1.ResourceName]k8sresource.Quantity{
+												corev1.ResourceCPU:    k8sresource.MustParse("50m"),
+												corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
+											},
+											Requests: map[corev1.ResourceName]k8sresource.Quantity{
+												corev1.ResourceCPU:    k8sresource.MustParse("20m"),
+												corev1.ResourceMemory: k8sresource.MustParse("20Mi"),
 											},
 										},
-									},
 									},
 								},
 							},
@@ -678,80 +674,76 @@ func TestFunctionReconciler_equalServices(t *testing.T) {
 		{
 			name: "different labels on pods",
 			args: args{
-				existing: &servingv1.Service{
+				existing: appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: map[string]string{
 							"label-key": "label-value",
 						},
 					},
-					Spec: servingv1.ServiceSpec{
-						ConfigurationSpec: servingv1.ConfigurationSpec{
-							Template: servingv1.RevisionTemplateSpec{
-								ObjectMeta: metav1.ObjectMeta{
-									Labels: map[string]string{
-										"some-template-label-key": "some-template-label-val",
-									},
+					Spec: appsv1.DeploymentSpec{
+						Template: corev1.PodTemplateSpec{
+							ObjectMeta: metav1.ObjectMeta{
+								Labels: map[string]string{
+									"some-template-label-key": "some-template-label-val",
 								},
-								Spec: servingv1.RevisionSpec{
-									PodSpec: corev1.PodSpec{Containers: []corev1.Container{
-										{
-											Image: "container-image1",
-											Env: []corev1.EnvVar{{
-												Name:  "env-name1",
-												Value: "env-value1",
-											}},
-											Resources: corev1.ResourceRequirements{
-												Limits: map[corev1.ResourceName]k8sresource.Quantity{
-													corev1.ResourceCPU:    k8sresource.MustParse("50m"),
-													corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
-												},
-												Requests: map[corev1.ResourceName]k8sresource.Quantity{
-													corev1.ResourceCPU:    k8sresource.MustParse("20m"),
-													corev1.ResourceMemory: k8sresource.MustParse("20Mi"),
-												},
+							},
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{
+									{
+										Image: "container-image1",
+										Env: []corev1.EnvVar{{
+											Name:  "env-name1",
+											Value: "env-value1",
+										}},
+										Resources: corev1.ResourceRequirements{
+											Limits: map[corev1.ResourceName]k8sresource.Quantity{
+												corev1.ResourceCPU:    k8sresource.MustParse("50m"),
+												corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
+											},
+											Requests: map[corev1.ResourceName]k8sresource.Quantity{
+												corev1.ResourceCPU:    k8sresource.MustParse("20m"),
+												corev1.ResourceMemory: k8sresource.MustParse("20Mi"),
 											},
 										},
-									},
 									},
 								},
 							},
 						},
 					},
 				},
-				expected: servingv1.Service{
+				expected: appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: map[string]string{
 							"label-key": "label-value",
 						},
 					},
-					Spec: servingv1.ServiceSpec{
-						ConfigurationSpec: servingv1.ConfigurationSpec{
-							Template: servingv1.RevisionTemplateSpec{
-								ObjectMeta: metav1.ObjectMeta{
-									Labels: map[string]string{
-										"some-template-label-key": "different-value", // that's different
-									},
+					Spec: appsv1.DeploymentSpec{
+
+						Template: corev1.PodTemplateSpec{
+							ObjectMeta: metav1.ObjectMeta{
+								Labels: map[string]string{
+									"some-template-label-key": "different-value", // that's different
 								},
-								Spec: servingv1.RevisionSpec{
-									PodSpec: corev1.PodSpec{Containers: []corev1.Container{
-										{
-											Image: "container-image1",
-											Env: []corev1.EnvVar{{
-												Name:  "env-name1",
-												Value: "env-value1",
-											}},
-											Resources: corev1.ResourceRequirements{
-												Limits: map[corev1.ResourceName]k8sresource.Quantity{
-													corev1.ResourceCPU:    k8sresource.MustParse("50m"),
-													corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
-												},
-												Requests: map[corev1.ResourceName]k8sresource.Quantity{
-													corev1.ResourceCPU:    k8sresource.MustParse("20m"),
-													corev1.ResourceMemory: k8sresource.MustParse("20Mi"),
-												},
+							},
+							Spec: corev1.PodSpec{
+
+								Containers: []corev1.Container{
+									{
+										Image: "container-image1",
+										Env: []corev1.EnvVar{{
+											Name:  "env-name1",
+											Value: "env-value1",
+										}},
+										Resources: corev1.ResourceRequirements{
+											Limits: map[corev1.ResourceName]k8sresource.Quantity{
+												corev1.ResourceCPU:    k8sresource.MustParse("50m"),
+												corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
+											},
+											Requests: map[corev1.ResourceName]k8sresource.Quantity{
+												corev1.ResourceCPU:    k8sresource.MustParse("20m"),
+												corev1.ResourceMemory: k8sresource.MustParse("20Mi"),
 											},
 										},
-									},
 									},
 								},
 							},
@@ -762,39 +754,94 @@ func TestFunctionReconciler_equalServices(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "different pod annotations",
+			name:
+			"different pod annotations",
 			args: args{
-				existing: &servingv1.Service{
+				existing: appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: map[string]string{
 							"label-key": "label-value",
 						},
 					},
-					Spec: servingv1.ServiceSpec{
-						ConfigurationSpec: servingv1.ConfigurationSpec{
-							Template: servingv1.RevisionTemplateSpec{
-								Spec: servingv1.RevisionSpec{
-									PodSpec: corev1.PodSpec{Containers: []corev1.Container{{Image: "container-image1"}}},
+					Spec: appsv1.DeploymentSpec{
+
+						Template: corev1.PodTemplateSpec{
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{{Image: "container-image1"}},
+							},
+						},
+					},
+				},
+				expected: appsv1.Deployment{
+					ObjectMeta: metav1.ObjectMeta{
+						Labels: map[string]string{
+							"label-key": "label-value",
+						},
+					},
+					Spec: appsv1.DeploymentSpec{
+						Template: corev1.PodTemplateSpec{
+							ObjectMeta: metav1.ObjectMeta{
+								Annotations: map[string]string{
+									"here's something": "that should be different than in 'existing'",
+								},
+							},
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{{Image: "container-image1"}}},
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name:
+			"different resources",
+			args: args{
+				existing: appsv1.Deployment{
+					Spec: appsv1.DeploymentSpec{
+						Template: corev1.PodTemplateSpec{
+							Spec: corev1.PodSpec{
+
+								Containers: []corev1.Container{
+									{
+										Image: "container-image1",
+										Resources: corev1.ResourceRequirements{
+											Limits: map[corev1.ResourceName]k8sresource.Quantity{
+												corev1.ResourceCPU:    k8sresource.MustParse("50m"),
+												corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
+											},
+											Requests: map[corev1.ResourceName]k8sresource.Quantity{
+												corev1.ResourceCPU:    k8sresource.MustParse("20m"),
+												corev1.ResourceMemory: k8sresource.MustParse("20Mi"),
+											},
+										},
+									},
 								},
 							},
 						},
 					},
 				},
-				expected: servingv1.Service{
-					ObjectMeta: metav1.ObjectMeta{
-						Labels: map[string]string{
-							"label-key": "label-value",
-						},
-					},
-					Spec: servingv1.ServiceSpec{
-						ConfigurationSpec: servingv1.ConfigurationSpec{
-							Template: servingv1.RevisionTemplateSpec{
-								ObjectMeta: metav1.ObjectMeta{
-									Annotations: map[string]string{
-										"here's something": "that should be different than in 'existing'",
+				expected: appsv1.Deployment{
+					Spec: appsv1.DeploymentSpec{
+
+						Template: corev1.PodTemplateSpec{
+							Spec: corev1.PodSpec{
+
+								Containers: []corev1.Container{
+									{
+										Image: "container-image1",
+										Resources: corev1.ResourceRequirements{
+											Limits: map[corev1.ResourceName]k8sresource.Quantity{
+												corev1.ResourceCPU:    k8sresource.MustParse("50m"),
+												corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
+											},
+											Requests: map[corev1.ResourceName]k8sresource.Quantity{
+												corev1.ResourceCPU:    k8sresource.MustParse("400m"),
+												corev1.ResourceMemory: k8sresource.MustParse("40Mi"),
+											},
+										},
 									},
 								},
-								Spec: servingv1.RevisionSpec{PodSpec: corev1.PodSpec{Containers: []corev1.Container{{Image: "container-image1"}}}},
 							},
 						},
 					},
@@ -803,92 +850,29 @@ func TestFunctionReconciler_equalServices(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "different resources",
+			name:
+			"different image",
 			args: args{
-				existing: &servingv1.Service{
-					Spec: servingv1.ServiceSpec{
-						ConfigurationSpec: servingv1.ConfigurationSpec{
-							Template: servingv1.RevisionTemplateSpec{
-								Spec: servingv1.RevisionSpec{
-									PodSpec: corev1.PodSpec{Containers: []corev1.Container{
-										{
-											Image: "container-image1",
-											Resources: corev1.ResourceRequirements{
-												Limits: map[corev1.ResourceName]k8sresource.Quantity{
-													corev1.ResourceCPU:    k8sresource.MustParse("50m"),
-													corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
-												},
-												Requests: map[corev1.ResourceName]k8sresource.Quantity{
-													corev1.ResourceCPU:    k8sresource.MustParse("20m"),
-													corev1.ResourceMemory: k8sresource.MustParse("20Mi"),
-												},
-											},
-										},
-									},
+				existing: appsv1.Deployment{
+					Spec: appsv1.DeploymentSpec{
+						Template: corev1.PodTemplateSpec{
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{
+									{
+										Image: "container-image1",
 									},
 								},
 							},
 						},
 					},
 				},
-				expected: servingv1.Service{
-					Spec: servingv1.ServiceSpec{
-						ConfigurationSpec: servingv1.ConfigurationSpec{
-							Template: servingv1.RevisionTemplateSpec{
-								Spec: servingv1.RevisionSpec{
-									PodSpec: corev1.PodSpec{Containers: []corev1.Container{
-										{
-											Image: "container-image1",
-											Resources: corev1.ResourceRequirements{
-												Limits: map[corev1.ResourceName]k8sresource.Quantity{
-													corev1.ResourceCPU:    k8sresource.MustParse("50m"),
-													corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
-												},
-												Requests: map[corev1.ResourceName]k8sresource.Quantity{
-													corev1.ResourceCPU:    k8sresource.MustParse("400m"),
-													corev1.ResourceMemory: k8sresource.MustParse("40Mi"),
-												},
-											},
-										},
-									},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			want: false,
-		},
-		{
-			name: "different image",
-			args: args{
-				existing: &servingv1.Service{
-					Spec: servingv1.ServiceSpec{
-						ConfigurationSpec: servingv1.ConfigurationSpec{
-							Template: servingv1.RevisionTemplateSpec{
-								Spec: servingv1.RevisionSpec{
-									PodSpec: corev1.PodSpec{Containers: []corev1.Container{
-										{
-											Image: "container-image1",
-										},
-									},
-									},
-								},
-							},
-						},
-					},
-				},
-				expected: servingv1.Service{
-					Spec: servingv1.ServiceSpec{
-						ConfigurationSpec: servingv1.ConfigurationSpec{
-							Template: servingv1.RevisionTemplateSpec{
-								Spec: servingv1.RevisionSpec{
-									PodSpec: corev1.PodSpec{Containers: []corev1.Container{
-										{
-											Image: "different-image",
-										},
-									},
+				expected: appsv1.Deployment{
+					Spec: appsv1.DeploymentSpec{
+						Template: corev1.PodTemplateSpec{
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{
+									{
+										Image: "different-image",
 									},
 								},
 							},
@@ -903,7 +887,7 @@ func TestFunctionReconciler_equalServices(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			r := &FunctionReconciler{}
-			got := r.equalServices(tt.args.existing, tt.args.expected)
+			got := r.equalDeployments(tt.args.existing, tt.args.expected)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}

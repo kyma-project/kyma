@@ -1,4 +1,4 @@
-FROM golang:1.13 as builder
+FROM golang:1.14-alpine as builder
 
 ENV BASE_APP_DIR=/go/src/github.com/kyma-project/kyma/components/function-controller \
     GO111MODULE=on \
@@ -32,7 +32,7 @@ RUN apk --update add ca-certificates
 # result container
 FROM scratch
 
-LABEL source = git@github.com:kyma-project/rafter.git
+LABEL source = git@github.com:kyma-project/kyma/components/function-controller.git
 
 COPY --from=builder /app /app
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt

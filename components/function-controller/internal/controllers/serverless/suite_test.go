@@ -8,7 +8,6 @@ import (
 	"github.com/onsi/gomega"
 	"github.com/vrischmann/envconfig"
 	"k8s.io/client-go/kubernetes/scheme"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
@@ -52,8 +51,8 @@ var _ = ginkgo.BeforeSuite(func(done ginkgo.Done) {
 	err = serverlessv1alpha1.AddToScheme(scheme.Scheme)
 	gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
-	err = servingv1.AddToScheme(scheme.Scheme)
-	gomega.Expect(err).NotTo(gomega.HaveOccurred())
+	// err = servingv1.AddToScheme(scheme.Scheme)
+	// gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
 	// +kubebuilder:scaffold:scheme
 
