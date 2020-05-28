@@ -40,7 +40,6 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		s.TestID,
 	)
 
-	// lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
 	state := s.NewState()
 	dataStore := testkit.NewDataStore(coreClientset, s.TestID)
 
