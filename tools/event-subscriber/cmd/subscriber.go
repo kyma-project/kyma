@@ -10,15 +10,17 @@ import (
 	"sync/atomic"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/cloudevents/sdk-go/v2/protocol"
+	cehttp "github.com/cloudevents/sdk-go/v2/protocol/http"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 )
 
-var (
+type SubscriberState struct {
 	counter     uint32
 	receivedCEs map[string]cloudevents.Event
 	mu          sync.Mutex
-)
+}
 
 type counterResponse struct {
 	Counter int `json:"counter"`
@@ -28,20 +30,26 @@ func main() {
 	port := flag.Int("port", 9000, "tcp port on which to listen for http requests")
 	flag.Parse()
 
-	receivedCEs = make(map[string]cloudevents.Event)
+	state := SubscriberState{}
+	router := state.setupRouter()
 
+	log.Printf("will listen on :%v\n", *port)
+	if err := http.ListenAndServe(fmt.Sprintf(":%v", *port), router); err != nil {
+		log.Fatalf("unable to start http server, %s", err)
+	}
+}
+
+func (s *SubscriberState) setupRouter() *mux.Router {
+	s.receivedCEs = make(map[string]cloudevents.Event)
 	ctx := context.Background()
 	p, err := cloudevents.NewHTTP()
 	if err != nil {
 		log.Fatalf("failed to create protocol: %s", err.Error())
 	}
-
-	cehandler, err := cloudevents.NewHTTPReceiveHandler(ctx, p, receiveCE)
+	cehandler, err := cloudevents.NewHTTPReceiveHandler(ctx, p, s.receiveCE)
 	if err != nil {
 		log.Fatalf("failed to create handler: %s", err.Error())
 	}
-
-	// Use a gorilla mux implementation for the overall http handler.
 	router := mux.NewRouter()
 
 	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -50,45 +58,48 @@ func main() {
 	})
 
 	router.Handle("/ce", cehandler).Methods("POST")
-	router.HandleFunc("/", increaseCounter).Methods("POST")
+	router.HandleFunc("/", s.increaseCounter).Methods("POST")
 
-	router.HandleFunc("/ce/{source}/{type}/{version}", checkCEBySourceTypeVersion).Methods("GET")
-	router.HandleFunc("/ce/by-uuid/{uuid}", checkCEbyUUID).Methods("GET")
-	router.HandleFunc("/ce", getAllCE).Methods("GET")
-	router.HandleFunc("/", checkCounter).Methods("GET")
+	router.HandleFunc("/ce/{source}/{type}/{version}", s.checkCEBySourceTypeVersion).Methods("GET")
+	router.HandleFunc("/ce/by-uuid/{uuid}", s.checkCEbyUUID).Methods("GET")
+	router.HandleFunc("/ce", s.getAllCE).Methods("GET")
+	router.HandleFunc("/", s.checkCounter).Methods("GET")
 
-	router.HandleFunc("/", reset).Methods("DELETE")
-
-	log.Printf("will listen on :%v\n", *port)
-	if err := http.ListenAndServe(fmt.Sprintf(":%v", *port), router); err != nil {
-		log.Fatalf("unable to start http server, %s", err)
-	}
+	router.HandleFunc("/", s.reset).Methods("DELETE")
+	return router
 }
 
-func receiveCE(_ context.Context, event cloudevents.Event) {
-	mu.Lock()
-	defer mu.Unlock()
+func (s *SubscriberState) receiveCE(ctx context.Context, event cloudevents.Event) protocol.Result {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	id := event.Context.GetID()
+	if id == "" {
+		return cehttp.NewResult(http.StatusBadRequest, "ID missing")
+	}
+	if event.Extensions()["eventtypeversion"] == nil {
+		return cehttp.NewResult(http.StatusBadRequest, "event-type-version missing")
+	}
 	log.Infof("Received CE: %v", id)
-	receivedCEs[id] = event
+	s.receivedCEs[id] = event
+	return nil
 
 }
 
-func increaseCounter(_ http.ResponseWriter, _ *http.Request) {
-	atomic.AddUint32(&counter, 1)
-	log.Infof("Received Request: counter = %v", counter)
+func (s *SubscriberState) increaseCounter(_ http.ResponseWriter, _ *http.Request) {
+	atomic.AddUint32(&s.counter, 1)
+	log.Infof("Received Request: counter = %v", s.counter)
 }
 
-func checkCEBySourceTypeVersion(w http.ResponseWriter, r *http.Request) {
-	mu.Lock()
-	defer mu.Unlock()
+func (s *SubscriberState) checkCEBySourceTypeVersion(w http.ResponseWriter, r *http.Request) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	vars := mux.Vars(r)
 	eventsource := vars["source"]
 	eventtype := vars["type"]
 	eventversion := vars["version"]
 
 	events := make([]cloudevents.Event, 0)
-	for _, event := range receivedCEs {
+	for _, event := range s.receivedCEs {
 		if event.Source() == eventsource &&
 			event.Type() == eventtype &&
 			event.Extensions()["eventtypeversion"] == eventversion {
@@ -98,18 +109,17 @@ func checkCEBySourceTypeVersion(w http.ResponseWriter, r *http.Request) {
 	log.Infof("Checking for source: %v, type: %v, version: %v  :: found: %v", eventsource, eventtype, eventversion, events)
 	if len(events) == 0 {
 		w.WriteHeader(http.StatusNoContent)
-		return
 	}
 	if err := json.NewEncoder(w).Encode(events); err != nil {
 		log.Errorf("Error during checkCEbySourceTypeVersion: %v", err)
 	}
 }
 
-func getAllCE(w http.ResponseWriter, r *http.Request) {
-	mu.Lock()
-	defer mu.Unlock()
+func (s *SubscriberState) getAllCE(w http.ResponseWriter, r *http.Request) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	events := make([]cloudevents.Event, 0)
-	for _, event := range receivedCEs {
+	for _, event := range s.receivedCEs {
 		events = append(events, event)
 	}
 	log.Infof("Getting all CE: %v", events)
@@ -119,14 +129,14 @@ func getAllCE(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func checkCEbyUUID(w http.ResponseWriter, r *http.Request) {
-	mu.Lock()
-	defer mu.Unlock()
+func (s *SubscriberState) checkCEbyUUID(w http.ResponseWriter, r *http.Request) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	vars := mux.Vars(r)
 	uuid := vars["uuid"]
-	ce, exists := receivedCEs[uuid]
+	ce, exists := s.receivedCEs[uuid]
 	if !exists {
-		log.Infof("Checking for uuid: %v. found: []", uuid)
+		log.Infof("Checking for uuid: %v. Not found", uuid)
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
@@ -136,8 +146,8 @@ func checkCEbyUUID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func checkCounter(w http.ResponseWriter, r *http.Request) {
-	response := counterResponse{Counter: int(counter)}
+func (s *SubscriberState) checkCounter(w http.ResponseWriter, r *http.Request) {
+	response := counterResponse{Counter: int(s.counter)}
 	log.Infof("Checking counter: %v", response)
 
 	if err := json.NewEncoder(w).Encode(response); err != nil {
@@ -145,10 +155,10 @@ func checkCounter(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func reset(w http.ResponseWriter, r *http.Request) {
-	mu.Lock()
-	defer mu.Unlock()
+func (s *SubscriberState) reset(w http.ResponseWriter, r *http.Request) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	log.Info("Reset")
-	receivedCEs = make(map[string]cloudevents.Event)
-	atomic.StoreUint32(&counter, 0)
+	s.receivedCEs = make(map[string]cloudevents.Event)
+	atomic.StoreUint32(&s.counter, 0)
 }
