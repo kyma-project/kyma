@@ -151,6 +151,10 @@ func (t *TestSuite) Run() {
 	ns, err := t.namespace.Create()
 	failOnError(t.g, err)
 
+	t.t.Log("Creating function without body should be rejected by the webhook")
+	err = t.function.Create(&functionData{})
+	t.g.Expect(err).NotTo(gomega.BeNil())
+
 	t.t.Log("Creating function...")
 	functionDetails := t.getFunction(helloWorld)
 	err = t.function.Create(functionDetails)
@@ -158,6 +162,12 @@ func (t *TestSuite) Run() {
 
 	t.t.Log("Waiting for function to have ready phase...")
 	err = t.function.WaitForStatusRunning()
+	failOnError(t.g, err)
+
+	t.t.Log("Checking function after defaulting and validation")
+	function, err := t.function.get()
+	failOnError(t.g, err)
+	err = t.checkDefaultedFunction(function)
 	failOnError(t.g, err)
 
 	t.t.Log("Creating addons configuration...")
