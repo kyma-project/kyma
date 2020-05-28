@@ -24,6 +24,11 @@ gardener:
   secretName: "gardener-credentials"
   auditLogsPolicyConfigMap: ""
   manageSecrets: true
+  clusterCreationTimeout: 2h
+  clusterDeletionTimeout: 30m
+  waitingForClusterDeletionTimeout: 4h
+  clusterCleanupTimeout: 20m
+  clusterCleanupResourceSelector: "https://service-manager."
 
 provisioner: "gardener"
 
@@ -34,7 +39,7 @@ kymaRelease:
     enabled: true
 
 installation:
-  timeout: 24h
+  timeout: 22h
 
 runtimeAgent:
   configurationTimeout: 1h

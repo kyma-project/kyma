@@ -7,7 +7,7 @@
 # These are the default owners for the whole content of the `kyma` repository. The default owners are automatically added as reviewers when you open a pull request, unless different owners are specified in the file.
 * @pbochynski @PK85 @a-thaler
 
-/common/ @mszostok @aszecowka @piotrmiskiewicz @Tomasz-Smelcerz-SAP @strekm @crabtree @akgalwas @janmedrek @Szymongib @sayanh @radufa @suleymanakbas91
+/common/ @mszostok @piotrmiskiewicz @Tomasz-Smelcerz-SAP @strekm @crabtree @akgalwas @janmedrek @Szymongib @sayanh @radufa @suleymanakbas91
 
 # Microfrontend k8s client
 /common/microfrontend-client/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
@@ -19,7 +19,7 @@
 /resources/cluster-essentials/ @piotrmsc @PK85 @michal-hudy @janmedrek
 
 # The `pod-preset` subchart
-/resources/cluster-essentials/charts/pod-preset/ @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
+/resources/cluster-essentials/charts/pod-preset/ @mszostok @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
 # The Microfrontend CRDs
 /resources/cluster-essentials/templates/microfrontend.crd.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
@@ -80,7 +80,7 @@
 /resources/core/charts/gateway/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `helm-broker` subchart
-/resources/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
+/resources/helm-broker/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
 # The `addons-ui` subchart
 /resources/helm-broker/charts/addons-ui/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
@@ -110,10 +110,10 @@
 /resources/knative-provisioner-natss/ @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # The `application-broker` subchart
-/resources/application-connector/charts/application-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @anishj0shi @lilitgh
+/resources/application-connector/charts/application-broker/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @anishj0shi @lilitgh
 
 # The `service-catalog-addons` subchart
-/resources/service-catalog-addons/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
+/resources/service-catalog-addons/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
 # The `service-catalog-ui` subchart
 /resources/service-catalog-addons/charts/service-catalog-ui/ @dariadomagala @akucharska @parostatkiem @Wawrzyn321 @kwiatekus
@@ -122,19 +122,19 @@
 /resources/service-manager-proxy/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001
 
 # The `testing` chart with Octopus
-/resources/testing/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
+/resources/testing/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
 # The `docs` subchart
-/resources/core/charts/docs/ @michal-hudy @m00g3n @aerfio @pPrecel @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
+/resources/core/charts/docs/ @michal-hudy @m00g3n @aerfio @pPrecel @magicmatatjahu @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
 # The `console-backend-service` subchart
 /resources/core/charts/console-backend-service/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # The `templates` chart
-/resources/core/templates/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
+/resources/core/templates/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
 # The `templates` chart
-/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @pPrecel @tgorgol @magicmatatjahu @antiheld @jasiu001 @adamwalach @kwiatekus @dariadomagala @parostatkiem @k15r
+/resources/core/templates/tests/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @pPrecel @tgorgol @magicmatatjahu @antiheld @jasiu001 @adamwalach @kwiatekus @dariadomagala @parostatkiem @k15r
 
 # The `istio` chart
 /resources/istio/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -155,7 +155,7 @@
 /resources/tracing/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # The `service-catalog` chart
-/resources/service-catalog/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
+/resources/service-catalog/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
 # The `xip-patch` chart
 /resources/xip-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -167,15 +167,15 @@
 /resources/api-gateway/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `compass` chart
-/resources/compass/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
-/resources/compass/values.yaml @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @rafalpotempa
-/resources/compass/templates/registration-job.yaml @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @dbadura @kjaksik @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @koala7659 @rafalpotempa
+/resources/compass/ @PK85 @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
+/resources/compass/values.yaml @PK85 @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @rafalpotempa
+/resources/compass/templates/registration-job.yaml @PK85 @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @dbadura @kjaksik @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @koala7659 @rafalpotempa
 
 # The `compass-cockpit` chart
 /resources/compass/charts/cockpit/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # The `compass-runtime-agent` chart
-/resources/compass-runtime-agent/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
+/resources/compass-runtime-agent/ @PK85 @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
 
 # The `kyma-environment-broker` chart
 /resources/compass/charts/kyma-environment-broker/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001
@@ -201,13 +201,13 @@
 # Components
 
 # The etcd-tls-setup directory
-components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
+components/etcd-tls-setup-job/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
 #API server proxy Component
 /components/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Binding usage controller Component
-/components/service-binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
+/components/service-binding-usage-controller/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
 # Kyma Operator Component
 /components/kyma-operator/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @Demonsthere
@@ -222,7 +222,7 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /components/istio-installer/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Application broker Component
-/components/application-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @anishj0shi @lilitgh
+/components/application-broker/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @anishj0shi @lilitgh
 
 # Console Backend Service Component
 /components/console-backend-service/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
@@ -286,11 +286,11 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /components/function-controller/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @michal-hudy @m00g3n @aerfio @pPrecel @magicmatatjahu
 
 # Compass Runtime Agent
-/components/compass-runtime-agent/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
+/components/compass-runtime-agent/ @PK85 @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
 
 # Tests
 # Service Catalog acceptance tests
-/tests/service-catalog/ @mszostok @polskikiel @ksputo @piotrmiskiewicz @aszecowka @PK85 @jasiu001 @adamwalach
+/tests/service-catalog/ @mszostok @polskikiel @ksputo @piotrmiskiewicz @PK85 @jasiu001 @adamwalach
 
 # Dex integration tests
 /tests/integration/dex/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -338,7 +338,7 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /tests/connection-token-handler-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
 # Compass Runtime Agent Tests
-/tests/compass-runtime-agent/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
+/tests/compass-runtime-agent/ @PK85 @crabtree @pkosiec @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
 
 # Tools
 
@@ -370,7 +370,7 @@ components/etcd-tls-setup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @pols
 /tests/contract/knative-channel-kafka/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # E2E Upgrade Tests
-/tests/end-to-end/upgrade/ @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @k15r
+/tests/end-to-end/upgrade/ @mszostok @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @k15r
 
 # E2E Api Gateway Upgrade Tests
 /tests/end-to-end/upgrade/pkg/tests/api-gateway/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere

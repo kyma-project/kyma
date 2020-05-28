@@ -14,7 +14,7 @@ tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "a60c949f"
+    tag: "PR-8513"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -233,3 +233,7 @@ docker-registry:
             path: password.txt
     - name: htpasswd-data
       emptyDir: {}
+
+webhook:
+  enabled: true
+  fullnameOverride: "serverless-webhook"
