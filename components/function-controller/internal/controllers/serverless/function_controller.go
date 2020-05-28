@@ -134,3 +134,13 @@ func (r *FunctionReconciler) getConditionStatus(conditions []serverlessv1alpha1.
 
 	return corev1.ConditionUnknown
 }
+
+func (r *FunctionReconciler) getConditionReason(conditions []serverlessv1alpha1.Condition, conditionType serverlessv1alpha1.ConditionType) serverlessv1alpha1.ConditionReason {
+	for _, condition := range conditions {
+		if condition.Type == conditionType {
+			return condition.Reason
+		}
+	}
+
+	return ""
+}

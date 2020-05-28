@@ -15,12 +15,16 @@ import (
 
 func (r *FunctionReconciler) isOnDeploymentChange(instance *serverlessv1alpha1.Function, deployments []appsv1.Deployment) bool {
 	deployStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionRunning)
+	deployReason := r.getConditionReason(instance.Status.Conditions, serverlessv1alpha1.ConditionRunning)
 	expectedDeployment := r.buildDeployment(instance)
 
-	return !(len(deployments) == 1 &&
-		len(deployments[0].Spec.Template.Spec.Containers) == 1 &&
-		// Compare image argument
-		r.equalDeployments(deployments[0], expectedDeployment) &&
+	resourceOk := len(deployments) == 1 && len(deployments[0].Spec.Template.Spec.Containers) == 1 && r.equalDeployments(deployments[0], expectedDeployment)
+
+	if resourceOk && deployReason == serverlessv1alpha1.ConditionReasonServiceReady && deployStatus == corev1.ConditionTrue {
+		return false
+	}
+
+	return !(resourceOk &&
 		deployStatus == corev1.ConditionUnknown)
 }
 

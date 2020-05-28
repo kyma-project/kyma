@@ -317,3 +317,55 @@ func TestFunctionReconciler_envsEqual(t *testing.T) {
 		})
 	}
 }
+
+func TestFunctionReconciler_getConditionReason(t *testing.T) {
+	type args struct {
+		conditions    []serverlessv1alpha1.Condition
+		conditionType serverlessv1alpha1.ConditionType
+	}
+	tests := []struct {
+		name string
+		args args
+		want serverlessv1alpha1.ConditionReason
+	}{
+		{
+			name: "Should correctly return proper status given slice of conditions",
+			args: args{
+				conditions: []serverlessv1alpha1.Condition{
+					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapCreated},
+					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha1.ConditionReasonServiceReady},
+					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonDeploymentWaiting},
+				},
+				conditionType: serverlessv1alpha1.ConditionRunning,
+			},
+			want: serverlessv1alpha1.ConditionReasonServiceReady,
+		},
+		{
+			name: "Should correctly return status unknown if there's no needed conditionType",
+			args: args{
+				conditions: []serverlessv1alpha1.Condition{
+					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse},
+					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse},
+				},
+				conditionType: serverlessv1alpha1.ConditionRunning,
+			},
+			want: "",
+		},
+		{
+			name: "Should correctly return status unknown if slice is empty",
+			args: args{
+				conditions:    []serverlessv1alpha1.Condition{},
+				conditionType: serverlessv1alpha1.ConditionRunning,
+			},
+			want: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewGomegaWithT(t)
+			r := &FunctionReconciler{}
+			got := r.getConditionReason(tt.args.conditions, tt.args.conditionType)
+			g.Expect(got).To(gomega.Equal(tt.want))
+		})
+	}
+}
