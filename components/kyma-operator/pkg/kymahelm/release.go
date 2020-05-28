@@ -7,11 +7,28 @@ import (
 	helm "k8s.io/helm/pkg/proto/hapi/release"
 )
 
-// ReleaseStatus is an inner representation of a Helm release
+//Release is an insternal representation of a Helm release
+type Release struct {
+	*ReleaseMeta
+	*ReleaseStatus
+}
+
+//ReleaseMeta is an internal representation of Helm's release metadata
+type ReleaseMeta struct {
+	Name        string
+	Namespace   string
+	Description string
+}
+
+// ReleaseStatus is an internal representation of Helm's release status
 type ReleaseStatus struct {
 	StatusCode           helm.Status_Code
 	CurrentRevision      int32
 	LastDeployedRevision int32
+}
+
+// UninstallReleaseResponse is an internal representation of Helm's uninstall release response
+type UninstallReleaseStatus struct {
 }
 
 func (rs *ReleaseStatus) IsUpgradeStep() (bool, error) {
