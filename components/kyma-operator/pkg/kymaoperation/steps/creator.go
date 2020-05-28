@@ -29,20 +29,20 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]kymahelm.Relea
 
 	existingReleases := make(map[string]kymahelm.ReleaseStatus)
 
-	list, err := sfc.helmClient.ListReleases()
+	releases, err := sfc.helmClient.ListReleases()
 	if err != nil {
 		return nil, errors.New("Helm error: " + err.Error())
 	}
 
-	if list != nil {
+	if releases != nil {
 		log.Println("Helm releases list:")
 
-		for _, release := range list.Releases {
+		for _, release := range releases {
 			var lastDeployedRev int32
 
-			statusCode := release.Info.Status.Code
+			statusCode := release.StatusCode
 			if statusCode == helm.Status_DEPLOYED {
-				lastDeployedRev = release.Version
+				lastDeployedRev = release.CurrentRevision
 			} else {
 				lastDeployedRev, err = sfc.helmClient.ReleaseDeployedRevision(release.Name)
 				if err != nil {
@@ -53,7 +53,7 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]kymahelm.Relea
 			log.Printf("%s status: %s, last deployed revision: %d", release.Name, statusCode, lastDeployedRev)
 			existingReleases[release.Name] = kymahelm.ReleaseStatus{
 				StatusCode:           statusCode,
-				CurrentRevision:      release.Version,
+				CurrentRevision:      release.CurrentRevision,
 				LastDeployedRevision: lastDeployedRev,
 			}
 		}

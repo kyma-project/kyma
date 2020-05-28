@@ -15,6 +15,6 @@ func (s uninstallStep) Run() error {
 		return errors.New("Helm delete error: " + deleteErr.Error())
 	}
 
-	s.helmClient.PrintRelease(uninstallReleaseResponse.Release)
+	s.helmClient.PrintRelease(uninstallReleaseResponse)
 	return nil
 }
