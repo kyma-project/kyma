@@ -7,14 +7,15 @@ metadata:
     "auth.istio.io/{{ .Values.service.externalPort }}": NONE
   labels:
     app: {{ .Chart.Name }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   type: {{ .Values.service.type }}
   selector:
     app: {{ .Chart.Name }}
-    release: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
     - name: http-app-broker
       port: {{ .Values.service.externalPort }}

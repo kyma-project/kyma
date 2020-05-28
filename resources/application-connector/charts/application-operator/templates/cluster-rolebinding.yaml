@@ -4,8 +4,10 @@ metadata:
   name: {{ .Chart.Name }}
   labels:
     app: {{ .Chart.Name }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications"]
@@ -19,8 +21,10 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ .Chart.Name }}
   labels:
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
   - kind: User
     name: system:serviceaccount:{{ .Values.global.namespace }}:{{ .Chart.Name }}

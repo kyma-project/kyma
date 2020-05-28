@@ -8,8 +8,10 @@ metadata:
   namespace: {{ .Values.global.namespace }}
   labels:
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   type: ClusterIP
   ports:
@@ -18,7 +20,7 @@ spec:
       name: http-api-port
   selector:
     app: {{ .Chart.Name }}
-    release: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 ---
 apiVersion: v1
 kind: Service
@@ -26,14 +28,16 @@ metadata:
   name: {{ .Chart.Name}}-metrics
   namespace: {{ .Values.global.namespace }}
   labels:
-    k8s-app: {{ .Chart.Name}}-metrics
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}-metrics
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   selector:
     app: {{ .Chart.Name }}
-    release: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
   - name: http-metrics
     port: 9090
     protocol: TCP
-
 {{- end }}

@@ -7,13 +7,18 @@ metadata:
   labels:
     prometheus: monitoring
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   selector:
     matchLabels:
-      k8s-app: {{ .Chart.Name }}-metrics
+      app.kubernetes.io/name: {{ template "name" . }}-metrics
+      app.kubernetes.io/instance: {{ .Release.Name }}
   targetLabels:
-    - k8s-app
+    - app.kubernetes.io/name
+    - app.kubernetes.io/instance
   endpoints:
   - port: http-metrics
     metricRelabelings:

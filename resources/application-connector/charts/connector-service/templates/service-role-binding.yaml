@@ -5,6 +5,11 @@ kind: ServiceRoleBinding
 metadata:
   name: {{ .Chart.Name }}-internal-api
   namespace: {{ .Values.global.namespace }}
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   subjects:
 {{ tpl (toYaml .Values.istio.rbac.connectorServiceInternalApi.subjects | indent 4) . }}
