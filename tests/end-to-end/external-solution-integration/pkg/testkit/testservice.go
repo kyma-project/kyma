@@ -48,13 +48,14 @@ type TestService struct {
 
 func NewTestService(httpClient *http.Client, deployments appsclient.DeploymentInterface, services coreclient.ServiceInterface, apiRules dynamic.ResourceInterface, domain, namespace, testServiceImage string) *TestService {
 	return &TestService{
-		HttpClient:      httpClient,
-		domain:          domain,
-		apiRules:        apiRules,
-		deployments:     deployments,
-		services:        services,
-		namespace:       namespace,
-		testServiceName: fmt.Sprintf("%v-%v", testServiceNamePrefix, namespace),
+		HttpClient:       httpClient,
+		domain:           domain,
+		apiRules:         apiRules,
+		deployments:      deployments,
+		services:         services,
+		namespace:        namespace,
+		testServiceName:  fmt.Sprintf("%v-%v", testServiceNamePrefix, namespace),
+		testServiceImage: testServiceImage,
 	}
 }
 
