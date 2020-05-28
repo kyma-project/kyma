@@ -54,7 +54,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: compass-agent-configuration
-          image: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407"
+          image: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576"
           command:
             - bash
             - -c
@@ -63,7 +63,7 @@ spec:
               DIRECTOR_URL=http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/graphql
               DIRECTOR_HEALTHZ_URL=http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/healthz
               CONNECTOR_EXTERNAL_URL=https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql
-              
+
               TOKEN_PAYLOAD_TENANT=""
               ENCODED_TOKEN_PAYLOAD_TENANT=""
               INTERNAL_TOKEN_TENANT=""
@@ -71,7 +71,7 @@ spec:
               TOKEN_PAYLOAD_NO_TENANT='{"scopes":"tenant:read","externalTenant":"","tenant":""}'
               ENCODED_TOKEN_PAYLOAD_NO_TENANT=$(echo -e ${TOKEN_PAYLOAD_NO_TENANT} | base64 | tr -d \\n)
               INTERNAL_TOKEN_NO_TENANT="eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.${ENCODED_TOKEN_PAYLOAD_NO_TENANT//=}."
-              
+
               echo "Token without tenant: ${INTERNAL_TOKEN_NO_TENANT}"
 
               function kill_proxy_and_exit() {
@@ -152,7 +152,7 @@ spec:
                       echo "Max retries has been reached (retries $MAX_RETRIES). Exit."
                       exit 1
                     fi
-  
+
                     echo "Unable to fetch external tenant ID, waiting 15s..."
                     sleep 15
                   fi

@@ -4,15 +4,15 @@
 
 
 
-The documentation here is for developers only, please follow the installation instructions from [istio.io](https://istio.io/docs/setup/kubernetes/install/helm/) for all other uses.
+The documentation here is for developers only, please follow the installation instructions from [istio.io](https://istio.io/docs/setup/install/istioctl/) for all other uses.
 
 ## Introduction
 
-This chart bootstraps all Istio [components](https://istio.io/docs/concepts/what-is-istio/) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart bootstraps all Istio [components](https://istio.io/docs/concepts/what-is-istio/) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager and the [istioctl](https://istio.io/docs/reference/commands/istioctl/) tool.
 
 ## Chart Details
 
-This chart can install multiple Istio components as subcharts:
+This chart can install multiple Istio components:
 - ingressgateway
 - egressgateway
 - sidecarInjectorWebhook
@@ -121,10 +121,11 @@ The chart deploys pods that consume minimum resources as specified in the resour
 
 ## Configuration
 
-The Helm chart ships with reasonable defaults.  There may be circumstances in which defaults require overrides.
-To override Helm values, use `--set key=value` argument during the `helm install` command.  Multiple `--set` operations may be used in the same Helm operation.
+The installation of Istio ships with reasonable defaults. There may be circumstances in which defaults require overrides.
 
-Helm charts expose configuration options which are currently in alpha.  The currently exposed options can be found [here](https://istio.io/docs/reference/config/installation-options/).
+Istio offers an Istio Control Plane CR, which is used to configure the installation. The currently exposed options can be found [here](https://istio.io/pt-br/docs/reference/config/istio.operator.v1alpha12.pb/). Provide the whole configuration as an [override](https://kyma-project.io/docs/#configuration-helm-overrides-for-kyma-installation).
+
+Some options still can be provided by overriding Helm values. However, it is not recommended. The currently exposed options can be found [here](https://istio.io/pt-br/docs/reference/config/installation-options/). Use `--set key=value` argument during the `helm install` command to do so, or add them to the overrides Config Map. Multiple `--set` operations may be used in the same Helm operation.
 
 ## Uninstalling the Chart
 
