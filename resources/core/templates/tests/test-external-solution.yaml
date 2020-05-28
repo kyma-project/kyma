@@ -46,7 +46,7 @@ spec:
               /e2e {{ $val.testsuite }} \
               --domain {{ $.Values.global.ingress.domainName }} \
               --testID {{ $val.testsuite }} \
-              --skipSSLVerify
+              --skipSSLVerify \
               --testServiceImage "{{ $.Values.global.containerRegistry.path }}/{{ $.Values.global.e2e_external_solution_test_service.dir }}event-subscriber-tools:{{ $.Values.global.e2e_external_solution_test_service.version }}"
               {{- if $.Values.tests.application_connector_tests.connector_service.central }} --applicationTenant=tenant --applicationGroup=group {{- end }}
               exit_code=$?

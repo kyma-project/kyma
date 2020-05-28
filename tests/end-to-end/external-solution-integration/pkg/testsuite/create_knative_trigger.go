@@ -24,9 +24,6 @@ const retryDelay = 2 * time.Second
 var retryOpts = []retry.Option{
 	retry.Attempts(retryAttemptsCount),
 	retry.Delay(retryDelay),
-	retry.OnRetry(func(n uint, err error) {
-		logrus.WithField("component", "CreateKnativeTrigger").Debugf("OnRetry: attempts: %d, error: %v", n, err)
-	}),
 }
 
 type CreateKnativeTrigger struct {

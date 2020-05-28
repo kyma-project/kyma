@@ -27,7 +27,7 @@ spec:
         /e2e e2e-prepare \
         --domain {{ .Values.domain }} \
         --testID {{ .Release.Name }}-external-solution \
-        --skipSSLVerify
+        --skipSSLVerify \
         --testServiceImage "{{ .Values.containerRegistry.path }}/{{ .Values.testServiceImage.dir }}event-subscriber-tools:{{ .Values.testServiceImage.version }}"
         exit_code=$?
         echo exit_code is $exit_code
