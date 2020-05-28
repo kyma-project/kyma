@@ -2,7 +2,7 @@ deployment:
   replicaCount: 1
   image:
     pullPolicy: IfNotPresent
-
+  
   resources: {}
 
   securityContext: # Set on container level
@@ -19,7 +19,7 @@ gardener:
   kubeconfig: "" # Base64 encoded Gardener SA key
   auditLogTenantConfigPath: "" # "/gardener/tenant/config"
   auditLogTenantConfigMapName: ""
-  maintenanceWindowConfigPath: # "/gardener/maintenance/config"
+  maintenanceWindowConfigPath: "" # "/gardener/maintenance/config"
   maintenanceWindowConfigMapName: ""
   secretName: "gardener-credentials"
   auditLogsPolicyConfigMap: ""
@@ -44,6 +44,9 @@ installation:
 runtimeAgent:
   configurationTimeout: 1h
   connectionTimeout: 1h
+
+metrics:
+  port: 9000
 
 logs:
   level: "info"

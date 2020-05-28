@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}-dashboard
+  labels:
+    grafana_dashboard: "1"
+    app: monitoring-grafana
+data:
+  {{ template "fullname" . }}-dashboard.json: |-
+{{ .Files.Get "files/dashboard.json" | indent 4 }}
