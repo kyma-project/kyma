@@ -82,7 +82,6 @@ func (s *SubscriberState) receiveCE(ctx context.Context, event cloudevents.Event
 	log.Infof("Received CE: %v", id)
 	s.receivedCEs[id] = event
 	return nil
-
 }
 
 func (s *SubscriberState) increaseCounter(_ http.ResponseWriter, _ *http.Request) {
@@ -112,6 +111,7 @@ func (s *SubscriberState) checkCEBySourceTypeVersion(w http.ResponseWriter, r *h
 	}
 	if err := json.NewEncoder(w).Encode(events); err != nil {
 		log.Errorf("Error during checkCEbySourceTypeVersion: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
@@ -126,6 +126,7 @@ func (s *SubscriberState) getAllCE(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewEncoder(w).Encode(events); err != nil {
 		log.Errorf("Error during getAllCE: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
@@ -143,6 +144,7 @@ func (s *SubscriberState) checkCEbyUUID(w http.ResponseWriter, r *http.Request) 
 	log.Infof("Checking for uuid: %v. found: %v", uuid, ce)
 	if err := json.NewEncoder(w).Encode(ce); err != nil {
 		log.Errorf("Error during checkCEbyUUID: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
@@ -152,6 +154,7 @@ func (s *SubscriberState) checkCounter(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Errorf("Error during checkCounter: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
