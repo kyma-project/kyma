@@ -43,7 +43,6 @@ require (
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/rs/cors v1.7.0
 	github.com/stretchr/testify v1.4.0
-	github.com/vektah/gqlparser v1.2.1
 	github.com/vektah/gqlparser/v2 v2.0.1
 	github.com/vrischmann/envconfig v1.2.0
 	go.uber.org/multierr v1.5.0 // indirect
@@ -60,10 +59,10 @@ require (
 	k8s.io/apimachinery v0.17.4
 	k8s.io/apiserver v0.17.4
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
-	k8s.io/kube-openapi v0.0.0-20200121204235-bf4fb3bd569c // indirect
-	k8s.io/utils v0.0.0-20200124190032-861946025e34 // indirect
 	knative.dev/eventing v0.13.1 // indirect
 	knative.dev/pkg v0.0.0-20200306005226-fc857aa77f79
 )
 
 replace github.com/kyma-project/kyma => github.com/sjanota/kyma v0.0.0-20200527102814-edd195d9b9a3
+
+replace k8s.io/client-go => k8s.io/client-go v0.17.4
