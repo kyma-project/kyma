@@ -40,7 +40,6 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&serverlessv1alpha1.Function{}).
 		Owns(&corev1.ConfigMap{}).
 		Owns(&batchv1.Job{}).
-		// Owns(&servingv1.Service{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
 		Owns(&autoscalingv1.HorizontalPodAutoscaler{}).

@@ -51,9 +51,6 @@ var _ = ginkgo.BeforeSuite(func(done ginkgo.Done) {
 	err = serverlessv1alpha1.AddToScheme(scheme.Scheme)
 	gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
-	// err = servingv1.AddToScheme(scheme.Scheme)
-	// gomega.Expect(err).NotTo(gomega.HaveOccurred())
-
 	// +kubebuilder:scaffold:scheme
 
 	k8sClient, err := client.New(cfg, client.Options{Scheme: scheme.Scheme})

@@ -26,7 +26,6 @@ var (
 
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
-	// _ = servingv1.AddToScheme(scheme)
 
 	_ = serverlessv1alpha1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
