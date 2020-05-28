@@ -196,6 +196,7 @@ func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function)
 				Name:       "http", // it has to be here for istio to work properly
 				TargetPort: intstr.FromInt(80),
 				Port:       80,
+				Protocol:   corev1.ProtocolTCP,
 			}},
 			Selector: deploymentLabels,
 		},

@@ -10,63 +10,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestFunctionReconciler_isDeploymentInProgress(t *testing.T) {
-	type args struct {
-		conditions []appsv1.DeploymentCondition
-	}
-	tests := []struct {
-		name string
-		args args
-		want bool
-	}{
-		{
-			name: "simple case",
-			args: args{conditions: []appsv1.DeploymentCondition{{
-				Type:   appsv1.DeploymentProgressing,
-				Status: corev1.ConditionTrue,
-			}}},
-			want: true,
-		},
-		{
-			name: "simple case - 2 conditions",
-			args: args{conditions: []appsv1.DeploymentCondition{{
-				Type:   appsv1.DeploymentReplicaFailure,
-				Status: corev1.ConditionFalse,
-			}, {
-				Type:   appsv1.DeploymentProgressing,
-				Status: corev1.ConditionTrue,
-			}}},
-			want: true,
-		},
-		{
-			name: "Fails on empty condition",
-			args: args{conditions: []appsv1.DeploymentCondition{}},
-			want: false,
-		},
-		{
-			name: "fails if there is no proper condition",
-			args: args{conditions: []appsv1.DeploymentCondition{{
-				Type:   appsv1.DeploymentReplicaFailure,
-				Status: corev1.ConditionFalse,
-			}, {
-				Type:   appsv1.DeploymentProgressing,
-				Status: corev1.ConditionFalse,
-			}}},
-			want: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.isDeploymentInProgress(appsv1.Deployment{
-				Status: appsv1.DeploymentStatus{Conditions: tt.args.conditions},
-			})
-			g.Expect(got).To(gomega.Equal(tt.want))
-		})
-	}
-}
-
 func TestFunctionReconciler_equalDeployments(t *testing.T) {
 	type args struct {
 		existing appsv1.Deployment
@@ -474,6 +417,127 @@ func Test_equalResources(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			got := equalResources(tt.args.expected, tt.args.existing)
+			g.Expect(got).To(gomega.Equal(tt.want))
+		})
+	}
+}
+
+func TestFunctionReconciler_isDeploymentReady(t *testing.T) {
+	type args struct {
+		conditions []appsv1.DeploymentCondition
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "simple case",
+			args: args{conditions: []appsv1.DeploymentCondition{{
+				Type:   appsv1.DeploymentAvailable,
+				Status: corev1.ConditionTrue,
+			}}},
+			want: true,
+		},
+		{
+			name: "simple case - 3 conditions",
+			args: args{conditions: []appsv1.DeploymentCondition{{
+				Type:   appsv1.DeploymentReplicaFailure,
+				Status: corev1.ConditionFalse,
+			}, {
+				Type:   appsv1.DeploymentProgressing,
+				Status: corev1.ConditionTrue,
+			},
+				{
+					Type:   appsv1.DeploymentAvailable,
+					Status: corev1.ConditionTrue,
+				}}},
+			want: true,
+		},
+		{
+			name: "Fails on empty condition",
+			args: args{conditions: []appsv1.DeploymentCondition{}},
+			want: false,
+		},
+		{
+			name: "fails if there is no proper condition",
+			args: args{conditions: []appsv1.DeploymentCondition{{
+				Type:   appsv1.DeploymentReplicaFailure,
+				Status: corev1.ConditionFalse,
+			}, {
+				Type:   appsv1.DeploymentProgressing,
+				Status: corev1.ConditionFalse,
+			}, {
+				Type:   appsv1.DeploymentAvailable,
+				Status: corev1.ConditionFalse,
+			}}},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewGomegaWithT(t)
+			r := &FunctionReconciler{}
+			got := r.isDeploymentReady(appsv1.Deployment{
+				Status: appsv1.DeploymentStatus{Conditions: tt.args.conditions},
+			})
+			g.Expect(got).To(gomega.Equal(tt.want))
+		})
+	}
+}
+
+func TestFunctionReconciler_isDeploymentInProgress(t *testing.T) {
+	type args struct {
+		conditions []appsv1.DeploymentCondition
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "simple case",
+			args: args{conditions: []appsv1.DeploymentCondition{{
+				Type:   appsv1.DeploymentProgressing,
+				Status: corev1.ConditionTrue,
+			}}},
+			want: true,
+		},
+		{
+			name: "simple case - 2 conditions",
+			args: args{conditions: []appsv1.DeploymentCondition{{
+				Type:   appsv1.DeploymentReplicaFailure,
+				Status: corev1.ConditionFalse,
+			}, {
+				Type:   appsv1.DeploymentProgressing,
+				Status: corev1.ConditionTrue,
+			}}},
+			want: true,
+		},
+		{
+			name: "Fails on empty condition",
+			args: args{conditions: []appsv1.DeploymentCondition{}},
+			want: false,
+		},
+		{
+			name: "fails if there is no proper condition",
+			args: args{conditions: []appsv1.DeploymentCondition{{
+				Type:   appsv1.DeploymentReplicaFailure,
+				Status: corev1.ConditionFalse,
+			}, {
+				Type:   appsv1.DeploymentProgressing,
+				Status: corev1.ConditionFalse,
+			}}},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewGomegaWithT(t)
+			r := &FunctionReconciler{}
+			got := r.isDeploymentInProgress(appsv1.Deployment{
+				Status: appsv1.DeploymentStatus{Conditions: tt.args.conditions},
+			})
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}

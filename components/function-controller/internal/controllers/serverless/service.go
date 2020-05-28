@@ -76,7 +76,12 @@ func (r *FunctionReconciler) createService(ctx context.Context, log logr.Logger,
 
 func (r *FunctionReconciler) updateService(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, oldService corev1.Service, newService corev1.Service) (ctrl.Result, error) {
 	svc := oldService.DeepCopy()
-	svc.Spec = newService.Spec
+
+	// manually change fields that interest us, as clusterIP is immutable
+	svc.Spec.Ports = newService.Spec.Ports
+	svc.Spec.Selector = newService.Spec.Selector
+	svc.Spec.Type = newService.Spec.Type
+
 	svc.ObjectMeta.Labels = newService.GetLabels()
 
 	log.Info(fmt.Sprintf("Updating Service %s", svc.GetName()))
