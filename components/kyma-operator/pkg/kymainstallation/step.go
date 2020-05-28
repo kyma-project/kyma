@@ -92,7 +92,7 @@ func (s installStep) Run() error {
 		return errors.New(errorMsg)
 	}
 
-	s.helmClient.PrintRelease(installResp.Release)
+	s.helmClient.PrintRelease(installResp)
 
 	return nil
 }
@@ -143,7 +143,7 @@ func (s upgradeStep) Run() error {
 		return errors.New(errorMsg)
 	}
 
-	s.helmClient.PrintRelease(upgradeResp.Release)
+	s.helmClient.PrintRelease(upgradeResp)
 
 	return nil
 }
@@ -161,7 +161,7 @@ func (s uninstallStep) Run() error {
 		return errors.New("Helm delete error: " + deleteErr.Error())
 	}
 
-	s.helmClient.PrintRelease(uninstallReleaseResponse.Release)
+	s.helmClient.PrintRelease(uninstallReleaseResponse)
 	return nil
 }
 
