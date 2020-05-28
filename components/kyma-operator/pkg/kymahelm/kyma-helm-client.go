@@ -19,7 +19,7 @@ type ClientInterface interface {
 	InstallRelease(chartdir, ns, releasename, overrides string) (*Release, error)
 	InstallReleaseWithoutWait(chartdir, ns, releasename, overrides string) (*Release, error)
 	UpgradeRelease(chartDir, releaseName, overrides string) (*Release, error)
-	DeleteRelease(releaseName string) (*UninstallReleaseStatus, error)
+	DeleteRelease(releaseName string) (*Release, error) //todo: rename to "uninstall"
 	RollbackRelease(releaseName string, revision int32) (*Release, error)
 	PrintRelease(release *Release)
 }
@@ -156,7 +156,7 @@ func (hc *Client) RollbackRelease(releaseName string, revision int32) (*Release,
 }
 
 // DeleteRelease .
-func (hc *Client) DeleteRelease(releaseName string) (*UninstallReleaseStatus, error) {
+func (hc *Client) DeleteRelease(releaseName string) (*Release, error) { //todo: rename to "uninstall"
 
 	// Helm3 uninstall release
 
