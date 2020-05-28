@@ -59,7 +59,6 @@ func (r *FunctionReconciler) equalJobs(existing batchv1.Job, expected batchv1.Jo
 	return existingDst == expectedDst
 }
 
-
 func (r *FunctionReconciler) getArg(args []string, arg string) string {
 	for _, item := range args {
 		if strings.HasPrefix(item, arg) {

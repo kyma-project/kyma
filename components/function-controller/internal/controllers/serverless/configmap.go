@@ -55,7 +55,6 @@ func (r *FunctionReconciler) updateConfigMap(ctx context.Context, log logr.Logge
 	})
 }
 
-
 func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Function, configMaps []corev1.ConfigMap, deployments []appsv1.Deployment) bool {
 	image := r.buildExternalImageAddress(instance)
 	configurationStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)
@@ -70,7 +69,6 @@ func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Fu
 		configMaps[0].Data[configMapHandler] != configMapHandler ||
 		configurationStatus != corev1.ConditionTrue
 }
-
 
 func (r *FunctionReconciler) onConfigMapChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, configMaps []corev1.ConfigMap) (ctrl.Result, error) {
 	configMapsLen := len(configMaps)

@@ -17,12 +17,11 @@ func (r *FunctionReconciler) isOnDeploymentChange(instance *serverlessv1alpha1.F
 	deployStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionRunning)
 	expectedDeployment := r.buildDeployment(instance)
 
-	return !(
-		len(deployments) == 1 &&
-			len(deployments[0].Spec.Template.Spec.Containers) == 1 &&
-			// Compare image argument
-			r.equalDeployments(deployments[0], expectedDeployment) &&
-			deployStatus == corev1.ConditionUnknown)
+	return !(len(deployments) == 1 &&
+		len(deployments[0].Spec.Template.Spec.Containers) == 1 &&
+		// Compare image argument
+		r.equalDeployments(deployments[0], expectedDeployment) &&
+		deployStatus == corev1.ConditionUnknown)
 }
 
 func (r *FunctionReconciler) onDeploymentChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, deployments []appsv1.Deployment) (ctrl.Result, error) {

@@ -754,8 +754,7 @@ func TestFunctionReconciler_equalServices(t *testing.T) {
 			want: false,
 		},
 		{
-			name:
-			"different pod annotations",
+			name: "different pod annotations",
 			args: args{
 				existing: appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
@@ -794,8 +793,7 @@ func TestFunctionReconciler_equalServices(t *testing.T) {
 			want: false,
 		},
 		{
-			name:
-			"different resources",
+			name: "different resources",
 			args: args{
 				existing: appsv1.Deployment{
 					Spec: appsv1.DeploymentSpec{
@@ -850,8 +848,7 @@ func TestFunctionReconciler_equalServices(t *testing.T) {
 			want: false,
 		},
 		{
-			name:
-			"different image",
+			name: "different image",
 			args: args{
 				existing: appsv1.Deployment{
 					Spec: appsv1.DeploymentSpec{
