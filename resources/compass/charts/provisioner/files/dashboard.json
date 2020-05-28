@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 115,
-  "iteration": 1590577492776,
+  "id": 178,
+  "iteration": 1590657189000,
   "links": [],
   "panels": [
     {
@@ -37,6 +37,7 @@
             "lastNotNull"
           ],
           "defaults": {
+            "links": [],
             "mappings": [
               {
                 "id": 0,
@@ -55,11 +56,12 @@
                   "value": null
                 },
                 {
-                  "color": "red",
+                  "color": "light-blue",
                   "value": 80
                 }
               ]
             },
+            "title": "",
             "unit": "none"
           },
           "overrides": [],
@@ -73,8 +75,10 @@
       "targets": [
         {
           "expr": "SUM(compass_provisioner_in_progress_provision_operations_total)",
+          "format": "time_series",
+          "instant": false,
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "operations",
           "refId": "A"
         }
       ],
@@ -265,7 +269,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by (container) (container_memory_usage_bytes{job=\"kubelet\",pod=~\"$component-.*\",container!=\"POD\",container!=\"\"})",
+          "expr": "sum by (container) (container_memory_usage_bytes{job=\"kubelet\",pod=~\"compass-provisioner-.*\",container!=\"POD\",container!=\"\"})",
           "format": "time_series",
           "instant": false,
           "interval": "10s",
@@ -276,7 +280,7 @@
           "step": 15
         },
         {
-          "expr": "avg by (container) (kube_pod_container_resource_requests_memory_bytes{pod=~\"$component-.*\"})",
+          "expr": "avg by (container) (kube_pod_container_resource_requests_memory_bytes{pod=~\"compass-provisioner-.*\"})",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -288,7 +292,7 @@
           "step": 20
         },
         {
-          "expr": "avg by (container) (kube_pod_container_resource_limits_memory_bytes{pod=~\"$component-.*\"})",
+          "expr": "avg by (container) (kube_pod_container_resource_limits_memory_bytes{pod=~\"compass-provisioner-.*\"})",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -390,7 +394,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by(container) (irate(container_cpu_usage_seconds_total{job=\"kubelet\",pod=~\"$component-.*\",container!=\"POD\",container!=\"\"}[1m]))",
+          "expr": "sum by(container) (irate(container_cpu_usage_seconds_total{job=\"kubelet\",pod=~\"compass-provisioner-.*\",container!=\"POD\",container!=\"\"}[1m]))",
           "format": "time_series",
           "instant": false,
           "interval": "10s",
@@ -401,7 +405,7 @@
           "step": 15
         },
         {
-          "expr": "avg by (container) (kube_pod_container_resource_requests_cpu_cores{pod=~\"$component-.*\"})",
+          "expr": "avg by (container) (kube_pod_container_resource_requests_cpu_cores{pod=~\"compass-provisioner-.*\"})",
           "format": "time_series",
           "instant": false,
           "interval": "10s",
@@ -412,7 +416,7 @@
           "step": 20
         },
         {
-          "expr": "avg by (container) (kube_pod_container_resource_limits_cpu_cores{pod=~\"$component-.*\"})",
+          "expr": "avg by (container) (kube_pod_container_resource_limits_cpu_cores{pod=~\"compass-provisioner-.*\"})",
           "format": "time_series",
           "instant": false,
           "interval": "10s",
@@ -605,7 +609,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sort_desc(sum by (pod) (rate(container_network_receive_bytes_total{pod=~\"$component-.*\"}[1m])))",
+          "expr": "sort_desc(sum by (pod) (rate(container_network_receive_bytes_total{pod=~\"compass-provisioner-.*\"}[1m])))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -656,6 +660,98 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "Prometheus",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 25
+      },
+      "hiddenSeries": false,
+      "id": 12,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "go_threads{service=\"$component\"}",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "{{pod}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Gothreads",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -664,7 +760,7 @@
       "gridPos": {
         "h": 8,
         "w": 8,
-        "x": 0,
+        "x": 8,
         "y": 25
       },
       "hiddenSeries": false,
@@ -794,13 +890,119 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "Prometheus",
+      "editable": true,
+      "error": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "grid": {},
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 25
+      },
+      "hiddenSeries": false,
+      "id": 14,
+      "interval": "",
+      "isNew": true,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 2,
+      "links": [],
+      "nullPointMode": "connected",
+      "options": {
+        "dataLinks": []
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "process_open_fds{service=\"$component\"}",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 2,
+          "legendFormat": "Open FDS {{pod}}",
+          "metric": "process_open_fds",
+          "refId": "A",
+          "step": 4
+        },
+        {
+          "expr": "process_max_fds{service=\"$component\"}",
+          "interval": "",
+          "legendFormat": "Max FDS",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Open File Descriptors",
+      "tooltip": {
+        "msResolution": false,
+        "shared": true,
+        "sort": 0,
+        "value_type": "cumulative"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
         "h": 8,
         "w": 8,
-        "x": 8,
-        "y": 25
+        "x": 0,
+        "y": 33
       },
       "hiddenSeries": false,
       "id": 18,
@@ -886,16 +1088,17 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "Prometheus",
+      "description": "The fraction of this program's available CPU time used by the GC since the program started.",
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
         "h": 8,
         "w": 8,
-        "x": 16,
-        "y": 25
+        "x": 8,
+        "y": 33
       },
       "hiddenSeries": false,
-      "id": 12,
+      "id": 24,
       "legend": {
         "avg": false,
         "current": false,
@@ -923,7 +1126,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "go_threads{service=\"$component\"}",
+          "expr": "go_memstats_gc_cpu_fraction{service=\"$component\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -935,7 +1138,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Gothreads",
+      "title": "GC CPU Usage",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -952,205 +1155,7 @@
       "yaxes": [
         {
           "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "editable": true,
-      "error": false,
-      "fill": 1,
-      "fillGradient": 0,
-      "grid": {},
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 0,
-        "y": 33
-      },
-      "hiddenSeries": false,
-      "id": 14,
-      "interval": "",
-      "isNew": true,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 2,
-      "links": [],
-      "nullPointMode": "connected",
-      "options": {
-        "dataLinks": []
-      },
-      "paceLength": 10,
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "process_open_fds{service=\"$component\"}",
-          "format": "time_series",
-          "interval": "",
-          "intervalFactor": 2,
-          "legendFormat": "{{pod}}",
-          "metric": "process_open_fds",
-          "refId": "A",
-          "step": 4
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Open File Descriptors",
-      "tooltip": {
-        "msResolution": false,
-        "shared": true,
-        "sort": 0,
-        "value_type": "cumulative"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 8,
-        "y": 33
-      },
-      "hiddenSeries": false,
-      "id": 20,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {
-        "dataLinks": []
-      },
-      "paceLength": 10,
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "go_memstats_heap_inuse_bytes{job=\"$component\"}",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "Heap in use",
-          "refId": "A"
-        },
-        {
-          "expr": "go_memstats_stack_inuse_bytes{job=\"$component\"}",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "Stack in use",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Application Memory Usage",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "bytes",
-          "label": null,
+          "label": "application CPU fractrion",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -1217,10 +1222,10 @@
     ]
   },
   "timezone": "",
-  "title": "Compass/Provisioner",
-  "uid": "fzbgItkGk",
+  "title": "Compass/Provisioner2",
+  "uid": "fzbgItkGj",
   "variables": {
     "list": []
   },
-  "version": 14
+  "version": 2
 }
