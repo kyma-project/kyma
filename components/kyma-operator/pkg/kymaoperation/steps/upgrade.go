@@ -34,7 +34,6 @@ func (s upgradeStep) Run() error {
 
 	if upgradeErr != nil {
 		upgradeErrMsg := fmt.Sprintf("Helm upgrade error: %s", upgradeErr.Error())
-		errorMsg := upgradeErrMsg
 
 		log.Println(fmt.Sprintf("Helm upgrade of %s failed. Performing rollback to last known deployed revision.", s.component.GetReleaseName()))
 		_, err := s.helmClient.RollbackRelease(s.component.GetReleaseName(), 0)
@@ -48,9 +47,7 @@ func (s upgradeStep) Run() error {
 		//TODO implement waiting method
 		time.Sleep(time.Second * time.Duration(s.rollbackWaitTimeSec))
 
-		errorMsg = fmt.Sprintf("%s\nHelm rollback of %s was successfull", upgradeErrMsg, s.component.GetReleaseName())
-
-		return errors.New(errorMsg)
+		return errors.New(fmt.Sprintf("%s\nHelm rollback of %s was successfull", upgradeErrMsg, s.component.GetReleaseName()))
 	}
 
 	s.helmClient.PrintRelease(upgradeResp.Release)

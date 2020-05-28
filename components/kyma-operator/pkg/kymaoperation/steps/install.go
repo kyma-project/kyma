@@ -39,13 +39,12 @@ func (s installStep) Run() error {
 
 	if installErr != nil {
 		installErrMsg := fmt.Sprintf("Helm install error: %s", installErr.Error())
-		errorMsg := installErrMsg
 
 		isDeletable, err := s.helmClient.IsReleaseDeletable(s.component.GetReleaseName())
 		if err != nil {
-			errMsg := fmt.Sprintf("Checking status of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
-			log.Println(errMsg)
-			return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, errMsg))
+			statusErrMsg = fmt.Sprintf("Checking status of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
+			log.Println(statusErrMsg)
+			return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, statusErrorMsg))
 		}
 
 		if isDeletable {
@@ -62,10 +61,10 @@ func (s installStep) Run() error {
 			//TODO implement waiting method
 			time.Sleep(time.Second * time.Duration(s.deleteWaitTimeSec))
 
-			errorMsg = fmt.Sprintf("%s\nHelm delete of %s was successfull", installErrMsg, s.component.GetReleaseName())
+			return errors.New(fmt.Sprintf("%s\nHelm delete of %s was successfull", installErrMsg, s.component.GetReleaseName()))
 		}
 
-		return errors.New(errorMsg)
+		return errors.New(installErrMsg)
 	}
 
 	s.helmClient.PrintRelease(installResp.Release)
