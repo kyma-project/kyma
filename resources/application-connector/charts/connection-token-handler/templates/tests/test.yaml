@@ -26,6 +26,5 @@ spec:
         - name: CENTRAL
           value: {{ .Values.tests.central | quote }}
       restartPolicy: Never
-
-{{- end}}
-{{- end}}
+{{- end }}
+{{- end }}

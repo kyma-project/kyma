@@ -26,5 +26,4 @@ spec:
           required:
             - managementInfoUrl
           type: object
-
-{{- end}}
+{{- end }}

@@ -29,4 +29,4 @@ spec:
       - name: {{ .Chart.Name }}
         image: {{ .Values.global.containerRegistry.path }}/connection-token-handler:{{ .Values.global.connection_token_handler.version }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
-{{- end}}
+{{- end }}
