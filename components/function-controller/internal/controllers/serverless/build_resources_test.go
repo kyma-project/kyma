@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/onsi/gomega"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -14,7 +14,7 @@ func TestFunctionReconciler_buildConfigMap(t *testing.T) {
 	tests := []struct {
 		name string
 		fn   *serverlessv1alpha1.Function
-		want v1.ConfigMap
+		want corev1.ConfigMap
 	}{
 		{
 			name: "should properly build configmap",
@@ -26,7 +26,7 @@ func TestFunctionReconciler_buildConfigMap(t *testing.T) {
 				},
 				Spec: serverlessv1alpha1.FunctionSpec{Source: "fn-source", Deps: ""},
 			},
-			want: v1.ConfigMap{
+			want: corev1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
 					Namespace:    "fn-ns",
 					GenerateName: "function-name-",
@@ -264,6 +264,29 @@ func TestFunctionReconciler_functionLabels(t *testing.T) {
 			got := r.functionLabels(tt.args.instance)
 			g.Expect(got).To(gomega.Equal(tt.want))
 			g.Expect(got).To(gomega.HaveLen(len(tt.args.instance.Labels) + 3))
+		})
+	}
+}
+
+func TestFunctionReconciler_buildDeployment(t *testing.T) {
+	type args struct {
+		instance *serverlessv1alpha1.Function
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "selector should be the same as podtemplate labels",
+			args: args{instance: newFixFunction("ns", "name")},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewGomegaWithT(t)
+			r := &FunctionReconciler{}
+			got := r.buildDeployment(tt.args.instance)
+			g.Expect(got.Spec.Selector.MatchLabels).To(gomega.Equal(got.Spec.Template.Labels))
 		})
 	}
 }
