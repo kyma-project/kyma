@@ -3,8 +3,29 @@ package kymahelm
 import (
 	"errors"
 	"fmt"
+)
 
-	helm "k8s.io/helm/pkg/proto/hapi/release"
+type Status_Code int32
+
+const (
+	// Status_UNKNOWN indicates that a release is in an uncertain state.
+	Status_UNKNOWN Status_Code = 0
+	// Status_DEPLOYED indicates that the release has been pushed to Kubernetes.
+	Status_DEPLOYED Status_Code = 1
+	// Status_DELETED indicates that a release has been deleted from Kubernetes.
+	Status_DELETED Status_Code = 2
+	// Status_SUPERSEDED indicates that this release object is outdated and a newer one exists.
+	Status_SUPERSEDED Status_Code = 3
+	// Status_FAILED indicates that the release was not successfully deployed.
+	Status_FAILED Status_Code = 4
+	// Status_DELETING indicates that a delete operation is underway.
+	Status_DELETING Status_Code = 5
+	// Status_PENDING_INSTALL indicates that an install operation is underway.
+	Status_PENDING_INSTALL Status_Code = 6
+	// Status_PENDING_UPGRADE indicates that an upgrade operation is underway.
+	Status_PENDING_UPGRADE Status_Code = 7
+	// Status_PENDING_ROLLBACK indicates that a rollback operation is underway.
+	Status_PENDING_ROLLBACK Status_Code = 8
 )
 
 //Release is an insternal representation of a Helm release
@@ -22,7 +43,7 @@ type ReleaseMeta struct {
 
 // ReleaseStatus is an internal representation of Helm's release status
 type ReleaseStatus struct {
-	StatusCode           helm.Status_Code
+	StatusCode           Status_Code
 	CurrentRevision      int32
 	LastDeployedRevision int32
 }
@@ -35,13 +56,13 @@ func (rs *ReleaseStatus) IsUpgradeStep() (bool, error) {
 
 	switch rs.StatusCode {
 
-	case helm.Status_PENDING_INSTALL:
+	case Status_PENDING_INSTALL:
 		return false, nil
 
-	case helm.Status_DEPLOYED, helm.Status_PENDING_UPGRADE, helm.Status_PENDING_ROLLBACK:
+	case Status_DEPLOYED, Status_PENDING_UPGRADE, Status_PENDING_ROLLBACK:
 		return true, nil
 
-	case helm.Status_FAILED, helm.Status_UNKNOWN, helm.Status_DELETED, helm.Status_DELETING:
+	case Status_FAILED, Status_UNKNOWN, Status_DELETED, Status_DELETING:
 
 		if rs.hasMultipleRevisions() {
 

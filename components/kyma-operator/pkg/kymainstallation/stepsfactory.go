@@ -3,13 +3,12 @@ package kymainstallation
 import (
 	"log"
 
-	errors "github.com/pkg/errors"
+	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
-	helm "k8s.io/helm/pkg/proto/hapi/release"
 )
 
 const (
@@ -79,7 +78,7 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]kymahelm.Relea
 			var lastDeployedRev int32
 
 			statusCode := release.StatusCode
-			if statusCode == helm.Status_DEPLOYED {
+			if statusCode == kymahelm.Status_DEPLOYED {
 				lastDeployedRev = release.CurrentRevision
 			} else {
 				lastDeployedRev, err = sfc.helmClient.ReleaseDeployedRevision(release.Name)
