@@ -168,6 +168,19 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
 		gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
 		gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
+
+		ginkgo.By("reconciling again should not change status")
+		result, err = reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(result.Requeue).To(gomega.BeFalse())
+		gomega.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
+
+		function = &serverlessv1alpha1.Function{}
+		gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		gomega.Expect(function.Status.Conditions).To(gomega.HaveLen(3))
+		gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+		gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
 	})
 
 	ginkgo.It("should handle reconcilation lags", func() {

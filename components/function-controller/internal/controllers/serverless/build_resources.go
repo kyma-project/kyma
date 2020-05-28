@@ -160,11 +160,12 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 		Spec: appsv1.DeploymentSpec{
 			Replicas: instance.Spec.MinReplicas,
 			Selector: &metav1.LabelSelector{
-				MatchLabels: podLabels, // this has to be same as spec.template.objectmeta.Lables
+				MatchLabels: r.internalFunctionLabels(instance), // this has to be same as spec.template.objectmeta.Lables
+				// and also it has to be immutable
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: podLabels,
+					Labels: podLabels, // podLabels contains InternalFnLabels, so it's ok
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
@@ -184,21 +185,20 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 }
 
 func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function) corev1.Service {
-	deploymentLabels := r.functionLabels(instance)
 	return corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instance.GetName(),
 			Namespace: instance.GetNamespace(),
-			Labels:    deploymentLabels,
+			Labels:    r.functionLabels(instance),
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{{
-				Name:       "http", // it has to be here for istio to work properly
-				TargetPort: intstr.FromInt(80),
+				Name:       "http",               // it has to be here for istio to work properly
+				TargetPort: intstr.FromInt(8080), // https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js#L28
 				Port:       80,
 				Protocol:   corev1.ProtocolTCP,
 			}},
-			Selector: deploymentLabels,
+			Selector: r.internalFunctionLabels(instance),
 		},
 	}
 }

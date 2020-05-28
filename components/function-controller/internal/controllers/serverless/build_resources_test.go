@@ -277,7 +277,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 		args args
 	}{
 		{
-			name: "selector should be the same as podtemplate labels",
+			name: "spec.template.labels should contain every element from spec.selector.MatchLabels",
 			args: args{instance: newFixFunction("ns", "name")},
 		},
 	}
@@ -286,7 +286,10 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			r := &FunctionReconciler{}
 			got := r.buildDeployment(tt.args.instance)
-			g.Expect(got.Spec.Selector.MatchLabels).To(gomega.Equal(got.Spec.Template.Labels))
+
+			for key, value := range got.Spec.Selector.MatchLabels {
+				g.Expect(got.Spec.Template.Labels[key]).To(gomega.Equal(value))
+			}
 		})
 	}
 }

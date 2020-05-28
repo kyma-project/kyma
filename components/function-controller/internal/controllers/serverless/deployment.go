@@ -95,7 +95,7 @@ func (r *FunctionReconciler) updateDeploymentStatus(ctx context.Context, log log
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonDeploymentReady,
-			Message:            fmt.Sprintf("Function %s is ready", instance.GetName()),
+			Message:            fmt.Sprintf("Deployment %s is ready", instance.GetName()),
 		})
 	case r.isDeploymentInProgress(deployment):
 		log.Info(fmt.Sprintf("Deployment %s is not ready yet", deployment.GetName()))

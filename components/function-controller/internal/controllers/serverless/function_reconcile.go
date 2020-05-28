@@ -116,9 +116,10 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return r.onJobChange(ctx, log, instance, configMaps.Items[0].GetName(), jobs.Items)
 	case r.isOnDeploymentChange(instance, deployments.Items):
 		return r.onDeploymentChange(ctx, log, instance, deployments.Items)
-	// case r.isOnServiceChange(instance, services.Items):
-	// 	return r.onServiceChange(ctx, log, instance, services.Items)
-	default:
+	case r.isOnServiceChange(instance, services.Items):
 		return r.onServiceChange(ctx, log, instance, services.Items)
+	default:
+		log.Info("Function is ready...")
+		return ctrl.Result{}, nil
 	}
 }

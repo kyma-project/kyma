@@ -14,9 +14,10 @@ import (
 
 func (r *FunctionReconciler) isOnServiceChange(instance *serverlessv1alpha1.Function, services []corev1.Service) bool {
 	newSvc := r.buildService(instance)
-
+	deployStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionRunning)
 	return !(len(services) == 1 &&
-		r.equalServices(services[0], newSvc))
+		r.equalServices(services[0], newSvc) &&
+		deployStatus == corev1.ConditionTrue)
 }
 
 func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, services []corev1.Service) (ctrl.Result, error) {
