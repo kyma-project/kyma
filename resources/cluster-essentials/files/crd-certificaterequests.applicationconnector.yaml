@@ -1,10 +1,7 @@
-{{- if not .Values.global.disableLegacyConnectivity }}
-{{- if not (.Capabilities.APIVersions.Has "applicationconnector.kyma-project.io/v1alpha1/CertificateRequest") }}
-{{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: certificaterequests.applicationconnector.kyma-project.io  
+  name: certificaterequests.applicationconnector.kyma-project.io
 spec:
   group: applicationconnector.kyma-project.io
   version: v1alpha1
@@ -24,6 +21,3 @@ spec:
           - csrInfoUrl
           type: object
 
-{{- end }}
-{{- end }}
-{{- end }}
