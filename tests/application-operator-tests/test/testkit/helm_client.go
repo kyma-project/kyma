@@ -109,7 +109,6 @@ func NewHelmClient(helmDriver string) (HelmClient, error) {
 	}, nil
 }
 
-
 func (hc *helmClient) CheckReleaseStatus(rlsName string, namespace string) (release.Status, error) {
 
 	actionConfig, err := hc.actionConfigInit(namespace)
@@ -125,7 +124,6 @@ func (hc *helmClient) CheckReleaseStatus(rlsName string, namespace string) (rele
 
 	return status.Info.Status, nil
 }
-
 
 func (hc *helmClient) IsInstalled(rlsName string, namespace string) bool {
 
@@ -170,24 +168,24 @@ func (hc *helmClient) TestRelease(rlsName string, namespace string) (*release.Re
 
 	return releaseTesting.Run(rlsName)
 	/*
-	// We only return an error if we weren't even able to get the
-				// release, otherwise we keep going so we can print status and logs
-				// if requested
-				if runErr != nil && rel == nil {
-					return runErr
-				}
+		// We only return an error if we weren't even able to get the
+					// release, otherwise we keep going so we can print status and logs
+					// if requested
+					if runErr != nil && rel == nil {
+						return runErr
+					}
 
-				if err := outfmt.Write(out, &statusPrinter{rel, settings.Debug}); err != nil {
-					return err
-				}
-
-				if outputLogs {
-					// Print a newline to stdout to separate the output
-					fmt.Fprintln(out)
-					if err := client.GetPodLogs(out, rel); err != nil {
+					if err := outfmt.Write(out, &statusPrinter{rel, settings.Debug}); err != nil {
 						return err
 					}
-				}
+
+					if outputLogs {
+						// Print a newline to stdout to separate the output
+						fmt.Fprintln(out)
+						if err := client.GetPodLogs(out, rel); err != nil {
+							return err
+						}
+					}
 	*/
 
 	//if err != nil {
@@ -200,7 +198,6 @@ func (hc *helmClient) TestRelease(rlsName string, namespace string) (*release.Re
 	//	}
 	//}
 }
-
 
 func (hc *helmClient) CheckReleaseExistence(rlsName string, namespace string) (bool, error) {
 
@@ -241,7 +238,6 @@ func (hc *helmClient) actionConfigInit(namespace string) (*action.Configuration,
 
 	return actionConfig, nil
 }
-
 
 /*
 package kymahelm

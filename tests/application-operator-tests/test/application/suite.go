@@ -99,7 +99,7 @@ func (ts *TestSuite) RunApplicationTests(t *testing.T) {
 
 	ts.getLogsAndCleanup(t)
 
-	if err != nil  {
+	if err != nil {
 		t.Errorf("Error while executing tests for %s release: %s", ts.application, err.Error())
 		t.Logf("%s tests failed", ts.application)
 		t.Fatal("Application tests failed")

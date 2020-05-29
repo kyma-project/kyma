@@ -5,6 +5,11 @@ ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/application-operator-test
 WORKDIR $SRC_DIR
 COPY . $SRC_DIR
 
+COPY go.mod .
+COPY go.sum .
+
+RUN go mod download
+
 RUN CGO_ENABLED=0 go test -o applicationcontroller.test -c ./test/applicationcontroller/tests
 RUN CGO_ENABLED=0 go test -o serviceinstancecontroller.test -c ./test/serviceinstancecontroller/tests
 RUN CGO_ENABLED=0 go test -o applicationtests.test -c ./test/application/tests
