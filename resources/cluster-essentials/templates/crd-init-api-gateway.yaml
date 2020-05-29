@@ -23,15 +23,9 @@ spec:
           mountPath: /etc/crd
           readOnly: true
         command:
-        - timeout
-        - 60s
-        - bash
+        - /bin/bash
         - -c
-        - |-
-          until \
-          kubectl replace -f /etc/crd/apirules.yaml \
-          || kubectl apply -f /etc/crd/apirules.yaml; \
-          do sleep 2; done
+        - timeout 60s bash -c 'until kubectl apply -f /etc/crd/apirules.yaml; do sleep 2; done'
       volumes:
       - name: crd-apirules
         configMap:
