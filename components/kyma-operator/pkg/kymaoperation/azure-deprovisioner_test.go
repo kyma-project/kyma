@@ -1,4 +1,4 @@
-package steps
+package kymaoperation
 
 import (
 	"testing"

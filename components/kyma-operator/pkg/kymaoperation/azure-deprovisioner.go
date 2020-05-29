@@ -1,4 +1,4 @@
-package steps
+package kymaoperation
 
 import (
 	"log"
@@ -38,7 +38,7 @@ func DefaultDeprovisionConfig() *DeprovisionConfig {
 }
 
 // DeprovisionAzureResources performs automatic removal of all resources created with Azure Broker.
-func (steps *InstallationSteps) DeprovisionAzureResources(config *DeprovisionConfig, installation installationConfig.InstallationContext) error {
+func (steps *Executor) DeprovisionAzureResources(config *DeprovisionConfig, installation installationConfig.InstallationContext) error {
 
 	const stepName string = "Deprovisioning Azure Broker resources"
 	steps.PrintStep(stepName)
