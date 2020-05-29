@@ -204,7 +204,6 @@ spec:
         image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
         imagePullPolicy: IfNotPresent
         args:
-          - -tillerTLSInsecureSkipVerify=true
           - -overrideLogFile=/app/overrides.txt
         volumeMounts:
           - mountPath: /etc/certs
