@@ -155,7 +155,11 @@ func testTargetsAreHealthy() {
 				}
 				if target.Health != "up" {
 					allTargetsAreHealthy = false
-					timeoutMessage += fmt.Sprintf("Target with job=%s and instance=%s is not healthy, with labels=%v\n", target.Labels["job"], target.Labels["instance"], target.Labels)
+					timeoutMessage += "The following target is not healthy:\n"
+					for label, value := range target.Labels {
+						timeoutMessage += fmt.Sprintf("- %s=%s\n", label, value)
+					}
+					timeoutMessage += fmt.Sprintf("- errorMessage: %s", target.LastError)
 				}
 			}
 			if allTargetsAreHealthy {
