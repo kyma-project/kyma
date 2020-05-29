@@ -262,14 +262,6 @@ func (t *TestSuite) Run() {
 	t.t.Log("Testing injection of env variables via gateway")
 	err = t.pollForAnswer(fnGatewayURL, redisEnvPing, answerForEnvPing)
 	failOnError(t.g, err)
-
-	// t.t.Log("Testing cleanup of stale revisions")
-	// err = t.revisions.WaitForRevisionCleanup()
-	// failOnError(t.g, err)
-	//
-	// t.t.Log("Testing that remaining revision is the newest one")
-	// err = t.revisions.VerifyConfigurationGeneration(3) // 1 update caused from fn update, one from servicebindingusage
-	// failOnError(t.g, err)
 }
 
 func (t *TestSuite) Cleanup() {
