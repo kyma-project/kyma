@@ -8,7 +8,7 @@ metadata:
   labels:
     app: {{ .Chart.Name }}-tests
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/name: {{ template "name" . }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
@@ -24,7 +24,7 @@ metadata:
   labels:
     app: {{ .Chart.Name }}-tests
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/name: {{ template "name" . }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
