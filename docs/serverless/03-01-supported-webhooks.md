@@ -7,24 +7,24 @@ A newly created or updated Function CR is first updated by the defaulting webhoo
 
 1. **Defaulting webhook** sets the default values for CPU and memory requests and limits, and adds the maximum and the minimum number of replicas, if not specified already in the Function CR.
 
-| Parameter | Default value |
-|----------|----------|
-| **requestCpu** | `50m` |
-| **requestMemory** | `64Mi` |
-| **limitsCpu** | `100m` |
-| **limitsMemory** | `128Mi` |
-| **minReplicas** | `1` |
-| **maxReplicas** | `1` |
+    | Parameter | Default value |
+    |----------|----------|
+    | **requestCpu** | `50m` |
+    | **requestMemory** | `64Mi` |
+    | **limitsCpu** | `100m` |
+    | **limitsMemory** | `128Mi` |
+    | **minReplicas** | `1` |
+    | **maxReplicas** | `1` |
 
 2. **Validation webhook** checks if:
 
 - Minimum values requested for CPU, memory, and replicas are not lower than the required ones:
 
-| Parameter | Required value |
-|----------|----------|
-| **minRequestCpu** | `10m` |
-| **minRequestMemory** | `16Mi` |
-| **minReplicasValue** | `0` |
+    | Parameter | Required value |
+    |----------|----------|
+    | **minRequestCpu** | `10m` |
+    | **minRequestMemory** | `16Mi` |
+    | **minReplicasValue** | `0` |
 
 - Requests are lower than or equal to limits, and that the minimum number of replicas is lower than or equal to the maximum one.
 - The Function CR contains all the required parameters.
