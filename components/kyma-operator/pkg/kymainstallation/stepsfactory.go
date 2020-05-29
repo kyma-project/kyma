@@ -75,10 +75,10 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]kymahelm.Relea
 		log.Println("Helm releases list:")
 
 		for _, release := range releases {
-			var lastDeployedRev int32
+			var lastDeployedRev int
 
 			statusCode := release.StatusCode
-			if statusCode == kymahelm.Status_DEPLOYED {
+			if statusCode == kymahelm.StatusDeployed {
 				lastDeployedRev = release.CurrentRevision
 			} else {
 				lastDeployedRev, err = sfc.helmClient.ReleaseDeployedRevision(release.Name)

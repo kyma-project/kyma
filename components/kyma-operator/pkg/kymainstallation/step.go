@@ -99,7 +99,7 @@ func (s installStep) Run() error {
 
 type upgradeStep struct {
 	installStep
-	deployedRevision    int32
+	deployedRevision    int
 	rollbackWaitTimeSec uint32
 }
 
