@@ -3,9 +3,10 @@ APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190930-d28d219
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-include $(SCRIPTS_DIR)/generic-make-go.mk
+include $(SCRIPTS_DIR)/go-modules.mk
 
 VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
+
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
@@ -24,4 +25,4 @@ watch: export APP_OIDC_ISSUER_URL=https://dex.${KYMA_DOMAIN}
 watch: export APP_OIDC_CLIENT_ID=kyma-client
 
 watch:
-	CompileDaemon -build="make build" -command="go run main.go"
+	CompileDaemon -build="make build-local" -command="go run main.go"
