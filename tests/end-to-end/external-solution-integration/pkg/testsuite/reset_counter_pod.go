@@ -9,7 +9,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 )
 
-// CheckCounterPod is a step which checks if counter has been updated in test pod
+// ResetCounterPod resets the request counter deployed as a service
 type ResetCounterPod struct {
 	testService *testkit.TestService
 	retryOpts   []retrygo.Option
@@ -17,7 +17,7 @@ type ResetCounterPod struct {
 
 var _ step.Step = &ResetCounterPod{}
 
-// NewCheckCounterPod returns new CheckCounterPod
+// NewResetCounterPod returns new ResetCounterPod
 func NewResetCounterPod(testService *testkit.TestService, opts ...retrygo.Option) *ResetCounterPod {
 	return &ResetCounterPod{
 		testService: testService,

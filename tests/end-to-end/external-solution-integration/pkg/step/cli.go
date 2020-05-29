@@ -52,7 +52,7 @@ func (m CleanupMode) String() string {
 // Set implements pflag.Value.Set
 func (m *CleanupMode) Set(v string) error {
 	switch CleanupMode(v) {
-	case CleanupModeNo, CleanupModeYes, CleanupModeOnly:
+	case CleanupModeNo, CleanupModeYes, CleanupModeOnly, CleanupModeOnErrorOnly:
 	default:
 		return errors.Errorf("invalid cleanup value: %s", v)
 	}

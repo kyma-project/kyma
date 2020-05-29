@@ -7,19 +7,17 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 )
 
-// ConnectApplication is a step which connects application with client certificates and saves connected httpClient in the state
 type LoadStoredCertificates struct {
 	ds    *testkit.DataStore
 	state LoadStoredCertificatesState
 }
 
-// ConnectApplicationState allows ConnectApplication to save connected http.Client for further use by other steps
 type LoadStoredCertificatesState interface {
 	SetGatewayClientCerts(certs []tls.Certificate)
 	SetApplicationName(string)
 }
 
-// NewConnectApplication returns new ConnectApplication
+//  NewLoadStoredCertificates loads previously stored certificates
 func NewLoadStoredCertificates(ds *testkit.DataStore, state LoadStoredCertificatesState) *LoadStoredCertificates {
 	return &LoadStoredCertificates{
 		ds:    ds,

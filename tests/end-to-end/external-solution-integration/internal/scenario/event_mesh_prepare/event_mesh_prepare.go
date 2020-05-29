@@ -1,7 +1,7 @@
 package event_mesh_prepare
 
 import (
-	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	servicecatalogclient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
@@ -9,11 +9,11 @@ import (
 	"k8s.io/client-go/rest"
 	eventing "knative.dev/eventing/pkg/client/clientset/versioned"
 
-	appBrokerClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
-	appOperatorClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	connectionTokenHandlerClient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
+	appbrokerclient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	appoperatorclient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	connectiontokenhandlerclient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
-	serviceBindingUsageClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+	servicebindingusageclient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
@@ -26,19 +26,19 @@ const (
 	defaultBrokerName        = "default"
 )
 
-var (
-	apiRuleRes = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
-	function   = schema.GroupVersionResource{Group: "serverless.kyma-project.io", Version: "v1alpha1", Resource: "functions"}
-)
-
 // Steps return scenario steps
 func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
-	appOperatorClientset := appOperatorClient.NewForConfigOrDie(config)
-	appBrokerClientset := appBrokerClient.NewForConfigOrDie(config)
+	var (
+		apiRuleRes = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
+		function   = schema.GroupVersionResource{Group: "serverless.kyma-project.io", Version: "v1alpha1", Resource: "functions"}
+	)
+
+	appOperatorClientset := appoperatorclient.NewForConfigOrDie(config)
+	appBrokerClientset := appbrokerclient.NewForConfigOrDie(config)
 	coreClientset := coreClient.NewForConfigOrDie(config)
-	serviceCatalogClientset := serviceCatalogClient.NewForConfigOrDie(config)
-	serviceBindingUsageClientset := serviceBindingUsageClient.NewForConfigOrDie(config)
-	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
+	serviceCatalogClientset := servicecatalogclient.NewForConfigOrDie(config)
+	serviceBindingUsageClientset := servicebindingusageclient.NewForConfigOrDie(config)
+	connectionTokenHandlerClientset := connectiontokenhandlerclient.NewForConfigOrDie(config)
 	httpSourceClientset := sourcesclientv1alpha1.NewForConfigOrDie(config)
 	knativeEventingClientSet := eventing.NewForConfigOrDie(config)
 	dynamicInterface := dynamic.NewForConfigOrDie(config)

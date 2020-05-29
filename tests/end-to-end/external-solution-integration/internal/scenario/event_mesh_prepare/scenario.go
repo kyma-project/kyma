@@ -27,8 +27,8 @@ func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 	pflag.StringVar(&s.TestServiceImage, "testServiceImage", "eu.gcr.io/kyma-project/event-subscriber-tools:PR-8483", "TestServiceImage")
 }
 
-func (s *Scenario) NewState() *e2EEventMeshState {
-	return &e2EEventMeshState{
+func (s *Scenario) NewState() *e2eEventMeshState {
+	return &e2eEventMeshState{
 		E2EState: scenario.E2EState{Domain: s.Domain, SkipSSLVerify: s.SkipSSLVerify, AppName: s.TestID, GatewaySubdomain: "gateway"},
 	}
 }

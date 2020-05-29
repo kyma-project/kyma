@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/avast/retry-go"
-	coreClient "k8s.io/client-go/kubernetes"
+	coreclient "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
@@ -28,7 +28,7 @@ var (
 
 // Steps return scenario steps
 func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
-	coreClientset := coreClient.NewForConfigOrDie(config)
+	coreClientset := coreclient.NewForConfigOrDie(config)
 	testService := testkit.NewTestService(
 		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.SkipSSLVerify)),
 		nil,
