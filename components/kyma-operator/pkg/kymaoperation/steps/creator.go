@@ -51,7 +51,7 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]kymahelm.Relea
 
 			log.Printf("%s status: %s, last deployed revision: %d", release.Name, statusCode, lastDeployedRev)
 			existingReleases[release.Name] = kymahelm.ReleaseStatus{
-				Status:           statusCode,
+				Status:               statusCode,
 				CurrentRevision:      release.CurrentRevision,
 				LastDeployedRevision: lastDeployedRev,
 			}

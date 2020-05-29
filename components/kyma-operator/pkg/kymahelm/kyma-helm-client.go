@@ -37,12 +37,14 @@ type Client struct {
 }
 
 // NewClient .
-func NewClient(  overridesLogger *logrus.Logger, maxHistory int, timeout int64) (*Client, error) {
+func NewClient(overridesLogger *logrus.Logger, maxHistory int, timeout int64) (*Client, error) {
 	cfg := &action.Configuration{}
 	clientGetter := genericclioptions.NewConfigFlags(false)
 	debugLog := overridesLogger.Printf
 
-	cfg.Init(clientGetter, "kyma-installer", "memory", debugLog)
+	if err := cfg.Init(clientGetter, "kyma-installer", "memory", debugLog); err != nil {
+		return nil, err
+	}
 
 	return &Client{
 		cfg:             cfg,
