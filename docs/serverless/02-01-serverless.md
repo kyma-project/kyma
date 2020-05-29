@@ -12,7 +12,7 @@ Serverless relies on [Knative Serving](https://knative.dev/docs/serving/) for de
 
     >**NOTE:** Function Controller sets the Node.js 12 runtime by default.
 
-2. Before the Function can be saved or updated, it is verified verified sequentially by the [defaulting and validation webhooks](#supported-webshooks).
+2. Before the Function can be saved or updated, it is verified sequentially by the [defaulting and validation webhooks](#supported-webhooks).
 
 3. Function Controller (FC) detects the new, validated Function CR.
 
