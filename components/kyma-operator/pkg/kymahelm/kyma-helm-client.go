@@ -251,7 +251,5 @@ func (hc *Client) PrintOverrides(values overrides.Map, relName string, action st
 		return
 	}
 
-	for key, val := range values {
-		hc.overridesLogger.Printf("\n%s: %s", key, val)
-	}
+	hc.overridesLogger.Println(overrides.ToYaml(values))
 }
