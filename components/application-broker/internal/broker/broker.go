@@ -3,21 +3,21 @@ package broker
 import (
 	"context"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal/servicecatalog"
-	"k8s.io/client-go/tools/cache"
-
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/kyma-project/kyma/components/application-broker/internal/director"
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
+	"github.com/kyma-project/kyma/components/application-broker/internal/servicecatalog"
 	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	listers "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/platform/idprovider"
+
 	gcli "github.com/machinebox/graphql"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 	istioCli "istio.io/client-go/pkg/clientset/versioned"
+	"k8s.io/client-go/tools/cache"
 )
 
 //go:generate mockery -name=instanceStorage -output=automock -outpkg=automock -case=underscore
@@ -125,6 +125,10 @@ type (
 	ServiceBindingFetcher interface {
 		GetServiceBindingSecretName(ns, externalID string) (string, error)
 	}
+
+	appSvcIDSelector interface {
+		SelectID(req interface{}) internal.ApplicationServiceID
+	}
 )
 
 // New creates instance of broker server.
@@ -143,20 +147,21 @@ func New(applicationFinder appFinder,
 	apiPackagesSupport bool,
 	service director.ServiceConfig, directorProxyURL string,
 	sbInformer cache.SharedIndexInformer, gatewayBaseURL string,
+	idSelector appSvcIDSelector,
 ) *Server {
 
 	idpRaw := idprovider.New()
 	idp := func() (internal.OperationID, error) {
 		idRaw, err := idpRaw()
 		if err != nil {
-			return internal.OperationID(""), err
+			return "", err
 		}
 		return internal.OperationID(idRaw), nil
 	}
 
 	enabledChecker := access.NewApplicationMappingService(emLister)
 
-	directorSvc, conv, getBindingCredentials, idSelector, validateProvisionReq := getImplementationBasedOnVersion(sbInformer, service, directorProxyURL, gatewayBaseURL, apiPackagesSupport)
+	directorSvc, conv, getBindingCredentials, validateProvisionReq := getImplementationBasedOnVersion(sbInformer, service, directorProxyURL, gatewayBaseURL, apiPackagesSupport)
 
 	stateService := &instanceStateService{operationCollectionGetter: opStorage}
 	return &Server{
@@ -165,7 +170,7 @@ func New(applicationFinder appFinder,
 			conv:              conv,
 			appEnabledChecker: enabledChecker,
 		},
-		provisioner: NewProvisioner(instStorage, instStorage, stateService, opStorage, opStorage, accessChecker, applicationFinder,
+		provisioner: NewProvisioner(instStorage, stateService, opStorage, opStorage, accessChecker, applicationFinder,
 			eaClient, knClient, *istioClient, instStorage, idp, log, idSelector, directorSvc, validateProvisionReq),
 		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, applicationFinder,
 			knClient, eaClient, log, idSelector, directorSvc),
@@ -177,51 +182,24 @@ func New(applicationFinder appFinder,
 		lastOpGetter: &getLastOperationService{
 			getter: opStorage,
 		},
-		brokerService: brokerService,
-		sanityChecker: NewSanityChecker(mClient, log, livenessCheckStatus),
-		logger:        log.WithField("service", "broker:server"),
+		brokerService:       brokerService,
+		sanityChecker:       NewSanityChecker(mClient, log, livenessCheckStatus),
+		logger:              log.WithField("service", "broker:server"),
+		operationIDProvider: idp,
 	}
 }
 
-func getImplementationBasedOnVersion(sbInformer cache.SharedIndexInformer, service director.ServiceConfig, directorProxyURL string, gatewayBaseURL string, apiPackagesSupport bool) (DirectorService, converter, getCredentialFn, *IDSelector, func(req *osb.ProvisionRequest) *osb.HTTPStatusCodeError) {
+func getImplementationBasedOnVersion(sbInformer cache.SharedIndexInformer, service director.ServiceConfig, directorProxyURL string, gatewayBaseURL string, apiPackagesSupport bool) (DirectorService, converter, getCredentialFn, func(req *osb.ProvisionRequest) *osb.HTTPStatusCodeError) {
 	if apiPackagesSupport {
 		sbFetcher := servicecatalog.NewServiceBindingFetcher(sbInformer)
 		directorCli := director.NewQGLClient(gcli.NewClient(directorProxyURL))
 		directorSvc := director.NewService(directorCli, service)
 		credRenderer := NewBindingCredentialsRenderer(directorSvc, gatewayBaseURL, sbFetcher)
 
-		return directorSvc, &appToServiceConverterV2{}, credRenderer.GetBindingCredentialsV2, &IDSelector{apiPackagesSupport: apiPackagesSupport}, validateProvisionRequestV2
+		return directorSvc, &appToServiceConverterV2{}, credRenderer.GetBindingCredentialsV2, validateProvisionRequestV2
 	} else {
 		directorSvc := director.NewNothingDoerService()
 		credRenderer := BindingCredentialsRenderer{}
-		return directorSvc, &appToServiceConverter{}, credRenderer.GetBindingCredentialsV1, &IDSelector{apiPackagesSupport: apiPackagesSupport}, validateProvisionRequestV1
+		return directorSvc, &appToServiceConverter{}, credRenderer.GetBindingCredentialsV1, validateProvisionRequestV1
 	}
-}
-
-type appSvcIDSelector interface {
-	SelectID(req interface{}) internal.ApplicationServiceID
-}
-
-type IDSelector struct {
-	apiPackagesSupport bool
-}
-
-func (s *IDSelector) SelectID(req interface{}) internal.ApplicationServiceID {
-	var svcID, planID string
-	switch d := req.(type) {
-	case *osb.BindRequest:
-		svcID, planID = d.ServiceID, d.PlanID
-	case *osb.ProvisionRequest:
-		svcID, planID = d.ServiceID, d.PlanID
-	case *osb.DeprovisionRequest:
-		svcID, planID = d.ServiceID, d.PlanID
-	}
-
-	// In new approach ApplicationServiceID == req Plan ID
-	if s.apiPackagesSupport {
-		return internal.ApplicationServiceID(planID)
-	}
-
-	// In old approach ApplicationServiceID == req Service ID == Class ID
-	return internal.ApplicationServiceID(svcID)
 }
