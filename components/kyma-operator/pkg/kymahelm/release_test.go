@@ -21,25 +21,25 @@ func TestIsUpgradeStep(t *testing.T) {
 				}{
 					{
 						status: kymahelm.ReleaseStatus{
-							StatusCode: kymahelm.StatusPendingInstall,
+							Status: kymahelm.StatusPendingInstall,
 						},
 						expectedResult: installation,
 					},
 					{
 						status: kymahelm.ReleaseStatus{
-							StatusCode: kymahelm.StatusDeployed,
+							Status: kymahelm.StatusDeployed,
 						},
 						expectedResult: upgrade,
 					},
 					{
 						status: kymahelm.ReleaseStatus{
-							StatusCode: kymahelm.StatusPendingUpgrade,
+							Status: kymahelm.StatusPendingUpgrade,
 						},
 						expectedResult: upgrade,
 					},
 					{
 						status: kymahelm.ReleaseStatus{
-							StatusCode: kymahelm.StatusPendingRollback,
+							Status: kymahelm.StatusPendingRollback,
 						},
 						expectedResult: upgrade,
 					},
@@ -112,7 +112,7 @@ func TestIsUpgradeStep(t *testing.T) {
 
 						//given
 						statusObj := kymahelm.ReleaseStatus{
-							StatusCode:           testStatus,
+							Status:               testStatus,
 							CurrentRevision:      testData.currentRevision,
 							LastDeployedRevision: testData.lastDeployedRevision,
 						}
@@ -139,7 +139,7 @@ func TestIsUpgradeStep(t *testing.T) {
 
 				//given
 				statusObj := kymahelm.ReleaseStatus{
-					StatusCode: testStatus,
+					Status: testStatus,
 				}
 
 				//when

@@ -5,8 +5,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	. "github.com/smartystreets/goconvey/convey"
-	release "k8s.io/helm/pkg/proto/hapi/release"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
 )
 
 func TestStepsFactory(t *testing.T) {
@@ -40,13 +38,13 @@ func TestStepsFactory(t *testing.T) {
 			//then
 			So(err, ShouldBeNil)
 			So(len(releases), ShouldEqual, 3)
-			So(releases["abc"].StatusCode, ShouldEqual, release.Status_DEPLOYED)
+			So(releases["abc"].Status, ShouldEqual, kymahelm.StatusDeployed)
 			So(releases["abc"].CurrentRevision, ShouldEqual, 3)
 			So(releases["abc"].LastDeployedRevision, ShouldEqual, 3)
-			So(releases["ijk"].StatusCode, ShouldEqual, release.Status_DEPLOYED)
+			So(releases["ijk"].Status, ShouldEqual, kymahelm.StatusDeployed)
 			So(releases["ijk"].CurrentRevision, ShouldEqual, 1)
 			So(releases["ijk"].LastDeployedRevision, ShouldEqual, 1)
-			So(releases["xyz"].StatusCode, ShouldEqual, release.Status_DEPLOYED)
+			So(releases["xyz"].Status, ShouldEqual, kymahelm.StatusDeployed)
 			So(releases["xyz"].CurrentRevision, ShouldEqual, 2)
 			So(releases["xyz"].LastDeployedRevision, ShouldEqual, 2)
 		})
@@ -68,13 +66,13 @@ func TestStepsFactory(t *testing.T) {
 			//then
 			So(err, ShouldBeNil)
 			So(len(releases), ShouldEqual, 3)
-			So(releases["abc"].StatusCode, ShouldEqual, release.Status_FAILED)
+			So(releases["abc"].Status, ShouldEqual, kymahelm.StatusFailed)
 			So(releases["abc"].CurrentRevision, ShouldEqual, 3)
 			So(releases["abc"].LastDeployedRevision, ShouldEqual, 2)
-			So(releases["ijk"].StatusCode, ShouldEqual, release.Status_DELETED)
+			So(releases["ijk"].Status, ShouldEqual, kymahelm.StatusUninstalled)
 			So(releases["ijk"].CurrentRevision, ShouldEqual, 1)
 			So(releases["ijk"].LastDeployedRevision, ShouldEqual, 0)
-			So(releases["xyz"].StatusCode, ShouldEqual, release.Status_DEPLOYED)
+			So(releases["xyz"].Status, ShouldEqual, kymahelm.StatusDeployed)
 			So(releases["xyz"].CurrentRevision, ShouldEqual, 2)
 			So(releases["xyz"].LastDeployedRevision, ShouldEqual, 2)
 		})
@@ -105,7 +103,7 @@ func TestStepsFactory(t *testing.T) {
 
 			installedReleases := map[string]kymahelm.ReleaseStatus{}
 			installedReleases[component.GetReleaseName()] = kymahelm.ReleaseStatus{
-				StatusCode:           release.Status_DEPLOYED,
+				Status:               kymahelm.StatusDeployed,
 				CurrentRevision:      2,
 				LastDeployedRevision: 2,
 			}
@@ -152,7 +150,7 @@ func TestStepsFactory(t *testing.T) {
 
 			installedReleases := map[string]kymahelm.ReleaseStatus{}
 			installedReleases[component.GetReleaseName()] = kymahelm.ReleaseStatus{
-				StatusCode:           release.Status_DEPLOYED,
+				Status:               kymahelm.StatusDeployed,
 				CurrentRevision:      2,
 				LastDeployedRevision: 2,
 			}
@@ -174,36 +172,35 @@ func TestStepsFactory(t *testing.T) {
 	})
 }
 
-func fakeRelease(name string, version int32, code release.Status_Code) *release.Release {
-	return &release.Release{
-		Name:    name,
-		Version: version,
-		Info: &release.Info{
-			Status: &release.Status{
-				Code: code,
-			},
+func fakeRelease(name string, version int, status kymahelm.Status) *kymahelm.Release {
+
+	return &kymahelm.Release{
+		ReleaseMeta: &kymahelm.ReleaseMeta{
+			Name:        name,
+			Description: "",
+		},
+		ReleaseStatus: &kymahelm.ReleaseStatus{
+			CurrentRevision: version,
+			Status:          status,
 		},
 	}
 }
 
-func fakeReleasesNoErrors() *rls.ListReleasesResponse {
-	r1 := fakeRelease("abc", 1, release.Status_DEPLOYED)
-	r2 := fakeRelease("abc", 2, release.Status_DEPLOYED)
-	r3 := fakeRelease("abc", 3, release.Status_DEPLOYED)
-	r4 := fakeRelease("ijk", 1, release.Status_DEPLOYED)
-	r5 := fakeRelease("xyz", 1, release.Status_DEPLOYED)
-	r6 := fakeRelease("xyz", 2, release.Status_DEPLOYED)
+func fakeReleasesNoErrors() []*kymahelm.Release {
+	r1 := fakeRelease("abc", 1, kymahelm.StatusDeployed)
+	r2 := fakeRelease("abc", 2, kymahelm.StatusDeployed)
+	r3 := fakeRelease("abc", 3, kymahelm.StatusDeployed)
+	r4 := fakeRelease("ijk", 1, kymahelm.StatusDeployed)
+	r5 := fakeRelease("xyz", 1, kymahelm.StatusDeployed)
+	r6 := fakeRelease("xyz", 2, kymahelm.StatusDeployed)
 
-	releases := []*release.Release{r1, r2, r3, r4, r5, r6}
-	return &rls.ListReleasesResponse{
-		Releases: releases,
-	}
+	return []*kymahelm.Release{r1, r2, r3, r4, r5, r6}
 }
 
 //returns a list of fake releases and a function that returns last deployed release for given release name
-func fakeReleasesWithErrors() (*rls.ListReleasesResponse, func(string) (int32, error)) {
+func fakeReleasesWithErrors() ([]*kymahelm.Release, func(string) (int, error)) {
 
-	releaseDeployedRevision := func(releaseName string) (int32, error) {
+	releaseDeployedRevision := func(releaseName string) (int, error) {
 
 		switch releaseName {
 		case "abc":
@@ -217,15 +214,12 @@ func fakeReleasesWithErrors() (*rls.ListReleasesResponse, func(string) (int32, e
 		panic("Unknown release")
 	}
 
-	r1 := fakeRelease("abc", 1, release.Status_FAILED)
-	r2 := fakeRelease("abc", 2, release.Status_DEPLOYED)
-	r3 := fakeRelease("abc", 3, release.Status_FAILED)
-	r4 := fakeRelease("ijk", 1, release.Status_DELETED)
-	r5 := fakeRelease("xyz", 1, release.Status_FAILED)
-	r6 := fakeRelease("xyz", 2, release.Status_DEPLOYED)
+	r1 := fakeRelease("abc", 1, kymahelm.StatusFailed)
+	r2 := fakeRelease("abc", 2, kymahelm.StatusDeployed)
+	r3 := fakeRelease("abc", 3, kymahelm.StatusFailed)
+	r4 := fakeRelease("ijk", 1, kymahelm.StatusUninstalled)
+	r5 := fakeRelease("xyz", 1, kymahelm.StatusFailed)
+	r6 := fakeRelease("xyz", 2, kymahelm.StatusDeployed)
 
-	releases := []*release.Release{r1, r2, r3, r4, r5, r6}
-	return &rls.ListReleasesResponse{
-		Releases: releases,
-	}, releaseDeployedRevision
+	return []*kymahelm.Release{r1, r2, r3, r4, r5, r6}, releaseDeployedRevision
 }

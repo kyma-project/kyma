@@ -44,7 +44,7 @@ type ReleaseMeta struct {
 
 // ReleaseStatus is an internal representation of Helm's release status
 type ReleaseStatus struct {
-	StatusCode           Status
+	Status               Status
 	CurrentRevision      int
 	LastDeployedRevision int
 }
@@ -61,7 +61,7 @@ func helmReleaseToKymaRelease(hr *release.Release) *Release {
 			Description: hr.Info.Description,
 		},
 		&ReleaseStatus{
-			StatusCode:      Status(hr.Info.Status),
+			Status:          Status(hr.Info.Status),
 			CurrentRevision: hr.Version,
 		},
 	}
@@ -69,7 +69,7 @@ func helmReleaseToKymaRelease(hr *release.Release) *Release {
 
 func (rs *ReleaseStatus) IsUpgradeStep() (bool, error) {
 
-	switch rs.StatusCode {
+	switch rs.Status {
 
 	case StatusPendingInstall:
 		return false, nil
@@ -91,7 +91,7 @@ func (rs *ReleaseStatus) IsUpgradeStep() (bool, error) {
 		return false, nil
 
 	default:
-		return false, errors.New(fmt.Sprintf("unexpected status code %s", rs.StatusCode))
+		return false, errors.New(fmt.Sprintf("unexpected status code %s", rs.Status))
 	}
 }
 
