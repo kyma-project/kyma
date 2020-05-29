@@ -307,7 +307,7 @@ For Linux with Chrome, run:
 1. To get the address of the cluster's Console, check the host of the Console's virtual service. The name of the host of this virtual service corresponds to the Console URL. To get the virtual service host, run:
 
     ```bash
-    kubectl get virtualservice core-console -n kyma-system -o jsonpath='{ .spec.hosts[0] }'
+    kubectl get virtualservice console-console -n kyma-system -o jsonpath='{ .spec.hosts[0] }'
     ```
 
 2. Access your cluster under this address:
