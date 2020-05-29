@@ -57,8 +57,6 @@ clusterRoles:
       - "caching.internal.knative.dev"
       - "autoscaling.internal.knative.dev"
       - "serving.knative.dev"
-    kubeless:
-      - "kubeless.io"
   verbs:
     edit:
       - "create"

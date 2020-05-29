@@ -38,3 +38,7 @@ func (e *Endpoints) GetKubeConfig(w http.ResponseWriter, req *http.Request) {
 
 	e.kubeConfig.Generate(w, token)
 }
+
+func (e *Endpoints) GetHealthStatus(w http.ResponseWriter, req *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}

@@ -3,7 +3,7 @@ replicaCount: 1
 rbacJob:
   image:
     repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20200310-5f52f407"
+    tag: "v20200507-070ff576"
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
@@ -79,7 +79,7 @@ tests:
   enabled: true
   image:
     registry: "eu.gcr.io/kyma-project"
-    version: "8256adfe"
+    version: "PR-8619"
   env:
     testUser: "admin-user"
     timeout: 120

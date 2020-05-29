@@ -1,10 +1,12 @@
-package installation
+package k8s
 
 import (
+	"context"
 	"log"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	kubeerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -31,7 +33,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
 	internalerrors "github.com/kyma-project/kyma/components/kyma-operator/pkg/errors"
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/steps"
 )
 
 const (
@@ -43,7 +44,13 @@ const (
 	MessageResourceSynced = "Installation synced successfully"
 )
 
-// Controller .
+// KymaOperation defines the contract for possible operations on Kyma
+type KymaOperation interface {
+	InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData) error
+	UninstallKyma(installationData *config.InstallationData) error
+}
+
+// Controller holds runtime dependencies to clients and business logic modules and implements reconciliation loop.
 type Controller struct {
 	kubeClientset      *kubernetes.Clientset
 	installationLister listers.InstallationLister
@@ -51,7 +58,7 @@ type Controller struct {
 	queue              workqueue.RateLimitingInterface
 	recorder           record.EventRecorder
 	errorHandlers      internalerrors.ErrorHandlersInterface
-	kymaSteps          *steps.InstallationSteps
+	kymaOperation      KymaOperation
 	conditionManager   conditionmanager.Interface
 	finalizerManager   *finalizer.Manager
 	internalClientset  *internalClientset.Clientset
@@ -59,7 +66,7 @@ type Controller struct {
 
 // NewController .
 func NewController(kubeClientset *kubernetes.Clientset, kubeInformerFactory kubeinformers.SharedInformerFactory,
-	internalInformerFactory informers.SharedInformerFactory, installationSteps *steps.InstallationSteps,
+	internalInformerFactory informers.SharedInformerFactory, kymaOperation KymaOperation,
 	conditionManager conditionmanager.Interface, finalizerManager *finalizer.Manager, internalClientset *internalClientset.Clientset) *Controller {
 
 	installationInformer := internalInformerFactory.Installer().V1alpha1().Installations()
@@ -77,7 +84,7 @@ func NewController(kubeClientset *kubernetes.Clientset, kubeInformerFactory kube
 		queue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "kymaOperatorQueue"),
 		recorder:           recorder,
 		errorHandlers:      &internalerrors.ErrorHandlers{},
-		kymaSteps:          installationSteps,
+		kymaOperation:      kymaOperation,
 		conditionManager:   conditionManager,
 		finalizerManager:   finalizerManager,
 		internalClientset:  internalClientset,
@@ -180,7 +187,7 @@ func (c *Controller) syncHandler(key string) error {
 			return err
 		}
 
-		err = c.kymaSteps.InstallKyma(installationData, overrideProvider)
+		err = c.kymaOperation.InstallKyma(installationData, overrideProvider)
 		if c.errorHandlers.CheckError("Error during install/update: ", err) {
 			_ = c.conditionManager.InstallError()
 			return err
@@ -198,7 +205,7 @@ func (c *Controller) syncHandler(key string) error {
 			return err
 		}
 
-		err = c.kymaSteps.UninstallKyma(installationData)
+		err = c.kymaOperation.UninstallKyma(installationData)
 		if c.errorHandlers.CheckError("Uninstall error: ", err) {
 			_ = c.conditionManager.UninstallError()
 			return err
@@ -231,7 +238,7 @@ func (c *Controller) deleteFinalizer(installation *v1alpha1.Installation) error 
 		installationCopy := instObj.DeepCopy()
 
 		c.finalizerManager.RemoveFinalizer(installationCopy)
-		_, updateErr := c.internalClientset.InstallerV1alpha1().Installations(installation.Namespace).Update(installationCopy)
+		_, updateErr := c.internalClientset.InstallerV1alpha1().Installations(installation.Namespace).Update(context.TODO(), installationCopy, v1.UpdateOptions{})
 		return updateErr
 	})
 
