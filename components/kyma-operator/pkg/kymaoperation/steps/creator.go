@@ -8,7 +8,6 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 	errors "github.com/pkg/errors"
-	helm "k8s.io/helm/pkg/proto/hapi/release"
 )
 
 // stepFactoryCreator is used to create StepFactory instances for installation or uninstallation.

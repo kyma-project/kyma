@@ -22,5 +22,6 @@ require (
 	k8s.io/apimachinery v0.18.2
 	k8s.io/cli-runtime v0.18.2
 	k8s.io/client-go v0.18.2
+	k8s.io/helm v2.16.7+incompatible
 	rsc.io/letsencrypt v0.0.3 // indirect
 )
