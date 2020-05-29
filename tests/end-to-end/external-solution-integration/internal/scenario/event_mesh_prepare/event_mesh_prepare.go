@@ -14,7 +14,6 @@ import (
 	connectionTokenHandlerClient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
 	serviceBindingUsageClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
-
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
@@ -42,7 +41,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
 	httpSourceClientset := sourcesclientv1alpha1.NewForConfigOrDie(config)
 	knativeEventingClientSet := eventing.NewForConfigOrDie(config)
-	dynamic := dynamic.NewForConfigOrDie(config)
+	dynamicInterface := dynamic.NewForConfigOrDie(config)
 
 	connector := testkit.NewConnectorClient(
 		s.TestID,
@@ -55,7 +54,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		internal.NewHTTPClient(internal.WithSkipSSLVerification(s.SkipSSLVerify)),
 		coreClientset.AppsV1().Deployments(s.TestID),
 		coreClientset.CoreV1().Services(s.TestID),
-		dynamic.Resource(apiRuleRes).Namespace(s.TestID),
+		dynamicInterface.Resource(apiRuleRes).Namespace(s.TestID),
 		s.Domain,
 		s.TestID,
 		s.TestServiceImage,
@@ -75,7 +74,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.TestID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.TestID)),
-			testsuite.NewDeployFunction(s.TestID, helpers.FunctionPayload, helpers.FunctionPort, dynamic.Resource(function).Namespace(s.TestID), true),
+			testsuite.NewDeployFunction(s.TestID, helpers.FunctionPayload, helpers.FunctionPort, dynamicInterface.Resource(function).Namespace(s.TestID), true),
 			testsuite.NewStartTestServer(testService),
 			testsuite.NewConnectApplication(connector, state, s.ApplicationTenant, s.ApplicationGroup),
 		),

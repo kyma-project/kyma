@@ -8,7 +8,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
-// E2EScenario executes complete external solution integration test scenario
+// Scenario executes complete external solution integration test scenario
 type Scenario struct {
 	prepare           event_mesh_prepare.Scenario
 	evaluate          event_mesh_evaluate.Scenario

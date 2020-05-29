@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/avast/retry-go"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	coreClient "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
@@ -21,8 +20,7 @@ const (
 )
 
 var (
-	apiRuleRes = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
-	retry_opts = []retry.Option{
+	retryOpts = []retry.Option{
 		retry.Attempts(retryAttemptsCount),
 		retry.Delay(retryDelay),
 	}
@@ -48,8 +46,8 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		testsuite.NewLoadStoredCertificates(dataStore, state),
 		testsuite.NewResetCounterPod(testService),
 		testsuite.NewSendEventToMesh(s.TestID, helpers.FunctionPayload, state),
-		testsuite.NewCheckCounterPod(testService, 1, retry_opts...),
+		testsuite.NewCheckCounterPod(testService, 1, retryOpts...),
 		testsuite.NewSendEventToCompatibilityLayer(s.TestID, helpers.FunctionPayload, state),
-		testsuite.NewCheckCounterPod(testService, 2, retry_opts...),
+		testsuite.NewCheckCounterPod(testService, 2, retryOpts...),
 	}, nil
 }

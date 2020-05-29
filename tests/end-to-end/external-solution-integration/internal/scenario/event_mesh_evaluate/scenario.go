@@ -7,7 +7,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
-// E2EScenario executes complete external solution integration test scenario
+// Scenario executes the evaluation of the 2 phase end to end scenario
 type Scenario struct {
 	Domain        string
 	TestID        string
