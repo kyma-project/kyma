@@ -247,7 +247,7 @@ func (hc *mockHelmClient) IsReleaseDeletable(relName string) (bool, error) {
 	return hc.isReleaseDeletable, nil
 }
 
-func (hc *mockHelmClient) InstallRelease(chartDir, ns, relName, overrides string) (*kymahelm.Release, error) {
+func (hc *mockHelmClient) InstallRelease(chartDir, ns, relName string, values overrides.Map) (*kymahelm.Release, error) {
 	if hc.failInstallingRelease == true {
 		err := errors.New("failed to install release")
 		return nil, err
@@ -281,15 +281,15 @@ func (hc *mockHelmClient) ReleaseStatus(relName string) (string, error) {
 	return "", nil
 }
 
-func (hc *mockHelmClient) InstallReleaseFromChart(chartDir, ns, relName, overrides string) (*kymahelm.Release, error) {
+func (hc *mockHelmClient) InstallReleaseFromChart(chartDir, ns, relName string, values overrides.Map) (*kymahelm.Release, error) {
 	return nil, nil
 }
 
-func (hc *mockHelmClient) InstallReleaseWithoutWait(chartDir, ns, relName, overrides string) (*kymahelm.Release, error) {
+func (hc *mockHelmClient) InstallReleaseWithoutWait(chartDir, ns, relName string, values overrides.Map) (*kymahelm.Release, error) {
 	return nil, nil
 }
 
-func (hc *mockHelmClient) UpgradeRelease(chartDir, relName, overrides string) (*kymahelm.Release, error) {
+func (hc *mockHelmClient) UpgradeRelease(chartDir, relName string, values overrides.Map) (*kymahelm.Release, error) {
 	if hc.failUpgradingRelease == true {
 		err := errors.New("failed to upgrade release")
 		return nil, err
@@ -334,8 +334,8 @@ type mockOverrideData struct {
 	overrides.OverrideData
 }
 
-func (mod *mockOverrideData) ForRelease(releaseName string) (string, error) {
-	return "", nil
+func (mod *mockOverrideData) ForRelease(releaseName string) overrides.Map {
+	return nil
 }
 
 func fakeComponent() v1alpha1.KymaComponent {

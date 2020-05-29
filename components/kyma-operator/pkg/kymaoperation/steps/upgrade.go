@@ -21,16 +21,10 @@ func (s upgradeStep) Run() error {
 		return err
 	}
 
-	releaseOverrides, releaseOverridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
-
-	if releaseOverridesErr != nil {
-		return releaseOverridesErr
-	}
-
 	upgradeResp, upgradeErr := s.helmClient.UpgradeRelease(
 		chartDir,
 		s.component.GetReleaseName(),
-		releaseOverrides)
+		s.overrideData.ForRelease(s.component.GetReleaseName()))
 
 	if upgradeErr != nil {
 		upgradeErrMsg := fmt.Sprintf("Helm upgrade error: %s", upgradeErr.Error())

@@ -25,17 +25,11 @@ func (s installStep) Run() error {
 		return err
 	}
 
-	releaseOverrides, releaseOverridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
-
-	if releaseOverridesErr != nil {
-		return releaseOverridesErr
-	}
-
 	installResp, installErr := s.helmClient.InstallRelease(
 		chartDir,
 		s.component.Namespace,
 		s.component.GetReleaseName(),
-		releaseOverrides)
+		s.overrideData.ForRelease(s.component.GetReleaseName()))
 
 	if installErr != nil {
 		installErrMsg := fmt.Sprintf("Helm install error: %s", installErr.Error())

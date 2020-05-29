@@ -16,18 +16,8 @@ type Step interface {
 	GetReleaseName() string
 }
 
-// Helm functions common to all steps
-type HelmClient interface {
-	IsReleaseDeletable(rname string) (bool, error)
-	InstallRelease(chartdir, ns, releasename, overrides string) (*kymahelm.Release, error)
-	UpgradeRelease(chartDir, releaseName, overrides string) (*kymahelm.Release, error)
-	RollbackRelease(releaseName string, revision int) (*kymahelm.Release, error)
-	DeleteRelease(releaseName string) (*kymahelm.Release, error)
-	PrintRelease(release *kymahelm.Release)
-}
-
 type step struct {
-	helmClient HelmClient
+	helmClient kymahelm.ClientInterface
 	component  v1alpha1.KymaComponent
 }
 

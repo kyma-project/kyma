@@ -1,6 +1,7 @@
 package kymahelm
 
 import (
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 	"log"
 	"strings"
 	"time"
@@ -19,10 +20,10 @@ type ClientInterface interface {
 	ReleaseStatus(relName string) (string, error)
 	IsReleaseDeletable(relName string) (bool, error)
 	ReleaseDeployedRevision(relName string) (int, error)
-	InstallReleaseFromChart(chartDir, ns, relName, overrides string) (*Release, error)
-	InstallRelease(chartDir, ns, relName, overrides string) (*Release, error)
-	InstallReleaseWithoutWait(chartDir, ns, relName, overrides string) (*Release, error)
-	UpgradeRelease(chartDir, relName, overrides string) (*Release, error)
+	InstallReleaseFromChart(chartDir, ns, relName string, overrides overrides.Map) (*Release, error)
+	InstallRelease(chartDir, ns, relName string, overrides overrides.Map) (*Release, error)
+	InstallReleaseWithoutWait(chartDir, ns, relName string, overrides overrides.Map) (*Release, error)
+	UpgradeRelease(chartDir, relName string, overrides overrides.Map) (*Release, error)
 	DeleteRelease(relName string) (*Release, error) //todo: rename to "uninstall"
 	RollbackRelease(relName string, revision int) (*Release, error)
 	PrintRelease(release *Release)
@@ -144,7 +145,7 @@ func (hc *Client) ReleaseDeployedRevision(relName string) (int, error) { //todo:
 }
 
 // InstallReleaseFromChart .
-func (hc *Client) InstallReleaseFromChart(chartDir, ns, relName, overrides string) (*Release, error) {
+func (hc *Client) InstallReleaseFromChart(chartDir, ns, relName string, values overrides.Map) (*Release, error) {
 
 	chart, err := loader.Load(chartDir)
 	if err != nil {
@@ -158,10 +159,9 @@ func (hc *Client) InstallReleaseFromChart(chartDir, ns, relName, overrides strin
 	install.Wait = true
 	install.Timeout = hc.timeout
 
-	// todo: overrides -> string to map
-	hc.PrintOverrides(overrides, relName, "install")
+	hc.PrintOverrides(values, relName, "install")
 
-	installedRelease, err := install.Run(chart, map[string]interface{}{}) // todo: replace with actual map
+	installedRelease, err := install.Run(chart, values)
 	if err != nil {
 		return nil, err
 	}
@@ -170,17 +170,17 @@ func (hc *Client) InstallReleaseFromChart(chartDir, ns, relName, overrides strin
 }
 
 // InstallRelease .
-func (hc *Client) InstallRelease(chartDir, ns, relName, overrides string) (*Release, error) {
-	return hc.InstallReleaseFromChart(chartDir, ns, relName, overrides)
+func (hc *Client) InstallRelease(chartDir, ns, relName string, values overrides.Map) (*Release, error) {
+	return hc.InstallReleaseFromChart(chartDir, ns, relName, values)
 }
 
 // InstallReleaseWithoutWait .
-func (hc *Client) InstallReleaseWithoutWait(chartDir, ns, relName, overrides string) (*Release, error) { //todo: implemented with wait, we don't need that function anyways
-	return hc.InstallReleaseFromChart(chartDir, ns, relName, overrides)
+func (hc *Client) InstallReleaseWithoutWait(chartDir, ns, relName string, values overrides.Map) (*Release, error) { //todo: implemented with wait, we don't need that function anyways
+	return hc.InstallReleaseFromChart(chartDir, ns, relName, values)
 }
 
 // UpgradeRelease .
-func (hc *Client) UpgradeRelease(chartDir, relName, overrides string) (*Release, error) {
+func (hc *Client) UpgradeRelease(chartDir, relName string, values overrides.Map) (*Release, error) {
 
 	chart, err := loader.Load(chartDir)
 	if err != nil {
@@ -194,10 +194,9 @@ func (hc *Client) UpgradeRelease(chartDir, relName, overrides string) (*Release,
 	upgrade.Timeout = hc.timeout
 	upgrade.ReuseValues = true
 
-	// todo: overrides -> string to map
-	hc.PrintOverrides(overrides, relName, "update")
+	hc.PrintOverrides(values, relName, "update")
 
-	upgradedRelease, err := upgrade.Run(relName, chart, map[string]interface{}{}) // todo: replace with actual map
+	upgradedRelease, err := upgrade.Run(relName, chart, values)
 	if err != nil {
 		return nil, err
 	}
@@ -242,15 +241,16 @@ func (hc *Client) PrintRelease(release *Release) {
 }
 
 // PrintOverrides .
-func (hc *Client) PrintOverrides(overrides string, relName string, action string) {
+func (hc *Client) PrintOverrides(values overrides.Map, relName string, action string) {
 
-	//todo: overrides are moved to map
+	hc.overridesLogger.Printf("Overrides used to %s component %s", action, relName)
 
-	hc.overridesLogger.Printf("Overrides used for %s of component %s", action, relName)
-
-	if overrides == "" {
+	if len(values) == 0 {
 		hc.overridesLogger.Println("No overrides found")
 		return
 	}
-	hc.overridesLogger.Println("\n", overrides)
+
+	for key, val := range values {
+		hc.overridesLogger.Printf("\n%s: %s", key, val)
+	}
 }
