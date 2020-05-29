@@ -1,10 +1,7 @@
 name: logging
 version: 0.3.0
 description: "Helm Chart for Kyma logging"
-apiVersion: v2
-dependencies:
-  - name: logui
-    condition: loki.enabled
+apiVersion: v1
 keywords:
   - logging
   - loki
