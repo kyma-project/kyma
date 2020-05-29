@@ -38,8 +38,7 @@ var (
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Errorf("Scenario not specified. Specify it as the first argument")
-		os.Exit(1)
+		log.Fatalf("Scenario not specified. Specify it as the first argument")
 	}
 
 	scenarioName := os.Args[1]

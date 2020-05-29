@@ -39,8 +39,8 @@ func (ds DataStore) Store(key, val string) error {
 			Data: map[string]string{},
 		}
 	}
-	data := &cm.Data
-	(*data)[key] = val
+
+	cm.Data[key] = val
 	if found {
 		_, err = ds.coreClient.CoreV1().ConfigMaps(ds.namespace).Update(cm)
 	} else {

@@ -32,10 +32,6 @@ func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 	pflag.StringVar(&s.testServiceImage, "testServiceImage", "eu.gcr.io/kyma-project/event-subscriber-tools:PR-8483", "TestServiceImage")
 }
 
-func (s *Scenario) NewState() *state {
-	return &state{}
-}
-
 func (s *Scenario) RunnerOpts() []step.RunnerOption {
 	runnerOpts := s.prepare.RunnerOpts()
 	runnerOpts = append(runnerOpts, s.evaluate.RunnerOpts()...)

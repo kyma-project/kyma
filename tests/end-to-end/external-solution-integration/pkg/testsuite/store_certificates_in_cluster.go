@@ -21,19 +21,12 @@ type PEMCertificate struct {
 	PrivateKey  []byte   `json:"private_key"`
 }
 
-// ConnectApplication is a step which connects application with client certificates and saves connected httpClient in the state
 type StoreCertificatesInCluster struct {
 	getCertificates func() []tls.Certificate
 	ds              *testkit.DataStore
 	appName         string
 }
 
-// ConnectApplicationState allows ConnectApplication to save connected http.Client for further use by other steps
-type StoreCertificatesInClusterState interface {
-	SetGatewayClientCerts(certs []tls.Certificate)
-}
-
-// NewConnectApplication returns new ConnectApplication
 func NewStoreCertificatesInCluster(ds *testkit.DataStore, applicationName string, get func() []tls.Certificate) *StoreCertificatesInCluster {
 	return &StoreCertificatesInCluster{
 		ds:              ds,
