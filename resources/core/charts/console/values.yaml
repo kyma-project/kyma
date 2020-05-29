@@ -28,7 +28,7 @@ compass_mfs:
 console:
   image:
     pullPolicy: IfNotPresent
-    tag: caa72ad5
+    tag: 78fc0967
   service:
     externalPort: 80
     internalPort: 8080
