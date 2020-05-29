@@ -1,4 +1,4 @@
-{{- if (.Values.certsSetupJob.enabled) }}
+{{- if .Values.certsSetupJob.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -7,6 +7,11 @@ metadata:
   annotations:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   template:
     metadata:
@@ -31,4 +36,4 @@ spec:
       securityContext:
 {{ toYaml . | indent 12 }}
       {{- end }}
-{{- end -}}
+{{- end }}

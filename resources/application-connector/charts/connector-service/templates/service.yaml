@@ -54,7 +54,7 @@ metadata:
 spec:
   selector:
     app: {{ .Chart.Name }}
-    release: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
   - name: http-metrics
     port: 9090
