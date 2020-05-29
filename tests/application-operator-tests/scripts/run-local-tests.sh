@@ -37,8 +37,6 @@ spec:
     image: application-operator-tests
     imagePullPolicy: Never
     env:
-    - name: TILLER_HOST
-      value: tiller-deploy.kube-system.svc.cluster.local:44134
     - name: NAMESPACE
       value: kyma-integration
     - name: INSTALLATION_TIMEOUT_SECONDS

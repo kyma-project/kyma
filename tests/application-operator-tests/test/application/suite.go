@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 
@@ -17,7 +16,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
 	hapirelease1 "k8s.io/helm/pkg/proto/hapi/release"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
 )
 
 const (
@@ -30,6 +28,7 @@ const (
 
 type TestSuite struct {
 	application string
+	namespace   string
 
 	config     testkit.TestConfig
 	helmClient testkit.HelmClient
@@ -48,7 +47,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	helmClient, err := testkit.NewHelmClient(config.TillerHost, config.TillerTLSKeyFile, config.TillerTLSCertificateFile, config.TillerTLSSkipVerify)
+	helmClient, err := testkit.NewHelmClient(config.HelmDriver)
 	require.NoError(t, err)
 
 	testPodsLabels := labels.Set{
@@ -57,8 +56,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	}
 
 	return &TestSuite{
-		application: app,
-
+		application:         app,
 		config:              config,
 		helmClient:          helmClient,
 		k8sClient:           k8sResourcesClient,
@@ -93,19 +91,22 @@ func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T) {
 }
 
 func (ts *TestSuite) RunApplicationTests(t *testing.T) {
-	wg := sync.WaitGroup{}
-	wg.Add(2)
 
 	t.Log("Running application tests")
-	responseChan, errorChan := ts.helmClient.TestRelease(ts.application)
+	_, err := ts.helmClient.TestRelease(ts.application, ts.config.Namespace)
 
-	go ts.receiveTestResponse(t, &wg, responseChan)
-	go ts.receiveErrorResponse(t, &wg, errorChan)
+	t.Logf("%s tests finished.", ts.application)
 
-	wg.Wait()
+	ts.getLogsAndCleanup(t)
+
+	if err != nil  {
+		t.Errorf("Error while executing tests for %s release: %s", ts.application, err.Error())
+		t.Logf("%s tests failed", ts.application)
+		t.Fatal("Application tests failed")
+	}
 }
 
-func (ts *TestSuite) receiveTestResponse(t *testing.T, wg *sync.WaitGroup, responseChan <-chan *rls.TestReleaseResponse) {
+/*unc (ts *TestSuite) receiveTestResponse(t *testing.T, wg *sync.WaitGroup, responseChan <-chan *rls.TestReleaseResponse) {
 	defer wg.Done()
 
 	testFailed := false
@@ -134,7 +135,7 @@ func (ts *TestSuite) receiveErrorResponse(t *testing.T, wg *sync.WaitGroup, erro
 	}
 
 	t.Log("Error channel closed")
-}
+}*/
 
 func (ts *TestSuite) getLogsAndCleanup(t *testing.T) {
 	podsToFetch, err := ts.k8sClient.ListPods(metav1.ListOptions{LabelSelector: ts.labelSelector})
