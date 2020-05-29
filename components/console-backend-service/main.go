@@ -4,8 +4,8 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless"
@@ -13,7 +13,8 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/golang/glog"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -26,8 +27,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/origin"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/signal"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/tracing"
-	opentracing "github.com/opentracing/opentracing-go"
-	zipkin "github.com/openzipkin/zipkin-go-opentracing"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
 	"github.com/vrischmann/envconfig"
@@ -35,6 +34,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 type config struct {
@@ -76,7 +76,7 @@ func main() {
 	if !developmentMode {
 		authenticator, err = authn.NewOIDCAuthenticator(&cfg.OIDC)
 		exitOnError(err, "Error while creating OIDC authenticator")
-		sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
+		sarClient := kubeClient.AuthorizationV1().SubjectAccessReviews()
 		authorizer, err := authz.NewAuthorizer(sarClient, cfg.SARCacheConfig)
 		exitOnError(err, "Failed to create authorizer")
 
@@ -139,9 +139,8 @@ func newRestClientConfig(kubeconfigPath string, burst int) (*restclient.Config, 
 }
 
 func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema, authenticator authenticatorpkg.Request) {
-	setupTracing(cfg.Tracing, cfg.Port)
 	var allowedOrigins []string
-	if len(allowedOrigins) == 0 {
+	if len(cfg.AllowedOrigins) == 0 {
 		allowedOrigins = []string{"*"}
 	} else {
 		allowedOrigins = cfg.AllowedOrigins
@@ -152,14 +151,14 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 	if authenticator != nil {
 		router.Use(authn.AuthMiddleware(authenticator))
 	}
-	router.HandleFunc("/", handler.Playground("Dataloader", "/graphql"))
-	graphQLHandler := handler.GraphQL(schema,
-		handler.WebsocketUpgrader(websocket.Upgrader{
+	router.Handle("/", playground.Handler("Kyma GQL", "/graphql"))
+	graphQLHandler := handler.NewDefaultServer(schema)
+	graphQLHandler.AddTransport(&transport.Websocket{
+		Upgrader: websocket.Upgrader{
 			CheckOrigin: origin.CheckFn(allowedOrigins),
-		}),
-		handler.Tracer(tracing.New()),
-	)
-	router.HandleFunc("/graphql", tracing.NewWithParentSpan(cfg.Tracing.ServiceSpanName, graphQLHandler))
+		},
+	})
+	router.Handle("/graphql", graphQLHandler)
 	serverHandler := cors.New(cors.Options{
 		AllowedOrigins: allowedOrigins,
 		AllowedMethods: []string{
@@ -188,11 +187,4 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 	}
 }
 
-func setupTracing(cfg tracing.Config, hostPort int) {
-	collector, err := zipkin.NewHTTPCollector(cfg.CollectorUrl)
-	exitOnError(err, "Error while initializing zipkin")
-	recorder := zipkin.NewRecorder(collector, cfg.Debug, strconv.Itoa(hostPort), cfg.ServiceSpanName)
-	tracer, err := zipkin.NewTracer(recorder, zipkin.TraceID128Bit(false))
-	exitOnError(err, "Error while initializing tracer")
-	opentracing.SetGlobalTracer(tracer)
-}
+
