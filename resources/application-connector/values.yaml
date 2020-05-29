@@ -24,7 +24,7 @@ global:
     version: PR-8417
   application_operator_tests:
     dir:
-    version: d4a1c24a
+    version: PR-8417
   connector_service:
     dir:
     version: 4e3576cd
