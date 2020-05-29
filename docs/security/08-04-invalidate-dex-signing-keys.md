@@ -1,3 +1,4 @@
+---
 title: Invalidate Dex signing keys
 type: Tutorials
 ---
