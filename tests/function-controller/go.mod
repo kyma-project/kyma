@@ -3,9 +3,7 @@ module github.com/kyma-project/kyma/tests/function-controller
 go 1.14
 
 require (
-	contrib.go.opencensus.io/exporter/stackdriver v0.13.1 // indirect
 	github.com/golang/protobuf v1.4.0 // indirect
-	github.com/google/go-containerregistry v0.0.0-20200430153450-5cbd060f5c92 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
@@ -31,7 +29,6 @@ require (
 	k8s.io/utils v0.0.0-20200414100711-2df71ebbae66 // indirect
 	knative.dev/eventing v0.12.0
 	knative.dev/pkg v0.0.0-20200207155214-fef852970f43
-	knative.dev/serving v0.12.1
 	sigs.k8s.io/controller-runtime v0.5.2
 )
 
