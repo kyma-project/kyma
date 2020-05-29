@@ -127,7 +127,7 @@ func testPodsAreReady() {
 
 func testTargetsAreHealthy() {
 	timeout := time.After(3 * time.Minute)
-	tick := time.NewTicker(30 * time.Second)
+	tick := time.NewTicker(5 * time.Second)
 
 	var timeoutMessage string
 	for {
@@ -188,7 +188,7 @@ func shouldIgnoreTarget(target promAPI.Labels) bool {
 
 func testRulesAreHealthy() {
 	timeout := time.After(3 * time.Minute)
-	tick := time.NewTicker(30 * time.Second)
+	tick := time.NewTicker(5 * time.Second)
 	var timeoutMessage string
 	for {
 		select {
