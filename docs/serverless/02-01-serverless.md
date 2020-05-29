@@ -12,7 +12,7 @@ Serverless relies on [Knative Serving](https://knative.dev/docs/serving/) for de
 
     >**NOTE:** Function Controller sets the Node.js 12 runtime by default.
 
-2. Before the Function can be saved or updated, it is verified sequentially by the [defaulting and validation webhooks](#supported-webhooks).
+2. Before the Function can be saved or updated, it is first updated and then verified by the [defaulting and validation webhooks](#supported-webhooks) respectively.
 
 3. Function Controller (FC) detects the new, validated Function CR.
 
@@ -20,7 +20,7 @@ Serverless relies on [Knative Serving](https://knative.dev/docs/serving/) for de
 
 5. Based on the ConfigMap, FC creates a Kubernetes Job that triggers the creation of a Function image.
 
-6. The Job creates a Pod with the Docker image containing the Function definition. It also pushes the image to a Docker registry.
+6. The Job creates a Pod which builds the production Docker image based on the Function's definition. The Job then pushes this image to a Docker registry.
 
 7. FC monitors the Job status. When the image creation finishes successfully, FC creates a Service CR (KService) that points to the Pod with the image.
 
