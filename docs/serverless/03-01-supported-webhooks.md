@@ -3,7 +3,7 @@ title: Supported webhooks
 type: Details
 ---
 
-A newly created or updated Function CR is first updated by the defaulting webhook and then verified by the validation webhook before the Function Controller starts to process it:
+A newly created or modified Function CR is first updated by the defaulting webhook and then verified by the validation webhook before the Function Controller starts to process it:
 
 1. **Defaulting webhook** sets the default values for CPU and memory requests and limits, and adds the maximum and the minimum number of replicas, if not specified already in the Function CR.
 
