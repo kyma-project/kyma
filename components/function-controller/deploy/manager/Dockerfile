@@ -32,7 +32,7 @@ RUN apk --update add ca-certificates
 # result container
 FROM scratch
 
-LABEL source = git@github.com:kyma-project/kyma/components/function-controller.git
+LABEL source = git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /app /app
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
