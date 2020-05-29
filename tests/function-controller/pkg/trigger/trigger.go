@@ -11,7 +11,6 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	watchtools "k8s.io/client-go/tools/watch"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
@@ -59,7 +58,7 @@ func (t *Trigger) Create(serviceName string) error {
 					Kind:       "Service",
 					Namespace:  t.namespace,
 					Name:       serviceName,
-					APIVersion: servingv1.SchemeGroupVersion.String(),
+					APIVersion: corev1.SchemeGroupVersion.Version,
 				},
 			},
 		},
