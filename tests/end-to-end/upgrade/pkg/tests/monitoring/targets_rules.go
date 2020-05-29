@@ -176,7 +176,7 @@ func (t TargetsAndRulesTest) testTargetsAreHealthy() error {
 			allTargetsAreHealthy := true
 			timeoutMessage = ""
 			for _, target := range activeTargets {
-				if target.Health != "up" && target.Labels.Job != "istio-ingressgateway" {
+				if target.Health != "up" {
 					allTargetsAreHealthy = false
 					timeoutMessage += "The following target is not healthy:\n"
 					for label, value := range target.Labels {
