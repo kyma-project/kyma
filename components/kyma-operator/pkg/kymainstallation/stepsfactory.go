@@ -77,7 +77,7 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]kymahelm.Relea
 		for _, release := range releases {
 			var lastDeployedRev int
 
-			statusCode := release.StatusCode
+			statusCode := release.Status
 			if statusCode == kymahelm.StatusDeployed {
 				lastDeployedRev = release.CurrentRevision
 			} else {
@@ -89,7 +89,7 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]kymahelm.Relea
 
 			log.Printf("%s status: %s, last deployed revision: %d", release.Name, statusCode, lastDeployedRev)
 			existingReleases[release.Name] = kymahelm.ReleaseStatus{
-				StatusCode:           statusCode,
+				Status:               statusCode,
 				CurrentRevision:      release.CurrentRevision,
 				LastDeployedRevision: lastDeployedRev,
 			}

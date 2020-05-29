@@ -9,8 +9,6 @@ import (
 	"log"
 	"strings"
 	"time"
-
-	"k8s.io/helm/pkg/helm"
 )
 
 // ClientInterface .
@@ -22,7 +20,7 @@ type ClientInterface interface {
 	InstallReleaseFromChart(chartDir, ns, relName, overrides string) (*Release, error)
 	InstallRelease(chartDir, ns, relName, overrides string) (*Release, error)
 	InstallReleaseWithoutWait(chartDir, ns, relName, overrides string) (*Release, error)
-	UpgradeRelease(chartDir, releaseName, overrides string) (*Release, error)
+	UpgradeRelease(chartDir, relName, overrides string) (*Release, error)
 	DeleteRelease(relName string) (*Release, error) //todo: rename to "uninstall"
 	RollbackRelease(relName string, revision int) (*Release, error)
 	PrintRelease(release *Release)
@@ -31,7 +29,6 @@ type ClientInterface interface {
 // Client .
 type Client struct {
 	cfg             *action.Configuration
-	helm            *helm.Client
 	overridesLogger *logrus.Logger
 	maxHistory      int
 	timeout         time.Duration
@@ -230,7 +227,7 @@ func (hc *Client) PrintRelease(release *Release) {
 	log.Printf("Name: %s", release.Name)
 	log.Printf("Namespace: %s", release.Namespace)
 	log.Printf("Version: %d", release.CurrentRevision)
-	log.Printf("Status: %s", release.StatusCode)
+	log.Printf("Status: %s", release.Status)
 	log.Printf("Description: %s", release.Description)
 }
 
