@@ -1,10 +1,11 @@
 package kymahelm
 
 import (
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 
 	"github.com/avast/retry-go"
 	"github.com/sirupsen/logrus"
