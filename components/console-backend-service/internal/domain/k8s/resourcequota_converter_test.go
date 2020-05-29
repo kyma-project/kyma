@@ -26,7 +26,17 @@ func TestResourceQuotaConverter_ToGQLs(t *testing.T) {
 
 	// THEN
 	assert.Equal(t, []*gqlschema.ResourceQuota{
-		{Name: "mem-default"},
+		{
+			Name: "mem-default",
+			Limits: &gqlschema.ResourceValues{
+				Memory: nil,
+				CPU:    nil,
+			},
+			Requests: &gqlschema.ResourceValues{
+				Memory: nil,
+				CPU:    nil,
+			},
+		},
 	}, result)
 }
 
@@ -44,6 +54,14 @@ func TestResourceQuotaConverter_ToGQL(t *testing.T) {
 			},
 			expected: &gqlschema.ResourceQuota{
 				Name: "mem-default",
+				Limits: &gqlschema.ResourceValues{
+					Memory: nil,
+					CPU:    nil,
+				},
+				Requests: &gqlschema.ResourceValues{
+					Memory: nil,
+					CPU:    nil,
+				},
 			},
 		},
 		"full": {

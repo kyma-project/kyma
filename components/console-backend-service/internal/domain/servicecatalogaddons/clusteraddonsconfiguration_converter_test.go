@@ -165,6 +165,7 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 							},
 						},
 					},
+					Status: &gqlschema.AddonsConfigurationStatus{},
 				},
 				{
 					Name: "test2",
@@ -177,6 +178,7 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 							URL: url,
 						},
 					},
+					Status: &gqlschema.AddonsConfigurationStatus{},
 				},
 			},
 		},

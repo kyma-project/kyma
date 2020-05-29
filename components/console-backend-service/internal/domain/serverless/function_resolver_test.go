@@ -279,11 +279,11 @@ func TestFunctionResolver_DeleteManyFunction(t *testing.T) {
 
 		mutation1 := fixGQLMetadata("1", "a")
 		mutation2 := fixGQLMetadata("2", "a")
-		mutations := []gqlschema.FunctionMetadata{mutation1, mutation2}
+		mutations := []*gqlschema.FunctionMetadata{mutation1, mutation2}
 
 		svc := automock.NewFunctionService()
-		svc.On("Delete", mutationInput1).Return(nil).Once()
-		svc.On("Delete", mutationInput2).Return(nil).Once()
+		svc.On("Delete", *mutationInput1).Return(nil).Once()
+		svc.On("Delete", *mutationInput2).Return(nil).Once()
 		defer svc.AssertExpectations(t)
 
 		resourceLister := new(shared.ServiceBindingUsageLister)
@@ -308,14 +308,14 @@ func TestFunctionResolver_DeleteManyFunction(t *testing.T) {
 		resources := []*gqlschema.FunctionMetadataInput{mutationInput1, mutationInput2}
 
 		svc := automock.NewFunctionService()
-		svc.On("Delete", mutationInput1).Return(expected).Once()
+		svc.On("Delete", *mutationInput1).Return(expected).Once()
 		defer svc.AssertExpectations(t)
 
 		resolver := newFunctionResolver(svc, nil, nil, nil)
 
 		result, err := resolver.DeleteManyFunctions(nil, "a", resources)
 		require.Error(t, err)
-		require.Equal(t, []gqlschema.FunctionMetadata{}, result)
+		require.Equal(t, []*gqlschema.FunctionMetadata{}, result)
 	})
 }
 
@@ -369,8 +369,8 @@ func fixGQLMetadataInput(name, namespace string) *gqlschema.FunctionMetadataInpu
 	}
 }
 
-func fixGQLMetadata(name, namespace string) gqlschema.FunctionMetadata {
-	return gqlschema.FunctionMetadata{
+func fixGQLMetadata(name, namespace string) *gqlschema.FunctionMetadata {
+	return &gqlschema.FunctionMetadata{
 		Name:      name,
 		Namespace: namespace,
 	}
