@@ -1,11 +1,13 @@
 package kymahelm
 
 import (
+	"github.com/avast/retry-go"
 	"github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/release"
 	"log"
+	"strings"
 	"time"
 
 	"k8s.io/helm/pkg/helm"
@@ -82,33 +84,34 @@ func (hc *Client) ReleaseStatus(relName string) (string, error) {
 
 //IsReleaseDeletable returns true for release that can be deleted
 func (hc *Client) IsReleaseDeletable(relName string) (bool, error) { //todo: helm3 allows atomic operations, this func might be useless
-	//isDeletable := false
-	//maxAttempts := 3
-	//fixedDelay := 3
-	//
-	//err := retry.Do(
-	//	func() error {
-	//		statusRes, err := hc.helm.ReleaseStatus(relName)
-	//		if err != nil {
-	//			if strings.Contains(err.Error(), errors.ErrReleaseNotFound(relName).Error()) {
-	//				isDeletable = false
-	//				return nil
-	//			}
-	//			return err
-	//		}
-	//		isDeletable = statusRes.Info.Status.Code != release.Status_DEPLOYED
-	//		return nil
-	//	},
-	//	retry.Attempts(uint(maxAttempts)),
-	//	retry.DelayType(func(attempt uint, config *retry.Config) time.Duration {
-	//		log.Printf("Retry number %d on getting release status.\n", attempt+1)
-	//		return time.Duration(fixedDelay) * time.Second
-	//	}),
-	//)
-	//
-	//return isDeletable, err
 
-	return true, nil
+	isDeletable := false
+	maxAttempts := 3
+	fixedDelay := 3
+
+	status := action.NewStatus(hc.cfg)
+
+	err := retry.Do(
+		func() error {
+			rel, err := status.Run(relName)
+			if err != nil {
+				if strings.Contains(err.Error(), "not found") { //todo: replace with actual h3 error if it exists
+					isDeletable = false
+					return nil
+				}
+				return err
+			}
+			isDeletable = rel.Info.Status != release.StatusDeployed
+			return nil
+		},
+		retry.Attempts(uint(maxAttempts)),
+		retry.DelayType(func(attempt uint, config *retry.Config) time.Duration {
+			log.Printf("Retry number %d on getting release status.\n", attempt+1)
+			return time.Duration(fixedDelay) * time.Second
+		}),
+	)
+
+	return isDeletable, err
 }
 
 func (hc *Client) ReleaseDeployedRevision(relName string) (int, error) { //todo: helm3 allows atomic operations, this func might be useless
