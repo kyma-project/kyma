@@ -26,7 +26,7 @@ A newly created or modified Function CR is first updated by the defaulting webho
     | **minRequestMemory** | `16Mi` |
     | **minReplicasValue** | `0` |
 
-    - Requests are lower than or equal to limits, and that the minimum number of replicas is lower than or equal to the maximum one.
+    - Requests are lower than or equal to limits, and the minimum number of replicas is lower than or equal to the maximum one.
     - The Function CR contains all the required parameters.
     - The format of deps, envs, labels, and the Function name ([RFC 1035](https://tools.ietf.org/html/rfc1035)) is correct.
     - The Function CR contains any envs reserved for the KService: `K_REVISION`, `K_CONFIGURATION`, `K_SERVICE`, `FUNC_RUNTIME`, `FUNC_HANDLER`, `FUNC_TIMEOUT`, `FUNC_PORT`, `PORT`, `MOD_NAME`, `NODE_PATH`.
