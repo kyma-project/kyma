@@ -49,17 +49,21 @@ spec:
     name: my-bucket
   displayName: "Operations svc"
 status:
-  phase: Failed
-  reason: ValidationFailed
-  message: "The file is not valid against the provided json schema"
+  phase: Ready
+  reason: Uploaded
+  message: Asset content has been uploaded
   lastHeartbeatTime: "2018-01-03T07:38:24Z"
   observedGeneration: 1
   assetRef:
-    assets:
-    - README.md
-    - directory/subdirectory/file.md
-    baseUrl: https://{STORAGE_ADDRESS}/test-sample-1b19rnbuc6ir8/asset-sample
-
+    baseUrl: https://{STORAGE_ADDRESS}/my-bucket-1b19rnbuc6ir8/my-package-assets
+    files:
+    - metadata:
+        title: Overview
+      name: README.md
+    - metadata:
+        title: Benefits of distributed storage
+        type: Details
+      name: directory/subdirectory/file.md
 ```
 
 ## Custom resource parameters
@@ -100,7 +104,9 @@ This table lists all possible parameters of a given resource together with their
 | **status.lastHeartbeatTime** | Not applicable | Specifies when was the last time the Asset Controller processed the Asset CR. |
 | **status.observedGeneration** | Not applicable | Specifies the most recent Asset CR generation that the Asset Controller observed. |
 | **status.assetRef** | Not applicable  | Provides details on the location of the assets stored in the bucket.   |
-| **status.assetRef.assets** | Not applicable | Provides the relative path to the given asset in the storage bucket. |
+| **status.assetRef.files** | Not applicable | Provides asset metadata and the relative path to the given asset in the storage bucket with metadata. |
+| **status.assetRef.files.metadata** | Not applicable | Lists metadata extracted from the asset. |
+| **status.assetRef.files.name** | Not applicable | Specifies the relative path to the given asset in the storage bucket. |
 | **status.assetRef.baseUrl** | Not applicable | Specifies the absolute path to the location of the assets in the storage bucket. |
 
 > **NOTE:** The Asset Controller automatically adds all parameters marked as **Not applicable** to the Asset CR.

@@ -1,6 +1,7 @@
 package overrides
 
 import (
+	"context"
 	"strings"
 
 	core "k8s.io/api/core/v1"
@@ -92,7 +93,7 @@ func (r reader) readCommonOverrides() ([]inputMap, error) {
 
 func (r reader) getLabeledConfigMaps(opts metav1.ListOptions) ([]core.ConfigMap, error) {
 
-	configmaps, err := r.client.CoreV1().ConfigMaps(namespace).List(opts)
+	configmaps, err := r.client.CoreV1().ConfigMaps(namespace).List(context.TODO(), opts)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +102,7 @@ func (r reader) getLabeledConfigMaps(opts metav1.ListOptions) ([]core.ConfigMap,
 
 func (r reader) getLabeledSecrets(opts metav1.ListOptions) ([]core.Secret, error) {
 
-	secrets, err := r.client.CoreV1().Secrets(namespace).List(opts)
+	secrets, err := r.client.CoreV1().Secrets(namespace).List(context.TODO(), opts)
 	if err != nil {
 		return nil, err
 	}
