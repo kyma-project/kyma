@@ -3,7 +3,7 @@ title: Issues with certificates on Gardener
 type: Troubleshooting
 ---
 
-During installation on Gardener, Kyma requests domain SSL certificates using the Gardener's [`Certificate`](https://gardener.cloud/050-tutorials/content/howto/x509_certificates/#request-a-certificate-via-certificate) custom resource to ensure secure communication through both Kyma UI and Kubernetes CLI. 
+During installation on Gardener, Kyma requests domain SSL certificates using the Gardener's [`Certificate`](https://gardener.cloud/documentation/050-tutorials/content/howto/x509_certificates/#request-a-certificate-via-certificate) custom resource to ensure secure communication through both Kyma UI and Kubernetes CLI. 
 
 This process can result in the following issues:
 

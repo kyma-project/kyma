@@ -25,7 +25,7 @@ spec:
       JSONPath: .spec.serviceBrokerName
     - name: Class
       type: string
-      JSONPath: .spec.serviceClassRef.Name
+      JSONPath: .spec.serviceClassRef.name
     - name: Age
       type: date
       JSONPath: .metadata.creationTimestamp

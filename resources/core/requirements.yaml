@@ -1,5 +1,3 @@
 dependencies:
-  - name: kubeless
-    condition: kubeless.enabled
   - name: docs
     condition: docs.enabled

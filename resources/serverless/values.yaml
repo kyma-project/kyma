@@ -7,14 +7,14 @@ fullnameOverride: "serverless"
 bindingsMigration:
   image:
     repository: 'eu.gcr.io/kyma-project/test-infra/alpine-kubectl'
-    tag: 'v20200310-5f52f407'
+    tag: 'v20200507-070ff576'
     pullPolicy: IfNotPresent
 
 tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-8542"
+    tag: "PR-8513"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -62,7 +62,7 @@ images:
     pullPolicy: IfNotPresent
   functionRuntimeNodejs12:
     repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-    tag: "a62f4a7f"  
+    tag: "a62f4a7f"
 
 deployment:
   replicas: 1
@@ -210,7 +210,7 @@ clusterMicroFrontend:
 grafanaDashboard:
   enabled: true
 
-usageKind: 
+usageKind:
   name: serverless-function
 
 docker-registry:
@@ -233,3 +233,7 @@ docker-registry:
             path: password.txt
     - name: htpasswd-data
       emptyDir: {}
+
+webhook:
+  enabled: true
+  fullnameOverride: "serverless-webhook"
