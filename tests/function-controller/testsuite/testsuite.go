@@ -398,23 +398,33 @@ func (t *TestSuite) LogResources() {
 		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
 	}
 
-	fnYaml, err := t.prettyYaml(fn)
+	fnStatusYaml, err := t.prettyYaml(fn.Status)
 	if err != nil {
 		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
 	}
 
-	jobsYaml, err := t.prettyYaml(jobs)
-	if err != nil {
-		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
+	var jobStatusYaml string
+	switch len(jobs.Items) {
+	case 0:
+		t.t.Log("no job resources matching needed labels")
+		jobStatusYaml = "no job resources matching needed labels"
+	default:
+		jobStatusYaml, err = t.prettyYaml(jobs.Items[0].Status)
+		if err != nil {
+			t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
+		}
+
 	}
 
 	t.t.Logf(`Pretty printed resources:
 ---
+Function's status:
 %s
 ---
+Job's status:
 %s
 ---
-`, fnYaml, jobsYaml)
+`, fnStatusYaml, jobStatusYaml)
 }
 
 func (t *TestSuite) prettyYaml(resource interface{}) (string, error) {
