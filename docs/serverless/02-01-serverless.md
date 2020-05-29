@@ -12,19 +12,21 @@ Serverless relies on [Knative Serving](https://knative.dev/docs/serving/) for de
 
     >**NOTE:** Function Controller sets the Node.js 12 runtime by default.
 
-2. Function Controller (FC) detects a new Function CR.
+2. Before the Function can be saved or updated, it is verified verified sequentially by the [defaulting and validation webhooks](#supported-webshooks).
 
-3. FC creates a ConfigMap with the Function definition.
+3. Function Controller (FC) detects the new, validated Function CR.
 
-4. Based on the ConfigMap, FC creates a Kubernetes Job that triggers the creation of a Function image.
+4. FC creates a ConfigMap with the Function definition.
 
-5. The Job creates a Pod with the Docker image containing the Function definition. It also pushes the image to a Docker registry.
+5. Based on the ConfigMap, FC creates a Kubernetes Job that triggers the creation of a Function image.
 
-6. FC monitors the Job status. When the image creation finishes successfully, FC creates a Service CR (KService) that points to the Pod with the image.
+6. The Job creates a Pod with the Docker image containing the Function definition. It also pushes the image to a Docker registry.
 
-7. Knative Serving Controller (KSC) detects the new KService and reads its definition.
+7. FC monitors the Job status. When the image creation finishes successfully, FC creates a Service CR (KService) that points to the Pod with the image.
 
-8. KSC creates these resources:
+8. Knative Serving Controller (KSC) detects the new KService and reads its definition.
+
+9. KSC creates these resources:
 
     - Service Placeholder - a Kubernetes Service which has exactly the same name as the KService but [has no selectors](https://kubernetes.io/docs/concepts/services-networking/service/#services-without-selectors) (does not point to any Pods). Its purpose is only to register the actual service name, such as `helloworld`, so it is unique. This service is exposed on port `80`.
 
