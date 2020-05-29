@@ -10,6 +10,7 @@ import (
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/release"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
 
 // ClientInterface .
@@ -36,9 +37,15 @@ type Client struct {
 }
 
 // NewClient .
-func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify bool, overridesLogger *logrus.Logger, maxHistory int, timeout int64) (*Client, error) { //keeping the signature; todo: remove unused params,  change int32 -> int, don't return error
+func NewClient(  overridesLogger *logrus.Logger, maxHistory int, timeout int64) (*Client, error) {
+	cfg := &action.Configuration{}
+	clientGetter := genericclioptions.NewConfigFlags(false)
+	debugLog := overridesLogger.Printf
+
+	cfg.Init(clientGetter, "kyma-installer", "memory", debugLog)
+
 	return &Client{
-		cfg:             nil, //todo: declare in main, pass in params; cfg.Init()
+		cfg:             cfg,
 		overridesLogger: overridesLogger,
 		maxHistory:      maxHistory,
 		timeout:         time.Duration(timeout) * time.Second,
