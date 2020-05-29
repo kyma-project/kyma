@@ -27,7 +27,7 @@ rules:
     resources: ["deployments"]
     verbs: ["get", "list"]   
   - apiGroups: ["batch"]
-    resources: ["job"]
+    resources: ["jobs"]
     verbs: ["list"]    
   - apiGroups: ["serverless.kyma-project.io"]
     resources: ["functions"]
