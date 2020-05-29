@@ -28,7 +28,7 @@ nameOverride:
 # If specified, these labels are applied in place of the default "app" label.
 defaultLabels: {}
 
-# Whether to apply labels specific to Helm: chart, release, heritage.
+# Whether to apply labels specific to Helm: chart, release.
 helmLabels:
   enabled: true
 
