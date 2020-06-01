@@ -21,13 +21,10 @@ metadata:
     helm.sh/chart: {{ include "chart" . }}
 rules:
   - apiGroups: [""]
-    resources: ["namespaces", "services"]
+    resources: ["namespaces"]
     verbs: ["create", "get", "delete", "list", "watch"]
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
-    verbs: ["get", "list"]   
   - apiGroups: ["batch"]
-    resources: ["jobs"]
+    resources: ["job"]
     verbs: ["list"]    
   - apiGroups: ["serverless.kyma-project.io"]
     resources: ["functions"]
@@ -51,6 +48,12 @@ rules:
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["serviceinstances", "servicebindings"]
     verbs: ["create", "get", "delete", "list", "watch"]
+  - apiGroups: ["serving.knative.dev"]
+    resources: ["revisions"]
+    verbs: ["list"]
+  - apiGroups: ["serving.knative.dev"]
+    resources: ["services"]
+    verbs: ["get"]    
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
