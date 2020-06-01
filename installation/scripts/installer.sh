@@ -49,7 +49,6 @@ echo "
 "
 
 bash ${CURRENT_DIR}/is-ready.sh kube-system k8s-app kube-dns
-bash ${CURRENT_DIR}/install-tiller.sh
 
 if [ $CR_PATH ]; then
 
@@ -83,6 +82,3 @@ bash ${CURRENT_DIR}/configure-components.sh
 
 echo -e "\nStarting installation!"
 kubectl apply -f - <<< "$COMBO_YAML"
-
-echo -e "\nGetting Helm certificates"
-${CURRENT_DIR}/tiller-tls.sh && echo "Certificates successfully saved! " || echo "An unexpected error occured while saving Helm certificates. Please check the installation status"
