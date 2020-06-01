@@ -39,20 +39,14 @@ spec:
         image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
         terminationMessagePolicy: "FallbackToLogsOnError"
         volumeMounts:
-        - name: crd-app-connector
+        - name: crd-knative-provisioner
           mountPath: /etc/crd
           readOnly: true
         command:
-        - timeout
-        - 60s
-        - bash
+        - /bin/bash
         - -c
-        - |-
-          until \
-            kubectl get crd natsschannels.messaging.knative.dev \
-            || kubectl apply -f /etc/crd/natsschannels.messaging.knative.dev; \
-          do sleep 2; done        
+        - timeout 60s bash -c 'until kubectl apply -f /etc/crd/natsschannels.messaging.knative.dev; do sleep 2; done'
       volumes:
-      - name: crd-app-connector
+      - name: crd-knative-provisioner
         configMap:
           name: {{ .Release.Name }}-crd-knative-provisioner
