@@ -96,11 +96,11 @@ type: Details
   Service Catalog UI preview
   </summary>
 
-![](./assets/catalog-ui-docs.png)
+![Documentation tab](./assets/catalog-ui-docs.png)
   </details>
 </div>
 
->**NOTE:** A document with the **Overview** `title` always displays as the first tab. Markdown files with `title` other than **Overview** appear in alphanumeric order.
+>**NOTE:** A document with the **Overview** `title` always displays as the first tab. Markdown files with `title` other than **Overview** appear in an alphanumeric order.
 
 ### Content
 
@@ -162,7 +162,7 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       Preview
       </summary>
 
-    ![](./assets/docs-toggle.png)
+    ![Documentation toggle](./assets/docs-toggle.png)
       </details>
     </div>
 
@@ -183,7 +183,7 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       Preview
       </summary>
 
-    ![](./assets/tip-panel.png)
+    ![TIP panel](./assets/tip-panel.png)
       </details>
     </div>
 

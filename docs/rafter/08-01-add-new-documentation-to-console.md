@@ -167,7 +167,7 @@ This tutorial shows how you can customize the Documentation view that is availab
 
 3. Open the Console UI and navigate to the Documentation view. The new **Prometheus** section with **Concepts** and **Guides** topic groups and alphabetically ordered Markdown documents appears at the bottom of the documentation panel:
 
-   ![](./assets/prometheus.png)
+   ![Overview of the Prometheus section](./assets/prometheus.png)
 
    >**NOTE:** Since the source Markdown documents are prepared for different UIs and can contain custom tags, there can be issues with rendering their full content. If you prepare your own input, use our [content guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines) to make sure the documents render properly in the Console UI.
 

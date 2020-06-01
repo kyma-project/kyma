@@ -5,7 +5,7 @@ type: Architecture
 
 This diagram provides an overview of the basic Asset and Bucket CRs flow and the role of particular components in this process:
 
-![](./assets/rafter-architecture-2.svg)
+![Rafter's architecture](./assets/rafter-architecture-2.svg)
 
 1. The user creates a bucket through a Bucket CR.
 2. The Bucket Controller (BC) listens for new events and acts upon receiving the Bucket CR creation event.

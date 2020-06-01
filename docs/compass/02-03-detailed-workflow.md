@@ -17,7 +17,7 @@ Connecting an Application consists of two phases: Application pairing and API re
 
 Application pairing phase is a process of creating a new Application and establishing a trusted connection between the Application and Compass. The workflow looks as follows:
 
-![](./assets/app-pairing.svg)
+![Application pairing](./assets/app-pairing.svg)
 
 1. Administrator sends a request to register a new Application in Compass.
 2. Director registers the Application.
@@ -31,7 +31,7 @@ Application pairing phase is a process of creating a new Application and establi
 
 API registration phase is a process of registering new API and Event Definitions, which consists of two steps:
 
-![](./assets/api-registration.svg)
+![API registration](./assets/api-registration.svg)
 
 1. Application sends a request to the Director to register an API or Event Definition.
 2. Director returns the operation result to the Application.
@@ -40,7 +40,7 @@ API registration phase is a process of registering new API and Event Definitions
 
 The process of registering a new Runtime looks as follows:
 
-![](./assets/runtime-creation.svg)
+![Runtime creation](./assets/runtime-creation.svg)
 
 1. Administrator sends a request to provision a new Runtime.
 2. Runtime Provisioner requests Runtime configuration from the Director.
@@ -66,11 +66,11 @@ There are two options for updating Application configuration:
 
 In the first case, the Application periodically pulls configuration details, such as **eventURL**, for connected Runtimes.
 
-![](./assets/app-configuration-update.svg)
+![Application configuration update](./assets/app-configuration-update.svg)
 
 In the second case, if configuration for any connected Runtime changes, Application Webhook API notifies an Application that new configuration details are available. The following diagram shows the interaction between the Runtime Agent, the Director, and an Application when a new Runtime is configured successfully:
 
-![](./assets/runtime-notification.svg)
+![Runtime notification](./assets/runtime-notification.svg)
 
 1. Runtime Agent sends a request to change Application configuration.
 2. Director notifies the Application about the request.
@@ -81,4 +81,4 @@ In the second case, if configuration for any connected Runtime changes, Applicat
 
 Runtime Agent gets Runtime configuration details from the Director and applies the configuration asynchronously. The configuration details include information such as the list of Applications and their credentials. Runtime Agent periodically checks for new configuration details and applies the changes.
 
-![](./assets/runtime-configuration-update.svg)
+![Runtime configuration update](./assets/runtime-configuration-update.svg)
