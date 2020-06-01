@@ -197,7 +197,7 @@ func (hc *Client) InstallReleaseFromChart(chartDir, relNamespace, relName string
 	install.ReleaseName = relName
 	install.Namespace = relNamespace
 	install.Atomic = false
-	install.Wait = true //todo: defaults to true if atomic is set. Remove if atomic == true
+	install.Wait = true            //todo: defaults to true if atomic is set. Remove if atomic == true
 	install.CreateNamespace = true // see https://v3.helm.sh/docs/faq/#automatically-creating-namespaces
 
 	hc.PrintOverrides(values, relName, "install")
