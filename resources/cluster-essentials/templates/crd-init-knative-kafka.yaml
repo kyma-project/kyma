@@ -23,15 +23,9 @@ spec:
           mountPath: /etc/crd
           readOnly: true
         command:
-        - timeout
-        - 60s
-        - bash
+        - /bin/bash
         - -c
-        - |-
-          until \
-          kubectl get crd kafkachannels.knativekafka.kyma-project.io \
-          || kubectl apply -f /etc/crd/kafkachannel.yaml; \
-          do sleep 2; done
+        - timeout 60s bash -c 'until kubectl apply -f /etc/crd/kafkachannel.yaml; do sleep 2; done'
       volumes:
       - name: crd-knative-kafka
         configMap:
