@@ -10,8 +10,6 @@ VERIFY_IGNORE := /vendor\|/mocks
 test: 
 	@echo "Tests are not to be run at this stage."
 
-verify:: mod-verify
-
 resolve-local:
 	GO111MODULE=on go mod vendor -v
 
@@ -24,15 +22,8 @@ dep-status:
 dep-status-local:
 	@echo "Go modules present in component - omitting."
 
-mod-verify-local:
+verify-local:
 	GO111MODULE=on go mod verify
-
-test-local:
-	GO111MODULE=on go test ./...
-
-$(eval $(call buildpack-cp-ro,resolve))
-$(eval $(call buildpack-mount,mod-verify))
-$(eval $(call buildpack-mount,test))
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
