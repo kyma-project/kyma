@@ -52,7 +52,6 @@ func (s installStep) onError(installErr error) error {
 
 	if checkErr != nil {
 		statusErrMsg := fmt.Sprintf("Checking status of release \"%s\" failed with an error: %s", s.component.GetReleaseName(), checkErr.Error())
-		log.Println(statusErrMsg)
 		return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, statusErrMsg))
 	}
 

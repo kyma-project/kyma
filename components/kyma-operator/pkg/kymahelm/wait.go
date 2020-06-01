@@ -73,26 +73,18 @@ func (hc *Client) WaitForCondition(releaseName string, pf WaitPredicateFunc, opt
 
 func (hc *Client) WaitForReleaseDelete(releaseName string) (bool, error) {
 
-	initiallyExisted := false
-
 	pf := func(resp *rls.GetReleaseStatusResponse, getStatusRespErr error) (bool, error) {
 		if getStatusRespErr != nil {
 			if strings.Contains(getStatusRespErr.Error(), helmerrors.ErrReleaseNotFound(releaseName).Error()) {
-				if initiallyExisted {
-					log.Printf("WaitForReleaseDelete() - success: Release \"%s\" deleted.", releaseName)
-				} else {
-					log.Printf("WaitForReleaseDelete() - success: Release \"%s\" does not exist.", releaseName)
-				}
 				return true, nil
 			}
-			log.Printf("WaitForReleaseDelete() - error: %s", getStatusRespErr.Error())
+			log.Printf("Error while waiting for release delete: %s", getStatusRespErr.Error())
 			//Continue waiting
 			return false, nil
 		}
 
 		if resp != nil {
-			initiallyExisted = true
-			log.Printf("WaitForReleaseDelete() - pending: release found with status: %s/%s: %s", resp.Namespace, resp.Name, resp.Info.Status.Code.String())
+			log.Printf("Waiting for release delete: release status: %s/%s: %s", resp.Namespace, resp.Name, resp.Info.Status.Code.String())
 		}
 
 		//Continue waiting
@@ -106,21 +98,16 @@ func (hc *Client) WaitForReleaseRollback(releaseName string) (bool, error) {
 
 	pf := func(resp *rls.GetReleaseStatusResponse, getStatusRespErr error) (bool, error) {
 		if getStatusRespErr != nil {
-			log.Printf("WaitForReleaseRollback() - error: %s", getStatusRespErr.Error())
+			log.Printf("Error while waiting for release rollback: %s", getStatusRespErr.Error())
 			//Continue waiting
 			return false, nil
 		}
 
 		if resp != nil {
 			if resp.Info.Status.Code.String() == "DEPLOYED" {
-				log.Printf("WaitForReleaseRollback() - success: Release \"%s\" deployed.", releaseName)
 				return true, nil
 			}
-			if resp.Info.Status.Code.String() == "PENDING_ROLLBACK" {
-				log.Printf("WaitForReleaseRollback() - pending: release found with status: %s/%s: %s", resp.Namespace, resp.Name, resp.Info.Status.Code.String())
-			} else {
-				log.Printf("WaitForReleaseRollback() - pending: release found with unexpected status: %s/%s: %s", resp.Namespace, resp.Name, resp.Info.Status.Code.String())
-			}
+			log.Printf("Waiting for release rollback: release status: %s/%s: %s", resp.Namespace, resp.Name, resp.Info.Status.Code.String())
 		}
 
 		//Continue waiting
