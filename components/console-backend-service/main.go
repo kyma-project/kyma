@@ -39,7 +39,7 @@ import (
 
 type config struct {
 	Host                 string        `envconfig:"default=127.0.0.1"`
-	Port                 int           `envconfig:"default=3001"`
+	Port                 int           `envconfig:"default=3000"`
 	AllowedOrigins       []string      `envconfig:"optional"`
 	Verbose              bool          `envconfig:"default=false"`
 	KubeconfigPath       string        `envconfig:"optional"`
