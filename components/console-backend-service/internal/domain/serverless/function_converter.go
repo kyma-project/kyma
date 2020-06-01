@@ -300,7 +300,6 @@ func (c *functionConverter) fromGQLResources(resources *gqlschema.FunctionResour
 		return resourcesList, errs
 	}
 
-
 	resourcesReq := v1.ResourceRequirements{}
 	var errs apierror.ErrorFieldAggregate
 

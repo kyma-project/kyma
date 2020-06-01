@@ -46,7 +46,7 @@ func TestLimitRangeConverter_ToGQL(t *testing.T) {
 				},
 			},
 			expected: &gqlschema.LimitRange{
-				Name: fixLimitRangeName(),
+				Name:   fixLimitRangeName(),
 				Limits: []*gqlschema.LimitRangeItem{{}},
 			},
 		},

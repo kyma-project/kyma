@@ -4,9 +4,10 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"net/http"
 	"time"
+
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless"
 
@@ -32,9 +33,9 @@ import (
 	"github.com/vrischmann/envconfig"
 	authenticatorpkg "k8s.io/apiserver/pkg/authentication/authenticator"
 	"k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 type config struct {
@@ -182,10 +183,7 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 		}
 	}()
 
-
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 		glog.Errorf("HTTP server ListenAndServe: %v", err)
 	}
 }
-
-
