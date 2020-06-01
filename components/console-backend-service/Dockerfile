@@ -1,7 +1,20 @@
-FROM golang:1.11.4-alpine3.8 as builder
+FROM golang:1.13.11-alpine3.11 as builder
 
 ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/components/console-backend-service
+
+ENV GO111MODULE on
+
 WORKDIR ${BASE_APP_DIR}
+
+
+COPY ./go.mod .
+COPY ./go.sum .
+
+# cache deps before building and copying source so that we don't need to re-download as much
+# and so that source changes don't invalidate our downloaded layer
+RUN go mod download
+
+#
 
 #
 # Copy files
@@ -12,6 +25,7 @@ COPY ./internal/ ${BASE_APP_DIR}/internal/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
 COPY ./main.go ${BASE_APP_DIR}/
 COPY ./licenses/ ${BASE_APP_DIR}/licenses/
+# COPY . ${BASE_APP_DIR}/
 
 #
 # Build app

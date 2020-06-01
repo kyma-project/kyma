@@ -3,9 +3,30 @@ APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190930-d28d219
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-include $(SCRIPTS_DIR)/go-modules.mk
+# include $(SCRIPTS_DIR)/go-modules.mk
 
 VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
+IMG_NAME = $(APP_NAME)
+
+.PHONY:  format release 
+
+format:: imports fmt
+
+release: build-image push-image
+
+.PHONY: build-image push-image
+build-image: pull-licenses
+	docker build -t $(IMG_NAME) .
+push-image:
+	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
+	docker push $(IMG_NAME):$(TAG)
+
+pull-licenses:
+ifdef LICENSE_PULLER_PATH
+	bash $(LICENSE_PULLER_PATH)
+else
+	mkdir -p licenses
+endif
 
 
 .PHONY: path-to-referenced-charts
