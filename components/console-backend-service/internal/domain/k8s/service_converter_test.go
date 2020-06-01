@@ -28,6 +28,9 @@ func TestServiceConverter_ToGQL(t *testing.T) {
 		emptyServiceJSON, err := converter.serviceToGQLJSON(&v1.Service{})
 		expected := &gqlschema.Service{
 			JSON: emptyServiceJSON,
+			Status: &gqlschema.ServiceStatus{
+				LoadBalancer: &gqlschema.LoadBalancerStatus{},
+			},
 		}
 		result, err := converter.ToGQL(&v1.Service{})
 		require.NoError(t, err)
