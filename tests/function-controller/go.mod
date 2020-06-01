@@ -15,6 +15,7 @@ require (
 	github.com/kyma-project/kyma/components/function-controller v0.0.0-20200507074609-9796320d6479
 	github.com/onsi/gomega v1.9.0
 	github.com/pkg/errors v0.9.1
+	github.com/robfig/cron v1.2.0 // indirect
 	github.com/vrischmann/envconfig v1.2.0
 	golang.org/x/crypto v0.0.0-20200414173820-0848c9571904 // indirect
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect
@@ -28,10 +29,12 @@ require (
 	k8s.io/apimachinery v0.17.4
 	k8s.io/client-go v0.17.4
 	k8s.io/utils v0.0.0-20200414100711-2df71ebbae66 // indirect
-	knative.dev/eventing v0.14.0
-	knative.dev/pkg v0.0.0-20200513151758-7b6bb61326ae
-	knative.dev/serving v0.14.0
+	knative.dev/eventing v0.12.0
+	knative.dev/pkg v0.0.0-20200207155214-fef852970f43
+	knative.dev/serving v0.12.1
 	sigs.k8s.io/controller-runtime v0.5.2
 )
 
-replace knative.dev/serving => knative.dev/serving v0.14.0
+// mismatch among fun-controller, knative enevting and knative serving...
+// try to delete it after update of eventing/serving
+replace knative.dev/pkg => knative.dev/pkg v0.0.0-20200113182502-b8dc5fbc6d2f

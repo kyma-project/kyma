@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/watch"
@@ -53,7 +55,7 @@ func (t *Trigger) Create(serviceName string) error {
 		Spec: eventingv1alpha1.TriggerSpec{
 			Broker: broker.DefaultName,
 			Subscriber: duckv1.Destination{
-				Ref: &duckv1.KReference{
+				Ref: &corev1.ObjectReference{
 					Kind:       "Service",
 					Namespace:  t.namespace,
 					Name:       serviceName,
