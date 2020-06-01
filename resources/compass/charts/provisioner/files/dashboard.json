@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 178,
-  "iteration": 1590657189000,
+  "id": 57,
+  "iteration": 1591000872931,
   "links": [],
   "panels": [
     {
@@ -1178,7 +1178,10 @@
   ],
   "schemaVersion": 22,
   "style": "dark",
-  "tags": [],
+  "tags": [
+    "kyma",
+    "compass"
+  ],
   "templating": {
     "list": [
       {
@@ -1227,5 +1230,5 @@
   "variables": {
     "list": []
   },
-  "version": 2
+  "version": 1
 }
