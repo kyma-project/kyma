@@ -24,9 +24,7 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/job"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/kservice"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/namespace"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/revision"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebinding"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebindingusage"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/serviceinstance"
@@ -78,9 +76,7 @@ type TestSuite struct {
 	serviceinstance     *serviceinstance.ServiceInstance
 	servicebinding      *servicebinding.ServiceBinding
 	servicebindingusage *servicebindingusage.ServiceBindingUsage
-	revisions           *revision.Revision
 	jobs                *job.Job
-	kservice            *kservice.KService
 	t                   *testing.T
 	g                   *gomega.GomegaWithT
 	dynamicCli          dynamic.Interface
@@ -122,9 +118,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	si := serviceinstance.New(cfg.ServiceInstanceName, container)
 	sb := servicebinding.New(cfg.ServiceBindingName, container)
 	sbu := servicebindingusage.New(cfg.ServiceBindingUsageName, cfg.UsageKindName, container)
-	revList := revision.New(cfg.FunctionName, container)
 	jobList := job.New(cfg.FunctionName, clientset.BatchV1(), container)
-	ksrv := kservice.New(cfg.FunctionName, container)
 
 	return &TestSuite{
 		namespace:           ns,
@@ -136,9 +130,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		serviceinstance:     si,
 		servicebinding:      sb,
 		servicebindingusage: sbu,
-		revisions:           revList,
 		jobs:                jobList,
-		kservice:            ksrv,
 		t:                   t,
 		g:                   g,
 		dynamicCli:          dynamicCli,
@@ -269,14 +261,6 @@ func (t *TestSuite) Run() {
 
 	t.t.Log("Testing injection of env variables via gateway")
 	err = t.pollForAnswer(fnGatewayURL, redisEnvPing, answerForEnvPing)
-	failOnError(t.g, err)
-
-	t.t.Log("Testing cleanup of stale revisions")
-	err = t.revisions.WaitForRevisionCleanup()
-	failOnError(t.g, err)
-
-	t.t.Log("Testing that remaining revision is the newest one")
-	err = t.revisions.VerifyConfigurationGeneration(3) // 1 update caused from fn update, one from servicebindingusage
 	failOnError(t.g, err)
 }
 
@@ -414,35 +398,33 @@ func (t *TestSuite) LogResources() {
 		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
 	}
 
-	ksrv, err := t.kservice.Get()
+	fnStatusYaml, err := t.prettyYaml(fn.Status)
 	if err != nil {
 		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
 	}
 
-	fnYaml, err := t.prettyYaml(fn)
-	if err != nil {
-		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
-	}
+	var jobStatusYaml string
+	switch len(jobs.Items) {
+	case 0:
+		t.t.Log("no job resources matching needed labels")
+		jobStatusYaml = "no job resources matching needed labels"
+	default:
+		jobStatusYaml, err = t.prettyYaml(jobs.Items[0].Status)
+		if err != nil {
+			t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
+		}
 
-	jobsYaml, err := t.prettyYaml(jobs)
-	if err != nil {
-		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
-	}
-
-	ksrvYaml, err := t.prettyYaml(ksrv)
-	if err != nil {
-		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
 	}
 
 	t.t.Logf(`Pretty printed resources:
 ---
+Function's status:
 %s
 ---
+Job's status:
 %s
 ---
-%s
----
-`, fnYaml, jobsYaml, ksrvYaml)
+`, fnStatusYaml, jobStatusYaml)
 }
 
 func (t *TestSuite) prettyYaml(resource interface{}) (string, error) {

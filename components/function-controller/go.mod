@@ -7,13 +7,14 @@ require (
 	contrib.go.opencensus.io/exporter/ocagent v0.6.0 // indirect
 	contrib.go.opencensus.io/exporter/prometheus v0.1.0 // indirect
 	contrib.go.opencensus.io/exporter/stackdriver v0.12.9 // indirect
+	github.com/aws/aws-sdk-go v1.27.1 // indirect
 	github.com/go-logr/logr v0.1.0
 	github.com/go-logr/zapr v0.1.1 // indirect
 	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/google/go-cmp v0.4.0 // indirect
-	github.com/google/go-containerregistry v0.0.0-20200331213917-3d03ed9b1ca2 // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
+	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/markbates/inflect v1.0.4 // indirect
@@ -43,7 +44,6 @@ require (
 	k8s.io/apimachinery v0.17.4
 	k8s.io/client-go v0.17.4
 	knative.dev/pkg v0.0.0-20200306230727-a56a6ea3fa56
-	knative.dev/serving v0.13.2
 	sigs.k8s.io/controller-runtime v0.5.1
 )
 
