@@ -164,7 +164,6 @@ func (hc *Client) InstallReleaseFromChart(chartDir, ns, relName string, values o
 	install.Namespace = ns
 	install.Atomic = false
 	install.Wait = true
-	install.Timeout = hc.timeout
 	install.CreateNamespace = true //https://v3.helm.sh/docs/faq/#automatically-creating-namespaces
 
 	hc.PrintOverrides(values, relName, "install")
@@ -199,8 +198,8 @@ func (hc *Client) UpgradeRelease(chartDir, relName string, values overrides.Map)
 	upgrade.Atomic = true
 	upgrade.CleanupOnFail = true
 	upgrade.Wait = true
-	upgrade.Timeout = hc.timeout
 	upgrade.ReuseValues = true
+	upgrade.Recreate = true
 
 	hc.PrintOverrides(values, relName, "update")
 
@@ -217,7 +216,6 @@ func (hc *Client) RollbackRelease(relName string, revision int) (*Release, error
 
 	rollback := action.NewRollback(hc.cfg)
 	rollback.Wait = true
-	rollback.Timeout = hc.timeout
 	rollback.Version = revision
 	rollback.CleanupOnFail = true
 	rollback.Recreate = true
@@ -229,7 +227,6 @@ func (hc *Client) RollbackRelease(relName string, revision int) (*Release, error
 func (hc *Client) DeleteRelease(relName string) (*Release, error) { //todo: rename to "uninstall"
 
 	uninstall := action.NewUninstall(hc.cfg)
-	uninstall.Timeout = hc.timeout
 
 	_, err := uninstall.Run(relName)
 	if err != nil {
