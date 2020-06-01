@@ -162,7 +162,7 @@ func (hc *Client) InstallReleaseFromChart(chartDir, ns, relName string, values o
 	install := action.NewInstall(hc.cfg)
 	install.ReleaseName = relName
 	install.Namespace = ns
-	install.Atomic = true
+	install.Atomic = false
 	install.Wait = true
 	install.Timeout = hc.timeout
 	install.CreateNamespace = true //https://v3.helm.sh/docs/faq/#automatically-creating-namespaces
