@@ -22,9 +22,26 @@ spec:
         - name: crd-oauth2clients
           mountPath: /etc/crd
           readOnly: true
-        command: ["kubectl",  "apply", "-f", "/etc/crd/oauth2clients.yaml"]
+        command:
+        - /bin/bash
+        - -c
+        - |
+          timeout 60s bash -c 'until kubectl apply -f /etc/crd/oauth2clients.yaml; do sleep 2; done'
       volumes:
       - name: crd-oauth2clients
         configMap:
           name: {{ .Release.Name }}-crd-oauth2clients
       restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-crd-oauth2clients
+  annotations:
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+data:
+  oauth2clients.yaml: |-
+{{.Files.Get "files/crd-oauth2clients.yaml" | printf "%s" | indent 4}}
