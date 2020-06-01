@@ -17,7 +17,7 @@ When you create an Asset CR, the Asset Controller (AC) receives a CR creation Ev
 
 When you remove the Asset CR, the AC receives a CR deletion Event and deletes the CR from MinIO Gateway.
 
-![Delete and asset](./assets/delete-asset.svg)
+![Delete an asset](./assets/delete-asset.svg)
 
 ## Change the bucket reference
 
