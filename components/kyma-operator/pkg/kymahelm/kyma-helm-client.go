@@ -6,56 +6,64 @@ import (
 	"strings"
 	"time"
 
+	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/kubectl/pkg/cmd/util"
+
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 
 	"github.com/avast/retry-go"
 	"github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/kube"
 	"helm.sh/helm/v3/pkg/release"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"helm.sh/helm/v3/pkg/storage"
+	"helm.sh/helm/v3/pkg/storage/driver"
 )
+
+//todo: pass relname and relnamespace in a dedicated internal structure namespacedName
+
+//todo: each function in a separate file?
 
 // ClientInterface .
 type ClientInterface interface {
 	ListReleases() ([]*Release, error)
-	ReleaseStatus(relName string) (string, error)
-	IsReleaseDeletable(relName string) (bool, error)
-	ReleaseDeployedRevision(relName string) (int, error)
-	InstallReleaseFromChart(chartDir, ns, relName string, overrides overrides.Map) (*Release, error)
-	InstallRelease(chartDir, ns, relName string, overrides overrides.Map) (*Release, error)
-	InstallReleaseWithoutWait(chartDir, ns, relName string, overrides overrides.Map) (*Release, error)
-	UpgradeRelease(chartDir, relName string, overrides overrides.Map) (*Release, error)
-	DeleteRelease(relName string) (*Release, error) //todo: rename to "uninstall"
-	RollbackRelease(relName string, revision int) (*Release, error)
+	ReleaseStatus(relNamespace, relName string) (string, error)
+	IsReleaseDeletable(relNamespace, relName string) (bool, error)
+	ReleaseDeployedRevision(relNamespace, relName string) (int, error)
+	InstallReleaseFromChart(chartDir, relNamespace, relName string, overrides overrides.Map) (*Release, error)
+	InstallRelease(chartDir, relNamespace, relName string, overrides overrides.Map) (*Release, error)
+	InstallReleaseWithoutWait(chartDir, relNamespace, relName string, overrides overrides.Map) (*Release, error)
+	UpgradeRelease(chartDir, relNamespace, relName string, overrides overrides.Map) (*Release, error)
+	DeleteRelease(relNamespace, relName string) (*Release, error) //todo: rename to "uninstall"
+	RollbackRelease(relNamespace, relName string, revision int) (*Release, error)
 	PrintRelease(release *Release)
 }
 
+type infoLogFunc func(string, ...interface{})
+
 // Client .
 type Client struct {
-	cfg             *action.Configuration
+	kubeConfig      *rest.Config
 	overridesLogger *logrus.Logger
 	maxHistory      int
-	timeout         time.Duration
+	timeout         time.Duration //todo: timeout param consumed by actions limits single applies rather than entire operations (helm install, helm upgrade, etc.). Either remove or find a workaround
 }
 
-func debug(format string, v ...interface{}) {
-	format = fmt.Sprintf("[debug] %s\n", format)
-	log.Output(2, fmt.Sprintf(format, v...))
+func (hc *Client) infoLogFunc(namespace string, releaseName string) infoLogFunc {
+	return func(format string, args ...interface{}) {
+		message := fmt.Sprintf(format, args...)
+		log.Printf("info: %s, targetNamespace: %s, release: %s", message, namespace, releaseName)
+	}
 }
 
 // NewClient .
-func NewClient(overridesLogger *logrus.Logger, maxHistory int, timeout int64) (*Client, error) {
-	cfg := &action.Configuration{}
-	clientGetter := genericclioptions.NewConfigFlags(false)
-
-	if err := cfg.Init(clientGetter, "kyma-installer", "configmap", debug); err != nil {
-		debug("%+v", err)
-		return nil, err
-	}
+func NewClient(kubeConfig *rest.Config, overridesLogger *logrus.Logger, maxHistory int, timeout int64) (*Client, error) {
 
 	return &Client{
-		cfg:             cfg,
+		kubeConfig:      kubeConfig,
 		overridesLogger: overridesLogger,
 		maxHistory:      maxHistory,
 		timeout:         time.Duration(timeout) * time.Second,
@@ -65,8 +73,14 @@ func NewClient(overridesLogger *logrus.Logger, maxHistory int, timeout int64) (*
 // ListReleases lists all releases except for the superseded ones
 func (hc *Client) ListReleases() ([]*Release, error) {
 
-	lister := action.NewList(hc.cfg)
+	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc("all", "all"), "", "") //todo: is that ok???????
+	if err != nil {
+		return nil, err
+	}
+
+	lister := action.NewList(cfg)
 	lister.All = true
+	lister.AllNamespaces = true //todo: is that ok?
 	//todo: sorter?
 
 	releases, err := lister.Run()
@@ -84,9 +98,14 @@ func (hc *Client) ListReleases() ([]*Release, error) {
 }
 
 //ReleaseStatus returns roughly-formatted Release status (columns are separated with blanks but not adjusted)
-func (hc *Client) ReleaseStatus(relName string) (string, error) {
+func (hc *Client) ReleaseStatus(relNamespace, relName string) (string, error) {
 
-	status := action.NewStatus(hc.cfg)
+	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, "")
+	if err != nil {
+		return "", err
+	}
+
+	status := action.NewStatus(cfg)
 	//status.Version = 0 // default: 0 -> get last
 
 	rel, err := status.Run(relName)
@@ -98,15 +117,20 @@ func (hc *Client) ReleaseStatus(relName string) (string, error) {
 }
 
 //IsReleaseDeletable returns true for release that can be deleted
-func (hc *Client) IsReleaseDeletable(relName string) (bool, error) { //todo: helm3 allows atomic operations, this func might be useless
+func (hc *Client) IsReleaseDeletable(relNamespace, relName string) (bool, error) { //todo: helm3 allows atomic operations, this func might be useless
 
 	isDeletable := false
 	maxAttempts := 3
 	fixedDelay := 3
 
-	status := action.NewStatus(hc.cfg)
+	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, "")
+	if err != nil {
+		return false, err
+	}
 
-	err := retry.Do(
+	status := action.NewStatus(cfg)
+
+	err = retry.Do(
 		func() error {
 			rel, err := status.Run(relName)
 			if err != nil {
@@ -129,11 +153,16 @@ func (hc *Client) IsReleaseDeletable(relName string) (bool, error) { //todo: hel
 	return isDeletable, err
 }
 
-func (hc *Client) ReleaseDeployedRevision(relName string) (int, error) { //todo: helm3 allows atomic operations, this func might be useless
+func (hc *Client) ReleaseDeployedRevision(relNamespace, relName string) (int, error) { //todo: helm3 allows atomic operations, this func might be useless
 
 	var deployedRevision = 0
 
-	history := action.NewHistory(hc.cfg)
+	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, "")
+	if err != nil {
+		return deployedRevision, err
+	}
+
+	history := action.NewHistory(cfg)
 	history.Max = hc.maxHistory
 
 	relHistory, err := history.Run(relName)
@@ -152,19 +181,24 @@ func (hc *Client) ReleaseDeployedRevision(relName string) (int, error) { //todo:
 }
 
 // InstallReleaseFromChart .
-func (hc *Client) InstallReleaseFromChart(chartDir, ns, relName string, values overrides.Map) (*Release, error) {
+func (hc *Client) InstallReleaseFromChart(chartDir, relNamespace, relName string, values overrides.Map) (*Release, error) {
+
+	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, "") //todo: parameterize driver
+	if err != nil {
+		return nil, err
+	}
 
 	chart, err := loader.Load(chartDir)
 	if err != nil {
 		return nil, err
 	}
 
-	install := action.NewInstall(hc.cfg)
+	install := action.NewInstall(cfg) //todo: stretch: implement configurator, see https://github.com/fluxcd/helm-operator/blob/706bcb34841ed65fed007ad706082f28429e19bb/pkg/helm/v3/upgrade.go#L52
 	install.ReleaseName = relName
-	install.Namespace = ns
+	install.Namespace = relNamespace
 	install.Atomic = false
-	install.Wait = true
-	install.CreateNamespace = true //https://v3.helm.sh/docs/faq/#automatically-creating-namespaces
+	install.Wait = true //todo: defaults to true if atomic is set. Remove if atomic == true
+	install.CreateNamespace = true // see https://v3.helm.sh/docs/faq/#automatically-creating-namespaces
 
 	hc.PrintOverrides(values, relName, "install")
 
@@ -187,14 +221,19 @@ func (hc *Client) InstallReleaseWithoutWait(chartDir, ns, relName string, values
 }
 
 // UpgradeRelease .
-func (hc *Client) UpgradeRelease(chartDir, relName string, values overrides.Map) (*Release, error) {
+func (hc *Client) UpgradeRelease(chartDir, relNamespace, relName string, values overrides.Map) (*Release, error) {
+
+	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, "")
+	if err != nil {
+		return nil, err
+	}
 
 	chart, err := loader.Load(chartDir)
 	if err != nil {
 		return nil, err
 	}
 
-	upgrade := action.NewUpgrade(hc.cfg)
+	upgrade := action.NewUpgrade(cfg)
 	upgrade.Atomic = true
 	upgrade.CleanupOnFail = true
 	upgrade.Wait = true
@@ -212,9 +251,14 @@ func (hc *Client) UpgradeRelease(chartDir, relName string, values overrides.Map)
 }
 
 //RollbackRelease performs rollback to given revision
-func (hc *Client) RollbackRelease(relName string, revision int) (*Release, error) {
+func (hc *Client) RollbackRelease(relNamespace, relName string, revision int) (*Release, error) {
 
-	rollback := action.NewRollback(hc.cfg)
+	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, "")
+	if err != nil {
+		return nil, err
+	}
+
+	rollback := action.NewRollback(cfg)
 	rollback.Wait = true
 	rollback.Version = revision
 	rollback.CleanupOnFail = true
@@ -224,11 +268,16 @@ func (hc *Client) RollbackRelease(relName string, revision int) (*Release, error
 }
 
 // DeleteRelease .
-func (hc *Client) DeleteRelease(relName string) (*Release, error) { //todo: rename to "uninstall"
+func (hc *Client) DeleteRelease(relNamespace, relName string) (*Release, error) { //todo: rename to "uninstall"
 
-	uninstall := action.NewUninstall(hc.cfg)
+	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, "")
+	if err != nil {
+		return nil, err
+	}
 
-	_, err := uninstall.Run(relName)
+	uninstall := action.NewUninstall(cfg)
+
+	_, err = uninstall.Run(relName)
 	if err != nil {
 		return nil, err
 	}
@@ -256,4 +305,56 @@ func (hc *Client) PrintOverrides(values overrides.Map, relName string, action st
 	}
 
 	hc.overridesLogger.Println(overrides.ToYaml(values))
+}
+
+func newActionConfig(config *rest.Config, logFunc infoLogFunc, namespace, driver string) (*action.Configuration, error) {
+
+	restClientGetter := newConfigFlags(config, namespace)
+	kubeClient := &kube.Client{
+		Factory: util.NewFactory(restClientGetter),
+		Log:     logFunc,
+	}
+	client, err := kubeClient.Factory.KubernetesClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	store, err := newStorageDriver(client, logFunc, namespace, driver)
+	if err != nil {
+		return nil, err
+	}
+
+	return &action.Configuration{
+		RESTClientGetter: restClientGetter,
+		Releases:         store,
+		KubeClient:       kubeClient,
+		Log:              logFunc,
+	}, nil
+}
+
+func newConfigFlags(config *rest.Config, namespace string) *genericclioptions.ConfigFlags {
+	return &genericclioptions.ConfigFlags{
+		Namespace:   &namespace,
+		APIServer:   &config.Host,
+		CAFile:      &config.CAFile,
+		BearerToken: &config.BearerToken,
+	}
+}
+
+func newStorageDriver(client *kubernetes.Clientset, logFunc infoLogFunc, namespace, d string) (*storage.Storage, error) {
+	switch d {
+	case "secret", "secrets", "":
+		s := driver.NewSecrets(client.CoreV1().Secrets(namespace))
+		s.Log = logFunc
+		return storage.Init(s), nil
+	case "configmap", "configmaps":
+		c := driver.NewConfigMaps(client.CoreV1().ConfigMaps(namespace))
+		c.Log = logFunc
+		return storage.Init(c), nil
+	case "memory":
+		m := driver.NewMemory()
+		return storage.Init(m), nil
+	default:
+		return nil, fmt.Errorf("unsupported storage driver '%s'", d)
+	}
 }

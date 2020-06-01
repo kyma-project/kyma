@@ -34,7 +34,7 @@ func (s installStep) Run() error {
 	if installErr != nil {
 		installErrMsg := fmt.Sprintf("Helm install error: %s", installErr.Error())
 
-		isDeletable, err := s.helmClient.IsReleaseDeletable(s.component.GetReleaseName())
+		isDeletable, err := s.helmClient.IsReleaseDeletable(s.component.Namespace, s.component.GetReleaseName())
 		if err != nil {
 			statusErrMsg := fmt.Sprintf("Checking status of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
 			log.Println(statusErrMsg)
@@ -44,7 +44,7 @@ func (s installStep) Run() error {
 		if isDeletable {
 
 			log.Println(fmt.Sprintf("Helm installation of %s failed. Deleting before retrying installation.", s.component.GetReleaseName()))
-			_, err := s.helmClient.DeleteRelease(s.component.GetReleaseName())
+			_, err := s.helmClient.DeleteRelease(s.component.Namespace, s.component.GetReleaseName())
 
 			if err != nil {
 				deleteErrMsg := fmt.Sprintf("Helm delete of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())

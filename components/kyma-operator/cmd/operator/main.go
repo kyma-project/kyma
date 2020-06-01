@@ -95,7 +95,7 @@ func main() {
 		log.Fatalf("Unable to create logrus Instance. Error: %v", err)
 	}
 
-	helmClient, err := kymahelm.NewClient(overridesLogger, *helmMaxHistory, *helmTimeout)
+	helmClient, err := kymahelm.NewClient(config, overridesLogger, *helmMaxHistory, *helmTimeout)
 	if err != nil {
 		log.Fatalf("Unable create helm client. Error: %v", err)
 	}

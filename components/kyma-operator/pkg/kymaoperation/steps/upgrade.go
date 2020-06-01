@@ -23,6 +23,7 @@ func (s upgradeStep) Run() error {
 
 	upgradeResp, upgradeErr := s.helmClient.UpgradeRelease(
 		chartDir,
+		s.component.Namespace,
 		s.component.GetReleaseName(),
 		s.overrideData.ForRelease(s.component.GetReleaseName()))
 
@@ -30,7 +31,7 @@ func (s upgradeStep) Run() error {
 		upgradeErrMsg := fmt.Sprintf("Helm upgrade error: %s", upgradeErr.Error())
 
 		log.Println(fmt.Sprintf("Helm upgrade of %s failed. Performing rollback to last known deployed revision.", s.component.GetReleaseName()))
-		_, err := s.helmClient.RollbackRelease(s.component.GetReleaseName(), 0)
+		_, err := s.helmClient.RollbackRelease(s.component.Namespace, s.component.GetReleaseName(), 0)
 
 		if err != nil {
 			rollbackErrMsg := fmt.Sprintf("Helm rollback of %s failed with an error: %s", s.component.GetReleaseName(), err.Error())
