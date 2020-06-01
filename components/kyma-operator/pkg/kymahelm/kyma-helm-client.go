@@ -4,6 +4,7 @@ import (
 	"log"
 	"strings"
 	"time"
+	"fmt"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 
@@ -38,13 +39,18 @@ type Client struct {
 	timeout         time.Duration
 }
 
+func debug(format string, v ...interface{}) {
+	format = fmt.Sprintf("[debug] %s\n", format)
+	log.Output(2, fmt.Sprintf(format, v...))
+}
+
 // NewClient .
 func NewClient(overridesLogger *logrus.Logger, maxHistory int, timeout int64) (*Client, error) {
 	cfg := &action.Configuration{}
 	clientGetter := genericclioptions.NewConfigFlags(false)
-	debugLog := overridesLogger.Printf
 
-	if err := cfg.Init(clientGetter, "kyma-installer", "memory", debugLog); err != nil {
+	if err := cfg.Init(clientGetter, "kyma-installer", "configmap", debug); err != nil {
+		debug("%+v", err)
 		return nil, err
 	}
 
