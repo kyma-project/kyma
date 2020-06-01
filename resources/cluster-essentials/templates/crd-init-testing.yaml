@@ -56,8 +56,7 @@ spec:
           )
 
           for crd in "${crds[@]}"; do
-            kubectl get crd "$crd" \
-            || kubectl apply -f /etc/crd/"$crd"
+            timeout 60s bash -c "until kubectl apply -f /etc/crd/$crd; do sleep 2; done"
           done
       volumes:
       - name: crd-testing
