@@ -17,14 +17,36 @@ spec:
       serviceAccountName: {{ .Release.Name }}-crd-init
       containers:
       - name: {{ .Release.Name }}-crd-rules
-        image: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407"
+        image: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576"
         volumeMounts:
         - name: crd-rules
           mountPath: /etc/ory/crd
           readOnly: true
-        command: ["kubectl",  "apply", "-f", "/etc/ory/crd/rules.yaml"]
+        command:
+        - timeout
+        - 60s
+        - bash
+        - -c
+        - |-
+          until \
+            kubectl get crd rules.oathkeeper.ory.sh \
+            || kubectl apply -f /etc/ory/crd/rules.yaml; \
+          do sleep 2; done
       volumes:
       - name: crd-rules
         configMap:
           name: {{ .Release.Name }}-crd-rules
       restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-crd-rules
+  annotations:
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+data:
+  rules.yaml: |-
+{{.Files.Get "files/crd-rules.yaml" | printf "%s" | indent 4}}

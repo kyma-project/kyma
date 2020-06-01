@@ -23,7 +23,7 @@ global:
       version: "d068b250"
     director:
       dir:
-      version: "289fe304"
+      version: "89271b77"
     gateway:
       dir:
       version: "53b12181"
@@ -53,7 +53,7 @@ global:
     tests:
       director:
         dir:
-        version: "7ba46e80"
+        version: "65c5ce38"
       connector:
         dir:
         version: "d068b250"
@@ -62,7 +62,7 @@ global:
         version: "8fb2e53b"
       e2e_provisioning:
         dir:
-        version: "e0b2be21"
+        version: "9103d980"
       connectivity_adapter:
         dir:
         version: "d068b250"

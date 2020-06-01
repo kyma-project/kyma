@@ -211,7 +211,7 @@ func (c *Controller) processItem(key string) error {
 
 	dm, err := c.appCRMapper.ToModel(app)
 	if err != nil {
-		errors.Wrap(err, "while mapping Application CR to model")
+		return errors.Wrap(err, "while mapping Application CR to model")
 	}
 	replaced, err := c.appUpserter.Upsert(dm)
 	if err != nil {

@@ -63,7 +63,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: job
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200312-fc2a4147
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
           env:
             - name: API_PACKAGES_SUPPORT
               value: "{{ .Values.global.disableLegacyConnectivity }}"

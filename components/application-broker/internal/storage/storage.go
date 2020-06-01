@@ -3,7 +3,7 @@ package storage
 import (
 	"github.com/kyma-project/kyma/components/application-broker/internal/storage/driver/memory"
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // Factory provides access to concrete storage.
