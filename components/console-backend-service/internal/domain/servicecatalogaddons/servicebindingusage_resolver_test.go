@@ -286,8 +286,8 @@ func TestServiceBindingUsageResolver_ServiceBindingUsagesQuery(t *testing.T) {
 		gqlBindingUsage1.Name = "app1"
 		gqlBindingUsage2 := fixServiceBindingUsage()
 		gqlBindingUsage2.Name = "app2"
-		gqlBindingUsages := []gqlschema.ServiceBindingUsage{
-			*gqlBindingUsage1, *gqlBindingUsage2,
+		gqlBindingUsages := []*gqlschema.ServiceBindingUsage{
+			gqlBindingUsage1, gqlBindingUsage2,
 		}
 
 		converter.On("ToGQLs", bindingUsages).Return(gqlBindingUsages, nil).Once()
@@ -309,7 +309,7 @@ func TestServiceBindingUsageResolver_ServiceBindingUsagesQuery(t *testing.T) {
 		converter := automock.NewServiceBindingUsageConverter()
 
 		usages := []*api.ServiceBindingUsage{}
-		gqlUsages := []gqlschema.ServiceBindingUsage{}
+		gqlUsages := []*gqlschema.ServiceBindingUsage{}
 
 		converter.On("ToGQLs", usages).Return(gqlUsages, nil).Once()
 		defer svc.AssertExpectations(t)
@@ -345,9 +345,9 @@ func TestServiceBindingUsageResolver_ServiceBindingUsagesOfInstanceQuery(t *test
 			fixServiceBindingUsageResource(),
 			fixServiceBindingUsageResource(),
 		}
-		gqlUsages := []gqlschema.ServiceBindingUsage{
-			*fixServiceBindingUsage(),
-			*fixServiceBindingUsage(),
+		gqlUsages := []*gqlschema.ServiceBindingUsage{
+			fixServiceBindingUsage(),
+			fixServiceBindingUsage(),
 		}
 
 		svc := automock.NewServiceBindingUsageOperations()
@@ -371,7 +371,7 @@ func TestServiceBindingUsageResolver_ServiceBindingUsagesOfInstanceQuery(t *test
 		converter := automock.NewServiceBindingUsageConverter()
 
 		usages := []*api.ServiceBindingUsage{}
-		gqlUsages := []gqlschema.ServiceBindingUsage{}
+		gqlUsages := []*gqlschema.ServiceBindingUsage{}
 
 		converter.On("ToGQLs", usages).Return(gqlUsages, nil).Once()
 		defer svc.AssertExpectations(t)

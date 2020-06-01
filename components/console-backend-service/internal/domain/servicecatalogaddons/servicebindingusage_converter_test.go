@@ -157,6 +157,7 @@ func TestBindingUsageConversionInput(t *testing.T) {
 				UsedBy: &gqlschema.LocalObjectReferenceInput{
 					Kind: "Function",
 				},
+				ServiceBindingRef: &gqlschema.ServiceBindingRefInput{},
 			},
 			expK8sSBU: &api.ServiceBindingUsage{
 				TypeMeta: v1.TypeMeta{

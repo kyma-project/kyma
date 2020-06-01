@@ -74,7 +74,7 @@ func TestUsageKindService_ListResources(t *testing.T) {
 
 		apiVersion := fmt.Sprintf("%s/%s", usageKind.Spec.Resource.Group, usageKind.Spec.Resource.Version)
 		existingFunction := newUnstructured(apiVersion, usageKind.Spec.Resource.Kind, "test", "test", []interface{}{})
-		expected := []gqlschema.BindableResourcesOutputItem{
+		expected := []*gqlschema.BindableResourcesOutputItem{
 			{
 				Kind:        usageKind.Name,
 				DisplayName: usageKind.Spec.DisplayName,
