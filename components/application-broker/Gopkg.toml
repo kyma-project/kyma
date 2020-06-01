@@ -128,8 +128,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-incubator/compass"
-  branch = "add-executor-and-signal-in-director"
-  source = "https://github.com/akucharska/compass.git"
+  revision = "960cf3fa606ce139cea977928be029784bd42be5"
 
 [[override]]
   name = "knative.dev/eventing"

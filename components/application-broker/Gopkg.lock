@@ -448,8 +448,7 @@
   revision = "ccab5234396729fee8dbf70620eafdfbc3d1a6af"
 
 [[projects]]
-  branch = "add-executor-and-signal-in-director"
-  digest = "1:2a95eb235bcfa1186ef9d6c688f146c35e590140a06d2671b574eb412c96914d"
+  digest = "1:a4c5b20edb93502f2f90ac8042b6bf18a5d4a3d4da1e324cbdc5c0c210781b38"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/connectivity-adapter/pkg/gqlcli",
@@ -462,8 +461,7 @@
     "components/director/pkg/scalar",
   ]
   pruneopts = "NUT"
-  revision = "deeb16799befde152f457416680dcbc015e8bdc3"
-  source = "https://github.com/akucharska/compass.git"
+  revision = "960cf3fa606ce139cea977928be029784bd42be5"
 
 [[projects]]
   digest = "1:6410fbc7335414ede070ec64886ad15900ff421e0ad58c3740e5d60a0ba47a42"
