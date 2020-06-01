@@ -106,37 +106,6 @@ func (ts *TestSuite) RunApplicationTests(t *testing.T) {
 	}
 }
 
-/*unc (ts *TestSuite) receiveTestResponse(t *testing.T, wg *sync.WaitGroup, responseChan <-chan *rls.TestReleaseResponse) {
-	defer wg.Done()
-
-	testFailed := false
-
-	for msg := range responseChan {
-		t.Log(msg.String())
-		if msg.Status == hapirelease1.TestRun_FAILURE {
-			testFailed = true
-		}
-	}
-	t.Logf("%s tests finished. Message channel closed", ts.application)
-
-	ts.getLogsAndCleanup(t)
-
-	if testFailed {
-		t.Logf("%s tests failed", ts.application)
-		t.Fatal("Application tests failed")
-	}
-}
-
-func (ts *TestSuite) receiveErrorResponse(t *testing.T, wg *sync.WaitGroup, errorChan <-chan error) {
-	defer wg.Done()
-
-	for err := range errorChan {
-		t.Errorf("Error while executing tests for %s release: %s", ts.application, err.Error())
-	}
-
-	t.Log("Error channel closed")
-}*/
-
 func (ts *TestSuite) getLogsAndCleanup(t *testing.T) {
 	podsToFetch, err := ts.k8sClient.ListPods(metav1.ListOptions{LabelSelector: ts.labelSelector})
 	require.NoError(t, err)
