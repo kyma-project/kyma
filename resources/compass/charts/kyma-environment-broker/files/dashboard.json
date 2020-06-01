@@ -648,7 +648,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "avg by (service) (rate(compass_keb_provisioning_duration_minutes_sum{job=\"compass-kyma-environment-broker\"}[3h]) / rate(compass_keb_provisioning_duration_minutes_count{job=\"compass-kyma-environment-broker\"}[3h]))",
+          "expr": "avg by (service) (rate(compass_keb_provisioning_duration_minutes_sum{job=\"compass-kyma-environment-broker\"}[30m]) / rate(compass_keb_provisioning_duration_minutes_count{job=\"compass-kyma-environment-broker\"}[30m]))",
           "hide": false,
           "instant": false,
           "interval": "",
@@ -657,7 +657,7 @@
           "refId": "C"
         },
         {
-          "expr": "avg by (service) (rate(compass_keb_deprovisioning_duration_minutes_sum{job=\"compass-kyma-environment-broker\"}[3h]) / rate(compass_keb_deprovisioning_duration_minutes_count{job=\"compass-kyma-environment-broker\"}[3h]))",
+          "expr": "avg by (service) (rate(compass_keb_deprovisioning_duration_minutes_sum{job=\"compass-kyma-environment-broker\"}[30m]) / rate(compass_keb_deprovisioning_duration_minutes_count{job=\"compass-kyma-environment-broker\"}[30m]))",
           "hide": false,
           "instant": false,
           "interval": "",
