@@ -1,10 +1,10 @@
 package kymahelm
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"time"
-	"fmt"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 
