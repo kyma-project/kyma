@@ -38,5 +38,5 @@ func TestResourceQuotaStatusResolver_ResourceQuotaStatus_Error(t *testing.T) {
 
 	// THEN
 	require.Error(t, err)
-	assert.Nil(t, status.ExceededQuotas)
+	assert.Nil(t, status)
 }

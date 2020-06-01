@@ -55,8 +55,8 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 
 		// check with default values
 		result, err := resolver.NamespacesQuery(nil, nil, nil)
-		expected := []gqlschema.Namespace{
-			gqlNamespace,
+		expected := []*gqlschema.Namespace{
+			&gqlNamespace,
 		}
 
 		require.NoError(t, err)
@@ -66,8 +66,8 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 
 		// check with system namespaces
 		result, err = resolver.NamespacesQuery(nil, &trueBool, nil)
-		expected = []gqlschema.Namespace{
-			gqlNamespace, gqlSystemNamespace,
+		expected = []*gqlschema.Namespace{
+			&gqlNamespace, &gqlSystemNamespace,
 		}
 
 		require.NoError(t, err)
@@ -75,8 +75,8 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 
 		// check with inactive namespaces
 		result, err = resolver.NamespacesQuery(nil, nil, &trueBool)
-		expected = []gqlschema.Namespace{
-			gqlNamespace, gqlInactiveNamespace,
+		expected = []*gqlschema.Namespace{
+			&gqlNamespace, &gqlInactiveNamespace,
 		}
 
 		require.NoError(t, err)
@@ -85,7 +85,7 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 
 	t.Run("Empty", func(t *testing.T) {
 		resources := []*v1.Namespace{}
-		expected := []gqlschema.Namespace(nil)
+		expected := []*gqlschema.Namespace(nil)
 		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
 		svc.On("List").Return(resources, nil).Once()
@@ -184,7 +184,7 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 		}
 
 		resource := fixNamespace(name, labels)
-		expected := gqlschema.NamespaceMutationOutput{
+		expected := &gqlschema.NamespaceMutationOutput{
 			Name:   name,
 			Labels: labels,
 		}
@@ -230,7 +230,7 @@ func TestNamespaceResolver_UpdateNamespace(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		resource := fixNamespace(name, labels)
-		expected := gqlschema.NamespaceMutationOutput{
+		expected := &gqlschema.NamespaceMutationOutput{
 			Name:   name,
 			Labels: labels,
 		}

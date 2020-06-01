@@ -109,7 +109,7 @@ func TestConfigMapResolver_ConfigMapsQuery(t *testing.T) {
 		resources := []*v1.ConfigMap{
 			resource, resource,
 		}
-		expected := []gqlschema.ConfigMap{
+		expected := []*gqlschema.ConfigMap{
 			{
 				Name: name,
 			},
@@ -138,7 +138,7 @@ func TestConfigMapResolver_ConfigMapsQuery(t *testing.T) {
 	t.Run("NotFound", func(t *testing.T) {
 		namespace := "namespace"
 		var resources []*v1.ConfigMap
-		var expected []gqlschema.ConfigMap
+		var expected []*gqlschema.ConfigMap
 
 		resourceGetter := automock.NewConfigMapSvc()
 		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, nil).Once()

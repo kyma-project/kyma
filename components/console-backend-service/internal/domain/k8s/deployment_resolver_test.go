@@ -1,8 +1,6 @@
 package k8s_test
 
 import (
-	"testing"
-
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/automock"
@@ -15,6 +13,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/apps/v1"
+	"testing"
 )
 
 func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
@@ -22,14 +21,15 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 
 	t.Run("Success with default", func(t *testing.T) {
 		deployment := fixDeployment("test", nsName, "function")
-		deployments := []*v1.Deployment{deployment, deployment}
+		deployments := []*v1.Deployment{deployment}
 
-		expected := gqlschema.Deployment{
+		expected := &gqlschema.Deployment{
 			Name:      "test",
 			Namespace: nsName,
 			Labels: gqlschema.Labels{
 				"function": "",
 			},
+			Status: &gqlschema.DeploymentStatus{},
 		}
 
 		svc := automock.NewDeploymentLister()
@@ -40,7 +40,7 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 		result, err := resolver.DeploymentsQuery(nil, nsName, nil)
 
 		require.NoError(t, err)
-		assert.Equal(t, []gqlschema.Deployment{expected, expected}, result)
+		assert.Equal(t, []*gqlschema.Deployment{expected}, result)
 		svc.AssertNotCalled(t, "ListWithoutFunctions", mock.Anything, mock.Anything)
 	})
 
@@ -48,12 +48,13 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 		deployment := fixDeployment("test", nsName, "deployment")
 		deployments := []*v1.Deployment{deployment, deployment}
 
-		expected := gqlschema.Deployment{
+		expected := &gqlschema.Deployment{
 			Name:      "test",
 			Namespace: nsName,
 			Labels: gqlschema.Labels{
 				"deployment": "",
 			},
+			Status: &gqlschema.DeploymentStatus{},
 		}
 
 		svc := automock.NewDeploymentLister()
@@ -64,7 +65,7 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 		result, err := resolver.DeploymentsQuery(nil, nsName, getBoolPointer(false))
 
 		require.NoError(t, err)
-		assert.Equal(t, []gqlschema.Deployment{expected, expected}, result)
+		assert.Equal(t, []*gqlschema.Deployment{expected, expected}, result)
 		svc.AssertNotCalled(t, "ListWithoutFunctions", mock.Anything, mock.Anything)
 	})
 
@@ -72,12 +73,13 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 		deployment := fixDeployment("test", nsName, "function")
 		deployments := []*v1.Deployment{deployment, deployment}
 
-		expected := gqlschema.Deployment{
+		expected := &gqlschema.Deployment{
 			Name:      "test",
 			Namespace: nsName,
 			Labels: gqlschema.Labels{
 				"function": "",
 			},
+			Status: &gqlschema.DeploymentStatus{},
 		}
 
 		svc := automock.NewDeploymentLister()
@@ -88,7 +90,7 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 		result, err := resolver.DeploymentsQuery(nil, nsName, getBoolPointer(true))
 
 		require.NoError(t, err)
-		assert.Equal(t, []gqlschema.Deployment{expected, expected}, result)
+		assert.Equal(t, []*gqlschema.Deployment{expected, expected}, result)
 		svc.AssertNotCalled(t, "List", mock.Anything, mock.Anything)
 	})
 
