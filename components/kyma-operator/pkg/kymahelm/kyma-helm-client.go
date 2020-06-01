@@ -159,6 +159,7 @@ func (hc *Client) InstallReleaseFromChart(chartDir, ns, relName string, values o
 	install.Atomic = true
 	install.Wait = true
 	install.Timeout = hc.timeout
+	install.CreateNamespace = true //https://v3.helm.sh/docs/faq/#automatically-creating-namespaces
 
 	hc.PrintOverrides(values, relName, "install")
 
