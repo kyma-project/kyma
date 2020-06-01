@@ -57,7 +57,7 @@ type config struct {
 }
 
 func main() {
-	cfg, developmentMode, err := loadConfig("APP")
+	cfg, _, err := loadConfig("APP")
 	exitOnError(err, "Error while loading app config")
 	parseFlags(cfg)
 
@@ -73,15 +73,14 @@ func main() {
 	gqlCfg := gqlschema.Config{Resolvers: resolvers}
 
 	var authenticator authenticatorpkg.Request
-	if !developmentMode {
-		authenticator, err = authn.NewOIDCAuthenticator(&cfg.OIDC)
-		exitOnError(err, "Error while creating OIDC authenticator")
-		sarClient := kubeClient.AuthorizationV1().SubjectAccessReviews()
-		authorizer, err := authz.NewAuthorizer(sarClient, cfg.SARCacheConfig)
-		exitOnError(err, "Failed to create authorizer")
 
-		gqlCfg.Directives.HasAccess = authz.NewRBACDirective(authorizer, kubeClient.Discovery())
-	}
+	authenticator, err = authn.NewOIDCAuthenticator(&cfg.OIDC)
+	exitOnError(err, "Error while creating OIDC authenticator")
+	sarClient := kubeClient.AuthorizationV1().SubjectAccessReviews()
+	authorizer, err := authz.NewAuthorizer(sarClient, cfg.SARCacheConfig)
+	exitOnError(err, "Failed to create authorizer")
+
+	gqlCfg.Directives.HasAccess = authz.NewRBACDirective(authorizer, kubeClient.Discovery())
 
 	stopCh := signal.SetupChannel()
 	resolvers.WaitForCacheSync(stopCh)
@@ -151,6 +150,7 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 	if authenticator != nil {
 		router.Use(authn.AuthMiddleware(authenticator))
 	}
+
 	router.Handle("/", playground.Handler("Kyma GQL", "/graphql"))
 	graphQLHandler := handler.NewDefaultServer(schema)
 	graphQLHandler.AddTransport(&transport.Websocket{
@@ -181,6 +181,7 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 			glog.Errorf("HTTP server Shutdown: %v", err)
 		}
 	}()
+
 
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 		glog.Errorf("HTTP server ListenAndServe: %v", err)

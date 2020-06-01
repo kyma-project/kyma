@@ -52,7 +52,7 @@ type extractedAttributes struct {
 
 // PrepareAttributes prepares attributes for authorization
 func PrepareAttributes(ctx context.Context, u user.Info, attributes gqlschema.ResourceAttributes, obj interface{}, client discovery.DiscoveryInterface) (authorizer.Attributes, error) {
-	resolverCtx := graphql.GetResolverContext(ctx)
+	resolverCtx := graphql.GetFieldContext(ctx)
 
 	// make sure resource information is taken either from directive or from field
 	err := validateAttributes(attributes)
