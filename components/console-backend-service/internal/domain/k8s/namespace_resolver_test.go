@@ -218,7 +218,7 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
-		assert.NotNil(t, result)
+		assert.Nil(t, result)
 	})
 }
 
@@ -262,7 +262,7 @@ func TestNamespaceResolver_UpdateNamespace(t *testing.T) {
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
-		assert.NotNil(t, result)
+		assert.Nil(t, result)
 	})
 }
 

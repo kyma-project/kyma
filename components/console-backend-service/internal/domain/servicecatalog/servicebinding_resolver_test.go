@@ -200,7 +200,7 @@ func TestServiceBindingResolver_ServiceBindingsToInstanceQuery(t *testing.T) {
 		result, err := resolver.ServiceBindingsToInstanceQuery(nil, "redis", "production")
 
 		require.NoError(t, err)
-		assert.Nil(t, result)
+		assert.Nil(t, result.Items)
 	})
 
 	t.Run("Error", func(t *testing.T) {
