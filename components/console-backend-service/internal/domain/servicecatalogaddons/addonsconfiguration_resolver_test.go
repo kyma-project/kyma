@@ -192,6 +192,7 @@ func fixGQLAddonsConfiguration(name string) *gqlschema.AddonsConfiguration {
 				URL: url,
 			},
 		},
+		Labels: gqlschema.Labels{},
 		Status: &gqlschema.AddonsConfigurationStatus{},
 	}
 }
