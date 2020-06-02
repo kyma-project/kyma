@@ -7,6 +7,7 @@ metadata:
   namespace: {{ .Values.global.connector.secrets.ca.namespace }}
   labels:
     app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -24,6 +25,7 @@ metadata:
   namespace: {{ .Values.global.connector.secrets.ca.namespace }}
   labels:
     app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -47,6 +49,7 @@ metadata:
   namespace: {{ .Values.global.connector.secrets.rootCA.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -64,6 +67,7 @@ metadata:
   namespace: {{ .Values.global.connector.secrets.rootCA.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -85,6 +89,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -102,6 +107,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
