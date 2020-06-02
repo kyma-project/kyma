@@ -177,7 +177,7 @@
           "instant": true,
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{`{{global_account_id}}`}}",
+          "legendFormat": "{{global_account_id}}",
           "refId": "A"
         }
       ],
@@ -777,7 +777,7 @@
           "instant": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{`{{quantile}}`}}",
+          "legendFormat": "{{quantile}}",
           "refId": "A"
         }
       ],
@@ -875,7 +875,7 @@
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{`{{pod}}`}}",
+          "legendFormat": "{{pod}}",
           "refId": "A"
         }
       ],
@@ -973,7 +973,7 @@
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{`{{service}}`}}",
+          "legendFormat": "{{service}}",
           "refId": "A"
         }
       ],
@@ -1221,7 +1221,7 @@
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{`{{service}}`}}",
+          "legendFormat": "{{service}}",
           "metric": "process_open_fds",
           "refId": "A",
           "step": 4
@@ -1458,7 +1458,7 @@
           "instant": false,
           "interval": "10s",
           "intervalFactor": 1,
-          "legendFormat": "{{`{{container}}`}}",
+          "legendFormat": "{{container}}",
           "metric": "container_memory_usage_bytes",
           "refId": "A",
           "step": 15
@@ -1470,7 +1470,7 @@
           "instant": false,
           "interval": "10s",
           "intervalFactor": 2,
-          "legendFormat": "{{`{{container}}`}} - Requests",
+          "legendFormat": "{{container}} - Requests",
           "metric": "kube_pod_container_resource_requests_memory_bytes",
           "refId": "B",
           "step": 20
@@ -1481,7 +1481,7 @@
           "instant": false,
           "interval": "10s",
           "intervalFactor": 2,
-          "legendFormat": "{{`{{container}}`}} - Limit",
+          "legendFormat": "{{container}} - Limit",
           "metric": "kube_pod_container_resource_limits_memory_bytes",
           "refId": "C",
           "step": 20
@@ -1590,7 +1590,7 @@
           "instant": false,
           "interval": "10s",
           "intervalFactor": 1,
-          "legendFormat": "{{`{{container}}`}}",
+          "legendFormat": "{{container}}",
           "metric": "container_cpu_usage_seconds",
           "refId": "A",
           "step": 15
@@ -1602,7 +1602,7 @@
           "instant": false,
           "interval": "10s",
           "intervalFactor": 2,
-          "legendFormat": "{{`{{container}}`}} - Requests",
+          "legendFormat": "{{container}} - Requests",
           "metric": "kube_pod_container_resource_requests_cpu_cores",
           "refId": "B",
           "step": 20
@@ -1614,7 +1614,7 @@
           "instant": false,
           "interval": "10s",
           "intervalFactor": 2,
-          "legendFormat": "{{`{{container}}`}} - Limit",
+          "legendFormat": "{{container}} - Limit",
           "metric": "kube_pod_container_resource_limits_cpu_cores",
           "refId": "C",
           "step": 20
