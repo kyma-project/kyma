@@ -3,23 +3,24 @@ APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190930-d28d219
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-# include $(SCRIPTS_DIR)/go-modules.mk
 
+# VERIFY_IGNORE is a grep pattern to exclude files and directories from verification
 VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
-IMG_NAME = $(APP_NAME)
+# FILES_TO_CHECK is a command used to determine which files should be verified
+FILES_TO_CHECK = find . -type f -name "*.go" | grep -v "$(VERIFY_IGNORE)"
 
-.PHONY:  format release 
+IMG_NAME = $(DOCKER_PUSH_REPOSITORY)/$(APP_NAME)
 
-format:: imports fmt
+ release: build-image push-image
 
-release: build-image push-image
+check-imports:
+	goimports -w -l $$($(FILES_TO_CHECK))
 
-.PHONY: build-image push-image
 build-image: pull-licenses
 	docker build -t $(IMG_NAME) .
 push-image:
-	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
-	docker push $(IMG_NAME):$(TAG)
+	docker tag $(IMG_NAME) $(IMG_NAME):$(DOCKER_TAG)
+	docker push $(IMG_NAME):$(DOCKER_TAG)
 
 pull-licenses:
 ifdef LICENSE_PULLER_PATH
@@ -27,14 +28,6 @@ ifdef LICENSE_PULLER_PATH
 else
 	mkdir -p licenses
 endif
-
-
-.PHONY: path-to-referenced-charts
-path-to-referenced-charts:
-	@echo "resources/core"
-
-dev-deps:
-	go get github.com/githubnemo/CompileDaemon
 
 watch: export APP_KUBECONFIG_PATH=/Users/${USER}/.kube/config
 watch: export APP_VERBOSE=true
