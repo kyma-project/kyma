@@ -117,7 +117,7 @@ spec:
       serviceAccountName: kyma-installer
       initContainers:
       - name: certhelper
-        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200529-34b39bd3
         command:
           - bash
           - -c
@@ -194,19 +194,37 @@ spec:
               namespace: kyma-installer
             type: Opaque
             EOF
-
             timeout 60s bash -c 'until kubectl create -f /tmp/secret.yaml ; do sleep 2; done'
-
         volumeMounts:
           - mountPath: /etc/certs
             name: helm-certs
             readOnly: true
+      # - name: 2to3
+      #   image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200529-34b39bd3
+      #   command:
+      #   - /bin/bash
+      #   - -c
+      #   - |
+      #     HELM_2_BINARY=$(which helm)
+      #     HELM_3_BINARY=/Users/i319397/Downloads/darwin-amd64/helm
+
+      #     echo "---> Get migration plugin"
+      #     ${HELM_3_BINARY} plugin install https://github.com/helm/helm-2to3.git
+
+      #     echo "---> Migrate config files"
+      #     ${HELM_3_BINARY} 2to3 move config
+
+      #     echo "---> Get current releases"
+      #     ${HELM_2_BINARY} ls --tls --all | grep -v "NAME" | awk '{ print $1 }' > helm2-releases
+
+      #     echo "---> Migrate releases"
+      #     cat helm2-releases | xargs -I % ${HELM_3_BINARY} 2to3 convert --delete-v2-releases %
       containers:
       - name: kyma-installer-container
         image: eu.gcr.io/kyma-project/develop/kyma-installer:63f27f76
         imagePullPolicy: IfNotPresent
         args:
-          - -tillerTLSInsecureSkipVerify=true
+          # - -tillerTLSInsecureSkipVerify=true
           - -overrideLogFile=/app/overrides.txt
         volumeMounts:
           - mountPath: /etc/certs
