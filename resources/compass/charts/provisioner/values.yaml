@@ -43,6 +43,9 @@ runtimeAgent:
   configurationTimeout: 1h
   connectionTimeout: 1h
 
+metrics:
+  port: 9000
+
 logs:
   level: "info"
 

@@ -1,8 +1,6 @@
 dependencies:
   - name: console
     condition: console.enabled
-  - name: kubeless
-    condition: kubeless.enabled
   - name: console-backend-service
     condition: console-backend-service.enabled
   - name: docs

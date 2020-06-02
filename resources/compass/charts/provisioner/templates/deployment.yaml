@@ -44,6 +44,9 @@ spec:
             - name: http
               containerPort: {{ .Values.global.provisioner.graphql.port }}
               protocol: TCP
+            - name: http-metrics
+              containerPort: {{ .Values.metrics.port }}
+              protocol: TCP
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           env:

@@ -68,8 +68,8 @@ Follow these steps to create an alerting rule:
 
 4. Go to [`http://localhost:9090/rules`](http://localhost:9090/rules) to view the rule in the dashboard.
 
-   ![](./assets/rules-dashboard.png)
+   ![Rule on the dashboard](./assets/rules-dashboard.png)
 
 5. Go to [`http://localhost:9090/alerts`](http://localhost:9090/alerts) to see if the alert fires appropriately.
 
-   ![](./assets/fired-alert.png)
+   ![Alert on the dashboard](./assets/fired-alert.png)
