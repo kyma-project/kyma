@@ -38,7 +38,7 @@ func TestFunctionConverter_ToGQL(t *testing.T) {
 			Status: &gqlschema.FunctionStatus{
 				Phase: gqlschema.FunctionPhaseTypeInitializing,
 			},
-			Labels:  map[string]string{},
+			Labels: map[string]string{},
 		}
 
 		converter := newFunctionConverter()

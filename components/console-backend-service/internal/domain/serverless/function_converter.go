@@ -37,9 +37,9 @@ func (c *functionConverter) ToGQL(function *v1alpha1.Function) (*gqlschema.Funct
 		return nil, nil
 	}
 
-	labels :=map[string]string{}
-	if (function.Labels!=nil){
-		labels=function.Labels
+	labels := map[string]string{}
+	if function.Labels != nil {
+		labels = function.Labels
 	}
 	envVariables := c.toGQLEnv(function.Spec.Env)
 	resources := c.toGQLResources(function.Spec.Resources)
@@ -303,7 +303,6 @@ func (c *functionConverter) fromGQLResources(resources *gqlschema.FunctionResour
 
 		return resourcesList, errs
 	}
-
 
 	resourcesReq := v1.ResourceRequirements{}
 	var errs apierror.ErrorFieldAggregate

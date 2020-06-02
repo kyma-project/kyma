@@ -175,9 +175,9 @@ func TestTriggerConverter_ToGQL(t *testing.T) {
 				},
 			},
 			expected: &gqlschema.Trigger{
-				Name:      "TestName",
-				Namespace: "TestNamespace",
-				Broker:    "default",
+				Name:             "TestName",
+				Namespace:        "TestNamespace",
+				Broker:           "default",
 				FilterAttributes: map[string]interface{}{},
 				Subscriber: &gqlschema.Subscriber{
 					URI: &rawURL,
@@ -221,9 +221,9 @@ func TestTriggerConverter_ToGQL(t *testing.T) {
 				},
 			},
 			expected: &gqlschema.Trigger{
-				Name:      "TestName",
-				Namespace: "TestNamespace",
-				Broker:    "default",
+				Name:             "TestName",
+				Namespace:        "TestNamespace",
+				Broker:           "default",
 				FilterAttributes: map[string]interface{}{},
 				Subscriber: &gqlschema.Subscriber{
 					URI: &rawURL,
