@@ -60,7 +60,7 @@ spec:
           env:
           {{- if .Values.metrics.enabled }}
             - name: APP_METRICS_ADDRESS
-              value: "0.0.0.0:{{ .Values.metrics.manager.port.port }}"
+              value: ":{{ .Values.metrics.manager.port.port }}"
           {{- end }}
           {{- if gt (int .Values.deployment.replicas) 1 }}
             - name: APP_LEADER_ELECTION_ENABLED
