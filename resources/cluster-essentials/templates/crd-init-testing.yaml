@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-crd-testing
+  annotations:
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
+data:
+  clustertestsuites.testing.kyma-project.io: |-
+{{.Files.Get "files/crd-clustertestsuite.yaml" | printf "%s" | indent 4}}
+  testdefinitions.testing.kyma-project.io: |-
+{{.Files.Get "files/crd-testdefinition.yaml" | printf "%s" | indent 4}}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-init-testing
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded"
+    helm.sh/hook: "pre-upgrade, pre-install"
+    helm.sh/hook-weight: "10"
+  labels:
+    job: {{ .Release.Name }}-init-testing
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: {{ .Release.Name }}-init-testing
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        job: {{ .Release.Name }}-init-testing
+    spec:
+      serviceAccountName: {{ .Release.Name }}-crd-init
+      restartPolicy: Never
+      containers:
+      - name: job
+        image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+        terminationMessagePolicy: "FallbackToLogsOnError"
+        volumeMounts:
+        - name: crd-testing
+          mountPath: /etc/crd
+          readOnly: true
+        command:
+        - /bin/bash
+        - -c
+        - |-
+          set -e
+
+          crds=( \
+            clustertestsuites.testing.kyma-project.io \
+            testdefinitions.testing.kyma-project.io \
+          )
+
+          for crd in "${crds[@]}"; do
+            timeout 60s bash -c "until kubectl apply -f /etc/crd/$crd; do sleep 2; done"
+          done
+      volumes:
+      - name: crd-testing
+        configMap:
+          name: {{ .Release.Name }}-crd-testing
