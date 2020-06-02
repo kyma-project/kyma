@@ -24,10 +24,11 @@ data:
       exit 0
     fi
 
+    DECODED_CERT=$(echo "${CERT_FILE_TEXT}" | base64 -d)
     CERT_FILE="/cert/cert.txt"
     mkdir "/cert"
     touch "${CERT_FILE}"
-    echo "${CERT_FILE_TEXT}" > "${CERT_FILE}"  
+    echo "${DECODED_CERT}" > "${CERT_FILE}"  
 
     ISSUER_NO_WHITESPACE=$(openssl x509 -in "${CERT_FILE}" -inform PEM -noout -issuer | sed 's/issuer=//' | tr -d '[:space:]')
     SUBJECT_NO_WHITESPACE=$(openssl x509 -in "${CERT_FILE}" -inform PEM -noout -subject | sed 's/subject=//' | tr -d '[:space:]')
