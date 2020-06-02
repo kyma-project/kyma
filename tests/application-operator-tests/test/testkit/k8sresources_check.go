@@ -120,7 +120,7 @@ func (c *K8sResourceChecker) checkK8sResources(t *testing.T, checkFunc func(reso
 
 func (c *K8sResourceChecker) checkResourceDeployed(_ interface{}, err error) bool {
 	if err != nil {
-		log.Errorf("Failed to checkResourceDeployed: ",  err.Error())
+		log.Errorf("Failed to checkResourceDeployed: ", err.Error())
 		return false
 	}
 
@@ -130,7 +130,7 @@ func (c *K8sResourceChecker) checkResourceDeployed(_ interface{}, err error) boo
 func (c *K8sResourceChecker) checkResourceRemoved(_ interface{}, err error) bool {
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			log.Errorf("Failed to checkResourceDeployed: ",  err.Error())
+			log.Errorf("Failed to checkResourceDeployed: ", err.Error())
 			return true
 		}
 	}
