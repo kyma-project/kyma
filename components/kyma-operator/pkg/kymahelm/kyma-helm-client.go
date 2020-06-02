@@ -183,7 +183,9 @@ func (hc *Client) ReleaseDeployedRevision(relNamespace, relName string) (int, er
 // InstallReleaseFromChart .
 func (hc *Client) InstallReleaseFromChart(chartDir, relNamespace, relName string, values overrides.Map) (*Release, error) {
 
-	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, "") //todo: parameterize driver
+	//cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, "") //todo: parameterize driver
+	//mst experimenting
+	cfg, err := newActionConfigMst(relNamespace)
 	if err != nil {
 		return nil, err
 	}
@@ -305,6 +307,23 @@ func (hc *Client) PrintOverrides(values overrides.Map, relName string, action st
 	}
 
 	hc.overridesLogger.Println(overrides.ToYaml(values))
+}
+
+func debug(format string, v ...interface{}) {
+	format = fmt.Sprintf("[debug] %s\n", format)
+	log.Output(2, fmt.Sprintf(format, v...))
+}
+
+func newActionConfigMst(namespace string) (*action.Configuration, error) {
+	cfg := &action.Configuration{}
+	clientGetter := genericclioptions.NewConfigFlags(false)
+
+	if err := cfg.Init(clientGetter, namespace, "configmap", debug); err != nil {
+		debug("%+v", err)
+		return nil, err
+	}
+
+	return cfg, nil
 }
 
 func newActionConfig(config *rest.Config, logFunc infoLogFunc, namespace, driver string) (*action.Configuration, error) {
