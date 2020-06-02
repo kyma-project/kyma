@@ -29,6 +29,8 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+//go:generate go run github.com/99designs/gqlgen
+
 type RootResolver struct {
 	ui  *ui.Resolver
 	k8s *k8s.Resolver

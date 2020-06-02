@@ -189,11 +189,11 @@ func (c *triggerConverter) solveSubscriberInput(ref *gqlschema.SubscriberInput) 
 }
 
 func (c *triggerConverter) solveAttributes(filter *v1alpha1.TriggerFilter) map[string]interface{} {
-	if filter == nil || filter.Attributes == nil {
-		return nil
-	}
-
 	attr := make(map[string]interface{})
+
+	if filter == nil || filter.Attributes == nil {
+		return attr
+	}
 	for key, value := range *filter.Attributes {
 		attr[key] = value
 	}

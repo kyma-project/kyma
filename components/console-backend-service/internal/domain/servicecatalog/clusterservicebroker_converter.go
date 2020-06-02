@@ -18,11 +18,16 @@ func (c *clusterServiceBrokerConverter) ToGQL(item *v1beta1.ClusterServiceBroker
 	conditions := item.Status.Conditions
 	returnStatus := c.extractor.Status(conditions)
 
+	labels := item.Labels
+	if labels == nil {
+		labels = gqlschema.Labels{}
+	}
+
 	broker := gqlschema.ClusterServiceBroker{
 		Name:              item.Name,
 		Status:            returnStatus,
 		CreationTimestamp: item.CreationTimestamp.Time,
-		Labels:            item.Labels,
+		Labels:            labels,
 		URL:               item.Spec.URL,
 	}
 

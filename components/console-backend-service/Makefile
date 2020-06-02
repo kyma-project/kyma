@@ -25,4 +25,4 @@ watch: export APP_OIDC_ISSUER_URL=https://dex.${KYMA_DOMAIN}
 watch: export APP_OIDC_CLIENT_ID=kyma-client
 
 watch:
-	CompileDaemon -build="make build-local" -command="go run main.go"
+	CompileDaemon -build="make build-local" -command="go run main.go" -graceful-kill

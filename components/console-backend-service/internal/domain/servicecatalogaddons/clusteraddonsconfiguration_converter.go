@@ -19,9 +19,14 @@ func (c *clusterAddonsConfigurationConverter) ToGQL(item *v1alpha1.ClusterAddons
 		repositories = append(repositories, parseRepository(repo))
 	}
 
+	labels := item.Labels
+	if labels == nil {
+		labels = gqlschema.Labels{}
+	}
+
 	addonsCfg := gqlschema.AddonsConfiguration{
 		Name:         item.Name,
-		Labels:       item.Labels,
+		Labels:       labels,
 		Urls:         urls,
 		Status:       parseStatus(item.Status.CommonAddonsConfigurationStatus),
 		Repositories: repositories,

@@ -37,6 +37,10 @@ func (c *functionConverter) ToGQL(function *v1alpha1.Function) (*gqlschema.Funct
 		return nil, nil
 	}
 
+	labels :=map[string]string{}
+	if (function.Labels!=nil){
+		labels=function.Labels
+	}
 	envVariables := c.toGQLEnv(function.Spec.Env)
 	resources := c.toGQLResources(function.Spec.Resources)
 	replicas := c.toGQLReplicas(function.Spec.MinReplicas, function.Spec.MaxReplicas)
@@ -46,7 +50,7 @@ func (c *functionConverter) ToGQL(function *v1alpha1.Function) (*gqlschema.Funct
 		Name:         function.Name,
 		Namespace:    function.Namespace,
 		UID:          string(function.UID),
-		Labels:       function.Labels,
+		Labels:       labels,
 		Source:       function.Spec.Source,
 		Dependencies: function.Spec.Deps,
 		Env:          envVariables,

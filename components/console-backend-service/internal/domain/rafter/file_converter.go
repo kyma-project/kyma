@@ -53,8 +53,9 @@ func (c *fileConverter) ToGQLs(files []*File) ([]*gqlschema.File, error) {
 }
 
 func (c *fileConverter) extractMetadata(metadata *runtime.RawExtension) (gqlschema.JSON, error) {
+	result := make(gqlschema.JSON)
 	if metadata == nil {
-		return nil, nil
+		return result, nil
 	}
 
 	extracted, err := resource.ExtractRawToMap("Metadata", metadata.Raw)
@@ -62,7 +63,7 @@ func (c *fileConverter) extractMetadata(metadata *runtime.RawExtension) (gqlsche
 		return nil, err
 	}
 
-	result := make(gqlschema.JSON)
+
 	for k, v := range extracted {
 		result[k] = v
 	}
