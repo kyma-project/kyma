@@ -113,6 +113,8 @@ func TestFunctionEventQueries(t *testing.T) {
 			queryFunctionsArguments(namespaceName), functionDetailsFields())},
 		auth.Delete: {fixFunctionRequest("mutation", "deleteFunction",
 			deleteFunctionArguments(functionName1, namespaceName), functionMetadataDetailsFields())},
+		auth.Watch: {fixFunctionRequest("subscription", "functionEvent",
+			createFunctionEventArguments(functionName1, namespaceName), functionEventDetailsFields())},
 	}
 	auth.New().Run(t, opts)
 }

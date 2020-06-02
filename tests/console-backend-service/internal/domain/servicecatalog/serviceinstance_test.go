@@ -147,6 +147,7 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 			fixCreateServiceInstanceRequest(resourceDetailsQuery, fixture.ServiceInstanceFromServiceClass("", TestNamespace), false),
 		},
 		auth.Delete: {fixDeleteServiceInstanceRequest(resourceDetailsQuery, expectedResourceFromServiceClass)},
+		auth.Watch: {fixInstanceSubscription(instanceEventDetailsFields(), TestNamespace)},
 	}
 	AuthSuite.Run(t, ops)
 }
@@ -196,7 +197,7 @@ func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedReso
 	return res, err
 }
 
-func subscribeInstance(c *graphql.Client, resourceDetailsQuery string, namespace string) *graphql.Subscription {
+func fixInstanceSubscription(resourceDetailsQuery string, namespace string) *graphql.Request {
 	query := fmt.Sprintf(`
 			subscription ($namespace: String!) {
 				serviceInstanceEvent(namespace: $namespace) {
@@ -206,7 +207,12 @@ func subscribeInstance(c *graphql.Client, resourceDetailsQuery string, namespace
 		`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
 	req.SetVar("namespace", namespace)
+	return req
 
+}
+
+func subscribeInstance(c *graphql.Client, resourceDetailsQuery string, namespace string) *graphql.Subscription {
+	req := fixInstanceSubscription(resourceDetailsQuery, namespace)
 	return c.Subscribe(req)
 }
 

@@ -183,6 +183,7 @@ func TestPod(t *testing.T) {
 		auth.List:   {fixPodsQuery()},
 		auth.Delete: {fixDeletePodMutation()},
 		auth.Update: {fixUpdatePodMutation("{\"\":\"\"}")},
+		auth.Watch:  {fixPodSubscription()},
 	}
 	AuthSuite.Run(t, ops)
 }
