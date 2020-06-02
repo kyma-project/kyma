@@ -21,7 +21,7 @@ const (
 
 // Manager contains operations for managing Application CRD
 type Manager interface {
-	Update(appName *v1alpha1.Application) (*v1alpha1.Application, error)
+	Update(application *v1alpha1.Application) (*v1alpha1.Application, error)
 	Get(name string, options v1.GetOptions) (*v1alpha1.Application, error)
 }
 
