@@ -101,7 +101,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "SUM(compass_keb_instances_total)",
+          "expr": "SUM(compass_keb_instances_total{service=\"compass-kyma-environment-broker\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -255,7 +255,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "count(compass_keb_global_account_id_instances_total)",
+          "expr": "count(compass_keb_global_account_id_instances_total{service=\"compass-kyma-environment-broker\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -347,7 +347,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "SUM(compass_keb_operations_provisioning_in_progress_total)",
+          "expr": "SUM(compass_keb_operations_provisioning_in_progress_total{service=\"compass-kyma-environment-broker\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -437,7 +437,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "SUM(compass_keb_operations_deprovisioning_in_progress_total)",
+          "expr": "SUM(compass_keb_operations_deprovisioning_in_progress_total{service=\"compass-kyma-environment-broker\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
