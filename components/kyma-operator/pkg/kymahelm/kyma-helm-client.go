@@ -308,7 +308,6 @@ func (hc *Client) PrintOverrides(values overrides.Map, relName string, action st
 	hc.overridesLogger.Println(overrides.ToYaml(values))
 }
 
-
 //experimental, lets leave it for better times
 func debug(format string, v ...interface{}) {
 	format = fmt.Sprintf("[debug] %s\n", format)
