@@ -12,11 +12,16 @@ func (c *deploymentConverter) ToGQL(in *api.Deployment) *gqlschema.Deployment {
 		return nil
 	}
 
+	labels := in.Labels
+	if labels == nil {
+		labels = gqlschema.Labels{}
+	}
+
 	return &gqlschema.Deployment{
 		Name:              in.Name,
 		Namespace:         in.Namespace,
 		CreationTimestamp: in.CreationTimestamp.Time,
-		Labels:            in.Labels,
+		Labels:            labels,
 		Status:            c.toGQLStatus(*in),
 		Containers:        c.toGQLContainers(*in),
 	}
