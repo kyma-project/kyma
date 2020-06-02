@@ -230,7 +230,8 @@
   version = "v0.2.2"
 
 [[projects]]
-  digest = "1:8ea0d16c829d5fa219ad9bdf893518a49c1d6dc9847d8b86dd21feff5dc6e40b"
+  branch = "fix-headers"
+  digest = "1:08c43626ea9f17e2264b5163069b8eaa18b3a807d4ebed20fd906b25e5f9b6db"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/connector/pkg/graphql/clientset",
@@ -245,7 +246,8 @@
     "components/director/pkg/scalar",
   ]
   pruneopts = "UT"
-  revision = "64f737ad7e1db26e2c3e9b71335bd67e69199092"
+  revision = "8b523ed481cac6aec480531620a20912928b9147"
+  source = "github.com/crabtree/compass"
 
 [[projects]]
   digest = "1:597bc6ff8b60514972eb0070042fabef4d34c9b910f1c849e78f800cc1b616a0"

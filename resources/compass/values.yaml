@@ -17,13 +17,13 @@ global:
       version: "7f9b1eb5"
     connectivity_adapter:
       dir:
-      version: "7f9b1eb5"
+      version: "PR-1409"
     pairing_adapter:
       dir:
       version: "904c3b06"
     director:
       dir:
-      version: "b13e7fe9"
+      version: "PR-1409"
     gateway:
       dir:
       version: "904c3b06"
@@ -53,7 +53,7 @@ global:
     tests:
       director:
         dir:
-        version: "b13e7fe9"
+        version: "PR-1409"
       connector:
         dir:
         version: "7f9b1eb5"

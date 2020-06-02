@@ -126,7 +126,7 @@ func (c *ProxyAPIAccessChecker) GetPathBasedOnAuth(auth *graphql.Auth) string {
 	}
 
 	if auth.AdditionalHeaders != nil {
-		firstHeader, firstValue := getFirstPair(*auth.AdditionalHeaders)
+		firstHeader, firstValue := getFirstPairFromHttpHeaders(*auth.AdditionalHeaders)
 		return fmt.Sprintf("%s/%s/%s", mock.Headers, firstHeader, firstValue)
 	}
 	if auth.AdditionalQueryParams != nil {
@@ -135,6 +135,14 @@ func (c *ProxyAPIAccessChecker) GetPathBasedOnAuth(auth *graphql.Auth) string {
 	}
 
 	return mock.StatusOk.String()
+}
+
+func getFirstPairFromHttpHeaders(headers graphql.HttpHeaders2) (string, string) {
+	data, err := headers.Unmarshal()
+	if err != nil {
+		// TO DO handle err
+	}
+	return getFirstPair(data)
 }
 
 func getFirstPair(data map[string][]string) (string, string) {

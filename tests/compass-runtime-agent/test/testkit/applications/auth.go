@@ -38,7 +38,10 @@ func (in *AuthInput) WithBasicAuth(username, password string) *AuthInput {
 }
 
 func (in *AuthInput) WithHeaders(headers map[string][]string) *AuthInput {
-	cHeaders := graphql.HttpHeaders(headers)
+	cHeaders, err := graphql.NewHttpHeaders2(headers)
+	if err != nil {
+		// TODO handle err
+	}
 	in.AdditionalHeaders = &cHeaders
 
 	return in
