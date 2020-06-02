@@ -3,7 +3,7 @@ title: UsageKind
 type: Custom Resource
 ---
 
-The `usagekinds.servicecatalog.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to define which resources can be bound with the ServiceBinding and how to bind them. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `usagekinds.servicecatalog.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to define what kind of resources can be bound with the ServiceBinding and how to bind them. To get the up-to-date CRD and show the output in the YAML format, run this command:
 
 ```
 kubectl get crd usagekinds.servicecatalog.kyma-project.io -o yaml
@@ -26,6 +26,14 @@ spec:
     version: v1
   labelsPath: spec.template.metadata.labels
 ```
+
+The binding process modifies the target resource by adding labels to the Pod. The UsageKind specifies the field which contains labels added to the Pod, as well as the resource type defined by the **group**, **kind**, and **version** fields.
+
+The ServiceBindingUsage Controller takes the value from the **spec.usedBy.kind** field of the ServiceBindingUsage custom resource and looks for the corresponding UsageKind which contains information about the resource to be bound. The ServiceBindingUsage Controller handles resources even if the specified **labelsPath** field does not exist.
+
+### Finalizer
+
+Every UsageKind contains a finalizer which prevents deletion of the UsageKind in use. The ServiceBindingUsage Controller removes the finalizer only when the UsageKind is not used by any ServiceBindingUsage.
 
 ## Custom resource parameters
 
@@ -53,14 +61,14 @@ These components use this CR:
 
 | Component   |   Description |
 |----------|------|
-| Service Binding Usage Controller |  Uses the UsageKind **spec.resource** and **spec.labelsPath** parameters to find a resource and a path to which it should inject Secrets. |
-| Console Backend Service |  Exposes the given CR to the Console UI. |
+| [ServiceBindingUsage Controller](https://github.com/kyma-project/kyma/tree/master/components/service-binding-usage-controller) |  Uses the UsageKind **spec.resource** and **spec.labelsPath** parameters to find a resource and path to which it should inject Secrets. |
+| [Console Backend Service](/components/console/#details-console-backend-service) |  Exposes the given CR to the Console UI. |
 
 ## RBAC settings
 
-The administrator who adds the UsageKind must take care of the RBAC settings. The Service Binding Usage Controller and Console Backend Service must be allowed to perform needed operations on the resources, with the type defined in the UsageKind object.
+The administrator who adds the UsageKind must take care of the RBAC settings. The ServiceBindingUsage Controller and Console Backend Service must be allowed to perform required operations on the resources, with the type defined in the UsageKind object.
 
-See the example of the RBAC Rule for the Binding Usage Controller:
+See the example of the RBAC Rule for the ServiceBindingUsage Controller:
 
 ```yaml
 - apiGroups: ["serving.knative.dev"]

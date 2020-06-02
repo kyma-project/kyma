@@ -3,7 +3,7 @@ title: Specifications in the Console UI
 type: Console UI Views
 ---
 
-Documentation for Service Classes is rendered in both Service Catalog and Instances views. It includes the following specification types:
+Documentation for ServiceClasses is rendered in both Service Catalog and Instances views. It includes the following specification types:
 
 - Markdown
 - [OpenAPI](https://www.openapis.org/)
@@ -69,7 +69,7 @@ type: {Document type}
 
 ### Display
 
-In the Service Catalog and Instances views, which contain Service Classes documentation, Markdown documents display in the **Documentation** tab. The `title` and `type` metadata create the right-side navigation. A document with the **Overview** `title` always displays on top. If you don't provide `title` and `type`, these UIs display the file name as a fallback. The right-side document structure is based on the same logic as in the Documentation view. See the following example:
+In the Service Catalog and Instances views, which contain ServiceClasses documentation, Markdown documents display in the **Documentation** tab. The `title` and `type` metadata create the right-side navigation. A document with the **Overview** `title` always displays on top. If you don't provide `title` and `type`, these UIs display the file name as a fallback. The right-side document structure is based on the same logic as in the Documentation view. See the following example:
 
 <div tabs>
   <details>

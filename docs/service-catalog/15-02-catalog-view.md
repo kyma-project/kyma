@@ -11,7 +11,7 @@ These are the OSBA fields used in the main Catalog page:
 
 | Number | OSBA field                        | Fallbacks  | Description                                                                                                                |
 | ------ | --------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------- |
-| (1)    | **metadata.displayName**              | **name***, **id***| If **metadata.displayName**, **name**, or **id** fields are not present, a given Service Class does not appear on the landing page. |
+| (1)    | **metadata.displayName**              | **name***, **id***| If **metadata.displayName**, **name**, or **id** fields are not present, a given ServiceClass does not appear on the landing page. |
 | (2)    | **metadata.providerDisplayName**      | -          | If not provided, UI does not display this information.                                                                     |
 | (3)    | **description\***                     | -          | If not provided, UI does not display this information.                                                                     |
 | (4)    | **metadata.labels\*\***               | -          | If not provided, UI does not display any labels.                                                                           |
@@ -28,7 +28,7 @@ These are the OSBA fields used in the main Catalog page:
 
 ## Catalog Details page
 
-These are the OSBA fields used in the detailed Service Class view:
+These are the OSBA fields used in the detailed ServiceClass view:
 
 | Number | OSBA field                   | Fallbacks      | Description                                                       |
 | ------ | ---------------------------- | -------------- | ----------------------------------------------------------------- |
@@ -61,7 +61,7 @@ These are the OSBA fields used in the **Add to Namespace** window:
 
 ### Plan schema
 
-A [plan object](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#plan-object) in the OSBA can have the **schemas** field. Schema is used to generate a form which enables provisioning of the Service Class.
+A [plan object](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#plan-object) in the OSBA can have the **schemas** field. Schema is used to generate a form which enables provisioning of the ServiceClass.
 
 See the sample schema:
 
@@ -98,6 +98,6 @@ This sample renders in the following way:
 Follow these rules when you design schema objects:
 
 * If the field has limited possible values, use the **enum** field. It renders as a dropdown menu, so it prevents the user from making mistakes.
-* If the field is required for the Service Class, mark it as **required**. UI blocks provisioning if you do not fill in the required fields.
+* If the field is required for the ServiceClass, mark it as **required**. UI blocks provisioning if you do not fill in the required fields.
 * Fill the **default** value for a field whenever possible, it makes the provisioning faster.
 * If the field, such as the password field, must be starred, use the **format** key with the **password** value.
