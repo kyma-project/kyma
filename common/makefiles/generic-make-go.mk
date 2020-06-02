@@ -103,7 +103,7 @@ resolve-local:
 ensure-local:
 	dep ensure -v
 
-dep-status-local:
+dep-status-local:^
 	dep status -v
 
 check-imports-local:
