@@ -23,7 +23,6 @@ spec:
           securityContext:
             runAsUser: 0
           image: "{{ .Values.injectCerts.image.repository }}:{{ .Values.injectCerts.image.tag }}"
-          imagePullPolicy: "{{ .Values.injectCerts.image.pullPolicy }}"
           resources:
             requests:
               cpu: 70m
