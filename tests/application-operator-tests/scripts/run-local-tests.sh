@@ -2,7 +2,7 @@
 
 CURRENT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
-eval $(minikube docker-env)
+#eval $(minikube docker-env)
 
 echo ""
 echo "------------------------"
@@ -41,15 +41,10 @@ spec:
       value: kyma-integration
     - name: INSTALLATION_TIMEOUT_SECONDS
       value: "180"
+    - name: HELM_DRIVER
+      value: configmap
     volumeMounts:
-    - mountPath: /etc/certs
-      name: helm-certs
-      readOnly: true
   restartPolicy: Never
-  volumes:
-  - name: helm-certs
-    secret:
-      secretName: helm-secret
 EOF
 
 cat <<EOF | kubectl -n kyma-integration apply -f -
@@ -76,6 +71,60 @@ rules:
   verbs:
   - get
   - list
+- apiGroups:
+  - '*'
+  resources:
+  - configmaps
+  - services
+  - deployments
+  - serviceaccounts
+  - roles
+  - rolebindings
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - 'networking.istio.io'
+  resources:
+  - virtualservices
+  verbs:
+  - get
+  - list
+EOF
+
+cat <<EOF | kubectl -n kyma-integration apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    helm-chart-test: "true"
+  name: app-operator-tests-clusterrole
+rules:
+- apiGroups:
+  - 'rbac.authorization.k8s.io'
+  resources:
+  - clusterroles
+  - clusterrolebindings
+  verbs:
+  - get
+  - list
+EOF
+
+cat <<EOF | kubectl -n kyma-integration apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    helm-chart-test: "true"
+  name: app-operator-tests-clusterrolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: app-operator-tests-clusterrole
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: system:serviceaccount:kyma-integration:default
 EOF
 
 cat <<EOF | kubectl -n kyma-integration apply -f -
@@ -102,6 +151,6 @@ echo "Waiting 5 seconds for pod to start..."
 echo "------------------------"
 echo ""
 
-sleep 5
+sleep 10
 
 kubectl -n kyma-integration logs application-operator-tests -f
