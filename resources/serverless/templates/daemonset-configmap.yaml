@@ -22,7 +22,7 @@ data:
     if [ -z "${CERT_FILE_TEXT}" ]; then
       echo "No cert file to inject. Exit 0"
       exit 0
-    else
+    fi
 
     CERT_FILE="/cert/cert.txt"
     mkdir "/cert"
