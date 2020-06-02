@@ -123,6 +123,12 @@ containers:
       functionDockerExternalAddress:
         value: "registry.{{ .Values.global.ingress.domainName -}}"
 
+services:
+  manager:
+    type: ClusterIP
+    labels: {}
+    annotations: {}
+
 metrics:
   enabled: true
   manager:
