@@ -15,10 +15,6 @@ metadata:
 spec:
   type: {{ .Values.services.manager.type }}
   ports:
-    - name: {{ .Values.services.manager.port.name }}
-      port: {{ .Values.services.manager.port.port }}
-      protocol: {{ .Values.services.manager.port.protocol }}
-      targetPort: {{ .Values.services.manager.port.targerPort }}
     - name: {{ .Values.metrics.manager.port.name }}
       port: {{ .Values.metrics.manager.port.port }}
       protocol: {{ .Values.metrics.manager.port.protocol }}
