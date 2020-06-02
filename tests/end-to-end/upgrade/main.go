@@ -35,6 +35,7 @@ import (
 	apigateway "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-gateway"
 	applicationoperator "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/application-operator"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/logging"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/rafter"
 	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
@@ -144,7 +145,7 @@ func main() {
 		"ApplicationOperatorUpgradeTest":  applicationoperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
 		"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli),
-		//"LoggingUpgradeTest":            logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
+		"LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
 	}
 	tRegistry, err := runner.NewConfigMapTestRegistry(k8sCli, cfg.WorkingNamespace, cfg.TestsInfoConfigMapName)
 	fatalOnError(err, "while creating Test Registry")
