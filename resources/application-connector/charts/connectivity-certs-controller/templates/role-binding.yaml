@@ -6,6 +6,7 @@ metadata:
   namespace: {{ .Values.secrets.clientCertificate.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -22,6 +23,7 @@ metadata:
   namespace: {{ .Values.secrets.clientCertificate.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -42,6 +44,7 @@ metadata:
   namespace: {{ .Values.secrets.caCertificate.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -58,6 +61,7 @@ metadata:
   namespace: {{ .Values.secrets.caCertificate.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}

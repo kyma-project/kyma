@@ -6,6 +6,7 @@ metadata:
   namespace: {{ .Values.global.namespace }}
   labels:
     app: {{ .Chart.Name }}-tests
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -18,6 +19,7 @@ metadata:
   namespace: {{ .Values.global.namespace }}
   labels:
     app: {{ .Chart.Name }}-tests
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -43,6 +45,7 @@ metadata:
   namespace: {{ .Values.global.namespace }}
   labels:
     app: {{ .Chart.Name }}-tests
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -56,13 +59,13 @@ subjects:
     kind: User
     name: system:serviceaccount:{{ .Values.global.namespace }}:{{ .Chart.Name }}-tests
 ---
-
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ .Chart.Name }}-tests
   labels:
     app: {{ .Chart.Name }}-tests
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -90,6 +93,7 @@ metadata:
   name: {{ .Chart.Name }}-tests
   labels:
     app: {{ .Chart.Name }}-tests
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}

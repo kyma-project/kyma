@@ -6,6 +6,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}-gateway-tests
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}-gateway-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -17,6 +18,7 @@ metadata:
   name: {{ .Chart.Name }}-gateway-tests
   labels:
     app: {{ .Chart.Name }}-gateway-tests
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}-gateway-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -38,6 +40,7 @@ metadata:
   name: {{ .Chart.Name }}-gateway-tests
   labels:
     app: {{ .Chart.Name }}-gateway-tests
+    release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}-gateway-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
