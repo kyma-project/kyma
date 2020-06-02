@@ -29,18 +29,21 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 			Name:              name,
 			Status:            "Active",
 			IsSystemNamespace: false,
+			Labels:            gqlschema.Labels{},
 		}
 		k8sInactiveNamespace := fixNamespaceWithStatus(inactiveName, "Terminating")
 		gqlInactiveNamespace := gqlschema.Namespace{
 			Name:              inactiveName,
 			Status:            "Terminating",
 			IsSystemNamespace: false,
+			Labels:            gqlschema.Labels{},
 		}
 		k8sSystemNamespace := fixNamespaceWithStatus(systemName, "Active")
 		gqlSystemNamespace := gqlschema.Namespace{
 			Name:              systemName,
 			Status:            "Active",
 			IsSystemNamespace: true,
+			Labels:            gqlschema.Labels{},
 		}
 
 		resources := []*v1.Namespace{k8sNamespace, k8sInactiveNamespace, k8sSystemNamespace}

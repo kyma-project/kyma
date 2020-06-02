@@ -20,10 +20,15 @@ func (c *namespaceConverter) ToGQL(in *v1.Namespace) *gqlschema.Namespace {
 		return nil
 	}
 
+	labels := map[string]string{}
+	if in.Labels != nil {
+		labels = in.Labels
+	}
+
 	isSystem := isSystemNamespace(*in, c.systemNamespaces)
 	return &gqlschema.Namespace{
 		Name:              in.Name,
-		Labels:            in.Labels,
+		Labels:            labels,
 		Status:            string(in.Status.Phase),
 		IsSystemNamespace: isSystem,
 	}
