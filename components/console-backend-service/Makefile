@@ -32,6 +32,8 @@ verify: test check-imports check-fmt
 
 test:
 	go test -coverprofile=/tmp/artifacts/cover.out ./...
+	ls /tmp
+	ls /tmp/artifacts
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
 
