@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-crd-service-catalog
+  annotations:
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
+data:
+  clusterservicebrokers.servicecatalog: |-
+{{.Files.Get "files/crd-clusterservicebroker.servicecatalog.yaml" | printf "%s" | indent 4}}
+  clusterserviceclasses.servicecatalog: |-
+{{.Files.Get "files/crd-clusterserviceclass.servicecatalog.yaml" | printf "%s" | indent 4}}
+  clusterserviceplans.servicecatalog: |-
+{{.Files.Get "files/crd-clusterserviceplan.servicecatalog.yaml" | printf "%s" | indent 4}}
+  servicebrokers.servicecatalog: |-
+{{.Files.Get "files/crd-servicebroker.servicecatalog.yaml" | printf "%s" | indent 4}}
+  serviceclasses.servicecatalog: |-
+{{.Files.Get "files/crd-serviceclass.servicecatalog.yaml" | printf "%s" | indent 4}}
+  serviceplans.servicecatalog: |-
+{{.Files.Get "files/crd-serviceplan.servicecatalog.yaml" | printf "%s" | indent 4}}
+  serviceinstances.servicecatalog: |-
+{{.Files.Get "files/crd-serviceinstance.servicecatalog.yaml" | printf "%s" | indent 4}}
+  servicebindings.servicecatalog: |-
+{{.Files.Get "files/crd-servicebinding.servicecatalog.yaml" | printf "%s" | indent 4}}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-init-service-catalog
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded"
+    helm.sh/hook: "pre-upgrade, pre-install"
+    helm.sh/hook-weight: "10"
+  labels:
+    job: {{ .Release.Name }}-init-service-catalog
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: {{ .Release.Name }}-init-service-catalog
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        job: {{ .Release.Name }}-init-service-catalog
+    spec:
+      serviceAccountName: {{ .Release.Name }}-crd-init
+      restartPolicy: Never
+      containers:
+        - name: job
+          image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+          terminationMessagePolicy: "FallbackToLogsOnError"
+          volumeMounts:
+            - name: crd-service-catalog
+              mountPath: /etc/crd
+              readOnly: true
+          command:
+            - /bin/bash
+            - -c
+            - |-
+              set -e
+
+              crds=( clusterservicebrokers.servicecatalog \
+                clusterserviceclasses.servicecatalog \
+                clusterserviceplans.servicecatalog \
+                servicebrokers.servicecatalog \
+                serviceclasses.servicecatalog \
+                serviceplans.servicecatalog \
+                serviceinstances.servicecatalog \
+                servicebindings.servicecatalog )
+
+              for crd in "${crds[@]}"; do
+                timeout 60s bash -c "until kubectl apply -f /etc/crd/$crd; do sleep 2; done"
+              done
+      volumes:
+        - name: crd-service-catalog
+          configMap:
+            name: {{ .Release.Name }}-crd-service-catalog
