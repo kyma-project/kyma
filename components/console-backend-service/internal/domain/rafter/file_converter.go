@@ -63,7 +63,6 @@ func (c *fileConverter) extractMetadata(metadata *runtime.RawExtension) (gqlsche
 		return nil, err
 	}
 
-
 	for k, v := range extracted {
 		result[k] = v
 	}

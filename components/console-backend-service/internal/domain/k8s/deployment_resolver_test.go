@@ -1,6 +1,8 @@
 package k8s_test
 
 import (
+	"testing"
+
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/automock"
@@ -13,7 +15,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/apps/v1"
-	"testing"
 )
 
 func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
