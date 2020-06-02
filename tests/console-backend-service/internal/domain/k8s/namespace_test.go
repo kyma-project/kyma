@@ -3,6 +3,7 @@
 package k8s
 
 import (
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"math/rand"
 	"testing"
 	"time"
@@ -68,6 +69,16 @@ func TestNamespace(t *testing.T) {
 	suite.thenNamespaceIsRemovedFromK8sEventually(t)
 	//namespace changes its status to 'Terminating' first - delete event is sent after few seconds
 	suite.thenUpdateEventIsSent(t, subscription, "Terminating")
+
+	t.Log("Checking authorization directives...")
+	as := auth.New()
+	ops := &auth.OperationsInput{
+		auth.Create: {suite.fixNamespaceCreate()},
+		auth.Update: {suite.fixNamespaceUpdate()},
+		auth.Delete: {suite.fixNamespaceDelete()},
+		auth.Watch:  {suite.fixNamespacesSubscription()},
+	}
+	as.Run(t, ops)
 }
 
 type testNamespaceSuite struct {
