@@ -192,7 +192,6 @@ spec:
               namespace: kyma-installer
             type: Opaque
             EOF
-
             timeout 60s bash -c 'until kubectl create -f /tmp/secret.yaml ; do sleep 2; done'
         volumeMounts:
           - mountPath: /etc/certs
@@ -223,7 +222,6 @@ spec:
         image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
         imagePullPolicy: IfNotPresent
         args:
-          - -tillerTLSInsecureSkipVerify=true
           - -overrideLogFile=/app/overrides.txt
         volumeMounts:
           - mountPath: /etc/certs
