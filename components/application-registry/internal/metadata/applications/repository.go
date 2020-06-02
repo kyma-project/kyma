@@ -21,7 +21,7 @@ const (
 
 // Manager contains operations for managing Application CRD
 type Manager interface {
-	Update(application *v1alpha1.Application) (*v1alpha1.Application, error)
+	Update(appName *v1alpha1.Application) (*v1alpha1.Application, error)
 	Get(name string, options v1.GetOptions) (*v1alpha1.Application, error)
 }
 
@@ -81,11 +81,11 @@ type Service struct {
 
 // ServiceRepository contains operations for managing services stored in Application CRD
 type ServiceRepository interface {
-	Create(application string, service Service) apperrors.AppError
-	Get(application, id string) (Service, apperrors.AppError)
-	GetAll(application string) ([]Service, apperrors.AppError)
-	Update(application string, service Service) apperrors.AppError
-	Delete(application, id string) apperrors.AppError
+	Create(appName string, service Service) apperrors.AppError
+	Get(appName, id string) (Service, apperrors.AppError)
+	GetAll(appName string) ([]Service, apperrors.AppError)
+	Update(appName string, service Service) apperrors.AppError
+	Delete(appName, id string) apperrors.AppError
 }
 
 // NewServiceRepository creates a new ApplicationServiceRepository
@@ -94,30 +94,25 @@ func NewServiceRepository(appManager Manager) ServiceRepository {
 }
 
 // Create adds a new Service in Application
-func (r *repository) Create(application string, service Service) apperrors.AppError {
-	app, err := r.getApplication(application)
+func (r *repository) Create(appName string, service Service) apperrors.AppError {
+	err := r.updateApplicationWithRetries(appName, func(app *v1alpha1.Application) error {
+		if err := ensureServiceNotExists(service.ID, app); err != nil {
+			return err
+		}
+
+		app.Spec.Services = append(app.Spec.Services, convertToK8sType(service))
+		return nil
+	})
 	if err != nil {
-		return err
-	}
-
-	err = ensureServiceNotExists(service.ID, app)
-	if err != nil {
-		return err
-	}
-
-	app.Spec.Services = append(app.Spec.Services, convertToK8sType(service))
-
-	e := r.updateApplication(app)
-	if e != nil {
-		return apperrors.Internal(fmt.Sprintf("Creating service failed, %s", e.Error()))
+		return r.plainErrorToInternalAppError(err, "Creating service failed")
 	}
 
 	return nil
 }
 
 // Get reads Service from Application by service id
-func (r *repository) Get(application, id string) (Service, apperrors.AppError) {
-	app, err := r.getApplication(application)
+func (r *repository) Get(appName, id string) (Service, apperrors.AppError) {
+	app, err := r.getApplication(appName)
 	if err != nil {
 		return Service{}, err
 	}
@@ -132,8 +127,8 @@ func (r *repository) Get(application, id string) (Service, apperrors.AppError) {
 }
 
 // GetAll gets slice of services defined in Application
-func (r *repository) GetAll(application string) ([]Service, apperrors.AppError) {
-	app, err := r.getApplication(application)
+func (r *repository) GetAll(appName string) ([]Service, apperrors.AppError) {
+	app, err := r.getApplication(appName)
 	if err != nil {
 		return nil, err
 	}
@@ -151,66 +146,78 @@ func (r *repository) GetAll(application string) ([]Service, apperrors.AppError) 
 }
 
 // Update updates a given service defined in Application
-func (r *repository) Update(application string, service Service) apperrors.AppError {
-	app, err := r.getApplication(application)
+func (r *repository) Update(appName string, service Service) apperrors.AppError {
+	err := r.updateApplicationWithRetries(appName, func(app *v1alpha1.Application) error {
+		if err := ensureServiceExists(service.ID, app); err != nil {
+			return err
+		}
+
+		replaceService(service.ID, app, convertToK8sType(service))
+		return nil
+	})
 	if err != nil {
-		return err
-	}
-
-	err = ensureServiceExists(service.ID, app)
-	if err != nil {
-		return err
-	}
-
-	replaceService(service.ID, app, convertToK8sType(service))
-
-	e := r.updateApplication(app)
-	if e != nil {
-		return apperrors.Internal(fmt.Sprintf("Updating service failed, %s", e.Error()))
+		return r.plainErrorToInternalAppError(err, "Updating service failed")
 	}
 
 	return nil
 }
 
 // Delete deletes a given service defined in Application
-func (r *repository) Delete(application, id string) apperrors.AppError {
-	app, err := r.getApplication(application)
-	if err != nil {
-		return err
-	}
+func (r *repository) Delete(appName, id string) apperrors.AppError {
+	err := r.updateApplicationWithRetries(appName, func(app *v1alpha1.Application) error {
+		if !serviceExists(id, app) {
+			return nil
+		}
 
-	if !serviceExists(id, app) {
+		removeService(id, app)
 		return nil
-	}
-
-	removeService(id, app)
-
-	e := r.updateApplication(app)
-	if e != nil {
-		return apperrors.Internal(fmt.Sprintf("Deleting service failed, %s", e.Error()))
+	})
+	if err != nil {
+		return r.plainErrorToInternalAppError(err, "Deleting service failed")
 	}
 
 	return nil
 }
 
-func (r *repository) getApplication(application string) (*v1alpha1.Application, apperrors.AppError) {
-	app, err := r.appManager.Get(application, v1.GetOptions{})
+func (r *repository) getApplication(appName string) (*v1alpha1.Application, apperrors.AppError) {
+	app, err := r.appManager.Get(appName, v1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			message := fmt.Sprintf("Application %s not found", application)
+			message := fmt.Sprintf("Application %s not found", appName)
 			return nil, apperrors.NotFound(message)
 		}
 
-		message := fmt.Sprintf("Getting Application %s failed, %s", application, err.Error())
+		message := fmt.Sprintf("Getting Application %s failed, %s", appName, err.Error())
 		return nil, apperrors.Internal(message)
 	}
 
 	return app, nil
 }
 
-func (r *repository) updateApplication(app *v1alpha1.Application) error {
+func (r *repository) updateApplicationWithRetries(
+	appName string,
+	modifyApplication func(app *v1alpha1.Application) error) error {
+
 	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-		_, e := r.appManager.Update(app)
-		return e
+		app, appErr := r.getApplication(appName)
+		if appErr != nil {
+			return appErr
+		}
+
+		err := modifyApplication(app)
+		if err != nil {
+			return err
+		}
+
+		_, err = r.appManager.Update(app)
+		return err
 	})
+}
+
+func (r *repository) plainErrorToInternalAppError(err error, message string) apperrors.AppError {
+	appErr, ok := err.(apperrors.AppError)
+	if !ok {
+		return apperrors.Internal(fmt.Sprintf("%s: %v", message, err))
+	}
+	return appErr
 }
