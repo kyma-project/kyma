@@ -15,14 +15,17 @@ path-to-referenced-charts:
 dev-deps:
 	go get github.com/githubnemo/CompileDaemon
 
-watch: export APP_KUBECONFIG_PATH=/Users/${USER}/.kube/config
-watch: export APP_VERBOSE=true
-watch: export APP_RAFTER_ADDRESS=https://storage.${KYMA_DOMAIN}
-watch: export APP_RAFTER_VERIFY_SSL=false
-watch: export APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE=kyma-integration
-watch: export APP_APPLICATION_CONNECTOR_URL=http://dummy.url
-watch: export APP_OIDC_ISSUER_URL=https://dex.${KYMA_DOMAIN}
-watch: export APP_OIDC_CLIENT_ID=kyma-client
+run: export APP_KUBECONFIG_PATH=/Users/${USER}/.kube/config
+run: export APP_VERBOSE=true
+run: export APP_RAFTER_ADDRESS=https://storage.${KYMA_DOMAIN}
+run: export APP_RAFTER_VERIFY_SSL=false
+run: export APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE=kyma-integration
+run: export APP_APPLICATION_CONNECTOR_URL=http://dummy.url
+run: export APP_OIDC_ISSUER_URL=https://dex.${KYMA_DOMAIN}
+run: export APP_OIDC_CLIENT_ID=kyma-client
+
+run:
+	./console-backend-service
 
 watch:
 	CompileDaemon -build="make build-local" -command="go run main.go" -graceful-kill
