@@ -56,10 +56,6 @@ images:
     repository: "eu.gcr.io/kyma-project/function-controller"
     tag: "01eacd39"
     pullPolicy: IfNotPresent
-  kubeRbacProxy:
-    repository: "gcr.io/kubebuilder/kube-rbac-proxy"
-    tag: "v0.5.0"
-    pullPolicy: IfNotPresent
   functionRuntimeNodejs12:
     repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
     tag: "a62f4a7f"
@@ -126,49 +122,14 @@ containers:
         value: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:5000"
       functionDockerExternalAddress:
         value: "registry.{{ .Values.global.ingress.domainName -}}"
-  kubeRbacProxy:
-    resources:
-      limits:
-        cpu: 60m
-        memory: 60Mi
-      requests:
-        cpu: 10m
-        memory: 16Mi
-    extraProperties: {}
-
-services:
-  manager:
-    type: ClusterIP
-    port:
-      name: http
-      targerPort: 9876
-      port: 443
-      protocol: TCP
-    labels: {}
-    annotations: {}
-  authProxy:
-    type: ClusterIP
-    port:
-      name: https
-      port: 8443
-      targerPort: 8443
-      protocol: TCP
-    labels: {}
-    annotations: {}
 
 metrics:
-  enabled: false
+  enabled: true
   manager:
     port:
       name: http-metrics
       port: 8080
       targerPort: 8080
-      protocol: TCP
-  authProxy:
-    port:
-      name: https
-      port: 8443
-      targerPort: 8443
       protocol: TCP
   serviceMonitor:
     create: true
