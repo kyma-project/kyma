@@ -80,7 +80,7 @@ func (c *navigationNodeConverter) settingsToGQLJSON(in *uiV1alpha1v.NavigationNo
 		return nil, errors.Wrapf(err, "while unmarshalling %s with ViewURL `%s` to map", pretty.NavigationNode, in.ViewURL)
 	}
 
-	var result gqlschema.Settings
+	result := gqlschema.Settings{}
 	err = result.UnmarshalGQL(jsonMap)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while unmarshalling %s with ViewURL `%s` to GQL JSON", pretty.NavigationNode, in.ViewURL)
