@@ -16,7 +16,7 @@ FILES_TO_CHECK = find . -type f -name "*.go" | grep -v "$(VERIFY_IGNORE)"
 release: build-image push-image
 
 build-image: pull-licenses
-	docker build -t $(IMG_NAME) .
+	docker build -t $(APP_NAME) .
 push-image:
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
 	docker push $(IMG_NAME):$(TAG)
@@ -30,7 +30,7 @@ endif
 
 verify: test check-imports check-fmt
 
-test-local:
+test:
 	go test -coverprofile=/tmp/artifacts/cover.out ./...
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
