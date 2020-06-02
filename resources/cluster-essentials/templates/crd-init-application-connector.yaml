@@ -42,7 +42,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: job
-        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
         terminationMessagePolicy: "FallbackToLogsOnError"
         volumeMounts:
         - name: crd-app-connector

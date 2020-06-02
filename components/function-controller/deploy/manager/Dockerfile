@@ -1,4 +1,4 @@
-FROM golang:1.13 as builder
+FROM golang:1.14-alpine as builder
 
 ENV BASE_APP_DIR=/go/src/github.com/kyma-project/kyma/components/function-controller \
     GO111MODULE=on \
@@ -20,7 +20,7 @@ RUN go mod download
 #
 COPY . ${BASE_APP_DIR}/
 
-RUN go build -a -o manager cmd/manager/main.go \
+RUN go build -ldflags "-s -w" -a -o manager cmd/manager/main.go \
     && mkdir /app \
     && mv ./manager /app/manager \
     && if [ -f ${BASE_APP_DIR}/licenses ]; then mv ${BASE_APP_DIR}/licenses /app/licenses; fi
@@ -32,7 +32,7 @@ RUN apk --update add ca-certificates
 # result container
 FROM scratch
 
-LABEL source = git@github.com:kyma-project/rafter.git
+LABEL source = git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /app /app
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt

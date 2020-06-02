@@ -2,4 +2,5 @@
 
 ## Overview
 
-The `cluster-essentials` folder contains chart with essential resources for the installation of the `core` components in Kyma.
+The `cluster-essentials` folder contains a chart with essential resources for the installation of all components in Kyma.
+The `files` subfolder contains custom resource definitions (CRDs) of Kyma components.

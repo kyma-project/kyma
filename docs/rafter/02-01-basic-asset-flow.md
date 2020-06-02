@@ -7,7 +7,7 @@ This diagram shows a high-level overview of how Rafter works:
 
 >**NOTE:** This flow also applies to the cluster-wide counterparts of all CRs.
 
-![](./assets/basic-architecture.svg)
+![Basic architecture](./assets/basic-architecture.svg)
 
 1. The user creates a Bucket CR. This propagates the creation of buckets in MinIO Gateway where assets will be stored.
 2. The user creates an Asset CR that contains the reference to assets.

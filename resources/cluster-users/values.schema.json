@@ -324,9 +324,6 @@
             "dex": [
               "dex.coreos.com"
             ],
-            "kubeless": [
-              "kubeless.io"
-            ],
             "rafter": [
               "rafter.kyma-project.io"
             ],
@@ -435,9 +432,6 @@
               ],
               "dex": [
                 "dex.coreos.com"
-              ],
-              "kubeless": [
-                "kubeless.io"
               ]
             }
           ],
@@ -688,29 +682,6 @@
                   "networking.internal.knative.dev",
                   "caching.internal.knative.dev",
                   "autoscaling.internal.knative.dev"
-                ]
-              }
-            },
-            "kubeless": {
-              "$id": "#/properties/clusterRoles/properties/apiGroups/properties/kubeless",
-              "type": "array",
-              "title": "The Kubeless Schema",
-              "description": "",
-              "default": [],
-              "examples": [
-                [
-                  "kubeless.io"
-                ]
-              ],
-              "additionalItems": true,
-              "items": {
-                "$id": "#/properties/clusterRoles/properties/apiGroups/properties/kubeless/items",
-                "type": "string",
-                "title": "The Items Schema",
-                "description": "",
-                "default": "",
-                "examples": [
-                  "kubeless.io"
                 ]
               }
             }
