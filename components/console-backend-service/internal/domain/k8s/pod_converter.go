@@ -29,13 +29,18 @@ func (c *podConverter) ToGQL(in *v1.Pod) (*gqlschema.Pod, error) {
 		return nil, errors.Wrapf(err, "while converting %s `%s` to it's json representation", pretty.Pod, in.Name)
 	}
 
+	labels := in.Labels
+	if labels == nil {
+		labels = gqlschema.Labels{}
+	}
+
 	return &gqlschema.Pod{
 		Name:              in.Name,
 		NodeName:          in.Spec.NodeName,
 		Namespace:         in.Namespace,
 		RestartCount:      c.getRestartCount(in.Status.ContainerStatuses),
 		CreationTimestamp: in.CreationTimestamp.Time,
-		Labels:            in.Labels,
+		Labels:            labels,
 		Status:            c.podStatusPhaseToGQLStatusType(in.Status.Phase),
 		ContainerStates:   containerStates,
 		JSON:              gqlJSON,

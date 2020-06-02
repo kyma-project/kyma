@@ -51,6 +51,7 @@ func TestConfigMapConverter_ToGQL(t *testing.T) {
 		require.NoError(t, err)
 		expected := &gqlschema.ConfigMap{
 			JSON: emptyConfigMapJSON,
+			Labels: gqlschema.Labels{},
 		}
 
 		result, err := converter.ToGQL(&v1.ConfigMap{})
