@@ -235,7 +235,7 @@ func (hc *Client) UpgradeRelease(chartDir, relNamespace, relName string, values 
 	}
 
 	upgrade := action.NewUpgrade(cfg)
-	upgrade.Atomic = true
+	upgrade.Atomic = false
 	upgrade.CleanupOnFail = true
 	upgrade.Wait = true
 	upgrade.ReuseValues = true
