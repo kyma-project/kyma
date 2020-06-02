@@ -68,19 +68,22 @@ func (c *navigationNodeConverter) settingsToGQLJSON(in *uiV1alpha1v.NavigationNo
 	if in == nil {
 		return nil, nil
 	}
+	result := gqlschema.Settings{}
+	if in.Settings == nil {
+		return result, nil
+	}
 
 	jsonByte, err := json.Marshal(in.Settings)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while marshalling %s with ViewURL `%s`", pretty.NavigationNode, in.ViewURL)
 	}
 
-	var jsonMap map[string]interface{}
+	jsonMap := make(map[string]interface{})
 	err = json.Unmarshal(jsonByte, &jsonMap)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while unmarshalling %s with ViewURL `%s` to map", pretty.NavigationNode, in.ViewURL)
 	}
 
-	result := gqlschema.Settings{}
 	err = result.UnmarshalGQL(jsonMap)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while unmarshalling %s with ViewURL `%s` to GQL JSON", pretty.NavigationNode, in.ViewURL)

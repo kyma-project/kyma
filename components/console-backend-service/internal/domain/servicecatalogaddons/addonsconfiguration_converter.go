@@ -63,7 +63,7 @@ func parseRepository(repo v1alpha1.SpecRepository) *gqlschema.AddonsConfiguratio
 func parseStatus(status v1alpha1.CommonAddonsConfigurationStatus) *gqlschema.AddonsConfigurationStatus {
 	var repositories []*gqlschema.AddonsConfigurationStatusRepository
 	for _, repo := range status.Repositories {
-		var addons []*gqlschema.AddonsConfigurationStatusAddons
+		addons := make([]*gqlschema.AddonsConfigurationStatusAddons, 0)
 		for _, addon := range repo.Addons {
 			addons = append(addons, &gqlschema.AddonsConfigurationStatusAddons{
 				Status:  string(addon.Status),
