@@ -337,6 +337,12 @@
               "autoscaling.internal.knative.dev",
               "serving.knative.dev"
             ],
+            "kymaEventing": [
+              "knativekafka.kyma-project.io",
+              "sources.kyma-project.io",
+              "messaging.knative.dev",
+              "eventing.knative.dev"
+            ],
             "addons": [
               "addons.kyma-project.io"
             ],
@@ -396,6 +402,12 @@
                 "caching.internal.knative.dev",
                 "autoscaling.internal.knative.dev",
                 "serving.knative.dev"
+              ],
+              "kymaEventing": [
+                "knativekafka.kyma-project.io",
+                "sources.kyma-project.io",
+                "messaging.knative.dev",
+                "eventing.knative.dev"
               ],
               "addons": [
                 "addons.kyma-project.io"
@@ -682,6 +694,35 @@
                   "networking.internal.knative.dev",
                   "caching.internal.knative.dev",
                   "autoscaling.internal.knative.dev"
+                ]
+              }
+            },
+            "kymaEventing": {
+              "$id": "#/properties/clusterRoles/properties/apiGroups/properties/kymaEventing",
+              "type": "array",
+              "title": "The kymaEventing Schema",
+              "description": "",
+              "default": [],
+              "examples": [
+                [
+                  "knativekafka.kyma-project.io",
+                  "sources.kyma-project.io",
+                  "messaging.knative.dev",
+                  "eventing.knative.dev"
+                ]
+              ],
+              "additionalItems": true,
+              "items": {
+                "$id": "#/properties/clusterRoles/properties/apiGroups/properties/kymaEventing/items",
+                "type": "string",
+                "title": "The Items Schema",
+                "description": "",
+                "default": "",
+                "examples": [
+                  "knativekafka.kyma-project.io",
+                  "sources.kyma-project.io",
+                  "messaging.knative.dev",
+                  "eventing.knative.dev"
                 ]
               }
             }
