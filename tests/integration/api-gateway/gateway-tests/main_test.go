@@ -55,14 +55,16 @@ var (
 )
 
 type Config struct {
-	HydraAddr     string        `envconfig:"TEST_HYDRA_ADDRESS"`
-	User          string        `envconfig:"TEST_USER_EMAIL"`
-	Pwd           string        `envconfig:"TEST_USER_PASSWORD"`
-	ReqTimeout    uint          `envconfig:"TEST_REQUEST_TIMEOUT,default=180"`
-	ReqDelay      uint          `envconfig:"TEST_REQUEST_DELAY,default=5"`
-	Domain        string        `envconfig:"TEST_DOMAIN"`
-	ClientTimeout time.Duration `envconfig:"TEST_CLIENT_TIMEOUT,default=10s"` //Don't forget the unit!
-	IsMinikubeEnv bool          `envconfig:"TEST_MINIKUBE_ENV,default=false"`
+	HydraAddr        string        `envconfig:"TEST_HYDRA_ADDRESS"`
+	User             string        `envconfig:"TEST_USER_EMAIL"`
+	Pwd              string        `envconfig:"TEST_USER_PASSWORD"`
+	ReqTimeout       uint          `envconfig:"TEST_REQUEST_TIMEOUT,default=180"`
+	ReqDelay         uint          `envconfig:"TEST_REQUEST_DELAY,default=5"`
+	Domain           string        `envconfig:"TEST_DOMAIN"`
+	GatewayName      string        `envconfig:"TEST_GATEWAY_NAME,default=kyma-gateway"`
+	GatewayNamespace string        `envconfig:"TEST_GATEWAY_NAMESPACE,default=kyma-system"`
+	ClientTimeout    time.Duration `envconfig:"TEST_CLIENT_TIMEOUT,default=10s"` //Don't forget the unit!
+	IsMinikubeEnv    bool          `envconfig:"TEST_MINIKUBE_ENV,default=false"`
 }
 
 func TestApiGatewayIntegration(t *testing.T) {
@@ -196,11 +198,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			// create api-rule from file
 			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
-				Namespace  string
-				NamePrefix string
-				TestID     string
-				Domain     string
-			}{Namespace: namespace, NamePrefix: "unsecured", TestID: testID, Domain: conf.Domain})
+				Namespace        string
+				NamePrefix       string
+				TestID           string
+				Domain           string
+				GatewayName      string
+				GatewayNamespace string
+			}{Namespace: namespace, NamePrefix: "unsecured", TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
+				GatewayNamespace: conf.GatewayNamespace})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -230,11 +235,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			// create api-rule from file
 			resources, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
-				Namespace  string
-				NamePrefix string
-				TestID     string
-				Domain     string
-			}{Namespace: namespace, NamePrefix: "oauth2", TestID: testID, Domain: conf.Domain})
+				Namespace        string
+				NamePrefix       string
+				TestID           string
+				Domain           string
+				GatewayName      string
+				GatewayNamespace string
+			}{Namespace: namespace, NamePrefix: "oauth2", TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
+				GatewayNamespace: conf.GatewayNamespace})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -270,11 +278,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			// create api-rule from file
 			oauthStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(jwtAndOauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
-				Namespace  string
-				NamePrefix string
-				TestID     string
-				Domain     string
-			}{Namespace: namespace, NamePrefix: "jwt-oauth", TestID: testID, Domain: conf.Domain})
+				Namespace        string
+				NamePrefix       string
+				TestID           string
+				Domain           string
+				GatewayName      string
+				GatewayNamespace string
+			}{Namespace: namespace, NamePrefix: "jwt-oauth", TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
+				GatewayNamespace: conf.GatewayNamespace})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -318,11 +329,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			// create api-rule from file
 			oauthStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(jwtAndOauthOnePathApiruleFile, manifestsDirectory, resourceSeparator, struct {
-				Namespace  string
-				NamePrefix string
-				TestID     string
-				Domain     string
-			}{Namespace: namespace, NamePrefix: "jwt-oauth-one-path", TestID: testID, Domain: conf.Domain})
+				Namespace        string
+				NamePrefix       string
+				TestID           string
+				Domain           string
+				GatewayName      string
+				GatewayNamespace string
+			}{Namespace: namespace, NamePrefix: "jwt-oauth-one-path", TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
+				GatewayNamespace: conf.GatewayNamespace})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -364,11 +378,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			// create api-rule from file
 			resources, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
-				Namespace  string
-				NamePrefix string
-				TestID     string
-				Domain     string
-			}{Namespace: namespace, NamePrefix: "oauth2", TestID: testID, Domain: conf.Domain})
+				Namespace        string
+				NamePrefix       string
+				TestID           string
+				Domain           string
+				GatewayName      string
+				GatewayNamespace string
+			}{Namespace: namespace, NamePrefix: "oauth2", TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
+				GatewayNamespace: conf.GatewayNamespace})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -383,11 +400,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 			namePrefix := strings.TrimSuffix(resources[0].GetName(), "-"+testID)
 
 			unsecuredApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
-				Namespace  string
-				NamePrefix string
-				TestID     string
-				Domain     string
-			}{Namespace: namespace, NamePrefix: namePrefix, TestID: testID, Domain: conf.Domain})
+				Namespace        string
+				NamePrefix       string
+				TestID           string
+				Domain           string
+				GatewayName      string
+				GatewayNamespace string
+			}{Namespace: namespace, NamePrefix: namePrefix, TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
+				GatewayNamespace: conf.GatewayNamespace})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -420,11 +440,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			// create api-rule from file
 			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
-				Namespace  string
-				NamePrefix string
-				TestID     string
-				Domain     string
-			}{Namespace: namespace, NamePrefix: "unsecured", TestID: testID, Domain: conf.Domain})
+				Namespace        string
+				NamePrefix       string
+				TestID           string
+				Domain           string
+				GatewayName      string
+				GatewayNamespace string
+			}{Namespace: namespace, NamePrefix: "unsecured", TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
+				GatewayNamespace: conf.GatewayNamespace})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -437,11 +460,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 			namePrefix := strings.TrimSuffix(noAccessStrategyApiruleResource[0].GetName(), "-"+testID)
 
 			securedApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
-				Namespace  string
-				NamePrefix string
-				TestID     string
-				Domain     string
-			}{Namespace: namespace, NamePrefix: namePrefix, TestID: testID, Domain: conf.Domain})
+				Namespace        string
+				NamePrefix       string
+				TestID           string
+				Domain           string
+				GatewayName      string
+				GatewayNamespace string
+			}{Namespace: namespace, NamePrefix: namePrefix, TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
+				GatewayNamespace: conf.GatewayNamespace})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -474,11 +500,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			// create api-rule from file
 			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
-				Namespace  string
-				NamePrefix string
-				TestID     string
-				Domain     string
-			}{Namespace: namespace, NamePrefix: "unsecured", TestID: testID, Domain: conf.Domain})
+				Namespace        string
+				NamePrefix       string
+				TestID           string
+				Domain           string
+				GatewayName      string
+				GatewayNamespace string
+			}{Namespace: namespace, NamePrefix: "unsecured", TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
+				GatewayNamespace: conf.GatewayNamespace})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -491,11 +520,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 			namePrefix := strings.TrimSuffix(noAccessStrategyApiruleResource[0].GetName(), "-"+testID)
 
 			securedApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(jwtAndOauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
-				Namespace  string
-				NamePrefix string
-				TestID     string
-				Domain     string
-			}{Namespace: namespace, NamePrefix: namePrefix, TestID: testID, Domain: conf.Domain})
+				Namespace        string
+				NamePrefix       string
+				TestID           string
+				Domain           string
+				GatewayName      string
+				GatewayNamespace string
+			}{Namespace: namespace, NamePrefix: namePrefix, TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
+				GatewayNamespace: conf.GatewayNamespace})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
