@@ -7,3 +7,5 @@ global:
   service_binding_usage_controller:
     dir:
     version: 7a244165
+  ingress:
+    domainName: "TBD"

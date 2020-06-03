@@ -49,10 +49,6 @@ spec:
               value: "https://oauth2.{{ .Values.global.ingress.domainName }}/oauth2/token"
             - name: APP_PROVISIONER_URL
               value: "{{ .Values.provisioner.URL }}"
-            - name: APP_RUNTIME_UUA_INSTANCE_NAME
-              value: "uaa-issuer"
-            - name: APP_RUNTIME_UUA_INSTANCE_NAMESPACE
-              value: "kyma-system"
             - name: APP_CONFIG_NAME
               value: "{{ .Values.e2e.gcp.configName }}"
             - name: APP_DEPLOY_NAMESPACE
@@ -121,10 +117,6 @@ spec:
               value: "https://oauth2.{{ .Values.global.ingress.domainName }}/oauth2/token"
             - name: APP_PROVISIONER_URL
               value: "{{ .Values.provisioner.URL }}"
-            - name: APP_RUNTIME_UUA_INSTANCE_NAME
-              value: "uaa-issuer"
-            - name: APP_RUNTIME_UUA_INSTANCE_NAMESPACE
-              value: "kyma-system"
             - name: APP_CONFIG_NAME
               value: "{{ .Values.e2e.gcp.configName }}"
             - name: APP_DEPLOY_NAMESPACE

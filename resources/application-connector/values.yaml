@@ -9,6 +9,12 @@ global:
   isLocalEnv: false
   namespace: kyma-integration
   strictMode: disabled
+  ingress:
+    domainName: "TBD"
+  helm:
+    tls:
+      crt: "TBD"
+      key: "TBD"
   istio:
     namespace: istio-system
     tls:
@@ -63,7 +69,7 @@ global:
     version: c608dbf3
   application_broker:
     dir:
-    version: a5ccfe43
+    version: c76cbcd6
   application_connectivity_certs_setup_job:
     dir:
     version: fbf1000b

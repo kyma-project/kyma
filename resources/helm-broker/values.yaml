@@ -70,3 +70,10 @@ global:
       - "bitbucket.org/"
     additionalDevelopMode:
       - "http://"
+
+  ingress:
+    domainName: "TBD"
+  helm:
+    tls:
+      crt: "TBD"
+      key: "TBD"

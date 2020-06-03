@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: {{ .Values.images.containerRegistry.path }}/{{ .Values.images.ui.dir }}compass-ui:{{ .Values.images.ui.version }}
+          image: {{ .Values.images.containerRegistry.path }}/{{ .Values.images.ui.dir }}compass:{{ .Values.images.ui.version }}
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           livenessProbe:
             httpGet:
