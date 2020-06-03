@@ -22,8 +22,10 @@ func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
 		"empty": {
 			givenAddon: &v1alpha1.ClusterAddonsConfiguration{},
 			expectedAddonsConfig: &gqlschema.AddonsConfiguration{
-				Labels: gqlschema.Labels{},
-				Status: &gqlschema.AddonsConfigurationStatus{},
+				Labels:       gqlschema.Labels{},
+				Status:       &gqlschema.AddonsConfigurationStatus{Repositories: []*gqlschema.AddonsConfigurationStatusRepository{}},
+				Repositories: []*gqlschema.AddonsConfigurationRepository{},
+				Urls:         []string{},
 			},
 		},
 		"full": {

@@ -12,8 +12,8 @@ func (c *addonsConfigurationConverter) ToGQL(item *v1alpha1.AddonsConfiguration)
 		return nil
 	}
 
-	var urls []string
-	var repositories []*gqlschema.AddonsConfigurationRepository
+	urls := []string{}
+	repositories := []*gqlschema.AddonsConfigurationRepository{}
 	for _, repo := range item.Spec.Repositories {
 		urls = append(urls, repo.URL)
 		repositories = append(repositories, parseRepository(repo))
@@ -61,7 +61,7 @@ func parseRepository(repo v1alpha1.SpecRepository) *gqlschema.AddonsConfiguratio
 }
 
 func parseStatus(status v1alpha1.CommonAddonsConfigurationStatus) *gqlschema.AddonsConfigurationStatus {
-	var repositories []*gqlschema.AddonsConfigurationStatusRepository
+	repositories := []*gqlschema.AddonsConfigurationStatusRepository{}
 	for _, repo := range status.Repositories {
 		addons := make([]*gqlschema.AddonsConfigurationStatusAddons, 0)
 		for _, addon := range repo.Addons {

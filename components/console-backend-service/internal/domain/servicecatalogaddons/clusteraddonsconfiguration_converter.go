@@ -12,8 +12,8 @@ func (c *clusterAddonsConfigurationConverter) ToGQL(item *v1alpha1.ClusterAddons
 		return nil
 	}
 
-	var urls []string
-	var repositories []*gqlschema.AddonsConfigurationRepository
+	urls := []string{}
+	repositories := []*gqlschema.AddonsConfigurationRepository{}
 	for _, repo := range item.Spec.Repositories {
 		urls = append(urls, repo.URL)
 		repositories = append(repositories, parseRepository(repo))

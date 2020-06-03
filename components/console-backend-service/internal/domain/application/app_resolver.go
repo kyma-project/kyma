@@ -245,18 +245,19 @@ func (r *applicationResolver) ApplicationEnabledInNamespacesField(ctx context.Co
 }
 
 func (r *applicationResolver) ApplicationEnabledMappingServices(ctx context.Context, obj *gqlschema.Application) ([]*gqlschema.EnabledMappingService, error) {
+	collection := []*gqlschema.EnabledMappingService{}
+
 	if obj == nil {
 		glog.Error(fmt.Errorf("while resolving 'EnabledMappingServices' field obj is empty"))
-		return nil, gqlerror.NewInternal()
+		return collection, gqlerror.NewInternal()
 	}
 
 	items, err := r.appSvc.ListApplicationMapping(obj.Name)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s for %s %q", pretty.ApplicationMapping, pretty.Application, obj.Name))
-		return nil, gqlerror.New(err, pretty.ApplicationMapping)
+		return collection, gqlerror.New(err, pretty.ApplicationMapping)
 	}
 
-	var collection []*gqlschema.EnabledMappingService
 	for _, mapping := range items {
 		ems := &gqlschema.EnabledMappingService{}
 
@@ -282,7 +283,7 @@ func (r *applicationResolver) findEnabledApplicationService(appServices []gqlsch
 		return "", false
 	}
 
-	var result []*gqlschema.EnabledApplicationService
+	result := []*gqlschema.EnabledApplicationService{}
 	for _, srv := range mapping.Spec.Services {
 		es := &gqlschema.EnabledApplicationService{}
 		es.ID = srv.ID
