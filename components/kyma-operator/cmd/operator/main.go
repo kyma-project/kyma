@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/actionmanager"
@@ -48,6 +50,7 @@ func main() {
 	}
 
 	stop := make(chan struct{})
+	consts.InitConfig()
 
 	kubeconfig := flag.String("kubeconfig", "", "Path to a kubeconfig file")
 	helmHost := flag.String("helmhost", "tiller-deploy.kube-system.svc.cluster.local:44134", "Helm host")
@@ -101,14 +104,16 @@ func main() {
 	kymaCommandExecutor := &toolkit.KymaCommandExecutor{}
 
 	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30)
-	internalInformerFactory := informers.NewSharedInformerFactory(internalClient, time.Second*30)
+	internalInformerFactory := informers.NewSharedInformerFactoryWithOptions(internalClient, time.Second*30, informers.WithTweakListOptions(func(listOptions *v1.ListOptions) {
+		listOptions.FieldSelector = fmt.Sprintf(`metadata.name=%s`, consts.Config.InstResource)
+	}))
 	installationLister := internalInformerFactory.Installer().V1alpha1().Installations().Lister()
 
 	kymaStatusManager := statusmanager.NewKymaStatusManager(internalClient, installationLister)
 	kymaActionManager := actionmanager.NewKymaActionManager(internalClient, installationLister)
 	conditionManager := conditionmanager.New(internalClient, installationLister)
 
-	installationFinalizerManager := finalizer.NewManager(consts.InstFinalizer)
+	installationFinalizerManager := finalizer.NewManager(consts.Config.InstFinalizer)
 
 	//////////////////////////////////////////
 	//SETUP BUSINESS DOMAIN MODULES

@@ -145,7 +145,7 @@ func (cm *impl) UninstallError() error {
 }
 
 func (cm *impl) getInstallation() (*installationv1alpha1.Installation, error) {
-	installation, err := cm.lister.Installations(consts.InstNamespace).Get(consts.InstResource)
+	installation, err := cm.lister.Installations(consts.Config.InstNamespace).Get(consts.Config.InstResource)
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +194,7 @@ func (cm *impl) setCondition(installation *installationv1alpha1.Installation, co
 
 func (cm *impl) update(installation *installationv1alpha1.Installation) error {
 	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		instObj, getErr := cm.lister.Installations(consts.InstNamespace).Get(consts.InstResource)
+		instObj, getErr := cm.lister.Installations(consts.Config.InstNamespace).Get(consts.Config.InstResource)
 		if getErr != nil {
 			return getErr
 		}
@@ -202,7 +202,7 @@ func (cm *impl) update(installation *installationv1alpha1.Installation) error {
 		installationCopy := instObj.DeepCopy()
 		installationCopy.Status.Conditions = installation.Status.Conditions
 
-		_, updateErr := cm.client.InstallerV1alpha1().Installations(consts.InstNamespace).Update(context.TODO(), installationCopy, metav1.UpdateOptions{})
+		_, updateErr := cm.client.InstallerV1alpha1().Installations(consts.Config.InstNamespace).Update(context.TODO(), installationCopy, metav1.UpdateOptions{})
 
 		return updateErr
 	})

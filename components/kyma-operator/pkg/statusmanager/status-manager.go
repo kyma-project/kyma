@@ -96,7 +96,7 @@ func appendErrorLog(entries []installationv1alpha1.ErrorLogEntry, newEntry insta
 
 func (sm *statusManager) updateFunc(updater statusUpdater) error {
 	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		instObj, getErr := sm.lister.Installations(consts.InstNamespace).Get(consts.InstResource)
+		instObj, getErr := sm.lister.Installations(consts.Config.InstNamespace).Get(consts.Config.InstResource)
 		if getErr != nil {
 			return getErr
 		}
@@ -104,7 +104,7 @@ func (sm *statusManager) updateFunc(updater statusUpdater) error {
 		installationCopy := instObj.DeepCopy()
 		updater(&installationCopy.Status)
 
-		_, updateErr := sm.client.InstallerV1alpha1().Installations(consts.InstNamespace).Update(context.TODO(), installationCopy, v1.UpdateOptions{})
+		_, updateErr := sm.client.InstallerV1alpha1().Installations(consts.Config.InstNamespace).Update(context.TODO(), installationCopy, v1.UpdateOptions{})
 		return updateErr
 	})
 
