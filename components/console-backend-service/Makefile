@@ -52,7 +52,6 @@ check-fmt:
 
 build:
 	env CGO_ENABLED=0 go build -o $(APP_NAME) ./$(ENTRYPOINT)
-	rm $(APP_NAME)
 
 watch: export APP_KUBECONFIG_PATH=/Users/${USER}/.kube/config
 watch: export APP_VERBOSE=true
