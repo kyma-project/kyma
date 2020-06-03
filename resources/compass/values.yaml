@@ -125,7 +125,6 @@ global:
       configmap:
         name: revocations-config
         namespace: "{{ .Release.Namespace }}"
-        shouldCreate: *disableLegacyConnectivity
     # If key and certificate are not provided they will be generated
     caKey: ""
     caCertificate: ""
