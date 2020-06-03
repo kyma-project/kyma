@@ -44,6 +44,8 @@ spec:
             - name: {{ .Values.service.ports.httpsWebhook.name }}
               containerPort: {{ .Values.service.ports.httpsWebhook.targetPort }}
           env:
+            # Because of the serverless webhook is based on the knative webhook we have to set the following configuration envs:
+            # SYSTEM_NAMESPACE, METRICS_DOMAIN, CONFIG_OBSERVABILITY_NAME
             - name: SYSTEM_NAMESPACE
               valueFrom:
                 fieldRef:
