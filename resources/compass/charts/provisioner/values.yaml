@@ -2,9 +2,7 @@ deployment:
   replicaCount: 1
   image:
     pullPolicy: IfNotPresent
-  
   resources: {}
-
   securityContext: # Set on container level
     runAsUser: 2000
     allowPrivilegeEscalation: false
@@ -61,5 +59,5 @@ tests:
     azureSecret: "" # Name of Gardener secret for Azure
     gcpSecret: "" # Name of Gardener secret for GCP
   kyma:
-    version: "1.12.0-rc2"
+    version: "1.12.0"
   queryLogging: false

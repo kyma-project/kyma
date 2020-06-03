@@ -103,8 +103,10 @@ defaultRules:
 
 ## Provide custom recording or alerting rules to be deployed into the cluster.
 ##
-additionalPrometheusRules: []
-#  - name: my-rule-file
+additionalPrometheusRules: |-
+#  custom_rule:
+#    additionalLabels:
+#      some: label
 #    groups:
 #      - name: my_group
 #        rules:
