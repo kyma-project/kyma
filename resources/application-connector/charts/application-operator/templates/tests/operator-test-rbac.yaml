@@ -76,7 +76,7 @@ rules:
     verbs: ["get", "list", "create", "delete"]
   - apiGroups: ["rbac.authorization.k8s.io"]
     resources: ["clusterroles", "clusterrolebindings"]
-    verbs: ["get, list"]
+    verbs: ["get", "list"]
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["serviceinstances"]
     verbs: ["get", "list", "create", "delete"]
