@@ -22,6 +22,10 @@ spec:
         app: {{ template "kiali.name" . }}-operator
     spec:
       serviceAccountName: {{ template "kiali.name" . }}-operator
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      {{- end }}
       containers:
       - name: operator
         image: "{{ .Values.kiali.operator.image.repository }}:{{ .Values.kiali.operator.image.tag }}"

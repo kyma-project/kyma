@@ -15,7 +15,7 @@ resources:
         cpu: 10m
         memory: 40Mi
 
-nodeSelector:{}
+nodeSelector: {}
 
 crd:
     install: true
@@ -107,7 +107,7 @@ kcproxy:
     inPort: 10001
     clientId: jaeger
     clientSecret: oiEWUWOIEwedfgg
-    nodeSelector:{}
+    nodeSelector: {}
     image:
       repository: bitnami/keycloak-gatekeeper
       tag: 9.0.3
