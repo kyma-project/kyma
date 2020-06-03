@@ -4,12 +4,13 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"net/http"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+
 	"github.com/99designs/gqlgen/graphql/handler/lru"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless"
 
