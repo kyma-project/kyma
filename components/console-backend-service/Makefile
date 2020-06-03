@@ -12,7 +12,8 @@ VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
 # FILES_TO_CHECK is a command used to determine which files should be verified
 FILES_TO_CHECK = find . -type f -name "*.go" | grep -v "$(VERIFY_IGNORE)"
 
-.PHONY: release
+
+
 release: build-image push-image
 
 build-image: pull-licenses
@@ -28,7 +29,9 @@ else
 	mkdir -p licenses
 endif
 
-verify: test check-imports check-fmt
+format: check-imports check-fmt
+
+verify: test format
 
 test:
 	mkdir -p /tmp/artifacts
