@@ -1,5 +1,5 @@
 global:
-  disableLegacyConnectivity: true
+  disableLegacyConnectivity: &disableLegacyConnectivity true
   defaultTenant: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
   tenants:
     - name: default
@@ -124,8 +124,8 @@ global:
     revocation:
       configmap:
         name: revocations-config
-        namespace: {{ .Release.Namespace }}
-        shouldCreate: {{ .Values.global.disableLegacyConnectivity }}
+        namespace: "{{ .Release.Namespace }}"
+        shouldCreate: *disableLegacyConnectivity
     # If key and certificate are not provided they will be generated
     caKey: ""
     caCertificate: ""
