@@ -9,6 +9,7 @@ RESOURCES_DIR="${CURRENT_DIR}/../resources"
 INSTALLER="${RESOURCES_DIR}/installer-local.yaml"
 INSTALLER_CONFIG="${RESOURCES_DIR}/installer-config-local.yaml.tpl"
 AZURE_BROKER_CONFIG=""
+HELM_VERSION=$(helm3 version --short | cut -d '.' -f 1)
 
 source $CURRENT_DIR/utils.sh
 
@@ -86,5 +87,7 @@ kubectl apply -f - <<< "$COMBO_YAML"
 sleep 15
 kubectl apply -f ${CR_PATH}
 
-echo -e "\nGetting Helm certificates"
-${CURRENT_DIR}/tiller-tls.sh && echo "Certificates successfully saved! " || echo "An unexpected error occured while saving Helm certificates. Please check the installation status"
+if [[ ! "${HELM_VERSION}" == *"v2"* ]]; then
+    echo -e "\nGetting Helm certificates"
+    ${CURRENT_DIR}/tiller-tls.sh && echo "Certificates successfully saved! " || echo "An unexpected error occured while saving Helm certificates. Please check the installation status"
+fi
