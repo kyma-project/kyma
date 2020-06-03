@@ -170,7 +170,9 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 							},
 						},
 					},
-					Status: &gqlschema.AddonsConfigurationStatus{},
+					Status: &gqlschema.AddonsConfigurationStatus{
+						Repositories: []*gqlschema.AddonsConfigurationStatusRepository{},
+					},
 				},
 				{
 					Name: "test2",
@@ -183,7 +185,9 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 							URL: url,
 						},
 					},
-					Status: &gqlschema.AddonsConfigurationStatus{},
+					Status: &gqlschema.AddonsConfigurationStatus{
+						Repositories: []*gqlschema.AddonsConfigurationStatusRepository{},
+					},
 				},
 			},
 		},

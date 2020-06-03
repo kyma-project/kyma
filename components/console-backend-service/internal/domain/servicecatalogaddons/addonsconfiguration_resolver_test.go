@@ -193,6 +193,8 @@ func fixGQLAddonsConfiguration(name string) *gqlschema.AddonsConfiguration {
 			},
 		},
 		Labels: gqlschema.Labels{},
-		Status: &gqlschema.AddonsConfigurationStatus{},
+		Status: &gqlschema.AddonsConfigurationStatus{
+			Repositories: []*gqlschema.AddonsConfigurationStatusRepository{},
+		},
 	}
 }

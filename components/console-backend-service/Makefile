@@ -76,4 +76,4 @@ run:
 	./console-backend-service
 
 watch:
-	CompileDaemon -build="make build-local" -command="go run main.go" -graceful-kill
+	CompileDaemon -build="make build-local" -command="make run" -graceful-kill
