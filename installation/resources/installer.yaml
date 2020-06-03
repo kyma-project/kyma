@@ -230,14 +230,15 @@ spec:
             set +e
             cat helm2-releases | xargs -I % ${HELM_3_BINARY} 2to3 convert --delete-v2-releases %
             set -e
-            
+
             echo "---> $(wc -l <helm2-releases) releases migrated"
           else
             echo "---> No HELM_2 releases"
           fi
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
+        # image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
+        image: eu.gcr.io/sap-kyma-prow/pr/gke-integration/kyma-project/kyma:PR-8679
         imagePullPolicy: IfNotPresent
         args:
           - -overrideLogFile=/app/overrides.txt
