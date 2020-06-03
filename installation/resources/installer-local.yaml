@@ -229,7 +229,9 @@ spec:
             yes | ${HELM_3_BINARY} 2to3 move config
 
             echo "---> Migrate releases"
+            set +e
             cat helm2-releases | xargs -I % ${HELM_3_BINARY} 2to3 convert --delete-v2-releases %
+            set -e
 
             echo "---> $(wc -l <helm2-releases) releases migrated"
           else
