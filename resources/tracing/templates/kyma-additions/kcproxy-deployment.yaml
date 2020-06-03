@@ -24,6 +24,10 @@ spec:
           hostnames:
           - "dex.{{ .Values.global.ingress.domainName }}"
       {{- end }}
+      {{- if .Values.kcproxy.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.kcproxy.nodeSelector | indent 8 }}
+      {{- end }}
       containers:
       - image: "{{ .Values.kcproxy.image.repository }}:{{ .Values.kcproxy.image.tag }}"
         imagePullPolicy: {{ .Values.kcproxy.image.pullPolicy }}
