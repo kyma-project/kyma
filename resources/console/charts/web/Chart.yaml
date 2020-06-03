@@ -1,4 +1,4 @@
-name: console
+name: web
 description: Console UI for Kyma
 version: 0.2.0
 apiVersion: v1

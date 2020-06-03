@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ template "fullname" . }}
   labels:
-    app: core-{{ template "name" . }}
+    app: console-{{ template "name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -11,7 +11,7 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: core-{{ template "name" . }}
+      app: console-{{ template "name" . }}
       release: {{ .Release.Name }}
       kyma-alerts: enabled
       kyma-component: ui
@@ -19,7 +19,7 @@ spec:
   template:
     metadata:
       labels:
-        app: core-{{ template "name" . }}
+        app: console-{{ template "name" . }}
         release: {{ .Release.Name }}
         kyma-alerts: enabled
         kyma-component: ui

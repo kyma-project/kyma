@@ -2,9 +2,9 @@
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: core-{{ .Chart.Name }}
+  name: console-{{ .Chart.Name }}
   labels:
-    app: {{ .Chart.Name }}-tests
+    app: console-{{ .Chart.Name }}-tests
     app.kubernetes.io/name: {{ .Chart.Name }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
