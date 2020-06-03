@@ -57,10 +57,10 @@ spec:
         resources:
           limits:
             cpu: 100m
-            memory: 100Mi
+            memory: 120Mi
           requests:
             cpu: 100m
-            memory: 20Mi
+            memory: 30Mi
         volumeMounts:
           - mountPath: /etc/certs
             name: helm-certs
