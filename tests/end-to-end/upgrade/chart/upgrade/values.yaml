@@ -17,4 +17,4 @@ authorizationPolicy:
     applicationName: eventmesh-upgrade
   consoleBackendService:
     namespace: kyma-system
-    serviceAccount: console-console-backend-service
+    serviceAccount: console-backend
