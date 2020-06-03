@@ -2,6 +2,7 @@ package application
 
 import (
 	"fmt"
+	"helm.sh/helm/v3/pkg/release"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -15,7 +16,6 @@ import (
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
-	hapirelease1 "k8s.io/helm/pkg/proto/hapi/release"
 )
 
 const (
@@ -83,8 +83,7 @@ func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T) {
 		if err != nil {
 			return false
 		}
-
-		return app.Status.InstallationStatus.Status == hapirelease1.Status_DEPLOYED.String()
+ 		return app.Status.InstallationStatus.Status == release.StatusDeployed.String()
 	})
 
 	require.NoError(t, err)
