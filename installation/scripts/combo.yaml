@@ -1,8 +1,249 @@
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: compass-installer
+  labels:
+    istio-injection: disabled
+    kyma-project.io/installation: ""
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: compass-default
+  namespace: compass-installer
+  labels:
+    kyma-project.io/installation: ""
+spec:
+  limits:
+  - max:
+      memory: 1024Mi # Maximum memory that a container can request
+    default:
+      # If a container does not specify memory limit, this default value will be applied.
+      # If a container tries to allocate more memory, container will be OOM killed.
+      memory: 256Mi
+    defaultRequest:
+      # If a container does not specify memory request, this default value will be applied.
+      # The scheduler considers this value when scheduling a container to a node.
+      # If a node has not enough memory, such pod will not be created.
+      memory: 32Mi
+    type: Container
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: installations.installer.kyma-project.io
+  labels:
+    kyma-project.io/installation: ""
+spec:
+  group: installer.kyma-project.io
+  version: v1alpha1
+  scope: Namespaced
+  names:
+    kind: Installation
+    singular: installation
+    plural: installations
+    shortNames: ['installation']
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: releases.release.kyma-project.io
+  labels:
+    kyma-project.io/installation: ""
+spec:
+  group: release.kyma-project.io
+  version: v1alpha1
+  scope: Namespaced
+  names:
+    kind: Release
+    singular: release
+    plural: releases
+    shortNames: ['release']
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: all-psp
+rules:
+- apiGroups: ["policy/v1beta1"]
+  resources: ["podsecuritypolicies"]
+  verbs: ["use"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: all-psp
+subjects:
+- kind: ServiceAccount
+  name: helm-certs-job-sa
+  namespace: compass-installer
+roleRef:
+  kind: ClusterRole
+  name: all-psp
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: compass-installer
+  namespace: compass-installer
+  labels:
+    kyma-project.io/installation: ""
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compass-installer
+  namespace: compass-installer
+  labels:
+    name: compass-installer
+    kyma-project.io/installation: "compass-installer"
+    kyma-project.io/installation: ""
+spec:
+  selector:
+    matchLabels:
+      name: compass-installer
+  # Installer is designed to be run as a single instance only
+  # We enforce it by changing default rolling update to recreate startegy.
+  # With that k8s will first delete old pod and then provision new one during upgrade.
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        name: compass-installer
+    spec:
+      serviceAccountName: compass-installer
+      initContainers:
+        - name: certhelper
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
+          command:
+            - bash
+            - -c
+            - |
+              set -e
+              if [ -f "/etc/certs/tls.crt" ]; then
+                echo "Helm Certificate already exists, do nothing."
+                exit 0
+              fi
+              WORKING_DIR="/tmp/certs"
+              mkdir -p "${WORKING_DIR}"
+              cat <<EOF > "${WORKING_DIR}/openssl.cnf"
+              [ req ]
+              #default_bits   = 2048
+              #default_md   = sha256
+              #default_keyfile  = privkey.pem
+              distinguished_name  = req_distinguished_name
+              attributes    = req_attributes
+              [ req_distinguished_name ]
+              countryName     = Country Name (2 letter code)
+              countryName_min     = 2
+              countryName_max     = 2
+              stateOrProvinceName   = State or Province Name (full name)
+              localityName      = Locality Name (eg, city)
+              0.organizationName    = Organization Name (eg, company)
+              organizationalUnitName    = Organizational Unit Name (eg, section)
+              commonName      = Common Name (eg, fully qualified host name)
+              commonName_max      = 64
+              emailAddress      = Email Address
+              emailAddress_max    = 64
+              [ req_attributes ]
+              challengePassword   = A challenge password
+              challengePassword_min   = 4
+              challengePassword_max   = 20
+              [ v3_ca ]
+              basicConstraints = critical,CA:TRUE
+              subjectKeyIdentifier = hash
+              authorityKeyIdentifier = keyid:always,issuer:always
+              EOF
+              echo "---> Get Tiller CA"
+              if [[ $(kubectl get -n kube-system secret tiller-secret) ]] ; then
+                kubectl get -n kube-system secret tiller-secret -o jsonpath="{.data['ca\.crt']}" | base64 --decode > "${WORKING_DIR}/ca.crt"
+                kubectl get -n kube-system secret tiller-secret -o jsonpath="{.data['ca\.key']}" | base64 --decode > "${WORKING_DIR}/ca.key"
+              else
+                echo "Secret: tiller-secret does not exists!"
+                exit 1
+              fi
+              echo "---> Generate Helm key"
+              openssl genrsa -out "${WORKING_DIR}/helm.key.pem" 4096
+              openssl req -key "${WORKING_DIR}/helm.key.pem" -new -sha256 -out "${WORKING_DIR}/helm.csr.pem" -subj "/C=PL/ST=Gliwice/L=Gliwice/O=Helm Client/CN=helm-client"
+              openssl x509 -req -CA "${WORKING_DIR}/ca.crt" -CAkey "${WORKING_DIR}/ca.key" -CAcreateserial -in "${WORKING_DIR}/helm.csr.pem" -out "${WORKING_DIR}/helm.cert.pem" -days 365
+              echo "---> Create secrets in k8s"
+              cat << EOF > /tmp/secret.yaml
+              ---
+              apiVersion: v1
+              data:
+                global.helm.ca.crt: "$(base64 "${WORKING_DIR}/ca.crt" | tr -d '\n')"
+                global.helm.tls.crt: "$(base64 ${WORKING_DIR}/helm.cert.pem | tr -d '\n')"
+                global.helm.tls.key: "$(base64 ${WORKING_DIR}/helm.key.pem | tr -d '\n')"
+              kind: Secret
+              metadata:
+                creationTimestamp: null
+                labels:
+                  installer: overrides
+                  kyma-project.io/installation: ""
+                name: helm-secret
+                namespace: compass-installer
+              type: Opaque
+              EOF
+              timeout 60s bash -c 'until kubectl create -f /tmp/secret.yaml ; do sleep 2; done'
+          volumeMounts:
+            - mountPath: /etc/certs
+              name: helm-certs
+              readOnly: true
+      containers:
+      - name: compass-installer-container
+        image: karoljaksik/operator:1.0.0
+        imagePullPolicy: IfNotPresent
+        args:
+          - -tillerTLSInsecureSkipVerify=true
+          - -overrideLogFile=/app/overrides.txt
+        volumeMounts:
+          - mountPath: /etc/certs
+            name: helm-certs
+            readOnly: true
+      volumes:
+      - name: helm-certs
+        secret:
+          secretName: helm-secret
+          optional: true
+          items:
+            - key: global.helm.tls.crt
+              path: tls.crt
+            - key: global.helm.tls.key
+              path: tls.key
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: compass-installer-reader
+  labels:
+    kyma-project.io/installation: ""
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: compass-installer
+  labels:
+    kyma-project.io/installation: ""
+subjects:
+- kind: ServiceAccount
+  name: compass-installer
+  namespace: compass-installer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: compass-installer-reader
+---
+apiVersion: v1
 kind: Secret
 metadata:
   name: application-connector-certificate-overrides
-  namespace: kyma-installer
+  namespace: compass-installer
   labels:
     installer: overrides
     kyma-project.io/installation: ""
@@ -15,7 +256,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: cluster-certificate-overrides
-  namespace: kyma-installer
+  namespace: compass-installer
   labels:
     installer: overrides
     kyma-project.io/installation: ""
@@ -27,35 +268,48 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: installation-config-overrides
-  namespace: kyma-installer
+  namespace: compass-installer
   labels:
     installer: overrides
     kyma-project.io/installation: ""
 data:
   global.isLocalEnv: "true"
   global.domainName: "kyma.local"
-  global.adminPassword: ""
-  global.minikubeIP: ""
+  global.adminPassword: V3Vka2Fpb2d1cmFzeTE2Lg==
+  global.minikubeIP: 192.168.64.4
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: istio-overrides
-  namespace: kyma-installer
+  namespace: compass-installer
   labels:
     installer: overrides
     component: istio
+    kyma-project.io/installation: ""
 data:
-  global.proxy.resources.requests.cpu: 20m
-  global.proxy.resources.requests.memory: 32Mi
-  global.proxy.resources.limits.cpu: 100m
-  global.proxy.resources.limits.memory: 128Mi
+  pilot.resources.limits.memory: 1024Mi
+  pilot.resources.limits.cpu: 500m
+  pilot.resources.requests.memory: 512Mi
+  pilot.resources.requests.cpu: 250m
+  pilot.autoscaleEnabled: "false"
+  mixer.policy.resources.limits.memory: 2048Mi
+  mixer.policy.resources.limits.cpu: 500m
+  mixer.policy.resources.requests.memory: 512Mi
+  mixer.policy.resources.requests.cpu: 300m
+  mixer.telemetry.resources.limits.memory: 2048Mi
+  mixer.telemetry.resources.limits.cpu: 500m
+  mixer.telemetry.resources.requests.memory: 512Mi
+  mixer.telemetry.resources.requests.cpu: 300m
+  mixer.loadshedding.mode: disabled
+  mixer.policy.autoscaleEnabled: "false"
+  mixer.telemetry.autoscaleEnabled: "false"
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: service-catalog-overrides
-  namespace: kyma-installer
+  namespace: compass-installer
   labels:
     installer: overrides
     component: service-catalog
@@ -68,7 +322,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: helm-broker-overrides
-  namespace: kyma-installer
+  namespace: compass-installer
   labels:
     installer: overrides
     component: helm-broker
@@ -79,8 +333,20 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: dex-overrides
+  namespace: compass-installer
+  labels:
+    installer: overrides
+    component: dex
+    kyma-project.io/installation: ""
+data:
+  telemetry.enabled: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: application-connector-tests
-  namespace: kyma-installer
+  namespace: compass-installer
   labels:
     installer: overrides
     component: application-connector
@@ -95,7 +361,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: core-tests
-  namespace: kyma-installer
+  namespace: compass-installer
   labels:
     installer: overrides
     component: core
@@ -107,7 +373,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: compass-runtime-agent-tests
-  namespace: kyma-installer
+  namespace: compass-installer
   labels:
     installer: overrides
     component: compass-runtime-agent
@@ -118,8 +384,22 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: ory-overrides
+  namespace: compass-installer
+  labels:
+    installer: overrides
+    component: ory
+    kyma-project.io/installation: ""
+data:
+  global.ory.hydra.persistence.enabled: "false"
+  global.ory.hydra.persistence.postgresql.enabled: "false"
+  hydra.hydra.autoMigrate: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: tracing-overrides
-  namespace: kyma-installer
+  namespace: compass-installer
   labels:
     installer: overrides
     component: tracing
@@ -134,7 +414,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: monitoring-overrides
-  namespace: kyma-installer
+  namespace: compass-installer
   labels:
     installer: overrides
     component: monitoring
@@ -158,7 +438,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: serverless-overrides
-  namespace: kyma-installer
+  namespace: compass-installer
   labels:
     installer: overrides
     component: serverless
@@ -171,54 +451,20 @@ data:
   # TODO: Solve a problem with DNS
   tests.enabled: "false"
 ---
-apiVersion: v1
-kind: ConfigMap
+apiVersion: "installer.kyma-project.io/v1alpha1"
+kind: Installation
 metadata:
-  name: compass-overrides-dex
-  namespace: kyma-installer
+  name: compass-installation
+  namespace: default
   labels:
-    installer: overrides
-    component: dex
+    action: install
     kyma-project.io/installation: ""
-data:
-  global.istio.gateway.name: "compass-istio-gateway"
-  global.istio.gateway.namespace: "compass-system"
+  finalizers:
+    - finalizer.installer.kyma-project.io
+spec:
+  version: ""
+  url: ""
+  components:
+    - name: "compass"
+      namespace: "compass-system"
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: compass-overrides-ory
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: ory
-    kyma-project.io/installation: ""
-data:
-  global.istio.gateway.name: "compass-istio-gateway"
-  global.istio.gateway.namespace: "compass-system"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: compass-api-gateway-tests
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: api-gateway
-    kyma-project.io/installation: ""
-data:
-  tests.env.gatewayName: "compass-istio-gateway"
-  tests.env.gatewayNamespace: "compass-system"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: global-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    kyma-project.io/installation: ""
-data:
-  global.ingress.domainName: "compass-istio-gateway"
-  global.istio.gateway.name: "compass-istio-gateway"
-  global.istio.gateway.namespace: "compass-system"
