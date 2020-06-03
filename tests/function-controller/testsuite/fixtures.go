@@ -2,7 +2,9 @@ package testsuite
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"text/template"
 )
 
@@ -21,6 +23,24 @@ func (t *TestSuite) getUpdatedFunction() *functionData {
 		MaxReplicas: 2,
 		MinReplicas: 1,
 	}
+}
+
+func (t *TestSuite) checkDefaultedFunction(function *serverlessv1alpha1.Function) error {
+	if function == nil {
+		return errors.New("function can't be nil")
+	}
+
+	spec := function.Spec
+	if spec.MinReplicas == nil {
+		return errors.New("minReplicas equal nil")
+	} else if spec.MaxReplicas == nil {
+		return errors.New("maxReplicas equal nil")
+	} else if spec.Resources.Requests.Memory().IsZero() || spec.Resources.Requests.Cpu().IsZero() {
+		return errors.New("requests equal zero")
+	} else if spec.Resources.Limits.Memory().IsZero() || spec.Resources.Limits.Cpu().IsZero() {
+		return errors.New("limits equal zero")
+	}
+	return nil
 }
 
 func getBodyString() string {

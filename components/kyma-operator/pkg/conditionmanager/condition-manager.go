@@ -1,6 +1,8 @@
 package conditionmanager
 
 import (
+	"context"
+
 	installationv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	installationClientset "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned"
 	listers "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/listers/installer/v1alpha1"
@@ -200,7 +202,7 @@ func (cm *impl) update(installation *installationv1alpha1.Installation) error {
 		installationCopy := instObj.DeepCopy()
 		installationCopy.Status.Conditions = installation.Status.Conditions
 
-		_, updateErr := cm.client.InstallerV1alpha1().Installations(consts.InstNamespace).Update(installationCopy)
+		_, updateErr := cm.client.InstallerV1alpha1().Installations(consts.InstNamespace).Update(context.TODO(), installationCopy, metav1.UpdateOptions{})
 
 		return updateErr
 	})

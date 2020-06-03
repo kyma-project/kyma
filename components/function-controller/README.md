@@ -16,7 +16,7 @@ To develop the component, use the formulae declared in the [generic](/common/mak
 
 ### Environment variables
 
-The Function Controller uses these environment variables:
+#### The Function Controller uses these environment variables:
 
 | Variable                                            | Description                                                                                                                                                                                                             | Default value                                                                                                                                            |
 | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,3 +42,22 @@ The Function Controller uses these environment variables:
 | **APP_FUNCTION_DOCKER_ADDRESS**                     | Internal address of the Docker Registry                                                                                                                                                                                 | `serverless-docker-registry.kyma-system.svc.cluster.local:5000`                                                                                          |
 | **APP_FUNCTION_DOCKER_EXTERNAL_ADDRESS**            | External address of the Docker Registry                                                                                                                                                                                 | `registry.kyma.local`                                                                                                                                    |
 | **APP_KSERVICE_REQUEUE_DURATION**                   | Period of time after which the Knative Service Controller retries to clean up stale revisions                                                                                                                           | `10m`                                                                                                                                                    |
+
+#### The Webhook uses these environment variables:
+
+| Variable                                  | Description                                                                                     | Default value        |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------- | -------------------- |
+| **SYSTEM_NAMESPACE**                      | Namespace which contains the Service Account and the Secret                                     | `kyma-system`        |
+| **WEBHOOK_SERVICE_NAME**                  | Name of the Service Account which is used by the webhook server                                 | `serverless-webhook` |
+| **WEBHOOK_SECRET_NAME**                   | Name of the Secret which contains the certificate is used to register the webhook server        | `serverless-webhook` |
+| **WEBHOOK_PORT**                          | Port on which the webhook server are exposed                                                    | `8443`               |
+| **WEBHOOK_VALIDATION_MIN_REQUEST_CPU**    | Minimum amount of requested the limits and requests CPU to pass through the validation          | `10m`                |
+| **WEBHOOK_VALIDATION_MIN_REQUEST_MEMORY** | Minimum amount of requested the limits and requests memory to pass through the validation       | `16Mi`               |
+| **WEBHOOK_VALIDATION_MIN_REPLICAS_VALUE** | Minimum amount of replicas to pass through the validation                                       | `0`                  |
+| **WEBHOOK_VALIDATION_RESERVED_ENVS**      | List of reserved envs                                                                           | `{}`                 |
+| **WEBHOOK_DEFAULTING_REQUEST_CPU**        | Value of the request CPU which webhook should set if origin equals null                         | `50m`                |
+| **WEBHOOK_DEFAULTING_REQUEST_MEMORY**     | Value of the request memory which webhook should set if origin equals null                      | `64Mi`               |
+| **WEBHOOK_DEFAULTING_LIMITS_CPU**         | Value of the limits CPU which webhook should set if origin equals null                          | `100m`               |
+| **WEBHOOK_DEFAULTING_LIMITS_MEMORY**      | Value of the limits memory which webhook should set if origin equals null                       | `128Mi`              |
+| **WEBHOOK_DEFAULTING_MINREPLICAS**        | Value of the minReplicas which webhook should set if origin equals null                         | `1`                  |
+| **WEBHOOK_DEFAULTING_MAXREPLICAS**        | Value of the maxReplicas which webhook should set if origin equals null                         | `1`                  |

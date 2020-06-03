@@ -7,9 +7,9 @@ global:
     gateway:
       name: kyma-gateway
       namespace: kyma-system
-  ory:  
-    oathkeeper: 
-      maester:  
+  ory:
+    oathkeeper:
+      maester:
         mode: sidecar
     hydra:
       persistence:
@@ -49,7 +49,7 @@ hpa:
 maintenance:
   image:
     name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20200310-5f52f407"
+    tag: "v20200507-070ff576"
 
 # Overrides for the Hydra chart
 hydra:
@@ -93,7 +93,7 @@ hydra:
 # Overrides for the Oathkeeper chart
 oathkeeper:
   kubectlJob:
-    image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
+    image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
   oathkeeper:
     config:
       authenticators:

@@ -23,6 +23,9 @@ rules:
   - apiGroups: [""]
     resources: ["namespaces"]
     verbs: ["create", "get", "delete", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["job"]
+    verbs: ["list"]    
   - apiGroups: ["serverless.kyma-project.io"]
     resources: ["functions"]
     verbs: ["create", "get", "delete", "list", "deletecollection", "watch", "update"]
@@ -48,6 +51,9 @@ rules:
   - apiGroups: ["serving.knative.dev"]
     resources: ["revisions"]
     verbs: ["list"]
+  - apiGroups: ["serving.knative.dev"]
+    resources: ["services"]
+    verbs: ["get"]    
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1

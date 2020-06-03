@@ -11,7 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: PR-8505
+    version: 7e73540b
     tests:
       enabled: true
 

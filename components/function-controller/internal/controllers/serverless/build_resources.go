@@ -4,21 +4,18 @@ import (
 	"fmt"
 	"strings"
 
+	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-
-	"knative.dev/serving/pkg/apis/autoscaling"
+	"k8s.io/apimachinery/pkg/util/intstr"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 const (
-	servingKnativeVisibilityLabel      = "serving.knative.dev/visibility"
-	servingKnativeVisibilityLabelValue = "cluster-local"
-
-	destinationArg = "--destination"
+	destinationArg        = "--destination"
+	functionContainerName = "function"
 )
 
 func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
@@ -148,42 +145,60 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 	}
 }
 
-func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function) servingv1.Service {
+func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function) appsv1.Deployment {
 	imageName := r.buildExternalImageAddress(instance)
-	serviceLabels := r.serviceLabels(instance)
+	deploymentLabels := r.functionLabels(instance)
 
-	podAnnotations := r.servicePodAnnotations(instance)
 	podLabels := r.servicePodLabels(instance)
 
-	return servingv1.Service{
+	return appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
+			Namespace:    instance.GetNamespace(),
+			Labels:       deploymentLabels,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: instance.Spec.MinReplicas,
+			Selector: &metav1.LabelSelector{
+				MatchLabels: r.internalFunctionLabels(instance), // this has to be same as spec.template.objectmeta.Lables
+				// and also it has to be immutable
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: podLabels, // podLabels contains InternalFnLabels, so it's ok
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:            functionContainerName,
+							Image:           imageName,
+							Env:             append(instance.Spec.Env, envVarsForDeployment...),
+							Resources:       instance.Spec.Resources,
+							ImagePullPolicy: corev1.PullIfNotPresent,
+						},
+					},
+					ServiceAccountName: r.config.ImagePullAccountName,
+				},
+			},
+		},
+	}
+}
+
+func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function) corev1.Service {
+	return corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instance.GetName(),
 			Namespace: instance.GetNamespace(),
-			Labels:    serviceLabels,
+			Labels:    r.functionLabels(instance),
 		},
-		Spec: servingv1.ServiceSpec{
-			ConfigurationSpec: servingv1.ConfigurationSpec{
-				Template: servingv1.RevisionTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: podAnnotations,
-						Labels:      podLabels,
-					},
-					Spec: servingv1.RevisionSpec{
-						PodSpec: corev1.PodSpec{
-							Containers: []corev1.Container{
-								{
-									Name:            "lambda",
-									Image:           imageName,
-									Env:             append(instance.Spec.Env, envVarsForRevision...),
-									Resources:       instance.Spec.Resources,
-									ImagePullPolicy: corev1.PullIfNotPresent,
-								},
-							},
-							ServiceAccountName: r.config.ImagePullAccountName,
-						},
-					},
-				},
-			},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{{
+				Name:       "http",               // it has to be here for istio to work properly
+				TargetPort: intstr.FromInt(8080), // https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js#L28
+				Port:       80,
+				Protocol:   corev1.ProtocolTCP,
+			}},
+			Selector: r.internalFunctionLabels(instance),
 		},
 	}
 }
@@ -219,26 +234,6 @@ func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha1
 	labels[serverlessv1alpha1.FunctionUUIDLabel] = string(instance.GetUID())
 
 	return labels
-}
-
-func (r *FunctionReconciler) serviceLabels(instance *serverlessv1alpha1.Function) map[string]string {
-	serviceLabels := r.functionLabels(instance)
-	serviceLabels[servingKnativeVisibilityLabel] = servingKnativeVisibilityLabelValue
-	return serviceLabels
-}
-
-func (r *FunctionReconciler) servicePodAnnotations(instance *serverlessv1alpha1.Function) map[string]string {
-	annotations := map[string]string{
-		autoscaling.MinScaleAnnotationKey: "1",
-		autoscaling.MaxScaleAnnotationKey: "1",
-	}
-	if instance.Spec.MinReplicas != nil {
-		annotations[autoscaling.MinScaleAnnotationKey] = fmt.Sprintf("%d", *instance.Spec.MinReplicas)
-	}
-	if instance.Spec.MaxReplicas != nil {
-		annotations[autoscaling.MaxScaleAnnotationKey] = fmt.Sprintf("%d", *instance.Spec.MaxReplicas)
-	}
-	return annotations
 }
 
 func (r *FunctionReconciler) servicePodLabels(instance *serverlessv1alpha1.Function) map[string]string {

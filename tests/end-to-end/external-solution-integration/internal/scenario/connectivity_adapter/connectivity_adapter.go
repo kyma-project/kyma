@@ -66,6 +66,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 			knativeEventingClientSet.EventingV1alpha1().Brokers(s.testID),
 			knativeEventingClientSet.MessagingV1alpha1().Subscriptions(helpers.KymaIntegrationNamespace)),
 		testsuite.NewCreateKnativeTrigger(s.testID, helpers.DefaultBrokerName, functionEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
+		testsuite.NewSleep(s.eventSendDelay),
 		testsuite.NewSendEventToMesh(s.testID, helpers.FunctionPayload, state),
 		testsuite.NewCheckCounterPod(testService, 1),
 		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.FunctionPayload, state),

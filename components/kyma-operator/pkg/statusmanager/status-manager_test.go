@@ -1,6 +1,7 @@
 package statusmanager
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -46,7 +47,7 @@ func TestStatusManager(t *testing.T) {
 
 			err := testStatusManager.InProgress(expectedDescription)
 
-			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
+			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(context.TODO(), consts.InstResource, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
 			So(kymaInst.Status.State, ShouldEqual, expectedStatus)
@@ -86,7 +87,7 @@ func TestStatusManager(t *testing.T) {
 
 			err := testStatusManager.InProgress(testDescription)
 
-			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
+			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(context.TODO(), consts.InstResource, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
 			So(kymaInst.Status.State, ShouldEqual, testState)
@@ -122,7 +123,7 @@ func TestStatusManager(t *testing.T) {
 
 			err := testStatusManager.Error(expectedComponent, expectedDescription, expectedError)
 
-			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
+			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(context.TODO(), consts.InstResource, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
 			So(kymaInst.Status.State, ShouldEqual, expectedState)
@@ -170,7 +171,7 @@ func TestStatusManager(t *testing.T) {
 
 			err := testStatusManager.Error(testComponent, testDescription, testError)
 
-			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
+			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(context.TODO(), consts.InstResource, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
 			So(kymaInst.Status.State, ShouldEqual, testState)
@@ -222,7 +223,7 @@ func TestStatusManager(t *testing.T) {
 
 			err := testStatusManager.Error(testComponent, testDescription, testError)
 
-			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
+			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(context.TODO(), consts.InstResource, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
 			So(kymaInst.Status.State, ShouldEqual, testState)
@@ -272,7 +273,7 @@ func TestStatusManager(t *testing.T) {
 
 			err := testStatusManager.Error(testComponent, testDescription, testError)
 
-			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
+			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(context.TODO(), consts.InstResource, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
 			So(kymaInst.Status.State, ShouldEqual, testState)
@@ -326,7 +327,7 @@ func TestStatusManager(t *testing.T) {
 
 			err := testStatusManager.InstallDone(testURL, testVersion)
 
-			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
+			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(context.TODO(), consts.InstResource, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
 			So(kymaInst.Status.State, ShouldEqual, testState)
