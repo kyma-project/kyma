@@ -1,12 +1,12 @@
-package consts
+package env
 
 import "github.com/vrischmann/envconfig"
 
 var (
-	Config ConstConfig
+	Config EnvConfig
 )
 
-type ConstConfig struct {
+type EnvConfig struct {
 	InstNamespace      string `envconfig:"default=default"`
 	InstResource       string `envconfig:"default=kyma-installation"`
 	InstFinalizer      string `envconfig:"default=finalizer.installer.kyma-project.io"`

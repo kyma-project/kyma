@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/consts"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/env"
 
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -94,7 +94,7 @@ func (r reader) readCommonOverrides() ([]inputMap, error) {
 
 func (r reader) getLabeledConfigMaps(opts metav1.ListOptions) ([]core.ConfigMap, error) {
 
-	configmaps, err := r.client.CoreV1().ConfigMaps(consts.Config.OverridesNamespace).List(context.TODO(), opts)
+	configmaps, err := r.client.CoreV1().ConfigMaps(env.Config.OverridesNamespace).List(context.TODO(), opts)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func (r reader) getLabeledConfigMaps(opts metav1.ListOptions) ([]core.ConfigMap,
 
 func (r reader) getLabeledSecrets(opts metav1.ListOptions) ([]core.Secret, error) {
 
-	secrets, err := r.client.CoreV1().Secrets(consts.Config.OverridesNamespace).List(context.TODO(), opts)
+	secrets, err := r.client.CoreV1().Secrets(env.Config.OverridesNamespace).List(context.TODO(), opts)
 	if err != nil {
 		return nil, err
 	}
