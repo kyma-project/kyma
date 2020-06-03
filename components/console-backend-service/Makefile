@@ -12,15 +12,11 @@ VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
 # FILES_TO_CHECK is a command used to determine which files should be verified
 FILES_TO_CHECK = find . -type f -name "*.go" | grep -v "$(VERIFY_IGNORE)"
 
-ifndef ARTIFACTS
-ARTIFACTS:=/tmp/artifacts
-endif
-
 .PHONY: release
 release: build-image push-image
 
 build-image: pull-licenses
-	docker build -t $(APP_NAME) -v $(ARTIFACTS):/tmp/artifacts .
+	docker build -t $(APP_NAME) .
 push-image:
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
 	docker push $(IMG_NAME):$(TAG)
@@ -37,6 +33,7 @@ verify: test check-imports check-fmt
 test:
 	# ls /tmp
 	# ls /tmp/artifacts
+	mkdir -p /tmp/artifacts
 	go test -coverprofile=/tmp/artifacts/cover.out ./...
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
