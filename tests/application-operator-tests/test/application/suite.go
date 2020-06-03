@@ -2,11 +2,12 @@ package application
 
 import (
 	"fmt"
-	"helm.sh/helm/v3/pkg/release"
 	"io/ioutil"
 	"strings"
 	"testing"
 	"time"
+
+	"helm.sh/helm/v3/pkg/release"
 
 	"k8s.io/apimachinery/pkg/labels"
 
@@ -83,7 +84,7 @@ func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T) {
 		if err != nil {
 			return false
 		}
- 		return app.Status.InstallationStatus.Status == release.StatusDeployed.String()
+		return app.Status.InstallationStatus.Status == release.StatusDeployed.String()
 	})
 
 	require.NoError(t, err)
