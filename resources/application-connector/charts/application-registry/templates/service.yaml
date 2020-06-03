@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -7,8 +8,11 @@ metadata:
   namespace: {{ .Values.global.namespace }}
   labels:
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
-    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   type: ClusterIP
   ports:
@@ -25,7 +29,12 @@ metadata:
   name: {{ .Chart.Name}}-metrics
   namespace: {{ .Values.global.namespace }}
   labels:
-    k8s-app: {{ .Chart.Name}}-metrics
+    k8s-app: {{ .Chart.Name }}-metrics
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}-metrics
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   selector:
     app: {{ .Chart.Name }}
@@ -34,3 +43,4 @@ spec:
   - name: http-metrics
     port: 9090
     protocol: TCP
+{{- end }}

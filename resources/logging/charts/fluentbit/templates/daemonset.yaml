@@ -8,7 +8,6 @@ metadata:
   labels:
     {{- include "fluent-bit.metaLabels" . | trim | nindent 4 }}
   annotations:
-    sidecar.istio.io/inject: "false"
     {{- if .Values.globalAnnotations }}
     {{- toYaml .Values.globalAnnotations | trim | nindent 4 }}
     {{- end }}
@@ -23,7 +22,6 @@ spec:
       labels:
         {{- include "fluent-bit.matchLabels" . | trim | nindent 8 }}
       annotations:
-        sidecar.istio.io/inject: "false"
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
 {{- if .Values.podAnnotations }}
         {{- toYaml .Values.podAnnotations | trim | nindent 8 }}

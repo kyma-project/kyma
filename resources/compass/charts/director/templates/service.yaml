@@ -12,6 +12,29 @@ spec:
     - port: {{ .Values.global.director.port }}
       protocol: TCP
       name: http
+    - port: {{ .Values.global.istio.proxy.port }}
+      protocol: TCP
+      name: proxy-status
   selector:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
+---
+{{- if and .Values.global.metrics.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fullname" . }}-metrics
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.metrics.port }}
+      protocol: TCP
+      name: metrics
+  selector:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+{{- end }}

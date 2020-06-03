@@ -4,16 +4,27 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/avast/retry-go"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	"github.com/sirupsen/logrus"
+
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	eventingv1alpha1client "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
+
+const retryAttemptsCount = 60
+const retryDelay = 2 * time.Second
+
+var retryOpts = []retry.Option{
+	retry.Attempts(retryAttemptsCount),
+	retry.Delay(retryDelay),
+}
 
 type CreateKnativeTrigger struct {
 	triggers eventingv1alpha1client.TriggerInterface
@@ -49,7 +60,7 @@ func (c CreateKnativeTrigger) Run() error {
 		return error
 	}
 
-	return retry.Do(c.isKnativeTriggerReady)
+	return retry.Do(c.isKnativeTriggerReady, retryOpts...)
 }
 
 func (c CreateKnativeTrigger) isKnativeTriggerReady() error {
@@ -60,6 +71,7 @@ func (c CreateKnativeTrigger) isKnativeTriggerReady() error {
 	if !trigger.Status.IsReady() {
 		return errors.Errorf("knative trigger with name: %s is not ready. Status of Knative Tigger:\n %+v", c.name, trigger.Status)
 	}
+	logrus.WithField("component", "CreateKnativeTrigger").Debugf("Trigger ready: %v, Status: %v", c.name, trigger.Status)
 	return nil
 }
 
@@ -71,8 +83,7 @@ func (c CreateKnativeTrigger) Cleanup() error {
 
 	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
 		return c.triggers.Get(c.name, v1.GetOptions{})
-	}, retry.DelayType(retry.BackOffDelay),
-		retry.Delay(1*time.Second))
+	})
 }
 
 var _ step.Step = &CreateKnativeTrigger{}

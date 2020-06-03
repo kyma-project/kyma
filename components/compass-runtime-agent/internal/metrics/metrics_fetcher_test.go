@@ -2,15 +2,16 @@ package metrics
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/metrics/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
-	"kyma-project.io/compass-runtime-agent/internal/metrics/mocks"
-	"testing"
-	"time"
 )
 
 func Test_FetchNodeMetrics(t *testing.T) {
@@ -30,8 +31,8 @@ func Test_FetchNodeMetrics(t *testing.T) {
 				Usage: corev1.ResourceList{
 					corev1.ResourceCPU:              *resource.NewQuantity(1, resource.DecimalSI),
 					corev1.ResourceMemory:           *resource.NewQuantity(1, resource.BinarySI),
-					corev1.ResourceEphemeralStorage: *resource.NewQuantity(1, resource.BinarySI),
-					corev1.ResourcePods:             *resource.NewQuantity(1, resource.DecimalSI),
+					corev1.ResourceEphemeralStorage: *resource.NewQuantity(0, resource.BinarySI),
+					corev1.ResourcePods:             *resource.NewQuantity(0, resource.DecimalSI),
 				},
 				Timestamp: v1.Time{Time: now},
 			}},
@@ -48,8 +49,8 @@ func Test_FetchNodeMetrics(t *testing.T) {
 		assert.Equal(t, "somename", metrics[0].Name)
 		assert.Equal(t, "1", metrics[0].Usage.CPU)
 		assert.Equal(t, "1", metrics[0].Usage.Memory)
-		assert.Equal(t, "1", metrics[0].Usage.EphemeralStorage)
-		assert.Equal(t, "1", metrics[0].Usage.Pods)
+		assert.Equal(t, "0", metrics[0].Usage.EphemeralStorage)
+		assert.Equal(t, "0", metrics[0].Usage.Pods)
 		assert.Equal(t, now, metrics[0].StartCollectingTimestamp)
 	})
 

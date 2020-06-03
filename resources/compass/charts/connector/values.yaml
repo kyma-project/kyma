@@ -1,6 +1,7 @@
 deployment:
   image:
     pullPolicy: IfNotPresent
+  resources: {}
   args:
     token:
       length: 64
@@ -15,11 +16,14 @@ deployment:
     certificateValidityTime: "2160h"
     attachRootCAToChain: false
 
+  strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+
   securityContext: # Set on container level
     runAsUser: 2000
     allowPrivilegeEscalation: false
 
 certsSetupJob:
+  enabled: true
   generatedCertificateValidity: 92d
   securityContext: # Set on container level
     runAsUser: 2000

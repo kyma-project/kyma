@@ -1,9 +1,0 @@
-{
-    "name": "hellowithdeps",
-    "version": "0.0.1",
-    "dependencies": {
-        "end-of-stream": "^1.4.1",
-        "from2": "^2.3.0",
-        "lodash": "^4.17.5"
-    }
-}

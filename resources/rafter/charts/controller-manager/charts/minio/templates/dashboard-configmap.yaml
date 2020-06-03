@@ -22,7 +22,7 @@ data:
         ]
       },
       "description": "minio dashboard",
-      "editable": true,
+      "editable": false,
       "gnetId": 6248,
       "graphTooltip": 0,
       "id": 2,
@@ -708,6 +708,7 @@ data:
       "schemaVersion": 18,
       "style": "dark",
       "tags": [
+        "assets",
         "kyma"
       ],
       "templating": {

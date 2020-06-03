@@ -1,15 +1,15 @@
 package director
 
 import (
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 	"github.com/stretchr/testify/require"
-	"kyma-project.io/compass-runtime-agent/internal/config"
 
-	kymamodel "kyma-project.io/compass-runtime-agent/internal/kyma/model"
+	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
-	gql "kyma-project.io/compass-runtime-agent/internal/graphql"
+	gql "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
 
 	gcli "github.com/machinebox/graphql"
 
@@ -28,6 +28,12 @@ const (
 		providerName
 		description
 		labels
+		auths {id}
+		packages {data {
+		id
+		name
+		description
+		instanceAuthRequestInputSchema
 		apiDefinitions {data {
 				id
 		name
@@ -37,75 +43,6 @@ const (
 		type}
 		targetURL
 		group
-		auth(runtimeID: "runtimeId") {runtimeID
-		auth {credential {
-				... on BasicCredentialData {
-					username
-					password
-				}
-				...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				}
-			}
-			additionalHeaders
-			additionalQueryParams
-			requestAuth { 
-			  csrf {
-				tokenEndpointURL
-				credential {
-				  ... on BasicCredentialData {
-				  	username
-					password
-				  }
-				  ...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				  }
-			    }
-				additionalHeaders
-				additionalQueryParams
-			}
-			}
-		}}
-		defaultAuth {credential {
-				... on BasicCredentialData {
-					username
-					password
-				}
-				...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				}
-			}
-			additionalHeaders
-			additionalQueryParams
-			requestAuth { 
-			  csrf {
-				tokenEndpointURL
-				credential {
-				  ... on BasicCredentialData {
-				  	username
-					password
-				  }
-				  ...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				  }
-			    }
-				additionalHeaders
-				additionalQueryParams
-			}
-			}
-		}
 		version {value
 		deprecated
 		deprecatedSince
@@ -119,7 +56,6 @@ const (
 		eventDefinitions {data {
 		
 			id
-			applicationID
 			name
 			description
 			group 
@@ -140,7 +76,6 @@ const (
 		documents {data {
 		
 		id
-		applicationID
 		title
 		displayName
 		description
@@ -153,7 +88,13 @@ const (
 		hasNextPage}
 	totalCount
 	}
-		auths {id}
+		
+	}
+	pageInfo {startCursor
+		endCursor
+		hasNextPage}
+	totalCount
+	}
 	
 	}
 	pageInfo {startCursor
@@ -165,13 +106,13 @@ const (
 }`
 
 	expectedSetEventsURLLabelQuery = `mutation {
-		result: setRuntimeLabel(runtimeID: "runtimeId", key: "runtime/event_service_url", value: "https://gateway.kyma.local") {
+		result: setRuntimeLabel(runtimeID: "runtimeId", key: "runtime_eventServiceUrl", value: "https://gateway.kyma.local") {
 			key
 			value
 		}
 	}`
 	expectedSetConsoleURLLabelQuery = `mutation {
-		result: setRuntimeLabel(runtimeID: "runtimeId", key: "runtime/console_url", value: "https://console.kyma.local") {
+		result: setRuntimeLabel(runtimeID: "runtimeId", key: "runtime_consoleUrl", value: "https://console.kyma.local") {
 			key
 			value
 		}

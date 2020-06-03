@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	pkgerrors "github.com/pkg/errors"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -49,6 +48,9 @@ import (
 	fakeservingclient "knative.dev/serving/pkg/client/injection/client/fake"
 	routeconfig "knative.dev/serving/pkg/reconciler/route/config"
 
+	"knative.dev/pkg/client/injection/ducks/duck/v1/addressable"
+	_ "knative.dev/pkg/client/injection/ducks/duck/v1/addressable/fake"
+
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	fakesourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
 	fakeistioclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/client/fake"
@@ -66,6 +68,7 @@ const (
 	tRevision    = "varkes-foo"
 	tPolicy      = "varkes-foo-private"
 	tRevisionSvc = "varkes-foo-private"
+	tTargetPort  = "http-usermetric"
 
 	tMetricsDomain = "testing"
 )
@@ -360,6 +363,7 @@ func TestReconcile(t *testing.T) {
 	}
 
 	var ctor Ctor = func(t *testing.T, ctx context.Context, ls *Listers) controller.Reconciler {
+		ctx = addressable.WithDuck(ctx)
 		defer SetEnvVar(t, metrics.DomainEnv, tMetricsDomain)()
 
 		cmw := configmap.NewStaticWatcher(
@@ -553,6 +557,13 @@ func newPolicyWithSpec() *authv1alpha1.Policy {
 	policy.Spec = authenticationv1alpha1api.Policy{
 		Targets: []*authenticationv1alpha1api.TargetSelector{{
 			Name: tRevisionSvc,
+			Ports: []*authenticationv1alpha1api.PortSelector{
+				{
+					Port: &authenticationv1alpha1api.PortSelector_Name{
+						Name: tTargetPort,
+					},
+				},
+			},
 		}},
 		Peers: []*authenticationv1alpha1api.PeerAuthenticationMethod{{
 			Params: &authenticationv1alpha1api.PeerAuthenticationMethod_Mtls{

@@ -209,6 +209,14 @@
   version = "v0.3.0"
 
 [[projects]]
+  digest = "1:d54244e92e91f46e0cfd6ea3cf9e99d403c97eba929c19153da1474dcc5989fa"
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "75dcda0896e109a2a22c9315bca3bb21b87b2ba5"
+  version = "v1.7.4"
+
+[[projects]]
   digest = "1:ed860d2b2c1d066d36a89c982eefc7d019badd534f60e87ab65d3d94f0797ef0"
   name = "github.com/hashicorp/golang-lru"
   packages = [
@@ -979,7 +987,7 @@
   revision = "955ffa8fcfc983717cd9de5d2a1e9f5c465f4376"
 
 [[projects]]
-  digest = "1:391d9b14089f2319f4a8a0435756ea4914fea018dcbd2910e797f746a48523fd"
+  digest = "1:50d9e22e9b76b99fbba64a8fadf23fa7836d61d66bbb7cd3a6d00078a7530972"
   name = "k8s.io/helm"
   packages = [
     "pkg/chartutil",
@@ -1000,8 +1008,8 @@
     "pkg/version",
   ]
   pruneopts = "NUT"
-  revision = "0e7f3b6637f7af8fcfddb3d2941fcc7cbebb0085"
-  version = "v2.14.3"
+  revision = "1ee0254c86d4ed6887327dabed7aa7da29d7eb0d"
+  version = "v2.16.3"
 
 [[projects]]
   digest = "1:c05ad592787fc6cdacf8c5309d826561aa4a7d9e4e7ea28660dfb2c77ff68ab0"
@@ -1117,6 +1125,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/emicklei/go-restful",
+    "github.com/gorilla/mux",
     "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/onsi/ginkgo",

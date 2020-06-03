@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -6,11 +7,15 @@ metadata:
   labels:
     prometheus: monitoring
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   selector:
     matchLabels:
-      k8s-app: {{ .Chart.Name}}-metrics
+      k8s-app: {{ .Chart.Name }}-metrics
   targetLabels:
     - k8s-app
   endpoints:
@@ -22,3 +27,5 @@ spec:
   namespaceSelector:
     matchNames:
       - {{ .Values.global.namespace }}
+
+{{- end }}

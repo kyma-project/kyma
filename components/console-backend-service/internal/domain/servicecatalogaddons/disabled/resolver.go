@@ -252,6 +252,15 @@ func (_m *Resolver) ServiceBindingUsagesOfInstanceQuery(ctx context.Context, ins
 	return r0, r1
 }
 
+// ServiceBindingUsagesQuery provides a failing mock function with given fields: ctx, namespace, resourceKind, resourceName
+func (_m *Resolver) ServiceBindingUsagesQuery(ctx context.Context, namespace string, resourceKind *string, resourceName *string) ([]gqlschema.ServiceBindingUsage, error) {
+	var r0 []gqlschema.ServiceBindingUsage
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // UpdateAddonsConfiguration provides a failing mock function with given fields: ctx, name, namespace, repositories, urls, labels
 func (_m *Resolver) UpdateAddonsConfiguration(ctx context.Context, name string, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
 	var r0 *gqlschema.AddonsConfiguration

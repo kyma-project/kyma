@@ -123,6 +123,20 @@
   version = "v1.3.2"
 
 [[projects]]
+  digest = "1:0aeda02073125667ac6c9df50c7921cb22c08a4accdc54589c697a7e76be65c2"
+  name = "github.com/google/go-cmp"
+  packages = [
+    "cmp",
+    "cmp/internal/diff",
+    "cmp/internal/flags",
+    "cmp/internal/function",
+    "cmp/internal/value",
+  ]
+  pruneopts = "NUT"
+  revision = "5a6f75716e1203a923a78c9efb94089d857df0f6"
+  version = "v0.4.0"
+
+[[projects]]
   digest = "1:52c5834e2bebac9030c97cc0798ac11c3aa8a39f098aeb419f142533da6cd3cc"
   name = "github.com/google/gofuzz"
   packages = ["."]
@@ -475,7 +489,7 @@
   version = "v2.2.7"
 
 [[projects]]
-  digest = "1:759855d98a898d7d6a091b89b9c85c03d6efd673c44e15561d716543f4e88f31"
+  digest = "1:760e08df99c3c3b53764ef7c41c03ea9d90e8594d9df42364d9209e99a0352e1"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1beta1",
@@ -516,11 +530,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "fdd30b57c827abbc506646ecfd579f6ccb3b80ab"
-  version = "kubernetes-1.15.2"
+  revision = "69a2d5506ad7b030fe591df7911e399d4ee8c916"
+  version = "kubernetes-1.15.9"
 
 [[projects]]
-  digest = "1:0db508f16c0059bbc1dc063fd5917c48e64693f5756a6e313a2f39821d81b327"
+  digest = "1:fc35e8d69a18f421999481c8fe66eced533aff414c8b235c63a38d210e8fce1f"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -567,11 +581,11 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
-  revision = "6a84e37a896db9780c75367af8d2ed2bb944022e"
-  version = "kubernetes-1.14.1"
+  revision = "31ade1b30762be61c32b2e8db2a11aa8b0b8960e"
+  version = "kubernetes-1.15.9"
 
 [[projects]]
-  digest = "1:bfb0c256c4be1646a419d8d2c6fd7edeb184f93b91d8a8b691523cff4110273f"
+  digest = "1:a15f7e6d11e91587b461a82578951ea617095157f1b136145ae8e6189de437e4"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -636,11 +650,11 @@
     "util/retry",
   ]
   pruneopts = "NUT"
-  revision = "1a26190bd76a9017e289958b9fba936430aa3704"
-  version = "kubernetes-1.14.1"
+  revision = "bcaa470f9d99edab8ea63fce01bdefe30d99a602"
+  version = "kubernetes-1.15.9"
 
 [[projects]]
-  digest = "1:a03325d956faf012be7863861c668dc5be5fe5d448f1fcb8819f140499c91c0d"
+  digest = "1:c169302e123c3e1478da21b2e56ab20a0a8e0ce7b8abe238f448aba7bd6876fd"
   name = "k8s.io/code-generator"
   packages = [
     "cmd/client-gen",
@@ -668,8 +682,8 @@
     "pkg/util",
   ]
   pruneopts = "NUT"
-  revision = "50b561225d70b3eb79a1faafd3dfe7b1a62cbe73"
-  version = "kubernetes-1.14.1"
+  revision = "18da4a14b22b17d2fa761e50037fabfbacec225b"
+  version = "kubernetes-1.15.9"
 
 [[projects]]
   digest = "1:b3e2f0e1c912c26e82156e4170f9a90f414bd39258c2d7b96a1457df3dd1eb88"

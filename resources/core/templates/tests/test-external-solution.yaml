@@ -4,11 +4,11 @@
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: {{ $.Chart.Name }}-test-external-solution-{{ $suffix | replace "_" "-" }}
+  name: {{ $.Chart.Name }}-test-external-solution
   labels:
     kyma-project.io/test-kind: e2e
     app: {{ $.Chart.Name }}-test-external-solution
-    app.kubernetes.io/name: {{ $.Chart.Name }}-test-external-solution-{{ $suffix | replace "_" "-" }}
+    app.kubernetes.io/name: {{ $.Chart.Name }}-test-external-solution
     app.kubernetes.io/managed-by: {{ $.Release.Service }}
     app.kubernetes.io/instance: {{ $.Release.Name }}
     helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
@@ -26,7 +26,7 @@ spec:
         - ip: {{ $.Values.global.minikubeIP }}
           hostnames:
             - "connector-service.{{ $.Values.global.ingress.domainName }}"
-            - "counter-service-{{ $val.testsuite }}.{{ $.Values.global.ingress.domainName }}"
+            - "ctr-svc-{{ $val.testsuite }}.{{ $.Values.global.ingress.domainName }}"
             - "gateway.{{ $.Values.global.ingress.domainName }}"
       {{- end }}
       containers:
@@ -46,7 +46,8 @@ spec:
               /e2e {{ $val.testsuite }} \
               --domain {{ $.Values.global.ingress.domainName }} \
               --testID {{ $val.testsuite }} \
-              --skipSSLVerify
+              --skipSSLVerify \
+              --testServiceImage "{{ $.Values.global.containerRegistry.path }}/{{ $.Values.global.e2e_external_solution_test_service.dir }}event-subscriber-tools:{{ $.Values.global.e2e_external_solution_test_service.version }}"
               {{- if $.Values.tests.application_connector_tests.connector_service.central }} --applicationTenant=tenant --applicationGroup=group {{- end }}
               exit_code=$?
               echo "code is $exit_code"

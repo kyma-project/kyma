@@ -4,14 +4,17 @@ import (
 	"encoding/json"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
+
+	cloudevents "github.com/cloudevents/sdk-go"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	apiv1 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/mesh"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -21,7 +24,6 @@ const (
 var (
 	isValidEventTypeVersion = regexp.MustCompile(shared.AllowedEventTypeVersionChars).MatchString
 	isValidEventID          = regexp.MustCompile(shared.AllowedEventIDChars).MatchString
-	traceHeaderKeys         = []string{"x-request-id", "x-b3-traceid", "x-b3-spanid", "x-b3-parentspanid", "x-b3-sampled", "x-b3-flags", "x-ot-span-context"}
 )
 
 type maxBytesHandler struct {
@@ -34,14 +36,26 @@ func (h *maxBytesHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	h.next.ServeHTTP(rw, r)
 }
 
+type traceHeaderHandler struct {
+	next http.Handler
+}
+
+func (h traceHeaderHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	for key := range r.Header {
+		if strings.HasPrefix(strings.ToLower(key), "x-b3-") || strings.ToLower(key) == "b3" {
+			r = r.WithContext(cloudevents.ContextWithHeader(r.Context(), key, r.Header.Get(key)))
+		}
+	}
+	h.next.ServeHTTP(rw, r)
+}
+
 // NewEventsHandler creates an http.Handler to handle the events endpoint
 func NewEventsHandler(config *mesh.Configuration, maxRequestSize int64) http.Handler {
-	return &maxBytesHandler{next: http.HandlerFunc(getEventsHandler(config)), limit: maxRequestSize}
+	return traceHeaderHandler{next: &maxBytesHandler{next: http.HandlerFunc(getEventsHandler(config)), limit: maxRequestSize}}
 }
 
 type permanentRedirectionHandler struct {
 	location string
-	handler  http.Handler
 }
 
 func (h *permanentRedirectionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -93,6 +107,9 @@ func getEventsHandler(config *mesh.Configuration) func(w http.ResponseWriter, re
 		// send publishRequest to meshclient, this would convert the legacy publish request to CloudEvent
 		// and send it to the event mesh using cloudevent go-sdk's httpclient
 		response, err := mesh.SendEvent(config, context, parameters)
+		if err != nil {
+			response = shared.ErrorResponseFromEventMesh(err.Error())
+		}
 
 		writeJSONResponse(w, response)
 	}
@@ -112,6 +129,7 @@ func checkParameters(parameters *apiv1.PublishEventParametersV1) (response *api.
 		return shared.ErrorResponseWrongEventTypeVersion()
 	}
 	if len(parameters.PublishrequestV1.EventTime) == 0 {
+
 		return shared.ErrorResponseMissingFieldEventTime()
 	}
 	if _, err := time.Parse(time.RFC3339, parameters.PublishrequestV1.EventTime); err != nil {

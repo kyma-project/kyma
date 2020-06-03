@@ -1,0 +1,16 @@
+{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.create }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+  name: {{ template "fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpoints:
+    - path: /metrics
+      port: {{ .Values.metrics.authProxy.port.name }}
+      interval: "{{ .Values.metrics.serviceMonitor.scrapeInterval }}"
+  selector:
+    {{- include "tplValue" ( dict "value" .Values.global.commonMatchLabels "context" . ) | nindent 4 }}
+{{- end }}

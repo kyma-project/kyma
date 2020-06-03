@@ -8,7 +8,7 @@ By default, you install Kyma with a set of components provided in the [**Kyma Li
 During installation, the Kyma Installer applies the content of the local or cluster installation file that includes the list of component names and Namespaces in which the components are installed. The Installer skips the lines starting with a hash character (#):
 
 ```
-# - name: "backup"
+# - name: "tracing"
 #   namespace: "kyma-system"
 ```
 
@@ -65,7 +65,7 @@ To add a component that was not installed with Kyma by default, modify the Insta
     ```
 2. Add the new component to the list of components or remove the hash character (#) preceding these lines:
     ```
-    #- name: "jaeger"
+    #- name: "tracing"
     #  namespace: "kyma-system"
     ```
 3. Trigger the installation:

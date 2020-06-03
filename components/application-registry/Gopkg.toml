@@ -22,23 +22,23 @@ required = [
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.15.9"
 
 [[constraint]]
   name="k8s.io/apimachinery"
-  version="kubernetes-1.14.1"
+  version="kubernetes-1.15.9"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.14.1"
+  version = "kubernetes-1.15.9"
 
 [[constraint]]
   name = "k8s.io/code-generator"
-  version = "kubernetes-1.14.1"
+  version = "kubernetes-1.15.9"
 
 [[override]]
   name = "k8s.io/kubernetes"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.15.9"
 
 [[constraint]]
   name = "github.com/prometheus/client_golang"

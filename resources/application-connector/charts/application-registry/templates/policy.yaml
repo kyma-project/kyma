@@ -1,8 +1,15 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
   name: {{ .Chart.Name }}-external-api-policy
   namespace: {{ .Values.global.namespace }}
+  labels:
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   targets:
     - name: {{ .Chart.Name }}-external-api
@@ -15,9 +22,16 @@ kind: Policy
 metadata:
   name: {{ .Chart.Name }}-metrics-policy
   namespace: {{ .Values.global.namespace }}
+  labels:
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   peers:
     - mtls:
         mode: "PERMISSIVE"
   targets:
     - name: {{ .Chart.Name }}-metrics
+{{- end }}

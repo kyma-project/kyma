@@ -15,7 +15,7 @@ For example, if you're running Kyma 1.0 and you want to upgrade to version 1.3, 
 2. Upgrade from version 1.1 to version 1.2.
 3. Upgrade from version 1.2 to version 1.3.
 
->**NOTE:** Kyma does not support a dedicated downgrade procedure. You can achieve a similar result by restoring your cluster from a backup. Read [this](/components/backup/#overview-overview) document to learn more about backups.
+>**NOTE:** Kyma does not support a dedicated downgrade procedure. You can achieve a similar result by creating a backup of your cluster before upgrade. Read [this](/components/backup/#tutorials-taking-backup-using-velero) document to learn more about backups.
 
 The upgrade procedure relies heavily on Helm. As a result, the availability of cluster services during the upgrade is not defined by Kyma and can vary from version to version. The existing custom resources (CRs) remain in the cluster.
 
@@ -31,11 +31,15 @@ Follow these steps:
   ```
 2. Perform the required actions described in the migration guide published with the release you want to upgrade to. Migration guides are linked in the [release notes](https://kyma-project.io/blog/) and are available on the respective [release branches](https://github.com/kyma-project/kyma/branches) in the `docs/migration-guides` directory.
   >**NOTE:** Not all releases require you to perform additional migration steps. If your target release doesn't come with a migration guide, proceed to the next step.
-3. Upgrade Tiller. Run:
-   ```
-      kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{NEW_KYMA_VERSION}/installation/resources/tiller.yaml
-   ```
-4. Trigger the upgrade:
+3. Delete the existing `kyma-installer` deployment.
+   ```bash
+   kubectl delete deployment kyma-installer -n kyma-installer
+   ``` 
+4. Once the deployment is deleted, upgrade Tiller. Run:
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{NEW_KYMA_VERSION}/installation/resources/tiller.yaml
+   ``` 
+5. Trigger the upgrade:
 
     <div tabs name="trigger-the-upgrade" group="upgrade-kyma">
       <details>
@@ -72,7 +76,7 @@ Follow these steps:
       </details>
     </div>
 
-5. Applying the release artifacts to the cluster triggers the installation of the desired Kyma version. To watch the installation status, run:
+6. Applying the release artifacts to the cluster triggers the installation of the desired Kyma version. To watch the installation status, run:
 
     <div tabs name="installation-status" group="upgrade-kyma">
       <details>

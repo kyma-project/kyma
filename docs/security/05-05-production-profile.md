@@ -5,7 +5,7 @@ type: Configuration
 
 By default, every Kyma deployment is installed with the OAuth2 server using what is considered a default profile. This configuration is not considered production-ready. To use the Kyma OAuth2 server in a production environment, configure Hydra to use the production profile.
 
-## The default profile
+## Default profile
 
 In the case of the ORY Hydra OAuth2 server, the default profile includes:
    - An in-cluster database that stores the registered client data.
@@ -17,7 +17,7 @@ In the case of the ORY Hydra OAuth2 server, the default profile includes:
 
 The default profile for the OAuth2 server enables the use of a [preconfigured PostgreSQL](https://github.com/helm/charts/tree/master/stable/postgresql) database, which is installed together with the Hydra server. The database is created in the cluster as a StatefulSet and uses a PersistentVolume that is provider-specific. This means that the PersistentVolume used by the database uses the default StorageClass of the cluster's host provider. The internal PostgreSQL database is installed with every Kyma deployment and doesn't require manual configuration. 
    
-## The production profile
+## Production profile
 
 The production profile introduces the following changes to the Hydra OAuth2 server deployment:
    - The registered client data is saved in a user-managed database.
@@ -59,9 +59,9 @@ Alternatively, you can use a compatible, custom database to store the registered
 | **global.ory.hydra.persistence.user** | Specifies the name of the user with permissions to access the database. | `dbuser` |
 | **global.ory.hydra.persistence.secretName** | Specifies the name of the Secret in the same Namespace as Hydra that stores the database password. | `my-secret` |
 | **global.ory.hydra.persistence.secretKey** | Specifies the name of the key in the Secret that contains the database password. | `my-db-password` |
-| **global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, read [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) document. | `mydb.my-namespace:1234` |
+| **global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, read [this](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml) document. | `mydb.my-namespace:1234` |
 | **global.ory.hydra.persistence.dbName** | Specifies the name of the database saved in Hydra. | `db` |
-| **global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) link for more information. | `postgres` |
+| **global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml) link for more information. | `postgres` |
 
 #### Google Cloud SQL
 
@@ -83,15 +83,15 @@ The Cloud SQL is a provider-supplied and maintained database, which requires a s
 | **data.global.ory.hydra.persistence.user** | Specifies the name of the user with permissions to access the database. | `dbuser` |
 | **data.global.ory.hydra.persistence.secretName** | Specifies the name of the Secret in the same Namespace as Hydra that stores the database password. | `my-secret` |
 | **data.global.ory.hydra.persistence.secretKey** | Specifies the name of the key in the Secret that contains the database password. | `my-db-password` |
-| **data.global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, read [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) document. | Required: `ory-gcloud-sqlproxy.kyma-system` |
+| **data.global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, read [this](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml) document. | Required: `ory-gcloud-sqlproxy.kyma-system` |
 | **data.global.ory.hydra.persistence.dbName** | Specifies the name of the database saved in Hydra. | `db` |
-| **data.global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/master/docs/config.yaml) link for more information. | `postgres` |
+| **data.global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml) link for more information. | `postgres` |
 
 **Proxy settings:**
 
 | Parameter | Description | Example value |
 |----------|------| :---: |
-| **gcloud-sqlproxy.cloudsql.instance.instanceName** | Specifies the name of the database instance in GCP. | `mydbinstance` |
+| **gcloud-sqlproxy.cloudsql.instance.instanceName** | Specifies the name of the database instance in GCP. This value is the last part of the string returned by the Cloud SQL Console for **Instance connection name** - the one after the final `:`. For example, if the value for **Instance connection name** is `my_project:my_region:mydbinstance`, use only `mydbinstance`. | `mydbinstance` |
 | **gcloud-sqlproxy.cloudsql.instance.project** | Specifies the name of the GCP project used. | `my-gcp-project` |
 | **gcloud-sqlproxy.cloudsql.instance.region** | Specifies the name of the GCP **region** used. Note, that it does not equal the GCP **zone**. | `europe-west4` |
 | **gcloud-sqlproxy.cloudsql.instance.port** | Specifies the port used by the database to handle connections. Database dependent. | postgres: `5432` mysql: `3306` |
@@ -108,7 +108,7 @@ Follow these steps to migrate your Oauth2 server to the production profile:
 - [User-maintained](assets/003-ory-db-custom.yaml)
 - [Google Cloud SQL](assets/004-ory-db-gcloud.yaml)
 
-2. Run the cluster [update procedure](/root/kyma/#installation-update-kyma).
+2. Run the [cluster update process](/root/kyma/#installation-update-kyma).
 
 >**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
 >* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)

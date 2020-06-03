@@ -2,7 +2,7 @@
 
 ## Overview
 
-This chart includes [knative eventing](https://github.com/knative/docs/tree/master/docs/eventing) release files.
+This chart includes [Knative eventing](https://github.com/knative/docs/tree/master/docs/eventing) release files.
 
 Included releases:
  * https://github.com/knative/eventing/releases/download/v0.12.0/eventing.yaml

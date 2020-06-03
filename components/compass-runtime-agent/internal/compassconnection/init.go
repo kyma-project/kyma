@@ -3,17 +3,19 @@ package compassconnection
 import (
 	"time"
 
-	"kyma-project.io/compass-runtime-agent/internal/compass/director"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
 
 	"github.com/pkg/errors"
 
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	"kyma-project.io/compass-runtime-agent/internal/certificates"
-	"kyma-project.io/compass-runtime-agent/internal/compass"
-	"kyma-project.io/compass-runtime-agent/internal/config"
-	"kyma-project.io/compass-runtime-agent/internal/kyma"
-	"kyma-project.io/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
 
 	"k8s.io/client-go/rest"
 )
@@ -26,6 +28,7 @@ type DependencyConfig struct {
 	CredentialsManager     certificates.Manager
 	SynchronizationService kyma.Service
 	ConfigProvider         config.Provider
+	ConnectionDataCache    cache.ConnectionDataCache
 
 	RuntimeURLsConfig            director.RuntimeURLsConfig
 	CertValidityRenewalThreshold float64
@@ -50,7 +53,8 @@ func (config DependencyConfig) InitializeController() (Supervisor, error) {
 		config.ConfigProvider,
 		config.CertValidityRenewalThreshold,
 		config.MinimalCompassSyncTime,
-		config.RuntimeURLsConfig)
+		config.RuntimeURLsConfig,
+		config.ConnectionDataCache)
 
 	if err := InitCompassConnectionController(config.ControllerManager, connectionSupervisor, config.MinimalCompassSyncTime); err != nil {
 		return nil, errors.Wrap(err, "Unable to register controllers to the manager")

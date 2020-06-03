@@ -34,7 +34,7 @@ import (
 	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	messaginglistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
 	"knative.dev/eventing/pkg/reconciler"
-	apisv1alpha1 "knative.dev/pkg/apis/v1alpha1"
+	apisv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/resolver"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
@@ -435,10 +435,10 @@ func getSinkURI(sink *messagingv1alpha1.Channel, r *resolver.URIResolver, parent
 
 // channelAsDestination returns a Destination representation of the given
 // Channel.
-func channelAsDestination(ch *messagingv1alpha1.Channel) apisv1alpha1.Destination {
+func channelAsDestination(ch *messagingv1alpha1.Channel) apisv1beta1.Destination {
 	gvk := ch.GetGroupVersionKind()
 
-	return apisv1alpha1.Destination{
+	return apisv1beta1.Destination{
 		Ref: &corev1.ObjectReference{
 			APIVersion: gvk.GroupVersion().String(),
 			Kind:       gvk.Kind,

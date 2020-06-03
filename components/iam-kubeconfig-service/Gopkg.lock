@@ -244,8 +244,8 @@
     "plugin/pkg/authenticator/token/oidc",
   ]
   pruneopts = "UT"
-  revision = "92cc630367d00d05752f0cf0d6eca534bcd1e5a3"
-  version = "kubernetes-1.15.3"
+  revision = "9ca1dc5866829af144ff306b7d13fbab2157a818"
+  version = "kubernetes-1.16.3"
 
 [[projects]]
   digest = "1:2813fd1f64c4df2d641501461cb1c10610fdbe1dcd86fbcef19fc76c6dd1ae2c"
@@ -255,8 +255,8 @@
     "util/keyutil",
   ]
   pruneopts = "UT"
-  revision = "e14f31a72a77f7aa82a95eaf542d1194fb027d04"
-  version = "kubernetes-1.15.3"
+  revision = "6c5935290e3335b200f75d874a19be3093e9c36b"
+  version = "kubernetes-1.16.3"
 
 [[projects]]
   digest = "1:93e82f25d75aba18436ad1ac042cb49493f096011f2541075721ed6f9e05c044"

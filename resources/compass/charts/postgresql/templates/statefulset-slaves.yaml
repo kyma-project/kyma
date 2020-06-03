@@ -129,7 +129,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ template "postgresql.secretName" . }}
-              key: postgresql-password
+              key: postgresql-director-password
         {{- end }}
         ports:
         - name: postgresql
@@ -166,7 +166,7 @@ spec:
         {{- end }}
         volumeMounts:
         {{- if .Values.usePasswordFile }}
-        - name: postgresql-password
+        - name: postgresql-director-password
           mountPath: /opt/bitnami/postgresql/secrets/
         {{- end }}
         {{- if .Values.persistence.enabled }}
@@ -187,7 +187,7 @@ spec:
         {{- end }}
       volumes:
       {{- if .Values.usePasswordFile }}
-      - name: postgresql-password
+      - name: postgresql-director-password
         secret:
           secretName: {{ template "postgresql.secretName" . }}
       {{- end }}

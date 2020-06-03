@@ -10,9 +10,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 const (
@@ -53,7 +53,7 @@ func (ut *HelmBrokerUpgradeConflictTest) CreateResources(stop <-chan struct{}, l
 	return ut.newFlow(stop, log, namespace).CreateResources()
 }
 
-// TestResources tests resources after backup phase
+// TestResources tests resources after upgrade
 func (ut *HelmBrokerUpgradeConflictTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	if err := ut.newFlow(stop, log, namespace).TestResources(); err != nil {
 		return err

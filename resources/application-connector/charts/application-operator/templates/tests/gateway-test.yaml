@@ -1,4 +1,4 @@
-{{ if and .Values.tests.enabled .Values.global.enableAPIPackages }}
+{{ if and .Values.tests.enabled .Values.global.disableLegacyConnectivity }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -6,21 +6,27 @@ metadata:
   name: {{ .Chart.Name }}-gateway
   labels:
     app: {{ .Chart.Name }}-gateway-tests
-    app.kubernetes.io/name: {{ .Chart.Name }}-gateway-tests
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}-gateway-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-gateway-{{ .Chart.Version | replace "+" "_" }}
 spec:
   disableConcurrency: false
   template:
     metadata:
       labels:
         app: {{ .Chart.Name }}-gateway-tests
+        release: {{ .Release.Name }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        app.kubernetes.io/name: {{ template "name" . }}-gateway-tests
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       serviceAccountName: {{ .Chart.Name }}-gateway-tests
       containers:
         - name: tests
-          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway_tests.dir }}application-gateway-tests:{{ .Values.global.application_gateway_tests.version }}
+          image: {{ .Values.global.containerRegistry.path }}/application-gateway-tests:{{ .Values.global.application_gateway_tests.version }}
           imagePullPolicy: {{ .Values.tests.pullPolicy }}
           env:
             - name: GATEWAY_NAMESPACE
@@ -38,12 +44,17 @@ spec:
             - containerPort: {{ .Values.tests.gateway.mockServicePort }}
               name: http-port
       restartPolicy: Never
-
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Chart.Name }}-gateway-tests
+  labels:
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}-gateway-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   selector:
     app: {{ .Chart.Name }}-gateway-tests

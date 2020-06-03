@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/base64"
 	"fmt"
 	"log"
 	"math/rand"
+	"net/http"
 	"strings"
 	"testing"
 	"time"
@@ -46,29 +48,46 @@ const jwtAndOauthOnePathApiruleFile = "jwt-oauth-one-path-strategy.yaml"
 const resourceSeparator = "---"
 const defaultHeaderName = "Authorization"
 
-var resourceManager *resource.Manager
+var (
+	resourceManager *resource.Manager
+	conf            Config
+	httpClient      *http.Client
+)
 
 type Config struct {
-	HydraAddr  string `envconfig:"TEST_HYDRA_ADDRESS"`
-	User       string `envconfig:"TEST_USER_EMAIL"`
-	Pwd        string `envconfig:"TEST_USER_PASSWORD"`
-	ReqTimeout uint   `envconfig:"TEST_REQUEST_TIMEOUT,default=100"`
-	ReqDelay   uint   `envconfig:"TEST_REQUEST_DELAY,default=5"`
-	Domain     string `envconfig:"DOMAIN"`
+	HydraAddr     string        `envconfig:"TEST_HYDRA_ADDRESS"`
+	User          string        `envconfig:"TEST_USER_EMAIL"`
+	Pwd           string        `envconfig:"TEST_USER_PASSWORD"`
+	ReqTimeout    uint          `envconfig:"TEST_REQUEST_TIMEOUT,default=180"`
+	ReqDelay      uint          `envconfig:"TEST_REQUEST_DELAY,default=5"`
+	Domain        string        `envconfig:"TEST_DOMAIN"`
+	ClientTimeout time.Duration `envconfig:"TEST_CLIENT_TIMEOUT,default=10s"` //Don't forget the unit!
+	IsMinikubeEnv bool          `envconfig:"TEST_MINIKUBE_ENV,default=false"`
 }
 
 func TestApiGatewayIntegration(t *testing.T) {
 
 	assert, require := assert.New(t), require.New(t)
 
-	var conf Config
 	if err := envconfig.Init(&conf); err != nil {
 		t.Fatalf("Unable to setup config: %v", err)
 	}
 
-	httpClient, err := ingressgateway.FromEnv().Client()
-	if err != nil {
-		t.Fatalf("Unable to initialize ingress gateway client: %v", err)
+	if conf.IsMinikubeEnv {
+		var err error
+		log.Printf("Using dedicated ingress client")
+		httpClient, err = ingressgateway.FromEnv().Client()
+		if err != nil {
+			t.Fatalf("Unable to initialize ingress gateway client: %v", err)
+		}
+	} else {
+		log.Printf("Fallback to default http client")
+		httpClient = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+			Timeout: conf.ClientTimeout,
+		}
 	}
 
 	oauthClientID := generateRandomString(OauthClientIDLength)
@@ -85,7 +104,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 		ClientSecret: oauthClientSecret,
 		TokenURL:     fmt.Sprintf("%s/oauth2/token", conf.HydraAddr),
 		Scopes:       []string{"read"},
-		AuthStyle: oauth2.AuthStyleInHeader,
+		AuthStyle:    oauth2.AuthStyleInHeader,
 	}
 
 	jwtConfig, err := jwt.LoadConfig()
@@ -125,12 +144,13 @@ func TestApiGatewayIntegration(t *testing.T) {
 	}
 
 	// delete test namespace if the previous test namespace persists
-
 	nsResourceSchema, ns, name := resource.GetResourceSchemaAndNamespace(globalCommonResources[0])
+	log.Printf("Delete test namespace, if exists: %s\n", name)
 	resourceManager.DeleteResource(k8sClient, nsResourceSchema, ns, name)
 
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
 
+	log.Printf("Creating common tests resources")
 	batch.CreateResources(k8sClient, globalCommonResources...)
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
 
@@ -146,6 +166,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	log.Printf("Creating hydra client resources")
 	batch.CreateResources(k8sClient, hydraClientResource...)
 	// Let's wait a bit to register client in hydra
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
@@ -225,6 +246,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", tokenOAUTH.AccessToken), defaultHeaderName))
 
 			batch.DeleteResources(k8sClient, commonResources...)
+			batch.DeleteResources(k8sClient, resources...)
 
 			assert.NoError(tester.TestDeletedAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 		})
@@ -375,6 +397,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			assert.NoError(tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 
 			batch.DeleteResources(k8sClient, commonResources...)
+			batch.DeleteResources(k8sClient, unsecuredApiruleResource...)
 
 			assert.NoError(tester.TestDeletedAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 		})

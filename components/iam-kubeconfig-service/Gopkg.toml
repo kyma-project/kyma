@@ -30,11 +30,11 @@ required = [
 
 [[constraint]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.3"
 
 [[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.3"
 
 
 [[constraint]]

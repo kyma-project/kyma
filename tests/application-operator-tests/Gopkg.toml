@@ -30,3 +30,15 @@
 [[constraint]]
   name = "github.com/kyma-project/kyma"
   revision = "70782d1888118ad2c76b978b49505bb5286e264c"
+
+[[constraint]]
+  name = "k8s.io/helm"
+  version = "v2.16.1"
+
+[[constraint]]
+  name = "istio.io/client-go"
+  version = "1.5.1"
+
+[[override]]
+  name = "github.com/gogo/protobuf"
+  version = "v1.3.1"

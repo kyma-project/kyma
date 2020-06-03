@@ -11,11 +11,9 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 |----------------|------|------|
 | `cluster-essentials` | ✅ | ✅ |
 | `testing` | ✅ | ✅ |
-| `istio-init` | ✅ | ✅ |
 | `istio` | ✅ | ✅ |
 | `xip-patch` | ✅ | ✅ |
 | `istio-kyma-patch` | ✅ | ✅ |
-| `tekton-pipelines` | ⛔️ | ⛔️ |
 | `knative-serving-init` | ✅ | ✅ |
 | `knative-serving` | ✅ | ✅ |
 | `knative-eventing` | ✅ | ✅ |
@@ -23,31 +21,28 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `dex` | ✅ | ✅ |
 | `ory` | ✅ | ✅ |
 | `api-gateway` | ✅ | ✅ |
-| `function-controller-init` | ⛔️ | ⛔️ |
-| `function-controller` | ⛔️ | ⛔️ |
 | `rafter` | ✅ | ✅ |
 | `service-catalog` | ✅ | ✅ |
 | `service-catalog-addons` | ✅ | ✅ |
 | `helm-broker` | ✅ | ✅ |
 | `nats-streaming` | ✅ | ✅ |
 | `core` | ✅ | ✅ |
+| `cluster-users` | ✅ | ✅ |
 | `permission-controller` | ✅ | ✅ |
+| `apiserver-proxy` | ✅ | ✅ |
+| `iam-kubeconfig-service` | ✅ | ✅ |
+| `serverless` | ✅ | ✅ |
 | `knative-provisioner-natss` | ✅ | ✅ |
-| `event-bus` | ✅ | ✅ |
 | `event-sources` | ✅ | ✅ |
 | `application-connector-ingress` | ✅ | ✅ |
 | `application-connector-helper` | ✅ | ✅ |
 | `application-connector` | ✅ | ✅ |
-| `backup-init` | ✅ | ⛔️ |
-| `backup`  | ✅ | ⛔️ |
 | `logging` | ✅ | ⛔️ |
-| `jaeger` | ✅ | ⛔️ |
+| `tracing` | ✅ | ⛔️ |
 | `monitoring` | ✅ | ⛔️ |
 | `kiali` | ✅ | ⛔️ |
 | `compass` | ⛔️ | ⛔️ |
 | `compass-runtime-agent` | ⛔️ | ⛔️ |
-
->**NOTE**: To include backup in the installation process, you need to set it up first. Use the Kyma backup [setup instructions](/components/backup#overview-overview) to do so.
 
 ## Installation guides
 
@@ -61,6 +56,5 @@ Read the rest of the installation documents to learn how to:
 - [Upgrade Kyma to a new version](#installation-upgrade-kyma)
 - [Update Kyma](#installation-update-kyma)
 - [Reinstall Kyma](#installation-reinstall-kyma)
-- [Set up the Kyma backup](/components/backup#overview-overview)
 
 >**NOTE:** Make sure that the version of the documentation selected in the left pane of `kyma-project.io` matches the version of Kyma you're using.

@@ -27,6 +27,7 @@ import (
 	"k8s.io/client-go/tools/record"
 
 	fakeeventingclient "knative.dev/eventing/pkg/client/injection/client/fake"
+	fakelegacyclient "knative.dev/eventing/pkg/legacyclient/injection/client/fake"
 	fakekubeclient "knative.dev/pkg/client/injection/kube/client/fake"
 	"knative.dev/pkg/controller"
 	fakedynamicclient "knative.dev/pkg/injection/clients/dynamicclient/fake"
@@ -62,6 +63,7 @@ func MakeFactory(ctor Ctor) rt.Factory {
 		ctx, sourcesClient := fakesourcesclient.With(ctx, ls.GetSourcesObjects()...)
 		ctx, servingClient := fakeservingclient.With(ctx, ls.GetServingObjects()...)
 		ctx, eventingClient := fakeeventingclient.With(ctx, ls.GetEventingObjects()...)
+		ctx, legacyClient := fakelegacyclient.With(ctx, ls.GetLegacyObjects()...)
 		ctx, istioClient := fakeistioclient.With(ctx, ls.GetIstioObjects()...)
 		// the sink URI resolver lists/watches objects using the dynamic client
 		ctx, _ = fakedynamicclient.With(ctx, scheme,
@@ -75,7 +77,7 @@ func MakeFactory(ctor Ctor) rt.Factory {
 		// set up Controller from fakes
 		c := ctor(t, ctx, &ls)
 
-		actionRecorderList := rt.ActionRecorderList{sourcesClient, servingClient, eventingClient, istioClient}
+		actionRecorderList := rt.ActionRecorderList{sourcesClient, servingClient, eventingClient, istioClient, legacyClient}
 		eventList := rt.EventList{Recorder: eventRecorder}
 		statsReporter := &rt.FakeStatsReporter{}
 

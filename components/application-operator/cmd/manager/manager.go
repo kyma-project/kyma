@@ -3,6 +3,8 @@ package main
 import (
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-operator/internal/healthz"
+
 	service_instance_scheme "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 
@@ -114,6 +116,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	log.Info("Starting Healthcheck Server")
+
+	go healthz.StartHealthCheckServer(log.StandardLogger(), options.healthPort)
+
 	log.Printf("Starting the Cmd.")
 	log.Info(mgr.Start(signals.SetupSignalHandler()))
 }
@@ -143,6 +149,7 @@ func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient
 		EventServiceTestsImage:                options.eventServiceTestsImage,
 		ApplicationConnectivityValidatorImage: options.applicationConnectivityValidatorImage,
 		GatewayOncePerNamespace:               options.gatewayOncePerNamespace,
+		StrictMode:                            options.strictMode,
 	}
 
 	appClient, err := versioned.NewForConfig(cfg)

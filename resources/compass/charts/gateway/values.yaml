@@ -1,10 +1,16 @@
 deployment:
+  replicaCount: 1
   image:
     pullPolicy: IfNotPresent
+  resources: {}
   securityContext: # Set on container level
     runAsUser: 2000
     allowPrivilegeEscalation: false
+  strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 
 gateway:
   enabled: false
   manageCerts: true
+  auditlog:
+    enabled: false
+    authMode: "basic"

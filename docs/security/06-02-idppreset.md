@@ -3,7 +3,7 @@ title: IDPPreset
 type: Custom Resource
 ---
 
-The `idppresets.authentication.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format that represents presets of the Identity Provider configuration used to secure API through the Console UI. Presets are a convenient way to configure the **authentication** section in the API custom resource.
+The `idppresets.authentication.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format that represents presets of the Identity Provider configuration used to secure the service through the Console UI. Presets are a convenient way to configure the **JWT** access strategy in the APIRule custom resource.
 
 To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
@@ -37,7 +37,7 @@ This table lists all the possible parameters of a given resource together with t
 
 ## Usage in the UI
 
-The **issuer** and **jwksUri** fields originate from the [Api CR](/components/api-gateway/#custom-resource-custom-resource) specification. In most cases, these values are reused many times. Use the IDPPreset CR to store these details in a single object and reuse them in a convenient way. In the UI, the IDPPreset CR allows you to choose a preset with details of a specific identity provider from the drop-down menu instead of entering them manually every time you expose a secured API. Apart from consuming IDPPresets, you can also manage them in the Console UI. To create and delete IDPPresets, select **IDP Presets** from the **Integration** section.
+The **issuer** and **jwksUri** fields originate from the [APIRule CR](/components/api-gateway#custom-resource-custom-resource) access strategies configuration. In most cases, these values are reused many times. Use the IDPPreset CR to store these details in a single object and reuse them in a convenient way. In the UI, the IDPPreset CR allows you to choose a preset with details of a specific identity provider from the drop-down menu instead of entering them manually every time you expose a secured API. Apart from consuming IDPPresets, you can also manage them in the Console UI. To create and delete IDPPresets, select **IDP Presets** from the **Integration** section.
 
 ## Related resources and components
 

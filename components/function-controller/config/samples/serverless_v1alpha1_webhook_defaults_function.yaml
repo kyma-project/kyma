@@ -5,14 +5,13 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: function-webhook-defaults
 spec:
-  function: |
+  labels:
+    podLabel1: data1
+  source: |
     module.exports = {
         main: function(event, context) {
           return 'Hello World'
         }
       }
-  functionContentType: "plaintext"
-  # use default values:
-  # size: "L"
-  # runtime: "nodejs8"
-  # timeout: 20
+  minReplicas: 1
+  maxReplicas: 2

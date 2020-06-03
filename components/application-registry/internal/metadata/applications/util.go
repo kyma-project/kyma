@@ -120,26 +120,26 @@ func convertToK8sType(service Service) v1alpha1.Service {
 	}
 }
 
-func removeService(id string, re *v1alpha1.Application) {
-	serviceIndex := getServiceIndex(id, re)
+func removeService(id string, app *v1alpha1.Application) {
+	serviceIndex := getServiceIndex(id, app)
 
 	if serviceIndex != -1 {
-		copy(re.Spec.Services[serviceIndex:], re.Spec.Services[serviceIndex+1:])
-		size := len(re.Spec.Services)
-		re.Spec.Services = re.Spec.Services[:size-1]
+		copy(app.Spec.Services[serviceIndex:], app.Spec.Services[serviceIndex+1:])
+		size := len(app.Spec.Services)
+		app.Spec.Services = app.Spec.Services[:size-1]
 	}
 }
 
-func replaceService(id string, re *v1alpha1.Application, service v1alpha1.Service) {
-	serviceIndex := getServiceIndex(id, re)
+func replaceService(id string, app *v1alpha1.Application, service v1alpha1.Service) {
+	serviceIndex := getServiceIndex(id, app)
 
 	if serviceIndex != -1 {
-		re.Spec.Services[serviceIndex] = service
+		app.Spec.Services[serviceIndex] = service
 	}
 }
 
-func ensureServiceExists(id string, re *v1alpha1.Application) apperrors.AppError {
-	if !serviceExists(id, re) {
+func ensureServiceExists(id string, app *v1alpha1.Application) apperrors.AppError {
+	if !serviceExists(id, app) {
 		message := fmt.Sprintf("Service with ID %s does not exist", id)
 
 		return apperrors.NotFound(message)
@@ -148,8 +148,8 @@ func ensureServiceExists(id string, re *v1alpha1.Application) apperrors.AppError
 	return nil
 }
 
-func ensureServiceNotExists(id string, re *v1alpha1.Application) apperrors.AppError {
-	if serviceExists(id, re) {
+func ensureServiceNotExists(id string, app *v1alpha1.Application) apperrors.AppError {
+	if serviceExists(id, app) {
 		message := fmt.Sprintf("Service with ID %s already exists", id)
 
 		return apperrors.AlreadyExists(message)
@@ -158,12 +158,12 @@ func ensureServiceNotExists(id string, re *v1alpha1.Application) apperrors.AppEr
 	return nil
 }
 
-func serviceExists(id string, re *v1alpha1.Application) bool {
-	return getServiceIndex(id, re) != -1
+func serviceExists(id string, app *v1alpha1.Application) bool {
+	return getServiceIndex(id, app) != -1
 }
 
-func getServiceIndex(id string, re *v1alpha1.Application) int {
-	for i, service := range re.Spec.Services {
+func getServiceIndex(id string, app *v1alpha1.Application) int {
+	for i, service := range app.Spec.Services {
 		if service.ID == id {
 			return i
 		}

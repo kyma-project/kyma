@@ -1,0 +1,10 @@
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: {{ template "prometheus-postgres-exporter.fullname" . }}
+spec:
+  peers:
+    - mtls:
+        mode: PERMISSIVE
+  targets:
+    - name: {{ template "prometheus-postgres-exporter.fullname" . }}

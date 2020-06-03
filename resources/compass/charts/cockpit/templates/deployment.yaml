@@ -11,6 +11,8 @@ spec:
     matchLabels:
       app: {{ .Chart.Name }}
       release: {{ .Release.Name }}
+  strategy:
+    {{- toYaml .Values.deployment.strategy | nindent 4 }}
   template:
     metadata:
       labels:
@@ -19,11 +21,19 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: {{ .Values.images.containerRegistry.path }}/{{ .Values.images.ui.dir }}compass-ui:{{ .Values.images.ui.version }}
+          image: {{ .Values.images.containerRegistry.path }}/{{ .Values.images.ui.dir }}compass:{{ .Values.images.ui.version }}
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.statusPort }}
+            initialDelaySeconds: 10
           ports:
+            - containerPort: {{ .Values.statusPort }}
             - containerPort: {{ .Values.service.internalPort }}
-            - containerPort: {{ .Values.service.mfInternalPort}}
+            - containerPort: {{ .Values.service.mfInternalPort }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
           - name: config
             mountPath: /var/public/config

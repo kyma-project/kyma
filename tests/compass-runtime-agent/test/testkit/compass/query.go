@@ -8,7 +8,7 @@ type queryProvider struct{}
 
 func (qp queryProvider) updateLabelDefinition(input string) string {
 	return fmt.Sprintf(`mutation {
-  result: updateLabelDefinition( in: %s ) {
+  result: updateLabelDefinition(in: %s ) {
     key
     schema
   }
@@ -77,12 +77,36 @@ func (qp queryProvider) getRuntime(runtimeId string) string {
 }`, runtimeId, runtimeData())
 }
 
-func (qp queryProvider) createAPI(applicationId string, input string) string {
+func (qp queryProvider) addAPIPackage(appId string, input string) string {
 	return fmt.Sprintf(`mutation {
-	result: addAPIDefinition(applicationID: "%s", in: %s) {
+	result: addPackage(applicationID: "%s", in: %s) {
 		%s
 	}
-}`, applicationId, input, apiDefinitionData())
+}`, appId, input, packageData())
+}
+
+func (qp queryProvider) updateAPIPackage(pkgId string, input string) string {
+	return fmt.Sprintf(`mutation {
+	result: updatePackage(id: "%s", in: %s) {
+		%s
+	}
+}`, pkgId, input, packageData())
+}
+
+func (qp queryProvider) deleteAPIPackage(pkgId string) string {
+	return fmt.Sprintf(`mutation {
+	result: deletePackage(id: "%s") {
+		id
+	}
+}`, pkgId)
+}
+
+func (qp queryProvider) addAPIToPackage(pkgId, input string) string {
+	return fmt.Sprintf(`mutation {
+	result: addAPIDefinitionToPackage(packageID: "%s", in: %s) {
+		%s
+	}
+}`, pkgId, input, apiDefinitionData())
 }
 
 func (qp queryProvider) updateAPI(apiId string, input string) string {
@@ -101,12 +125,12 @@ func (qp queryProvider) deleteAPI(apiId string) string {
 }`, apiId)
 }
 
-func (qp queryProvider) createEventAPI(applicationId string, input string) string {
+func (qp queryProvider) addEventAPIToPackage(pkgId string, input string) string {
 	return fmt.Sprintf(`mutation {
-	result: addEventDefinition(applicationID: "%s", in: %s) {
+	result: addEventDefinitionToPackage(packageID: "%s", in: %s) {
 		%s
 	}
-}`, applicationId, input, eventAPIData())
+}`, pkgId, input, eventAPIData())
 }
 
 func (qp queryProvider) updateEventAPI(apiId string, input string) string {
@@ -143,12 +167,23 @@ func pageInfoData() string {
 func applicationData() string {
 	return fmt.Sprintf(`id
 		name
+		providerName
 		description
 		labels
+		packages {%s}
+	`, pageData(packageData()))
+}
+
+func packageData() string {
+	return fmt.Sprintf(`
+		id
+		name
+		description
+		defaultInstanceAuth {%s}
 		apiDefinitions {%s}
 		eventDefinitions {%s}
 		documents {%s}
-	`, pageData(apiDefinitionData()), pageData(eventAPIData()), pageData(documentData()))
+	`, authData(), pageData(apiDefinitionData()), pageData(eventAPIData()), pageData(documentData()))
 }
 
 func runtimeData() string {
@@ -208,13 +243,10 @@ func apiDefinitionData() string {
 	return fmt.Sprintf(`		id
 		name
 		description
-		applicationID
 		spec {%s}
 		targetURL
 		group
-		auths {%s}
-		defaultAuth {%s}
-		version {%s}`, apiSpecData(), runtimeAuthData(), authData(), versionData())
+		version {%s}`, apiSpecData(), versionData())
 }
 
 func apiSpecData() string {
@@ -238,7 +270,6 @@ func versionData() string {
 func eventAPIData() string {
 	return fmt.Sprintf(`
 			id
-			applicationID
 			name
 			description
 			group 
@@ -256,7 +287,6 @@ func eventSpecData() string {
 func documentData() string {
 	return `
 		id
-		applicationID
 		title
 		displayName
 		description

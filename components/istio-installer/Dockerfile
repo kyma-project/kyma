@@ -1,8 +1,8 @@
-FROM eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200309-9a88ce97
+FROM eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
-ENV ISTIOCTL_VERSION 1.4.6
+ENV ISTIOCTL_VERSION 1.4.7
 ENV YQ_VERSION 3.1.1
 
 RUN curl -L https://github.com/istio/istio/releases/download/${ISTIOCTL_VERSION}/istioctl-${ISTIOCTL_VERSION}-linux.tar.gz -o istioctl.tar.gz &&\

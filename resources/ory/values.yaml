@@ -7,9 +7,9 @@ global:
     gateway:
       name: kyma-gateway
       namespace: kyma-system
-  ory:  
-    oathkeeper: 
-      maester:  
+  ory:
+    oathkeeper:
+      maester:
         mode: sidecar
     hydra:
       persistence:
@@ -45,6 +45,12 @@ hpa:
         name: cpu
         targetAverageUtilization: 80
 
+# Maintenance options
+maintenance:
+  image:
+    name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
+    tag: "v20200507-070ff576"
+
 # Overrides for the Hydra chart
 hydra:
   ingress:
@@ -52,6 +58,14 @@ hydra:
       enabled: false
     admin:
       enabled: false
+  deployment:
+    resources:
+      limits:
+        cpu: 100m
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 128Mi
   hydra:
     # The ORY Hydra configuration. For a full list of available settings, check:
     #   https://github.com/ory/hydra/blob/master/docs/config.yaml
@@ -73,19 +87,13 @@ hydra:
     autoMigrate: true
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
-  resources:
-    limits:
-      cpu: 100m
-      memory: 256Mi
-    requests:
-      cpu: 50m
-      memory: 128Mi
+    existingSecret: "ory-hydra-credentials"
   hydra-maester:
     globalAccess: true
 # Overrides for the Oathkeeper chart
 oathkeeper:
   kubectlJob:
-    image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200121-4f3202bd
+    image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
   oathkeeper:
     config:
       authenticators:
@@ -167,6 +175,10 @@ oathkeeper:
       serve:
         proxy:
           port: 4455
+          timeout:
+            read: 120s
+            write: 120s
+            idle: 120s
         api:
           port: 4456
   deployment:
@@ -188,11 +200,8 @@ oathkeeper:
         requests:
           cpu: 50m
           memory: 20Mi
-      envs:
-        - name: "mutatorsAvailable" # TODO: remove after version >v0.0.2-beta.1 is released
-          value: "noop,id_token,header,cookie,hydrator"
 
-# Persistance settings
+# Local persistance settings
 postgresql:
   resources:
     requests:
@@ -204,7 +213,9 @@ postgresql:
   master:
     podAnnotations:
       sidecar.istio.io/inject: "false"
+  existingSecret: "ory-hydra-credentials"
 
+# Remote persistance settings
 gcloud-sqlproxy:
   rbac:
     create: true

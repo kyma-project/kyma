@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
-
 	prometheus "github.com/prometheus/client_golang/api"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
@@ -15,6 +13,15 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+)
+
+const (
+	prometheusDomain     = "http://monitoring-prometheus.kyma-system"
+	prometheusPort       = "9090"
+	metricsQuery         = "max(sum(kube_pod_container_resource_requests_cpu_cores) by (instance))"
+	metricsConfigMapName = "metrics-upgrade-test"
+	metricsDataField     = "response"
+	metricsTimeField     = "collected_at"
 )
 
 // MetricsUpgradeTest compares metrics from before and after upgrade
@@ -37,7 +44,6 @@ func NewMetricsUpgradeTest(k8sCli kubernetes.Interface) (*MetricsUpgradeTest, er
 		prometheusAPI: promAPI,
 		k8sCli:        k8sCli,
 	}, nil
-
 }
 
 // CreateResources retrieves metrics and stores the value in an configmap
@@ -45,7 +51,7 @@ func (ut *MetricsUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 	ut.namespace = namespace
 	ut.log = log
 
-	time := time.Now().Add(-time.Minute)
+	time := time.Now()
 	result, err := ut.collectMetrics(time)
 	if err != nil {
 		return err
@@ -60,17 +66,6 @@ func (ut *MetricsUpgradeTest) TestResources(stop <-chan struct{}, log logrus.Fie
 	ut.log = log
 	return ut.compareMetrics()
 }
-
-const (
-	prometheusDomain     = "http://monitoring-prometheus.kyma-system"
-	prometheusNS         = "kyma-system"
-	prometheusPort       = "9090"
-	metricsName          = "kube_pod_container_resource_requests_cpu_cores"
-	metricsQuery         = "max(sum(kube_pod_container_resource_requests_cpu_cores) by (instance))"
-	metricsConfigMapName = "metrics-upgrade-test"
-	metricsDataField     = "response"
-	metricsTimeField     = "collected_at"
-)
 
 func (ut *MetricsUpgradeTest) collectMetrics(time time.Time) (model.Vector, error) {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -109,7 +104,6 @@ func (ut *MetricsUpgradeTest) storeMetrics(value model.Vector, time time.Time) e
 }
 
 func (ut *MetricsUpgradeTest) retrievePreviousMetrics() (time.Time, model.Vector, error) {
-
 	cm, err := ut.k8sCli.CoreV1().ConfigMaps(ut.namespace).Get(metricsConfigMapName, metav1.GetOptions{})
 	if err != nil {
 		return time.Time{}, nil, err
@@ -134,13 +128,21 @@ func (ut *MetricsUpgradeTest) compareMetrics() error {
 	if err != nil {
 		return err
 	}
+	if len(previous) < 1 {
+		return fmt.Errorf("previous metric is empty")
+	}
+
 	current, err := ut.collectMetrics(time)
 	if err != nil {
 		return err
 	}
+	if len(current) < 1 {
+		return fmt.Errorf("current metric is empty")
+	}
+
 	ut.log.Debugln(previous)
 	ut.log.Debugln(current)
-	if !cmp.Equal(previous, current) {
+	if float32(previous[0].Value) != float32(current[0].Value) {
 		return fmt.Errorf("retrieved data not equal: before: %+v, after: %+v", previous, current)
 	}
 	return nil

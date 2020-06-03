@@ -99,25 +99,23 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
             }
             clusterConfig: {
               gardenerConfig: {
-                kubernetesVersion: "1.15.4"
+                kubernetesVersion: "1.15.11"
                 diskType: "pd-standard"
                 volumeSizeGB: 30
-                nodeCount: 3
                 machineType: "n1-standard-4"
                 region: "europe-west4"
                 provider: "gcp"
-                seed: "gcp-eu1"
                 targetSecret: "{GARDENER_GCP_SECRET_NAME}"
                 workerCidr: "10.250.0.0/19"
                 autoScalerMin: 2
                 autoScalerMax: 4
                 maxSurge: 4
                 maxUnavailable: 1
-                providerSpecificConfig: { gcpConfig: { zone: "europe-west4-a" } }
+                providerSpecificConfig: { gcpConfig: { zones: ["europe-west4-a"] } }
               }
             }
             kymaConfig: {
-              version: "1.8.0"
+              version: "1.12.0"
               components: [
                 { component: "compass-runtime-agent", namespace: "compass-system" }
                 {
@@ -126,16 +124,17 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                   configuration: [
                     { key: "{CONFIG_PROPERTY_KEY}"
                       value: "{CONFIG_PROPERTY_VALUE}"
-                      secret: {true|false} # Specifies if the property is confidential
+                      secret: true|false # Specifies if the property is confidential
                     }
                   ]
+                  sourceURL: "{CUSTOM_COMPONENT_SOURCE_URL}"
                 }
               ]
               configuration: [
                 { 
                   key: "{CONFIG_PROPERTY_KEY}"
                   value: "{CONFIG_PROPERTY_VALUE}"
-                  secret: {true|false} # Specifies if the property is confidential
+                  secret: true|false # Specifies if the property is confidential
                 }
               ]
             }
@@ -190,25 +189,23 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
             }
             clusterConfig: {
               gardenerConfig: {
-                kubernetesVersion: "1.15.4"
+                kubernetesVersion: "1.15.11"
                 diskType: "Standard_LRS"
                 volumeSizeGB: 35
-                nodeCount: 3
                 machineType: "Standard_D2_v3"
                 region: "westeurope"
                 provider: "azure"
-                seed: "az-eu1"
                 targetSecret: "{GARDENER_AZURE_SECRET_NAME}"
                 workerCidr: "10.250.0.0/19"
                 autoScalerMin: 2
                 autoScalerMax: 4
                 maxSurge: 4
                 maxUnavailable: 1
-                providerSpecificConfig: { azureConfig: { vnetCidr: "10.250.0.0/19" } }
+                providerSpecificConfig: { azureConfig: { vnetCidr: "10.250.0.0/19", zones : ["1", "2"] } }
               }
             }
             kymaConfig: {
-              version: "1.8.0"
+              version: "1.12.0"
               components: [
                 { component: "compass-runtime-agent", namespace: "compass-system" }
                 {
@@ -217,16 +214,17 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                   configuration: [
                     { key: "{CONFIG_PROPERTY_KEY}"
                       value: "{CONFIG_PROPERTY_VALUE}"
-                      secret: {true|false} # Specifies if the property is confidential
+                      secret: true|false # Specifies if the property is confidential
                     }
                   ]
+                  sourceURL: "{CUSTOM_COMPONENT_SOURCE_URL}"
                 }
               ]
               configuration: [
                 { 
                   key: "{CONFIG_PROPERTY_KEY}"
                   value: "{CONFIG_PROPERTY_VALUE}"
-                  secret: {true|false} # Specifies if the property is confidential
+                  secret: true|false # Specifies if the property is confidential
                 }
               ]
             }
@@ -281,14 +279,12 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
             }
             clusterConfig: {
               gardenerConfig: {
-                kubernetesVersion: "1.15.4"
+                kubernetesVersion: "1.15.11"
                 diskType: "gp2"
                 volumeSizeGB: 35
-                nodeCount: 3
                 machineType: "m4.2xlarge"
                 region: "eu-west-1"
                 provider: "aws"
-                seed: "aws-eu1"
                 targetSecret: "{GARDENER_AWS_SECRET_NAME}"
                 workerCidr: "10.250.0.0/19"
                 autoScalerMin: 2
@@ -306,7 +302,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
               }
             }
             kymaConfig: {
-              version: "1.8.0"
+              version: "1.12.0"
               components: [
                 { component: "compass-runtime-agent", namespace: "compass-system" }
                 {
@@ -315,16 +311,17 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                   configuration: [
                     { key: "{CONFIG_PROPERTY_KEY}"
                       value: "{CONFIG_PROPERTY_VALUE}"
-                      secret: {true|false} # Specifies if the property is confidential
+                      secret: true|false # Specifies if the property is confidential
                     }
                   ]
+                  sourceURL: "{CUSTOM_COMPONENT_SOURCE_URL}"
                 }
               ]
               configuration: [
                 { 
                   key: "{CONFIG_PROPERTY_KEY}"
                   value: "{CONFIG_PROPERTY_VALUE}"
-                  secret: {true|false} # Specifies if the property is confidential
+                  secret: true|false # Specifies if the property is confidential
                 }
               ]
             }
@@ -355,4 +352,4 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
 
 The operation of provisioning is asynchronous. The operation of provisioning returns the Runtime Operation Status containing the Runtime ID (`provisionRuntime.runtimeID`) and the operation ID (`provisionRuntime.id`). Use the Runtime ID to [check the Runtime Status](#tutorials-check-runtime-status). Use the provisioning operation ID to [check the Runtime Operation Status](#tutorials-check-runtime-operation-status) and verify that the provisioning was successful.
 
-> **NOTE:** To see how to provide the labels, see [this](https://github.com/kyma-incubator/compass/blob/master/docs/compass/03-02-labeling.md) document. To see an example of label usage, go [here](https://github.com/kyma-incubator/compass/blob/master/components/director/examples/register-application/register-application.graphql). 
+> **NOTE:** To see how to provide the labels, see [this](#details-labels) document. To see an example of label usage, go [here](https://github.com/kyma-incubator/compass/blob/master/components/director/examples/register-application/register-application.graphql). 

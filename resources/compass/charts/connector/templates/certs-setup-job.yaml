@@ -1,3 +1,4 @@
+{{- if .Values.certsSetupJob.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -5,7 +6,13 @@ metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+  labels:
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   template:
     metadata:
@@ -22,7 +29,7 @@ spec:
         args:
           - "/appconnectivitycertssetupjob"
           - "--connectorCertificateSecret={{ .Values.global.connector.secrets.ca.namespace }}/{{ .Values.global.connector.secrets.ca.name }}"
-          - "--caCertificateSecret={{ .Values.global.connector.secrets.rootCA.namespace }}/{{ .Values.global.connector.secrets.rootCA.name }}"
+          - "--caCertificateSecret={{ .Values.global.connector.secrets.rootCA.namespace }}/{{ .Values.global.connector.secrets.rootCA.cacert }}"
           - "--caCertificate={{ .Values.global.connector.caCertificate }}"
           - "--caKey={{ .Values.global.connector.caKey }}"
           - "--generatedValidityTime={{ .Values.certsSetupJob.generatedCertificateValidity }}"
@@ -30,3 +37,4 @@ spec:
       securityContext:
 {{ toYaml . | indent 12 }}
       {{- end }}
+{{- end }}

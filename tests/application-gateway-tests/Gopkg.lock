@@ -110,6 +110,7 @@
   version = "v0.2.2"
 
 [[projects]]
+  branch = "master"
   digest = "1:168561b448b6bb9fd20733a461d18048c728c8ceac0ca0be74c65a608cd0e300"
   name = "github.com/kyma-project/kyma"
   packages = [
@@ -123,8 +124,7 @@
     "components/application-gateway/pkg/proxyconfig",
   ]
   pruneopts = "NUT"
-  revision = "856f00c4fad4a9f85fa61ab30a88bed87dea0394"
-  source = "github.com/Szymongib/kyma"
+  revision = "f0669ea95e3397e7cd14821bb76dbbe814af883b"
 
 [[projects]]
   digest = "1:2f42fa12d6911c7b7659738758631bec870b7e9b4c6be5444f963cdcfccc191f"

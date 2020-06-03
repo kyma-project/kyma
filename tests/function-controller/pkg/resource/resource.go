@@ -2,10 +2,13 @@ package resource
 
 import (
 	"context"
-	"fmt"
 	"time"
 
+	"k8s.io/apimachinery/pkg/labels"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
+
 	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,63 +24,95 @@ type Resource struct {
 	ResCli    dynamic.ResourceInterface
 	namespace string
 	kind      string
-
-	log func(format string, args ...interface{})
+	verbose   bool
+	log       shared.Logger
 }
 
-func New(dynamicCli dynamic.Interface, s schema.GroupVersionResource, namespace string, logFn func(format string, args ...interface{})) *Resource {
+func New(dynamicCli dynamic.Interface, s schema.GroupVersionResource, namespace string, log shared.Logger, verbose bool) *Resource {
 	resCli := dynamicCli.Resource(s).Namespace(namespace)
-	return &Resource{ResCli: resCli, namespace: namespace, kind: s.Resource, log: logFn}
+	return &Resource{ResCli: resCli, namespace: namespace, kind: s.Resource, log: log, verbose: verbose}
 }
 
-func (r *Resource) Create(res interface{}, callbacks ...func(...interface{})) (string, error) {
+func (r *Resource) Create(res interface{}) (string, error) {
 	var resourceVersion string
 	u, err := runtime.DefaultUnstructuredConverter.ToUnstructured(res)
 	if err != nil {
-		return resourceVersion, errors.Wrapf(err, "while converting resource %s %s to unstructured", r.kind, res)
+		return resourceVersion, errors.Wrapf(err, "while converting resource %s %+v to unstructured", r.kind, res)
 	}
 	unstructuredObj := &unstructured.Unstructured{
 		Object: u,
 	}
 	err = retry.OnTimeout(retry.DefaultBackoff, func() error {
 		var resource *unstructured.Unstructured
-		for _, callback := range callbacks {
-			callback(fmt.Sprintf("[CREATE]: %s", unstructuredObj))
-		}
+
 		resource, err = r.ResCli.Create(unstructuredObj, metav1.CreateOptions{})
 		if err != nil {
 			return err
 		}
 		resourceVersion = resource.GetResourceVersion()
 		return nil
-	}, callbacks...)
+	}, r.log)
 	if err != nil {
 		return resourceVersion, errors.Wrapf(err, "while creating resource %s", unstructuredObj.GetKind())
 	}
+
+	if r.verbose {
+		r.log.Logf("[CREATE]: name %s, namespace %s, resource %v", unstructuredObj.GetName(), unstructuredObj.GetNamespace(), unstructuredObj)
+	}
+
 	return resourceVersion, nil
 }
 
-func (r *Resource) Get(name string, callbacks ...func(...interface{})) (*unstructured.Unstructured, error) {
+func (r *Resource) List(set map[string]string) (*unstructured.UnstructuredList, error) {
+	var result *unstructured.UnstructuredList
+
+	selector := labels.SelectorFromSet(set).String()
+
+	err := retry.OnTimeout(retry.DefaultBackoff, func() error {
+		var err error
+		result, err = r.ResCli.List(metav1.ListOptions{
+			LabelSelector: selector,
+		})
+		return err
+	}, r.log)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while listing resource %s in namespace %s", r.kind, r.namespace)
+	}
+	namespace := "-"
+	if r.namespace != "" {
+		namespace = r.namespace
+	}
+
+	if r.verbose {
+		r.log.Logf("LIST %s: namespace:%s kind:%s\n%v", selector, namespace, r.kind, result)
+	}
+
+	return result, nil
+}
+
+func (r *Resource) Get(name string) (*unstructured.Unstructured, error) {
 	var result *unstructured.Unstructured
 	err := retry.OnTimeout(retry.DefaultBackoff, func() error {
 		var err error
 		result, err = r.ResCli.Get(name, metav1.GetOptions{})
 		return err
-	}, callbacks...)
+	}, r.log)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while getting resource %s '%s'", r.kind, name)
 	}
-	for _, callback := range callbacks {
-		namespace := "-"
-		if r.namespace != "" {
-			namespace = r.namespace
-		}
-		callback(fmt.Sprintf("GET %s: namespace:%s kind:%s\n%v", name, namespace, r.kind, result))
+	namespace := "-"
+	if r.namespace != "" {
+		namespace = r.namespace
 	}
+
+	if r.verbose {
+		r.log.Logf("GET name:%s: namespace:%s kind:%s\n%v", name, namespace, r.kind, result)
+	}
+
 	return result, nil
 }
 
-func (r *Resource) Delete(name string, timeout time.Duration, callbacks ...func(...interface{})) error {
+func (r *Resource) Delete(name string, timeout time.Duration) error {
 	var initialResourceVersion string
 	err := retry.OnTimeout(retry.DefaultBackoff, func() error {
 		u, err := r.ResCli.Get(name, metav1.GetOptions{})
@@ -86,7 +121,7 @@ func (r *Resource) Delete(name string, timeout time.Duration, callbacks ...func(
 		}
 		initialResourceVersion = u.GetResourceVersion()
 		return nil
-	}, callbacks...)
+	}, r.log)
 	if apierrors.IsNotFound(err) {
 		return nil
 	}
@@ -94,15 +129,17 @@ func (r *Resource) Delete(name string, timeout time.Duration, callbacks ...func(
 		return err
 	}
 	err = retry.WithIgnoreOnNotFound(retry.DefaultBackoff, func() error {
-		for _, callback := range callbacks {
-			namespace := "-"
-			if r.namespace != "" {
-				namespace = r.namespace
-			}
-			callback(fmt.Sprintf("DELETE %s: namespace:%s name:%s", r.kind, namespace, name))
+		namespace := "-"
+		if r.namespace != "" {
+			namespace = r.namespace
 		}
+
+		if r.verbose {
+			r.log.Logf("DELETE %s: namespace:%s name:%s", r.kind, namespace, name)
+		}
+
 		return r.ResCli.Delete(name, &metav1.DeleteOptions{})
-	}, callbacks...)
+	}, r.log)
 
 	if err != nil {
 		return err
@@ -126,4 +163,39 @@ func (r *Resource) Delete(name string, timeout time.Duration, callbacks ...func(
 		return err
 	}
 	return nil
+}
+
+func (r *Resource) Update(res interface{}) (*unstructured.Unstructured, error) {
+	// https://github.com/kubernetes/client-go/blob/kubernetes-1.17.4/examples/dynamic-create-update-delete-deployment/main.go#L119-L166
+
+	u, err := runtime.DefaultUnstructuredConverter.ToUnstructured(res)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while converting resource %s %s to unstructured", r.kind, res)
+	}
+
+	unstructuredObj := &unstructured.Unstructured{
+		Object: u,
+	}
+
+	var result *unstructured.Unstructured
+	err = retry.WithIgnoreOnConflict(retry.DefaultBackoff, func() error {
+		var errUpdate error
+		result, errUpdate = r.ResCli.Update(unstructuredObj, metav1.UpdateOptions{})
+		return errUpdate
+	}, r.log)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while updating resource %s '%s'", r.kind, unstructuredObj.GetName())
+	}
+
+	namespace := "-"
+	if r.namespace != "" {
+		namespace = r.namespace
+	}
+
+	r.log.Logf("UPDATE %s: namespace:%s kind:%s", result.GetName(), namespace, r.kind)
+	if r.verbose {
+		r.log.Logf("%+v", result)
+	}
+
+	return result, nil
 }

@@ -31,6 +31,7 @@ This tutorial shows how you can customize the Documentation view that is availab
      description: "Some docs about Prometheus concepts"
      sources:
        - type: markdown # This type indicates that the Asset Metadata Service must extract Front Matter metadata from the source Prometheus documents and add them to a ClusterAssetGroup as a status.
+         displayName: "Concepts"
          name: docs
          mode: package # This mode indicates that the source file is compressed and the Asset Controller must unpack it first to process it.
          url: https://github.com/prometheus/docs/archive/master.zip # The source location of Prometheus documents.
@@ -49,6 +50,7 @@ This tutorial shows how you can customize the Documentation view that is availab
      description: "Some docs about Prometheus guides"
      sources:
        - type: markdown
+         displayName: "Guides"
          name: docs
          mode: package
          url: https://github.com/prometheus/docs/archive/master.zip
@@ -165,7 +167,7 @@ This tutorial shows how you can customize the Documentation view that is availab
 
 3. Open the Console UI and navigate to the Documentation view. The new **Prometheus** section with **Concepts** and **Guides** topic groups and alphabetically ordered Markdown documents appears at the bottom of the documentation panel:
 
-   ![](./assets/prometheus.png)
+   ![Prometheus section in navigation](./assets/prometheus.png)
 
    >**NOTE:** Since the source Markdown documents are prepared for different UIs and can contain custom tags, there can be issues with rendering their full content. If you prepare your own input, use our [content guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines) to make sure the documents render properly in the Console UI.
 

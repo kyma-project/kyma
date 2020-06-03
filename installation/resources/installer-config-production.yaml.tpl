@@ -27,7 +27,7 @@ metadata:
     component: istio
     kyma-project.io/installation: ""
 data:
-  global.proxy.resources.requests.cpu: "300m"
+  global.proxy.resources.requests.cpu: "150m"
   global.proxy.resources.requests.memory: "128Mi"
   global.proxy.resources.limits.cpu: "500m"
   global.proxy.resources.limits.memory: "1024Mi"
@@ -54,3 +54,17 @@ data:
   prometheus.prometheusSpec.resources.requests.cpu: "300m"
   prometheus.prometheusSpec.resources.requests.memory: "1Gi"
   alertmanager.alertmanagerSpec.retention: "240h"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logging-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: logging
+    kyma-project.io/installation: ""
+data:
+  loki.resources.limits.memory: "512Mi"
+  fluent-bit.resources.limits.memory: "256Mi"

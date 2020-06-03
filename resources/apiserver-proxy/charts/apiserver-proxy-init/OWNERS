@@ -1,0 +1,12 @@
+approvers:
+  - Tomasz-Smelcerz-SAP
+  - strekm
+  - jakkab
+  - piotrmsc
+  - kubadz
+  - Demonsthere
+  - colunira
+
+labels:
+- area/service-mesh
+- area/security

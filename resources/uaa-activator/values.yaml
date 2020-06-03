@@ -1,10 +1,9 @@
 job:
   backoffLimit: 3
 
-# BE AWARE: Those values need to remain the same as those defined in `core/charts/cluster-users/values.yaml`
+# BE AWARE: Those values need to remain the same as those defined in `cluster-users/values.yaml`
 global:
   kymaRuntime:
-    adminGroup: runtimeAdmin
     developerGroup: runtimeDeveloper
     namespaceAdminGroup: runtimeNamespaceAdmin
 

@@ -11,7 +11,7 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 
 spec:
-    disableConcurrency: true
+    disableConcurrency: false
     template:
         metadata:
           annotations:
@@ -34,11 +34,12 @@ spec:
               - "console-backend.{{ .Values.global.ingress.domainName }}"
               - "storage.{{ .Values.global.ingress.domainName }}"
               - "ui-test-exposed-api.{{ .Values.global.ingress.domainName }}"
+              - "core-ui.{{ .Values.global.ingress.domainName }}"
           {{ end }}
           serviceAccountName: {{ .Chart.Name }}-tests
           containers:
             - name: tests
-              image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.ui_acceptance_tests.dir }}ui-tests:{{ .Values.global.ui_acceptance_tests.version }}
+              image: {{ .Values.global.containerRegistry.path }}/ui-tests:{{ .Values.global.ui_acceptance_tests.version }}
               imagePullPolicy: IfNotPresent
               resources:
                  requests:
@@ -48,8 +49,6 @@ spec:
                    memory: {{ .Values.test.acceptance.ui.limits.memory }}
                    cpu: {{ .Values.test.acceptance.ui.limits.cpu }}
               env:
-                - name: LOGGING_ENABLED
-                  value: {{ .Values.test.acceptance.ui.logging.enabled | quote }}
                 - name: DOMAIN
                   value: {{ .Values.global.ingress.domainName }}
                 - name: LOGIN
@@ -62,6 +61,14 @@ spec:
                     secretKeyRef:
                       name: admin-user
                       key: password
+                - name: DISABLE_LEGACY_CONNECTIVITY
+                  value: {{ .Values.global.disableLegacyConnectivity | quote }}
+                - name: CATALOG_ENABLED
+                  value: {{ .Values.test.acceptance.ui.service_catalog.enabled | quote }}
+                - name: LOGGING_ENABLED
+                  value: {{ .Values.test.acceptance.ui.logging.enabled | quote }}
+                - name: FUNCTIONS_ENABLED
+                  value: {{ .Values.test.acceptance.ui.functions.enabled | quote }}
               command:
                 - "/bin/sh"
               args:

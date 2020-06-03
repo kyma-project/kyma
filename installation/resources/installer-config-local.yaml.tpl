@@ -36,7 +36,6 @@ data:
   global.domainName: "kyma.local"
   global.adminPassword: ""
   global.minikubeIP: ""
-  nginx-ingress.controller.service.loadBalancerIP: ""
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -123,6 +122,18 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: core-tests
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: core
+    kyma-project.io/installation: ""
+data:
+  console.test.acceptance.enabled: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: compass-runtime-agent-tests
   namespace: kyma-installer
   labels:
@@ -131,18 +142,6 @@ metadata:
     kyma-project.io/installation: ""
 data:
   compassRuntimeAgent.tests.enabled: "false"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: core-tests
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: core
-    kyma-project.io/installation: ""
-data:
-  kubeless.tests.enabled: "false"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -161,6 +160,21 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: tracing-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: tracing
+    kyma-project.io/installation: ""
+data:
+  jaeger.spec.strategy: "allInOne"
+  jaeger.spec.storage.type: "memory"
+  jaeger.spec.storage.options.memory.max-traces: "10000"
+  jaeger.spec.resources.limits.memory: "150Mi"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: monitoring-overrides
   namespace: kyma-installer
   labels:
@@ -168,11 +182,33 @@ metadata:
     component: monitoring
     kyma-project.io/installation: ""
 data:
-  prometheus.prometheusSpec.retentionSize: "500MB"
-  prometheus.prometheusSpec.retention: "2h"
-  prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: "1Gi"
-  prometheus.prometheusSpec.resources.limits.cpu: "300m"
-  prometheus.prometheusSpec.resources.limits.memory: "250Mi"
-  prometheus.prometheusSpec.resources.requests.cpu: "200m"
-  prometheus.prometheusSpec.resources.requests.memory: "200Mi"
+  alertmanager.alertmanagerSpec.resources.limits.cpu: "50m"
+  alertmanager.alertmanagerSpec.resources.limits.memory: "100Mi"
+  alertmanager.alertmanagerSpec.resources.requests.cpu: "20m"
+  alertmanager.alertmanagerSpec.resources.requests.memory: "50Mi"
   alertmanager.alertmanagerSpec.retention: "1h"
+  prometheus.prometheusSpec.resources.limits.cpu: "150m"
+  prometheus.prometheusSpec.resources.limits.memory: "800Mi"
+  prometheus.prometheusSpec.resources.requests.cpu: "100m"
+  prometheus.prometheusSpec.resources.requests.memory: "200Mi"
+  prometheus.prometheusSpec.retention: "2h"
+  prometheus.prometheusSpec.retentionSize: "500MB"
+  prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: "1Gi"
+  grafana.persistence.enabled: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: serverless-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: serverless
+    kyma-project.io/installation: ""
+data:
+  containers.manager.envs.buildRequestsCPU.value: "100m"
+  containers.manager.envs.buildRequestsMemory.value: "200Mi"
+  containers.manager.envs.buildLimitsCPU.value: "200m"
+  containers.manager.envs.buildLimitsMemory.value: "400Mi"
+  # TODO: Solve a problem with DNS
+  tests.enabled: "false"

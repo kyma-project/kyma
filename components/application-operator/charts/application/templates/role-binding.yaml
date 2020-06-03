@@ -89,9 +89,13 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 rules:
-- apiGroups: ["*"]
-  resources: ["namespaces", "subscriptions", "triggers"]
+- apiGroups: [""]
+  resources: ["namespaces"]
   verbs: ["get", "list", "watch"]
+- apiGroups: ["eventing.knative.dev"]
+  resources: ["triggers"]
+  verbs: ["get", "list", "watch"]
+
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -109,3 +113,33 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: {{ .Release.Name }}-event-service
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .Release.Name }}-connectivity-validator
+  labels:
+    app: {{ .Release.Name }}-connectivity-validator
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+rules:
+  - apiGroups: ["applicationconnector.kyma-project.io"]
+    resources: ["applications"]
+    verbs: ["get", "list"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .Release.Name }}-connectivity-validator
+  labels:
+    app: {{ .Release.Name }}-connectivity-validator
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+subjects:
+  - kind: User
+    name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-connectivity-validator
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Name }}-connectivity-validator

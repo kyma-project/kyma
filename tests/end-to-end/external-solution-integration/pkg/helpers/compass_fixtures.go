@@ -3,9 +3,9 @@ package helpers
 import (
 	"fmt"
 
-	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
-
 	gcli "github.com/machinebox/graphql"
+
+	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
 )
 
 type CompassFixtures struct {

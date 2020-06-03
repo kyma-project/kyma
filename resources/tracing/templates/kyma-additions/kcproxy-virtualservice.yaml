@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "jaeger-operator.fullname" . }}
+  labels:
+      app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+spec:
+  hosts:
+  - jaeger.{{ .Values.global.ingress.domainName }}
+  gateways:
+  - {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}.svc.cluster.local
+  http:
+  - route:
+    - destination:
+        host: {{ template "jaeger-operator.fullname" . }}-jaeger-query-secured
+        port:
+          number: {{ .Values.jaeger.kyma.uiPort }}

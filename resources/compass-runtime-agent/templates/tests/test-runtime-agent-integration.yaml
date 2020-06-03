@@ -22,13 +22,13 @@ spec:
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.runtimeAgentTests.dir }}compass-runtime-agent-tests:{{ .Values.global.images.runtimeAgentTests.version }}
           imagePullPolicy: {{ .Values.compassRuntimeAgent.image.pullPolicy }}
           envFrom:
-          - configMapRef:
-              name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
+          - secretRef:
+              name: {{ .Values.compassRuntimeAgent.config.secret.name }}
               optional: true
           env:
             - name: DIRECTOR_URL
               value: {{ tpl .Values.compassRuntimeAgent.tests.director.url . }}
-            - name: NAMESPACE
+            - name: COMPASS_NAMESPACE
               value: {{ .Release.Namespace }}
             - name: INTEGRATION_NAMESPACE
               value: {{ .Values.compassRuntimeAgent.resources.integrationNamespace }}

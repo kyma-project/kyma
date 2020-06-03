@@ -4,9 +4,13 @@ import (
 	"context"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	cloudevents "github.com/cloudevents/sdk-go"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/example_schema"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 )
 
 // SendEvent is a step which sends an example event to the application gateway
@@ -14,6 +18,11 @@ type SendEventToMesh struct {
 	state   SendEventState
 	appName string
 	payload string
+}
+
+// SendEventState represents SendEvent dependencies
+type SendEventState interface {
+	GetEventSender() *testkit.EventSender
 }
 
 var _ step.Step = &SendEventToMesh{}
@@ -37,6 +46,7 @@ func (s *SendEventToMesh) Run() error {
 	}
 
 	_, _, err = s.state.GetEventSender().SendCloudEventToMesh(ctx, event)
+	logrus.WithField("component", "SendEventToMesh").Debugf("SendCloudEventToMesh: eventID: %v; error: %v", event.ID(), err)
 	return err
 }
 

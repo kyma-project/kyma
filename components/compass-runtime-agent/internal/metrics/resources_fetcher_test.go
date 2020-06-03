@@ -1,13 +1,14 @@
 package metrics
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubernetesFake "k8s.io/client-go/kubernetes/fake"
-	"testing"
 )
 
 func Test_FetchNodesResources(t *testing.T) {

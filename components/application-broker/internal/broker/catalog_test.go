@@ -215,7 +215,7 @@ func TestConvertServiceV2(t *testing.T) {
 	}
 }
 
-func TestFailConvertServiceV2WhenNoServicesAreMappedToPlans(t *testing.T) {
+func TestConvertServiceV2WhenNoServicesAreMappedToPlans(t *testing.T) {
 	// given
 	var (
 		converter = broker.NewConverterV2()
@@ -224,10 +224,11 @@ func TestFailConvertServiceV2WhenNoServicesAreMappedToPlans(t *testing.T) {
 	)
 
 	// when
-	_, err := converter.Convert(checker, givenApp)
+	services, err := converter.Convert(checker, givenApp)
 
 	// then
-	assert.EqualError(t, err, "None plans were mapped from Application Services. Used Checker: Service Checker for testing purpose, Services: [[{ID:api-0023-abcd-2098 Name:api-service-name DisplayName:API Based Service display name Description:API Based Service description Entries:[APIEntry{Name: api-entry-name-for-V2, TargetURL: , GateywaURL:www.gate.com, AccessLabel: access-label-1}] EventProvider:false ServiceInstanceCreateParameterSchema:map[] LongDescription:API Based Service long description ProviderDisplayName:HakunaMatata Tags:[tag1 tag2] Labels:map[connected-app:ec-prod]}]].")
+	assert.NoError(t, err)
+	assert.Empty(t, services)
 
 }
 

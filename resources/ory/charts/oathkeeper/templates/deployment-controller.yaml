@@ -16,6 +16,8 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
+  strategy:
+    {{- toYaml .Values.deployment.strategy | nindent 4 }}
   template:
     metadata:
       labels:
@@ -75,10 +77,16 @@ spec:
             httpGet:
               path: /health/alive
               port: http-api
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            failureThreshold: 10
           readinessProbe:
             httpGet:
               path: /health/ready
               port: http-api
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            failureThreshold: 10
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
       {{- with .Values.deployment.nodeSelector }}

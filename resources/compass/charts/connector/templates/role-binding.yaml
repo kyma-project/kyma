@@ -8,12 +8,15 @@ metadata:
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
 - apiGroups: ["*"]
   resources: ["secrets"]
   resourceNames: ["{{ .Values.global.connector.secrets.ca.name }}"]
   verbs: ["get"]
-
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -23,6 +26,10 @@ metadata:
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
 - kind: ServiceAccount
   name: {{ template "fullname" . }}
@@ -33,70 +40,78 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 {{ end }}
 
-
-{{ if .Values.global.connector.secrets.rootCA.name }}
+{{ if .Values.global.connector.secrets.rootCA.cacert }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ template "fullname" . }}-{{ .Values.global.connector.secrets.rootCA.name }}
+  name: {{ template "fullname" . }}-{{ .Values.global.connector.secrets.rootCA.cacert }}
   namespace: {{ .Values.global.connector.secrets.rootCA.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
 - apiGroups: ["*"]
   resources: ["secrets"]
-  resourceNames: ["{{ .Values.global.connector.secrets.rootCA.name }}"]
+  resourceNames: ["{{ .Values.global.connector.secrets.rootCA.cacert }}"]
   verbs: ["get"]
-
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ template "fullname" . }}-{{ .Values.global.connector.secrets.rootCA.name }}
+  name: {{ template "fullname" . }}-{{ .Values.global.connector.secrets.rootCA.cacert }}
   namespace: {{ .Values.global.connector.secrets.rootCA.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
 - kind: ServiceAccount
   name: {{ template "fullname" . }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role
-  name: {{ template "fullname" . }}-{{ .Values.global.connector.secrets.rootCA.name }}
+  name: {{ template "fullname" . }}-{{ .Values.global.connector.secrets.rootCA.cacert }}
   apiGroup: rbac.authorization.k8s.io
 {{ end }}
-
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ template "fullname" . }}-{{ .Values.global.connector.revocation.configmap.name }}
-  namespace: {{ .Values.global.connector.revocation.configmap.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
-    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
 - apiGroups: ["*"]
   resources: ["configmaps"]
   resourceNames: ["{{ .Values.global.connector.revocation.configmap.name }}"]
   verbs: ["get", "update"]
-
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ template "fullname" . }}-{{ .Values.global.connector.revocation.configmap.name }}
-  namespace: {{ .Values.global.connector.revocation.configmap.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
-    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
 - kind: ServiceAccount
   name: {{ template "fullname" . }}
@@ -105,5 +120,4 @@ roleRef:
   kind: Role
   name: {{ template "fullname" . }}-{{ .Values.global.connector.revocation.configmap.name }}
   apiGroup: rbac.authorization.k8s.io
-
 ---

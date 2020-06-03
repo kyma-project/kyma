@@ -7,7 +7,7 @@ By default, you install Kyma with Rafter in MinIO stand-alone mode. This tutoria
 
 >**CAUTION:** The authentication and authorization measures required to edit the assets in the public cloud storage may differ from those used in Rafter. That's why we recommend using separate subscriptions for Minio Gateway to ensure that you only have access to data created by Rafter, and to avoid compromising other public data.
 
->**CAUTION:** Cloud providers offer different payment policies for their services, such as bucket storage or network traffic. To avoid unexpected costs, verify the payment policy with the given provider before you start using Gateway mode. 
+>**CAUTION:** Cloud providers offer different payment policies for their services, such as bucket storage or network traffic. To avoid unexpected costs, verify the payment policy with the given provider before you start using Gateway mode.
 
 ## Prerequisites
 
@@ -59,7 +59,7 @@ By default, you install Kyma with Rafter in MinIO stand-alone mode. This tutoria
 
 ## Steps
 
-You can set MinIO to the given Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an access key for your cloud provider account, apply a Secret and a ConfigMap with an override to a cluster or Minikube, and trigger the Kyma installation process.
+You can set MinIO to the given Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an access key for your cloud provider account, apply a Secret and a ConfigMap with an override to a cluster or Minikube, and trigger the Kyma installation process. This tutorial shows how to switch to MinIO Gateway in the runtime, when you already have Kyma installed locally or on a cluster.
 
 >**CAUTION:** Buckets created in MinIO without using Bucket CRs are not recreated or migrated while switching to MinIO Gateway mode.
 
@@ -247,11 +247,14 @@ metadata:
     kyma-project.io/installation: ""
 data:
   controller-manager.minio.persistence.enabled: "false"
+  upload-service.minio.persistence.enabled: "false"
   controller-manager.minio.gcsgateway.enabled: "true"
   controller-manager.minio.gcsgateway.projectId: "$PROJECT"
   controller-manager.minio.DeploymentUpdate.type: RollingUpdate
   controller-manager.minio.DeploymentUpdate.maxSurge: "0"
   controller-manager.minio.DeploymentUpdate.maxUnavailable: "50%"
+  controller-manager.minio.podAnnotations.persistence: "false"
+  upload-service.minio.podAnnotations.persistence: "false"
 EOF
 ```
 
@@ -290,10 +293,13 @@ metadata:
     kyma-project.io/installation: ""
 data:
   controller-manager.minio.persistence.enabled: "false"
+  upload-service.minio.persistence.enabled: "false"
   controller-manager.minio.azuregateway.enabled: "true"
   controller-manager.minio.DeploymentUpdate.type: RollingUpdate
   controller-manager.minio.DeploymentUpdate.maxSurge: "0"
   controller-manager.minio.DeploymentUpdate.maxUnavailable: "50%"
+  controller-manager.minio.podAnnotations.persistence: "false"
+  upload-service.minio.podAnnotations.persistence: "false"
 EOF
 ```
 
@@ -338,11 +344,14 @@ metadata:
     kyma-project.io/installation: ""
 data:
   controller-manager.minio.persistence.enabled: "false"
+  upload-service.minio.persistence.enabled: "false"
   controller-manager.minio.s3gateway.enabled: "true"
   controller-manager.minio.s3gateway.serviceEndpoint: "${AWS_SERVICE_ENDPOINT}"
   controller-manager.minio.DeploymentUpdate.type: RollingUpdate
   controller-manager.minio.DeploymentUpdate.maxSurge: "0"
   controller-manager.minio.DeploymentUpdate.maxUnavailable: "50%"
+  controller-manager.minio.podAnnotations.persistence: "false"
+  upload-service.minio.podAnnotations.persistence: "false"
 EOF
 ```
 
@@ -387,18 +396,26 @@ metadata:
     kyma-project.io/installation: ""
 data:
   controller-manager.minio.persistence.enabled: "false"
+  upload-service.minio.persistence.enabled: "false"
   controller-manager.minio.ossgateway.enabled: "true"
   controller-manager.minio.ossgateway.endpointURL: "${ALIBABA_SERVICE_ENDPOINT}"
   controller-manager.minio.DeploymentUpdate.type: RollingUpdate
   controller-manager.minio.DeploymentUpdate.maxSurge: "0"
   controller-manager.minio.DeploymentUpdate.maxUnavailable: "50%"
+  controller-manager.minio.podAnnotations.persistence: "false"
+  upload-service.minio.podAnnotations.persistence: "false"
 EOF
 ```
 
   </details>
 </div>
 
->**CAUTION:** When you install Kyma locally from sources, you need to manually add the ConfigMap and the Secret to the `installer-config-local.yaml.tpl` template located under the `installation/resources` subfolder before you run the installation script.
+> **CAUTION:** If you want to activate MinIO Gateway mode before you install Kyma, you need to manually add the ConfigMap and the Secret to the `installer-config-local.yaml.tpl` template located under the `installation/resources` subfolder before you run the installation script. In this case you start from scratch, so add the ConfigMap without these lines that trigger the default buckets migration from MinIO to MinIO Gateway:
+>
+> ```bash
+> controller-manager.minio.podAnnotations.persistence: "false"
+> upload-service.minio.podAnnotations.persistence: "false"
+> ```
 
 ### Trigger installation
 

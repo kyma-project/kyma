@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"time"
 
+	"k8s.io/utils/pointer"
+
 	"github.com/avast/retry-go"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -19,10 +21,8 @@ import (
 
 	"golang.org/x/oauth2/clientcredentials"
 
-	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
-	"k8s.io/apimachinery/pkg/api/resource"
+	dex "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/fetch-dex-token"
 
-	kubelessv1beta1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	apiRulev1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	rulev1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	appv1 "k8s.io/api/apps/v1"
@@ -37,15 +37,20 @@ import (
 )
 
 var (
-	functionRes    = schema.GroupVersionResource{Version: kubelessv1beta1.SchemeGroupVersion.Version, Group: kubelessv1beta1.SchemeGroupVersion.Group, Resource: "functions"}
+	deploymentRes  = schema.GroupVersionResource{Version: "v1", Group: appv1.SchemeGroupVersion.Group, Resource: "deployments"}
+	serviceRes     = schema.GroupVersionResource{Version: "v1", Group: corev1.SchemeGroupVersion.Group, Resource: "services"}
 	hydraClientRes = schema.GroupVersionResource{Group: "hydra.ory.sh", Version: "v1alpha1", Resource: "oauth2clients"}
 	secretRes      = schema.GroupVersionResource{Group: corev1.GroupName, Version: "v1", Resource: "secrets"}
 	apiRuleRes     = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
 	secretName     = "api-gateway-upgrade-tests"
-	functionName   = "apigateway"
-	client_id      = "dummy_client"
-	client_secret  = "dummy_secret"
+	serviceName    = "httpbin-apigateway-test"
+	deploymentName = serviceName
+	containerName  = serviceName
+	httpbinImage   = "kennethreitz/httpbin:test"
+	clientID       = "dummy_client"
+	clientSecret   = "dummy_secret"
 	scope          = "read"
+	labels         = map[string]string{"app": fmt.Sprintf("%s", deploymentName)}
 )
 
 type ApiGatewayTest struct {
@@ -62,7 +67,7 @@ func NewApiGatewayTest(coreInterface kubernetes.Interface, dynamicInterface dyna
 		coreInterface: coreInterface,
 		dynInterface:  dynamicInterface,
 		domainName:    domainName,
-		hostName:      functionName + "." + domainName,
+		hostName:      fmt.Sprintf("%s.%s", serviceName, domainName),
 		idpConfig:     dexConfig,
 	}
 }
@@ -72,9 +77,14 @@ func (t ApiGatewayTest) CreateResources(stop <-chan struct{}, log logrus.FieldLo
 }
 
 func (t ApiGatewayTest) CreateResourcesError(namespace string) error {
-	_, err := t.createFunction(namespace)
+	_, err := t.createDeployment(namespace)
 	if err != nil {
-		return errors.Wrap(err, "cannot create function")
+		return errors.Wrap(err, "cannot create deployment")
+	}
+
+	_, err = t.createService(namespace)
+	if err != nil {
+		return errors.Wrap(err, "cannot create service")
 	}
 
 	_, err = t.createHydraClientSecret(namespace)
@@ -100,14 +110,15 @@ func (t ApiGatewayTest) TestResources(stop <-chan struct{}, log logrus.FieldLogg
 }
 
 func (t ApiGatewayTest) TestResourcesError(namespace string) error {
-	err := t.getFunctionPodStatus(namespace, 2*time.Minute)
+
+	err := t.getDeploymentPodStatus(namespace, 2*time.Minute)
 	if err != nil {
-		return errors.Wrap(err, "cannot get function pod status")
+		return errors.Wrap(err, "cannot get deployment pod status")
 	}
 
-	err = t.callFunctionWithoutToken()
+	err = t.callTestServiceWithoutToken()
 	if err != nil {
-		return errors.Wrap(err, "cannot call function without token")
+		return errors.Wrap(err, "cannot call deployment without token")
 	}
 
 	jwtToken, err := t.fetchDexToken()
@@ -115,9 +126,9 @@ func (t ApiGatewayTest) TestResourcesError(namespace string) error {
 		return errors.Wrap(err, "cannot fetch dex token")
 	}
 
-	err = t.callFunctionWithJWTToken(jwtToken)
+	err = t.callTestServiceWithJWTToken(jwtToken)
 	if err != nil {
-		return errors.Wrap(err, "cannot call function with JWT")
+		return errors.Wrap(err, "cannot call deployment with JWT")
 	}
 
 	oauthToken, err := t.fetchOauth2Token()
@@ -125,15 +136,15 @@ func (t ApiGatewayTest) TestResourcesError(namespace string) error {
 		return errors.Wrap(err, "cannot fetch oauth2 access token")
 	}
 
-	err = t.callFunctionWithOauth2AccessToken(oauthToken)
+	err = t.callTestServiceWithOauth2AccessToken(oauthToken)
 	if err != nil {
-		return errors.Wrap(err, "cannot call function with oauth2 access token")
+		return errors.Wrap(err, "cannot call deployment with oauth2 access token")
 	}
 
 	return nil
 }
 
-func (t ApiGatewayTest) callFunctionWithoutToken() error {
+func (t ApiGatewayTest) callTestServiceWithoutToken() error {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	err := retry.Do(func() error {
@@ -152,20 +163,20 @@ func (t ApiGatewayTest) callFunctionWithoutToken() error {
 		return errors.Errorf("unexpected response %v: %s", resp.StatusCode, string(rspBody))
 	})
 	if err != nil {
-		err = errors.Wrap(err, "cannot callFunctionWithoutToken")
+		err = errors.Wrap(err, "cannot callTestServiceWithoutToken")
 	}
 	return err
 }
 
-func (t ApiGatewayTest) callFunctionWithJWTToken(token string) error {
-	return t.callFunctionWithToken("Bearer "+token, "Authorization")
+func (t ApiGatewayTest) callTestServiceWithJWTToken(token string) error {
+	return t.callTestServiceWithToken("Bearer "+token, "Authorization")
 }
 
-func (t ApiGatewayTest) callFunctionWithOauth2AccessToken(token string) error {
-	return t.callFunctionWithToken(token, "oauth2-access-token")
+func (t ApiGatewayTest) callTestServiceWithOauth2AccessToken(token string) error {
+	return t.callTestServiceWithToken(token, "oauth2-access-token")
 }
 
-func (t ApiGatewayTest) callFunctionWithToken(token string, headerName string) error {
+func (t ApiGatewayTest) callTestServiceWithToken(token string, headerName string) error {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -232,12 +243,12 @@ func (t ApiGatewayTest) createApiRule(namespace string) (*unstructured.Unstructu
 			APIVersion: apiRulev1alpha1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: functionName,
+			Name: deploymentName,
 		},
 		Spec: apiRulev1alpha1.APIRuleSpec{
 			Gateway: &gateway,
 			Service: &apiRulev1alpha1.Service{
-				Name: &functionName,
+				Name: &serviceName,
 				Port: &servicePort,
 				Host: &t.hostName,
 			},
@@ -254,83 +265,71 @@ func (t ApiGatewayTest) createApiRule(namespace string) (*unstructured.Unstructu
 	return t.createResource(apiRule, apiRuleRes, namespace)
 }
 
-func (t ApiGatewayTest) createFunction(namespace string) (*unstructured.Unstructured, error) {
-	resources := make(map[corev1.ResourceName]resource.Quantity)
-	resources[corev1.ResourceCPU] = resource.MustParse("100m")
-	resources[corev1.ResourceMemory] = resource.MustParse("128Mi")
+func (t ApiGatewayTest) createDeployment(namespace string) (*unstructured.Unstructured, error) {
 
-	annotations := make(map[string]string)
-	annotations["function-size"] = "S"
-
-	var podContainers []corev1.Container
-	podContainer := corev1.Container{
-		Name: functionName,
-		Resources: corev1.ResourceRequirements{
-			Limits:   resources,
-			Requests: resources,
-		},
-	}
-
-	podContainers = append(podContainers, podContainer)
-
-	functionDeployment := appv1.Deployment{
+	deployment := &appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: functionName,
+			Name:   deploymentName,
+			Labels: labels,
 		},
 		Spec: appv1.DeploymentSpec{
-			Replicas: t.int32Ptr(1),
-			Template: corev1.PodTemplateSpec{
-				Spec: corev1.PodSpec{
-					Containers: podContainers,
-				},
+			Selector: &metav1.LabelSelector{
+				MatchLabels: labels,
 			},
-		},
-	}
-
-	serviceSelector := make(map[string]string)
-	serviceSelector["created-by"] = "kubeless"
-	serviceSelector["function"] = functionName
-
-	function := &kubelessv1beta1.Function{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Function",
-			APIVersion: kubelessv1beta1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        functionName,
-			Annotations: annotations,
-		},
-		Spec: kubelessv1beta1.FunctionSpec{
-			Handler: "handler.authorize",
-			Runtime: "nodejs8",
-			Function: `module.exports = {
-				authorize: function(event, context) {
-				  return(event.data)
-				}
-			  }`,
-			FunctionContentType: "text",
-			ServiceSpec: corev1.ServiceSpec{
-				Ports: []corev1.ServicePort{
-					{
-						Name:       "http-function-port",
-						Port:       8080,
-						Protocol:   corev1.ProtocolTCP,
-						TargetPort: instr.FromInt(8080),
+			Replicas: pointer.Int32Ptr(1),
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: labels,
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  containerName,
+							Image: httpbinImage,
+							Ports: []corev1.ContainerPort{
+								{
+									Name:          "http",
+									Protocol:      corev1.ProtocolTCP,
+									ContainerPort: 80,
+								},
+							},
+						},
 					},
 				},
-				Selector: serviceSelector,
 			},
-			Deployment: functionDeployment,
 		},
 	}
 
-	return t.createResource(function, functionRes, namespace)
+	return t.createResource(deployment, deploymentRes, namespace)
+}
+
+func (t ApiGatewayTest) createService(namespace string) (*unstructured.Unstructured, error) {
+
+	service := &corev1.Service{
+
+		ObjectMeta: metav1.ObjectMeta{
+			Name: serviceName,
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name:       "httpbin",
+					Port:       8080,
+					Protocol:   corev1.ProtocolTCP,
+					TargetPort: instr.FromInt(80),
+				},
+			},
+			Selector: labels,
+		},
+	}
+
+	return t.createResource(service, serviceRes, namespace)
 }
 
 func (t ApiGatewayTest) createHydraClientSecret(namespace string) (*unstructured.Unstructured, error) {
 	secretData := make(map[string]string)
-	secretData["client_id"] = client_id
-	secretData["client_secret"] = client_secret
+	secretData["client_id"] = clientID
+	secretData["client_secret"] = clientSecret
 
 	hydraClientSecret := &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
@@ -362,7 +361,7 @@ func (t ApiGatewayTest) createHydraClient(namespace string) (*unstructured.Unstr
 			APIVersion: hydrav1alpha1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: functionName,
+			Name: deploymentName,
 		},
 		Spec: hydrav1alpha1.OAuth2ClientSpec{
 			GrantTypes: []hydrav1alpha1.GrantType{"client_credentials"},
@@ -383,11 +382,11 @@ func toUnstructured(obj interface{}) (*unstructured.Unstructured, error) {
 	return &unstructured.Unstructured{Object: object}, nil
 }
 
-func (t ApiGatewayTest) getFunctionPodStatus(namespace string, waitmax time.Duration) error {
+func (t ApiGatewayTest) getDeploymentPodStatus(namespace string, waitmax time.Duration) error {
 	const retriesCount = 10
 	return retry.Do(
 		func() error {
-			pods, err := t.coreInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + functionName})
+			pods, err := t.coreInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app=" + deploymentName})
 			if err != nil {
 				return err
 			}
@@ -406,13 +405,13 @@ func (t ApiGatewayTest) getFunctionPodStatus(namespace string, waitmax time.Dura
 			if pod.Status.Phase == corev1.PodRunning {
 				return nil
 			}
-			return errors.Errorf("Function in state %v: \n%+v", pod.Status.Phase, pod)
+			return errors.Errorf("Deployment in state %v: \n%+v", pod.Status.Phase, pod)
 		},
 		retry.Attempts(retriesCount),
 		retry.DelayType(retry.FixedDelay),
 		retry.Delay(waitmax/retriesCount), //doesn't have to be very precise
 		retry.OnRetry(func(n uint, err error) {
-			log.Printf("Function Pod Status exection #%d: %s\n", n, err)
+			log.Printf("Deployment Pod Status exection #%d: %s\n", n, err)
 		}),
 	)
 }
@@ -423,8 +422,8 @@ func (t ApiGatewayTest) fetchDexToken() (string, error) {
 
 func (t ApiGatewayTest) fetchOauth2Token() (string, error) {
 	oauthConfig := clientcredentials.Config{
-		ClientID:     client_id,
-		ClientSecret: client_secret,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
 		TokenURL:     fmt.Sprintf("https://oauth2.%s/oauth2/token", t.domainName),
 		Scopes:       []string{scope},
 	}
@@ -436,5 +435,3 @@ func (t ApiGatewayTest) fetchOauth2Token() (string, error) {
 
 	return token.AccessToken, nil
 }
-
-func (t ApiGatewayTest) int32Ptr(i int32) *int32 { return &i }

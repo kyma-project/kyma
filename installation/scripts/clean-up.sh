@@ -12,7 +12,7 @@ helm del --purge core
 helm del --purge istio
 helm del --purge cluster-essentials
 helm del --purge logging
-helm del --purge jaeger
+helm del --purge tracing
 
 kubectl delete ns kyma-system
 kubectl delete ns istio-system

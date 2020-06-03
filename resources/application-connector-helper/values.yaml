@@ -1,7 +1,0 @@
-containerRegistry:
-  path: eu.gcr.io/kyma-project
-xip_patch:
-  dir:
-  version: 3b88aaaf
-labelSelector: "application-connector-lb=true"
-labelNamespace: kyma-system

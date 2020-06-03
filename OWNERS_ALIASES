@@ -18,7 +18,6 @@ aliases:
   console-reviewers:
     - parostatkiem
     - Wawrzyn321
-    - y-kkamil
     - kwiatekus
     - dariadomagala
     - akucharska
@@ -26,13 +25,11 @@ aliases:
   console-approvers:
     - parostatkiem
     - Wawrzyn321
-    - y-kkamil
     - kwiatekus
     - dariadomagala
     - akucharska
     - sjanota
   knative-eventing-kafka-approvers:
-    - Abd4llA
     - rakesh-garimella
     - lilitgh
     - k15r
@@ -42,9 +39,7 @@ aliases:
     - marcobebway
     - radufa
     - sayanh
-    - antoineco
   knative-eventing-kafka-reviewers:
-    - Abd4llA
     - rakesh-garimella
     - lilitgh
     - k15r
@@ -54,9 +49,7 @@ aliases:
     - marcobebway
     - radufa
     - sayanh
-    - antoineco
   event-bus-approvers:
-    - Abd4llA
     - rakesh-garimella
     - lilitgh
     - k15r
@@ -66,9 +59,7 @@ aliases:
     - marcobebway
     - radufa
     - sayanh
-    - antoineco
   event-bus-reviewers:
-    - Abd4llA
     - rakesh-garimella
     - lilitgh
     - k15r
@@ -78,9 +69,7 @@ aliases:
     - marcobebway
     - radufa
     - sayanh
-    - antoineco
   event-sources-approvers:
-    - Abd4llA
     - rakesh-garimella
     - lilitgh
     - k15r
@@ -90,9 +79,7 @@ aliases:
     - marcobebway
     - radufa
     - sayanh
-    - antoineco
   event-sources-reviewers:
-    - Abd4llA
     - rakesh-garimella
     - lilitgh
     - k15r
@@ -102,9 +89,7 @@ aliases:
     - marcobebway
     - radufa
     - sayanh
-    - antoineco
   serverless-approvers:
-    - Abd4llA
     - rakesh-garimella
     - lilitgh
     - k15r
@@ -114,9 +99,7 @@ aliases:
     - marcobebway
     - radufa
     - sayanh
-    - antoineco
   serverless-reviewers:
-    - Abd4llA
     - rakesh-garimella
     - lilitgh
     - k15r
@@ -126,4 +109,3 @@ aliases:
     - marcobebway
     - radufa
     - sayanh
-    - antoineco

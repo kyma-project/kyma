@@ -21,7 +21,7 @@ data:
           }
         ]
       },
-      "editable": true,
+      "editable": false,
       "gnetId": null,
       "graphTooltip": 0,
       "id": 49,
@@ -1222,6 +1222,7 @@ data:
       "schemaVersion": 18,
       "style": "dark",
       "tags": [
+        "assets",
         "kyma"
       ],
       "templating": {

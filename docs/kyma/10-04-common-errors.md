@@ -3,17 +3,6 @@ title: Common installation errors
 type: Troubleshooting
 ---
 
-## Istio-related error
-
-In some cases, the logs of the Kyma Installer may show this error, which seemingly indicates problems with Istio:
-
-```
-Step error:  Details: Helm install error: rpc error: code = Unknown desc = validation failed: [unable to recognize "": no matches for kind "DestinationRule" in version "networking.istio.io/v1alpha3", unable to recognize "": no matches for kind "DestinationRule" in version "networking.istio.io/v1alpha3", unable to recognize "": no matches for kind "attributemanifest" in version "config.istio.io/v1alpha2"
-```
-
-As Istio is the first sizeable component handled by the Kyma Installer, sometimes not all of the required CRDs are created before the Installer proceeds to the next component. This situation doesn't cause the installation to fail.
-Instead, the Istio installation step repeats and gets more time for setup. The error message is logged regardless of that.
-
 ## Job failed: DeadlineExceeded error
 
 The `Job failed: DeadlineExceeded` error indicates that a job object didn't finish in a set time leading to a time-out. Frequently this error is followed by a message that indicates the release which failed to install: `Helm install error: rpc error: code = Unknown desc = a release named core already exists`.
@@ -68,4 +57,18 @@ Tiller in older versions prepares names plurals using a set of rules, instead of
 To resolve this error, upgrade Tiller. Run:
 ```
 kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{YOUR_KYMA_VERSION}/installation/resources/tiller.yaml
+```
+
+## Maximum number of retries reached
+
+The Kyma Installer retries the failed installation of releases a set number of times (default is 5). It stops the installation when it reaches the limit and returns this message: `Max number of retries reached during step {STEP_NAME}`. Fetch the logs of the Kyma Installer to check the reason for failure. Run:
+
+```bash 
+kubectl -n kyma-installer logs -l 'name=kyma-installer'
+```
+
+After you fix the error that caused the installation to fail, run this command to restart the installation process: 
+
+```bash
+kubectl -n default label installation/kyma-installation action=install
 ```

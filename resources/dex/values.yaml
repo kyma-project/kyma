@@ -1,5 +1,7 @@
 imageRegistry: "eu.gcr.io/kyma-project/incubator/develop"
 
+replicaCount: 1
+
 containerPort: 5556
 
 oidc:
@@ -57,7 +59,14 @@ dex:
   expiry:
     signingKeys: "720h"
     idTokens: "8h"
+  logger:
+    # Log level, can be "debug", "info", "warn", "error", "fatal", "panic"
+    level: info
+    # log format, can be "text" or "json"
+    format: json
   useStaticConnector: true
+
+deploymentStrategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 
 resources:
   limits:
@@ -74,7 +83,7 @@ global:
       namespace: kyma-system
   dex_static_user_configurer:
     dir:
-    version: 3b88aaaf
+    version: PR-8619
   containerRegistry:
     path: eu.gcr.io/kyma-project
   dex_integration_tests:

@@ -1,5 +1,5 @@
 PKG = github.com/kyma-project/kyma/components/function-controller
-
+ROOT :=  $(shell pwd)
 # Image URL to use all building/pushing image targets
 APP_NAME = function-controller
 APP_PATH = components/$(APP_NAME)
@@ -23,7 +23,9 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-verify:: mod-verify 
+verify:: mod-verify
+release: build-function-runtime-image push-function-runtime-image build-function-webhook push-function-webhook build-image push-image
+
 
 resolve-local:
 	GO111MODULE=on go mod download
@@ -39,13 +41,13 @@ dep-status-local:
 	@echo "Go modules present in component - omitting."
 
 mod-verify-local:
-	GO111MODULE=on go mod verify 
+	GO111MODULE=on go mod verify
 
 # Run tests
 test-local: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
 test-local: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
 test-local: generate-local manifests
-	GO111MODULE=on go test -v -coverprofile=/tmp/artifacts/cover.out -mod vendor ./...
+	GO111MODULE=on go test -v -race -coverprofile=/tmp/artifacts/cover.out -mod vendor ./...
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
 
@@ -57,10 +59,7 @@ install: manifests
 uninstall: manifests
 	kustomize build config/crd | kubectl delete -f -
 
-removewebhook:
-	kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io -n default function-mutating-webhook-configuration
-
-undeploy: uninstall removewebhook
+undeploy: uninstall
 	kustomize build config/default | kubectl delete  -f -
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
@@ -70,7 +69,11 @@ deploy: install manifests
 # Generate manifests e.g. CRD, RBAC etc.
 .PHONY: manifests
 manifests: controller-gen-local generate-local
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=serverless webhook paths="./..." \
+		object:headerFile=hack/boilerplate.go.txt \
+		output:crd:artifacts:config=config/crd/bases \
+		output:rbac:artifacts:config=config/rbac \
+		output:webhook:artifacts:config=config/webhook
 
 # Generate code
 .PHONY: generate-local
@@ -97,9 +100,48 @@ endif
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
-	@echo "resources/function-controller"
+	@echo "resources/serverless"
 
-$(eval $(call buildpack-mount,resolve)) 
+######## function manager
+
+MANAGER_NAME = function-controller
+MANAGER_IMG_TAG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(MANAGER_NAME)
+
+.PHONY: build-image push-image
+build-image:
+	docker build -t $(MANAGER_NAME) -f $(ROOT)/deploy/manager/Dockerfile .
+
+push-image:
+	docker tag $(MANAGER_NAME) $(MANAGER_IMG_TAG):$(DOCKER_TAG)
+	docker push $(MANAGER_IMG_TAG):$(DOCKER_TAG)
+
+######## function webhook
+
+WEBHOOK_NAME = function-webhook
+WEBHOOK_IMG_NAME = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(WEBHOOK_NAME)
+
+.PHONY: build-function-webhook push-function-webhook
+build-function-webhook:
+	docker build -t $(WEBHOOK_NAME) -f $(ROOT)/deploy/webhook/Dockerfile .
+
+push-function-webhook:
+	docker tag $(WEBHOOK_NAME) $(WEBHOOK_IMG_NAME):$(DOCKER_TAG)
+	docker push $(WEBHOOK_IMG_NAME):$(DOCKER_TAG)
+
+######## function runtime image
+
+FUNCTION_RUNTIME_IMAGE_NODEJS12 = function-runtime-nodejs12
+FUNCTION_RUNTIME_NODEJS12_IMG_NAME=$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(FUNCTION_RUNTIME_IMAGE_NODEJS12)
+
+.PHONY: build-function-runtime-image push-function-runtime-image
+build-function-runtime-image:
+	docker build -t $(FUNCTION_RUNTIME_IMAGE_NODEJS12) $(ROOT)/deploy/function-runtime-image/nodejs12/
+
+push-function-runtime-image:
+	docker tag $(FUNCTION_RUNTIME_IMAGE_NODEJS12) $(FUNCTION_RUNTIME_NODEJS12_IMG_NAME):$(DOCKER_TAG)
+	docker push $(FUNCTION_RUNTIME_NODEJS12_IMG_NAME):$(DOCKER_TAG)
+
+$(eval $(call buildpack-mount,resolve))
 $(eval $(call buildpack-mount,mod-verify))
 $(eval $(call buildpack-mount,controller-gen))
 $(eval $(call buildpack-mount,generate))

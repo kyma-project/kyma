@@ -25,7 +25,7 @@ query { runtimeStatus(id: "{RUNTIME_ID}") {
         __typename ... on GCPConfig {
           bootDiskSizeGB name numberOfNodes kubernetesVersion projectName machineType zone region }
           ... on GardenerConfig { 
-          name workerCidr region diskType maxSurge nodeCount volumeSizeGB projectName machineType targetSecret 
+          name workerCidr region diskType maxSurge volumeSizeGB machineType targetSecret 
           autoScalerMin autoScalerMax provider maxUnavailable kubernetesVersion }
       }
       kymaConfig {
@@ -36,6 +36,7 @@ query { runtimeStatus(id: "{RUNTIME_ID}") {
             value
             secret
           }
+          sourceURL
         }
         configuration {
           key value secret
@@ -67,7 +68,7 @@ An example response for a successful request looks like this:
       "runtimeConfiguration": {
         "clusterConfig": {CLUSTER_CONFIG},
         "kymaConfig": {
-          "version": "1.8.0",
+          "version": "1.12.0",
           "components": [{COMPONENTS_LIST}]
         },
         "kubeconfig": {KUBECONFIG}

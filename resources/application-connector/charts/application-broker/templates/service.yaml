@@ -4,12 +4,14 @@ metadata:
   name: {{ .Chart.Name }}
   namespace: {{ .Values.global.namespace }}
   annotations:
-    "auth.istio.io/{{.Values.service.externalPort}}": NONE
+    "auth.istio.io/{{ .Values.service.externalPort }}": NONE
   labels:
     app: {{ .Chart.Name }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   type: {{ .Values.service.type }}
   selector:
@@ -20,4 +22,7 @@ spec:
       port: {{ .Values.service.externalPort }}
       targetPort: {{ .Values.service.internalPort }}
       protocol: TCP
-
+    - name: status-port
+      port: 15020
+      targetPort: 15020
+      protocol: TCP

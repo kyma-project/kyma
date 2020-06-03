@@ -1,4 +1,4 @@
-{{- if or .Values.test.external_solution.event_bus.enabled .Values.test.external_solution.event_mesh.enabled }}
+{{- if .Values.test.external_solution.event_mesh.enabled }}
 ---
 kind: ServiceAccount
 apiVersion: v1
@@ -28,6 +28,9 @@ rules:
   - apiGroups: [""]
     resources: ["namespaces"]
     verbs: ["create", "get", "delete"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["create", "get", "update", "delete"]
   - apiGroups: ["*"]
     resources: ["services", "deployments", "pods"]
     verbs: ["create", "get", "delete", "list"]
@@ -43,9 +46,6 @@ rules:
   - apiGroups: ["eventing.kyma-project.io"]
     resources: ["subscriptions"]
     verbs: ["create", "get", "update", "delete"]
-  - apiGroups: ["kubeless.io"]
-    resources: ["functions"]
-    verbs: ["create", "get", "update", "delete"]
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["serviceinstances", "servicebindings", "serviceclasses"]
     verbs: ["create", "get", "update", "delete", "list", "deletecollection"]
@@ -53,7 +53,7 @@ rules:
     resources: ["servicebindingusages"]
     verbs: ["create", "get", "update", "delete"]
   - apiGroups: ["gateway.kyma-project.io"]
-    resources: ["apis"]
+    resources: ["apirules"]
     verbs: ["create", "delete"]
   - apiGroups: ["messaging.knative.dev"]
     resources: ["subscriptions", "channels"]
@@ -64,6 +64,9 @@ rules:
   - apiGroups: ["eventing.knative.dev"]
     resources: ["brokers"]
     verbs: [ "get", "list"]
+  - apiGroups: ["serverless.kyma-project.io"]
+    resources: ["functions"]
+    verbs: [ "create", "get", "delete"]
   - apiGroups: ["sources.kyma-project.io"]
     resources: ["httpsources"]
     verbs: ["get", "list"]

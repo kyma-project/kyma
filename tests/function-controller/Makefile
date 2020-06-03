@@ -15,7 +15,7 @@ test:
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
-	@echo "resources/function-controller"
+	@echo "resources/serverless"
 
 .PHONY: release
 release: build-image push-image

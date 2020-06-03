@@ -7,10 +7,24 @@ To enable Compass in Kyma, follow the instructions for the [custom component ins
 
 ## Default Kyma installation
 
-This is a single-tenant mode which provides the complete cluster Kyma installation with all components, including Compass and Runtime Agent. In this mode, Runtime Agent is already connected to Compass and they both work in a single-tenant mode as well. Using this mode, you can register external Applications in Kyma. To enable it, follow the cluster Kyma installation and use the [`installer-cr-cluster-with-compass.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-with-compass.yaml.tpl) configuration file.
-
 ![Kyma mode1](./assets/kyma-mode1.svg)
 
+This is a single-tenant mode which provides the complete cluster Kyma installation with all components, including Compass and the Runtime Agent. In this mode, the Runtime Agent is already connected to Compass. Using this mode, you can register external Applications in Kyma. To enable it, follow the cluster Kyma installation using the [`installer-cr-cluster-with-compass.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-with-compass.yaml.tpl) configuration file. The default [legacy mode](#architecture-application-connector-components-application-operator) used in Kyma does not support integration with Compass. For that reason, before you start the installation, apply the following ConfigMap which disables components used in the legacy mode, such as the Application Registry and the Connector Service: 
+
+```yaml
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: disable-legacy-connectivity-override
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    kyma-project.io/installation: ""
+data:
+  global.disableLegacyConnectivity: "true"
+EOF
+```
 
 ## Compass as a Central Management Plane
 
@@ -49,4 +63,19 @@ data:
 
 ### Kyma Runtime
 
-This is a single-tenant mode that provides complete cluster Kyma installation with Runtime Agent. To enable this mode, follow the cluster Kyma installation and use the [`installer-cr-cluster-runtime.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-runtime.yaml.tpl) configuration file.
+This is a single-tenant mode that provides complete cluster Kyma installation with the Runtime Agent. To enable this mode, follow the cluster Kyma installation using the [`installer-cr-cluster-runtime.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-runtime.yaml.tpl) configuration file. The default [legacy mode](#architecture-application-connector-components-application-operator) used in Kyma does not support integration with Compass. For that reason, before you start the installation, apply the following ConfigMap which disables components used in the legacy mode, such as the Application Registry and the Connector Service: 
+
+```yaml
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: disable-legacy-connectivity-override
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    kyma-project.io/installation: ""
+data:
+  global.disableLegacyConnectivity: "true"
+EOF
+```

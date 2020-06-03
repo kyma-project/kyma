@@ -12,6 +12,9 @@ spec:
     - port: {{ .Values.global.gateway.port }}
       protocol: TCP
       name: http
+    - port: {{ .Values.global.istio.proxy.port }}
+      protocol: TCP
+      name: proxy-status
   selector:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}

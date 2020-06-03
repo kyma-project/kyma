@@ -4,6 +4,12 @@ dependencies:
 - name: provisioner
   condition: global.provisioning.enabled
 - name: kyma-environment-broker
-  condition: global.provisioning.enabled
+  condition: global.kyma_environment_broker.enabled
 - name: pairing-adapter
   condition: pairing-adapter.enabled
+- name: external-services-mock
+  condition: global.externalServicesMock.enabled
+- name: metris
+  condition: global.metris.enabled
+- name: prometheus-postgres-exporter
+  condition: global.metrics.enabled

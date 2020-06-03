@@ -35,6 +35,7 @@ spec:
         disableRelativeLinks: "true"
       url: https://raw.githubusercontent.com/slackapi/slack-api-specs/master/README.md
     - type: asyncapi
+      displayName: "Slack"
       name: asyncapi-slack
       mode: single
       url: https://raw.githubusercontent.com/slackapi/slack-api-specs/master/events-api/slack_events_api_async_v1.json
@@ -58,17 +59,18 @@ This table lists all possible parameters of a given resource together with their
 |----------|:-------------:|------|
 | **metadata.name** | Yes | Specifies the name of the CR. It also defines the **rafter.kyma-project.io/asset-group** label added to the Asset CR that the AssetGroup CR defines. Because of label name limitations, AssetGroup CR names can have a maximum length of 63 characters. |
 | **metadata.labels** | No | Specifies how to filter and group Asset CRs that the AssetGroup CR defines. See [this](#details-rafter-in-console) document for more details. |
-| **spec.displayname** | Yes | Specifies a human-readable name of the AssetGroup CR. |
+| **spec.displayName** | Yes | Specifies a human-readable name of the AssetGroup CR. |
 | **spec.description** | Yes | Provides more details on the purpose of the AssetGroup CR. |
 | **spec.bucketRef.name** | No | Specifies the name of the bucket that stores the assets from the AssetGroup. |
 | **spec.sources** | Yes | Defines the type of the asset and the **rafter.kyma-project.io/type** label added to the Asset CR.  |
 | **spec.sources.type** | Yes | Specifies the type of assets included in the AssetGroup CR. |
+| **spec.sources.displayName** | No | Specifies a human-readable name of the asset. |
 | **spec.sources.name** | Yes | Defines an identifier of a given asset. It must be unique if there is more than one asset of a given type in the AssetGroup CR. |
 | **spec.sources.mode** | Yes | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR format. Use `single` for one file and `package` for a set of files.  |
 | **spec.sources.parameters** | No | Specifies a set of parameters for the asset. For example, use it to define what to render, disable, or modify in the UI. Define it in a valid YAML or JSON format. |
 | **spec.sources.url** | Yes | Specifies the location of a single file or a package. |
 | **spec.sources.filter** | No | Specifies a set of assets from the package to upload. The regex used in the filter must be [RE2](https://golang.org/s/re2syntax)-compliant. |
-| **status.lastheartbeattime** | Not applicable | Provides the last time when the AssetGroup Controller processed the AssetGroup CR. |
+| **status.lastHeartbeatTime** | Not applicable | Specifies when was the last time when the AssetGroup Controller processed the AssetGroup CR. |
 | **status.message** | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure. |
 | **status.phase** | Not applicable | The AssetGroup Controller adds it to the AssetGroup CR. It describes the status of processing the AssetGroup CR by the AssetGroup Controller. It can be `Ready`, `Pending`, or `Failed`. |
 | **status.reason** | Not applicable | Provides the reason why the AssetGroup CR processing succeeded, is pending, or failed. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. |

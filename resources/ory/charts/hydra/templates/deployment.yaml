@@ -11,6 +11,8 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "hydra.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
+  strategy:
+    {{- toYaml .Values.deployment.strategy | nindent 4 }}
   template:
     metadata:
       labels:
@@ -36,7 +38,7 @@ spec:
             - name: DSN
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "hydra.fullname" . }}
+                  name: {{ include "hydra.secretName" . }}
                   key: dsn
     {{- end}}
       volumes:
@@ -76,16 +78,16 @@ spec:
             httpGet:
               path: /health/alive
               port: http-admin
-            initialDelaySeconds: 30
+            initialDelaySeconds: 45
             periodSeconds: 10
-            failureThreshold: 5
+            failureThreshold: 10
           readinessProbe:
             httpGet:
               path: /health/ready
               port: http-admin
-            initialDelaySeconds: 30
+            initialDelaySeconds: 45
             periodSeconds: 10
-            failureThreshold: 5
+            failureThreshold: 10
           env:
             {{- $issuer := include "hydra.config.urls.issuer" . -}}
             {{- if $issuer }}
@@ -95,17 +97,17 @@ spec:
             - name: DSN
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "hydra.fullname" . }}
+                  name: {{ template "hydra.secretName" . }}
                   key: dsn
             - name: SECRETS_SYSTEM
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "hydra.fullname" . }}
+                  name: {{ template "hydra.secretName" . }}
                   key: secretsSystem
             - name: SECRETS_COOKIE
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "hydra.fullname" . }}
+                  name: {{ template "hydra.secretName" . }}
                   key: secretsCookie
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}

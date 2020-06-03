@@ -18,13 +18,16 @@ func NewNamespace(name string, coreCli *corev1.CoreV1Client) *NamespaceConfigure
 	return &NamespaceConfigurer{NamePrefix: name, coreCli: coreCli}
 }
 
-func (c *NamespaceConfigurer) Create() error {
+func (c *NamespaceConfigurer) Create(additionalLabels map[string]string) error {
+	labels := map[string]string{tester.TestLabelKey: tester.TestLabelValue}
+	for key, value := range additionalLabels {
+		labels[key] = value
+	}
+
 	namespace, err := c.coreCli.Namespaces().Create(&v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: c.NamePrefix,
-			Labels: map[string]string{
-				tester.TestLabelKey: tester.TestLabelValue,
-			},
+			Labels:       labels,
 		},
 	})
 

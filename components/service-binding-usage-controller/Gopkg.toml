@@ -102,3 +102,8 @@ required = [
   name = "github.com/golang/protobuf"
   version = "v1.2.0"
 
+[[override]]
+  name = "gopkg.in/yaml.v2"
+  version = "v2.2.8"
+
+

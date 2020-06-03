@@ -4,24 +4,27 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/actionmanager"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/conditionmanager"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/consts"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/finalizer"
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/installation"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/k8s"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymainstallation"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymaoperation/steps"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/servicecatalog"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/toolkit"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/statusmanager"
 
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/steps"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymaoperation"
 
 	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
@@ -33,6 +36,8 @@ import (
 )
 
 var gitCommitHash string
+
+const STDOUT = "/dev/stdout"
 
 func main() {
 
@@ -51,6 +56,10 @@ func main() {
 	tlsCrt := flag.String("tillerTLSCrt", "/etc/certs/tls.crt", "Path to TLS cert file")
 	TLSInsecureSkipVerify := flag.Bool("tillerTLSInsecureSkipVerify", false, "Disable verification of Tiller TLS cert")
 	backoffIntervalsRaw := flag.String("backoffIntervals", "10,20,40,60,80", "Number of seconds to wait before subsequent retries")
+	overrideLogFile := flag.String("overrideLogFile", STDOUT, "Log File to Print Installation overrides. (Default: /dev/stdout)")
+	overrideLogFormat := flag.String("overrideLogFormat", "text", "Installation Override Log format (Accepted values: text or json)")
+	helmMaxHistory := flag.Int("helmMaxHistory", 10, "Max number of releases returned by Helm release history query")
+	helmTimeout := flag.Int64("helmTimeout", 3600, "Number of seconds on Helm operations")
 
 	flag.Parse()
 
@@ -64,6 +73,10 @@ func main() {
 		log.Fatalf("Unable to build kubernetes configuration. Error: %v", err)
 	}
 
+	//////////////////////////////////////////
+	//SETUP K8s DEPENDENCIES
+	//////////////////////////////////////////
+
 	kubeClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Fatalf("Unable to create kubernetes client. Error: %v", err)
@@ -74,7 +87,12 @@ func main() {
 		log.Fatalf("Unable to create internal client. Error: %v", err)
 	}
 
-	helmClient, err := kymahelm.NewClient(*helmHost, *tlsKey, *tlsCrt, *TLSInsecureSkipVerify)
+	overridesLogger, closeFn, err := setupLogrus(*overrideLogFile, getLogrusFormatter(*overrideLogFormat))
+	if err != nil {
+		log.Fatalf("Unable to create logrus Instance. Error: %v", err)
+	}
+
+	helmClient, err := kymahelm.NewClient(*helmHost, *tlsKey, *tlsCrt, *TLSInsecureSkipVerify, overridesLogger, int32(*helmMaxHistory), *helmTimeout)
 	if err != nil {
 		log.Fatalf("Unable create helm client. Error: %v", err)
 	}
@@ -92,18 +110,36 @@ func main() {
 
 	installationFinalizerManager := finalizer.NewManager(consts.InstFinalizer)
 
+	//////////////////////////////////////////
+	//SETUP BUSINESS DOMAIN MODULES
+	//////////////////////////////////////////
+
 	fsWrapper := kymasources.NewFilesystemWrapper()
 
 	kymaPackages := kymasources.NewKymaPackages(fsWrapper, kymaCommandExecutor, *kymaDir)
-	stepFactoryCreator := kymainstallation.NewStepFactoryCreator(helmClient, kymaPackages, fsWrapper, *kymaDir)
-	installationSteps := steps.New(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator, backoffIntervals)
 
-	installationController := installation.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, installationSteps, conditionManager, installationFinalizerManager, internalClient)
+	sgls := sourceGetterLegacySupport{
+		kymaPackages: kymaPackages,
+		fsWrapper:    fsWrapper,
+		kymaDir:      *kymaDir,
+	}
+
+	//TODO: Rethink the approach. steps is now package nested in kymaoperation, yet it is set up here. Maybe it should be completely managed inside kymaoperation (no uses ouside of kymaoperation)?
+	stepFactoryCreator := steps.NewStepFactoryCreator(helmClient, &sgls)
+	opExecutor := kymaoperation.NewExecutor(serviceCatalogClient, kymaStatusManager, kymaActionManager, stepFactoryCreator, backoffIntervals)
+
+	installationController := k8s.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, opExecutor, conditionManager, installationFinalizerManager, internalClient)
+
+	//////////////////////////////////////////
+	//STARTING THE THING
+	//////////////////////////////////////////
 
 	kubeInformerFactory.Start(stop)
 	internalInformerFactory.Start(stop)
 
 	installationController.Run(stop)
+
+	closeFn(stop)
 }
 
 func getClientConfig(kubeconfig string) (*rest.Config, error) {
@@ -127,4 +163,58 @@ func parseBackoffIntervals(backoffIntervals string) ([]uint, error) {
 	}
 
 	return backoffIntervalsParsed, nil
+}
+
+func setupLogrus(logFile string, formatter logrus.Formatter) (*logrus.Logger, func(ch <-chan struct{}), error) {
+	// create the logger
+	logger := logrus.New()
+	logger.SetFormatter(formatter)
+
+	//open the log file
+	file, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
+	if err != nil {
+		return nil, nil, err
+	}
+	logger.SetOutput(file)
+	if logFile == STDOUT {
+		return logger, func(ch <-chan struct{}) {}, nil
+	}
+
+	// return logger instance and function which can close the log file at recieving signal from the channel
+	return logger, func(ch <-chan struct{}) {
+		defer func() {
+			log.Println("Closing log file")
+			if err := file.Close(); err != nil {
+				log.Fatalf("Unable to close the logfile with error: %+v", err)
+			}
+		}()
+		// Wait for Channel to send stop signal
+		<-ch
+	}, nil
+}
+
+func getLogrusFormatter(format string) logrus.Formatter {
+	switch format {
+	case "json":
+		return new(logrus.JSONFormatter)
+	}
+	return new(logrus.TextFormatter)
+}
+
+//TODO: Remove ASAP. See kymasources.SourceGetterCreator
+type sourceGetterLegacySupport struct {
+	kymaPackages kymasources.KymaPackages
+	fsWrapper    kymasources.FilesystemWrapper
+	kymaDir      string
+}
+
+//SourceGetterFor is a "patch" method that allows to inject kymaURL and kymaVersion into process in order to fetch a SourceGetter
+func (sgls *sourceGetterLegacySupport) SourceGetterFor(kymaURL, kymaVersion string) steps.SourceGetter {
+
+	legacyKymaSourceConfig := kymasources.LegacyKymaSourceConfig{
+		KymaURL:     kymaURL,
+		KymaVersion: kymaVersion,
+	}
+
+	return kymasources.NewSourceGetterCreator(sgls.kymaPackages, sgls.fsWrapper, sgls.kymaDir).NewGetterFor(legacyKymaSourceConfig)
 }

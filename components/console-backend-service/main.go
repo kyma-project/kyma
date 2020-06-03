@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -41,12 +43,13 @@ type config struct {
 	AllowedOrigins       []string      `envconfig:"optional"`
 	Verbose              bool          `envconfig:"default=false"`
 	KubeconfigPath       string        `envconfig:"optional"`
-	SystemNamespaces     []string      `envconfig:"default=istio-system;knative-eventing;knative-serving;kube-public;kube-system;kyma-backup;kyma-installer;kyma-integration;kyma-system;natss;compass-system"`
+	SystemNamespaces     []string      `envconfig:"default=istio-system;knative-eventing;knative-serving;kube-public;kube-system;kyma-installer;kyma-integration;kyma-system;natss;compass-system"`
 	InformerResyncPeriod time.Duration `envconfig:"default=10m"`
 	ServerTimeout        time.Duration `envconfig:"default=10s"`
 	Burst                int           `envconfig:"default=2"`
 	Application          application.Config
 	Rafter               rafter.Config
+	Serverless           serverless.Config
 	OIDC                 authn.OIDCConfig
 	SARCacheConfig       authz.SARCacheConfig
 	FeatureToggles       experimental.FeatureToggles
@@ -61,7 +64,7 @@ func main() {
 	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath, cfg.Burst)
 	exitOnError(err, "Error while initializing REST client config")
 
-	resolvers, err := domain.New(k8sConfig, cfg.Application, cfg.Rafter, cfg.InformerResyncPeriod, cfg.FeatureToggles, cfg.SystemNamespaces)
+	resolvers, err := domain.New(k8sConfig, cfg.Application, cfg.Rafter, cfg.Serverless, cfg.InformerResyncPeriod, cfg.FeatureToggles, cfg.SystemNamespaces)
 	exitOnError(err, "Error while creating resolvers")
 
 	kubeClient, err := kubernetes.NewForConfig(k8sConfig)

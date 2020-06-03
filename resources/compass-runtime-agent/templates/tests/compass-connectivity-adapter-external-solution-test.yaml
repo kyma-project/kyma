@@ -23,7 +23,7 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-          - "counter-service-connectivity-adapter-e2e.{{ $.Values.global.ingress.domainName }}"
+          - "ctr-svc-connectivity-adapter-e2e.{{ $.Values.global.ingress.domainName }}"
           - "gateway.{{ .Values.global.ingress.domainName }}"
           - "compass-gateway.{{ .Values.global.ingress.domainName }}"
           - "dex.{{ .Values.global.ingress.domainName }}"
@@ -51,8 +51,8 @@ spec:
               sleep 4
               exit $exit_code
           envFrom:
-              - configMapRef:
-                    name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
+              - secretRef:
+                    name: {{ .Values.compassRuntimeAgent.config.secret.name }}
                     optional: true
           env:
             - name: DIRECTOR_URL

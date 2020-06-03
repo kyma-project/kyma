@@ -2171,7 +2171,10 @@ data:
       "refresh": "10s",
       "schemaVersion": 16,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "service-mesh",
+        "kyma"
+      ],
       "templating": {
         "list": [
         {
@@ -2306,7 +2309,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Istio Workload Dashboard",
+      "title": "Istio / Workload",
       "uid": "UbsSZTDik",
       "version": 1
     }

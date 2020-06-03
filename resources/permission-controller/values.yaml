@@ -1,6 +1,6 @@
 image:
   repository: eu.gcr.io/kyma-project/permission-controller
-  tag: PR-7319
+  tag: PR-7459
   pullPolicy: IfNotPresent
 
 deployment:
@@ -32,5 +32,5 @@ config:
     - kyma-installer
     - kyma-integration
     - kyma-system
-    - tekton-pipelines
     - natss
+    - compass-system

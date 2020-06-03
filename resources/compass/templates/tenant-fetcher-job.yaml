@@ -7,9 +7,16 @@ spec:
   schedule: "{{ .Values.global.tenantFetcher.schedule }}"
   failedJobsHistoryLimit: 5
   concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 60 # Fix for https://github.com/kyma-incubator/compass/issues/1155
   jobTemplate:
+    metadata:
+      labels:
+        cronjob: tenant-fetcher
     spec:
       template:
+        metadata:
+          labels:
+            cronjob: tenant-fetcher
         spec:
           containers:
           - name: fetcher
@@ -20,12 +27,12 @@ spec:
                 valueFrom:
                   secretKeyRef:
                     name: compass-postgresql
-                    key: postgresql-username
+                    key: postgresql-director-username
               - name: APP_DB_PASSWORD
                 valueFrom:
                   secretKeyRef:
                     name: compass-postgresql
-                    key: postgresql-password
+                    key: postgresql-director-password
               - name: APP_DB_HOST
                 valueFrom:
                   secretKeyRef:
@@ -40,12 +47,16 @@ spec:
                 valueFrom:
                   secretKeyRef:
                     name: compass-postgresql
-                    key: postgresql-directorDatabaseName
+                    key: postgresql-director-db-name
               - name: APP_DB_SSL
                 valueFrom:
                   secretKeyRef:
                     name: compass-postgresql
                     key: postgresql-sslMode
+              - name: APP_DB_MAX_OPEN_CONNECTIONS
+                value: "{{.Values.global.tenantFetcher.dbPool.maxOpenConnections}}"
+              - name: APP_DB_MAX_IDLE_CONNECTIONS
+                value: "{{.Values.global.tenantFetcher.dbPool.maxIdleConnections}}"
               - name: APP_ENDPOINT_TENANT_CREATED
                 value: {{ .Values.global.tenantFetcher.endpoints.tenantCreated }}
               - name: APP_ENDPOINT_TENANT_DELETED
@@ -77,6 +88,10 @@ spec:
                 value: {{ .Values.global.tenantFetcher.fieldMapping.discriminatorField }}
               - name: APP_MAPPING_VALUE_DISCRIMINATOR
                 value: {{ .Values.global.tenantFetcher.fieldMapping.discriminatorValue }}
+            {{ if and (.Values.global.metrics.enabled) (.Values.global.metrics.pushEndpoint) }}
+              - name: APP_METRICS_PUSH_ENDPOINT
+                value: {{ .Values.global.metrics.pushEndpoint}}
+            {{ end }}
             command:
               - "/bin/sh"
             args:
@@ -84,7 +99,7 @@ spec:
               - "./tenantfetcher; exit_code=$?; echo '# KILLING PILOT-AGENT #'; pkill -INT cloud_sql_proxy; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 5; exit $exit_code;"
           {{if eq .Values.global.database.embedded.enabled false}}
           - name: cloudsql-proxy
-            image: gcr.io/cloudsql-docker/gce-proxy:1.13
+            image: gcr.io/cloudsql-docker/gce-proxy:1.14
             command:
               - /bin/sh
             args:

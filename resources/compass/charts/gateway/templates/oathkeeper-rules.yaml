@@ -8,7 +8,7 @@ spec:
     url: "http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.gateway.port }}"
   match:
     methods: ["GET", "POST", "OPTIONS"]
-    url: <http|https>://{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}/director/graphql
+    url: <http|https>://{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}<(:(80|443))?>/director/graphql
   authenticators:
   - handler: oauth2_introspection
   authorizer:
@@ -30,7 +30,7 @@ spec:
     url: "http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.gateway.port }}"
   match:
     methods: ["GET", "POST", "OPTIONS"]
-    url: <http|https>://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/director/graphql
+    url: <http|https>://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}<(:(80|443))?>/director/graphql
   authenticators:
   - handler: jwt
     config:
@@ -47,6 +47,31 @@ spec:
 apiVersion: oathkeeper.ory.sh/v1alpha1
 kind: Rule
 metadata:
+  name: compass-gateway-jwt-runtime
+spec:
+  description: Configuration of oathkeeper for secure endpoint of compass gateway for runtime access
+  upstream:
+    url: "http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.gateway.port }}"
+    stripPath: "/runtime"
+  match:
+    methods: ["POST", "OPTIONS"]
+    url: <http|https>://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}<(:(80|443))?>/runtime/director/graphql
+  authenticators:
+  - handler: noop
+  authorizer:
+    handler: allow
+  mutators:
+  - handler: hydrator
+{{ toYaml .Values.global.oathkeeper.mutators.runtimeMappingService | indent 4 }}
+  - handler: hydrator
+{{ toYaml .Values.global.oathkeeper.mutators.tenantMappingService | indent 4 }}
+  - handler: id_token
+    config:
+      claims: {{ .Values.global.oathkeeper.idTokenConfig.claims | quote }}
+---
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
   name: compass-director-certs
 spec:
   description: Configuration of oathkeeper for secure endpoint of compass gateway
@@ -54,7 +79,7 @@ spec:
     url: "http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.gateway.port }}"
   match:
     methods: ["GET", "POST"]
-    url: <http|https>://{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}/director/graphql
+    url: <http|https>://{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}<(:(80|443))?>/director/graphql
   authenticators:
   - handler: noop
   authorizer:
@@ -78,7 +103,7 @@ spec:
     url: "http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.gateway.port }}"
   match:
     methods: ["GET"]
-    url: <http|https>://<{{ .Values.global.gateway.tls.secure.oauth.host }}|{{ .Values.global.gateway.tls.host }}|{{ .Values.global.gateway.mtls.host }}>.{{ .Values.global.ingress.domainName }}/director/<(examples/.*)?>
+    url: <http|https>://<{{ .Values.global.gateway.tls.secure.oauth.host }}|{{ .Values.global.gateway.tls.host }}|{{ .Values.global.gateway.mtls.host }}>.{{ .Values.global.ingress.domainName }}<(:(80|443))?>/director/<(examples/.*)?>
   authenticators:
   - handler: anonymous
   authorizer:
@@ -97,7 +122,7 @@ spec:
     url: "http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.gateway.port }}"
   match:
     methods: ["GET", "POST"]
-    url: <http|https>://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql
+    url: <http|https>://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}<(:(80|443))?>/connector/graphql
   authenticators:
   - handler: noop
   authorizer:
@@ -105,6 +130,11 @@ spec:
   mutators:
   - handler: hydrator
 {{ toYaml .Values.global.oathkeeper.mutators.tokenResolverService | indent 4 }}
+  - handler: hydrator
+{{ toYaml .Values.global.oathkeeper.mutators.tenantMappingService | indent 4 }}
+  - handler: id_token
+    config:
+      claims: {{ .Values.global.oathkeeper.idTokenConfig.claims | quote }}
 ---
 apiVersion: oathkeeper.ory.sh/v1alpha1
 kind: Rule
@@ -117,7 +147,7 @@ spec:
     url: "http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.gateway.port }}"
   match:
     methods: ["GET", "POST"]
-    url: <http|https>://{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql
+    url: <http|https>://{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}<(:(80|443))?>/connector/graphql
   authenticators:
   - handler: noop
   authorizer:
@@ -125,3 +155,8 @@ spec:
   mutators:
   - handler: hydrator
 {{ toYaml .Values.global.oathkeeper.mutators.certificateResolverService | indent 4 }}
+  - handler: hydrator
+{{ toYaml .Values.global.oathkeeper.mutators.tenantMappingService | indent 4 }}
+  - handler: id_token
+    config:
+      claims: {{ .Values.global.oathkeeper.idTokenConfig.claims | quote }}

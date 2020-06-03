@@ -7,11 +7,12 @@ package tracing
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/opentracing/opentracing-go/log"
-	"strings"
 )
 
 var _ graphql.Tracer = (tracerImpl)(0)

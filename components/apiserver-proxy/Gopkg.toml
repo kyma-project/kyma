@@ -46,27 +46,31 @@ required = [
 
 [[constraint]]
   name = "gopkg.in/yaml.v2"
-  version = "2.2.1"
+  version = "2.2.8"
+
+[[constraint]]
+  name = "github.com/prometheus/client_golang"
+  version = "v0.9.2"
 
 [[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.0"
 
 [[constraint]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.0"
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.0"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.0"
 
 [[constraint]]
   name = "k8s.io/component-base"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.0"
 
 [[constraint]]
   name = "github.com/gorilla/handlers"

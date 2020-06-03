@@ -16,7 +16,8 @@ func fixOperationID() internal.OperationID {
 
 func fixApp() *internal.Application {
 	return &internal.Application{
-		Name: fixAppName(),
+		Name:            fixAppName(),
+		CompassMetadata: fixAppID(),
 		Services: []internal.Service{
 			{
 				ID:          fixAppServiceID(),
@@ -39,6 +40,10 @@ func fixApp() *internal.Application {
 			},
 		},
 	}
+}
+
+func fixAppID() internal.CompassMetadata {
+	return internal.CompassMetadata{ApplicationID: "123"}
 }
 
 func fixEventActivation() *v1alpha1.EventActivation {
@@ -167,4 +172,8 @@ func fixDisplayName() string {
 
 func fixEventProvider() bool {
 	return true
+}
+
+func stringPtr(in string) *string {
+	return &in
 }

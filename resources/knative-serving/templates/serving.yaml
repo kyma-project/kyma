@@ -114,7 +114,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    rbac.authorization.k8s.io/aggregate-to-admin: "true"
     serving.knative.dev/release: "{{ .Values.global.version }}"
   name: knative-serving-namespaced-admin
 rules:
@@ -133,7 +132,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    rbac.authorization.k8s.io/aggregate-to-edit: "true"
     serving.knative.dev/release: "{{ .Values.global.version }}"
   name: knative-serving-namespaced-edit
 rules:
@@ -154,7 +152,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    rbac.authorization.k8s.io/aggregate-to-view: "true"
     serving.knative.dev/release: "{{ .Values.global.version }}"
   name: knative-serving-namespaced-view
 rules:
@@ -399,16 +396,6 @@ metadata:
     serving.knative.dev/release: "{{ .Values.global.version }}"
   name: webhook-certs
   namespace: knative-serving
----
-apiVersion: v1
-data:
-  "key": {{ .Values.global.ingress.tlsKey }}
-  "cert": {{ .Values.global.ingress.tlsCrt }}
-kind: Secret
-metadata:
-  name: knative-gateway-certs
-  namespace: istio-system
-type: Opaque
 ---
 apiVersion: v1
 kind: Service
@@ -981,7 +968,8 @@ data:
 
     # List of repositories for which tag to digest resolving should be skipped
     registriesSkippingTagResolving: "ko.local,dev.local"
-  queueSidecarImage: gcr.io/knative-releases/knative.dev/serving/cmd/queue:{{ .Values.global.version }}
+  queueSidecarImage: "gcr.io/knative-releases/knative.dev/serving/cmd/queue:{{ .Values.global.version }}"
+  registriesSkippingTagResolving: "registry.{{ .Values.global.ingress.domainName }}"
 kind: ConfigMap
 metadata:
   labels:
@@ -1458,7 +1446,7 @@ spec:
           value: knative.dev/serving
         - name: KUBERNETES_MIN_VERSION
           value: "{{ .Values.global.kubernetes_minimum_version }}"
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/controller:{{ .Values.global.version }}
+        image: "gcr.io/knative-releases/knative.dev/serving/cmd/controller:{{ .Values.global.version }}"
         name: controller
         ports:
         - containerPort: 9090
@@ -1538,7 +1526,7 @@ spec:
           value: knative.dev/serving
         - name: KUBERNETES_MIN_VERSION
           value: "{{ .Values.global.kubernetes_minimum_version }}"
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/networking/istio:{{ .Values.global.version }}
+        image: "gcr.io/knative-releases/knative.dev/serving/cmd/networking/istio:{{ .Values.global.version }}"
         name: networking-istio
         ports:
         - containerPort: 9090
@@ -1602,7 +1590,7 @@ spec:
           value: knative.dev/serving
         - name: KUBERNETES_MIN_VERSION
           value: "{{ .Values.global.kubernetes_minimum_version }}"
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/webhook:{{ .Values.global.version }}
+        image: "gcr.io/knative-releases/knative.dev/serving/cmd/webhook:{{ .Values.global.version }}"
         name: webhook
         ports:
         - containerPort: 9090
@@ -1617,6 +1605,3 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
       serviceAccountName: controller
-
-
----
