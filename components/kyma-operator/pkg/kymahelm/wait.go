@@ -9,6 +9,11 @@ import (
 	helmerrors "k8s.io/helm/pkg/storage/errors"
 )
 
+const (
+	defaultMaxIterations = 10
+	defaultSleepTimeSec  = 10
+)
+
 type WaitReleaseStatusFunc func(releaseName string) (*rls.GetReleaseStatusResponse, error)
 type WaitPredicateFunc func(relStatusResponse *rls.GetReleaseStatusResponse, relStatusResponseErr error) (bool, error)
 
@@ -119,8 +124,8 @@ func (hc *Client) WaitForReleaseRollback(releaseName string) (bool, error) {
 func defaultWaitConditionCfg() *waitConditionCfg {
 
 	return &waitConditionCfg{
-		sleepTimeSec:  10,
-		maxIterations: 10,
+		sleepTimeSec:  defaultSleepTimeSec,
+		maxIterations: defaultMaxIterations,
 	}
 }
 

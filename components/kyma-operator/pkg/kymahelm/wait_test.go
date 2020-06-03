@@ -10,97 +10,98 @@ import (
 
 func TestWaitForCondition(t *testing.T) {
 
+	const testReleaseName = "some"
+
+	mockReleaseStatusFn := ReleaseStatusFunc(func(releaseName string) (*rls.GetReleaseStatusResponse, error) {
+		if releaseName == testReleaseName {
+			return nil, nil
+		}
+		return nil, errors.New("Unknown revision")
+	})
+
 	Convey("Client.WaitForCondition function should", t, func() {
 
-		rsf := func(releaseName string) (*rls.GetReleaseStatusResponse, error) {
-			if releaseName == "some" {
-				return nil, nil
-			}
-			return nil, errors.New("Unknown revision")
-		}
+		commonOptions := []WaitOption{mockReleaseStatusFn, SleepTimeSecs(0), MaxIterations(5)}
 
-		Convey("return a status on first iteration", func() {
+		Convey("succeed on the first iteration in a happy path scenario", func() {
 			//given
+			count := 0
 			c := &Client{}
-			pf := func(*rls.GetReleaseStatusResponse, error) (bool, error) {
+			predicateFn := func(*rls.GetReleaseStatusResponse, error) (bool, error) {
+				count++
 				//always succeeds
 				return true, nil
 			}
 
 			//when
-			b, err := c.WaitForCondition("some", pf, ReleaseStatusFunc(rsf))
+			success, err := c.WaitForCondition(testReleaseName, predicateFn, commonOptions...)
 
 			//then
 			So(err, ShouldBeNil)
-			So(b, ShouldBeTrue)
+			So(success, ShouldBeTrue)
+			So(count, ShouldEqual, 1)
 		})
 
-		Convey("return a status on second try", func() {
-			count := 1
+		Convey("succeed on the second try (one retry)", func() {
 			//given
+			const initialCountValue = 1
+			const succeedAtCount = 2
+			count := initialCountValue
 			c := &Client{}
-			pf := func(*rls.GetReleaseStatusResponse, error) (bool, error) {
-				if count == 2 {
-					return true, nil
-				}
-				count++
-				return false, nil
-			}
+			predicateFn := succeedAtCountPredicateFn(&count, succeedAtCount)
 
 			//when
-			b, err := c.WaitForCondition("some", pf, ReleaseStatusFunc(rsf), SleepTimeSecs(0))
+			success, err := c.WaitForCondition(testReleaseName, predicateFn, commonOptions...)
 
 			//then
 			So(err, ShouldBeNil)
-			So(b, ShouldBeTrue)
-			So(count, ShouldEqual, 2)
+			So(success, ShouldBeTrue)
+			So(count, ShouldEqual, succeedAtCount)
 		})
 
-		Convey("return a status on fourth try", func() {
-			count := 1
+		Convey("succeed on the fourth try (three retries)", func() {
+
 			//given
+			const initialCountValue = 1
+			const succeedAtCount = 4
+			count := initialCountValue
 			c := &Client{}
-			pf := func(*rls.GetReleaseStatusResponse, error) (bool, error) {
-				if count == 4 {
-					return true, nil
-				}
-				count++
-				return false, nil
-			}
+			predicateFn := succeedAtCountPredicateFn(&count, succeedAtCount)
 
 			//when
-			b, err := c.WaitForCondition("some", pf, ReleaseStatusFunc(rsf), SleepTimeSecs(0))
+			success, err := c.WaitForCondition(testReleaseName, predicateFn, commonOptions...)
 
 			//then
 			So(err, ShouldBeNil)
-			So(b, ShouldBeTrue)
-			So(count, ShouldEqual, 4)
+			So(success, ShouldBeTrue)
+			So(count, ShouldEqual, succeedAtCount)
 		})
 
-		Convey("eventually give up trying", func() {
-			count := 1
+		Convey("fail after max number of iterations is reached", func() {
 			//given
+			const initialCountValue = 1
+			const expectedRetries = 5
+			count := initialCountValue
 			c := &Client{}
-			pf := func(*rls.GetReleaseStatusResponse, error) (bool, error) {
-				count++
-				return false, nil
-			}
+			predicateFn := alwaysFailPredicateFn(&count)
 
 			//when
-			b, err := c.WaitForCondition("some", pf, ReleaseStatusFunc(rsf), SleepTimeSecs(0), MaxIterations(3))
+			b, err := c.WaitForCondition(testReleaseName, predicateFn, commonOptions...)
 
 			//then
 			So(err, ShouldBeNil)
 			So(b, ShouldBeFalse)
-			So(count, ShouldEqual, 4)
+			So(count, ShouldEqual, initialCountValue+expectedRetries)
 		})
 
 		Convey("return an error as soon as predicate func returns error", func() {
-			count := 1
 			//given
+			count := 1
+			const failAtCount = 4
+
 			c := &Client{}
-			pf := func(*rls.GetReleaseStatusResponse, error) (bool, error) {
-				if count == 4 {
+			failAtCountPredicateFn := func(*rls.GetReleaseStatusResponse, error) (bool, error) {
+				if count == failAtCount {
 					return false, errors.New("Predicate error occured")
 				}
 				count++
@@ -108,20 +109,24 @@ func TestWaitForCondition(t *testing.T) {
 			}
 
 			//when
-			b, err := c.WaitForCondition("some", pf, ReleaseStatusFunc(rsf), SleepTimeSecs(0), MaxIterations(10))
+			b, err := c.WaitForCondition(testReleaseName, failAtCountPredicateFn, commonOptions...)
 
 			//then
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldContainSubstring, "Predicate error occured")
 			So(b, ShouldBeFalse)
-			So(count, ShouldEqual, 4)
+			So(count, ShouldEqual, failAtCount)
 		})
 
 		Convey("pass an error from the release status func into predicate func", func() {
-			count := 1
 			//given
+			const initialCountValue = 1
+			const expectedRetries = 4
+			count := initialCountValue
 			c := &Client{}
-			pf := func(resp *rls.GetReleaseStatusResponse, err error) (bool, error) {
+
+			failUntilErrorPredicateFn := func(resp *rls.GetReleaseStatusResponse, err error) (bool, error) {
+				count++
 				if err != nil {
 					So(err.Error(), ShouldContainSubstring, "Release status function error occured")
 					return true, nil
@@ -129,21 +134,57 @@ func TestWaitForCondition(t *testing.T) {
 				return false, nil
 			}
 
-			rsfErr := func(releaseName string) (*rls.GetReleaseStatusResponse, error) {
-				if count == 4 {
+			relStatusWithErrAtCountFn := func(releaseName string) (*rls.GetReleaseStatusResponse, error) {
+				if count == expectedRetries {
 					return nil, errors.New("Release status function error occured")
 				}
-				count++
-
 				return nil, nil
 			}
+
 			//when
-			b, err := c.WaitForCondition("some", pf, ReleaseStatusFunc(rsfErr), SleepTimeSecs(0), MaxIterations(10))
+			b, err := c.WaitForCondition(testReleaseName, failUntilErrorPredicateFn, ReleaseStatusFunc(relStatusWithErrAtCountFn), SleepTimeSecs(0), MaxIterations(10))
 
 			//then
 			So(err, ShouldBeNil)
 			So(b, ShouldBeTrue)
-			So(count, ShouldEqual, 4)
+			So(count, ShouldEqual, initialCountValue+expectedRetries)
 		})
 	})
+
+	Convey("Client.WaitForCondition function with default number of iterations should", t, func() {
+
+		Convey("fail after max number of iterations is reached", func() {
+			//given
+			const initialCountValue = 1
+			const expectedCountValue = initialCountValue + 10
+			count := initialCountValue
+			c := &Client{}
+
+			//when
+			b, err := c.WaitForCondition(testReleaseName, alwaysFailPredicateFn(&count), SleepTimeSecs(0), mockReleaseStatusFn)
+
+			//then
+			So(err, ShouldBeNil)
+			So(b, ShouldBeFalse)
+			So(count, ShouldEqual, expectedCountValue)
+		})
+
+	})
+}
+
+func alwaysFailPredicateFn(count *int) func(*rls.GetReleaseStatusResponse, error) (bool, error) {
+	return func(*rls.GetReleaseStatusResponse, error) (bool, error) {
+		(*count)++
+		return false, nil
+	}
+}
+
+func succeedAtCountPredicateFn(count *int, atValue int) func(*rls.GetReleaseStatusResponse, error) (bool, error) {
+	return func(*rls.GetReleaseStatusResponse, error) (bool, error) {
+		if (*count) == atValue {
+			return true, nil
+		}
+		(*count)++
+		return false, nil
+	}
 }
