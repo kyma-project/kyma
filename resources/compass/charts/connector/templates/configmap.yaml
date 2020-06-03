@@ -1,4 +1,4 @@
-{{ if eq .Values.global.disableLegacyConnectivity true }}
+{{ if .Values.global.disableLegacyConnectivity }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

@@ -1,5 +1,5 @@
 global:
-  disableLegacyConnectivity: &disableLegacyConnectivity true
+  disableLegacyConnectivity: true
   defaultTenant: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
   tenants:
     - name: default
