@@ -224,7 +224,7 @@ spec:
             ${HELM_3_BINARY} plugin install https://github.com/helm/helm-2to3.git
 
             echo "---> Migrate config files"
-            ${HELM_3_BINARY} 2to3 move config
+            yes | ${HELM_3_BINARY} 2to3 move config
 
             echo "---> Migrate releases"
             cat helm2-releases | xargs -I % ${HELM_3_BINARY} 2to3 convert %
