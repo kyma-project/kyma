@@ -4,10 +4,7 @@ metadata:
   name: {{ template "kiali.name" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "kiali.name" . }}
-    chart: {{ template "kiali.chart" . }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    {{- include "kiali.labels" . | nindent 4 }}
 spec:
   gateways:
   - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
