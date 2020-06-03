@@ -24,7 +24,7 @@ data:
       daemonset serverless-docker-registry-self-signed-cert \
       -n istio-system
 
-    echo "Deleted old daemonset in istio-system"
+    echo "Deleted"
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -49,7 +49,7 @@ metadata:
     helm.sh/hook-delete-policy: hook-succeeded
     helm.sh/hook-weight: "0"
 rules:
-- apiGroups: ["apps"]
+- apiGroups: ["apps", "extensions"]
   resources: ["daemonsets"]
   verbs: ["get", "list", "delete", "watch"]
 ---
