@@ -73,7 +73,7 @@ func TestPodConverter_ToGQL(t *testing.T) {
 			Status:          gqlschema.PodStatusTypeUnknown,
 			ContainerStates: []*gqlschema.ContainerState{},
 			JSON:            emptyPodJSON,
-			Labels: gqlschema.Labels{},
+			Labels:          gqlschema.Labels{},
 		}
 
 		result, err := converter.ToGQL(&v1.Pod{})
