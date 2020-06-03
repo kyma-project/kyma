@@ -31,8 +31,6 @@ endif
 verify: test check-imports check-fmt
 
 test:
-	# ls /tmp
-	# ls /tmp/artifacts
 	mkdir -p /tmp/artifacts
 	go test -coverprofile=/tmp/artifacts/cover.out ./...
 	@echo -n "Total coverage: "

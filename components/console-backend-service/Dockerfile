@@ -1,10 +1,7 @@
 FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190930-d28d219 as builder
 
 ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/components/console-backend-service
-
 ENV GO111MODULE on
-ENV CGO_ENABLED 0
-
 
 WORKDIR ${BASE_APP_DIR}
 
@@ -24,7 +21,7 @@ RUN make build
 
 # Copy built app
 RUN mkdir /app
-RUN mv ./main /app/main 
+RUN mv ./console-backend-service /app/main 
 
 COPY ./licenses/ /app/licenses
 
