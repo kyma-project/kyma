@@ -6,6 +6,10 @@ metadata:
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.deployment.replicaCount }}
   selector:
@@ -19,6 +23,10 @@ spec:
       labels:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        app.kubernetes.io/name: {{ template "name" . }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
@@ -42,7 +50,7 @@ spec:
               containerPort: {{ .Values.metrics.port }}
               protocol: TCP
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.deployment.resources | nindent 12 }}
           env:
             - name: APP_ADDRESS
               value: "0.0.0.0:{{ .Values.global.provisioner.graphql.port }}"
@@ -83,25 +91,25 @@ spec:
             - name: APP_DIRECTOR_URL
               value: "https://{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}/director/graphql"
             - name: APP_OAUTH_CREDENTIALS_SECRET_NAME
-              value: "{{ .Values.global.provisioner.secrets.integrationSystemCredentials.name }}"
+              value: {{ .Values.global.provisioner.secrets.integrationSystemCredentials.name | quote }}
             - name: APP_SKIP_DIRECTOR_CERT_VERIFICATION
-              value: "{{ or .Values.global.isLocalEnv .Values.security.skipTLSCertificateVeryfication }}"
+              value: {{ or .Values.global.isLocalEnv .Values.security.skipTLSCertificateVeryfication | quote }}
             - name: APP_PROVISIONING_TIMEOUT_INSTALLATION
-              value: "{{ .Values.installation.timeout }}"
+              value: {{ .Values.installation.timeout | quote }}
             - name: APP_PROVISIONING_TIMEOUT_UPGRADE
-              value: "{{ .Values.installation.timeout }}"
+              value: {{ .Values.installation.timeout | quote }}
             - name: APP_PROVISIONING_TIMEOUT_AGENT_CONFIGURATION
-              value: "{{ .Values.runtimeAgent.configurationTimeout }}"
+              value: {{ .Values.runtimeAgent.configurationTimeout | quote }}
             - name: APP_PROVISIONING_TIMEOUT_AGENT_CONNECTION
-              value: "{{ .Values.runtimeAgent.connectionTimeout }}"
+              value: {{ .Values.runtimeAgent.connectionTimeout | quote }}
             - name: APP_PROVISIONING_TIMEOUT_CLUSTER_CREATION
-              value: "{{ .Values.gardener.clusterCreationTimeout }}"
+              value: {{ .Values.gardener.clusterCreationTimeout | quote }}
             - name: APP_DEPROVISIONING_TIMEOUT_CLUSTER_DELETION
-              value: "{{ .Values.gardener.clusterDeletionTimeout }}"
+              value: {{ .Values.gardener.clusterDeletionTimeout | quote }}
             - name: APP_DEPROVISIONING_TIMEOUT_WAITING_FOR_CLUSTER_DELETION
-              value: "{{ .Values.gardener.waitingForClusterDeletionTimeout }}"
+              value: {{ .Values.gardener.waitingForClusterDeletionTimeout | quote }}
             - name: APP_DEPROVISIONING_TIMEOUT_CLUSTER_CLEANUP
-              value: "{{ .Values.gardener.clusterCleanupTimeout }}"
+              value: {{ .Values.gardener.clusterCleanupTimeout | quote }}
             - name: APP_GARDENER_PROJECT
               value: {{ .Values.gardener.project }}
             - name: APP_GARDENER_KUBECONFIG_PATH
@@ -119,11 +127,11 @@ spec:
             - name: APP_LATEST_DOWNLOADED_RELEASES
               value: "5"
             - name: APP_SUPPORT_ON_DEMAND_RELEASES
-              value: "{{ .Values.kymaRelease.onDemand.enabled }}"
+              value: {{ .Values.kymaRelease.onDemand.enabled | quote }}
             - name: APP_DOWNLOAD_PRE_RELEASES
-              value: "{{ .Values.kymaRelease.preReleases.enabled }}"
+              value: {{ .Values.kymaRelease.preReleases.enabled | quote }}
             - name: APP_LOG_LEVEL
-              value: "{{ .Values.logs.level }}"
+              value: {{ .Values.logs.level | quote }}
             - name: APP_ENQUEUE_IN_PROGRESS_OPERATIONS
               value: "true"
           volumeMounts:

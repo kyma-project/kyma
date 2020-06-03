@@ -42,16 +42,9 @@ deployment:
 service:
   externalapi:
     port: *externalAPIPort
-    nodePort: 32010
   internalapi:
     serviceType: ClusterIP
     port: *internalAPIPort
-
-ingress:
-  externalapi:
-    port: *externalAPIPort
-  authSecret: kyma-integration/nginx-auth-ca
-  tlsSecret: application-connector-ingress-tls-cert
 
 istio:
   rbac:

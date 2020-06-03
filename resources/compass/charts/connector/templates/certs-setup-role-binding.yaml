@@ -1,4 +1,4 @@
-{{- if (.Values.certsSetupJob.enabled) }}
+{{- if .Values.certsSetupJob.enabled }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -7,7 +7,10 @@ metadata:
   labels:
     app: {{ .Chart.Name }}-certs-setup-job
     release: {{ .Release.Name }}
-
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -16,7 +19,11 @@ metadata:
   namespace: {{ .Values.global.connector.secrets.ca.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}-certs-setup-job
-    release: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
   - apiGroups: ["*"]
     resources: ["secrets"]
@@ -29,7 +36,11 @@ metadata:
   namespace: {{ .Values.global.connector.secrets.ca.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
   - kind: ServiceAccount
     name: {{ .Chart.Name }}-certs-setup-job
@@ -46,7 +57,11 @@ metadata:
   namespace: {{ .Values.global.connector.secrets.rootCA.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}-certs-setup-job
-    release: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
   - apiGroups: ["*"]
     resources: ["secrets"]
@@ -59,7 +74,11 @@ metadata:
   namespace: {{  .Values.global.connector.secrets.rootCA.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}-certs-setup-job
-    release: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
   - kind: ServiceAccount
     name: {{ .Chart.Name }}-certs-setup-job
@@ -68,4 +87,4 @@ roleRef:
   kind: Role
   name: {{ .Chart.Name }}-certs-setup-job-connector-cert-role
   apiGroup: rbac.authorization.k8s.io
-{{- end -}}
+{{- end }}
