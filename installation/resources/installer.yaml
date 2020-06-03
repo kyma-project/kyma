@@ -203,6 +203,7 @@ spec:
         - /bin/bash
         - -c
         - |
+          set -e
           HELM_2_BINARY=$(which helm)
           HELM_3_BINARY=$(which helm3)
           SECRET_NAME="helm-secret"
@@ -219,6 +220,7 @@ spec:
 
           if [[ $(wc -l <helm2-releases) -ge 1 ]]; then
             echo "---> Get migration plugin"
+            apk add git
             ${HELM_3_BINARY} plugin install https://github.com/helm/helm-2to3.git
 
             echo "---> Migrate config files"
