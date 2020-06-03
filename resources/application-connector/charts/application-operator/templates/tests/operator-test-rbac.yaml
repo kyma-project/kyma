@@ -30,7 +30,7 @@ rules:
     verbs: ["get"]
   - apiGroups: ["*"]
     resources: ["pods"]
-    verbs: ["get", "list", "delete"]
+    verbs: ["get", "list", "create", "delete"]
   - apiGroups: ["*"]
     resources: ["pods/log"]
     verbs: ["get", "list"]
