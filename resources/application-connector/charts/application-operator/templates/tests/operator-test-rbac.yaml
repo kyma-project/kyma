@@ -74,7 +74,7 @@ rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications"]
     verbs: ["get", "list", "create", "delete"]
-  - apiGroups: ["*"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
     resources: ["clusterroles", "clusterrolebindings"]
     verbs: ["get, list"]
   - apiGroups: ["servicecatalog.k8s.io"]
