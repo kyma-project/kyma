@@ -134,7 +134,7 @@ func (hc *Client) IsReleaseDeletable(relNamespace, relName string) (bool, error)
 		func() error {
 			rel, err := status.Run(relName)
 			if err != nil {
-				if strings.Contains(err.Error(), "not found") { //todo: replace with actual h3 error if it exists
+				if strings.Contains(err.Error(), driver.ErrReleaseExists.Error()) {
 					isDeletable = false
 					return nil
 				}
