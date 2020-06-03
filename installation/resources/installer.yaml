@@ -197,26 +197,40 @@ spec:
           - mountPath: /etc/certs
             name: helm-certs
             readOnly: true
-    # - name: 2to3
-    #   image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200529-34b39bd3
-    #   command:
-    #   - /bin/bash
-    #   - -c
-    #   - |
-    #     HELM_2_BINARY=$(which helm)
-    #     HELM_3_BINARY=/Users/i319397/Downloads/darwin-amd64/helm
+      - name: 2to3
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200529-34b39bd3
+        command:
+        - /bin/bash
+        - -c
+        - |
+          HELM_2_BINARY=$(which helm)
+          HELM_3_BINARY=$(which helm3)
+          SECRET_NAME="helm-secret"
+          NAMESPACE="kyma-installer"
 
-    #     echo "---> Get migration plugin"
-    #     ${HELM_3_BINARY} plugin install https://github.com/helm/helm-2to3.git
+          echo "---> Get HELM_2 certs"
+          mkdir -p "$(helm home)"
+          kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.ca\\.crt']}" | base64 --decode > "$(helm home)/ca.pem"
+          kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.tls\\.crt']}" | base64 --decode > "$(helm home)/cert.pem"
+          kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.tls\\.key']}" | base64 --decode > "$(helm home)/key.pem"
 
-    #     echo "---> Migrate config files"
-    #     ${HELM_3_BINARY} 2to3 move config
+          echo "---> Get current releases"
+          ${HELM_2_BINARY} ls --tls --all | grep -v "NAME" | awk '{ print $1 }' > helm2-releases
 
-    #     echo "---> Get current releases"
-    #     ${HELM_2_BINARY} ls --tls --all | grep -v "NAME" | awk '{ print $1 }' > helm2-releases
+          if [[ $(wc -l <helm2-releases) -ge 1 ]]; then
+            echo "---> Get migration plugin"
+            ${HELM_3_BINARY} plugin install https://github.com/helm/helm-2to3.git
 
-    #     echo "---> Migrate releases"
-    #     cat helm2-releases | xargs -I % ${HELM_3_BINARY} 2to3 convert --delete-v2-releases %
+            echo "---> Migrate config files"
+            ${HELM_3_BINARY} 2to3 move config
+
+            echo "---> Migrate releases"
+            cat helm2-releases | xargs -I % ${HELM_3_BINARY} 2to3 convert %
+
+            echo "---> $(wc -l <helm2-releases) releases migrated"
+          else
+            echo "---> No HELM_2 releases"
+          fi
       containers:
       - name: kyma-installer-container
         image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
