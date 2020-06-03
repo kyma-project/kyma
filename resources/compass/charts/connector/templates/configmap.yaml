@@ -1,9 +1,9 @@
-{{ if .Values.global.disableLegacyConnectivity }}
+{{ if (tpl .Values.global.connector.revocation.configmap.shouldCreate .) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Values.global.connector.revocation.configmap.name }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ tpl .Values.global.connector.revocation.configmap.namespace . }}
   labels:
     app: {{ template "name" . }}
     release: {{ .Release.Name }}
