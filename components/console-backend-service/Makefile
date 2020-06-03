@@ -11,7 +11,8 @@ IMG_NAME := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
 # FILES_TO_CHECK is a command used to determine which files should be verified
 FILES_TO_CHECK = find . -type f -name "*.go" | grep -v "$(VERIFY_IGNORE)"
-
+# DIRS_TO_CHECK is a command used to determine which directories should be verified
+DIRS_TO_CHECK = go list ./... | grep -v "$(VERIFY_IGNORE)"
 
 
 release: build-image push-image
@@ -29,9 +30,9 @@ else
 	mkdir -p licenses
 endif
 
-format: check-imports check-fmt
+format: imports fmt
 
-verify: test format
+verify: test check-imports check-fmt
 
 test:
 	mkdir -p /tmp/artifacts
@@ -52,6 +53,12 @@ check-fmt:
 		echo "✗ some files contain not propery formatted imports. To repair run make imports-local"; \
 		exit 1; \
 	fi;
+
+imports:
+	goimports -w -l $$($(FILES_TO_CHECK))
+
+fmt:
+	go fmt $$($(DIRS_TO_CHECK))
 
 build:
 	env CGO_ENABLED=0 go build -o $(APP_NAME) ./$(ENTRYPOINT)
