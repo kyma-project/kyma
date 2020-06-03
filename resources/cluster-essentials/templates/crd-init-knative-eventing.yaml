@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-crd-knative-eventing
+  annotations:
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
+data:
+  apiserversources.sources.knative.dev: |-
+{{.Files.Get "files/crd-apiserversources.sources.knative.dev.yaml" | printf "%s" | indent 4}}
+  brokers.eventing.knative.dev: |-
+{{.Files.Get "files/crd-brokers.eventing.knative.dev.yaml" | printf "%s" | indent 4}}
+  channels.messaging.knative.dev: |-
+{{.Files.Get "files/crd-channels.messaging.knative.dev.yaml" | printf "%s" | indent 4}}
+  eventtypes.eventing.knative.dev: |-
+{{.Files.Get "files/crd-eventtypes.eventing.knative.dev.yaml" | printf "%s" | indent 4}}
+  parallels.flows.knative.dev: |-
+{{.Files.Get "files/crd-parallels.flows.knative.dev.yaml" | printf "%s" | indent 4}}
+  sequences.flows.knative.dev: |-
+{{.Files.Get "files/crd-sequences.flows.knative.dev.yaml" | printf "%s" | indent 4}}
+  apiserversources.sources.eventing.knative.dev: |-
+{{.Files.Get "files/crd-apiserversources.sources.eventing.knative.dev.yaml" | printf "%s" | indent 4}}
+  containersources.sources.eventing.knative.dev: |-
+{{.Files.Get "files/crd-containersources.sources.eventing.knative.dev.yaml" | printf "%s" | indent 4}}
+  cronjobsources.sources.eventing.knative.dev: |-
+{{.Files.Get "files/crd-cronjobsources.sources.eventing.knative.dev.yaml" | printf "%s" | indent 4}}
+  sinkbindings.sources.eventing.knative.dev: |-
+{{.Files.Get "files/crd-sinkbindings.sources.eventing.knative.dev.yaml" | printf "%s" | indent 4}}
+  parallels.messaging.knative.dev: |-
+{{.Files.Get "files/crd-parallels.messaging.knative.dev.yaml" | printf "%s" | indent 4}}
+  sequences.messaging.knative.dev: |-
+{{.Files.Get "files/crd-sequences.messaging.knative.dev.yaml" | printf "%s" | indent 4}}
+  sinkbindings.sources.knative.dev: |-
+{{.Files.Get "files/crd-sinkbindings.sources.knative.dev.yaml" | printf "%s" | indent 4}}
+  subscriptions.messaging.knative.dev: |-
+{{.Files.Get "files/crd-subscriptions.messaging.knative.dev.yaml" | printf "%s" | indent 4}}
+  triggers.eventing.knative.dev: |-
+{{.Files.Get "files/crd-triggers.eventing.knative.dev.yaml" | printf "%s" | indent 4}}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-init-knative-eventing
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded"
+    helm.sh/hook: "pre-upgrade, pre-install"
+    helm.sh/hook-weight: "10"
+  labels:
+    job: {{ .Release.Name }}-init-knative-eventing
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: {{ .Release.Name }}-init-knative-eventing
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        job: {{ .Release.Name }}-init-knative-eventing
+    spec:
+      serviceAccountName: {{ .Release.Name }}-crd-init
+      restartPolicy: Never
+      containers:
+      - name: job
+        image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+        terminationMessagePolicy: "FallbackToLogsOnError"
+        volumeMounts:
+        - name: crd-knative-eventing
+          mountPath: /etc/crd
+          readOnly: true
+        command:
+        - /bin/bash
+        - -c
+        - |-
+          set -e
+
+          crds=( apiserversources.sources.knative.dev \
+            brokers.eventing.knative.dev \
+            channels.messaging.knative.dev \
+            eventtypes.eventing.knative.dev \
+            parallels.flows.knative.dev \
+            sequences.flows.knative.dev \
+            apiserversources.sources.eventing.knative.dev \
+            containersources.sources.eventing.knative.dev \
+            cronjobsources.sources.eventing.knative.dev \
+            sinkbindings.sources.eventing.knative.dev \
+            parallels.messaging.knative.dev \
+            parallels.messaging.knative.dev \
+            sequences.messaging.knative.dev \
+            sinkbindings.sources.knative.dev \
+            subscriptions.messaging.knative.dev \
+            triggers.eventing.knative.dev )
+
+          for crd in "${crds[@]}"; do
+            timeout 60s bash -c "until kubectl apply -f /etc/crd/$crd; do sleep 2; done"
+          done
+      volumes:
+      - name: crd-knative-eventing
+        configMap:
+          name: {{ .Release.Name }}-crd-knative-eventing
