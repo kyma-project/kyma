@@ -4,7 +4,7 @@ type: Tutorials
 ---
 
 By default, Dex in Kyma stores private and public keys used to sign and validate JWT tokens on a cluster using custom resources. If, for some reason, the private keys leak, you must invalidate the private-public key pair to prevent the attacker from issuing tokens and validating the existing ones.
-It is critical to do so, because otherwise the attackers can use private JWT tokens to call third party services which have Dex JWT authentication enabled. 
+It is critical to do so, because otherwise the attackers can use a private key to issue a new JWT token to call third party services which have Dex JWT authentication enabled. 
 Follow this tutorial to learn how to invalidate the signing keys.
 
 ## Prerequisites
