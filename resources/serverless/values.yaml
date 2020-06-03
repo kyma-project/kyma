@@ -4,11 +4,17 @@
 
 fullnameOverride: "serverless"
 
+bindingsMigration:
+  image:
+    repository: 'eu.gcr.io/kyma-project/test-infra/alpine-kubectl'
+    tag: 'v20200507-070ff576'
+    pullPolicy: IfNotPresent
+
 tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-8312"
+    tag: "PR-8513"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -33,6 +39,14 @@ global:
     app.kubernetes.io/managed-by: "{{ .Release.Service }}"
     app.kubernetes.io/version: "{{ .Values.images.manager.tag }}"
     helm.sh/chart: "{{ include \"chart\" . }}"
+  commonMatchLabels:
+    app: "{{ template \"name\" . }}"
+    version: "21757b11"
+    app.kubernetes.io/name: "{{ template \"name\" . }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+    app.kubernetes.io/version: "21757b11"
+    helm.sh/chart: "{{ include \"chart\" . }}"
   dockerServicePort: 5000
   ingress:
     domainName:
@@ -40,7 +54,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "e56a613c"
+    tag: "01eacd39"
     pullPolicy: IfNotPresent
   kubeRbacProxy:
     repository: "gcr.io/kubebuilder/kube-rbac-proxy"
@@ -48,7 +62,7 @@ images:
     pullPolicy: IfNotPresent
   functionRuntimeNodejs12:
     repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-    tag: "a62f4a7f"  
+    tag: "a62f4a7f"
 
 deployment:
   replicas: 1
@@ -100,10 +114,12 @@ containers:
         value: 5m
       functionRequeueDuration:
         value: 5m
+      functionBuildExecutorArgs:
+        value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildExecutorImage:
-        value: gcr.io/kaniko-project/executor:v0.17.1
+        value: gcr.io/kaniko-project/executor:v0.22.0
       functionBuildCredsInitImage:
-        value: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.10.1
+        value: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.12.1
       functionDockerAddress:
         # TODO: I don't know why {{ .Values.global.dockerServicePort }} doesn't work. It is rendered as {{\n  .Values.global.dockerServicePort }}
         # value: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}"
@@ -194,6 +210,9 @@ clusterMicroFrontend:
 grafanaDashboard:
   enabled: true
 
+usageKind:
+  name: serverless-function
+
 docker-registry:
   enabled: true
   fullnameOverride: "serverless-docker-registry"
@@ -214,3 +233,7 @@ docker-registry:
             path: password.txt
     - name: htpasswd-data
       emptyDir: {}
+
+webhook:
+  enabled: true
+  fullnameOverride: "serverless-webhook"

@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/sirupsen/logrus"
 
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/release"
 	rls "k8s.io/helm/pkg/proto/hapi/services"
+	"k8s.io/helm/pkg/storage/errors"
 	"k8s.io/helm/pkg/tlsutil"
 )
 
@@ -18,22 +21,27 @@ import (
 type ClientInterface interface {
 	ListReleases() (*rls.ListReleasesResponse, error)
 	ReleaseStatus(rname string) (string, error)
+	IsReleaseDeletable(rname string) (bool, error)
+	ReleaseDeployedRevision(rname string) (int32, error)
 	InstallReleaseFromChart(chartdir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error)
 	InstallRelease(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error)
 	InstallReleaseWithoutWait(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error)
 	UpgradeRelease(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error)
 	DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error)
 	PrintRelease(release *release.Release)
+	RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error)
 }
 
 // Client .
 type Client struct {
 	helm            *helm.Client
 	overridesLogger *logrus.Logger
+	maxHistory      int32
+	timeout         int64
 }
 
 // NewClient .
-func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify bool, overridesLogger *logrus.Logger) (*Client, error) {
+func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify bool, overridesLogger *logrus.Logger, maxHistory int32, timeout int64) (*Client, error) {
 	tlsopts := tlsutil.Options{
 		KeyFile:            TLSKey,
 		CertFile:           TLSCert,
@@ -43,6 +51,8 @@ func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify
 	return &Client{
 		helm:            helm.NewClient(helm.Host(host), helm.WithTLS(tlscfg), helm.ConnectTimeout(30)),
 		overridesLogger: overridesLogger,
+		maxHistory:      maxHistory,
+		timeout:         timeout,
 	}, err
 }
 
@@ -71,6 +81,52 @@ func (hc *Client) ReleaseStatus(rname string) (string, error) {
 	return strings.Replace(statusStr, `\n`, "\n", -1), nil
 }
 
+//IsReleaseDeletable returns true for release that can be deleted
+func (hc *Client) IsReleaseDeletable(rname string) (bool, error) {
+	isDeletable := false
+	maxAttempts := 3
+	fixedDelay := 3
+
+	err := retry.Do(
+		func() error {
+			statusRes, err := hc.helm.ReleaseStatus(rname)
+			if err != nil {
+				if strings.Contains(err.Error(), errors.ErrReleaseNotFound(rname).Error()) {
+					isDeletable = false
+					return nil
+				}
+				return err
+			}
+			isDeletable = statusRes.Info.Status.Code != release.Status_DEPLOYED
+			return nil
+		},
+		retry.Attempts(uint(maxAttempts)),
+		retry.DelayType(func(attempt uint, config *retry.Config) time.Duration {
+			log.Printf("Retry number %d on getting release status.\n", attempt+1)
+			return time.Duration(fixedDelay) * time.Second
+		}),
+	)
+
+	return isDeletable, err
+}
+
+func (hc *Client) ReleaseDeployedRevision(rname string) (int32, error) {
+	var deployedRevision int32 = 0
+
+	releaseHistoryRes, err := hc.helm.ReleaseHistory(rname, helm.WithMaxHistory(int32(hc.maxHistory)))
+	if err != nil {
+		return deployedRevision, err
+	}
+
+	for _, rel := range releaseHistoryRes.Releases {
+		if rel.Info.Status.Code == release.Status_DEPLOYED {
+			deployedRevision = rel.Version
+		}
+	}
+
+	return deployedRevision, nil
+}
+
 // InstallReleaseFromChart .
 func (hc *Client) InstallReleaseFromChart(chartdir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error) {
 	chart, err := chartutil.Load(chartdir)
@@ -87,7 +143,7 @@ func (hc *Client) InstallReleaseFromChart(chartdir, ns, releaseName, overrides s
 		helm.ReleaseName(string(releaseName)),
 		helm.ValueOverrides([]byte(overrides)),
 		helm.InstallWait(true),
-		helm.InstallTimeout(3600),
+		helm.InstallTimeout(hc.timeout),
 	)
 }
 
@@ -101,7 +157,7 @@ func (hc *Client) InstallRelease(chartdir, ns, releasename, overrides string) (*
 		helm.ReleaseName(releasename),
 		helm.ValueOverrides([]byte(overrides)),
 		helm.InstallWait(true),
-		helm.InstallTimeout(3600),
+		helm.InstallTimeout(hc.timeout),
 	)
 }
 
@@ -115,7 +171,7 @@ func (hc *Client) InstallReleaseWithoutWait(chartdir, ns, releasename, overrides
 		helm.ReleaseName(releasename),
 		helm.ValueOverrides([]byte(overrides)),
 		helm.InstallWait(false),
-		helm.InstallTimeout(3600),
+		helm.InstallTimeout(hc.timeout),
 	)
 }
 
@@ -128,9 +184,21 @@ func (hc *Client) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.
 		chartDir,
 		helm.UpdateValueOverrides([]byte(overrides)),
 		helm.ReuseValues(false),
-		helm.UpgradeTimeout(3600),
+		helm.UpgradeTimeout(hc.timeout),
 		helm.UpgradeWait(true),
+		helm.UpgradeCleanupOnFail(true),
 	)
+}
+
+//RollbackRelease performs rollback to given revision
+func (hc *Client) RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error) {
+	return hc.helm.RollbackRelease(
+		releaseName,
+		helm.RollbackWait(true),
+		helm.RollbackVersion(revision),
+		helm.RollbackCleanupOnFail(true),
+		helm.RollbackRecreate(true),
+		helm.RollbackTimeout(hc.timeout))
 }
 
 // DeleteRelease .
@@ -138,7 +206,7 @@ func (hc *Client) DeleteRelease(releaseName string) (*rls.UninstallReleaseRespon
 	return hc.helm.DeleteRelease(
 		releaseName,
 		helm.DeletePurge(true),
-		helm.DeleteTimeout(3600),
+		helm.DeleteTimeout(hc.timeout),
 	)
 }
 

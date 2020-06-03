@@ -155,6 +155,10 @@ spec:
                 - name
                 type: object
               type: array
+            labels:
+              additionalProperties:
+                type: string
+              type: object
             maxReplicas:
               format: int32
               minimum: 0

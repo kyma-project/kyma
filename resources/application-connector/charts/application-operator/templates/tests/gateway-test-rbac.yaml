@@ -6,11 +6,11 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}-gateway-tests
-    app.kubernetes.io/name: {{ .Chart.Name }}-gateway-tests
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}-gateway-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
@@ -18,10 +18,11 @@ metadata:
   name: {{ .Chart.Name }}-gateway-tests
   labels:
     app: {{ .Chart.Name }}-gateway-tests
-    app.kubernetes.io/name: {{ .Chart.Name }}-gateway-tests
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}-gateway-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 rules:
   - apiGroups: ["*"]
     resources: ["namespaces"]
@@ -39,10 +40,11 @@ metadata:
   name: {{ .Chart.Name }}-gateway-tests
   labels:
     app: {{ .Chart.Name }}-gateway-tests
-    app.kubernetes.io/name: {{ .Chart.Name }}-gateway-tests
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}-gateway-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 subjects:
   - kind: ServiceAccount
     namespace: {{ .Release.Namespace }}

@@ -13,7 +13,7 @@ import (
 	"github.com/imdario/mergo"
 	"github.com/kyma-project/kyma/components/application-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/application-broker/platform/logger"
-	"github.com/mcuadros/go-defaults"
+	defaults "github.com/mcuadros/go-defaults"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
 )

@@ -11,7 +11,6 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	watchtools "k8s.io/client-go/tools/watch"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
@@ -19,7 +18,6 @@ import (
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 )
 
@@ -32,15 +30,9 @@ type Trigger struct {
 	verbose     bool
 }
 
-type ResourceVersion string
-
 func New(name string, c shared.Container) *Trigger {
 	return &Trigger{
-		resCli: resource.New(c.DynamicCli, schema.GroupVersionResource{
-			Version:  eventingv1alpha1.SchemeGroupVersion.Version,
-			Group:    eventingv1alpha1.SchemeGroupVersion.Group,
-			Resource: "triggers",
-		}, c.Namespace, c.Log, c.Verbose),
+		resCli:      resource.New(c.DynamicCli, eventingv1alpha1.SchemeGroupVersion.WithResource("triggers"), c.Namespace, c.Log, c.Verbose),
 		name:        name,
 		namespace:   c.Namespace,
 		waitTimeout: c.WaitTimeout,
@@ -49,7 +41,7 @@ func New(name string, c shared.Container) *Trigger {
 	}
 }
 
-func (t *Trigger) Create(serviceName string) (ResourceVersion, error) {
+func (t *Trigger) Create(serviceName string) error {
 	br := &eventingv1alpha1.Trigger{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Trigger",
@@ -66,18 +58,18 @@ func (t *Trigger) Create(serviceName string) (ResourceVersion, error) {
 					Kind:       "Service",
 					Namespace:  t.namespace,
 					Name:       serviceName,
-					APIVersion: servingv1.SchemeGroupVersion.String(),
+					APIVersion: corev1.SchemeGroupVersion.Version,
 				},
 			},
 		},
 	}
 
-	resourceVersion, err := t.resCli.Create(br)
+	_, err := t.resCli.Create(br)
 	if err != nil {
-		return ResourceVersion(resourceVersion), errors.Wrapf(err, "while creating Trigger %s in namespace %s", t.name, t.namespace)
+		return errors.Wrapf(err, "while creating Trigger %s in namespace %s", t.name, t.namespace)
 	}
 
-	return ResourceVersion(resourceVersion), err
+	return err
 }
 
 func (t *Trigger) Delete() error {
@@ -104,7 +96,7 @@ func (t *Trigger) get() (*eventingv1alpha1.Trigger, error) {
 	return trigger, nil
 }
 
-func (t *Trigger) WaitForStatusRunning(initialResourceVersion ResourceVersion) error {
+func (t *Trigger) WaitForStatusRunning() error {
 	tr, err := t.get()
 	if err != nil {
 		return err
@@ -117,7 +109,7 @@ func (t *Trigger) WaitForStatusRunning(initialResourceVersion ResourceVersion) e
 	ctx, cancel := context.WithTimeout(context.Background(), t.waitTimeout)
 	defer cancel()
 	condition := t.isTriggerReady(t.name)
-	_, err = watchtools.Until(ctx, string(initialResourceVersion), t.resCli.ResCli, condition)
+	_, err = watchtools.Until(ctx, tr.GetResourceVersion(), t.resCli.ResCli, condition)
 	if err != nil {
 		return err
 	}
@@ -155,15 +147,7 @@ func convertFromUnstructuredToTrigger(u unstructured.Unstructured) (eventingv1al
 func (t Trigger) isStateReady(trigger eventingv1alpha1.Trigger) bool {
 	ready := trigger.Status.IsReady()
 
-	if ready {
-		t.log.Logf("Trigger %s is ready", t.name)
-	} else {
-		t.log.Logf("Trigger %s is not ready", t.name)
-	}
-
-	if t.verbose {
-		t.log.Logf("%+v", trigger)
-	}
+	shared.LogReadiness(ready, t.verbose, t.name, t.log, trigger)
 
 	return ready
 }

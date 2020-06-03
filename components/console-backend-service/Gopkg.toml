@@ -43,7 +43,7 @@ required = [
 
 [[constraint]]
   name="github.com/kyma-project/kyma"
-  revision = "7abc87a29e13d66414ffe53f54784199c1bf93df"
+  revision = "84fa953c5321089a79ad167d4f7582845dc45c2c"
 
 [[constraint]]
   name="github.com/kyma-project/rafter"

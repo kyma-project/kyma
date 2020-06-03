@@ -21,8 +21,7 @@ global:
     gateway:
       name: kyma-gateway
   ui_acceptance_tests:
-    dir: 
-    version: cc3793ec
+    version: e80fe188
   api_controller:
     dir:
     version: 3b88aaaf
@@ -38,15 +37,15 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    version: "4ea4dad6"
+    version: 30d17097
   console_backend_service_test:
-    version: PR-8251
+    version: "d4ff1c8c"
   xip_patch:
     dir:
-    version: 0e322dac
+    version: PR-8619
   e2e_external_solution:
     dir:
-    version: "88f5bc2a"
+    version: PR-8581
   disableLegacyConnectivity: false
 
 tests:

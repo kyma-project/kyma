@@ -7,17 +7,21 @@ WORKDIR ${BASE_APP_DIR}
 # Copy files
 #
 
+COPY ./go.mod ${BASE_APP_DIR}
+COPY ./go.sum ${BASE_APP_DIR}
+
+RUN GO111MODULE=on go mod download
+
+
 COPY ./testsuite/ ${BASE_APP_DIR}/testsuite/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
 COPY ./main_test.go ${BASE_APP_DIR}
-COPY ./go.mod ${BASE_APP_DIR}
 COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 #
 # Build tests
 #
 
-RUN cd ${BASE_APP_DIR} && GO111MODULE=on go mod download
 RUN CGO_ENABLED=0 go test main_test.go -c
 
 FROM alpine:3.11

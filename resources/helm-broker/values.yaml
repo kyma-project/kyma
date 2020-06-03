@@ -57,9 +57,6 @@ global:
   etcdClientPort: 2379
 
   # Additional values for sub-charts and extras
-  addons_ui:
-    dir:
-    version: "49294757"
   istio:
     gateway:
       name: kyma-gateway
@@ -73,3 +70,10 @@ global:
       - "bitbucket.org/"
     additionalDevelopMode:
       - "http://"
+
+  ingress:
+    domainName: "TBD"
+  helm:
+    tls:
+      crt: "TBD"
+      key: "TBD"

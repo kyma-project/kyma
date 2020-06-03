@@ -10,6 +10,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
+//go:generate mockery -name=Client -output=automock -outpkg=automock -case=underscore
 type Client interface {
 	Create(ctx context.Context, object Object) error
 	CreateWithReference(ctx context.Context, parent Object, object Object) error

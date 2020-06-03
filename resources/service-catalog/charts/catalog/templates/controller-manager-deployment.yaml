@@ -9,8 +9,7 @@ metadata:
     heritage: "{{ .Release.Service }}"
 spec:
   replicas: {{ .Values.controllerManager.replicas }}
-  strategy:
-{{ toYaml .Values.controllerManager.updateStrategy | indent 4 }}
+  strategy: {{ toYaml .Values.controllerManager.strategy | nindent 4 }}
   minReadySeconds: {{ .Values.controllerManager.minReadySeconds }}
   selector:
     matchLabels:
@@ -34,6 +33,8 @@ spec:
 {{ toYaml . | indent 8 }}
 {{- end }}
       serviceAccountName: "{{ .Values.controllerManager.serviceAccount }}"
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
       containers:
       {{- if .Values.controllerManager.healthcheck.enabled }}
       - name: healthcheck
@@ -92,6 +93,10 @@ spec:
         - --operation-polling-maximum-backoff-duration
         - {{ .Values.controllerManager.operationPollingMaximumBackoffDuration }}
         {{- end }}
+        {{ if .Values.controllerManager.osbApiRequestTimeout -}}
+        - --osb-api-request-timeout
+        - {{ .Values.controllerManager.osbApiRequestTimeout }}
+        {{- end }}
         - --feature-gates
         - OriginatingIdentity={{.Values.originatingIdentityEnabled}}
         - --feature-gates
@@ -114,7 +119,29 @@ spec:
         {{- end }}
         ports:
         - containerPort: 8444
+        {{- if .Values.controllerManager.healthcheck.enabled }}
+        readinessProbe:
+          httpGet:
+            port: 8444
+            path: /healthz/ready
+            scheme: HTTPS
+          failureThreshold: 1
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            port: 8444
+            path: /healthz
+            scheme: HTTPS
+          failureThreshold: 3
+          initialDelaySeconds: 40
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        {{- end }}
       {{ if .Values.controllerManager.nodeSelector }}
       nodeSelector:
-         {{ .Values.controllerManager.nodeSelector }}
+{{ toYaml .Values.controllerManager.nodeSelector | indent 8 }}
       {{ end }}

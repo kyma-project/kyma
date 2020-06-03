@@ -77,10 +77,16 @@ spec:
             httpGet:
               path: /health/alive
               port: http-api
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            failureThreshold: 10
           readinessProbe:
             httpGet:
               path: /health/ready
               port: http-api
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            failureThreshold: 10
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
       {{- with .Values.deployment.nodeSelector }}

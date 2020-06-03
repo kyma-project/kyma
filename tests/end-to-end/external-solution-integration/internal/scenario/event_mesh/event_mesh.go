@@ -1,9 +1,12 @@
 package event_mesh
 
 import (
+	"fmt"
+
 	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	eventingclientset "knative.dev/eventing/pkg/client/clientset/versioned"
@@ -18,7 +21,6 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
-	"k8s.io/client-go/dynamic"
 )
 
 const (
@@ -28,10 +30,16 @@ const (
 
 var (
 	apiRuleRes = schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
+	function   = schema.GroupVersionResource{Group: "serverless.kyma-project.io", Version: "v1alpha1", Resource: "functions"}
 )
 
 // Steps return scenario steps
 func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
+	if level, err := log.ParseLevel(s.logLevel); err != nil {
+		return nil, fmt.Errorf("False \"logLevel\" configuration: %v", err)
+	} else {
+		log.SetLevel(level)
+	}
 	appOperatorClientset := appoperatorclientset.NewForConfigOrDie(config)
 	appBrokerClientset := appbrokerclientset.NewForConfigOrDie(config)
 	coreClientset := k8s.NewForConfigOrDie(config)
@@ -57,7 +65,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		s.testID,
 	)
 
-	lambdaEndpoint := helpers.InClusterEndpoint(s.testID, s.testID, helpers.LambdaPort)
+	functionEndpoint := helpers.InClusterEndpoint(s.testID, s.testID, helpers.FunctionPort)
 	state := s.NewState()
 
 	return []step.Step{
@@ -69,11 +77,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
-			testsuite.NewDeployFakeLambda(s.testID, helpers.LambdaPayload, helpers.LambdaPort,
-				coreClientset.AppsV1().Deployments(s.testID),
-				coreClientset.CoreV1().Services(s.testID),
-				coreClientset.CoreV1().Pods(s.testID),
-				true),
+			testsuite.NewDeployFunction(s.testID, helpers.FunctionPayload, helpers.FunctionPort, dynamic.Resource(function).Namespace(s.testID), true),
 			testsuite.NewStartTestServer(testService),
 			testsuite.NewConnectApplication(connector, state, s.applicationTenant, s.applicationGroup),
 		),
@@ -85,10 +89,11 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID,
 			serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID),
 			knativeEventingClientSet.EventingV1alpha1().Brokers(s.testID), knativeEventingClientSet.MessagingV1alpha1().Subscriptions(kymaIntegrationNamespace)),
-		testsuite.NewCreateKnativeTrigger(s.testID, defaultBrokerName, lambdaEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
-		testsuite.NewSendEventToMesh(s.testID, helpers.LambdaPayload, state),
-		testsuite.NewCheckCounterPod(testService, 1),
-		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.LambdaPayload, state),
-		testsuite.NewCheckCounterPod(testService, 2),
+		testsuite.NewCreateKnativeTrigger(s.testID, defaultBrokerName, functionEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
+		testsuite.NewSleep(s.eventSendDelay),
+		testsuite.NewSendEventToMesh(s.testID, helpers.FunctionPayload, state),
+		NewWrappedCounterPod(testService, 1),
+		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.FunctionPayload, state),
+		NewWrappedCounterPod(testService, 2),
 	}, nil
 }

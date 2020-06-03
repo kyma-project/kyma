@@ -122,6 +122,7 @@ func (svc *functionService) Update(function *v1alpha1.Function) (*v1alpha1.Funct
 	}
 	function.ObjectMeta.ResourceVersion = oldFunction.ObjectMeta.ResourceVersion
 	function.TypeMeta = functionTypeMeta
+	function.Spec.Labels = oldFunction.Spec.Labels
 
 	u, err := svc.extractor.toUnstructured(function)
 	if err != nil {

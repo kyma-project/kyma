@@ -117,12 +117,12 @@ spec:
       serviceAccountName: kyma-installer
       initContainers:
       - name: certhelper
-        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
         command:
           - bash
           - -c
           - |
-
+            set -e
             if [ -f "/etc/certs/tls.crt" ]; then
               echo "Helm Certificate already exists, do nothing."
               exit 0
@@ -177,7 +177,7 @@ spec:
             openssl x509 -req -CA "${WORKING_DIR}/ca.crt" -CAkey "${WORKING_DIR}/ca.key" -CAcreateserial -in "${WORKING_DIR}/helm.csr.pem" -out "${WORKING_DIR}/helm.cert.pem" -days 365
 
             echo "---> Create secrets in k8s"
-            COMBO_YAML=$(cat << EOF
+            cat << EOF > /tmp/secret.yaml
             ---
             apiVersion: v1
             data:
@@ -194,9 +194,8 @@ spec:
               namespace: kyma-installer
             type: Opaque
             EOF
-            )
 
-            echo "${COMBO_YAML}" | kubectl create -f -
+            timeout 60s bash -c 'until kubectl create -f /tmp/secret.yaml ; do sleep 2; done'
 
         volumeMounts:
           - mountPath: /etc/certs

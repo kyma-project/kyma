@@ -39,7 +39,8 @@ spec:
         - --verbose=false
         - --listen=0.0.0.0:{{ .Values.kcproxy.inPort }}
         - --upstream-url=http://{{ template "jaeger-operator.fullname" . }}-jaeger-query:{{ .Values.jaeger.kyma.uiPort }}
-        - --enable-logging=true
+        - --enable-logging=false
+        - --enable-json-logging=true
         - --secure-cookie=true
         - --enable-authorization-cookies=false
         - --enable-token-header=false

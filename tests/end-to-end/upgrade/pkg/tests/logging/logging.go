@@ -33,24 +33,19 @@ func NewLoggingTest(coreInterface kubernetes.Interface, domainName string, dexCo
 // CreateResources creates resources for logging upgrade test
 func (t LoggingTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("Cleaning up before creating resources")
-	err := logstream.Cleanup(namespace, t.coreInterface)
-	if err != nil {
+	if err := logstream.Cleanup(namespace, t.coreInterface); err != nil {
 		return err
 	}
 	log.Println("Deploying test-counter-pod")
-	err = logstream.DeployDummyPod(namespace, t.coreInterface)
-	if err != nil {
+	if err := logstream.DeployDummyPod(namespace, t.coreInterface); err != nil {
 		return err
 	}
 	log.Println("Waiting for test-counter-pod to run...")
-	err = logstream.WaitForDummyPodToRun(namespace, t.coreInterface)
-	if err != nil {
+	if err := logstream.WaitForDummyPodToRun(namespace, t.coreInterface); err != nil {
 		return err
 	}
 	log.Println("Test if logs from test-counter-pod are streamed by Loki before upgrade")
-	err = t.testLogStream(namespace)
-	if err != nil {
-		logstream.Cleanup(namespace, t.coreInterface)
+	if err := t.testLogStream(namespace); err != nil {
 		return err
 	}
 	return nil
@@ -59,14 +54,11 @@ func (t LoggingTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogge
 // TestResources checks if resources are working properly after upgrade
 func (t LoggingTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("Test if new logs from test-counter-pod are streamed by Loki after upgrade")
-	err := t.testLogStream(namespace)
-	if err != nil {
-		logstream.Cleanup(namespace, t.coreInterface)
+	if err := t.testLogStream(namespace); err != nil {
 		return err
 	}
 	log.Println("Deleting test-counter-pod")
-	err = logstream.Cleanup(namespace, t.coreInterface)
-	if err != nil {
+	if err := logstream.Cleanup(namespace, t.coreInterface); err != nil {
 		return err
 	}
 	return nil
@@ -78,16 +70,13 @@ func (t LoggingTest) testLogStream(namespace string) error {
 		return errors.Wrap(err, "cannot fetch dex token")
 	}
 	authHeader := jwt.SetAuthHeader(token)
-	err = logstream.Test("container", "count", authHeader, t.httpClient)
-	if err != nil {
+	if err := logstream.Test("container", "count", authHeader, t.httpClient); err != nil {
 		return err
 	}
-	err = logstream.Test("app", "test-counter-pod", authHeader, t.httpClient)
-	if err != nil {
+	if err := logstream.Test("app", "test-counter-pod", authHeader, t.httpClient); err != nil {
 		return err
 	}
-	err = logstream.Test("namespace", namespace, authHeader, t.httpClient)
-	if err != nil {
+	if err := logstream.Test("namespace", namespace, authHeader, t.httpClient); err != nil {
 		return err
 	}
 	return nil

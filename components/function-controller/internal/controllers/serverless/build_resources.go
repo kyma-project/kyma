@@ -2,22 +2,46 @@ package serverless
 
 import (
 	"fmt"
+	"strings"
 
-	"github.com/go-logr/logr"
+	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
+
+const (
+	destinationArg        = "--destination"
+	functionContainerName = "function"
+)
+
+func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
+	data := map[string]string{
+		configMapHandler:  configMapHandler,
+		configMapFunction: instance.Spec.Source,
+		configMapDeps:     r.sanitizeDependencies(instance.Spec.Deps),
+	}
+	labels := r.functionLabels(instance)
+
+	return corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels:       labels,
+			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
+			Namespace:    instance.GetNamespace(),
+		},
+		Data: data,
+	}
+}
 
 func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, configMapName string) batchv1.Job {
 	imageName := r.buildInternalImageAddress(instance)
 	one := int32(1)
 	zero := int32(0)
 
-	job := batchv1.Job{
+	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-build-", instance.GetName()),
 			Namespace:    instance.GetNamespace(),
@@ -88,7 +112,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 						{
 							Name:  "executor",
 							Image: r.config.Build.ExecutorImage,
-							Args:  []string{fmt.Sprintf("--destination=%s", imageName), "--insecure", "--skip-tls-verify"},
+							Args:  append(r.config.Build.ExecutorArgs, fmt.Sprintf("%s=%s", destinationArg, imageName), "--context=dir:///workspace"),
 							Resources: corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceMemory: r.config.Build.LimitsMemoryValue,
@@ -100,8 +124,11 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 								},
 							},
 							VolumeMounts: []corev1.VolumeMount{
-								{Name: "sources", ReadOnly: true, MountPath: "/src"},
-								{Name: "runtime", ReadOnly: true, MountPath: "/workspace"},
+								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
+								// If COPY is not used, then the cache will not work
+								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/package.json", SubPath: "package.json"},
+								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/handler.js", SubPath: "handler.js"},
+								{Name: "runtime", ReadOnly: true, MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile"},
 								{Name: "tekton-home", ReadOnly: false, MountPath: "/tekton/home"},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
@@ -116,62 +143,109 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 			},
 		},
 	}
-
-	return job
 }
 
-func (r *FunctionReconciler) buildService(log logr.Logger, instance *serverlessv1alpha1.Function, oldService *servingv1.Service) servingv1.Service {
+func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function) appsv1.Deployment {
 	imageName := r.buildExternalImageAddress(instance)
-	annotations := map[string]string{
-		"autoscaling.knative.dev/minScale": "1",
-		"autoscaling.knative.dev/maxScale": "1",
-	}
-	if instance.Spec.MinReplicas != nil {
-		annotations["autoscaling.knative.dev/minScale"] = fmt.Sprintf("%d", *instance.Spec.MinReplicas)
-	}
-	if instance.Spec.MaxReplicas != nil {
-		annotations["autoscaling.knative.dev/maxScale"] = fmt.Sprintf("%d", *instance.Spec.MaxReplicas)
-	}
-	serviceLabels := r.functionLabels(instance)
-	serviceLabels["serving.knative.dev/visibility"] = "cluster-local"
+	deploymentLabels := r.functionLabels(instance)
 
-	bindingAnnotation := ""
-	if oldService != nil {
-		bindingAnnotation = oldService.GetAnnotations()[serviceBindingUsagesAnnotation]
-	}
-	podLabels := r.servingPodLabels(log, instance, bindingAnnotation)
+	podLabels := r.servicePodLabels(instance)
 
-	service := servingv1.Service{
+	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.GetName(),
-			Namespace: instance.GetNamespace(),
-			Labels:    serviceLabels,
+			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
+			Namespace:    instance.GetNamespace(),
+			Labels:       deploymentLabels,
 		},
-		Spec: servingv1.ServiceSpec{
-			ConfigurationSpec: servingv1.ConfigurationSpec{
-				Template: servingv1.RevisionTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: annotations,
-						Labels:      podLabels,
-					},
-					Spec: servingv1.RevisionSpec{
-						PodSpec: corev1.PodSpec{
-							Containers: []corev1.Container{
-								{
-									Name:            "lambda",
-									Image:           imageName,
-									Env:             append(instance.Spec.Env, envVarsForRevision...),
-									Resources:       instance.Spec.Resources,
-									ImagePullPolicy: corev1.PullIfNotPresent,
-								},
-							},
-							ServiceAccountName: r.config.ImagePullAccountName,
+		Spec: appsv1.DeploymentSpec{
+			Replicas: instance.Spec.MinReplicas,
+			Selector: &metav1.LabelSelector{
+				MatchLabels: r.internalFunctionLabels(instance), // this has to be same as spec.template.objectmeta.Lables
+				// and also it has to be immutable
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: podLabels, // podLabels contains InternalFnLabels, so it's ok
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:            functionContainerName,
+							Image:           imageName,
+							Env:             append(instance.Spec.Env, envVarsForDeployment...),
+							Resources:       instance.Spec.Resources,
+							ImagePullPolicy: corev1.PullIfNotPresent,
 						},
 					},
+					ServiceAccountName: r.config.ImagePullAccountName,
 				},
 			},
 		},
 	}
+}
 
-	return service
+func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function) corev1.Service {
+	return corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instance.GetName(),
+			Namespace: instance.GetNamespace(),
+			Labels:    r.functionLabels(instance),
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{{
+				Name:       "http",               // it has to be here for istio to work properly
+				TargetPort: intstr.FromInt(8080), // https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js#L28
+				Port:       80,
+				Protocol:   corev1.ProtocolTCP,
+			}},
+			Selector: r.internalFunctionLabels(instance),
+		},
+	}
+}
+
+func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
+	imageTag := r.calculateImageTag(instance)
+	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.Address, instance.Namespace, instance.Name, imageTag)
+}
+
+func (r *FunctionReconciler) buildExternalImageAddress(instance *serverlessv1alpha1.Function) string {
+	imageTag := r.calculateImageTag(instance)
+	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.ExternalAddress, instance.Namespace, instance.Name, imageTag)
+}
+
+func (r *FunctionReconciler) sanitizeDependencies(dependencies string) string {
+	result := "{}"
+	if strings.Trim(dependencies, " ") != "" {
+		result = dependencies
+	}
+
+	return result
+}
+
+func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Function) map[string]string {
+	return r.mergeLabels(instance.GetLabels(), r.internalFunctionLabels(instance))
+}
+
+func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha1.Function) map[string]string {
+	labels := make(map[string]string, 3)
+
+	labels[serverlessv1alpha1.FunctionNameLabel] = instance.Name
+	labels[serverlessv1alpha1.FunctionManagedByLabel] = "function-controller"
+	labels[serverlessv1alpha1.FunctionUUIDLabel] = string(instance.GetUID())
+
+	return labels
+}
+
+func (r *FunctionReconciler) servicePodLabels(instance *serverlessv1alpha1.Function) map[string]string {
+	return r.mergeLabels(instance.Spec.Labels, r.internalFunctionLabels(instance))
+}
+
+func (r *FunctionReconciler) mergeLabels(labelsCollection ...map[string]string) map[string]string {
+	result := make(map[string]string, 0)
+	for _, labels := range labelsCollection {
+		for key, value := range labels {
+			result[key] = value
+		}
+	}
+	return result
 }

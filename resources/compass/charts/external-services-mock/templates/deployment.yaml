@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ template "fullname" . }}
+    namespace: {{ .Release.Namespace }}
+    labels:
+        app: {{ .Chart.Name }}
+        release: {{ .Release.Name }}
+spec:
+    selector:
+        matchLabels:
+            app: {{ .Chart.Name }}
+            release: {{ .Release.Name }}
+    template:
+        metadata:
+            labels:
+                app: {{ .Chart.Name }}
+                release: {{ .Release.Name }}
+        spec:
+            containers:
+            - name: {{ .Chart.Name }}
+              image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.external_services_mock.dir }}compass-external-services-mock:{{ .Values.global.images.external_services_mock.version }}
+              imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+              env:
+              - name: APP_ADDRESS
+                value: "127.0.0.1:{{ .Values.deployment.port }}"
+              - name: APP_AUDITLOG_CLIENT_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.global.auditlog.secretName }}
+                    key: auditlog-client-id
+              - name: APP_AUDITLOG_CLIENT_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.global.auditlog.secretName }}
+                    key: auditlog-client-secret
+              ports:
+              - name: http
+                containerPort: {{ .Values.deployment.port }}
+                protocol: TCP
+              resources:
+                {{- toYaml .Values.deployment.resources | nindent 16 }}
+              {{- with .Values.deployment.securityContext }}
+              securityContext:
+                {{ toYaml . | nindent 16 }}
+              {{- end }}
