@@ -8,7 +8,7 @@ COPY ./licenses/ /app/licenses
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -o manager ./cmd/manager
 
-FROM scratch
+FROM alpine:3.11.3
 LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY charts/application application/

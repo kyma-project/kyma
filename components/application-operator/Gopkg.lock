@@ -298,6 +298,14 @@
   version = "v0.2.2"
 
 [[projects]]
+  digest = "1:6f99a5db6c12ac7be3a489531d5ba87bc1894917c59665fbd0d4660c587b912c"
+  name = "github.com/kyma-project/kyma"
+  packages = ["components/application-broker/pkg/apis/applicationconnector/v1alpha1"]
+  pruneopts = "NUT"
+  revision = "6e80a312e0a244470f87c82e397ed6f3c88244b0"
+  version = "1.13.0"
+
+[[projects]]
   digest = "1:08c231ec84231a7e23d67e4b58f975e1423695a32467a362ee55a803f9de8061"
   name = "github.com/mattn/go-colorable"
   packages = ["."]
@@ -1128,6 +1136,7 @@
     "github.com/gorilla/mux",
     "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
+    "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/pkg/errors",
@@ -1136,6 +1145,7 @@
     "github.com/stretchr/testify/mock",
     "github.com/stretchr/testify/require",
     "golang.org/x/tools/cmd/goimports",
+    "k8s.io/api/admission/v1beta1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/labels",

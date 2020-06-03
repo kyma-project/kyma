@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/kyma-project/kyma/components/application-operator/internal/webhook"
 	"time"
 
 	"github.com/kyma-project/kyma/components/application-operator/internal/healthz"
@@ -119,6 +120,15 @@ func main() {
 	log.Info("Starting Healthcheck Server")
 
 	go healthz.StartHealthCheckServer(log.StandardLogger(), options.healthPort)
+
+	log.Info("Starting webhook server")
+
+	appClient, err := versioned.NewForConfig(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go webhook.StartWebhookServer(log.StandardLogger(), "5050", appClient.ApplicationconnectorV1alpha1().Applications())
 
 	log.Printf("Starting the Cmd.")
 	log.Info(mgr.Start(signals.SetupSignalHandler()))
