@@ -134,7 +134,7 @@ func (hc *Client) IsReleaseDeletable(relNamespace, relName string) (bool, error)
 		func() error {
 			rel, err := status.Run(relName)
 			if err != nil {
-				if strings.Contains(err.Error(), driver.ErrReleaseExists.Error()) {
+				if strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
 					isDeletable = false
 					return nil
 				}
