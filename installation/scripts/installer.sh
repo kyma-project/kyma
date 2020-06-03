@@ -9,7 +9,7 @@ RESOURCES_DIR="${CURRENT_DIR}/../resources"
 INSTALLER="${RESOURCES_DIR}/installer-local.yaml"
 INSTALLER_CONFIG="${RESOURCES_DIR}/installer-config-local.yaml.tpl"
 AZURE_BROKER_CONFIG=""
-HELM_VERSION=$(helm3 version --short | cut -d '.' -f 1)
+HELM_VERSION=$(helm version --short -c | cut -d '.' -f 1)
 
 source $CURRENT_DIR/utils.sh
 
