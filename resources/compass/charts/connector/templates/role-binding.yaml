@@ -40,12 +40,12 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 {{ end }}
 
-{{ if (tpl .Values.global.connector.secrets.rootCA.cacert .) }}
+{{ if .Values.global.connector.secrets.rootCA.cacert }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ template "fullname" . }}-{{ tpl .Values.global.connector.secrets.rootCA.cacert . }}
+  name: {{ template "fullname" . }}-{{ .Values.global.connector.secrets.rootCA.cacert }}
   namespace: {{ .Values.global.connector.secrets.rootCA.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
@@ -57,13 +57,13 @@ metadata:
 rules:
 - apiGroups: ["*"]
   resources: ["secrets"]
-  resourceNames: ["{{ tpl .Values.global.connector.secrets.rootCA.cacert . }}"]
+  resourceNames: ["{{ .Values.global.connector.secrets.rootCA.cacert }}"]
   verbs: ["get"]
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ template "fullname" . }}-{{ tpl .Values.global.connector.secrets.rootCA.cacert . }}
+  name: {{ template "fullname" . }}-{{ .Values.global.connector.secrets.rootCA.cacert }}
   namespace: {{ .Values.global.connector.secrets.rootCA.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
@@ -78,7 +78,7 @@ subjects:
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role
-  name: {{ template "fullname" . }}-{{ tpl .Values.global.connector.secrets.rootCA.cacert . }}
+  name: {{ template "fullname" . }}-{{ .Values.global.connector.secrets.rootCA.cacert }}
   apiGroup: rbac.authorization.k8s.io
 {{ end }}
 ---

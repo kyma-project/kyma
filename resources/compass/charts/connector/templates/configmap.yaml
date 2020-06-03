@@ -1,4 +1,4 @@
-{{ if eq (tpl .Values.global.connector.revocation.configmap.shouldCreate .) true }}
+{{ if eq .Values.global.connector.revocation.configmap.shouldCreate true }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
