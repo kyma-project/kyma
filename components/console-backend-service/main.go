@@ -4,10 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"net/http"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless"
 
@@ -153,12 +155,7 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 	}
 
 	router.Handle("/", playground.Handler("Kyma GQL", "/graphql"))
-	graphQLHandler := handler.NewDefaultServer(schema)
-	graphQLHandler.AddTransport(&transport.Websocket{
-		Upgrader: websocket.Upgrader{
-			CheckOrigin: origin.CheckFn(allowedOrigins),
-		},
-	})
+	graphQLHandler := newGqlServer(schema, allowedOrigins)
 	router.Handle("/graphql", graphQLHandler)
 	serverHandler := cors.New(cors.Options{
 		AllowedOrigins: allowedOrigins,
@@ -186,4 +183,28 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 		glog.Errorf("HTTP server ListenAndServe: %v", err)
 	}
+}
+
+func newGqlServer(es graphql.ExecutableSchema, allowedOrigins []string) *handler.Server {
+	srv := handler.New(es)
+
+	srv.AddTransport(transport.Websocket{
+		KeepAlivePingInterval: 10 * time.Second,
+		Upgrader: websocket.Upgrader{
+			CheckOrigin: origin.CheckFn(allowedOrigins),
+		},
+	})
+	srv.AddTransport(transport.Options{})
+	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.POST{})
+	srv.AddTransport(transport.MultipartForm{})
+
+	srv.SetQueryCache(lru.New(1000))
+
+	srv.Use(extension.Introspection{})
+	srv.Use(extension.AutomaticPersistedQuery{
+		Cache: lru.New(100),
+	})
+
+	return srv
 }
