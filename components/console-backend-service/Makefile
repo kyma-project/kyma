@@ -18,7 +18,7 @@ release: build-image push-image
 build-image: pull-licenses
 	docker build -t $(APP_NAME) .
 push-image:
-	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
+	docker tag $(APP_NAME) $(IMG_NAME):$(TAG)
 	docker push $(IMG_NAME):$(TAG)
 
 pull-licenses:
