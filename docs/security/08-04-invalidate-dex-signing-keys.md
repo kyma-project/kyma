@@ -28,7 +28,7 @@ kubectl delete signingkeies.dex.coreos.com -n kyma-system --all
 ```bash
 kubectl delete po -n kyma-system -lapp=dex
 ```
-Dex will create a new CR with a private and public key pair.
+Dex will create a new CR with a private-public key pair.
 
 3. Restart `kyma-system` Pods that validate tokens issued from Dex to drop the existing public keys:
 
@@ -38,4 +38,4 @@ kubectl delete po -n kyma-system -l'app in (apiserver-proxy,iam-kubeconfig-servi
 
 4. Manually restart all your applications that validate Dex JWT tokens internally to get the new public keys. 
 
->**NOTE:** Mentioned commands result in downtime of Dex, a couple of Kyma components, and potentially your applications. If you want to use `kubectl scale` command to scale replicas, bear in mind that this downtime is intentional. It prevents Dex from issuing new tokens signed by a compromised private key and forces at least Kyma applications to fetch new public keys, and at the same time reject all existing tokens signed by the compromised private key during JWT token validation.
+>**NOTE:** Following the tutorial steps results in the downtime of Dex, a couple of Kyma components, and potentially your applications. If you want to use `kubectl scale` command to scale replicas, bear in mind that this downtime is intentional. It prevents Dex from issuing new tokens signed by a compromised private key and forces at least Kyma applications to fetch new public keys, and at the same time reject all existing tokens signed by the compromised private key during JWT token validation.
