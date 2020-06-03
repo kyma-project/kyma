@@ -3,30 +3,39 @@ title: Invalidate Dex signing keys
 type: Tutorials
 ---
 
-By default Dex in Kyma stores private and public keys used for signing and validating JWTs on a cluster using custom resources.
-If for some reason private keys will leak it is required to invalidate such key pair to prevent issuing tokens and validating existing ones.
-It is a critical security issue because an attacker can issue its own JWTs and call 3rd party services which have Dex JWT authentication enabled.
+By default, Dex in Kyma stores private and public keys used to sign and validate JWT tokens on a cluster using custom resources. If, for some reason, the private keys leak, you must invalidate the private-public key pair to prevent the attacker from issuing tokens and validating the existing ones.
+It is critical to do so, because otherwise the attackers can use private JWT tokens to call third party services which have Dex JWT authentication enabled. 
+Follow this tutorial to learn how to invalidate the signing keys.
 
- 
 ## Prerequisites
-To complete this tutorial, the user must have either cluster-admin kubeconfig issued from a cloud provider or kyma kubeconfig and
-[kyma-admin](03-05-roles-in-kyma.md) role assigned.
 
-## Invalidate keys
+To complete this tutorial, you must have either the cluster-admin `kubeconfig` file issued from a cloud provider or the Kyma `kubeconfig` file the and [**kyma-admin**](#details-roles-in-kyma) role assigned.
 
-1. Delete all singing keys on a cluster by running this command: `bash kubectl delete signingkeies.dex.coreos.com -n kyma-system --all `
-   
-   It is not recommended to interact with any of Dex CRs, however, in this situation it is the only way to change keys.
+## Steps
 
-2. Restart dex pod : `bash kubectl delete po -n kyma-system -lapp=dex`. Dex will create new CR with key pair
+Perform these steps to invalidate the keys: 
 
-3. Restart kyma system pods that are validating tokens issued from dex to force dropping existing public keys :
+1. Delete all signing keys on a cluster:
 
-    `bash kubectl delete po -n kyma-system -l'app in (apiserver-proxy,iam-kubeconfig-service,console-backend-service,kiali-kcproxy,log-ui)'; kubectl delete po -n kyma-system -l 'app.kubernetes.io/name in (oathkeeper,tracing)'`
+```bash
+kubectl delete signingkeies.dex.coreos.com -n kyma-system --all 
+```
 
-4. Restart all your applications that are validating dex JWTs internally(manually in the code) to force getting new public keys. 
+>**NOTE:** Although it is not recommended to interact with any of Dex CRs, in this situation it is the only way to invalidate the keys.
 
->**NOTE:** Mentioned commands create downtime of dex, a couple of kyma components, and potentially your applications. 
->It is possible to use `kubectl scale` command and scale replicas, however, here downtime is used by intention. 
->It prevents issuing new tokens from dex signed by a compromised private key and to forces at least kyma applications
->to fetch new public keys, therefore reject all existing tokens signed by mentioned private key when validating JWT.
+2. Restart the Dex Pod:
+
+```bash
+kubectl delete po -n kyma-system -lapp=dex
+```
+Dex will create a new CR with a private and public key pair.
+
+3. Restart `kyma-system` Pods that validate tokens issued from Dex to drop the existing public keys:
+
+```bash 
+kubectl delete po -n kyma-system -l'app in (apiserver-proxy,iam-kubeconfig-service,console-backend-service,kiali-kcproxy,log-ui)'; kubectl delete po -n kyma-system -l 'app.kubernetes.io/name in (oathkeeper,tracing)'
+```
+
+4. Manually restart all your applications that validate Dex JWT tokens internally to get the new public keys. 
+
+>**NOTE:** Mentioned commands result in downtime of Dex, a couple of Kyma components, and potentially your applications. If you want to use `kubectl scale` command to scale replicas, bear in mind that this downtime is intentional. It prevents Dex from issuing new tokens signed by a compromised private key and forces at least Kyma applications to fetch new public keys, and at the same time reject all existing tokens signed by the compromised private key during JWT token validation.
