@@ -26,10 +26,13 @@ func (c *applicationConverter) ToGQL(in *v1alpha1.Application) *gqlschema.Applic
 
 		appServices = append(appServices, dmSvc)
 	}
-
+	labels := in.Spec.Labels
+	if labels == nil {
+		labels = gqlschema.Labels{}
+	}
 	dto := &gqlschema.Application{
 		Name:        in.Name,
-		Labels:      in.Spec.Labels,
+		Labels:      labels,
 		Description: in.Spec.Description,
 		Services:    appServices,
 	}
