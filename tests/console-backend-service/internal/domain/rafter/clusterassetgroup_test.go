@@ -21,7 +21,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-
 )
 
 const (
@@ -82,7 +81,7 @@ func TestClusterAssetGroupsQueries(t *testing.T) {
 
 	t.Log("Checking authorization directives...")
 	ops := &auth.OperationsInput{
-		auth.List: {fixClusterAssetGroupsQuery(clusterAssetGroupDetailsFields())},
+		auth.List:  {fixClusterAssetGroupsQuery(clusterAssetGroupDetailsFields())},
 		auth.Watch: {fixClusterAssetGroupSubscription(clusterAssetGroupEventDetailsFields())},
 	}
 	AuthSuite.Run(t, ops)

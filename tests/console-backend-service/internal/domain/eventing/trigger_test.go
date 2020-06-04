@@ -68,9 +68,8 @@ func TestTriggerEventQueries(t *testing.T) {
 			listTriggersArguments(namespaceName), triggerDetailsFields())},
 		auth.Delete: {fixTriggerRequest("mutation", "deleteTrigger",
 			deleteTriggerArguments(namespaceName), metadataDetailsFields())},
-		auth.Watch:  {fixTriggerRequest("subscription", "triggerEvent",
+		auth.Watch: {fixTriggerRequest("subscription", "triggerEvent",
 			createTriggerEventArguments(namespaceName), triggerEventDetailsFields())},
-
 	}
 	auth.New().Run(t, opts)
 }

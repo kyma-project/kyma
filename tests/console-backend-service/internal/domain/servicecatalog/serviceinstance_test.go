@@ -147,7 +147,7 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 			fixCreateServiceInstanceRequest(resourceDetailsQuery, fixture.ServiceInstanceFromServiceClass("", TestNamespace), false),
 		},
 		auth.Delete: {fixDeleteServiceInstanceRequest(resourceDetailsQuery, expectedResourceFromServiceClass)},
-		auth.Watch: {fixInstanceSubscription(instanceEventDetailsFields(), TestNamespace)},
+		auth.Watch:  {fixInstanceSubscription(instanceEventDetailsFields(), TestNamespace)},
 	}
 	AuthSuite.Run(t, ops)
 }

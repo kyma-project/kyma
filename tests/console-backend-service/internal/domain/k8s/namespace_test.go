@@ -3,10 +3,11 @@
 package k8s
 
 import (
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

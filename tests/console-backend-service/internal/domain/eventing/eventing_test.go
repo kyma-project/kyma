@@ -13,7 +13,6 @@ import (
 
 	"github.com/pkg/errors"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-
 )
 
 var AuthSuite *auth.TestSuite

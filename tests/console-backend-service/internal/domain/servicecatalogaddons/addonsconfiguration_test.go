@@ -100,7 +100,7 @@ func TestAddonsConfigurationMutationsAndQueries(t *testing.T) {
 		auth.Get:    {suite.fixAddonsConfigurationRequest()},
 		auth.Create: {suite.fixCreateAddonsConfigurationsRequest()},
 		auth.Delete: {suite.fixDeleteAddonsConfigurationRequest()},
-		auth.Watch: {suite.fixAddonConfigurationSubscription()},
+		auth.Watch:  {suite.fixAddonConfigurationSubscription()},
 	}
 	AuthSuite.Run(t, ops)
 }

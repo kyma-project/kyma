@@ -236,7 +236,7 @@ func (a *TestSuite) runTestsSubscribe(t *testing.T, testCases *testCases, reques
 			a.changeUser(t, testCase.user)
 
 			var res interface{}
-			err := a.client.Subscribe(request).Next(res, 500 * time.Millisecond)
+			err := a.client.Subscribe(request).Next(res, 500*time.Millisecond)
 
 			if testCase.user == graphql.NoUser {
 				assert.EqualError(t, err, wsError)
