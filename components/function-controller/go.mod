@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/function-controller
 
-go 1.13
+go 1.14
 
 require (
 	cloud.google.com/go v0.47.0 // indirect
@@ -39,6 +39,7 @@ require (
 	google.golang.org/api v0.15.0 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/grpc v1.26.0 // indirect
+	gopkg.in/yaml.v2 v2.2.8
 	k8s.io/api v0.17.4
 	k8s.io/apiextensions-apiserver v0.17.3 // indirect
 	k8s.io/apimachinery v0.17.4

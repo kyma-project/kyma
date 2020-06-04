@@ -14,7 +14,7 @@ tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-8513"
+    tag: "PR-8651"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -54,7 +54,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "01eacd39"
+    tag: "PR-8651"
     pullPolicy: IfNotPresent
   functionRuntimeNodejs12:
     repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
@@ -106,6 +106,8 @@ containers:
         value: "{{ template \"fullname\" . }}-registry-credentials"
       imagePullAccountName:
         value: "{{ template \"fullname\" . }}"
+      targetCPUUtilizationPercentage:
+        value: "50"
       kserviceRequeueDuration:
         value: 5m
       functionRequeueDuration:
