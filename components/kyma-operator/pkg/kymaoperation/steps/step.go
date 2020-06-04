@@ -25,6 +25,8 @@ type HelmClient interface {
 	RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error)
 	DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error)
 	PrintRelease(release *release.Release)
+	WaitForReleaseDelete(releaseName string) (bool, error)
+	WaitForReleaseRollback(releaseName string) (bool, error)
 }
 
 type step struct {

@@ -6,6 +6,10 @@ metadata:
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.deployment.replicaCount }}
   selector:
@@ -19,6 +23,10 @@ spec:
       labels:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        app.kubernetes.io/name: {{ template "name" . }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
         - name: {{ .Chart.Name }}
@@ -29,7 +37,7 @@ spec:
               containerPort: {{ .Values.global.connectivity_adapter.port }}
               protocol: TCP
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.deployment.resources | nindent 12 }}
           env:
             - name: APP_ADDRESS
               value: "0.0.0.0:{{ .Values.global.connectivity_adapter.port }}"
@@ -51,11 +59,11 @@ spec:
               path: "/v1/health"
             initialDelaySeconds: {{ .Values.global.livenessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.global.livenessProbe.timeoutSeconds }}
-            periodSeconds: {{.Values.global.livenessProbe.periodSeconds }}
+            periodSeconds: {{ .Values.global.livenessProbe.periodSeconds }}
           readinessProbe:
             httpGet:
               port: {{ .Values.global.connectivity_adapter.port }}
               path: "/v1/health"
             initialDelaySeconds: {{ .Values.global.readinessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.global.readinessProbe.timeoutSeconds }}
-            periodSeconds: {{.Values.global.readinessProbe.periodSeconds }}
+            periodSeconds: {{ .Values.global.readinessProbe.periodSeconds }}
