@@ -12,7 +12,7 @@ import (
 // Installation step may be implemented an a Helm upgrade or install operation.
 type Step interface {
 	Run() error
-	ToString() string
+	String() string
 	GetReleaseName() string
 }
 
@@ -22,7 +22,7 @@ type step struct {
 }
 
 // ToString method returns step details in readable string
-func (s step) ToString() string {
+func (s step) String() string {
 	return fmt.Sprintf("Component: %s, Release: %s, Namespace: %s", s.component.Name, s.component.GetReleaseName(), s.component.Namespace)
 }
 

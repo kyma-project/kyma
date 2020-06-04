@@ -13,7 +13,7 @@ import (
 // stepFactoryCreator is used to create StepFactory instances for installation or uninstallation.
 type stepFactoryCreator struct {
 	helmClient          kymahelm.ClientInterface
-	sourceGetterSupport SourceGetterLegacySupport
+	sourceGetterSupport SourceGetterLegacySupport //TODO: Perhaps this should be moved to: "ForInstallation" method parameter
 }
 
 // NewStepFactoryCreator returns a new stepFactoryCreator instance.
@@ -24,6 +24,8 @@ func NewStepFactoryCreator(helmClient kymahelm.ClientInterface, sgls SourceGette
 	}
 }
 
+// TODO: Once migration to Helm3 is done, we should extend the map key to format: "namespace/name"
+// getInstalledReleases returns a map of installed releases. The map key is the release name
 func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]kymahelm.ReleaseStatus, error) {
 
 	existingReleases := make(map[string]kymahelm.ReleaseStatus)

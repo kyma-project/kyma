@@ -29,7 +29,7 @@ func TestSteps(t *testing.T) {
 				testUpgradeStep := fakeUpgradeStep(mockHelmClient)
 
 				//when
-				asString := testUpgradeStep.ToString()
+				asString := testUpgradeStep.String()
 
 				expected := "Component: test-component, Release: test-release, Namespace: test-namespace"
 
@@ -91,7 +91,6 @@ func TestSteps(t *testing.T) {
 				//then
 				So(err.Error(), ShouldEqual, expectedError)
 			})
-
 		})
 		Convey("install step should", func() {
 			Convey("print itself", func() {
@@ -100,7 +99,7 @@ func TestSteps(t *testing.T) {
 				testInstallStep := fakeInstallStep(mockHelmClient)
 
 				//when
-				asString := testInstallStep.ToString()
+				asString := testInstallStep.String()
 
 				expected := "Component: test-component, Release: test-release, Namespace: test-namespace"
 
