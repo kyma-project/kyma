@@ -48,7 +48,7 @@ The Operator doesn't migrate Custom Resources to a new version when update is tr
 
 The [Installation custom resource file](https://kyma-project.io/docs/root/kyma/#custom-resource-installation) provides the basic information for Kyma installation.
 
-### Many operators
+### Configuration
 
 Operator by default doesn't support many Installation Custom Resources on the cluster. You need to provision another
 Operator instance. You can configure which Installation resource it will track with those environmental variables:
