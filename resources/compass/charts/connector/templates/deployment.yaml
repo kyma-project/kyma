@@ -76,7 +76,7 @@ spec:
             - name: APP_CERTIFICATE_DATA_HEADER
               value: {{ .Values.global.connector.certificateDataHeader | quote }}
             - name: APP_REVOCATION_CONFIG_MAP_NAME
-              value: "{{ .Release.Namespace }}/{{ .Values.global.connector.revocation.configmap.name }}"
+              value: "{{ tpl .Values.global.connector.revocation.configmap.namespace . }}/{{ .Values.global.connector.revocation.configmap.name }}"
             - name: APP_CSR_SUBJECT_COUNTRY
               value: {{ .Values.deployment.args.csrSubject.country | quote }}
             - name: APP_CSR_SUBJECT_ORGANIZATION
