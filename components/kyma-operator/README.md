@@ -47,3 +47,15 @@ The Operator doesn't migrate Custom Resources to a new version when update is tr
 ### Custom resource file
 
 The [Installation custom resource file](https://kyma-project.io/docs/root/kyma/#custom-resource-installation) provides the basic information for Kyma installation.
+
+### Many operators
+
+Operator by default doesn't support many Installation Custom Resources on the cluster. You need to provision another
+Operator instance. You can configure which Installation resource it will track with those environmental variables:
+
+| Name                	| Default                               	| Description                                            	|
+|---------------------	|---------------------------------------	|--------------------------------------------------------	|
+| INST_NAMESPACE      	| `default`                             	| Namespace in which the installation is located         	|
+| INST_RESOURCE       	| `kyma-installation`                   	| Name of the installation resource                      	|
+| INST_FINALIZER      	| `finalizer.installer.kyma-project.io` 	| Name of the finalizer                                  	|
+| OVERRIDES_NAMESPACE 	| `kyma-installer`                      	| Namespace in which the installer overrides are located 	|
