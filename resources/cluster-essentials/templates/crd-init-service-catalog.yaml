@@ -8,21 +8,21 @@ metadata:
     "helm.sh/hook-weight": "1"
     "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
 data:
-  clusterservicebrokers.servicecatalog: |-
+  clusterservicebrokers.servicecatalog.k8s.io: |-
 {{.Files.Get "files/crd-clusterservicebroker.servicecatalog.yaml" | printf "%s" | indent 4}}
-  clusterserviceclasses.servicecatalog: |-
+  clusterserviceclasses.servicecatalog.k8s.io: |-
 {{.Files.Get "files/crd-clusterserviceclass.servicecatalog.yaml" | printf "%s" | indent 4}}
-  clusterserviceplans.servicecatalog: |-
+  clusterserviceplans.servicecatalog.k8s.io: |-
 {{.Files.Get "files/crd-clusterserviceplan.servicecatalog.yaml" | printf "%s" | indent 4}}
-  servicebrokers.servicecatalog: |-
+  servicebrokers.servicecatalog.k8s.io: |-
 {{.Files.Get "files/crd-servicebroker.servicecatalog.yaml" | printf "%s" | indent 4}}
-  serviceclasses.servicecatalog: |-
+  serviceclasses.servicecatalog.k8s.io: |-
 {{.Files.Get "files/crd-serviceclass.servicecatalog.yaml" | printf "%s" | indent 4}}
-  serviceplans.servicecatalog: |-
+  serviceplans.servicecatalog.k8s.io: |-
 {{.Files.Get "files/crd-serviceplan.servicecatalog.yaml" | printf "%s" | indent 4}}
-  serviceinstances.servicecatalog: |-
+  serviceinstances.servicecatalog.k8s.io: |-
 {{.Files.Get "files/crd-serviceinstance.servicecatalog.yaml" | printf "%s" | indent 4}}
-  servicebindings.servicecatalog: |-
+  servicebindings.servicecatalog.k8s.io: |-
 {{.Files.Get "files/crd-servicebinding.servicecatalog.yaml" | printf "%s" | indent 4}}
 ---
 apiVersion: batch/v1
@@ -62,14 +62,14 @@ spec:
             - |-
               set -e
 
-              crds=( clusterservicebrokers.servicecatalog \
-                clusterserviceclasses.servicecatalog \
-                clusterserviceplans.servicecatalog \
-                servicebrokers.servicecatalog \
-                serviceclasses.servicecatalog \
-                serviceplans.servicecatalog \
-                serviceinstances.servicecatalog \
-                servicebindings.servicecatalog )
+              crds=( clusterservicebrokers.servicecatalog.k8s.io \
+                clusterserviceclasses.servicecatalog.k8s.io \
+                clusterserviceplans.servicecatalog.k8s.io \
+                servicebrokers.servicecatalog.k8s.io \
+                serviceclasses.servicecatalog.k8s.io \
+                serviceplans.servicecatalog.k8s.io \
+                serviceinstances.servicecatalog.k8s.io \
+                servicebindings.servicecatalog.k8s.io )
 
               for crd in "${crds[@]}"; do
                 timeout 60s bash -c "until kubectl get $crd || kubectl apply -f /etc/crd/$crd; do sleep 2; done"
