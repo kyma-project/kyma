@@ -325,14 +325,6 @@ func (hc *mockHelmClient) WaitForReleaseRollback(nn kymahelm.NamespacedName) (bo
 	return true, nil
 }
 
-func (hc *mockHelmClient) WaitForReleaseDelete(releaseName string) (bool, error) {
-	return true, nil
-}
-
-func (hc *mockHelmClient) WaitForReleaseRollback(releaseName string) (bool, error) {
-	return true, nil
-}
-
 // SourceGetter Mock
 
 type mockSourceGetter struct {
