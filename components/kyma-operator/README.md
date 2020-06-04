@@ -48,14 +48,14 @@ The Operator doesn't migrate Custom Resources to a new version when update is tr
 
 The [Installation custom resource file](https://kyma-project.io/docs/root/kyma/#custom-resource-installation) provides the basic information for Kyma installation.
 
-### Configuration
+## Configuration
 
-Operator tracks the Installation CR and waits for overrides in a given namespace. You can configure them using those
-environmental variables. 
+Kyma Operator tracks the Installation CR and waits for overrides in a given Namespace. You can configure both overrides and the CR using these
+environmental variables:
 
 | Name                	| Default                               	| Description                                            	|
 |---------------------	|---------------------------------------	|--------------------------------------------------------	|
-| INST_NAMESPACE      	| `default`                             	| Namespace in which the Installation is located         	|
-| INST_RESOURCE       	| `kyma-installation`                   	| Name of the Installation resource                      	|
-| INST_FINALIZER      	| `finalizer.installer.kyma-project.io` 	| Name of the finalizer                                  	|
-| OVERRIDES_NAMESPACE 	| `kyma-installer`                      	| Namespace in which the Installer Overrides are located 	|
+| **INST_NAMESPACE**      	| `default`                             	| Namespace in which the Installation CR is located         	|
+| **INST_RESOURCE**       	| `kyma-installation`                   	| Name of the Installation custom resource                      	|
+| **INST_FINALIZER**      	| `finalizer.installer.kyma-project.io` 	| Name of the finalizer                                  	|
+| **OVERRIDES_NAMESPACE** 	| `kyma-installer`                      	| Namespace in which the Installer overrides are located 	|
