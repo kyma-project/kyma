@@ -55,6 +55,9 @@ func TestSteps(t *testing.T) {
 
 				mockHelmClient := &mockHelmClient{
 					failUpgradingRelease: true,
+					releaseDeployedRevision: func(string) (int, error) {
+						return 2, nil
+					},
 				}
 
 				testUpgradeStep := fakeUpgradeStep(mockHelmClient)
@@ -74,7 +77,10 @@ func TestSteps(t *testing.T) {
 
 				mockHelmClient := &mockHelmClient{
 					failUpgradingRelease: true,
-					failRollback:         true,
+					releaseDeployedRevision: func(string) (int, error) {
+						return 2, nil
+					},
+					failRollback: true,
 				}
 
 				testUpgradeStep := fakeUpgradeStep(mockHelmClient)
@@ -376,7 +382,6 @@ func fakeUpgradeStep(hc *mockHelmClient) *upgradeStep {
 			sourceGetter: &mockSourceGetter{},
 			overrideData: &mockOverrideData{},
 		},
-		deployedRevision: 13,
 	}
 }
 
