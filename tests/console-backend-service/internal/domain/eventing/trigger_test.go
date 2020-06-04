@@ -208,7 +208,7 @@ func deleteTriggerArguments(namespace string) string {
 func triggerDetailsFields() string {
 	return `
 		name
-    	namespace
+		namespace
 		broker
 		filterAttributes
 		subscriber {
@@ -220,11 +220,11 @@ func triggerDetailsFields() string {
 				namespace
 			}
 		}
-    	status {
-		reason
-		status
+		status {
+			reason
+			status
 		}
-	`
+`
 }
 
 func metadataDetailsFields() string {
