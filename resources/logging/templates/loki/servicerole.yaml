@@ -7,7 +7,6 @@ metadata:
     app: {{ template "loki.name" . }}
     chart: {{ template "loki.chart" . }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
 spec:
   rules:
   - services: ["{{ template "loki.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"]

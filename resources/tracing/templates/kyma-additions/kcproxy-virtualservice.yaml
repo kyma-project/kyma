@@ -3,7 +3,7 @@ kind: VirtualService
 metadata:
   name: {{ template "jaeger-operator.fullname" . }}
   labels:
-      app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+{{ include "jaeger-operator.labels" . | indent 4 }}
 spec:
   hosts:
   - jaeger.{{ .Values.global.ingress.domainName }}

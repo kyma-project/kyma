@@ -7,7 +7,6 @@ metadata:
     app: {{ template "loki.name" . }}
     chart: {{ template "loki.chart" . }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
   annotations:
     {{- toYaml .Values.loki.annotations | nindent 4 }}
 spec:

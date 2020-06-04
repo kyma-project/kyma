@@ -6,7 +6,6 @@ metadata:
     app: {{ template "logui.name" . }}
     chart: {{ template "logui.chart" . }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
 spec:
   category: Diagnostics
   viewBaseUrl: https://log-ui.{{ .Values.global.ingress.domainName }}
