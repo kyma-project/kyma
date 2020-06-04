@@ -5,6 +5,8 @@ import (
 	"log"
 	"strings"
 	"time"
+
+	"helm.sh/helm/v3/pkg/storage/driver"
 )
 
 const (
@@ -78,7 +80,7 @@ func (hc *Client) WaitForReleaseDelete(nn NamespacedName) (bool, error) {
 
 	pf := func(relStatus *ReleaseStatus, getStatusRespErr error) (bool, error) {
 		if getStatusRespErr != nil {
-			if strings.Contains(getStatusRespErr.Error(), "release: not found") {
+			if strings.Contains(getStatusRespErr.Error(), driver.ErrReleaseNotFound.Error()) {
 				return true, nil
 			}
 			log.Printf("Error while waiting for release delete: %s", getStatusRespErr.Error())
