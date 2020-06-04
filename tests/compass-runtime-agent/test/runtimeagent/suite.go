@@ -239,7 +239,7 @@ func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T, applicationNam
 			return false
 		}
 
-		t.Log(app.Status.InstallationStatus.Status)
+		logrus.Infof("Application Installation status is: %s", app.Status.InstallationStatus.Status)
 
 		return app.Status.InstallationStatus.Status == "deployed"
 	})
