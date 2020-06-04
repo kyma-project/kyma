@@ -46,7 +46,7 @@ func (t *TestSuite) checkDefaultedFunction(function *serverlessv1alpha1.Function
 func getBodyString() string {
 	t := template.Must(template.New("body").Parse(
 		`
-const _ = require("lodash.add");
+const add = require("lodash.add");
 
 let counter = 0;
 let eventCounter = 0;
@@ -54,7 +54,7 @@ let eventCounter = 0;
 module.exports = {
   main: function (event, context) {
     try {
-      counter = _.add(counter, 1);
+      counter = add(counter, 1);
 	  console.log(event.data)
       const eventData = event.data["{{ .TestData }}"];
   
