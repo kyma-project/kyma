@@ -1,5 +1,4 @@
-{{- if not (.Capabilities.APIVersions.Has "clustertestsuites.testing.kyma-project.io/v1alpha1") }}
-{{- if .Release.IsUpgrade }}
+{{- if  not (.Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1/ClusterTestSuite") }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -139,5 +138,4 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-{{- end }}
 {{- end }}
