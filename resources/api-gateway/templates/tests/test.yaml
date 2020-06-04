@@ -57,6 +57,10 @@ spec:
             value: {{ .Values.tests.env.jwtMaxAttempts | quote }}
           - name: TEST_RETRY_DELAY
             value: {{ .Values.tests.env.jwtDelay | quote }}
+          - name: TEST_GATEWAY_NAME
+            value: {{ .Values.tests.env.gatewayName }}
+          - name: TEST_GATEWAY_NAMESPACE
+            value: {{ .Values.tests.env.gatewayNamespace }}
           {{- if .Values.global.isLocalEnv }}
           - name: TEST_MINIKUBE_ENV
             value: "true"

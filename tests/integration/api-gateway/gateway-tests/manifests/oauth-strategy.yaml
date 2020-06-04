@@ -4,7 +4,7 @@ metadata:
   name: "{{.NamePrefix}}-{{.TestID}}"
   namespace: "{{.Namespace}}"
 spec:
-  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  gateway: "{{.GatewayName}}.{{.GatewayNamespace}}.svc.cluster.local"
   service:
     host: "httpbin-{{.TestID}}.{{.Domain}}"
     name: httpbin-{{.TestID}}
