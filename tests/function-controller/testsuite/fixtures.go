@@ -19,7 +19,7 @@ func (t *TestSuite) getUpdatedFunction() *functionData {
 	return &functionData{
 		// such a function tests simultaneously importing external lib, the fact that it was triggered (by using counter) and passing argument to function in event
 		Body:        getBodyString(),
-		Deps:        `{ "name": "hellowithdeps", "version": "0.0.1", "dependencies": { "from2": "^2.3.0" } }`,
+		Deps:        `{ "name": "hellowithdeps", "version": "0.0.1", "dependencies": { "lodash.add": "^3.7.0" } }`,
 		MaxReplicas: 2,
 		MinReplicas: 1,
 	}
@@ -46,7 +46,7 @@ func (t *TestSuite) checkDefaultedFunction(function *serverlessv1alpha1.Function
 func getBodyString() string {
 	t := template.Must(template.New("body").Parse(
 		`
-const _ = require("from2");
+const _ = require("lodash.add");
 
 let counter = 0;
 let eventCounter = 0;
