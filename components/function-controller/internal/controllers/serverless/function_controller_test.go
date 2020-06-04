@@ -114,11 +114,11 @@ func TestFunctionReconciler_equalConditions(t *testing.T) {
 			args: args{
 				existing: []serverlessv1alpha1.Condition{
 					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapUpdated, Message: "msg"},
-					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha1.ConditionReasonServiceReady, Message: "some message"},
+					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha1.ConditionReasonServiceCreated, Message: "some message"},
 					{Type: serverlessv1alpha1.ConditionBuildReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonJobFinished, Message: "blabla"}},
 				expected: []serverlessv1alpha1.Condition{
 					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapUpdated, Message: "msg"},
-					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha1.ConditionReasonServiceReady, Message: "some message"},
+					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha1.ConditionReasonServiceCreated, Message: "some message"},
 					{Type: serverlessv1alpha1.ConditionBuildReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonJobFinished, Message: "blabla"}},
 			},
 			want: true,
@@ -128,11 +128,11 @@ func TestFunctionReconciler_equalConditions(t *testing.T) {
 			args: args{
 				existing: []serverlessv1alpha1.Condition{
 					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapUpdated, Message: "msg"},
-					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha1.ConditionReasonServiceReady, Message: "some message"},
+					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha1.ConditionReasonServiceCreated, Message: "some message"},
 					{Type: serverlessv1alpha1.ConditionBuildReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonJobFinished, Message: "blabla"}},
 				expected: []serverlessv1alpha1.Condition{
 					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapUpdated, Message: "msg"},
-					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha1.ConditionReasonServiceReady, Message: "some message"},
+					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha1.ConditionReasonServiceCreated, Message: "some message"},
 				},
 			},
 			want: false,
@@ -333,12 +333,12 @@ func TestFunctionReconciler_getConditionReason(t *testing.T) {
 			args: args{
 				conditions: []serverlessv1alpha1.Condition{
 					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapCreated},
-					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha1.ConditionReasonServiceReady},
+					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha1.ConditionReasonServiceCreated},
 					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonDeploymentWaiting},
 				},
 				conditionType: serverlessv1alpha1.ConditionRunning,
 			},
-			want: serverlessv1alpha1.ConditionReasonServiceReady,
+			want: serverlessv1alpha1.ConditionReasonServiceCreated,
 		},
 		{
 			name: "Should correctly return status unknown if there's no needed conditionType",

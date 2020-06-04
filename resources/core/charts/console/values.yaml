@@ -37,7 +37,11 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
+<<<<<<< HEAD
     tag: f2c6f41e
+=======
+    tag: 4725d3c8
+>>>>>>> 7070d23c0... squash
   service:
     externalPort: 80
     internalPort: 80
