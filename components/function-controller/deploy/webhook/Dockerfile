@@ -1,4 +1,4 @@
-FROM golang:1.13 as builder
+FROM golang:1.14-alpine as builder
 
 ENV BASE_APP_DIR=/go/src/github.com/kyma-project/kyma/components/function-controller \
     GO111MODULE=on \

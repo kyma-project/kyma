@@ -42,26 +42,6 @@ spec:
       {{ include "tplValue" ( dict "value" .Values.pod.extraProperties  "context" . ) | nindent 6 }}
       {{- end }}
       containers:
-        - name: kube-rbac-proxy
-          image: "{{ .Values.images.kubeRbacProxy.repository }}:{{ .Values.images.kubeRbacProxy.tag }}"
-          imagePullPolicy: {{ .Values.images.kubeRbacProxy.pullPolicy }}
-          args:
-          - --secure-listen-address
-          - "0.0.0.0:{{ .Values.metrics.authProxy.port.port }}"
-          - --upstream
-          - "http://127.0.0.1:{{ .Values.metrics.manager.port.port }}/"
-          - --logtostderr=true
-          - --v=10
-          {{- if .Values.containers.kubeRbacProxy.resources }}
-          resources:
-            {{- include "tplValue" ( dict "value" .Values.containers.kubeRbacProxy.resources "context" . ) | nindent 12 }}
-          {{- end }}
-          ports:
-            - containerPort: {{ .Values.metrics.authProxy.port.port }}
-              name: {{ .Values.metrics.authProxy.port.name }}
-          {{- if .Values.containers.kubeRbacProxy.extraProperties }}
-          {{ include "tplValue" ( dict "value" .Values.containers.kubeRbacProxy.extraProperties "context" . ) | nindent 10 }}
-          {{- end }}
         - name: manager
           image: "{{ .Values.images.manager.repository }}:{{ .Values.images.manager.tag }}"
           imagePullPolicy: {{ .Values.images.manager.pullPolicy }}
@@ -72,13 +52,15 @@ spec:
             {{- include "tplValue" ( dict "value" .Values.containers.manager.resources "context" . ) | nindent 12 }}
           {{- end }}
           ports:
+            {{- if .Values.metrics.enabled }}
             - containerPort: {{ .Values.metrics.manager.port.port }}
               name: {{ .Values.metrics.manager.port.name }}
               protocol: {{ .Values.metrics.manager.port.protocol }}
+            {{- end }}
           env:
           {{- if .Values.metrics.enabled }}
             - name: APP_METRICS_ADDRESS
-              value: "127.0.0.1:{{ .Values.metrics.manager.port.port }}"
+              value: ":{{ .Values.metrics.manager.port.port }}"
           {{- end }}
           {{- if gt (int .Values.deployment.replicas) 1 }}
             - name: APP_LEADER_ELECTION_ENABLED
@@ -102,6 +84,7 @@ spec:
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_CREDS_INIT_IMAGE" "value" .Values.containers.manager.envs.functionBuildCredsInitImage "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_DOCKER_ADDRESS" "value" .Values.containers.manager.envs.functionDockerAddress "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_DOCKER_EXTERNAL_ADDRESS" "value" .Values.containers.manager.envs.functionDockerExternalAddress "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_FUNCTION_TARGET_CPU_UTILIZATION_PERCENTAGE" "value" .Values.containers.manager.envs.targetCPUUtilizationPercentage "context" . ) | nindent 12 }}
           {{- if .Values.containers.manager.extraProperties }}
           {{ include "tplValue" ( dict "value" .Values.containers.manager.extraProperties "context" . ) | nindent 10 }}
           {{- end }}

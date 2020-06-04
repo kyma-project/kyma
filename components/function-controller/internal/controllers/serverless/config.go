@@ -7,11 +7,12 @@ import (
 )
 
 type FunctionConfig struct {
-	ImagePullSecretName  string        `envconfig:"default=serverless-registry-credentials"`
-	ImagePullAccountName string        `envconfig:"default=serverless"`
-	RequeueDuration      time.Duration `envconfig:"default=1m"`
-	Build                BuildConfig
-	Docker               DockerConfig
+	ImagePullSecretName            string        `envconfig:"default=serverless-registry-credentials"`
+	ImagePullAccountName           string        `envconfig:"default=serverless"`
+	TargetCPUUtilizationPercentage int32         `envconfig:"default=50"`
+	RequeueDuration                time.Duration `envconfig:"default=1m"`
+	Build                          BuildConfig
+	Docker                         DockerConfig
 }
 
 type BuildConfig struct {
