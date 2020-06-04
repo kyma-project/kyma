@@ -78,7 +78,7 @@ func (hc *Client) WaitForReleaseDelete(nn NamespacedName) (bool, error) {
 
 	pf := func(relStatus *ReleaseStatus, getStatusRespErr error) (bool, error) {
 		if getStatusRespErr != nil {
-			if strings.Contains(getStatusRespErr.Error(), "release Not Found") { //TODO: Improve!
+			if strings.Contains(getStatusRespErr.Error(), "release: not found") {
 				return true, nil
 			}
 			log.Printf("Error while waiting for release delete: %s", getStatusRespErr.Error())
@@ -87,7 +87,7 @@ func (hc *Client) WaitForReleaseDelete(nn NamespacedName) (bool, error) {
 		}
 
 		if relStatus == nil {
-			return false, errors.New("non-existing release status")
+			return false, errors.New("release status in nil")
 		}
 
 		log.Printf("Waiting for release delete: release status: %s/%s: %s", nn.Namespace, nn.Name, relStatus.Status)
@@ -109,7 +109,7 @@ func (hc *Client) WaitForReleaseRollback(nn NamespacedName) (bool, error) {
 		}
 
 		if relStatus == nil {
-			return false, errors.New("non-existing release status")
+			return false, errors.New("release status in nil")
 		}
 
 		if relStatus.Status == StatusDeployed {
