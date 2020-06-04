@@ -2,7 +2,7 @@ name: tracing
 apiVersion: v1
 description: jaeger-operator Helm chart for Kubernetes
 version: 2.14.1
-appVersion: 1.17.0
+appVersion: 1.17.1
 keywords:
   - Istio
   - tracing
