@@ -17,7 +17,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      serviceAccountName: {{ template "fullname" . }}-controller-manager
+      serviceAccountName: {{ template "fullname" . }}-self-signed-cert
       initContainers:
         - name: inject-certs
           securityContext:
