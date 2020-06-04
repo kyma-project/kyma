@@ -72,7 +72,7 @@ spec:
                 servicebindings.servicecatalog )
 
               for crd in "${crds[@]}"; do
-                timeout 60s bash -c "until kubectl apply -f /etc/crd/$crd; do sleep 2; done"
+                timeout 60s bash -c "until kubectl get $crd || kubectl apply -f /etc/crd/$crd; do sleep 2; done"
               done
       volumes:
         - name: crd-service-catalog
