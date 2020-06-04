@@ -39,6 +39,8 @@ type ClientInterface interface {
 	UpgradeRelease(chartDir, relNamespace, relName string, overrides overrides.Map) (*Release, error)
 	DeleteRelease(relNamespace, relName string) (*Release, error) //todo: rename to "uninstall"
 	RollbackRelease(relNamespace, relName string, revision int) (*Release, error)
+	WaitForReleaseDelete(relNamespace, relName string) (bool, error)
+	WaitForReleaseRollback(relNamespace, relName string) (bool, error)
 	PrintRelease(release *Release)
 }
 

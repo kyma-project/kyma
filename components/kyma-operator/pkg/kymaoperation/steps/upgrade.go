@@ -8,7 +8,7 @@ import (
 
 type upgradeStep struct {
 	installStep
-	deployedRevision    int32
+	deployedRevision    int
 	rollbackWaitTimeSec uint32
 }
 
@@ -20,22 +20,17 @@ func (s upgradeStep) Run() error {
 		return err
 	}
 
-	releaseOverrides, releaseOverridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
-
-	if releaseOverridesErr != nil {
-		return releaseOverridesErr
-	}
-
 	upgradeResp, upgradeErr := s.helmClient.UpgradeRelease(
 		chartDir,
+		s.component.Namespace,
 		s.component.GetReleaseName(),
-		releaseOverrides)
+		s.overrideData.ForRelease(s.component.GetReleaseName()))
 
 	if upgradeErr != nil {
 		return s.onError(upgradeErr)
 	}
 
-	s.helmClient.PrintRelease(upgradeResp.Release)
+	s.helmClient.PrintRelease(upgradeResp)
 
 	return nil
 }
@@ -45,7 +40,7 @@ func (s upgradeStep) onError(upgradeErr error) error {
 	upgradeErrMsg := fmt.Sprintf("Helm upgrade error: %s", upgradeErr.Error())
 
 	log.Println(fmt.Sprintf("Helm upgrade of release \"%s\" failed. Performing rollback to last known deployed revision.", s.component.GetReleaseName()))
-	_, err := s.helmClient.RollbackRelease(s.component.GetReleaseName(), 0)
+	_, err := s.helmClient.RollbackRelease(s.component.Namespace, s.component.GetReleaseName(), 0)
 
 	if err != nil {
 		rollbackErrMsg := fmt.Sprintf("Helm rollback of release \"%s\" failed with an error: %s", s.component.GetReleaseName(), err.Error())
@@ -53,7 +48,7 @@ func (s upgradeStep) onError(upgradeErr error) error {
 	}
 
 	//waiting for release to rollback
-	success, waitErr := s.helmClient.WaitForReleaseRollback(s.component.GetReleaseName())
+	success, waitErr := s.helmClient.WaitForReleaseRollback(s.component.Namespace, s.component.GetReleaseName())
 
 	if waitErr != nil {
 		return errors.New(fmt.Sprintf("%s\nHelm rollback of release \"%s\" failed with error: %s", upgradeErrMsg, s.component.GetReleaseName(), waitErr.Error()))

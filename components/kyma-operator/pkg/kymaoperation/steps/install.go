@@ -24,23 +24,17 @@ func (s installStep) Run() error {
 		return err
 	}
 
-	releaseOverrides, releaseOverridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
-
-	if releaseOverridesErr != nil {
-		return releaseOverridesErr
-	}
-
 	installResp, installErr := s.helmClient.InstallRelease(
 		chartDir,
 		s.component.Namespace,
 		s.component.GetReleaseName(),
-		releaseOverrides)
+		s.overrideData.ForRelease(s.component.GetReleaseName()))
 
 	if installErr != nil {
 		return s.onError(installErr)
 	}
 
-	s.helmClient.PrintRelease(installResp.Release)
+	s.helmClient.PrintRelease(installResp)
 
 	return nil
 }
@@ -48,7 +42,7 @@ func (s installStep) Run() error {
 func (s installStep) onError(installErr error) error {
 	installErrMsg := fmt.Sprintf("Helm install error: %s", installErr.Error())
 
-	isDeletable, checkErr := s.helmClient.IsReleaseDeletable(s.component.GetReleaseName())
+	isDeletable, checkErr := s.helmClient.IsReleaseDeletable(s.component.Namespace, s.component.GetReleaseName())
 
 	if checkErr != nil {
 		statusErrMsg := fmt.Sprintf("Checking status of release \"%s\" failed with an error: %s", s.component.GetReleaseName(), checkErr.Error())
@@ -58,7 +52,7 @@ func (s installStep) onError(installErr error) error {
 	if isDeletable {
 
 		log.Println(fmt.Sprintf("Helm installation of release \"%s\" failed. Deleting release before retrying.", s.component.GetReleaseName()))
-		_, deleteErr := s.helmClient.DeleteRelease(s.component.GetReleaseName())
+		_, deleteErr := s.helmClient.DeleteRelease(s.component.Namespace, s.component.GetReleaseName())
 
 		if deleteErr != nil {
 			deleteErrMsg := fmt.Sprintf("Helm delete of release \"%s\" failed with an error: %s", s.component.GetReleaseName(), deleteErr.Error())
@@ -66,7 +60,7 @@ func (s installStep) onError(installErr error) error {
 		}
 
 		//waiting for release to be deleted
-		success, waitErr := s.helmClient.WaitForReleaseDelete(s.component.GetReleaseName())
+		success, waitErr := s.helmClient.WaitForReleaseDelete(s.component.Namespace, s.component.GetReleaseName())
 		if waitErr != nil {
 			return errors.New(fmt.Sprintf("%s\nHelm delete of release \"%s\" failed with error: %s", installErrMsg, s.component.GetReleaseName(), waitErr.Error()))
 		} else {
