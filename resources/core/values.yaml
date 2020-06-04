@@ -39,7 +39,7 @@ global:
   console_backend_service:
     version: PR-8620
   console_backend_service_test:
-    version: "d4ff1c8c"
+    version: PR-8675
   xip_patch:
     dir:
     version: PR-8619
