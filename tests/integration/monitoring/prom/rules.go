@@ -1,4 +1,4 @@
-package promAPI
+package prom
 
 // To parse JSON response from http://monitoring-prometheus.kyma-system:9090/api/v1/rules
 type AlertResponse struct {
