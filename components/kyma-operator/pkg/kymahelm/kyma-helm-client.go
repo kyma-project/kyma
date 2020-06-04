@@ -30,7 +30,6 @@ import (
 // ClientInterface .
 type ClientInterface interface {
 	ListReleases() ([]*Release, error)
-	ReleaseStatus(relNamespace, relName string) (string, error)
 	IsReleaseDeletable(relNamespace, relName string) (bool, error)
 	ReleaseDeployedRevision(relNamespace, relName string) (int, error)
 	InstallReleaseFromChart(chartDir, relNamespace, relName string, overrides overrides.Map) (*Release, error)
@@ -39,8 +38,8 @@ type ClientInterface interface {
 	UpgradeRelease(chartDir, relNamespace, relName string, overrides overrides.Map) (*Release, error)
 	DeleteRelease(relNamespace, relName string) (*Release, error) //todo: rename to "uninstall"
 	RollbackRelease(relNamespace, relName string, revision int) (*Release, error)
-	WaitForReleaseDelete(relNamespace, relName string) (bool, error)
-	WaitForReleaseRollback(relNamespace, relName string) (bool, error)
+	WaitForReleaseDelete(nn NamespacedName) (bool, error)
+	WaitForReleaseRollback(nn NamespacedName) (bool, error)
 	PrintRelease(release *Release)
 }
 
@@ -99,23 +98,23 @@ func (hc *Client) ListReleases() ([]*Release, error) {
 	return kymaReleases, nil
 }
 
-//ReleaseStatus returns roughly-formatted Release status (columns are separated with blanks but not adjusted)
-func (hc *Client) ReleaseStatus(relNamespace, relName string) (string, error) {
+// ReleaseStatus returns release status
+func (hc *Client) ReleaseStatus(nn NamespacedName) (*ReleaseStatus, error) {
 
-	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, "")
+	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(nn.Namespace, nn.Name), nn.Namespace, "")
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	status := action.NewStatus(cfg)
 	//status.Version = 0 // default: 0 -> get last
 
-	rel, err := status.Run(relName)
+	rel, err := status.Run(nn.Name)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return rel.Info.Status.String(), nil
+	return helmReleaseToKymaRelease(rel).ReleaseStatus, nil
 }
 
 //IsReleaseDeletable returns true for release that can be deleted

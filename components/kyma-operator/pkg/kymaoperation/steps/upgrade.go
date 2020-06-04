@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 )
 
 type upgradeStep struct {
@@ -48,7 +50,7 @@ func (s upgradeStep) onError(upgradeErr error) error {
 	}
 
 	//waiting for release to rollback
-	success, waitErr := s.helmClient.WaitForReleaseRollback(s.component.Namespace, s.component.GetReleaseName())
+	success, waitErr := s.helmClient.WaitForReleaseRollback(kymahelm.NamespacedName{Namespace: s.component.Namespace, Name: s.component.GetReleaseName()})
 
 	if waitErr != nil {
 		return errors.New(fmt.Sprintf("%s\nHelm rollback of release \"%s\" failed with error: %s", upgradeErrMsg, s.component.GetReleaseName(), waitErr.Error()))

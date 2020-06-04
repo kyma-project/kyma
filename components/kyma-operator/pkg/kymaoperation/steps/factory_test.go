@@ -176,8 +176,8 @@ func fakeRelease(name string, version int, status kymahelm.Status) *kymahelm.Rel
 
 	return &kymahelm.Release{
 		ReleaseMeta: &kymahelm.ReleaseMeta{
-			Name:        name,
-			Description: "",
+			NamespacedName: kymahelm.NamespacedName{Name: name, Namespace: ""},
+			Description:    "",
 		},
 		ReleaseStatus: &kymahelm.ReleaseStatus{
 			CurrentRevision: version,

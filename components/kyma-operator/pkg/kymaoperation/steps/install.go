@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 )
@@ -60,7 +61,7 @@ func (s installStep) onError(installErr error) error {
 		}
 
 		//waiting for release to be deleted
-		success, waitErr := s.helmClient.WaitForReleaseDelete(s.component.Namespace, s.component.GetReleaseName())
+		success, waitErr := s.helmClient.WaitForReleaseDelete(kymahelm.NamespacedName{Namespace: s.component.Namespace, Name: s.component.GetReleaseName()})
 		if waitErr != nil {
 			return errors.New(fmt.Sprintf("%s\nHelm delete of release \"%s\" failed with error: %s", installErrMsg, s.component.GetReleaseName(), waitErr.Error()))
 		} else {

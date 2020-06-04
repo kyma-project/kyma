@@ -1,6 +1,7 @@
 package kymahelm
 
 import (
+	"errors"
 	"log"
 	"strings"
 	"time"
@@ -11,8 +12,8 @@ const (
 	defaultSleepTimeSec  = 10
 )
 
-type WaitReleaseStatusFunc func(releaseName, releaseNamespace string) (ReleaseStatus, error)
-type WaitPredicateFunc func(releaseStatus ReleaseStatus, relStatusResponseErr error) (bool, error)
+type WaitReleaseStatusFunc func(nn NamespacedName) (*ReleaseStatus, error)
+type WaitPredicateFunc func(releaseStatus *ReleaseStatus, relStatusResponseErr error) (bool, error)
 
 type WaitOption func(*waitConditionCfg)
 
@@ -23,14 +24,14 @@ type waitConditionCfg struct {
 	maxIterations   uint8
 }
 
-func (wc *waitConditionCfg) wait(releaseName, releaseNamespace string) (bool, error) {
+func (wc *waitConditionCfg) wait(nn NamespacedName) (bool, error) {
 
 	var fulfilled bool
 	var iter uint8 = 0
 
 	for !fulfilled && iter < wc.maxIterations {
 
-		relStatus, relStatusErr := wc.releaseStatusFn(releaseName, releaseNamespace)
+		relStatus, relStatusErr := wc.releaseStatusFn(nn)
 
 		eval, predicateError := wc.predicateFn(relStatus, relStatusErr)
 
@@ -52,14 +53,13 @@ func (wc *waitConditionCfg) wait(releaseName, releaseNamespace string) (bool, er
 
 // WaitForCondition returns true if condition was fulfilled within configured time, returns false otherwise.
 // Returns an error immediately if the configured predicate function returns an error.
-func (hc *Client) WaitForCondition(releaseName string, releaseNamespace string, pf WaitPredicateFunc, opts ...WaitOption) (bool, error) {
+func (hc *Client) WaitForCondition(nn NamespacedName, pf WaitPredicateFunc, opts ...WaitOption) (bool, error) {
 
 	//default
-	relStatusFn := func(releaseName, releaseNamespace string) (ReleaseStatus, error) {
+	relStatusFn := func(nn NamespacedName) (*ReleaseStatus, error) {
 		//No retries here on purpose. Perhaps the user wants to wait for "release not exist" condition. That will return an error.
 		//Implement smarter error handling/retries with the help of WaitPredicateFunc
-		_, err := hc.ReleaseStatus(releaseName, releaseNamespace) //TODO: Improve
-		return ReleaseStatus{}, err
+		return hc.ReleaseStatus(nn)
 	}
 
 	cfg := defaultWaitConditionCfg()
@@ -71,12 +71,12 @@ func (hc *Client) WaitForCondition(releaseName string, releaseNamespace string, 
 		opt(cfg)
 	}
 
-	return cfg.wait(releaseName, releaseNamespace)
+	return cfg.wait(nn)
 }
 
-func (hc *Client) WaitForReleaseDelete(releaseName, releaseNamespace string) (bool, error) {
+func (hc *Client) WaitForReleaseDelete(nn NamespacedName) (bool, error) {
 
-	pf := func(relStatus ReleaseStatus, getStatusRespErr error) (bool, error) {
+	pf := func(relStatus *ReleaseStatus, getStatusRespErr error) (bool, error) {
 		if getStatusRespErr != nil {
 			if strings.Contains(getStatusRespErr.Error(), "release Not Found") { //TODO: Improve!
 				return true, nil
@@ -86,34 +86,42 @@ func (hc *Client) WaitForReleaseDelete(releaseName, releaseNamespace string) (bo
 			return false, nil
 		}
 
-		log.Printf("Waiting for release delete: release status: %s/%s: %s", releaseNamespace, releaseName, relStatus.Status)
+		if relStatus == nil {
+			return false, errors.New("non-existing release status")
+		}
+
+		log.Printf("Waiting for release delete: release status: %s/%s: %s", nn.Namespace, nn.Name, relStatus.Status)
 
 		//Continue waiting
 		return false, nil
 	}
 
-	return hc.WaitForCondition(releaseName, releaseNamespace, pf)
+	return hc.WaitForCondition(nn, pf)
 }
 
-func (hc *Client) WaitForReleaseRollback(releaseName, releaseNamespace string) (bool, error) {
+func (hc *Client) WaitForReleaseRollback(nn NamespacedName) (bool, error) {
 
-	pf := func(releaseStatus ReleaseStatus, getStatusRespErr error) (bool, error) {
+	pf := func(relStatus *ReleaseStatus, getStatusRespErr error) (bool, error) {
 		if getStatusRespErr != nil {
 			log.Printf("Error while waiting for release rollback: %s", getStatusRespErr.Error())
 			//Continue waiting
 			return false, nil
 		}
 
-		if releaseStatus.Status == "DEPLOYED" { //TODO: Improve
+		if relStatus == nil {
+			return false, errors.New("non-existing release status")
+		}
+
+		if relStatus.Status == StatusDeployed {
 			return true, nil
 		}
-		log.Printf("Waiting for release rollback: release status: %s/%s: %s", releaseNamespace, releaseName, releaseStatus.Status)
+		log.Printf("Waiting for release rollback: release status: %s/%s: %s", nn.Namespace, nn.Name, relStatus.Status)
 
 		//Continue waiting
 		return false, nil
 	}
 
-	return hc.WaitForCondition(releaseName, releaseNamespace, pf)
+	return hc.WaitForCondition(nn, pf)
 }
 func defaultWaitConditionCfg() *waitConditionCfg {
 

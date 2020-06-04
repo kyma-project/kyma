@@ -30,16 +30,21 @@ const (
 	StatusPendingRollback Status = "pending-rollback"
 )
 
-//Release is an insternal representation of a Helm release
+// Release is an insternal representation of a Helm release
 type Release struct {
 	*ReleaseMeta
 	*ReleaseStatus
 }
 
-//ReleaseMeta is an internal representation of Helm's release metadata
+// NamespacedName Combines release name and namespace
+type NamespacedName struct {
+	Name      string
+	Namespace string
+}
+
+// ReleaseMeta is an internal representation of Helm's release metadata
 type ReleaseMeta struct {
-	Name        string
-	Namespace   string
+	NamespacedName
 	Description string
 }
 
@@ -57,9 +62,8 @@ type UninstallReleaseStatus struct {
 func helmReleaseToKymaRelease(hr *release.Release) *Release {
 	return &Release{
 		&ReleaseMeta{
-			Name:        hr.Name,
-			Namespace:   hr.Namespace,
-			Description: hr.Info.Description,
+			NamespacedName: NamespacedName{Name: hr.Name, Namespace: hr.Namespace},
+			Description:    hr.Info.Description,
 		},
 		&ReleaseStatus{
 			Status:          Status(hr.Info.Status),

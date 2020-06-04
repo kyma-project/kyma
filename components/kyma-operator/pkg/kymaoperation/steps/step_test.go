@@ -297,8 +297,10 @@ func (hc *mockHelmClient) UpgradeRelease(chartDir, relNamespace, relName string,
 
 	return &kymahelm.Release{
 		ReleaseMeta: &kymahelm.ReleaseMeta{
-			Name:        "testRelease",
-			Namespace:   "testNamespace",
+			NamespacedName: kymahelm.NamespacedName{
+				Name:      "testRelease",
+				Namespace: "testNamespace",
+			},
 			Description: "",
 		},
 		ReleaseStatus: &kymahelm.ReleaseStatus{
@@ -309,11 +311,11 @@ func (hc *mockHelmClient) UpgradeRelease(chartDir, relNamespace, relName string,
 
 func (hc *mockHelmClient) PrintRelease(release *kymahelm.Release) {}
 
-func (hc *mockHelmClient) WaitForReleaseDelete(relNamespace, relName string) (bool, error) {
+func (hc *mockHelmClient) WaitForReleaseDelete(nn kymahelm.NamespacedName) (bool, error) {
 	return true, nil
 }
 
-func (hc *mockHelmClient) WaitForReleaseRollback(relNamespace, relName string) (bool, error) {
+func (hc *mockHelmClient) WaitForReleaseRollback(nn kymahelm.NamespacedName) (bool, error) {
 	return true, nil
 }
 
