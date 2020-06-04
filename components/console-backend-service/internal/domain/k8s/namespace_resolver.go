@@ -70,20 +70,21 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNames
 }
 
 func (r *namespaceResolver) ApplicationsField(ctx context.Context, obj *gqlschema.Namespace) ([]string, error) {
+
+	appNames := []string{}
 	if obj == nil {
-		return nil, errors.New("Cannot get application field for namespace")
+		return appNames, errors.New("Cannot get application field for namespace")
 	}
 
 	items, err := r.appRetriever.Application().ListInNamespace(obj.Name)
 	if err != nil {
 		if module.IsDisabledModuleError(err) {
-			return nil, nil
+			return appNames, nil
 		}
 
 		return nil, errors.Wrapf(err, "while listing %s for namespace %s", appPretty.Application, obj.Name)
 	}
 
-	var appNames []string
 	for _, app := range items {
 		appNames = append(appNames, app.Name)
 	}
