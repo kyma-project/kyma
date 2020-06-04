@@ -23,7 +23,7 @@ global:
       version: "d068b250"
     director:
       dir:
-      version: "6e1e3182"
+      version: "PR-1408"
     gateway:
       dir:
       version: "53b12181"
@@ -53,7 +53,7 @@ global:
     tests:
       director:
         dir:
-        version: "5d59cd98"
+        version: "PR-1408"
       connector:
         dir:
         version: "d068b250"
