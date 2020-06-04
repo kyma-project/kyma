@@ -51,6 +51,7 @@ type Client struct {
 	overridesLogger *logrus.Logger
 	maxHistory      int
 	timeout         time.Duration //todo: timeout param consumed by actions limits single applies rather than entire operations (helm install, helm upgrade, etc.). Either remove or find a workaround
+	driver          string //todo: add validation in main?
 }
 
 func (hc *Client) infoLogFunc(namespace string, releaseName string) infoLogFunc {
@@ -61,20 +62,21 @@ func (hc *Client) infoLogFunc(namespace string, releaseName string) infoLogFunc 
 }
 
 // NewClient .
-func NewClient(kubeConfig *rest.Config, overridesLogger *logrus.Logger, maxHistory int, timeout int64) (*Client, error) {
+func NewClient(kubeConfig *rest.Config, overridesLogger *logrus.Logger, maxHistory int, timeout int64, driver string) (*Client, error) {
 
 	return &Client{
 		kubeConfig:      kubeConfig,
 		overridesLogger: overridesLogger,
 		maxHistory:      maxHistory,
 		timeout:         time.Duration(timeout) * time.Second,
+		driver:          driver,
 	}, nil
 }
 
 // ListReleases lists all releases except for the superseded ones
 func (hc *Client) ListReleases() ([]*Release, error) {
 
-	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc("all", "all"), "", "") //todo: is that ok???????
+	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc("all", "all"), "", hc.driver) //todo: is that ok???????
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +103,7 @@ func (hc *Client) ListReleases() ([]*Release, error) {
 // ReleaseStatus returns release status
 func (hc *Client) ReleaseStatus(nn NamespacedName) (*ReleaseStatus, error) {
 
-	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(nn.Namespace, nn.Name), nn.Namespace, "")
+	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(nn.Namespace, nn.Name), nn.Namespace, hc.driver)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +126,7 @@ func (hc *Client) IsReleaseDeletable(relNamespace, relName string) (bool, error)
 	maxAttempts := 3
 	fixedDelay := 3
 
-	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, "")
+	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, hc.driver)
 	if err != nil {
 		return false, err
 	}
@@ -184,7 +186,7 @@ func (hc *Client) ReleaseDeployedRevision(relNamespace, relName string) (int, er
 // InstallReleaseFromChart .
 func (hc *Client) InstallReleaseFromChart(chartDir, relNamespace, relName string, values overrides.Map) (*Release, error) {
 
-	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, "") //todo: parameterize driver
+	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, hc.driver) //todo: parameterize driver
 	//cfg, err := newActionConfigMst(relNamespace)
 	if err != nil {
 		return nil, err
@@ -225,7 +227,7 @@ func (hc *Client) InstallReleaseWithoutWait(chartDir, ns, relName string, values
 // UpgradeRelease .
 func (hc *Client) UpgradeRelease(chartDir, relNamespace, relName string, values overrides.Map) (*Release, error) {
 
-	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, "")
+	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, hc.driver)
 	if err != nil {
 		return nil, err
 	}
@@ -255,7 +257,7 @@ func (hc *Client) UpgradeRelease(chartDir, relNamespace, relName string, values 
 //RollbackRelease performs rollback to given revision
 func (hc *Client) RollbackRelease(relNamespace, relName string, revision int) (*Release, error) {
 
-	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, "")
+	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, hc.driver)
 	if err != nil {
 		return nil, err
 	}
@@ -272,7 +274,7 @@ func (hc *Client) RollbackRelease(relNamespace, relName string, revision int) (*
 // DeleteRelease .
 func (hc *Client) DeleteRelease(relNamespace, relName string) (*Release, error) { //todo: rename to "uninstall"
 
-	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, "")
+	cfg, err := newActionConfig(hc.kubeConfig, hc.infoLogFunc(relNamespace, relName), relNamespace, hc.driver)
 	if err != nil {
 		return nil, err
 	}

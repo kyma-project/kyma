@@ -63,6 +63,7 @@ func main() {
 	overrideLogFormat := flag.String("overrideLogFormat", "text", "Installation Override Log format (Accepted values: text or json)")
 	helmMaxHistory := flag.Int("helmMaxHistory", 10, "Max number of releases returned by Helm release history query")
 	helmTimeout := flag.Int64("helmTimeout", 3600, "Number of seconds on Helm operations")
+	helmDriver := flag.String("helmDriver", "configmaps", "driver represents a method used to store Helm releases")
 
 	flag.Parse()
 
@@ -95,7 +96,7 @@ func main() {
 		log.Fatalf("Unable to create logrus Instance. Error: %v", err)
 	}
 
-	helmClient, err := kymahelm.NewClient(config, overridesLogger, *helmMaxHistory, *helmTimeout)
+	helmClient, err := kymahelm.NewClient(config, overridesLogger, *helmMaxHistory, *helmTimeout, *helmDriver)
 	if err != nil {
 		log.Fatalf("Unable create helm client. Error: %v", err)
 	}
