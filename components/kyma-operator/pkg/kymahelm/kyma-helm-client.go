@@ -51,7 +51,7 @@ type Client struct {
 	overridesLogger *logrus.Logger
 	maxHistory      int
 	timeout         time.Duration //todo: timeout param consumed by actions limits single applies rather than entire operations (helm install, helm upgrade, etc.). Either remove or find a workaround
-	driver          string //todo: add validation in main?
+	driver          string        //todo: add validation in main?
 }
 
 func (hc *Client) infoLogFunc(namespace string, releaseName string) infoLogFunc {
