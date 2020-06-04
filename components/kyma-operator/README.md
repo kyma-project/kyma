@@ -50,12 +50,12 @@ The [Installation custom resource file](https://kyma-project.io/docs/root/kyma/#
 
 ### Configuration
 
-Operator by default doesn't support many Installation Custom Resources on the cluster. You need to provision another
-Operator instance. You can configure which Installation resource it will track with those environmental variables:
+Operator tracks the Installation CR and waits for overrides in a given namespace. You can configure them using those
+environmental variables. 
 
 | Name                	| Default                               	| Description                                            	|
 |---------------------	|---------------------------------------	|--------------------------------------------------------	|
-| INST_NAMESPACE      	| `default`                             	| Namespace in which the installation is located         	|
-| INST_RESOURCE       	| `kyma-installation`                   	| Name of the installation resource                      	|
+| INST_NAMESPACE      	| `default`                             	| Namespace in which the Installation is located         	|
+| INST_RESOURCE       	| `kyma-installation`                   	| Name of the Installation resource                      	|
 | INST_FINALIZER      	| `finalizer.installer.kyma-project.io` 	| Name of the finalizer                                  	|
-| OVERRIDES_NAMESPACE 	| `kyma-installer`                      	| Namespace in which the installer overrides are located 	|
+| OVERRIDES_NAMESPACE 	| `kyma-installer`                      	| Namespace in which the Installer Overrides are located 	|
