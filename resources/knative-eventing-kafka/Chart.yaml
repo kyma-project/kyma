@@ -1,8 +1,8 @@
-name: knative-kafka
+apiVersion: v2
+name: knative-eventing-kafka
 version: 0.0.1
 description: A Helm chart for knative-kafka
 keywords:
 - knative
 - eventing
 - kafka
-apiVersion: v1
