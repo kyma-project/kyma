@@ -3,16 +3,17 @@ package webhook
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	v1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
 	"k8s.io/api/admission/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
-	"net/http"
 )
 
 var (
@@ -106,23 +107,21 @@ func (s Handler) mutate(admissionReview v1beta1.AdmissionReview) *v1beta1.Admiss
 }
 
 func createPatch(application *alpha1.Application) ([]byte, error) {
-	controller := true
 
 	reference := metav1.OwnerReference{
 		APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		Kind:       "Application",
 		Name:       application.Name,
 		UID:        application.UID,
-		Controller: &controller,
 	}
 
-	patch := patch{
+	p := patch{
 		Op:    "add",
 		Path:  "/metadata/ownerReferences",
-		Value: reference,
+		Value: []metav1.OwnerReference{reference},
 	}
 
-	marshal, err := json.Marshal(patch)
+	marshal, err := json.Marshal([]patch{p})
 
 	if err != nil {
 		return nil, err
