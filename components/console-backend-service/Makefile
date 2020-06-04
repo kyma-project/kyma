@@ -76,4 +76,4 @@ run:
 	./console-backend-service
 
 watch:
-	CompileDaemon -build="make build-local" -command="make run" -graceful-kill
+	CompileDaemon -build="make build" -command="make run" -graceful-kill
