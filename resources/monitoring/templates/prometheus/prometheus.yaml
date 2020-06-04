@@ -133,7 +133,8 @@ spec:
 {{ else }}
 {{- if .Values.prometheus.prometheusSpec.serviceMonitorSelector }}
   serviceMonitorSelector:
-{{ toYaml .Values.prometheus.prometheusSpec.serviceMonitorSelector | indent 4 }}
+    matchLabels:
+{{ toYaml .Values.prometheus.prometheusSpec.serviceMonitorSelector | indent 6 }}
 {{ else if .Values.prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues  }}
   serviceMonitorSelector:
     matchLabels:
@@ -143,7 +144,8 @@ spec:
 {{- end }}
 {{- if .Values.prometheus.prometheusSpec.serviceMonitorNamespaceSelector }}
   serviceMonitorNamespaceSelector:
-{{ toYaml .Values.prometheus.prometheusSpec.serviceMonitorNamespaceSelector | indent 4 }}
+    matchLabels:
+{{ toYaml .Values.prometheus.prometheusSpec.serviceMonitorNamespaceSelector | indent 6 }}
 {{ else }}
   serviceMonitorNamespaceSelector: {}
 {{- end }}
