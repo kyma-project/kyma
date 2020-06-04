@@ -45,7 +45,7 @@ global:
     version: PR-8619
   e2e_external_solution:
     dir:
-    version: PR-8511
+    version: PR-8709
   e2e_external_solution_test_service:
     dir:
     version: PR-8483
