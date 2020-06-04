@@ -46,7 +46,7 @@ global:
   application_gateway_tests:
     version: "1272752c"
   application_registry:
-    version: "35130f2e"
+    version: "PR-8674"
   application_registry_tests:
     version: "c608dbf3"
   application_broker:

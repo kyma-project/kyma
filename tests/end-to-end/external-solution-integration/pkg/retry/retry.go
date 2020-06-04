@@ -3,8 +3,6 @@ package retry
 import (
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/avast/retry-go"
 )
 
@@ -24,9 +22,6 @@ var defaultOpts = []retry.Option{
 	Attempts(retryAttemptsCount),
 	Delay(retryDelay),
 	DelayType(FixedDelay),
-	OnRetry(func(n uint, err error) {
-		logrus.WithField("component", "RetryTest").Debugf("OnRetry: attempts: %d, error: %v", n, err)
-	}),
 }
 
 func Do(fn retry.RetryableFunc, opts ...retry.Option) error {
