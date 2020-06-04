@@ -59,11 +59,11 @@ func (c *serviceBindingUsageConverter) ToGQL(in *api.ServiceBindingUsage) (*gqls
 }
 
 func (c *serviceBindingUsageConverter) ToGQLs(in []*api.ServiceBindingUsage) ([]*gqlschema.ServiceBindingUsage, error) {
-	var out []*gqlschema.ServiceBindingUsage
+	out := []*gqlschema.ServiceBindingUsage{}
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
-			return nil, err
+			return out, err
 		}
 
 		if converted != nil {

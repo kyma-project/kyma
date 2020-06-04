@@ -15,7 +15,7 @@ func (p *clusterServicePlanConverter) ToGQL(item *v1beta1.ClusterServicePlan) (*
 		return nil, nil
 	}
 
-	var externalMetadata map[string]interface{}
+	externalMetadata := map[string]interface{}{}
 	var err error
 	if item.Spec.ExternalMetadata != nil {
 		externalMetadata, err = resource.ExtractRawToMap("ExternalMetadata", item.Spec.ExternalMetadata.Raw)
@@ -24,14 +24,14 @@ func (p *clusterServicePlanConverter) ToGQL(item *v1beta1.ClusterServicePlan) (*
 		}
 	}
 
-	var instanceCreateParameterSchema *gqlschema.JSON
+	instanceCreateParameterSchema := &gqlschema.JSON{}
 	if item.Spec.InstanceCreateParameterSchema != nil {
 		instanceCreateParameterSchema, err = jsonschema.Unpack(item.Spec.InstanceCreateParameterSchema.Raw)
 		if err != nil {
 			return nil, p.wrapConversionError(err, item.Name)
 		}
 	}
-	var bindingCreateParameterSchema *gqlschema.JSON
+	bindingCreateParameterSchema := &gqlschema.JSON{}
 	if item.Spec.ServiceBindingCreateParameterSchema != nil {
 		bindingCreateParameterSchema, err = jsonschema.Unpack(item.Spec.ServiceBindingCreateParameterSchema.Raw)
 		if err != nil {
