@@ -63,7 +63,7 @@ Create meta labels
 {{- $labelChart := include "fluent-bit.chart" $ -}}
 {{- $labelApp := include "fluent-bit.name" $ -}}
 {{- if .Values.helmLabels.enabled -}}
-  {{- $labels := dict "chart" $labelChart "release" .Release.Name "heritage" .Release.Service -}}
+  {{- $labels := dict "chart" $labelChart "release" .Release.Name -}}
   {{ merge $labels .Values.extraLabels (default (dict "app" $labelApp) .Values.defaultLabels) | toYaml }}
 {{- else -}}
   {{ merge .Values.extraLabels (default (dict "app" $labelApp) .Values.defaultLabels) | toYaml }}

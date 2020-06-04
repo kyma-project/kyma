@@ -8,7 +8,7 @@ spec:
     host: "httpbin-{{.TestID}}.{{.Domain}}"
     name: httpbin-{{.TestID}}
     port: 8000
-  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  gateway: "{{.GatewayName}}.{{.GatewayNamespace}}.svc.cluster.local"
   rules:
   - path: /.*
     methods: ["GET"]

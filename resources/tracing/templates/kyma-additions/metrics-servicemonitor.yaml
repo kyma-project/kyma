@@ -19,7 +19,7 @@ kind: ServiceMonitor
 metadata:
   name: {{ template "jaeger-operator.fullname" . }}-jaeger
   labels:
-    app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger
+{{ include "jaeger-operator.labels" . | indent 4 }}
     prometheus: monitoring
 spec:
   endpoints:
@@ -36,7 +36,7 @@ kind: ServiceMonitor
 metadata:
   name: {{ template "jaeger-operator.fullname" . }}-jaeger-agent
   labels:
-    app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-agent
+{{ include "jaeger-operator.labels" . | indent 4 }}
     prometheus: monitoring
 spec:
   endpoints:
@@ -50,7 +50,7 @@ kind: ServiceMonitor
 metadata:
   name: {{ template "jaeger-operator.fullname" . }}-jaeger-collector
   labels:
-    app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-collector
+{{ include "jaeger-operator.labels" . | indent 4 }}
     prometheus: monitoring
 spec:
   endpoints:
@@ -64,7 +64,7 @@ kind: ServiceMonitor
 metadata:
   name: {{ template "jaeger-operator.fullname" . }}-jaeger-query
   labels:
-    app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-query
+{{ include "jaeger-operator.labels" . | indent 4 }}
     prometheus: monitoring
 spec:
   endpoints:

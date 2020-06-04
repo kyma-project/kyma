@@ -4,10 +4,7 @@ metadata:
   name: {{ template "kiali.name" . }}-kcproxy
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "kiali.name" . }}-kcproxy
-    chart: {{ template "kiali.chart" . }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    {{- include "kiali.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.kcproxy.replicaCount }}
   selector:

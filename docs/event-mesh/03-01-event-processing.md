@@ -17,7 +17,7 @@ This diagram explains the event flow in Kyma, from the moment the Application se
 
 4. The Broker sends the event to the Trigger which is configured to receive events of this type.
 
-5. The Trigger filters the events based on the attributes you can find in the [Trigger specification](https://knative.dev/docs/eventing/broker-trigger/). See the example of a Trigger CR:
+5. The Trigger filters the events based on the attributes you can find in the [Trigger specification](https://knative.dev/v0.12-docs/eventing/broker-trigger/). See the example of a Trigger CR:
 
 ```yaml
 apiVersion: eventing.knative.dev/v1alpha1

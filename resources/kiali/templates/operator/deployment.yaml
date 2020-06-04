@@ -6,10 +6,7 @@ kind: Deployment
 metadata:
   name: {{ template "kiali.name" . }}-operator
   labels:
-    app: {{ template "kiali.name" . }}-operator
-    chart: {{ template "kiali.chart" . }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    {{- include "kiali.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
