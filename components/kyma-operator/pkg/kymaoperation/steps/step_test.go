@@ -12,6 +12,8 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	. "github.com/smartystreets/goconvey/convey"
+	"k8s.io/helm/pkg/proto/hapi/release"
+	rls "k8s.io/helm/pkg/proto/hapi/services"
 )
 
 const (
@@ -232,83 +234,93 @@ type mockHelmClient struct {
 	isReleaseDeletable      bool
 	deleteReleaseCalled     bool
 	rollbackReleaseCalled   bool
-	listReleasesResponse    []*kymahelm.Release
-	releaseDeployedRevision func(string) (int, error)
+	listReleasesResponse    *rls.ListReleasesResponse
+	releaseDeployedRevision func(string) (int32, error)
 }
 
-func (hc *mockHelmClient) ReleaseDeployedRevision(relNamespace, relName string) (int, error) {
-	return hc.releaseDeployedRevision(relName)
+func (hc *mockHelmClient) ReleaseDeployedRevision(name string) (int32, error) {
+	return hc.releaseDeployedRevision(name)
 }
 
-func (hc *mockHelmClient) IsReleaseDeletable(relNamespace, relName string) (bool, error) {
+func (hc *mockHelmClient) IsReleaseDeletable(rname string) (bool, error) {
 	if hc.failIsReleaseDeletable {
 		return false, errors.New("failed to get release status")
 	}
 	return hc.isReleaseDeletable, nil
 }
 
-func (hc *mockHelmClient) InstallRelease(chartDir, relNamespace, relName string, values overrides.Map) (*kymahelm.Release, error) {
+func (hc *mockHelmClient) InstallRelease(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error) {
 	if hc.failInstallingRelease == true {
 		err := errors.New("failed to install release")
 		return nil, err
 	}
-	return &kymahelm.Release{}, nil
+	return &rls.InstallReleaseResponse{}, nil
 }
 
-func (hc *mockHelmClient) DeleteRelease(relNamespace, relName string) (*kymahelm.Release, error) {
+func (hc *mockHelmClient) DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error) {
 	hc.deleteReleaseCalled = true
 	if hc.failDeletingRelease {
 		err := errors.New("failed to delete release")
 		return nil, err
 	}
-	return &kymahelm.Release{}, nil
+	return &rls.UninstallReleaseResponse{}, nil
 }
 
-func (hc *mockHelmClient) RollbackRelease(relNamespace, relName string, revision int) (*kymahelm.Release, error) {
+func (hc *mockHelmClient) RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error) {
 	hc.rollbackReleaseCalled = true
 	if hc.failRollback {
 		err := errors.New("failed to rollback release")
 		return nil, err
 	}
-	return &kymahelm.Release{}, nil
+	return &rls.RollbackReleaseResponse{}, nil
 }
 
-func (hc *mockHelmClient) ListReleases() ([]*kymahelm.Release, error) {
+func (hc *mockHelmClient) ListReleases() (*rls.ListReleasesResponse, error) {
 	return hc.listReleasesResponse, nil
 }
 
-func (hc *mockHelmClient) ReleaseStatus(relNamespace, relName string) (string, error) {
+func (hc *mockHelmClient) ReleaseStatus(rname string) (string, error) {
 	return "", nil
 }
 
-func (hc *mockHelmClient) InstallReleaseFromChart(chartDir, relNamespace, relName string, values overrides.Map) (*kymahelm.Release, error) {
+func (hc *mockHelmClient) InstallReleaseFromChart(chartdir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error) {
 	return nil, nil
 }
 
-func (hc *mockHelmClient) InstallReleaseWithoutWait(chartDir, relNamespace, relName string, values overrides.Map) (*kymahelm.Release, error) {
+func (hc *mockHelmClient) InstallReleaseWithoutWait(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error) {
 	return nil, nil
 }
 
-func (hc *mockHelmClient) UpgradeRelease(chartDir, relNamespace, relName string, values overrides.Map) (*kymahelm.Release, error) {
+func (hc *mockHelmClient) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error) {
 	if hc.failUpgradingRelease == true {
 		err := errors.New("failed to upgrade release")
 		return nil, err
 	}
 
-	return &kymahelm.Release{
-		ReleaseMeta: &kymahelm.ReleaseMeta{
-			Name:        "testRelease",
-			Namespace:   "testNamespace",
-			Description: "",
-		},
-		ReleaseStatus: &kymahelm.ReleaseStatus{
-			CurrentRevision: 14,
-			Status:          kymahelm.StatusDeployed,
+	return &rls.UpdateReleaseResponse{
+		Release: &release.Release{
+			Name:      "testRelease",
+			Namespace: "testNamespace",
+			Version:   14,
+			Info: &release.Info{
+				Status: &release.Status{
+					Code: release.Status_DEPLOYED,
+				},
+				Description: "",
+			},
 		},
 	}, nil
 }
 
-func (hc *mockHelmClient) PrintRelease(release *kymahelm.Release) {}
+func (hc *mockHelmClient) PrintRelease(release *release.Release) {}
+
+func (hc *mockHelmClient) WaitForReleaseDelete(releaseName string) (bool, error) {
+	return true, nil
+}
+
+func (hc *mockHelmClient) WaitForReleaseRollback(releaseName string) (bool, error) {
+	return true, nil
+}
 
 func (hc *mockHelmClient) WaitForReleaseDelete(releaseName string) (bool, error) {
 	return true, nil
@@ -334,8 +346,8 @@ type mockOverrideData struct {
 	overrides.OverrideData
 }
 
-func (mod *mockOverrideData) ForRelease(releaseName string) overrides.Map {
-	return nil
+func (mod *mockOverrideData) ForRelease(releaseName string) (string, error) {
+	return "", nil
 }
 
 func fakeComponent() v1alpha1.KymaComponent {
