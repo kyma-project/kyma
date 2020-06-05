@@ -5,5 +5,5 @@ keywords:
 - dex
 - oidc
 - kyma
-appVersion: "55795a8e"
+appVersion: "PR-12"
 apiVersion: v1
