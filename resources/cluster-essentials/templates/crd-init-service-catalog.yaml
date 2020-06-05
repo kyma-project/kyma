@@ -31,7 +31,7 @@ metadata:
   name: {{ .Release.Name }}-init-service-catalog
   namespace: {{ .Release.Namespace }}
   annotations:
-    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded"
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook: "pre-upgrade, pre-install"
     helm.sh/hook-weight: "10"
   labels:
