@@ -3,11 +3,32 @@ package steps
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
+	errors "github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestStepsFactory(t *testing.T) {
+	Convey("stepFactory.stepList", t, func() {
+		Convey("should return error if provided newStepFn function returns an error", func() {
+			//given
+
+			sf := stepFactory{
+				installationData: fakeInstallationData(),
+			}
+			testErr := errors.New("unexpectedError")
+			newStepFn := func(component v1alpha1.KymaComponent) (Step, error) {
+				return nil, testErr
+			}
+
+			//when
+			_, err := sf.stepList(newStepFn)
+
+			//then
+			So(err, ShouldEqual, testErr)
+		})
+	})
 	Convey("installStepFactory.newStep", t, func() {
 		Convey("should return install step for non-existing release", func() {
 			//given
@@ -26,7 +47,6 @@ func TestStepsFactory(t *testing.T) {
 			So(res.String(), ShouldEqual, "Component: test-component, Release: test-release, Namespace: test-namespace")
 			So(res, ShouldHaveSameTypeAs, installStep{})
 		})
-
 		Convey("should return upgrade step for existing release", func() {
 			//given
 			component := fakeComponent()
@@ -100,4 +120,15 @@ func TestStepsFactory(t *testing.T) {
 			So(res, ShouldHaveSameTypeAs, uninstallStep{})
 		})
 	})
+}
+
+func fakeReleases(component v1alpha1.KymaComponent) map[string]kymahelm.ReleaseStatus {
+
+	res := map[string]kymahelm.ReleaseStatus{}
+	res[component.GetReleaseName()] = kymahelm.ReleaseStatus{
+		Status:               kymahelm.StatusDeployed,
+		CurrentRevision:      2,
+		LastDeployedRevision: 2,
+	}
+	return res
 }
