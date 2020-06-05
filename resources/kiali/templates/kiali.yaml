@@ -5,9 +5,6 @@ metadata:
   annotations:
     ansible.operator-sdk/verbosity: "1"
   labels:
-    app: {{ template "kiali.name" . }}
-    chart: {{ template "kiali.chart" . }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    {{- include "kiali.labels" . | nindent 4 }}
 spec:
 {{ tpl (toYaml .Values.kiali.spec | indent 2) . }}

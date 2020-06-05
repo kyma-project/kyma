@@ -8,12 +8,12 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-{{ include "jaeger-operator.labels" . | indent 6 }}
+      app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-operator
   template:
     metadata:
       name: {{ include "jaeger-operator.fullname" . }}
       labels:
-{{ include "jaeger-operator.labels" . | indent 8 }}
+        app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-operator
     spec:
       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "jaeger-operator.serviceAccountName" . }}
