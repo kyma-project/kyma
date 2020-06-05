@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    control-plane: application-operator
+  name: operator-webhook
+  namespace: kyma-integration
+spec:
+  ports:
+    - port: 5050
+      protocol: TCP
+      targetPort: 5050
+  selector:
+    control-plane: application-operator
+  type: ClusterIP
