@@ -75,6 +75,7 @@ func (hc *helmClient) InstallReleaseFromChart(chartDir, releaseName string, name
 	installAction.ReleaseName = releaseName
 	installAction.Namespace = namespace
 	installAction.Timeout = time.Duration(hc.installationTimeout)
+	installAction.Wait = true
 
 	chartRequested, err := loader.Load(chartDir)
 	if err != nil {
