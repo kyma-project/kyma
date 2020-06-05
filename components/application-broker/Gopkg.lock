@@ -448,12 +448,12 @@
   revision = "ccab5234396729fee8dbf70620eafdfbc3d1a6af"
 
 [[projects]]
-  branch = "master"
-  digest = "1:e1713763fa77f09567d57664976b76fd81c8ab93d6d99135551a3bc791becdb9"
+  digest = "1:a4c5b20edb93502f2f90ac8042b6bf18a5d4a3d4da1e324cbdc5c0c210781b38"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/connectivity-adapter/pkg/gqlcli",
     "components/director/internal/model",
+    "components/director/pkg/apperrors",
     "components/director/pkg/graphql",
     "components/director/pkg/inputvalidation",
     "components/director/pkg/jsonschema",
@@ -461,7 +461,7 @@
     "components/director/pkg/scalar",
   ]
   pruneopts = "NUT"
-  revision = "278c7b08b73992b5c6abdddab67b52838aa6a6d7"
+  revision = "960cf3fa606ce139cea977928be029784bd42be5"
 
 [[projects]]
   digest = "1:6410fbc7335414ede070ec64886ad15900ff421e0ad58c3740e5d60a0ba47a42"
