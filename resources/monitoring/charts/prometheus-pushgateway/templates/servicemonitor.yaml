@@ -9,7 +9,6 @@ metadata:
   labels:
     app: {{ template "prometheus-pushgateway.name" . }}
     chart: {{ template "prometheus-pushgateway.chart" . }}
-    heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
     {{- if .Values.serviceMonitor.additionalLabels }}
 {{ toYaml .Values.serviceMonitor.additionalLabels | indent 4 }}

@@ -49,7 +49,7 @@ Create default labels
 {{- define "prometheus-pushgateway.defaultLabels" -}}
 {{- $labelChart := include "prometheus-pushgateway.chart" $ -}}
 {{- $labelApp := include "prometheus-pushgateway.name" $ -}}
-{{- $labels := dict "app" $labelApp "chart" $labelChart "release" .Release.Name "heritage" .Release.Service -}}
+{{- $labels := dict "app" $labelApp "chart" $labelChart "release" .Release.Name -}}
 {{ merge .extraLabels $labels | toYaml | indent 4 }}
 {{- end -}}
 
