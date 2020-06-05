@@ -8,6 +8,7 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/actionmanager"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
+	installationConfig "github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
 	internalerrors "github.com/kyma-project/kyma/components/kyma-operator/pkg/errors"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymaoperation/steps"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
@@ -23,12 +24,13 @@ type StepsProvider interface {
 
 //Executor exposes top-level interfaxce for installation/uninstallation of Kyma
 type Executor struct {
-	serviceCatalog   serviceCatalog.ClientInterface
-	errorHandlers    internalerrors.ErrorHandlersInterface
-	statusManager    statusmanager.StatusManager
-	actionManager    actionmanager.ActionManager
-	stepsProvider    StepsProvider
-	backoffIntervals []uint
+	serviceCatalog              serviceCatalog.ClientInterface
+	errorHandlers               internalerrors.ErrorHandlersInterface
+	statusManager               statusmanager.StatusManager
+	actionManager               actionmanager.ActionManager
+	stepsProvider               StepsProvider
+	deprovisionAzureResourcesFn func(extr *Executor, config *DeprovisionConfig, installation installationConfig.InstallationContext) error //TODO: Refactor!
+	backoffIntervals            []uint
 }
 
 //NewExecutor creates a new instance of executor
@@ -36,12 +38,13 @@ func NewExecutor(serviceCatalog serviceCatalog.ClientInterface,
 	statusManager statusmanager.StatusManager, actionManager actionmanager.ActionManager,
 	stepsProvider StepsProvider, backoffIntervals []uint) *Executor {
 	res := &Executor{
-		serviceCatalog:   serviceCatalog,
-		errorHandlers:    &internalerrors.ErrorHandlers{},
-		statusManager:    statusManager,
-		actionManager:    actionManager,
-		stepsProvider:    stepsProvider,
-		backoffIntervals: backoffIntervals,
+		serviceCatalog:              serviceCatalog,
+		errorHandlers:               &internalerrors.ErrorHandlers{},
+		statusManager:               statusManager,
+		actionManager:               actionManager,
+		stepsProvider:               stepsProvider,
+		deprovisionAzureResourcesFn: DeprovisionAzureResources,
+		backoffIntervals:            backoffIntervals,
 	}
 
 	return res
@@ -84,7 +87,9 @@ func (extr *Executor) UninstallKyma(installationData *config.InstallationData) e
 
 	removeLabelAndReturn := extr.removeLabelOnError(installationData.Context.Name, installationData.Context.Namespace)
 
-	err := extr.DeprovisionAzureResources(DefaultDeprovisionConfig(), installationData.Context)
+	err := extr.deprovisionAzureResourcesFn(extr, DefaultDeprovisionConfig(), installationData.Context)
+	//DeprovisionAzureResources(extr, DefaultDeprovisionConfig(), installationData.Context)
+	//
 	extr.errorHandlers.LogError("An error during deprovisioning: ", err)
 
 	_ = extr.statusManager.InProgress("Verify components to uninstall")
@@ -155,7 +160,7 @@ func (extr *Executor) processComponents(removeLabelAndReturn func(err error) err
 			return removeLabelAndReturn(fmt.Errorf("max number of retries reached during step: %s", stepName))
 		}
 
-		log.Println(stepName + "...DONE!")
+		log.Println(stepName + "... DONE!")
 	}
 
 	log.Println(logPrefix + " Kyma components ...DONE!")
