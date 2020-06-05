@@ -7,6 +7,8 @@ metadata:
   labels:
 {{ include "knative-kafka.labels" . | indent 4 }}
     prometheus: monitoring
+  annotations:
+{{ include "knative-kafka.annotations" . | indent 4 }}
 spec:
   selector:
     matchLabels:
@@ -29,6 +31,8 @@ metadata:
   labels:
 {{ include "knative-kafka.labels" . | indent 4 }}
     prometheus: monitoring
+  annotations:
+{{ include "knative-kafka.annotations" . | indent 4 }}
 spec:
   selector:
     matchLabels:
@@ -51,6 +55,8 @@ metadata:
   labels:
 {{ include "knative-kafka.labels" . | indent 4 }}
     prometheus: monitoring
+  annotations:
+{{ include "knative-kafka.annotations" . | indent 4 }}
 spec:
   selector:
     matchLabels:

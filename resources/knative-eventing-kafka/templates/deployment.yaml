@@ -5,6 +5,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels: 
 {{ include "knative-kafka.labels" . | indent 4 }}
+  annotations:
+{{ include "knative-kafka.annotations" . | indent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:

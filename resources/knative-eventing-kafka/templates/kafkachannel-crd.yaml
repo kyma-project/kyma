@@ -8,6 +8,8 @@ metadata:
     knative.dev/crd-install: "true"
     messaging.knative.dev/subscribable: "true"
 {{ include "knative-kafka.labels" . | indent 4 }}
+  annotations:
+{{ include "knative-kafka.annotations" . | indent 4 }}
   name: kafkachannels.knativekafka.kyma-project.io
 spec:
   group: knativekafka.kyma-project.io

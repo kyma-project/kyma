@@ -38,8 +38,13 @@ Common labels
 app: {{ include "knative-kafka.name" . }}
 app.kubernetes.io/name: {{ include "knative-kafka.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/managed-by: Helm
 helm.sh/chart: {{ include "knative-kafka.chart" . }}
+{{- end -}}
+
+{{- define "knative-kafka.annotations" -}}
+meta.helm.sh/release-name: {{ include "knative-kafka.name" . }}
+meta.helm.sh/release-namespace: {{ include "knative-kafka.name" . }}
 {{- end -}}
 
 {{- define "knative-kafka.brokers" -}}
