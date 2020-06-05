@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-crd-event-sources
+  annotations:
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
+data:
+  httpsources.sources.kyma-project.io: |-
+{{.Files.Get "files/crd-init-300-httpsource.yaml" | printf "%s" | indent 4}}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-init-event-sources
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded"
+    helm.sh/hook: "pre-upgrade, pre-install"
+    helm.sh/hook-weight: "10"
+  labels:
+    job: {{ .Release.Name }}-init-event-sources
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: {{ .Release.Name }}-init-event-sources
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        job: {{ .Release.Name }}-init-event-sources
+    spec:
+      serviceAccountName: {{ .Release.Name }}-crd-init
+      restartPolicy: Never
+      containers:
+      - name: job
+        image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+        terminationMessagePolicy: "FallbackToLogsOnError"
+        volumeMounts:
+        - name: crd-event-sources
+          mountPath: /etc/crd
+          readOnly: true
+        command:
+        - /bin/bash
+        - -c
+        - timeout 60s bash -c 'until kubectl apply -f /etc/crd/httpsources.sources.kyma-project.io; do sleep 2; done'
+      volumes:
+      - name: crd-event-sources
+        configMap:
+          name: {{ .Release.Name }}-crd-event-sources

@@ -176,9 +176,13 @@ func (t TargetsAndRulesTest) testTargetsAreHealthy() error {
 			allTargetsAreHealthy := true
 			timeoutMessage = ""
 			for _, target := range activeTargets {
-				if target.Health != "up" && target.Labels.Job != "istio-ingressgateway" {
+				if target.Health != "up" {
 					allTargetsAreHealthy = false
-					timeoutMessage += fmt.Sprintf("Target with job=%s and instance=%s is not healthy\n", target.Labels.Job, target.Labels.Instance)
+					timeoutMessage += "The following target is not healthy:\n"
+					for label, value := range target.Labels {
+						timeoutMessage += fmt.Sprintf("- %s=%s\n", label, value)
+					}
+					timeoutMessage += fmt.Sprintf("- errorMessage: %s", target.LastError)
 				}
 			}
 			if allTargetsAreHealthy {

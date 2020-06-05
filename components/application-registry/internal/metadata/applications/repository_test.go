@@ -290,6 +290,8 @@ func TestDeleteServices(t *testing.T) {
 		appManagerMock := &mocks.ApplicationManager{}
 		appManagerMock.On("Get", "production", metav1.GetOptions{}).
 			Return(application, nil)
+		appManagerMock.On("Update", mock.AnythingOfType("*v1alpha1.Application")).
+			Return(application, nil)
 
 		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
@@ -308,7 +310,6 @@ func TestDeleteServices(t *testing.T) {
 		appManagerMock := &mocks.ApplicationManager{}
 		appManagerMock.On("Get", "production", metav1.GetOptions{}).
 			Return(application, nil)
-
 		appManagerMock.On("Update", mock.AnythingOfType("*v1alpha1.Application")).Return(nil, errors.New("failed to update App"))
 
 		repository := applications.NewServiceRepository(appManagerMock)

@@ -3,11 +3,13 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Values.global.connector.revocation.configmap.name }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ tpl .Values.global.connector.revocation.configmap.namespace . }}
   labels:
     app: {{ template "name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 data:
 {{ end }}

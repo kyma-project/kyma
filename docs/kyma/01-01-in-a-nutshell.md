@@ -17,4 +17,4 @@ Kyma comes equipped with these out-of-the-box functionalities:
 - The messaging channel to receive Events, enrich them, and trigger business flows using Functions or services ([Event Mesh](/components/event-mesh/#overview-overview), NATS)
 - CLI supported by the intuitive UI ([Console](/components/console/#overview-overview))
 - Asset management and storing tool ([Rafter](/components/rafter/#overview-overview), MinIO)
-- Backup of Kyma clusters ([Kyma Backup](/root/kyma/#installation-back-up-kyma)
+- Backup of Kyma clusters ([Kyma Backup](/root/kyma/#installation-back-up-kyma))

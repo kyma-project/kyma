@@ -30,6 +30,8 @@ type ClientInterface interface {
 	DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error)
 	PrintRelease(release *release.Release)
 	RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error)
+	WaitForReleaseDelete(releaseName string) (bool, error)
+	WaitForReleaseRollback(releaseName string) (bool, error)
 }
 
 // Client .
@@ -71,7 +73,7 @@ func (hc *Client) ListReleases() (*rls.ListReleasesResponse, error) {
 	return hc.helm.ListReleases(helm.ReleaseListStatuses(statuses))
 }
 
-//ReleaseStatus returns roughly-formatted Release status (columns are separated with blanks but not adjusted)
+// ReleaseStatus returns roughly-formatted Release status (columns are separated with blanks but not adjusted)
 func (hc *Client) ReleaseStatus(rname string) (string, error) {
 	status, err := hc.helm.ReleaseStatus(rname)
 	if err != nil {

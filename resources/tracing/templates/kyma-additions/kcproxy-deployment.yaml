@@ -3,8 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "jaeger-operator.fullname" . }}-kcproxy
   labels:
-    app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
-    app.kubernetes.io/component: kcproxy 
+{{ include "jaeger-operator.labels" . | indent 4 }}
 spec:
   replicas: {{ .Values.kcproxy.replicaCount }}
   selector:

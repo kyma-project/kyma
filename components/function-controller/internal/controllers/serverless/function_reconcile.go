@@ -75,39 +75,35 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, nil
 	}
 
-	log.Info("Listing ConfigMaps")
 	var configMaps corev1.ConfigMapList
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &configMaps); err != nil {
 		log.Error(err, "Cannot list ConfigMaps")
 		return ctrl.Result{}, err
 	}
-	log.Info("Listing Jobs")
+
 	var jobs batchv1.JobList
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &jobs); err != nil {
 		log.Error(err, "Cannot list Jobs")
 		return ctrl.Result{}, err
 	}
 
-	log.Info("Listing Deployments")
 	var deployments appsv1.DeploymentList
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &deployments); err != nil {
 		log.Error(err, "Cannot list Deployments")
 		return ctrl.Result{}, err
 	}
 
-	log.Info("Listing Services")
 	var services corev1.ServiceList
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &services); err != nil {
 		log.Error(err, "Cannot list Services")
 		return ctrl.Result{}, err
 	}
 
-	// log.Info("Listing HorizotalPodAutoscalers")
-	// var hpas autoscalingv1.HorizontalPodAutoscaler
-	// if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &hpas); err != nil {
-	// 	log.Error(err, "Cannot list HorizotalPodAutoscalers")
-	// 	return ctrl.Result{}, err
-	// }
+	var hpas autoscalingv1.HorizontalPodAutoscalerList
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &hpas); err != nil {
+		log.Error(err, "Cannot list HorizotalPodAutoscalers")
+		return ctrl.Result{}, err
+	}
 
 	switch {
 	case r.isOnConfigMapChange(instance, configMaps.Items, deployments.Items):
@@ -118,8 +114,9 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return r.onDeploymentChange(ctx, log, instance, deployments.Items)
 	case r.isOnServiceChange(instance, services.Items):
 		return r.onServiceChange(ctx, log, instance, services.Items)
+	case r.isOnHorizontalPodAutoscalerChange(instance, hpas.Items, deployments.Items):
+		return r.onHorizontalPodAutoscalerChange(ctx, log, instance, hpas.Items, deployments.Items[0].GetName())
 	default:
-		log.Info("Function is ready...")
-		return ctrl.Result{}, nil
+		return r.updateDeploymentStatus(ctx, log, instance, deployments.Items, corev1.ConditionTrue)
 	}
 }

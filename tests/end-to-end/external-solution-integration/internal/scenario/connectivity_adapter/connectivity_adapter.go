@@ -39,6 +39,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		clients.ApiRules,
 		s.domain,
 		s.testID,
+		s.testServiceImage,
 	)
 
 	functionEndpoint := helpers.InClusterEndpoint(s.testID, s.testID, helpers.FunctionPort)

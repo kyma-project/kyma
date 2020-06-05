@@ -65,8 +65,8 @@ func (r *ServiceAccountReconciler) predicate() predicate.Predicate {
 }
 
 // Reconcile reads that state of the cluster for a ServiceAccount object and makes changes based
-// +kubebuilder:rbac:groups=core,resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=core,resources=namespaces,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;list;watch
 
 func (r *ServiceAccountReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())

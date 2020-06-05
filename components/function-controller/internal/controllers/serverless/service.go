@@ -14,10 +14,8 @@ import (
 
 func (r *FunctionReconciler) isOnServiceChange(instance *serverlessv1alpha1.Function, services []corev1.Service) bool {
 	newSvc := r.buildService(instance)
-	deployStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionRunning)
 	return !(len(services) == 1 &&
-		r.equalServices(services[0], newSvc) &&
-		deployStatus == corev1.ConditionTrue)
+		r.equalServices(services[0], newSvc))
 }
 
 func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, services []corev1.Service) (ctrl.Result, error) {
@@ -33,19 +31,13 @@ func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logge
 			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonServiceError,
-			Message:            fmt.Sprintf("Service %s is ready", instance.GetName()),
+			Message:            fmt.Sprintf("Service step failed, too many Services found, needed 1 but got %d", len(services)),
 		})
 	case !r.equalServices(services[0], newSvc):
 		return r.updateService(ctx, log, instance, services[0], newSvc)
 	default:
 		log.Info(fmt.Sprintf("Service %s is ready", services[0].GetName()))
-		return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionRunning,
-			Status:             corev1.ConditionTrue, // change it to unknown when you add hpa
-			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonServiceReady,
-			Message:            fmt.Sprintf("Service %s is ready", instance.GetName()),
-		})
+		return ctrl.Result{}, nil
 	}
 }
 

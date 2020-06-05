@@ -4,9 +4,11 @@ metadata:
   name: {{ template "fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   hosts:
     - provisioner.{{ .Values.global.ingress.domainName }}

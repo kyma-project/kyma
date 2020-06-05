@@ -6,8 +6,11 @@ metadata:
   namespace: {{ .Values.global.namespace }}
   labels:
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
-    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
 - apiGroups: ["*"]
   resources: ["configmaps"]
@@ -19,7 +22,6 @@ rules:
   resourceNames:  
   - {{ .Release.Name }}
 {{- end }}
-
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -28,8 +30,11 @@ metadata:
   namespace: {{ .Values.global.namespace }}
   labels:
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
-    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
 - kind: ServiceAccount
   name: {{ .Chart.Name }}
@@ -38,9 +43,7 @@ roleRef:
   kind: Role
   name: {{ .Chart.Name }}-role
   apiGroup: rbac.authorization.k8s.io
-
-
-  {{ if .Values.secrets.caSecretName }}
+{{ if .Values.secrets.caSecretName }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -49,14 +52,16 @@ metadata:
   namespace: {{ .Values.secrets.caSecretNamespace }}
   labels:
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
-    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
 - apiGroups: ["*"]
   resources: ["secrets"]
   resourceNames: ["{{ .Values.secrets.caSecretName }}"]
   verbs: ["create", "get", "update", "delete"]
-
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -65,8 +70,11 @@ metadata:
   namespace: {{ .Values.secrets.caSecretNamespace }}
   labels:
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
-    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
 - kind: ServiceAccount
   name: {{ .Chart.Name }}
@@ -75,10 +83,8 @@ roleRef:
   kind: Role
   name: {{ .Chart.Name }}-{{ .Values.secrets.caSecretName }}-role
   apiGroup: rbac.authorization.k8s.io
-  {{ end }}
-
-
-  {{ if .Values.secrets.rootCACertificateSecretName  }}
+{{ end }}
+{{ if .Values.secrets.rootCACertificateSecretName  }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -87,14 +93,16 @@ metadata:
   namespace: {{ .Values.secrets.rootCACertificateSecretNamespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
-    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
 - apiGroups: ["*"]
   resources: ["secrets"]
   resourceNames: ["{{ .Values.secrets.rootCACertificateSecretName }}"]
   verbs: ["create", "get", "update", "delete"]
-
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -103,8 +111,11 @@ metadata:
   namespace: {{ .Values.secrets.rootCACertificateSecretNamespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
-    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
 - kind: ServiceAccount
   name: {{ .Chart.Name }}
@@ -113,5 +124,5 @@ roleRef:
   kind: Role
   name: {{ .Chart.Name }}-{{ .Values.secrets.rootCACertificateSecretName }}-role
   apiGroup: rbac.authorization.k8s.io
-  {{ end }}
-  {{- end }}
+{{ end }}
+{{- end }}
