@@ -25,8 +25,7 @@ items:
 {{ toYaml .namespaceSelector | indent 8 }}
     {{- end }}
       selector:
-        matchLabels:
-{{ toYaml .selector | indent 10 }}
+{{ toYaml .selector | indent 8 }}
     {{- if .targetLabels }}
       targetLabels:
 {{ toYaml .targetLabels | indent 8 }}
