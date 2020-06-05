@@ -1,1 +1,9 @@
-server
+.idea
+*.iml
+.vscode/
+/debug
+vendor/
+.DS_Store
+telepresence.log
+internal/gqlschema/gqlgen
+licenses/

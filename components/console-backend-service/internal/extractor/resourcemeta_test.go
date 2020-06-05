@@ -3,6 +3,7 @@ package extractor
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,18 +21,18 @@ const (
 
 var (
 	fakeResources = []*v1.APIResourceList{
-		{
+		&v1.APIResourceList{
 			TypeMeta:     v1.TypeMeta{},
 			GroupVersion: groupVersion,
 			APIResources: []v1.APIResource{
-				{
+				v1.APIResource{
 					Name: resource,
 					Kind: kind,
 				},
 			},
 		},
 	}
-	resourceJSON = map[string]interface{}{
+	resourceJSON = gqlschema.JSON{
 		"apiVersion": groupVersion,
 		"kind":       kind,
 		"metadata": map[string]interface{}{
@@ -56,7 +57,7 @@ func TestExtractResourceMeta(t *testing.T) {
 	})
 
 	t.Run("Missing metadata fields", func(t *testing.T) {
-		rm, err := ExtractResourceMeta(map[string]interface{}{
+		rm, err := ExtractResourceMeta(gqlschema.JSON{
 			"metadata": map[string]interface{}{},
 		})
 
@@ -65,7 +66,7 @@ func TestExtractResourceMeta(t *testing.T) {
 	})
 
 	t.Run("Empty input", func(t *testing.T) {
-		rm, err := ExtractResourceMeta(map[string]interface{}{})
+		rm, err := ExtractResourceMeta(gqlschema.JSON{})
 
 		require.Error(t, err)
 		assert.Empty(t, rm)

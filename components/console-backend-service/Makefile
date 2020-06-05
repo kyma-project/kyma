@@ -1,17 +1,12 @@
-.PHONY: generate build build-dev
+APP_NAME = console-backend-service
+APP_PATH = components/$(APP_NAME)
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190930-d28d219
+SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-generate:
-	go generate ./...
+include $(SCRIPTS_DIR)/generic-make-go.mk
 
-build:
-	go build ./cmd/server
+VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
 
-build-dev: generate	build
-
-watch: export APP_VERBOSE=true
-watch: export APP_KUBECONFIG_PATH=/Users/${USER}/.kube/config
-watch: export APP_OIDC_ISSUER_URL=https://dex.${KYMA_DOMAIN}
-watch: export APP_OIDC_CLIENT_ID=kyma-client
-
-watch:
-	compileDaemon -build="make build" -command="./server"
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
+	@echo "resources/core"
