@@ -85,7 +85,6 @@ func (isf installStepFactory) newStep(component v1alpha1.KymaComponent) (Step, e
 		if isUpgrade {
 			return upgradeStep{
 				installStep: inststp,
-				// deployedRevision:    relStatus.LastDeployedRevision, todo: deployed revision is refreshed before rollback, no need to set it here.
 				rollbackWaitTimeSec: defaultRollbackWaitTimeSec,
 			}, nil
 		}

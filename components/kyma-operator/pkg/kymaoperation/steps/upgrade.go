@@ -10,7 +10,6 @@ import (
 
 type upgradeStep struct {
 	installStep
-	// deployedRevision    int //todo: deployed revision is refreshed before rollback, remove this field.
 	rollbackWaitTimeSec uint32
 }
 
