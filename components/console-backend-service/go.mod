@@ -26,7 +26,7 @@ require (
 	github.com/kubernetes-sigs/service-catalog v0.2.2-0.20190920221325-ccab52343967
 	github.com/kyma-incubator/api-gateway v0.0.0-20191125140217-295e8fcaa03f
 	github.com/kyma-project/helm-broker v0.0.0-20190906085923-d07feb2d365a
-	github.com/kyma-project/kyma v0.5.1-0.20200506200011-84fa953c5321
+	github.com/kyma-project/kyma v0.5.1-0.20200605091830-76faea35b9d9
 	github.com/kyma-project/kyma/components/function-controller v0.0.0-20200527102940-1579eff8c7a5
 	github.com/kyma-project/rafter v0.0.0-20200402080904-a0157e52e150
 	github.com/moby/moby v1.13.1
