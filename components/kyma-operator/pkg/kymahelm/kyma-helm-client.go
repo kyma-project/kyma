@@ -16,21 +16,18 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
 
-//todo: pass relname and relnamespace in a dedicated internal structure namespacedName
-
 //todo: each function in a separate file?
 
 // ClientInterface .
 type ClientInterface interface {
 	ListReleases() ([]*Release, error)
-	IsReleaseDeletable(relNamespace, relName string) (bool, error)
-	ReleaseDeployedRevision(relNamespace, relName string) (int, error)
-	InstallReleaseFromChart(chartDir, relNamespace, relName string, overrides overrides.Map) (*Release, error)
-	InstallRelease(chartDir, relNamespace, relName string, overrides overrides.Map) (*Release, error)
-	InstallReleaseWithoutWait(chartDir, relNamespace, relName string, overrides overrides.Map) (*Release, error)
-	UpgradeRelease(chartDir, relNamespace, relName string, overrides overrides.Map) (*Release, error)
-	DeleteRelease(relNamespace, relName string) (*Release, error) //todo: rename to "uninstall"
-	RollbackRelease(relNamespace, relName string, revision int) (*Release, error)
+	IsReleaseDeletable(nn NamespacedName) (bool, error)
+	ReleaseDeployedRevision(nn NamespacedName) (int, error)
+	InstallReleaseFromChart(chartDir string, nn NamespacedName, overrides overrides.Map) (*Release, error)
+	InstallRelease(chartDir string, nn NamespacedName, overrides overrides.Map) (*Release, error)
+	UpgradeRelease(chartDir string, nn NamespacedName, overrides overrides.Map) (*Release, error)
+	UninstallRelease(nn NamespacedName) error
+	RollbackRelease(nn NamespacedName, revision int) error
 	WaitForReleaseDelete(nn NamespacedName) (bool, error)
 	WaitForReleaseRollback(nn NamespacedName) (bool, error)
 	PrintRelease(release *Release)
@@ -69,15 +66,14 @@ func NewClient(overridesLogger *logrus.Logger, maxHistory int, timeout int64, dr
 // ListReleases lists all releases except for the superseded ones
 func (hc *Client) ListReleases() ([]*Release, error) {
 
-	cfg, err := hc.newActionConfig("") //todo: is that ok???????
+	cfg, err := hc.newActionConfig("")
 	if err != nil {
 		return nil, err
 	}
 
 	lister := action.NewList(cfg)
 	lister.All = true
-	lister.AllNamespaces = true //todo: is that ok?
-	//todo: sorter?
+	lister.AllNamespaces = true
 
 	releases, err := lister.Run()
 	if err != nil {
@@ -102,7 +98,6 @@ func (hc *Client) ReleaseStatus(nn NamespacedName) (*ReleaseStatus, error) {
 	}
 
 	status := action.NewStatus(cfg)
-	//status.Version = 0 // default: 0 -> get last
 
 	rel, err := status.Run(nn.Name)
 	if err != nil {
@@ -113,13 +108,13 @@ func (hc *Client) ReleaseStatus(nn NamespacedName) (*ReleaseStatus, error) {
 }
 
 //IsReleaseDeletable returns true for release that can be deleted
-func (hc *Client) IsReleaseDeletable(relNamespace, relName string) (bool, error) { //todo: helm3 allows atomic operations, this func might be useless
+func (hc *Client) IsReleaseDeletable(nn NamespacedName) (bool, error) { //todo: helm3 allows atomic operations, this func might be useless
 
 	isDeletable := false
 	maxAttempts := 3
 	fixedDelay := 3
 
-	cfg, err := hc.newActionConfig(relNamespace)
+	cfg, err := hc.newActionConfig(nn.Namespace)
 	if err != nil {
 		return false, err
 	}
@@ -128,7 +123,7 @@ func (hc *Client) IsReleaseDeletable(relNamespace, relName string) (bool, error)
 
 	err = retry.Do(
 		func() error {
-			rel, err := status.Run(relName)
+			rel, err := status.Run(nn.Name)
 			if err != nil {
 				if strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
 					isDeletable = false
@@ -149,11 +144,11 @@ func (hc *Client) IsReleaseDeletable(relNamespace, relName string) (bool, error)
 	return isDeletable, err
 }
 
-func (hc *Client) ReleaseDeployedRevision(relNamespace, relName string) (int, error) { //todo: helm3 allows atomic operations, this func might be useless
+func (hc *Client) ReleaseDeployedRevision(nn NamespacedName) (int, error) { //todo: helm3 allows atomic operations, this func might be useless
 
 	var deployedRevision = 0
 
-	cfg, err := hc.newActionConfig(relNamespace)
+	cfg, err := hc.newActionConfig(nn.Namespace)
 	if err != nil {
 		return deployedRevision, err
 	}
@@ -161,7 +156,7 @@ func (hc *Client) ReleaseDeployedRevision(relNamespace, relName string) (int, er
 	history := action.NewHistory(cfg)
 	history.Max = hc.maxHistory
 
-	relHistory, err := history.Run(relName)
+	relHistory, err := history.Run(nn.Name)
 	if err != nil {
 		return deployedRevision, err
 	}
@@ -177,9 +172,9 @@ func (hc *Client) ReleaseDeployedRevision(relNamespace, relName string) (int, er
 }
 
 // InstallReleaseFromChart .
-func (hc *Client) InstallReleaseFromChart(chartDir, relNamespace, relName string, values overrides.Map) (*Release, error) {
+func (hc *Client) InstallReleaseFromChart(chartDir string, nn NamespacedName, values overrides.Map) (*Release, error) {
 
-	cfg, err := hc.newActionConfig(relNamespace) //todo: parameterize driver
+	cfg, err := hc.newActionConfig(nn.Namespace)
 	//cfg, err := hc.newActionConfigMst(relNamespace)
 	if err != nil {
 		return nil, err
@@ -190,14 +185,14 @@ func (hc *Client) InstallReleaseFromChart(chartDir, relNamespace, relName string
 		return nil, err
 	}
 
-	install := action.NewInstall(cfg) //todo: stretch: implement configurator, see https://github.com/fluxcd/helm-operator/blob/706bcb34841ed65fed007ad706082f28429e19bb/pkg/helm/v3/upgrade.go#L52
-	install.ReleaseName = relName
-	install.Namespace = relNamespace
+	install := action.NewInstall(cfg) //todo: stretch: implement configurator
+	install.ReleaseName = nn.Name
+	install.Namespace = nn.Namespace
 	install.Atomic = false
 	install.Wait = true            //todo: defaults to true if atomic is set. Remove if atomic == true
 	install.CreateNamespace = true // see https://v3.helm.sh/docs/faq/#automatically-creating-namespaces
 
-	hc.PrintOverrides(values, relName, "install")
+	hc.PrintOverrides(values, nn.Name, "install")
 
 	installedRelease, err := install.Run(chart, values)
 	if err != nil {
@@ -208,19 +203,14 @@ func (hc *Client) InstallReleaseFromChart(chartDir, relNamespace, relName string
 }
 
 // InstallRelease .
-func (hc *Client) InstallRelease(chartDir, ns, relName string, values overrides.Map) (*Release, error) {
-	return hc.InstallReleaseFromChart(chartDir, ns, relName, values)
-}
-
-// InstallReleaseWithoutWait .
-func (hc *Client) InstallReleaseWithoutWait(chartDir, ns, relName string, values overrides.Map) (*Release, error) { //todo: implemented with wait, we don't need that function anyways
-	return hc.InstallReleaseFromChart(chartDir, ns, relName, values)
+func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, values overrides.Map) (*Release, error) {
+	return hc.InstallReleaseFromChart(chartDir, nn, values)
 }
 
 // UpgradeRelease .
-func (hc *Client) UpgradeRelease(chartDir, relNamespace, relName string, values overrides.Map) (*Release, error) {
+func (hc *Client) UpgradeRelease(chartDir string, nn NamespacedName, values overrides.Map) (*Release, error) {
 
-	cfg, err := hc.newActionConfig(relNamespace)
+	cfg, err := hc.newActionConfig(nn.Namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -237,9 +227,9 @@ func (hc *Client) UpgradeRelease(chartDir, relNamespace, relName string, values 
 	upgrade.ReuseValues = true
 	upgrade.Recreate = true
 
-	hc.PrintOverrides(values, relName, "update")
+	hc.PrintOverrides(values, nn.Name, "update")
 
-	upgradedRelease, err := upgrade.Run(relName, chart, values)
+	upgradedRelease, err := upgrade.Run(nn.Name, chart, values)
 	if err != nil {
 		return nil, err
 	}
@@ -248,11 +238,11 @@ func (hc *Client) UpgradeRelease(chartDir, relNamespace, relName string, values 
 }
 
 //RollbackRelease performs rollback to given revision
-func (hc *Client) RollbackRelease(relNamespace, relName string, revision int) (*Release, error) {
+func (hc *Client) RollbackRelease(nn NamespacedName, revision int) error {
 
-	cfg, err := hc.newActionConfig(relNamespace)
+	cfg, err := hc.newActionConfig(nn.Namespace)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	rollback := action.NewRollback(cfg)
@@ -261,25 +251,22 @@ func (hc *Client) RollbackRelease(relNamespace, relName string, revision int) (*
 	rollback.CleanupOnFail = true
 	rollback.Recreate = true
 
-	return nil, rollback.Run(relName) //todo: return only error or fetch actual object
+	return rollback.Run(nn.Name)
 }
 
-// DeleteRelease .
-func (hc *Client) DeleteRelease(relNamespace, relName string) (*Release, error) { //todo: rename to "uninstall"
+// DeleteRelease uninstall a given release
+func (hc *Client) UninstallRelease(nn NamespacedName) error {
 
-	cfg, err := hc.newActionConfig(relNamespace)
+	cfg, err := hc.newActionConfig(nn.Namespace)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	uninstall := action.NewUninstall(cfg)
 
-	_, err = uninstall.Run(relName)
-	if err != nil {
-		return nil, err
-	}
+	_, err = uninstall.Run(nn.Name)
 
-	return &Release{}, nil //todo: return only error or transform uninstall response to internal type or I don't care rly
+	return err
 }
 
 //PrintRelease .

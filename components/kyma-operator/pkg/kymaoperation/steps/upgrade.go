@@ -24,8 +24,7 @@ func (s upgradeStep) Run() error {
 
 	upgradeResp, upgradeErr := s.helmClient.UpgradeRelease(
 		chartDir,
-		s.component.Namespace,
-		s.component.GetReleaseName(),
+		s.GetNamespacedName(),
 		s.overrideData.ForRelease(s.component.GetReleaseName()))
 
 	if upgradeErr != nil {
@@ -40,10 +39,11 @@ func (s upgradeStep) Run() error {
 func (s upgradeStep) onError(upgradeErr error) error {
 
 	upgradeErrMsg := fmt.Sprintf("Helm upgrade error: %s", upgradeErr.Error())
-
 	log.Println(fmt.Sprintf("Helm upgrade of release \"%s\" failed. Finding last known deployed revision to rollback to.", s.component.GetReleaseName()))
 
-	rollbackTo, err := s.helmClient.ReleaseDeployedRevision(s.component.Namespace, s.component.GetReleaseName())
+	namespacedName := s.GetNamespacedName()
+
+	rollbackTo, err := s.helmClient.ReleaseDeployedRevision(namespacedName)
 	if err != nil {
 		deployedRevisionErr := fmt.Sprintf("an error occurred while looking for a deployed %s release: %s", s.component.GetReleaseName(), err.Error())
 		return errors.New(fmt.Sprintf("%s \n %s \n", upgradeErrMsg, deployedRevisionErr))
@@ -51,14 +51,13 @@ func (s upgradeStep) onError(upgradeErr error) error {
 
 	log.Println(fmt.Sprintf("Performing rollback to last known deployed revision: %d", rollbackTo))
 
-	_, err = s.helmClient.RollbackRelease(s.component.Namespace, s.component.GetReleaseName(), rollbackTo)
-	if err != nil {
+	if err = s.helmClient.RollbackRelease(kymahelm.NamespacedName{Name: s.component.GetReleaseName(), Namespace: s.component.Namespace}, rollbackTo); err != nil {
 		rollbackErrMsg := fmt.Sprintf("Helm rollback of release \"%s\" failed with an error: %s", s.component.GetReleaseName(), err.Error())
 		return errors.New(fmt.Sprintf("%s \n %s \n", upgradeErrMsg, rollbackErrMsg))
 	}
 
 	//waiting for release to rollback
-	success, waitErr := s.helmClient.WaitForReleaseRollback(kymahelm.NamespacedName{Namespace: s.component.Namespace, Name: s.component.GetReleaseName()})
+	success, waitErr := s.helmClient.WaitForReleaseRollback(namespacedName)
 
 	if waitErr != nil {
 		return errors.New(fmt.Sprintf("%s\nHelm rollback of release \"%s\" failed with error: %s", upgradeErrMsg, s.component.GetReleaseName(), waitErr.Error()))

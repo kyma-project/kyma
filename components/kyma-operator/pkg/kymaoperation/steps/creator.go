@@ -7,7 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
-	errors "github.com/pkg/errors"
+	"github.com/pkg/errors"
 )
 
 // stepFactoryCreator is used to create StepFactory instances for installation or uninstallation.
@@ -45,7 +45,7 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]kymahelm.Relea
 			if statusCode == kymahelm.StatusDeployed {
 				lastDeployedRev = release.CurrentRevision
 			} else {
-				lastDeployedRev, err = sfc.helmClient.ReleaseDeployedRevision(release.Namespace, release.Name)
+				lastDeployedRev, err = sfc.helmClient.ReleaseDeployedRevision(kymahelm.NamespacedName{Namespace: release.Namespace, Name: release.Name})
 				if err != nil {
 					return nil, errors.New("Helm error: " + err.Error())
 				}

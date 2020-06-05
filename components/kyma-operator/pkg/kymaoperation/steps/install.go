@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 )
@@ -27,8 +26,7 @@ func (s installStep) Run() error {
 
 	installResp, installErr := s.helmClient.InstallRelease(
 		chartDir,
-		s.component.Namespace,
-		s.component.GetReleaseName(),
+		s.GetNamespacedName(),
 		s.overrideData.ForRelease(s.component.GetReleaseName()))
 
 	if installErr != nil {
@@ -41,10 +39,12 @@ func (s installStep) Run() error {
 }
 
 func (s installStep) onError(installErr error) error {
+
 	installErrMsg := fmt.Sprintf("Helm install error: %s", installErr.Error())
 
-	isDeletable, checkErr := s.helmClient.IsReleaseDeletable(s.component.Namespace, s.component.GetReleaseName())
+	namespacedName := s.GetNamespacedName()
 
+	isDeletable, checkErr := s.helmClient.IsReleaseDeletable(namespacedName)
 	if checkErr != nil {
 		statusErrMsg := fmt.Sprintf("Checking status of release \"%s\" failed with an error: %s", s.component.GetReleaseName(), checkErr.Error())
 		return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, statusErrMsg))
@@ -53,15 +53,14 @@ func (s installStep) onError(installErr error) error {
 	if isDeletable {
 
 		log.Println(fmt.Sprintf("Helm installation of release \"%s\" failed. Deleting release before retrying.", s.component.GetReleaseName()))
-		_, deleteErr := s.helmClient.DeleteRelease(s.component.Namespace, s.component.GetReleaseName())
 
-		if deleteErr != nil {
+		if deleteErr := s.helmClient.UninstallRelease(namespacedName); deleteErr != nil {
 			deleteErrMsg := fmt.Sprintf("Helm delete of release \"%s\" failed with an error: %s", s.component.GetReleaseName(), deleteErr.Error())
 			return errors.New(fmt.Sprintf("%s \n %s \n", installErrMsg, deleteErrMsg))
 		}
 
 		//waiting for release to be deleted
-		success, waitErr := s.helmClient.WaitForReleaseDelete(kymahelm.NamespacedName{Namespace: s.component.Namespace, Name: s.component.GetReleaseName()})
+		success, waitErr := s.helmClient.WaitForReleaseDelete(namespacedName)
 		if waitErr != nil {
 			return errors.New(fmt.Sprintf("%s\nHelm delete of release \"%s\" failed with error: %s", installErrMsg, s.component.GetReleaseName(), waitErr.Error()))
 		} else {

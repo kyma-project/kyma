@@ -14,6 +14,7 @@ type Step interface {
 	Run() error
 	String() string
 	GetReleaseName() string
+	GetNamespacedName() kymahelm.NamespacedName
 }
 
 type step struct {
@@ -28,6 +29,10 @@ func (s step) String() string {
 
 func (s step) GetReleaseName() string {
 	return s.component.GetReleaseName()
+}
+
+func (s step) GetNamespacedName() kymahelm.NamespacedName {
+	return kymahelm.NamespacedName{Name: s.GetReleaseName(), Namespace: s.component.Namespace}
 }
 
 // Used to support the contract in case there's no action to do (e.g. uninstalling a non-existing release)
