@@ -104,6 +104,7 @@ func TestApplicationMutations(t *testing.T) {
 		auth.Create: {fixCreateApplicationMutation(fixApplication("", "", map[string]string{}))},
 		auth.Update: {fixUpdateApplicationMutation(fixApp)},
 		auth.Delete: {fixDeleteApplicationMutation(fixName)},
+		auth.Watch:  {fixApplicationSubscription()},
 	}
 	as.Run(t, ops)
 }
@@ -118,14 +119,17 @@ func readApplicationEvent(sub *graphql.Subscription) (applicationEvent, error) {
 	return appEvent.ApplicationEvent, err
 }
 
-func subscribeApplicationEvent(c *graphql.Client) *graphql.Subscription {
+func fixApplicationSubscription() *graphql.Request {
 	query := fmt.Sprintf(`
 			subscription {
 				%s
 			}
 		`, appEventFields())
-	req := graphql.NewRequest(query)
-	return c.Subscribe(req)
+	return graphql.NewRequest(query)
+}
+
+func subscribeApplicationEvent(c *graphql.Client) *graphql.Subscription {
+	return c.Subscribe(fixApplicationSubscription())
 }
 
 func appEventFields() string {
