@@ -3,6 +3,8 @@ apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
   name: {{ template "fullname" . }}
+  labels:
+    {{ include "prometheus-pushgateway.labels" . | indent 4 }}
 spec:
   peers:
     - mtls:

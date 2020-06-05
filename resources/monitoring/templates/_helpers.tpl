@@ -51,6 +51,20 @@ release: {{ $.Release.Name | quote }}
 {{- if .Values.commonLabels}}
 {{ toYaml .Values.commonLabels }}
 {{- end }}
+helm.sh/chart: {{ include "prometheus-operator.chartref" . }}
+{{ include "prometheus-operator.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "prometheus-operator.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "prometheus-operator.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/* Create the name of prometheus-operator service account to use */}}
