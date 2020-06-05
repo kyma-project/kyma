@@ -111,7 +111,7 @@ func (hc *Client) WaitForReleaseRollback(nn NamespacedName) (bool, error) {
 		}
 
 		if relStatus == nil {
-			return false, errors.New("release status in nil")
+			return false, errors.New("release status is nil")
 		}
 
 		if relStatus.Status == StatusDeployed {
