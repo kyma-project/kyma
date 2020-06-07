@@ -31,18 +31,18 @@ patchTriggers() {
   IFS=$'\n'
   for trigger in ${triggers}
   do
-    local -r subscriberName="$(echo ${trigger} | jq -r '.spec.subscriber.ref.name')"
-    local -r subscriberNamespace="$(echo ${trigger} | jq -r '.spec.subscriber.ref.namespace')"
+    local subscriberName="$(echo ${trigger} | jq -r '.spec.subscriber.ref.name')"
+    local subscriberNamespace="$(echo ${trigger} | jq -r '.spec.subscriber.ref.namespace')"
 
     IFS=$'\n'
     for function in ${functions}
     do
-      local -r functionName="$(echo ${function} | jq -r '.name')"
-      local -r functionNamespace="$(echo ${function} | jq -r '.namespace')"
+      local functionName="$(echo ${function} | jq -r '.name')"
+      local functionNamespace="$(echo ${function} | jq -r '.namespace')"
 
-      if [ "${subscriberName}" == "${functionName}" && "${subscriberNamespace}" == "${functionNamespace}" ]; then
+      if [ "${subscriberName}" == "${functionName}" ] && [ "${subscriberNamespace}" == "${functionNamespace}" ]; then
         patchSingleTrigger "${trigger}"
-      if 
+      fi
     done
   done
 }
@@ -70,7 +70,8 @@ patchSingleTrigger() {
 deleteKServices() {
   kubectl delete ${KSERVICE_RESOURCE_TYPE} \
     --all-namespaces \
-    -l "${MANAGED_BY_LABEL_KEY}"="${MANAGED_BY_LABEL_VALUE}"
+    -l "${MANAGED_BY_LABEL_KEY}"="${MANAGED_BY_LABEL_VALUE}" \
+    --ignore-not-found
 }
 
 main() {
