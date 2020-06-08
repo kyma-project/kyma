@@ -42,3 +42,7 @@ func (r *Retried) Cleanup() error {
 	}
 	return errAll.ErrorOrNil()
 }
+
+func Retry(steps ...Step) *Retried {
+	return &Retried{steps: steps}
+}

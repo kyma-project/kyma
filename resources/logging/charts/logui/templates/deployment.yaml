@@ -3,9 +3,7 @@ kind: Deployment
 metadata:
   name: {{ template "logui.fullname" . }}
   labels:
-    app: {{ template "logui.name" . }}
-    chart: {{ template "logui.chart" . }}
-    release: {{ .Release.Name }}
+    {{- include "logui.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
