@@ -4,7 +4,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ include "jaeger-operator.fullname" . }}-jaeger
   labels:
-    app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+{{ include "jaeger-operator.labels" . | indent 4 }}
   {{- with .Values.jaeger.kyma.badgerPvc.annotations  }}
   annotations:
 {{ toYaml . | indent 4 }}

@@ -18,6 +18,7 @@ const (
 	startMsg          = "start"
 	connectionAckMsg  = "connection_ack"
 	dataMsg           = "data"
+	keepAliveMsg      = "ka"
 )
 
 type clusterWebsocket struct {
@@ -91,31 +92,36 @@ func newSubscription(connection *clusterWebsocket) *Subscription {
 		Close:        connection.Close,
 		IsCloseError: websocket.IsCloseError,
 		Next: func(response interface{}, timeout time.Duration) error {
-			var op operationMessage
-			err := connection.SetReadDeadline(time.Now().Add(timeout))
-			if err != nil {
-				return errors.Wrap(err, "while setting connection deadline for subscription")
-			}
+			for {
+				var op operationMessage
+				err := connection.SetReadDeadline(time.Now().Add(timeout))
+				if err != nil {
+					return errors.Wrap(err, "while setting connection deadline for subscription")
+				}
 
-			err = connection.ReadJSON(&op)
-			if err != nil {
-				return errors.Wrap(err, "while reading JSON from subscription")
-			}
-			if op.Type != dataMsg {
-				return fmt.Errorf("expected data message, got %s with payload %s", op.Type, op.Payload)
-			}
+				err = connection.ReadJSON(&op)
+				if err != nil {
+					return errors.Wrap(err, "while reading JSON from subscription")
+				}
+				if op.Type == keepAliveMsg {
+					continue
+				}
+				if op.Type != dataMsg {
+					return fmt.Errorf("expected data message, got %s with payload %s", op.Type, op.Payload)
+				}
 
-			respDataRaw := map[string]interface{}{}
-			err = json.Unmarshal(op.Payload, &respDataRaw)
-			if err != nil {
-				return errors.Wrap(err, "while decoding response")
-			}
+				respDataRaw := map[string]interface{}{}
+				err = json.Unmarshal(op.Payload, &respDataRaw)
+				if err != nil {
+					return errors.Wrap(err, "while decoding response")
+				}
 
-			if respDataRaw["errors"] != nil {
-				return fmt.Errorf("%s", respDataRaw["errors"])
-			}
+				if respDataRaw["errors"] != nil {
+					return fmt.Errorf("%s", respDataRaw["errors"])
+				}
 
-			return unpack(respDataRaw["data"], response)
+				return unpack(respDataRaw["data"], response)
+			}
 		},
 	}
 }
