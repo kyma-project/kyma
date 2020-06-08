@@ -155,6 +155,7 @@ func TestConfigMap(t *testing.T) {
 		auth.List:   {fixConfigMapsQuery()},
 		auth.Update: {fixUpdateConfigMapMutation("{\"\":\"\"}")},
 		auth.Delete: {fixDeleteConfigMapMutation()},
+		auth.Watch:  {fixConfigMapSubscription()},
 	}
 	as.Run(t, ops)
 }

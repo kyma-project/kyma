@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:805922a698719105a020d35c21420478beab6505764348ab994cb443cdc1ac4b"
+  name = "cloud.google.com/go"
+  packages = ["compute/metadata"]
+  pruneopts = "NUT"
+  revision = "925e4a2f53e8013f144420c7f561482b927024b9"
+  version = "v0.57.0"
+
+[[projects]]
   digest = "1:15c12ef481d2688a480dc12e3b55c104fac7fc42529d225f2d03f4a8a51eb3df"
   name = "github.com/avast/retry-go"
   packages = ["."]
@@ -290,11 +298,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9b81fa6bfce070f7cc90a6fd7d6e2a52ecf5ec0dcc2de264b8dbbe6ee338de10"
+  digest = "1:b16c67a209af9d3ecf1e09d1ccee69ae6a04a6d07763819cab2b7001e8ac21de"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
+    "google",
     "internal",
+    "jws",
+    "jwt",
   ]
   pruneopts = "NUT"
   revision = "858c2ad4c8b6c5d10852cb89079f6ca1c7309787"
@@ -365,13 +376,16 @@
   revision = "3393d29bb9feddd4fb8d6d2f81faf9f50b70616d"
 
 [[projects]]
-  digest = "1:c8131c929081f0fa26901a27eec93162a44afb3fc89a38573520dd4e3f1b1621"
+  digest = "1:c381a96ea5276e8c5e98b2fa4fab83be71a959ff37dc51117555dc5059390c18"
   name = "google.golang.org/appengine"
   packages = [
+    ".",
     "internal",
+    "internal/app_identity",
     "internal/base",
     "internal/datastore",
     "internal/log",
+    "internal/modules",
     "internal/remote_api",
     "internal/urlfetch",
     "urlfetch",
@@ -486,7 +500,7 @@
   version = "kubernetes-1.15.0"
 
 [[projects]]
-  digest = "1:1aa90f4b41f65c341e7fe4390585f8fcee71f0907596f9d9f663d176848fd58b"
+  digest = "1:c1eeb8b1fff5a8e8470fd55cdf5634b9d71270f6a16ae382c9430eca2cf67f96"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -499,9 +513,11 @@
     "pkg/apis/clientauthentication/v1beta1",
     "pkg/version",
     "plugin/pkg/client/auth/exec",
+    "plugin/pkg/client/auth/gcp",
     "rest",
     "rest/watch",
     "restmapper",
+    "third_party/forked/golang/template",
     "tools/auth",
     "tools/clientcmd",
     "tools/clientcmd/api",
@@ -514,6 +530,7 @@
     "util/connrotation",
     "util/flowcontrol",
     "util/homedir",
+    "util/jsonpath",
     "util/keyutil",
   ]
   pruneopts = "NUT"
@@ -598,6 +615,7 @@
     "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/kubernetes/typed/apps/v1",
     "k8s.io/client-go/kubernetes/typed/core/v1",
+    "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
     "sigs.k8s.io/controller-runtime/pkg/client",
