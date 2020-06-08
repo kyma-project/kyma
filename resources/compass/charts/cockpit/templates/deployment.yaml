@@ -40,7 +40,7 @@ spec:
           - name: config
             mountPath: /var/public-luigi/config  
       nodeSelector: 
-        {{ toYaml .Values.deployment.nodeSelector | indent 8 }}
+        {{- toYaml .Values.deployment.nodeSelector | nindent 8 }}
       volumes:
         - name: config
           configMap:
