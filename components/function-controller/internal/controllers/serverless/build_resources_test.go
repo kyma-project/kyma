@@ -207,7 +207,7 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			r := &FunctionReconciler{}
-			got := r.servicePodLabels(tt.args.instance)
+			got := r.podLabels(tt.args.instance)
 			g.Expect(got).To(gomega.Equal(tt.want))
 			g.Expect(got).To(gomega.HaveLen(len(tt.args.instance.Spec.Labels) + 3))
 		})

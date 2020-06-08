@@ -3,10 +3,7 @@ kind: Service
 metadata:
   name: {{ template "logui.fullname" . }}
   labels:
-    app: {{ template "logui.name" . }}
-    chart: {{ template "logui.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    {{- include "logui.labels" . | nindent 4 }}
 spec:
   ports:
     - port: {{ .Values.service.externalPort }}

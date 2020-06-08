@@ -7,10 +7,7 @@ kind: ClusterRoleBinding
 metadata:
   name: {{ template "kiali.name" . }}-operator
   labels:
-    app: {{ template "kiali.name" . }}-operator
-    chart: {{ template "kiali.chart" . }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    {{- include "kiali.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

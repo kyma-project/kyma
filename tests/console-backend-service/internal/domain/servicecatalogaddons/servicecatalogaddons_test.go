@@ -12,6 +12,7 @@ import (
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/module"
 	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/exit"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 var AuthSuite *auth.TestSuite

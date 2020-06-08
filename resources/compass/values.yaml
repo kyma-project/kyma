@@ -124,6 +124,7 @@ global:
     revocation:
       configmap:
         name: revocations-config
+        namespace: "{{ .Release.Namespace }}"
     # If key and certificate are not provided they will be generated
     caKey: ""
     caCertificate: ""

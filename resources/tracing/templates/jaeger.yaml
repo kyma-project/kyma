@@ -3,6 +3,8 @@ apiVersion: jaegertracing.io/v1
 kind: Jaeger
 metadata:
   name: {{ include "jaeger-operator.fullname" . }}-jaeger
+  labels:
+{{ include "jaeger-operator.labels" . | indent 4 }}
 spec:
 {{ tpl (toYaml .Values.jaeger.spec | indent 2) . }}
 {{- /*
