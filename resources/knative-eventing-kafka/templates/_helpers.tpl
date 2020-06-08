@@ -38,7 +38,7 @@ Common labels
 app: {{ include "knative-kafka.name" . }}
 app.kubernetes.io/name: {{ include "knative-kafka.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/managed-by: Helm
+app.kubernetes.io/managed-by: {{ .Release.Service }}
 helm.sh/chart: {{ include "knative-kafka.chart" . }}
 {{- end -}}
 

@@ -725,13 +725,11 @@
             "properties": {
                 "dir": {
                     "$id": "#/properties/test/properties/dir",
-                    "type": "object",
+                    "type": "string",
                     "title": "The dir schema",
                     "description": "Specifies dir.",
-                    "default": {},
-                    "examples": [
-                        {}
-                    ],
+                    "default": "",
+                    "examples": [""],
                     "required": [],
                     "additionalProperties": true,
                     "properties": {}
