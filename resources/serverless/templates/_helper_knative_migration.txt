@@ -16,7 +16,7 @@ readonly MANAGED_BY_LABEL_VALUE="function-controller"
 # patchResources patches Functions/Triggers
 #
 patchResources() {
-  local -r functions=$(kubectl get ${FUNCTIONS_RESOURCE_TYPE} --all-namespaces -ojson | jq -c ".items[] | {namespace: .metadata.namespace, name: .metadata.name}")
+  local -r functions=$(kubectl get ${FUNCTIONS_RESOURCE_TYPE} --all-namespaces -ojson | jq -c ".items[]")
   if [[ -z ${functions} ]]; then
     echo "There are not any Functions. Skipping... :("
     return 0
@@ -43,8 +43,8 @@ patchResources() {
     IFS=$'\n'
     for function in ${functions}
     do
-      local functionName="$(echo ${function} | jq -r '.name')"
-      local functionNamespace="$(echo ${function} | jq -r '.namespace')"
+      local functionName="$(echo ${function} | jq -r '.metadata.name')"
+      local functionNamespace="$(echo ${function} | jq -r '.metadata.namespace')"
 
       if [ "${subscriberName}" == "${functionName}" ] && [ "${subscriberNamespace}" == "${functionNamespace}" ]; then
         patchSingleTrigger "${trigger}"
@@ -83,11 +83,11 @@ patchSingleFunction() {
 
   local minReplicas="$(echo ${function} | jq -r '.spec.minReplicas')"
   if [[ -z ${minReplicas} || "${minReplicas}" == "null" || "${minReplicas}" == "0" ]]; then
-    minReplicas="1"
+    minReplicas=1
   fi
   local maxReplicas="$(echo ${function} | jq -r '.spec.maxReplicas')"
-  if [[ -z ${maxReplicas} || "${maxReplicas}" == "null" || "${minReplicas}" == "0" ]]; then
-    minReplicas="1"
+  if [[ -z ${maxReplicas} || "${maxReplicas}" == "null" || "${maxReplicas}" == "0" ]]; then
+    maxReplicas=1
   fi
 
   local requestCpu="$(echo ${function} | jq -r '.spec.resources.requests.cpu')"
@@ -108,7 +108,7 @@ patchSingleFunction() {
   fi
 
   kubectl patch functions -n "${functionNamespace}" "${functionName}" \
-    --patch "{\"spec\": {\"minReplicas\": \"${minReplicas}\", \"maxReplicas\": \"${maxReplicas}\", \"resources\": {\"requests\": {\"cpu\": \"${requestCpu}\", \"memory\": \"${requestMemory}\"}, \"limits\": {\"cpu\": \"${limitsCpu}\", \"memory\": \"${limitsMemory}\"}}}}" \
+    --patch "{\"spec\": {\"minReplicas\": ${minReplicas}, \"maxReplicas\": ${maxReplicas}, \"resources\": {\"requests\": {\"cpu\": \"${requestCpu}\", \"memory\": \"${requestMemory}\"}, \"limits\": {\"cpu\": \"${limitsCpu}\", \"memory\": \"${limitsMemory}\"}}}}" \
     --type=merge
 }
 
