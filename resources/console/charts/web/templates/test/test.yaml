@@ -2,10 +2,10 @@
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: console-{{ .Chart.Name }}
+  name: {{ template "fullname" . }}
   labels:
-    app: console-{{ .Chart.Name }}-tests
-    app.kubernetes.io/name: {{ .Chart.Name }}-tests
+    app: {{ template "fullname" . }}
+    app.kubernetes.io/name: {{ template "fullname" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -36,7 +36,7 @@ spec:
               - "ui-test-exposed-api.{{ .Values.global.ingress.domainName }}"
               - "core-ui.{{ .Values.global.ingress.domainName }}"
           {{ end }}
-          serviceAccountName: {{ .Chart.Name }}-tests
+          serviceAccountName: {{ template "fullname" . }}-tests
           containers:
             - name: tests
               image: {{ .Values.global.containerRegistry.path }}/ui-tests:{{ .Values.global.ui_acceptance_tests.version }}
