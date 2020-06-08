@@ -284,10 +284,6 @@ func (hc *mockHelmClient) ReleaseStatus(nn kymahelm.NamespacedName) (string, err
 	return "", nil
 }
 
-func (hc *mockHelmClient) InstallReleaseFromChart(chartDir string, nn kymahelm.NamespacedName, values overrides.Map) (*kymahelm.Release, error) {
-	return nil, nil
-}
-
 func (hc *mockHelmClient) UpgradeRelease(chartDir string, nn kymahelm.NamespacedName, values overrides.Map) (*kymahelm.Release, error) {
 	if hc.failUpgradingRelease == true {
 		err := errors.New("failed to upgrade release")

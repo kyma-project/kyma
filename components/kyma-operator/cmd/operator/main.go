@@ -53,16 +53,11 @@ func main() {
 	env.InitConfig()
 
 	kubeconfig := flag.String("kubeconfig", "", "Path to a kubeconfig file")
-	//helmHost := flag.String("helmhost", "tiller-deploy.kube-system.svc.cluster.local:44134", "Helm host")
 	kymaDir := flag.String("kymadir", "/kyma", "Directory where kyma packages will be extracted")
-	//tlsKey := flag.String("tillerTLSKey", "/etc/certs/tls.key", "Path to TLS key file")
-	//tlsCrt := flag.String("tillerTLSCrt", "/etc/certs/tls.crt", "Path to TLS cert file")
-	//TLSInsecureSkipVerify := flag.Bool("tillerTLSInsecureSkipVerify", false, "Disable verification of Tiller TLS cert")
 	backoffIntervalsRaw := flag.String("backoffIntervals", "10,20,40,60,80", "Number of seconds to wait before subsequent retries")
 	overrideLogFile := flag.String("overrideLogFile", STDOUT, "Log File to Print Installation overrides. (Default: /dev/stdout)")
 	overrideLogFormat := flag.String("overrideLogFormat", "text", "Installation Override Log format (Accepted values: text or json)")
 	helmMaxHistory := flag.Int("helmMaxHistory", 10, "Max number of releases returned by Helm release history query")
-	helmTimeout := flag.Int64("helmTimeout", 3600, "Number of seconds on Helm operations")
 	helmDriver := flag.String("helmDriver", "secrets", "driver represents a method used to store Helm releases")
 	helmDebugMode := flag.Bool("helmDebugMode", false, "include Helm client output to logs if true")
 
@@ -97,7 +92,7 @@ func main() {
 		log.Fatalf("Unable to create logrus Instance. Error: %v", err)
 	}
 
-	helmClient := kymahelm.NewClient(overridesLogger, *helmMaxHistory, *helmTimeout, *helmDriver, *helmDebugMode)
+	helmClient := kymahelm.NewClient(overridesLogger, *helmMaxHistory, *helmDriver, *helmDebugMode)
 
 	serviceCatalogClient := servicecatalog.NewClient(config)
 	kymaCommandExecutor := &toolkit.KymaCommandExecutor{}

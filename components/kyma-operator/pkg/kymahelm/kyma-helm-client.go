@@ -16,14 +16,11 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
 
-//todo: each function in a separate file?
-
-// ClientInterface .
+// ClientInterface exposes functions to interact with Helm
 type ClientInterface interface {
 	ListReleases() ([]*Release, error)
 	IsReleaseDeletable(nn NamespacedName) (bool, error)
 	ReleaseDeployedRevision(nn NamespacedName) (int, error)
-	InstallReleaseFromChart(chartDir string, nn NamespacedName, overrides overrides.Map) (*Release, error)
 	InstallRelease(chartDir string, nn NamespacedName, overrides overrides.Map) (*Release, error)
 	UpgradeRelease(chartDir string, nn NamespacedName, overrides overrides.Map) (*Release, error)
 	UninstallRelease(nn NamespacedName) error
@@ -33,19 +30,16 @@ type ClientInterface interface {
 	PrintRelease(release *Release)
 }
 
-type infoLogFunc func(string, ...interface{})
-
-// Client .
+// Client is a Helm client
 type Client struct {
 	overridesLogger *logrus.Logger
 	maxHistory      int
-	timeout         time.Duration //todo: timeout param consumed by actions limits single applies rather than entire operations (helm install, helm upgrade, etc.). Either remove or find a workaround
-	driver          string        //todo: add validation in main?
+	driver          string
 	logFn           func(string, ...interface{})
 }
 
-// NewClient .
-func NewClient(overridesLogger *logrus.Logger, maxHistory int, timeout int64, driver string, debug bool) *Client {
+// NewClient initializes an instance of Client and returns it
+func NewClient(overridesLogger *logrus.Logger, maxHistory int, driver string, debug bool) *Client {
 
 	logFn := func(format string, v ...interface{}) {
 		if debug {
@@ -57,7 +51,6 @@ func NewClient(overridesLogger *logrus.Logger, maxHistory int, timeout int64, dr
 	return &Client{
 		overridesLogger: overridesLogger,
 		maxHistory:      maxHistory,
-		timeout:         time.Duration(timeout) * time.Second,
 		driver:          driver,
 		logFn:           logFn,
 	}
@@ -107,8 +100,8 @@ func (hc *Client) ReleaseStatus(nn NamespacedName) (*ReleaseStatus, error) {
 	return helmReleaseToKymaRelease(rel).ReleaseStatus, nil
 }
 
-//IsReleaseDeletable returns true for release that can be deleted
-func (hc *Client) IsReleaseDeletable(nn NamespacedName) (bool, error) { //todo: helm3 allows atomic operations, this func might be useless
+// IsReleaseDeletable returns true for release that can be deleted
+func (hc *Client) IsReleaseDeletable(nn NamespacedName) (bool, error) {
 
 	isDeletable := false
 	maxAttempts := 3
@@ -144,7 +137,8 @@ func (hc *Client) IsReleaseDeletable(nn NamespacedName) (bool, error) { //todo: 
 	return isDeletable, err
 }
 
-func (hc *Client) ReleaseDeployedRevision(nn NamespacedName) (int, error) { //todo: helm3 allows atomic operations, this func might be useless
+// ReleaseDeployedRevision returns the last deployed revision
+func (hc *Client) ReleaseDeployedRevision(nn NamespacedName) (int, error) {
 
 	var deployedRevision = 0
 
@@ -171,11 +165,10 @@ func (hc *Client) ReleaseDeployedRevision(nn NamespacedName) (int, error) { //to
 	return deployedRevision, nil
 }
 
-// InstallReleaseFromChart .
-func (hc *Client) InstallReleaseFromChart(chartDir string, nn NamespacedName, values overrides.Map) (*Release, error) {
+// InstallRelease installs a Helm chart
+func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, values overrides.Map) (*Release, error) {
 
 	cfg, err := hc.newActionConfig(nn.Namespace)
-	//cfg, err := hc.newActionConfigMst(relNamespace)
 	if err != nil {
 		return nil, err
 	}
@@ -185,12 +178,12 @@ func (hc *Client) InstallReleaseFromChart(chartDir string, nn NamespacedName, va
 		return nil, err
 	}
 
-	install := action.NewInstall(cfg) //todo: stretch: implement configurator
+	install := action.NewInstall(cfg)
 	install.ReleaseName = nn.Name
 	install.Namespace = nn.Namespace
 	install.Atomic = false
-	install.Wait = true            //todo: defaults to true if atomic is set. Remove if atomic == true
-	install.CreateNamespace = true // see https://v3.helm.sh/docs/faq/#automatically-creating-namespaces
+	install.Wait = true
+	install.CreateNamespace = true
 
 	hc.PrintOverrides(values, nn.Name, "install")
 
@@ -202,12 +195,7 @@ func (hc *Client) InstallReleaseFromChart(chartDir string, nn NamespacedName, va
 	return helmReleaseToKymaRelease(installedRelease), nil
 }
 
-// InstallRelease .
-func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, values overrides.Map) (*Release, error) {
-	return hc.InstallReleaseFromChart(chartDir, nn, values)
-}
-
-// UpgradeRelease .
+// UpgradeRelease upgrades a Helm chart
 func (hc *Client) UpgradeRelease(chartDir string, nn NamespacedName, values overrides.Map) (*Release, error) {
 
 	cfg, err := hc.newActionConfig(nn.Namespace)
@@ -237,7 +225,7 @@ func (hc *Client) UpgradeRelease(chartDir string, nn NamespacedName, values over
 	return helmReleaseToKymaRelease(upgradedRelease), nil
 }
 
-//RollbackRelease performs rollback to given revision
+//RollbackRelease performs rollback of a Helm release
 func (hc *Client) RollbackRelease(nn NamespacedName, revision int) error {
 
 	cfg, err := hc.newActionConfig(nn.Namespace)
@@ -254,7 +242,7 @@ func (hc *Client) RollbackRelease(nn NamespacedName, revision int) error {
 	return rollback.Run(nn.Name)
 }
 
-// DeleteRelease uninstall a given release
+// DeleteRelease uninstalls a Helm release
 func (hc *Client) UninstallRelease(nn NamespacedName) error {
 
 	cfg, err := hc.newActionConfig(nn.Namespace)
