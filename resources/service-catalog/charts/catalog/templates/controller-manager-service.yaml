@@ -12,7 +12,7 @@ spec:
   selector:
     app: {{ template "fullname" . }}-controller-manager
   ports:
-  - name: secure
+  - name: https-secure
     protocol: TCP
     port: 443
     targetPort: 8444
