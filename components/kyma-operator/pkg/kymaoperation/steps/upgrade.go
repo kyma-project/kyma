@@ -10,7 +10,6 @@ import (
 
 type upgradeStep struct {
 	installStep
-	rollbackWaitTimeSec uint32
 }
 
 // Run method for upgradeStep triggers step upgrade via helm
