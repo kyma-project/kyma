@@ -42,11 +42,6 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 helm.sh/chart: {{ include "knative-kafka.chart" . }}
 {{- end -}}
 
-{{- define "knative-kafka.annotations" -}}
-meta.helm.sh/release-name: {{ include "knative-kafka.name" . }}
-meta.helm.sh/release-namespace: {{ include "knative-kafka.name" . }}
-{{- end -}}
-
 {{- define "knative-kafka.brokers" -}}
 {{-  printf "%s:%v" .Values.kafka.brokers.hostname .Values.kafka.brokers.port -}}
 {{- end -}}

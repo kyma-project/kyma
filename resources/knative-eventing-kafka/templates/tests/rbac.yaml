@@ -7,8 +7,6 @@ metadata:
   labels:
 {{ include "knative-kafka.labels" . | indent 4 }}
     kyma-project.io/test: {{ .Release.Name }}
-  annotations:
-{{ include "knative-kafka.annotations" . | indent 4 }}
 rules:
 - apiGroups: ["knativekafka.kyma-project.io"]
   resources: ["kafkachannels"]
@@ -21,8 +19,6 @@ metadata:
   labels:
 {{ include "knative-kafka.labels" . | indent 4 }}
     kyma-project.io/test: {{ .Release.Name }}
-  annotations:
-{{ include "knative-kafka.annotations" . | indent 4 }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -31,8 +27,6 @@ metadata:
   labels:
 {{ include "knative-kafka.labels" . | indent 4 }}
     kyma-project.io/test: {{ .Release.Name }}
-  annotations:
-{{ include "knative-kafka.annotations" . | indent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

@@ -6,8 +6,6 @@ metadata:
   labels:
 {{ include "knative-kafka.labels" . | indent 4 }}
     k8s-app: knative-kafka-channel-controller
-  annotations:
-{{ include "knative-kafka.annotations" . | indent 4 }}
 spec:
   selector:
     app.kubernetes.io/name: {{ template "knative-kafka.name" . }}

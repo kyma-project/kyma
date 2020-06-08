@@ -8,8 +8,6 @@ metadata:
   labels:
 {{ include "knative-kafka.labels" . | indent 4 }}
     kyma-project.io/test: {{ .Release.Name }}
-  annotations:
-{{ include "knative-kafka.annotations" . | indent 4 }}
 spec:
   disableConcurrency: false
   template:
