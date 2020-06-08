@@ -1,11 +1,11 @@
 # in case of changes please test this on GKE, Azure and Gardener
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ template "registry-fullname" }}-cert-patch
-  namespace: istio-system
+  namespace: {{ .Release.Namespace }}
   labels:
-  {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
-apiVersion: v1
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 data:
   patch-docker.sh: |
     #!/usr/bin/env bash
@@ -17,12 +17,22 @@ data:
     apk update
     apk add --no-cache openssl
 
-    CERT_FILE="/cert/cert.txt"
+    CERT_FILE_TEXT=$(kubectl get secret kyma-gateway-certs -n istio-system -o=jsonpath='{.data.cert}' --ignore-not-found)
+    if [ -z "${CERT_FILE_TEXT}" ]; then
+      echo "No cert key in secret kyma-gateway-certs to inject. Checking tls.crt."
 
-    if [ ! -f "${CERT_FILE}" ]; then
-      echo "No cert file to inject. Exit 0"
-      exit 0
+      CERT_FILE_TEXT=$(kubectl get secret kyma-gateway-certs -n istio-system -o=jsonpath="{.data['tls\.crt']}" --ignore-not-found)
+      if [ -z "${CERT_FILE_TEXT}" ]; then
+        echo "No tls.crt key in secret kyma-gateway-certs to inject. Exit 0."
+        exit 0
+      fi
     fi
+
+    DECODED_CERT=$(echo "${CERT_FILE_TEXT}" | sed 's/ /\\ /g' | tr -d '\n' | base64 -d)
+    CERT_FILE="/cert/cert.txt"
+    mkdir "/cert"
+    touch "${CERT_FILE}"
+    echo "${DECODED_CERT}" > "${CERT_FILE}"  
 
     ISSUER_NO_WHITESPACE=$(openssl x509 -in "${CERT_FILE}" -inform PEM -noout -issuer | sed 's/issuer=//' | tr -d '[:space:]')
     SUBJECT_NO_WHITESPACE=$(openssl x509 -in "${CERT_FILE}" -inform PEM -noout -subject | sed 's/subject=//' | tr -d '[:space:]')
