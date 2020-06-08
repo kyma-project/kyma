@@ -39,6 +39,8 @@ spec:
             mountPath: /var/public/config
           - name: config
             mountPath: /var/public-luigi/config  
+      nodeSelector: 
+        {{ toYaml .Values.deployment.nodeSelector | indent 8 }}
       volumes:
         - name: config
           configMap:
