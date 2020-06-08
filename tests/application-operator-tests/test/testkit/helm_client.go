@@ -51,7 +51,6 @@ func (hc *helmClient) IsInstalled(rlsName string, namespace string) bool {
 	status, err := hc.CheckReleaseStatus(rlsName, namespace)
 
 	if err != nil {
-		log.Errorf("Failed to execute CheckReleaseStatus: %s", err.Error())
 		return false
 	}
 	return err == nil && status == release.StatusDeployed
