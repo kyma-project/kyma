@@ -25,7 +25,7 @@ RUN mv ./console-backend-service /app/main
 
 COPY ./licenses/ /app/licenses
 
-FROM alpine:3.10
+FROM alpine:3.11
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 
