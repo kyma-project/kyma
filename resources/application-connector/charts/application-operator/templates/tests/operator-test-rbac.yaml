@@ -35,7 +35,7 @@ rules:
     resources: ["pods/log"]
     verbs: ["get", "list"]
   - apiGroups: ["*"]
-    resources: ["configmaps"]
+    resources: ["configmaps", "secrets"]
     verbs: ["get", "list", "update"]
   - apiGroups: ["networking.istio.io"]
     resources: ["virtualservices"]
