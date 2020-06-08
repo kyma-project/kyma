@@ -53,9 +53,6 @@ release: {{ $.Release.Name | quote }}
 {{- end }}
 helm.sh/chart: {{ include "prometheus-operator.chartref" . }}
 {{ include "prometheus-operator.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 

@@ -53,9 +53,6 @@ Create default labels
 {{ merge .extraLabels $labels | toYaml | indent 4 }}
 helm.sh/chart: {{ include "prometheus-pushgateway.chart" . }}
 {{ include "prometheus-pushgateway.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 

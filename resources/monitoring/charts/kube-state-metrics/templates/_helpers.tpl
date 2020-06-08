@@ -59,9 +59,6 @@ Common labels
 {{- define "kube-state-metrics.labels" -}}
 helm.sh/chart: {{ include "kube-state-metrics.chart" . }}
 {{ include "kube-state-metrics.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 

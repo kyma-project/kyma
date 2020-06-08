@@ -29,9 +29,6 @@ If release name contains chart name it will be used as a full name.
 app: {{ template "prometheus-node-exporter.name" . }}
 helm.sh/chart: {{ include "prometheus-node-exporter.chart" . }}
 {{ include "prometheus-node-exporter.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 release: {{.Release.Name }}
 chart: {{ template "prometheus-node-exporter.chart" . }}
