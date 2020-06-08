@@ -30,6 +30,6 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "prometheus-test.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "prometheus-test.name" . }}
+app.kubernetes.io/name: {{ include "fullname" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
