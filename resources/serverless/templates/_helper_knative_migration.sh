@@ -13,14 +13,20 @@ readonly TRIGGERS_RESOURCE_TYPE="triggers.eventing.knative.dev"
 readonly MANAGED_BY_LABEL_KEY="serverless.kyma-project.io/managed-by"
 readonly MANAGED_BY_LABEL_VALUE="function-controller"
 
-# patchTriggers patches all Triggers connected to KNative Services in all namespaces to pure k8s Service resource
+# patchResources patches Functions/Triggers
 #
-patchTriggers() {
+patchResources() {
   local -r functions=$(kubectl get ${FUNCTIONS_RESOURCE_TYPE} --all-namespaces -ojson | jq -c ".items[] | {namespace: .metadata.namespace, name: .metadata.name}")
   if [[ -z ${functions} ]]; then
     echo "There are not any Functions. Skipping... :("
     return 0
   fi
+
+  IFS=$'\n'
+  for function in ${functions}
+  do
+    patchSingleFunction "${function}"
+  done
 
   local -r triggers=$(kubectl get ${TRIGGERS_RESOURCE_TYPE} --all-namespaces -ojson | jq -c ".items[] | select( .spec.subscriber.ref.apiVersion == \"${SERVING_API_VERSION}\" )")
   if [[ -z ${triggers} ]]; then
@@ -65,6 +71,47 @@ patchSingleTrigger() {
     --type=merge
 }
 
+# patchSingleFunction patches single Function with default fields
+#
+# Arguments:
+#   $1 - Function resource
+patchSingleFunction() {
+  local -r function="${1}"
+
+  local -r functionName="$(echo ${function} | jq -r '.metadata.name')"
+  local -r functionNamespace="$(echo ${function} | jq -r '.metadata.namespace')"
+
+  local minReplicas="$(echo ${function} | jq -r '.spec.minReplicas')"
+  if [[ -z ${minReplicas} || "${minReplicas}" == "null" || "${minReplicas}" == "0" ]]; then
+    minReplicas="1"
+  fi
+  local maxReplicas="$(echo ${function} | jq -r '.spec.maxReplicas')"
+  if [[ -z ${maxReplicas} || "${maxReplicas}" == "null" || "${minReplicas}" == "0" ]]; then
+    minReplicas="1"
+  fi
+
+  local requestCpu="$(echo ${function} | jq -r '.spec.resources.requests.cpu')"
+  if [[ -z ${requestCpu} || "${requestCpu}" == "null" ]]; then
+    requestCpu="50m"
+  fi
+  local requestMemory="$(echo ${function} | jq -r '.spec.resources.requests.memory')"
+  if [[ -z ${requestMemory} || "${requestMemory}" == "null" ]]; then
+    requestMemory="64Mi"
+  fi
+  local limitsCpu="$(echo ${function} | jq -r '.spec.resources.limits.cpu')"
+  if [[ -z ${limitsCpu} || "${limitsCpu}" == "null" ]]; then
+    limitsCpu="100m"
+  fi
+  local limitsMemory="$(echo ${function} | jq -r '.spec.resources.limits.memory')"
+  if [[ -z ${limitsMemory} || "${limitsMemory}" == "null" ]]; then
+    limitsMemory="128Mi"
+  fi
+
+  kubectl patch functions -n "${functionNamespace}" "${functionName}" \
+    --patch "{\"spec\": {\"minReplicas\": \"${minReplicas}\", \"maxReplicas\": \"${maxReplicas}\", \"resources\": {\"requests\": {\"cpu\": \"${requestCpu}\", \"memory\": \"${requestMemory}\"}, \"limits\": {\"cpu\": \"${limitsCpu}\", \"memory\": \"${limitsMemory}\"}}}}" \
+    --type=merge
+}
+
 # deleteKServices deletes all KServices managed/created by function-controller
 #
 deleteKServices() {
@@ -75,7 +122,7 @@ deleteKServices() {
 }
 
 main() {
-  patchTriggers
+  patchResources
   deleteKServices || 0
 }
 main
