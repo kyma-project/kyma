@@ -110,7 +110,6 @@
   version = "v0.2.2"
 
 [[projects]]
-  branch = "master"
   digest = "1:168561b448b6bb9fd20733a461d18048c728c8ceac0ca0be74c65a608cd0e300"
   name = "github.com/kyma-project/kyma"
   packages = [
@@ -324,9 +323,10 @@
   version = "v2.2.2"
 
 [[projects]]
-  digest = "1:759855d98a898d7d6a091b89b9c85c03d6efd673c44e15561d716543f4e88f31"
+  digest = "1:061024a203efbf02654d4aa55d69cd10d1f8985dada4cbafe5d6ce1b6914d22a"
   name = "k8s.io/api"
   packages = [
+    "admissionregistration/v1",
     "admissionregistration/v1beta1",
     "apps/v1",
     "apps/v1beta1",
@@ -346,6 +346,7 @@
     "coordination/v1",
     "coordination/v1beta1",
     "core/v1",
+    "discovery/v1alpha1",
     "events/v1beta1",
     "extensions/v1beta1",
     "networking/v1",
@@ -365,11 +366,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "fdd30b57c827abbc506646ecfd579f6ccb3b80ab"
-  version = "kubernetes-1.15.2"
+  revision = "6287e2b171401931686bb9a4d1c769343f712343"
+  version = "kubernetes-1.16.10"
 
 [[projects]]
-  digest = "1:f44773441143e5dba1ecd359fa729e35c7db0e5898dee76374e0ad371961dbc9"
+  digest = "1:e7d203a42facb653069b65c44657c63d638f3bb7d569cf53a96534229eeb342d"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -408,16 +409,17 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
-  revision = "1799e75a07195de9460b8ef7300883499f12127b"
-  version = "kubernetes-1.15.2"
+  revision = "9402b4926e83cddfcac78460d5dca7ae87c1dc49"
+  version = "kubernetes-1.16.10"
 
 [[projects]]
-  digest = "1:423849080259f7edb2c769207421e46b5a327040813d781416a23c2ae7a682f2"
+  digest = "1:e622bf588c485cb17e452eaa9fde019366c20f4cc17eae7655b6750ce83e1d4c"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "kubernetes",
     "kubernetes/scheme",
+    "kubernetes/typed/admissionregistration/v1",
     "kubernetes/typed/admissionregistration/v1beta1",
     "kubernetes/typed/apps/v1",
     "kubernetes/typed/apps/v1beta1",
@@ -437,6 +439,7 @@
     "kubernetes/typed/coordination/v1",
     "kubernetes/typed/coordination/v1beta1",
     "kubernetes/typed/core/v1",
+    "kubernetes/typed/discovery/v1alpha1",
     "kubernetes/typed/events/v1beta1",
     "kubernetes/typed/extensions/v1beta1",
     "kubernetes/typed/networking/v1",
@@ -471,8 +474,8 @@
     "util/keyutil",
   ]
   pruneopts = "NUT"
-  revision = "2fe0317bcee0e1ff48861f77cc1e2791cceba458"
-  version = "kubernetes-1.15.2"
+  revision = "0f69009510c3f4630de40c7b7f9034f2a2728023"
+  version = "kubernetes-1.16.10"
 
 [[projects]]
   digest = "1:c05ad592787fc6cdacf8c5309d826561aa4a7d9e4e7ea28660dfb2c77ff68ab0"
