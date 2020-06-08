@@ -921,9 +921,8 @@ func (r *namespaceResolver) Pods(ctx context.Context, obj *gqlschema.Namespace) 
 	return r.k8s.PodsQuery(ctx, obj.Name, nil, nil)
 }
 
-func (r *namespaceResolver) Deployments(ctx context.Context, obj *gqlschema.Namespace) ([]gqlschema.Deployment, error) {
-	var excludeFunctions = false
-	return r.k8s.DeploymentsQuery(ctx, obj.Name, &excludeFunctions)
+func (r *namespaceResolver) Deployments(ctx context.Context, obj *gqlschema.Namespace, excludeFunctions *bool) ([]gqlschema.Deployment, error) {
+	return r.k8s.DeploymentsQuery(ctx, obj.Name, excludeFunctions)
 }
 
 // Rafter
