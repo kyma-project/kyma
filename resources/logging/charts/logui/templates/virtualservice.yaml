@@ -3,9 +3,7 @@ kind: VirtualService
 metadata:
   name: {{ template "logui.fullname" . }}
   labels:
-    app: {{ template "logui.name" . }}
-    chart: {{ template "logui.chart" . }}
-    release: {{ .Release.Name }}
+    {{- include "logui.labels" . | nindent 4 }}
 spec:
   hosts:
   - log-ui.{{ .Values.global.ingress.domainName }}

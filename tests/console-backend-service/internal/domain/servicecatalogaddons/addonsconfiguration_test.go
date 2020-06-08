@@ -100,6 +100,7 @@ func TestAddonsConfigurationMutationsAndQueries(t *testing.T) {
 		auth.Get:    {suite.fixAddonsConfigurationRequest()},
 		auth.Create: {suite.fixCreateAddonsConfigurationsRequest()},
 		auth.Delete: {suite.fixDeleteAddonsConfigurationRequest()},
+		auth.Watch:  {suite.fixAddonConfigurationSubscription()},
 	}
 	AuthSuite.Run(t, ops)
 }
@@ -257,7 +258,7 @@ func (s *addonsConfigurationTestSuite) addonsConfigurationDetailsFields() string
 	`
 }
 
-func (s *addonsConfigurationTestSuite) subscribeAddonsConfiguration() *graphql.Subscription {
+func (s *addonsConfigurationTestSuite) fixAddonConfigurationSubscription() *graphql.Request {
 	query := fmt.Sprintf(`
 			subscription ($namespace: String!) {
 				addonsConfigurationEvent(namespace: $namespace) {
@@ -267,8 +268,11 @@ func (s *addonsConfigurationTestSuite) subscribeAddonsConfiguration() *graphql.S
 		`, s.addonsConfigurationEventDetailsFields())
 	req := graphql.NewRequest(query)
 	req.SetVar("namespace", TestNamespace)
+	return req
+}
 
-	return s.gqlCli.Subscribe(req)
+func (s *addonsConfigurationTestSuite) subscribeAddonsConfiguration() *graphql.Subscription {
+	return s.gqlCli.Subscribe(s.fixAddonConfigurationSubscription())
 }
 
 func (s *addonsConfigurationTestSuite) readAddonsConfigurationEvent(sub *graphql.Subscription) (addonsConfigurationEvent, error) {

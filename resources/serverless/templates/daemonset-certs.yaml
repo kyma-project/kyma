@@ -2,10 +2,10 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: "{{ template "registry-fullname" }}-self-signed-cert"
-  namespace: istio-system
+  name: {{ template "registry-fullname" }}-self-signed-cert
+  namespace: {{ .Release.Namespace }}
   labels:
-  {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 spec:
   selector:
     matchLabels:
@@ -17,11 +17,12 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
+      serviceAccountName: {{ template "fullname" . }}-self-signed-cert
       initContainers:
         - name: inject-certs
           securityContext:
             runAsUser: 0
-          image: alpine:3.11
+          image: "{{ .Values.injectCerts.image.repository }}:{{ .Values.injectCerts.image.tag }}"
           resources:
             requests:
               cpu: 70m
@@ -33,9 +34,6 @@ spec:
             - name: etckube
               mountPath: /kube-etc/
               readOnly: false
-            - name: cert
-              mountPath: /cert
-              readOnly: true
             - name: scripts
               mountPath: /scripts
               readOnly: true
@@ -44,13 +42,6 @@ spec:
         - name: etckube
           hostPath:
             path: /etc/
-        - name: cert
-          secret:
-            optional: true
-            secretName: kyma-gateway-certs
-            items:
-              - key: cert
-                path: cert.txt
         - configMap:
             defaultMode: 420
             name: {{ template "registry-fullname" }}-cert-patch
