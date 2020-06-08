@@ -4,12 +4,6 @@
 
 fullnameOverride: "serverless"
 
-bindingsMigration:
-  image:
-    repository: 'eu.gcr.io/kyma-project/test-infra/alpine-kubectl'
-    tag: 'v20200507-070ff576'
-    pullPolicy: IfNotPresent
-
 injectCerts:
   image:
     repository: 'eu.gcr.io/kyma-project/test-infra/alpine-kubectl'
