@@ -680,6 +680,7 @@ type Namespace {
     status: String!
     isSystemNamespace: Boolean!
     pods: [Pod!]!
+    deployments: [Deployment!]!
 
     # Depends on application module
     applications: [String!]

@@ -133,5 +133,7 @@ models:
     fields:
       applications:
         resolver: true
+      deployments:
+        resolver: true
       pods:
         resolver: true

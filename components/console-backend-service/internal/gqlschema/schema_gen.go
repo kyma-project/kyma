@@ -582,6 +582,7 @@ type ComplexityRoot struct {
 		Status            func(childComplexity int) int
 		IsSystemNamespace func(childComplexity int) int
 		Pods              func(childComplexity int) int
+		Deployments       func(childComplexity int) int
 		Applications      func(childComplexity int) int
 	}
 
@@ -1100,6 +1101,7 @@ type MutationResolver interface {
 }
 type NamespaceResolver interface {
 	Pods(ctx context.Context, obj *Namespace) ([]Pod, error)
+	Deployments(ctx context.Context, obj *Namespace) ([]Deployment, error)
 	Applications(ctx context.Context, obj *Namespace) ([]string, error)
 }
 type QueryResolver interface {
@@ -7588,6 +7590,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Namespace.Pods(childComplexity), true
+
+	case "Namespace.deployments":
+		if e.complexity.Namespace.Deployments == nil {
+			break
+		}
+
+		return e.complexity.Namespace.Deployments(childComplexity), true
 
 	case "Namespace.applications":
 		if e.complexity.Namespace.Applications == nil {
@@ -22765,6 +22774,15 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 				}
 				wg.Done()
 			}(i, field)
+		case "deployments":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Namespace_deployments(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "applications":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -22934,6 +22952,66 @@ func (ec *executionContext) _Namespace_pods(ctx context.Context, field graphql.C
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec._Pod(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Namespace_deployments(ctx context.Context, field graphql.CollectedField, obj *Namespace) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Namespace",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Namespace().Deployments(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]Deployment)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._Deployment(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -37941,6 +38019,7 @@ type Namespace {
     status: String!
     isSystemNamespace: Boolean!
     pods: [Pod!]!
+    deployments: [Deployment!]!
 
     # Depends on application module
     applications: [String!]
