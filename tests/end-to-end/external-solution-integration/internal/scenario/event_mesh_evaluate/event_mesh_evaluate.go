@@ -44,10 +44,15 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 
 	return []step.Step{
 		testsuite.NewLoadStoredCertificates(dataStore, state),
-		testsuite.NewResetCounterPod(testService),
-		testsuite.NewSendEventToMesh(s.TestID, helpers.FunctionPayload, state),
-		testsuite.NewCheckCounterPod(testService, 1, retryOpts...),
-		testsuite.NewSendEventToCompatibilityLayer(s.TestID, helpers.FunctionPayload, state),
-		testsuite.NewCheckCounterPod(testService, 2, retryOpts...),
+		step.Retry(
+			testsuite.NewResetCounterPod(testService),
+			testsuite.NewSendEventToMesh(s.TestID, helpers.FunctionPayload, state),
+			testsuite.NewCheckCounterPod(testService, 1, retryOpts...),
+		),
+		step.Retry(
+			testsuite.NewResetCounterPod(testService),
+			testsuite.NewSendEventToCompatibilityLayer(s.TestID, helpers.FunctionPayload, state),
+			testsuite.NewCheckCounterPod(testService, 1, retryOpts...),
+		),
 	}, nil
 }
