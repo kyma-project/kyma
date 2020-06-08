@@ -1,17 +1,12 @@
 package steps
 
 import (
-	errors "github.com/pkg/errors"
+	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
-)
-
-const (
-	defaultDeleteWaitTimeSec   = 10
-	defaultRollbackWaitTimeSec = 10
 )
 
 //StepList is a list of steps corresponding to a list of components as defined by Installation CR
@@ -67,10 +62,9 @@ func (isf installStepFactory) newStep(component v1alpha1.KymaComponent) (Step, e
 	}
 
 	inststp := installStep{
-		step:              step,
-		sourceGetter:      isf.sourceGetter,
-		overrideData:      isf.overrideData,
-		deleteWaitTimeSec: defaultDeleteWaitTimeSec,
+		step:         step,
+		sourceGetter: isf.sourceGetter,
+		overrideData: isf.overrideData,
 	}
 
 	relStatus, exists := isf.installedReleases[component.GetReleaseName()]
@@ -84,8 +78,7 @@ func (isf installStepFactory) newStep(component v1alpha1.KymaComponent) (Step, e
 
 		if isUpgrade {
 			return upgradeStep{
-				installStep:         inststp,
-				rollbackWaitTimeSec: defaultRollbackWaitTimeSec,
+				installStep: inststp,
 			}, nil
 		}
 	}

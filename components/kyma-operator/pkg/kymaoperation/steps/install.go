@@ -11,9 +11,8 @@ import (
 
 type installStep struct {
 	step
-	sourceGetter      kymasources.SourceGetter
-	overrideData      overrides.OverrideData
-	deleteWaitTimeSec uint32
+	sourceGetter kymasources.SourceGetter
+	overrideData overrides.OverrideData
 }
 
 // Run method for installStep triggers step installation via helm
