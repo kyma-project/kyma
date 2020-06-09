@@ -28,8 +28,8 @@ func (_m *GqlServiceBindingUsageConverter) ToGQL(item *v1alpha1.ServiceBindingUs
 }
 
 // ToGQLs provides a failing mock function with given fields: in
-func (_m *GqlServiceBindingUsageConverter) ToGQLs(in []*v1alpha1.ServiceBindingUsage) ([]gqlschema.ServiceBindingUsage, error) {
-	var r0 []gqlschema.ServiceBindingUsage
+func (_m *GqlServiceBindingUsageConverter) ToGQLs(in []*v1alpha1.ServiceBindingUsage) ([]*gqlschema.ServiceBindingUsage, error) {
+	var r0 []*gqlschema.ServiceBindingUsage
 	var r1 error
 	r1 = _m.err
 

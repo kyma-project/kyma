@@ -13,7 +13,7 @@ func TestResourceQuotaStatusConverter_ToGQL(t *testing.T) {
 	conv := resourceQuotaStatusConverter{}
 	for tn, tc := range map[string]struct {
 		InputMap       map[string]map[v1.ResourceName][]string
-		ExceededQuotas []gqlschema.ExceededQuota
+		ExceededQuotas []*gqlschema.ExceededQuota
 	}{
 		"success": {
 			InputMap: map[string]map[v1.ResourceName][]string{
@@ -23,7 +23,7 @@ func TestResourceQuotaStatusConverter_ToGQL(t *testing.T) {
 					},
 				},
 			},
-			ExceededQuotas: []gqlschema.ExceededQuota{
+			ExceededQuotas: []*gqlschema.ExceededQuota{
 				{
 					QuotaName:    "rq-a",
 					ResourceName: string(v1.ResourceLimitsMemory),
@@ -35,11 +35,11 @@ func TestResourceQuotaStatusConverter_ToGQL(t *testing.T) {
 		},
 		"nil input": {
 			InputMap:       nil,
-			ExceededQuotas: []gqlschema.ExceededQuota{},
+			ExceededQuotas: []*gqlschema.ExceededQuota{},
 		},
 		"empty input": {
 			InputMap:       map[string]map[v1.ResourceName][]string{},
-			ExceededQuotas: []gqlschema.ExceededQuota{},
+			ExceededQuotas: []*gqlschema.ExceededQuota{},
 		},
 	} {
 		t.Run(tn, func(t *testing.T) {

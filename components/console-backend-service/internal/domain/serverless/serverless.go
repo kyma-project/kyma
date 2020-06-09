@@ -70,14 +70,14 @@ type resolverConfig struct {
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
 type Resolver interface {
 	FunctionQuery(ctx context.Context, name string, namespace string) (*gqlschema.Function, error)
-	FunctionsQuery(ctx context.Context, namespace string) ([]gqlschema.Function, error)
+	FunctionsQuery(ctx context.Context, namespace string) ([]*gqlschema.Function, error)
 
 	CreateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionMutationInput) (*gqlschema.Function, error)
 	UpdateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionMutationInput) (*gqlschema.Function, error)
 	DeleteFunction(ctx context.Context, namespace string, function gqlschema.FunctionMetadataInput) (*gqlschema.FunctionMetadata, error)
-	DeleteManyFunctions(ctx context.Context, namespace string, functions []gqlschema.FunctionMetadataInput) ([]gqlschema.FunctionMetadata, error)
+	DeleteManyFunctions(ctx context.Context, namespace string, functions []*gqlschema.FunctionMetadataInput) ([]*gqlschema.FunctionMetadata, error)
 
-	FunctionEventSubscription(ctx context.Context, namespace string, functionName *string) (<-chan gqlschema.FunctionEvent, error)
+	FunctionEventSubscription(ctx context.Context, namespace string, functionName *string) (<-chan *gqlschema.FunctionEvent, error)
 }
 
 type domainResolver struct {

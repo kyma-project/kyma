@@ -16,13 +16,13 @@ type gqlAssetGroupConverter interface {
 }
 
 type AssetGroup struct {
-	channel   chan<- gqlschema.AssetGroupEvent
+	channel   chan<- *gqlschema.AssetGroupEvent
 	filter    func(entity *v1beta1.AssetGroup) bool
 	converter gqlAssetGroupConverter
 	extractor extractor.AssetGroupUnstructuredExtractor
 }
 
-func NewAssetGroup(channel chan<- gqlschema.AssetGroupEvent, filter func(entity *v1beta1.AssetGroup) bool, converter gqlAssetGroupConverter) *AssetGroup {
+func NewAssetGroup(channel chan<- *gqlschema.AssetGroupEvent, filter func(entity *v1beta1.AssetGroup) bool, converter gqlAssetGroupConverter) *AssetGroup {
 	return &AssetGroup{
 		channel:   channel,
 		filter:    filter,
@@ -68,9 +68,9 @@ func (l *AssetGroup) notify(eventType gqlschema.SubscriptionEventType, entity *v
 		return
 	}
 
-	event := gqlschema.AssetGroupEvent{
+	event := &gqlschema.AssetGroupEvent{
 		Type:       eventType,
-		AssetGroup: *gqlAssetGroup,
+		AssetGroup: gqlAssetGroup,
 	}
 
 	l.channel <- event

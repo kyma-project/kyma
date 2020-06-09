@@ -6,6 +6,10 @@ WORKDIR $DOCK_PKG_DIR
 COPY . $DOCK_PKG_DIR
 COPY ./licenses/ /app/licenses
 
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
 RUN CGO_ENABLED=0 GOOS=linux go build -a -o manager ./cmd/manager
 
 FROM scratch

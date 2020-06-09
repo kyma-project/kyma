@@ -74,7 +74,7 @@ type resolverConfig struct {
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
 type Resolver interface {
-	IDPPresetsQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.IDPPreset, error)
+	IDPPresetsQuery(ctx context.Context, first *int, offset *int) ([]*gqlschema.IDPPreset, error)
 	IDPPresetQuery(ctx context.Context, name string) (*gqlschema.IDPPreset, error)
 	DeleteIDPPresetMutation(ctx context.Context, name string) (*gqlschema.IDPPreset, error)
 	CreateIDPPresetMutation(ctx context.Context, name string, issuer string, jwksURI string) (*gqlschema.IDPPreset, error)

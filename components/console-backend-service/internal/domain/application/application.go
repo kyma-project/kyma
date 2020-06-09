@@ -180,20 +180,20 @@ type resolverConfig struct {
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
 type Resolver interface {
 	ApplicationQuery(ctx context.Context, name string) (*gqlschema.Application, error)
-	ApplicationsQuery(ctx context.Context, namespace *string, first *int, offset *int) ([]gqlschema.Application, error)
-	ApplicationEventSubscription(ctx context.Context) (<-chan gqlschema.ApplicationEvent, error)
-	CreateApplication(ctx context.Context, name string, description *string, qglLabels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error)
-	DeleteApplication(ctx context.Context, name string) (gqlschema.DeleteApplicationOutput, error)
-	UpdateApplication(ctx context.Context, name string, description *string, qglLabels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error)
-	ConnectorServiceQuery(ctx context.Context, application string) (gqlschema.ConnectorService, error)
+	ApplicationsQuery(ctx context.Context, namespace *string, first *int, offset *int) ([]*gqlschema.Application, error)
+	ApplicationEventSubscription(ctx context.Context) (<-chan *gqlschema.ApplicationEvent, error)
+	CreateApplication(ctx context.Context, name string, description *string, qglLabels gqlschema.Labels) (*gqlschema.ApplicationMutationOutput, error)
+	DeleteApplication(ctx context.Context, name string) (*gqlschema.DeleteApplicationOutput, error)
+	UpdateApplication(ctx context.Context, name string, description *string, qglLabels gqlschema.Labels) (*gqlschema.ApplicationMutationOutput, error)
+	ConnectorServiceQuery(ctx context.Context, application string) (*gqlschema.ConnectorService, error)
 	EnableApplicationMutation(ctx context.Context, application string, namespace string, allServices *bool, services []*gqlschema.ApplicationMappingService) (*gqlschema.ApplicationMapping, error)
 	OverloadApplicationMutation(ctx context.Context, application string, namespace string, allServices *bool, services []*gqlschema.ApplicationMappingService) (*gqlschema.ApplicationMapping, error)
 	DisableApplicationMutation(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error)
 	ApplicationEnabledInNamespacesField(ctx context.Context, obj *gqlschema.Application) ([]string, error)
 	ApplicationEnabledMappingServices(ctx context.Context, obj *gqlschema.Application) ([]*gqlschema.EnabledMappingService, error)
 	ApplicationStatusField(ctx context.Context, app *gqlschema.Application) (gqlschema.ApplicationStatus, error)
-	EventActivationsQuery(ctx context.Context, namespace string) ([]gqlschema.EventActivation, error)
-	EventActivationEventsField(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]gqlschema.EventActivationEvent, error)
+	EventActivationsQuery(ctx context.Context, namespace string) ([]*gqlschema.EventActivation, error)
+	EventActivationEventsField(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]*gqlschema.EventActivationEvent, error)
 }
 
 type domainResolver struct {

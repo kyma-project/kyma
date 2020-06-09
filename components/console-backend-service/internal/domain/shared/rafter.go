@@ -32,7 +32,7 @@ type AssetGroupGetter interface {
 //go:generate mockery -name=GqlClusterAssetGroupConverter -output=automock -outpkg=automock -case=underscore
 type GqlClusterAssetGroupConverter interface {
 	ToGQL(item *v1beta1.ClusterAssetGroup) (*gqlschema.ClusterAssetGroup, error)
-	ToGQLs(in []*v1beta1.ClusterAssetGroup) ([]gqlschema.ClusterAssetGroup, error)
+	ToGQLs(in []*v1beta1.ClusterAssetGroup) ([]*gqlschema.ClusterAssetGroup, error)
 }
 
 //go:generate mockery -name=GqlAssetGroupConverter -output=automock -outpkg=automock -case=underscore
@@ -54,13 +54,13 @@ type AssetGetter interface {
 //go:generate mockery -name=GqlClusterAssetConverter -output=automock -outpkg=automock -case=underscore
 type GqlClusterAssetConverter interface {
 	ToGQL(item *v1beta1.ClusterAsset) (*gqlschema.ClusterAsset, error)
-	ToGQLs(in []*v1beta1.ClusterAsset) ([]gqlschema.ClusterAsset, error)
+	ToGQLs(in []*v1beta1.ClusterAsset) ([]*gqlschema.ClusterAsset, error)
 }
 
 //go:generate mockery -name=GqlAssetConverter -output=automock -outpkg=automock -case=underscore
 type GqlAssetConverter interface {
 	ToGQL(item *v1beta1.Asset) (*gqlschema.Asset, error)
-	ToGQLs(in []*v1beta1.Asset) ([]gqlschema.Asset, error)
+	ToGQLs(in []*v1beta1.Asset) ([]*gqlschema.Asset, error)
 }
 
 //go:generate mockery -name=SpecificationGetter -output=automock -outpkg=automock -case=underscore

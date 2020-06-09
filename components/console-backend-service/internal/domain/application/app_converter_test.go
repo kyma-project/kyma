@@ -3,6 +3,8 @@ package application
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -80,8 +82,11 @@ func TestApplicationConverter_ToGQL(t *testing.T) {
 	t.Run("Empty", func(t *testing.T) {
 		converter := &applicationConverter{}
 		result := converter.ToGQL(&v1alpha1.Application{})
+		expected := &gqlschema.Application{
+			Labels: gqlschema.Labels{},
+		}
 
-		assert.Empty(t, result)
+		assert.Equal(t, expected, result)
 	})
 
 	t.Run("Nil", func(t *testing.T) {
