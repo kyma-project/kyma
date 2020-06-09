@@ -7,7 +7,7 @@ fullnameOverride:
 
 image:
   repository: "eu.gcr.io/kyma-project/function-webhook"
-  tag: "PR-8513"
+  tag: "PR-8710"
   pullPolicy: IfNotPresent
 
 commonLabels:
@@ -46,6 +46,10 @@ service:
 container:
   allowPrivilegeEscalation: false
   envs:
+    metricsDomain:
+      value: "kyma-project.io/serverless"
+    configObservabilityName:
+      value: "{{ template \"webhook.fullname\" . }}-config-observability"
     webhookServiceName:
       value: "{{ template \"webhook.fullname\" . }}"
     webhookSecretName:
@@ -57,9 +61,9 @@ container:
     minRequestMemory:
       value: "16Mi"
     minReplicasValue:
-      value: "0"
+      value: "1"
     reservedEnvs:
-      value: "K_REVISION,K_CONFIGURATION,K_SERVICE,FUNC_RUNTIME,FUNC_HANDLER,FUNC_TIMEOUT,FUNC_PORT,PORT,MOD_NAME,NODE_PATH"
+      value: "FUNC_RUNTIME,FUNC_HANDLER,FUNC_TIMEOUT,FUNC_PORT,PORT,MOD_NAME,NODE_PATH,REQ_MB_LIMIT,FUNC_MEMORY_LIMIT" # https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js
     requestCpu:
       value: "50m"
     requestMemory:

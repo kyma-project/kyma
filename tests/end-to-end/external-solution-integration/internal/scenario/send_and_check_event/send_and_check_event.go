@@ -37,6 +37,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		dynamic.Resource(apiRuleRes).Namespace(s.testID),
 		s.Domain,
 		s.testID,
+		s.testServiceImage,
 	)
 	state := s.NewState()
 

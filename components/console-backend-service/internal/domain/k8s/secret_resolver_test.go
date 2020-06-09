@@ -93,7 +93,7 @@ func TestSecretResolver_SecretsQuery(t *testing.T) {
 		resources := []*v1.Secret{
 			resource, resource,
 		}
-		expected := []gqlschema.Secret{
+		expected := []*gqlschema.Secret{
 			{
 				Name: name,
 			},
@@ -122,7 +122,7 @@ func TestSecretResolver_SecretsQuery(t *testing.T) {
 	t.Run("NotFound", func(t *testing.T) {
 		namespace := "namespace"
 		var resources []*v1.Secret
-		var expected []gqlschema.Secret
+		var expected []*gqlschema.Secret
 
 		resourceGetter := automock.NewSecretSvc()
 		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, nil).Once()

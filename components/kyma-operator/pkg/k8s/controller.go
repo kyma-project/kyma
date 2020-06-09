@@ -179,9 +179,7 @@ func (c *Controller) syncHandler(key string) error {
 	}
 
 	if installation.ShouldInstall() {
-
 		overrideProvider := overrides.New(c.kubeClientset)
-
 		err = c.conditionManager.InstallStart()
 		if c.errorHandlers.CheckError("Error starting install/update: ", err) {
 			return err

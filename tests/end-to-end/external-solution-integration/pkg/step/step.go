@@ -23,14 +23,28 @@ type Runner struct {
 	cleanup CleanupMode
 }
 
+type RunnerOption func(runner *Runner)
+
+func WithCleanupDefault(mode CleanupMode) RunnerOption {
+	return func(runner *Runner) {
+		runner.cleanup = mode
+	}
+}
+
 // NewRunner returns new runner
-func NewRunner() *Runner {
+func NewRunner(opts ...RunnerOption) *Runner {
 	log := logrus.New()
 	log.SetReportCaller(false)
-	return &Runner{
+
+	runner := &Runner{
 		log:     log,
 		cleanup: CleanupModeYes,
 	}
+	for _, opt := range opts {
+		opt(runner)
+	}
+
+	return runner
 }
 
 // Run executes steps in specified order. If skipCleanup is false it also executes Step.Cleanup in reverse order

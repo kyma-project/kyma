@@ -86,7 +86,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ template "fullname" . }}-{{ .Values.global.connector.revocation.configmap.name }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ tpl .Values.global.connector.revocation.configmap.namespace . }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
@@ -104,7 +104,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ template "fullname" . }}-{{ .Values.global.connector.revocation.configmap.name }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ tpl .Values.global.connector.revocation.configmap.namespace . }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}

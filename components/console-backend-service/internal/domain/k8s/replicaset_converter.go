@@ -26,6 +26,10 @@ func (c *replicaSetConverter) ToGQL(in *apps.ReplicaSet) (*gqlschema.ReplicaSet,
 	if err != nil {
 		return nil, errors.Wrapf(err, "while converting %s `%s` to it's json representation", pretty.ReplicaSet, in.Name)
 	}
+	labels := in.Labels
+	if labels == nil {
+		labels = gqlschema.Labels{}
+	}
 
 	return &gqlschema.ReplicaSet{
 		Name:              in.Name,
@@ -33,13 +37,13 @@ func (c *replicaSetConverter) ToGQL(in *apps.ReplicaSet) (*gqlschema.ReplicaSet,
 		Namespace:         in.Namespace,
 		Images:            c.getImages(in.Spec.Template.Spec.Containers),
 		CreationTimestamp: in.CreationTimestamp.Time,
-		Labels:            in.Labels,
+		Labels:            labels,
 		JSON:              gqlJSON,
 	}, nil
 }
 
-func (c *replicaSetConverter) ToGQLs(in []*apps.ReplicaSet) ([]gqlschema.ReplicaSet, error) {
-	var result []gqlschema.ReplicaSet
+func (c *replicaSetConverter) ToGQLs(in []*apps.ReplicaSet) ([]*gqlschema.ReplicaSet, error) {
+	var result []*gqlschema.ReplicaSet
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -47,7 +51,7 @@ func (c *replicaSetConverter) ToGQLs(in []*apps.ReplicaSet) ([]gqlschema.Replica
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

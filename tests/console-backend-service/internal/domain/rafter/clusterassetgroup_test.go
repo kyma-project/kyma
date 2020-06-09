@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 const (
@@ -80,7 +81,8 @@ func TestClusterAssetGroupsQueries(t *testing.T) {
 
 	t.Log("Checking authorization directives...")
 	ops := &auth.OperationsInput{
-		auth.List: {fixClusterAssetGroupsQuery(clusterAssetGroupDetailsFields())},
+		auth.List:  {fixClusterAssetGroupsQuery(clusterAssetGroupDetailsFields())},
+		auth.Watch: {fixClusterAssetGroupSubscription(clusterAssetGroupEventDetailsFields())},
 	}
 	AuthSuite.Run(t, ops)
 }
@@ -185,7 +187,7 @@ func checkClusterAsset(t *testing.T, expected, actual shared.ClusterAsset) {
 	assert.Equal(t, 1, len(actual.Files))
 }
 
-func subscribeClusterAssetGroup(c *graphql.Client, resourceDetailsQuery string) *graphql.Subscription {
+func fixClusterAssetGroupSubscription(resourceDetailsQuery string) *graphql.Request {
 	query := fmt.Sprintf(`
 		subscription {
 			clusterAssetGroupEvent {
@@ -193,8 +195,11 @@ func subscribeClusterAssetGroup(c *graphql.Client, resourceDetailsQuery string) 
 			}
 		}
 	`, resourceDetailsQuery)
-	req := graphql.NewRequest(query)
+	return graphql.NewRequest(query)
+}
 
+func subscribeClusterAssetGroup(c *graphql.Client, resourceDetailsQuery string) *graphql.Subscription {
+	req := fixClusterAssetGroupSubscription(resourceDetailsQuery)
 	return c.Subscribe(req)
 }
 

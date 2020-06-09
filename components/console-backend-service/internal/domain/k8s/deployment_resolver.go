@@ -37,7 +37,7 @@ func newDeploymentResolver(deploymentLister deploymentLister, scRetriever shared
 	}
 }
 
-func (r *deploymentResolver) DeploymentsQuery(ctx context.Context, namespace string, excludeFunctions *bool) ([]gqlschema.Deployment, error) {
+func (r *deploymentResolver) DeploymentsQuery(ctx context.Context, namespace string, excludeFunctions *bool) ([]*gqlschema.Deployment, error) {
 	var deployments []*v1.Deployment
 	var err error
 	if excludeFunctions == nil || !*excludeFunctions {

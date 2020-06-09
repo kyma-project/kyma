@@ -15,12 +15,12 @@ type gqlPodConverter interface {
 }
 
 type Pod struct {
-	channel   chan<- gqlschema.PodEvent
+	channel   chan<- *gqlschema.PodEvent
 	filter    func(pod *v1.Pod) bool
 	converter gqlPodConverter
 }
 
-func NewPod(channel chan<- gqlschema.PodEvent, filter func(pod *v1.Pod) bool, converter gqlPodConverter) *Pod {
+func NewPod(channel chan<- *gqlschema.PodEvent, filter func(pod *v1.Pod) bool, converter gqlPodConverter) *Pod {
 	return &Pod{
 		channel:   channel,
 		filter:    filter,
@@ -62,9 +62,9 @@ func (l *Pod) notify(eventType gqlschema.SubscriptionEventType, pod *v1.Pod) {
 		return
 	}
 
-	event := gqlschema.PodEvent{
+	event := &gqlschema.PodEvent{
 		Type: eventType,
-		Pod:  *gqlPod,
+		Pod:  gqlPod,
 	}
 
 	l.channel <- event

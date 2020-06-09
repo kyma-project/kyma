@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
+	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,7 +16,7 @@ import (
 
 const (
 	destinationArg        = "--destination"
-	functionContainerName = "function"
+	functionContainerName = "lambda"
 )
 
 func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
@@ -149,7 +150,7 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 	imageName := r.buildExternalImageAddress(instance)
 	deploymentLabels := r.functionLabels(instance)
 
-	podLabels := r.servicePodLabels(instance)
+	podLabels := r.podLabels(instance)
 
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -160,7 +161,7 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 		Spec: appsv1.DeploymentSpec{
 			Replicas: instance.Spec.MinReplicas,
 			Selector: &metav1.LabelSelector{
-				MatchLabels: r.internalFunctionLabels(instance), // this has to be same as spec.template.objectmeta.Lables
+				MatchLabels: r.internalFunctionLabels(instance), // this has to match spec.template.objectmeta.Labels
 				// and also it has to be immutable
 			},
 			Template: corev1.PodTemplateSpec{
@@ -203,6 +204,26 @@ func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function)
 	}
 }
 
+func (r *FunctionReconciler) buildHorizontalPodAutoscaler(instance *serverlessv1alpha1.Function, deploymentName string) autoscalingv1.HorizontalPodAutoscaler {
+	return autoscalingv1.HorizontalPodAutoscaler{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
+			Namespace:    instance.GetNamespace(),
+			Labels:       r.functionLabels(instance),
+		},
+		Spec: autoscalingv1.HorizontalPodAutoscalerSpec{
+			ScaleTargetRef: autoscalingv1.CrossVersionObjectReference{
+				Kind:       "Deployment",
+				Name:       deploymentName,
+				APIVersion: appsv1.SchemeGroupVersion.String(),
+			},
+			MinReplicas:                    instance.Spec.MinReplicas,
+			MaxReplicas:                    *instance.Spec.MaxReplicas, // Max replicas gets defaulted by webhook, so it's always gonna be there
+			TargetCPUUtilizationPercentage: &r.config.TargetCPUUtilizationPercentage,
+		},
+	}
+}
+
 func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
 	imageTag := r.calculateImageTag(instance)
 	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.Address, instance.Namespace, instance.Name, imageTag)
@@ -236,7 +257,7 @@ func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha1
 	return labels
 }
 
-func (r *FunctionReconciler) servicePodLabels(instance *serverlessv1alpha1.Function) map[string]string {
+func (r *FunctionReconciler) podLabels(instance *serverlessv1alpha1.Function) map[string]string {
 	return r.mergeLabels(instance.Spec.Labels, r.internalFunctionLabels(instance))
 }
 

@@ -7,7 +7,7 @@ rbacJob:
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
-  tag: "a0dbea7d"
+  tag: "d419f5a4"
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -79,7 +79,7 @@ tests:
   enabled: true
   image:
     registry: "eu.gcr.io/kyma-project"
-    version: "PR-8619"
+    version: "PR-8691"
   env:
     testUser: "admin-user"
     timeout: 120
@@ -87,3 +87,5 @@ tests:
     jwtTimeout: "30s"
     jwtMaxAttempts: 5
     jwtDelay: 5
+    gatewayName: "kyma-gateway"
+    gatewayNamespace: "kyma-system"

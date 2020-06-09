@@ -25,8 +25,8 @@ required = [
   version = "kubernetes-1.15.9"
 
 [[constraint]]
-  name="k8s.io/apimachinery"
-  version="kubernetes-1.15.9"
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.15.9"
 
 [[constraint]]
   name = "k8s.io/client-go"
@@ -54,5 +54,5 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "ba297749ad3c81d2786c3e9acaaa8751d0a2a2db"
+  revision = "28790517dd090d0b61ea121652ce98ad2a7d038c"
 

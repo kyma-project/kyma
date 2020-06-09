@@ -230,12 +230,13 @@
   version = "v0.2.2"
 
 [[projects]]
-  digest = "1:3b5487e80c2bb6033e04eda0793a8582eb327acd06a522c20c4a6c9eabe0e490"
+  digest = "1:8ea0d16c829d5fa219ad9bdf893518a49c1d6dc9847d8b86dd21feff5dc6e40b"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/connector/pkg/graphql/clientset",
     "components/connector/pkg/graphql/externalschema",
     "components/director/internal/model",
+    "components/director/pkg/apperrors",
     "components/director/pkg/graphql",
     "components/director/pkg/graphql/graphqlizer",
     "components/director/pkg/inputvalidation",
@@ -244,10 +245,10 @@
     "components/director/pkg/scalar",
   ]
   pruneopts = "UT"
-  revision = "8604d53a20a2848c53cad30c288bf8f6c823b825"
+  revision = "64f737ad7e1db26e2c3e9b71335bd67e69199092"
 
 [[projects]]
-  digest = "1:6e5f4ed4104a26c92a98f44c5cc907d3ce3f9424051aad2a28dd284e620ab58d"
+  digest = "1:597bc6ff8b60514972eb0070042fabef4d34c9b910f1c849e78f800cc1b616a0"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
@@ -260,14 +261,14 @@
     "tests/application-gateway-tests/test/tools",
   ]
   pruneopts = "UT"
-  revision = "d6a5da9fa78875fcee0084a2fa51d3479ff432d3"
+  revision = "28790517dd090d0b61ea121652ce98ad2a7d038c"
 
 [[projects]]
   digest = "1:99424f7a75003ed260a8c77aacbb22e330ec31937cfdefee5f894f0cf5a8fa5a"
   name = "github.com/kyma-project/rafter"
   packages = ["pkg/apis/rafter/v1beta1"]
   pruneopts = "UT"
-  revision = "a0157e52e150b26f63c2ddc9f4e63c0cb7650ac7"
+  revision = "1a89277ac3d8266cfdf137c500d24e36538de9f4"
 
 [[projects]]
   digest = "1:d86c8eb7189141c0e902fd8dcf6e79b8feea523978018e20f2ac794626ad0f63"
@@ -528,9 +529,10 @@
   version = "v2.2.3"
 
 [[projects]]
-  digest = "1:b2e959d92a38ffc25142da8e8bf4fefe0e5e687ecb871fabaac58db0497304df"
+  digest = "1:274e6b4fd11a6a01212ee6af5ba488c7623f5eaa7339d3bb5642220d96ee8744"
   name = "k8s.io/api"
   packages = [
+    "admissionregistration/v1",
     "admissionregistration/v1beta1",
     "apps/v1",
     "apps/v1beta1",
@@ -550,6 +552,7 @@
     "coordination/v1",
     "coordination/v1beta1",
     "core/v1",
+    "discovery/v1alpha1",
     "events/v1beta1",
     "extensions/v1beta1",
     "networking/v1",
@@ -569,11 +572,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "UT"
-  revision = "fdd30b57c827abbc506646ecfd579f6ccb3b80ab"
-  version = "kubernetes-1.15.2"
+  revision = "6287e2b171401931686bb9a4d1c769343f712343"
+  version = "kubernetes-1.16.10"
 
 [[projects]]
-  digest = "1:0bbfcdcaafb217d72bb9ce1a83d5edf91b5d48c39f78aa0994271af803051ad0"
+  digest = "1:77036d97e84ad4c9f7ee54f2d594a0a2fe8352dba32b41b3771f32b30172d4c6"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/equality",
@@ -615,17 +618,18 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "UT"
-  revision = "1799e75a07195de9460b8ef7300883499f12127b"
-  version = "kubernetes-1.15.2"
+  revision = "9402b4926e83cddfcac78460d5dca7ae87c1dc49"
+  version = "kubernetes-1.16.10"
 
 [[projects]]
-  digest = "1:0aa4c9cc534fe50870890f9cee4efc14da5b3929b7099c2557595deb75f2aaaf"
+  digest = "1:e8151559c9f98e7a077b9a7e1ad3926473ca369738873652453cce07366a51c3"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "dynamic",
     "kubernetes",
     "kubernetes/scheme",
+    "kubernetes/typed/admissionregistration/v1",
     "kubernetes/typed/admissionregistration/v1beta1",
     "kubernetes/typed/apps/v1",
     "kubernetes/typed/apps/v1beta1",
@@ -645,6 +649,7 @@
     "kubernetes/typed/coordination/v1",
     "kubernetes/typed/coordination/v1beta1",
     "kubernetes/typed/core/v1",
+    "kubernetes/typed/discovery/v1alpha1",
     "kubernetes/typed/events/v1beta1",
     "kubernetes/typed/extensions/v1beta1",
     "kubernetes/typed/networking/v1",
@@ -687,8 +692,8 @@
     "util/keyutil",
   ]
   pruneopts = "UT"
-  revision = "2fe0317bcee0e1ff48861f77cc1e2791cceba458"
-  version = "kubernetes-1.15.2"
+  revision = "0f69009510c3f4630de40c7b7f9034f2a2728023"
+  version = "kubernetes-1.16.10"
 
 [[projects]]
   digest = "1:93e82f25d75aba18436ad1ac042cb49493f096011f2541075721ed6f9e05c044"

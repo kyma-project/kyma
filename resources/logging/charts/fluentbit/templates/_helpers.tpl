@@ -60,15 +60,35 @@ Create the name of the service account to use
 Create meta labels
 */}}
 {{- define "fluent-bit.metaLabels" -}}
-{{- $labelChart := include "fluent-bit.chart" $ -}}
 {{- $labelApp := include "fluent-bit.name" $ -}}
 {{- if .Values.helmLabels.enabled -}}
-  {{- $labels := dict "chart" $labelChart "release" .Release.Name "heritage" .Release.Service -}}
-  {{ merge $labels .Values.extraLabels (default (dict "app" $labelApp) .Values.defaultLabels) | toYaml }}
+  {{ merge .Values.extraLabels (default (dict "app" $labelApp) .Values.defaultLabels) | toYaml }}
 {{- else -}}
   {{ merge .Values.extraLabels (default (dict "app" $labelApp) .Values.defaultLabels) | toYaml }}
 {{- end -}}
+{{- printf "\n" -}}
+{{ include "fluent-bit.labels" . -}}
 {{- end -}}
+
+{{/*
+Common labels
+*/}}
+{{- define "fluent-bit.labels" -}}
+helm.sh/chart: {{ include "fluent-bit.chart" . }}
+{{ include "fluent-bit.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "fluent-bit.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "fluent-bit.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
 
 {{/*
 Create match labels

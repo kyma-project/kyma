@@ -130,7 +130,7 @@
   version = "v1.1.6"
 
 [[projects]]
-  branch = "release-1.12"
+  branch = "release-1.13"
   digest = "1:9118f0ba98a0838d22aec5a3d51c527079b382dcb9a28fdd608e7903b9511b6d"
   name = "github.com/kyma-project/kyma"
   packages = [
@@ -148,7 +148,7 @@
     "components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "5eee35eeecc1161a1a9ac29d2d464cda7db71f1c"
+  revision = "6e80a312e0a244470f87c82e397ed6f3c88244b0"
 
 [[projects]]
   digest = "1:2f42fa12d6911c7b7659738758631bec870b7e9b4c6be5444f963cdcfccc191f"

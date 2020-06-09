@@ -12,7 +12,7 @@ import (
 //go:generate failery -name=gqlClusterAssetConverter -case=underscore -output disabled -outpkg disabled
 type gqlClusterAssetConverter interface {
 	ToGQL(in *v1beta1.ClusterAsset) (*gqlschema.ClusterAsset, error)
-	ToGQLs(in []*v1beta1.ClusterAsset) ([]gqlschema.ClusterAsset, error)
+	ToGQLs(in []*v1beta1.ClusterAsset) ([]*gqlschema.ClusterAsset, error)
 }
 
 type clusterAssetConverter struct {
@@ -47,8 +47,8 @@ func (c *clusterAssetConverter) ToGQL(item *v1beta1.ClusterAsset) (*gqlschema.Cl
 	return &clusterAsset, nil
 }
 
-func (c *clusterAssetConverter) ToGQLs(in []*v1beta1.ClusterAsset) ([]gqlschema.ClusterAsset, error) {
-	var result []gqlschema.ClusterAsset
+func (c *clusterAssetConverter) ToGQLs(in []*v1beta1.ClusterAsset) ([]*gqlschema.ClusterAsset, error) {
+	var result []*gqlschema.ClusterAsset
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -56,7 +56,7 @@ func (c *clusterAssetConverter) ToGQLs(in []*v1beta1.ClusterAsset) ([]gqlschema.
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

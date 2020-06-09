@@ -28,8 +28,8 @@ func (_m *GQLConverter) ToGQL(in *v1alpha1.Trigger) (*gqlschema.Trigger, error) 
 }
 
 // ToGQLs provides a failing mock function with given fields: in
-func (_m *GQLConverter) ToGQLs(in []*v1alpha1.Trigger) ([]gqlschema.Trigger, error) {
-	var r0 []gqlschema.Trigger
+func (_m *GQLConverter) ToGQLs(in []*v1alpha1.Trigger) ([]*gqlschema.Trigger, error) {
+	var r0 []*gqlschema.Trigger
 	var r1 error
 	r1 = _m.err
 
@@ -37,7 +37,7 @@ func (_m *GQLConverter) ToGQLs(in []*v1alpha1.Trigger) ([]gqlschema.Trigger, err
 }
 
 // ToTrigger provides a failing mock function with given fields: in, ownerRef
-func (_m *GQLConverter) ToTrigger(in gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) (*v1alpha1.Trigger, error) {
+func (_m *GQLConverter) ToTrigger(in *gqlschema.TriggerCreateInput, ownerRef []*gqlschema.OwnerReference) (*v1alpha1.Trigger, error) {
 	var r0 *v1alpha1.Trigger
 	var r1 error
 	r1 = _m.err
@@ -46,7 +46,7 @@ func (_m *GQLConverter) ToTrigger(in gqlschema.TriggerCreateInput, ownerRef []gq
 }
 
 // ToTriggers provides a failing mock function with given fields: in, ownerRef
-func (_m *GQLConverter) ToTriggers(in []gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) ([]*v1alpha1.Trigger, error) {
+func (_m *GQLConverter) ToTriggers(in []*gqlschema.TriggerCreateInput, ownerRef []*gqlschema.OwnerReference) ([]*v1alpha1.Trigger, error) {
 	var r0 []*v1alpha1.Trigger
 	var r1 error
 	r1 = _m.err

@@ -25,17 +25,22 @@ func (c *configMapConverter) ToGQL(in *v1.ConfigMap) (*gqlschema.ConfigMap, erro
 		return nil, errors.Wrapf(err, "while converting %s `%s` to it's json representation", pretty.ConfigMap, in.Name)
 	}
 
+	labels := in.Labels
+	if labels == nil {
+		labels = gqlschema.Labels{}
+	}
+
 	return &gqlschema.ConfigMap{
 		Name:              in.Name,
 		Namespace:         in.Namespace,
 		CreationTimestamp: in.CreationTimestamp.Time,
-		Labels:            in.Labels,
+		Labels:            labels,
 		JSON:              gqlJSON,
 	}, nil
 }
 
-func (c *configMapConverter) ToGQLs(in []*v1.ConfigMap) ([]gqlschema.ConfigMap, error) {
-	var result []gqlschema.ConfigMap
+func (c *configMapConverter) ToGQLs(in []*v1.ConfigMap) ([]*gqlschema.ConfigMap, error) {
+	var result []*gqlschema.ConfigMap
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -43,7 +48,7 @@ func (c *configMapConverter) ToGQLs(in []*v1.ConfigMap) ([]gqlschema.ConfigMap, 
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

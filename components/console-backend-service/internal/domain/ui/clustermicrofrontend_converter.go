@@ -8,7 +8,7 @@ import (
 //go:generate mockery -name=qglNavigationNodeConverter -output=automock -outpkg=automock -case=underscore
 type qglNavigationNodeConverter interface {
 	ToGQL(in *uiV1alpha1v.NavigationNode) (*gqlschema.NavigationNode, error)
-	ToGQLs(in []uiV1alpha1v.NavigationNode) ([]gqlschema.NavigationNode, error)
+	ToGQLs(in []uiV1alpha1v.NavigationNode) ([]*gqlschema.NavigationNode, error)
 }
 
 type clusterMicroFrontendConverter struct {
@@ -44,8 +44,8 @@ func (c *clusterMicroFrontendConverter) ToGQL(in *uiV1alpha1v.ClusterMicroFronte
 	return &cmf, nil
 }
 
-func (c *clusterMicroFrontendConverter) ToGQLs(in []*uiV1alpha1v.ClusterMicroFrontend) ([]gqlschema.ClusterMicroFrontend, error) {
-	var result []gqlschema.ClusterMicroFrontend
+func (c *clusterMicroFrontendConverter) ToGQLs(in []*uiV1alpha1v.ClusterMicroFrontend) ([]*gqlschema.ClusterMicroFrontend, error) {
+	var result []*gqlschema.ClusterMicroFrontend
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -53,7 +53,7 @@ func (c *clusterMicroFrontendConverter) ToGQLs(in []*uiV1alpha1v.ClusterMicroFro
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

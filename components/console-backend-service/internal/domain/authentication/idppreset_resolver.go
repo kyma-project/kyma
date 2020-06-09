@@ -22,7 +22,7 @@ type idpPresetSvc interface {
 
 //go:generate mockery -name=gqlIDPPresetConverter  -output=automock -outpkg=automock -case=underscore
 type gqlIDPPresetConverter interface {
-	ToGQL(in *v1alpha1.IDPPreset) gqlschema.IDPPreset
+	ToGQL(in *v1alpha1.IDPPreset) *gqlschema.IDPPreset
 }
 
 type idpPresetResolver struct {
@@ -50,7 +50,7 @@ func (r *idpPresetResolver) CreateIDPPresetMutation(ctx context.Context, name st
 
 	idpPreset := r.idpPresetConverter.ToGQL(item)
 
-	return &idpPreset, nil
+	return idpPreset, nil
 }
 
 func (r *idpPresetResolver) DeleteIDPPresetMutation(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
@@ -72,7 +72,7 @@ func (r *idpPresetResolver) DeleteIDPPresetMutation(ctx context.Context, name st
 
 	deletedIdpPreset := r.idpPresetConverter.ToGQL(idpPresetCopy)
 
-	return &deletedIdpPreset, nil
+	return deletedIdpPreset, nil
 }
 
 func (r *idpPresetResolver) IDPPresetQuery(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
@@ -87,17 +87,17 @@ func (r *idpPresetResolver) IDPPresetQuery(ctx context.Context, name string) (*g
 
 	idpPreset := r.idpPresetConverter.ToGQL(idpObj)
 
-	return &idpPreset, nil
+	return idpPreset, nil
 }
 
-func (r *idpPresetResolver) IDPPresetsQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.IDPPreset, error) {
+func (r *idpPresetResolver) IDPPresetsQuery(ctx context.Context, first *int, offset *int) ([]*gqlschema.IDPPreset, error) {
 	items, err := r.idpPresetSvc.List(pager.PagingParams{First: first, Offset: offset})
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s", pretty.IDPPresets))
-		return []gqlschema.IDPPreset{}, gqlerror.New(err, pretty.IDPPreset)
+		return nil, gqlerror.New(err, pretty.IDPPreset)
 	}
 
-	idpPresets := make([]gqlschema.IDPPreset, 0, len(items))
+	idpPresets := make([]*gqlschema.IDPPreset, 0, len(items))
 	for _, item := range items {
 		idpPresets = append(idpPresets, r.idpPresetConverter.ToGQL(item))
 	}

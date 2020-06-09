@@ -63,14 +63,14 @@ func (r *PluggableContainer) Disable() error {
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
 //go:generate mockery -name=Resolver -output=automock -outpkg=automock -case=underscore
 type Resolver interface {
-	TriggersQuery(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) ([]gqlschema.Trigger, error)
+	TriggersQuery(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) ([]*gqlschema.Trigger, error)
 
-	CreateTrigger(ctx context.Context, namespace string, trigger gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) (*gqlschema.Trigger, error)
-	CreateManyTriggers(ctx context.Context, namespace string, triggers []gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) ([]gqlschema.Trigger, error)
+	CreateTrigger(ctx context.Context, namespace string, trigger gqlschema.TriggerCreateInput, ownerRef []*gqlschema.OwnerReference) (*gqlschema.Trigger, error)
+	CreateManyTriggers(ctx context.Context, namespace string, triggers []*gqlschema.TriggerCreateInput, ownerRef []*gqlschema.OwnerReference) ([]*gqlschema.Trigger, error)
 	DeleteTrigger(ctx context.Context, namespace string, trigger gqlschema.TriggerMetadataInput) (*gqlschema.TriggerMetadata, error)
-	DeleteManyTriggers(ctx context.Context, namespace string, triggers []gqlschema.TriggerMetadataInput) ([]gqlschema.TriggerMetadata, error)
+	DeleteManyTriggers(ctx context.Context, namespace string, triggers []*gqlschema.TriggerMetadataInput) ([]*gqlschema.TriggerMetadata, error)
 
-	TriggerEventSubscription(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) (<-chan gqlschema.TriggerEvent, error)
+	TriggerEventSubscription(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) (<-chan *gqlschema.TriggerEvent, error)
 }
 
 type resolver struct {

@@ -26,9 +26,9 @@ func TestUsageKindResolver_ListUsageKinds(t *testing.T) {
 		usageKindA,
 		usageKindB,
 	}
-	gqlUsageKinds := []gqlschema.UsageKind{
-		*fixUsageKindGQL("fix-A", resourceRef),
-		*fixUsageKindGQL("fix-B", resourceRef),
+	gqlUsageKinds := []*gqlschema.UsageKind{
+		fixUsageKindGQL("fix-A", resourceRef),
+		fixUsageKindGQL("fix-B", resourceRef),
 	}
 
 	svc := automock.NewUsageKindServices()

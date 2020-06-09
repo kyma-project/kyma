@@ -37,8 +37,8 @@ func (_m *gqlFunctionConverter) ToGQL(item *v1alpha1.Function) (*gqlschema.Funct
 }
 
 // ToGQLs provides a failing mock function with given fields: items
-func (_m *gqlFunctionConverter) ToGQLs(items []*v1alpha1.Function) ([]gqlschema.Function, error) {
-	var r0 []gqlschema.Function
+func (_m *gqlFunctionConverter) ToGQLs(items []*v1alpha1.Function) ([]*gqlschema.Function, error) {
+	var r0 []*gqlschema.Function
 	var r1 error
 	r1 = _m.err
 

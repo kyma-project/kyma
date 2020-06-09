@@ -1,7 +1,7 @@
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  branch = "release-1.12"
+  branch = "release-1.13"
 
 [[constraint]]
   name = "github.com/pkg/errors"

@@ -28,6 +28,9 @@ func TestServiceConverter_ToGQL(t *testing.T) {
 		emptyServiceJSON, err := converter.serviceToGQLJSON(&v1.Service{})
 		expected := &gqlschema.Service{
 			JSON: emptyServiceJSON,
+			Status: &gqlschema.ServiceStatus{
+				LoadBalancer: &gqlschema.LoadBalancerStatus{},
+			},
 		}
 		result, err := converter.ToGQL(&v1.Service{})
 		require.NoError(t, err)
@@ -46,18 +49,18 @@ func TestServiceConverter_ToGQL(t *testing.T) {
 				"exampleKey":  "exampleValue",
 				"exampleKey2": "exampleValue2",
 			},
-			Ports: []gqlschema.ServicePort{
+			Ports: []*gqlschema.ServicePort{
 				{
 					Name:            "test",
-					ServiceProtocol: gqlschema.ServiceProtocolTcp,
+					ServiceProtocol: gqlschema.ServiceProtocolTCP,
 					Port:            1,
 					NodePort:        3,
 					TargetPort:      2,
 				},
 			},
-			Status: gqlschema.ServiceStatus{
-				LoadBalancer: gqlschema.LoadBalancerStatus{
-					Ingress: []gqlschema.LoadBalancerIngress{
+			Status: &gqlschema.ServiceStatus{
+				LoadBalancer: &gqlschema.LoadBalancerStatus{
+					Ingress: []*gqlschema.LoadBalancerIngress{
 						{
 							IP:       "123.123.123.123",
 							HostName: "test",
@@ -125,7 +128,7 @@ func TestServiceConverter_toGQLSchemaServicePort(t *testing.T) {
 		})
 		assert.Equal(&gqlschema.ServicePort{
 			Name:            "testName",
-			ServiceProtocol: gqlschema.ServiceProtocolUdp,
+			ServiceProtocol: gqlschema.ServiceProtocolUDP,
 			NodePort:        3,
 			TargetPort:      2,
 			Port:            1,
@@ -150,11 +153,11 @@ func TestServiceConverter_toGQLSchemaServiceProtocol(t *testing.T) {
 	}{
 		{
 			protocol: v1.ProtocolTCP,
-			expected: gqlschema.ServiceProtocolTcp,
+			expected: gqlschema.ServiceProtocolTCP,
 		},
 		{
 			protocol: v1.ProtocolUDP,
-			expected: gqlschema.ServiceProtocolUdp,
+			expected: gqlschema.ServiceProtocolUDP,
 		},
 		{
 			protocol: v1.Protocol("FTP"),

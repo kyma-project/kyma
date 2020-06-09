@@ -105,7 +105,7 @@ func (r *serviceBindingUsageResolver) ServiceBindingUsageQuery(ctx context.Conte
 	return out, nil
 }
 
-func (r *serviceBindingUsageResolver) ServiceBindingUsagesQuery(ctx context.Context, namespace string, resourceKind, resourceName *string) ([]gqlschema.ServiceBindingUsage, error) {
+func (r *serviceBindingUsageResolver) ServiceBindingUsagesQuery(ctx context.Context, namespace string, resourceKind, resourceName *string) ([]*gqlschema.ServiceBindingUsage, error) {
 	var kind = ""
 	var resName = ""
 	if resourceKind != nil {
@@ -129,7 +129,7 @@ func (r *serviceBindingUsageResolver) ServiceBindingUsagesQuery(ctx context.Cont
 	return out, nil
 }
 
-func (r *serviceBindingUsageResolver) ServiceBindingUsagesOfInstanceQuery(ctx context.Context, instanceName, namespace string) ([]gqlschema.ServiceBindingUsage, error) {
+func (r *serviceBindingUsageResolver) ServiceBindingUsagesOfInstanceQuery(ctx context.Context, instanceName, namespace string) ([]*gqlschema.ServiceBindingUsage, error) {
 	usages, err := r.operations.ListForServiceInstance(namespace, instanceName)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s of instance [namespace: %s, instance: %s]", pretty.ServiceBindingUsages, namespace, instanceName))
@@ -143,8 +143,8 @@ func (r *serviceBindingUsageResolver) ServiceBindingUsagesOfInstanceQuery(ctx co
 	return out, nil
 }
 
-func (r *serviceBindingUsageResolver) ServiceBindingUsageEventSubscription(ctx context.Context, namespace string, resourceKind, resourceName *string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
-	channel := make(chan gqlschema.ServiceBindingUsageEvent, 1)
+func (r *serviceBindingUsageResolver) ServiceBindingUsageEventSubscription(ctx context.Context, namespace string, resourceKind, resourceName *string) (<-chan *gqlschema.ServiceBindingUsageEvent, error) {
+	channel := make(chan *gqlschema.ServiceBindingUsageEvent, 1)
 	filter := func(bindingUsage *api.ServiceBindingUsage) bool {
 		if bindingUsage == nil || bindingUsage.Namespace != namespace {
 			return false
