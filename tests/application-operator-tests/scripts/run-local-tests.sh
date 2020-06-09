@@ -76,10 +76,7 @@ rules:
   - '*'
   resources:
   - services
-  - deployments
   - serviceaccounts
-  - roles
-  - rolebindings
   verbs:
   - get
   - list
@@ -105,6 +102,17 @@ rules:
   resources:
   - clusterroles
   - clusterrolebindings
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - '*'
+  resources:
+  - roles
+  - rolebindings
+  - services
+  - serviceaccounts
+  - deployments
   verbs:
   - get
   - list
