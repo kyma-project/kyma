@@ -37,8 +37,8 @@ func (_m *Resolver) ApplicationEnabledMappingServices(ctx context.Context, obj *
 }
 
 // ApplicationEventSubscription provides a failing mock function with given fields: ctx
-func (_m *Resolver) ApplicationEventSubscription(ctx context.Context) (<-chan gqlschema.ApplicationEvent, error) {
-	var r0 <-chan gqlschema.ApplicationEvent
+func (_m *Resolver) ApplicationEventSubscription(ctx context.Context) (<-chan *gqlschema.ApplicationEvent, error) {
+	var r0 <-chan *gqlschema.ApplicationEvent
 	var r1 error
 	r1 = _m.err
 
@@ -64,8 +64,8 @@ func (_m *Resolver) ApplicationStatusField(ctx context.Context, app *gqlschema.A
 }
 
 // ApplicationsQuery provides a failing mock function with given fields: ctx, namespace, first, offset
-func (_m *Resolver) ApplicationsQuery(ctx context.Context, namespace *string, first *int, offset *int) ([]gqlschema.Application, error) {
-	var r0 []gqlschema.Application
+func (_m *Resolver) ApplicationsQuery(ctx context.Context, namespace *string, first *int, offset *int) ([]*gqlschema.Application, error) {
+	var r0 []*gqlschema.Application
 	var r1 error
 	r1 = _m.err
 
@@ -73,8 +73,8 @@ func (_m *Resolver) ApplicationsQuery(ctx context.Context, namespace *string, fi
 }
 
 // ConnectorServiceQuery provides a failing mock function with given fields: ctx, _a1
-func (_m *Resolver) ConnectorServiceQuery(ctx context.Context, _a1 string) (gqlschema.ConnectorService, error) {
-	var r0 gqlschema.ConnectorService
+func (_m *Resolver) ConnectorServiceQuery(ctx context.Context, _a1 string) (*gqlschema.ConnectorService, error) {
+	var r0 *gqlschema.ConnectorService
 	var r1 error
 	r1 = _m.err
 
@@ -82,8 +82,8 @@ func (_m *Resolver) ConnectorServiceQuery(ctx context.Context, _a1 string) (gqls
 }
 
 // CreateApplication provides a failing mock function with given fields: ctx, name, description, qglLabels
-func (_m *Resolver) CreateApplication(ctx context.Context, name string, description *string, qglLabels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error) {
-	var r0 gqlschema.ApplicationMutationOutput
+func (_m *Resolver) CreateApplication(ctx context.Context, name string, description *string, qglLabels gqlschema.Labels) (*gqlschema.ApplicationMutationOutput, error) {
+	var r0 *gqlschema.ApplicationMutationOutput
 	var r1 error
 	r1 = _m.err
 
@@ -91,8 +91,8 @@ func (_m *Resolver) CreateApplication(ctx context.Context, name string, descript
 }
 
 // DeleteApplication provides a failing mock function with given fields: ctx, name
-func (_m *Resolver) DeleteApplication(ctx context.Context, name string) (gqlschema.DeleteApplicationOutput, error) {
-	var r0 gqlschema.DeleteApplicationOutput
+func (_m *Resolver) DeleteApplication(ctx context.Context, name string) (*gqlschema.DeleteApplicationOutput, error) {
+	var r0 *gqlschema.DeleteApplicationOutput
 	var r1 error
 	r1 = _m.err
 
@@ -118,8 +118,8 @@ func (_m *Resolver) EnableApplicationMutation(ctx context.Context, _a1 string, n
 }
 
 // EventActivationEventsField provides a failing mock function with given fields: ctx, eventActivation
-func (_m *Resolver) EventActivationEventsField(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]gqlschema.EventActivationEvent, error) {
-	var r0 []gqlschema.EventActivationEvent
+func (_m *Resolver) EventActivationEventsField(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]*gqlschema.EventActivationEvent, error) {
+	var r0 []*gqlschema.EventActivationEvent
 	var r1 error
 	r1 = _m.err
 
@@ -127,8 +127,8 @@ func (_m *Resolver) EventActivationEventsField(ctx context.Context, eventActivat
 }
 
 // EventActivationsQuery provides a failing mock function with given fields: ctx, namespace
-func (_m *Resolver) EventActivationsQuery(ctx context.Context, namespace string) ([]gqlschema.EventActivation, error) {
-	var r0 []gqlschema.EventActivation
+func (_m *Resolver) EventActivationsQuery(ctx context.Context, namespace string) ([]*gqlschema.EventActivation, error) {
+	var r0 []*gqlschema.EventActivation
 	var r1 error
 	r1 = _m.err
 
@@ -145,8 +145,8 @@ func (_m *Resolver) OverloadApplicationMutation(ctx context.Context, _a1 string,
 }
 
 // UpdateApplication provides a failing mock function with given fields: ctx, name, description, qglLabels
-func (_m *Resolver) UpdateApplication(ctx context.Context, name string, description *string, qglLabels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error) {
-	var r0 gqlschema.ApplicationMutationOutput
+func (_m *Resolver) UpdateApplication(ctx context.Context, name string, description *string, qglLabels gqlschema.Labels) (*gqlschema.ApplicationMutationOutput, error) {
+	var r0 *gqlschema.ApplicationMutationOutput
 	var r1 error
 	r1 = _m.err
 

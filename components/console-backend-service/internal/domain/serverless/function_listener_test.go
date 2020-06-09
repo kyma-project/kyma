@@ -16,7 +16,7 @@ func TestFunctionListener_OnAdd(t *testing.T) {
 		function := new(v1alpha1.Function)
 		converter := automock.NewGQLFunctionConverter()
 
-		channel := make(chan gqlschema.FunctionEvent, 1)
+		channel := make(chan *gqlschema.FunctionEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", function).Return(gqlFunction, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -28,7 +28,7 @@ func TestFunctionListener_OnAdd(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeAdd, result.Type)
-		assert.Equal(t, *gqlFunction, result.Function)
+		assert.Equal(t, gqlFunction, result.Function)
 	})
 
 	t.Run("Filtered out", func(t *testing.T) {
@@ -76,7 +76,7 @@ func TestFunctionListener_OnDelete(t *testing.T) {
 		function := new(v1alpha1.Function)
 		converter := automock.NewGQLFunctionConverter()
 
-		channel := make(chan gqlschema.FunctionEvent, 1)
+		channel := make(chan *gqlschema.FunctionEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", function).Return(gqlFunction, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -88,7 +88,7 @@ func TestFunctionListener_OnDelete(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeDelete, result.Type)
-		assert.Equal(t, *gqlFunction, result.Function)
+		assert.Equal(t, gqlFunction, result.Function)
 	})
 
 	t.Run("Filtered out", func(t *testing.T) {
@@ -136,7 +136,7 @@ func TestFunctionListener_OnUpdate(t *testing.T) {
 		function := new(v1alpha1.Function)
 		converter := automock.NewGQLFunctionConverter()
 
-		channel := make(chan gqlschema.FunctionEvent, 1)
+		channel := make(chan *gqlschema.FunctionEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", function).Return(gqlFunction, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -148,7 +148,7 @@ func TestFunctionListener_OnUpdate(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeUpdate, result.Type)
-		assert.Equal(t, *gqlFunction, result.Function)
+		assert.Equal(t, gqlFunction, result.Function)
 	})
 
 	t.Run("Filtered out", func(t *testing.T) {

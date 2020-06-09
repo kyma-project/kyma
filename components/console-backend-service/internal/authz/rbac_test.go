@@ -87,7 +87,7 @@ type mockAuthorizer struct {
 	lastCallAttributes authorizer.Attributes
 }
 
-func (a *mockAuthorizer) Authorize(attrs authorizer.Attributes) (authorized authorizer.Decision, reason string, err error) {
+func (a *mockAuthorizer) Authorize(ctx context.Context, attrs authorizer.Attributes) (authorized authorizer.Decision, reason string, err error) {
 	a.lastCallAttributes = attrs
 	return a.decision, "", nil
 }

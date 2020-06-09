@@ -26,7 +26,7 @@ func TestLimitRangeResolver_LimitRangeQuery(t *testing.T) {
 
 	// THEN
 	require.NoError(t, err)
-	assert.Contains(t, result, *fixGQLLimitRange())
+	assert.Contains(t, result, fixGQLLimitRange())
 	assert.Len(t, result, 1)
 }
 
@@ -44,16 +44,16 @@ func TestLimitRangeResolver_CreateLimitRange(t *testing.T) {
 
 	expectedResult := gqlschema.LimitRange{
 		Name: "testlimitrangename",
-		Limits: []gqlschema.LimitRangeItem{
-			gqlschema.LimitRangeItem{
+		Limits: []*gqlschema.LimitRangeItem{
+			{
 				LimitType: "Container",
-				Max: gqlschema.ResourceType{
+				Max: &gqlschema.ResourceType{
 					Memory: &expectedMemory,
 				},
-				Default: gqlschema.ResourceType{
+				Default: &gqlschema.ResourceType{
 					Memory: &expectedMemory,
 				},
-				DefaultRequest: gqlschema.ResourceType{
+				DefaultRequest: &gqlschema.ResourceType{
 					Memory: &expectedMemory,
 				},
 			},

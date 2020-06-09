@@ -70,9 +70,9 @@ func TestSelfSubjectRulesQuery(t *testing.T) {
 	})
 }
 
-func fixExampleSSRRGQLResponse() []gqlschema.ResourceRule {
-	return []gqlschema.ResourceRule{
-		gqlschema.ResourceRule{
+func fixExampleSSRRGQLResponse() []*gqlschema.ResourceRule {
+	return []*gqlschema.ResourceRule{
+		&gqlschema.ResourceRule{
 			Verbs:     []string{"a", "b"},
 			Resources: []string{"resA", "resB"},
 			APIGroups: []string{"gA", "gB"},

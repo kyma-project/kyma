@@ -28,7 +28,7 @@ func TestClusterAssetGroupResolver_ClusterAssetGroupsQuery(t *testing.T) {
 		resources := []*v1beta1.ClusterAssetGroup{
 			resource, resource,
 		}
-		expected := []gqlschema.ClusterAssetGroup{
+		expected := []*gqlschema.ClusterAssetGroup{
 			{
 				Name: "Test",
 			}, {
@@ -54,7 +54,7 @@ func TestClusterAssetGroupResolver_ClusterAssetGroupsQuery(t *testing.T) {
 
 	t.Run("NotFound", func(t *testing.T) {
 		var resources []*v1beta1.ClusterAssetGroup
-		var expected []gqlschema.ClusterAssetGroup
+		var expected []*gqlschema.ClusterAssetGroup
 
 		svc := automock.NewClusterAssetGroupService()
 		svc.On("List", (*string)(nil), (*string)(nil)).Return(resources, nil).Once()
@@ -119,7 +119,7 @@ func TestClusterAssetGroupResolver_ClusterAssetGroupAssetsField(t *testing.T) {
 				},
 			},
 		}
-		expected := []gqlschema.ClusterAsset{
+		expected := []*gqlschema.ClusterAsset{
 			{
 				Name: "ExampleClusterAssetA",
 			},

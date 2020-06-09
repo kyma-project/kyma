@@ -20,8 +20,13 @@ func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
 		expectedAddonsConfig *gqlschema.AddonsConfiguration
 	}{
 		"empty": {
-			givenAddon:           &v1alpha1.ClusterAddonsConfiguration{},
-			expectedAddonsConfig: &gqlschema.AddonsConfiguration{},
+			givenAddon: &v1alpha1.ClusterAddonsConfiguration{},
+			expectedAddonsConfig: &gqlschema.AddonsConfiguration{
+				Labels:       gqlschema.Labels{},
+				Status:       &gqlschema.AddonsConfigurationStatus{Repositories: []*gqlschema.AddonsConfigurationStatusRepository{}},
+				Repositories: []*gqlschema.AddonsConfigurationRepository{},
+				Urls:         []string{},
+			},
 		},
 		"full": {
 			givenAddon: &v1alpha1.ClusterAddonsConfiguration{
@@ -67,20 +72,20 @@ func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
 					"ion": "al",
 				},
 				Urls: []string{url},
-				Repositories: []gqlschema.AddonsConfigurationRepository{
+				Repositories: []*gqlschema.AddonsConfigurationRepository{
 					{
 						URL: url,
 					},
 				},
-				Status: gqlschema.AddonsConfigurationStatus{
+				Status: &gqlschema.AddonsConfigurationStatus{
 					Phase: string(v1alpha1.AddonsConfigurationReady),
-					Repositories: []gqlschema.AddonsConfigurationStatusRepository{
+					Repositories: []*gqlschema.AddonsConfigurationStatusRepository{
 						{
 							Status:  "Failed",
 							URL:     "rul",
 							Reason:  "reason",
 							Message: "fix",
-							Addons: []gqlschema.AddonsConfigurationStatusAddons{
+							Addons: []*gqlschema.AddonsConfigurationStatusAddons{
 								{
 									Status:  "Failed",
 									Message: "test",
@@ -105,11 +110,11 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 
 	for tn, tc := range map[string]struct {
 		givenAddons          []*v1alpha1.ClusterAddonsConfiguration
-		expectedAddonsConfig []gqlschema.AddonsConfiguration
+		expectedAddonsConfig []*gqlschema.AddonsConfiguration
 	}{
 		"empty": {
 			givenAddons:          []*v1alpha1.ClusterAddonsConfiguration{},
-			expectedAddonsConfig: []gqlschema.AddonsConfiguration(nil),
+			expectedAddonsConfig: []*gqlschema.AddonsConfiguration(nil),
 		},
 		"full": {
 			givenAddons: []*v1alpha1.ClusterAddonsConfiguration{
@@ -149,14 +154,14 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 						},
 					}},
 			},
-			expectedAddonsConfig: []gqlschema.AddonsConfiguration{
+			expectedAddonsConfig: []*gqlschema.AddonsConfiguration{
 				{
 					Name: "test",
 					Labels: gqlschema.Labels{
 						"test": "test",
 					},
 					Urls: []string{url},
-					Repositories: []gqlschema.AddonsConfigurationRepository{
+					Repositories: []*gqlschema.AddonsConfigurationRepository{
 						{
 							URL: url,
 							SecretRef: &gqlschema.ResourceRef{
@@ -165,6 +170,9 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 							},
 						},
 					},
+					Status: &gqlschema.AddonsConfigurationStatus{
+						Repositories: []*gqlschema.AddonsConfigurationStatusRepository{},
+					},
 				},
 				{
 					Name: "test2",
@@ -172,10 +180,13 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 						"test2": "test2",
 					},
 					Urls: []string{url},
-					Repositories: []gqlschema.AddonsConfigurationRepository{
+					Repositories: []*gqlschema.AddonsConfigurationRepository{
 						{
 							URL: url,
 						},
+					},
+					Status: &gqlschema.AddonsConfigurationStatus{
+						Repositories: []*gqlschema.AddonsConfigurationStatusRepository{},
 					},
 				},
 			},

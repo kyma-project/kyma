@@ -40,9 +40,6 @@ data:
       serverless: {
         functionUsageKind: "serverless-function",
         restrictedVariables: [
-          'K_REVISION',
-          'K_CONFIGURATION',
-          'K_SERVICE',
           'FUNC_RUNTIME',
           'FUNC_HANDLER',
           'FUNC_TIMEOUT',
@@ -50,6 +47,8 @@ data:
           'PORT',
           'MOD_NAME',
           'NODE_PATH',
+          'REQ_MB_LIMIT',
+          'FUNC_MEMORY_LIMIT'
         ],
         resources: {
           min: {

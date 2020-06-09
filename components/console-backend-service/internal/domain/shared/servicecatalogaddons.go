@@ -20,5 +20,5 @@ type ServiceBindingUsageLister interface {
 //go:generate mockery -name=GqlServiceBindingUsageConverter -output=automock -outpkg=automock -case=underscore
 type GqlServiceBindingUsageConverter interface {
 	ToGQL(item *usageApi.ServiceBindingUsage) (*gqlschema.ServiceBindingUsage, error)
-	ToGQLs(in []*usageApi.ServiceBindingUsage) ([]gqlschema.ServiceBindingUsage, error)
+	ToGQLs(in []*usageApi.ServiceBindingUsage) ([]*gqlschema.ServiceBindingUsage, error)
 }

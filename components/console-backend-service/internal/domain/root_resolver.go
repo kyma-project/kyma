@@ -29,6 +29,8 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+//go:generate go run github.com/99designs/gqlgen
+
 type RootResolver struct {
 	ui  *ui.Resolver
 	k8s *k8s.Resolver
@@ -226,7 +228,7 @@ func (r *mutationResolver) CreateResourceQuota(ctx context.Context, namespace st
 	return r.k8s.CreateResourceQuota(ctx, namespace, name, resourceQuotaInput)
 }
 
-func (r *mutationResolver) CreateResource(ctx context.Context, namespace string, resource gqlschema.JSON) (*gqlschema.JSON, error) {
+func (r *mutationResolver) CreateResource(ctx context.Context, namespace string, resource gqlschema.JSON) (gqlschema.JSON, error) {
 	return r.k8s.CreateResourceMutation(ctx, namespace, resource)
 }
 
@@ -278,7 +280,7 @@ func (r *mutationResolver) DeleteServiceInstance(ctx context.Context, name strin
 	return r.sc.Resolver.DeleteServiceInstanceMutation(ctx, name, namespace)
 }
 
-func (r *mutationResolver) CreateServiceBinding(ctx context.Context, serviceBindingName *string, serviceInstanceName, ns string, parameters *gqlschema.JSON) (*gqlschema.CreateServiceBindingOutput, error) {
+func (r *mutationResolver) CreateServiceBinding(ctx context.Context, serviceBindingName *string, serviceInstanceName, ns string, parameters gqlschema.JSON) (*gqlschema.CreateServiceBindingOutput, error) {
 	return r.sc.Resolver.CreateServiceBindingMutation(ctx, serviceBindingName, serviceInstanceName, ns, parameters)
 }
 
@@ -318,23 +320,23 @@ func (r *mutationResolver) DeleteIDPPreset(ctx context.Context, name string) (*g
 	return r.authentication.DeleteIDPPresetMutation(ctx, name)
 }
 
-func (r *mutationResolver) CreateApplication(ctx context.Context, name string, description *string, labels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error) {
+func (r *mutationResolver) CreateApplication(ctx context.Context, name string, description *string, labels gqlschema.Labels) (*gqlschema.ApplicationMutationOutput, error) {
 	return r.app.Resolver.CreateApplication(ctx, name, description, labels)
 }
 
-func (r *mutationResolver) UpdateApplication(ctx context.Context, name string, description *string, labels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error) {
+func (r *mutationResolver) UpdateApplication(ctx context.Context, name string, description *string, labels gqlschema.Labels) (*gqlschema.ApplicationMutationOutput, error) {
 	return r.app.Resolver.UpdateApplication(ctx, name, description, labels)
 }
 
-func (r *mutationResolver) DeleteApplication(ctx context.Context, name string) (gqlschema.DeleteApplicationOutput, error) {
+func (r *mutationResolver) DeleteApplication(ctx context.Context, name string) (*gqlschema.DeleteApplicationOutput, error) {
 	return r.app.Resolver.DeleteApplication(ctx, name)
 }
 
-func (r *mutationResolver) CreateAddonsConfiguration(ctx context.Context, name string, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+func (r *mutationResolver) CreateAddonsConfiguration(ctx context.Context, name string, namespace string, repositories []*gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
 	return r.sca.Resolver.CreateAddonsConfiguration(ctx, name, namespace, repositories, urls, labels)
 }
 
-func (r *mutationResolver) UpdateAddonsConfiguration(ctx context.Context, name string, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+func (r *mutationResolver) UpdateAddonsConfiguration(ctx context.Context, name string, namespace string, repositories []*gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
 	return r.sca.Resolver.UpdateAddonsConfiguration(ctx, name, namespace, repositories, urls, labels)
 }
 
@@ -350,7 +352,7 @@ func (r *mutationResolver) RemoveAddonsConfigurationURLs(ctx context.Context, na
 	return r.sca.Resolver.RemoveAddonsConfigurationURLs(ctx, name, namespace, urls)
 }
 
-func (r *mutationResolver) AddAddonsConfigurationRepository(ctx context.Context, name string, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput) (*gqlschema.AddonsConfiguration, error) {
+func (r *mutationResolver) AddAddonsConfigurationRepository(ctx context.Context, name string, namespace string, repositories []*gqlschema.AddonsConfigurationRepositoryInput) (*gqlschema.AddonsConfiguration, error) {
 	return r.sca.Resolver.AddAddonsConfigurationRepositories(ctx, name, namespace, repositories)
 }
 
@@ -362,11 +364,11 @@ func (r *mutationResolver) ResyncAddonsConfiguration(ctx context.Context, name s
 	return r.sca.Resolver.ResyncAddonsConfiguration(ctx, name, namespace)
 }
 
-func (r *mutationResolver) CreateClusterAddonsConfiguration(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+func (r *mutationResolver) CreateClusterAddonsConfiguration(ctx context.Context, name string, repositories []*gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
 	return r.sca.Resolver.CreateClusterAddonsConfiguration(ctx, name, repositories, urls, labels)
 }
 
-func (r *mutationResolver) UpdateClusterAddonsConfiguration(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+func (r *mutationResolver) UpdateClusterAddonsConfiguration(ctx context.Context, name string, repositories []*gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
 	return r.sca.Resolver.UpdateClusterAddonsConfiguration(ctx, name, repositories, urls, labels)
 }
 
@@ -382,7 +384,7 @@ func (r *mutationResolver) RemoveClusterAddonsConfigurationURLs(ctx context.Cont
 	return r.sca.Resolver.RemoveClusterAddonsConfigurationURLs(ctx, name, urls)
 }
 
-func (r *mutationResolver) AddClusterAddonsConfigurationRepository(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput) (*gqlschema.AddonsConfiguration, error) {
+func (r *mutationResolver) AddClusterAddonsConfigurationRepository(ctx context.Context, name string, repositories []*gqlschema.AddonsConfigurationRepositoryInput) (*gqlschema.AddonsConfiguration, error) {
 	return r.sca.Resolver.AddClusterAddonsConfigurationRepositories(ctx, name, repositories)
 }
 
@@ -394,11 +396,11 @@ func (r *mutationResolver) ResyncClusterAddonsConfiguration(ctx context.Context,
 	return r.sca.Resolver.ResyncClusterAddonsConfiguration(ctx, name)
 }
 
-func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, labels *gqlschema.Labels) (gqlschema.NamespaceMutationOutput, error) {
+func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, labels gqlschema.Labels) (*gqlschema.NamespaceMutationOutput, error) {
 	return r.k8s.CreateNamespace(ctx, name, labels)
 }
 
-func (r *mutationResolver) UpdateNamespace(ctx context.Context, name string, labels gqlschema.Labels) (gqlschema.NamespaceMutationOutput, error) {
+func (r *mutationResolver) UpdateNamespace(ctx context.Context, name string, labels gqlschema.Labels) (*gqlschema.NamespaceMutationOutput, error) {
 	return r.k8s.UpdateNamespace(ctx, name, labels)
 }
 
@@ -434,15 +436,15 @@ func (r *mutationResolver) DeleteFunction(ctx context.Context, namespace string,
 	return r.serverless.Resolver.DeleteFunction(ctx, namespace, function)
 }
 
-func (r *mutationResolver) DeleteManyFunctions(ctx context.Context, namespace string, functions []gqlschema.FunctionMetadataInput) ([]gqlschema.FunctionMetadata, error) {
+func (r *mutationResolver) DeleteManyFunctions(ctx context.Context, namespace string, functions []*gqlschema.FunctionMetadataInput) ([]*gqlschema.FunctionMetadata, error) {
 	return r.serverless.Resolver.DeleteManyFunctions(ctx, namespace, functions)
 }
 
-func (r *mutationResolver) CreateTrigger(ctx context.Context, namespace string, trigger gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) (*gqlschema.Trigger, error) {
+func (r *mutationResolver) CreateTrigger(ctx context.Context, namespace string, trigger gqlschema.TriggerCreateInput, ownerRef []*gqlschema.OwnerReference) (*gqlschema.Trigger, error) {
 	return r.eventing.CreateTrigger(ctx, namespace, trigger, ownerRef)
 }
 
-func (r *mutationResolver) CreateManyTriggers(ctx context.Context, namespace string, triggers []gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) ([]gqlschema.Trigger, error) {
+func (r *mutationResolver) CreateManyTriggers(ctx context.Context, namespace string, triggers []*gqlschema.TriggerCreateInput, ownerRef []*gqlschema.OwnerReference) ([]*gqlschema.Trigger, error) {
 	return r.eventing.CreateManyTriggers(ctx, namespace, triggers, ownerRef)
 }
 
@@ -450,7 +452,7 @@ func (r *mutationResolver) DeleteTrigger(ctx context.Context, namespace string, 
 	return r.eventing.DeleteTrigger(ctx, namespace, trigger)
 }
 
-func (r *mutationResolver) DeleteManyTriggers(ctx context.Context, namespace string, triggers []gqlschema.TriggerMetadataInput) ([]gqlschema.TriggerMetadata, error) {
+func (r *mutationResolver) DeleteManyTriggers(ctx context.Context, namespace string, triggers []*gqlschema.TriggerMetadataInput) ([]*gqlschema.TriggerMetadata, error) {
 	return r.eventing.DeleteManyTriggers(ctx, namespace, triggers)
 }
 
@@ -460,7 +462,7 @@ type queryResolver struct {
 	*RootResolver
 }
 
-func (r *queryResolver) Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]gqlschema.Namespace, error) {
+func (r *queryResolver) Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]*gqlschema.Namespace, error) {
 	return r.k8s.NamespacesQuery(ctx, withSystemNamespaces, withInactiveStatus)
 }
 
@@ -468,23 +470,23 @@ func (r *queryResolver) Namespace(ctx context.Context, name string) (*gqlschema.
 	return r.k8s.NamespaceQuery(ctx, name)
 }
 
-func (r *queryResolver) Deployments(ctx context.Context, namespace string, excludeFunctions *bool) ([]gqlschema.Deployment, error) {
+func (r *queryResolver) Deployments(ctx context.Context, namespace string, excludeFunctions *bool) ([]*gqlschema.Deployment, error) {
 	return r.k8s.DeploymentsQuery(ctx, namespace, excludeFunctions)
 }
 
-func (r *queryResolver) VersionInfo(ctx context.Context) (gqlschema.VersionInfo, error) {
+func (r *queryResolver) VersionInfo(ctx context.Context) (*gqlschema.VersionInfo, error) {
 	return r.k8s.VersionInfoQuery(ctx)
 }
 
-func (r *queryResolver) LimitRanges(ctx context.Context, ns string) ([]gqlschema.LimitRange, error) {
+func (r *queryResolver) LimitRanges(ctx context.Context, ns string) ([]*gqlschema.LimitRange, error) {
 	return r.k8s.LimitRangesQuery(ctx, ns)
 }
 
-func (r *queryResolver) ResourceQuotas(ctx context.Context, namespace string) ([]gqlschema.ResourceQuota, error) {
+func (r *queryResolver) ResourceQuotas(ctx context.Context, namespace string) ([]*gqlschema.ResourceQuota, error) {
 	return r.k8s.ResourceQuotasQuery(ctx, namespace)
 }
 
-func (r *RootResolver) ResourceQuotasStatus(ctx context.Context, namespace string) (gqlschema.ResourceQuotasStatus, error) {
+func (r *RootResolver) ResourceQuotasStatus(ctx context.Context, namespace string) (*gqlschema.ResourceQuotasStatus, error) {
 	return r.k8s.ResourceQuotasStatus(ctx, namespace)
 }
 
@@ -492,7 +494,7 @@ func (r *queryResolver) Service(ctx context.Context, name string, namespace stri
 	return r.k8s.ServiceQuery(ctx, name, namespace)
 }
 
-func (r *queryResolver) Services(ctx context.Context, namespace string, excludedLabels []string, first *int, offset *int) ([]gqlschema.Service, error) {
+func (r *queryResolver) Services(ctx context.Context, namespace string, excludedLabels []string, first *int, offset *int) ([]*gqlschema.Service, error) {
 	return r.k8s.ServicesQuery(ctx, namespace, excludedLabels, first, offset)
 }
 
@@ -500,7 +502,7 @@ func (r *queryResolver) Pod(ctx context.Context, name string, namespace string) 
 	return r.k8s.PodQuery(ctx, name, namespace)
 }
 
-func (r *queryResolver) Pods(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.Pod, error) {
+func (r *queryResolver) Pods(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.Pod, error) {
 	return r.k8s.PodsQuery(ctx, namespace, first, offset)
 }
 
@@ -508,7 +510,7 @@ func (r *queryResolver) ReplicaSet(ctx context.Context, name string, namespace s
 	return r.k8s.ReplicaSetQuery(ctx, name, namespace)
 }
 
-func (r *queryResolver) ReplicaSets(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ReplicaSet, error) {
+func (r *queryResolver) ReplicaSets(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.ReplicaSet, error) {
 	return r.k8s.ReplicaSetsQuery(ctx, namespace, first, offset)
 }
 
@@ -516,7 +518,7 @@ func (r *queryResolver) ConfigMap(ctx context.Context, name string, namespace st
 	return r.k8s.ConfigMapQuery(ctx, name, namespace)
 }
 
-func (r *queryResolver) ConfigMaps(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ConfigMap, error) {
+func (r *queryResolver) ConfigMaps(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.ConfigMap, error) {
 	return r.k8s.ConfigMapsQuery(ctx, namespace, first, offset)
 }
 
@@ -524,11 +526,11 @@ func (r *queryResolver) ServiceInstance(ctx context.Context, name string, namesp
 	return r.sc.Resolver.ServiceInstanceQuery(ctx, name, namespace)
 }
 
-func (r *queryResolver) ServiceInstances(ctx context.Context, namespace string, first *int, offset *int, status *gqlschema.InstanceStatusType) ([]gqlschema.ServiceInstance, error) {
+func (r *queryResolver) ServiceInstances(ctx context.Context, namespace string, first *int, offset *int, status *gqlschema.InstanceStatusType) ([]*gqlschema.ServiceInstance, error) {
 	return r.sc.Resolver.ServiceInstancesQuery(ctx, namespace, first, offset, status)
 }
 
-func (r *queryResolver) ServiceClasses(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ServiceClass, error) {
+func (r *queryResolver) ServiceClasses(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.ServiceClass, error) {
 	return r.sc.Resolver.ServiceClassesQuery(ctx, namespace, first, offset)
 }
 
@@ -536,7 +538,7 @@ func (r *queryResolver) ServiceClass(ctx context.Context, namespace string, name
 	return r.sc.Resolver.ServiceClassQuery(ctx, name, namespace)
 }
 
-func (r *queryResolver) ClusterServiceClasses(ctx context.Context, first *int, offset *int) ([]gqlschema.ClusterServiceClass, error) {
+func (r *queryResolver) ClusterServiceClasses(ctx context.Context, first *int, offset *int) ([]*gqlschema.ClusterServiceClass, error) {
 	return r.sc.Resolver.ClusterServiceClassesQuery(ctx, first, offset)
 }
 
@@ -544,7 +546,7 @@ func (r *queryResolver) ClusterServiceClass(ctx context.Context, name string) (*
 	return r.sc.Resolver.ClusterServiceClassQuery(ctx, name)
 }
 
-func (r *queryResolver) ServiceBrokers(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ServiceBroker, error) {
+func (r *queryResolver) ServiceBrokers(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.ServiceBroker, error) {
 	return r.sc.Resolver.ServiceBrokersQuery(ctx, namespace, first, offset)
 }
 
@@ -552,7 +554,7 @@ func (r *queryResolver) ServiceBroker(ctx context.Context, namespace string, nam
 	return r.sc.Resolver.ServiceBrokerQuery(ctx, namespace, name)
 }
 
-func (r *queryResolver) ClusterServiceBrokers(ctx context.Context, first *int, offset *int) ([]gqlschema.ClusterServiceBroker, error) {
+func (r *queryResolver) ClusterServiceBrokers(ctx context.Context, first *int, offset *int) ([]*gqlschema.ClusterServiceBroker, error) {
 	return r.sc.Resolver.ClusterServiceBrokersQuery(ctx, first, offset)
 }
 
@@ -560,19 +562,19 @@ func (r *queryResolver) ClusterServiceBroker(ctx context.Context, name string) (
 	return r.sc.Resolver.ClusterServiceBrokerQuery(ctx, name)
 }
 
-func (r *queryResolver) UsageKinds(ctx context.Context, first *int, offset *int) ([]gqlschema.UsageKind, error) {
+func (r *queryResolver) UsageKinds(ctx context.Context, first *int, offset *int) ([]*gqlschema.UsageKind, error) {
 	return r.sca.Resolver.ListUsageKinds(ctx, first, offset)
 }
 
-func (r *queryResolver) AddonsConfigurations(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.AddonsConfiguration, error) {
+func (r *queryResolver) AddonsConfigurations(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.AddonsConfiguration, error) {
 	return r.sca.Resolver.AddonsConfigurationsQuery(ctx, namespace, first, offset)
 }
 
-func (r *queryResolver) ClusterAddonsConfigurations(ctx context.Context, first *int, offset *int) ([]gqlschema.AddonsConfiguration, error) {
+func (r *queryResolver) ClusterAddonsConfigurations(ctx context.Context, first *int, offset *int) ([]*gqlschema.AddonsConfiguration, error) {
 	return r.sca.Resolver.ClusterAddonsConfigurationsQuery(ctx, first, offset)
 }
 
-func (r *queryResolver) BindableResources(ctx context.Context, namespace string) ([]gqlschema.BindableResourcesOutputItem, error) {
+func (r *queryResolver) BindableResources(ctx context.Context, namespace string) ([]*gqlschema.BindableResourcesOutputItem, error) {
 	return r.sca.Resolver.ListBindableResources(ctx, namespace)
 }
 
@@ -584,11 +586,11 @@ func (r *queryResolver) ServiceBindingUsage(ctx context.Context, name, namespace
 	return r.sca.Resolver.ServiceBindingUsageQuery(ctx, name, namespace)
 }
 
-func (r *queryResolver) ServiceBindingUsages(ctx context.Context, namespace string, resourceKind, resourceName *string) ([]gqlschema.ServiceBindingUsage, error) {
+func (r *queryResolver) ServiceBindingUsages(ctx context.Context, namespace string, resourceKind, resourceName *string) ([]*gqlschema.ServiceBindingUsage, error) {
 	return r.sca.Resolver.ServiceBindingUsagesQuery(ctx, namespace, resourceKind, resourceName)
 }
 
-func (r *queryResolver) ClusterAssetGroups(ctx context.Context, viewContext *string, groupName *string) ([]gqlschema.ClusterAssetGroup, error) {
+func (r *queryResolver) ClusterAssetGroups(ctx context.Context, viewContext *string, groupName *string) ([]*gqlschema.ClusterAssetGroup, error) {
 	return r.rafter.Resolver.ClusterAssetGroupsQuery(ctx, viewContext, groupName)
 }
 
@@ -596,15 +598,15 @@ func (r *queryResolver) Application(ctx context.Context, name string) (*gqlschem
 	return r.app.Resolver.ApplicationQuery(ctx, name)
 }
 
-func (r *queryResolver) Applications(ctx context.Context, namespace *string, first *int, offset *int) ([]gqlschema.Application, error) {
+func (r *queryResolver) Applications(ctx context.Context, namespace *string, first *int, offset *int) ([]*gqlschema.Application, error) {
 	return r.app.Resolver.ApplicationsQuery(ctx, namespace, first, offset)
 }
 
-func (r *queryResolver) ConnectorService(ctx context.Context, application string) (gqlschema.ConnectorService, error) {
+func (r *queryResolver) ConnectorService(ctx context.Context, application string) (*gqlschema.ConnectorService, error) {
 	return r.app.Resolver.ConnectorServiceQuery(ctx, application)
 }
 
-func (r *queryResolver) EventActivations(ctx context.Context, namespace string) ([]gqlschema.EventActivation, error) {
+func (r *queryResolver) EventActivations(ctx context.Context, namespace string) ([]*gqlschema.EventActivation, error) {
 	return r.app.Resolver.EventActivationsQuery(ctx, namespace)
 }
 
@@ -612,7 +614,7 @@ func (r *queryResolver) APIRule(ctx context.Context, name string, namespace stri
 	return r.ag.APIRuleQuery(ctx, name, namespace)
 }
 
-func (r *queryResolver) APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.APIRule, error) {
+func (r *queryResolver) APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*gqlschema.APIRule, error) {
 	return r.ag.APIRulesQuery(ctx, namespace, serviceName, hostname)
 }
 
@@ -620,11 +622,11 @@ func (r *queryResolver) IDPPreset(ctx context.Context, name string) (*gqlschema.
 	return r.authentication.IDPPresetQuery(ctx, name)
 }
 
-func (r *queryResolver) IDPPresets(ctx context.Context, first *int, offset *int) ([]gqlschema.IDPPreset, error) {
+func (r *queryResolver) IDPPresets(ctx context.Context, first *int, offset *int) ([]*gqlschema.IDPPreset, error) {
 	return r.authentication.IDPPresetsQuery(ctx, first, offset)
 }
 
-func (r *queryResolver) BackendModules(ctx context.Context) ([]gqlschema.BackendModule, error) {
+func (r *queryResolver) BackendModules(ctx context.Context) ([]*gqlschema.BackendModule, error) {
 	return r.ui.BackendModulesQuery(ctx)
 }
 
@@ -632,23 +634,23 @@ func (r *queryResolver) Secret(ctx context.Context, name, namespace string) (*gq
 	return r.k8s.SecretQuery(ctx, name, namespace)
 }
 
-func (r *queryResolver) Secrets(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.Secret, error) {
+func (r *queryResolver) Secrets(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.Secret, error) {
 	return r.k8s.SecretsQuery(ctx, namespace, first, offset)
 }
 
-func (r *queryResolver) MicroFrontends(ctx context.Context, namespace string) ([]gqlschema.MicroFrontend, error) {
+func (r *queryResolver) MicroFrontends(ctx context.Context, namespace string) ([]*gqlschema.MicroFrontend, error) {
 	return r.ui.MicroFrontendsQuery(ctx, namespace)
 }
 
-func (r *queryResolver) ClusterMicroFrontends(ctx context.Context) ([]gqlschema.ClusterMicroFrontend, error) {
+func (r *queryResolver) ClusterMicroFrontends(ctx context.Context) ([]*gqlschema.ClusterMicroFrontend, error) {
 	return r.ui.ClusterMicroFrontendsQuery(ctx)
 }
 
-func (r *queryResolver) SelfSubjectRules(ctx context.Context, namespace *string) ([]gqlschema.ResourceRule, error) {
+func (r *queryResolver) SelfSubjectRules(ctx context.Context, namespace *string) ([]*gqlschema.ResourceRule, error) {
 	return r.k8s.SelfSubjectRulesQuery(ctx, namespace)
 }
 
-func (r *queryResolver) Functions(ctx context.Context, namespace string) ([]gqlschema.Function, error) {
+func (r *queryResolver) Functions(ctx context.Context, namespace string) ([]*gqlschema.Function, error) {
 	return r.serverless.FunctionsQuery(ctx, namespace)
 }
 
@@ -656,7 +658,7 @@ func (r *queryResolver) Function(ctx context.Context, name string, namespace str
 	return r.serverless.FunctionQuery(ctx, name, namespace)
 }
 
-func (r *queryResolver) Triggers(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) ([]gqlschema.Trigger, error) {
+func (r *queryResolver) Triggers(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) ([]*gqlschema.Trigger, error) {
 	return r.eventing.TriggersQuery(ctx, namespace, subscriber)
 }
 
@@ -666,83 +668,83 @@ type subscriptionResolver struct {
 	*RootResolver
 }
 
-func (r *subscriptionResolver) ClusterAssetEvent(ctx context.Context) (<-chan gqlschema.ClusterAssetEvent, error) {
+func (r *subscriptionResolver) ClusterAssetEvent(ctx context.Context) (<-chan *gqlschema.ClusterAssetEvent, error) {
 	return r.rafter.Resolver.ClusterAssetEventSubscription(ctx)
 }
 
-func (r *subscriptionResolver) AssetEvent(ctx context.Context, namespace string) (<-chan gqlschema.AssetEvent, error) {
+func (r *subscriptionResolver) AssetEvent(ctx context.Context, namespace string) (<-chan *gqlschema.AssetEvent, error) {
 	return r.rafter.Resolver.AssetEventSubscription(ctx, namespace)
 }
 
-func (r *subscriptionResolver) ClusterAssetGroupEvent(ctx context.Context) (<-chan gqlschema.ClusterAssetGroupEvent, error) {
+func (r *subscriptionResolver) ClusterAssetGroupEvent(ctx context.Context) (<-chan *gqlschema.ClusterAssetGroupEvent, error) {
 	return r.rafter.Resolver.ClusterAssetGroupEventSubscription(ctx)
 }
 
-func (r *subscriptionResolver) AssetGroupEvent(ctx context.Context, namespace string) (<-chan gqlschema.AssetGroupEvent, error) {
+func (r *subscriptionResolver) AssetGroupEvent(ctx context.Context, namespace string) (<-chan *gqlschema.AssetGroupEvent, error) {
 	return r.rafter.Resolver.AssetGroupEventSubscription(ctx, namespace)
 }
 
-func (r *subscriptionResolver) ServiceInstanceEvent(ctx context.Context, namespace string) (<-chan gqlschema.ServiceInstanceEvent, error) {
+func (r *subscriptionResolver) ServiceInstanceEvent(ctx context.Context, namespace string) (<-chan *gqlschema.ServiceInstanceEvent, error) {
 	return r.sc.Resolver.ServiceInstanceEventSubscription(ctx, namespace)
 }
 
-func (r *subscriptionResolver) ServiceBindingUsageEvent(ctx context.Context, namespace string, resourceKind, resourceName *string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
+func (r *subscriptionResolver) ServiceBindingUsageEvent(ctx context.Context, namespace string, resourceKind, resourceName *string) (<-chan *gqlschema.ServiceBindingUsageEvent, error) {
 	return r.sca.Resolver.ServiceBindingUsageEventSubscription(ctx, namespace, resourceKind, resourceName)
 }
 
-func (r *subscriptionResolver) ServiceBindingEvent(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBindingEvent, error) {
+func (r *subscriptionResolver) ServiceBindingEvent(ctx context.Context, namespace string) (<-chan *gqlschema.ServiceBindingEvent, error) {
 	return r.sc.Resolver.ServiceBindingEventSubscription(ctx, namespace)
 }
 
-func (r *subscriptionResolver) ServiceBrokerEvent(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBrokerEvent, error) {
+func (r *subscriptionResolver) ServiceBrokerEvent(ctx context.Context, namespace string) (<-chan *gqlschema.ServiceBrokerEvent, error) {
 	return r.sc.Resolver.ServiceBrokerEventSubscription(ctx, namespace)
 }
 
-func (r *subscriptionResolver) ClusterServiceBrokerEvent(ctx context.Context) (<-chan gqlschema.ClusterServiceBrokerEvent, error) {
+func (r *subscriptionResolver) ClusterServiceBrokerEvent(ctx context.Context) (<-chan *gqlschema.ClusterServiceBrokerEvent, error) {
 	return r.sc.Resolver.ClusterServiceBrokerEventSubscription(ctx)
 }
 
-func (r *subscriptionResolver) ApplicationEvent(ctx context.Context) (<-chan gqlschema.ApplicationEvent, error) {
+func (r *subscriptionResolver) ApplicationEvent(ctx context.Context) (<-chan *gqlschema.ApplicationEvent, error) {
 	return r.app.Resolver.ApplicationEventSubscription(ctx)
 }
 
-func (r *subscriptionResolver) PodEvent(ctx context.Context, namespace string) (<-chan gqlschema.PodEvent, error) {
+func (r *subscriptionResolver) PodEvent(ctx context.Context, namespace string) (<-chan *gqlschema.PodEvent, error) {
 	return r.k8s.PodEventSubscription(ctx, namespace)
 }
 
-func (r *subscriptionResolver) ServiceEvent(ctx context.Context, namespace string) (<-chan gqlschema.ServiceEvent, error) {
+func (r *subscriptionResolver) ServiceEvent(ctx context.Context, namespace string) (<-chan *gqlschema.ServiceEvent, error) {
 	return r.k8s.ServiceEventSubscription(ctx, namespace)
 }
 
-func (r *subscriptionResolver) ConfigMapEvent(ctx context.Context, namespace string) (<-chan gqlschema.ConfigMapEvent, error) {
+func (r *subscriptionResolver) ConfigMapEvent(ctx context.Context, namespace string) (<-chan *gqlschema.ConfigMapEvent, error) {
 	return r.k8s.ConfigMapEventSubscription(ctx, namespace)
 }
 
-func (r *subscriptionResolver) SecretEvent(ctx context.Context, namespace string) (<-chan gqlschema.SecretEvent, error) {
+func (r *subscriptionResolver) SecretEvent(ctx context.Context, namespace string) (<-chan *gqlschema.SecretEvent, error) {
 	return r.k8s.SecretEventSubscription(ctx, namespace)
 }
 
-func (r *subscriptionResolver) AddonsConfigurationEvent(ctx context.Context, namespace string) (<-chan gqlschema.AddonsConfigurationEvent, error) {
+func (r *subscriptionResolver) AddonsConfigurationEvent(ctx context.Context, namespace string) (<-chan *gqlschema.AddonsConfigurationEvent, error) {
 	return r.sca.Resolver.AddonsConfigurationEventSubscription(ctx, namespace)
 }
 
-func (r *subscriptionResolver) ClusterAddonsConfigurationEvent(ctx context.Context) (<-chan gqlschema.ClusterAddonsConfigurationEvent, error) {
+func (r *subscriptionResolver) ClusterAddonsConfigurationEvent(ctx context.Context) (<-chan *gqlschema.ClusterAddonsConfigurationEvent, error) {
 	return r.sca.Resolver.ClusterAddonsConfigurationEventSubscription(ctx)
 }
 
-func (r *subscriptionResolver) APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiRuleEvent, error) {
+func (r *subscriptionResolver) APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan *gqlschema.APIRuleEvent, error) {
 	return r.ag.APIRuleEventSubscription(ctx, namespace, serviceName)
 }
 
-func (r *subscriptionResolver) NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan gqlschema.NamespaceEvent, error) {
+func (r *subscriptionResolver) NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan *gqlschema.NamespaceEvent, error) {
 	return r.k8s.NamespaceEventSubscription(ctx, withSystemNamespaces)
 }
 
-func (r *subscriptionResolver) TriggerEvent(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) (<-chan gqlschema.TriggerEvent, error) {
+func (r *subscriptionResolver) TriggerEvent(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) (<-chan *gqlschema.TriggerEvent, error) {
 	return r.eventing.TriggerEventSubscription(ctx, namespace, subscriber)
 }
 
-func (r *subscriptionResolver) FunctionEvent(ctx context.Context, namespace string, functionName *string) (<-chan gqlschema.FunctionEvent, error) {
+func (r *subscriptionResolver) FunctionEvent(ctx context.Context, namespace string, functionName *string) (<-chan *gqlschema.FunctionEvent, error) {
 	return r.serverless.FunctionEventSubscription(ctx, namespace, functionName)
 }
 
@@ -777,7 +779,7 @@ func (r *serviceInstanceResolver) ServiceBindings(ctx context.Context, obj *gqls
 	return r.sc.Resolver.ServiceBindingsToInstanceQuery(ctx, obj.Name, obj.Namespace)
 }
 
-func (r *serviceInstanceResolver) ServiceBindingUsages(ctx context.Context, obj *gqlschema.ServiceInstance) ([]gqlschema.ServiceBindingUsage, error) {
+func (r *serviceInstanceResolver) ServiceBindingUsages(ctx context.Context, obj *gqlschema.ServiceInstance) ([]*gqlschema.ServiceBindingUsage, error) {
 	return r.sca.Resolver.ServiceBindingUsagesOfInstanceQuery(ctx, obj.Name, obj.Namespace)
 }
 
@@ -835,7 +837,7 @@ type eventActivationResolver struct {
 	app *application.PluggableContainer
 }
 
-func (r *eventActivationResolver) Events(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]gqlschema.EventActivationEvent, error) {
+func (r *eventActivationResolver) Events(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]*gqlschema.EventActivationEvent, error) {
 	return r.app.Resolver.EventActivationEventsField(ctx, eventActivation)
 }
 
@@ -845,7 +847,7 @@ type serviceClassResolver struct {
 	sc *servicecatalog.PluggableContainer
 }
 
-func (r *serviceClassResolver) Instances(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServiceInstance, error) {
+func (r *serviceClassResolver) Instances(ctx context.Context, obj *gqlschema.ServiceClass) ([]*gqlschema.ServiceInstance, error) {
 	return r.sc.Resolver.ServiceClassInstancesField(ctx, obj)
 }
 
@@ -853,7 +855,7 @@ func (r *serviceClassResolver) Activated(ctx context.Context, obj *gqlschema.Ser
 	return r.sc.Resolver.ServiceClassActivatedField(ctx, obj)
 }
 
-func (r *serviceClassResolver) Plans(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServicePlan, error) {
+func (r *serviceClassResolver) Plans(ctx context.Context, obj *gqlschema.ServiceClass) ([]*gqlschema.ServicePlan, error) {
 	return r.sc.Resolver.ServiceClassPlansField(ctx, obj)
 }
 
@@ -871,7 +873,7 @@ type clusterServiceClassResolver struct {
 	sc *servicecatalog.PluggableContainer
 }
 
-func (r *clusterServiceClassResolver) Instances(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) ([]gqlschema.ServiceInstance, error) {
+func (r *clusterServiceClassResolver) Instances(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) ([]*gqlschema.ServiceInstance, error) {
 	return r.sc.Resolver.ClusterServiceClassInstancesField(ctx, obj, namespace)
 }
 
@@ -879,7 +881,7 @@ func (r *clusterServiceClassResolver) Activated(ctx context.Context, obj *gqlsch
 	return r.sc.Resolver.ClusterServiceClassActivatedField(ctx, obj, namespace)
 }
 
-func (r *clusterServiceClassResolver) Plans(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ClusterServicePlan, error) {
+func (r *clusterServiceClassResolver) Plans(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]*gqlschema.ClusterServicePlan, error) {
 	return r.sc.Resolver.ClusterServiceClassPlansField(ctx, obj)
 }
 
@@ -917,7 +919,7 @@ func (r *namespaceResolver) Applications(ctx context.Context, obj *gqlschema.Nam
 	return r.k8s.ApplicationsField(ctx, obj)
 }
 
-func (r *namespaceResolver) Pods(ctx context.Context, obj *gqlschema.Namespace) ([]gqlschema.Pod, error) {
+func (r *namespaceResolver) Pods(ctx context.Context, obj *gqlschema.Namespace) ([]*gqlschema.Pod, error) {
 	return r.k8s.PodsQuery(ctx, obj.Name, nil, nil)
 }
 
@@ -927,7 +929,7 @@ type clusterAssetResolver struct {
 	rafter *rafter.PluggableContainer
 }
 
-func (r *clusterAssetResolver) Files(ctx context.Context, obj *gqlschema.ClusterAsset, filterExtensions []string) ([]gqlschema.File, error) {
+func (r *clusterAssetResolver) Files(ctx context.Context, obj *gqlschema.ClusterAsset, filterExtensions []string) ([]*gqlschema.File, error) {
 	return r.rafter.Resolver.ClusterAssetFilesField(ctx, obj, filterExtensions)
 }
 
@@ -935,7 +937,7 @@ type assetResolver struct {
 	rafter *rafter.PluggableContainer
 }
 
-func (r *assetResolver) Files(ctx context.Context, obj *gqlschema.Asset, filterExtensions []string) ([]gqlschema.File, error) {
+func (r *assetResolver) Files(ctx context.Context, obj *gqlschema.Asset, filterExtensions []string) ([]*gqlschema.File, error) {
 	return r.rafter.Resolver.AssetFilesField(ctx, obj, filterExtensions)
 }
 
@@ -943,7 +945,7 @@ type clusterAssetGroupResolver struct {
 	rafter *rafter.PluggableContainer
 }
 
-func (r *clusterAssetGroupResolver) Assets(ctx context.Context, obj *gqlschema.ClusterAssetGroup, types []string) ([]gqlschema.ClusterAsset, error) {
+func (r *clusterAssetGroupResolver) Assets(ctx context.Context, obj *gqlschema.ClusterAssetGroup, types []string) ([]*gqlschema.ClusterAsset, error) {
 	return r.rafter.Resolver.ClusterAssetGroupAssetsField(ctx, obj, types)
 }
 
@@ -951,6 +953,6 @@ type assetGroupResolver struct {
 	rafter *rafter.PluggableContainer
 }
 
-func (r *assetGroupResolver) Assets(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]gqlschema.Asset, error) {
+func (r *assetGroupResolver) Assets(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]*gqlschema.Asset, error) {
 	return r.rafter.Resolver.AssetGroupAssetsField(ctx, obj, types)
 }

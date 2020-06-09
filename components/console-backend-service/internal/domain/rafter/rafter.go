@@ -122,19 +122,19 @@ func (r *PluggableContainer) Disable() error {
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
 type Resolver interface {
-	ClusterAssetGroupsQuery(ctx context.Context, viewContext *string, groupName *string) ([]gqlschema.ClusterAssetGroup, error)
+	ClusterAssetGroupsQuery(ctx context.Context, viewContext *string, groupName *string) ([]*gqlschema.ClusterAssetGroup, error)
 
-	ClusterAssetGroupEventSubscription(ctx context.Context) (<-chan gqlschema.ClusterAssetGroupEvent, error)
-	AssetGroupEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.AssetGroupEvent, error)
+	ClusterAssetGroupEventSubscription(ctx context.Context) (<-chan *gqlschema.ClusterAssetGroupEvent, error)
+	AssetGroupEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.AssetGroupEvent, error)
 
-	ClusterAssetGroupAssetsField(ctx context.Context, obj *gqlschema.ClusterAssetGroup, types []string) ([]gqlschema.ClusterAsset, error)
-	AssetGroupAssetsField(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]gqlschema.Asset, error)
+	ClusterAssetGroupAssetsField(ctx context.Context, obj *gqlschema.ClusterAssetGroup, types []string) ([]*gqlschema.ClusterAsset, error)
+	AssetGroupAssetsField(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]*gqlschema.Asset, error)
 
-	ClusterAssetEventSubscription(ctx context.Context) (<-chan gqlschema.ClusterAssetEvent, error)
-	AssetEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.AssetEvent, error)
+	ClusterAssetEventSubscription(ctx context.Context) (<-chan *gqlschema.ClusterAssetEvent, error)
+	AssetEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.AssetEvent, error)
 
-	ClusterAssetFilesField(ctx context.Context, obj *gqlschema.ClusterAsset, filterExtensions []string) ([]gqlschema.File, error)
-	AssetFilesField(ctx context.Context, obj *gqlschema.Asset, filterExtensions []string) ([]gqlschema.File, error)
+	ClusterAssetFilesField(ctx context.Context, obj *gqlschema.ClusterAsset, filterExtensions []string) ([]*gqlschema.File, error)
+	AssetFilesField(ctx context.Context, obj *gqlschema.Asset, filterExtensions []string) ([]*gqlschema.File, error)
 }
 
 type domainResolver struct {

@@ -80,13 +80,13 @@ func TestLimitRange_Create(t *testing.T) {
 
 func fixLimitRangeFromProperties(defaultMem string, defaultRequestMem string, maxMem string, lrType string) gqlschema.LimitRangeInput {
 	return gqlschema.LimitRangeInput{
-		Default: gqlschema.ResourceValuesInput{
+		Default: &gqlschema.ResourceValuesInput{
 			Memory: &defaultMem,
 		},
-		DefaultRequest: gqlschema.ResourceValuesInput{
+		DefaultRequest: &gqlschema.ResourceValuesInput{
 			Memory: &defaultRequestMem,
 		},
-		Max: gqlschema.ResourceValuesInput{
+		Max: &gqlschema.ResourceValuesInput{
 			Memory: &maxMem,
 		},
 		Type: lrType,

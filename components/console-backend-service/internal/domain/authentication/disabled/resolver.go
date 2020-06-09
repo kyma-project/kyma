@@ -46,8 +46,8 @@ func (_m *Resolver) IDPPresetQuery(ctx context.Context, name string) (*gqlschema
 }
 
 // IDPPresetsQuery provides a failing mock function with given fields: ctx, first, offset
-func (_m *Resolver) IDPPresetsQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.IDPPreset, error) {
-	var r0 []gqlschema.IDPPreset
+func (_m *Resolver) IDPPresetsQuery(ctx context.Context, first *int, offset *int) ([]*gqlschema.IDPPreset, error) {
+	var r0 []*gqlschema.IDPPreset
 	var r1 error
 	r1 = _m.err
 

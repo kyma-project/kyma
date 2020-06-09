@@ -19,7 +19,7 @@ const ValidationConfigKey = "validation-config"
 type ValidationConfig struct {
 	MinRequestCpu    string   `envconfig:"default=10m"`
 	MinRequestMemory string   `envconfig:"default=16Mi"`
-	MinReplicasValue int32    `envconfig:"default=0"`
+	MinReplicasValue int32    `envconfig:"default=1"`
 	ReservedEnvs     []string `envconfig:"default={}"`
 }
 

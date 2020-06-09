@@ -27,7 +27,7 @@ type serviceClassListGetter interface {
 //go:generate mockery -name=gqlServiceClassConverter -output=automock -outpkg=automock -case=underscore
 type gqlServiceClassConverter interface {
 	ToGQL(in *v1beta1.ServiceClass) (*gqlschema.ServiceClass, error)
-	ToGQLs(in []*v1beta1.ServiceClass) ([]gqlschema.ServiceClass, error)
+	ToGQLs(in []*v1beta1.ServiceClass) ([]*gqlschema.ServiceClass, error)
 }
 
 //go:generate mockery -name=servicePlanLister  -output=automock -outpkg=automock -case=underscore
@@ -80,7 +80,7 @@ func (r *serviceClassResolver) ServiceClassQuery(ctx context.Context, name, name
 	return result, nil
 }
 
-func (r *serviceClassResolver) ServiceClassesQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ServiceClass, error) {
+func (r *serviceClassResolver) ServiceClassesQuery(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.ServiceClass, error) {
 	items, err := r.classLister.List(namespace, pager.PagingParams{
 		First:  first,
 		Offset: offset,
@@ -100,7 +100,7 @@ func (r *serviceClassResolver) ServiceClassesQuery(ctx context.Context, namespac
 	return serviceClasses, nil
 }
 
-func (r *serviceClassResolver) ServiceClassPlansField(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServicePlan, error) {
+func (r *serviceClassResolver) ServiceClassPlansField(ctx context.Context, obj *gqlschema.ServiceClass) ([]*gqlschema.ServicePlan, error) {
 	if obj == nil {
 		glog.Error(errors.New("%s cannot be empty in order to resolve %s for class"), pretty.ServiceClass, pretty.ServicePlans)
 		return nil, gqlerror.NewInternal()
@@ -121,7 +121,7 @@ func (r *serviceClassResolver) ServiceClassPlansField(ctx context.Context, obj *
 	return convertedPlans, nil
 }
 
-func (r *serviceClassResolver) ServiceClassInstancesField(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServiceInstance, error) {
+func (r *serviceClassResolver) ServiceClassInstancesField(ctx context.Context, obj *gqlschema.ServiceClass) ([]*gqlschema.ServiceInstance, error) {
 
 	if obj == nil {
 		glog.Error(fmt.Errorf("%s cannot be empty in order to resolve activated field", pretty.ServiceClass))
