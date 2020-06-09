@@ -105,12 +105,12 @@ To test if the Trigger CR is properly connected to the Function:
     }
     ```
 
-2.  Send an event manually to trigger the function. In the first example, the [CloudEvent](https://github.com/cloudevents/spec/blob/v1.0/spec.md) is sent to the `/events` endpoint and forwarded to directly to Event Mesh. The second example shows an event sent to the `v1/events` endpoint. To ensure the payload reaches the Event Mesh, it is translated into the format compliant with the CloudEvents specification and forwarded to the Event Mesh. Read more about endpoints and compatibility layer in the [event processing](/components/event-mesh/#details-event-processing-and-delivery) documentation.
+2.  Send an event manually to trigger the function. In the first example, a [CloudEvent](https://github.com/cloudevents/spec/blob/v1.0/spec.md) is sent to the `/events` endpoint exposed directly by the Event Mesh. The second example shows an event sent to the `v1/events`, translated into the format compliant with the CloudEvents specification, and forwarded to the Event Mesh. For details, read about [event processing in Kyma](/components/event-mesh/#details-event-processing-and-delivery).
 
     <div tabs name="examples" group="test=trigger">
       <details>
       <summary label="CloudEvents">
-      CloudEvents
+      Send CloudEvents to Event Mesh
       </summary>
 
     ```bash
@@ -128,7 +128,7 @@ To test if the Trigger CR is properly connected to the Function:
       </details>
       <details>
       <summary label="Compatibility layer">
-      Compatibility layer
+      Send events to Event Mesh through compatibility layer
       </summary>
 
     ```bash
