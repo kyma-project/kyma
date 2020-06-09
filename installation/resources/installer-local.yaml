@@ -118,6 +118,7 @@ spec:
       initContainers:
       - name: certhelper
         image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200529-34b39bd3
+        terminationMessagePolicy: "FallbackToLogsOnError"
         command:
           - bash
           - -c
@@ -201,6 +202,7 @@ spec:
             readOnly: true
       - name: 2to3
         image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200529-34b39bd3
+        terminationMessagePolicy: "FallbackToLogsOnError"
         command:
         - /bin/bash
         - -c
@@ -218,13 +220,13 @@ spec:
           echo "---> Get HELM_2 certs"
           ${HELM_2_BINARY} init -c
 
-          if [[ $(kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o name) ]]; then
+          if [[ $(kubectl get -n kube-system deploy tiller-deploy -o name) ]]; then
             kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.ca\\.crt']}" | base64 --decode > "$(helm home)/ca.pem"
             kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.tls\\.crt']}" | base64 --decode > "$(helm home)/cert.pem"
             kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.tls\\.key']}" | base64 --decode > "$(helm home)/key.pem"
           else
             echo "------> No HELM_2 certs found, exiting"
-            exit 0
+            exit 1
           fi
 
           echo "---> Get current releases"
