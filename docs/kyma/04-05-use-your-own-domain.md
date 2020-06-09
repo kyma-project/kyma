@@ -32,7 +32,6 @@ This guide explains how to deploy Kyma on a cluster using your own domain.
 - A domain for your [Azure Kubernetes Service](https://azure.microsoft.com/services/kubernetes-service/) (AKS) cluster
 - [Microsoft Azure](https://azure.microsoft.com)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
-- Tiller 2.10.0 or higher
 - [Docker](https://www.docker.com/)
 - A [Docker Hub](https://hub.docker.com/) account
 - [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
@@ -410,28 +409,23 @@ Get the TLS certificate:
 
 ## Install Kyma
 
-1. Install Tiller on the cluster you provisioned. Run:
-
-   ```bash
-   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
-   ```
    >**NOTE**: If you want to use the Kyma production profile, see the following documents before you go to the next step:
       >* [Istio production profile](/components/service-mesh/#configuration-service-mesh-production-profile)
       >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-profiles)
 
-2. Deploy Kyma. Run:
+1. Deploy Kyma. Run:
 
     ```bash
     kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-installer-cluster.yaml
     ```
 
-3. Check if the Pods of Tiller and the Kyma Installer are running:
+2. Check if the Pod of the Kyma Installer is running:
 
     ```bash
-    kubectl get pods --all-namespaces
+    kubectl get pods -n kyma-installer
     ```
 
-4. To watch the installation progress, run:
+3. To watch the installation progress, run:
 
     ```bash
     while true; do \

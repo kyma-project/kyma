@@ -25,12 +25,12 @@ If the installation is successful but a component does not behave in the expecte
 
 Run this command to list all of the available Helm releases:
 ```
-helm list --tls
+helm list --all-namespaces --all
 ```
 
 Run this command to get more detailed information about a given release:
 ```
-helm status {RELEASE_NAME} --tls
+helm status {RELEASE_NAME} -n {RELEASE_NAMESPACE}
 ```
 >**NOTE:** Names of Helm releases correspond to names of Kyma components.
 
