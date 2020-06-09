@@ -105,17 +105,44 @@ To test if the Trigger CR is properly connected to the Function:
     }
     ```
 
-2. Send an event manually to trigger the Function:
+2.  Send an event manually to trigger the function. In the first example, the [CloudEvent](https://github.com/cloudevents/spec/blob/v1.0/spec.md) is sent to the `/events` endpoint and forwarded to directly to Event Mesh. The second example shows an event sent to the `v1/events` endpoint. To ensure the payload reaches the Event Mesh, it is translated into the format compliant with the CloudEvents specification and forwarded to the Event Mesh. Read more about endpoints and compatibility layer in the [event processing](/components/event-mesh/#details-event-processing-and-delivery) documentation.
+
+    <div tabs name="examples" group="test=trigger">
+      <details>
+      <summary label="CloudEvents">
+      CloudEvents
+      </summary>
 
     ```bash
-    curl -X POST -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
-    '{
-        "event-type": "{EVENT_TYPE}",
-        "event-type-version": "{EVENT_VERSION}",
-        "event-time": "2020-04-02T21:37:00Z",
-        "data": "123456789"
-    }'
+    curl -v -H "Content-Type: application/cloudevents+json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/events -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d \
+      '{
+        "specversion": "1.0",
+        "source": "{APP_NAME}",
+        "type": "{EVENT_TYPE}",
+        "eventtypeversion": "{EVENT_VERSION}",
+        "id": "A234-1234-1234",
+        "data": "123456789",
+        "datacontenttype": "application/json"
+      }' 
     ```
+      </details>
+      <details>
+      <summary label="Compatibility layer">
+      Compatibility layer
+      </summary>
+
+    ```bash
+    curl -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d \
+      '{
+          "event-type": "{EVENT_TYPE}",
+          "event-type-version": "{EVENT_VERSION}",
+          "event-time": "2020-04-02T21:37:00Z",
+          "data": "123456789"
+         }'
+    ``` 
+
+      </details>
+  </div>
 
     - **CLUSTER_DOMAIN** is the domain of your cluster, such as `kyma.local`.
 
