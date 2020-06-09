@@ -1,0 +1,168 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-crd-apirules
+  annotations:
+    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-weight": "10"
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ .Release.Name }}-crd-init
+      containers:
+      - name: {{ .Release.Name }}-crd-all
+        image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+        volumeMounts:
+        - name: crd-all
+          mountPath: /etc/crd
+          readOnly: true
+        command:
+          - /bin/bash
+          - -c
+          - |-
+            set -e
+
+            crds=( apiserversources.sources.knative.dev \
+              brokers.eventing.knative.dev \
+              channels.messaging.knative.dev \
+              eventtypes.eventing.knative.dev \
+              parallels.flows.knative.dev \
+              sequences.flows.knative.dev \
+              apiserversources.sources.eventing.knative.dev \
+              containersources.sources.eventing.knative.dev \
+              cronjobsources.sources.eventing.knative.dev \
+              sinkbindings.sources.eventing.knative.dev \
+              parallels.messaging.knative.dev \
+              parallels.messaging.knative.dev \
+              sequences.messaging.knative.dev \
+              sinkbindings.sources.knative.dev \
+              subscriptions.messaging.knative.dev \
+              triggers.eventing.knative.dev \
+              apirules.yaml \
+              rules.yaml \ 
+              idppresets.authentication.kyma-project.io \
+              compassconnections.compass.kyma-project.io \
+              clustertestsuites.testing.kyma-project.io \
+              testdefinitions.testing.kyma-project.io \
+              certificates.networking.internal.knative.dev \
+              configurations.serving.knative.dev \
+              images.caching.internal.knative.dev \
+              ingresses.networking.internal.knative.dev \
+              metrics.autoscaling.internal.knative.dev \ 
+              podautoscalers.autoscaling.internal.knative.dev \
+              revisions.serving.knative.dev \
+              routes.serving.knative.dev \
+              serverlessservices.networking.internal.knative.dev \
+              services.serving.knative.dev \
+              applications.applicationconnector.kyma-project.io \
+              certificaterequests.applicationconnector.kyma-project.io \
+              tokenrequests.applicationconnector.kyma-project.io \ 
+              centralconnections.applicationconnector.kyma-project.io \
+              natsschannels.messaging.knative.dev \
+              oauth2clients.yaml \
+              kafkachannel.yaml \
+              httpsources.sources.kyma-project.io )
+
+            for crd in "${crds[@]}"; do
+              timeout 60s bash -c "until kubectl get crd $crd || kubectl apply -f /etc/crd/$crd; do sleep 2; done"
+            done
+      volumes:
+      - name: crd-all
+        configMap:
+          name: {{ .Release.Name }}-crd-all
+      restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-crd-all
+  annotations:
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+data:
+  apiserversources.sources.knative.dev: |-
+{{.Files.Get "files/crd-apiserversources.sources.knative.dev.yaml" | printf "%s" | indent 4}}
+  brokers.eventing.knative.dev: |-
+{{.Files.Get "files/crd-brokers.eventing.knative.dev.yaml" | printf "%s" | indent 4}}
+  channels.messaging.knative.dev: |-
+{{.Files.Get "files/crd-channels.messaging.knative.dev.yaml" | printf "%s" | indent 4}}
+  eventtypes.eventing.knative.dev: |-
+{{.Files.Get "files/crd-eventtypes.eventing.knative.dev.yaml" | printf "%s" | indent 4}}
+  parallels.flows.knative.dev: |-
+{{.Files.Get "files/crd-parallels.flows.knative.dev.yaml" | printf "%s" | indent 4}}
+  sequences.flows.knative.dev: |-
+{{.Files.Get "files/crd-sequences.flows.knative.dev.yaml" | printf "%s" | indent 4}}
+  apiserversources.sources.eventing.knative.dev: |-
+{{.Files.Get "files/crd-apiserversources.sources.eventing.knative.dev.yaml" | printf "%s" | indent 4}}
+  containersources.sources.eventing.knative.dev: |-
+{{.Files.Get "files/crd-containersources.sources.eventing.knative.dev.yaml" | printf "%s" | indent 4}}
+  cronjobsources.sources.eventing.knative.dev: |-
+{{.Files.Get "files/crd-cronjobsources.sources.eventing.knative.dev.yaml" | printf "%s" | indent 4}}
+  sinkbindings.sources.eventing.knative.dev: |-
+{{.Files.Get "files/crd-sinkbindings.sources.eventing.knative.dev.yaml" | printf "%s" | indent 4}}
+  parallels.messaging.knative.dev: |-
+{{.Files.Get "files/crd-parallels.messaging.knative.dev.yaml" | printf "%s" | indent 4}}
+  sequences.messaging.knative.dev: |-
+{{.Files.Get "files/crd-sequences.messaging.knative.dev.yaml" | printf "%s" | indent 4}}
+  sinkbindings.sources.knative.dev: |-
+{{.Files.Get "files/crd-sinkbindings.sources.knative.dev.yaml" | printf "%s" | indent 4}}
+  subscriptions.messaging.knative.dev: |-
+{{.Files.Get "files/crd-subscriptions.messaging.knative.dev.yaml" | printf "%s" | indent 4}}
+  triggers.eventing.knative.dev: |-
+{{.Files.Get "files/crd-triggers.eventing.knative.dev.yaml" | printf "%s" | indent 4}}
+  apirules.yaml: |-
+{{.Files.Get "files/crd-apirules.yaml" | printf "%s" | indent 4}}
+  rules.yaml: |-
+{{.Files.Get "files/crd-rules.yaml" | printf "%s" | indent 4}}
+  idppresets.authentication.kyma-project.io: |-
+{{.Files.Get "files/crd-idppreset.yaml" | printf "%s" | indent 4}}
+  compassconnections.compass.kyma-project.io: |-
+{{.Files.Get "files/compass-connection.crd.yaml" | printf "%s" | indent 4}}
+  clustertestsuites.testing.kyma-project.io: |-
+{{.Files.Get "files/crd-clustertestsuite.yaml" | printf "%s" | indent 4}}
+  testdefinitions.testing.kyma-project.io: |-
+{{.Files.Get "files/crd-testdefinition.yaml" | printf "%s" | indent 4}}
+  certificates.networking.internal.knative.dev: |-
+{{.Files.Get "files/crd-certificates.networking.internal.knative.dev.yaml" | printf "%s" | indent 4}}
+  configurations.serving.knative.dev: |-
+{{.Files.Get "files/crd-configurations.serving.knative.dev.yaml" | printf "%s" | indent 4}}
+  images.caching.internal.knative.dev: |-
+{{.Files.Get "files/crd-images.caching.internal.knative.dev.yaml" | printf "%s" | indent 4}}
+  ingresses.networking.internal.knative.dev: |-
+{{.Files.Get "files/crd-ingresses.networking.internal.knative.dev.yaml" | printf "%s" | indent 4}}
+  metrics.autoscaling.internal.knative.dev: |-
+{{.Files.Get "files/crd-metrics.autoscaling.internal.knative.dev.yaml" | printf "%s" | indent 4}}
+  podautoscalers.autoscaling.internal.knative.dev: |-
+{{.Files.Get "files/crd-podautoscalers.autoscaling.internal.knative.dev.yaml" | printf "%s" | indent 4}}
+  revisions.serving.knative.dev: |-
+{{.Files.Get "files/crd-revisions.serving.knative.dev.yaml" | printf "%s" | indent 4}}
+  routes.serving.knative.dev: |-
+{{.Files.Get "files/crd-routes.serving.knative.dev.yaml" | printf "%s" | indent 4}}
+  serverlessservices.networking.internal.knative.dev: |-
+{{.Files.Get "files/crd-serverlessservices.networking.internal.knative.dev.yaml" | printf "%s" | indent 4}}
+  services.serving.knative.dev: |-
+{{.Files.Get "files/crd-services.serving.knative.dev.yaml" | printf "%s" | indent 4}}
+  applications.applicationconnector.kyma-project.io: |-
+{{.Files.Get "files/crd-applications.applicationconnector.yaml" | printf "%s" | indent 4}}
+  certificaterequests.applicationconnector.kyma-project.io: |-
+{{.Files.Get "files/crd-certificaterequests.applicationconnector.yaml" | printf "%s" | indent 4}}
+  tokenrequests.applicationconnector.kyma-project.io: |-
+{{.Files.Get "files/crd-tokenrequests.applicationconnector.yaml" | printf "%s" | indent 4}}
+  centralconnections.applicationconnector.kyma-project.io: |-
+{{.Files.Get "files/crd-centralconnections.applicationconnector.yaml" | printf "%s" | indent 4}}
+  natsschannels.messaging.knative.dev: |-
+{{.Files.Get "files/crd-natschannel.yaml" | printf "%s" | indent 4}}
+  oauth2clients.yaml: |-
+{{.Files.Get "files/crd-oauth2clients.yaml" | printf "%s" | indent 4}}
+  kafkachannel.yaml: |-
+{{.Files.Get "files/crd-init-kafkachannel.yaml" | printf "%s" | indent 4}}
+  httpsources.sources.kyma-project.io: |-
+{{.Files.Get "files/crd-init-300-httpsource.yaml" | printf "%s" | indent 4}}
