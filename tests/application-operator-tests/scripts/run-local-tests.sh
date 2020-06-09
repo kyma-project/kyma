@@ -34,16 +34,15 @@ metadata:
 spec:
   containers:
   - name: application-operator-tests
-    image: application-operator-tests
-    imagePullPolicy: Never
+    image: docker.io/koala7659/application-operator-tests:PR-8417
+    imagePullPolicy: Always
     env:
     - name: NAMESPACE
       value: kyma-integration
     - name: INSTALLATION_TIMEOUT_SECONDS
       value: "180"
     - name: HELM_DRIVER
-      value: configmap
-    volumeMounts:
+      value: secret
   restartPolicy: Never
 EOF
 
@@ -63,7 +62,9 @@ rules:
   verbs:
   - get
   - list
+  - create
   - delete
+  - watch
 - apiGroups:
   - '*'
   resources:
@@ -74,7 +75,6 @@ rules:
 - apiGroups:
   - '*'
   resources:
-  - configmaps
   - services
   - deployments
   - serviceaccounts
@@ -83,6 +83,17 @@ rules:
   verbs:
   - get
   - list
+- apiGroups:
+  - '*'
+  resources:
+  - configmaps
+  - secrets
+  verbs:
+  - get
+  - list
+  - update
+  - create
+  - delete
 - apiGroups:
   - 'networking.istio.io'
   resources:
