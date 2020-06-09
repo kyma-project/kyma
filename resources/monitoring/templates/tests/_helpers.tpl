@@ -20,9 +20,6 @@ Common labels
 {{- define "prometheus-test.labels" -}}
 helm.sh/chart: {{ include "prometheus-test.chart" . }}
 {{ include "prometheus-test.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
