@@ -12,6 +12,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 var AuthSuite *auth.TestSuite

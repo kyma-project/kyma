@@ -28,7 +28,7 @@ type apiRuleSvc interface {
 //go:generate mockery -name=apiRuleConv -output=automock -outpkg=automock -case=underscore
 type apiRuleConv interface {
 	ToGQL(in *v1alpha1.APIRule) (*gqlschema.APIRule, error)
-	ToGQLs(in []*v1alpha1.APIRule) ([]gqlschema.APIRule, error)
+	ToGQLs(in []*v1alpha1.APIRule) ([]*gqlschema.APIRule, error)
 	ToApiRule(name string, namespace string, in gqlschema.APIRuleInput) *v1alpha1.APIRule
 }
 
@@ -48,7 +48,7 @@ func newApiRuleResolver(svc apiRuleSvc) (*apiRuleResolver, error) {
 	}, nil
 }
 
-func (ar *apiRuleResolver) APIRulesQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.APIRule, error) {
+func (ar *apiRuleResolver) APIRulesQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*gqlschema.APIRule, error) {
 	apiRulessObj, err := ar.apiRuleSvc.List(namespace, serviceName, hostname)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s for service name %v, hostname %v", pretty.APIRules, serviceName, hostname))
@@ -91,8 +91,8 @@ func (ar *apiRuleResolver) CreateAPIRule(ctx context.Context, name string, names
 	return ar.apiRuleCon.ToGQL(apiRule)
 }
 
-func (ar *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiRuleEvent, error) {
-	channel := make(chan gqlschema.ApiRuleEvent, 1)
+func (ar *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan *gqlschema.APIRuleEvent, error) {
+	channel := make(chan *gqlschema.APIRuleEvent, 1)
 	filter := func(apiRule *v1alpha1.APIRule) bool {
 		if serviceName == nil {
 			return apiRule != nil && apiRule.Namespace == namespace

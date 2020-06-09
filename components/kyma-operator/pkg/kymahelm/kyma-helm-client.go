@@ -29,16 +29,21 @@ type ClientInterface interface {
 	UpgradeRelease(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error)
 	DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error)
 	PrintRelease(release *release.Release)
+	RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error)
+	WaitForReleaseDelete(releaseName string) (bool, error)
+	WaitForReleaseRollback(releaseName string) (bool, error)
 }
 
 // Client .
 type Client struct {
 	helm            *helm.Client
 	overridesLogger *logrus.Logger
+	maxHistory      int32
+	timeout         int64
 }
 
 // NewClient .
-func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify bool, overridesLogger *logrus.Logger) (*Client, error) {
+func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify bool, overridesLogger *logrus.Logger, maxHistory int32, timeout int64) (*Client, error) {
 	tlsopts := tlsutil.Options{
 		KeyFile:            TLSKey,
 		CertFile:           TLSCert,
@@ -48,6 +53,8 @@ func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify
 	return &Client{
 		helm:            helm.NewClient(helm.Host(host), helm.WithTLS(tlscfg), helm.ConnectTimeout(30)),
 		overridesLogger: overridesLogger,
+		maxHistory:      maxHistory,
+		timeout:         timeout,
 	}, err
 }
 
@@ -66,7 +73,7 @@ func (hc *Client) ListReleases() (*rls.ListReleasesResponse, error) {
 	return hc.helm.ListReleases(helm.ReleaseListStatuses(statuses))
 }
 
-//ReleaseStatus returns roughly-formatted Release status (columns are separated with blanks but not adjusted)
+// ReleaseStatus returns roughly-formatted Release status (columns are separated with blanks but not adjusted)
 func (hc *Client) ReleaseStatus(rname string) (string, error) {
 	status, err := hc.helm.ReleaseStatus(rname)
 	if err != nil {
@@ -106,10 +113,9 @@ func (hc *Client) IsReleaseDeletable(rname string) (bool, error) {
 }
 
 func (hc *Client) ReleaseDeployedRevision(rname string) (int32, error) {
-	maxHistory := 10
 	var deployedRevision int32 = 0
 
-	releaseHistoryRes, err := hc.helm.ReleaseHistory(rname, helm.WithMaxHistory(int32(maxHistory)))
+	releaseHistoryRes, err := hc.helm.ReleaseHistory(rname, helm.WithMaxHistory(int32(hc.maxHistory)))
 	if err != nil {
 		return deployedRevision, err
 	}
@@ -139,7 +145,7 @@ func (hc *Client) InstallReleaseFromChart(chartdir, ns, releaseName, overrides s
 		helm.ReleaseName(string(releaseName)),
 		helm.ValueOverrides([]byte(overrides)),
 		helm.InstallWait(true),
-		helm.InstallTimeout(3600),
+		helm.InstallTimeout(hc.timeout),
 	)
 }
 
@@ -153,7 +159,7 @@ func (hc *Client) InstallRelease(chartdir, ns, releasename, overrides string) (*
 		helm.ReleaseName(releasename),
 		helm.ValueOverrides([]byte(overrides)),
 		helm.InstallWait(true),
-		helm.InstallTimeout(3600),
+		helm.InstallTimeout(hc.timeout),
 	)
 }
 
@@ -167,7 +173,7 @@ func (hc *Client) InstallReleaseWithoutWait(chartdir, ns, releasename, overrides
 		helm.ReleaseName(releasename),
 		helm.ValueOverrides([]byte(overrides)),
 		helm.InstallWait(false),
-		helm.InstallTimeout(3600),
+		helm.InstallTimeout(hc.timeout),
 	)
 }
 
@@ -180,9 +186,21 @@ func (hc *Client) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.
 		chartDir,
 		helm.UpdateValueOverrides([]byte(overrides)),
 		helm.ReuseValues(false),
-		helm.UpgradeTimeout(3600),
+		helm.UpgradeTimeout(hc.timeout),
 		helm.UpgradeWait(true),
+		helm.UpgradeCleanupOnFail(true),
 	)
+}
+
+//RollbackRelease performs rollback to given revision
+func (hc *Client) RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error) {
+	return hc.helm.RollbackRelease(
+		releaseName,
+		helm.RollbackWait(true),
+		helm.RollbackVersion(revision),
+		helm.RollbackCleanupOnFail(true),
+		helm.RollbackRecreate(true),
+		helm.RollbackTimeout(hc.timeout))
 }
 
 // DeleteRelease .
@@ -190,7 +208,7 @@ func (hc *Client) DeleteRelease(releaseName string) (*rls.UninstallReleaseRespon
 	return hc.helm.DeleteRelease(
 		releaseName,
 		helm.DeletePurge(true),
-		helm.DeleteTimeout(3600),
+		helm.DeleteTimeout(hc.timeout),
 	)
 }
 

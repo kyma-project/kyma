@@ -76,14 +76,14 @@ func TestApplicationResolver_CreateApplication(t *testing.T) {
 	// GIVEN
 	for tn, tc := range map[string]struct {
 		givenDesc      *string
-		givenLabels    *gqlschema.Labels
+		givenLabels    gqlschema.Labels
 		expectedDesc   string
 		expectedLabels gqlschema.Labels
 	}{
 		"nothing provided": {},
 		"fully parametrized": {
 			givenDesc: ptrStr("desc"),
-			givenLabels: &gqlschema.Labels{
+			givenLabels: gqlschema.Labels{
 				"lol": "test",
 			},
 			expectedDesc: "desc",
@@ -96,7 +96,7 @@ func TestApplicationResolver_CreateApplication(t *testing.T) {
 			expectedDesc: "desc",
 		},
 		"only labels provided": {
-			givenLabels: &gqlschema.Labels{
+			givenLabels: gqlschema.Labels{
 				"lol": "test",
 			},
 			expectedLabels: gqlschema.Labels{
@@ -189,14 +189,14 @@ func TestApplicationResolver_UpdateApplication(t *testing.T) {
 
 	for tn, tc := range map[string]struct {
 		givenDesc      *string
-		givenLabels    *gqlschema.Labels
+		givenLabels    gqlschema.Labels
 		expectedDesc   string
 		expectedLabels gqlschema.Labels
 	}{
 		"nothing provided": {},
 		"fully parametrized": {
 			givenDesc: ptrStr("desc"),
-			givenLabels: &gqlschema.Labels{
+			givenLabels: gqlschema.Labels{
 				"lol": "test",
 			},
 			expectedDesc: "desc",
@@ -209,7 +209,7 @@ func TestApplicationResolver_UpdateApplication(t *testing.T) {
 			expectedDesc: "desc",
 		},
 		"only labels provided": {
-			givenLabels: &gqlschema.Labels{
+			givenLabels: gqlschema.Labels{
 				"lol": "test",
 			},
 			expectedLabels: gqlschema.Labels{
@@ -257,7 +257,7 @@ func TestConnectorServiceQuerySuccess(t *testing.T) {
 	var (
 		fixAppName = "app-name"
 		fixURL     = "http://some-url-with-token"
-		fixGQLObj  = gqlschema.ConnectorService{
+		fixGQLObj  = &gqlschema.ConnectorService{
 			URL: "http://some-url-with-token",
 		}
 	)

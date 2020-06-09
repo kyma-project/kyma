@@ -113,6 +113,8 @@ func TestFunctionEventQueries(t *testing.T) {
 			queryFunctionsArguments(namespaceName), functionDetailsFields())},
 		auth.Delete: {fixFunctionRequest("mutation", "deleteFunction",
 			deleteFunctionArguments(functionName1, namespaceName), functionMetadataDetailsFields())},
+		auth.Watch: {fixFunctionRequest("subscription", "functionEvent",
+			createFunctionEventArguments(functionName1, namespaceName), functionEventDetailsFields())},
 	}
 	auth.New().Run(t, opts)
 }
@@ -280,7 +282,7 @@ func mutationFunctionArguments(name, namespaceName string, labels []string) stri
 			dependencies: "{ \"name\": \"asd\", \"version\": \"1.0.0\", \"dependencies\": {} }",
 			env: [  ],
 			replicas: { min: 1, max: 1 },
-			resources: { limits: { memory: "100m", cpu: "128Mi" }, requests: { memory: "50m", cpu: "64Mi" } },
+			resources: { limits: { memory: "128Mi", cpu: "100m" }, requests: { memory: "64Mi", cpu: "50m" } },
 		},
 	`, name, namespaceName, labelTemplate)
 }

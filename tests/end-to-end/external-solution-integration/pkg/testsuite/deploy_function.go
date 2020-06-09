@@ -5,13 +5,14 @@ import (
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 
-	serverless "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic"
+
+	serverless "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
@@ -68,7 +69,7 @@ module.exports = { main: function (event, context) {
 		throw new Error("Payload not as expected")	
     }
 	return new Promise((resolve, reject) => {	
-		const url = gateway + "/counter";	
+		const url = gateway;	
 		console.log("Counter URL: ", url);	
 		sendReq(url, resolve, reject);	
 	}).then(resolved, rejected);	

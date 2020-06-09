@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	appsv1 "k8s.io/api/apps/v1"
+	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -40,18 +40,23 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&serverlessv1alpha1.Function{}).
 		Owns(&corev1.ConfigMap{}).
 		Owns(&batchv1.Job{}).
-		Owns(&servingv1.Service{}).
+		Owns(&appsv1.Deployment{}).
+		Owns(&corev1.Service{}).
+		Owns(&autoscalingv1.HorizontalPodAutoscaler{}).
 		Complete(r)
 }
 
 // Reconcile reads that state of the cluster for a Function object and makes changes based on the state read and what is in the Function.Spec
 // +kubebuilder:rbac:groups="serverless.kyma-project.io",resources=functions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="serverless.kyma-project.io",resources=functions/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups="serving.knative.dev",resources=services,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups="serving.knative.dev",resources=services/status,verbs=get
+// +kubebuilder:rbac:groups="apps",resources=deployments,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="apps",resources=deployments/status,verbs=get
 // +kubebuilder:rbac:groups="batch",resources=jobs,verbs=get;list;watch;create;update;patch;delete;deletecollection
 // +kubebuilder:rbac:groups="batch",resources=jobs/status,verbs=get
-// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
+// +kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update
+// +kubebuilder:rbac:groups="autoscaling",resources=horizontalpodautoscalers,verbs=get;list;watch;create;update
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
@@ -70,35 +75,48 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, nil
 	}
 
-	log.Info("Listing ConfigMaps")
 	var configMaps corev1.ConfigMapList
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &configMaps); err != nil {
 		log.Error(err, "Cannot list ConfigMaps")
 		return ctrl.Result{}, err
 	}
-	log.Info("Listing Jobs")
+
 	var jobs batchv1.JobList
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &jobs); err != nil {
 		log.Error(err, "Cannot list Jobs")
 		return ctrl.Result{}, err
 	}
-	log.Info("Gathering Service")
-	service := &servingv1.Service{}
-	if err := r.client.Get(ctx, request.NamespacedName, service); err != nil {
-		if apierrors.IsNotFound(err) {
-			service = nil
-		} else {
-			log.Error(err, "Cannot get Service %s", instance.GetName())
-			return ctrl.Result{}, err
-		}
+
+	var deployments appsv1.DeploymentList
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &deployments); err != nil {
+		log.Error(err, "Cannot list Deployments")
+		return ctrl.Result{}, err
+	}
+
+	var services corev1.ServiceList
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &services); err != nil {
+		log.Error(err, "Cannot list Services")
+		return ctrl.Result{}, err
+	}
+
+	var hpas autoscalingv1.HorizontalPodAutoscalerList
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &hpas); err != nil {
+		log.Error(err, "Cannot list HorizotalPodAutoscalers")
+		return ctrl.Result{}, err
 	}
 
 	switch {
-	case r.isOnConfigMapChange(instance, configMaps.Items, service):
+	case r.isOnConfigMapChange(instance, configMaps.Items, deployments.Items):
 		return r.onConfigMapChange(ctx, log, instance, configMaps.Items)
-	case r.isOnJobChange(instance, jobs.Items, service):
+	case r.isOnJobChange(instance, jobs.Items, deployments.Items):
 		return r.onJobChange(ctx, log, instance, configMaps.Items[0].GetName(), jobs.Items)
+	case r.isOnDeploymentChange(instance, deployments.Items):
+		return r.onDeploymentChange(ctx, log, instance, deployments.Items)
+	case r.isOnServiceChange(instance, services.Items):
+		return r.onServiceChange(ctx, log, instance, services.Items)
+	case r.isOnHorizontalPodAutoscalerChange(instance, hpas.Items, deployments.Items):
+		return r.onHorizontalPodAutoscalerChange(ctx, log, instance, hpas.Items, deployments.Items[0].GetName())
 	default:
-		return r.onServiceChange(ctx, log, instance, service)
+		return r.updateDeploymentStatus(ctx, log, instance, deployments.Items, corev1.ConditionTrue)
 	}
 }

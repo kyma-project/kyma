@@ -48,7 +48,7 @@ func (r *functionResolver) FunctionQuery(ctx context.Context, name string, names
 	return function, nil
 }
 
-func (r *functionResolver) FunctionsQuery(ctx context.Context, namespace string) ([]gqlschema.Function, error) {
+func (r *functionResolver) FunctionsQuery(ctx context.Context, namespace string) ([]*gqlschema.Function, error) {
 	items, err := r.functionService.List(namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s [namespace: %s]", pretty.Functions, namespace))
@@ -130,16 +130,16 @@ func (r *functionResolver) DeleteFunction(ctx context.Context, namespace string,
 	}, nil
 }
 
-func (r *functionResolver) DeleteManyFunctions(ctx context.Context, namespace string, functions []gqlschema.FunctionMetadataInput) ([]gqlschema.FunctionMetadata, error) {
-	deletedFunctions := make([]gqlschema.FunctionMetadata, 0)
+func (r *functionResolver) DeleteManyFunctions(ctx context.Context, namespace string, functions []*gqlschema.FunctionMetadataInput) ([]*gqlschema.FunctionMetadata, error) {
+	deletedFunctions := make([]*gqlschema.FunctionMetadata, 0)
 	for _, function := range functions {
-		_, err := r.DeleteFunction(ctx, namespace, function)
+		_, err := r.DeleteFunction(ctx, namespace, *function)
 		if err != nil {
 			glog.Error(errors.Wrapf(err, "while deleting %s [namespace: %s]", pretty.Functions, function.Namespace))
 			return deletedFunctions, gqlerror.New(err, pretty.Functions, gqlerror.WithNamespace(function.Namespace))
 		}
 
-		deletedFunctions = append(deletedFunctions, gqlschema.FunctionMetadata{
+		deletedFunctions = append(deletedFunctions, &gqlschema.FunctionMetadata{
 			Name:      function.Name,
 			Namespace: function.Namespace,
 		})
@@ -147,8 +147,8 @@ func (r *functionResolver) DeleteManyFunctions(ctx context.Context, namespace st
 	return deletedFunctions, nil
 }
 
-func (r *functionResolver) FunctionEventSubscription(ctx context.Context, namespace string, functionName *string) (<-chan gqlschema.FunctionEvent, error) {
-	channel := make(chan gqlschema.FunctionEvent, 1)
+func (r *functionResolver) FunctionEventSubscription(ctx context.Context, namespace string, functionName *string) (<-chan *gqlschema.FunctionEvent, error) {
+	channel := make(chan *gqlschema.FunctionEvent, 1)
 	filter := func(entity *v1alpha1.Function) bool {
 		if entity == nil {
 			return false

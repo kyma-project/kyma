@@ -16,6 +16,9 @@ readonly WEBSITE_DIR="website"
 readonly WEBSITE_REPO="https://github.com/kyma-project/website"
 
 readonly BUILD_DIR="${KYMA_PROJECT_IO_DIR}/${WEBSITE_DIR}"
+readonly PUBLIC_DIR="${KYMA_PROJECT_IO_DIR}/${WEBSITE_DIR}/public"
+
+readonly DOCS_DIR="$( cd "${KYMA_PROJECT_IO_DIR}/../docs" && pwd )"
 
 # Colors
 readonly RED='\033[0;31m'
@@ -46,6 +49,11 @@ build-preview() {
   make -C "${BUILD_DIR}" netlify-docs-preview
 }
 
+copy-build-result() {
+  mkdir -p "${DOCS_DIR}/.kyma-project-io/"
+  cp -rp "${PUBLIC_DIR}/" "${DOCS_DIR}/.kyma-project-io/"
+}
+
 main() {
   step "Remove website cached content"
   remove-cached-content
@@ -58,5 +66,9 @@ main() {
   step "Building preview"
   build-preview
   pass "Builded"
+
+  step "Copying public folder"
+  copy-build-result
+  pass "Copied"
 }
 main

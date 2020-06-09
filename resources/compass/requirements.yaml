@@ -11,3 +11,5 @@ dependencies:
   condition: global.externalServicesMock.enabled
 - name: metris
   condition: global.metris.enabled
+- name: prometheus-postgres-exporter
+  condition: global.metrics.enabled

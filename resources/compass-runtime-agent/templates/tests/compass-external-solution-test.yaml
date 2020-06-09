@@ -50,7 +50,7 @@ spec:
               exit $exit_code
           envFrom:
               - secretRef:
-                    name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
+                    name: {{ .Values.compassRuntimeAgent.config.secret.name }}
                     optional: true
           env:
             - name: DIRECTOR_URL

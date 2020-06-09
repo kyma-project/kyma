@@ -47,19 +47,25 @@ const (
 type ConditionReason string
 
 const (
-	ConditionReasonConfigMapCreated ConditionReason = "ConfigMapCreated"
-	ConditionReasonConfigMapUpdated ConditionReason = "ConfigMapUpdated"
-	ConditionReasonConfigMapError   ConditionReason = "ConfigMapError"
-	ConditionReasonJobFailed        ConditionReason = "JobFailed"
-	ConditionReasonJobCreated       ConditionReason = "JobCreated"
-	ConditionReasonJobRunning       ConditionReason = "JobRunning"
-	ConditionReasonJobsDeleted      ConditionReason = "JobsDeleted"
-	ConditionReasonJobFinished      ConditionReason = "JobFinished"
-	ConditionReasonServiceCreated   ConditionReason = "ServiceCreated"
-	ConditionReasonServiceUpdated   ConditionReason = "ServiceUpdated"
-	ConditionReasonServiceFailed    ConditionReason = "ServiceFailed"
-	ConditionReasonServiceWaiting   ConditionReason = "ServiceWaiting"
-	ConditionReasonServiceReady     ConditionReason = "ServiceReady"
+	ConditionReasonConfigMapCreated               ConditionReason = "ConfigMapCreated"
+	ConditionReasonConfigMapUpdated               ConditionReason = "ConfigMapUpdated"
+	ConditionReasonConfigMapError                 ConditionReason = "ConfigMapError"
+	ConditionReasonJobFailed                      ConditionReason = "JobFailed"
+	ConditionReasonJobCreated                     ConditionReason = "JobCreated"
+	ConditionReasonJobRunning                     ConditionReason = "JobRunning"
+	ConditionReasonJobsDeleted                    ConditionReason = "JobsDeleted"
+	ConditionReasonJobFinished                    ConditionReason = "JobFinished"
+	ConditionReasonDeploymentCreated              ConditionReason = "DeploymentCreated"
+	ConditionReasonDeploymentUpdated              ConditionReason = "DeploymentUpdated"
+	ConditionReasonDeploymentFailed               ConditionReason = "DeploymentFailed"
+	ConditionReasonDeploymentWaiting              ConditionReason = "DeploymentWaiting"
+	ConditionReasonDeploymentReady                ConditionReason = "DeploymentReady"
+	ConditionReasonServiceCreated                 ConditionReason = "ServiceCreated"
+	ConditionReasonServiceUpdated                 ConditionReason = "ServiceUpdated"
+	ConditionReasonServiceError                   ConditionReason = "ServiceError"
+	ConditionReasonHorizontalPodAutoscalerCreated ConditionReason = "HorizontalPodAutoscalerCreated"
+	ConditionReasonHorizontalPodAutoscalerUpdated ConditionReason = "HorizontalPodAutoscalerUpdated"
+	ConditionReasonHorizontalPodAutoscalerError   ConditionReason = "HorizontalPodAutoscalerError"
 )
 
 type Condition struct {

@@ -13,24 +13,24 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-incubator/compass"
-  revision = "8604d53a20a2848c53cad30c288bf8f6c823b825"
+  revision = "64f737ad7e1db26e2c3e9b71335bd67e69199092"
 
 [[constraint]]
   name = "github.com/kyma-project/rafter"
-  revision = "a0157e52e150b26f63c2ddc9f4e63c0cb7650ac7"
+  revision = "1a89277ac3d8266cfdf137c500d24e36538de9f4"
 
 [[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.16.10"
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.16.10"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.16.10"
 
  [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "d6a5da9fa78875fcee0084a2fa51d3479ff432d3"
+  revision = "28790517dd090d0b61ea121652ce98ad2a7d038c"

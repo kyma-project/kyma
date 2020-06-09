@@ -193,7 +193,7 @@ func (r *serviceInstanceResolver) ServiceInstanceQuery(ctx context.Context, name
 	return result, nil
 }
 
-func (r *serviceInstanceResolver) ServiceInstancesQuery(ctx context.Context, namespace string, first *int, offset *int, status *gqlschema.InstanceStatusType) ([]gqlschema.ServiceInstance, error) {
+func (r *serviceInstanceResolver) ServiceInstancesQuery(ctx context.Context, namespace string, first *int, offset *int, status *gqlschema.InstanceStatusType) ([]*gqlschema.ServiceInstance, error) {
 	var items []*v1beta1.ServiceInstance
 	var err error
 
@@ -224,8 +224,8 @@ func (r *serviceInstanceResolver) ServiceInstancesQuery(ctx context.Context, nam
 	return serviceInstances, nil
 }
 
-func (r *serviceInstanceResolver) ServiceInstanceEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceInstanceEvent, error) {
-	channel := make(chan gqlschema.ServiceInstanceEvent, 1)
+func (r *serviceInstanceResolver) ServiceInstanceEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.ServiceInstanceEvent, error) {
+	channel := make(chan *gqlschema.ServiceInstanceEvent, 1)
 	filter := func(instance *v1beta1.ServiceInstance) bool {
 		return instance != nil && instance.Namespace == namespace
 	}

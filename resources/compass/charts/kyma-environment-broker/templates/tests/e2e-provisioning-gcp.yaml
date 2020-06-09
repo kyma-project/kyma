@@ -24,9 +24,9 @@ spec:
               readOnly: true
           env:
             - name: APP_PROVISION_TIMEOUT
-              value: "105m"
+              value: "{{ .Values.e2e.provisioning.timeout }}"
             - name: APP_DEPROVISION_TIMEOUT
-              value: "45m"
+              value: "{{ .Values.e2e.deprovisioning.timeout }}"
             - name: APP_SKIP_CERT_VERIFICATION
               value: "true"
             - name: APP_TENANT_ID
@@ -47,12 +47,8 @@ spec:
               value: {{ include "kyma-env-broker.fullname" . | quote }}
             - name: APP_BROKER_TOKEN_URL
               value: "https://oauth2.{{ .Values.global.ingress.domainName }}/oauth2/token"
-            - name: APP_RUNTIME_PROVISIONER_URL
+            - name: APP_PROVISIONER_URL
               value: "{{ .Values.provisioner.URL }}"
-            - name: APP_RUNTIME_UUA_INSTANCE_NAME
-              value: "uaa-issuer"
-            - name: APP_RUNTIME_UUA_INSTANCE_NAMESPACE
-              value: "kyma-system"
             - name: APP_CONFIG_NAME
               value: "{{ .Values.e2e.gcp.configName }}"
             - name: APP_DEPLOY_NAMESPACE
@@ -69,8 +65,10 @@ spec:
               value: {{ .Values.gardener.kubeconfigPath }}
             - name: APP_TEST_AZURE_EVENT_HUBS_ENABLED
               value: "true"
+            - name: APP_UPGRADE_TEST
+              value: "false"
           command: ["/bin/sh"]
-          args: ["-c", "echo 'Starting e2e-provisioning test on GCP. Waiting 20s for api server...'; sleep 20; ./test.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
+          args: ["-c", "echo 'Starting e2e-provisioning test on GCP. Waiting 20s for api server...'; sleep 20; ./test.test -test.run Test_E2E_Provisioning; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
 ---
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -98,9 +96,9 @@ spec:
               readOnly: true
           env:
             - name: APP_PROVISION_TIMEOUT
-              value: "105m"
+              value: "{{ .Values.e2e.provisioning.timeout }}"
             - name: APP_DEPROVISION_TIMEOUT
-              value: "45m"
+              value: "{{ .Values.e2e.deprovisioning.timeout }}"
             - name: APP_SKIP_CERT_VERIFICATION
               value: "true"
             - name: APP_TENANT_ID
@@ -117,12 +115,8 @@ spec:
               value: {{ include "kyma-env-broker.fullname" . | quote }}
             - name: APP_BROKER_TOKEN_URL
               value: "https://oauth2.{{ .Values.global.ingress.domainName }}/oauth2/token"
-            - name: APP_RUNTIME_PROVISIONER_URL
+            - name: APP_PROVISIONER_URL
               value: "{{ .Values.provisioner.URL }}"
-            - name: APP_RUNTIME_UUA_INSTANCE_NAME
-              value: "uaa-issuer"
-            - name: APP_RUNTIME_UUA_INSTANCE_NAMESPACE
-              value: "kyma-system"
             - name: APP_CONFIG_NAME
               value: "{{ .Values.e2e.gcp.configName }}"
             - name: APP_DEPLOY_NAMESPACE
@@ -139,5 +133,7 @@ spec:
               value: {{ .Values.gardener.kubeconfigPath }}
             - name: APP_TEST_AZURE_EVENT_HUBS_ENABLED
               value: "true"
+            - name: APP_UPGRADE_TEST
+              value: "false"
           command: ["/bin/sh"]
-          args: ["-c", "echo 'Starting e2e-provisioning cleanup test on GCP. Waiting 20s for api server...'; sleep 20; ./test.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
+          args: ["-c", "echo 'Starting e2e-provisioning cleanup test on GCP. Waiting 20s for api server...'; sleep 20; ./test.test -test.run Test_E2E_Provisioning; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]

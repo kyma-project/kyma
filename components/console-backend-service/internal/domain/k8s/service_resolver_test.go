@@ -90,7 +90,7 @@ func TestServiceResolver_ServicesQuery(t *testing.T) {
 		resources := []*v1.Service{
 			resource, resource,
 		}
-		expected := []gqlschema.Service{
+		expected := []*gqlschema.Service{
 			{
 				Name: name,
 			},
@@ -118,7 +118,7 @@ func TestServiceResolver_ServicesQuery(t *testing.T) {
 
 	t.Run("NotFound", func(t *testing.T) {
 		var resources []*v1.Service
-		var expected []gqlschema.Service
+		var expected []*gqlschema.Service
 
 		resourceGetter := automock.NewServiceSvc()
 		resourceGetter.On("List", namespace, []string(nil), pager.PagingParams{}).Return(resources, nil).Once()

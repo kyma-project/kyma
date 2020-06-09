@@ -4,10 +4,11 @@ metadata:
   name: {{ .Chart.Name }}
   labels:
     app: {{ .Chart.Name }}-tests
-    app.kubernetes.io/name: {{ .Chart.Name }}-tests
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   disableConcurrency: false
   template:
@@ -30,13 +31,13 @@ spec:
             - name: APP_DIRECTOR_URL
               value: http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/graphql
             - name: APP_SKIP_SSL_VERIFY
-              value: "{{ .Values.tests.skipTLSVerify }}"
+              value: {{ .Values.tests.skipTLSVerify | quote }}
             - name: APP_CONNECTIVITY_ADAPTER_URL
               value: "https://{{ .Values.global.connectivity_adapter.tls.host }}.{{ .Values.global.ingress.domainName }}"
             - name: APP_CONNECTIVITY_ADAPTER_MTLS_URL
               value: "https://{{ .Values.global.connectivity_adapter.mtls.host }}.{{ .Values.global.ingress.domainName }}"
             - name: APP_TENANT
-              value: {{ .Values.global.defaultTenant }}
+              value: {{ .Values.global.defaultTenant | quote }}
             - name: APP_DIRECTOR_HEALTHZ_URL
               value: "http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/healthz"
           command:

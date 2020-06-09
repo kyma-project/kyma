@@ -88,7 +88,7 @@ func TestClassResolver_ServiceClassesQuery(t *testing.T) {
 		resources := []*v1beta1.ServiceClass{
 			resource, resource,
 		}
-		expected := []gqlschema.ServiceClass{
+		expected := []*gqlschema.ServiceClass{
 			{
 				Name: "Test",
 			}, {
@@ -121,7 +121,7 @@ func TestClassResolver_ServiceClassesQuery(t *testing.T) {
 		resourceGetter.On("List", ns, pager.PagingParams{}).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 		resolver := servicecatalog.NewServiceClassResolver(resourceGetter, nil, nil, nil)
-		var expected []gqlschema.ServiceClass
+		var expected []*gqlschema.ServiceClass
 
 		result, err := resolver.ServiceClassesQuery(nil, ns, nil, nil)
 
@@ -187,7 +187,7 @@ func TestClassResolver_ServiceClassInstancesField(t *testing.T) {
 		ns := "ns"
 		name := "name"
 		externalName := "externalName"
-		var expected []gqlschema.ServiceInstance
+		var expected []*gqlschema.ServiceInstance
 		resourceGetter := automock.NewInstanceListerByServiceClass()
 		resourceGetter.On("ListForServiceClass", name, externalName, ns).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
@@ -303,10 +303,10 @@ func TestClassResolver_ServiceClassActivatedField(t *testing.T) {
 func TestClassResolver_ServiceClassPlansField(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		ns := "ns"
-		expectedSingleObj := gqlschema.ServicePlan{
+		expectedSingleObj := &gqlschema.ServicePlan{
 			Name: "Test",
 		}
-		expected := []gqlschema.ServicePlan{
+		expected := []*gqlschema.ServicePlan{
 			expectedSingleObj,
 			expectedSingleObj,
 		}

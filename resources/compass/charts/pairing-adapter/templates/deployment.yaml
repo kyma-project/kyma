@@ -21,7 +21,7 @@ spec:
                 release: {{ .Release.Name }}
         spec:
             containers:
-            - name: main
+            - name: {{ .Chart.Name }}
               image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.pairing_adapter.dir }}pairing-adapter:{{ .Values.global.images.pairing_adapter.version }}
               imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
               env:

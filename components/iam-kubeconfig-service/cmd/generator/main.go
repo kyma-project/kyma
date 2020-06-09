@@ -56,6 +56,9 @@ func main() {
 	router.Use(authn.AuthMiddleware(oidcAuthenticator))
 	router.Methods("GET").Path("/kube-config").HandlerFunc(kubeConfigEndpoints.GetKubeConfig)
 
+	healthRouter := mux.NewRouter()
+	healthRouter.Methods("GET").Path("/health/ready").HandlerFunc(kubeConfigEndpoints.GetHealthStatus)
+
 	term := make(chan os.Signal)
 	signal.Notify(term, os.Interrupt, syscall.SIGTERM)
 
@@ -66,6 +69,14 @@ func main() {
 	}()
 
 	log.Infof("IAM kubeconfig service started on port: %d...", cfg.port)
+
+	go func() {
+		err := http.ListenAndServe(":"+strconv.Itoa(cfg.healthPort), healthRouter)
+		log.Errorf("Error serving HTTP: %v", err)
+		term <- os.Interrupt
+	}()
+
+	log.Infof("Health endpoint started on port %d...", cfg.healthPort)
 
 	select {
 	case <-term:
@@ -80,6 +91,7 @@ func main() {
 func readAppConfig() *appConfig {
 
 	portArg := flag.Int("port", 8000, "Application port")
+	healthPortArg := flag.Int("health-port", 9000, "Application health status port")
 	clusterNameArg := flag.String(clusterNameFlag, "", "Name of the Kubernetes cluster")
 	apiserverUrlArg := flag.String(apiserverURLFlag, "", "URL of the Kubernetes Apiserver")
 	clusterCAFileArg := flag.String(clusterCAFileFlag, "", "File with Certificate Authority of the Kubernetes cluster, also used for OIDC authentication")
@@ -136,6 +148,7 @@ func readAppConfig() *appConfig {
 
 	return &appConfig{
 		port:              *portArg,
+		healthPort:        *healthPortArg,
 		clusterName:       *clusterNameArg,
 		apiserverURL:      *apiserverUrlArg,
 		clusterCAFilePath: *clusterCAFileArg,
@@ -165,6 +178,7 @@ func readCAFromFile(caFile string) (string, error) {
 
 type appConfig struct {
 	port              int
+	healthPort        int
 	clusterName       string
 	apiserverURL      string
 	clusterCAFilePath string

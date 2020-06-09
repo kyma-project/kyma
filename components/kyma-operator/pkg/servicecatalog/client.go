@@ -1,6 +1,8 @@
 package servicecatalog
 
 import (
+	"context"
+
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
@@ -36,7 +38,7 @@ func (c *client) GetServiceBindings(ns string) (*v1beta1.ServiceBindingList, err
 		return nil, err
 	}
 
-	return api.ServiceBindings(ns).List(v1.ListOptions{})
+	return api.ServiceBindings(ns).List(context.TODO(), v1.ListOptions{})
 }
 
 // GetServiceInstances returns all ServiceInstance objects from provided namespace.
@@ -47,7 +49,7 @@ func (c *client) GetServiceInstances(ns string) (*v1beta1.ServiceInstanceList, e
 		return nil, err
 	}
 
-	return api.ServiceInstances(ns).List(v1.ListOptions{})
+	return api.ServiceInstances(ns).List(context.TODO(), v1.ListOptions{})
 }
 
 // DeleteBinding deletes ServiceBinding with given name from given namespace
@@ -57,7 +59,7 @@ func (c *client) DeleteBinding(namespace, name string) error {
 		return err
 	}
 
-	err = api.ServiceBindings(namespace).Delete(name, &v1.DeleteOptions{})
+	err = api.ServiceBindings(namespace).Delete(context.TODO(), name, v1.DeleteOptions{})
 
 	if err != nil {
 		return err
@@ -73,7 +75,7 @@ func (c *client) DeleteInstance(namespace, name string) error {
 		return err
 	}
 
-	err = api.ServiceInstances(namespace).Delete(name, &v1.DeleteOptions{})
+	err = api.ServiceInstances(namespace).Delete(context.TODO(), name, v1.DeleteOptions{})
 
 	if err != nil {
 		return err

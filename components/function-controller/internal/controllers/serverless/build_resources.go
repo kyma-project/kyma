@@ -4,19 +4,19 @@ import (
 	"fmt"
 	"strings"
 
+	appsv1 "k8s.io/api/apps/v1"
+	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-
-	"knative.dev/serving/pkg/apis/autoscaling"
+	"k8s.io/apimachinery/pkg/util/intstr"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 const (
-	servingKnativeVisibilityLabel      = "serving.knative.dev/visibility"
-	servingKnativeVisibilityLabelValue = "cluster-local"
+	destinationArg        = "--destination"
+	functionContainerName = "lambda"
 )
 
 func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
@@ -113,7 +113,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 						{
 							Name:  "executor",
 							Image: r.config.Build.ExecutorImage,
-							Args:  []string{fmt.Sprintf("--destination=%s", imageName), "--insecure", "--skip-tls-verify"},
+							Args:  append(r.config.Build.ExecutorArgs, fmt.Sprintf("%s=%s", destinationArg, imageName), "--context=dir:///workspace"),
 							Resources: corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceMemory: r.config.Build.LimitsMemoryValue,
@@ -125,8 +125,11 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 								},
 							},
 							VolumeMounts: []corev1.VolumeMount{
-								{Name: "sources", ReadOnly: true, MountPath: "/src"},
-								{Name: "runtime", ReadOnly: true, MountPath: "/workspace"},
+								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
+								// If COPY is not used, then the cache will not work
+								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/package.json", SubPath: "package.json"},
+								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/handler.js", SubPath: "handler.js"},
+								{Name: "runtime", ReadOnly: true, MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile"},
 								{Name: "tekton-home", ReadOnly: false, MountPath: "/tekton/home"},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
@@ -143,44 +146,97 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 	}
 }
 
-func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function) servingv1.Service {
+func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function) appsv1.Deployment {
 	imageName := r.buildExternalImageAddress(instance)
-	serviceLabels := r.serviceLabels(instance)
+	deploymentLabels := r.functionLabels(instance)
 
-	podAnnotations := r.servicePodAnnotations(instance)
-	podLabels := r.servicePodLabels(instance)
+	podLabels := r.podLabels(instance)
 
-	return servingv1.Service{
+	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.GetName(),
-			Namespace: instance.GetNamespace(),
-			Labels:    serviceLabels,
+			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
+			Namespace:    instance.GetNamespace(),
+			Labels:       deploymentLabels,
 		},
-		Spec: servingv1.ServiceSpec{
-			ConfigurationSpec: servingv1.ConfigurationSpec{
-				Template: servingv1.RevisionTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: podAnnotations,
-						Labels:      podLabels,
-					},
-					Spec: servingv1.RevisionSpec{
-						PodSpec: corev1.PodSpec{
-							Containers: []corev1.Container{
-								{
-									Name:            "lambda",
-									Image:           imageName,
-									Env:             append(instance.Spec.Env, envVarsForRevision...),
-									Resources:       instance.Spec.Resources,
-									ImagePullPolicy: corev1.PullIfNotPresent,
-								},
-							},
-							ServiceAccountName: r.config.ImagePullAccountName,
+		Spec: appsv1.DeploymentSpec{
+			Replicas: instance.Spec.MinReplicas,
+			Selector: &metav1.LabelSelector{
+				MatchLabels: r.internalFunctionLabels(instance), // this has to match spec.template.objectmeta.Labels
+				// and also it has to be immutable
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: podLabels, // podLabels contains InternalFnLabels, so it's ok
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:            functionContainerName,
+							Image:           imageName,
+							Env:             append(instance.Spec.Env, envVarsForDeployment...),
+							Resources:       instance.Spec.Resources,
+							ImagePullPolicy: corev1.PullIfNotPresent,
 						},
 					},
+					ServiceAccountName: r.config.ImagePullAccountName,
 				},
 			},
 		},
 	}
+}
+
+func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function) corev1.Service {
+	return corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instance.GetName(),
+			Namespace: instance.GetNamespace(),
+			Labels:    r.functionLabels(instance),
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{{
+				Name:       "http",               // it has to be here for istio to work properly
+				TargetPort: intstr.FromInt(8080), // https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js#L28
+				Port:       80,
+				Protocol:   corev1.ProtocolTCP,
+			}},
+			Selector: r.internalFunctionLabels(instance),
+		},
+	}
+}
+
+func (r *FunctionReconciler) buildHorizontalPodAutoscaler(instance *serverlessv1alpha1.Function, deploymentName string) autoscalingv1.HorizontalPodAutoscaler {
+	minReplicas, maxReplicas := r.defaultReplicas(instance.Spec)
+	return autoscalingv1.HorizontalPodAutoscaler{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
+			Namespace:    instance.GetNamespace(),
+			Labels:       r.functionLabels(instance),
+		},
+		Spec: autoscalingv1.HorizontalPodAutoscalerSpec{
+			ScaleTargetRef: autoscalingv1.CrossVersionObjectReference{
+				Kind:       "Deployment",
+				Name:       deploymentName,
+				APIVersion: appsv1.SchemeGroupVersion.String(),
+			},
+			MinReplicas:                    &minReplicas,
+			MaxReplicas:                    maxReplicas,
+			TargetCPUUtilizationPercentage: &r.config.TargetCPUUtilizationPercentage,
+		},
+	}
+}
+
+func (r *FunctionReconciler) defaultReplicas(spec serverlessv1alpha1.FunctionSpec) (int32, int32) {
+	min, max := int32(1), int32(1)
+	if spec.MinReplicas != nil && *spec.MinReplicas > 0 {
+		min = *spec.MinReplicas
+	}
+	// special case
+	if spec.MaxReplicas == nil || min > *spec.MaxReplicas {
+		max = min
+	} else {
+		max = *spec.MaxReplicas
+	}
+	return min, max
 }
 
 func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
@@ -216,27 +272,7 @@ func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha1
 	return labels
 }
 
-func (r *FunctionReconciler) serviceLabels(instance *serverlessv1alpha1.Function) map[string]string {
-	serviceLabels := r.functionLabels(instance)
-	serviceLabels[servingKnativeVisibilityLabel] = servingKnativeVisibilityLabelValue
-	return serviceLabels
-}
-
-func (r *FunctionReconciler) servicePodAnnotations(instance *serverlessv1alpha1.Function) map[string]string {
-	annotations := map[string]string{
-		autoscaling.MinScaleAnnotationKey: "1",
-		autoscaling.MaxScaleAnnotationKey: "1",
-	}
-	if instance.Spec.MinReplicas != nil {
-		annotations[autoscaling.MinScaleAnnotationKey] = fmt.Sprintf("%d", *instance.Spec.MinReplicas)
-	}
-	if instance.Spec.MaxReplicas != nil {
-		annotations[autoscaling.MaxScaleAnnotationKey] = fmt.Sprintf("%d", *instance.Spec.MaxReplicas)
-	}
-	return annotations
-}
-
-func (r *FunctionReconciler) servicePodLabels(instance *serverlessv1alpha1.Function) map[string]string {
+func (r *FunctionReconciler) podLabels(instance *serverlessv1alpha1.Function) map[string]string {
 	return r.mergeLabels(instance.Spec.Labels, r.internalFunctionLabels(instance))
 }
 

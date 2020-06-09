@@ -22,13 +22,13 @@ type extractor interface {
 }
 
 type ApiRuleListener struct {
-	channel   chan<- gqlschema.ApiRuleEvent
+	channel   chan<- *gqlschema.APIRuleEvent
 	filter    func(api *v1alpha1.APIRule) bool
 	converter gqlApiRuleConverter
 	extractor extractor
 }
 
-func NewApiRule(channel chan<- gqlschema.ApiRuleEvent, filter func(api *v1alpha1.APIRule) bool, converter gqlApiRuleConverter, extractor extractor) *ApiRuleListener {
+func NewApiRule(channel chan<- *gqlschema.APIRuleEvent, filter func(api *v1alpha1.APIRule) bool, converter gqlApiRuleConverter, extractor extractor) *ApiRuleListener {
 	return &ApiRuleListener{
 		channel:   channel,
 		filter:    filter,
@@ -76,9 +76,9 @@ func (l *ApiRuleListener) notify(eventType gqlschema.SubscriptionEventType, apiR
 		return
 	}
 
-	event := gqlschema.ApiRuleEvent{
+	event := &gqlschema.APIRuleEvent{
 		Type:    eventType,
-		APIRule: *gqlApiRule,
+		APIRule: gqlApiRule,
 	}
 
 	l.channel <- event

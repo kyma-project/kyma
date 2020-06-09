@@ -4,17 +4,17 @@
 
 fullnameOverride: "serverless"
 
-bindingsMigration:
+injectCerts:
   image:
     repository: 'eu.gcr.io/kyma-project/test-infra/alpine-kubectl'
-    tag: 'v20200310-5f52f407'
+    tag: 'v20200507-070ff576'
     pullPolicy: IfNotPresent
 
 tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "a60c949f"
+    tag: "PR-8651"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -54,15 +54,11 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "84fa953c"
-    pullPolicy: IfNotPresent
-  kubeRbacProxy:
-    repository: "gcr.io/kubebuilder/kube-rbac-proxy"
-    tag: "v0.5.0"
+    tag: "PR-8744"
     pullPolicy: IfNotPresent
   functionRuntimeNodejs12:
     repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-    tag: "a62f4a7f"  
+    tag: "a62f4a7f"
 
 deployment:
   replicas: 1
@@ -110,63 +106,38 @@ containers:
         value: "{{ template \"fullname\" . }}-registry-credentials"
       imagePullAccountName:
         value: "{{ template \"fullname\" . }}"
+      targetCPUUtilizationPercentage:
+        value: "50"
       kserviceRequeueDuration:
         value: 5m
       functionRequeueDuration:
         value: 5m
+      functionBuildExecutorArgs:
+        value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildExecutorImage:
-        value: gcr.io/kaniko-project/executor:v0.17.1
+        value: gcr.io/kaniko-project/executor:v0.22.0
       functionBuildCredsInitImage:
-        value: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.10.1
+        value: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.12.1
       functionDockerAddress:
         # TODO: I don't know why {{ .Values.global.dockerServicePort }} doesn't work. It is rendered as {{\n  .Values.global.dockerServicePort }}
         # value: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}"
         value: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:5000"
       functionDockerExternalAddress:
         value: "registry.{{ .Values.global.ingress.domainName -}}"
-  kubeRbacProxy:
-    resources:
-      limits:
-        cpu: 60m
-        memory: 60Mi
-      requests:
-        cpu: 10m
-        memory: 16Mi
-    extraProperties: {}
 
 services:
   manager:
     type: ClusterIP
-    port:
-      name: http
-      targerPort: 9876
-      port: 443
-      protocol: TCP
-    labels: {}
-    annotations: {}
-  authProxy:
-    type: ClusterIP
-    port:
-      name: https
-      port: 8443
-      targerPort: 8443
-      protocol: TCP
     labels: {}
     annotations: {}
 
 metrics:
-  enabled: false
+  enabled: true
   manager:
     port:
       name: http-metrics
       port: 8080
       targerPort: 8080
-      protocol: TCP
-  authProxy:
-    port:
-      name: https
-      port: 8443
-      targerPort: 8443
       protocol: TCP
   serviceMonitor:
     create: true
@@ -208,7 +179,7 @@ clusterMicroFrontend:
 grafanaDashboard:
   enabled: true
 
-usageKind: 
+usageKind:
   name: serverless-function
 
 docker-registry:
@@ -231,3 +202,7 @@ docker-registry:
             path: password.txt
     - name: htpasswd-data
       emptyDir: {}
+
+webhook:
+  enabled: true
+  fullnameOverride: "serverless-webhook"

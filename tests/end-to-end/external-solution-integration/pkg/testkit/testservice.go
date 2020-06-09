@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -27,33 +28,34 @@ import (
 const (
 	testServiceNamePrefix   = "ctr-svc"
 	testServicePort         = 8090
-	testServiceImage        = "maladie/counterservice:latest"
 	labelKey                = "component"
 	healthEndpointFormat    = "https://%s.%s/health"
 	endpointFormat          = "https://%s.%s"
-	inClusterEndpointFormat = "http://%s.%s.svc.cluster.local:8090"
+	inClusterEndpointFormat = "http://%s.%s.svc.cluster.local:%v"
 	gateway                 = "kyma-gateway.kyma-system.svc.cluster.local"
 )
 
 type TestService struct {
-	apiRules        dynamic.ResourceInterface
-	deployments     appsclient.DeploymentInterface
-	services        coreclient.ServiceInterface
-	HttpClient      *http.Client
-	domain          string
-	namespace       string
-	testServiceName string
+	apiRules         dynamic.ResourceInterface
+	deployments      appsclient.DeploymentInterface
+	services         coreclient.ServiceInterface
+	HttpClient       *http.Client
+	domain           string
+	namespace        string
+	testServiceImage string
+	testServiceName  string
 }
 
-func NewTestService(httpClient *http.Client, deployments appsclient.DeploymentInterface, services coreclient.ServiceInterface, apiRules dynamic.ResourceInterface, domain, namespace string) *TestService {
+func NewTestService(httpClient *http.Client, deployments appsclient.DeploymentInterface, services coreclient.ServiceInterface, apiRules dynamic.ResourceInterface, domain, namespace, testServiceImage string) *TestService {
 	return &TestService{
-		HttpClient:      httpClient,
-		domain:          domain,
-		apiRules:        apiRules,
-		deployments:     deployments,
-		services:        services,
-		namespace:       namespace,
-		testServiceName: fmt.Sprintf("%v-%v", testServiceNamePrefix, namespace),
+		HttpClient:       httpClient,
+		domain:           domain,
+		apiRules:         apiRules,
+		deployments:      deployments,
+		services:         services,
+		namespace:        namespace,
+		testServiceName:  fmt.Sprintf("%v-%v", testServiceNamePrefix, namespace),
+		testServiceImage: testServiceImage,
 	}
 }
 
@@ -72,7 +74,7 @@ func (ts *TestService) CreateTestService() error {
 func (ts *TestService) checkValue() (int, error) {
 
 	url := ts.GetTestServiceURL()
-	resp, err := ts.HttpClient.Get(url + "/counter")
+	resp, err := ts.HttpClient.Get(url)
 
 	if err != nil {
 		return 0, err
@@ -117,6 +119,23 @@ func (ts *TestService) IsReady() error {
 
 	return nil
 }
+
+func (ts *TestService) Reset() error {
+	url := ts.GetTestServiceURL()
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := ts.HttpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("expected 200, got %v", resp.StatusCode)
+	}
+	return nil
+}
+
 func (ts *TestService) WaitForCounterPodToUpdateValue(val int) error {
 	count, err := ts.checkValue()
 	if err != nil {
@@ -142,7 +161,7 @@ func (ts *TestService) GetTestServiceURL() string {
 }
 
 func (ts *TestService) GetInClusterTestServiceURL() string {
-	return fmt.Sprintf(inClusterEndpointFormat, ts.testServiceName, ts.namespace)
+	return fmt.Sprintf(inClusterEndpointFormat, ts.testServiceName, ts.namespace, testServicePort)
 }
 
 func (ts *TestService) getHealthEndpointURL() string {
@@ -174,11 +193,17 @@ func (ts *TestService) createDeployment() error {
 				Spec: v1.PodSpec{
 					Containers: []v1.Container{
 						{
-							Name:  ts.testServiceName,
-							Image: testServiceImage,
+							Name:    ts.testServiceName,
+							Image:   ts.testServiceImage,
+							Command: []string{"/event-subscriber"},
+							Args: []string{
+								"--port",
+								strconv.Itoa(testServicePort),
+							},
 							Ports: []v1.ContainerPort{
 								{ContainerPort: testServicePort},
 							},
+							ImagePullPolicy: v1.PullAlways,
 						},
 					},
 				},
@@ -235,8 +260,11 @@ func (ts *TestService) createAPI() error {
 			Gateway: &gateway,
 			Rules: []apiRulev1alpha1.Rule{
 				{
-					Path:    "/.*",
-					Methods: []string{"GET"},
+					Path: "/.*",
+					Methods: []string{
+						"GET",
+						"DELETE",
+					},
 					AccessStrategies: []*rulev1alpha1.Authenticator{
 						{
 							Handler: &rulev1alpha1.Handler{

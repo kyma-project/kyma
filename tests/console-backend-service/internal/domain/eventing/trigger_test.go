@@ -68,6 +68,8 @@ func TestTriggerEventQueries(t *testing.T) {
 			listTriggersArguments(namespaceName), triggerDetailsFields())},
 		auth.Delete: {fixTriggerRequest("mutation", "deleteTrigger",
 			deleteTriggerArguments(namespaceName), metadataDetailsFields())},
+		auth.Watch: {fixTriggerRequest("subscription", "triggerEvent",
+			createTriggerEventArguments(namespaceName), triggerEventDetailsFields())},
 	}
 	auth.New().Run(t, opts)
 }
@@ -206,9 +208,9 @@ func deleteTriggerArguments(namespace string) string {
 func triggerDetailsFields() string {
 	return `
 		name
-    	namespace
+		namespace
 		broker
-    	filterAttributes
+		filterAttributes
 		subscriber {
 			uri
 			ref {
@@ -218,11 +220,11 @@ func triggerDetailsFields() string {
 				namespace
 			}
 		}
-    	status {
-		reason
-		status
+		status {
+			reason
+			status
 		}
-	`
+`
 }
 
 func metadataDetailsFields() string {

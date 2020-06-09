@@ -34,6 +34,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		kymaClients.ApiRules,
 		s.domain,
 		s.testID,
+		s.testServiceImage,
 	)
 
 	functionEndpoint := helpers.InClusterEndpoint(s.testID, s.testID, helpers.FunctionPort)
@@ -66,6 +67,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 			serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID),
 			knativeEventingClientset.EventingV1alpha1().Brokers(s.testID), knativeEventingClientset.MessagingV1alpha1().Subscriptions(helpers.KymaIntegrationNamespace)),
 		testsuite.NewCreateKnativeTrigger(s.testID, helpers.DefaultBrokerName, functionEndpoint, knativeEventingClientset.EventingV1alpha1().Triggers(s.testID)),
+		testsuite.NewSleep(s.eventSendDelay),
 		testsuite.NewSendEventToMesh(s.testID, helpers.FunctionPayload, state),
 		testsuite.NewCheckCounterPod(testService, 1),
 		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.FunctionPayload, state),

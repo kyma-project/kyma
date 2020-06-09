@@ -80,12 +80,11 @@ func (s *CreateLambdaServiceBindingUsage) Run() error {
 		return err
 	}
 
-	return retry.Do(s.isServiceBindingUsageReady)
+	return retry.Do(s.isServiceBindingUsageReady, retry.Attempts(retryAttemptsCount), retry.Delay(retryDelay))
 }
 
 func (s *CreateLambdaServiceBindingUsage) isServiceBindingUsageReady() error {
 	sbu, err := s.serviceBindingUsages.Get(s.name, metav1.GetOptions{})
-
 	if err != nil {
 		return err
 	}
@@ -116,7 +115,7 @@ func (s *CreateLambdaServiceBindingUsage) isServiceBindingUsageReady() error {
 		}
 	}
 
-	return retry.Do(s.isBrokerReady)
+	return retry.Do(s.isBrokerReady, retry.Attempts(retryAttemptsCount), retry.Delay(retryDelay))
 }
 
 func (s *CreateLambdaServiceBindingUsage) isBrokerReady() error {

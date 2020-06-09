@@ -28,8 +28,8 @@ func (_m *gqlClusterAssetGroupConverter) ToGQL(in *v1beta1.ClusterAssetGroup) (*
 }
 
 // ToGQLs provides a failing mock function with given fields: in
-func (_m *gqlClusterAssetGroupConverter) ToGQLs(in []*v1beta1.ClusterAssetGroup) ([]gqlschema.ClusterAssetGroup, error) {
-	var r0 []gqlschema.ClusterAssetGroup
+func (_m *gqlClusterAssetGroupConverter) ToGQLs(in []*v1beta1.ClusterAssetGroup) ([]*gqlschema.ClusterAssetGroup, error) {
+	var r0 []*gqlschema.ClusterAssetGroup
 	var r1 error
 	r1 = _m.err
 

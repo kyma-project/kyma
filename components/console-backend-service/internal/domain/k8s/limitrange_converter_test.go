@@ -24,7 +24,7 @@ func TestLimitRangeConverter_ToGQL(t *testing.T) {
 			},
 			expected: &gqlschema.LimitRange{
 				Name:   fixLimitRangeName(),
-				Limits: make([]gqlschema.LimitRangeItem, 0),
+				Limits: make([]*gqlschema.LimitRangeItem, 0),
 			},
 		},
 		"full": {
@@ -40,21 +40,14 @@ func TestLimitRangeConverter_ToGQL(t *testing.T) {
 				Spec: v1.LimitRangeSpec{
 					Limits: []v1.LimitRangeItem{
 						{
-							Max: v1.ResourceList{},
+							Max: nil,
 						},
 					},
 				},
 			},
 			expected: &gqlschema.LimitRange{
-				Name: fixLimitRangeName(),
-				Limits: []gqlschema.LimitRangeItem{
-					{
-						Max: gqlschema.ResourceType{
-							Memory: nil,
-							CPU:    nil,
-						},
-					},
-				},
+				Name:   fixLimitRangeName(),
+				Limits: []*gqlschema.LimitRangeItem{{}},
 			},
 		},
 	} {
@@ -80,8 +73,8 @@ func TestLimitRangeConverter_ToGQLs(t *testing.T) {
 	gql := conv.ToGQLs(fixLimitRanges())
 
 	// THEN
-	assert.Equal(t, []gqlschema.LimitRange{
-		*fixGQLLimitRange(),
+	assert.Equal(t, []*gqlschema.LimitRange{
+		fixGQLLimitRange(),
 	}, gql)
 }
 
@@ -133,18 +126,18 @@ func fixLimitRangeNamespace() string {
 	return "kyma-integration"
 }
 
-func fixLimits() []gqlschema.LimitRangeItem {
-	return []gqlschema.LimitRangeItem{
+func fixLimits() []*gqlschema.LimitRangeItem {
+	return []*gqlschema.LimitRangeItem{
 		{
-			Max: gqlschema.ResourceType{
+			Max: &gqlschema.ResourceType{
 				Memory: ptrStr("120Mi"),
 				CPU:    ptrStr("100m"),
 			},
-			Default: gqlschema.ResourceType{
+			Default: &gqlschema.ResourceType{
 				Memory: ptrStr("120Mi"),
 				CPU:    ptrStr("10"),
 			},
-			DefaultRequest: gqlschema.ResourceType{
+			DefaultRequest: &gqlschema.ResourceType{
 				Memory: ptrStr("120Mi"),
 				CPU:    ptrStr("1200m"),
 			},

@@ -39,6 +39,23 @@ data:
 {{- end}}
       serverless: {
         functionUsageKind: "serverless-function",
+        restrictedVariables: [
+          'FUNC_RUNTIME',
+          'FUNC_HANDLER',
+          'FUNC_TIMEOUT',
+          'FUNC_PORT',
+          'PORT',
+          'MOD_NAME',
+          'NODE_PATH',
+          'REQ_MB_LIMIT',
+          'FUNC_MEMORY_LIMIT'
+        ],
+        resources: {
+          min: {
+            memory: '16Mi',
+            cpu: '10m',
+          },
+        },
       },
     };
     
