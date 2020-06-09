@@ -54,6 +54,115 @@ func TestFunctionReconciler_buildConfigMap(t *testing.T) {
 	}
 }
 
+func TestFunctionReconciler_buildDeployment(t *testing.T) {
+	type args struct {
+		instance *serverlessv1alpha1.Function
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "spec.template.labels should contain every element from spec.selector.MatchLabels",
+			args: args{instance: newFixFunction("ns", "name", 1, 2)},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewGomegaWithT(t)
+			r := &FunctionReconciler{}
+			got := r.buildDeployment(tt.args.instance)
+
+			for key, value := range got.Spec.Selector.MatchLabels {
+				g.Expect(got.Spec.Template.Labels[key]).To(gomega.Equal(value))
+			}
+		})
+	}
+}
+
+func TestFunctionReconciler_buildHorizontalPodAutoscaler(t *testing.T) {
+	type args struct {
+		instance *serverlessv1alpha1.Function
+	}
+	type wants struct {
+		minReplicas int32
+		maxReplicas int32
+	}
+
+	nilCase1 := newFixFunction("ns", "name", 2, 2)
+	nilCase1.Spec.MinReplicas = nil
+	nilCase1.Spec.MaxReplicas = nil
+	nilCase2 := newFixFunction("ns", "name", 2, 2)
+	nilCase2.Spec.MinReplicas = nil
+	nilCase3 := newFixFunction("ns", "name", 2, 2)
+	nilCase3.Spec.MaxReplicas = nil
+
+	tests := []struct {
+		name  string
+		args  args
+		wants wants
+	}{
+		{
+			name: "spec.minReplicas and spec.maxReplicas fields should contain fixed (from Function spec or default) values - 0 in spec",
+			args: args{instance: newFixFunction("ns", "name", 0, 0)},
+			wants: wants{
+				minReplicas: 1,
+				maxReplicas: 1,
+			},
+		},
+		{
+			name: "spec.minReplicas and spec.maxReplicas fields should contain fixed (from Function spec or default) values - nil in spec",
+			args: args{instance: nilCase1},
+			wants: wants{
+				minReplicas: 1,
+				maxReplicas: 1,
+			},
+		},
+		{
+			name: "spec.minReplicas and spec.maxReplicas fields should contain fixed (from Function spec or default) values, when min is set to 0",
+			args: args{instance: newFixFunction("ns", "name", 2, 0)},
+			wants: wants{
+				minReplicas: 2,
+				maxReplicas: 2,
+			},
+		},
+		{
+			name: "spec.minReplicas and spec.maxReplicas fields should contain fixed (from Function spec or default) values, when min is nil",
+			args: args{instance: nilCase2},
+			wants: wants{
+				minReplicas: 1,
+				maxReplicas: 2,
+			},
+		},
+		{
+			name: "spec.minReplicas and spec.maxReplicas fields should contain fixed (from Function spec or default) values, when max is set to 0",
+			args: args{instance: newFixFunction("ns", "name", 0, 3)},
+			wants: wants{
+				minReplicas: 1,
+				maxReplicas: 3,
+			},
+		},
+		{
+			name: "spec.minReplicas and spec.maxReplicas fields should contain fixed (from Function spec or default) values, when max is nil",
+			args: args{instance: nilCase3},
+			wants: wants{
+				minReplicas: 2,
+				maxReplicas: 2,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewGomegaWithT(t)
+			r := &FunctionReconciler{}
+			got := r.buildHorizontalPodAutoscaler(tt.args.instance, "foo-bar")
+
+			g.Expect(*got.Spec.MinReplicas).To(gomega.Equal(tt.wants.minReplicas))
+			g.Expect(got.Spec.MaxReplicas).To(gomega.Equal(tt.wants.maxReplicas))
+		})
+	}
+}
+
 func TestFunctionReconciler_sanitizeDependencies(t *testing.T) {
 	tests := []struct {
 		name string
@@ -264,32 +373,6 @@ func TestFunctionReconciler_functionLabels(t *testing.T) {
 			got := r.functionLabels(tt.args.instance)
 			g.Expect(got).To(gomega.Equal(tt.want))
 			g.Expect(got).To(gomega.HaveLen(len(tt.args.instance.Labels) + 3))
-		})
-	}
-}
-
-func TestFunctionReconciler_buildDeployment(t *testing.T) {
-	type args struct {
-		instance *serverlessv1alpha1.Function
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		{
-			name: "spec.template.labels should contain every element from spec.selector.MatchLabels",
-			args: args{instance: newFixFunction("ns", "name")},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.buildDeployment(tt.args.instance)
-
-			for key, value := range got.Spec.Selector.MatchLabels {
-				g.Expect(got.Spec.Template.Labels[key]).To(gomega.Equal(value))
-			}
 		})
 	}
 }
