@@ -700,7 +700,7 @@
             "kymaEventing": {
               "$id": "#/properties/clusterRoles/properties/apiGroups/properties/kymaEventing",
               "type": "array",
-              "title": "The kymaEventing Schema",
+              "title": "The KymaEventing Schema",
               "description": "",
               "default": [],
               "examples": [
