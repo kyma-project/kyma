@@ -7,9 +7,6 @@
   "default": {},
   "examples": [
     {
-      "resources/event-sources/templates/500-sources-controller": {
-        "yaml": null
-      },
       "global": {
         "containerRegistry": {
           "path": "eu.gcr.io/kyma-project"
