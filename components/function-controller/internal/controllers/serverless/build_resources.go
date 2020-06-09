@@ -205,6 +205,7 @@ func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function)
 }
 
 func (r *FunctionReconciler) buildHorizontalPodAutoscaler(instance *serverlessv1alpha1.Function, deploymentName string) autoscalingv1.HorizontalPodAutoscaler {
+	minReplicas, maxReplicas := r.defaultReplicas(instance.Spec)
 	return autoscalingv1.HorizontalPodAutoscaler{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
@@ -217,11 +218,25 @@ func (r *FunctionReconciler) buildHorizontalPodAutoscaler(instance *serverlessv1
 				Name:       deploymentName,
 				APIVersion: appsv1.SchemeGroupVersion.String(),
 			},
-			MinReplicas:                    instance.Spec.MinReplicas,
-			MaxReplicas:                    *instance.Spec.MaxReplicas, // Max replicas gets defaulted by webhook, so it's always gonna be there
+			MinReplicas:                    &minReplicas,
+			MaxReplicas:                    maxReplicas,
 			TargetCPUUtilizationPercentage: &r.config.TargetCPUUtilizationPercentage,
 		},
 	}
+}
+
+func (r *FunctionReconciler) defaultReplicas(spec serverlessv1alpha1.FunctionSpec) (int32, int32) {
+	min, max := int32(1), int32(1)
+	if spec.MinReplicas != nil && *spec.MinReplicas > 0 {
+		min = *spec.MinReplicas
+	}
+	// special case
+	if spec.MaxReplicas == nil || min > *spec.MaxReplicas {
+		max = min
+	} else {
+		max = *spec.MaxReplicas
+	}
+	return min, max
 }
 
 func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
