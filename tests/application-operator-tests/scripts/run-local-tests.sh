@@ -30,12 +30,12 @@ kind: Pod
 metadata:
   name: application-operator-tests
   annotations:
-   sidecar.istio.io/inject: “false”
+   sidecar.istio.io/inject: "false"
 spec:
   containers:
   - name: application-operator-tests
-    image: docker.io/koala7659/application-operator-tests:PR-8417
-    imagePullPolicy: Always
+    image: application-operator-tests
+    imagePullPolicy: Never
     env:
     - name: NAMESPACE
       value: kyma-integration
