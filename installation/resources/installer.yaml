@@ -259,7 +259,7 @@ spec:
       containers:
       - name: kyma-installer-container
         # image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
-        image: eu.gcr.io/sap-kyma-prow/pr/gke-integration/kyma-project/kyma:PR-8679
+        image: eu.gcr.io/kyma-project/kyma-installer:PR-8679-8996a2c3
         imagePullPolicy: IfNotPresent
         args:
           - -overrideLogFile=/app/overrides.txt
