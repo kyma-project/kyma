@@ -4,7 +4,7 @@ metadata:
   labels:
     duck.knative.dev/podspecable: "true"
     knative.dev/crd-install: "true"
-    serving.knative.dev/release: "v0.12.0"
+    serving.knative.dev/release: "v0.14.0"
   name: configurations.serving.knative.dev
 spec:
   additionalPrinterColumns:
