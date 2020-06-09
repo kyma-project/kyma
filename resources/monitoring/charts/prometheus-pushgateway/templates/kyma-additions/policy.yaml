@@ -4,7 +4,7 @@ kind: Policy
 metadata:
   name: {{ template "prometheus-pushgateway.name" . }}
   labels:
-    {{ include "prometheus-pushgateway.labels" . | indent 4 }}
+    {{- include "prometheus-pushgateway.labels" . | nindent 4 }}
 spec:
   peers:
     - mtls:
