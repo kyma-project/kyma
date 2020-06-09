@@ -26,7 +26,7 @@ require (
 	github.com/kubernetes-sigs/service-catalog v0.2.2-0.20190920221325-ccab52343967
 	github.com/kyma-incubator/api-gateway v0.0.0-20191125140217-295e8fcaa03f
 	github.com/kyma-project/helm-broker v0.0.0-20190906085923-d07feb2d365a
-	github.com/kyma-project/kyma v0.5.1-0.20200605091830-76faea35b9d9
+	github.com/kyma-project/kyma v0.5.1-0.20200609051543-f5997d4a36d6
 	github.com/kyma-project/kyma/components/function-controller v0.0.0-20200527102940-1579eff8c7a5
 	github.com/kyma-project/rafter v0.0.0-20200402080904-a0157e52e150
 	github.com/moby/moby v1.13.1
@@ -62,7 +62,5 @@ require (
 	knative.dev/eventing v0.13.1 // indirect
 	knative.dev/pkg v0.0.0-20200306005226-fc857aa77f79
 )
-
-replace github.com/kyma-project/kyma => github.com/sjanota/kyma v0.0.0-20200605094804-335fd55301e9
 
 replace k8s.io/client-go => k8s.io/client-go v0.17.4
