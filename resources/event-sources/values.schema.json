@@ -29,44 +29,15 @@
     }
   ],
   "required": [
-    "resources/event-sources/templates/500-sources-controller",
     "global"
   ],
   "additionalProperties": true,
   "properties": {
-    "resources/event-sources/templates/500-sources-controller": {
-      "$id": "#/properties/resources/event-sources/templates/500-sources-controller",
-      "type": "object",
-      "title": "The resources/event-sources/templates/500-sources-controller schema",
-      "description": "An explanation about the purpose of this instance.",
-      "default": {},
-      "examples": [
-        {
-          "yaml": null
-        }
-      ],
-      "required": [
-        "yaml"
-      ],
-      "additionalProperties": true,
-      "properties": {
-        "yaml": {
-          "$id": "#/properties/resources/event-sources/templates/500-sources-controller/properties/yaml",
-          "type": "null",
-          "title": "The yaml schema",
-          "description": "An explanation about the purpose of this instance.",
-          "default": null,
-          "examples": [
-            null
-          ]
-        }
-      }
-    },
     "global": {
       "$id": "#/properties/global",
       "type": "object",
       "title": "The global schema",
-      "description": "An explanation about the purpose of this instance.",
+      "description": "Specifies global configurations.",
       "default": {},
       "examples": [
         {
@@ -97,7 +68,7 @@
           "$id": "#/properties/global/properties/containerRegistry",
           "type": "object",
           "title": "The containerRegistry schema",
-          "description": "An explanation about the purpose of this instance.",
+          "description": "Specifies container registry.",
           "default": {},
           "examples": [
             {
@@ -113,7 +84,7 @@
               "$id": "#/properties/global/properties/containerRegistry/properties/path",
               "type": "string",
               "title": "The path schema",
-              "description": "An explanation about the purpose of this instance.",
+              "description": "Specifies path of the docker repository.",
               "default": "",
               "examples": [
                 "eu.gcr.io/kyma-project"
@@ -125,7 +96,7 @@
           "$id": "#/properties/global/properties/controllerManager",
           "type": "object",
           "title": "The controllerManager schema",
-          "description": "An explanation about the purpose of this instance.",
+          "description": "Provides configuration of the controller manager.",
           "default": {},
           "examples": [
             {
@@ -147,7 +118,7 @@
               "$id": "#/properties/global/properties/controllerManager/properties/name",
               "type": "string",
               "title": "The name schema",
-              "description": "An explanation about the purpose of this instance.",
+              "description": "The name of the unit.",
               "default": "",
               "examples": [
                 "controller-manager"
@@ -157,7 +128,7 @@
               "$id": "#/properties/global/properties/controllerManager/properties/image",
               "type": "string",
               "title": "The image schema",
-              "description": "An explanation about the purpose of this instance.",
+              "description": "The image for the http source adapter.",
               "default": "",
               "examples": [
                 "event-sources-controller-manager"
@@ -167,7 +138,7 @@
               "$id": "#/properties/global/properties/controllerManager/properties/dir",
               "type": "string",
               "title": "The dir schema",
-              "description": "An explanation about the purpose of this instance.",
+              "description": "Specifies the container in the container registry.",
               "default": "",
               "examples": [
                 ""
@@ -177,7 +148,7 @@
               "$id": "#/properties/global/properties/controllerManager/properties/version",
               "type": "string",
               "title": "The version schema",
-              "description": "An explanation about the purpose of this instance.",
+              "description": "The container image version.",
               "default": "",
               "examples": [
                 "08b6fe17"
@@ -189,7 +160,7 @@
           "$id": "#/properties/global/properties/httpAdapter",
           "type": "object",
           "title": "The httpAdapter schema",
-          "description": "An explanation about the purpose of this instance.",
+          "description": "Provides configuration of the http source adapter.",
           "default": {},
           "examples": [
             {
@@ -209,7 +180,7 @@
               "$id": "#/properties/global/properties/httpAdapter/properties/image",
               "type": "string",
               "title": "The image schema",
-              "description": "An explanation about the purpose of this instance.",
+              "description": "The image for the http source adapter.",
               "default": "",
               "examples": [
                 "event-sources-http-adapter"
@@ -219,7 +190,7 @@
               "$id": "#/properties/global/properties/httpAdapter/properties/dir",
               "type": "string",
               "title": "The dir schema",
-              "description": "An explanation about the purpose of this instance.",
+              "description": "Specifies the container in the container registry.",
               "default": "",
               "examples": [
                 ""
@@ -229,7 +200,7 @@
               "$id": "#/properties/global/properties/httpAdapter/properties/version",
               "type": "string",
               "title": "The version schema",
-              "description": "An explanation about the purpose of this instance.",
+              "description": "The container image version.",
               "default": "",
               "examples": [
                 "08b6fe17"
