@@ -1,4 +1,4 @@
-{{- if not (.Capabilities.APIVersions.Has "servicecatalog.k8s.io/v1beta1/ClusterServiceBroker") }}
+{{- if not (.Capabilities.APIVersions.Has "clusterservicebrokers.servicecatalog.k8s.io/v1beta1") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -8,6 +8,7 @@ metadata:
     svcat: "true"
 spec:
   group: servicecatalog.k8s.io
+  version: v1beta1
   versions:
   - name: v1beta1
     storage: true
