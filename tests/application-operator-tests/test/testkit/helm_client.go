@@ -51,9 +51,10 @@ func (hc *helmClient) IsInstalled(rlsName string, namespace string) bool {
 	status, err := hc.CheckReleaseStatus(rlsName, namespace)
 
 	if err != nil {
+		log.Errorf("Failed to execute CheckReleaseStatus for %s in namespace %s: %s message: %s", rlsName, namespace, err.Error())
 		return false
 	}
-	return err == nil && status == release.StatusDeployed
+	return status == release.StatusDeployed
 }
 
 func (hc *helmClient) listReleases(namespace string) ([]*release.Release, error) {
@@ -69,7 +70,6 @@ func (hc *helmClient) listReleases(namespace string) ([]*release.Release, error)
 	listAction.Uninstalled = true
 	listAction.Superseded = true
 	listAction.Uninstalling = true
-	listAction.Deployed = true
 	listAction.Failed = true
 	listAction.Pending = true
 
