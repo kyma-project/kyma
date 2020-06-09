@@ -19,8 +19,8 @@ func NewResolver(err error) *Resolver {
 }
 
 // CreateManyTriggers provides a failing mock function with given fields: ctx, namespace, triggers, ownerRef
-func (_m *Resolver) CreateManyTriggers(ctx context.Context, namespace string, triggers []gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) ([]gqlschema.Trigger, error) {
-	var r0 []gqlschema.Trigger
+func (_m *Resolver) CreateManyTriggers(ctx context.Context, namespace string, triggers []*gqlschema.TriggerCreateInput, ownerRef []*gqlschema.OwnerReference) ([]*gqlschema.Trigger, error) {
+	var r0 []*gqlschema.Trigger
 	var r1 error
 	r1 = _m.err
 
@@ -28,7 +28,7 @@ func (_m *Resolver) CreateManyTriggers(ctx context.Context, namespace string, tr
 }
 
 // CreateTrigger provides a failing mock function with given fields: ctx, namespace, trigger, ownerRef
-func (_m *Resolver) CreateTrigger(ctx context.Context, namespace string, trigger gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) (*gqlschema.Trigger, error) {
+func (_m *Resolver) CreateTrigger(ctx context.Context, namespace string, trigger gqlschema.TriggerCreateInput, ownerRef []*gqlschema.OwnerReference) (*gqlschema.Trigger, error) {
 	var r0 *gqlschema.Trigger
 	var r1 error
 	r1 = _m.err
@@ -37,8 +37,8 @@ func (_m *Resolver) CreateTrigger(ctx context.Context, namespace string, trigger
 }
 
 // DeleteManyTriggers provides a failing mock function with given fields: ctx, namespace, triggers
-func (_m *Resolver) DeleteManyTriggers(ctx context.Context, namespace string, triggers []gqlschema.TriggerMetadataInput) ([]gqlschema.TriggerMetadata, error) {
-	var r0 []gqlschema.TriggerMetadata
+func (_m *Resolver) DeleteManyTriggers(ctx context.Context, namespace string, triggers []*gqlschema.TriggerMetadataInput) ([]*gqlschema.TriggerMetadata, error) {
+	var r0 []*gqlschema.TriggerMetadata
 	var r1 error
 	r1 = _m.err
 
@@ -55,8 +55,8 @@ func (_m *Resolver) DeleteTrigger(ctx context.Context, namespace string, trigger
 }
 
 // TriggerEventSubscription provides a failing mock function with given fields: ctx, namespace, subscriber
-func (_m *Resolver) TriggerEventSubscription(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) (<-chan gqlschema.TriggerEvent, error) {
-	var r0 <-chan gqlschema.TriggerEvent
+func (_m *Resolver) TriggerEventSubscription(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) (<-chan *gqlschema.TriggerEvent, error) {
+	var r0 <-chan *gqlschema.TriggerEvent
 	var r1 error
 	r1 = _m.err
 
@@ -64,8 +64,8 @@ func (_m *Resolver) TriggerEventSubscription(ctx context.Context, namespace stri
 }
 
 // TriggersQuery provides a failing mock function with given fields: ctx, namespace, subscriber
-func (_m *Resolver) TriggersQuery(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) ([]gqlschema.Trigger, error) {
-	var r0 []gqlschema.Trigger
+func (_m *Resolver) TriggersQuery(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) ([]*gqlschema.Trigger, error) {
+	var r0 []*gqlschema.Trigger
 	var r1 error
 	r1 = _m.err
 

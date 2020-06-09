@@ -53,12 +53,12 @@ func (r *PluggableResolver) Disable() error {
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
 type Resolver interface {
-	APIRulesQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.APIRule, error)
+	APIRulesQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*gqlschema.APIRule, error)
 	APIRuleQuery(ctx context.Context, name string, namespace string) (*gqlschema.APIRule, error)
 	CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error)
 	UpdateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error)
 	DeleteAPIRule(ctx context.Context, name string, namespace string) (*gqlschema.APIRule, error)
-	APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiRuleEvent, error)
+	APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan *gqlschema.APIRuleEvent, error)
 }
 
 type domainResolver struct {

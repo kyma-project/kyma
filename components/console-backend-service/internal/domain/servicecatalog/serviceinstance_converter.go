@@ -76,8 +76,8 @@ func (c *serviceInstanceConverter) ToGQL(in *v1beta1.ServiceInstance) (*gqlschem
 	return &instance, nil
 }
 
-func (c *serviceInstanceConverter) ToGQLs(in []*v1beta1.ServiceInstance) ([]gqlschema.ServiceInstance, error) {
-	var result []gqlschema.ServiceInstance
+func (c *serviceInstanceConverter) ToGQLs(in []*v1beta1.ServiceInstance) ([]*gqlschema.ServiceInstance, error) {
+	var result []*gqlschema.ServiceInstance
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -85,7 +85,7 @@ func (c *serviceInstanceConverter) ToGQLs(in []*v1beta1.ServiceInstance) ([]gqls
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil
@@ -98,7 +98,7 @@ func (c *serviceInstanceConverter) GQLCreateInputToInstanceCreateParameters(in *
 
 	var parameterSchema map[string]interface{}
 	if in.ParameterSchema != nil {
-		parameterSchema = *in.ParameterSchema
+		parameterSchema = in.ParameterSchema
 	}
 
 	var labels []string
@@ -111,17 +111,21 @@ func (c *serviceInstanceConverter) GQLCreateInputToInstanceCreateParameters(in *
 		Namespace: namespace,
 		Labels:    labels,
 		Schema:    parameterSchema,
-		ClassRef: instanceCreateResourceRef{
-			ExternalName: in.ClassRef.ExternalName,
-			ClusterWide:  in.ClassRef.ClusterWide,
-		},
-		PlanRef: instanceCreateResourceRef{
-			ExternalName: in.PlanRef.ExternalName,
-			ClusterWide:  in.PlanRef.ClusterWide,
-		},
+		ClassRef:  refFromGql(in.ClassRef),
+		PlanRef:   refFromGql(in.PlanRef),
 	}
 
 	return &parameters
+}
+
+func refFromGql(ref *gqlschema.ServiceInstanceCreateInputResourceRef) instanceCreateResourceRef {
+	if ref == nil {
+		return instanceCreateResourceRef{}
+	}
+	return instanceCreateResourceRef{
+		ExternalName: ref.ExternalName,
+		ClusterWide:  ref.ClusterWide,
+	}
 }
 
 func (c *serviceInstanceConverter) ServiceStatusTypeToGQLStatusType(in status.ServiceInstanceStatusType) gqlschema.InstanceStatusType {

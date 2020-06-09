@@ -15,13 +15,13 @@ type gqlClusterAddonsConfigurationConverter interface {
 }
 
 type ClusterAddonsConfiguration struct {
-	channel   chan<- gqlschema.ClusterAddonsConfigurationEvent
+	channel   chan<- *gqlschema.ClusterAddonsConfigurationEvent
 	filter    func(entity *v1alpha1.ClusterAddonsConfiguration) bool
 	converter gqlClusterAddonsConfigurationConverter
 	extractor extractor.ClusterAddonsUnstructuredExtractor
 }
 
-func NewClusterAddonsConfiguration(channel chan<- gqlschema.ClusterAddonsConfigurationEvent, filter func(entity *v1alpha1.ClusterAddonsConfiguration) bool, converter gqlClusterAddonsConfigurationConverter) *ClusterAddonsConfiguration {
+func NewClusterAddonsConfiguration(channel chan<- *gqlschema.ClusterAddonsConfigurationEvent, filter func(entity *v1alpha1.ClusterAddonsConfiguration) bool, converter gqlClusterAddonsConfigurationConverter) *ClusterAddonsConfiguration {
 	return &ClusterAddonsConfiguration{
 		channel:   channel,
 		filter:    filter,
@@ -63,9 +63,9 @@ func (l *ClusterAddonsConfiguration) notify(eventType gqlschema.SubscriptionEven
 		return
 	}
 
-	event := gqlschema.ClusterAddonsConfigurationEvent{
+	event := &gqlschema.ClusterAddonsConfigurationEvent{
 		Type:                eventType,
-		AddonsConfiguration: *gqlAddonsConfiguration,
+		AddonsConfiguration: gqlAddonsConfiguration,
 	}
 
 	l.channel <- event

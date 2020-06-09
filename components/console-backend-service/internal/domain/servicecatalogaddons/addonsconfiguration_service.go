@@ -61,7 +61,7 @@ func (s *addonsConfigurationService) List(namespace string, pagingParams pager.P
 	return addons, nil
 }
 
-func (s *addonsConfigurationService) AddRepos(name, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.AddonsConfiguration, error) {
+func (s *addonsConfigurationService) AddRepos(name, namespace string, repositories []*gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.AddonsConfiguration, error) {
 	var addon *v1alpha1.AddonsConfiguration
 	var err error
 	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
@@ -110,7 +110,7 @@ func (s *addonsConfigurationService) RemoveRepos(name, namespace string, reposTo
 	return addon, nil
 }
 
-func (s *addonsConfigurationService) Create(name, namespace string, repository []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error) {
+func (s *addonsConfigurationService) Create(name, namespace string, repository []*gqlschema.AddonsConfigurationRepositoryInput, labels gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error) {
 	addon := &v1alpha1.AddonsConfiguration{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "AddonsConfiguration",
@@ -138,7 +138,7 @@ func (s *addonsConfigurationService) Create(name, namespace string, repository [
 	return addon, nil
 }
 
-func (s *addonsConfigurationService) Update(name, namespace string, repository []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error) {
+func (s *addonsConfigurationService) Update(name, namespace string, repository []*gqlschema.AddonsConfigurationRepositoryInput, labels gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error) {
 	addon, err := s.getAddonsConfiguration(name, namespace)
 	if err != nil {
 		return nil, err
@@ -233,19 +233,19 @@ func filterOutRepositories(repository []v1alpha1.SpecRepository, repos []string)
 	return result
 }
 
-func toMapLabels(givenLabels *gqlschema.Labels) map[string]string {
+func toMapLabels(givenLabels gqlschema.Labels) map[string]string {
 	if givenLabels == nil {
 		return nil
 	}
 
 	labels := map[string]string{}
-	for k, v := range *givenLabels {
+	for k, v := range givenLabels {
 		labels[k] = v
 	}
 	return labels
 }
 
-func toSpecRepository(repo gqlschema.AddonsConfigurationRepositoryInput) v1alpha1.SpecRepository {
+func toSpecRepository(repo *gqlschema.AddonsConfigurationRepositoryInput) v1alpha1.SpecRepository {
 	secretRef := &v1.SecretReference{}
 	if repo.SecretRef != nil {
 		secretRef.Name = repo.SecretRef.Name
@@ -256,7 +256,7 @@ func toSpecRepository(repo gqlschema.AddonsConfigurationRepositoryInput) v1alpha
 	return v1alpha1.SpecRepository{URL: repo.URL, SecretRef: secretRef}
 }
 
-func toSpecRepositories(repositories []gqlschema.AddonsConfigurationRepositoryInput) []v1alpha1.SpecRepository {
+func toSpecRepositories(repositories []*gqlschema.AddonsConfigurationRepositoryInput) []v1alpha1.SpecRepository {
 	var result []v1alpha1.SpecRepository
 
 	for _, repo := range repositories {

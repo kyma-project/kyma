@@ -44,7 +44,7 @@ func TestContainerExtractor_States(t *testing.T) {
 			}),
 			fixContainerStatus("EmptyState", 0, &v1.ContainerState{}),
 		}
-		expected := []gqlschema.ContainerState{
+		expected := []*gqlschema.ContainerState{
 			{
 				State:   gqlschema.ContainerStateTypeWaiting,
 				Reason:  strings[0],
@@ -75,7 +75,7 @@ func TestContainerExtractor_States(t *testing.T) {
 	t.Run("EmptyPassed", func(t *testing.T) {
 		extractor := ContainerExtractor{}
 		in := []v1.ContainerStatus{}
-		expected := []gqlschema.ContainerState{}
+		expected := []*gqlschema.ContainerState{}
 
 		result := extractor.States(in)
 
@@ -85,7 +85,7 @@ func TestContainerExtractor_States(t *testing.T) {
 	t.Run("NilPassed", func(t *testing.T) {
 		extractor := ContainerExtractor{}
 		var in []v1.ContainerStatus = nil
-		expected := []gqlschema.ContainerState{}
+		expected := []*gqlschema.ContainerState{}
 
 		result := extractor.States(in)
 
@@ -110,7 +110,6 @@ func TestPodConverter_GetTerminatedContainerState(t *testing.T) {
 
 		assert.Equal(t, expected, result)
 	})
-
 	t.Run("Signal", func(t *testing.T) {
 		extractor := ContainerExtractor{}
 		signal := int32(123)
@@ -146,7 +145,7 @@ func TestPodConverter_GetTerminatedContainerState(t *testing.T) {
 
 	t.Run("Nil", func(t *testing.T) {
 		extractor := ContainerExtractor{}
-		expected := gqlschema.ContainerState{
+		expected := &gqlschema.ContainerState{
 			State: gqlschema.ContainerStateTypeTerminated,
 		}
 
@@ -169,8 +168,8 @@ func fixContainerStatus(name string, restartCount int, state *v1.ContainerState)
 	}
 }
 
-func fixGQLContainerState(state gqlschema.ContainerStateType, reason string, message string) gqlschema.ContainerState {
-	return gqlschema.ContainerState{
+func fixGQLContainerState(state gqlschema.ContainerStateType, reason string, message string) *gqlschema.ContainerState {
+	return &gqlschema.ContainerState{
 		State:   state,
 		Reason:  reason,
 		Message: message,

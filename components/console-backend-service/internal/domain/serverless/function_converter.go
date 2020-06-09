@@ -18,7 +18,7 @@ import (
 //go:generate failery -name=gqlFunctionConverter -case=underscore -output disabled -outpkg disabled
 type gqlFunctionConverter interface {
 	ToGQL(item *v1alpha1.Function) (*gqlschema.Function, error)
-	ToGQLs(items []*v1alpha1.Function) ([]gqlschema.Function, error)
+	ToGQLs(items []*v1alpha1.Function) ([]*gqlschema.Function, error)
 	ToFunction(name, namespace string, in gqlschema.FunctionMutationInput) (*v1alpha1.Function, error)
 }
 
@@ -37,6 +37,10 @@ func (c *functionConverter) ToGQL(function *v1alpha1.Function) (*gqlschema.Funct
 		return nil, nil
 	}
 
+	labels := map[string]string{}
+	if function.Labels != nil {
+		labels = function.Labels
+	}
 	envVariables := c.toGQLEnv(function.Spec.Env)
 	resources := c.toGQLResources(function.Spec.Resources)
 	replicas := c.toGQLReplicas(function.Spec.MinReplicas, function.Spec.MaxReplicas)
@@ -46,7 +50,7 @@ func (c *functionConverter) ToGQL(function *v1alpha1.Function) (*gqlschema.Funct
 		Name:         function.Name,
 		Namespace:    function.Namespace,
 		UID:          string(function.UID),
-		Labels:       function.Labels,
+		Labels:       labels,
 		Source:       function.Spec.Source,
 		Dependencies: function.Spec.Deps,
 		Env:          envVariables,
@@ -56,12 +60,12 @@ func (c *functionConverter) ToGQL(function *v1alpha1.Function) (*gqlschema.Funct
 	}, nil
 }
 
-func (c *functionConverter) ToGQLs(functions []*v1alpha1.Function) ([]gqlschema.Function, error) {
+func (c *functionConverter) ToGQLs(functions []*v1alpha1.Function) ([]*gqlschema.Function, error) {
 	if functions == nil {
 		return nil, nil
 	}
 
-	var result []gqlschema.Function
+	var result []*gqlschema.Function
 	for _, function := range functions {
 		converted, err := c.ToGQL(function)
 		if err != nil {
@@ -69,7 +73,7 @@ func (c *functionConverter) ToGQLs(functions []*v1alpha1.Function) ([]gqlschema.
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil
@@ -105,11 +109,11 @@ func (c *functionConverter) ToFunction(name, namespace string, in gqlschema.Func
 	}, nil
 }
 
-func (c *functionConverter) toGQLEnv(env []v1.EnvVar) []gqlschema.FunctionEnv {
-	var variables []gqlschema.FunctionEnv
+func (c *functionConverter) toGQLEnv(env []v1.EnvVar) []*gqlschema.FunctionEnv {
+	var variables []*gqlschema.FunctionEnv
 	for _, variable := range env {
 		if variable.ValueFrom == nil {
-			variables = append(variables, gqlschema.FunctionEnv{
+			variables = append(variables, &gqlschema.FunctionEnv{
 				Name:  variable.Name,
 				Value: variable.Value,
 			})
@@ -123,7 +127,7 @@ func (c *functionConverter) toGQLEnv(env []v1.EnvVar) []gqlschema.FunctionEnv {
 		}
 
 		if configMapKeyRef != nil {
-			variables = append(variables, gqlschema.FunctionEnv{
+			variables = append(variables, &gqlschema.FunctionEnv{
 				Name: variable.Name,
 				ValueFrom: &gqlschema.FunctionEnvValueFrom{
 					Type:     gqlschema.FunctionEnvValueFromTypeConfigMap,
@@ -134,7 +138,7 @@ func (c *functionConverter) toGQLEnv(env []v1.EnvVar) []gqlschema.FunctionEnv {
 			})
 			continue
 		}
-		variables = append(variables, gqlschema.FunctionEnv{
+		variables = append(variables, &gqlschema.FunctionEnv{
 			Name: variable.Name,
 			ValueFrom: &gqlschema.FunctionEnvValueFrom{
 				Type:     gqlschema.FunctionEnvValueFromTypeSecret,
@@ -147,7 +151,11 @@ func (c *functionConverter) toGQLEnv(env []v1.EnvVar) []gqlschema.FunctionEnv {
 	return variables
 }
 
-func (c *functionConverter) toGQLReplicas(minReplicas, maxReplicas *int32) gqlschema.FunctionReplicas {
+func (c *functionConverter) toGQLReplicas(minReplicas, maxReplicas *int32) *gqlschema.FunctionReplicas {
+	if minReplicas == nil && maxReplicas == nil {
+		return nil
+	}
+
 	intPtr := func(ptrValue *int32) *int {
 		var ptr *int
 		if ptrValue != nil {
@@ -157,18 +165,18 @@ func (c *functionConverter) toGQLReplicas(minReplicas, maxReplicas *int32) gqlsc
 		return ptr
 	}
 
-	return gqlschema.FunctionReplicas{
+	return &gqlschema.FunctionReplicas{
 		Min: intPtr(minReplicas),
 		Max: intPtr(maxReplicas),
 	}
 }
 
-func (c *functionConverter) toGQLResources(resources v1.ResourceRequirements) gqlschema.FunctionResources {
+func (c *functionConverter) toGQLResources(resources v1.ResourceRequirements) *gqlschema.FunctionResources {
 	stringPtr := func(str string) *string {
 		return &str
 	}
-	extractResourceValues := func(item v1.ResourceList) gqlschema.ResourceValues {
-		rv := gqlschema.ResourceValues{}
+	extractResourceValues := func(item v1.ResourceList) *gqlschema.ResourceValues {
+		rv := &gqlschema.ResourceValues{}
 		if item, ok := item[v1.ResourceMemory]; ok {
 			rv.Memory = stringPtr(item.String())
 		}
@@ -178,7 +186,11 @@ func (c *functionConverter) toGQLResources(resources v1.ResourceRequirements) gq
 		return rv
 	}
 
-	gqlResources := gqlschema.FunctionResources{}
+	if resources.Requests == nil && resources.Limits == nil {
+		return nil
+	}
+
+	gqlResources := &gqlschema.FunctionResources{}
 	if resources.Requests != nil {
 		gqlResources.Requests = extractResourceValues(resources.Requests)
 	}
@@ -188,7 +200,7 @@ func (c *functionConverter) toGQLResources(resources v1.ResourceRequirements) gq
 	return gqlResources
 }
 
-func (c *functionConverter) fromGQLEnv(env []gqlschema.FunctionEnvInput) []v1.EnvVar {
+func (c *functionConverter) fromGQLEnv(env []*gqlschema.FunctionEnvInput) []v1.EnvVar {
 	var variables []v1.EnvVar
 	for _, variable := range env {
 		if variable.ValueFrom == nil {
@@ -231,7 +243,10 @@ func (c *functionConverter) fromGQLEnv(env []gqlschema.FunctionEnvInput) []v1.En
 	return variables
 }
 
-func (c *functionConverter) fromGQLReplicas(replicas gqlschema.FunctionReplicasInput) (*int32, *int32) {
+func (c *functionConverter) fromGQLReplicas(replicas *gqlschema.FunctionReplicasInput) (*int32, *int32) {
+	if replicas == nil {
+		return nil, nil
+	}
 	intPtr := func(ptrValue *int) *int32 {
 		var ptr *int32
 		if ptrValue != nil {
@@ -244,8 +259,15 @@ func (c *functionConverter) fromGQLReplicas(replicas gqlschema.FunctionReplicasI
 	return intPtr(replicas.Min), intPtr(replicas.Max)
 }
 
-func (c *functionConverter) fromGQLResources(resources gqlschema.FunctionResourcesInput) (v1.ResourceRequirements, apierror.ErrorFieldAggregate) {
-	createResourceList := func(values gqlschema.ResourceValuesInput, pathPrefix string) (v1.ResourceList, apierror.ErrorFieldAggregate) {
+func (c *functionConverter) fromGQLResources(resources *gqlschema.FunctionResourcesInput) (v1.ResourceRequirements, apierror.ErrorFieldAggregate) {
+	if resources == nil {
+		return v1.ResourceRequirements{}, nil
+	}
+	createResourceList := func(values *gqlschema.ResourceValuesInput, pathPrefix string) (v1.ResourceList, apierror.ErrorFieldAggregate) {
+		if values == nil {
+			return nil, nil
+		}
+
 		var resourcesList v1.ResourceList
 		var errs apierror.ErrorFieldAggregate
 
@@ -296,12 +318,12 @@ func (c *functionConverter) fromGQLResources(resources gqlschema.FunctionResourc
 	return resourcesReq, errs
 }
 
-func (c *functionConverter) getStatus(status v1alpha1.FunctionStatus) gqlschema.FunctionStatus {
+func (c *functionConverter) getStatus(status v1alpha1.FunctionStatus) *gqlschema.FunctionStatus {
 	conditions := status.Conditions
 
 	// Initializing phase
 	if len(conditions) == 0 {
-		return gqlschema.FunctionStatus{
+		return &gqlschema.FunctionStatus{
 			Phase: gqlschema.FunctionPhaseTypeInitializing,
 		}
 	}
@@ -315,44 +337,38 @@ func (c *functionConverter) getStatus(status v1alpha1.FunctionStatus) gqlschema.
 	if hasFailed {
 		reasonType := c.getReasonType(condition.Type)
 		if functionIsRunning {
-			return gqlschema.FunctionStatus{
+			return &gqlschema.FunctionStatus{
 				Phase:   gqlschema.FunctionPhaseTypeNewRevisionError,
 				Reason:  &reasonType,
 				Message: &condition.Message,
 			}
 		}
 
-		return gqlschema.FunctionStatus{
+		return &gqlschema.FunctionStatus{
 			Phase:   gqlschema.FunctionPhaseTypeFailed,
 			Reason:  &reasonType,
 			Message: &condition.Message,
 		}
 	}
 
+	var phase gqlschema.FunctionPhaseType
+
 	if functionConfigCreated {
 		if functionJobFinished {
-			// Running phase
 			if functionIsRunning {
-				return gqlschema.FunctionStatus{
-					Phase: gqlschema.FunctionPhaseTypeRunning,
-				}
+				phase = gqlschema.FunctionPhaseTypeRunning
+			} else {
+				phase = gqlschema.FunctionPhaseTypeDeploying
 			}
-
-			// Deploying phase
-			return gqlschema.FunctionStatus{
-				Phase: gqlschema.FunctionPhaseTypeDeploying,
-			}
+		} else {
+			phase = gqlschema.FunctionPhaseTypeBuilding
 		}
-
-		// Building phase
-		return gqlschema.FunctionStatus{
-			Phase: gqlschema.FunctionPhaseTypeBuilding,
-		}
+	} else {
+		phase = gqlschema.FunctionPhaseTypeInitializing
 	}
 
-	// Otherwise Initializing phase
-	return gqlschema.FunctionStatus{
-		Phase: gqlschema.FunctionPhaseTypeInitializing,
+	return &gqlschema.FunctionStatus{
+		Phase: phase,
 	}
 }
 

@@ -22,13 +22,13 @@ func fixIDPPresets() []*v1alpha1.IDPPreset {
 	return []*v1alpha1.IDPPreset{fixIDPPreset()}
 }
 
-func fixIDPPresetGQL() gqlschema.IDPPreset {
-	return gqlschema.IDPPreset{
+func fixIDPPresetGQL() *gqlschema.IDPPreset {
+	return &gqlschema.IDPPreset{
 		JwksURI: "uri",
 		Issuer:  "issuer",
 	}
 }
 
-func fixIDPPresetsGQL() []gqlschema.IDPPreset {
-	return []gqlschema.IDPPreset{fixIDPPresetGQL()}
+func fixIDPPresetsGQL() []*gqlschema.IDPPreset {
+	return []*gqlschema.IDPPreset{fixIDPPresetGQL()}
 }

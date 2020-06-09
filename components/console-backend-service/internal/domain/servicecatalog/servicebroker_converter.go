@@ -30,8 +30,8 @@ func (c *serviceBrokerConverter) ToGQL(item *v1beta1.ServiceBroker) (*gqlschema.
 	return &broker, nil
 }
 
-func (c *serviceBrokerConverter) ToGQLs(in []*v1beta1.ServiceBroker) ([]gqlschema.ServiceBroker, error) {
-	var result []gqlschema.ServiceBroker
+func (c *serviceBrokerConverter) ToGQLs(in []*v1beta1.ServiceBroker) ([]*gqlschema.ServiceBroker, error) {
+	var result []*gqlschema.ServiceBroker
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -39,7 +39,7 @@ func (c *serviceBrokerConverter) ToGQLs(in []*v1beta1.ServiceBroker) ([]gqlschem
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

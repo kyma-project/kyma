@@ -15,12 +15,12 @@ type gqlClusterServiceBrokerConverter interface {
 }
 
 type ClusterServiceBroker struct {
-	channel   chan<- gqlschema.ClusterServiceBrokerEvent
+	channel   chan<- *gqlschema.ClusterServiceBrokerEvent
 	filter    func(entity *api.ClusterServiceBroker) bool
 	converter gqlClusterServiceBrokerConverter
 }
 
-func NewClusterServiceBroker(channel chan<- gqlschema.ClusterServiceBrokerEvent, filter func(entity *api.ClusterServiceBroker) bool, converter gqlClusterServiceBrokerConverter) *ClusterServiceBroker {
+func NewClusterServiceBroker(channel chan<- *gqlschema.ClusterServiceBrokerEvent, filter func(entity *api.ClusterServiceBroker) bool, converter gqlClusterServiceBrokerConverter) *ClusterServiceBroker {
 	return &ClusterServiceBroker{
 		channel:   channel,
 		filter:    filter,
@@ -62,9 +62,9 @@ func (l *ClusterServiceBroker) notify(eventType gqlschema.SubscriptionEventType,
 		return
 	}
 
-	event := gqlschema.ClusterServiceBrokerEvent{
+	event := &gqlschema.ClusterServiceBrokerEvent{
 		Type:                 eventType,
-		ClusterServiceBroker: *gqlClusterServiceBroker,
+		ClusterServiceBroker: gqlClusterServiceBroker,
 	}
 
 	l.channel <- event

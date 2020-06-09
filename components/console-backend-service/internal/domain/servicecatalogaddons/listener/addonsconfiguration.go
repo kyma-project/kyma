@@ -15,13 +15,13 @@ type gqlAddonsConfigurationConverter interface {
 }
 
 type AddonsConfiguration struct {
-	channel   chan<- gqlschema.AddonsConfigurationEvent
+	channel   chan<- *gqlschema.AddonsConfigurationEvent
 	filter    func(entity *v1alpha1.AddonsConfiguration) bool
 	converter gqlAddonsConfigurationConverter
 	extractor extractor.AddonsUnstructuredExtractor
 }
 
-func NewAddonsConfiguration(channel chan<- gqlschema.AddonsConfigurationEvent, filter func(entity *v1alpha1.AddonsConfiguration) bool, converter gqlAddonsConfigurationConverter) *AddonsConfiguration {
+func NewAddonsConfiguration(channel chan<- *gqlschema.AddonsConfigurationEvent, filter func(entity *v1alpha1.AddonsConfiguration) bool, converter gqlAddonsConfigurationConverter) *AddonsConfiguration {
 	return &AddonsConfiguration{
 		channel:   channel,
 		filter:    filter,
@@ -63,9 +63,9 @@ func (l *AddonsConfiguration) notify(eventType gqlschema.SubscriptionEventType, 
 		return
 	}
 
-	event := gqlschema.AddonsConfigurationEvent{
+	event := &gqlschema.AddonsConfigurationEvent{
 		Type:                eventType,
-		AddonsConfiguration: *gqlAddonsConfiguration,
+		AddonsConfiguration: gqlAddonsConfiguration,
 	}
 
 	l.channel <- event

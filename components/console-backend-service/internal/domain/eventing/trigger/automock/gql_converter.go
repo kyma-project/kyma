@@ -38,15 +38,15 @@ func (_m *GQLConverter) ToGQL(in *v1alpha1.Trigger) (*gqlschema.Trigger, error) 
 }
 
 // ToGQLs provides a mock function with given fields: in
-func (_m *GQLConverter) ToGQLs(in []*v1alpha1.Trigger) ([]gqlschema.Trigger, error) {
+func (_m *GQLConverter) ToGQLs(in []*v1alpha1.Trigger) ([]*gqlschema.Trigger, error) {
 	ret := _m.Called(in)
 
-	var r0 []gqlschema.Trigger
-	if rf, ok := ret.Get(0).(func([]*v1alpha1.Trigger) []gqlschema.Trigger); ok {
+	var r0 []*gqlschema.Trigger
+	if rf, ok := ret.Get(0).(func([]*v1alpha1.Trigger) []*gqlschema.Trigger); ok {
 		r0 = rf(in)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]gqlschema.Trigger)
+			r0 = ret.Get(0).([]*gqlschema.Trigger)
 		}
 	}
 
@@ -61,11 +61,11 @@ func (_m *GQLConverter) ToGQLs(in []*v1alpha1.Trigger) ([]gqlschema.Trigger, err
 }
 
 // ToTrigger provides a mock function with given fields: in, ownerRef
-func (_m *GQLConverter) ToTrigger(in gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) (*v1alpha1.Trigger, error) {
+func (_m *GQLConverter) ToTrigger(in *gqlschema.TriggerCreateInput, ownerRef []*gqlschema.OwnerReference) (*v1alpha1.Trigger, error) {
 	ret := _m.Called(in, ownerRef)
 
 	var r0 *v1alpha1.Trigger
-	if rf, ok := ret.Get(0).(func(gqlschema.TriggerCreateInput, []gqlschema.OwnerReference) *v1alpha1.Trigger); ok {
+	if rf, ok := ret.Get(0).(func(*gqlschema.TriggerCreateInput, []*gqlschema.OwnerReference) *v1alpha1.Trigger); ok {
 		r0 = rf(in, ownerRef)
 	} else {
 		if ret.Get(0) != nil {
@@ -74,7 +74,7 @@ func (_m *GQLConverter) ToTrigger(in gqlschema.TriggerCreateInput, ownerRef []gq
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(gqlschema.TriggerCreateInput, []gqlschema.OwnerReference) error); ok {
+	if rf, ok := ret.Get(1).(func(*gqlschema.TriggerCreateInput, []*gqlschema.OwnerReference) error); ok {
 		r1 = rf(in, ownerRef)
 	} else {
 		r1 = ret.Error(1)
@@ -84,11 +84,11 @@ func (_m *GQLConverter) ToTrigger(in gqlschema.TriggerCreateInput, ownerRef []gq
 }
 
 // ToTriggers provides a mock function with given fields: in, ownerRef
-func (_m *GQLConverter) ToTriggers(in []gqlschema.TriggerCreateInput, ownerRef []gqlschema.OwnerReference) ([]*v1alpha1.Trigger, error) {
+func (_m *GQLConverter) ToTriggers(in []*gqlschema.TriggerCreateInput, ownerRef []*gqlschema.OwnerReference) ([]*v1alpha1.Trigger, error) {
 	ret := _m.Called(in, ownerRef)
 
 	var r0 []*v1alpha1.Trigger
-	if rf, ok := ret.Get(0).(func([]gqlschema.TriggerCreateInput, []gqlschema.OwnerReference) []*v1alpha1.Trigger); ok {
+	if rf, ok := ret.Get(0).(func([]*gqlschema.TriggerCreateInput, []*gqlschema.OwnerReference) []*v1alpha1.Trigger); ok {
 		r0 = rf(in, ownerRef)
 	} else {
 		if ret.Get(0) != nil {
@@ -97,7 +97,7 @@ func (_m *GQLConverter) ToTriggers(in []gqlschema.TriggerCreateInput, ownerRef [
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func([]gqlschema.TriggerCreateInput, []gqlschema.OwnerReference) error); ok {
+	if rf, ok := ret.Get(1).(func([]*gqlschema.TriggerCreateInput, []*gqlschema.OwnerReference) error); ok {
 		r1 = rf(in, ownerRef)
 	} else {
 		r1 = ret.Error(1)
