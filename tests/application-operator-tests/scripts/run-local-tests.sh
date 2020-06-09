@@ -84,17 +84,6 @@ rules:
   - get
   - list
 - apiGroups:
-  - '*'
-  resources:
-  - configmaps
-  - secrets
-  verbs:
-  - get
-  - list
-  - update
-  - create
-  - delete
-- apiGroups:
   - 'networking.istio.io'
   resources:
   - virtualservices
@@ -119,6 +108,37 @@ rules:
   verbs:
   - get
   - list
+- apiGroups:
+  - '*'
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+  - update
+  - create
+  - delete
+- apiGroups:
+  - '*'
+  resources:
+  - configmaps
+  - secrets
+  verbs:
+  - get
+  - list
+  - update
+  - create
+  - delete
+- apiGroups:
+  - 'servicecatalog.k8s.io'
+  resources:
+  - serviceinstances
+  verbs:
+  - get
+  - list
+  - update
+  - create
+  - delete
 EOF
 
 cat <<EOF | kubectl -n kyma-integration apply -f -
