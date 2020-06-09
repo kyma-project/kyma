@@ -144,6 +144,8 @@ All notes are based on Helm v3.2.1 implementation and are subject to change in f
 
 * Manifests are sorted by `Kind`. You can find the list and the order of the resources on the Helm [Github](https://github.com/helm/helm/blob/release-3.2/pkg/releaseutil/kind_sorter.go) page.
 
+* To provide better error handling, Helm validates rendered templates against the Kubernetes OpenAPI schema before they are sent to the Kubernetes API. This means any resources that are not aligned with the Kubernetes API docs (e.g. because of unsupported fields) will fail the release.
+
 ## Glossary
 
 * **resource** is any document in a chart recognized by Helm. This includes manifests, hooks, and notes.
