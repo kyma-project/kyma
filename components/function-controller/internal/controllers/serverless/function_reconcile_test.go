@@ -34,7 +34,7 @@ var _ = ginkgo.Describe("Function", func() {
 	)
 
 	ginkgo.BeforeEach(func() {
-		function := newFixFunction("tutaj", "ah-tak-przeciez")
+		function := newFixFunction("tutaj", "ah-tak-przeciez", 1, 2)
 		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: function.GetNamespace(), Name: function.GetName()}}
 		gomega.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
 
