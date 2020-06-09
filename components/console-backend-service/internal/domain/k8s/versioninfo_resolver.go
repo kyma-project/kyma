@@ -9,7 +9,7 @@ import (
 
 //go:generate mockery -name=gqlVersionInfoConverter -output=automock -outpkg=automock -case=underscore
 type gqlVersionInfoConverter interface {
-	ToGQL(in *v1.Deployment) gqlschema.VersionInfo
+	ToGQL(in *v1.Deployment) *gqlschema.VersionInfo
 }
 
 type versionInfoResolver struct {
@@ -24,13 +24,13 @@ func newVersionInfoResolver(deploymentLister deploymentLister) *versionInfoResol
 	}
 }
 
-func (r *versionInfoResolver) VersionInfoQuery(ctx context.Context) (gqlschema.VersionInfo, error) {
+func (r *versionInfoResolver) VersionInfoQuery(ctx context.Context) (*gqlschema.VersionInfo, error) {
 	name := "kyma-installer"
 	namespace := "kyma-installer"
 
 	deployment, err := r.deploymentLister.Find(name, namespace)
 	if err != nil || deployment == nil {
-		return gqlschema.VersionInfo{}, nil
+		return nil, nil
 	}
 
 	version := r.versionInfoConverter.ToGQL(deployment)

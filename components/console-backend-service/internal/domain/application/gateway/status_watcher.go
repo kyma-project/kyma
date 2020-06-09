@@ -75,8 +75,8 @@ func (s *gatewayStatusWatcher) Refresh(stopCh <-chan struct{}) {
 
 		healthy, err := s.isHealthy(fmt.Sprintf("http://%s/v1/health", item.Host))
 		if err != nil {
-			glog.Warningf("Application %s health check failed (%s), error: %s",
-				item.ApplicationName, item.Host, err.Error())
+			//glog.Warningf("Application %s health check failed (%s), error: %s",
+			//	item.ApplicationName, item.Host, err.Error())
 		}
 		localHealthiness[item.ApplicationName] = healthy
 	}

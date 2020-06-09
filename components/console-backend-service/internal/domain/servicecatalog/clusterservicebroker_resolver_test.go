@@ -88,7 +88,7 @@ func TestClusterServiceBrokerResolver_ClusterServiceBrokersQuery(t *testing.T) {
 		resources := []*v1beta1.ClusterServiceBroker{
 			resource, resource,
 		}
-		expected := []gqlschema.ClusterServiceBroker{
+		expected := []*gqlschema.ClusterServiceBroker{
 			{
 				Name: "Test",
 			}, {
@@ -120,7 +120,7 @@ func TestClusterServiceBrokerResolver_ClusterServiceBrokersQuery(t *testing.T) {
 		svc.On("List", pager.PagingParams{}).Return(resources, nil).Once()
 		defer svc.AssertExpectations(t)
 		resolver := servicecatalog.NewClusterServiceBrokerResolver(svc)
-		var expected []gqlschema.ClusterServiceBroker
+		var expected []*gqlschema.ClusterServiceBroker
 
 		result, err := resolver.ClusterServiceBrokersQuery(nil, nil, nil)
 

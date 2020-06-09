@@ -28,7 +28,7 @@ func newClusterAssetGroupResolver(clusterAssetGroupService clusterAssetGroupSvc,
 	}
 }
 
-func (r *clusterAssetGroupResolver) ClusterAssetGroupsQuery(ctx context.Context, viewContext *string, groupName *string) ([]gqlschema.ClusterAssetGroup, error) {
+func (r *clusterAssetGroupResolver) ClusterAssetGroupsQuery(ctx context.Context, viewContext *string, groupName *string) ([]*gqlschema.ClusterAssetGroup, error) {
 	items, err := r.clusterAssetGroupService.List(viewContext, groupName)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s", pretty.ClusterAssetGroups))
@@ -44,7 +44,7 @@ func (r *clusterAssetGroupResolver) ClusterAssetGroupsQuery(ctx context.Context,
 	return clusterAssetGroups, nil
 }
 
-func (r *clusterAssetGroupResolver) ClusterAssetGroupAssetsField(ctx context.Context, obj *gqlschema.ClusterAssetGroup, types []string) ([]gqlschema.ClusterAsset, error) {
+func (r *clusterAssetGroupResolver) ClusterAssetGroupAssetsField(ctx context.Context, obj *gqlschema.ClusterAssetGroup, types []string) ([]*gqlschema.ClusterAsset, error) {
 	if obj == nil {
 		glog.Error(errors.Errorf("%s cannot be empty in order to resolve `assets` field", pretty.ClusterAssetGroup))
 		return nil, gqlerror.NewInternal()
@@ -65,8 +65,8 @@ func (r *clusterAssetGroupResolver) ClusterAssetGroupAssetsField(ctx context.Con
 	return clusterAssets, nil
 }
 
-func (r *clusterAssetGroupResolver) ClusterAssetGroupEventSubscription(ctx context.Context) (<-chan gqlschema.ClusterAssetGroupEvent, error) {
-	channel := make(chan gqlschema.ClusterAssetGroupEvent, 1)
+func (r *clusterAssetGroupResolver) ClusterAssetGroupEventSubscription(ctx context.Context) (<-chan *gqlschema.ClusterAssetGroupEvent, error) {
+	channel := make(chan *gqlschema.ClusterAssetGroupEvent, 1)
 	filter := func(entity *v1beta1.ClusterAssetGroup) bool {
 		return entity != nil
 	}

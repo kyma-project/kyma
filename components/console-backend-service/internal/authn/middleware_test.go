@@ -198,7 +198,7 @@ func newHttpRequest() *http.Request {
 
 func newMalformedWebsocketRequest() *http.Request {
 	req := httptest.NewRequest("GET", "/graphql", strings.NewReader(""))
-	req.Header.Set("sec-websocket-protocol", "graphql token")
+	req.Header.Set("sec-websocket-protocol", "graphql, token, smth")
 	return req
 }
 

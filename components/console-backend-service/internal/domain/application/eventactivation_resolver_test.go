@@ -35,8 +35,8 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 
 		require.NoError(t, err)
 		assert.Len(t, result, 2)
-		assert.Contains(t, result, *fixGQLEventActivation("event1"))
-		assert.Contains(t, result, *fixGQLEventActivation("event2"))
+		assert.Contains(t, result, fixGQLEventActivation("event1"))
+		assert.Contains(t, result, fixGQLEventActivation("event2"))
 	})
 
 	t.Run("Not found", func(t *testing.T) {
@@ -129,8 +129,8 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 
 		require.NoError(t, err)
 		assert.Len(t, result, 2)
-		assert.Contains(t, result, *fixGQLEventActivationEvent("sell", "v1", "desc"))
-		assert.Contains(t, result, *fixGQLEventActivationEvent("sell", "v2", "desc"))
+		assert.Contains(t, result, fixGQLEventActivationEvent("sell", "v1", "desc"))
+		assert.Contains(t, result, fixGQLEventActivationEvent("sell", "v2", "desc"))
 	})
 
 	t.Run("Not found", func(t *testing.T) {

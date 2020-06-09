@@ -9,13 +9,13 @@ import (
 )
 
 type functionListener struct {
-	channel   chan<- gqlschema.FunctionEvent
+	channel   chan<- *gqlschema.FunctionEvent
 	filter    func(entity *v1alpha1.Function) bool
 	converter gqlFunctionConverter
 	extractor *functionUnstructuredExtractor
 }
 
-func newFunctionListener(channel chan<- gqlschema.FunctionEvent, filter func(entity *v1alpha1.Function) bool, converter gqlFunctionConverter) *functionListener {
+func newFunctionListener(channel chan<- *gqlschema.FunctionEvent, filter func(entity *v1alpha1.Function) bool, converter gqlFunctionConverter) *functionListener {
 	return &functionListener{
 		channel:   channel,
 		filter:    filter,
@@ -61,9 +61,9 @@ func (l *functionListener) notify(eventType gqlschema.SubscriptionEventType, ent
 		return
 	}
 
-	event := gqlschema.FunctionEvent{
+	event := &gqlschema.FunctionEvent{
 		Type:     eventType,
-		Function: *gqlFunction,
+		Function: gqlFunction,
 	}
 
 	l.channel <- event

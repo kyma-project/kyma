@@ -1,13 +1,13 @@
-schema: schema.graphql
+schema: internal/gqlschema/schema.graphql
 
 # Let gqlgen know where to put the generated server
 exec:
-  filename: schema_gen.go
+  filename: internal/gqlschema/schema_gen.go
   package: gqlschema
 
 # Let gqlgen know where to the generated models (if any)
 model:
-  filename: models_gen.go
+  filename: internal/gqlschema/models_gen.go
   package: gqlschema
 
 # Optional turns on binding to field names by tag provided
