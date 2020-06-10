@@ -50,8 +50,8 @@ func TestSteps(t *testing.T) {
 			})
 			Convey("rollback failed upgrade", func() {
 				//given
-				upgradeError := fmt.Sprintf("Helm upgrade error: %s", "failed to upgrade release")
-				expectedError := fmt.Sprintf("%s\nHelm rollback of release \"%s\" was successfull", upgradeError, testReleaseName)
+				upgradeError := fmt.Sprintf("Helm upgrade of release \"%s\" failed: %s", testReleaseName, "failed to upgrade release.")
+				expectedError := fmt.Sprintf("%s\nFinding last known deployed revision to rollback to.\nPerforming rollback to last known deployed revision: 2\nHelm rollback of release \"%s\" was successfull", upgradeError, testReleaseName)
 
 				mockHelmClient := &mockHelmClient{
 					failUpgradingRelease: true,
@@ -71,9 +71,9 @@ func TestSteps(t *testing.T) {
 			})
 			Convey("return an error when release rollback fails", func() {
 				//given
-				upgradeError := fmt.Sprintf("Helm upgrade error: %s", "failed to upgrade release")
-				rollbackError := fmt.Sprintf("Helm rollback of release \"%s\" failed with an error: %s", testReleaseName, "failed to rollback release")
-				expectedError := fmt.Sprintf("%s \n %s \n", upgradeError, rollbackError)
+				upgradeError := fmt.Sprintf("Helm upgrade of release \"%s\" failed: %s", testReleaseName, "failed to upgrade release.")
+				rollbackError := fmt.Sprintf("Finding last known deployed revision to rollback to.\nPerforming rollback to last known deployed revision: 2 \n Helm rollback of release \"%s\" failed with an error: %s", testReleaseName, "failed to rollback release ")
+				expectedError := fmt.Sprintf("%s\n%s\n", upgradeError, rollbackError)
 
 				mockHelmClient := &mockHelmClient{
 					failUpgradingRelease: true,
@@ -89,6 +89,7 @@ func TestSteps(t *testing.T) {
 				err := testUpgradeStep.Run()
 
 				//then
+
 				So(err.Error(), ShouldEqual, expectedError)
 			})
 		})

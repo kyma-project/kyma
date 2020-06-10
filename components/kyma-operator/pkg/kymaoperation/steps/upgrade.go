@@ -3,7 +3,6 @@ package steps
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 )
@@ -36,8 +35,7 @@ func (s upgradeStep) Run() error {
 
 func (s upgradeStep) onError(upgradeErr error) error {
 
-	upgradeErrMsg := fmt.Sprintf("Helm upgrade error: %s", upgradeErr.Error())
-	log.Println(fmt.Sprintf("Helm upgrade of release \"%s\" failed. Finding last known deployed revision to rollback to.", s.component.GetReleaseName()))
+	upgradeErrMsg := fmt.Sprintf("Helm upgrade of release \"%s\" failed: %s.\nFinding last known deployed revision to rollback to.", s.component.GetReleaseName(), upgradeErr.Error())
 
 	namespacedName := s.GetNamespacedName()
 
@@ -47,7 +45,7 @@ func (s upgradeStep) onError(upgradeErr error) error {
 		return errors.New(fmt.Sprintf("%s \n %s \n", upgradeErrMsg, deployedRevisionErr))
 	}
 
-	log.Println(fmt.Sprintf("Performing rollback to last known deployed revision: %d", rollbackTo))
+	upgradeErrMsg = upgradeErrMsg + fmt.Sprintf("\nPerforming rollback to last known deployed revision: %d", rollbackTo)
 
 	if err = s.helmClient.RollbackRelease(kymahelm.NamespacedName{Name: s.component.GetReleaseName(), Namespace: s.component.Namespace}, rollbackTo); err != nil {
 		rollbackErrMsg := fmt.Sprintf("Helm rollback of release \"%s\" failed with an error: %s", s.component.GetReleaseName(), err.Error())
