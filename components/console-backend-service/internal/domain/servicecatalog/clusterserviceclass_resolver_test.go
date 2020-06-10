@@ -16,7 +16,33 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+
+	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
+	"github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions"
+	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
+	"time"
+	"context"
 )
+
+func TestClusterServiceClassResolver_ClusterServiceClassQueryPOC(t *testing.T) {
+	className := "testExample"
+	serviceClass := fixClusterServiceClass(className, className)
+	client := fake.NewSimpleClientset(serviceClass)
+	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
+	serviceClassInformer := informerFactory.Servicecatalog().V1beta1().ClusterServiceClasses().Informer()
+	svc, err := servicecatalog.NewClusterServiceClassService(serviceClassInformer)
+	require.NoError(t, err)
+	testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
+	resolver := servicecatalog.NewClusterServiceClassResolver(svc, nil, nil, nil)
+
+	// when
+	resp, err := resolver.ClusterServiceClassQuery(context.TODO(), "testExample")
+	require.NoError(t, err)
+
+	assert.Equal(t, className, resp.Name)
+	assert.Equal(t, className, resp.ExternalName)
+}
 
 func TestClusterServiceClassResolver_ClusterServiceClassQuery(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
