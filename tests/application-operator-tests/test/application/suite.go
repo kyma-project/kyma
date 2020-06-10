@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
-	"sync"
 	"testing"
 	"time"
+
+	"helm.sh/helm/v3/pkg/release"
 
 	"k8s.io/apimachinery/pkg/labels"
 
@@ -16,8 +17,6 @@ import (
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
-	hapirelease1 "k8s.io/helm/pkg/proto/hapi/release"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
 )
 
 const (
@@ -48,7 +47,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	helmClient, err := testkit.NewHelmClient(config.TillerHost, config.TillerTLSKeyFile, config.TillerTLSCertificateFile, config.TillerTLSSkipVerify)
+	helmClient, err := testkit.NewHelmClient(config.HelmDriver)
 	require.NoError(t, err)
 
 	testPodsLabels := labels.Set{
@@ -57,8 +56,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	}
 
 	return &TestSuite{
-		application: app,
-
+		application:         app,
 		config:              config,
 		helmClient:          helmClient,
 		k8sClient:           k8sResourcesClient,
@@ -85,55 +83,26 @@ func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T) {
 		if err != nil {
 			return false
 		}
-
-		return app.Status.InstallationStatus.Status == hapirelease1.Status_DEPLOYED.String()
+		return app.Status.InstallationStatus.Status == release.StatusDeployed.String()
 	})
 
 	require.NoError(t, err)
 }
 
 func (ts *TestSuite) RunApplicationTests(t *testing.T) {
-	wg := sync.WaitGroup{}
-	wg.Add(2)
 
 	t.Log("Running application tests")
-	responseChan, errorChan := ts.helmClient.TestRelease(ts.application)
+	_, err := ts.helmClient.TestRelease(ts.application, ts.config.Namespace)
 
-	go ts.receiveTestResponse(t, &wg, responseChan)
-	go ts.receiveErrorResponse(t, &wg, errorChan)
-
-	wg.Wait()
-}
-
-func (ts *TestSuite) receiveTestResponse(t *testing.T, wg *sync.WaitGroup, responseChan <-chan *rls.TestReleaseResponse) {
-	defer wg.Done()
-
-	testFailed := false
-
-	for msg := range responseChan {
-		t.Log(msg.String())
-		if msg.Status == hapirelease1.TestRun_FAILURE {
-			testFailed = true
-		}
-	}
-	t.Logf("%s tests finished. Message channel closed", ts.application)
+	t.Logf("%s tests finished.", ts.application)
 
 	ts.getLogsAndCleanup(t)
 
-	if testFailed {
+	if err != nil {
+		t.Errorf("Error while executing tests for %s release: %s", ts.application, err.Error())
 		t.Logf("%s tests failed", ts.application)
 		t.Fatal("Application tests failed")
 	}
-}
-
-func (ts *TestSuite) receiveErrorResponse(t *testing.T, wg *sync.WaitGroup, errorChan <-chan error) {
-	defer wg.Done()
-
-	for err := range errorChan {
-		t.Errorf("Error while executing tests for %s release: %s", ts.application, err.Error())
-	}
-
-	t.Log("Error channel closed")
 }
 
 func (ts *TestSuite) getLogsAndCleanup(t *testing.T) {

@@ -41,7 +41,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	helmClient, err := testkit.NewHelmClient(config.TillerHost, config.TillerTLSKeyFile, config.TillerTLSCertificateFile, config.TillerTLSSkipVerify)
+	helmClient, err := testkit.NewHelmClient(config.HelmDriver)
 	require.NoError(t, err)
 
 	k8sResourcesChecker := testkit.NewAppK8sChecker(k8sResourcesClient, app, !config.GatewayOncePerNamespace)
@@ -98,7 +98,7 @@ func (ts *TestSuite) CleanUp() {
 
 func (ts *TestSuite) WaitForReleaseToInstall(t *testing.T) {
 	err := testkit.WaitForFunction(defaultCheckInterval, ts.installationTimeout, func() bool {
-		return ts.helmClient.IsInstalled(ts.application)
+		return ts.helmClient.IsInstalled(ts.application, ts.config.Namespace)
 	})
 	require.NoError(t, err, "Received timeout while waiting for release to install")
 }
@@ -122,5 +122,5 @@ func (ts *TestSuite) CheckK8sResourceRemoved(t *testing.T) {
 }
 
 func (ts *TestSuite) helmReleaseNotExist() bool {
-	return !ts.helmClient.IsInstalled(ts.application)
+	return !ts.helmClient.IsInstalled(ts.application, ts.config.Namespace)
 }

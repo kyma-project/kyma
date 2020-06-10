@@ -4,31 +4,23 @@ go 1.13
 
 require (
 	cloud.google.com/go v0.44.3 // indirect
-	github.com/Masterminds/goutils v1.1.0 // indirect
-	github.com/Masterminds/semver v1.5.0 // indirect
-	github.com/Masterminds/sprig v2.22.0+incompatible // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/cyphar/filepath-securejoin v0.2.2 // indirect
-	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/gogo/protobuf v1.3.1 // indirect
+	github.com/emicklei/go-restful v2.9.6+incompatible // indirect
 	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
-	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
-	github.com/huandu/xstrings v1.2.0 // indirect
-	github.com/imdario/mergo v0.3.7 // indirect
 	github.com/kubernetes-sigs/service-catalog v0.2.2
-	github.com/mitchellh/copystructure v1.0.0 // indirect
+	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.6.0 // indirect
-	github.com/prometheus/procfs v0.0.5 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.5.1
-	golang.org/x/sys v0.0.0-20190916202348-b4ddaad3f8a3 // indirect
-	google.golang.org/grpc v1.27.0 // indirect
+	helm.sh/helm/v3 v3.1.3
 	k8s.io/apimachinery v0.17.2
+	k8s.io/cli-runtime v0.17.2
 	k8s.io/client-go v0.17.2
-	k8s.io/helm v2.16.7+incompatible
+	k8s.io/klog v1.0.0
+	rsc.io/letsencrypt v0.0.3 // indirect
 	sigs.k8s.io/controller-runtime v0.5.0
 )
 

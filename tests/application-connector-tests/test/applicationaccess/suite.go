@@ -24,7 +24,6 @@ import (
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
-	helmapirelease "k8s.io/helm/pkg/proto/hapi/release"
 )
 
 const (
@@ -144,10 +143,10 @@ func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T, applicationNam
 			t.Logf("Application %s not found: %v", applicationName, err)
 			return false
 		}
-		if app.Status.InstallationStatus.Status != helmapirelease.Status_DEPLOYED.String() {
+		if app.Status.InstallationStatus.Status != "deployed" {
 			t.Logf("Application installation status %s does not equal %s",
 				app.Status.InstallationStatus.Status,
-				helmapirelease.Status_DEPLOYED.String())
+				"deployed")
 			return false
 		}
 
