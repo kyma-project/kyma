@@ -19,4 +19,4 @@ This is a sample subscriber app that simulates an event subscriber via exposing 
 
 | Flag                   | Usage          |
 |---------------------- |-------------- |
-| `--port <int>` | Listens on o a provided port.|
+| `--port <int>` | Listens on a provided port.|
