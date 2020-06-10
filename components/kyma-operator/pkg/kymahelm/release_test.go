@@ -147,7 +147,7 @@ func TestIsUpgradeStep(t *testing.T) {
 
 				//then
 				So(err, ShouldNotBeNil)
-				So(err.Error(), ShouldContainSubstring, "unexpected status code")
+				So(err.Error(), ShouldContainSubstring, "unexpected status")
 			}
 		})
 	})
