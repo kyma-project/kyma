@@ -25,4 +25,4 @@ To fix this problem, try adjusting the configuration of the software that's bloc
 
 For example, [dnsmasq](http://www.thekelleys.org.uk/dnsmasq/doc.html) users can add `listen-address=192.168.64.1` to `dnsmasq.conf` to run dnsmasq and Minikube at the same time.
 
-For more details, read issue [#3036](https://github.com/kubernetes/minikube/issues/3036).
+For more details, refer to the issue [#3036](https://github.com/kubernetes/minikube/issues/3036).

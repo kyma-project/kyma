@@ -7,7 +7,7 @@ This Installation guide shows you how to quickly deploy Kyma locally on the MacO
 
 >**NOTE:** By default, the local **Kyma Lite** installation on Minikube requires 4 CPU and 8GB of RAM. If you want to add more components to your installation, [install Kyma on a cluster](/root/kyma/#installation-install-kyma-on-a-cluster).
 
->**TIP:** See the [troubleshooting document](#troubleshooting-overview) for tips.
+>**TIP:** See the [troubleshooting guide](#troubleshooting-overview) for tips.
 
 ## Prerequisites
 
