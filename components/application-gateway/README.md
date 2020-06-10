@@ -84,7 +84,7 @@ In the current solution, the Console Backend Service iterates through services t
 The Console Backend Service has the following obligatory requirements:
 - The Kubernetes service uses the `application` key, with the value as the name of the Application.
 - The Kubernetes service contains one port with the `http-api-port` name. The system uses this port for the status check.
-- Find the Kubernetes service in the `kyma-integration` Namespace. You can change its location in the `console-backend-service` chart configuration.
+- Find the Kubernetes service in the `kyma-integration` Namespace. You can change its location in the `console-backend` chart configuration.
 - The `/v1/health` endpoint returns a status of `HTTP 200`. Any other status code indicates the service is not healthy.
 
 ### Contribution

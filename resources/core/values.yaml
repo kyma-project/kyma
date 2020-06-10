@@ -2,12 +2,6 @@ dex:
   tls:
     createSecret: false
 
-console:
-  cluster:
-    headerLogoUrl: "assets/logo.svg"
-    headerTitle: ""
-    faviconUrl: "favicon.ico"
-
 global:
   isLocalEnv: false
   knative:
@@ -20,8 +14,6 @@ global:
   istio:
     gateway:
       name: kyma-gateway
-  ui_acceptance_tests:
-    version: e80fe188
   api_controller:
     dir:
     version: 3b88aaaf
@@ -36,10 +28,13 @@ global:
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f
+<<<<<<< HEAD
   console_backend_service:
     version: 69154c81
   console_backend_service_test:
     version: c86ce2c0
+=======
+>>>>>>> aa8859a78a8e5e97c5c30ed61e8d72da273c2bdc
   xip_patch:
     dir:
     version: PR-8619
