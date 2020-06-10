@@ -26,9 +26,9 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    version: PR-8417
+    version: "1066324c"
   application_operator_tests:
-    version: PR-8417
+    version: "1066324c"
   connector_service:
     version: "4e3576cd"
   connector_service_tests:
@@ -76,5 +76,5 @@ tests:
       central: false
     skipSslVerify: true
     image:
-      version: "PR-8417"
+      version: "1066324c"
       pullPolicy: IfNotPresent
