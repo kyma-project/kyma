@@ -88,12 +88,12 @@ func Test_ResetCounter(t *testing.T) {
 }
 
 func Test_SendCE(t *testing.T) {
-	type tabletest struct {
+	type tableTest struct {
 		name       string
 		event      mockevent
 		wantStatus int
 	}
-	tt := []tabletest{
+	tt := []tableTest{
 		{
 			name: "Send event with id",
 			event: mockevent{
