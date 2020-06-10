@@ -37,7 +37,7 @@ This guide explains how to deploy Kyma on a cluster using your own domain.
 - A [Docker Hub](https://hub.docker.com/) account
 - [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
->**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general). The Kyma production profile requires at least `Standard_F8s_v2` machines, but it is recommended to use the `Standard_D8_v3` type. Create these machines when you complete the **Prepare the cluster** step. 
+>**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general). The Kyma production profile requires at least `Standard_F8s_v2` machines, but it is recommended to use the `Standard_D8_v3` type. Create these machines when you complete the **Prepare the cluster** step.
 
   </details>
 
@@ -45,7 +45,7 @@ This guide explains how to deploy Kyma on a cluster using your own domain.
 
 ## Choose the release to install
 
-1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to install.
+1. Go to [Kyma releases](https://github.com/kyma-project/kyma/releases/) and choose the release you want to install.
 
 2. Export the release version as an environment variable. Run:
 
@@ -346,7 +346,7 @@ Get the TLS certificate:
    && kubectl label configmap owndomain-overrides -n kyma-installer installer=overrides
    ```
 
->**TIP:** An example config map is available [here](./assets/owndomain-overrides.yaml).
+>**TIP:** See a [sample ConfigMap](./assets/owndomain-overrides.yaml) for reference.
 
   </details>
   <details>
@@ -402,7 +402,7 @@ Get the TLS certificate:
     && kubectl label configmap owndomain-overrides -n kyma-installer installer=overrides
     ```
 
->**CAUTION:** If you define your own Kubernetes jobs on the AKS cluster, follow [this](/components/service-mesh/#troubleshooting-kubernetes-jobs-fail-on-aks) troubleshooting guide to avoid jobs running endlessly on AKS deployments of Kyma.
+>**CAUTION:** If you define your own Kubernetes jobs on the AKS cluster, follow the [troubleshooting guide](/components/service-mesh/#troubleshooting-kubernetes-jobs-fail-on-aks) to avoid jobs running endlessly on AKS deployments of Kyma.
 
   </details>
 

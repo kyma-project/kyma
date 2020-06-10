@@ -51,4 +51,4 @@ To allow access specifically to the example query, create this RBAC role in the 
     verbs: ["get"]
   ```
 
-> **NOTE:** To learn more about RBAC authorization in a Kubernetes cluster, read [this](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) document.
+> **NOTE:** Read also about [RBAC authorization in a Kubernetes cluster](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).

@@ -36,8 +36,8 @@ The AWS Service Broker provides these Service Classes to use with the Service Ca
 * Amazon Aurora PostgreSQL
 * Amazon Aurora MySQL
 
-Find the documentation for each Service Class [here](https://github.com/awslabs/aws-servicebroker/tree/v1.0.0/templates). You can also see the details and specification of each Service Class in the Service Catalog UI, after provisioning a given class.
+See the [Service Class documentation](https://github.com/awslabs/aws-servicebroker/tree/v1.0.0/templates) for reference. You can also see the details and specification of each Service Class in the Service Catalog UI, after provisioning a given class.
 
-For more information about the Service Brokers, see [this](#service-brokers-overview) document.
+For more information about the Service Brokers, read their [overview](#service-brokers-overview).
 
 >**NOTE:** Kyma uses the AWS Service Broker open-source project. To ensure the best performance and stability of the product, Kyma uses a version of the AWS Service Broker that precedes the newest version released by Amazon.

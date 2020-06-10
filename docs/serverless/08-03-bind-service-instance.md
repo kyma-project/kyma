@@ -7,7 +7,7 @@ This tutorial shows how you can bind a sample instance of the Redis service to a
 
 To create the binding, you will use ServiceBinding and ServiceBindingUsage custom resources (CRs) managed by the Service Catalog.
 
->**NOTE:** To learn more about binding Service Instances to applications in Kyma, read [this](/components/service-catalog/#details-provisioning-and-binding) document.
+>**NOTE:** See the document on [provisioning and binding](/components/service-catalog/#details-provisioning-and-binding) to learn more about binding Service Instances to applications in Kyma.
 
 ## Prerequisites
 

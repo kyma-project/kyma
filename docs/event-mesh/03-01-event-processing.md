@@ -48,4 +48,4 @@ The **filter** section of the Trigger CR specification defines the Broker which 
 | **spec.filter.attributes.eventtypeversion** | Event version, such as `v1`. |
 | **spec.filter.attributes.source** | Name of the Application which sends events. |
 
-To learn how to trigger a Function with an event, follow [this](/components/serverless/#tutorials-trigger-a-function-with-an-event) tutorial.
+To learn how to trigger a Function with an event, follow the [tutorial](/components/serverless/#tutorials-trigger-a-function-with-an-event).

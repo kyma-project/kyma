@@ -21,7 +21,7 @@ For details, see [Istio's Distributed Tracing](https://istio.io/docs/tasks/obser
 
 ## Install Tracing locally
 
-Read [this](/root/kyma#configuration-custom-component-installation-add-a-component) document to learn how to install Jaeger locally.
+Read the [configuration document](/root/kyma#configuration-custom-component-installation-add-a-component) to learn how to install Jaeger locally.
 
 ## Access Jaeger
 

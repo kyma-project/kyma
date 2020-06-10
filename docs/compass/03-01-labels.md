@@ -37,7 +37,7 @@ type Mutation {
 }
 ```
 
-> **TIP:** For all the GraphQL query and mutation examples that you can use, go to [this](https://github.com/kyma-incubator/compass/tree/master/components/director/examples) directory.
+> **TIP:** For all the GraphQL query and mutation examples that you can use, go to the [`examples`](https://github.com/kyma-incubator/compass/tree/master/components/director/examples) directory.
 
 LabelDefinition key has to be unique for a given tenant. You can provide only one value for a given label. However, this label can contain many elements, depending on the LabelDefinition schema. In the following example, the type of the label value is `Any`, which means that the value can be of any type, such as `JSON`, `string`, `int` etc.:
 

@@ -11,12 +11,12 @@ In the case of the ORY Hydra OAuth2 server, the default profile includes:
    - An in-cluster database that stores the registered client data.
    - A job that reads the generated database credentials and saves them to the configuration of Hydra before the installation and update.
    - Default resource quotas.
-   
+
 
 ### Persistence mode for the default profile
 
-The default profile for the OAuth2 server enables the use of a [preconfigured PostgreSQL](https://github.com/helm/charts/tree/master/stable/postgresql) database, which is installed together with the Hydra server. The database is created in the cluster as a StatefulSet and uses a PersistentVolume that is provider-specific. This means that the PersistentVolume used by the database uses the default StorageClass of the cluster's host provider. The internal PostgreSQL database is installed with every Kyma deployment and doesn't require manual configuration. 
-   
+The default profile for the OAuth2 server enables the use of a [preconfigured PostgreSQL](https://github.com/helm/charts/tree/master/stable/postgresql) database, which is installed together with the Hydra server. The database is created in the cluster as a StatefulSet and uses a PersistentVolume that is provider-specific. This means that the PersistentVolume used by the database uses the default StorageClass of the cluster's host provider. The internal PostgreSQL database is installed with every Kyma deployment and doesn't require manual configuration.
+
 ## Production profile
 
 The production profile introduces the following changes to the Hydra OAuth2 server deployment:
@@ -49,7 +49,7 @@ Alternatively, you can use a compatible, custom database to store the registered
 | Parameter | Description | Required value |
 |----------|------| :---: |
 | **global.ory.hydra.persistence.postgresql.enabled** | Defines whether Hydra should initiate the deployment of an in-cluster database. Set to `false` to use a self-provided database. If set to `true`, Hydra always uses an in-cluster database and ignores the custom database details. | `false` |
-| **hydra.hydra.config.secrets.system** | Sets the system encryption string for Hydra. | An at least 16 characters long alphanumerical string | 
+| **hydra.hydra.config.secrets.system** | Sets the system encryption string for Hydra. | An at least 16 characters long alphanumerical string |
 | **hydra.hydra.config.secrets.cookie** | Sets the cookie session encryption string for Hydra. | An at least 16 characters long alphanumerical string |
 
 **Database settings:**
@@ -59,9 +59,9 @@ Alternatively, you can use a compatible, custom database to store the registered
 | **global.ory.hydra.persistence.user** | Specifies the name of the user with permissions to access the database. | `dbuser` |
 | **global.ory.hydra.persistence.secretName** | Specifies the name of the Secret in the same Namespace as Hydra that stores the database password. | `my-secret` |
 | **global.ory.hydra.persistence.secretKey** | Specifies the name of the key in the Secret that contains the database password. | `my-db-password` |
-| **global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, read [this](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml) document. | `mydb.my-namespace:1234` |
+| **global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, see the [configuration file](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml). | `mydb.my-namespace:1234` |
 | **global.ory.hydra.persistence.dbName** | Specifies the name of the database saved in Hydra. | `db` |
-| **global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml) link for more information. | `postgres` |
+| **global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. See [`config.yaml`](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml) for more information. | `postgres` |
 
 #### Google Cloud SQL
 
@@ -73,7 +73,7 @@ The Cloud SQL is a provider-supplied and maintained database, which requires a s
 |----------|------| :---: |
 | **global.ory.hydra.persistence.postgresql.enabled** | Defines whether Hydra should initiate the deployment of an in-cluster database. Set to `false` to use a self-provided database. If set to `true`, Hydra always uses an in-cluster database and ignores the custom database details. | `false` |
 | **global.ory.hydra.persistence.gcloud.enabled** | Defines whether Hydra should initiate the deployment of Google SQL proxy. | `true` |
-| **hydra.hydra.config.secrets.system** | Sets the system encryption string for Hydra. | An at least 16 characters long alphanumerical string | 
+| **hydra.hydra.config.secrets.system** | Sets the system encryption string for Hydra. | An at least 16 characters long alphanumerical string |
 | **hydra.hydra.config.secrets.cookie** | Sets the cookie session encryption string for Hydra. | An at least 16 characters long alphanumerical string |
 
 **Database settings:**
@@ -83,9 +83,9 @@ The Cloud SQL is a provider-supplied and maintained database, which requires a s
 | **data.global.ory.hydra.persistence.user** | Specifies the name of the user with permissions to access the database. | `dbuser` |
 | **data.global.ory.hydra.persistence.secretName** | Specifies the name of the Secret in the same Namespace as Hydra that stores the database password. | `my-secret` |
 | **data.global.ory.hydra.persistence.secretKey** | Specifies the name of the key in the Secret that contains the database password. | `my-db-password` |
-| **data.global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, read [this](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml) document. | Required: `ory-gcloud-sqlproxy.kyma-system` |
+| **data.global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, see the [`config.yaml`](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml) file. | Required: `ory-gcloud-sqlproxy.kyma-system` |
 | **data.global.ory.hydra.persistence.dbName** | Specifies the name of the database saved in Hydra. | `db` |
-| **data.global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. Follow [this](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml) link for more information. | `postgres` |
+| **data.global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. See the [`config.yaml`](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml) file for more information. | `postgres` |
 
 **Proxy settings:**
 
@@ -114,4 +114,4 @@ Follow these steps to migrate your Oauth2 server to the production profile:
 >* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
 >* [Top-level charts overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation-top-level-charts-overrides)
 
->**TIP:** All the client data registered by Hydra Maester is migrated to the new database as a part of the update process. If you notice missing or inconsistent data, delete the Hydra Maester Pod to force reconciliation. Read [this](#details-oauth2-and-openid-connect-server) document to learn about Hydra Maester controller and Oauth2 client registration in Kyma.
+>**TIP:** All the client data registered by Hydra Maester is migrated to the new database as a part of the update process. If you notice missing or inconsistent data, delete the Hydra Maester Pod to force reconciliation. For more information, read about [Hydra Maester controller and Oauth2 client registration in Kyma](#details-o-auth2-and-open-id-connect-server).
