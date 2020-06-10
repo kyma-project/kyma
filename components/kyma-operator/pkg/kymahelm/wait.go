@@ -89,7 +89,7 @@ func (hc *Client) WaitForReleaseDelete(nn NamespacedName) (bool, error) {
 		}
 
 		if relStatus == nil {
-			return false, errors.New("release status in nil")
+			return false, errors.New("release status is nil")
 		}
 
 		log.Printf("Waiting for release delete: release status: %s/%s: %s", nn.Namespace, nn.Name, relStatus.Status)

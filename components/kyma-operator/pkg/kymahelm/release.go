@@ -30,7 +30,7 @@ const (
 	StatusPendingRollback Status = "pending-rollback"
 )
 
-// Release is an insternal representation of a Helm release
+// Release is an internal representation of a Helm release
 type Release struct {
 	*ReleaseMeta
 	*ReleaseStatus
@@ -96,7 +96,7 @@ func (rs *ReleaseStatus) IsUpgradeStep() (bool, error) {
 		return false, nil
 
 	default:
-		return false, errors.New(fmt.Sprintf("unexpected status code %s", rs.Status))
+		return false, errors.New(fmt.Sprintf("unexpected status %s", rs.Status))
 	}
 }
 

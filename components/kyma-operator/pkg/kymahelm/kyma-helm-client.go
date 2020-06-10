@@ -213,7 +213,7 @@ func (hc *Client) UpgradeRelease(chartDir string, nn NamespacedName, values over
 	upgrade.CleanupOnFail = true
 	upgrade.Wait = true
 	upgrade.ReuseValues = true
-	upgrade.Recreate = true
+	upgrade.Recreate = false
 
 	hc.PrintOverrides(values, nn.Name, "update")
 
