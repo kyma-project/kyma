@@ -12,7 +12,7 @@ metadata:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-    - "eventing.knative.dev"
+{{ toYaml .Values.clusterRoles.apiGroups.kymaEventing | indent 4 }}
   resources:
     - "*"
   verbs:
@@ -31,7 +31,7 @@ metadata:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-    - "eventing.knative.dev"
+{{ toYaml .Values.clusterRoles.apiGroups.kymaEventing | indent 4 }}
   resources:
     - "*"
   verbs:
@@ -50,7 +50,7 @@ metadata:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-    - "eventing.knative.dev"
+{{ toYaml .Values.clusterRoles.apiGroups.kymaEventing | indent 4 }}
   resources:
     - "*"
   verbs:
