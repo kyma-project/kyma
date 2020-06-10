@@ -88,8 +88,7 @@ func (extr *Executor) UninstallKyma(installationData *config.InstallationData) e
 	removeLabelAndReturn := extr.removeLabelOnError(installationData.Context.Name, installationData.Context.Namespace)
 
 	err := extr.deprovisionAzureResourcesFn(extr, DefaultDeprovisionConfig(), installationData.Context)
-	//DeprovisionAzureResources(extr, DefaultDeprovisionConfig(), installationData.Context)
-	//
+
 	extr.errorHandlers.LogError("An error during deprovisioning: ", err)
 
 	_ = extr.statusManager.InProgress("Verify components to uninstall")
