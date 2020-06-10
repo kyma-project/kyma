@@ -68,7 +68,7 @@
 /resources/application-connector-ingress/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
 # The `console` subchart
-/resources/core/charts/console/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
+/resources/console/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # The `dex` subchart
 /resources/dex/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -121,14 +121,11 @@
 # The `docs` subchart
 /resources/core/charts/docs/ @michal-hudy @m00g3n @aerfio @pPrecel @magicmatatjahu @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
-# The `console-backend-service` subchart
-/resources/core/charts/console-backend-service/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
 # The `templates` chart
 /resources/core/templates/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach
 
 # The `templates` chart
-/resources/core/templates/tests/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @pPrecel @tgorgol @magicmatatjahu @antiheld @jasiu001 @adamwalach @kwiatekus @dariadomagala @parostatkiem @k15r
+/resources/core/templates/tests/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @michal-hudy @m00g3n @pkosiec @aerfio @pPrecel @tgorgol @magicmatatjahu @antiheld @jasiu001 @adamwalach @kwiatekus @k15r
 
 # The `istio` chart
 /resources/istio/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
