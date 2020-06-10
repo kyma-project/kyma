@@ -39,7 +39,7 @@ Expose your addons repository so that you can provide URLs in the [AddonsConfigu
   HTTP/HTTPS
   </summary>
 
->**NOTE:** The HTTP protocol is supported only in `DevelopMode`. To learn more, read [this](#details-registration-rules-using-http-urls) document.
+>**NOTE:** The HTTP protocol is supported only in `DevelopMode`. To learn more, read about [using HTTP URLs](#details-registration-rules-using-http-ur-ls).
 
 If you want to use an HTTP or HTTPS server, you must compress your addons to `.tgz` files. The repository structure looks as follows:
 ```
@@ -52,7 +52,7 @@ sample-addon-repository
   └── ...                                                    
 ```
 
-See the example of the Kyma `addons` repository [here](https://github.com/kyma-project/addons/releases).
+See the [example](https://github.com/kyma-project/addons/releases) of the Kyma `addons` repository.
 
 >**TIP:** If you contribute to the Kyma [`addons`](https://github.com/kyma-project/addons/tree/master/addons) repository, you do not have to compress your addons as the system does it automatically.
 
@@ -87,7 +87,7 @@ sample-addon-repository
   └── ...                                                    
 ```
 
-See the example of the Kyma `addons` repository [here](https://github.com/kyma-project/addons/tree/master/addons).
+See the [example](https://github.com/kyma-project/addons/tree/master/addons) of the Kyma `addons` repository.
 
 > **NOTE:** The amount of memory and storage size determine the maximum size of your addons repository. These limits are set in the
 [Helm Broker chart](https://kyma-project.io/docs/components/helm-broker/#configuration-helm-broker-chart).
@@ -226,7 +226,7 @@ To secure your addons repository with basic authentication credentials, create a
   Git SSH
   </summary>
 
-  The Git SSH protocol requires an SSH key to authenticate with your repository. Setting SSH keys differs among hosting providers. Read [this](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key) document to learn how to generate a new SSH key in the GitHub service.
+  The Git SSH protocol requires an SSH key to authenticate with your repository. Setting SSH keys differs among hosting providers. Read the [instruction](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key) to learn how to generate a new SSH key in the GitHub service.
   >**NOTE:** The Git SSH private key must be base64-encoded.
 
   Follow these steps to secure your addons repository with basic authentication credentials:
@@ -266,7 +266,7 @@ To secure your addons repository with basic authentication credentials, create a
   The S3 protocol requires a key and a secret to authenticate with your bucket. To get a key and a secret, log in to the AWS [console](https://console.aws.amazon.com),
   select **My Security Credentials**, and go to the **Access keys** tab where you can create a new access key.
 
-  > **NOTE:** For more information about security credentials and access key, read [this](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html) document.
+  > **NOTE:** For more information about security credentials and access key, read the [AWS documentation](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html).
 
   Follow these steps to secure your S3 addons repository with basic authentication credentials:
 

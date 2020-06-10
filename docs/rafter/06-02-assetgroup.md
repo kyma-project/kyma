@@ -58,7 +58,7 @@ This table lists all possible parameters of a given resource together with their
 | Parameter   |      Required      |  Description |
 |----------|:-------------:|------|
 | **metadata.name** | Yes | Specifies the name of the CR. It also defines the **rafter.kyma-project.io/asset-group** label added to the Asset CR that the AssetGroup CR defines. Because of label name limitations, AssetGroup CR names can have a maximum length of 63 characters. |
-| **metadata.labels** | No | Specifies how to filter and group Asset CRs that the AssetGroup CR defines. See [this](#details-rafter-in-console) document for more details. |
+| **metadata.labels** | No | Specifies how to filter and group Asset CRs that the AssetGroup CR defines. See the [details](/components/console/#details-rafter-in-the-console) to learn more about these labels. |
 | **spec.displayName** | Yes | Specifies a human-readable name of the AssetGroup CR. |
 | **spec.description** | Yes | Provides more details on the purpose of the AssetGroup CR. |
 | **spec.bucketRef.name** | No | Specifies the name of the bucket that stores the assets from the AssetGroup. |

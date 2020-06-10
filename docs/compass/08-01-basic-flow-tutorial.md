@@ -17,7 +17,7 @@ For simplicity reasons, use the available Order Service as the sample external A
 - [Function](./assets/function.yaml) that calls `order-service` for orders
 - Kyma cluster with the Compass module and the API Packages feature enabled
 
->**NOTE:** Read [this](#installation-enable-compass-in-kyma-default-kyma-installation) document to learn how to install Kyma with the Compass module and the API Packages feature.
+>**NOTE:** Read about the [default installation](#installation-enable-compass-in-kyma-default-kyma-installation) to learn how to install Kyma with the Compass module and the API Packages feature.
 
 ## Steps
 
@@ -54,9 +54,9 @@ For simplicity reasons, use the available Order Service as the sample external A
 
 3. Create a Function. In the **Overview** tab, click the **Deploy new resource** button and upload the file with the [Function](./assets/function.yaml).
 
-4. Expose your Function following [this](/components/serverless/#tutorials-expose-a-function-with-an-api-rule) tutorial. Follow the instructions in the `Console UI` tab.
+4. Expose your Function following the [tutorial](/components/serverless/#tutorials-expose-a-function-with-an-api-rule). Use the instructions in the **Console UI** tab.
 
-5. Bind the ServiceInstance to your Function following [this](/components/serverless/#tutorials-bind-a-service-instance-to-a-function) tutorial. Follow the instructions in the `Console UI` tab.
+5. Bind the ServiceInstance to your Function following the [tutorial](/components/serverless/#tutorials-bind-a-service-instance-to-a-function). Use the instructions in the **Console UI** tab.
 
 ### Cleanup
 

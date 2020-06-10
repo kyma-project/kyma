@@ -10,4 +10,4 @@ The communication with Helm and Tiller is secured with TLS. If you get the `Tran
 
 This problem is most common for cluster deployments where the user must add the required elements to Helm Home manually. When you install Kyma locally, this operation is performed automatically in the installation process.
 
-Read [this](/components/security/#details-tls-in-tiller) document to learn more about security in communication with Helm and Tiller.
+For more information, read about [security](/components/security/#details-tls-in-tiller) in communication with Helm and Tiller.

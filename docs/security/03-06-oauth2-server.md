@@ -13,7 +13,7 @@ By default, every Kyma deployment comes with an OAuth2 authorization server solu
 
 Out of the box, the Kyma implementation of the ORY stack supports the [OAuth 2.0 Client Credentials Grant](https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/).
 
->**NOTE:** The implementation of the ORY Oauth2 server in Kyma is still in the early stages and is subject to changes and development. Read [this](https://kyma-project.io/blog/2019/7/31/kyma-collaboration-with-ory/) blog post to get a better understanding of the target integration of the ORY stack in Kyma.
+>**NOTE:** The implementation of the ORY Oauth2 server in Kyma is still in the early stages and is subject to changes and development. Read the [blog post](https://kyma-project.io/blog/2019/7/31/kyma-collaboration-with-ory/) to get a better understanding of the target integration of the ORY stack in Kyma.
 
 ## Register an OAuth2 client
 
@@ -60,7 +60,7 @@ Client credentials are stored as Kubernetes Secret in the same Namespace as the 
    EOF
    ```
 
-   >**NOTE:** This sample OAuth2Client CR has a redirect URI defined through the optional **spec.redirectUris** property. See [this](https://github.com/ory/hydra-maester/blob/master/config/crd/bases/hydra.ory.sh_oauth2clients.yaml) CRD for more details.  
+   >**NOTE:** This sample OAuth2Client CR has a redirect URI defined through the optional **spec.redirectUris** property. See the [CRD](https://github.com/ory/hydra-maester/blob/master/config/crd/bases/hydra.ory.sh_oauth2clients.yaml) for more details.  
 
 ### Use Hydra-generated credentials
 
@@ -100,7 +100,7 @@ If the credentials of your OAuth2 client are compromised, follow these steps to 
 
 ## OAuth2 server in action
 
-To see the OAuth2 server in action, complete [this](/components/api-gateway/#tutorials-tutorials) tutorial which shows you how to expose a service, secure it with OAuth2 tokens, and interact with it using the registered client.  
+To see the OAuth2 server in action, complete the [tutorial](/components/api-gateway/#tutorials-tutorials) which shows you how to expose a service, secure it with OAuth2 tokens, and interact with it using the registered client.  
 
 You can also interact with the OAuth2 server using its REST API. Read the official [ORY documentation](https://www.ory.sh/docs/hydra/sdk/api) to learn more about the available endpoints.
 
@@ -110,7 +110,7 @@ You can also interact with the OAuth2 server using its REST API. Read the offici
 
 ### OAuth2 client data persistence
 
-To prevent data loss, the OAuth2 server stores the registered client data in a database. By default, Kyma comes with a pre-configured in-cluster PostgreSQL database that requires no manual setup. This configuration is not, however, considered production-ready and we recommend using an external database. [This section](#configuration-o-auth2-server-profiles) provides guidance on migrating your OAuth2 server to the persistence mode of your choice, and describes the migration mechanism itself. 
+To prevent data loss, the OAuth2 server stores the registered client data in a database. By default, Kyma comes with a pre-configured in-cluster PostgreSQL database that requires no manual setup. This configuration is not, however, considered production-ready and we recommend using an external database. [This section](#configuration-o-auth2-server-profiles) provides guidance on migrating your OAuth2 server to the persistence mode of your choice, and describes the migration mechanism itself.
 
 ### The `ory-hydra-credentials` Secret
 
@@ -128,13 +128,13 @@ This list presents the priority of parameters in descending order:
 
 1. Use the overrides provided by the user before the installation or update process.
 
-2. Reuse the parameters stored in existing Kubernetes Secrets and accessible to the job's container through a volume mount. This option is available only for the update process. 
+2. Reuse the parameters stored in existing Kubernetes Secrets and accessible to the job's container through a volume mount. This option is available only for the update process.
 
    >**CAUTION:** The initial implementation of OAuth2 client persistence in Kyma doesn't follow the single Secret policy, but rather distributes the credentials per component. This mechanism is backward-compatible. However, we recommend removing the deprecated Secrets after upgrading. Deprecated Secrets are: `ory-hydra`, `ory-postgres`, and `ory-gcloud-sqlproxy`.
 
 3. Generate random values or fail, depending on the nature of a given value.
 
-The following table lists all the possible keys aggregated in the `ory-hydra-credentials` Secret, along with their fallback policies. 
+The following table lists all the possible keys aggregated in the `ory-hydra-credentials` Secret, along with their fallback policies.
 
 | Secret | Override | Fallback policy |
 |------- |----------|-----------------|

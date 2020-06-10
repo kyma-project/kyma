@@ -14,8 +14,8 @@ This tutorial is based on an existing Function. To create one, follow the [Creat
 You must also have:
 
 - An Application bound to a specific Namespace. Read the tutorials to learn how to [create](/components/application-connector#tutorials-create-a-new-application) an Application and [bind](/components/application-connector#tutorials-bind-an-application-to-a-namespace) it to a Namespace.
-- An event service (an API of [AsyncAPI](https://www.asyncapi.com/) type) registered in the desired Application. Learn [here](/components/application-connector#tutorials-register-a-service) how to do it.
-- A Service Instance created for the registered service to expose events in a specific Namespace. See [this](/components/application-connector#tutorials-bind-a-service-to-a-namespace) tutorial for details.
+- An event service (an API of [AsyncAPI](https://www.asyncapi.com/) type) registered in the desired Application. Read the [tutorial](/components/application-connector#tutorials-register-a-service) to learn how to do it.
+- A Service Instance created for the registered service to expose events in a specific Namespace. Read the [tutorial](/components/application-connector#tutorials-bind-a-service-to-a-namespace) for details.
 
 ## Steps
 
@@ -119,7 +119,7 @@ To test if the Trigger CR is properly connected to the Function:
 
     - **CLUSTER_DOMAIN** is the domain of your cluster, such as `kyma.local`.
 
-    - **CERT_FILE_NAME** and **KEY_FILE_NAME** are client certificates for a given Application. You can get them by completing steps in [this](/components/application-connector/#tutorials-get-the-client-certificate) tutorial.
+    - **CERT_FILE_NAME** and **KEY_FILE_NAME** are client certificates for a given Application. You can get them by completing steps in the [tutorial](/components/application-connector/#tutorials-get-the-client-certificate).
 
 3. After sending an event, you should get this result from logs of your Function's latest Pod:
 

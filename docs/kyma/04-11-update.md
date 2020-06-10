@@ -5,7 +5,7 @@ type: Installation
 
 This guide describes how to update Kyma deployed locally or on a cluster.
 
->**NOTE:** Updating Kyma means introducing changes to a running deployment. If you want to upgrade to a newer version, read [this](#installation-upgrade-kyma) document.
+>**NOTE:** Updating Kyma means introducing changes to a running deployment. If you want to upgrade to a newer version, read the [installation document](#installation-upgrade-kyma).
 
 ## Prerequisites
 
@@ -36,15 +36,13 @@ In case of dependency conflicts or major changes between components versions, so
 
 - If you update an existing component, make all required changes to the Helm charts of the component located in the [`resources`](https://github.com/kyma-project/kyma/tree/master/resources) directory.
 
-- If you add a new component to your Kyma deployment, add a top-level Helm chart for that component. Additionally, run this command to edit the Installation custom resource and add the new component to the installed components list:
+- If you add a new component to your Kyma deployment, add a top-level Helm chart for that component. Additionally, run this command to edit the [Installation custom resource](#custom-resource-installation) and add the new component to the installed components list:
 
    ```bash
    kubectl -n default edit installation kyma-installation
    ```
 
-   > **NOTE:** Read [this](#custom-resource-installation) document to learn more about the Installation custom resource.
-
-- If you introduced changes in overrides, update the existing ConfigMaps and Secrets. Add new ConfigMaps and Secrets if required. See [this](#configuration-helm-overrides-for-kyma-installation) document for more information on overrides.
+- If you introduced changes in overrides, update the existing ConfigMaps and Secrets. Add new ConfigMaps and Secrets if required. See the [configuration document](#configuration-helm-overrides-for-kyma-installation) for more information on overrides.
 
 ## Perform the update
 

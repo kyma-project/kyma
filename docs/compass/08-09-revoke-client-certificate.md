@@ -15,22 +15,22 @@ After you have established a secure connection with Compass and generated a clie
 - Runtime connected to Compass
 - [Established secure connection with Compass](#tutorials-establish-a-secure-connection-with-compass)
 
-> **NOTE**: To see how to maintain a secure connection with Compass and renew a client certificate, read [this](#tutorials-maintain-a-secure-connection-with-compass) tutorial.
+> **NOTE**: To see how to maintain a secure connection with Compass and renew a client certificate, read the [tutorial](#tutorials-maintain-a-secure-connection-with-compass).
 
 ## Steps
 
 1. Revoke the client certificate
 
-    To revoke a client certificate, make a call to the Certificate-Secured Connector URL using the client certificate. 
+    To revoke a client certificate, make a call to the Certificate-Secured Connector URL using the client certificate.
     The Certificate-Secured Connector URL is the `certificateSecuredConnectorURL` obtained when establishing a secure connection with Compass.
     Send this mutation with the call:
-    
+
     ```graphql
     mutation { result: revokeCertificate }
-    ``` 
+    ```
 
     A successful call returns the following response:
-    
+
     ```json
     {"data":{"result":true}}
     ```
