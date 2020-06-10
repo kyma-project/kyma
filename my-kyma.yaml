@@ -264,11 +264,10 @@ spec:
       containers:
       - name: kyma-installer-container
         # image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
-        image: eu.gcr.io/kyma-project/kyma-installer:PR-8679-8996a2c3
+        image: jakkab/kyma-installer:1006_1054
         imagePullPolicy: IfNotPresent
         args:
           - -overrideLogFile=/app/overrides.txt
-          - -helmDebugMode=true
         volumeMounts:
           - mountPath: /etc/certs
             name: helm-certs
@@ -309,3 +308,81 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: kyma-installer-reader
+---
+apiVersion: "installer.kyma-project.io/v1alpha1"
+kind: Installation
+metadata:
+  name: kyma-installation
+  namespace: default
+  labels:
+    action: install
+    kyma-project.io/installation: ""
+  finalizers:
+    - finalizer.installer.kyma-project.io
+spec:
+  version: "__VERSION__"
+  url: "__URL__"
+  components:
+    - name: "cluster-essentials"
+      namespace: "kyma-system"
+    - name: "testing"
+      namespace: "kyma-system"
+    - name: "istio"
+      namespace: "istio-system"
+    - name: "xip-patch"
+      namespace: "kyma-installer"
+    - name: "istio-kyma-patch"
+      namespace: "istio-system"
+    - name: "knative-serving"
+      namespace: "knative-serving"
+    - name: "knative-eventing"
+      namespace: "knative-eventing"
+    # - name: "knative-eventing-kafka"
+    #   namespace: knative-eventing    
+    - name: "dex"
+      namespace: "kyma-system"
+    - name: "ory"
+      namespace: "kyma-system"
+    - name: "api-gateway"
+      namespace: "kyma-system"   
+    - name: "rafter"
+      namespace: "kyma-system"
+    - name: "service-catalog"
+      namespace: "kyma-system"
+    - name: "service-catalog-addons"
+      namespace: "kyma-system"
+    - name: "helm-broker"
+      namespace: "kyma-system"
+    - name: "nats-streaming"
+      namespace: "natss"
+    - name: "core"
+      namespace: "kyma-system"
+    - name: "cluster-users"
+      namespace: "kyma-system"
+    - name: "logging"
+      namespace: "kyma-system"
+    - name: "permission-controller"
+      namespace: "kyma-system"
+    - name: "apiserver-proxy"
+      namespace: "kyma-system"
+    - name: "iam-kubeconfig-service"
+      namespace: "kyma-system"
+    - name: "serverless"
+      namespace: "kyma-system"
+    - name: "knative-provisioner-natss"
+      namespace: "knative-eventing"
+    - name: "event-sources"
+      namespace: "kyma-system"
+    - name: "application-connector"
+      namespace: "kyma-integration"
+    - name: "tracing"
+      namespace: "kyma-system"
+    - name: "monitoring"
+      namespace: "kyma-system"
+    - name: "kiali"
+      namespace: "kyma-system"
+
+    #- name: "compass"
+    #  namespace: "compass-system"
+    #- name: "compass-runtime-agent"
+    #  namespace: "compass-system"
