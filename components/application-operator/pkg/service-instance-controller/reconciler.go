@@ -3,7 +3,7 @@ package service_instance_controller
 import (
 	"context"
 
-	"k8s.io/helm/pkg/proto/hapi/release"
+	"helm.sh/helm/v3/pkg/release"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/gateway"
@@ -70,7 +70,7 @@ func (r *serviceInstanceReconciler) Reconcile(request reconcile.Request) (reconc
 	}
 
 	// If Gateway release is not properly deployed - delete release and requeue request
-	if status == release.Status_FAILED {
+	if status == release.StatusFailed {
 		err := r.deleteGateway(request.Namespace, log)
 		if err != nil {
 			return reconcile.Result{}, err
@@ -133,15 +133,15 @@ func (r *serviceInstanceReconciler) gatewayShouldBeDeleted(namespace string, log
 	return len(list.Items) == 0, nil
 }
 
-func (r *serviceInstanceReconciler) getGatewayStatus(namespace string, log *logrus.Entry) (release.Status_Code, bool, error) {
+func (r *serviceInstanceReconciler) getGatewayStatus(namespace string, log *logrus.Entry) (release.Status, bool, error) {
 	log.Info("Checking if Gateway exists and is in correct state")
 
 	exists, status, err := r.gatewayDeployer.GatewayExists(namespace)
 	if err != nil {
-		return release.Status_UNKNOWN, false, err
+		return release.StatusUnknown, false, err
 	}
 
-	log.Infof("Gateway status: Exists: %v, Status: %s", exists, release.Status_Code_name[int32(status)])
+	log.Infof("Gateway status: Exists: %v, Status: %s", exists, status)
 
 	return status, exists, nil
 }
