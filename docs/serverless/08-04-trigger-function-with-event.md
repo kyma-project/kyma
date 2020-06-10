@@ -107,7 +107,7 @@ To test if the Trigger CR is properly connected to the Function:
 
 2.  Send an event manually to trigger the function. The first example shows the implementation introduced with the Kyma 1.11 release where a [CloudEvent](https://github.com/cloudevents/spec/blob/v1.0/spec.md) is sent directly to the Event Mesh. In the second example, an event also reaches the Event Mesh, but it is first modified by the compatibility layer to the format compliant with the CloudEvents specification. This solution ensures compatibility if your events follow a format other than CloudEvents, or you use the Event Bus available before 1.11.
 
-> **TIP:** For details on CloudEvents, exposed endpoints, and the compatibility layer, read about [event processing and delivery](/components/event-mesh/#details-event-processing-and-delivery).
+    > **TIP:** For details on CloudEvents, exposed endpoints, and the compatibility layer, read about [event processing and delivery](/components/event-mesh/#details-event-processing-and-delivery).
 
     <div tabs name="examples" group="test=trigger">
       <details>
