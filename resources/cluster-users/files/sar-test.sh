@@ -441,7 +441,7 @@ function runTests() {
 	testKnativeServing "${ADMIN_EMAIL}" "${NAMESPACE}" "yes"
 
 	testKymaEventing "${ADMIN_EMAIL}" "${NAMESPACE}" "yes" "yes"
-  testKymaEventing "${ADMIN_EMAIL}" "${SYSTEM_NAMESPACE}" "yes" "yes"
+	testKymaEventing "${ADMIN_EMAIL}" "${SYSTEM_NAMESPACE}" "yes" "yes"
 
 	echo "--> ${ADMIN_EMAIL} should be able to delete any namespace in the cluster"
 	testPermissionsClusterScoped "delete" "namespace" "yes"
