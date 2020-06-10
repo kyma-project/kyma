@@ -2,18 +2,22 @@ package resource
 
 import (
 	"fmt"
-	"reflect"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/dynamic/dynamicinformer"
 	"time"
 
-	"github.com/pkg/errors"
-
-	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamicinformer"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 )
+
+var NotFound = fmt.Errorf("resource not found")
+
+type Appendable interface {
+	Append() interface{}
+}
 
 type ServiceFactory struct {
 	Client          dynamic.Interface
@@ -38,50 +42,54 @@ func NewServiceFactory(client dynamic.Interface, informerFactory dynamicinformer
 }
 
 type Service struct {
-	Client   dynamic.NamespaceableResourceInterface
-	Informer cache.SharedIndexInformer
-	new      func() interface{}
+	client   dynamic.NamespaceableResourceInterface
+	informer cache.SharedIndexInformer
+	notifier *Notifier
 }
 
 func (f *ServiceFactory) ForResource(gvr schema.GroupVersionResource) *Service {
+	notifier := NewNotifier()
+	informer := f.InformerFactory.ForResource(gvr).Informer()
+	informer.AddEventHandler(notifier)
 	return &Service{
-		Client:   f.Client.Resource(gvr),
-		Informer: f.InformerFactory.ForResource(gvr).Informer(),
+		client:   f.Client.Resource(gvr),
+		informer: informer,
+		notifier: notifier,
 	}
 }
 
-func (s *Service) ListInIndex(index, key string, results interface{}) error {
-	resultsVal := reflect.ValueOf(results)
-	if resultsVal.Kind() != reflect.Ptr {
-		return errors.New("results argument must be a pointer to a slice")
-	}
-
-	sliceVal := resultsVal.Elem()
-	elementType := sliceVal.Type().Elem()
-
-	items, err := s.Informer.GetIndexer().ByIndex(index, key)
+func (s *Service) ListByIndex(index, key string, result Appendable) error {
+	items, err := s.informer.GetIndexer().ByIndex(index, key)
 	if err != nil {
 		return err
 	}
 
-	sliceVal, err = s.addItems(sliceVal, elementType, items)
-	if err != nil {
-		return err
+	for _, item := range items {
+		converted := result.Append()
+		err := FromUnstructured(item.(*unstructured.Unstructured), converted)
+		if err != nil {
+			return err
+		}
 	}
 
-	resultsVal.Elem().Set(sliceVal)
 	return nil
 }
 
-func (s *Service) FindInNamespace(name, namespace string, result interface{}) error {
-	key := fmt.Sprintf("%s/%s", namespace, name)
-	item, exists, err := s.Informer.GetStore().GetByKey(key)
+func (s *Service) ListInNamespace(namespace string, result Appendable) error {
+	return s.ListByIndex(cache.NamespaceIndex, namespace, result)
+}
 
+func (s *Service) List(result Appendable) error {
+	return s.ListInNamespace("", result)
+}
+
+func (s *Service) GetByKey(key string, result interface{}) error {
+	item, exists, err := s.informer.GetStore().GetByKey(key)
 	if err != nil {
 		return err
 	}
 	if !exists {
-		return nil
+		return NotFound
 	}
 
 	err = FromUnstructured(item.(*unstructured.Unstructured), result)
@@ -92,29 +100,33 @@ func (s *Service) FindInNamespace(name, namespace string, result interface{}) er
 	return nil
 }
 
-func (s *Service) AddIndexers(indexers cache.Indexers) error {
-	err := s.Informer.AddIndexers(indexers)
-	if err != nil && err.Error() == "informer has already started" {
-		return nil
-	}
-	return err
+func (s *Service) GetInNamespace(name, namespace string, result interface{}) error {
+	key := fmt.Sprintf("%s/%s", namespace, name)
+	return s.GetByKey(key, result)
 }
 
-func (s *Service) addItems(sliceVal reflect.Value, elemType reflect.Type, items []interface{}) (reflect.Value, error) {
-	for index, item := range items {
-		if sliceVal.Len() == index {
-			// slice is full
-			newElem := reflect.New(elemType)
-			sliceVal = reflect.Append(sliceVal, newElem.Elem())
-			sliceVal = sliceVal.Slice(0, sliceVal.Cap())
-		}
+func (s *Service) Get(name string, result interface{}) error {
+	return s.GetByKey(name, result)
+}
 
-		currElem := sliceVal.Index(index).Addr().Interface()
-		err := FromUnstructured(item.(*unstructured.Unstructured), currElem)
-		if err != nil {
-			return sliceVal, err
-		}
+func (s *Service) Create(obj interface{}, result interface{}) error {
+	u, err := ToUnstructured(obj)
+	if err != nil {
+		return err
 	}
 
-	return sliceVal, nil
+	created, err := s.client.Create(u, v1.CreateOptions{})
+	if err != nil {
+		return err
+	}
+
+	return FromUnstructured(created, result)
+}
+
+func (s *Service) AddListener(listener *Listener) {
+	s.notifier.AddListener(listener)
+}
+
+func (s *Service) DeleteListener(listener *Listener) {
+	s.notifier.DeleteListener(listener)
 }
