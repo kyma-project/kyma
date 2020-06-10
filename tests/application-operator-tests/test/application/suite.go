@@ -29,7 +29,6 @@ const (
 
 type TestSuite struct {
 	application string
-	namespace   string
 
 	config     testkit.TestConfig
 	helmClient testkit.HelmClient
