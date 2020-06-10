@@ -26,6 +26,13 @@ webhooks:
     - CREATE
     resources:
     - pods
+  namespaceSelector:
+    matchExpressions:
+    - key: gardener.cloud/purpose
+      operator: NotIn
+      values:
+      - kube-system
+  timeoutSeconds: 10
 ---
 apiVersion: v1
 kind: Secret
