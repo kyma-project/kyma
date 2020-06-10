@@ -125,7 +125,7 @@ func (s *SubscriberState) getAllCE(w http.ResponseWriter, r *http.Request) {
 	log.Infof("Getting all CE: %v", events)
 
 	if err := json.NewEncoder(w).Encode(events); err != nil {
-		log.Errorf("Error during getAllCE: %v", err)
+		log.Errorf("error during getAllCE: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
@@ -143,7 +143,7 @@ func (s *SubscriberState) checkCEbyUUID(w http.ResponseWriter, r *http.Request) 
 	}
 	log.Infof("Checking for uuid: %v. found: %v", uuid, ce)
 	if err := json.NewEncoder(w).Encode(ce); err != nil {
-		log.Errorf("Error during checkCEbyUUID: %v", err)
+		log.Errorf("error during checkCEbyUUID: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
@@ -153,7 +153,7 @@ func (s *SubscriberState) checkCounter(w http.ResponseWriter, r *http.Request) {
 	log.Infof("Checking counter: %v", response)
 
 	if err := json.NewEncoder(w).Encode(response); err != nil {
-		log.Errorf("Error during checkCounter: %v", err)
+		log.Errorf("error during checkCounter: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
