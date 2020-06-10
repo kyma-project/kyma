@@ -53,7 +53,7 @@ To develop the component, use the formulae declared in the [generic](/common/mak
 | **WEBHOOK_PORT**                          | Port on which the webhook server are exposed                                                    | `8443`               |
 | **WEBHOOK_VALIDATION_MIN_REQUEST_CPU**    | Minimum amount of requested the limits and requests CPU to pass through the validation          | `10m`                |
 | **WEBHOOK_VALIDATION_MIN_REQUEST_MEMORY** | Minimum amount of requested the limits and requests memory to pass through the validation       | `16Mi`               |
-| **WEBHOOK_VALIDATION_MIN_REPLICAS_VALUE** | Minimum amount of replicas to pass through the validation                                       | `0`                  |
+| **WEBHOOK_VALIDATION_MIN_REPLICAS_VALUE** | Minimum amount of replicas to pass through the validation                                       | `1`                  |
 | **WEBHOOK_VALIDATION_RESERVED_ENVS**      | List of reserved envs                                                                           | `{}`                 |
 | **WEBHOOK_DEFAULTING_REQUEST_CPU**        | Value of the request CPU which webhook should set if origin equals null                         | `50m`                |
 | **WEBHOOK_DEFAULTING_REQUEST_MEMORY**     | Value of the request memory which webhook should set if origin equals null                      | `64Mi`               |

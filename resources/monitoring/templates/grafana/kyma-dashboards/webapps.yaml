@@ -1609,8 +1609,8 @@ data:
         {
           "allValue":null,
           "current":{
-            "text":"core-console",
-            "value":"core-console"
+            "text":"console-web",
+            "value":"console-web"
           },
           "datasource":"Prometheus",
           "hide":0,

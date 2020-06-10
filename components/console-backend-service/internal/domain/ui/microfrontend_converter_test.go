@@ -37,12 +37,12 @@ func TestMicroFrontendConverter_ToGQL(t *testing.T) {
 		}
 
 		expectedNavigationNode := fixGqlNavigationNode()
-		expected := gqlschema.MicroFrontend{
+		expected := &gqlschema.MicroFrontend{
 			Name:        name,
 			Version:     version,
 			Category:    category,
 			ViewBaseURL: viewBaseUrl,
-			NavigationNodes: []gqlschema.NavigationNode{
+			NavigationNodes: []*gqlschema.NavigationNode{
 				expectedNavigationNode,
 			},
 		}
@@ -50,7 +50,7 @@ func TestMicroFrontendConverter_ToGQL(t *testing.T) {
 		result, err := converter.ToGQL(&item)
 
 		assert.Nil(t, err)
-		assert.Equal(t, &expected, result)
+		assert.Equal(t, expected, result)
 	})
 
 	t.Run("Empty", func(t *testing.T) {
@@ -96,12 +96,12 @@ func TestMicroFrontendConverter_ToGQLs(t *testing.T) {
 	}
 
 	expectedNavigationNode := fixGqlNavigationNode()
-	expected := gqlschema.MicroFrontend{
+	expected := &gqlschema.MicroFrontend{
 		Name:        name,
 		Version:     version,
 		Category:    category,
 		ViewBaseURL: viewBaseUrl,
-		NavigationNodes: []gqlschema.NavigationNode{
+		NavigationNodes: []*gqlschema.NavigationNode{
 			expectedNavigationNode,
 		},
 	}

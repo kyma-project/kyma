@@ -15,12 +15,12 @@ type gqlBindingConverter interface {
 }
 
 type Binding struct {
-	channel   chan<- gqlschema.ServiceBindingEvent
+	channel   chan<- *gqlschema.ServiceBindingEvent
 	filter    func(bindingUsage *api.ServiceBinding) bool
 	converter gqlBindingConverter
 }
 
-func NewBinding(channel chan<- gqlschema.ServiceBindingEvent, filter func(binding *api.ServiceBinding) bool, converter gqlBindingConverter) *Binding {
+func NewBinding(channel chan<- *gqlschema.ServiceBindingEvent, filter func(binding *api.ServiceBinding) bool, converter gqlBindingConverter) *Binding {
 	return &Binding{
 		channel:   channel,
 		filter:    filter,
@@ -64,9 +64,9 @@ func (l *Binding) notify(eventType gqlschema.SubscriptionEventType, binding *api
 		return nil
 	}
 
-	event := gqlschema.ServiceBindingEvent{
+	event := &gqlschema.ServiceBindingEvent{
 		Type:           eventType,
-		ServiceBinding: *gqlBinding,
+		ServiceBinding: gqlBinding,
 	}
 
 	l.channel <- event

@@ -60,7 +60,7 @@ func TestResourceResolver_CreateResourceMutation(t *testing.T) {
 		result, err := resolver.CreateResourceMutation(nil, namespace, resourceJSON)
 
 		require.NoError(t, err)
-		assert.Equal(t, &resourceJSON, result)
+		assert.Equal(t, resourceJSON, result)
 	})
 
 	t.Run("ErrorConvertingToResource", func(t *testing.T) {

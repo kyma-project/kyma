@@ -50,7 +50,7 @@ type ServiceBindingUsageLister interface {
 //go:generate failery -name=GqlServiceBindingUsageConverter -case=underscore -output disabled -outpkg disabled
 type GqlServiceBindingUsageConverter interface {
 	ToGQL(item *bindingUsageApi.ServiceBindingUsage) (*gqlschema.ServiceBindingUsage, error)
-	ToGQLs(in []*bindingUsageApi.ServiceBindingUsage) ([]gqlschema.ServiceBindingUsage, error)
+	ToGQLs(in []*bindingUsageApi.ServiceBindingUsage) ([]*gqlschema.ServiceBindingUsage, error)
 }
 
 var (
@@ -151,34 +151,34 @@ type Resolver interface {
 	DeleteServiceBindingUsageMutation(ctx context.Context, serviceBindingUsageName, namespace string) (*gqlschema.DeleteServiceBindingUsageOutput, error)
 	DeleteServiceBindingUsagesMutation(ctx context.Context, serviceBindingUsageNames []string, namespace string) ([]*gqlschema.DeleteServiceBindingUsageOutput, error)
 	ServiceBindingUsageQuery(ctx context.Context, name, namespace string) (*gqlschema.ServiceBindingUsage, error)
-	ServiceBindingUsagesQuery(ctx context.Context, namespace string, resourceKind, resourceName *string) ([]gqlschema.ServiceBindingUsage, error)
-	ServiceBindingUsagesOfInstanceQuery(ctx context.Context, instanceName, env string) ([]gqlschema.ServiceBindingUsage, error)
-	ServiceBindingUsageEventSubscription(ctx context.Context, namespace string, resourceKind, resourceName *string) (<-chan gqlschema.ServiceBindingUsageEvent, error)
+	ServiceBindingUsagesQuery(ctx context.Context, namespace string, resourceKind, resourceName *string) ([]*gqlschema.ServiceBindingUsage, error)
+	ServiceBindingUsagesOfInstanceQuery(ctx context.Context, instanceName, env string) ([]*gqlschema.ServiceBindingUsage, error)
+	ServiceBindingUsageEventSubscription(ctx context.Context, namespace string, resourceKind, resourceName *string) (<-chan *gqlschema.ServiceBindingUsageEvent, error)
 
-	ListUsageKinds(ctx context.Context, first *int, offset *int) ([]gqlschema.UsageKind, error)
-	ListBindableResources(ctx context.Context, namespace string) ([]gqlschema.BindableResourcesOutputItem, error)
+	ListUsageKinds(ctx context.Context, first *int, offset *int) ([]*gqlschema.UsageKind, error)
+	ListBindableResources(ctx context.Context, namespace string) ([]*gqlschema.BindableResourcesOutputItem, error)
 
-	AddonsConfigurationsQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.AddonsConfiguration, error)
-	CreateAddonsConfiguration(ctx context.Context, name, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error)
-	UpdateAddonsConfiguration(ctx context.Context, name, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error)
+	AddonsConfigurationsQuery(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.AddonsConfiguration, error)
+	CreateAddonsConfiguration(ctx context.Context, name, namespace string, repositories []*gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels gqlschema.Labels) (*gqlschema.AddonsConfiguration, error)
+	UpdateAddonsConfiguration(ctx context.Context, name, namespace string, repositories []*gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels gqlschema.Labels) (*gqlschema.AddonsConfiguration, error)
 	DeleteAddonsConfiguration(ctx context.Context, name, namespace string) (*gqlschema.AddonsConfiguration, error)
 	AddAddonsConfigurationURLs(ctx context.Context, name, namespace string, urls []string) (*gqlschema.AddonsConfiguration, error)
 	RemoveAddonsConfigurationURLs(ctx context.Context, name, namespace string, urls []string) (*gqlschema.AddonsConfiguration, error)
-	AddAddonsConfigurationRepositories(ctx context.Context, name, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput) (*gqlschema.AddonsConfiguration, error)
+	AddAddonsConfigurationRepositories(ctx context.Context, name, namespace string, repositories []*gqlschema.AddonsConfigurationRepositoryInput) (*gqlschema.AddonsConfiguration, error)
 	RemoveAddonsConfigurationRepositories(ctx context.Context, name, namespace string, urls []string) (*gqlschema.AddonsConfiguration, error)
 	ResyncAddonsConfiguration(ctx context.Context, name, namespace string) (*gqlschema.AddonsConfiguration, error)
-	AddonsConfigurationEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.AddonsConfigurationEvent, error)
+	AddonsConfigurationEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.AddonsConfigurationEvent, error)
 
-	ClusterAddonsConfigurationsQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.AddonsConfiguration, error)
-	CreateClusterAddonsConfiguration(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error)
-	UpdateClusterAddonsConfiguration(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error)
+	ClusterAddonsConfigurationsQuery(ctx context.Context, first *int, offset *int) ([]*gqlschema.AddonsConfiguration, error)
+	CreateClusterAddonsConfiguration(ctx context.Context, name string, repositories []*gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels gqlschema.Labels) (*gqlschema.AddonsConfiguration, error)
+	UpdateClusterAddonsConfiguration(ctx context.Context, name string, repositories []*gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels gqlschema.Labels) (*gqlschema.AddonsConfiguration, error)
 	DeleteClusterAddonsConfiguration(ctx context.Context, name string) (*gqlschema.AddonsConfiguration, error)
 	AddClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error)
 	RemoveClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error)
-	AddClusterAddonsConfigurationRepositories(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput) (*gqlschema.AddonsConfiguration, error)
+	AddClusterAddonsConfigurationRepositories(ctx context.Context, name string, repositories []*gqlschema.AddonsConfigurationRepositoryInput) (*gqlschema.AddonsConfiguration, error)
 	RemoveClusterAddonsConfigurationRepositories(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error)
 	ResyncClusterAddonsConfiguration(ctx context.Context, name string) (*gqlschema.AddonsConfiguration, error)
-	ClusterAddonsConfigurationEventSubscription(ctx context.Context) (<-chan gqlschema.ClusterAddonsConfigurationEvent, error)
+	ClusterAddonsConfigurationEventSubscription(ctx context.Context) (<-chan *gqlschema.ClusterAddonsConfigurationEvent, error)
 }
 
 type domainResolver struct {

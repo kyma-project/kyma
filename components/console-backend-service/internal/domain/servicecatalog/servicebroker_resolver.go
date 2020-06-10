@@ -17,7 +17,7 @@ import (
 //go:generate mockery -name=gqlServiceBrokerConverter -output=automock -outpkg=automock -case=underscore
 type gqlServiceBrokerConverter interface {
 	ToGQL(in *v1beta1.ServiceBroker) (*gqlschema.ServiceBroker, error)
-	ToGQLs(in []*v1beta1.ServiceBroker) ([]gqlschema.ServiceBroker, error)
+	ToGQLs(in []*v1beta1.ServiceBroker) ([]*gqlschema.ServiceBroker, error)
 }
 
 //go:generate mockery -name=serviceBrokerSvc -output=automock -outpkg=automock -case=underscore
@@ -40,7 +40,7 @@ func newServiceBrokerResolver(serviceBrokerSvc serviceBrokerSvc) *serviceBrokerR
 	}
 }
 
-func (r *serviceBrokerResolver) ServiceBrokersQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ServiceBroker, error) {
+func (r *serviceBrokerResolver) ServiceBrokersQuery(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.ServiceBroker, error) {
 	items, err := r.serviceBrokerSvc.List(namespace, pager.PagingParams{
 		First:  first,
 		Offset: offset,
@@ -79,8 +79,8 @@ func (r *serviceBrokerResolver) ServiceBrokerQuery(ctx context.Context, name str
 	return result, nil
 }
 
-func (r *serviceBrokerResolver) ServiceBrokerEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBrokerEvent, error) {
-	channel := make(chan gqlschema.ServiceBrokerEvent, 1)
+func (r *serviceBrokerResolver) ServiceBrokerEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.ServiceBrokerEvent, error) {
+	channel := make(chan *gqlschema.ServiceBrokerEvent, 1)
 	filter := func(entity *v1beta1.ServiceBroker) bool {
 		return entity != nil && entity.Namespace == namespace
 	}

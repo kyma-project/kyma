@@ -46,7 +46,7 @@ func TestIDPPresetResolver_CreateIDPPresetMutation(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		require.NotNil(t, gotIDP)
-		assert.Equal(t, fixGQLIDPPresetObj, *gotIDP)
+		assert.Equal(t, fixGQLIDPPresetObj, gotIDP)
 	})
 
 	t.Run("Already exists", func(t *testing.T) {
@@ -128,7 +128,7 @@ func TestIDPPresetResolver_DeleteIDPPresetMutation(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		require.NotNil(t, gotIDP)
-		assert.Equal(t, fixGQLIDPPresetObj, *gotIDP)
+		assert.Equal(t, fixGQLIDPPresetObj, gotIDP)
 	})
 
 	t.Run("Not found", func(t *testing.T) {
@@ -203,7 +203,7 @@ func TestIDPPresetResolver_IDPPresetQuery(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		require.NotNil(t, gotIDP)
-		assert.Equal(t, fixGQLIDPPresetObj, *gotIDP)
+		assert.Equal(t, fixGQLIDPPresetObj, gotIDP)
 	})
 
 	t.Run("Not found", func(t *testing.T) {
@@ -280,10 +280,7 @@ func TestIDPPresetResolver_IDPPresetsQuery(t *testing.T) {
 
 	t.Run("Not found", func(t *testing.T) {
 		// given
-		var (
-			fixEmptyIDPPresetsArray    = []*v1alpha1.IDPPreset{}
-			fixEmptyGQLIDPPresetsArray = []gqlschema.IDPPreset{}
-		)
+		var fixEmptyIDPPresetsArray []*v1alpha1.IDPPreset
 
 		svc := automock.NewIDPPresetSvc()
 		defer svc.AssertExpectations(t)
@@ -297,14 +294,14 @@ func TestIDPPresetResolver_IDPPresetsQuery(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		assert.Equal(t, fixEmptyGQLIDPPresetsArray, gotIDPs)
+		assert.Equal(t, []*gqlschema.IDPPreset{}, gotIDPs)
 	})
 
 	t.Run("Error", func(t *testing.T) {
 		// given
 		var (
-			fixEmptyIDPPresetsArray    = []*v1alpha1.IDPPreset{}
-			fixEmptyGQLIDPPresetsArray = []gqlschema.IDPPreset{}
+			fixEmptyIDPPresetsArray    []*v1alpha1.IDPPreset
+			fixEmptyGQLIDPPresetsArray []*gqlschema.IDPPreset
 			fixErr                     = errors.New("something went wrong")
 		)
 

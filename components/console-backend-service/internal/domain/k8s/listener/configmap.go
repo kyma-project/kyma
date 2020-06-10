@@ -15,12 +15,12 @@ type gqlConfigMapConverter interface {
 }
 
 type ConfigMap struct {
-	channel   chan<- gqlschema.ConfigMapEvent
+	channel   chan<- *gqlschema.ConfigMapEvent
 	filter    func(configMap *v1.ConfigMap) bool
 	converter gqlConfigMapConverter
 }
 
-func NewConfigMap(channel chan<- gqlschema.ConfigMapEvent, filter func(configMap *v1.ConfigMap) bool, converter gqlConfigMapConverter) *ConfigMap {
+func NewConfigMap(channel chan<- *gqlschema.ConfigMapEvent, filter func(configMap *v1.ConfigMap) bool, converter gqlConfigMapConverter) *ConfigMap {
 	return &ConfigMap{
 		channel:   channel,
 		filter:    filter,
@@ -62,9 +62,9 @@ func (l *ConfigMap) notify(eventType gqlschema.SubscriptionEventType, configMap 
 		return
 	}
 
-	event := gqlschema.ConfigMapEvent{
+	event := &gqlschema.ConfigMapEvent{
 		Type:      eventType,
-		ConfigMap: *gqlConfigMap,
+		ConfigMap: gqlConfigMap,
 	}
 
 	l.channel <- event

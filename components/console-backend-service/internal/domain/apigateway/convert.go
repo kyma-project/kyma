@@ -74,12 +74,12 @@ func (c *apiRuleConverter) ToGQL(in *v1alpha1.APIRule) (*gqlschema.APIRule, erro
 		return nil, nil
 	}
 
-	var rules []gqlschema.Rule
+	var rules []*gqlschema.Rule
 
 	for _, rule := range in.Spec.Rules {
-		var gqlRule gqlschema.Rule
-		var gqlAccessStrategies []gqlschema.APIRuleConfig
-		var gqlMutators []gqlschema.APIRuleConfig
+		gqlRule := &gqlschema.Rule{}
+		var gqlAccessStrategies []*gqlschema.APIRuleConfig
+		var gqlMutators []*gqlschema.APIRuleConfig
 
 		for _, accessStrategy := range rule.AccessStrategies {
 			qglAccessStrategyConfig, err := toGQLJSON(accessStrategy.Config)
@@ -87,7 +87,7 @@ func (c *apiRuleConverter) ToGQL(in *v1alpha1.APIRule) (*gqlschema.APIRule, erro
 				return nil, err
 			}
 
-			gqlAccessStrategies = append(gqlAccessStrategies, gqlschema.APIRuleConfig{
+			gqlAccessStrategies = append(gqlAccessStrategies, &gqlschema.APIRuleConfig{
 				Name:   accessStrategy.Name,
 				Config: qglAccessStrategyConfig,
 			})
@@ -99,7 +99,7 @@ func (c *apiRuleConverter) ToGQL(in *v1alpha1.APIRule) (*gqlschema.APIRule, erro
 				return nil, err
 			}
 
-			gqlMutators = append(gqlMutators, gqlschema.APIRuleConfig{
+			gqlMutators = append(gqlMutators, &gqlschema.APIRuleConfig{
 				Name:   mutator.Name,
 				Config: gqlMutatorConfig,
 			})
@@ -115,14 +115,14 @@ func (c *apiRuleConverter) ToGQL(in *v1alpha1.APIRule) (*gqlschema.APIRule, erro
 
 	return &gqlschema.APIRule{
 		Name: in.Name,
-		Service: gqlschema.APIRuleService{
+		Service: &gqlschema.APIRuleService{
 			Host: *in.Spec.Service.Host,
 			Name: *in.Spec.Service.Name,
 			Port: int(*in.Spec.Service.Port),
 		},
 		Gateway: *in.Spec.Gateway,
 		Rules:   rules,
-		Status: gqlschema.APIRuleStatuses{
+		Status: &gqlschema.APIRuleStatuses{
 			APIRuleStatus:        getResourceStatusOrNil(in.Status.APIRuleStatus),
 			AccessRuleStatus:     getResourceStatusOrNil(in.Status.AccessRuleStatus),
 			VirtualServiceStatus: getResourceStatusOrNil(in.Status.VirtualServiceStatus),
@@ -140,8 +140,8 @@ func getResourceStatusOrNil(status *v1alpha1.APIRuleResourceStatus) *gqlschema.A
 	}
 }
 
-func (c *apiRuleConverter) ToGQLs(in []*v1alpha1.APIRule) ([]gqlschema.APIRule, error) {
-	var result []gqlschema.APIRule
+func (c *apiRuleConverter) ToGQLs(in []*v1alpha1.APIRule) ([]*gqlschema.APIRule, error) {
+	var result []*gqlschema.APIRule
 	for _, item := range in {
 		converted, err := c.ToGQL(item)
 		if err != nil {
@@ -149,7 +149,7 @@ func (c *apiRuleConverter) ToGQLs(in []*v1alpha1.APIRule) ([]gqlschema.APIRule, 
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 
@@ -189,7 +189,7 @@ func (c *apiRuleConverter) ToApiRule(name string, namespace string, in gqlschema
 	}
 }
 
-func toRules(ruleInputs []gqlschema.RuleInput) []v1alpha1.Rule {
+func toRules(ruleInputs []*gqlschema.RuleInput) []v1alpha1.Rule {
 	var rules []v1alpha1.Rule
 	for _, rule := range ruleInputs {
 
@@ -203,7 +203,7 @@ func toRules(ruleInputs []gqlschema.RuleInput) []v1alpha1.Rule {
 	return rules
 }
 
-func toAccessStrategies(accessStrategyInputs []gqlschema.APIRuleConfigInput) []*alpha1.Authenticator {
+func toAccessStrategies(accessStrategyInputs []*gqlschema.APIRuleConfigInput) []*alpha1.Authenticator {
 	var accessStrategies []*alpha1.Authenticator
 	for _, accessStrategy := range accessStrategyInputs {
 		accessStrategies = append(accessStrategies, &alpha1.Authenticator{
@@ -216,7 +216,7 @@ func toAccessStrategies(accessStrategyInputs []gqlschema.APIRuleConfigInput) []*
 	return accessStrategies
 }
 
-func toMutators(mutatorInputs []gqlschema.APIRuleConfigInput) []*alpha1.Mutator {
+func toMutators(mutatorInputs []*gqlschema.APIRuleConfigInput) []*alpha1.Mutator {
 	var mutators []*alpha1.Mutator
 	for _, mutator := range mutatorInputs {
 		mutators = append(mutators, &alpha1.Mutator{

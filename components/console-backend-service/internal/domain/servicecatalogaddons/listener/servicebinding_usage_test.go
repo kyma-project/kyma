@@ -18,7 +18,7 @@ func TestBindingUsage_OnAdd(t *testing.T) {
 		bindingUsage := new(api.ServiceBindingUsage)
 		converter := automock.NewGQLBindingUsageConverter()
 
-		channel := make(chan gqlschema.ServiceBindingUsageEvent, 1)
+		channel := make(chan *gqlschema.ServiceBindingUsageEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", bindingUsage).Return(gqlBindingUsage, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -30,7 +30,7 @@ func TestBindingUsage_OnAdd(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeAdd, result.Type)
-		assert.Equal(t, *gqlBindingUsage, result.ServiceBindingUsage)
+		assert.Equal(t, gqlBindingUsage, result.ServiceBindingUsage)
 	})
 
 	t.Run("Filtered out", func(t *testing.T) {
@@ -91,7 +91,7 @@ func TestBindingUsage_OnDelete(t *testing.T) {
 		bindingUsage := new(api.ServiceBindingUsage)
 		converter := automock.NewGQLBindingUsageConverter()
 
-		channel := make(chan gqlschema.ServiceBindingUsageEvent, 1)
+		channel := make(chan *gqlschema.ServiceBindingUsageEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", bindingUsage).Return(gqlBindingUsage, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -103,7 +103,7 @@ func TestBindingUsage_OnDelete(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeDelete, result.Type)
-		assert.Equal(t, *gqlBindingUsage, result.ServiceBindingUsage)
+		assert.Equal(t, gqlBindingUsage, result.ServiceBindingUsage)
 
 	})
 
@@ -165,7 +165,7 @@ func TestBindingUsage_OnUpdate(t *testing.T) {
 		bindingUsage := new(api.ServiceBindingUsage)
 		converter := automock.NewGQLBindingUsageConverter()
 
-		channel := make(chan gqlschema.ServiceBindingUsageEvent, 1)
+		channel := make(chan *gqlschema.ServiceBindingUsageEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", bindingUsage).Return(gqlBindingUsage, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -177,7 +177,7 @@ func TestBindingUsage_OnUpdate(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeUpdate, result.Type)
-		assert.Equal(t, *gqlBindingUsage, result.ServiceBindingUsage)
+		assert.Equal(t, gqlBindingUsage, result.ServiceBindingUsage)
 
 	})
 

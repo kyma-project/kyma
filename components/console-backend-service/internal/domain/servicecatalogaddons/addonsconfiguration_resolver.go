@@ -28,15 +28,15 @@ type addonsCfgLister interface {
 
 //go:generate mockery -name=addonsCfgUpdater  -output=automock -outpkg=automock -case=underscore
 type addonsCfgUpdater interface {
-	AddRepos(name, namespace string, repository []gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.AddonsConfiguration, error)
+	AddRepos(name, namespace string, repository []*gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.AddonsConfiguration, error)
 	RemoveRepos(name, namespace string, reposToRemove []string) (*v1alpha1.AddonsConfiguration, error)
 	Resync(name, namespace string) (*v1alpha1.AddonsConfiguration, error)
 }
 
 //go:generate mockery -name=addonsCfgMutations  -output=automock -outpkg=automock -case=underscore
 type addonsCfgMutations interface {
-	Create(name, namespace string, repository []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error)
-	Update(name, namespace string, repository []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error)
+	Create(name, namespace string, repository []*gqlschema.AddonsConfigurationRepositoryInput, labels gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error)
+	Update(name, namespace string, repository []*gqlschema.AddonsConfigurationRepositoryInput, labels gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error)
 	Delete(name, namespace string) (*v1alpha1.AddonsConfiguration, error)
 }
 
@@ -58,7 +58,7 @@ func newAddonsConfigurationResolver(svc *addonsConfigurationService) *addonsConf
 	}
 }
 
-func (r *addonsConfigurationResolver) AddonsConfigurationsQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.AddonsConfiguration, error) {
+func (r *addonsConfigurationResolver) AddonsConfigurationsQuery(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.AddonsConfiguration, error) {
 	params := pager.PagingParams{First: first, Offset: offset}
 
 	addons, err := r.addonsCfgLister.List(namespace, params)
@@ -70,7 +70,7 @@ func (r *addonsConfigurationResolver) AddonsConfigurationsQuery(ctx context.Cont
 	return r.addonsCfgConverter.ToGQLs(addons), nil
 }
 
-func (r *addonsConfigurationResolver) CreateAddonsConfiguration(ctx context.Context, name, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+func (r *addonsConfigurationResolver) CreateAddonsConfiguration(ctx context.Context, name, namespace string, repositories []*gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
 	repositories, err := resolveRepositories(repositories, urls)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while resolving repositories from %s %s", pretty.AddonsConfiguration, name))
@@ -86,7 +86,7 @@ func (r *addonsConfigurationResolver) CreateAddonsConfiguration(ctx context.Cont
 	return r.addonsCfgConverter.ToGQL(addon), nil
 }
 
-func (r *addonsConfigurationResolver) UpdateAddonsConfiguration(ctx context.Context, name, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+func (r *addonsConfigurationResolver) UpdateAddonsConfiguration(ctx context.Context, name, namespace string, repositories []*gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
 	repositories, err := resolveRepositories(repositories, urls)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while resolving repositories from %s %s", pretty.AddonsConfiguration, name))
@@ -121,7 +121,7 @@ func (r *addonsConfigurationResolver) RemoveAddonsConfigurationRepositories(ctx 
 	return r.addonsCfgConverter.ToGQL(addon), nil
 }
 
-func (r *addonsConfigurationResolver) AddAddonsConfigurationRepositories(ctx context.Context, name, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput) (*gqlschema.AddonsConfiguration, error) {
+func (r *addonsConfigurationResolver) AddAddonsConfigurationRepositories(ctx context.Context, name, namespace string, repositories []*gqlschema.AddonsConfigurationRepositoryInput) (*gqlschema.AddonsConfiguration, error) {
 	addon, err := r.addonsCfgUpdater.AddRepos(name, namespace, repositories)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while adding additional repositories to %s %s", pretty.AddonsConfiguration, name))
@@ -168,8 +168,8 @@ func (r *addonsConfigurationResolver) ResyncAddonsConfiguration(ctx context.Cont
 	return r.addonsCfgConverter.ToGQL(addon), nil
 }
 
-func (r *addonsConfigurationResolver) AddonsConfigurationEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.AddonsConfigurationEvent, error) {
-	channel := make(chan gqlschema.AddonsConfigurationEvent, 1)
+func (r *addonsConfigurationResolver) AddonsConfigurationEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.AddonsConfigurationEvent, error) {
+	channel := make(chan *gqlschema.AddonsConfigurationEvent, 1)
 
 	filter := func(entity *v1alpha1.AddonsConfiguration) bool {
 		return entity != nil && entity.Namespace == namespace
@@ -186,14 +186,14 @@ func (r *addonsConfigurationResolver) AddonsConfigurationEventSubscription(ctx c
 	return channel, nil
 }
 
-func resolveRepositories(repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string) ([]gqlschema.AddonsConfigurationRepositoryInput, error) {
+func resolveRepositories(repositories []*gqlschema.AddonsConfigurationRepositoryInput, urls []string) ([]*gqlschema.AddonsConfigurationRepositoryInput, error) {
 	if repositories != nil && urls != nil {
 		return nil, errors.New("provide only repositories or urls field")
 	}
 	if repositories == nil {
-		repositories = make([]gqlschema.AddonsConfigurationRepositoryInput, 0)
+		repositories = make([]*gqlschema.AddonsConfigurationRepositoryInput, 0)
 		for _, url := range urls {
-			repositories = append(repositories, gqlschema.AddonsConfigurationRepositoryInput{URL: url})
+			repositories = append(repositories, &gqlschema.AddonsConfigurationRepositoryInput{URL: url})
 		}
 	}
 	return repositories, nil

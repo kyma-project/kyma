@@ -17,6 +17,17 @@ import (
 
 func TestResourceQuotaResolver_ResourceQuotasQuery(t *testing.T) {
 	// GIVEN
+	expected := gqlschema.ResourceQuota{
+		Name: "mem-default",
+		Limits: &gqlschema.ResourceValues{
+			Memory: nil,
+			CPU:    nil,
+		},
+		Requests: &gqlschema.ResourceValues{
+			Memory: nil,
+			CPU:    nil,
+		},
+	}
 	env := "production"
 	lister := automock.NewResourceQuotaLister()
 	lister.On("ListResourceQuotas", env).Return([]*v1.ResourceQuota{
@@ -37,7 +48,7 @@ func TestResourceQuotaResolver_ResourceQuotasQuery(t *testing.T) {
 	// THEN
 	require.NoError(t, err)
 	assert.Len(t, result, 1)
-	assert.Equal(t, gqlschema.ResourceQuota{Name: "mem-default"}, result[0])
+	assert.Equal(t, &expected, result[0])
 }
 
 func TestResourceQuotaResolver_CreateResourceQuota(t *testing.T) {
@@ -50,19 +61,19 @@ func TestResourceQuotaResolver_CreateResourceQuota(t *testing.T) {
 	)
 
 	resourceQuotaInputGQL := gqlschema.ResourceQuotaInput{
-		Limits: gqlschema.ResourceValuesInput{
+		Limits: &gqlschema.ResourceValuesInput{
 			Memory: ptrStr(resourceLimitsMemory),
 		},
-		Requests: gqlschema.ResourceValuesInput{
+		Requests: &gqlschema.ResourceValuesInput{
 			Memory: ptrStr(resourceRequestsMemory),
 		},
 	}
 	resourceQuotaGQL := gqlschema.ResourceQuota{
 		Name: name,
-		Limits: gqlschema.ResourceValues{
+		Limits: &gqlschema.ResourceValues{
 			Memory: ptrStr(resourceLimitsMemory),
 		},
-		Requests: gqlschema.ResourceValues{
+		Requests: &gqlschema.ResourceValues{
 			Memory: ptrStr(resourceRequestsMemory),
 		},
 	}

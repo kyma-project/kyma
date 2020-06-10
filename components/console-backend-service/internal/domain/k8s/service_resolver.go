@@ -33,7 +33,7 @@ type serviceSvc interface {
 //go:generate mockery -name=gqlServiceConverter -output=automock -outpkg=automock -case=underscore
 type gqlServiceConverter interface {
 	ToGQL(in *v1.Service) (*gqlschema.Service, error)
-	ToGQLs(in []*v1.Service) ([]gqlschema.Service, error)
+	ToGQLs(in []*v1.Service) ([]*gqlschema.Service, error)
 	GQLJSONToService(in gqlschema.JSON) (v1.Service, error)
 }
 
@@ -44,7 +44,7 @@ func newServiceResolver(serviceSvc serviceSvc) *serviceResolver {
 	}
 }
 
-func (r *serviceResolver) ServicesQuery(ctx context.Context, namespace string, excludedLabels []string, first *int, offset *int) ([]gqlschema.Service, error) {
+func (r *serviceResolver) ServicesQuery(ctx context.Context, namespace string, excludedLabels []string, first *int, offset *int) ([]*gqlschema.Service, error) {
 	services, err := r.serviceSvc.List(namespace, excludedLabels, pager.PagingParams{
 		First:  first,
 		Offset: offset,
@@ -65,8 +65,8 @@ func (r *serviceResolver) ServiceQuery(ctx context.Context, name string, namespa
 	return r.gqlServiceConverter.ToGQL(service)
 }
 
-func (r *serviceResolver) ServiceEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceEvent, error) {
-	channel := make(chan gqlschema.ServiceEvent, 1)
+func (r *serviceResolver) ServiceEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.ServiceEvent, error) {
+	channel := make(chan *gqlschema.ServiceEvent, 1)
 	filter := func(service *v1.Service) bool {
 		return service != nil && service.Namespace == namespace
 	}

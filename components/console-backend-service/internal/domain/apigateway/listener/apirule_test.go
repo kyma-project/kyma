@@ -33,7 +33,7 @@ func TestApiRuleListener_OnAdd(t *testing.T) {
 
 		converter := automock.NewGqlApiRuleConverter()
 
-		channel := make(chan gqlschema.ApiRuleEvent, 1)
+		channel := make(chan *gqlschema.APIRuleEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", apiRule).Return(gqlApiRule, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -46,7 +46,7 @@ func TestApiRuleListener_OnAdd(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeAdd, result.Type)
-		assert.Equal(t, *gqlApiRule, result.APIRule)
+		assert.Equal(t, gqlApiRule, result.APIRule)
 	})
 
 	t.Run("Nil", func(t *testing.T) {
@@ -104,7 +104,7 @@ func TestApiRuleListener_OnDelete(t *testing.T) {
 
 		converter := automock.NewGqlApiRuleConverter()
 
-		channel := make(chan gqlschema.ApiRuleEvent, 1)
+		channel := make(chan *gqlschema.APIRuleEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", apiRule).Return(gqlApiRule, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -117,7 +117,7 @@ func TestApiRuleListener_OnDelete(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeDelete, result.Type)
-		assert.Equal(t, *gqlApiRule, result.APIRule)
+		assert.Equal(t, gqlApiRule, result.APIRule)
 
 	})
 
@@ -175,7 +175,7 @@ func TestApiRuleListener_OnUpdate(t *testing.T) {
 
 		converter := automock.NewGqlApiRuleConverter()
 
-		channel := make(chan gqlschema.ApiRuleEvent, 1)
+		channel := make(chan *gqlschema.APIRuleEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", apiRule).Return(gqlApiRule, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -188,7 +188,7 @@ func TestApiRuleListener_OnUpdate(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeUpdate, result.Type)
-		assert.Equal(t, *gqlApiRule, result.APIRule)
+		assert.Equal(t, gqlApiRule, result.APIRule)
 
 	})
 

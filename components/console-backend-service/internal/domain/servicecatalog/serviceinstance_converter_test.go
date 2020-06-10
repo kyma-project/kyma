@@ -208,12 +208,12 @@ func TestServiceInstanceConverter_GQLCreateInputToInstanceCreateParameters(t *te
 		input := gqlschema.ServiceInstanceCreateInput{
 			Name:            "name",
 			Labels:          []string{"test", "label"},
-			ParameterSchema: &JSON,
-			ClassRef: gqlschema.ServiceInstanceCreateInputResourceRef{
+			ParameterSchema: JSON,
+			ClassRef: &gqlschema.ServiceInstanceCreateInputResourceRef{
 				ExternalName: "className",
 				ClusterWide:  true,
 			},
-			PlanRef: gqlschema.ServiceInstanceCreateInputResourceRef{
+			PlanRef: &gqlschema.ServiceInstanceCreateInputResourceRef{
 				ExternalName: "planName",
 				ClusterWide:  true,
 			},

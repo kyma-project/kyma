@@ -18,7 +18,7 @@ import (
 func TestVersionInfoResolver_VersionInfoQuery(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		version := "version"
-		expected := gqlschema.VersionInfo{
+		expected := &gqlschema.VersionInfo{
 			KymaVersion: &version,
 		}
 
@@ -40,6 +40,7 @@ func TestVersionInfoResolver_VersionInfoQuery(t *testing.T) {
 		assert.Equal(t, expected, result)
 	})
 	t.Run("NotFound", func(t *testing.T) {
+		var expected *gqlschema.VersionInfo
 		svc := automock.NewDeploymentLister()
 		svc.On("Find", "kyma-installer", "kyma-installer").Return(nil, fmt.Errorf("error")).Once()
 		defer svc.AssertExpectations(t)
@@ -48,7 +49,7 @@ func TestVersionInfoResolver_VersionInfoQuery(t *testing.T) {
 		result, err := resolver.VersionInfoQuery(nil)
 
 		require.NoError(t, err)
-		assert.Equal(t, gqlschema.VersionInfo{}, result)
+		assert.Equal(t, expected, result)
 	})
 }
 

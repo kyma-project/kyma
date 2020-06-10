@@ -101,14 +101,6 @@
   version = "v1.3.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:e2b86e41f3d669fc36b50d31d32d22c8ac656c75aa5ea89717ce7177e134ff2a"
-  name = "github.com/golang/glog"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
-
-[[projects]]
   digest = "1:796f9c63c68774a89eade387a8476e45ec2b34f5649b0726983204202c3649d6"
   name = "github.com/golang/protobuf"
   packages = [
@@ -192,7 +184,7 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:926448fab94f84e3ae49b7115610baf8d44613245d7a436d5dfd0ff18bf5c5b3"
+  digest = "1:3410819d10efcaee13ca3d53710169eb910f610c6cc56b6cf66fbfbf33ecbb22"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-gateway/pkg/apperrors",
@@ -201,13 +193,14 @@
     "components/application-gateway/pkg/authorization/oauth/tokencache",
     "components/application-gateway/pkg/authorization/util",
     "components/application-gateway/pkg/httpconsts",
+    "components/application-gateway/pkg/httptools",
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "ba297749ad3c81d2786c3e9acaaa8751d0a2a2db"
+  revision = "28790517dd090d0b61ea121652ce98ad2a7d038c"
 
 [[projects]]
   branch = "master"

@@ -170,6 +170,22 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				),
 			),
 		},
+		"Should return error on replicas validation on 0 minReplicas set": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Source:      "test-source",
+					MinReplicas: &zero, // HPA needs this value to be greater then 0
+					MaxReplicas: &one,
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"spec.minReplicas",
+				),
+			),
+		},
 		"Should return error on resources validation": {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},

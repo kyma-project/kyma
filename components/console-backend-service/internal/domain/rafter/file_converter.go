@@ -11,7 +11,7 @@ import (
 //go:generate mockery -name=gqlFileConverter -output=automock -outpkg=automock -case=underscore
 type gqlFileConverter interface {
 	ToGQL(file *File) (*gqlschema.File, error)
-	ToGQLs(files []*File) ([]gqlschema.File, error)
+	ToGQLs(files []*File) ([]*gqlschema.File, error)
 }
 
 type fileConverter struct{}
@@ -37,8 +37,8 @@ func (c *fileConverter) ToGQL(file *File) (*gqlschema.File, error) {
 	return &result, nil
 }
 
-func (c *fileConverter) ToGQLs(files []*File) ([]gqlschema.File, error) {
-	var result []gqlschema.File
+func (c *fileConverter) ToGQLs(files []*File) ([]*gqlschema.File, error) {
+	var result []*gqlschema.File
 	for _, u := range files {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -46,15 +46,16 @@ func (c *fileConverter) ToGQLs(files []*File) ([]gqlschema.File, error) {
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil
 }
 
 func (c *fileConverter) extractMetadata(metadata *runtime.RawExtension) (gqlschema.JSON, error) {
+	result := make(gqlschema.JSON)
 	if metadata == nil {
-		return nil, nil
+		return result, nil
 	}
 
 	extracted, err := resource.ExtractRawToMap("Metadata", metadata.Raw)
@@ -62,7 +63,6 @@ func (c *fileConverter) extractMetadata(metadata *runtime.RawExtension) (gqlsche
 		return nil, err
 	}
 
-	result := make(gqlschema.JSON)
 	for k, v := range extracted {
 		result[k] = v
 	}

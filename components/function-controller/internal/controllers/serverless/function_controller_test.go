@@ -12,9 +12,9 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
-func newFixFunction(namespace, name string) *serverlessv1alpha1.Function {
-	one := int32(1)
-	two := int32(2)
+func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serverlessv1alpha1.Function {
+	one := int32(minReplicas)
+	two := int32(maxReplicas)
 	suffix := rand.Int()
 
 	return &serverlessv1alpha1.Function{

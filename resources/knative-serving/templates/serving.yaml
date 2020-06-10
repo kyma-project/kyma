@@ -189,110 +189,35 @@ metadata:
     serving.knative.dev/release: "{{ .Values.global.version }}"
   name: knative-serving-core
 rules:
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  - namespaces
-  - secrets
-  - configmaps
-  - endpoints
-  - services
-  - events
-  - serviceaccounts
-  verbs:
-  - get
-  - list
-  - create
-  - update
-  - delete
-  - patch
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - endpoints/restricted
-  verbs:
-  - create
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  - deployments/finalizers
-  verbs:
-  - get
-  - list
-  - create
-  - update
-  - delete
-  - patch
-  - watch
-- apiGroups:
-  - admissionregistration.k8s.io
-  resources:
-  - mutatingwebhookconfigurations
-  - validatingwebhookconfigurations
-  verbs:
-  - get
-  - list
-  - create
-  - update
-  - delete
-  - patch
-  - watch
-- apiGroups:
-  - apiextensions.k8s.io
-  resources:
-  - customresourcedefinitions
-  verbs:
-  - get
-  - list
-  - create
-  - update
-  - delete
-  - patch
-  - watch
-- apiGroups:
-  - autoscaling
-  resources:
-  - horizontalpodautoscalers
-  verbs:
-  - get
-  - list
-  - create
-  - update
-  - delete
-  - patch
-  - watch
-- apiGroups:
-  - serving.knative.dev
-  - autoscaling.internal.knative.dev
-  - networking.internal.knative.dev
-  resources:
-  - '*'
-  - '*/status'
-  - '*/finalizers'
-  verbs:
-  - get
-  - list
-  - create
-  - update
-  - delete
-  - deletecollection
-  - patch
-  - watch
-- apiGroups:
-  - caching.internal.knative.dev
-  resources:
-  - images
-  verbs:
-  - get
-  - list
-  - create
-  - update
-  - delete
-  - patch
-  - watch
+- apiGroups: [""]
+  resources: ["pods", "namespaces", "secrets", "configmaps", "endpoints", "services",
+    "events", "serviceaccounts"]
+  verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
+- apiGroups: [""]
+  resources: ["endpoints/restricted"] # Permission for RestrictedEndpointsAdmission
+  verbs: ["create"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "deployments/finalizers"] # finalizers are needed for the owner reference of the webhook
+  verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
+- apiGroups: ["admissionregistration.k8s.io"]
+  resources: ["mutatingwebhookconfigurations", "validatingwebhookconfigurations"]
+  verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions", "customresourcedefinitions/status"]
+  verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
+- apiGroups: ["autoscaling"]
+  resources: ["horizontalpodautoscalers"]
+  verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
+- apiGroups: ["serving.knative.dev", "autoscaling.internal.knative.dev", "networking.internal.knative.dev"]
+  resources: ["*", "*/status", "*/finalizers"]
+  verbs: ["get", "list", "create", "update", "delete", "deletecollection", "patch",
+    "watch"]
+- apiGroups: ["caching.internal.knative.dev"]
+  resources: ["images"]
+  verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -515,7 +440,7 @@ spec:
           value: knative.dev/serving
         - name: KUBERNETES_MIN_VERSION
           value: "{{ .Values.global.kubernetes_minimum_version }}"
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/activator:{{ .Values.global.version }}
+        image: gcr.io/knative-releases/knative.dev/serving/cmd/activator@sha256:3b530bbcf892aff098444ae529a9d4150dfd0cd35c97babebd90eedae34ad8af
         livenessProbe:
           httpGet:
             httpHeaders:
@@ -614,7 +539,7 @@ spec:
           value: knative.dev/serving
         - name: KUBERNETES_MIN_VERSION
           value: "{{ .Values.global.kubernetes_minimum_version }}"
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/autoscaler-hpa:{{ .Values.global.version }}
+        image: gcr.io/knative-releases/knative.dev/serving/cmd/autoscaler-hpa@sha256:a3941ff9d5bdd728ae6aabdf6c52a2e05888654cfbf9ac26aa8f3e091dbdd30c
         name: autoscaler-hpa
         ports:
         - containerPort: 9090
@@ -705,7 +630,7 @@ spec:
           value: knative.dev/serving
         - name: KUBERNETES_MIN_VERSION
           value: "{{ .Values.global.kubernetes_minimum_version }}"
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/autoscaler:{{ .Values.global.version }}
+        image: gcr.io/knative-releases/knative.dev/serving/cmd/autoscaler@sha256:bd125e90fffb44b843a183aa00f481cddee2317c0cfde9151c2482c5c2a8ed71
         livenessProbe:
           httpGet:
             httpHeaders:
@@ -968,7 +893,7 @@ data:
 
     # List of repositories for which tag to digest resolving should be skipped
     registriesSkippingTagResolving: "ko.local,dev.local"
-  queueSidecarImage: "gcr.io/knative-releases/knative.dev/serving/cmd/queue:{{ .Values.global.version }}"
+  queueSidecarImage: gcr.io/knative-releases/knative.dev/serving/cmd/queue@sha256:f32c20456c6349a4fe99c83060009c7e9f6ba0c644ef854a04514e1f8aca982e
   registriesSkippingTagResolving: "registry.{{ .Values.global.ingress.domainName }}"
 kind: ConfigMap
 metadata:
@@ -1446,7 +1371,7 @@ spec:
           value: knative.dev/serving
         - name: KUBERNETES_MIN_VERSION
           value: "{{ .Values.global.kubernetes_minimum_version }}"
-        image: "gcr.io/knative-releases/knative.dev/serving/cmd/controller:{{ .Values.global.version }}"
+        image: gcr.io/knative-releases/knative.dev/serving/cmd/controller@sha256:71f7c9f101e7e30e82a86d203fb98d6fa607c8d6ac2fcb73fd1defd365795223
         name: controller
         ports:
         - containerPort: 9090
@@ -1526,7 +1451,7 @@ spec:
           value: knative.dev/serving
         - name: KUBERNETES_MIN_VERSION
           value: "{{ .Values.global.kubernetes_minimum_version }}"
-        image: "gcr.io/knative-releases/knative.dev/serving/cmd/networking/istio:{{ .Values.global.version }}"
+        image: gcr.io/knative-nightly/knative.dev/net-istio/cmd/controller@sha256:94b126adb14d2a8c5b25d2908b0da83210f2a271258ba8bbd1a39177f56f54a6
         name: networking-istio
         ports:
         - containerPort: 9090
@@ -1590,7 +1515,7 @@ spec:
           value: knative.dev/serving
         - name: KUBERNETES_MIN_VERSION
           value: "{{ .Values.global.kubernetes_minimum_version }}"
-        image: "gcr.io/knative-releases/knative.dev/serving/cmd/webhook:{{ .Values.global.version }}"
+        image: gcr.io/knative-releases/knative.dev/serving/cmd/webhook@sha256:90562a10f5e37965f4f3332b0412afec1cf3dd1c06caed530213ca0603e52082
         name: webhook
         ports:
         - containerPort: 9090
@@ -1605,3 +1530,134 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
       serviceAccountName: controller
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: webhook.istio.networking.internal.knative.dev
+  labels:
+    serving.knative.dev/release: "{{ .Values.global.version }}"
+webhooks:
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: istio-webhook
+      namespace: knative-serving
+  failurePolicy: Fail
+  sideEffects: None
+  objectSelector:
+    matchExpressions:
+    - {key: "serving.knative.dev/configuration", operator: Exists}
+  name: webhook.istio.networking.internal.knative.dev
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: config.webhook.istio.networking.internal.knative.dev
+  labels:
+    serving.knative.dev/release: "{{ .Values.global.version }}"
+webhooks:
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: istio-webhook
+      namespace: knative-serving
+  failurePolicy: Fail
+  sideEffects: None
+  name: config.webhook.istio.networking.internal.knative.dev
+  namespaceSelector:
+    matchExpressions:
+    - key: serving.knative.dev/release
+      operator: Exists
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: istio-webhook-certs
+  namespace: knative-serving
+  labels:
+    serving.knative.dev/release: "{{ .Values.global.version }}"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: istio-webhook
+  namespace: knative-serving
+  labels:
+    serving.knative.dev/release: "{{ .Values.global.version }}"
+spec:
+  selector:
+    matchLabels:
+      app: istio-webhook
+      role: istio-webhook
+  template:
+    metadata:
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+      labels:
+        app: istio-webhook
+        role: istio-webhook
+        serving.knative.dev/release: "{{ .Values.global.version }}"
+    spec:
+      serviceAccountName: controller
+      containers:
+      - name: webhook
+        # This is the Go import path for the binary that is containerized
+        # and substituted here.
+        image: gcr.io/knative-nightly/knative.dev/net-istio/cmd/webhook@sha256:51c017906194d39107eafe865d55c91b1b19c3c436eacc1130e2fea1df70829a
+        resources:
+          requests:
+            cpu: 20m
+            memory: 20Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
+        env:
+        - name: SYSTEM_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: CONFIG_LOGGING_NAME
+          value: config-logging
+        - name: CONFIG_OBSERVABILITY_NAME
+          value: config-observability
+        - # TODO(https://github.com/knative/pkg/pull/953): Remove stackdriver specific config
+          name: METRICS_DOMAIN
+          value: knative.dev/net-istio
+        - name: WEBHOOK_NAME
+          value: istio-webhook
+        securityContext:
+          allowPrivilegeEscalation: false
+        ports:
+        - name: metrics
+          containerPort: 9090
+        - name: profiling
+          containerPort: 8008
+        - name: https-webhook
+          containerPort: 8443
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: istio-webhook
+  namespace: knative-serving
+  labels:
+    role: istio-webhook
+    serving.knative.dev/release: "{{ .Values.global.version }}"
+spec:
+  ports:
+  - # Define metrics and profiling for them to be accessible within service meshes.
+    name: http-metrics
+    port: 9090
+    targetPort: 9090
+  - name: http-profiling
+    port: 8008
+    targetPort: 8008
+  - name: https-webhook
+    port: 443
+    targetPort: 8443
+  selector:
+    app: istio-webhook
+---
