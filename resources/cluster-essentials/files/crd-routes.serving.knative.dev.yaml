@@ -4,7 +4,7 @@ metadata:
   labels:
     duck.knative.dev/addressable: "true"
     knative.dev/crd-install: "true"
-    serving.knative.dev/release: "v0.12.0"
+    serving.knative.dev/release: "v0.14.0"
   name: routes.serving.knative.dev
 spec:
   additionalPrinterColumns:

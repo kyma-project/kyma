@@ -66,6 +66,8 @@ spec:
       namespace: "kyma-system"
     - name: "kiali"
       namespace: "kyma-system"
+    - name: "console"
+      namespace: "kyma-system"
 
     #- name: "compass"
     #  namespace: "compass-system"
