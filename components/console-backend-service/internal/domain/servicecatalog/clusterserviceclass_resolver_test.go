@@ -17,12 +17,12 @@ import (
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"context"
+	"time"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
-	"time"
-	"context"
 )
 
 func TestClusterServiceClassResolver_ClusterServiceClassQueryPOC(t *testing.T) {
