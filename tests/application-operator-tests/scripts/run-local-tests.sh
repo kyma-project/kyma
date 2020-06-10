@@ -2,7 +2,7 @@
 
 CURRENT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
-#eval $(minikube docker-env)
+eval $(minikube docker-env)
 
 echo ""
 echo "------------------------"
@@ -58,25 +58,7 @@ rules:
 - apiGroups:
   - '*'
   resources:
-  - pods
-  verbs:
-  - get
-  - list
-  - create
-  - delete
-  - watch
-- apiGroups:
-  - '*'
-  resources:
   - pods/log
-  verbs:
-  - get
-  - list
-- apiGroups:
-  - '*'
-  resources:
-  - services
-  - serviceaccounts
   verbs:
   - get
   - list
@@ -120,6 +102,8 @@ rules:
   - '*'
   resources:
   - namespaces
+  - configmaps
+  - secrets
   verbs:
   - get
   - list
@@ -129,14 +113,14 @@ rules:
 - apiGroups:
   - '*'
   resources:
-  - configmaps
-  - secrets
+  - pods
   verbs:
   - get
   - list
   - update
   - create
   - delete
+  - watch
 - apiGroups:
   - 'servicecatalog.k8s.io'
   resources:
