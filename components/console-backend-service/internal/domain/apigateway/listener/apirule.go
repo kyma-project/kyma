@@ -3,18 +3,11 @@ package listener
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
-
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
-
-//go:generate mockery -name=gqlApiRuleConverter -output=automock -outpkg=automock -case=underscore
-type gqlApiRuleConverter interface {
-	ToGQL(in *v1alpha1.APIRule) (*gqlschema.APIRule, error)
-}
 
 //go:generate mockery -name=extractor -output=automock -outpkg=automock -case=underscore
 type extractor interface {
@@ -24,15 +17,13 @@ type extractor interface {
 type ApiRuleListener struct {
 	channel   chan<- *gqlschema.APIRuleEvent
 	filter    func(api *v1alpha1.APIRule) bool
-	converter gqlApiRuleConverter
 	extractor extractor
 }
 
-func NewApiRule(channel chan<- *gqlschema.APIRuleEvent, filter func(api *v1alpha1.APIRule) bool, converter gqlApiRuleConverter, extractor extractor) *ApiRuleListener {
+func NewApiRule(channel chan<- *gqlschema.APIRuleEvent, filter func(api *v1alpha1.APIRule) bool, extractor extractor) *ApiRuleListener {
 	return &ApiRuleListener{
 		channel:   channel,
 		filter:    filter,
-		converter: converter,
 		extractor: extractor,
 	}
 }
@@ -66,19 +57,13 @@ func (l *ApiRuleListener) onEvent(eventType gqlschema.SubscriptionEventType, obj
 }
 
 func (l *ApiRuleListener) notify(eventType gqlschema.SubscriptionEventType, apiRule *v1alpha1.APIRule) {
-	gqlApiRule, err := l.converter.ToGQL(apiRule)
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting *APIRule"))
-		return
-	}
-
-	if gqlApiRule == nil {
+	if apiRule == nil {
 		return
 	}
 
 	event := &gqlschema.APIRuleEvent{
 		Type:    eventType,
-		APIRule: gqlApiRule,
+		APIRule: apiRule,
 	}
 
 	l.channel <- event

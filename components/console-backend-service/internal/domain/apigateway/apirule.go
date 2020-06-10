@@ -2,6 +2,7 @@ package apigateway
 
 import (
 	"context"
+	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 
@@ -53,11 +54,11 @@ func (r *PluggableResolver) Disable() error {
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
 type Resolver interface {
-	APIRulesQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*gqlschema.APIRule, error)
-	APIRuleQuery(ctx context.Context, name string, namespace string) (*gqlschema.APIRule, error)
-	CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error)
-	UpdateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error)
-	DeleteAPIRule(ctx context.Context, name string, namespace string) (*gqlschema.APIRule, error)
+	APIRulesQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error)
+	APIRuleQuery(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
+	CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*v1alpha1.APIRule, error)
+	UpdateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*v1alpha1.APIRule, error)
+	DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
 	APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan *gqlschema.APIRuleEvent, error)
 }
 

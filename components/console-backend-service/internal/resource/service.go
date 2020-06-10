@@ -42,8 +42,8 @@ func NewServiceFactory(client dynamic.Interface, informerFactory dynamicinformer
 }
 
 type Service struct {
-	client   dynamic.NamespaceableResourceInterface
-	informer cache.SharedIndexInformer
+	Client   dynamic.NamespaceableResourceInterface
+	Informer cache.SharedIndexInformer
 	notifier *Notifier
 }
 
@@ -52,14 +52,15 @@ func (f *ServiceFactory) ForResource(gvr schema.GroupVersionResource) *Service {
 	informer := f.InformerFactory.ForResource(gvr).Informer()
 	informer.AddEventHandler(notifier)
 	return &Service{
-		client:   f.Client.Resource(gvr),
-		informer: informer,
+		Client:   f.Client.Resource(gvr),
+		Informer: informer,
 		notifier: notifier,
 	}
 }
 
 func (s *Service) ListByIndex(index, key string, result Appendable) error {
-	items, err := s.informer.GetIndexer().ByIndex(index, key)
+	items, err := s.Informer.GetIndexer().ByIndex(index, key)
+
 	if err != nil {
 		return err
 	}
@@ -84,7 +85,7 @@ func (s *Service) List(result Appendable) error {
 }
 
 func (s *Service) GetByKey(key string, result interface{}) error {
-	item, exists, err := s.informer.GetStore().GetByKey(key)
+	item, exists, err := s.Informer.GetStore().GetByKey(key)
 	if err != nil {
 		return err
 	}
@@ -98,6 +99,14 @@ func (s *Service) GetByKey(key string, result interface{}) error {
 	}
 
 	return nil
+}
+
+func (s *Service) AddIndexers(indexers cache.Indexers) error {
+	err := s.Informer.AddIndexers(indexers)
+	if err != nil && err.Error() == "informer has already started" {
+		return nil
+	}
+	return err
 }
 
 func (s *Service) GetInNamespace(name, namespace string, result interface{}) error {
@@ -115,7 +124,7 @@ func (s *Service) Create(obj interface{}, result interface{}) error {
 		return err
 	}
 
-	created, err := s.client.Create(u, v1.CreateOptions{})
+	created, err := s.Client.Create(u, v1.CreateOptions{})
 	if err != nil {
 		return err
 	}

@@ -56,104 +56,12 @@ func fromUnstructured(obj *unstructured.Unstructured) (*v1alpha1.APIRule, error)
 
 type apiRuleConverter struct{}
 
-func toGQLJSON(config *runtime.RawExtension) (gqlschema.JSON, error) {
-	result := gqlschema.JSON{}
-
-	if config != nil {
-		err := result.UnmarshalGQL(string(config.Raw))
-		if err != nil {
-			return nil, errors.Wrapf(err, "while unmarshalling %s with Config `%s` to GQL JSON", pretty.APIRule, config)
-		}
-	}
-
-	return result, nil
+func (c *apiRuleConverter) ToGQL(in *v1alpha1.APIRule) (*v1alpha1.APIRule, error) {
+	return in, nil
 }
 
-func (c *apiRuleConverter) ToGQL(in *v1alpha1.APIRule) (*gqlschema.APIRule, error) {
-	if in == nil {
-		return nil, nil
-	}
-
-	var rules []*gqlschema.Rule
-
-	for _, rule := range in.Spec.Rules {
-		gqlRule := &gqlschema.Rule{}
-		var gqlAccessStrategies []*gqlschema.APIRuleConfig
-		var gqlMutators []*gqlschema.APIRuleConfig
-
-		for _, accessStrategy := range rule.AccessStrategies {
-			qglAccessStrategyConfig, err := toGQLJSON(accessStrategy.Config)
-			if err != nil {
-				return nil, err
-			}
-
-			gqlAccessStrategies = append(gqlAccessStrategies, &gqlschema.APIRuleConfig{
-				Name:   accessStrategy.Name,
-				Config: qglAccessStrategyConfig,
-			})
-		}
-
-		for _, mutator := range rule.Mutators {
-			gqlMutatorConfig, err := toGQLJSON(mutator.Config)
-			if err != nil {
-				return nil, err
-			}
-
-			gqlMutators = append(gqlMutators, &gqlschema.APIRuleConfig{
-				Name:   mutator.Name,
-				Config: gqlMutatorConfig,
-			})
-		}
-
-		gqlRule.Path = rule.Path
-		gqlRule.Methods = rule.Methods
-		gqlRule.AccessStrategies = gqlAccessStrategies
-		gqlRule.Mutators = gqlMutators
-
-		rules = append(rules, gqlRule)
-	}
-
-	return &gqlschema.APIRule{
-		Name: in.Name,
-		Service: &gqlschema.APIRuleService{
-			Host: *in.Spec.Service.Host,
-			Name: *in.Spec.Service.Name,
-			Port: int(*in.Spec.Service.Port),
-		},
-		Gateway: *in.Spec.Gateway,
-		Rules:   rules,
-		Status: &gqlschema.APIRuleStatuses{
-			APIRuleStatus:        getResourceStatusOrNil(in.Status.APIRuleStatus),
-			AccessRuleStatus:     getResourceStatusOrNil(in.Status.AccessRuleStatus),
-			VirtualServiceStatus: getResourceStatusOrNil(in.Status.VirtualServiceStatus),
-		},
-	}, nil
-}
-
-func getResourceStatusOrNil(status *v1alpha1.APIRuleResourceStatus) *gqlschema.APIRuleStatus {
-	if status == nil {
-		return nil
-	}
-	return &gqlschema.APIRuleStatus{
-		Code: string(status.Code),
-		Desc: &status.Description,
-	}
-}
-
-func (c *apiRuleConverter) ToGQLs(in []*v1alpha1.APIRule) ([]*gqlschema.APIRule, error) {
-	var result []*gqlschema.APIRule
-	for _, item := range in {
-		converted, err := c.ToGQL(item)
-		if err != nil {
-			return nil, err
-		}
-
-		if converted != nil {
-			result = append(result, converted)
-		}
-	}
-
-	return result, nil
+func (c *apiRuleConverter) ToGQLs(in []*v1alpha1.APIRule) ([]*v1alpha1.APIRule, error) {
+	return in, nil
 }
 
 func fromGQLJSON(config gqlschema.JSON) *runtime.RawExtension {

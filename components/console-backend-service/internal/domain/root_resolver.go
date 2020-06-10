@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	"math/rand"
 	"time"
 
@@ -408,15 +409,15 @@ func (r *mutationResolver) DeleteNamespace(ctx context.Context, name string) (*g
 	return r.k8s.DeleteNamespace(ctx, name)
 }
 
-func (r *mutationResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error) {
+func (r *mutationResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*v1alpha1.APIRule, error) {
 	return r.ag.CreateAPIRule(ctx, name, namespace, params)
 }
 
-func (r *mutationResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error) {
+func (r *mutationResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*v1alpha1.APIRule, error) {
 	return r.ag.UpdateAPIRule(ctx, name, namespace, params)
 }
 
-func (r *mutationResolver) DeleteAPIRule(ctx context.Context, name string, namespace string) (*gqlschema.APIRule, error) {
+func (r *mutationResolver) DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {
 	return r.ag.DeleteAPIRule(ctx, name, namespace)
 }
 
@@ -610,11 +611,11 @@ func (r *queryResolver) EventActivations(ctx context.Context, namespace string) 
 	return r.app.Resolver.EventActivationsQuery(ctx, namespace)
 }
 
-func (r *queryResolver) APIRule(ctx context.Context, name string, namespace string) (*gqlschema.APIRule, error) {
+func (r *queryResolver) APIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {
 	return r.ag.APIRuleQuery(ctx, name, namespace)
 }
 
-func (r *queryResolver) APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*gqlschema.APIRule, error) {
+func (r *queryResolver) APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error) {
 	return r.ag.APIRulesQuery(ctx, namespace, serviceName, hostname)
 }
 

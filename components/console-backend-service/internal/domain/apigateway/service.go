@@ -10,10 +10,24 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+
+type APIRuleList []*v1alpha1.APIRule
+
+func (l *APIRuleList) Append() interface{} {
+	e := &v1alpha1.APIRule{}
+	*l = append(*l, e)
+	return e
+}
+
 var apiRulesGroupVersionResource = schema.GroupVersionResource{
 	Version:  v1alpha1.GroupVersion.Version,
 	Group:    v1alpha1.GroupVersion.Group,
 	Resource: "apirules",
+}
+
+var apiRuleTypeMeta = metav1.TypeMeta{
+	Kind:       "APIRule",
+	APIVersion: "gateway.kyma-project.io/v1alpha1",
 }
 
 type Service struct {
@@ -30,8 +44,8 @@ func NewService(serviceFactory *resource.ServiceFactory) *Service {
 }
 
 func (svc *Service) List(namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error) {
-	items := make([]*v1alpha1.APIRule, 0)
-	err := svc.ListInIndex("namespace", namespace, &items)
+	items := APIRuleList{}
+	err := svc.ListInNamespace(namespace, &items)
 	if err != nil {
 		return nil, err
 	}
@@ -60,32 +74,18 @@ func (svc *Service) List(namespace string, serviceName *string, hostname *string
 
 func (svc *Service) Find(name, namespace string) (*v1alpha1.APIRule, error) {
 	var result *v1alpha1.APIRule
-	err := svc.FindInNamespace(name, namespace, &result)
+	err := svc.GetInNamespace(name, namespace, &result)
 	return result, err
 }
 
 func (svc *Service) Delete(name, namespace string) error {
-	return svc.Client.Namespace(namespace).Delete(name, &metav1.DeleteOptions{})
-}
-
-var apiRuleTypeMeta = metav1.TypeMeta{
-	Kind:       "APIRule",
-	APIVersion: "gateway.kyma-project.io/v1alpha1",
+	return svc.Service.Client.Namespace(namespace).Delete(name, &metav1.DeleteOptions{})
 }
 
 func (svc *Service) Create(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule, error) {
-	apiRule.TypeMeta = apiRuleTypeMeta
-
-	u, err := toUnstructured(apiRule)
-	if err != nil {
-		return &v1alpha1.APIRule{}, err
-	}
-
-	created, err := svc.Client.Namespace(apiRule.ObjectMeta.Namespace).Create(u, metav1.CreateOptions{})
-	if err != nil {
-		return &v1alpha1.APIRule{}, err
-	}
-	return fromUnstructured(created)
+	result := &v1alpha1.APIRule{}
+	err := svc.Service.Create(apiRule, result)
+	return result, err
 }
 
 func (svc *Service) Subscribe(listener notifierRes.Listener) {

@@ -10,7 +10,17 @@ scalar Settings
 
 scalar ApplicationMappingService
 
+scalar Port @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Port")
+scalar Extension @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.RawExtension")
+
 # Directives
+
+directive @goModel(model: String, models: [String!]) on OBJECT
+    | INPUT_OBJECT
+    | SCALAR
+    | ENUM
+    | INTERFACE
+    | UNION
 
 directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
 
@@ -813,41 +823,56 @@ type IDPPreset {
 
 # API Gateway Controller
 
-type APIRule {
+type APIRule @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule"){
     name: String!
-    service: APIRuleService!
-    gateway: String!
-    rules: [Rule!]!
+    spec: APIRuleSpec!
     status: APIRuleStatuses!
 }
 
-type APIRuleService{
+type APIRuleSpec @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleSpec") {
+    service: APIRuleService!
+    gateway: String!
+    rules: [Rule!]!
+}
+
+type APIRuleService @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Service") {
     host: String!
     name: String!
-    port: Int!
+    port: Port!
 }
 
-type Rule {
+type Rule @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Rule") {
     path: String!
     methods: [String!]!
-    accessStrategies: [APIRuleConfig!]!
-    mutators: [APIRuleConfig!]
+    accessStrategies: [APIRuleAccessStrategy!]!
+    mutators: [APIRuleMutator!]
 }
 
-type APIRuleConfig {
+type APIRuleAccessStrategy @goModel(model: "github.com/ory/oathkeeper-maester/api/v1alpha1.Authenticator") {
     name: String!
-    config: JSON!
+    config: Extension!
 }
 
-type APIRuleStatuses {
+type APIRuleMutator @goModel(model: "github.com/ory/oathkeeper-maester/api/v1alpha1.Mutator") {
+    name: String!
+    config: Extension!
+}
+
+type APIRuleStatuses @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleStatus") {
     apiRuleStatus: APIRuleStatus
     accessRuleStatus: APIRuleStatus
     virtualServiceStatus: APIRuleStatus
 }
 
-type APIRuleStatus {
-    code: String!
-    desc: String
+type APIRuleStatus @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleResourceStatus") {
+    code: APIRuleStatusCode!
+    description: String
+}
+
+enum APIRuleStatusCode @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.StatusCode") {
+    OK
+    SKIPPED
+    ERROR
 }
 
 input APIRuleInput {
