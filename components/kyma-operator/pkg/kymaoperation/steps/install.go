@@ -3,7 +3,6 @@ package steps
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
@@ -38,8 +37,7 @@ func (s installStep) Run() error {
 }
 
 func (s installStep) onError(installErr error) error {
-
-	installErrMsg := fmt.Sprintf("Helm install error: %s", installErr.Error())
+	installErrMsg := fmt.Sprintf("Helm installation of release \"%s\" failed: %s", s.component.GetReleaseName(), installErr.Error())
 
 	namespacedName := s.GetNamespacedName()
 
@@ -51,7 +49,7 @@ func (s installStep) onError(installErr error) error {
 
 	if isDeletable {
 
-		log.Println(fmt.Sprintf("Helm installation of release \"%s\" failed. Deleting release before retrying.", s.component.GetReleaseName()))
+		installErrMsg = installErrMsg + "\n" + "Deleting release before retrying."
 
 		if deleteErr := s.helmClient.UninstallRelease(namespacedName); deleteErr != nil {
 			deleteErrMsg := fmt.Sprintf("Helm delete of release \"%s\" failed with an error: %s", s.component.GetReleaseName(), deleteErr.Error())

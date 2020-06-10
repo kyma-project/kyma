@@ -120,8 +120,9 @@ func TestSteps(t *testing.T) {
 			})
 			Convey("delete failed release if it is deletable", func() {
 				//given
-				installError := fmt.Sprintf("Helm install error: %s", "failed to install release")
-				expectedError := fmt.Sprintf("%s\nHelm delete of release \"%s\" was successfull", installError, testReleaseName)
+				installError := fmt.Sprintf("Helm installation of release \"%s\" failed: %s", testReleaseName, "failed to install release")
+				deletingMsg := "Deleting release before retrying."
+				expectedError := fmt.Sprintf("%s\n%s\nHelm delete of release \"%s\" was successfull", installError, deletingMsg, testReleaseName)
 
 				mockHelmClient := &mockHelmClient{
 					failInstallingRelease: true,
@@ -139,7 +140,7 @@ func TestSteps(t *testing.T) {
 			})
 			Convey("not delete failed release if it is not deletable", func() {
 				//given
-				expectedError := fmt.Sprintf("Helm install error: %s", "failed to install release")
+				expectedError := fmt.Sprintf("Helm installation of release \"%s\" failed: %s", testReleaseName, "failed to install release")
 
 				mockHelmClient := &mockHelmClient{
 					failInstallingRelease: true,
@@ -157,7 +158,7 @@ func TestSteps(t *testing.T) {
 			})
 			Convey("return an error when getting the release status fails", func() {
 				//given
-				installError := fmt.Sprintf("Helm install error: %s", "failed to install release")
+				installError := fmt.Sprintf("Helm installation of release \"%s\" failed: %s", testReleaseName, "failed to install release")
 				isDeletableError := fmt.Sprintf("Checking status of release \"%s\" failed with an error: %s", testReleaseName, "failed to get release status")
 				expectedError := fmt.Sprintf("%s \n %s \n", installError, isDeletableError)
 
@@ -175,9 +176,10 @@ func TestSteps(t *testing.T) {
 			})
 			Convey("return an error when release deletion fails", func() {
 				//given
-				installError := fmt.Sprintf("Helm install error: %s", "failed to install release")
+				installError := fmt.Sprintf("Helm installation of release \"%s\" failed: failed to install release", testReleaseName)
+				deletingMsg := "Deleting release before retrying."
 				deletingError := fmt.Sprintf("Helm delete of release \"%s\" failed with an error: %s", testReleaseName, "failed to delete release")
-				expectedError := fmt.Sprintf("%s \n %s \n", installError, deletingError)
+				expectedError := fmt.Sprintf("%s\n%s \n %s \n", installError, deletingMsg, deletingError)
 
 				mockHelmClient := &mockHelmClient{
 					failInstallingRelease: true,
