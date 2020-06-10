@@ -463,23 +463,8 @@ spec:
               value: activator
             path: /healthz
             port: 8012
-        {{ if (eq "kyma.local" .Values.global.ingress.domainName) }}
         resources:
-          limits:
-            cpu: 1000m
-            memory: 600Mi
-          requests:
-            cpu: "{{ .Values.knative_serving.minikube.activator.resources.requests.cpu }}"
-            memory: "{{ .Values.knative_serving.minikube.activator.resources.requests.memory }}"
-        {{ else }}
-        resources:
-          limits:
-            cpu: 1000m
-            memory: 600Mi
-          requests:
-            cpu: 300m
-            memory: 60Mi
-        {{ end }}
+{{ toYaml .Values.activator.resources | indent 10 }}
         securityContext:
           allowPrivilegeEscalation: false
       serviceAccountName: controller
@@ -544,23 +529,8 @@ spec:
         ports:
         - containerPort: 9090
           name: metrics
-        {{ if (eq "kyma.local" .Values.global.ingress.domainName) }}
         resources:
-          limits:
-            cpu: 1000m
-            memory: 1000Mi
-          requests:
-            cpu: "{{ .Values.knative_serving.minikube.autoscaler_hpa.resources.requests.cpu }}"
-            memory: "{{ .Values.knative_serving.minikube.autoscaler_hpa.resources.requests.memory }}"
-        {{ else }}
-        resources:
-          limits:
-            cpu: 1000m
-            memory: 1000Mi
-          requests:
-            cpu: 100m
-            memory: 100Mi
-        {{ end }}
+{{ toYaml .Values.autoscaler_hpa.resources | indent 10 }}
         securityContext:
           allowPrivilegeEscalation: false
       serviceAccountName: controller
@@ -653,23 +623,8 @@ spec:
               value: autoscaler
             path: /healthz
             port: 8080
-        {{ if (eq "kyma.local" .Values.global.ingress.domainName) }}
         resources:
-          limits:
-            cpu: 300m
-            memory: 400Mi
-          requests:
-            cpu: "{{ .Values.knative_serving.minikube.autoscaler.resources.requests.cpu }}"
-            memory: "{{ .Values.knative_serving.minikube.autoscaler.resources.requests.memory }}"
-        {{ else }}
-        resources:
-          limits:
-            cpu: 300m
-            memory: 400Mi
-          requests:
-            cpu: 30m
-            memory: 40Mi
-        {{ end }}
+{{ toYaml .Values.autoscaler_hpa.resources | indent 10 }}
         securityContext:
           allowPrivilegeEscalation: false
       serviceAccountName: controller
@@ -1376,23 +1331,8 @@ spec:
         ports:
         - containerPort: 9090
           name: metrics
-        {{ if (eq "kyma.local" .Values.global.ingress.domainName) }}
         resources:
-          limits:
-            cpu: 1000m
-            memory: 1000Mi
-          requests:
-            cpu: "{{ .Values.knative_serving.minikube.autoscaler.resources.requests.cpu }}"
-            memory: "{{ .Values.knative_serving.minikube.autoscaler.resources.requests.memory }}"
-        {{ else }}
-        resources:
-          limits:
-            cpu: 1000m
-            memory: 1000Mi
-          requests:
-            cpu: 100m
-            memory: 100Mi
-        {{ end }}
+{{ toYaml .Values.controller.resources | indent 10 }}
         securityContext:
           allowPrivilegeEscalation: false
       serviceAccountName: controller
@@ -1456,23 +1396,8 @@ spec:
         ports:
         - containerPort: 9090
           name: metrics
-        {{ if (eq "kyma.local" .Values.global.ingress.domainName) }}
         resources:
-          limits:
-            cpu: 1000m
-            memory: 1000Mi
-          requests:
-            cpu: "{{ .Values.knative_serving.minikube.networking_istio.resources.requests.cpu }}"
-            memory: "{{ .Values.knative_serving.minikube.networking_istio.resources.requests.memory }}"
-        {{ else }}
-        resources:
-          limits:
-            cpu: 1000m
-            memory: 1000Mi
-          requests:
-            cpu: 100m
-            memory: 100Mi
-        {{ end }}
+{{ toYaml .Values.networking_istio.resources | indent 10 }}
         securityContext:
           allowPrivilegeEscalation: false
       serviceAccountName: controller
