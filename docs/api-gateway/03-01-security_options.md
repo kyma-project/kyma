@@ -83,4 +83,4 @@ See these sample excerpts from APIRule custom resources that show the **rules** 
 
 </div>
 
->**TIP:** To learn more, read about the [APIRule custom resource](#custom-resource-api-rule) document. You can also follow the [tutorial](#tutorials-expose-and-secure-a-service) to learn how to expose and secure services.
+>**TIP:** To learn more, read about the [APIRule custom resource](#custom-resource-api-rule). You can also follow the [tutorial](#tutorials-expose-and-secure-a-service) to learn how to expose and secure services.

@@ -61,7 +61,7 @@ Alternatively, you can use a compatible, custom database to store the registered
 | **global.ory.hydra.persistence.secretKey** | Specifies the name of the key in the Secret that contains the database password. | `my-db-password` |
 | **global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, see the [configuration file](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml). | `mydb.my-namespace:1234` |
 | **global.ory.hydra.persistence.dbName** | Specifies the name of the database saved in Hydra. | `db` |
-| **global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. See [`config.yaml`](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml) for more information. | `postgres` |
+| **global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. For more information, see the [configuration file](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml). | `postgres` |
 
 #### Google Cloud SQL
 
@@ -83,9 +83,9 @@ The Cloud SQL is a provider-supplied and maintained database, which requires a s
 | **data.global.ory.hydra.persistence.user** | Specifies the name of the user with permissions to access the database. | `dbuser` |
 | **data.global.ory.hydra.persistence.secretName** | Specifies the name of the Secret in the same Namespace as Hydra that stores the database password. | `my-secret` |
 | **data.global.ory.hydra.persistence.secretKey** | Specifies the name of the key in the Secret that contains the database password. | `my-db-password` |
-| **data.global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, see the [`config.yaml`](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml) file. | Required: `ory-gcloud-sqlproxy.kyma-system` |
+| **data.global.ory.hydra.persistence.dbUrl** | Specifies the database URL. For more information, see the [configuration file](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml). | Required: `ory-gcloud-sqlproxy.kyma-system` |
 | **data.global.ory.hydra.persistence.dbName** | Specifies the name of the database saved in Hydra. | `db` |
-| **data.global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. See the [`config.yaml`](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml) file for more information. | `postgres` |
+| **data.global.ory.hydra.persistence.dbType** | Specifies the type of the database. The supported protocols are `postgres`, `mysql`, `cockroach`. For more information, see the [configuration file](https://github.com/ory/hydra/blob/v1.4.1/docs/config.yaml). | `postgres` |
 
 **Proxy settings:**
 

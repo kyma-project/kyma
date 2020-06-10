@@ -17,7 +17,7 @@ Note that the operations of provisioning and deprovisioning are asynchronous. Th
 
 The Runtime Provisioner exposes an API to manage cluster provisioning, installation, and deprovisioning.
 
-Read the [API specification(https://github.com/kyma-incubator/compass/blob/master/components/provisioner/pkg/gqlschema/schema.graphql) for more details.
+Read the [API specification](https://github.com/kyma-incubator/compass/blob/master/components/provisioner/pkg/gqlschema/schema.graphql) for more details.
 
 To access the Runtime Provisioner, forward the port that the GraphQL Server is listening on:
 
