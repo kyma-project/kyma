@@ -17,11 +17,12 @@ import (
 )
 
 const (
-	functionName  = "e2e-upgrade-fnc"
-	limitCPU      = "30m"
-	requestCPU    = "10m"
-	limitMemory   = "30Mi"
-	requestMemory = "10Mi"
+	functionName     = "e2e-upgrade-fnc"
+	functionResponse = "Hello Upgrade World!"
+	limitCPU         = "30m"
+	requestCPU       = "10m"
+	limitMemory      = "30Mi"
+	requestMemory    = "10Mi"
 
 	testTimeout  = 4 * time.Minute
 	waitInterval = 15 * time.Second
@@ -79,13 +80,13 @@ func (ut *serverlessUpgradeTest) TestResources(stop <-chan struct{}, log logrus.
 	}
 	logger.Info("Function is running")
 
-	logger.Info("Validating function...")
+	logger.Info("Validate function's manifest...")
 	expected := ut.buildFunction(namespace)
 	if !ut.compareFunctions(log, expected, function) {
-		logger.Error("Validation failed")
-		return fmt.Errorf("validation failed")
+		logger.Error("Validation of function's manifest failed")
+		return fmt.Errorf("validation of function's manifest failed")
 	}
-	logger.Info("Function validated")
+	logger.Info("Function's manifest validated")
 
 	logger.Info("Deleting function...")
 	if err := ut.client.Delete(namespace, functionName); err != nil {
@@ -244,11 +245,11 @@ func (ut *serverlessUpgradeTest) buildFunction(namespace string) v1alpha1.Functi
 			Annotations: map[string]string{"testAnn": "value"},
 		},
 		Spec: v1alpha1.FunctionSpec{
-			Source: `module.exports = { 
+			Source: fmt.Sprintf(`module.exports = { 
   main: function (event, context) {
-    return "Hello Upgrade World!";
+    return "%s";
   }
-}`,
+}`, functionResponse),
 			Deps: `{ 
   "version": "1.0.0",
   "dependencies": {}
