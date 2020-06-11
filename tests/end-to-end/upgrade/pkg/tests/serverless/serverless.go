@@ -20,8 +20,8 @@ const (
 	functionName  = "e2e-upgrade-fnc"
 	limitCPU      = "30m"
 	requestCPU    = "10m"
-	limitMemory   = "30mi"
-	requestMemory = "10mi"
+	limitMemory   = "30Mi"
+	requestMemory = "10Mi"
 
 	testTimeout  = 4 * time.Minute
 	waitInterval = 15 * time.Second
