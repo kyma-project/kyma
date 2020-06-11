@@ -15,9 +15,9 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **server.webRoot** | Defines the context root path for Kiali console, API endpoints, and readiness probes. | `/` |
-| **deployment.viewOnlyMode** | When set to `true`, Kiali is available in view-only mode, allowing you to view and retrieve management data for the Service Mesh. You cannot modify the Service Mesh.  | `true` |
-| **deployment.accessibleNamespaces** | Specifies the Namespaces Kiali can access to monitor the Service Mesh components deployed there. You can provide the names using regex expressions. The default value is `**`(two asterisks) meaning Kiali can access any Namespace. | `**` |
+| **server.web_root** | Defines the context root path for Kiali console, API endpoints, and readiness probes. | `/` |
+| **deployment.view_only_mode** | When set to `true`, Kiali is available in view-only mode, allowing you to view and retrieve management data for the Service Mesh. You cannot modify the Service Mesh.  | `true` |
+| **deployment.accessible_namespaces** | Specifies the Namespaces Kiali can access to monitor the Service Mesh components deployed there. You can provide the names using regex expressions. The default value is `**`(two asterisks) meaning Kiali can access any Namespace. | `**` |
 | **deployment.resources.requests.cpu** | Minimum number of CPUs requested by the Kiali operator to use. | `10m` |
 | **deployment.resources.requests.memory** | Minimum amount of memory requested by the Kiali operator to use. | `20Mi` |
 | **deployment.resources.limits.cpu** | Maximum number of CPUs available for the Kiali operator to use. | `100m` |
