@@ -230,12 +230,18 @@ func (_ *serverlessUpgradeTest) isRunning(function *v1alpha1.Function) bool {
 }
 
 func (ut *serverlessUpgradeTest) buildFunction(namespace string) v1alpha1.Function {
+	var minReplicas int32 = 1
+	var maxReplicas int32 = 3
 	return v1alpha1.Function{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Function",
+			APIVersion: v1alpha1.GroupVersion.String(),
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        functionName,
 			Namespace:   namespace,
-			Labels:      nil,
-			Annotations: nil,
+			Labels:      map[string]string{"testLbl": "value"},
+			Annotations: map[string]string{"testAnn": "value"},
 		},
 		Spec: v1alpha1.FunctionSpec{
 			Source: `module.exports = { 
@@ -267,9 +273,9 @@ func (ut *serverlessUpgradeTest) buildFunction(namespace string) v1alpha1.Functi
 					corev1.ResourceMemory: resource.MustParse(requestMemory),
 				},
 			},
-			MinReplicas: nil,
-			MaxReplicas: nil,
-			Labels:      nil,
+			MinReplicas: &minReplicas,
+			MaxReplicas: &maxReplicas,
+			Labels:      map[string]string{"testPodLbl": "value"},
 		},
 	}
 }
