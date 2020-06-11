@@ -135,31 +135,31 @@ func (ut *serverlessUpgradeTest) compareFunctions(log logrus.FieldLogger, expect
 		log.Errorf("Source field is not equal, expected: %v, actual: %v", expected.Spec.Source, actual.Spec.Source)
 		result = false
 	}
-	if expected.Spec.MaxReplicas != actual.Spec.MaxReplicas {
+	if &expected.Spec.MaxReplicas != &actual.Spec.MaxReplicas {
 		log.Errorf("MaxReplicas field is not equal, expected: %v, actual: %v", expected.Spec.MaxReplicas, actual.Spec.MaxReplicas)
 		result = false
 	}
-	if expected.Spec.MinReplicas != actual.Spec.MinReplicas {
+	if &expected.Spec.MinReplicas != &actual.Spec.MinReplicas {
 		log.Errorf("MinReplicas field is not equal, expected: %v, actual: %v", expected.Spec.MinReplicas, actual.Spec.MinReplicas)
 		result = false
 	}
-	if expected.Spec.Resources.Limits.Cpu() != actual.Spec.Resources.Limits.Cpu() {
+	if expected.Spec.Resources.Limits.Cpu().Value() != actual.Spec.Resources.Limits.Cpu().Value() {
 		log.Errorf("CPU limit field is not equal, expected: %v, actual: %v", expected.Spec.Resources.Limits.Cpu(), actual.Spec.Resources.Limits.Cpu())
 		result = false
 	}
-	if expected.Spec.Resources.Limits.Memory() != actual.Spec.Resources.Limits.Memory() {
+	if expected.Spec.Resources.Limits.Memory().Value() != actual.Spec.Resources.Limits.Memory().Value() {
 		log.Errorf("Memory limit field is not equal, expected: %v, actual: %v", expected.Spec.Resources.Limits.Memory(), actual.Spec.Resources.Limits.Memory())
 		result = false
 	}
-	if expected.Spec.Resources.Requests.Cpu() != actual.Spec.Resources.Requests.Cpu() {
+	if expected.Spec.Resources.Requests.Cpu().Value() != actual.Spec.Resources.Requests.Cpu().Value() {
 		log.Errorf("CPU request field is not equal, expected: %v, actual: %v", expected.Spec.Resources.Requests.Cpu(), actual.Spec.Resources.Requests.Cpu())
 		result = false
 	}
-	if expected.Spec.Resources.Requests.Memory() != actual.Spec.Resources.Requests.Memory() {
+	if expected.Spec.Resources.Requests.Memory().Value() != actual.Spec.Resources.Requests.Memory().Value() {
 		log.Errorf("Memory request field is not equal, expected: %v, actual: %v", expected.Spec.Resources.Requests.Memory(), actual.Spec.Resources.Requests.Memory())
 		result = false
 	}
-	if ut.envsContainsAll(expected.Spec.Env, actual.Spec.Env) {
+	if !ut.envsContainsAll(expected.Spec.Env, actual.Spec.Env) {
 		log.Errorf("Missing expected envs, expected: %v, actual: %v", expected.Spec.Env, actual.Spec.Env)
 		result = false
 	}
