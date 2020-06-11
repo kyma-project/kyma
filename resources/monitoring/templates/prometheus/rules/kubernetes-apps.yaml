@@ -25,13 +25,6 @@ spec:
   groups:
   - name: kubernetes-apps
     rules:
-    - alert: KubePodOOMKilled
-      annotations:
-        message: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.container {{`}}`}}) is OOMKilled for 5 minutes.
-      expr: sum_over_time(kube_pod_container_status_terminated_reason{reason="OOMKilled"}[5m]) > 0
-      for: 5m
-      labels:
-        severity: warning
     - alert: KubePodCrashLooping
       annotations:
         message: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.container {{`}}`}}) is restarting {{`{{`}} printf "%.2f" $value {{`}}`}} times / 5 minutes.
