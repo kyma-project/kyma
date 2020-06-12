@@ -93,9 +93,6 @@ spec:
         severity: critical
       annotations:
         message:  "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
-  {{- /*
-    Customization: This alert is added to monitor OOMKilled Pods.
-  */ -}}
   - name: kube-pod-oomkilled
     rules:
     - alert: KubePodOOMKilled
