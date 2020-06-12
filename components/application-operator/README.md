@@ -29,7 +29,7 @@ The Application Operator has the following parameters:
  - **appName** is the name used in controller registration. The default value is `application-operator`.
  - **domainName** is the domain name of the cluster. The default domain name is `kyma.local`.
  - **namespace** is the Namespace where the AO deploys the charts of the Application. The default Namespace is `kyma-integration`.
- - **helmDriver** is the Helm3 backend storage driver setting. Possible values are: `configmap`, `secret` and `memory`. The default value is `secret`.
+ - **helmDriver** is the Helm 3 backend storage driver setting. Possible values are: `configmap`, `secret` and `memory`. The default value is `secret`.
  - **syncPeriod** is the time period between resyncing existing resources. The default value is `30` seconds.
  - **installationTimeout** is the time after which the release installation will time out. The default value is `240` seconds.
  - **applicationGatewayImage** is the Application Gateway image version to use in the Application chart.
