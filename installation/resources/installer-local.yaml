@@ -212,7 +212,7 @@ spec:
           HELM_3_BINARY=$(which helm3)
           SECRET_NAME="helm-secret"
           NAMESPACE="kyma-installer"
-          CHART_BLACKLIST=( "gateway-0.0.1" )
+          CHART_BLACKLIST=( "gateway-0.0.1" "application-0.0.1" )
 
           echo "---> Install requirements"
           apk add git jq
