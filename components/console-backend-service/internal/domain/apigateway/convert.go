@@ -7,7 +7,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/pkg/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -56,14 +55,6 @@ func fromUnstructured(obj *unstructured.Unstructured) (*v1alpha1.APIRule, error)
 
 type apiRuleConverter struct{}
 
-func (c *apiRuleConverter) ToGQL(in *v1alpha1.APIRule) (*v1alpha1.APIRule, error) {
-	return in, nil
-}
-
-func (c *apiRuleConverter) ToGQLs(in []*v1alpha1.APIRule) ([]*v1alpha1.APIRule, error) {
-	return in, nil
-}
-
 func fromGQLJSON(config gqlschema.JSON) *runtime.RawExtension {
 	result := runtime.RawExtension{}
 	if config != nil {
@@ -74,27 +65,18 @@ func fromGQLJSON(config gqlschema.JSON) *runtime.RawExtension {
 	return &result
 }
 
-func (c *apiRuleConverter) ToApiRule(name string, namespace string, in gqlschema.APIRuleInput) *v1alpha1.APIRule {
+func (c *apiRuleConverter) ToApiRule(in gqlschema.APIRuleInput) v1alpha1.APIRuleSpec {
 	hostPort := uint32(in.ServicePort)
-	return &v1alpha1.APIRule{
-		TypeMeta: v1.TypeMeta{
-			APIVersion: "gateway.kyma-project.io/v1alpha1",
-			Kind:       "APIRule",
+	return v1alpha1.APIRuleSpec{
+		Service: &v1alpha1.Service{
+			Name: &in.ServiceName,
+			Port: &hostPort,
+			Host: &in.Host,
 		},
-		ObjectMeta: v1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Spec: v1alpha1.APIRuleSpec{
-			Service: &v1alpha1.Service{
-				Name: &in.ServiceName,
-				Port: &hostPort,
-				Host: &in.Host,
-			},
-			Gateway: &in.Gateway,
-			Rules:   toRules(in.Rules),
-		},
+		Gateway: &in.Gateway,
+		Rules:   toRules(in.Rules),
 	}
+
 }
 
 func toRules(ruleInputs []*gqlschema.RuleInput) []v1alpha1.Rule {

@@ -2,10 +2,8 @@ package apigateway
 
 import (
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
-	notifierRes "github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
-	"github.com/pkg/errors"
-	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -25,22 +23,45 @@ var apiRulesGroupVersionResource = schema.GroupVersionResource{
 	Resource: "apirules",
 }
 
-var apiRuleTypeMeta = metav1.TypeMeta{
-	Kind:       "APIRule",
-	APIVersion: "gateway.kyma-project.io/v1alpha1",
-}
-
 type Service struct {
 	*resource.Service
-	notifier notifierRes.Notifier
 }
 
 func NewService(serviceFactory *resource.ServiceFactory) *Service {
-	notifier := notifierRes.NewNotifier()
 	return &Service{
 		Service:  serviceFactory.ForResource(apiRulesGroupVersionResource),
-		notifier: notifier,
 	}
+}
+
+func (svc *Service) Find(name, namespace string) (*v1alpha1.APIRule, error) {
+	var result *v1alpha1.APIRule
+	err := svc.GetInNamespace(name, namespace, &result)
+	return result, err
+}
+
+func (svc *Service) Delete(name, namespace string) (*v1alpha1.APIRule, error) {
+	var result *v1alpha1.APIRule
+	err := svc.Service.DeleteInNamespace(namespace, name, result)
+	return result, err
+}
+
+func (svc *Service) Create(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule, error) {
+	var result *v1alpha1.APIRule
+	err := svc.Service.Create(apiRule, result)
+	return result, err
+}
+
+func (svc *Service) Subscribe(handler resource.EventHandlerProvider) resource.Unsubscribe {
+	return svc.Subscribe(handler)
+}
+
+func (svc *Service) Update(name, namespace string, newSpec v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
+	var result *v1alpha1.APIRule
+	err := svc.Service.Update(name, namespace, result, func() error {
+		result.Spec = newSpec
+		return nil
+	})
+	return result, err
 }
 
 func (svc *Service) List(namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error) {
@@ -72,53 +93,33 @@ func (svc *Service) List(namespace string, serviceName *string, hostname *string
 	return apiRules, nil
 }
 
-func (svc *Service) Find(name, namespace string) (*v1alpha1.APIRule, error) {
-	var result *v1alpha1.APIRule
-	err := svc.GetInNamespace(name, namespace, &result)
-	return result, err
-}
-
-func (svc *Service) Delete(name, namespace string) error {
-	return svc.Service.Client.Namespace(namespace).Delete(name, &metav1.DeleteOptions{})
-}
-
-func (svc *Service) Create(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule, error) {
-	result := &v1alpha1.APIRule{}
-	err := svc.Service.Create(apiRule, result)
-	return result, err
-}
-
-func (svc *Service) Subscribe(listener notifierRes.Listener) {
-	svc.notifier.AddListener(listener)
-}
-
-func (svc *Service) Unsubscribe(listener notifierRes.Listener) {
-	svc.notifier.DeleteListener(listener)
-}
-
-func (svc *Service) Update(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule, error) {
-	oldApiRule, err := svc.Find(apiRule.ObjectMeta.Name, apiRule.ObjectMeta.Namespace)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while finding APIRule %s", apiRule.ObjectMeta.Name)
+func NewEventHandler(channel chan<- *gqlschema.APIRuleEvent, filter func(v1alpha1.APIRule) bool) resource.EventHandlerProvider {
+	return func() resource.EventHandler {
+		return &EventHandler{
+			channel: channel,
+			filter:  filter,
+		}
 	}
-
-	if oldApiRule == nil {
-		return nil, apiErrors.NewNotFound(schema.GroupResource{
-			Group:    apiRulesGroupVersionResource.Group,
-			Resource: apiRulesGroupVersionResource.Resource,
-		}, apiRule.ObjectMeta.Name)
-	}
-	apiRule.ObjectMeta.ResourceVersion = oldApiRule.ObjectMeta.ResourceVersion
-	apiRule.TypeMeta = apiRuleTypeMeta
-
-	u, err := toUnstructured(apiRule)
-	if err != nil {
-		return &v1alpha1.APIRule{}, err
-	}
-
-	updated, err := svc.Client.Namespace(apiRule.ObjectMeta.Namespace).Update(u, metav1.UpdateOptions{})
-	if err != nil {
-		return &v1alpha1.APIRule{}, err
-	}
-	return fromUnstructured(updated)
 }
+
+type EventHandler struct {
+	channel chan<- *gqlschema.APIRuleEvent
+	filter  func(v1alpha1.APIRule) bool
+	res     *v1alpha1.APIRule
+}
+
+func (h *EventHandler) K8sResource() interface{} {
+	return h.res
+}
+
+func (h *EventHandler) ShouldNotify() bool {
+	return h.filter(*h.res)
+}
+
+func (h *EventHandler) Notify(eventType resource.EventType) {
+	h.channel <- &gqlschema.APIRuleEvent{
+		Type:    eventType,
+		APIRule: h.res,
+	}
+}
+

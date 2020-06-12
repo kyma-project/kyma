@@ -5,12 +5,8 @@ import (
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
-	"github.com/golang/glog"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway/listener"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway/pretty"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	"github.com/pkg/errors"
 )
 
@@ -19,15 +15,14 @@ type apiRuleSvc interface {
 	List(namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error)
 	Find(name string, namespace string) (*v1alpha1.APIRule, error)
 	Create(api *v1alpha1.APIRule) (*v1alpha1.APIRule, error)
-	Update(api *v1alpha1.APIRule) (*v1alpha1.APIRule, error)
-	Delete(name string, namespace string) error
-	Subscribe(listener resource.Listener)
-	Unsubscribe(listener resource.Listener)
+	Update(name, namespace string, api v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
+	Delete(name string, namespace string) (*v1alpha1.APIRule, error)
+	Subscribe(listener resource.EventHandlerProvider) resource.Unsubscribe
 }
 
 //go:generate mockery -name=apiRuleConv -output=automock -outpkg=automock -case=underscore
 type apiRuleConv interface {
-	ToApiRule(name string, namespace string, in gqlschema.APIRuleInput) *v1alpha1.APIRule
+	ToApiRule( in gqlschema.APIRuleInput) v1alpha1.APIRuleSpec
 }
 
 type apiRuleResolver struct {
@@ -62,19 +57,16 @@ func (ar *apiRuleResolver) CreateAPIRule(ctx context.Context, name string, names
 
 func (ar *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan *gqlschema.APIRuleEvent, error) {
 	channel := make(chan *gqlschema.APIRuleEvent, 1)
-	filter := func(apiRule *v1alpha1.APIRule) bool {
-		if serviceName == nil {
-			return apiRule != nil && apiRule.Namespace == namespace
-		}
-		return apiRule != nil && apiRule.Namespace == namespace && apiRule.Spec.Service.Name == serviceName
+	filter := func(apiRule v1alpha1.APIRule) bool {
+		namespaceMatches := apiRule.Namespace == namespace
+		serviceNameMatches := serviceName == nil || apiRule.Spec.Service.Name == serviceName
+		return namespaceMatches && serviceNameMatches
 	}
 
-	apiRuleListener := listener.NewApiRule(channel, filter, ApiRuleUnstructuredExtractor{})
-
-	ar.apiRuleSvc.Subscribe(apiRuleListener)
+	unsubscribe := ar.apiRuleSvc.Subscribe(NewEventHandler(channel, filter))
 	go func() {
 		defer close(channel)
-		defer ar.apiRuleSvc.Unsubscribe(apiRuleListener)
+		defer unsubscribe()
 		<-ctx.Done()
 	}()
 
@@ -82,19 +74,11 @@ func (ar *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespa
 }
 
 func (ar *apiRuleResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*v1alpha1.APIRule, error) {
-	apiRuleObject := ar.apiRuleCon.ToApiRule(name, namespace, params)
+	apiRuleObject := ar.apiRuleCon.ToApiRule(params)
 
-	return ar.apiRuleSvc.Update(apiRuleObject)
+	return ar.apiRuleSvc.Update(name, namespace, apiRuleObject)
 }
 
 func (ar *apiRuleResolver) DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {
-	apiRuleObj, err := ar.apiRuleSvc.Find(name, namespace)
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting %s `%s` in namespace `%s`", pretty.APIRule, name, namespace))
-		return nil, gqlerror.New(err, pretty.APIRules, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
-	}
-
-	apiRuleCopy := apiRuleObj.DeepCopy()
-	err = ar.apiRuleSvc.Delete(name, namespace)
-	return apiRuleCopy, err
+	return ar.apiRuleSvc.Delete(name, namespace)
 }

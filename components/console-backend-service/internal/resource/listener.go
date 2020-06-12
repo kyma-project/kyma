@@ -7,7 +7,7 @@ import (
 	"github.com/golang/glog"
 )
 
-type Handler func() EventHandler
+type EventHandlerProvider func() EventHandler
 
 type EventType string
 const (
@@ -23,10 +23,10 @@ type EventHandler interface {
 }
 
 type Listener struct {
-	handler Handler
+	handler EventHandlerProvider
 }
 
-func NewListener(handler Handler) *Listener {
+func NewListener(handler EventHandlerProvider) *Listener {
 	return &Listener{
 		handler: handler,
 	}

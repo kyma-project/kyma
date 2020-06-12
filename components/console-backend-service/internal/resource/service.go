@@ -2,7 +2,9 @@ package resource
 
 import (
 	"fmt"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"time"
 
@@ -18,6 +20,8 @@ var NotFound = fmt.Errorf("resource not found")
 type Appendable interface {
 	Append() interface{}
 }
+
+type Unsubscribe func()
 
 type ServiceFactory struct {
 	Client          dynamic.Interface
@@ -45,6 +49,7 @@ type Service struct {
 	Client   dynamic.NamespaceableResourceInterface
 	Informer cache.SharedIndexInformer
 	notifier *Notifier
+	gvr schema.GroupVersionResource
 }
 
 func (f *ServiceFactory) ForResource(gvr schema.GroupVersionResource) *Service {
@@ -55,6 +60,7 @@ func (f *ServiceFactory) ForResource(gvr schema.GroupVersionResource) *Service {
 		Client:   f.Client.Resource(gvr),
 		Informer: informer,
 		notifier: notifier,
+		gvr: gvr,
 	}
 }
 
@@ -132,10 +138,56 @@ func (s *Service) Create(obj interface{}, result interface{}) error {
 	return FromUnstructured(created, result)
 }
 
-func (s *Service) AddListener(listener *Listener) {
+func (s *Service) Apply(obj interface{}, result interface{}) error {
+	u, err := ToUnstructured(obj)
+	if err != nil {
+		return err
+	}
+
+	created, err := s.Client.Update(u, v1.UpdateOptions{})
+	if err != nil {
+		return err
+	}
+
+	return FromUnstructured(created, result)
+}
+
+func (s *Service) Update(name, namespace string, result interface{}, update func() error) error {
+	err := s.GetInNamespace(name, namespace, result)
+	if err != nil {
+		return err
+	}
+	if result == nil {
+		return apiErrors.NewNotFound(s.gvr.GroupResource(), name)
+	}
+
+	err = update()
+	if err != nil {
+		return err
+	}
+
+	return s.Apply(result, result)
+}
+
+func (s *Service) Subscribe(handler EventHandlerProvider) Unsubscribe {
+	listener := NewListener(handler)
 	s.notifier.AddListener(listener)
+	return func() {
+		s.DeleteListener(listener)
+	}
 }
 
 func (s *Service) DeleteListener(listener *Listener) {
 	s.notifier.DeleteListener(listener)
+}
+
+func (s *Service) DeleteInNamespace(namespace, name string, res runtime.Object) error {
+	err := s.GetInNamespace(name, namespace, res)
+	if err != nil {
+		return err
+	}
+
+	res = res.DeepCopyObject()
+	err = s.Client.Namespace(namespace).Delete(name, &v1.DeleteOptions{})
+	return err
 }
