@@ -23,6 +23,7 @@ func NewModule(name string, factory *ServiceFactory, serviceCreators ServiceCrea
 		Pluggable: module.NewPluggable(name),
 		serviceCreators: serviceCreators,
 		services: make(map[schema.GroupVersionResource]*Service),
+		factory: factory,
 	}
 }
 
@@ -36,9 +37,10 @@ func (m *Module) Enable() error {
 		}
 	}
 
-	m.EnableAndSyncDynamicInformerFactory(m.factory.InformerFactory, func() {
-		m.services = newServices
-	})
+	m.Pluggable.Enable()
+	m.factory.InformerFactory.Start(make(chan struct{}))
+	m.factory.InformerFactory.WaitForCacheSync(make(chan struct{}))
+	m.services = newServices
 	return nil
 }
 

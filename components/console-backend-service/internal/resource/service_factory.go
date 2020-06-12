@@ -32,7 +32,10 @@ func NewServiceFactory(client dynamic.Interface, informerFactory dynamicinformer
 
 func (f *ServiceFactory) ForResource(gvr schema.GroupVersionResource) *Service {
 	notifier := NewNotifier()
-	informer := f.InformerFactory.ForResource(gvr).Informer()
+	informer := f.
+		InformerFactory.
+		ForResource(gvr).
+		Informer()
 	informer.AddEventHandler(notifier)
 	return &Service{
 		ServiceBase: &enabledServiceBase{

@@ -20,10 +20,12 @@ func (l *APIRuleList) Append() interface{} {
 func (r *Resolver) APIRulesQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error) {
 	items := APIRuleList{}
 	var err error
-	if serviceName != nil {
-		err = r.Service().ListByIndex(apiRulesServiceIndex, apiRulesServiceIndexKey(namespace, serviceName), &items)
+	if serviceName != nil && hostname != nil {
+		err = r.Service().ListByIndex(apiRulesServiceAndHostnameIndex, apiRulesServiceAndHostnameIndexKey(namespace, serviceName, hostname), &items)
 	} else if hostname != nil {
 		err = r.Service().ListByIndex(apiRulesHostnameIndex, apiRulesHostnameIndexKey(namespace, hostname), &items)
+	} else if serviceName != nil {
+		err = r.Service().ListByIndex(apiRulesServiceIndex, apiRulesServiceIndexKey(namespace, serviceName), &items)
 	} else {
 		err = r.Service().ListInNamespace(namespace, &items)
 	}
@@ -48,8 +50,8 @@ func (r *Resolver) CreateAPIRule(ctx context.Context, name string, namespace str
 		},
 		Spec: params,
 	}
-	var result *v1alpha1.APIRule
-	err := r.Service().Create(apiRule, result)
+	result := &v1alpha1.APIRule{}
+	err := r.Service().CreateInNamespace(apiRule, result)
 	return result, err
 }
 

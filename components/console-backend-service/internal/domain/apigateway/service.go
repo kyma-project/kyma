@@ -18,13 +18,21 @@ var apiRulesGroupVersionResource = schema.GroupVersionResource{
 }
 
 var apiRulesServiceIndex = "service"
+
 func apiRulesServiceIndexKey(namespace string, serviceName *string) string {
-	return namespace +":" + *serviceName
+	return namespace + ":" + *serviceName
 }
 
 var apiRulesHostnameIndex = "hostname"
+
 func apiRulesHostnameIndexKey(namespace string, hostname *string) string {
-	return namespace +":" + *hostname
+	return namespace + ":" + *hostname
+}
+
+var apiRulesServiceAndHostnameIndex = "service-hostname"
+
+func apiRulesServiceAndHostnameIndexKey(namespace string, serviceName *string, hostname *string) string {
+	return namespace + ":" + *serviceName + ":" + *hostname
 }
 
 type Service struct {
@@ -49,6 +57,14 @@ func NewService(serviceFactory *resource.ServiceFactory) (*resource.Service, err
 				return nil, err
 			}
 			return []string{apiRulesHostnameIndexKey(rule.Namespace, rule.Spec.Service.Host)}, nil
+		},
+		apiRulesServiceAndHostnameIndex: func(obj interface{}) ([]string, error) {
+			rule  := &v1alpha1.APIRule{}
+			err := resource.FromUnstructured(obj.(*unstructured.Unstructured), rule)
+			if err != nil {
+				return nil, err
+			}
+			return []string{apiRulesServiceAndHostnameIndexKey(rule.Namespace, rule.Spec.Service.Name, rule.Spec.Service.Host)}, nil
 		},
 	})
 	return service, err
