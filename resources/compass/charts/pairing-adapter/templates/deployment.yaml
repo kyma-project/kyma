@@ -20,6 +20,8 @@ spec:
                 app: {{ .Chart.Name }}
                 release: {{ .Release.Name }}
         spec:
+            nodeSelector: 
+              {{- toYaml .Values.deployment.nodeSelector | nindent 14 }}
             containers:
             - name: {{ .Chart.Name }}
               image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.pairing_adapter.dir }}pairing-adapter:{{ .Values.global.images.pairing_adapter.version }}
