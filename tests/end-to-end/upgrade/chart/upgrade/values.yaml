@@ -1,9 +1,13 @@
 containerRegistry:
   path: eu.gcr.io/kyma-project
 
+subscriberimage:
+  dir:
+  version: PR-8483
+
 image:
   dir:
-  version: PR-8720
+  version: PR-8483
   pullPolicy: "IfNotPresent"
 
 dex:
