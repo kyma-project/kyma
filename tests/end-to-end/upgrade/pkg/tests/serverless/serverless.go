@@ -116,31 +116,31 @@ func (ut *serverlessUpgradeTest) compareFunctions(log logrus.FieldLogger, expect
 	result := true
 
 	if !ut.mapContainsAll(expected.Annotations, actual.Annotations) {
-		log.Errorf("Missing expected annotations, expected: %v, actual: %v", expected.Annotations, actual.Annotations)
+		log.Errorf("Missing expected annotations, expected: %#v, actual: %#v", expected.Annotations, actual.Annotations)
 		result = false
 	}
 	if !ut.mapContainsAll(expected.Labels, actual.Labels) {
-		log.Errorf("Missing expected labels, expected: %v, actual: %v", expected.Labels, actual.Labels)
+		log.Errorf("Missing expected labels, expected: %#v, actual: %#v", expected.Labels, actual.Labels)
 		result = false
 	}
 	if !ut.mapContainsAll(expected.Spec.Labels, actual.Spec.Labels) {
-		log.Errorf("Missing expected pod labels, expected: %v, actual: %v", expected.Spec.Labels, actual.Spec.Labels)
+		log.Errorf("Missing expected pod labels, expected: %#v, actual: %#v", expected.Spec.Labels, actual.Spec.Labels)
 		result = false
 	}
 	if expected.Spec.Deps != actual.Spec.Deps {
-		log.Errorf("Deps field is not equal, expected: %v, actual: %v", expected.Spec.Deps, actual.Spec.Deps)
+		log.Errorf("Deps field is not equal, expected: %s, actual: %s", expected.Spec.Deps, actual.Spec.Deps)
 		result = false
 	}
 	if expected.Spec.Source != actual.Spec.Source {
-		log.Errorf("Source field is not equal, expected: %v, actual: %v", expected.Spec.Source, actual.Spec.Source)
+		log.Errorf("Source field is not equal, expected: %s, actual: %s", expected.Spec.Source, actual.Spec.Source)
 		result = false
 	}
 	if &expected.Spec.MaxReplicas != &actual.Spec.MaxReplicas {
-		log.Errorf("MaxReplicas field is not equal, expected: %v, actual: %v", expected.Spec.MaxReplicas, actual.Spec.MaxReplicas)
+		log.Errorf("MaxReplicas field is not equal, expected: %d, actual: %d", &expected.Spec.MaxReplicas, &actual.Spec.MaxReplicas)
 		result = false
 	}
 	if &expected.Spec.MinReplicas != &actual.Spec.MinReplicas {
-		log.Errorf("MinReplicas field is not equal, expected: %v, actual: %v", expected.Spec.MinReplicas, actual.Spec.MinReplicas)
+		log.Errorf("MinReplicas field is not equal, expected: %d, actual: %d", &expected.Spec.MinReplicas, &actual.Spec.MinReplicas)
 		result = false
 	}
 	if expected.Spec.Resources.Limits.Cpu().Value() != actual.Spec.Resources.Limits.Cpu().Value() {
@@ -160,7 +160,7 @@ func (ut *serverlessUpgradeTest) compareFunctions(log logrus.FieldLogger, expect
 		result = false
 	}
 	if !ut.envsContainsAll(expected.Spec.Env, actual.Spec.Env) {
-		log.Errorf("Missing expected envs, expected: %v, actual: %v", expected.Spec.Env, actual.Spec.Env)
+		log.Errorf("Missing expected envs, expected: %#v, actual: %#v", expected.Spec.Env, actual.Spec.Env)
 		result = false
 	}
 
@@ -206,7 +206,7 @@ func (ut *serverlessUpgradeTest) waitForRunning(ctx context.Context, log logrus.
 			if ut.isRunning(function) {
 				return nil
 			} else {
-				log.Warnf("Function is not running, status: %+v", function.Status)
+				log.Warnf("Function is not running, status: %#v", function.Status)
 			}
 
 			time.Sleep(waitInterval)
