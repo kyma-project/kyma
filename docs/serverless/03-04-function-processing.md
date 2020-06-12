@@ -32,7 +32,7 @@ This initial phase starts when you create a Function CR with configuration speci
 
 This phase involves creating and processing the Job CR. It ends successfully when the Function image is built and sent to the Docker registry. If the image already exists and only an update is required, the Docker image receives a new tag.
 
-Updating an existing Function requires an image rebuild only if you change the Function's body (**source**) or dependencies (**deps**). An update of Function's other configuration details, such as environment variables, replicas, resources, or labels, does not require image rebuild as it only affects KService.
+Updating an existing Function requires an image rebuild only if you change the Function's body (**source**) or dependencies (**deps**). An update of Function's other configuration details, such as environment variables, replicas, resources, or labels, does not require image rebuild as it only affects the Deployment.
 
 > **NOTE:** Each time you update Function's configuration, the Function Controller deletes all previous Job CRs for the given Function's **UID**.
 
@@ -40,6 +40,10 @@ Updating an existing Function requires an image rebuild only if you change the F
 
 ## Running
 
-This stage revolves around creating a KService or updating it when configuration changes were made in the Function CR or the Function image was rebuilt. In general, the KService is considered updated when both configuration and the image tag in the KService are up to date. Thanks to the implemented reconciliation loop, the Function Controller constantly observes all newly created or updated KServices. If it detects one, it fetches the KService status and only then updates the Function's status.
+This stage revolves around creating a Deployment, Service and HorizontalPodAutoscaler or updating them when configuration changes were made in the Function CR or the Function image was rebuilt.
+
+In general, the Deployment is considered updated when both configuration and the image tag in the Deployment are up to date. Service and HorizontalPodAutoscaler are considered updated when there are proper labels set and configuration is up to date.
+
+Thanks to the implemented reconciliation loop, the Function Controller constantly observes all newly created or updated resources. If it detects changes, it fetches the appropriate resource's status and only then updates the Function's status.
 
 ![Function running](./assets/running.svg)
