@@ -145,7 +145,7 @@ func TestApiService_Find(t *testing.T) {
 		assert.Equal(t, apiRule1, result)
 	})
 
-	t.Run("Should return nil if not found", func(t *testing.T) {
+	t.Run("Should return error if not found", func(t *testing.T) {
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
 
@@ -155,11 +155,9 @@ func TestApiService_Find(t *testing.T) {
 
 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-		result, err := service.APIRuleQuery(context.Background(), name1, namespace)
+		_, err = service.APIRuleQuery(context.Background(), name1, namespace)
 
-		require.NoError(t, err)
-		var empty *v1alpha1.APIRule
-		assert.Equal(t, empty, result)
+		require.Error(t, err)
 	})
 }
 

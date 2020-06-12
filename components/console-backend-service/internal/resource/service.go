@@ -28,7 +28,7 @@ func (s *Service) Get(name string, result interface{}) error {
 	return s.GetByKey(name, result)
 }
 
-func (s *Service) Update(name, namespace string, result interface{}, update func() error) error {
+func (s *Service) UpdateInNamespace(name, namespace string, result interface{}, update func() error) error {
 	err := s.GetInNamespace(name, namespace, result)
 	if err != nil {
 		return err

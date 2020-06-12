@@ -21,7 +21,7 @@ type ServiceBase interface {
 	ListByIndex(index, key string, result Appendable) error
 	GetByKey(key string, result interface{}) error
 	AddIndexers(indexers cache.Indexers) error
-	CreateInNamespace(obj interface{}, result interface{}) error
+	Create(obj interface{}, result interface{}) error
 	Apply(obj interface{}, result interface{}) error
 	GVR() schema.GroupVersionResource
 	DeleteInNamespace(name, namespace string) error
@@ -78,13 +78,18 @@ func (s *enabledServiceBase) AddIndexers(indexers cache.Indexers) error {
 	return err
 }
 
-func (s *enabledServiceBase) CreateInNamespace(obj interface{}, result interface{}) error {
+func (s *enabledServiceBase) Create(obj interface{}, result interface{}) error {
 	u, err := ToUnstructured(obj)
 	if err != nil {
 		return err
 	}
 
-	created, err := s.Client.Namespace(u.GetNamespace()).Create(u, v1.CreateOptions{})
+	var created *unstructured.Unstructured
+	if u.GetNamespace() == "" {
+		created, err = s.Client.Create(u, v1.CreateOptions{})
+	} else {
+		created, err = s.Client.Namespace(u.GetNamespace()).Create(u, v1.CreateOptions{})
+	}
 	if err != nil {
 		return err
 	}
@@ -98,12 +103,18 @@ func (s *enabledServiceBase) Apply(obj interface{}, result interface{}) error {
 		return err
 	}
 
-	created, err := s.Client.Update(u, v1.UpdateOptions{})
+
+	var updated *unstructured.Unstructured
+	if u.GetNamespace() == "" {
+		updated, err = s.Client.Update(u, v1.UpdateOptions{})
+	} else {
+		updated, err = s.Client.Namespace(u.GetNamespace()).Update(u, v1.UpdateOptions{})
+	}
 	if err != nil {
 		return err
 	}
 
-	return FromUnstructured(created, result)
+	return FromUnstructured(updated, result)
 }
 
 func (s *enabledServiceBase) Subscribe(handler EventHandlerProvider) (Unsubscribe, error) {
@@ -143,7 +154,7 @@ func (s disabledServiceBase) AddIndexers(_ cache.Indexers) error {
 	return s.err
 }
 
-func (s disabledServiceBase) CreateInNamespace(_ interface{}, _ interface{}) error {
+func (s disabledServiceBase) Create(_ interface{}, _ interface{}) error {
 	return s.err
 }
 

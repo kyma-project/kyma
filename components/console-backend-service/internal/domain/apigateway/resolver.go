@@ -51,7 +51,7 @@ func (r *Resolver) CreateAPIRule(ctx context.Context, name string, namespace str
 		Spec: params,
 	}
 	result := &v1alpha1.APIRule{}
-	err := r.Service().CreateInNamespace(apiRule, result)
+	err := r.Service().Create(apiRule, result)
 	return result, err
 }
 
@@ -78,8 +78,8 @@ func (r *Resolver) APIRuleEventSubscription(ctx context.Context, namespace strin
 }
 
 func (r *Resolver) UpdateAPIRule(ctx context.Context, name string, namespace string, newSpec v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
-	var result *v1alpha1.APIRule
-	err := r.Service().Update(name, namespace, result, func() error {
+	result := &v1alpha1.APIRule{}
+	err := r.Service().UpdateInNamespace(name, namespace, result, func() error {
 		result.Spec = newSpec
 		return nil
 	})
