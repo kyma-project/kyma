@@ -11,6 +11,10 @@ This diagram explains the event flow in Kyma, from the moment the Application se
 
     >**NOTE:** The HTTP Source Adapter accepts only CloudEvents in version 1.0.
 
+  Before Kyma 1.11, applications sent events to the `/v1/events` endpoint exposed by the [Event Service](https://github.com/kyma-project/kyma/blob/master/components/event-service/README.md). This service was responsible for forwarding events to the Event Bus that used to handle event processing and delivery. In the current implementation based on the Event Mesh, applications send events to the directly exposed `/events` endpoint. These events must comply with the [CloudEvents specification](https://github.com/cloudevents/spec/blob/v1.0/spec.md).
+
+  It may happen that you still use the `/v1/events` endpoint to receive events. To support it, we extended the Event Service's logic to ensure all events sent to this endpoint are forwarded to the subscriber. This way, the Event Service acts as a compatibility layer that consumes the events in the non-CloudEvent format, transforms them into CloudEvents, and propagates them to the new Event Mesh. 
+
 2. The Subscription defines the Broker as the subscriber. This way, the Channel can communicate with the Broker to send events.
 
 3. The Channel listens for incoming events. When it receives an event, the underlying messaging layer dispatches it to the Broker.
