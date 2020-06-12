@@ -84,7 +84,7 @@ func (ut *serverlessUpgradeTest) TestResources(stop <-chan struct{}, log logrus.
 
 	logger.Info("Validating function's manifest...")
 	expected := ut.buildFunction(namespace)
-	if !ut.compareFunctions(log, expected, function) {
+	if !ut.compareFunctions(logger, expected, function) {
 		logger.Error("Validation of function's manifest failed")
 		return fmt.Errorf("validation of function's manifest failed")
 	}
