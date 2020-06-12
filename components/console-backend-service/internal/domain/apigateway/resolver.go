@@ -8,42 +8,46 @@ import (
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
-	"github.com/pkg/errors"
 )
 
-//go:generate mockery -name=apiRuleSvc -output=automock -outpkg=automock -case=underscore
-type apiRuleSvc interface {
-	List(namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error)
-	Find(name string, namespace string) (*v1alpha1.APIRule, error)
-	Create(api *v1alpha1.APIRule) (*v1alpha1.APIRule, error)
-	Update(name, namespace string, api v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
-	Delete(name string, namespace string) (*v1alpha1.APIRule, error)
-	Subscribe(listener resource.EventHandlerProvider) resource.Unsubscribe
-}
-
 type apiRuleResolver struct {
-	apiRuleSvc apiRuleSvc
+	service *resource.Service
 }
 
-func newApiRuleResolver(svc apiRuleSvc) (*apiRuleResolver, error) {
-	if svc == nil {
-		return nil, errors.New("Nil pointer for apiRuleSvc")
-	}
+type APIRuleList []*v1alpha1.APIRule
 
+func (l *APIRuleList) Append() interface{} {
+	e := &v1alpha1.APIRule{}
+	*l = append(*l, e)
+	return e
+}
+
+func newApiRuleResolver(service *resource.Service) (*apiRuleResolver, error) {
 	return &apiRuleResolver{
-		apiRuleSvc: svc,
+		service: service,
 	}, nil
 }
 
-func (ar *apiRuleResolver) APIRulesQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error) {
-	return ar.apiRuleSvc.List(namespace, serviceName, hostname)
+func (r *apiRuleResolver) APIRulesQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error) {
+	items := APIRuleList{}
+	var err error
+	if serviceName != nil {
+		err = r.service.ListByIndex(apiRulesServiceIndex, apiRulesServiceIndexKey(namespace, serviceName), &items)
+	} else if hostname != nil {
+		err = r.service.ListByIndex(apiRulesHostnameIndex, apiRulesHostnameIndexKey(namespace, hostname), &items)
+	} else {
+		err = r.service.ListInNamespace(namespace, &items)
+	}
+	return items, err
 }
 
-func (ar *apiRuleResolver) APIRuleQuery(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {
-	return ar.apiRuleSvc.Find(name, namespace)
+func (r *apiRuleResolver) APIRuleQuery(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {
+	var result *v1alpha1.APIRule
+	err := r.service.GetInNamespace(name, namespace, &result)
+	return result, err
 }
 
-func (ar *apiRuleResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
+func (r *apiRuleResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
 	apiRule := &v1alpha1.APIRule{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: apiRulesGroupVersionResource.GroupVersion().String(),
@@ -55,10 +59,12 @@ func (ar *apiRuleResolver) CreateAPIRule(ctx context.Context, name string, names
 		},
 		Spec: params,
 	}
-	return ar.apiRuleSvc.Create(apiRule)
+	var result *v1alpha1.APIRule
+	err := r.service.Create(apiRule, result)
+	return result, err
 }
 
-func (ar *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan *gqlschema.APIRuleEvent, error) {
+func (r *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan *gqlschema.APIRuleEvent, error) {
 	channel := make(chan *gqlschema.APIRuleEvent, 1)
 	filter := func(apiRule v1alpha1.APIRule) bool {
 		namespaceMatches := apiRule.Namespace == namespace
@@ -66,7 +72,7 @@ func (ar *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespa
 		return namespaceMatches && serviceNameMatches
 	}
 
-	unsubscribe := ar.apiRuleSvc.Subscribe(NewEventHandler(channel, filter))
+	unsubscribe := r.service.Subscribe(NewEventHandler(channel, filter))
 	go func() {
 		defer close(channel)
 		defer unsubscribe()
@@ -76,10 +82,17 @@ func (ar *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespa
 	return channel, nil
 }
 
-func (ar *apiRuleResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
-	return ar.apiRuleSvc.Update(name, namespace, params)
+func (r *apiRuleResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, newSpec v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
+	var result *v1alpha1.APIRule
+	err := r.service.Update(name, namespace, result, func() error {
+		result.Spec = newSpec
+		return nil
+	})
+	return result, err
 }
 
-func (ar *apiRuleResolver) DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {
-	return ar.apiRuleSvc.Delete(name, namespace)
+func (r *apiRuleResolver) DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {
+	var result *v1alpha1.APIRule
+	err := r.service.DeleteInNamespace(namespace, name, result)
+	return result, err
 }

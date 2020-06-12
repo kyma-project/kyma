@@ -10,14 +10,6 @@ import (
 )
 
 
-type APIRuleList []*v1alpha1.APIRule
-
-func (l *APIRuleList) Append() interface{} {
-	e := &v1alpha1.APIRule{}
-	*l = append(*l, e)
-	return e
-}
-
 var apiRulesKind = "APIRule"
 var apiRulesGroupVersionResource = schema.GroupVersionResource{
 	Version:  v1alpha1.GroupVersion.Version,
@@ -25,81 +17,41 @@ var apiRulesGroupVersionResource = schema.GroupVersionResource{
 	Resource: "apirules",
 }
 
+var apiRulesServiceIndex = "service"
+func apiRulesServiceIndexKey(namespace string, serviceName *string) string {
+	return namespace +":" + *serviceName
+}
+
+var apiRulesHostnameIndex = "hostname"
+func apiRulesHostnameIndexKey(namespace string, hostname *string) string {
+	return namespace +":" + *hostname
+}
+
 type Service struct {
 	*resource.Service
 }
 
-func NewService(serviceFactory *resource.ServiceFactory) (*Service, error) {
+func NewService(serviceFactory *resource.ServiceFactory) (*resource.Service, error) {
 	service := serviceFactory.ForResource(apiRulesGroupVersionResource)
 	err := service.AddIndexers(cache.Indexers{
-		"service": func(obj interface{}) ([]string, error) {
+		apiRulesServiceIndex: func(obj interface{}) ([]string, error) {
 			rule  := &v1alpha1.APIRule{}
 			err := resource.FromUnstructured(obj.(*unstructured.Unstructured), rule)
 			if err != nil {
 				return nil, err
 			}
-			return []string{rule.Namespace +":" + *rule.Spec.Service.Name}, nil
+			return []string{apiRulesServiceIndexKey(rule.Namespace, rule.Spec.Service.Name)}, nil
 		},
-		"hostname": func(obj interface{}) ([]string, error) {
+		apiRulesHostnameIndex: func(obj interface{}) ([]string, error) {
 			rule  := &v1alpha1.APIRule{}
 			err := resource.FromUnstructured(obj.(*unstructured.Unstructured), rule)
 			if err != nil {
 				return nil, err
 			}
-			return []string{rule.Namespace +":" + *rule.Spec.Service.Host}, nil
+			return []string{apiRulesHostnameIndexKey(rule.Namespace, rule.Spec.Service.Host)}, nil
 		},
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &Service{
-		Service:  service,
-	}, nil
-}
-
-func (svc *Service) Find(name, namespace string) (*v1alpha1.APIRule, error) {
-	var result *v1alpha1.APIRule
-	err := svc.GetInNamespace(name, namespace, &result)
-	return result, err
-}
-
-func (svc *Service) Delete(name, namespace string) (*v1alpha1.APIRule, error) {
-	var result *v1alpha1.APIRule
-	err := svc.Service.DeleteInNamespace(namespace, name, result)
-	return result, err
-}
-
-func (svc *Service) Create(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule, error) {
-	var result *v1alpha1.APIRule
-	err := svc.Service.Create(apiRule, result)
-	return result, err
-}
-
-func (svc *Service) Subscribe(handler resource.EventHandlerProvider) resource.Unsubscribe {
-	return svc.Service.Subscribe(handler)
-}
-
-func (svc *Service) Update(name, namespace string, newSpec v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
-	var result *v1alpha1.APIRule
-	err := svc.Service.Update(name, namespace, result, func() error {
-		result.Spec = newSpec
-		return nil
-	})
-	return result, err
-}
-
-func (svc *Service) List(namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error) {
-	items := APIRuleList{}
-	var err error
-	if serviceName != nil {
-		err = svc.ListByIndex("service", namespace + ":" + *serviceName, &items)
-	} else if hostname != nil {
-		err = svc.ListByIndex("hostname", namespace + ":" + *hostname, &items)
-	} else {
-		err = svc.ListInNamespace(namespace, &items)
-	}
-	return items, err
+	return service, err
 }
 
 func NewEventHandler(channel chan<- *gqlschema.APIRuleEvent, filter func(v1alpha1.APIRule) bool) resource.EventHandlerProvider {
