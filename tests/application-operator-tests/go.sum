@@ -312,8 +312,6 @@ github.com/julienschmidt/httprouter v1.2.0/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7V
 github.com/kisielk/errcheck v1.1.0/go.mod h1:EZBBE59ingxPouuu3KfxchcWSUPOHkagtvWXihfKN4Q=
 github.com/kisielk/errcheck v1.2.0/go.mod h1:/BMXB+zMLi60iA8Vv6Ksmxu/1UDYcXs4uQLJ+jE2L00=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
-github.com/koala7659/kyma/components/application-operator v0.0.0-20200529162005-1b73df3b6bac h1:XWBu7Znr5J/MOzFbvO9DJa+SlxMVjBv+EhJ1aJgXLMg=
-github.com/koala7659/kyma/components/application-operator v0.0.0-20200529162005-1b73df3b6bac/go.mod h1:k3dKHyJu8DBf1kEKVNFPx6rn6P7JhxAdPnhC6sAhjqM=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1 h1:mweAR1A6xJ3oS2pRaGiHgQ4OO8tzTaLawm8vnODuwDk=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515/go.mod h1:+0opPa2QZZtGFBFZlji/RkVcI2GknAs/DXo4wKdlNEc=
@@ -325,6 +323,8 @@ github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/kubernetes-sigs/service-catalog v0.2.2 h1:V/NrjGRWD37hkyvIwiS1Ekz/n7k1Ro9kPj6efRXkqEw=
 github.com/kubernetes-sigs/service-catalog v0.2.2/go.mod h1:fmRsWJ38Od93DQ7cOXR9mMSSwmjyDS1EAomWxBlumuo=
+github.com/kyma-project/kyma/components/application-operator v0.0.0-20200610124020-b925f71c3209 h1:v91pO6W82Z9/mAFLj+tLqONgAeSYQC7pfcKXd4tmiNM=
+github.com/kyma-project/kyma/components/application-operator v0.0.0-20200610124020-b925f71c3209/go.mod h1:q7ktyGNNIJWy72jTW5nKGrPJch1aqFb4xlhpgPR3ZX0=
 github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de h1:9TO3cAIGXtEhnIaL+V+BEER86oLrvS+kWobKpbJuye0=
 github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de/go.mod h1:zAbeS9B/r2mtpb6U+EI2rYA5OAXxsYw6wTamcNW+zcE=
 github.com/lithammer/dedent v1.1.0/go.mod h1:jrXYCQtgg0nJiN+StA2KgR7w6CiQNv9Fd/Z9BP0jIOc=

@@ -22,6 +22,6 @@ You can also install these brokers using the Helm Broker's addons:
 * [AWS Service Broker](#service-brokers-aws-broker)
 * [GCP Service Broker](#service-brokers-gcp-service-broker)
 
-To get the addons that the Helm Broker provides, go to the [`addons`](https://github.com/kyma-project/addons) repository. To build your own Service Broker, follow the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md) specification. For details on how to register a sample Service Broker in the Service Catalog, see [this](#tutorials-register-a-broker-in-the-service-catalog) tutorial.
+To get the addons that the Helm Broker provides, go to the [`addons`](https://github.com/kyma-project/addons) repository. To build your own Service Broker, follow the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md) specification. For details on how to register a sample Service Broker in the Service Catalog, see the [tutorial](#tutorials-register-a-broker-in-the-service-catalog).
 
 >**NOTE:** The Service Catalog has the Istio sidecar injected. To enable the communication between the Service Catalog and Service Brokers, either inject Istio sidecar into all brokers or disable mutual TLS authentication.

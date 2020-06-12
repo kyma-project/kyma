@@ -61,6 +61,6 @@ controller:
   cpuLimit: 100m
 
 test:
-  dir:
+  dir: ''
   version: 4d20063e
   enabled: true

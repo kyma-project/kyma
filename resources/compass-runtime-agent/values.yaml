@@ -7,7 +7,7 @@ global:
       version: "PR-8273"
     runtimeAgentTests:
       dir:
-      version: "PR-8417"
+      version: "1066324c"
     compassExternalSolutionTests:
       dir:
       version: "PR-8581"

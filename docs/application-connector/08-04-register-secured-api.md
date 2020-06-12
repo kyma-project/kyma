@@ -9,7 +9,7 @@ You can specify only one authentication method for every secured API you registe
 
 Additionally, you can secure the API against cross-site request forgery (CSRF) attacks. CSRF tokens are an additional layer of protection and can accompany any authentication method.  
 
->**NOTE:** Registering a secured API is a part of registering services of an external solution connected to Kyma. To learn more about this process, follow [this](#tutorials-register-a-service) tutorial.
+>**NOTE:** Registering a secured API is a part of registering services of an external solution connected to Kyma. To learn more about this process, follow the [tutorial](#tutorials-register-a-service).
 
 ## Register a Basic Authentication-secured API
 
@@ -159,7 +159,7 @@ This is an example of the `api` section of the request body for an API secured w
 
 ## Use headers and query parameters for custom authentication
 
-You can specify additional headers and query parameters to inject to requests made to the target API. 
+You can specify additional headers and query parameters to inject to requests made to the target API.
 
 This is an example of the `api` section of the request body for an API secured with Basic Authentication.
 

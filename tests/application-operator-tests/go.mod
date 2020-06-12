@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/kubernetes-sigs/service-catalog v0.2.2
-	github.com/kyma-project/kyma/components/application-operator v0.5.1
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20200610124020-b925f71c3209
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.5.1
 	helm.sh/helm/v3 v3.1.3
@@ -19,5 +19,3 @@ require (
 )
 
 replace golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9
-
-replace github.com/kyma-project/kyma/components/application-operator => github.com/koala7659/kyma/components/application-operator v0.0.0-20200529162005-1b73df3b6bac
