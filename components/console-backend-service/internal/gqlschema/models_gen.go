@@ -11,19 +11,6 @@ import (
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 )
 
-type APIRuleConfigInput struct {
-	Name   string `json:"name"`
-	Config JSON   `json:"config"`
-}
-
-type APIRuleInput struct {
-	Host        string       `json:"host"`
-	ServiceName string       `json:"serviceName"`
-	ServicePort int          `json:"servicePort"`
-	Gateway     string       `json:"gateway"`
-	Rules       []*RuleInput `json:"rules"`
-}
-
 type AddonsConfiguration struct {
 	Name         string                           `json:"name"`
 	Urls         []string                         `json:"urls"`
@@ -552,13 +539,6 @@ type ResourceValues struct {
 type ResourceValuesInput struct {
 	Memory *string `json:"memory"`
 	CPU    *string `json:"cpu"`
-}
-
-type RuleInput struct {
-	Path             string                `json:"path"`
-	Methods          []string              `json:"methods"`
-	AccessStrategies []*APIRuleConfigInput `json:"accessStrategies"`
-	Mutators         []*APIRuleConfigInput `json:"mutators"`
 }
 
 type Secret struct {

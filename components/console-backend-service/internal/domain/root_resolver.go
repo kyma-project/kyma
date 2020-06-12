@@ -409,11 +409,11 @@ func (r *mutationResolver) DeleteNamespace(ctx context.Context, name string) (*g
 	return r.k8s.DeleteNamespace(ctx, name)
 }
 
-func (r *mutationResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*v1alpha1.APIRule, error) {
+func (r *mutationResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
 	return r.ag.CreateAPIRule(ctx, name, namespace, params)
 }
 
-func (r *mutationResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*v1alpha1.APIRule, error) {
+func (r *mutationResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
 	return r.ag.UpdateAPIRule(ctx, name, namespace, params)
 }
 

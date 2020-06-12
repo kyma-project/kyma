@@ -76,11 +76,6 @@ type ComplexityRoot struct {
 		Name   func(childComplexity int) int
 	}
 
-	APIRuleMutator struct {
-		Config func(childComplexity int) int
-		Name   func(childComplexity int) int
-	}
-
 	APIRuleService struct {
 		Host func(childComplexity int) int
 		Name func(childComplexity int) int
@@ -537,7 +532,7 @@ type ComplexityRoot struct {
 		AddAddonsConfigurationURLs                 func(childComplexity int, name string, namespace string, urls []string) int
 		AddClusterAddonsConfigurationRepository    func(childComplexity int, name string, repositories []*AddonsConfigurationRepositoryInput) int
 		AddClusterAddonsConfigurationURLs          func(childComplexity int, name string, urls []string) int
-		CreateAPIRule                              func(childComplexity int, name string, namespace string, params APIRuleInput) int
+		CreateAPIRule                              func(childComplexity int, name string, namespace string, params v1alpha1.APIRuleSpec) int
 		CreateAddonsConfiguration                  func(childComplexity int, name string, namespace string, repositories []*AddonsConfigurationRepositoryInput, urls []string, labels Labels) int
 		CreateApplication                          func(childComplexity int, name string, description *string, labels Labels) int
 		CreateClusterAddonsConfiguration           func(childComplexity int, name string, repositories []*AddonsConfigurationRepositoryInput, urls []string, labels Labels) int
@@ -580,7 +575,7 @@ type ComplexityRoot struct {
 		RemoveClusterAddonsConfigurationURLs       func(childComplexity int, name string, urls []string) int
 		ResyncAddonsConfiguration                  func(childComplexity int, name string, namespace string) int
 		ResyncClusterAddonsConfiguration           func(childComplexity int, name string) int
-		UpdateAPIRule                              func(childComplexity int, name string, namespace string, params APIRuleInput) int
+		UpdateAPIRule                              func(childComplexity int, name string, namespace string, params v1alpha1.APIRuleSpec) int
 		UpdateAddonsConfiguration                  func(childComplexity int, name string, namespace string, repositories []*AddonsConfigurationRepositoryInput, urls []string, labels Labels) int
 		UpdateApplication                          func(childComplexity int, name string, description *string, labels Labels) int
 		UpdateClusterAddonsConfiguration           func(childComplexity int, name string, repositories []*AddonsConfigurationRepositoryInput, urls []string, labels Labels) int
@@ -746,7 +741,6 @@ type ComplexityRoot struct {
 	Rule struct {
 		AccessStrategies func(childComplexity int) int
 		Methods          func(childComplexity int) int
-		Mutators         func(childComplexity int) int
 		Path             func(childComplexity int) int
 	}
 
@@ -1103,8 +1097,8 @@ type MutationResolver interface {
 	CreateNamespace(ctx context.Context, name string, labels Labels) (*NamespaceMutationOutput, error)
 	UpdateNamespace(ctx context.Context, name string, labels Labels) (*NamespaceMutationOutput, error)
 	DeleteNamespace(ctx context.Context, name string) (*Namespace, error)
-	CreateAPIRule(ctx context.Context, name string, namespace string, params APIRuleInput) (*v1alpha1.APIRule, error)
-	UpdateAPIRule(ctx context.Context, name string, namespace string, params APIRuleInput) (*v1alpha1.APIRule, error)
+	CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
+	UpdateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
 	DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
 	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*LimitRange, error)
 	CreateFunction(ctx context.Context, name string, namespace string, params FunctionMutationInput) (*Function, error)
@@ -1270,20 +1264,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.APIRuleAccessStrategy.Name(childComplexity), true
-
-	case "APIRuleMutator.config":
-		if e.complexity.APIRuleMutator.Config == nil {
-			break
-		}
-
-		return e.complexity.APIRuleMutator.Config(childComplexity), true
-
-	case "APIRuleMutator.name":
-		if e.complexity.APIRuleMutator.Name == nil {
-			break
-		}
-
-		return e.complexity.APIRuleMutator.Name(childComplexity), true
 
 	case "APIRuleService.host":
 		if e.complexity.APIRuleService.Host == nil {
@@ -3102,7 +3082,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateAPIRule(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(APIRuleInput)), true
+		return e.complexity.Mutation.CreateAPIRule(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha1.APIRuleSpec)), true
 
 	case "Mutation.createAddonsConfiguration":
 		if e.complexity.Mutation.CreateAddonsConfiguration == nil {
@@ -3618,7 +3598,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateAPIRule(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(APIRuleInput)), true
+		return e.complexity.Mutation.UpdateAPIRule(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha1.APIRuleSpec)), true
 
 	case "Mutation.updateAddonsConfiguration":
 		if e.complexity.Mutation.UpdateAddonsConfiguration == nil {
@@ -4728,13 +4708,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Rule.Methods(childComplexity), true
-
-	case "Rule.mutators":
-		if e.complexity.Rule.Mutators == nil {
-			break
-		}
-
-		return e.complexity.Rule.Mutators(childComplexity), true
 
 	case "Rule.path":
 		if e.complexity.Rule.Path == nil {
@@ -6886,7 +6859,20 @@ type APIRuleSpec @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1al
     rules: [Rule!]!
 }
 
+input APIRuleSpecInput @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleSpec") {
+    service: APIRuleServiceInput!
+    gateway: String!
+    rules: [RuleInput!]!
+}
+
 type APIRuleService @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Service") {
+    host: String!
+    name: String!
+    port: Port!
+}
+
+
+input APIRuleServiceInput @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Service") {
     host: String!
     name: String!
     port: Port!
@@ -6896,7 +6882,12 @@ type Rule @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Ru
     path: String!
     methods: [String!]!
     accessStrategies: [APIRuleAccessStrategy!]!
-    mutators: [APIRuleMutator!]
+}
+
+input RuleInput @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Rule") {
+    path: String!
+    methods: [String!]!
+    accessStrategies: [APIRuleAccessStrategyInput!]!
 }
 
 type APIRuleAccessStrategy @goModel(model: "github.com/ory/oathkeeper-maester/api/v1alpha1.Authenticator") {
@@ -6904,7 +6895,7 @@ type APIRuleAccessStrategy @goModel(model: "github.com/ory/oathkeeper-maester/ap
     config: Extension!
 }
 
-type APIRuleMutator @goModel(model: "github.com/ory/oathkeeper-maester/api/v1alpha1.Mutator") {
+input APIRuleAccessStrategyInput @goModel(model: "github.com/ory/oathkeeper-maester/api/v1alpha1.Authenticator") {
     name: String!
     config: Extension!
 }
@@ -6924,26 +6915,6 @@ enum APIRuleStatusCode @goModel(model: "github.com/kyma-incubator/api-gateway/ap
     OK
     SKIPPED
     ERROR
-}
-
-input APIRuleInput {
-    host: String!
-    serviceName: String!
-    servicePort: Int!
-    gateway: String!
-    rules: [RuleInput!]!
-}
-
-input RuleInput {
-    path: String!
-    methods: [String!]!
-    accessStrategies: [APIRuleConfigInput!]!
-    mutators: [APIRuleConfigInput!]
-}
-
-input APIRuleConfigInput {
-    name: String!
-    config: JSON!
 }
 
 # Backend Module
@@ -7353,8 +7324,8 @@ type Mutation {
     updateNamespace(name: String!, labels: Labels!): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
     deleteNamespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
 
-    createAPIRule(name: String!, namespace: String!, params: APIRuleInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-    updateAPIRule(name: String!, namespace: String!, params: APIRuleInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    createAPIRule(name: String!, namespace: String!, params: APIRuleSpecInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    updateAPIRule(name: String!, namespace: String!, params: APIRuleSpecInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
     deleteAPIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
 
     createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
@@ -7637,9 +7608,9 @@ func (ec *executionContext) field_Mutation_createAPIRule_args(ctx context.Contex
 		}
 	}
 	args["namespace"] = arg1
-	var arg2 APIRuleInput
+	var arg2 v1alpha1.APIRuleSpec
 	if tmp, ok := rawArgs["params"]; ok {
-		arg2, err = ec.unmarshalNAPIRuleInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleInput(ctx, tmp)
+		arg2, err = ec.unmarshalNAPIRuleSpecInput2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -8711,9 +8682,9 @@ func (ec *executionContext) field_Mutation_updateAPIRule_args(ctx context.Contex
 		}
 	}
 	args["namespace"] = arg1
-	var arg2 APIRuleInput
+	var arg2 v1alpha1.APIRuleSpec
 	if tmp, ok := rawArgs["params"]; ok {
-		arg2, err = ec.unmarshalNAPIRuleInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleInput(ctx, tmp)
+		arg2, err = ec.unmarshalNAPIRuleSpecInput2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -10517,74 +10488,6 @@ func (ec *executionContext) _APIRuleAccessStrategy_config(ctx context.Context, f
 	}()
 	fc := &graphql.FieldContext{
 		Object:   "APIRuleAccessStrategy",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Config, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*runtime.RawExtension)
-	fc.Result = res
-	return ec.marshalNExtension2ᚖk8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _APIRuleMutator_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.Mutator) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "APIRuleMutator",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _APIRuleMutator_config(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.Mutator) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "APIRuleMutator",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -21834,7 +21737,7 @@ func (ec *executionContext) _Mutation_createAPIRule(ctx context.Context, field g
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().CreateAPIRule(rctx, args["name"].(string), args["namespace"].(string), args["params"].(APIRuleInput))
+			return ec.resolvers.Mutation().CreateAPIRule(rctx, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha1.APIRuleSpec))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "create"})
@@ -21896,7 +21799,7 @@ func (ec *executionContext) _Mutation_updateAPIRule(ctx context.Context, field g
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().UpdateAPIRule(rctx, args["name"].(string), args["namespace"].(string), args["params"].(APIRuleInput))
+			return ec.resolvers.Mutation().UpdateAPIRule(rctx, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha1.APIRuleSpec))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "update"})
@@ -27717,37 +27620,6 @@ func (ec *executionContext) _Rule_accessStrategies(ctx context.Context, field gr
 	res := resTmp.([]*v1alpha11.Authenticator)
 	fc.Result = res
 	return ec.marshalNAPIRuleAccessStrategy2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Rule_mutators(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Rule) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Rule",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Mutators, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*v1alpha11.Mutator)
-	fc.Result = res
-	return ec.marshalOAPIRuleMutator2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐMutatorᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Secret_name(ctx context.Context, field graphql.CollectedField, obj *Secret) (ret graphql.Marshaler) {
@@ -35063,8 +34935,8 @@ func (ec *executionContext) _enabledMappingService_services(ctx context.Context,
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputAPIRuleConfigInput(ctx context.Context, obj interface{}) (APIRuleConfigInput, error) {
-	var it APIRuleConfigInput
+func (ec *executionContext) unmarshalInputAPIRuleAccessStrategyInput(ctx context.Context, obj interface{}) (v1alpha11.Authenticator, error) {
+	var it v1alpha11.Authenticator
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -35077,7 +34949,7 @@ func (ec *executionContext) unmarshalInputAPIRuleConfigInput(ctx context.Context
 			}
 		case "config":
 			var err error
-			it.Config, err = ec.unmarshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, v)
+			it.Config, err = ec.unmarshalNExtension2ᚖk8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -35087,39 +34959,57 @@ func (ec *executionContext) unmarshalInputAPIRuleConfigInput(ctx context.Context
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputAPIRuleInput(ctx context.Context, obj interface{}) (APIRuleInput, error) {
-	var it APIRuleInput
+func (ec *executionContext) unmarshalInputAPIRuleServiceInput(ctx context.Context, obj interface{}) (v1alpha1.Service, error) {
+	var it v1alpha1.Service
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
 		switch k {
 		case "host":
 			var err error
-			it.Host, err = ec.unmarshalNString2string(ctx, v)
+			it.Host, err = ec.unmarshalNString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "serviceName":
+		case "name":
 			var err error
-			it.ServiceName, err = ec.unmarshalNString2string(ctx, v)
+			it.Name, err = ec.unmarshalNString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "servicePort":
+		case "port":
 			var err error
-			it.ServicePort, err = ec.unmarshalNInt2int(ctx, v)
+			it.Port, err = ec.unmarshalNPort2ᚖuint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputAPIRuleSpecInput(ctx context.Context, obj interface{}) (v1alpha1.APIRuleSpec, error) {
+	var it v1alpha1.APIRuleSpec
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "service":
+			var err error
+			it.Service, err = ec.unmarshalNAPIRuleServiceInput2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐService(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "gateway":
 			var err error
-			it.Gateway, err = ec.unmarshalNString2string(ctx, v)
+			it.Gateway, err = ec.unmarshalNString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "rules":
 			var err error
-			it.Rules, err = ec.unmarshalNRuleInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRuleInputᚄ(ctx, v)
+			it.Rules, err = ec.unmarshalNRuleInput2ᚕgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐRuleᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -35639,8 +35529,8 @@ func (ec *executionContext) unmarshalInputResourceValuesInput(ctx context.Contex
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputRuleInput(ctx context.Context, obj interface{}) (RuleInput, error) {
-	var it RuleInput
+func (ec *executionContext) unmarshalInputRuleInput(ctx context.Context, obj interface{}) (v1alpha1.Rule, error) {
+	var it v1alpha1.Rule
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -35659,13 +35549,7 @@ func (ec *executionContext) unmarshalInputRuleInput(ctx context.Context, obj int
 			}
 		case "accessStrategies":
 			var err error
-			it.AccessStrategies, err = ec.unmarshalNAPIRuleConfigInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInputᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "mutators":
-			var err error
-			it.Mutators, err = ec.unmarshalOAPIRuleConfigInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInputᚄ(ctx, v)
+			it.AccessStrategies, err = ec.unmarshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -35966,38 +35850,6 @@ func (ec *executionContext) _APIRuleAccessStrategy(ctx context.Context, sel ast.
 			}
 		case "config":
 			out.Values[i] = ec._APIRuleAccessStrategy_config(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var aPIRuleMutatorImplementors = []string{"APIRuleMutator"}
-
-func (ec *executionContext) _APIRuleMutator(ctx context.Context, sel ast.SelectionSet, obj *v1alpha11.Mutator) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, aPIRuleMutatorImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("APIRuleMutator")
-		case "name":
-			out.Values[i] = ec._APIRuleMutator_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "config":
-			out.Values[i] = ec._APIRuleMutator_config(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -40197,8 +40049,6 @@ func (ec *executionContext) _Rule(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "mutators":
-			out.Values[i] = ec._Rule_mutators(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -42161,11 +42011,11 @@ func (ec *executionContext) marshalNAPIRuleAccessStrategy2ᚖgithubᚗcomᚋory�
 	return ec._APIRuleAccessStrategy(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNAPIRuleConfigInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInput(ctx context.Context, v interface{}) (APIRuleConfigInput, error) {
-	return ec.unmarshalInputAPIRuleConfigInput(ctx, v)
+func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, v interface{}) (v1alpha11.Authenticator, error) {
+	return ec.unmarshalInputAPIRuleAccessStrategyInput(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNAPIRuleConfigInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInputᚄ(ctx context.Context, v interface{}) ([]*APIRuleConfigInput, error) {
+func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx context.Context, v interface{}) ([]*v1alpha11.Authenticator, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -42175,9 +42025,9 @@ func (ec *executionContext) unmarshalNAPIRuleConfigInput2ᚕᚖgithubᚗcomᚋky
 		}
 	}
 	var err error
-	res := make([]*APIRuleConfigInput, len(vSlice))
+	res := make([]*v1alpha11.Authenticator, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalNAPIRuleConfigInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -42185,30 +42035,12 @@ func (ec *executionContext) unmarshalNAPIRuleConfigInput2ᚕᚖgithubᚗcomᚋky
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNAPIRuleConfigInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInput(ctx context.Context, v interface{}) (*APIRuleConfigInput, error) {
+func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, v interface{}) (*v1alpha11.Authenticator, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalNAPIRuleConfigInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInput(ctx, v)
+	res, err := ec.unmarshalNAPIRuleAccessStrategyInput2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx, v)
 	return &res, err
-}
-
-func (ec *executionContext) unmarshalNAPIRuleInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleInput(ctx context.Context, v interface{}) (APIRuleInput, error) {
-	return ec.unmarshalInputAPIRuleInput(ctx, v)
-}
-
-func (ec *executionContext) marshalNAPIRuleMutator2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐMutator(ctx context.Context, sel ast.SelectionSet, v v1alpha11.Mutator) graphql.Marshaler {
-	return ec._APIRuleMutator(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNAPIRuleMutator2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐMutator(ctx context.Context, sel ast.SelectionSet, v *v1alpha11.Mutator) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._APIRuleMutator(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNAPIRuleService2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐService(ctx context.Context, sel ast.SelectionSet, v v1alpha1.Service) graphql.Marshaler {
@@ -42225,8 +42057,24 @@ func (ec *executionContext) marshalNAPIRuleService2ᚖgithubᚗcomᚋkymaᚑincu
 	return ec._APIRuleService(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNAPIRuleServiceInput2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐService(ctx context.Context, v interface{}) (v1alpha1.Service, error) {
+	return ec.unmarshalInputAPIRuleServiceInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNAPIRuleServiceInput2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐService(ctx context.Context, v interface{}) (*v1alpha1.Service, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNAPIRuleServiceInput2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐService(ctx, v)
+	return &res, err
+}
+
 func (ec *executionContext) marshalNAPIRuleSpec2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha1.APIRuleSpec) graphql.Marshaler {
 	return ec._APIRuleSpec(ctx, sel, &v)
+}
+
+func (ec *executionContext) unmarshalNAPIRuleSpecInput2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleSpec(ctx context.Context, v interface{}) (v1alpha1.APIRuleSpec, error) {
+	return ec.unmarshalInputAPIRuleSpecInput(ctx, v)
 }
 
 func (ec *executionContext) unmarshalNAPIRuleStatusCode2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐStatusCode(ctx context.Context, v interface{}) (v1alpha1.StatusCode, error) {
@@ -44885,11 +44733,11 @@ func (ec *executionContext) marshalNRule2ᚕgithubᚗcomᚋkymaᚑincubatorᚋap
 	return ret
 }
 
-func (ec *executionContext) unmarshalNRuleInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRuleInput(ctx context.Context, v interface{}) (RuleInput, error) {
+func (ec *executionContext) unmarshalNRuleInput2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐRule(ctx context.Context, v interface{}) (v1alpha1.Rule, error) {
 	return ec.unmarshalInputRuleInput(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNRuleInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRuleInputᚄ(ctx context.Context, v interface{}) ([]*RuleInput, error) {
+func (ec *executionContext) unmarshalNRuleInput2ᚕgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐRuleᚄ(ctx context.Context, v interface{}) ([]v1alpha1.Rule, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -44899,22 +44747,14 @@ func (ec *executionContext) unmarshalNRuleInput2ᚕᚖgithubᚗcomᚋkymaᚑproj
 		}
 	}
 	var err error
-	res := make([]*RuleInput, len(vSlice))
+	res := make([]v1alpha1.Rule, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalNRuleInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRuleInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNRuleInput2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐRule(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 	return res, nil
-}
-
-func (ec *executionContext) unmarshalNRuleInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRuleInput(ctx context.Context, v interface{}) (*RuleInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalNRuleInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRuleInput(ctx, v)
-	return &res, err
 }
 
 func (ec *executionContext) marshalNSecret2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSecret(ctx context.Context, sel ast.SelectionSet, v Secret) graphql.Marshaler {
@@ -46163,66 +46003,6 @@ func (ec *executionContext) marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑincubator�
 		return graphql.Null
 	}
 	return ec._APIRule(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOAPIRuleConfigInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInputᚄ(ctx context.Context, v interface{}) ([]*APIRuleConfigInput, error) {
-	var vSlice []interface{}
-	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
-	}
-	var err error
-	res := make([]*APIRuleConfigInput, len(vSlice))
-	for i := range vSlice {
-		res[i], err = ec.unmarshalNAPIRuleConfigInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInput(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalOAPIRuleMutator2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐMutatorᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha11.Mutator) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNAPIRuleMutator2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐMutator(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
 }
 
 func (ec *executionContext) marshalOAPIRuleStatus2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleResourceStatus(ctx context.Context, sel ast.SelectionSet, v v1alpha1.APIRuleResourceStatus) graphql.Marshaler {

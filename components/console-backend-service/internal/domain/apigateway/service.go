@@ -4,7 +4,6 @@ import (
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -17,6 +16,7 @@ func (l *APIRuleList) Append() interface{} {
 	return e
 }
 
+var apiRulesKind = "APIRule"
 var apiRulesGroupVersionResource = schema.GroupVersionResource{
 	Version:  v1alpha1.GroupVersion.Version,
 	Group:    v1alpha1.GroupVersion.Group,

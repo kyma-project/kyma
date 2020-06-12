@@ -2,6 +2,7 @@ package apigateway
 
 import (
 	"context"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
@@ -20,14 +21,8 @@ type apiRuleSvc interface {
 	Subscribe(listener resource.EventHandlerProvider) resource.Unsubscribe
 }
 
-//go:generate mockery -name=apiRuleConv -output=automock -outpkg=automock -case=underscore
-type apiRuleConv interface {
-	ToApiRule( in gqlschema.APIRuleInput) v1alpha1.APIRuleSpec
-}
-
 type apiRuleResolver struct {
 	apiRuleSvc apiRuleSvc
-	apiRuleCon apiRuleConv
 }
 
 func newApiRuleResolver(svc apiRuleSvc) (*apiRuleResolver, error) {
@@ -37,7 +32,6 @@ func newApiRuleResolver(svc apiRuleSvc) (*apiRuleResolver, error) {
 
 	return &apiRuleResolver{
 		apiRuleSvc: svc,
-		apiRuleCon: &apiRuleConverter{},
 	}, nil
 }
 
@@ -49,10 +43,19 @@ func (ar *apiRuleResolver) APIRuleQuery(ctx context.Context, name string, namesp
 	return ar.apiRuleSvc.Find(name, namespace)
 }
 
-func (ar *apiRuleResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*v1alpha1.APIRule, error) {
-	apiRuleObject := ar.apiRuleCon.ToApiRule(name, namespace, params)
-
-	return ar.apiRuleSvc.Create(apiRuleObject)
+func (ar *apiRuleResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
+	apiRule := &v1alpha1.APIRule{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: apiRulesGroupVersionResource.GroupVersion().String(),
+			Kind:       apiRulesKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: params,
+	}
+	return ar.apiRuleSvc.Create(apiRule)
 }
 
 func (ar *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan *gqlschema.APIRuleEvent, error) {
@@ -73,10 +76,8 @@ func (ar *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespa
 	return channel, nil
 }
 
-func (ar *apiRuleResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*v1alpha1.APIRule, error) {
-	apiRuleObject := ar.apiRuleCon.ToApiRule(params)
-
-	return ar.apiRuleSvc.Update(name, namespace, apiRuleObject)
+func (ar *apiRuleResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
+	return ar.apiRuleSvc.Update(name, namespace, params)
 }
 
 func (ar *apiRuleResolver) DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {
