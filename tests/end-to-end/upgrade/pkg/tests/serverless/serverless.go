@@ -17,12 +17,14 @@ import (
 )
 
 const (
-	functionName     = "e2e-upgrade-fnc"
-	functionResponse = "Hello Upgrade World!"
-	limitCPU         = "30m"
-	requestCPU       = "10m"
-	limitMemory      = "30Mi"
-	requestMemory    = "10Mi"
+	functionName           = "e2e-upgrade-fnc"
+	functionResponse       = "Hello Upgrade World!"
+	minReplicas      int32 = 1
+	maxReplicas      int32 = 3
+	limitCPU               = "30m"
+	requestCPU             = "10m"
+	limitMemory            = "30Mi"
+	requestMemory          = "10Mi"
 
 	testTimeout  = 4 * time.Minute
 	waitInterval = 15 * time.Second
@@ -135,12 +137,12 @@ func (ut *serverlessUpgradeTest) compareFunctions(log logrus.FieldLogger, expect
 		log.Errorf("Source field is not equal, expected: %s, actual: %s", expected.Spec.Source, actual.Spec.Source)
 		result = false
 	}
-	if &expected.Spec.MaxReplicas != &actual.Spec.MaxReplicas {
-		log.Errorf("MaxReplicas field is not equal, expected: %d, actual: %d", &expected.Spec.MaxReplicas, &actual.Spec.MaxReplicas)
+	if *expected.Spec.MaxReplicas != *actual.Spec.MaxReplicas {
+		log.Errorf("MaxReplicas field is not equal, expected: %d, actual: %d", *expected.Spec.MaxReplicas, *actual.Spec.MaxReplicas)
 		result = false
 	}
-	if &expected.Spec.MinReplicas != &actual.Spec.MinReplicas {
-		log.Errorf("MinReplicas field is not equal, expected: %d, actual: %d", &expected.Spec.MinReplicas, &actual.Spec.MinReplicas)
+	if *expected.Spec.MinReplicas != *actual.Spec.MinReplicas {
+		log.Errorf("MinReplicas field is not equal, expected: %d, actual: %d", *expected.Spec.MinReplicas, *actual.Spec.MinReplicas)
 		result = false
 	}
 	if expected.Spec.Resources.Limits.Cpu().Value() != actual.Spec.Resources.Limits.Cpu().Value() {
@@ -231,8 +233,8 @@ func (_ *serverlessUpgradeTest) isRunning(function *v1alpha1.Function) bool {
 }
 
 func (ut *serverlessUpgradeTest) buildFunction(namespace string) v1alpha1.Function {
-	var minReplicas int32 = 1
-	var maxReplicas int32 = 3
+	min := minReplicas
+	max := maxReplicas
 	return v1alpha1.Function{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Function",
@@ -274,8 +276,8 @@ func (ut *serverlessUpgradeTest) buildFunction(namespace string) v1alpha1.Functi
 					corev1.ResourceMemory: resource.MustParse(requestMemory),
 				},
 			},
-			MinReplicas: &minReplicas,
-			MaxReplicas: &maxReplicas,
+			MinReplicas: &min,
+			MaxReplicas: &max,
 			Labels:      map[string]string{"testPodLbl": "value"},
 		},
 	}
