@@ -7,12 +7,7 @@ import (
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 )
-
-type apiRuleResolver struct {
-	service *resource.Service
-}
 
 type APIRuleList []*v1alpha1.APIRule
 
@@ -22,32 +17,26 @@ func (l *APIRuleList) Append() interface{} {
 	return e
 }
 
-func newApiRuleResolver(service *resource.Service) (*apiRuleResolver, error) {
-	return &apiRuleResolver{
-		service: service,
-	}, nil
-}
-
-func (r *apiRuleResolver) APIRulesQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error) {
+func (r *Resolver) APIRulesQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error) {
 	items := APIRuleList{}
 	var err error
 	if serviceName != nil {
-		err = r.service.ListByIndex(apiRulesServiceIndex, apiRulesServiceIndexKey(namespace, serviceName), &items)
+		err = r.Service().ListByIndex(apiRulesServiceIndex, apiRulesServiceIndexKey(namespace, serviceName), &items)
 	} else if hostname != nil {
-		err = r.service.ListByIndex(apiRulesHostnameIndex, apiRulesHostnameIndexKey(namespace, hostname), &items)
+		err = r.Service().ListByIndex(apiRulesHostnameIndex, apiRulesHostnameIndexKey(namespace, hostname), &items)
 	} else {
-		err = r.service.ListInNamespace(namespace, &items)
+		err = r.Service().ListInNamespace(namespace, &items)
 	}
 	return items, err
 }
 
-func (r *apiRuleResolver) APIRuleQuery(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {
+func (r *Resolver) APIRuleQuery(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {
 	var result *v1alpha1.APIRule
-	err := r.service.GetInNamespace(name, namespace, &result)
+	err := r.Service().GetInNamespace(name, namespace, &result)
 	return result, err
 }
 
-func (r *apiRuleResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
+func (r *Resolver) CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
 	apiRule := &v1alpha1.APIRule{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: apiRulesGroupVersionResource.GroupVersion().String(),
@@ -60,11 +49,11 @@ func (r *apiRuleResolver) CreateAPIRule(ctx context.Context, name string, namesp
 		Spec: params,
 	}
 	var result *v1alpha1.APIRule
-	err := r.service.Create(apiRule, result)
+	err := r.Service().Create(apiRule, result)
 	return result, err
 }
 
-func (r *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan *gqlschema.APIRuleEvent, error) {
+func (r *Resolver) APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan *gqlschema.APIRuleEvent, error) {
 	channel := make(chan *gqlschema.APIRuleEvent, 1)
 	filter := func(apiRule v1alpha1.APIRule) bool {
 		namespaceMatches := apiRule.Namespace == namespace
@@ -72,7 +61,11 @@ func (r *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespac
 		return namespaceMatches && serviceNameMatches
 	}
 
-	unsubscribe := r.service.Subscribe(NewEventHandler(channel, filter))
+	unsubscribe, err := r.Service().Subscribe(NewEventHandler(channel, filter))
+	if err != nil {
+		return nil, err
+	}
+
 	go func() {
 		defer close(channel)
 		defer unsubscribe()
@@ -82,17 +75,17 @@ func (r *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespac
 	return channel, nil
 }
 
-func (r *apiRuleResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, newSpec v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
+func (r *Resolver) UpdateAPIRule(ctx context.Context, name string, namespace string, newSpec v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
 	var result *v1alpha1.APIRule
-	err := r.service.Update(name, namespace, result, func() error {
+	err := r.Service().Update(name, namespace, result, func() error {
 		result.Spec = newSpec
 		return nil
 	})
 	return result, err
 }
 
-func (r *apiRuleResolver) DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {
+func (r *Resolver) DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {
 	var result *v1alpha1.APIRule
-	err := r.service.DeleteInNamespace(namespace, name, result)
+	err := r.Service().DeleteInNamespace(namespace, name, result)
 	return result, err
 }

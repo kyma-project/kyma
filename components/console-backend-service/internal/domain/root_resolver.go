@@ -40,7 +40,7 @@ type RootResolver struct {
 	sca            *servicecatalogaddons.PluggableContainer
 	app            *application.PluggableContainer
 	rafter         *rafter.PluggableContainer
-	ag             *apigateway.PluggableResolver
+	ag             *apigateway.Resolver
 	authentication *authentication.PluggableResolver
 	serverless     *serverless.PluggableContainer
 	eventing       *eventing.PluggableContainer
@@ -51,7 +51,7 @@ func GetRandomNumber() time.Duration {
 	return time.Duration(rand.Intn(120)-60) * time.Second
 }
 
-func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, serverlessCfg serverless.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
+func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, serverlessCfg serverless.Config, informerResyncPeriod time.Duration, _ experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
 	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod+GetRandomNumber())
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing service factory")
@@ -92,10 +92,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}
 
-	agResolver, err := apigateway.New(serviceFactory)
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing apigateway resolver")
-	}
+	agResolver := apigateway.New(serviceFactory)
 	makePluggable(agResolver)
 
 	serverlessResolver, err := serverless.New(serviceFactory, serverlessCfg, scaContainer.ServiceCatalogAddonsRetriever)

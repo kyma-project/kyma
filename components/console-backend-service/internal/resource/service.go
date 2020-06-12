@@ -3,83 +3,12 @@ package resource
 import (
 	"fmt"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/dynamic/dynamicinformer"
-	"time"
-
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 )
 
-var NotFound = fmt.Errorf("resource not found")
-
-type Appendable interface {
-	Append() interface{}
-}
-
-type Unsubscribe func()
-
-type ServiceFactory struct {
-	Client          dynamic.Interface
-	InformerFactory dynamicinformer.DynamicSharedInformerFactory
-}
-
-func NewServiceFactoryForConfig(config *rest.Config, informerResyncPeriod time.Duration) (*ServiceFactory, error) {
-	dynamicClient, err := dynamic.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-
-	informerFactory := dynamicinformer.NewDynamicSharedInformerFactory(dynamicClient, informerResyncPeriod)
-	return NewServiceFactory(dynamicClient, informerFactory), nil
-}
-
-func NewServiceFactory(client dynamic.Interface, informerFactory dynamicinformer.DynamicSharedInformerFactory) *ServiceFactory {
-	return &ServiceFactory{
-		Client:          client,
-		InformerFactory: informerFactory,
-	}
-}
-
 type Service struct {
-	Client   dynamic.NamespaceableResourceInterface
-	Informer cache.SharedIndexInformer
-	notifier *Notifier
-	gvr schema.GroupVersionResource
-}
-
-func (f *ServiceFactory) ForResource(gvr schema.GroupVersionResource) *Service {
-	notifier := NewNotifier()
-	informer := f.InformerFactory.ForResource(gvr).Informer()
-	informer.AddEventHandler(notifier)
-	return &Service{
-		Client:   f.Client.Resource(gvr),
-		Informer: informer,
-		notifier: notifier,
-		gvr: gvr,
-	}
-}
-
-func (s *Service) ListByIndex(index, key string, result Appendable) error {
-	items, err := s.Informer.GetIndexer().ByIndex(index, key)
-
-	if err != nil {
-		return err
-	}
-
-	for _, item := range items {
-		converted := result.Append()
-		err := FromUnstructured(item.(*unstructured.Unstructured), converted)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	ServiceBase
 }
 
 func (s *Service) ListInNamespace(namespace string, result Appendable) error {
@@ -88,31 +17,6 @@ func (s *Service) ListInNamespace(namespace string, result Appendable) error {
 
 func (s *Service) List(result Appendable) error {
 	return s.ListInNamespace("", result)
-}
-
-func (s *Service) GetByKey(key string, result interface{}) error {
-	item, exists, err := s.Informer.GetStore().GetByKey(key)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		return NotFound
-	}
-
-	err = FromUnstructured(item.(*unstructured.Unstructured), result)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *Service) AddIndexers(indexers cache.Indexers) error {
-	err := s.Informer.AddIndexers(indexers)
-	if err != nil && err.Error() == "informer has already started" {
-		return nil
-	}
-	return err
 }
 
 func (s *Service) GetInNamespace(name, namespace string, result interface{}) error {
@@ -124,41 +28,13 @@ func (s *Service) Get(name string, result interface{}) error {
 	return s.GetByKey(name, result)
 }
 
-func (s *Service) Create(obj interface{}, result interface{}) error {
-	u, err := ToUnstructured(obj)
-	if err != nil {
-		return err
-	}
-
-	created, err := s.Client.Create(u, v1.CreateOptions{})
-	if err != nil {
-		return err
-	}
-
-	return FromUnstructured(created, result)
-}
-
-func (s *Service) Apply(obj interface{}, result interface{}) error {
-	u, err := ToUnstructured(obj)
-	if err != nil {
-		return err
-	}
-
-	created, err := s.Client.Update(u, v1.UpdateOptions{})
-	if err != nil {
-		return err
-	}
-
-	return FromUnstructured(created, result)
-}
-
 func (s *Service) Update(name, namespace string, result interface{}, update func() error) error {
 	err := s.GetInNamespace(name, namespace, result)
 	if err != nil {
 		return err
 	}
 	if result == nil {
-		return apiErrors.NewNotFound(s.gvr.GroupResource(), name)
+		return apiErrors.NewNotFound(s.GVR().GroupResource(), name)
 	}
 
 	err = update()
@@ -169,18 +45,6 @@ func (s *Service) Update(name, namespace string, result interface{}, update func
 	return s.Apply(result, result)
 }
 
-func (s *Service) Subscribe(handler EventHandlerProvider) Unsubscribe {
-	listener := NewListener(handler)
-	s.notifier.AddListener(listener)
-	return func() {
-		s.DeleteListener(listener)
-	}
-}
-
-func (s *Service) DeleteListener(listener *Listener) {
-	s.notifier.DeleteListener(listener)
-}
-
 func (s *Service) DeleteInNamespace(namespace, name string, res runtime.Object) error {
 	err := s.GetInNamespace(name, namespace, res)
 	if err != nil {
@@ -188,6 +52,6 @@ func (s *Service) DeleteInNamespace(namespace, name string, res runtime.Object) 
 	}
 
 	res = res.DeepCopyObject()
-	err = s.Client.Namespace(namespace).Delete(name, &v1.DeleteOptions{})
+	err = s.ServiceBase.DeleteInNamespace(name, namespace)
 	return err
 }
