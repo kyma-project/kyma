@@ -1097,9 +1097,6 @@ type MutationResolver interface {
 	CreateNamespace(ctx context.Context, name string, labels Labels) (*NamespaceMutationOutput, error)
 	UpdateNamespace(ctx context.Context, name string, labels Labels) (*NamespaceMutationOutput, error)
 	DeleteNamespace(ctx context.Context, name string) (*Namespace, error)
-	CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
-	UpdateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
-	DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
 	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*LimitRange, error)
 	CreateFunction(ctx context.Context, name string, namespace string, params FunctionMutationInput) (*Function, error)
 	UpdateFunction(ctx context.Context, name string, namespace string, params FunctionMutationInput) (*Function, error)
@@ -1109,6 +1106,9 @@ type MutationResolver interface {
 	CreateManyTriggers(ctx context.Context, namespace string, triggers []*TriggerCreateInput, ownerRef []*OwnerReference) ([]*Trigger, error)
 	DeleteTrigger(ctx context.Context, namespace string, trigger TriggerMetadataInput) (*TriggerMetadata, error)
 	DeleteManyTriggers(ctx context.Context, namespace string, triggers []*TriggerMetadataInput) ([]*TriggerMetadata, error)
+	CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
+	UpdateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
+	DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
 }
 type NamespaceResolver interface {
 	Pods(ctx context.Context, obj *Namespace) ([]*Pod, error)
@@ -1134,8 +1134,6 @@ type QueryResolver interface {
 	ClusterAddonsConfigurations(ctx context.Context, first *int, offset *int) ([]*AddonsConfiguration, error)
 	AddonsConfigurations(ctx context.Context, namespace string, first *int, offset *int) ([]*AddonsConfiguration, error)
 	BindableResources(ctx context.Context, namespace string) ([]*BindableResourcesOutputItem, error)
-	APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error)
-	APIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
 	Application(ctx context.Context, name string) (*Application, error)
 	Applications(ctx context.Context, namespace *string, first *int, offset *int) ([]*Application, error)
 	ConnectorService(ctx context.Context, application string) (*ConnectorService, error)
@@ -1166,6 +1164,8 @@ type QueryResolver interface {
 	Function(ctx context.Context, name string, namespace string) (*Function, error)
 	Functions(ctx context.Context, namespace string) ([]*Function, error)
 	Triggers(ctx context.Context, namespace string, subscriber *SubscriberInput) ([]*Trigger, error)
+	APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error)
+	APIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
 }
 type ServiceBindingResolver interface {
 	Secret(ctx context.Context, obj *ServiceBinding) (*Secret, error)
@@ -1209,10 +1209,10 @@ type SubscriptionResolver interface {
 	ConfigMapEvent(ctx context.Context, namespace string) (<-chan *ConfigMapEvent, error)
 	ClusterAddonsConfigurationEvent(ctx context.Context) (<-chan *ClusterAddonsConfigurationEvent, error)
 	AddonsConfigurationEvent(ctx context.Context, namespace string) (<-chan *AddonsConfigurationEvent, error)
-	APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan *APIRuleEvent, error)
 	NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan *NamespaceEvent, error)
 	FunctionEvent(ctx context.Context, namespace string, functionName *string) (<-chan *FunctionEvent, error)
 	TriggerEvent(ctx context.Context, namespace string, subscriber *SubscriberInput) (<-chan *TriggerEvent, error)
+	APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan *APIRuleEvent, error)
 }
 
 type executableSchema struct {
@@ -6022,6 +6022,95 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
+	&ast.Source{Name: "internal/gqlschema/apigateway.graphql", Input: `type APIRule @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule"){
+    name: String!
+    spec: APIRuleSpec!
+    status: APIRuleStatuses!
+}
+
+type APIRuleSpec @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleSpec") {
+    service: APIRuleService!
+    gateway: String!
+    rules: [Rule!]!
+}
+
+input APIRuleSpecInput @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleSpec") {
+    service: APIRuleServiceInput!
+    gateway: String!
+    rules: [RuleInput!]!
+}
+
+type APIRuleService @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Service") {
+    host: String!
+    name: String!
+    port: Port!
+}
+
+
+input APIRuleServiceInput @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Service") {
+    host: String!
+    name: String!
+    port: Port!
+}
+
+type Rule @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Rule") {
+    path: String!
+    methods: [String!]!
+    accessStrategies: [APIRuleAccessStrategy!]!
+}
+
+input RuleInput @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Rule") {
+    path: String!
+    methods: [String!]!
+    accessStrategies: [APIRuleAccessStrategyInput!]!
+}
+
+type APIRuleAccessStrategy @goModel(model: "github.com/ory/oathkeeper-maester/api/v1alpha1.Authenticator") {
+    name: String!
+    config: Extension!
+}
+
+input APIRuleAccessStrategyInput @goModel(model: "github.com/ory/oathkeeper-maester/api/v1alpha1.Authenticator") {
+    name: String!
+    config: Extension!
+}
+
+type APIRuleStatuses @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleStatus") {
+    apiRuleStatus: APIRuleStatus
+    accessRuleStatus: APIRuleStatus
+    virtualServiceStatus: APIRuleStatus
+}
+
+type APIRuleStatus @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleResourceStatus") {
+    code: APIRuleStatusCode!
+    description: String
+}
+
+enum APIRuleStatusCode @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.StatusCode") {
+    OK
+    SKIPPED
+    ERROR
+}
+
+type ApiRuleEvent {
+    type: SubscriptionEventType!
+    apiRule: APIRule!
+}
+
+extend type Query {
+    APIRules(namespace: String!, serviceName: String, hostname: String): [APIRule!]! @HasAccess(attributes: {resource: "apirules", verb: "list", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    APIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "get", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+}
+
+extend type Mutation {
+    createAPIRule(name: String!, namespace: String!, params: APIRuleSpecInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    updateAPIRule(name: String!, namespace: String!, params: APIRuleSpecInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    deleteAPIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+}
+
+extend type Subscription {
+    apiRuleEvent(namespace: String!, serviceName: String): ApiRuleEvent! @HasAccess(attributes: {resource: "apirules", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha", namespaceArg: "namespace"})
+}`, BuiltIn: false},
 	&ast.Source{Name: "internal/gqlschema/schema.graphql", Input: `# Scalars
 
 scalar JSON
@@ -6656,11 +6745,6 @@ type SecretEvent {
     secret: Secret!
 }
 
-type ApiRuleEvent {
-    type: SubscriptionEventType!
-    apiRule: APIRule!
-}
-
 type ContainerState {
     state: ContainerStateType!
     reason: String!
@@ -6843,78 +6927,6 @@ type IDPPreset {
     name: String!
     issuer: String!
     jwksUri: String!
-}
-
-# API Gateway Controller
-
-type APIRule @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule"){
-    name: String!
-    spec: APIRuleSpec!
-    status: APIRuleStatuses!
-}
-
-type APIRuleSpec @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleSpec") {
-    service: APIRuleService!
-    gateway: String!
-    rules: [Rule!]!
-}
-
-input APIRuleSpecInput @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleSpec") {
-    service: APIRuleServiceInput!
-    gateway: String!
-    rules: [RuleInput!]!
-}
-
-type APIRuleService @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Service") {
-    host: String!
-    name: String!
-    port: Port!
-}
-
-
-input APIRuleServiceInput @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Service") {
-    host: String!
-    name: String!
-    port: Port!
-}
-
-type Rule @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Rule") {
-    path: String!
-    methods: [String!]!
-    accessStrategies: [APIRuleAccessStrategy!]!
-}
-
-input RuleInput @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Rule") {
-    path: String!
-    methods: [String!]!
-    accessStrategies: [APIRuleAccessStrategyInput!]!
-}
-
-type APIRuleAccessStrategy @goModel(model: "github.com/ory/oathkeeper-maester/api/v1alpha1.Authenticator") {
-    name: String!
-    config: Extension!
-}
-
-input APIRuleAccessStrategyInput @goModel(model: "github.com/ory/oathkeeper-maester/api/v1alpha1.Authenticator") {
-    name: String!
-    config: Extension!
-}
-
-type APIRuleStatuses @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleStatus") {
-    apiRuleStatus: APIRuleStatus
-    accessRuleStatus: APIRuleStatus
-    virtualServiceStatus: APIRuleStatus
-}
-
-type APIRuleStatus @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleResourceStatus") {
-    code: APIRuleStatusCode!
-    description: String
-}
-
-enum APIRuleStatusCode @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.StatusCode") {
-    OK
-    SKIPPED
-    ERROR
 }
 
 # Backend Module
@@ -7211,9 +7223,6 @@ type Query {
     # The query returns all instance of the resources which could be bound (proper UsageKind exists).
     bindableResources(namespace: String!): [BindableResourcesOutputItem!]! @HasAccess(attributes: {resource: "usagekinds", verb: "list", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 
-    APIRules(namespace: String!, serviceName: String, hostname: String): [APIRule!]! @HasAccess(attributes: {resource: "apirules", verb: "list", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
-    APIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "get", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-
     application(name: String!): Application @HasAccess(attributes: {resource: "applications", verb: "get", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     applications(namespace: String, first: Int, offset: Int): [Application!]! @HasAccess(attributes: {resource: "applications", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
     connectorService(application: String!): ConnectorService! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
@@ -7324,10 +7333,6 @@ type Mutation {
     updateNamespace(name: String!, labels: Labels!): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
     deleteNamespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
 
-    createAPIRule(name: String!, namespace: String!, params: APIRuleSpecInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-    updateAPIRule(name: String!, namespace: String!, params: APIRuleSpecInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-    deleteAPIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-
     createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     createFunction(name: String!, namespace: String!, params: FunctionMutationInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
@@ -7365,7 +7370,6 @@ type Subscription {
     addonsConfigurationEvent(namespace: String!): AddonsConfigurationEvent! @HasAccess(attributes: {resource: "addonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
 
     # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
-    apiRuleEvent(namespace: String!, serviceName: String): ApiRuleEvent! @HasAccess(attributes: {resource: "apirules", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha", namespaceArg: "namespace"})
 
     namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 
@@ -21712,192 +21716,6 @@ func (ec *executionContext) _Mutation_deleteNamespace(ctx context.Context, field
 	return ec.marshalONamespace2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespace(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_createAPIRule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createAPIRule_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().CreateAPIRule(rctx, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha1.APIRuleSpec))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "create"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*v1alpha1.APIRule); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*v1alpha1.APIRule)
-	fc.Result = res
-	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_updateAPIRule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_updateAPIRule_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().UpdateAPIRule(rctx, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha1.APIRuleSpec))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "update"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*v1alpha1.APIRule); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*v1alpha1.APIRule)
-	fc.Result = res
-	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_deleteAPIRule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_deleteAPIRule_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().DeleteAPIRule(rctx, args["name"].(string), args["namespace"].(string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "delete"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*v1alpha1.APIRule); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*v1alpha1.APIRule)
-	fc.Result = res
-	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Mutation_createLimitRange(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -22454,6 +22272,192 @@ func (ec *executionContext) _Mutation_deleteManyTriggers(ctx context.Context, fi
 	res := resTmp.([]*TriggerMetadata)
 	fc.Result = res
 	return ec.marshalOTriggerMetadata2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐTriggerMetadataᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createAPIRule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createAPIRule_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CreateAPIRule(rctx, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha1.APIRuleSpec))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "create"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha1.APIRule); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.APIRule)
+	fc.Result = res
+	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateAPIRule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateAPIRule_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().UpdateAPIRule(rctx, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha1.APIRuleSpec))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "update"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha1.APIRule); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.APIRule)
+	fc.Result = res
+	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteAPIRule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteAPIRule_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().DeleteAPIRule(rctx, args["name"].(string), args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "delete"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha1.APIRule); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.APIRule)
+	fc.Result = res
+	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Namespace_name(ctx context.Context, field graphql.CollectedField, obj *Namespace) (ret graphql.Marshaler) {
@@ -24623,133 +24627,6 @@ func (ec *executionContext) _Query_bindableResources(ctx context.Context, field 
 	return ec.marshalNBindableResourcesOutputItem2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐBindableResourcesOutputItemᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_APIRules(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_APIRules_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().APIRules(rctx, args["namespace"].(string), args["serviceName"].(*string), args["hostname"].(*string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "apirules", "verb": "list"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*v1alpha1.APIRule); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*v1alpha1.APIRule)
-	fc.Result = res
-	return ec.marshalNAPIRule2ᚕᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_APIRule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_APIRule_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().APIRule(rctx, args["name"].(string), args["namespace"].(string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "get"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*v1alpha1.APIRule); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*v1alpha1.APIRule)
-	fc.Result = res
-	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_application(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -26623,6 +26500,133 @@ func (ec *executionContext) _Query_triggers(ctx context.Context, field graphql.C
 	res := resTmp.([]*Trigger)
 	fc.Result = res
 	return ec.marshalOTrigger2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐTriggerᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_APIRules(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_APIRules_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().APIRules(rctx, args["namespace"].(string), args["serviceName"].(*string), args["hostname"].(*string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "apirules", "verb": "list"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*v1alpha1.APIRule); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*v1alpha1.APIRule)
+	fc.Result = res
+	return ec.marshalNAPIRule2ᚕᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_APIRule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_APIRule_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().APIRule(rctx, args["name"].(string), args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "get"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha1.APIRule); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.APIRule)
+	fc.Result = res
+	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -32773,81 +32777,6 @@ func (ec *executionContext) _Subscription_addonsConfigurationEvent(ctx context.C
 	}
 }
 
-func (ec *executionContext) _Subscription_apiRuleEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = nil
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Subscription",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Subscription_apiRuleEvent_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return nil
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Subscription().APIRuleEvent(rctx, args["namespace"].(string), args["serviceName"].(*string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha", "namespaceArg": "namespace", "resource": "apirules", "verb": "watch"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(<-chan *APIRuleEvent); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRuleEvent`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return nil
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return nil
-	}
-	return func() graphql.Marshaler {
-		res, ok := <-resTmp.(<-chan *APIRuleEvent)
-		if !ok {
-			return nil
-		}
-		return graphql.WriterFunc(func(w io.Writer) {
-			w.Write([]byte{'{'})
-			graphql.MarshalString(field.Alias).MarshalGQL(w)
-			w.Write([]byte{':'})
-			ec.marshalNApiRuleEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleEvent(ctx, field.Selections, res).MarshalGQL(w)
-			w.Write([]byte{'}'})
-		})
-	}
-}
-
 func (ec *executionContext) _Subscription_namespaceEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -33068,6 +32997,81 @@ func (ec *executionContext) _Subscription_triggerEvent(ctx context.Context, fiel
 			graphql.MarshalString(field.Alias).MarshalGQL(w)
 			w.Write([]byte{':'})
 			ec.marshalNTriggerEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐTriggerEvent(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) _Subscription_apiRuleEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Subscription_apiRuleEvent_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Subscription().APIRuleEvent(rctx, args["namespace"].(string), args["serviceName"].(*string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha", "namespaceArg": "namespace", "resource": "apirules", "verb": "watch"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(<-chan *APIRuleEvent); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRuleEvent`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *APIRuleEvent)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNApiRuleEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleEvent(ctx, field.Selections, res).MarshalGQL(w)
 			w.Write([]byte{'}'})
 		})
 	}
@@ -38735,12 +38739,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "deleteNamespace":
 			out.Values[i] = ec._Mutation_deleteNamespace(ctx, field)
-		case "createAPIRule":
-			out.Values[i] = ec._Mutation_createAPIRule(ctx, field)
-		case "updateAPIRule":
-			out.Values[i] = ec._Mutation_updateAPIRule(ctx, field)
-		case "deleteAPIRule":
-			out.Values[i] = ec._Mutation_deleteAPIRule(ctx, field)
 		case "createLimitRange":
 			out.Values[i] = ec._Mutation_createLimitRange(ctx, field)
 		case "createFunction":
@@ -38759,6 +38757,12 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_deleteTrigger(ctx, field)
 		case "deleteManyTriggers":
 			out.Values[i] = ec._Mutation_deleteManyTriggers(ctx, field)
+		case "createAPIRule":
+			out.Values[i] = ec._Mutation_createAPIRule(ctx, field)
+		case "updateAPIRule":
+			out.Values[i] = ec._Mutation_updateAPIRule(ctx, field)
+		case "deleteAPIRule":
+			out.Values[i] = ec._Mutation_deleteAPIRule(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -39316,31 +39320,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "APIRules":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_APIRules(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "APIRule":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_APIRule(ctx, field)
-				return res
-			})
 		case "application":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -39729,6 +39708,31 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_triggers(ctx, field)
+				return res
+			})
+		case "APIRules":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_APIRules(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "APIRule":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_APIRule(ctx, field)
 				return res
 			})
 		case "__type":
@@ -41342,14 +41346,14 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_clusterAddonsConfigurationEvent(ctx, fields[0])
 	case "addonsConfigurationEvent":
 		return ec._Subscription_addonsConfigurationEvent(ctx, fields[0])
-	case "apiRuleEvent":
-		return ec._Subscription_apiRuleEvent(ctx, fields[0])
 	case "namespaceEvent":
 		return ec._Subscription_namespaceEvent(ctx, fields[0])
 	case "functionEvent":
 		return ec._Subscription_functionEvent(ctx, fields[0])
 	case "triggerEvent":
 		return ec._Subscription_triggerEvent(ctx, fields[0])
+	case "apiRuleEvent":
+		return ec._Subscription_apiRuleEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
