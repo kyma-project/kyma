@@ -2,6 +2,7 @@ package resource
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/golang/glog"
@@ -9,17 +10,17 @@ import (
 
 type EventHandlerProvider func() EventHandler
 
-type EventType string
-const (
-	EventTypeAdd = "ADD"
-	EventTypeUpdate = "UPDATE"
-	EventTypeDelete = "DELETE"
-)
+//type EventType string
+//const (
+//	EventTypeAdd = "ADD"
+//	EventTypeUpdate = "UPDATE"
+//	EventTypeDelete = "DELETE"
+//)
 
 type EventHandler interface {
 	K8sResource() interface{}
 	ShouldNotify() bool
-	Notify(EventType)
+	Notify(gqlschema.SubscriptionEventType)
 }
 
 type Listener struct {
@@ -33,18 +34,18 @@ func NewListener(handler EventHandlerProvider) *Listener {
 }
 
 func (l *Listener) OnAdd(object interface{}) {
-	l.onEvent(EventTypeAdd, object)
+	l.onEvent(gqlschema.SubscriptionEventTypeAdd, object)
 }
 
 func (l *Listener) OnUpdate(oldObject, newObject interface{}) {
-	l.onEvent(EventTypeUpdate, newObject)
+	l.onEvent(gqlschema.SubscriptionEventTypeUpdate, newObject)
 }
 
 func (l *Listener) OnDelete(object interface{}) {
-	l.onEvent(EventTypeDelete, object)
+	l.onEvent(gqlschema.SubscriptionEventTypeDelete, object)
 }
 
-func (l *Listener) onEvent(eventType EventType, object interface{}) {
+func (l *Listener) onEvent(eventType gqlschema.SubscriptionEventType, object interface{}) {
 	u, ok := object.(*unstructured.Unstructured)
 	if !ok {
 		glog.Error(fmt.Errorf("incorrect object type: %T, should be: *unstructured.Unstructured", object))

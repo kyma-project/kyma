@@ -4,7 +4,9 @@ import (
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/tools/cache"
 )
 
 
@@ -27,10 +29,33 @@ type Service struct {
 	*resource.Service
 }
 
-func NewService(serviceFactory *resource.ServiceFactory) *Service {
-	return &Service{
-		Service:  serviceFactory.ForResource(apiRulesGroupVersionResource),
+func NewService(serviceFactory *resource.ServiceFactory) (*Service, error) {
+	service := serviceFactory.ForResource(apiRulesGroupVersionResource)
+	err := service.AddIndexers(cache.Indexers{
+		"service": func(obj interface{}) ([]string, error) {
+			rule  := &v1alpha1.APIRule{}
+			err := resource.FromUnstructured(obj.(*unstructured.Unstructured), rule)
+			if err != nil {
+				return nil, err
+			}
+			return []string{rule.Namespace +":" + *rule.Spec.Service.Name}, nil
+		},
+		"hostname": func(obj interface{}) ([]string, error) {
+			rule  := &v1alpha1.APIRule{}
+			err := resource.FromUnstructured(obj.(*unstructured.Unstructured), rule)
+			if err != nil {
+				return nil, err
+			}
+			return []string{rule.Namespace +":" + *rule.Spec.Service.Host}, nil
+		},
+	})
+	if err != nil {
+		return nil, err
 	}
+
+	return &Service{
+		Service:  service,
+	}, nil
 }
 
 func (svc *Service) Find(name, namespace string) (*v1alpha1.APIRule, error) {
@@ -52,7 +77,7 @@ func (svc *Service) Create(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule, error)
 }
 
 func (svc *Service) Subscribe(handler resource.EventHandlerProvider) resource.Unsubscribe {
-	return svc.Subscribe(handler)
+	return svc.Service.Subscribe(handler)
 }
 
 func (svc *Service) Update(name, namespace string, newSpec v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
@@ -66,31 +91,15 @@ func (svc *Service) Update(name, namespace string, newSpec v1alpha1.APIRuleSpec)
 
 func (svc *Service) List(namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error) {
 	items := APIRuleList{}
-	err := svc.ListInNamespace(namespace, &items)
-	if err != nil {
-		return nil, err
+	var err error
+	if serviceName != nil {
+		err = svc.ListByIndex("service", namespace + ":" + *serviceName, &items)
+	} else if hostname != nil {
+		err = svc.ListByIndex("hostname", namespace + ":" + *hostname, &items)
+	} else {
+		err = svc.ListInNamespace(namespace, &items)
 	}
-
-	var apiRules []*v1alpha1.APIRule
-	for _, item := range items {
-		match := true
-		if serviceName != nil {
-			if *serviceName != *item.Spec.Service.Name {
-				match = false
-			}
-		}
-		if hostname != nil {
-			if *hostname != *item.Spec.Service.Host {
-				match = false
-			}
-		}
-
-		if match {
-			apiRules = append(apiRules, item)
-		}
-	}
-
-	return apiRules, nil
+	return items, err
 }
 
 func NewEventHandler(channel chan<- *gqlschema.APIRuleEvent, filter func(v1alpha1.APIRule) bool) resource.EventHandlerProvider {
@@ -116,7 +125,7 @@ func (h *EventHandler) ShouldNotify() bool {
 	return h.filter(*h.res)
 }
 
-func (h *EventHandler) Notify(eventType resource.EventType) {
+func (h *EventHandler) Notify(eventType gqlschema.SubscriptionEventType) {
 	h.channel <- &gqlschema.APIRuleEvent{
 		Type:    eventType,
 		APIRule: h.res,
