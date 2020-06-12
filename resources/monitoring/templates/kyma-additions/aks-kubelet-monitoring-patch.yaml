@@ -26,7 +26,6 @@ data:
       labels:
         app: {{ template "prometheus-operator.name" . }}-kubelet
         chart: {{template "prometheus-operator.chartref" . }}
-        heritage: {{ $.Release.Service }}
         release: {{ $.Release.Name }}
       name: {{ template "prometheus-operator.fullname" . }}-kubelet
       namespace: {{ $.Release.Namespace }}

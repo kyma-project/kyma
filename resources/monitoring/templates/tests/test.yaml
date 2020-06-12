@@ -5,11 +5,8 @@ kind: TestDefinition
 metadata:
   name: {{ .Chart.Name }}
   labels:
+    {{- include "prometheus-test.labels" . | nindent 4 }}
     app: {{ .Chart.Name }}-tests
-    app.kubernetes.io/name: {{ .Chart.Name }}-tests
-    app.kubernetes.io/managed-by: {{ $.Release.Service }}
-    app.kubernetes.io/instance: {{ $.Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   disableConcurrency: false
   template:

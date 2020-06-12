@@ -41,8 +41,8 @@ global:
   imagePullSecrets: []
   # - name: "image-pull-secret"
 
-resourceSelector: 
-  namespaces: 
+resourceSelector:
+  namespaces:
 
 # Default values for prometheus-operator.
 # This is a YAML-formatted file.
@@ -1570,13 +1570,12 @@ prometheus:
     ## prometheus resource to be created with selectors based on values in the helm deployment,
     ## which will also match the servicemonitors created
     ##
-    serviceMonitorSelectorNilUsesHelmValues: true
+    serviceMonitorSelectorNilUsesHelmValues: false
 
     ## ServiceMonitors to be selected for target discovery.
     ## If {}, select all ServiceMonitors
     ##
-    serviceMonitorSelector:
-      any: true
+    serviceMonitorSelector: {}
     ## Example which selects ServiceMonitors with label "prometheus" set to "somelabel"
     # serviceMonitorSelector:
     #   matchLabels:
@@ -1585,8 +1584,7 @@ prometheus:
     ## Namespaces to be selected for ServiceMonitor discovery.
     ## See https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#namespaceselector for usage
     ##
-    serviceMonitorNamespaceSelector:
-      any: true
+    serviceMonitorNamespaceSelector: {}
 
     ## If true, a nil or {} value for prometheus.prometheusSpec.podMonitorSelector will cause the
     ## prometheus resource to be created with selectors based on values in the helm deployment,
@@ -1827,8 +1825,7 @@ prometheus:
   - name: istio-mixer
     additionalLabels:
       prometheus: monitoring
-    selector:
-      istio: mixer
+    selector: {}
     namespaceSelector:
       matchNames:
         - istio-system
