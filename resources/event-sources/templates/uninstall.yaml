@@ -11,21 +11,31 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# About:
+# This pre-delete job removes all httpsource CRs from kyma-integration namespace
+# It does so by using a job which is executed before the helm chart is deleted
+# All the resources are cleaned up by helm on successful hook run
+
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: event-sources-delete
-  namespace: kyma-integration
+  name: "event-sources-delete"
+  namespace: "kyma-system"
   annotations:
+    # Executes on a deletion request before any resources are deleted from Kubernetes
+    # this gives the controllers a chance to act on CRs with a finalizer
+    # source: https://helm.sh/docs/topics/charts_hooks/
     helm.sh/hook: pre-delete
+    # delete the resources after success of the hook
     helm.sh/hook-delete-policy: hook-succeeded
+    # everything without a dependency has weight 0
     helm.sh/hook-weight: "0"
-
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: event-sources-delete
+  name: "event-sources-delete"
   annotations:
     helm.sh/hook: pre-delete
     helm.sh/hook-delete-policy: hook-succeeded
@@ -38,7 +48,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: event-sources-delete
+  name: "event-sources-delete"
   annotations:
     helm.sh/hook: pre-delete
     helm.sh/hook-delete-policy: hook-succeeded
@@ -46,36 +56,38 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: event-sources-delete
+  name: "event-sources-delete"
 subjects:
   - kind: ServiceAccount
-    name: event-sources-delete
-    namespace: kyma-integration
+    name: "event-sources-delete"
+    namespace: "kyma-system"
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: event-sources-delete
-  namespace: kyma-integration
+  name: "event-sources-delete"
+  namespace: "kyma-system"
   annotations:
     helm.sh/hook: pre-delete
     helm.sh/hook-delete-policy: hook-succeeded
     sidecar.istio.io/inject: "false"
-    helm.sh/hook-weight: "9"
+    # dependent on clusterrole, clusterrolebinding, serviceaccount
+    # => hook-weight=min(hook-weight)+1
+    helm.sh/hook-weight: "1"
 spec:
   backoffLimit: 1
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
-      name: event-sources-delete
+      name: "event-sources-delete"
       labels:
-        app: event-sources-delete
+        app: "event-sources-delete"
     spec:
-      serviceAccountName: event-sources-delete
+      serviceAccountName: "event-sources-delete"
       restartPolicy: Never
       containers:
-        - name: event-sources-delete
+        - name: "event-sources-delete"
           image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
           command:
             - "/bin/sh"
@@ -84,8 +96,15 @@ spec:
             - |
               set -eux -o pipefail
               echo "starting deletion of eventing custom resources"
-              kubectl delete --ignore-not-found httpsources.sources.kyma-project.io -n kyma-integration --all
+              kubectl \
+                delete \
+                --ignore-not-found \
+                httpsources.sources.kyma-project.io \
+                -n kyma-integration \
+                --all
               echo "finished deletion of eventing custom resources"
+          # use last chunk of container log output for terminal log
+          # source: https://kubernetes.io/docs/tasks/debug-application-cluster/determine-reason-pod-failure/#customizing-the-termination-message
           terminationMessagePolicy: "FallbackToLogsOnError"
           resources:
             requests:
