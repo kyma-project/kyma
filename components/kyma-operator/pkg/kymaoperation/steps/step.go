@@ -5,42 +5,34 @@ import (
 	"log"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
-	"k8s.io/helm/pkg/proto/hapi/release"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 )
 
 // Step defines the contract for a single installation/uninstallation operation
 // Installation step may be implemented an a Helm upgrade or install operation.
 type Step interface {
 	Run() error
-	ToString() string
+	String() string
 	GetReleaseName() string
-}
-
-// Helm functions common to all steps
-type HelmClient interface {
-	IsReleaseDeletable(rname string) (bool, error)
-	InstallRelease(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error)
-	UpgradeRelease(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error)
-	RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error)
-	DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error)
-	PrintRelease(release *release.Release)
-	WaitForReleaseDelete(releaseName string) (bool, error)
-	WaitForReleaseRollback(releaseName string) (bool, error)
+	GetNamespacedName() kymahelm.NamespacedName
 }
 
 type step struct {
-	helmClient HelmClient
+	helmClient kymahelm.ClientInterface
 	component  v1alpha1.KymaComponent
 }
 
 // ToString method returns step details in readable string
-func (s step) ToString() string {
+func (s step) String() string {
 	return fmt.Sprintf("Component: %s, Release: %s, Namespace: %s", s.component.Name, s.component.GetReleaseName(), s.component.Namespace)
 }
 
 func (s step) GetReleaseName() string {
 	return s.component.GetReleaseName()
+}
+
+func (s step) GetNamespacedName() kymahelm.NamespacedName {
+	return kymahelm.NamespacedName{Name: s.GetReleaseName(), Namespace: s.component.Namespace}
 }
 
 // Used to support the contract in case there's no action to do (e.g. uninstalling a non-existing release)

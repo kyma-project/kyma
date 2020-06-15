@@ -5,7 +5,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	. "github.com/smartystreets/goconvey/convey"
-	helm "k8s.io/helm/pkg/proto/hapi/release"
 )
 
 func TestIsUpgradeStep(t *testing.T) {
@@ -22,25 +21,25 @@ func TestIsUpgradeStep(t *testing.T) {
 				}{
 					{
 						status: kymahelm.ReleaseStatus{
-							StatusCode: helm.Status_PENDING_INSTALL,
+							Status: kymahelm.StatusPendingInstall,
 						},
 						expectedResult: installation,
 					},
 					{
 						status: kymahelm.ReleaseStatus{
-							StatusCode: helm.Status_DEPLOYED,
+							Status: kymahelm.StatusDeployed,
 						},
 						expectedResult: upgrade,
 					},
 					{
 						status: kymahelm.ReleaseStatus{
-							StatusCode: helm.Status_PENDING_UPGRADE,
+							Status: kymahelm.StatusPendingUpgrade,
 						},
 						expectedResult: upgrade,
 					},
 					{
 						status: kymahelm.ReleaseStatus{
-							StatusCode: helm.Status_PENDING_ROLLBACK,
+							Status: kymahelm.StatusPendingRollback,
 						},
 						expectedResult: upgrade,
 					},
@@ -62,16 +61,16 @@ func TestIsUpgradeStep(t *testing.T) {
 
 			Convey("in cases depending on release status and it's past revisions", func() {
 
-				statusCodesImportantPastRevisions := []helm.Status_Code{
-					helm.Status_FAILED,
-					helm.Status_UNKNOWN,
-					helm.Status_DELETED,
-					helm.Status_DELETING,
+				statusCodesImportantPastRevisions := []kymahelm.Status{
+					kymahelm.StatusFailed,
+					kymahelm.StatusUnknown,
+					kymahelm.StatusUninstalled,
+					kymahelm.StatusUninstalling,
 				}
 
 				testInput := []struct {
-					currentRevision      int32
-					lastDeployedRevision int32
+					currentRevision      int
+					lastDeployedRevision int
 					expectedResult       bool
 					expectedErrorMsg     string
 				}{
@@ -113,7 +112,7 @@ func TestIsUpgradeStep(t *testing.T) {
 
 						//given
 						statusObj := kymahelm.ReleaseStatus{
-							StatusCode:           testStatus,
+							Status:               testStatus,
 							CurrentRevision:      testData.currentRevision,
 							LastDeployedRevision: testData.lastDeployedRevision,
 						}
@@ -132,15 +131,15 @@ func TestIsUpgradeStep(t *testing.T) {
 			})
 		})
 		Convey("should report an error for unrecognized status", func() {
-			statusCodesNoProcessing := []helm.Status_Code{
-				helm.Status_SUPERSEDED,
+			statusCodesNoProcessing := []kymahelm.Status{
+				kymahelm.StatusSuperseded,
 			}
 
 			for _, testStatus := range statusCodesNoProcessing {
 
 				//given
 				statusObj := kymahelm.ReleaseStatus{
-					StatusCode: testStatus,
+					Status: testStatus,
 				}
 
 				//when
@@ -148,7 +147,7 @@ func TestIsUpgradeStep(t *testing.T) {
 
 				//then
 				So(err, ShouldNotBeNil)
-				So(err.Error(), ShouldContainSubstring, "unexpected status code")
+				So(err.Error(), ShouldContainSubstring, "unexpected status")
 			}
 		})
 	})
