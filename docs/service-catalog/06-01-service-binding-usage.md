@@ -93,7 +93,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.parameters.envPrefix** |    No   | Adds a prefix to environment variables injected from the given Secret. The prefixing is disabled by default. |
 | **spec.parameters.envPrefix.name** |    Yes   | Defines the value of the prefix. This field is mandatory if **envPrefix** is specified.  |
 | **status.conditions** |    No   | Defines the status of the ServiceBindingUsage.|
-| **status.conditions.lastTransitionTime** |    No   | Specifies the date when the ServiceBindingUsage Controller processed the ServiceBindingUsage for the first time, or when the **status.conditions.status** field changed. |
+| **status.conditions.lastTransitionTime** |    No   | Specifies the date when the ServiceBindingUsage Controller processed the ServiceBindingUsage for the first time or when the **status.conditions.status** field changed. |
 | **status.conditions.lastUpdateTime** |    No   | Specifies the date of the last ServiceBindingUsage condition update. |
 | **status.conditions.status** |    No   |  Specifies whether the ServiceBinding injection is successful. |
 | **status.conditions.type** |    No   | Defines the type of the condition. The value of this field is always `ready`. |
