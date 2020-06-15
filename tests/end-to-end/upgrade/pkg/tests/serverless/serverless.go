@@ -77,14 +77,6 @@ func (ut *serverlessUpgradeTest) TestResources(stop <-chan struct{}, log logrus.
 	logger := log.WithField("name", functionName).
 		WithField("namespace", namespace)
 
-	defer func() {
-		logger.Info("Deleting function...")
-		if err := ut.client.Delete(namespace, functionName); err != nil {
-			logger.Errorf("Deleting function failed, because: %v", err)
-		}
-		logger.Info("Function deleted")
-	}()
-
 	function := v1alpha1.Function{}
 	logger.Info("Waiting for function to be running...")
 	if err := ut.waitForRunning(ctx, logger, namespace, functionName, &function); err != nil {
@@ -107,6 +99,12 @@ func (ut *serverlessUpgradeTest) TestResources(stop <-chan struct{}, log logrus.
 		return err
 	}
 	logger.Info("Function is responding")
+
+	logger.Info("Deleting function...")
+	if err := ut.client.Delete(namespace, functionName); err != nil {
+		logger.Errorf("Deleting function failed, because: %v", err)
+	}
+	logger.Info("Function deleted")
 
 	return nil
 }
@@ -156,19 +154,19 @@ func (ut *serverlessUpgradeTest) compareFunctions(log logrus.FieldLogger, expect
 		log.Errorf("MinReplicas field is not equal, expected: %d, actual: %d", *expected.Spec.MinReplicas, *actual.Spec.MinReplicas)
 		result = false
 	}
-	if expected.Spec.Resources.Limits.Cpu().Equal(*actual.Spec.Resources.Limits.Cpu()) {
+	if !expected.Spec.Resources.Limits.Cpu().Equal(*actual.Spec.Resources.Limits.Cpu()) {
 		log.Errorf("CPU limit field is not equal, expected: %v, actual: %v", expected.Spec.Resources.Limits.Cpu(), actual.Spec.Resources.Limits.Cpu())
 		result = false
 	}
-	if expected.Spec.Resources.Limits.Memory().Equal(*actual.Spec.Resources.Limits.Memory()) {
+	if !expected.Spec.Resources.Limits.Memory().Equal(*actual.Spec.Resources.Limits.Memory()) {
 		log.Errorf("Memory limit field is not equal, expected: %v, actual: %v", expected.Spec.Resources.Limits.Memory(), actual.Spec.Resources.Limits.Memory())
 		result = false
 	}
-	if expected.Spec.Resources.Requests.Cpu().Equal(*actual.Spec.Resources.Requests.Cpu()) {
+	if !expected.Spec.Resources.Requests.Cpu().Equal(*actual.Spec.Resources.Requests.Cpu()) {
 		log.Errorf("CPU request field is not equal, expected: %v, actual: %v", expected.Spec.Resources.Requests.Cpu(), actual.Spec.Resources.Requests.Cpu())
 		result = false
 	}
-	if expected.Spec.Resources.Requests.Memory().Equal(*actual.Spec.Resources.Requests.Memory()) {
+	if !expected.Spec.Resources.Requests.Memory().Equal(*actual.Spec.Resources.Requests.Memory()) {
 		log.Errorf("Memory request field is not equal, expected: %v, actual: %v", expected.Spec.Resources.Requests.Memory(), actual.Spec.Resources.Requests.Memory())
 		result = false
 	}
