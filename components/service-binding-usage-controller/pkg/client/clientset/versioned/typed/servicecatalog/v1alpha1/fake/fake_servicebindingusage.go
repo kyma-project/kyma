@@ -3,6 +3,8 @@
 package fake
 
 import (
+	"context"
+
 	v1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -23,7 +25,7 @@ var servicebindingusagesResource = schema.GroupVersionResource{Group: "serviceca
 var servicebindingusagesKind = schema.GroupVersionKind{Group: "servicecatalog.kyma-project.io", Version: "v1alpha1", Kind: "ServiceBindingUsage"}
 
 // Get takes name of the serviceBindingUsage, and returns the corresponding serviceBindingUsage object, and an error if there is any.
-func (c *FakeServiceBindingUsages) Get(name string, options v1.GetOptions) (result *v1alpha1.ServiceBindingUsage, err error) {
+func (c *FakeServiceBindingUsages) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.ServiceBindingUsage, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(servicebindingusagesResource, c.ns, name), &v1alpha1.ServiceBindingUsage{})
 
@@ -34,7 +36,7 @@ func (c *FakeServiceBindingUsages) Get(name string, options v1.GetOptions) (resu
 }
 
 // List takes label and field selectors, and returns the list of ServiceBindingUsages that match those selectors.
-func (c *FakeServiceBindingUsages) List(opts v1.ListOptions) (result *v1alpha1.ServiceBindingUsageList, err error) {
+func (c *FakeServiceBindingUsages) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.ServiceBindingUsageList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(servicebindingusagesResource, servicebindingusagesKind, c.ns, opts), &v1alpha1.ServiceBindingUsageList{})
 
@@ -56,14 +58,14 @@ func (c *FakeServiceBindingUsages) List(opts v1.ListOptions) (result *v1alpha1.S
 }
 
 // Watch returns a watch.Interface that watches the requested serviceBindingUsages.
-func (c *FakeServiceBindingUsages) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeServiceBindingUsages) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(servicebindingusagesResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a serviceBindingUsage and creates it.  Returns the server's representation of the serviceBindingUsage, and an error, if there is any.
-func (c *FakeServiceBindingUsages) Create(serviceBindingUsage *v1alpha1.ServiceBindingUsage) (result *v1alpha1.ServiceBindingUsage, err error) {
+func (c *FakeServiceBindingUsages) Create(ctx context.Context, serviceBindingUsage *v1alpha1.ServiceBindingUsage, opts v1.CreateOptions) (result *v1alpha1.ServiceBindingUsage, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewCreateAction(servicebindingusagesResource, c.ns, serviceBindingUsage), &v1alpha1.ServiceBindingUsage{})
 
@@ -74,7 +76,7 @@ func (c *FakeServiceBindingUsages) Create(serviceBindingUsage *v1alpha1.ServiceB
 }
 
 // Update takes the representation of a serviceBindingUsage and updates it. Returns the server's representation of the serviceBindingUsage, and an error, if there is any.
-func (c *FakeServiceBindingUsages) Update(serviceBindingUsage *v1alpha1.ServiceBindingUsage) (result *v1alpha1.ServiceBindingUsage, err error) {
+func (c *FakeServiceBindingUsages) Update(ctx context.Context, serviceBindingUsage *v1alpha1.ServiceBindingUsage, opts v1.UpdateOptions) (result *v1alpha1.ServiceBindingUsage, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateAction(servicebindingusagesResource, c.ns, serviceBindingUsage), &v1alpha1.ServiceBindingUsage{})
 
@@ -85,7 +87,7 @@ func (c *FakeServiceBindingUsages) Update(serviceBindingUsage *v1alpha1.ServiceB
 }
 
 // Delete takes name of the serviceBindingUsage and deletes it. Returns an error if one occurs.
-func (c *FakeServiceBindingUsages) Delete(name string, options *v1.DeleteOptions) error {
+func (c *FakeServiceBindingUsages) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
 		Invokes(testing.NewDeleteAction(servicebindingusagesResource, c.ns, name), &v1alpha1.ServiceBindingUsage{})
 
@@ -93,15 +95,15 @@ func (c *FakeServiceBindingUsages) Delete(name string, options *v1.DeleteOptions
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeServiceBindingUsages) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(servicebindingusagesResource, c.ns, listOptions)
+func (c *FakeServiceBindingUsages) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+	action := testing.NewDeleteCollectionAction(servicebindingusagesResource, c.ns, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.ServiceBindingUsageList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched serviceBindingUsage.
-func (c *FakeServiceBindingUsages) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.ServiceBindingUsage, err error) {
+func (c *FakeServiceBindingUsages) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.ServiceBindingUsage, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(servicebindingusagesResource, c.ns, name, pt, data, subresources...), &v1alpha1.ServiceBindingUsage{})
 

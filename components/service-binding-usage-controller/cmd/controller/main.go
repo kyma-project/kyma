@@ -144,10 +144,11 @@ func main() {
 
 func runHTTPServer(stop <-chan struct{}, addr string, sbuClient *bindingUsageClientset.Clientset, ns string, log logrus.FieldLogger) {
 	counter := 0
+	ctx := context.Background()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/statusz", func(w http.ResponseWriter, req *http.Request) {
 		if counter >= livenessInhibitor {
-			if err := informerAvailability(sbuClient, log, ns); err != nil {
+			if err := informerAvailability(ctx, sbuClient, log, ns); err != nil {
 				log.Errorf("Cannot apply ServiceBindingUsage sample: %v ", err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
@@ -167,7 +168,7 @@ func runHTTPServer(stop <-chan struct{}, addr string, sbuClient *bindingUsageCli
 	go func() {
 		<-stop
 		// We received an interrupt signal, shut down.
-		if err := srv.Shutdown(context.Background()); err != nil {
+		if err := srv.Shutdown(ctx); err != nil {
 			log.Errorf("HTTP server Shutdown: %v", err)
 		}
 	}()
@@ -177,23 +178,24 @@ func runHTTPServer(stop <-chan struct{}, addr string, sbuClient *bindingUsageCli
 	}
 }
 
-func informerAvailability(sbuClient *bindingUsageClientset.Clientset, log logrus.FieldLogger, namespace string) error {
+func informerAvailability(ctx context.Context, sbuClient *bindingUsageClientset.Clientset, log logrus.FieldLogger, namespace string) error {
 	deleteSample := func() {
 		err := sbuClient.ServicecatalogV1alpha1().ServiceBindingUsages(namespace).Delete(
+			ctx,
 			controller.LivenessBUCSample,
-			&metav1.DeleteOptions{})
+			metav1.DeleteOptions{})
 		if err != nil {
 			log.Errorf("while deleting ServiceBindingUsage sample", err)
 		}
 	}
-	_, err := sbuClient.ServicecatalogV1alpha1().ServiceBindingUsages(namespace).Create(
+	_, err := sbuClient.ServicecatalogV1alpha1().ServiceBindingUsages(namespace).Create(ctx,
 		&v1alpha1.ServiceBindingUsage{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: "servicecatalog.kyma-project.io/v1alpha1",
 				Kind:       "ServiceBindingUsage",
 			},
 			ObjectMeta: metav1.ObjectMeta{Name: controller.LivenessBUCSample},
-		})
+		}, metav1.CreateOptions{})
 
 	switch {
 	case k8sErrors.IsAlreadyExists(err):
@@ -208,6 +210,7 @@ func informerAvailability(sbuClient *bindingUsageClientset.Clientset, log logrus
 	}()
 	err = wait.Poll(1*time.Second, 20*time.Second, func() (done bool, err error) {
 		sbuSample, err := sbuClient.ServicecatalogV1alpha1().ServiceBindingUsages(namespace).Get(
+			ctx,
 			controller.LivenessBUCSample,
 			metav1.GetOptions{})
 		if err != nil {
