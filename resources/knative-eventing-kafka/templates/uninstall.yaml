@@ -1,0 +1,116 @@
+# Copyright 2019 The Kyma Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# About:
+# This pre-delete job removes all kafkachannel custom resources
+# It does so by using a job which is executed before the helm chart is deleted
+# All the resources are cleaned up by helm on successful hook run
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "knative-kafka-delete"
+  namespace: "kyma-system"
+  annotations:
+    # Executes on a deletion request before any resources are deleted from Kubernetes
+    # this gives the controllers a chance to act on CRs with a finalizer
+    # source: https://helm.sh/docs/topics/charts_hooks/
+    helm.sh/hook: pre-delete
+    # delete the resources after success of the hook
+    helm.sh/hook-delete-policy: hook-succeeded
+    # everything without a dependency has weight 0
+    helm.sh/hook-weight: "0"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: "knative-kafka-delete"
+  annotations:
+    helm.sh/hook: pre-delete
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
+rules:
+- apiGroups: ["knativekafka.kyma-project.io"]
+  resources: ["kafkachannels"]
+  verbs: ["list", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: "knative-kafka-delete"
+  annotations:
+    helm.sh/hook: pre-delete
+    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-weight: "0"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: "knative-kafka-delete"
+subjects:
+  - kind: ServiceAccount
+    name: "knative-kafka-delete"
+    namespace: "kyma-system"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "knative-kafka-delete"
+  namespace: "kyma-system"
+  annotations:
+    helm.sh/hook: pre-delete
+    helm.sh/hook-delete-policy: hook-succeeded
+    sidecar.istio.io/inject: "false"
+    # dependent on clusterrole, clusterrolebinding, serviceaccount
+    # => hook-weight=min(hook-weight)+1
+    helm.sh/hook-weight: "1"
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      name: "knative-kafka-delete"
+      labels:
+        app: "knative-kafka-delete"
+    spec:
+      serviceAccountName: "knative-kafka-delete"
+      restartPolicy: Never
+      containers:
+        - name: "knative-kafka-delete"
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - |
+              set -eux -o pipefail
+              echo "starting deletion of kafkachannel custom resources"
+              kubectl \
+                delete \
+                --ignore-not-found \
+                kafkachannels.knativekafka.kyma-project.io \
+                --all-namespaces \
+                --all
+              echo "finished deletion of kafkachannel custom resources"
+          # use last chunk of container log output for terminal log
+          # source: https://kubernetes.io/docs/tasks/debug-application-cluster/determine-reason-pod-failure/#customizing-the-termination-message
+          terminationMessagePolicy: "FallbackToLogsOnError"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+
