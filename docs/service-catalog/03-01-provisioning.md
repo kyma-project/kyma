@@ -25,7 +25,6 @@ Binding is a process of connecting a ServiceInstance and an application. The bin
 > **TIP:** You can create the ServiceBinding and ServiceBindingUsage resources at the same time.
 
 
-By default, you can bind a ServiceInstance either to a Deployment or to a Function. Additionally, Kyma provides the
-[UsageKind custom resource](#custom-resource-usage-kind), which is a cluster-wide custom resource that allows you to bind a ServiceInstance to any kind of resource. You can add more UsageKind resources if you want to bind your ServiceInstance to other types of resources. UsageKind contains information on how the binding to these custom resources is conducted. Then, ServiceBindingUsage uses this information to inject Secrets to the application.
+By default, you can bind a ServiceInstance either to a Deployment or to a Function. Additionally, Kyma provides the [UsageKind custom resource](#custom-resource-usage-kind), which is a cluster-wide custom resource that allows you to bind a ServiceInstance to any kind of resource. You can add more UsageKinds if you want to bind your ServiceInstance to other types of resources. UsageKind contains information on how the binding to these custom resources is conducted. ServiceBindingUsage uses this information to inject Secrets to the Application.
 
 ![UsageKind](./assets/usagekind.svg)
