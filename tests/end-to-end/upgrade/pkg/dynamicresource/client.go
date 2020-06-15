@@ -10,28 +10,24 @@ import (
 
 // DynamicResource is a struct for dynamic resources
 type DynamicResource struct {
-	resCli    dynamic.ResourceInterface
-	namespace string
-	kind      string
+	resCli dynamic.NamespaceableResourceInterface
 }
 
 // NewClient function creates a new instance of DynamicResource
-func NewClient(dynamicCli dynamic.Interface, s schema.GroupVersionResource, namespace string) *DynamicResource {
+func NewClient(dynamicCli dynamic.Interface, s schema.GroupVersionResource) *DynamicResource {
 	return &DynamicResource{
-		resCli:    dynamicCli.Resource(s).Namespace(namespace),
-		namespace: namespace,
-		kind:      s.Resource,
+		resCli: dynamicCli.Resource(s),
 	}
 }
 
 // Create method creates a new instance of appropriate k8s resource
-func (r *DynamicResource) Create(res interface{}) error {
+func (r *DynamicResource) Create(res metav1.Object) error {
 	u, err := runtime.DefaultUnstructuredConverter.ToUnstructured(res)
 	if err != nil {
 		return err
 	}
 
-	_, err = r.resCli.Create(&unstructured.Unstructured{
+	_, err = r.resCli.Namespace(res.GetNamespace()).Create(&unstructured.Unstructured{
 		Object: u,
 	}, metav1.CreateOptions{})
 
@@ -39,11 +35,16 @@ func (r *DynamicResource) Create(res interface{}) error {
 }
 
 // Get method gets a existing instance of appropriate k8s resource
-func (r *DynamicResource) Get(name string) (*unstructured.Unstructured, error) {
-	return r.resCli.Get(name, metav1.GetOptions{})
+func (r *DynamicResource) Get(namespace, name string, obj interface{}) error {
+	u, err := r.resCli.Namespace(namespace).Get(name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	return runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, obj)
 }
 
 // Delete method deletes a existing instance of appropriate k8s resource
-func (r *DynamicResource) Delete(name string) error {
-	return r.resCli.Delete(name, &metav1.DeleteOptions{})
+func (r *DynamicResource) Delete(namespace, name string) error {
+	return r.resCli.Namespace(namespace).Delete(name, &metav1.DeleteOptions{})
 }
