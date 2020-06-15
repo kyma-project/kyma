@@ -57,11 +57,11 @@ container:
     webhookPort:
       value: "{{ .Values.service.ports.httpsWebhook.targetPort }}"
     minRequestCpu:
-      value: "10m"
+      value: "8m"
     minRequestMemory:
-      value: "16Mi"
+      value: "8Mi"
     minReplicasValue:
-      value: "0"
+      value: "1"
     reservedEnvs:
       value: "K_REVISION,K_CONFIGURATION,K_SERVICE,FUNC_RUNTIME,FUNC_HANDLER,FUNC_TIMEOUT,FUNC_PORT,PORT,MOD_NAME,NODE_PATH"
     requestCpu:
