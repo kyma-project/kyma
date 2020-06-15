@@ -31,6 +31,14 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       serviceAccountName: {{ .Chart.Name }}
+      initContainers:
+        - name: helm-release-migrator
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200529-34b39bd3
+          command:
+            - /bin/bash
+            - -c
+            - |
+{{ .Files.Get "files/helm-release-migration.sh" | indent 14 }}
       containers:
       - name: {{ .Chart.Name }}
         ports:
