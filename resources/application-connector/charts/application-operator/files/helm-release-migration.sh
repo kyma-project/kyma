@@ -14,9 +14,20 @@ apk add git jq
 
 echo "---> Get HELM_2 certs"
 ${HELM_2_BINARY} init -c
-kubectl get -n "${OVERRIDES_NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.ca\\.crt']}" | base64 --decode > "$(helm home)/ca.pem"
-kubectl get -n "${OVERRIDES_NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.tls\\.crt']}" | base64 --decode > "$(helm home)/cert.pem"
-kubectl get -n "${OVERRIDES_NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.tls\\.key']}" | base64 --decode > "$(helm home)/key.pem"
+
+if [[ $(kubectl get -n kube-system deploy tiller-deploy -o name) ]]; then
+    if [[ $(kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o name) ]]; then
+        kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.ca\\.crt']}" | base64 --decode > "$(helm home)/ca.pem"
+        kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.tls\\.crt']}" | base64 --decode > "$(helm home)/cert.pem"
+        kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.tls\\.key']}" | base64 --decode > "$(helm home)/key.pem"
+    else
+        echo "------> No HELM_2 Certs found, failing"
+        exit 1
+    fi
+else
+    echo "------> No Tiller deployment found, exiting gracefully"
+    exit 0
+fi
 
 echo "---> Setup Helm 3"
 if [[ ! $(${HELM_3_BINARY} plugin list | grep '2to3') ]]; then
@@ -37,24 +48,19 @@ while read line; do
     ns=$(echo $line | cut -d " " -f2)
     chart=$(echo $line | cut -d " " -f3)
 
-    if [[ "$chart" = "gateway-0.0.1" ]]; then
-        echo "------> Migrating Gateway release $release"
-        if [[ $(${HELM_3_BINARY} get all ${release} -n ${ns}) ]]; then
-            echo "------> Release ${release} in ns ${ns} already migrated!"
-            ${HELM_2_BINARY} delete --purge ${release} --tls
-        else
-            ${HELM_3_BINARY} 2to3 convert ${release}
-            ${HELM_2_BINARY} delete --purge ${release} --tls
-        fi
-    fi
+    case "$chart" in
+        "gateway-0.0.1") rtype="Gateway" ;;
+        "application-0.0.1") rtype="Application" ;; 
+        *) continue ;;
+    esac
 
-    if [[ "$chart" = "application-0.0.1" ]]; then
-        echo "------> Migrating Application release $release"
-        if [[ $(${HELM_3_BINARY} get all ${release} -n ${ns}) ]]; then
-            echo "------> Release ${release} in ns ${ns} already migrated!"
-        else
-            ${HELM_3_BINARY} 2to3 convert ${release}
-        fi
-    fi
+    echo "------> Migrating ${rtype} release $release"
+    if [[ $(${HELM_3_BINARY} get all ${release} -n ${ns}) ]]; then
+        echo "------> Release ${release} in ns ${ns} already migrated!"
+        ${HELM_3_BINARY} 2to3 cleanup --name ${release}
+    else
+        ${HELM_3_BINARY} 2to3 convert ${release}
+        ${HELM_3_BINARY} 2to3 cleanup --name ${release}
+    fi 
 
 done < helm2-all-releases
