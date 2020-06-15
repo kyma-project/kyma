@@ -21,4 +21,4 @@ To expose a Function outside the cluster, you must create an [APIRule custom res
 
 This way you can specify multiple API Rules with different authentication methods for a single Function service.
 
-> **TIP:** See [this](#tutorials-expose-a-function-with-an-api-rule) tutorial for a detailed example.
+> **TIP:** See the [tutorial](#tutorials-expose-a-function-with-an-api-rule) for a detailed example.

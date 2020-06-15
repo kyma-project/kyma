@@ -1,9 +1,7 @@
 package helpers
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -50,7 +48,7 @@ func SendEvent(target, eventType, eventTypeVersion string) error {
 	return nil
 }
 
-func CheckEvent(target, eventType, eventTypeVersion string, retryOptions ...retry.Option) error {
+func CheckEvent(target string, retryOptions ...retry.Option) error {
 	return retry.Do(func() error {
 		transport := &http.Transport{
 			DialContext: (&net.Dialer{
@@ -59,35 +57,13 @@ func CheckEvent(target, eventType, eventTypeVersion string, retryOptions ...retr
 		}
 		client := http.Client{Transport: transport}
 		res, err := client.Get(target)
+
 		if err != nil {
-			return errors.Wrap(err, "HTTP GET failed in CheckEvent()")
+			return errors.Wrap(err, fmt.Sprintf("HTTP GET failed in CheckEvent() for target: %v", target))
 		}
 
 		if err := verifyStatusCode(res, 200); err != nil {
-			return errors.Wrap(err, "HTTP GET request returned non-2xx in CheckEvent()")
-		}
-		body, err := ioutil.ReadAll(res.Body)
-		defer res.Body.Close()
-
-		if err != nil {
-			errors.Wrap(err, "failed ReadAll() in CheckEvent")
-		}
-		var resp http.Header
-		err = json.Unmarshal(body, &resp)
-		if err != nil {
-			errors.Wrap(err, "failed Unmarshal() in CheckEvent")
-		}
-
-		err = res.Body.Close()
-		if err != nil {
-			errors.Wrap(err, "failed Close() CheckEvent")
-		}
-
-		if resp.Get("ce-type") != eventType {
-			return fmt.Errorf("event type wrong: Got %s, Wanted: %s", resp.Get("ce-type"), eventType)
-		}
-		if resp.Get("ce-eventtypeversion") != eventTypeVersion {
-			return fmt.Errorf("event type version wrong: Got %s, Wanted: %s", resp.Get("ce-eventtypeversion"), eventTypeVersion)
+			return errors.Wrap(err, fmt.Sprintf("HTTP GET request returned non-200 in CheckEvent() for target: %v", target))
 		}
 
 		return nil
@@ -102,9 +78,7 @@ func WithURISubscriber(target string) TriggerOption {
 	url, err := apis.ParseURL(target)
 	if err != nil {
 		// TODO(k15r): proper error handling here
-		return func(trigger *v1alpha1.Trigger) {
-			return
-		}
+		return func(trigger *v1alpha1.Trigger) {}
 	}
 	destination := duckv1.Destination{
 		URI: url,

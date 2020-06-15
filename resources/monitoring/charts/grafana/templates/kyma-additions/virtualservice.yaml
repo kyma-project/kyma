@@ -14,8 +14,6 @@ metadata:
   labels:
     app: {{ template "grafana.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    heritage: {{ $.Release.Service }}
-    release: {{ $.Release.Name }}
 {{- if .Values.virtualservice.labels }}
 {{ toYaml .Values.virtualservice.labels | indent 4 }}
 {{- end }}

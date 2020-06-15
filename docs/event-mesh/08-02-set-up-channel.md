@@ -9,7 +9,7 @@ In the Event Mesh, Channels define an event forwarding and persistence layer. Th
 ## Steps
 Follow these steps to set up a new default Channel and allow communication between the Channel and the Kafka cluster.
 
-1. Define a ConfigMap with the Kafka Channel [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) and save it to a file called `kafka-channel.yaml`. 
+1. Define a ConfigMap with the Kafka Channel [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) and save it to a file called `kafka-channel.yaml`.
 
 ```yaml
 apiVersion: v1
@@ -25,7 +25,7 @@ data:
   knative-eventing.channel.default.apiVersion: knativekafka.kyma-project.io/v1alpha1
   knative-eventing.channel.default.kind: KafkaChannel
 ```
-2. Create a YAML file with the Azure Secret using the specification provided in [this](#tutorials-configure-the-kafka-channel) tutorial.
+2. Create a YAML file with the Azure Secret using the specification provided in the [tutorial](#tutorials-configure-the-kafka-channel).
 
 3. Use Kyma CLI to install Kyma with the overrides.
 

@@ -27,7 +27,9 @@ If release name contains chart name it will be used as a full name.
 {{/* Generate basic labels */}}
 {{- define "prometheus-node-exporter.labels" }}
 app: {{ template "prometheus-node-exporter.name" . }}
-heritage: {{.Release.Service }}
+helm.sh/chart: {{ include "prometheus-node-exporter.chart" . }}
+{{ include "prometheus-node-exporter.selectorLabels" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
 release: {{.Release.Name }}
 chart: {{ template "prometheus-node-exporter.chart" . }}
 {{- if .Values.podLabels}}
@@ -63,4 +65,12 @@ Allow the release namespace to be overridden for multi-namespace deployments in 
   {{- else -}}
     {{- .Release.Namespace -}}
   {{- end -}}
+{{- end -}}
+
+{{/*
+Selector labels
+*/}}
+{{- define "prometheus-node-exporter.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "prometheus-node-exporter.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}

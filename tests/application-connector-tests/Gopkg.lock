@@ -646,17 +646,6 @@
   version = "kubernetes-1.16.9"
 
 [[projects]]
-  digest = "1:3f4c7ac0f401dbf089a23df6a3674505c92196575a4fda12b54fedce5126765e"
-  name = "k8s.io/helm"
-  packages = [
-    "pkg/proto/hapi/chart",
-    "pkg/proto/hapi/release",
-  ]
-  pruneopts = "NUT"
-  revision = "05811b84a3f93603dd6c2fcfe57944dfa7ab7fd0"
-  version = "v2.14.0"
-
-[[projects]]
   digest = "1:c05ad592787fc6cdacf8c5309d826561aa4a7d9e4e7ea28660dfb2c77ff68ab0"
   name = "k8s.io/klog"
   packages = ["."]
@@ -754,7 +743,6 @@
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
     "k8s.io/client-go/util/homedir",
-    "k8s.io/helm/pkg/proto/hapi/release",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

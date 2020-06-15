@@ -38,12 +38,12 @@ func DefaultDeprovisionConfig() *DeprovisionConfig {
 }
 
 // DeprovisionAzureResources performs automatic removal of all resources created with Azure Broker.
-func (steps *Executor) DeprovisionAzureResources(config *DeprovisionConfig, installation installationConfig.InstallationContext) error {
+func DeprovisionAzureResources(extr *Executor, config *DeprovisionConfig, installation installationConfig.InstallationContext) error {
 
 	const stepName string = "Deprovisioning Azure Broker resources"
-	steps.PrintStep(stepName)
+	extr.PrintStep(stepName)
 
-	steps.statusManager.InProgress(stepName)
+	extr.statusManager.InProgress(stepName)
 
 	if config == nil {
 		config = DefaultDeprovisionConfig()
@@ -51,8 +51,8 @@ func (steps *Executor) DeprovisionAzureResources(config *DeprovisionConfig, inst
 
 	d := deprovisioner{
 		config:         config,
-		serviceCatalog: steps.serviceCatalog,
-		errorHandlers:  steps.errorHandlers,
+		serviceCatalog: extr.serviceCatalog,
+		errorHandlers:  extr.errorHandlers,
 	}
 
 	if err := d.deprovision(); err != nil {

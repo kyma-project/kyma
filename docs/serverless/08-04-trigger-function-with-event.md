@@ -14,8 +14,8 @@ This tutorial is based on an existing Function. To create one, follow the [Creat
 You must also have:
 
 - An Application bound to a specific Namespace. Read the tutorials to learn how to [create](/components/application-connector#tutorials-create-a-new-application) an Application and [bind](/components/application-connector#tutorials-bind-an-application-to-a-namespace) it to a Namespace.
-- An event service (an API of [AsyncAPI](https://www.asyncapi.com/) type) registered in the desired Application. Learn [here](/components/application-connector#tutorials-register-a-service) how to do it.
-- A Service Instance created for the registered service to expose events in a specific Namespace. See [this](/components/application-connector#tutorials-bind-a-service-to-a-namespace) tutorial for details.
+- An event service (an API of [AsyncAPI](https://www.asyncapi.com/) type) registered in the desired Application. Read the [tutorial](/components/application-connector#tutorials-register-a-service) to learn how to do it.
+- A Service Instance created for the registered service to expose events in a specific Namespace. Read the [tutorial](/components/application-connector#tutorials-bind-a-service-to-a-namespace) for details.
 
 ## Steps
 
@@ -105,21 +105,50 @@ To test if the Trigger CR is properly connected to the Function:
     }
     ```
 
-2. Send an event manually to trigger the Function:
+2.  Send an event manually to trigger the function. The first example shows the implementation introduced with the Kyma 1.11 release where a [CloudEvent](https://github.com/cloudevents/spec/blob/v1.0/spec.md) is sent directly to the Event Mesh. In the second example, an event also reaches the Event Mesh, but it is first modified by the compatibility layer to the format compliant with the CloudEvents specification. This solution ensures compatibility if your events follow a format other than CloudEvents, or you use the Event Bus available before 1.11.
+
+    > **TIP:** For details on CloudEvents, exposed endpoints, and the compatibility layer, read about [event processing and delivery](/components/event-mesh/#details-event-processing-and-delivery).
+
+    <div tabs name="examples" group="test=trigger">
+      <details>
+      <summary label="CloudEvents">
+      Send CloudEvents directly to Event Mesh
+      </summary>
 
     ```bash
-    curl -X POST -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
-    '{
-        "event-type": "{EVENT_TYPE}",
-        "event-type-version": "{EVENT_VERSION}",
-        "event-time": "2020-04-02T21:37:00Z",
-        "data": "123456789"
-    }'
+    curl -v -H "Content-Type: application/cloudevents+json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/events -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d \
+      '{
+        "specversion": "1.0",
+        "source": "{APP_NAME}",
+        "type": "{EVENT_TYPE}",
+        "eventtypeversion": "{EVENT_VERSION}",
+        "id": "A234-1234-1234",
+        "data": "123456789",
+        "datacontenttype": "application/json"
+      }' 
     ```
+      </details>
+      <details>
+      <summary label="Compatibility layer">
+      Send events to Event Mesh through compatibility layer
+      </summary>
+
+    ```bash
+    curl -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d \
+      '{
+          "event-type": "{EVENT_TYPE}",
+          "event-type-version": "{EVENT_VERSION}",
+          "event-time": "2020-04-02T21:37:00Z",
+          "data": "123456789"
+         }'
+    ``` 
+
+      </details>
+  </div>
 
     - **CLUSTER_DOMAIN** is the domain of your cluster, such as `kyma.local`.
 
-    - **CERT_FILE_NAME** and **KEY_FILE_NAME** are client certificates for a given Application. You can get them by completing steps in [this](/components/application-connector/#tutorials-get-the-client-certificate) tutorial.
+    - **CERT_FILE_NAME** and **KEY_FILE_NAME** are client certificates for a given Application. You can get them by completing steps in the [tutorial](/components/application-connector/#tutorials-get-the-client-certificate).
 
 3. After sending an event, you should get this result from logs of your Function's latest Pod:
 

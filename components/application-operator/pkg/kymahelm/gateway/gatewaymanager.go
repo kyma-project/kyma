@@ -1,13 +1,14 @@
 package gateway
 
 import (
+	"encoding/json"
 	"fmt"
 
 	v1beta12 "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	log "github.com/sirupsen/logrus"
 
+	"helm.sh/helm/v3/pkg/release"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"k8s.io/helm/pkg/proto/hapi/release"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/utils"
@@ -24,7 +25,7 @@ const (
 type GatewayManager interface {
 	InstallGateway(namespace string) error
 	DeleteGateway(namespace string) error
-	GatewayExists(namespace string) (bool, release.Status_Code, error)
+	GatewayExists(namespace string) (bool, release.Status, error)
 	UpgradeGateways() error
 }
 
@@ -49,14 +50,14 @@ type gatewayManager struct {
 }
 
 func (g *gatewayManager) InstallGateway(namespace string) error {
-	overrides, err := kymahelm.ParseOverrides(g.overrides, overridesTemplate)
+	overrides, err := g.getOverrides()
 	if err != nil {
 		return errors.Errorf("Error parsing overrides: %s", err.Error())
 	}
 
 	name := getGatewayReleaseName(namespace)
 
-	_, err = g.helmClient.InstallReleaseFromChart(gatewayChartDirectory, namespace, name, overrides)
+	_, err = g.helmClient.InstallReleaseFromChart(gatewayChartDirectory, name, namespace, overrides)
 	if err != nil {
 		return errors.Errorf("Error installing Gateway: %s", err.Error())
 	}
@@ -70,13 +71,13 @@ func (g *gatewayManager) DeleteGateway(namespace string) error {
 		return errors.Errorf("Error deleting Gateway: %s", err.Error())
 	}
 	if releaseExist {
-		return g.deleteGateway(gateway)
+		return g.deleteGateway(gateway, namespace)
 	}
 	return nil
 }
 
-func (g *gatewayManager) deleteGateway(gateway string) error {
-	_, err := g.helmClient.DeleteRelease(gateway)
+func (g *gatewayManager) deleteGateway(gateway string, namespace string) error {
+	_, err := g.helmClient.DeleteRelease(gateway, namespace)
 	if err != nil {
 		return errors.Errorf("Error deleting Gateway: %s", err.Error())
 	}
@@ -84,7 +85,7 @@ func (g *gatewayManager) deleteGateway(gateway string) error {
 	return nil
 }
 
-func (g *gatewayManager) GatewayExists(namespace string) (bool, release.Status_Code, error) {
+func (g *gatewayManager) GatewayExists(namespace string) (bool, release.Status, error) {
 	name := getGatewayReleaseName(namespace)
 	exists, status, err := g.gatewayExists(name, namespace)
 	return exists, status, err
@@ -133,15 +134,15 @@ func (g *gatewayManager) updateGateways(namespaces []string) {
 		}
 
 		if exists {
-			if status == release.Status_FAILED {
+			if status == release.StatusFailed {
 				log.Infof("Deleting Gateway %s in failed status", namespace)
-				err := g.deleteGateway(gateway)
+				err := g.deleteGateway(gateway, namespace)
 				if err != nil {
 					log.Errorf("Error deleting Gateway %s: %s", namespace, err.Error())
 				}
 				continue
 			}
-			err = g.upgradeGateway(gateway)
+			err = g.upgradeGateway(gateway, namespace)
 			if err != nil {
 				log.Errorf("Error upgrading Gateway %s: %s", namespace, err.Error())
 			}
@@ -149,36 +150,52 @@ func (g *gatewayManager) updateGateways(namespaces []string) {
 	}
 }
 
-func (g *gatewayManager) gatewayExists(name, namespace string) (bool, release.Status_Code, error) {
+func (g *gatewayManager) gatewayExists(name, namespace string) (bool, release.Status, error) {
 	listResponse, err := g.helmClient.ListReleases(namespace)
 	if err != nil {
-		return false, release.Status_UNKNOWN, errors.Errorf("Error listing releases: %s", err.Error())
+		return false, release.StatusUnknown, errors.Errorf("Error listing releases: %s", err.Error())
 	}
 
 	if listResponse == nil {
-		return false, release.Status_UNKNOWN, nil
+		return false, release.StatusUnknown, nil
 	}
 
-	for _, rel := range listResponse.Releases {
+	for _, rel := range listResponse {
 		if rel.Name == name {
-			return true, rel.Info.Status.Code, nil
+			return true, rel.Info.Status, nil
 		}
 	}
-	return false, release.Status_UNKNOWN, nil
+	return false, release.StatusUnknown, nil
 }
 
-func (g *gatewayManager) upgradeGateway(gateway string) error {
-	overrides, err := kymahelm.ParseOverrides(g.overrides, overridesTemplate)
+func (g *gatewayManager) upgradeGateway(gateway string, namespace string) error {
+	overrides, err := g.getOverrides()
+
 	if err != nil {
 		return errors.Errorf("Error parsing overrides: %s", err.Error())
 	}
 
-	_, err = g.helmClient.UpdateReleaseFromChart(gatewayChartDirectory, gateway, overrides)
+	_, err = g.helmClient.UpdateReleaseFromChart(gatewayChartDirectory, gateway, namespace, overrides)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("Failed to update %s Gateway", gateway))
 	}
 
 	return nil
+}
+
+func (g *gatewayManager) getOverrides() (map[string]interface{}, error) {
+	overridesData := g.overrides
+
+	var overridesMap map[string]interface{}
+	bytes, err := json.Marshal(overridesData)
+
+	if err = json.Unmarshal(bytes, &overridesMap); err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"global": overridesMap,
+	}, nil
 }
 
 func appendNamespace(namespaces []string, namespace string) []string {

@@ -15,6 +15,12 @@ const subscriberImage = "eu.gcr.io/kyma-project/event-subscriber-tools:f766b186"
 
 type SubscriberOption func(deployment *appsv1.Deployment)
 
+func WithSubscriberImage(image string) SubscriberOption {
+	return func(deployment *appsv1.Deployment) {
+		deployment.Spec.Template.Spec.Containers[0].Image = image
+	}
+}
+
 func CreateSubscriber(k8s k8s.Interface, name, namespace string, subscriberOptions ...SubscriberOption) error {
 	replicas := int32(1)
 	deployment := &appsv1.Deployment{

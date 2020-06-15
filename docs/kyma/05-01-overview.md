@@ -25,7 +25,7 @@ The default settings for the cluster and local installation are defined in diffe
   For the list of all components available to install see the `installer-cr.yaml.tpl` file.
   For the list of the default installation overrides see the `installer-config-local.yaml.tpl` file.
   Other configuration values are defined directly in the configuration of the respective components.
-  
+
   >**CAUTION:** The default configuration uses tested and recommended settings. Change them at your own risk.
   </details>
   <details>
@@ -55,7 +55,7 @@ You can customize the list of components by:
 - Commenting out a component entry using the hash character (#) to skip the installation of that component.
 - Adding new components along with their chart definitions to the list. If you do that, you must build your own [Kyma Installer image](#installation-use-your-own-kyma-installer-image) as you are adding a new component to Kyma.
 
-For more details on custom component installation, see [this](#configuration-custom-component-installation) document.
+For more details on custom component installation, see the [configuration document](#configuration-custom-component-installation).
 
 ### Overrides
 

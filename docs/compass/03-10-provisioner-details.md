@@ -14,11 +14,11 @@ It allows you to provision the clusters in the following ways:
 During the operation of provisioning, you can pass a list of Kyma components you want installed on the provisioned Runtime with their custom configuration, as well as a custom Runtime configuration. To install a customized version of a given component, you can also provide an [external URL as the installation source](docs/#configuration-install-components-from-user-defined-ur-ls) for the component. See the [provisioning tutorial](#tutorials-provision-clusters-through-gardener) for more details.
 
 Note that the operations of provisioning and deprovisioning are asynchronous. The operation of provisioning returns the Runtime Operation Status containing the Runtime ID and the operation ID. The operation of deprovisioning returns the operation ID. You can use the operation ID to [check the Runtime Operation Status](#tutorials-check-runtime-operation-status) and the Runtime ID to [check the Runtime Status](#tutorials-check-runtime-status).
-  
-The Runtime Provisioner exposes an API to manage cluster provisioning, installation, and deprovisioning. 
 
-Find the specification of the API [here](https://github.com/kyma-incubator/compass/blob/master/components/provisioner/pkg/gqlschema/schema.graphql).
-    
+The Runtime Provisioner exposes an API to manage cluster provisioning, installation, and deprovisioning.
+
+Read the [API specification](https://github.com/kyma-incubator/compass/blob/master/components/provisioner/pkg/gqlschema/schema.graphql) for more details.
+
 To access the Runtime Provisioner, forward the port that the GraphQL Server is listening on:
 
 ```bash

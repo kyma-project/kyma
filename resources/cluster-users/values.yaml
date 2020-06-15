@@ -57,6 +57,11 @@ clusterRoles:
       - "caching.internal.knative.dev"
       - "autoscaling.internal.knative.dev"
       - "serving.knative.dev"
+    kymaEventing:
+      - "knativekafka.kyma-project.io"
+      - "sources.kyma-project.io"
+      - "messaging.knative.dev"
+      - "eventing.knative.dev"
   verbs:
     edit:
       - "create"

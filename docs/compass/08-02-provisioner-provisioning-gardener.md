@@ -12,7 +12,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
   <summary label="GCP">
   GCP
   </summary>
-  
+
   - Existing project on GCP
   - Existing project on Gardener
   - Service account for GCP with the following roles:
@@ -25,16 +25,16 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
   - Compass with configured Runtime Provisioner and the following [overrides](#configuration-runtime-provisioner-chart) set up:
       * Kubeconfig (`provisioner.gardener.kubeconfig`)
       * Gardener project name (`provisioner.gardener.project`)
-  
+
   </details>
-  
+
   <details>
   <summary label="Azure">
   Azure
   </summary>
-  
+
   - Existing project on Gardener
-  - Valid Azure subscription with the Contributor role and the subscription ID 
+  - Valid Azure subscription with the Contributor role and the subscription ID
   - Existing App registration on Azure with the following credentials:
     * Application ID (Client ID)
     * Directory ID (Tenant ID)
@@ -45,12 +45,12 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
     * Gardener project name (`provisioner.gardener.project`)
 
   </details>
-  
+
   <details>
   <summary label="AWS">
   AWS
   </summary>
-  
+
   - Existing project on Gardener
   - AWS account with added AWS IAM policy for Gardener
   - Access key created for your AWS user with the following credentials:
@@ -60,14 +60,14 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
   - Compass with configured Runtime Provisioner and the following [overrides](#configuration-runtime-provisioner-chart) set up:
     * Kubeconfig (`provisioner.gardener.kubeconfig`)
     * Gardener project name (`provisioner.gardener.project`)
-  
-  > **NOTE:** To get the AWS IAM policy, access your project on Gardener, navigate to the **Secrets** tab, click on the help icon on the AWS card, and copy the JSON policy. 
-    
+
+  > **NOTE:** To get the AWS IAM policy, access your project on Gardener, navigate to the **Secrets** tab, click on the help icon on the AWS card, and copy the JSON policy.
+
   </details>
 </div>
 
 > **NOTE:** To access the Runtime Provisioner, forward the port on which the GraphQL Server is listening.
-   
+
 ## Steps
 
 <div tabs name="Provisioning" group="Provisioning-Gardener">
@@ -82,12 +82,12 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
 
   2. In the **Secrets** tab, add a new Google Secret for GCP. Use the `json` file with the service account key you downloaded from GCP.
 
-  3. In the **Members** tab, create a service account for Gardener. 
+  3. In the **Members** tab, create a service account for Gardener.
 
   4. Make a call to the Runtime Provisioner with a **tenant** header to create a cluster on GCP.
 
       > **NOTE:** The Runtime Agent component (`compass-runtime-agent`) in the Kyma configuration is mandatory and the order of the components matters.                                                     
-                                                                          
+
       ```graphql
       mutation {
         provisionRuntime(
@@ -131,7 +131,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 }
               ]
               configuration: [
-                { 
+                {
                   key: "{CONFIG_PROPERTY_KEY}"
                   value: "{CONFIG_PROPERTY_VALUE}"
                   secret: true|false # Specifies if the property is confidential
@@ -145,9 +145,9 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
         }
       }
       ```
-    
+
       A successful call returns the operation status:
-    
+
       ```graphql
         {
           "data": {
@@ -157,8 +157,8 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
             }
           }
         }
-      ``` 
-    
+      ```
+
   </details>
 
   <details>
@@ -172,12 +172,12 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
 
   2. In the **Secrets** tab, add a new Azure Secret. Use the credentials you got from Azure.
 
-  3. In the **Members** tab, create a service account for Gardener. 
+  3. In the **Members** tab, create a service account for Gardener.
 
   4. Make a call to the Runtime Provisioner with a **tenant** header to create a cluster on Azure.
-        
+
       > **NOTE:** The Runtime Agent component (`compass-runtime-agent`) in the Kyma configuration is mandatory and the order of the components matters.                                                    
-                                                                          
+
       ```graphql
       mutation {
         provisionRuntime(
@@ -221,7 +221,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 }
               ]
               configuration: [
-                { 
+                {
                   key: "{CONFIG_PROPERTY_KEY}"
                   value: "{CONFIG_PROPERTY_VALUE}"
                   secret: true|false # Specifies if the property is confidential
@@ -235,9 +235,9 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
         }
       }
       ```
-    
+
       A successful call returns the operation status:
-    
+
       ```graphql
       {
         "data": {
@@ -248,26 +248,26 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
         }
       }
       ```
-    
+
   </details>
-  
+
   <details>
   <summary label="AWS">
   AWS
   </summary>
-      
+
   To provision Kyma Runtime on AWS, follow these steps:
-    
+
   1. Access your project on [Gardener](https://dashboard.garden.canary.k8s.ondemand.com).
-  
+
   2. In the **Secrets** tab, add a new AWS Secret. Use the credentials you got from AWS.
-    
-  3. In the **Members** tab, create a service account for Gardener. 
+
+  3. In the **Members** tab, create a service account for Gardener.
 
   4. Make a call to the Runtime Provisioner with a **tenant** header to create a cluster on AWS.
-    
+
       > **NOTE:** The Runtime Agent component (`compass-runtime-agent`) in the Kyma configuration is mandatory and the order of the components matters.
-                                                                      
+
       ```graphql
       mutation {
         provisionRuntime(
@@ -291,13 +291,13 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 autoScalerMax: 4
                 maxSurge: 4
                 maxUnavailable: 1
-                providerSpecificConfig: { 
+                providerSpecificConfig: {
                   awsConfig: {
                     publicCidr: "10.250.96.0/22"
                     vpcCidr: "10.250.0.0/16"
                     internalCidr: "10.250.112.0/22"
                     zone: "eu-west-1b"
-                  } 
+                  }
                 }
               }
             }
@@ -318,7 +318,7 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
                 }
               ]
               configuration: [
-                { 
+                {
                   key: "{CONFIG_PROPERTY_KEY}"
                   value: "{CONFIG_PROPERTY_VALUE}"
                   secret: true|false # Specifies if the property is confidential
@@ -332,9 +332,9 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
         }
       }
       ```
-    
+
       A successful call returns the operation status:
-    
+
       ```graphql
       {
         "data": {
@@ -345,11 +345,11 @@ This tutorial shows how to provision clusters with Kyma Runtimes on Google Cloud
         }
       }
       ```
-     
+
   </details>
-    
+
 </div>
 
 The operation of provisioning is asynchronous. The operation of provisioning returns the Runtime Operation Status containing the Runtime ID (`provisionRuntime.runtimeID`) and the operation ID (`provisionRuntime.id`). Use the Runtime ID to [check the Runtime Status](#tutorials-check-runtime-status). Use the provisioning operation ID to [check the Runtime Operation Status](#tutorials-check-runtime-operation-status) and verify that the provisioning was successful.
 
-> **NOTE:** To see how to provide the labels, see [this](#details-labels) document. To see an example of label usage, go [here](https://github.com/kyma-incubator/compass/blob/master/components/director/examples/register-application/register-application.graphql). 
+> **NOTE:** To learn more, read how to [provide labels](#details-labels) or see the [example](https://github.com/kyma-incubator/compass/blob/master/components/director/examples/register-application/register-application.graphql) of label usage. 

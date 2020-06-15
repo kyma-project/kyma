@@ -30,4 +30,4 @@ The GCP Service Broker provides these Service Classes to use with the Service Ca
 * Google Cloud Storage
 
 See the details of each Service Class and its specification in the Service Catalog UI.
-For more information about the Service Brokers, see [this](#service-brokers-service-brokers) document.
+Read also about the [Service Brokers](#service-brokers-service-brokers) in Kyma.

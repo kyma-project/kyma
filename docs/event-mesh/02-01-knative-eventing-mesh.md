@@ -28,4 +28,4 @@ This diagram shows how the Event Mesh components work together.
 
 5. The user creates the [Trigger](https://knative.dev/v0.12-docs/eventing/broker-trigger/) which references the Broker and defines the subscriber along with the conditions for filtering events. This way, subscribers receive only the events of a given type.
 
-For details on the Trigger specification, read [this](/components/event-mesh/#details-event-processing-and-delivery) document.
+For details on the Trigger specification, read about [event processing and delivery](/components/event-mesh/#details-event-processing-and-delivery).

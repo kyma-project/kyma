@@ -12,8 +12,6 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymasources"
 	. "github.com/smartystreets/goconvey/convey"
-	"k8s.io/helm/pkg/proto/hapi/release"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
 )
 
 const (
@@ -31,7 +29,7 @@ func TestSteps(t *testing.T) {
 				testUpgradeStep := fakeUpgradeStep(mockHelmClient)
 
 				//when
-				asString := testUpgradeStep.ToString()
+				asString := testUpgradeStep.String()
 
 				expected := "Component: test-component, Release: test-release, Namespace: test-namespace"
 
@@ -52,11 +50,14 @@ func TestSteps(t *testing.T) {
 			})
 			Convey("rollback failed upgrade", func() {
 				//given
-				upgradeError := fmt.Sprintf("Helm upgrade error: %s", "failed to upgrade release")
-				expectedError := fmt.Sprintf("%s\nHelm rollback of release \"%s\" was successfull", upgradeError, testReleaseName)
+				upgradeError := fmt.Sprintf("Helm upgrade of release \"%s\" failed: %s", testReleaseName, "failed to upgrade release.")
+				expectedError := fmt.Sprintf("%s\nFinding last known deployed revision to rollback to.\nPerforming rollback to last known deployed revision: 2\nHelm rollback of release \"%s\" was successfull", upgradeError, testReleaseName)
 
 				mockHelmClient := &mockHelmClient{
 					failUpgradingRelease: true,
+					releaseDeployedRevision: func(string) (int, error) {
+						return 2, nil
+					},
 				}
 
 				testUpgradeStep := fakeUpgradeStep(mockHelmClient)
@@ -70,13 +71,16 @@ func TestSteps(t *testing.T) {
 			})
 			Convey("return an error when release rollback fails", func() {
 				//given
-				upgradeError := fmt.Sprintf("Helm upgrade error: %s", "failed to upgrade release")
-				rollbackError := fmt.Sprintf("Helm rollback of release \"%s\" failed with an error: %s", testReleaseName, "failed to rollback release")
-				expectedError := fmt.Sprintf("%s \n %s \n", upgradeError, rollbackError)
+				upgradeError := fmt.Sprintf("Helm upgrade of release \"%s\" failed: %s", testReleaseName, "failed to upgrade release.")
+				rollbackError := fmt.Sprintf("Finding last known deployed revision to rollback to.\nPerforming rollback to last known deployed revision: 2 \n Helm rollback of release \"%s\" failed with an error: %s", testReleaseName, "failed to rollback release ")
+				expectedError := fmt.Sprintf("%s\n%s\n", upgradeError, rollbackError)
 
 				mockHelmClient := &mockHelmClient{
 					failUpgradingRelease: true,
-					failRollback:         true,
+					releaseDeployedRevision: func(string) (int, error) {
+						return 2, nil
+					},
+					failRollback: true,
 				}
 
 				testUpgradeStep := fakeUpgradeStep(mockHelmClient)
@@ -85,9 +89,9 @@ func TestSteps(t *testing.T) {
 				err := testUpgradeStep.Run()
 
 				//then
+
 				So(err.Error(), ShouldEqual, expectedError)
 			})
-
 		})
 		Convey("install step should", func() {
 			Convey("print itself", func() {
@@ -96,7 +100,7 @@ func TestSteps(t *testing.T) {
 				testInstallStep := fakeInstallStep(mockHelmClient)
 
 				//when
-				asString := testInstallStep.ToString()
+				asString := testInstallStep.String()
 
 				expected := "Component: test-component, Release: test-release, Namespace: test-namespace"
 
@@ -117,8 +121,9 @@ func TestSteps(t *testing.T) {
 			})
 			Convey("delete failed release if it is deletable", func() {
 				//given
-				installError := fmt.Sprintf("Helm install error: %s", "failed to install release")
-				expectedError := fmt.Sprintf("%s\nHelm delete of release \"%s\" was successfull", installError, testReleaseName)
+				installError := fmt.Sprintf("Helm installation of release \"%s\" failed: %s", testReleaseName, "failed to install release")
+				deletingMsg := "Deleting release before retrying."
+				expectedError := fmt.Sprintf("%s\n%s\nHelm delete of release \"%s\" was successfull", installError, deletingMsg, testReleaseName)
 
 				mockHelmClient := &mockHelmClient{
 					failInstallingRelease: true,
@@ -136,7 +141,7 @@ func TestSteps(t *testing.T) {
 			})
 			Convey("not delete failed release if it is not deletable", func() {
 				//given
-				expectedError := fmt.Sprintf("Helm install error: %s", "failed to install release")
+				expectedError := fmt.Sprintf("Helm installation of release \"%s\" failed: %s", testReleaseName, "failed to install release")
 
 				mockHelmClient := &mockHelmClient{
 					failInstallingRelease: true,
@@ -154,7 +159,7 @@ func TestSteps(t *testing.T) {
 			})
 			Convey("return an error when getting the release status fails", func() {
 				//given
-				installError := fmt.Sprintf("Helm install error: %s", "failed to install release")
+				installError := fmt.Sprintf("Helm installation of release \"%s\" failed: %s", testReleaseName, "failed to install release")
 				isDeletableError := fmt.Sprintf("Checking status of release \"%s\" failed with an error: %s", testReleaseName, "failed to get release status")
 				expectedError := fmt.Sprintf("%s \n %s \n", installError, isDeletableError)
 
@@ -172,9 +177,10 @@ func TestSteps(t *testing.T) {
 			})
 			Convey("return an error when release deletion fails", func() {
 				//given
-				installError := fmt.Sprintf("Helm install error: %s", "failed to install release")
+				installError := fmt.Sprintf("Helm installation of release \"%s\" failed: failed to install release", testReleaseName)
+				deletingMsg := "Deleting release before retrying."
 				deletingError := fmt.Sprintf("Helm delete of release \"%s\" failed with an error: %s", testReleaseName, "failed to delete release")
-				expectedError := fmt.Sprintf("%s \n %s \n", installError, deletingError)
+				expectedError := fmt.Sprintf("%s\n%s \n %s \n", installError, deletingMsg, deletingError)
 
 				mockHelmClient := &mockHelmClient{
 					failInstallingRelease: true,
@@ -234,91 +240,80 @@ type mockHelmClient struct {
 	isReleaseDeletable      bool
 	deleteReleaseCalled     bool
 	rollbackReleaseCalled   bool
-	listReleasesResponse    *rls.ListReleasesResponse
-	releaseDeployedRevision func(string) (int32, error)
+	listReleasesResponse    []*kymahelm.Release
+	releaseDeployedRevision func(string) (int, error)
 }
 
-func (hc *mockHelmClient) ReleaseDeployedRevision(name string) (int32, error) {
-	return hc.releaseDeployedRevision(name)
+func (hc *mockHelmClient) ReleaseDeployedRevision(nn kymahelm.NamespacedName) (int, error) {
+	return hc.releaseDeployedRevision(nn.Name)
 }
 
-func (hc *mockHelmClient) IsReleaseDeletable(rname string) (bool, error) {
+func (hc *mockHelmClient) IsReleaseDeletable(nn kymahelm.NamespacedName) (bool, error) {
 	if hc.failIsReleaseDeletable {
 		return false, errors.New("failed to get release status")
 	}
 	return hc.isReleaseDeletable, nil
 }
 
-func (hc *mockHelmClient) InstallRelease(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error) {
+func (hc *mockHelmClient) InstallRelease(chartDir string, nn kymahelm.NamespacedName, values overrides.Map) (*kymahelm.Release, error) {
 	if hc.failInstallingRelease == true {
 		err := errors.New("failed to install release")
 		return nil, err
 	}
-	return &rls.InstallReleaseResponse{}, nil
+	return &kymahelm.Release{}, nil
 }
 
-func (hc *mockHelmClient) DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error) {
+func (hc *mockHelmClient) UninstallRelease(nn kymahelm.NamespacedName) error {
 	hc.deleteReleaseCalled = true
 	if hc.failDeletingRelease {
-		err := errors.New("failed to delete release")
-		return nil, err
+		return errors.New("failed to delete release")
 	}
-	return &rls.UninstallReleaseResponse{}, nil
+	return nil
 }
 
-func (hc *mockHelmClient) RollbackRelease(releaseName string, revision int32) (*rls.RollbackReleaseResponse, error) {
+func (hc *mockHelmClient) RollbackRelease(nn kymahelm.NamespacedName, revision int) error {
 	hc.rollbackReleaseCalled = true
 	if hc.failRollback {
-		err := errors.New("failed to rollback release")
-		return nil, err
+		return errors.New("failed to rollback release")
 	}
-	return &rls.RollbackReleaseResponse{}, nil
+	return nil
 }
 
-func (hc *mockHelmClient) ListReleases() (*rls.ListReleasesResponse, error) {
+func (hc *mockHelmClient) ListReleases() ([]*kymahelm.Release, error) {
 	return hc.listReleasesResponse, nil
 }
 
-func (hc *mockHelmClient) ReleaseStatus(rname string) (string, error) {
+func (hc *mockHelmClient) ReleaseStatus(nn kymahelm.NamespacedName) (string, error) {
 	return "", nil
 }
 
-func (hc *mockHelmClient) InstallReleaseFromChart(chartdir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error) {
-	return nil, nil
-}
-
-func (hc *mockHelmClient) InstallReleaseWithoutWait(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error) {
-	return nil, nil
-}
-
-func (hc *mockHelmClient) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error) {
+func (hc *mockHelmClient) UpgradeRelease(chartDir string, nn kymahelm.NamespacedName, values overrides.Map) (*kymahelm.Release, error) {
 	if hc.failUpgradingRelease == true {
 		err := errors.New("failed to upgrade release")
 		return nil, err
 	}
 
-	return &rls.UpdateReleaseResponse{
-		Release: &release.Release{
-			Name:      "testRelease",
-			Namespace: "testNamespace",
-			Version:   14,
-			Info: &release.Info{
-				Status: &release.Status{
-					Code: release.Status_DEPLOYED,
-				},
-				Description: "",
+	return &kymahelm.Release{
+		ReleaseMeta: &kymahelm.ReleaseMeta{
+			NamespacedName: kymahelm.NamespacedName{
+				Name:      "testRelease",
+				Namespace: "testNamespace",
 			},
+			Description: "",
 		},
-	}, nil
+		ReleaseStatus: &kymahelm.ReleaseStatus{
+			CurrentRevision: 14,
+			Status:          kymahelm.StatusDeployed,
+		}}, nil
 }
 
-func (hc *mockHelmClient) PrintRelease(release *release.Release) {}
+func (hc *mockHelmClient) PrintRelease(release *kymahelm.Release) {}
 
-func (hc *mockHelmClient) WaitForReleaseDelete(releaseName string) (bool, error) {
+func (hc *mockHelmClient) WaitForReleaseDelete(nn kymahelm.NamespacedName) (bool, error) {
 	return true, nil
 }
 
-func (hc *mockHelmClient) WaitForReleaseRollback(releaseName string) (bool, error) {
+func (hc *mockHelmClient) WaitForReleaseRollback(nn kymahelm.NamespacedName) (bool, error) {
 	return true, nil
 }
 
@@ -338,8 +333,8 @@ type mockOverrideData struct {
 	overrides.OverrideData
 }
 
-func (mod *mockOverrideData) ForRelease(releaseName string) (string, error) {
-	return "", nil
+func (mod *mockOverrideData) ForRelease(releaseName string) overrides.Map {
+	return nil
 }
 
 func fakeComponent() v1alpha1.KymaComponent {
@@ -371,7 +366,6 @@ func fakeUpgradeStep(hc *mockHelmClient) *upgradeStep {
 			sourceGetter: &mockSourceGetter{},
 			overrideData: &mockOverrideData{},
 		},
-		deployedRevision: 13,
 	}
 }
 
