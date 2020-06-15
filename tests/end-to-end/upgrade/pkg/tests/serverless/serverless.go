@@ -103,6 +103,7 @@ func (ut *serverlessUpgradeTest) TestResources(stop <-chan struct{}, log logrus.
 	logger.Info("Deleting function...")
 	if err := ut.client.Delete(namespace, functionName); err != nil {
 		logger.Errorf("Deleting function failed, because: %v", err)
+		return err
 	}
 	logger.Info("Function deleted")
 
