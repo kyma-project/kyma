@@ -3,12 +3,15 @@ package serverless
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"time"
 
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
 
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -74,6 +77,14 @@ func (ut *serverlessUpgradeTest) TestResources(stop <-chan struct{}, log logrus.
 	logger := log.WithField("name", functionName).
 		WithField("namespace", namespace)
 
+	defer func() {
+		logger.Info("Deleting function...")
+		if err := ut.client.Delete(namespace, functionName); err != nil {
+			logger.Errorf("Deleting function failed, because: %v", err)
+		}
+		logger.Info("Function deleted")
+	}()
+
 	function := v1alpha1.Function{}
 	logger.Info("Waiting for function to be running...")
 	if err := ut.waitForRunning(ctx, logger, namespace, functionName, &function); err != nil {
@@ -90,12 +101,12 @@ func (ut *serverlessUpgradeTest) TestResources(stop <-chan struct{}, log logrus.
 	}
 	logger.Info("Function's manifest validated")
 
-	logger.Info("Deleting function...")
-	if err := ut.client.Delete(namespace, functionName); err != nil {
-		logger.Errorf("Deleting function failed, because: %v", err)
+	logger.Info("Waiting for function's response...")
+	if err := ut.waitForResponse(ctx, logger, namespace, functionName); err != nil {
+		logger.Errorf("Waiting for a function response failed, because: %v", err)
 		return err
 	}
-	logger.Info("Function deleted")
+	logger.Info("Function is responding")
 
 	return nil
 }
@@ -145,19 +156,19 @@ func (ut *serverlessUpgradeTest) compareFunctions(log logrus.FieldLogger, expect
 		log.Errorf("MinReplicas field is not equal, expected: %d, actual: %d", *expected.Spec.MinReplicas, *actual.Spec.MinReplicas)
 		result = false
 	}
-	if expected.Spec.Resources.Limits.Cpu().Value() != actual.Spec.Resources.Limits.Cpu().Value() {
+	if expected.Spec.Resources.Limits.Cpu().Equal(*actual.Spec.Resources.Limits.Cpu()) {
 		log.Errorf("CPU limit field is not equal, expected: %v, actual: %v", expected.Spec.Resources.Limits.Cpu(), actual.Spec.Resources.Limits.Cpu())
 		result = false
 	}
-	if expected.Spec.Resources.Limits.Memory().Value() != actual.Spec.Resources.Limits.Memory().Value() {
+	if expected.Spec.Resources.Limits.Memory().Equal(*actual.Spec.Resources.Limits.Memory()) {
 		log.Errorf("Memory limit field is not equal, expected: %v, actual: %v", expected.Spec.Resources.Limits.Memory(), actual.Spec.Resources.Limits.Memory())
 		result = false
 	}
-	if expected.Spec.Resources.Requests.Cpu().Value() != actual.Spec.Resources.Requests.Cpu().Value() {
+	if expected.Spec.Resources.Requests.Cpu().Equal(*actual.Spec.Resources.Requests.Cpu()) {
 		log.Errorf("CPU request field is not equal, expected: %v, actual: %v", expected.Spec.Resources.Requests.Cpu(), actual.Spec.Resources.Requests.Cpu())
 		result = false
 	}
-	if expected.Spec.Resources.Requests.Memory().Value() != actual.Spec.Resources.Requests.Memory().Value() {
+	if expected.Spec.Resources.Requests.Memory().Equal(*actual.Spec.Resources.Requests.Memory()) {
 		log.Errorf("Memory request field is not equal, expected: %v, actual: %v", expected.Spec.Resources.Requests.Memory(), actual.Spec.Resources.Requests.Memory())
 		result = false
 	}
@@ -197,23 +208,47 @@ func (_ *serverlessUpgradeTest) envsContainsAll(expected, actual []corev1.EnvVar
 }
 
 func (ut *serverlessUpgradeTest) waitForRunning(ctx context.Context, log logrus.FieldLogger, namespace, name string, function *v1alpha1.Function) error {
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
-			if err := ut.client.Get(namespace, name, function); err != nil {
-				log.Errorf("Cannot get function, because: %v", err)
-			}
-			if ut.isRunning(function) {
-				return nil
-			} else {
-				log.Warnf("Function is not running, status: %#v", function.Status)
-			}
-
-			time.Sleep(waitInterval)
+	return wait.PollImmediateUntil(waitInterval, func() (bool, error) {
+		if err := ut.client.Get(namespace, name, function); err != nil {
+			log.Errorf("Cannot get function, because: %v", err)
+			return false, nil
 		}
-	}
+		if !ut.isRunning(function) {
+			log.Warnf("Function is not running, status: %#v", function.Status)
+			return false, nil
+		}
+
+		return true, nil
+	}, ctx.Done())
+}
+
+func (ut *serverlessUpgradeTest) waitForResponse(ctx context.Context, log logrus.FieldLogger, namespace, name string) error {
+	return wait.PollImmediateUntil(waitInterval, func() (bool, error) {
+		resp, err := http.Get(fmt.Sprintf("http://%s.%s.svc.cluster.local", name, namespace))
+		if err != nil {
+			log.Errorf("Cannot get response from function, because: %v", err)
+			return false, nil
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			log.Warnf("Function returned code %d", resp.StatusCode)
+			return false, nil
+		}
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Errorf("Cannot read function response body, because: %v", err)
+			return false, nil
+		}
+
+		if string(body) != functionResponse {
+			log.Warnf("Function returned different body than expected, returned: %s", string(body))
+			return false, nil
+		}
+
+		return true, nil
+	}, ctx.Done())
 }
 
 func (_ *serverlessUpgradeTest) isRunning(function *v1alpha1.Function) bool {
