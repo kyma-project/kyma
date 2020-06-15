@@ -42,11 +42,11 @@ The controller extends the api-server with the following custom resources:
 
 ## Installer custom resource
 
-The `installation.installer.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format the Kyma Operator Controller listens for. To get the up-to-date CRD and show
+The `installations.installer.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format the Kyma Operator Controller listens for. To get the up-to-date CRD and show
 the output in the `yaml` format, run this command:
 
 ```bash
-kubectl get crd installation.installer.kyma-project.io -o yaml
+kubectl get crd installations.installer.kyma-project.io -o yaml
 ```
 
 ### Sample custom resource
