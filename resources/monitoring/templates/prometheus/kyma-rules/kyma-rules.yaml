@@ -93,3 +93,12 @@ spec:
         severity: critical
       annotations:
         message:  "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
+  - name: kube-pod-oomkilled
+    rules:
+    - alert: KubePodOOMKilled
+      expr: sum_over_time(kube_pod_container_status_terminated_reason{reason="OOMKilled"}[5m]) > 0
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        message: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.container {{`}}`}}) is OOMKilled for 5 minutes.
