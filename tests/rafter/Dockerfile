@@ -19,28 +19,18 @@ COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 RUN CGO_ENABLED=0 go test main_test.go -c
 
-FROM alpine:3.11.3
+FROM alpine:latest as certs
+RUN apk --update add ca-certificates
+
+FROM scratch
+
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 
 ENV TEST_DIR /go/src/github.com/kyma-project/kyma/tests/rafter
 
-#
-# Install certificates and tools
-#
-
-RUN apk update && apk add ca-certificates && apk add curl && rm -rf /var/cache/apk/*
-
-#
-# Copy binaries
-#
-
-RUN mkdir -p /app/tests
 COPY --from=builder ${TEST_DIR}/main.test /app/
 COPY --from=builder ${TEST_DIR}/licenses/ /app/licenses/
-
-#
-# Run tests
-#
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 CMD ["/app/main.test"]
