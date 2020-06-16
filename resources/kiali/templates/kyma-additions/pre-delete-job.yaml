@@ -74,4 +74,4 @@ spec:
       containers:
       - name: kiali-pre-delete-job
         image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
-        command: ["kubectl","delete", "-n", "kyma-system", "kialis.kiali.io" , "kiali", "--wait=false"]
+        command: ["kubectl","delete", "-n", "kyma-system", "kialis.kiali.io" , "kiali", "--wait=false" ]
