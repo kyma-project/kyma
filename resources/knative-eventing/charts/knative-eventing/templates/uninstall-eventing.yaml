@@ -50,22 +50,6 @@ rules:
   - apiGroups: ["messaging.knative.dev"]
     resources: ["*"]
     verbs: ["list", "delete"]
-  # TODO: DELETE
-  # - apiGroups: ["sources.eventing.knative.dev"]
-  #   resources: ["apiserversources", "containersources", "cronjobsources", "sinkbindings"]
-  #   verbs: ["list", "delete"]
-  # - apiGroups: ["eventing.knative.dev"]
-  #   resources: ["brokers", "eventtypes", "sources", "subscriptions", "triggers"]
-  #   verbs: ["list", "delete"]
-  # - apiGroups: ["messaging.knative.dev"]
-  #   resources: ["brokers", "eventtypes", "sources", "subscriptions", "triggers"]
-  #   verbs: ["list", "delete"]
----
-# channels.messaging.knative.dev natsschannels.messaging.knative.dev parallels.messaging.knative.dev sequences.messaging.knative.dev subscriptions.messaging.knative.dev
-# apiserversources.sources.eventing.knative.dev brokers.eventing.knative.dev containersources.sources.eventing.knative.dev cronjobsources.sources.eventing.knative.dev eventtypes.eventing.knative.dev sinkbindings.sources.eventing.knative.dev triggers.eventing.knative.dev
-# kafkachannels.knativekafka.kyma-project.io
-# apiserversources.sources.eventing.knative.dev containersources.sources.eventing.knative.dev cronjobsources.sources.eventing.knative.dev sinkbindings.sources.eventing.knative.dev
-
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -145,12 +129,7 @@ spec:
                 echo "finished deletion of ${resource} custom resources"
               done
 
-              # echo "deleting namespace knative-eventing"
-              # kubectl \
-              #   delete \
-              #   namespace \
-              #   knative-eventing
-              # echo "done"
+              echo "done"
           # use last chunk of container log output for terminal log
           # source: https://kubernetes.io/docs/tasks/debug-application-cluster/determine-reason-pod-failure/#customizing-the-termination-message
           terminationMessagePolicy: "FallbackToLogsOnError"
@@ -160,4 +139,3 @@ spec:
               memory: 128Mi
             limits:
               cpu: 200m
-              memory: 128Mi
