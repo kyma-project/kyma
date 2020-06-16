@@ -14,6 +14,6 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **controller.args.installationTimeout** | Specifies a period of time provided for the Application Gateway, Application Connectivity Validator, and Event Service installation. The Application requires these services to be operational. The value is provided in seconds.| `240` |
-| **controller.args.helmDriver** | Specifies backend storage driver used by Helm 3 to store release data. Possible values are `configmap`, `secret` and `memory` | `secret` |
+| **controller.args.installationTimeout** | Specifies a period of time provided for the Application Gateway, Application Connectivity Validator, and Event Service installation. The Application requires these services to be operational. The value is provided in seconds. | `240` |
+| **controller.args.helmDriver** | Specifies the backend storage driver used by Helm 3 to store release data. Possible values are `configmap`, `secret` and `memory`. | `secret` |
 | **global.disableLegacyConnectivity** | Disables the default legacy [AO work mode](#architecture-application-connector-components-application-operator) and enables the Compass mode. | `false` | 

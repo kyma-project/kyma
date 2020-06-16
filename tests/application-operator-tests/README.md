@@ -13,11 +13,11 @@ Environment parameters used by the tests:
 
 | Name | Required | Default | Description | Possible values |
 |------|----------|---------|-------------|-----------------|
-| **NAMESPACE** | Yes | `kyma-integration` | The Namespace in which the test Application will operate |  |
-| **HELM_DRIVER** | Yes | `secret` | Specifies backend storage driver used by Helm 3 to store release data | `configmap`, `secret`, `memory` |
-| **INSTALLATION_TIMEOUT_SECONDS** | No | 180 | Timeout in second for release installation |  |
-| **GATEWAY_DEPLOYED_PER_NAMESPACE** | No | `false` | Flag that specifies whether Application Gateway should be deployed once per Namespace based on ServiceInstance or for every Application | `true`, `false`
+| **NAMESPACE** | Yes | `kyma-integration` | Namespace in which the test Application will operate. |  |
+| **HELM_DRIVER** | Yes | `secret` | Backend storage driver used by Helm 3 to store release data. | `configmap`, `secret`, `memory` |
+| **INSTALLATION_TIMEOUT_SECONDS** | No | 180 | Timeout for the release installation, provided in seconds. |  |
+| **GATEWAY_DEPLOYED_PER_NAMESPACE** | No | `false` | Flag that specifies whether Application Gateway should be deployed once per Namespace basing on ServiceInstance or for every Application. | `true`, `false` |
 
 ### Configuring Kyma
 
-After building and pushing the Docker image, set the proper tag in the `resources/core/charts/application-connector/charts/application-operator/values.yaml` file, in the`tests.image.tag` property.
+After building and pushing the Docker image, set the proper tag in the `resources/core/charts/application-connector/charts/application-operator/values.yaml` file, in the **tests.image.tag** property.
