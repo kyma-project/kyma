@@ -7,9 +7,7 @@ TAG = $(DOCKER_TAG)
 build-image:
 	cd ./../../; \
 	docker build -t $(IMG):$(TAG) \
-		-f ./tools/kyma-installer/kyma.Dockerfile  \
-		--build-arg INSTALLER_DIR=$(DOCKER_PATH) \
-		--build-arg INSTALLER_VERSION=$(TAG) .
+		-f ./tools/kyma-installer/kyma.Dockerfile .
 
 .PHONY: push-image
 push-image:
