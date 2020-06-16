@@ -30,7 +30,7 @@ func parseArgs() *options {
 	syncPeriod := flag.Int("syncPeriod", 30, "Time period between resyncing existing resources")
 	installationTimeout := flag.Int64("installationTimeout", 240, "Time after the release installation will time out")
 
-	helmDriver := flag.String("helmDriver", "secret", "Toggles Helm 3 configuration storage between configMap and secret")
+	helmDriver := flag.String("helmDriver", "secret", "Backend storage driver used by Helm 3 to store release data")
 	applicationGatewayImage := flag.String("applicationGatewayImage", "", "The image of the Application Gateway to use")
 	applicationGatewayTestsImage := flag.String("applicationGatewayTestsImage", "", "The image of the Application Gateway Tests to use")
 	eventServiceImage := flag.String("eventServiceImage", "", "The image of the Event Service to use")
