@@ -42,7 +42,7 @@ For this step, you need a running local Kyma instance. Read the [installation do
 
    ```shell
    # Use the following pattern:
-   minikube mount {LOCAL_DIR_PATH}:{CLUSTER_DIR_PATH}`
+   minikube mount {LOCAL_DIR_PATH}:{CLUSTER_DIR_PATH}
    # To follow this guide, call:
    minikube mount ~/go/src/github.com/kyma-project/examples/http-db-service:/go/src/github.com/kyma-project/examples/http-db-service
    ```
