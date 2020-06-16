@@ -39,7 +39,8 @@ The Application Operator has the following parameters:
  - **applicationConnectivityValidatorImage** is the Application Connectivity Validator image version to use in the Application chart.
  - **gatewayOncePerNamespace** is a flag that specifies whether Application Gateway should be deployed once per Namespace based on ServiceInstance or for every Application. The default value is `false`.
  - **strictMode** is a toggle used to enable or disable Istio authorization policy for validator and HTTP source adapter. The default value is `disabled`.
- - **healthPort** is a number of TCP port that is used to perform health checking of the Application Operator.
+ - **healthPort** is the number of the TCP port used to perform health checking of the Application Operator.
+ 
 ## Testing on a local deployment
 
 When you develop the Application Connector components, you can test the changes you introduced on a local Kyma deployment before you push them to a production cluster.
