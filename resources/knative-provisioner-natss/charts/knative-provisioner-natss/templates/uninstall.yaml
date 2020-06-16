@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 # About:
-# This pre-delete job removes all natschannels custom resources
+# This pre-delete job removes all natschannel custom resources
 # It does so by using a job which is executed before the helm chart is deleted
 # All the resources are cleaned up by helm on successful hook run
 
@@ -96,8 +96,6 @@ spec:
             - |
               set -eux -o pipefail
               echo "starting deletion of natsschannel custom resources"
-              # TODO: this only works once, then e.g. http-source controller is running, it will simply recreate the channel
-              # since it comes later in *.tpl, it won't help :/
               kubectl \
                 delete \
                 --ignore-not-found \
