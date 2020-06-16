@@ -1,8 +1,9 @@
 ---
-title: Architecture
+title: Basic architecture
+type: Architecture
 ---
 
-The diagram and steps describe the Service Catalog workflow and the roles of specific cluster and Namespace-wide resources in this process:
+The diagram describes the Service Catalog workflow and the roles of specific cluster and Namespace-scoped resources in this process:
 
 ![Service Catalog flow](./assets/service-catalog-flow.svg)
 
@@ -10,6 +11,6 @@ The diagram and steps describe the Service Catalog workflow and the roles of spe
 
 2. Inside the cluster, each ClusterServiceBroker exposes services that are ClusterServiceClasses in their different variations called ClusterServicePlans. Similarly, the ServiceBroker registered in a given Namespace exposes ServiceClasses and ServicePlans only in this specific Namespace.
 
-3. In the Console UI or CLI, the Kyma user lists all exposed cluster-wide and Namespace-specific services and requests to create instances of those services in the Namespace.
+3. Using the Console UI or CLI, the Kyma user lists all exposed cluster-wide and Namespace-specific services and requests to create instances of those services in the Namespace.
 
-4. The Kyma user creates bindings to the ServiceInstances to allow the given applications to access the provisioned services.
+4. The Kyma user creates bindings to the ServiceInstances so that the given applications can access the provisioned services.
