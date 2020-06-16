@@ -4,9 +4,7 @@ set -e
 HELM_2_BINARY=$(which helm)
 HELM_3_BINARY=$(which helm3)
 SECRET_NAME="helm-secret"
-OVERRIDES_NAMESPACE="kyma-installer"
-
-APPLICATION_RELEASES_NAMESPACE="kyma-integration"
+NAMESPACE="kyma-installer"
 
 echo "---> Install requirements"
 
