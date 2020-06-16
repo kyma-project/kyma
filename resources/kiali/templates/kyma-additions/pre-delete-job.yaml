@@ -1,4 +1,24 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kiali-delete
+  namespace: kyma-system
+  labels:
+    {{- include "kiali.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-delete
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook-weight: "0"
+data:
+  kiali-delete.sh: |
+    #!/usr/bin/env sh
+    set -e
+
+    kubectl patch -n kyma-system kialis.kiali.io kiali -p '{"metadata":{"finalizers": []}}' --type=merge
+    kubectl delete kialis.kiali.io -n kyma-system kiali --wait=false
+
+---
+apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: kiali-delete-cr
@@ -24,7 +44,7 @@ metadata:
 rules:
 - apiGroups: ["kiali.io"]
   resources: ["kialis"]
-  verbs: ["delete"]
+  verbs: ["delete", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -74,4 +94,12 @@ spec:
       containers:
       - name: kiali-pre-delete-job
         image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
-        command: ["kubectl","delete", "-n", "kyma-system", "kialis.kiali.io" , "kiali", "--wait=false" ]
+        command: ["/scripts/kiali-delete.sh"]
+        volumeMounts:
+            - name: kiali-delete
+              mountPath: /scripts
+      volumes:
+        - name: kiali-delete
+          configMap:
+            name: kiali-delete
+            defaultMode: 0744
