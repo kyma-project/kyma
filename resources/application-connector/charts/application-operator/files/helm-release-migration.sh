@@ -55,10 +55,10 @@ while read line; do
     echo "------> Migrating ${rtype} release $release"
     if [[ $(${HELM_3_BINARY} get all ${release} -n ${ns}) ]]; then
         echo "------> Release ${release} in ns ${ns} already migrated!"
-        ${HELM_3_BINARY} 2to3 cleanup --name ${release}
+        yes | ${HELM_3_BINARY} 2to3 cleanup --name ${release}
     else
         ${HELM_3_BINARY} 2to3 convert ${release}
-        ${HELM_3_BINARY} 2to3 cleanup --name ${release}
+        yes | ${HELM_3_BINARY} 2to3 cleanup --name ${release}
     fi 
 
 done < helm2-all-releases
