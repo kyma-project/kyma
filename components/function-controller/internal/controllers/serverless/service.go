@@ -7,7 +7,6 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	apilabels "k8s.io/apimachinery/pkg/labels"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -26,11 +25,11 @@ func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logge
 	case len(services) == 0:
 		return r.createService(ctx, log, instance, newSvc)
 	case len(services) > 1:
-		return r.deleteExcessServices(ctx, instance, log)
+		return r.deleteExcessServices(ctx, instance, log, services)
 	case !r.equalServices(services[0], newSvc):
 		return r.updateService(ctx, log, instance, services[0], newSvc)
 	default:
-		log.Info("Service is ready")
+		log.Info(fmt.Sprintf("Service %s is ready", services[0].GetName()))
 		return ctrl.Result{}, nil
 	}
 }
@@ -87,12 +86,21 @@ func (r *FunctionReconciler) updateService(ctx context.Context, log logr.Logger,
 	})
 }
 
-func (r *FunctionReconciler) deleteExcessServices(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (ctrl.Result, error) {
+func (r *FunctionReconciler) deleteExcessServices(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger, services []corev1.Service) (ctrl.Result, error) {
+	// services do not support deletecollection
+	// you can check this by `kubectl api-resources -o wide | grep services`
+
 	log.Info("Deleting excess Services")
-	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
-	if err := r.client.DeleteAllBySelector(ctx, &corev1.Service{}, instance.GetNamespace(), selector); err != nil {
-		log.Error(err, "Cannot delete excess Services")
-		return ctrl.Result{}, err
+
+	for i, _ := range services {
+		svc := services[i]
+		log.Info(fmt.Sprintf("Deleting Service %s", svc.GetName()))
+
+		err := r.client.Delete(ctx, &services[i])
+		if err != nil {
+			log.Error(err, fmt.Sprintf("Cannot delete excess Service %s", svc.GetName()))
+			return ctrl.Result{}, err
+		}
 	}
 
 	log.Info("Excess Services deleted")

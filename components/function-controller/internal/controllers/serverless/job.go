@@ -56,7 +56,7 @@ func (r *FunctionReconciler) equalJobs(existing batchv1.Job, expected batchv1.Jo
 	existingDst := r.getArg(existingArgs, destinationArg)
 	expectedDst := r.getArg(expectedArgs, destinationArg)
 
-	return existingDst == expectedDst
+	return existingDst == expectedDst && r.mapsEqual(existing.GetLabels(), expected.GetLabels())
 }
 
 func (r *FunctionReconciler) getArg(args []string, arg string) string {

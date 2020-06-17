@@ -68,7 +68,8 @@ func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Fu
 		instance.Spec.Source != configMaps[0].Data[configMapFunction] ||
 		r.sanitizeDependencies(instance.Spec.Deps) != configMaps[0].Data[configMapDeps] ||
 		configMaps[0].Data[configMapHandler] != configMapHandler ||
-		configurationStatus != corev1.ConditionTrue
+		configurationStatus != corev1.ConditionTrue ||
+		r.mapsEqual(configMaps[0].Labels, instance.GetLabels())
 }
 
 func (r *FunctionReconciler) onConfigMapChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, configMaps []corev1.ConfigMap) (ctrl.Result, error) {
