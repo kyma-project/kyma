@@ -116,12 +116,16 @@ spec:
 
               for resource in "${resources[@]}"; do
                 echo "starting deletion of ${resource} custom resources"
-                kubectl \
-                  delete \
-                  --ignore-not-found \
-                  "${resource}" \
-                  --all-namespaces \
-                  --all
+                if kubectl get crd "${resource}"; then
+                  kubectl \
+                    delete \
+                    --ignore-not-found \
+                    "${resource}" \
+                    --all-namespaces \
+                    --all
+                else
+                  echo "CRD ${resource} unknown to apiserver"
+                fi
                 echo "finished deletion of ${resource} custom resources"
               done
 
