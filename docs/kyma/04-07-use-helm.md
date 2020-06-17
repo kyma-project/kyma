@@ -11,7 +11,7 @@ Beginning with the version 1.14, Kyma uses [Helm v3](https://helm.sh/) to instal
 
 ## Helm v2
 
-If you upgraded Kyma to v1.14, your pre-upgrade Helm v2 configuration and release data is still accessible via `helm` commands. Nevertheless, Helm v2 relies on Tiller to govern charts and releases. To use Helm v2 CLI, you must establish a secure connection with Tiller by saving the cluster's client certificate, key, and Certificate Authority (CA) to [Helm Home](https://v2.helm.sh/docs/glossary/#helm-home-helm-home).
+If you upgraded Kyma to v1.14, your pre-upgrade Helm v2 configuration and release data is still accessible via Helm v2 CLI commands. Nevertheless, Helm v2 relies on Tiller to govern charts and releases. To use Helm v2 CLI, you must establish a secure connection with Tiller by saving the cluster's client certificate, key, and Certificate Authority (CA) to [Helm Home](https://v2.helm.sh/docs/glossary/#helm-home-helm-home).
 
 >**NOTE:** Read more about [TLS in Tiller](/components/security/#details-tls-in-tiller).
 
