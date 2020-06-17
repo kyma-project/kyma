@@ -32,7 +32,7 @@ func (r *FunctionReconciler) onHorizontalPodAutoscalerChange(ctx context.Context
 	case len(hpas) == 0:
 		return r.createHorizontalPodAutoscaler(ctx, log, instance, newHpa)
 	case len(hpas) > 1: // this step is needed, as sometimes informers lag behind reality, and then we create 2 (or more) hpas by accident
-		return r.deleteExcessHorizontalPodAutoscalers(ctx, instance,log)
+		return r.deleteExcessHorizontalPodAutoscalers(ctx, instance, log)
 	case !r.equalHorizontalPodAutoscalers(hpas[0], newHpa):
 		return r.updateHorizontalPodAutoscaler(ctx, log, instance, hpas[0], newHpa)
 	default:
@@ -100,7 +100,6 @@ func (r *FunctionReconciler) updateHorizontalPodAutoscaler(ctx context.Context, 
 		Message:            fmt.Sprintf("HorizontalPodAutoscaler %s updated", hpaCopy.GetName()),
 	})
 }
-
 
 func (r *FunctionReconciler) deleteExcessHorizontalPodAutoscalers(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (ctrl.Result, error) {
 	log.Info("Deleting excess HorizontalPodAutoscalers")
