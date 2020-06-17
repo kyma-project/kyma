@@ -315,3 +315,5 @@ For Linux with Chrome, run:
     ```bash
     kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
     ```
+
+If you need to use Helm to manage your Kubernetes resources, read the [additional configuration](#installation-use-helm) document.
