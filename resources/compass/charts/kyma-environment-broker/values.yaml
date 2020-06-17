@@ -61,6 +61,7 @@ kymaVersion: "9c738f01"
 kymaVersionOnDemand: "false"
 
 enablePlans: "azure,gcp"
+defaultGardenerShootPurpose: "development"
 
 gardener:
   project: "kyma-dev" # Gardener project connected to SA for HAP credentials lookup
