@@ -93,12 +93,12 @@ spec:
             - "-c"
             - |
               set -eux -o pipefail
-              echo "starting deletion of knative-eventing namespace"
+              echo "starting deletion of {{ .Release.Namespace }} namespace"
               kubectl \
                 delete \
                 namespace \
-                natss \
-              echo "finished deletion of knative-eventing namespace"
+                {{ .Release.Namespace }}
+              echo "finished deletion of {{ .Release.Namespace }} namespace "
           # use last chunk of container log output for terminal log
           # source: https://kubernetes.io/docs/tasks/debug-application-cluster/determine-reason-pod-failure/#customizing-the-termination-message
           terminationMessagePolicy: "FallbackToLogsOnError"
