@@ -6,7 +6,7 @@ This document presents the workflow of the Runtime Agent.
 
 ![Runtime Agent architecture](./assets/runtime-agent-architecture.svg)
 
-1. Runtime Agent fetches the certificate from the Connector to initialize connection with Compass.
+1. Runtime Agent fetches the certificate from the [Connector](https://github.com/kyma-incubator/compass/blob/master/docs/connector/02-01-connector-service.md) to initialize connection with Compass.
 
 2. Runtime Agent stores the certificate and key for the Connector and the Director in the Secret.
 
