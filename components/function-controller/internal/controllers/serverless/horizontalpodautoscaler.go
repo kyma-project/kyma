@@ -9,6 +9,7 @@ import (
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apilabels "k8s.io/apimachinery/pkg/labels"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -30,15 +31,8 @@ func (r *FunctionReconciler) onHorizontalPodAutoscalerChange(ctx context.Context
 	switch {
 	case len(hpas) == 0:
 		return r.createHorizontalPodAutoscaler(ctx, log, instance, newHpa)
-	case len(hpas) > 1:
-		log.Info("Too many HorizontalPodAutoscalers for function")
-		return r.updateStatus(ctx, ctrl.Result{RequeueAfter: r.config.RequeueDuration}, instance, serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionRunning,
-			Status:             corev1.ConditionFalse,
-			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonHorizontalPodAutoscalerError,
-			Message:            fmt.Sprintf("HorizontalPodAutoscaler step failed, too many HorizontalPodAutoscalers found, needed 1 got: %d", len(hpas)),
-		})
+	case len(hpas) > 1: // this step is needed, as sometimes informers lag behind reality, and then we create 2 (or more) hpas by accident
+		return r.deleteExcessHorizontalPodAutoscalers(ctx, instance,log)
 	case !r.equalHorizontalPodAutoscalers(hpas[0], newHpa):
 		return r.updateHorizontalPodAutoscaler(ctx, log, instance, hpas[0], newHpa)
 	default:
@@ -105,4 +99,17 @@ func (r *FunctionReconciler) updateHorizontalPodAutoscaler(ctx context.Context, 
 		Reason:             serverlessv1alpha1.ConditionReasonHorizontalPodAutoscalerUpdated,
 		Message:            fmt.Sprintf("HorizontalPodAutoscaler %s updated", hpaCopy.GetName()),
 	})
+}
+
+
+func (r *FunctionReconciler) deleteExcessHorizontalPodAutoscalers(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (ctrl.Result, error) {
+	log.Info("Deleting excess HorizontalPodAutoscalers")
+	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
+	if err := r.client.DeleteAllBySelector(ctx, &autoscalingv1.HorizontalPodAutoscaler{}, instance.GetNamespace(), selector); err != nil {
+		log.Error(err, "Cannot delete excess HorizontalPodAutoscalers")
+		return ctrl.Result{}, err
+	}
+
+	log.Info("Excess HorizontalPodAutoscalers deleted")
+	return ctrl.Result{}, nil
 }

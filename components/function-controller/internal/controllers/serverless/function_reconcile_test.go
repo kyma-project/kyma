@@ -58,7 +58,7 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonConfigMapCreated))
 
 		configMapList := &corev1.ConfigMapList{}
-		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.functionLabels(function), configMapList)
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.internalFunctionLabels(function), configMapList)
 		gomega.Expect(err).To(gomega.BeNil())
 		gomega.Expect(configMapList.Items).To(gomega.HaveLen(1))
 		gomega.Expect(configMapList.Items[0].Data[configMapFunction]).To(gomega.Equal(function.Spec.Source))
@@ -79,7 +79,7 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
 
 		jobList := &batchv1.JobList{}
-		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.functionLabels(function), jobList)
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.internalFunctionLabels(function), jobList)
 		gomega.Expect(err).To(gomega.BeNil())
 		gomega.Expect(jobList.Items).To(gomega.HaveLen(1))
 
@@ -135,7 +135,7 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
 
 		deployments := &appsv1.DeploymentList{}
-		gomega.Expect(resourceClient.ListByLabel(context.TODO(), request.Namespace, reconciler.functionLabels(function), deployments)).To(gomega.Succeed())
+		gomega.Expect(resourceClient.ListByLabel(context.TODO(), request.Namespace, reconciler.internalFunctionLabels(function), deployments)).To(gomega.Succeed())
 		gomega.Expect(len(deployments.Items)).To(gomega.Equal(1))
 		deployment := &deployments.Items[0]
 		gomega.Expect(deployment).ToNot(gomega.BeNil())
@@ -188,7 +188,7 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonHorizontalPodAutoscalerCreated))
 
 		hpaList := &autoscalingv1.HorizontalPodAutoscalerList{}
-		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.functionLabels(function), hpaList)
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.internalFunctionLabels(function), hpaList)
 		gomega.Expect(err).To(gomega.BeNil())
 		gomega.Expect(hpaList.Items).To(gomega.HaveLen(1))
 
@@ -247,7 +247,7 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 
 		jobList := &batchv1.JobList{}
-		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.functionLabels(function), jobList)
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.internalFunctionLabels(function), jobList)
 		gomega.Expect(err).To(gomega.BeNil())
 		gomega.Expect(jobList.Items).To(gomega.HaveLen(1))
 
@@ -277,7 +277,7 @@ var _ = ginkgo.Describe("Function", func() {
 
 		ginkgo.By("deployment failed")
 		deployments := &appsv1.DeploymentList{}
-		gomega.Expect(resourceClient.ListByLabel(context.TODO(), request.Namespace, reconciler.functionLabels(function), deployments)).To(gomega.Succeed())
+		gomega.Expect(resourceClient.ListByLabel(context.TODO(), request.Namespace, reconciler.internalFunctionLabels(function), deployments)).To(gomega.Succeed())
 		gomega.Expect(len(deployments.Items)).To(gomega.Equal(1))
 		deployment := &deployments.Items[0]
 		deployment.Status.Conditions = []appsv1.DeploymentCondition{

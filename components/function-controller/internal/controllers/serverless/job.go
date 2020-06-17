@@ -87,7 +87,7 @@ func (r *FunctionReconciler) createJob(ctx context.Context, log logr.Logger, ins
 
 func (r *FunctionReconciler) deleteJobs(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function) (ctrl.Result, error) {
 	log.Info("Deleting all old jobs")
-	selector := apilabels.SelectorFromSet(r.functionLabels(instance))
+	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
 	if err := r.client.DeleteAllBySelector(ctx, &batchv1.Job{}, instance.GetNamespace(), selector); err != nil {
 		log.Error(err, "Cannot delete old Jobs")
 		return ctrl.Result{}, err
