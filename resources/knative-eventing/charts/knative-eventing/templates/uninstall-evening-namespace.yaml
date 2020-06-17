@@ -15,7 +15,6 @@
 # About:
 # This post-delete job removes the knative-eventing namespace
 # It does so by using a job which is executed after the helm chart is deleted
-# All the resources are cleaned up by helm on successful hook run
 
 apiVersion: v1
 kind: ServiceAccount
@@ -27,8 +26,7 @@ metadata:
     # this gives the controllers a chance to act on CRs with a finalizer
     # source: https://helm.sh/docs/topics/charts_hooks/
     helm.sh/hook: post-delete
-    # delete the resources after success of the hook
-    helm.sh/hook-delete-policy: hook-succeeded, hook-failed
+    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
     # everything without a dependency has weight 0
     helm.sh/hook-weight: "0"
 ---
@@ -38,7 +36,7 @@ metadata:
   name: "eventing-delete-namespace"
   annotations:
     helm.sh/hook: post-delete
-    helm.sh/hook-delete-policy: hook-succeeded, hook-failed
+    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
     helm.sh/hook-weight: "0"
 rules:
   - apiGroups: [""]
@@ -51,7 +49,7 @@ metadata:
   name: "eventing-delete-namespace"
   annotations:
     helm.sh/hook: post-delete
-    helm.sh/hook-delete-policy: hook-succeeded, hook-failed
+    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
     helm.sh/hook-weight: "0"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -69,7 +67,7 @@ metadata:
   namespace: "default"
   annotations:
     helm.sh/hook: post-delete
-    helm.sh/hook-delete-policy: hook-succeeded, hook-failed
+    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
     sidecar.istio.io/inject: "false"
     # dependent on clusterrole, clusterrolebinding, serviceaccount
     # => hook-weight=min(hook-weight)+1
