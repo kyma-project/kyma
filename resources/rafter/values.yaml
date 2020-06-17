@@ -188,7 +188,7 @@ controller-manager:
     enabled: true
 
     image:
-      tag: RELEASE.2019-10-12T01-39-57Z-1e7dba13
+      tag: RELEASE.2019-10-12T01-39-57Z-a67baaa0
       repository: eu.gcr.io/kyma-project/incubator/develop/minio/minio
 
     persistence:
@@ -334,7 +334,7 @@ upload-service:
         pullPolicy: IfNotPresent
       minioClient:
         repository: eu.gcr.io/kyma-project/incubator/develop/minio/mc
-        tag: RELEASE.2019-04-03T17-59-57Z-23f7500f
+        tag: RELEASE.2019-04-03T17-59-57Z-a67baaa0
         pullPolicy: IfNotPresent
     pre:
       minioDeploymentRefName:
