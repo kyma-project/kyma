@@ -24,6 +24,6 @@ The connection status is preserved in the [CompassConnection Custom Resource](#c
 
 ## Reconnecting Runtime Agent
 
-If the connection with Management Plane fails, the Runtime Agent keeps trying to connect with the token from the Secret. If the connection is established successfully, the Runtime Agent ignores the Secret until the connection is lost.
+If the connection with Compass fails, the Runtime Agent keeps trying to connect with the token from the Secret. If the connection is established successfully, the Runtime Agent ignores the Secret until the connection is lost.
 
-To see how to reconnect the Runtime Agent with Management Plane, see the [tutorial](#tutorials-reconnect-runtime-agent-with-compass).
+To see how to reconnect the Runtime Agent with Compass, see the [tutorial](#tutorials-reconnect-runtime-agent-with-compass).
