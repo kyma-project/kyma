@@ -23,6 +23,13 @@ spec:
           mountPath: /etc/crd
           readOnly: true
         command: [ "kubectl", "apply", "-f", "/etc/crd" ]
+        resources:
+          requests:
+            memory: 128Mi
+            cpu: 100m
+          limits:
+            memory: 256Mi
+            cpu: 200m
       volumes:
       - name: crd-all
         configMap:
