@@ -24,7 +24,7 @@ To establish a secure connection with Compass and generate the client certificat
 
     ```graphql
     mutation {
-        result: generateOneTimeTokenForApplication(id: "{APPLICATION_ID}") {
+        result: requestOneTimeTokenForApplication(id: "{APPLICATION_ID}") {
             token
             connectorURL
         }
