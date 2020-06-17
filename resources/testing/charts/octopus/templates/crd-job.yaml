@@ -9,9 +9,9 @@ metadata:
     "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
 data:
   clustertestsuites.testing.kyma-project.io: |-
-  {{.Files.Get "files/crd-clustertestsuite.yaml" | printf "%s" | indent 4}}
+{{.Files.Get "files/crd-clustertestsuite.yaml" | printf "%s" | indent 4}}
   testdefinitions.testing.kyma-project.io: |-
-  {{.Files.Get "files/crd-testdefinition.yaml" | printf "%s" | indent 4}}
+{{.Files.Get "files/crd-testdefinition.yaml" | printf "%s" | indent 4}}
 ---
 apiVersion: batch/v1
 kind: Job
