@@ -104,15 +104,6 @@ func (r *FunctionReconciler) updateDeploymentStatus(ctx context.Context, log log
 	// this step is both in onDeploymentChange and as last step in reconcile
 	// it's checked here in onDeploymentChange to prevent nasty data races, where somehow deployment becomes ready before we
 	// trigger next reconcile loop, in which we should create svc
-	case len(deployments) > 1:
-		log.Info("Deployment failed")
-		return r.updateStatus(ctx, ctrl.Result{RequeueAfter: r.config.RequeueDuration}, instance, serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionRunning,
-			Status:             corev1.ConditionFalse,
-			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonDeploymentFailed,
-			Message:            fmt.Sprintf("Deployment step failed, too many deployments found, needed 1 got: %d", len(deployments)),
-		})
 	case r.isDeploymentReady(deployments[0]):
 		log.Info(fmt.Sprintf("Deployment %s is ready", deployments[0].GetName()))
 		return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{

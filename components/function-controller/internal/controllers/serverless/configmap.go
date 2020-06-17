@@ -8,6 +8,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apilabels "k8s.io/apimachinery/pkg/labels"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -79,13 +80,18 @@ func (r *FunctionReconciler) onConfigMapChange(ctx context.Context, log logr.Log
 	case 1:
 		return r.updateConfigMap(ctx, log, instance, configMaps[0])
 	default:
-		log.Info("Too many ConfigMaps for function")
-		return r.updateStatus(ctx, ctrl.Result{RequeueAfter: r.config.RequeueDuration}, instance, serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionConfigurationReady,
-			Status:             corev1.ConditionFalse,
-			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonConfigMapError,
-			Message:            "Too many ConfigMaps for function",
-		})
+		return r.deleteExcessConfigMap(ctx, instance, log)
 	}
+}
+
+func (r *FunctionReconciler) deleteExcessConfigMap(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (ctrl.Result, error) {
+	log.Info("Deleting excess ConfigMaps")
+	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
+	if err := r.client.DeleteAllBySelector(ctx, &corev1.ConfigMap{}, instance.GetNamespace(), selector); err != nil {
+		log.Error(err, "Cannot delete excess ConfigMaps")
+		return ctrl.Result{}, err
+	}
+
+	log.Info("Excess ConfigMaps deleted")
+	return ctrl.Result{}, nil
 }

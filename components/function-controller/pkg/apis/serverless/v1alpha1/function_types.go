@@ -49,7 +49,6 @@ type ConditionReason string
 const (
 	ConditionReasonConfigMapCreated               ConditionReason = "ConfigMapCreated"
 	ConditionReasonConfigMapUpdated               ConditionReason = "ConfigMapUpdated"
-	ConditionReasonConfigMapError                 ConditionReason = "ConfigMapError"
 	ConditionReasonJobFailed                      ConditionReason = "JobFailed"
 	ConditionReasonJobCreated                     ConditionReason = "JobCreated"
 	ConditionReasonJobRunning                     ConditionReason = "JobRunning"
@@ -62,10 +61,8 @@ const (
 	ConditionReasonDeploymentReady                ConditionReason = "DeploymentReady"
 	ConditionReasonServiceCreated                 ConditionReason = "ServiceCreated"
 	ConditionReasonServiceUpdated                 ConditionReason = "ServiceUpdated"
-	ConditionReasonServiceError                   ConditionReason = "ServiceError"
 	ConditionReasonHorizontalPodAutoscalerCreated ConditionReason = "HorizontalPodAutoscalerCreated"
 	ConditionReasonHorizontalPodAutoscalerUpdated ConditionReason = "HorizontalPodAutoscalerUpdated"
-	ConditionReasonHorizontalPodAutoscalerError   ConditionReason = "HorizontalPodAutoscalerError"
 )
 
 type Condition struct {
