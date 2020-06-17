@@ -9,8 +9,6 @@ metadata:
   labels:
     {{- include "prometheus-pushgateway.labels" . | nindent 4 }}
     app: {{ template "prometheus-pushgateway.name" . }}
-    chart: {{ template "prometheus-pushgateway.chart" . }}
-    release: {{ .Release.Name }}
     {{- if .Values.serviceMonitor.additionalLabels }}
 {{ toYaml .Values.serviceMonitor.additionalLabels | indent 4 }}
     {{- end }}
