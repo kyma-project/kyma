@@ -6,7 +6,6 @@ import (
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 )
@@ -23,7 +22,7 @@ func newClusterAssetGroup(dynamicCli dynamic.Interface, spec v1beta1.CommonAsset
 			Version:  v1beta1.GroupVersion.Version,
 			Group:    v1beta1.GroupVersion.Group,
 			Resource: "clusterassetgroups",
-		}, ""),
+		}),
 		name: clusterAssetGroupName,
 		spec: spec,
 	}
@@ -52,13 +51,8 @@ func (ag *clusterAssetGroup) create() error {
 }
 
 func (ag *clusterAssetGroup) get() (*v1beta1.ClusterAssetGroup, error) {
-	u, err := ag.resCli.Get(ag.name)
-	if err != nil {
-		return nil, err
-	}
-
 	var res v1beta1.ClusterAssetGroup
-	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &res)
+	err := ag.resCli.Get("", ag.name, &res)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while converting ClusterAssetGroup %s", ag.name)
 	}

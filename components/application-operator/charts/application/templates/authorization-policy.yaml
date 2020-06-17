@@ -4,6 +4,7 @@ apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
   name: {{ .Release.Name }}-connectivity-validator
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Release.Name }}-connectivity-validator
     release: {{ .Release.Name }}
@@ -48,6 +49,7 @@ apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
   name: {{ .Release.Name }}-event-service
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Release.Name }}-event-service
     release: {{ .Release.Name }}
@@ -97,7 +99,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
   name: {{ .Release.Name }}-http-source
-  namespace: kyma-integration
+  namespace: {{ .Release.Namespace }}
 spec:
   rules:
     - from:

@@ -38,6 +38,7 @@ func main() {
 	log.Infof("Options: %s", options)
 
 	cfg, err := config.GetConfig()
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,7 +69,8 @@ func main() {
 
 	log.Printf("Preparing Helm Client.")
 
-	helmClient, err := kymahelm.NewClient(options.tillerUrl, options.helmTLSKeyFile, options.helmTLSCertificateFile, options.tillerTLSSkipVerify, options.installationTimeout)
+	helmClient, err := kymahelm.NewClient(cfg, options.helmDriver, options.installationTimeout)
+
 	if err != nil {
 		log.Fatal(err)
 	}

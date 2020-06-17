@@ -16,6 +16,8 @@ resources: {}
   #   memory: "250Mi"
   #   cpu: "200m"
 
+nodeSelector: {}
+
 securityContext:
   runAsUser: 1001
 

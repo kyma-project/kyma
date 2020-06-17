@@ -583,6 +583,7 @@ type ComplexityRoot struct {
 
 	Namespace struct {
 		Applications      func(childComplexity int) int
+		Deployments       func(childComplexity int, excludeFunctions *bool) int
 		IsSystemNamespace func(childComplexity int) int
 		Labels            func(childComplexity int) int
 		Name              func(childComplexity int) int
@@ -1105,6 +1106,7 @@ type MutationResolver interface {
 }
 type NamespaceResolver interface {
 	Pods(ctx context.Context, obj *Namespace) ([]*Pod, error)
+	Deployments(ctx context.Context, obj *Namespace, excludeFunctions *bool) ([]*Deployment, error)
 	Applications(ctx context.Context, obj *Namespace) ([]string, error)
 }
 type QueryResolver interface {
@@ -3711,6 +3713,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Namespace.Applications(childComplexity), true
+
+	case "Namespace.deployments":
+		if e.complexity.Namespace.Deployments == nil {
+			break
+		}
+
+		args, err := ec.field_Namespace_deployments_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Namespace.Deployments(childComplexity, args["excludeFunctions"].(*bool)), true
 
 	case "Namespace.isSystemNamespace":
 		if e.complexity.Namespace.IsSystemNamespace == nil {
@@ -6684,6 +6698,7 @@ type Namespace {
     status: String!
     isSystemNamespace: Boolean!
     pods: [Pod!]!
+    deployments(excludeFunctions: Boolean): [Deployment!]!
 
     # Depends on application module
     applications: [String!]
@@ -8962,6 +8977,20 @@ func (ec *executionContext) field_Mutation_updateService_args(ctx context.Contex
 		}
 	}
 	args["service"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Namespace_deployments_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *bool
+	if tmp, ok := rawArgs["excludeFunctions"]; ok {
+		arg0, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["excludeFunctions"] = arg0
 	return args, nil
 }
 
@@ -22529,6 +22558,47 @@ func (ec *executionContext) _Namespace_pods(ctx context.Context, field graphql.C
 	res := resTmp.([]*Pod)
 	fc.Result = res
 	return ec.marshalNPod2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐPodᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Namespace_deployments(ctx context.Context, field graphql.CollectedField, obj *Namespace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Namespace",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Namespace_deployments_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Namespace().Deployments(rctx, obj, args["excludeFunctions"].(*bool))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*Deployment)
+	fc.Result = res
+	return ec.marshalNDeployment2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐDeploymentᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Namespace_applications(ctx context.Context, field graphql.CollectedField, obj *Namespace) (ret graphql.Marshaler) {
@@ -38666,6 +38736,20 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 					}
 				}()
 				res = ec._Namespace_pods(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "deployments":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Namespace_deployments(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

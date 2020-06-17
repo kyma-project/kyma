@@ -1,6 +1,7 @@
 package controller_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -79,11 +80,11 @@ func Test_guard_Process(t *testing.T) {
 	tg.Process()
 
 	// Then
-	sbuDeploymentUpdated, err := usageCli.ServicecatalogV1alpha1().ServiceBindingUsages("test").Get("testSbuDeployment", metaV1.GetOptions{})
+	sbuDeploymentUpdated, err := usageCli.ServicecatalogV1alpha1().ServiceBindingUsages("test").Get(context.TODO(), "testSbuDeployment", metaV1.GetOptions{})
 	assert.NoError(t, err)
 	assert.Equal(t, sbuDeploymentUpdated.Spec.ReprocessRequest, sbuDeploymentRR)
 
-	sbuFunctionUpdated, err := usageCli.ServicecatalogV1alpha1().ServiceBindingUsages("test").Get("testSbuFunction", metaV1.GetOptions{})
+	sbuFunctionUpdated, err := usageCli.ServicecatalogV1alpha1().ServiceBindingUsages("test").Get(context.TODO(), "testSbuFunction", metaV1.GetOptions{})
 	assert.NoError(t, err)
 	assert.Equal(t, sbuFunctionUpdated.Spec.ReprocessRequest, sbuFunctionRR+1)
 

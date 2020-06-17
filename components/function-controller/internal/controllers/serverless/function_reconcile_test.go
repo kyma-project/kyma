@@ -34,7 +34,7 @@ var _ = ginkgo.Describe("Function", func() {
 	)
 
 	ginkgo.BeforeEach(func() {
-		function := newFixFunction("tutaj", "ah-tak-przeciez")
+		function := newFixFunction("tutaj", "ah-tak-przeciez", 1, 2)
 		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: function.GetNamespace(), Name: function.GetName()}}
 		gomega.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
 
@@ -199,7 +199,10 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(hpaSpec.ScaleTargetRef.APIVersion).To(gomega.Equal(appsv1.SchemeGroupVersion.String()))
 
 		ginkgo.By("deployment ready")
-		deployment.Status.Conditions = []appsv1.DeploymentCondition{{Type: appsv1.DeploymentAvailable, Status: corev1.ConditionTrue}}
+		deployment.Status.Conditions = []appsv1.DeploymentCondition{
+			{Type: appsv1.DeploymentAvailable, Status: corev1.ConditionTrue, Reason: MinimumReplicasAvailable},
+			{Type: appsv1.DeploymentProgressing, Status: corev1.ConditionTrue, Reason: NewRSAvailableReason},
+		}
 		gomega.Expect(resourceClient.Status().Update(context.TODO(), deployment)).To(gomega.Succeed())
 
 		result, err = reconciler.Reconcile(request)

@@ -32,24 +32,10 @@ spec:
           env:
           - name: NAMESPACE
             value: {{ .Values.global.namespace }}
-          - name: TILLER_HOST
-            value: {{ .Values.controller.args.tillerUrl }}
-          - name: HELM_TLS_KEY_FILE
-            value: {{ .Values.controller.args.helmTLSKeyFile }}
-          - name: HELM_TLS_CERTIFICATE_FILE
-            value: {{ .Values.controller.args.helmTLSCertificateFile }}
-          - name: TILLER_TLS_SKIP_VERIFY
-            value: "{{ .Values.controller.args.tillerTLSInsecure }}"
+          - name: HELM_DRIVER
+            value: {{ .Values.controller.args.helmDriver }}
           - name: GATEWAY_DEPLOYED_PER_NAMESPACE
             value: "{{ .Values.global.disableLegacyConnectivity }}"
-          volumeMounts:
-              - mountPath: /etc/certs
-                name: helm-certs
-                readOnly: true
-      volumes:
-          - name: helm-certs
-            secret:
-                secretName: helm-secret
       restartPolicy: Never
 {{- end }}
 {{ end }}

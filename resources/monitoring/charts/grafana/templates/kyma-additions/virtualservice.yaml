@@ -12,10 +12,7 @@ metadata:
 {{- end }}
   name: {{ template "grafana.fullname" . }}
   labels:
-    app: {{ template "grafana.name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    heritage: {{ $.Release.Service }}
-    release: {{ $.Release.Name }}
+    {{- include "grafana.labels" . | nindent 4 }}
 {{- if .Values.virtualservice.labels }}
 {{ toYaml .Values.virtualservice.labels | indent 4 }}
 {{- end }}

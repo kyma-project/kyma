@@ -1,8 +1,9 @@
 package application
 
 import (
-	"fmt"
 	"testing"
+
+	hapi_release5 "helm.sh/helm/v3/pkg/release"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application/mocks"
 
@@ -14,38 +15,28 @@ import (
 	helmmocks "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/mocks"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	"k8s.io/helm/pkg/proto/hapi/release"
-	hapi_release5 "k8s.io/helm/pkg/proto/hapi/release"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
 )
 
 const (
-	appName                 = "default-app"
-	namespace               = "integration"
-	group                   = "group"
-	tenant                  = "tenant"
-	expectedOverridesFormat = `global:
-    domainName: 
-    applicationGatewayImage: 
-    applicationGatewayTestsImage: 
-    eventServiceImage: 
-    eventServiceTestsImage: 
-    applicationConnectivityValidatorImage: 
-    tenant: %s
-    group: %s
-    deployGatewayOncePerNamespace: false
-    strictMode: `
+	appName   = "default-app"
+	namespace = "integration"
+	group     = "group"
+	tenant    = "tenant"
 )
 
 var (
-	notEmptyListReleaseResponse = &rls.ListReleasesResponse{
-		Count: 1,
-		Releases: []*release.Release{
-			{Name: appName},
+	notEmptyListReleaseResponse = []*hapi_release5.Release{
+		{Name: appName},
+	}
+	emptyListReleaseResponse []*hapi_release5.Release
+
+	emptyOverrides              = map[string]interface{}{"global": map[string]interface{}{}}
+	overridesWithTenantAndGroup = map[string]interface{}{
+		"global": map[string]interface{}{
+			"tenant": tenant,
+			"group":  group,
 		},
 	}
-
-	emptyListReleaseResponse = &rls.ListReleasesResponse{}
 )
 
 func TestReleaseManager_InstallNewAppChart(t *testing.T) {
@@ -55,22 +46,17 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 	}
 
 	t.Run("should install release with CN equal to app name", func(t *testing.T) {
+
 		// given
-		installationResponse := &rls.InstallReleaseResponse{
-			Release: &hapi_release5.Release{
-				Info: &hapi_release5.Info{
-					Status: &hapi_release5.Status{
-						Code: hapi_release5.Status_DEPLOYED,
-					},
-					Description: "Installed",
-				},
+		installationResponse := &hapi_release5.Release{
+			Info: &hapi_release5.Info{
+				Status:      hapi_release5.StatusDeployed,
+				Description: "Installed",
 			},
 		}
 
-		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, "", "")
-
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)
+		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, appName, namespace, emptyOverrides).Return(installationResponse, nil)
 
 		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
@@ -79,21 +65,17 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		assert.Equal(t, hapi_release5.Status_DEPLOYED, status)
+		assert.Equal(t, hapi_release5.StatusDeployed, status)
 		assert.Equal(t, "Installed", description)
 		helmClient.AssertExpectations(t)
 	})
 
 	t.Run("should install release with CN equal to app name, O equal to tenant and OU equal to group", func(t *testing.T) {
 		// given
-		installationResponse := &rls.InstallReleaseResponse{
-			Release: &hapi_release5.Release{
-				Info: &hapi_release5.Info{
-					Status: &hapi_release5.Status{
-						Code: hapi_release5.Status_DEPLOYED,
-					},
-					Description: "Installed",
-				},
+		installationResponse := &hapi_release5.Release{
+			Info: &hapi_release5.Info{
+				Status:      hapi_release5.StatusDeployed,
+				Description: "Installed",
 			},
 		}
 
@@ -102,10 +84,8 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 			Spec:       v1alpha1.ApplicationSpec{Tenant: tenant, Group: group},
 		}
 
-		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, tenant, group)
-
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)
+		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, appName, namespace, overridesWithTenantAndGroup).Return(installationResponse, nil)
 
 		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
@@ -114,7 +94,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		assert.Equal(t, hapi_release5.Status_DEPLOYED, status)
+		assert.Equal(t, hapi_release5.StatusDeployed, status)
 		assert.Equal(t, "Installed", description)
 		helmClient.AssertExpectations(t)
 	})
@@ -122,7 +102,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 	t.Run("should return error when failed to install release", func(t *testing.T) {
 		// given
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, mock.AnythingOfType("string")).Return(nil, errors.New("Error"))
+		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, appName, namespace, emptyOverrides).Return(nil, errors.New("Error"))
 
 		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
 
@@ -140,7 +120,7 @@ func TestReleaseManager_DeleteReleaseIfExists(t *testing.T) {
 	t.Run("should delete release", func(t *testing.T) {
 		// given
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("DeleteRelease", appName).Return(nil, nil)
+		helmClient.On("DeleteRelease", appName, namespace).Return(nil, nil)
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil)
 
 		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
@@ -171,7 +151,7 @@ func TestReleaseManager_DeleteReleaseIfExists(t *testing.T) {
 	t.Run("should return error when failed to delete release", func(t *testing.T) {
 		// given
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("DeleteRelease", appName).Return(nil, errors.New("Error"))
+		helmClient.On("DeleteRelease", appName, namespace).Return(nil, errors.New("Error"))
 		helmClient.On("ListReleases", namespace).Return(notEmptyListReleaseResponse, nil)
 
 		releaseManager := NewApplicationReleaseManager(helmClient, nil, OverridesData{}, namespace)
@@ -269,23 +249,25 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 			},
 		}
 
-		updateResponse := &rls.UpdateReleaseResponse{
-			Release: &hapi_release5.Release{
-				Info: &hapi_release5.Info{
-					Status: &hapi_release5.Status{
-						Code: hapi_release5.Status_DEPLOYED,
-					},
-					Description: "Installed",
-				},
+		updateResponse := &hapi_release5.Release{
+			Info: &hapi_release5.Info{
+				Status:      hapi_release5.StatusDeployed,
+				Description: "Installed",
 			},
+		}
+
+		helmListReleaseResponse := []*hapi_release5.Release{
+			{Name: "app-1"},
+			{Name: "app-2"},
 		}
 
 		appClient := &mocks.ApplicationClient{}
 		appClient.On("List", mock.AnythingOfType("ListOptions")).Return(applicationList, nil)
 
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", mock.AnythingOfType("string")).Return(updateResponse, nil)
-		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-2", mock.AnythingOfType("string")).Return(updateResponse, nil)
+		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", namespace, emptyOverrides).Return(updateResponse, nil)
+		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-2", namespace, emptyOverrides).Return(updateResponse, nil)
+		helmClient.On("ListReleases", namespace).Return(helmListReleaseResponse, nil)
 
 		releaseManager := NewApplicationReleaseManager(helmClient, appClient, OverridesData{}, namespace)
 
@@ -301,14 +283,10 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 	t.Run("should set a proper status if upgrade failed", func(t *testing.T) {
 		// given
 
-		updateResponse := &rls.UpdateReleaseResponse{
-			Release: &hapi_release5.Release{
-				Info: &hapi_release5.Info{
-					Status: &hapi_release5.Status{
-						Code: hapi_release5.Status_FAILED,
-					},
-					Description: "Failed",
-				},
+		updateResponse := &hapi_release5.Release{
+			Info: &hapi_release5.Info{
+				Status:      hapi_release5.StatusFailed,
+				Description: "Failed",
 			},
 		}
 
@@ -327,10 +305,14 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 			ObjectMeta: v1.ObjectMeta{Name: "app-1"},
 			Status: v1alpha1.ApplicationStatus{
 				InstallationStatus: v1alpha1.InstallationStatus{
-					Status:      "FAILED",
+					Status:      "failed",
 					Description: "",
 				},
 			},
+		}
+
+		helmListReleaseResponse := []*hapi_release5.Release{
+			{Name: "app-1"},
 		}
 
 		appClient := &mocks.ApplicationClient{}
@@ -338,7 +320,8 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 		appClient.On("Update", updatedApplication).Return(&applicationList.Items[0], nil)
 
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", mock.AnythingOfType("string")).Return(updateResponse, errors.New("Error"))
+		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", namespace, emptyOverrides).Return(updateResponse, errors.New("Error"))
+		helmClient.On("ListReleases", namespace).Return(helmListReleaseResponse, nil)
 
 		releaseManager := NewApplicationReleaseManager(helmClient, appClient, OverridesData{}, namespace)
 

@@ -41,9 +41,6 @@ Common labels
 {{- define "jaeger-operator.labels" -}}
 helm.sh/chart: {{ include "jaeger-operator.chart" . }}
 {{ include "jaeger-operator.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 

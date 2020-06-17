@@ -11,7 +11,7 @@ By default, the controller binds users of the **runtimeNamespaceAdmin** group to
 
 You can adjust the default settings of the Permission Controller by applying these overrides to the cluster either before installation, or at runtime:
 
->**TIP:** To learn more about the adjustable parameters of the Permission Controller, read [this](#configuration-permission-controller-chart) document.
+>**TIP:** Read the [configuration document](#configuration-permission-controller-chart) to learn more about the adjustable parameters of the Permission Controller.
 
 1. To change the default group, run:
 

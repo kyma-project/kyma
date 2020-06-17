@@ -4,27 +4,85 @@ import (
 	"errors"
 	"fmt"
 
-	helm "k8s.io/helm/pkg/proto/hapi/release"
+	"helm.sh/helm/v3/pkg/release"
 )
 
-// ReleaseStatus is an inner representation of a Helm release
+type Status string
+
+const (
+	// StatusUnknown indicates that a release is in an uncertain state.
+	StatusUnknown Status = "unknown"
+	// StatusDeployed indicates that the release has been pushed to Kubernetes.
+	StatusDeployed Status = "deployed"
+	// StatusUninstalled indicates that a release has been uninstalled from Kubernetes.
+	StatusUninstalled Status = "uninstalled"
+	// StatusSuperseded indicates that this release object is outdated and a newer one exists.
+	StatusSuperseded Status = "superseded"
+	// StatusFailed indicates that the release was not successfully deployed.
+	StatusFailed Status = "failed"
+	// StatusUninstalling indicates that a uninstall operation is underway.
+	StatusUninstalling Status = "uninstalling"
+	// StatusPendingInstall indicates that an install operation is underway.
+	StatusPendingInstall Status = "pending-install"
+	// StatusPendingUpgrade indicates that an upgrade operation is underway.
+	StatusPendingUpgrade Status = "pending-upgrade"
+	// StatusPendingRollback indicates that an rollback operation is underway.
+	StatusPendingRollback Status = "pending-rollback"
+)
+
+// Release is an internal representation of a Helm release
+type Release struct {
+	*ReleaseMeta
+	*ReleaseStatus
+}
+
+// NamespacedName Combines release name and namespace
+type NamespacedName struct {
+	Name      string
+	Namespace string
+}
+
+// ReleaseMeta is an internal representation of Helm's release metadata
+type ReleaseMeta struct {
+	NamespacedName
+	Description string
+}
+
+// ReleaseStatus is an internal representation of Helm's release status
 type ReleaseStatus struct {
-	StatusCode           helm.Status_Code
-	CurrentRevision      int32
-	LastDeployedRevision int32
+	Status               Status
+	CurrentRevision      int
+	LastDeployedRevision int
+}
+
+// UninstallReleaseResponse is an internal representation of Helm's uninstall release response
+type UninstallReleaseStatus struct {
+}
+
+func helmReleaseToKymaRelease(hr *release.Release) *Release {
+	return &Release{
+		&ReleaseMeta{
+			NamespacedName: NamespacedName{Name: hr.Name, Namespace: hr.Namespace},
+			Description:    hr.Info.Description,
+		},
+		&ReleaseStatus{
+			Status:          Status(hr.Info.Status),
+			CurrentRevision: hr.Version,
+		},
+	}
 }
 
 func (rs *ReleaseStatus) IsUpgradeStep() (bool, error) {
 
-	switch rs.StatusCode {
+	switch rs.Status {
 
-	case helm.Status_PENDING_INSTALL:
+	case StatusPendingInstall:
 		return false, nil
 
-	case helm.Status_DEPLOYED, helm.Status_PENDING_UPGRADE, helm.Status_PENDING_ROLLBACK:
+	case StatusDeployed, StatusPendingUpgrade, StatusPendingRollback:
 		return true, nil
 
-	case helm.Status_FAILED, helm.Status_UNKNOWN, helm.Status_DELETED, helm.Status_DELETING:
+	case StatusFailed, StatusUnknown, StatusUninstalled, StatusUninstalling:
 
 		if rs.hasMultipleRevisions() {
 
@@ -38,7 +96,7 @@ func (rs *ReleaseStatus) IsUpgradeStep() (bool, error) {
 		return false, nil
 
 	default:
-		return false, errors.New(fmt.Sprintf("unexpected status code %s", rs.StatusCode))
+		return false, errors.New(fmt.Sprintf("unexpected status %s", rs.Status))
 	}
 }
 

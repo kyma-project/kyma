@@ -89,3 +89,5 @@ global:
   dex_integration_tests:
     dir:
     version: 47b606f6
+
+nodeSelector: {}
