@@ -19,8 +19,8 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: "natss-delete"
-  namespace: "knative-eventing"
+  name: {{ .Release.Name }}-cr-delete
+  namespace: {{ .Release.Namespace }}
   annotations:
     # Executes on a deletion request before any resources are deleted from Kubernetes
     # this gives the controllers a chance to act on CRs with a finalizer
@@ -33,7 +33,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: "natss-delete"
+  name: {{ .Release.Name }}-cr-delete
   annotations:
     helm.sh/hook: pre-delete
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
@@ -46,7 +46,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: "natss-delete"
+  name: {{ .Release.Name }}-cr-delete
   annotations:
     helm.sh/hook: pre-delete
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
@@ -54,17 +54,17 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: "natss-delete"
+  name: {{ .Release.Name }}-cr-delete
 subjects:
   - kind: ServiceAccount
-    name: "natss-delete"
-    namespace: "knative-eventing"
+    name: {{ .Release.Name }}-cr-delete
+    namespace: {{ .Release.Namespace }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "natss-delete"
-  namespace: "knative-eventing"
+  name: {{ .Release.Name }}-cr-delete
+  namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: pre-delete
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
@@ -78,14 +78,12 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
-      name: "natss-delete"
-      labels:
-        app: "natss-delete"
+      name: {{ .Release.Name }}-cr-delete
     spec:
-      serviceAccountName: "natss-delete"
+      serviceAccountName: {{ .Release.Name }}-cr-delete
       restartPolicy: Never
       containers:
-        - name: "natss-delete"
+        - name: {{ .Release.Name }}-cr-delete
           image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
           command:
             - "/bin/sh"

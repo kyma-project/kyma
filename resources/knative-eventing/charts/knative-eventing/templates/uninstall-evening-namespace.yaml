@@ -19,8 +19,8 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: "eventing-delete-namespace"
-  namespace: "default"
+  name: {{ .Release.Name }}-namespace-delete
+  namespace: {{ .Release.Namespace }}
   annotations:
     # Executes on a deletion request before any resources are deleted from Kubernetes
     # this gives the controllers a chance to act on CRs with a finalizer
@@ -33,7 +33,8 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: "eventing-delete-namespace"
+  name: {{ .Release.Name }}-namespace-delete
+  namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: post-delete
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
@@ -46,7 +47,8 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: "eventing-delete-namespace"
+  name: {{ .Release.Name }}-namespace-delete
+  namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: post-delete
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
@@ -54,17 +56,17 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: "eventing-delete-namespace"
+  name: {{ .Release.Name }}-namespace-delete
 subjects:
   - kind: ServiceAccount
-    name: "eventing-delete-namespace"
-    namespace: "default"
+    name: {{ .Release.Name }}-namespace-delete
+    namespace: {{ .Release.Namespace }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "eventing-delete-namespace"
-  namespace: "default"
+  name: {{ .Release.Name }}-namespace-delete
+  namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: post-delete
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
@@ -78,14 +80,12 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
-      name: "eventing-delete-namespace"
-      labels:
-        app: "eventing-delete-namespace"
+      name: {{ .Release.Name }}-namespace-delete
     spec:
-      serviceAccountName: "eventing-delete-namespace"
+      serviceAccountName: {{ .Release.Name }}-namespace-delete
       restartPolicy: Never
       containers:
-        - name: "eventing-delete-namespace"
+        - name: {{ .Release.Name }}-namespace-delete
           image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
           command:
             - "/bin/sh"
