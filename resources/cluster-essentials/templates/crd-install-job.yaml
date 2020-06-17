@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-crd-install
+  annotations:
+    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-weight": "10"
+spec:
+  activeDeadlineSeconds: 60
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ .Release.Name }}-crd-install
+      containers:
+      - name: {{ .Release.Name }}-install-crds
+        image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+        volumeMounts:
+        - name: crd-all
+          mountPath: /etc/crd
+          readOnly: true
+        command: [ "kubectl", "apply", "-f", "/etc/crd" ]
+      volumes:
+      - name: crd-all
+        configMap:
+          name: {{ .Release.Name }}-crd-all
+      restartPolicy: OnFailure
