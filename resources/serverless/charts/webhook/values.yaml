@@ -57,9 +57,9 @@ container:
     webhookPort:
       value: "{{ .Values.service.ports.httpsWebhook.targetPort }}"
     minRequestCpu:
-      value: "8m"
+      value: "10m"
     minRequestMemory:
-      value: "8Mi"
+      value: "16Mi"
     minReplicasValue:
       value: "1"
     reservedEnvs:
