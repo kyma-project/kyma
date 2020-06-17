@@ -28,7 +28,7 @@ metadata:
     # source: https://helm.sh/docs/topics/charts_hooks/
     helm.sh/hook: pre-delete
     # delete the resources after success of the hook
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: hook-succeeded, hook-failed
     # everything without a dependency has weight 0
     helm.sh/hook-weight: "0"
 ---
@@ -38,7 +38,7 @@ metadata:
   name: "knative-eventing-delete"
   annotations:
     helm.sh/hook: pre-delete
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: hook-succeeded, hook-failed
     helm.sh/hook-weight: "0"
 rules:
   - apiGroups: ["sources.eventing.knative.dev"]
@@ -57,7 +57,7 @@ metadata:
   name: "knative-eventing-delete"
   annotations:
     helm.sh/hook: pre-delete
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: hook-succeeded, hook-failed
     helm.sh/hook-weight: "0"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -75,7 +75,7 @@ metadata:
   namespace: "knative-eventing"
   annotations:
     helm.sh/hook: pre-delete
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: hook-succeeded, hook-failed
     sidecar.istio.io/inject: "false"
     # dependent on clusterrole, clusterrolebinding, serviceaccount
     # => hook-weight=min(hook-weight)+1
