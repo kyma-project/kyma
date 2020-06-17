@@ -20,8 +20,6 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "rafterFrontMatterService.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/managed-by: {{ .Release.Service }}
-      helm.sh/chart: {{ include "rafterFrontMatterService.chart" . }}
   {{- if .Values.deployment.extraProperties }}
   {{ include "rafterFrontMatterService.tplValue" ( dict "value" .Values.deployment.extraProperties "context" . ) | nindent 2 }}
   {{- end }}
