@@ -95,8 +95,7 @@ spec:
           args:
             - "-c"
             - |
-{{ .Files.Get "uninstall.sh" | printf "%s" | indent 14 }}
-
+{{ .Files.Get "uninstall.sh" | indent 14 }}
           # use last chunk of container log output for terminal log
           # source: https://kubernetes.io/docs/tasks/debug-application-cluster/determine-reason-pod-failure/#customizing-the-termination-message
           terminationMessagePolicy: "FallbackToLogsOnError"
