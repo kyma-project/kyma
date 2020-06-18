@@ -65,8 +65,9 @@ spec:
 
               # test start
 
-              curl -XGET http://{{ .Values.tests.long.name }}.{{ .Values.tests.long.namespace }} \
-              || kubectl -n {{ .Values.tests.long.namespace }} describe functions.serverless.kyma-project.io {{ .Values.tests.long.name }}
+              kubectl -n {{ .Values.tests.long.namespace }} get function {{ .Values.tests.long.name }} -o=jsonpath='{range .status.conditions[*]}{.status}{end}' | grep -E '^(True)*$' \
+              && curl -XGET http://{{ .Values.tests.long.name }}.{{ .Values.tests.long.namespace }} \
+              || ( kubectl -n {{ .Values.tests.long.namespace }} describe functions.serverless.kyma-project.io {{ .Values.tests.long.name }}; exit 1 )
 
               # test end
               
