@@ -94,6 +94,10 @@ func (r *FunctionReconciler) deleteExcessServices(ctx context.Context, instance 
 
 	for i, _ := range services {
 		svc := services[i]
+		if svc.GetName() == instance.GetName() {
+			continue
+		}
+
 		log.Info(fmt.Sprintf("Deleting Service %s", svc.GetName()))
 
 		err := r.client.Delete(ctx, &services[i])
