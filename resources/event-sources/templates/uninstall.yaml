@@ -38,7 +38,7 @@ metadata:
   annotations:
     helm.sh/hook: pre-delete
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
-    helm.sh/hook-weight: "0"
+    helm.sh/hook-weight: "1"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -59,7 +59,7 @@ metadata:
     sidecar.istio.io/inject: "false"
     # dependent on clusterrole, clusterrolebinding, serviceaccount
     # => hook-weight=min(hook-weight)+1
-    helm.sh/hook-weight: "1"
+    helm.sh/hook-weight: "2"
 spec:
   backoffLimit: 1
   template:
