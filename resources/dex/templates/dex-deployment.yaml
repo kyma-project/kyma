@@ -25,6 +25,8 @@ spec:
       serviceAccountName: dex-account
       securityContext:
         runAsUser: 2000
+      nodeSelector: 
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
       containers:
       - image: {{ .Values.imageRegistry }}/dex:{{ .Chart.AppVersion }}
         name: dex

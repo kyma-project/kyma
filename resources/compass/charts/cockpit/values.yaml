@@ -3,6 +3,7 @@ deployment:
     pullPolicy: IfNotPresent
   resources: {}
   strategy: {}
+  nodeSelector: {}
 images:
   containerRegistry:
     path: eu.gcr.io/kyma-project

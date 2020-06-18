@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -12,8 +13,8 @@ import (
 )
 
 type configMapClient interface {
-	Get(name string, options metaV1.GetOptions) (*coreV1.ConfigMap, error)
-	Update(*coreV1.ConfigMap) (*coreV1.ConfigMap, error)
+	Get(context context.Context, name string, options metaV1.GetOptions) (*coreV1.ConfigMap, error)
+	Update(context context.Context, cfgMap *coreV1.ConfigMap, options metaV1.UpdateOptions) (*coreV1.ConfigMap, error)
 }
 
 // BindingUsageSpecStorage provides functionality to get/delete/save ServiceBindingUsage.Spec
@@ -32,7 +33,7 @@ func NewBindingUsageSpecStorage(cfgMapClient configMapClient, cfgMapName string)
 
 // Get returns stored spec for given ServiceBindingUsage
 func (c *BindingUsageSpecStorage) Get(usageNS, usageName string) (*UsageSpec, bool, error) {
-	cfg, err := c.cfgMapClient.Get(c.cfgMapName, metaV1.GetOptions{})
+	cfg, err := c.cfgMapClient.Get(context.TODO(), c.cfgMapName, metaV1.GetOptions{})
 	if err != nil {
 		return nil, false, errors.Wrapf(err, "while getting config map with stored Spec for %s/%s", usageNS, usageName)
 	}
@@ -52,7 +53,7 @@ func (c *BindingUsageSpecStorage) Get(usageNS, usageName string) (*UsageSpec, bo
 
 // Delete deletes stored spec for given ServiceBindingUsage
 func (c *BindingUsageSpecStorage) Delete(namespace, name string) error {
-	cfg, err := c.cfgMapClient.Get(c.cfgMapName, metaV1.GetOptions{})
+	cfg, err := c.cfgMapClient.Get(context.TODO(), c.cfgMapName, metaV1.GetOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "while getting config map with stored Spec for %s/%s", namespace, name)
 	}
@@ -62,7 +63,7 @@ func (c *BindingUsageSpecStorage) Delete(namespace, name string) error {
 
 	delete(cfgCopy.Data, cfgKey)
 
-	if _, err := c.cfgMapClient.Update(cfgCopy); err != nil {
+	if _, err := c.cfgMapClient.Update(context.TODO(), cfgCopy, metaV1.UpdateOptions{}); err != nil {
 		return errors.Wrapf(err, "while updating config map %q", c.cfgMapName)
 	}
 
@@ -71,7 +72,7 @@ func (c *BindingUsageSpecStorage) Delete(namespace, name string) error {
 
 // Upsert upserts spec for given ServiceBindingUsage
 func (c *BindingUsageSpecStorage) Upsert(bUsage *sbuTypes.ServiceBindingUsage, applied bool) error {
-	cfg, err := c.cfgMapClient.Get(c.cfgMapName, metaV1.GetOptions{})
+	cfg, err := c.cfgMapClient.Get(context.TODO(), c.cfgMapName, metaV1.GetOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "while getting config map with stored Spec for %s", pretty.ServiceBindingUsageName(bUsage))
 	}
@@ -91,7 +92,7 @@ func (c *BindingUsageSpecStorage) Upsert(bUsage *sbuTypes.ServiceBindingUsage, a
 	cfgCopy.Data = EnsureMapIsInitiated(cfgCopy.Data)
 	cfgCopy.Data[cfgKey] = string(marshaledSpec)
 
-	if _, err := c.cfgMapClient.Update(cfgCopy); err != nil {
+	if _, err := c.cfgMapClient.Update(context.TODO(), cfgCopy, metaV1.UpdateOptions{}); err != nil {
 		return errors.Wrapf(err, "while updating config map %q", c.cfgMapName)
 	}
 

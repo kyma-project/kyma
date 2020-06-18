@@ -54,3 +54,13 @@ spec:
             path: webhook.crt
           - key: tls.key
             path: webhook.key
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ template "pod-preset.fullname" . }}-pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ template "pod-preset.name" . }}-webhook

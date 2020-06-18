@@ -15,3 +15,6 @@ spec:
       }
   minReplicas: 1
   maxReplicas: 2
+  env:
+    - name: "DATA"
+      value: "123"

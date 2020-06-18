@@ -6,7 +6,7 @@ type: Troubleshooting
 When you try to install Kyma locally on Minikube, the installation may fail at a very early stage logging this error:
 
 ``` bash
-POD: tiller-certs-job-cpl67: ERROR: Failed to pull image "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200121-4f3202bd": rpc error: code = Unknown desc = Error response from daemon: Get https://eu.gcr.io/v2/: dial tcp: lookup eu.gcr.io on 192.168.64.1:53: read udp 192.168.64.5:55778->192.168.64.1:53: read: connection refused
+POD: tiller-certs-job-cpl67: ERROR: Failed to pull image "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff": rpc error: code = Unknown desc = Error response from daemon: Get https://eu.gcr.io/v2/: dial tcp: lookup eu.gcr.io on 192.168.64.1:53: read udp 192.168.64.5:55778->192.168.64.1:53: read: connection refused
 error
 POD: tiller-deploy-f88ff7869-z5cmx: ERROR: MountVolume.SetUp failed for volume "tiller-certs" : secrets "tiller-secret" not found
 ```

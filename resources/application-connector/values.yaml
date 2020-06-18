@@ -50,7 +50,7 @@ global:
   application_registry_tests:
     version: "c608dbf3"
   application_broker:
-    version: "c76cbcd6"
+    version: "1acc510b"
   application_connectivity_certs_setup_job:
     version: "fbf1000b"
   application_connectivity_validator:

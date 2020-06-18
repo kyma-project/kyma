@@ -63,7 +63,7 @@ These variables refer to the following:
           type: $EVENT_TYPE
       subscriber:
         ref:
-          apiVersion: serving.knative.dev/v1
+          apiVersion: v1
           kind: Service
           name: $NAME
           namespace: $NAMESPACE

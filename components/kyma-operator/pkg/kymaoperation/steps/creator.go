@@ -7,14 +7,13 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
-	errors "github.com/pkg/errors"
-	helm "k8s.io/helm/pkg/proto/hapi/release"
+	"github.com/pkg/errors"
 )
 
 // stepFactoryCreator is used to create StepFactory instances for installation or uninstallation.
 type stepFactoryCreator struct {
 	helmClient          kymahelm.ClientInterface
-	sourceGetterSupport SourceGetterLegacySupport
+	sourceGetterSupport SourceGetterLegacySupport //TODO: Perhaps this should be moved to: "ForInstallation" method parameter
 }
 
 // NewStepFactoryCreator returns a new stepFactoryCreator instance.
@@ -25,26 +24,28 @@ func NewStepFactoryCreator(helmClient kymahelm.ClientInterface, sgls SourceGette
 	}
 }
 
+// TODO: Once migration to Helm3 is done, we should extend the map key to format: "namespace/name"
+// getInstalledReleases returns a map of installed releases. The map key is the release name
 func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]kymahelm.ReleaseStatus, error) {
 
 	existingReleases := make(map[string]kymahelm.ReleaseStatus)
 
-	list, err := sfc.helmClient.ListReleases()
+	releases, err := sfc.helmClient.ListReleases()
 	if err != nil {
 		return nil, errors.New("Helm error: " + err.Error())
 	}
 
-	if list != nil {
+	if releases != nil {
 		log.Println("Helm releases list:")
 
-		for _, release := range list.Releases {
-			var lastDeployedRev int32
+		for _, release := range releases {
+			var lastDeployedRev int
 
-			statusCode := release.Info.Status.Code
-			if statusCode == helm.Status_DEPLOYED {
-				lastDeployedRev = release.Version
+			statusCode := release.Status
+			if statusCode == kymahelm.StatusDeployed {
+				lastDeployedRev = release.CurrentRevision
 			} else {
-				lastDeployedRev, err = sfc.helmClient.ReleaseDeployedRevision(release.Name)
+				lastDeployedRev, err = sfc.helmClient.ReleaseDeployedRevision(kymahelm.NamespacedName{Namespace: release.Namespace, Name: release.Name})
 				if err != nil {
 					return nil, errors.New("Helm error: " + err.Error())
 				}
@@ -52,8 +53,8 @@ func (sfc *stepFactoryCreator) getInstalledReleases() (map[string]kymahelm.Relea
 
 			log.Printf("%s status: %s, last deployed revision: %d", release.Name, statusCode, lastDeployedRev)
 			existingReleases[release.Name] = kymahelm.ReleaseStatus{
-				StatusCode:           statusCode,
-				CurrentRevision:      release.Version,
+				Status:               statusCode,
+				CurrentRevision:      release.CurrentRevision,
 				LastDeployedRevision: lastDeployedRev,
 			}
 		}

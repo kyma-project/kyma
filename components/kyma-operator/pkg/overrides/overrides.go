@@ -6,7 +6,7 @@ import (
 
 //OverrideData exposes methods to fetch release-specific overrides
 type OverrideData interface {
-	ForRelease(releaseName string) (string, error)
+	ForRelease(releaseName string) Map
 }
 
 //Provider implements storage for all overrides
@@ -17,7 +17,7 @@ type Provider struct {
 }
 
 //ForRelease returns overrides for release
-func (o *Provider) ForRelease(releaseName string) (string, error) {
+func (o *Provider) ForRelease(releaseName string) Map {
 
 	o.refreshStore()
 	allOverrides := Map{}
@@ -25,7 +25,7 @@ func (o *Provider) ForRelease(releaseName string) (string, error) {
 	MergeMaps(allOverrides, o.common)
 	MergeMaps(allOverrides, o.components[releaseName])
 
-	return ToYaml(allOverrides)
+	return allOverrides
 }
 
 //New returns new Data instance.

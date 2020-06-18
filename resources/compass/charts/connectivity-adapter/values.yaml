@@ -7,5 +7,6 @@ deployment:
   securityContext: # Set on container level
     runAsUser: 2000
     allowPrivilegeEscalation: false
+  nodeSelector: {}
 tests:
   skipTLSVerify: true
