@@ -58,7 +58,6 @@ func (r *FunctionReconciler) equalHorizontalPodAutoscalers(existing, expected au
 		existing.Spec.MaxReplicas == expected.Spec.MaxReplicas &&
 		r.mapsEqual(existing.Labels, expected.Labels) &&
 		existing.Spec.ScaleTargetRef.Name == expected.Spec.ScaleTargetRef.Name
-
 }
 
 func (r *FunctionReconciler) createHorizontalPodAutoscaler(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, hpa autoscalingv1.HorizontalPodAutoscaler) (ctrl.Result, error) {
@@ -80,11 +79,7 @@ func (r *FunctionReconciler) createHorizontalPodAutoscaler(ctx context.Context, 
 
 func (r *FunctionReconciler) updateHorizontalPodAutoscaler(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, oldHpa, newHpa autoscalingv1.HorizontalPodAutoscaler) (ctrl.Result, error) {
 	hpaCopy := oldHpa.DeepCopy()
-
-	hpaCopy.Spec.MaxReplicas = newHpa.Spec.MaxReplicas
-	hpaCopy.Spec.MinReplicas = newHpa.Spec.MinReplicas
-	hpaCopy.Spec.TargetCPUUtilizationPercentage = newHpa.Spec.TargetCPUUtilizationPercentage
-
+	hpaCopy.Spec = newHpa.Spec
 	hpaCopy.ObjectMeta.Labels = newHpa.GetLabels()
 
 	log.Info(fmt.Sprintf("Updating HorizontalPodAutoscaler %s", hpaCopy.GetName()))

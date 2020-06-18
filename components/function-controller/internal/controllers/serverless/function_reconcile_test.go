@@ -2,6 +2,7 @@ package serverless
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/onsi/ginkgo"
@@ -11,6 +12,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/tools/record"
@@ -300,7 +302,7 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentFailed))
 	})
 
-	ginkgo.It("should properly handle apiserver lags, when two resources are created by accident", func() {
+	ginkgo.It("should properly handle apiserver lags, when two resources are created by accident 💪", func() {
 		ginkgo.By("creating cm")
 		_, err := reconciler.Reconcile(request)
 		gomega.Expect(err).To(gomega.BeNil())
@@ -352,8 +354,7 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(err).To(gomega.BeNil())
 		gomega.Expect(jobList.Items).To(gomega.HaveLen(1))
 
-		ginkgo.By("accidently creating second job -> apiserver lag")
-
+		ginkgo.By("accidently creating second job 😭")
 		excessJob := jobList.Items[0].DeepCopy()
 		excessJob.Name = "" // generateName will create this
 		excessJob.ResourceVersion = ""
@@ -411,14 +412,96 @@ var _ = ginkgo.Describe("Function", func() {
 		excessDeploy.ResourceVersion = ""
 		excessDeploy.UID = ""
 		excessDeploy.CreationTimestamp = metav1.Time{}
+		gomega.Expect(resourceClient.Create(context.TODO(), excessDeploy)).To(gomega.Succeed())
+
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.internalFunctionLabels(function), deployList)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(deployList.Items).To(gomega.HaveLen(2))
+
+		ginkgo.By("deleting excess deployment 🔫")
+		_, err = reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.BeNil())
+
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.internalFunctionLabels(function), deployList)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(deployList.Items).To(gomega.HaveLen(0))
+
+		ginkgo.By("creating new deployment")
+		_, err = reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.BeNil())
+
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.internalFunctionLabels(function), deployList)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(deployList.Items).To(gomega.HaveLen(1))
 
 		ginkgo.By("creating svc")
 		_, err = reconciler.Reconcile(request)
 		gomega.Expect(err).To(gomega.BeNil())
 
+		svcList := &corev1.ServiceList{}
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.internalFunctionLabels(function), svcList)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(svcList.Items).To(gomega.HaveLen(1))
+
+		ginkgo.By("somehow there's been created a new svc with labels we use")
+		excessSvc := svcList.Items[0].DeepCopy()
+		excessSvc.Name = fmt.Sprintf("%s-%s", excessSvc.Name, "2")
+		excessSvc.Spec.ClusterIP = ""
+		excessSvc.ResourceVersion = ""
+		excessSvc.UID = ""
+		excessSvc.CreationTimestamp = metav1.Time{}
+		gomega.Expect(resourceClient.Create(context.TODO(), excessSvc)).To(gomega.Succeed())
+
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.internalFunctionLabels(function), svcList)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(svcList.Items).To(gomega.HaveLen(2))
+
+		ginkgo.By("deleting that svc")
+		_, err = reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.BeNil())
+
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.internalFunctionLabels(function), svcList)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(svcList.Items).To(gomega.HaveLen(1))
+
 		ginkgo.By("creating hpa")
 		_, err = reconciler.Reconcile(request)
 		gomega.Expect(err).To(gomega.BeNil())
+
+		hpaList := &autoscalingv1.HorizontalPodAutoscalerList{}
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.internalFunctionLabels(function), hpaList)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(deployList.Items).To(gomega.HaveLen(1))
+
+		ginkgo.By("creating next hpa by accident - apiserver lag")
+
+		excessHpa := hpaList.Items[0].DeepCopy()
+		excessHpa.Name = "" // generateName will create this
+		excessHpa.ResourceVersion = ""
+		excessHpa.UID = ""
+		excessHpa.CreationTimestamp = metav1.Time{}
+		gomega.Expect(resourceClient.Create(context.TODO(), excessHpa)).To(gomega.Succeed())
+
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.internalFunctionLabels(function), hpaList)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(hpaList.Items).To(gomega.HaveLen(2))
+
+		ginkgo.By("deleting excess hpa 🔫")
+
+		_, err = reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.BeNil())
+
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.internalFunctionLabels(function), hpaList)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(hpaList.Items).To(gomega.HaveLen(0))
+
+		ginkgo.By("creating new hpa")
+		_, err = reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.BeNil())
+
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.internalFunctionLabels(function), hpaList)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(hpaList.Items).To(gomega.HaveLen(1))
 
 		ginkgo.By("deployment ready")
 		deployments := &appsv1.DeploymentList{}
@@ -433,7 +516,35 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(resourceClient.Status().Update(context.TODO(), deployment)).To(gomega.Succeed())
 
 		_, err = reconciler.Reconcile(request)
-		gomega.Expect(err).NotTo(gomega.BeNil())
+		gomega.Expect(err).To(gomega.BeNil())
+
+		gomega.Expect(hpaList.Items[0].Spec.ScaleTargetRef.Name).To(gomega.Equal(deployList.Items[0].Name), "hpa should target proper deployment")
+
+		ginkgo.By("deleting deployment by 'accident' to check proper hpa-deployment reference")
+
+		err = resourceClient.DeleteAllBySelector(context.TODO(), &appsv1.Deployment{}, request.Namespace, labels.SelectorFromSet(reconciler.internalFunctionLabels(function)))
+		gomega.Expect(err).To(gomega.BeNil())
+
+		ginkgo.By("recreating deployment")
+		_, err = reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.BeNil())
+
+		ginkgo.By("updating hpa")
+		_, err = reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.BeNil())
+
+		_, err = reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.BeNil())
+
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.internalFunctionLabels(function), hpaList)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(hpaList.Items).To(gomega.HaveLen(1))
+
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), reconciler.internalFunctionLabels(function), deployList)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(deployList.Items).To(gomega.HaveLen(1))
+
+		gomega.Expect(hpaList.Items[0].Spec.ScaleTargetRef.Name).To(gomega.Equal(deployList.Items[0].Name), "hpa should target proper deployment")
 	})
 
 	ginkgo.It("should handle reconcilation lags", func() {
