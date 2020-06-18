@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "webhook.fullname" . }}
+  name: {{ template "webhook.fullname" . }}-svc
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 4 }}
@@ -15,15 +15,18 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 6 }}
+      app: {{ template "webhook.fullname" . }}
+      app.kubernetes.io/name: {{ template "webhook.fullname" . }}
+      app.kubernetes.io/instance: "{{ .Release.Name }}"
+      role: webhook
   replicas: {{ .Values.deployment.replicas }}
   {{- if .Values.deployment.extraProperties }}
     {{ include "tplValue" ( dict "value" .Values.deployment.extraProperties "context" . ) | nindent 2 }}
   {{- end }}
   template:
     metadata:
-      annotations:
       {{- if .Values.pod.annotations }}
+      annotations:
         {{ include "tplValue" ( dict "value" .Values.pod.annotations "context" . ) | nindent 8 }}
       {{- end }}
       labels:

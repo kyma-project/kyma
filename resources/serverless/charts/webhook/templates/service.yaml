@@ -17,4 +17,7 @@ spec:
       port: {{ .Values.service.ports.httpsWebhook.port }}
       targetPort: {{ .Values.service.ports.httpsWebhook.targetPort }}
   selector:
-    {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 4 }}
+    app: {{ template "webhook.fullname" . }}
+    app.kubernetes.io/name: {{ template "webhook.fullname" . }}
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    role: webhook

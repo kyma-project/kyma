@@ -13,5 +13,7 @@ spec:
       interval: "{{ .Values.metrics.serviceMonitor.scrapeInterval }}"
   selector:
     matchLabels:
-      {{- include "tplValue" ( dict "value" .Values.global.commonMatchLabels "context" . ) | nindent 6 }}
+      app: {{ template "name" . }}-deployment
+      app.kubernetes.io/name: {{ template "name" . }}-deployment
+      app.kubernetes.io/instance: "{{ .Release.Name }}"
 {{- end }}

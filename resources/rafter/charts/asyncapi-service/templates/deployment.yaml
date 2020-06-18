@@ -20,14 +20,13 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "rafterAsyncAPIService.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/managed-by: {{ .Release.Service }}
-      helm.sh/chart: {{ include "rafterAsyncAPIService.chart" . }}
   {{- if .Values.deployment.extraProperties }}
   {{ include "rafterAsyncAPIService.tplValue" ( dict "value" .Values.deployment.extraProperties "context" . ) | nindent 2 }}
   {{- end }}
   template:
     metadata:
       labels:
+        app: {{ include "rafterAsyncAPIService.name" . }}
         app.kubernetes.io/name: {{ include "rafterAsyncAPIService.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}

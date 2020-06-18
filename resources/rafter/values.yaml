@@ -23,7 +23,7 @@ tests:
 controller-manager:
   enabled: true
 
-  fullnameOverride: "rafter-controller-manager"
+  fullnameOverride: "rafter-ctrl-mngr"
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-controller-manager
@@ -59,7 +59,7 @@ controller-manager:
         {
           "metadataExtractors":[
             {
-              "name": "rafter-front-matter-service",
+              "name": "rafter-front-matter-svc",
               "namespace": "{{ .Release.Namespace }}",
               "endpoint": "/v1/extract",
               "filter": "\\.md$"
@@ -70,14 +70,14 @@ controller-manager:
         {
           "validations":[
             {
-              "name": "rafter-asyncapi-service",
+              "name": "rafter-asyncapi-svc",
               "namespace": "{{ .Release.Namespace }}",
               "endpoint": "/v1/validate"
             }
           ],
           "mutations":[
             {
-              "name": "rafter-asyncapi-service",
+              "name": "rafter-asyncapi-svc",
               "namespace": "{{ .Release.Namespace }}",
               "endpoint": "/v1/convert"
             }
@@ -232,7 +232,7 @@ controller-manager:
 upload-service:
   enabled: true
 
-  fullnameOverride: "rafter-upload-service"
+  fullnameOverride: "rafter-upload-svc"
 
   minio:
     enabled: false
@@ -345,7 +345,7 @@ upload-service:
 front-matter-service:
   enabled: true
 
-  fullnameOverride: "rafter-front-matter-service"
+  fullnameOverride: "rafter-front-matter-svc"
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-front-matter-service
@@ -381,7 +381,7 @@ front-matter-service:
 asyncapi-service:
   enabled: true
 
-  fullnameOverride: "rafter-asyncapi-service"
+  fullnameOverride: "rafter-asyncapi-svc"
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-asyncapi-service
