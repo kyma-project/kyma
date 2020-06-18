@@ -7,7 +7,7 @@ fullnameOverride:
 
 image:
   repository: "eu.gcr.io/kyma-project/function-webhook"
-  tag: "PR-8710"
+  tag: "PR-8818"
   pullPolicy: IfNotPresent
 
 commonLabels:
@@ -57,13 +57,13 @@ container:
     webhookPort:
       value: "{{ .Values.service.ports.httpsWebhook.targetPort }}"
     minRequestCpu:
-      value: "8m"
+      value: "10m"
     minRequestMemory:
-      value: "8Mi"
+      value: "16Mi"
     minReplicasValue:
       value: "1"
     reservedEnvs:
-      value: "FUNC_RUNTIME,FUNC_HANDLER,FUNC_TIMEOUT,FUNC_PORT,PORT,MOD_NAME,NODE_PATH,REQ_MB_LIMIT,FUNC_MEMORY_LIMIT" # https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js
+      value: "FUNC_RUNTIME,FUNC_HANDLER,FUNC_TIMEOUT,FUNC_PORT,MOD_NAME,NODE_PATH,REQ_MB_LIMIT,FUNC_MEMORY_LIMIT" # https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js
     requestCpu:
       value: "50m"
     requestMemory:

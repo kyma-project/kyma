@@ -17,7 +17,7 @@ spec:
       serviceAccountName: {{ .Release.Name }}-crd-init
       containers:
       - name: {{ .Release.Name }}-crd-rules
-        image: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576"
+        image: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff"
         volumeMounts:
         - name: crd-rules
           mountPath: /etc/ory/crd

@@ -606,7 +606,7 @@ data:
             {
               "expr": "sum(rate(istio_requests_total{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_name\"}[2m])) by (destination_service, response_code)",
               "interval": "",
-              "legendFormat": "{{ `{{response_code}}` }}",,
+              "legendFormat": "{{ `{{response_code}}` }}",
               "refId": "A"
             }
           ],
@@ -1084,7 +1084,9 @@ data:
       "refresh": "10s",
       "schemaVersion": 25,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "kyma"
+      ],
       "templating": {
         "list": [
           {
