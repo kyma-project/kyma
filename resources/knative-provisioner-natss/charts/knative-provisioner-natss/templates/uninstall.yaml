@@ -95,25 +95,8 @@ spec:
           args:
             - "-c"
             - |
-              set -eux -o pipefail
-              resources=(
-                "natsschannels.messaging.knative.dev"
-              )
+{{ .Files.Get "uninstall.sh" | printf "%s" | indent 14 }}
 
-              for resource in "${resources[@]}"; do
-                echo "starting deletion of ${resource} custom resources"
-                if kubectl get crd "${resource}"; then
-                  kubectl \
-                    delete \
-                    --ignore-not-found \
-                    "${resource}" \
-                    --all-namespaces \
-                    --all
-                else
-                  echo "CRD ${resource} unknown to apiserver"
-                fi
-                echo "finished deletion of ${resource} custom resources"
-              done
           # use last chunk of container log output for terminal log
           # source: https://kubernetes.io/docs/tasks/debug-application-cluster/determine-reason-pod-failure/#customizing-the-termination-message
           terminationMessagePolicy: "FallbackToLogsOnError"
