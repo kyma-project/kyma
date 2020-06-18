@@ -19,7 +19,7 @@ compass_mfs:
   image:
     dir: null
     pullPolicy: IfNotPresent
-    tag: 206d3dbc
+    tag: e0146b08
   service:
     externalPort: 8888
     internalPort: 8888
