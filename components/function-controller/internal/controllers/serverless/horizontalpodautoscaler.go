@@ -56,7 +56,9 @@ func (r *FunctionReconciler) equalHorizontalPodAutoscalers(existing, expected au
 	return equalInt32Pointer(existing.Spec.TargetCPUUtilizationPercentage, expected.Spec.TargetCPUUtilizationPercentage) &&
 		equalInt32Pointer(existing.Spec.MinReplicas, expected.Spec.MinReplicas) &&
 		existing.Spec.MaxReplicas == expected.Spec.MaxReplicas &&
-		r.mapsEqual(existing.Labels, expected.Labels)
+		r.mapsEqual(existing.Labels, expected.Labels) &&
+		existing.Spec.ScaleTargetRef.Name == expected.Spec.ScaleTargetRef.Name
+
 }
 
 func (r *FunctionReconciler) createHorizontalPodAutoscaler(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, hpa autoscalingv1.HorizontalPodAutoscaler) (ctrl.Result, error) {
