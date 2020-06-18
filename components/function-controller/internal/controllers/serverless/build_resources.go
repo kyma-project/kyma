@@ -150,7 +150,7 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 	imageName := r.buildExternalImageAddress(instance)
 	deploymentLabels := r.functionLabels(instance)
 
-	podLabels := r.podLabels(instance)
+	podLabels := r.podLabels(instance, "deployment")
 
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -161,7 +161,7 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 		Spec: appsv1.DeploymentSpec{
 			Replicas: instance.Spec.MinReplicas,
 			Selector: &metav1.LabelSelector{
-				MatchLabels: r.internalFunctionLabels(instance), // this has to match spec.template.objectmeta.Labels
+				MatchLabels: r.internalFunctionLabels(instance, "deployment"), // this has to match spec.template.objectmeta.Labels
 				// and also it has to be immutable
 			},
 			Template: corev1.PodTemplateSpec{
@@ -199,7 +199,7 @@ func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function)
 				Port:       80,
 				Protocol:   corev1.ProtocolTCP,
 			}},
-			Selector: r.internalFunctionLabels(instance),
+			Selector: r.internalFunctionLabels(instance, "deployment"),
 		},
 	}
 }
@@ -259,21 +259,24 @@ func (r *FunctionReconciler) sanitizeDependencies(dependencies string) string {
 }
 
 func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Function) map[string]string {
-	return r.mergeLabels(instance.GetLabels(), r.internalFunctionLabels(instance))
+	return r.mergeLabels(instance.GetLabels(), r.internalFunctionLabels(instance, ""))
 }
 
-func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha1.Function) map[string]string {
+func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha1.Function, resource string) map[string]string {
 	labels := make(map[string]string, 3)
 
 	labels[serverlessv1alpha1.FunctionNameLabel] = instance.Name
 	labels[serverlessv1alpha1.FunctionManagedByLabel] = "function-controller"
 	labels[serverlessv1alpha1.FunctionUUIDLabel] = string(instance.GetUID())
+	if resource != "" {
+		labels[serverlessv1alpha1.FunctionResourceLabel] = resource
+	}
 
 	return labels
 }
 
-func (r *FunctionReconciler) podLabels(instance *serverlessv1alpha1.Function) map[string]string {
-	return r.mergeLabels(instance.Spec.Labels, r.internalFunctionLabels(instance))
+func (r *FunctionReconciler) podLabels(instance *serverlessv1alpha1.Function, resource string) map[string]string {
+	return r.mergeLabels(instance.Spec.Labels, r.internalFunctionLabels(instance, resource))
 }
 
 func (r *FunctionReconciler) mergeLabels(labelsCollection ...map[string]string) map[string]string {

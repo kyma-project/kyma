@@ -33,6 +33,7 @@ const (
 	FunctionNameLabel      = "serverless.kyma-project.io/function-name"
 	FunctionManagedByLabel = "serverless.kyma-project.io/managed-by"
 	FunctionUUIDLabel      = "serverless.kyma-project.io/uuid"
+	FunctionResourceLabel      = "serverless.kyma-project.io/resource"
 )
 
 // ConditionType defines condition of function.

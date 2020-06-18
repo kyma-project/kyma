@@ -141,7 +141,7 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(deployment).ToNot(gomega.BeNil())
 		gomega.Expect(deployment.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
 		gomega.Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(gomega.Equal(reconciler.buildExternalImageAddress(function)))
-		gomega.Expect(deployment.Spec.Template.Labels).To(gomega.HaveLen(6)) // function-name, managed-by, uuid + 3
+		gomega.Expect(deployment.Spec.Template.Labels).To(gomega.HaveLen(7)) // function-name, managed-by, uuid + 3
 		gomega.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionNameLabel]).To(gomega.Equal(function.Name))
 		gomega.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionManagedByLabel]).To(gomega.Equal("function-controller"))
 		gomega.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionUUIDLabel]).To(gomega.Equal(string(function.UID)))
