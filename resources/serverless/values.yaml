@@ -20,7 +20,7 @@ tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-8651"
+    tag: "PR-8818"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -60,11 +60,11 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-8803"
+    tag: "PR-8818"
     pullPolicy: IfNotPresent
   functionRuntimeNodejs12:
     repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-    tag: "a62f4a7f"
+    tag: "PR-8818"
 
 deployment:
   replicas: 1
