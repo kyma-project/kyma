@@ -144,11 +144,13 @@ All notes are based on Helm v3.2.1 implementation and are subject to change in f
 
 * Manifests are sorted by `Kind`. You can find the list and the order of the resources on the Helm [Github](https://github.com/helm/helm/blob/release-3.2/pkg/releaseutil/kind_sorter.go) page.
 
-* To provide better error handling, Helm validates rendered templates against the Kubernetes OpenAPI schema before they are sent to the Kubernetes API. This means any resources that are not aligned with the Kubernetes API docs (e.g. because of unsupported fields) will fail the release.
+* To provide better error handling, Helm validates rendered templates against the Kubernetes OpenAPI schema before they are sent to the Kubernetes API. This means any resources that don't comply with the Kubernetes API docs (for example because of unsupported fields) will fail the release.
 
 ## Migration to Helm v3
 
-Beginning with the version 1.14, Kyma uses [Helm v3](https://helm.sh/) to install and maintain components. To ensure compatibility, any Helm v2 releases existing on your cluster are automatically migrated to v3 prior to the upgrade process. The migration is handled by the Helm [2to3](https://github.com/helm/helm-2to3) plugin that runs as an init container inside the Kyma Installer Pod. This means that the component may take more time than usual to start operating. If the plugin fails to migrate a release, the container exits with an error and the upgrade process is interrupted. Note that successful migration does not erase Helm v2 configuration and release data. Thus, you can still access pre-upgrade Helm resources using the v2 CLI if you establish a secure connection with Tiller. Read the [additional configuration](#installation-use-helm) document to learn how to access legacy resources using Helm v2 CLI.
+As of version 1.14, Kyma uses [Helm v3](https://helm.sh/) to install and maintain components. To ensure compatibility, any Helm v2 releases existing on your cluster are automatically migrated to v3 prior to the upgrade process. The migration is handled by the Helm [2to3](https://github.com/helm/helm-2to3) plugin that runs as an init container inside the Kyma Installer Pod. This means that it may take some more time for the component to start operating. If the plugin fails to migrate a release, the container exits with an error and the upgrade process is interrupted. 
+
+>**NOTE:** Note that successful migration does not erase Helm v2 configuration and release data. Thus, you can still access pre-upgrade Helm resources using the v2 CLI if you establish a secure connection with Tiller. Read the [additional configuration](#installation-use-helm) document to learn how to access legacy resources using Helm v2 CLI.
 
 ## Glossary
 

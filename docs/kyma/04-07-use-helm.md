@@ -7,11 +7,11 @@ You can use Helm to manage Kubernetes resources in Kyma, for example to check th
 
 ## Helm v3
 
-Beginning with the version 1.14, Kyma uses [Helm v3](https://helm.sh/) to install and maintain components. Unlike its predecessor, Helm v3 interacts directly with the Kubernetes API and thus no longer features an in-cluster server. With Tiller gone, managing Kubernetes resources using Helm v3 CLI requires no manual configuration.
+As of version 1.14, Kyma uses [Helm v3](https://helm.sh/) to install and maintain components. Unlike its predecessor, Helm v3 interacts directly with the Kubernetes API and thus no longer features an in-cluster server. With Tiller gone, managing Kubernetes resources using Helm v3 CLI requires no manual configuration.
 
 ## Helm v2
 
-If you upgraded Kyma to v1.14, your pre-upgrade Helm v2 configuration and release data is still accessible via Helm v2 CLI commands. Nevertheless, Helm v2 relies on Tiller to govern charts and releases. To use Helm v2 CLI, you must establish a secure connection with Tiller by saving the cluster's client certificate, key, and Certificate Authority (CA) to [Helm Home](https://v2.helm.sh/docs/glossary/#helm-home-helm-home).
+If you upgraded Kyma to v1.14, you can still access your pre-upgrade Helm v2 configuration and release data using Helm v2 CLI commands. Nevertheless, Helm v2 relies on Tiller to govern charts and releases. To use Helm v2 CLI, you must establish a secure connection with Tiller by saving the cluster's client certificate, key, and Certificate Authority (CA) to [Helm Home](https://v2.helm.sh/docs/glossary/#helm-home-helm-home) local directory.
 
 >**NOTE:** Read more about [TLS in Tiller](/components/security/#details-tls-in-tiller).
 
