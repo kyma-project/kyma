@@ -8,9 +8,6 @@ metadata:
   name: {{ .Release.Name }}-cr-delete
   namespace: {{ .Release.Namespace }}
   annotations:
-    # Executes on a deletion request before any resources are deleted from Kubernetes
-    # this gives the controllers a chance to act on CRs with a finalizer
-    # source: https://helm.sh/docs/topics/charts_hooks/
     helm.sh/hook: pre-delete
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
     # everything without a dependency has weight 0
