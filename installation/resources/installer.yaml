@@ -263,7 +263,7 @@ spec:
           done < helm2-releases
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
+        image: eu.gcr.io/kyma-project/kyma-installer:PR-8679-ee2678cb
         imagePullPolicy: IfNotPresent
         args:
           - -overrideLogFile=/app/overrides.txt
