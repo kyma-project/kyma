@@ -25,11 +25,10 @@ func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Functio
 		configMapFunction: instance.Spec.Source,
 		configMapDeps:     r.sanitizeDependencies(instance.Spec.Deps),
 	}
-	labels := r.functionLabels(instance)
 
 	return corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Labels:       labels,
+			Labels:       r.functionLabels(instance),
 			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
 			Namespace:    instance.GetNamespace(),
 		},

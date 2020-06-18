@@ -120,4 +120,3 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return r.updateDeploymentStatus(ctx, log, instance, deployments.Items, corev1.ConditionTrue)
 	}
 }
-

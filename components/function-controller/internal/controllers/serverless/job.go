@@ -20,11 +20,15 @@ func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function
 	image := r.buildExternalImageAddress(instance)
 	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
-	if len(deployments) == 1 && deployments[0].Spec.Template.Spec.Containers[0].Image == image && buildStatus != corev1.ConditionUnknown {
+	expectedJob := r.buildJob(instance, "")
+
+	if len(deployments) == 1 &&
+		deployments[0].Spec.Template.Spec.Containers[0].Image == image &&
+		buildStatus != corev1.ConditionUnknown &&
+		len(jobs) == 1 &&
+		r.mapsEqual(jobs[0].GetLabels(), expectedJob.GetLabels()) {
 		return false
 	}
-
-	expectedJob := r.buildJob(instance, "")
 
 	return len(jobs) != 1 ||
 		len(jobs[0].Spec.Template.Spec.Containers) != 1 ||

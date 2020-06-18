@@ -60,16 +60,19 @@ func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Fu
 	image := r.buildExternalImageAddress(instance)
 	configurationStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)
 
-	if len(deployments) == 1 && deployments[0].Spec.Template.Spec.Containers[0].Image == image && configurationStatus != corev1.ConditionUnknown {
+	if len(deployments) == 1 &&
+		deployments[0].Spec.Template.Spec.Containers[0].Image == image &&
+		configurationStatus != corev1.ConditionUnknown &&
+		r.mapsEqual(configMaps[0].Labels, r.functionLabels(instance)) {
 		return false
 	}
 
-	return len(configMaps) != 1 ||
-		instance.Spec.Source != configMaps[0].Data[configMapFunction] ||
-		r.sanitizeDependencies(instance.Spec.Deps) != configMaps[0].Data[configMapDeps] ||
-		configMaps[0].Data[configMapHandler] != configMapHandler ||
-		configurationStatus != corev1.ConditionTrue ||
-		r.mapsEqual(configMaps[0].Labels, instance.GetLabels())
+	return !(len(configMaps) == 1 &&
+		instance.Spec.Source == configMaps[0].Data[configMapFunction] &&
+		r.sanitizeDependencies(instance.Spec.Deps) == configMaps[0].Data[configMapDeps] &&
+		configMaps[0].Data[configMapHandler] == configMapHandler &&
+		configurationStatus == corev1.ConditionTrue &&
+		r.mapsEqual(configMaps[0].Labels, r.functionLabels(instance)))
 }
 
 func (r *FunctionReconciler) onConfigMapChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, configMaps []corev1.ConfigMap) (ctrl.Result, error) {
