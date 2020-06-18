@@ -40,6 +40,7 @@ app.kubernetes.io/name: {{ include "knative-kafka.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 helm.sh/chart: {{ include "knative-kafka.chart" . }}
+foo: bar
 {{- end -}}
 
 {{- define "knative-kafka.brokers" -}}
