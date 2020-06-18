@@ -33,7 +33,7 @@ global:
     version: d022112f
   e2e_external_solution:
     dir:
-    version: PR-8734
+    version: PR-8811
   e2e_external_solution_test_service:
     dir:
     version: PR-8483
