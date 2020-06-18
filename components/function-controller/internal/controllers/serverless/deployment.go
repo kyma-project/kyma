@@ -42,7 +42,7 @@ func (r *FunctionReconciler) onDeploymentChange(ctx context.Context, log logr.Lo
 	case len(deployments) == 0:
 		return r.createDeployment(ctx, log, instance, newDeployment)
 	case len(deployments) > 1: // this step is needed, as sometimes informers lag behind reality, and then we create 2 (or more) deployments by accident
-		return r.deleteExcessDeployments(ctx, instance, log)
+		return r.deleteAllDeployments(ctx, instance, log)
 	case !r.equalDeployments(deployments[0], newDeployment):
 		return r.updateDeployment(ctx, log, instance, deployments[0], newDeployment)
 	default:
@@ -169,14 +169,14 @@ func equalResources(existing, expected corev1.ResourceRequirements) bool {
 		existing.Limits.Cpu().Equal(*expected.Limits.Cpu())
 }
 
-func (r *FunctionReconciler) deleteExcessDeployments(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (ctrl.Result, error) {
-	log.Info("Deleting excess Deployments")
+func (r *FunctionReconciler) deleteAllDeployments(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (ctrl.Result, error) {
+	log.Info("Deleting all underlying Deployments")
 	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
 	if err := r.client.DeleteAllBySelector(ctx, &appsv1.Deployment{}, instance.GetNamespace(), selector); err != nil {
-		log.Error(err, "Cannot delete excess Deployments")
+		log.Error(err, "Cannot delete underlying Deployments")
 		return ctrl.Result{}, err
 	}
 
-	log.Info("Excess Deployments deleted")
+	log.Info("Underlying Deployments deleted")
 	return ctrl.Result{}, nil
 }

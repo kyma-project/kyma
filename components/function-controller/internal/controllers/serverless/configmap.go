@@ -81,18 +81,18 @@ func (r *FunctionReconciler) onConfigMapChange(ctx context.Context, log logr.Log
 	case 1:
 		return r.updateConfigMap(ctx, log, instance, configMaps[0])
 	default:
-		return r.deleteExcessConfigMap(ctx, instance, log)
+		return r.deleteAllConfigMaps(ctx, instance, log)
 	}
 }
 
-func (r *FunctionReconciler) deleteExcessConfigMap(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (ctrl.Result, error) {
-	log.Info("Deleting excess ConfigMaps")
+func (r *FunctionReconciler) deleteAllConfigMaps(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (ctrl.Result, error) {
+	log.Info("Deleting all ConfigMaps")
 	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
 	if err := r.client.DeleteAllBySelector(ctx, &corev1.ConfigMap{}, instance.GetNamespace(), selector); err != nil {
-		log.Error(err, "Cannot delete excess ConfigMaps")
+		log.Error(err, "Cannot delete all ConfigMaps")
 		return ctrl.Result{}, err
 	}
 
-	log.Info("Excess ConfigMaps deleted")
+	log.Info("All underlying ConfigMaps deleted")
 	return ctrl.Result{}, nil
 }

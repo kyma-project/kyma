@@ -32,7 +32,7 @@ func (r *FunctionReconciler) onHorizontalPodAutoscalerChange(ctx context.Context
 	case len(hpas) == 0:
 		return r.createHorizontalPodAutoscaler(ctx, log, instance, newHpa)
 	case len(hpas) > 1: // this step is needed, as sometimes informers lag behind reality, and then we create 2 (or more) hpas by accident
-		return r.deleteExcessHorizontalPodAutoscalers(ctx, instance, log)
+		return r.deleteAllHorizontalPodAutoscalers(ctx, instance, log)
 	case !r.equalHorizontalPodAutoscalers(hpas[0], newHpa):
 		return r.updateHorizontalPodAutoscaler(ctx, log, instance, hpas[0], newHpa)
 	default:
@@ -103,14 +103,14 @@ func (r *FunctionReconciler) updateHorizontalPodAutoscaler(ctx context.Context, 
 	})
 }
 
-func (r *FunctionReconciler) deleteExcessHorizontalPodAutoscalers(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (ctrl.Result, error) {
-	log.Info("Deleting excess HorizontalPodAutoscalers")
+func (r *FunctionReconciler) deleteAllHorizontalPodAutoscalers(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (ctrl.Result, error) {
+	log.Info("Deleting all HorizontalPodAutoscalers")
 	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
 	if err := r.client.DeleteAllBySelector(ctx, &autoscalingv1.HorizontalPodAutoscaler{}, instance.GetNamespace(), selector); err != nil {
-		log.Error(err, "Cannot delete excess HorizontalPodAutoscalers")
+		log.Error(err, "Cannot delete underlying HorizontalPodAutoscalers")
 		return ctrl.Result{}, err
 	}
 
-	log.Info("Excess HorizontalPodAutoscalers deleted")
+	log.Info("Underlying HorizontalPodAutoscalers deleted")
 	return ctrl.Result{}, nil
 }
