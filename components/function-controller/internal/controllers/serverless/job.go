@@ -20,16 +20,21 @@ func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function
 	image := r.buildExternalImageAddress(instance)
 	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
-	if len(deployments) == 1 && deployments[0].Spec.Template.Spec.Containers[0].Image == image && buildStatus != corev1.ConditionUnknown {
+	expectedJob := r.buildJob(instance, "")
+
+	if len(deployments) == 1 &&
+		deployments[0].Spec.Template.Spec.Containers[0].Image == image &&
+		buildStatus != corev1.ConditionUnknown &&
+		len(jobs) > 0 &&
+		r.mapsEqual(expectedJob.GetLabels(), jobs[0].GetLabels()) {
 		return false
 	}
-
-	expectedJob := r.buildJob(instance, "")
 
 	return len(jobs) != 1 ||
 		len(jobs[0].Spec.Template.Spec.Containers) != 1 ||
 		// Compare image argument
 		!r.equalJobs(jobs[0], expectedJob) ||
+		!r.mapsEqual(expectedJob.GetLabels(), jobs[0].GetLabels()) ||
 		buildStatus == corev1.ConditionUnknown ||
 		buildStatus == corev1.ConditionFalse
 }
@@ -43,6 +48,8 @@ func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, i
 		return r.createJob(ctx, log, instance, newJob)
 	case jobsLen > 1 || !r.equalJobs(jobs[0], newJob):
 		return r.deleteJobs(ctx, log, instance)
+	case !r.mapsEqual(jobs[0].GetLabels(), newJob.GetLabels()):
+		return r.updateJobLabels(ctx, log, instance, jobs[0], newJob.GetLabels())
 	default:
 		return r.updateBuildStatus(ctx, log, instance, jobs[0])
 	}
@@ -87,7 +94,7 @@ func (r *FunctionReconciler) createJob(ctx context.Context, log logr.Logger, ins
 
 func (r *FunctionReconciler) deleteJobs(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function) (ctrl.Result, error) {
 	log.Info("Deleting all old jobs")
-	selector := apilabels.SelectorFromSet(r.functionLabels(instance))
+	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
 	if err := r.client.DeleteAllBySelector(ctx, &batchv1.Job{}, instance.GetNamespace(), selector); err != nil {
 		log.Error(err, "Cannot delete old Jobs")
 		return ctrl.Result{}, err
@@ -133,4 +140,24 @@ func (r *FunctionReconciler) updateBuildStatus(ctx context.Context, log logr.Log
 			Message:            fmt.Sprintf("Job %s failed", job.GetName()),
 		})
 	}
+}
+
+func (r *FunctionReconciler) updateJobLabels(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, job batchv1.Job, newLabels map[string]string) (ctrl.Result, error) {
+	newJob := job.DeepCopy()
+	newJob.Labels = newLabels
+
+	log.Info(fmt.Sprintf("Updating labels of a Job with name %s", newJob.GetName()))
+	if err := r.client.Update(ctx, newJob); err != nil {
+		log.Error(err, fmt.Sprintf("Cannot update Job with name %s", newJob.GetName()))
+		return ctrl.Result{}, err
+	}
+	log.Info(fmt.Sprintf("Job %s updated", newJob.GetName()))
+
+	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+		Type:               serverlessv1alpha1.ConditionBuildReady,
+		Status:             corev1.ConditionUnknown,
+		LastTransitionTime: metav1.Now(),
+		Reason:             serverlessv1alpha1.ConditionReasonJobUpdated,
+		Message:            fmt.Sprintf("Job %s updated", newJob.GetName()),
+	})
 }
