@@ -10,8 +10,6 @@ knative-provisioner-natss:
   controller:
     image:
       pullPolicy: IfNotPresent
-      gcr:
-        io/knative-releases/knative:
       location: gcr.io/knative-releases/knative.dev/eventing-contrib/natss/cmd/channel_controller@sha256:dfee3be9234ca89f4e0167d376ace0b3ae5f9fb5557ff2ec2e006403eb9999d7
   dispatcher:
     image:

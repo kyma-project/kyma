@@ -26,6 +26,7 @@ type EventMeshUpgradeTest struct {
 	appBrokerCli          appbrokerclientset.Interface
 	scCli                 scclientset.Interface
 	eventingCli           eventingv1alpha1clientset.EventingV1alpha1Interface
+	subscriberImage       string
 }
 
 // compile time assertion
@@ -38,7 +39,8 @@ func NewEventMeshUpgradeTest(
 	servingCli servingclientset.Interface,
 	appBrokerCli appbrokerclientset.Interface,
 	scCli scclientset.Interface,
-	eventingCli eventingv1alpha1clientset.EventingV1alpha1Interface) runner.UpgradeTest {
+	eventingCli eventingv1alpha1clientset.EventingV1alpha1Interface,
+	subscriberImage string) runner.UpgradeTest {
 	return &EventMeshUpgradeTest{
 		k8sInterface:          k8sCli,
 		messagingClient:       messagingCli,
@@ -47,6 +49,7 @@ func NewEventMeshUpgradeTest(
 		appBrokerCli:          appBrokerCli,
 		scCli:                 scCli,
 		eventingCli:           eventingCli,
+		subscriberImage:       subscriberImage,
 	}
 }
 
@@ -95,7 +98,7 @@ func (e *EventMeshUpgradeTest) TestResources(stop <-chan struct{}, log logrus.Fi
 	} {
 		err := fn()
 		if err != nil {
-			//f.log.WithField("error", err).Error("TestResources() failed")
+			// f.log.WithField("error", err).Error("TestResources() failed")
 			return err
 		}
 	}

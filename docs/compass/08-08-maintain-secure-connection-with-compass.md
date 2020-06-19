@@ -17,29 +17,29 @@ After you have established a secure connection with Compass, you can fetch the c
 
 1. Get the CSR information with the configuration details.
 
-    To fetch the configuration, make a call to the Certificate-Secured Connector URL using the client certificate. 
-    The Certificate-Secured Connector URL is the `certificateSecuredConnectorURL` obtained when establishing a secure connection with Compass. 
+    To fetch the configuration, make a call to the Certificate-Secured Connector URL using the client certificate.
+    The Certificate-Secured Connector URL is the `certificateSecuredConnectorURL` obtained when establishing a secure connection with Compass.
     Send this query with the call:
-    
+
     ```graphql
     query {
         result: configuration {
-            certificateSigningRequestInfo { 
-                subject 
-                keyAlgorithm 
+            certificateSigningRequestInfo {
+                subject
+                keyAlgorithm
             }
-            managementPlaneInfo { 
-                directorURL 
+            managementPlaneInfo {
+                directorURL
             }
         }
     }
-    ``` 
+    ```
 
     A successful call returns the requested configuration details.
 
 2. Generate a key and a Certificate Signing Request (CSR).
 
-    Generate a CSR with this command using the certificate subject data obtained with the CSR information: 
+    Generate a CSR with this command using the certificate subject data obtained with the CSR information:
     ```
     export KEY_LENGTH=4096
     openssl genrsa -out compass-app.key $KEY_LENGTH
@@ -47,11 +47,11 @@ After you have established a secure connection with Compass, you can fetch the c
     ```
    > **NOTE:** The key length is configurable, however, 4096 is the recommended value.
 
-3. Sign the CSR and renew the client certificate. 
+3. Sign the CSR and renew the client certificate.
 
     Encode the obtained CSR with base64:
     ```bash
-    openssl base64 -in compass-app.csr 
+    openssl base64 -in compass-app.csr
     ```
 
     Send the following GraphQL mutation with the encoded CSR to the Certificate-Secured Connector URL:
@@ -65,15 +65,15 @@ After you have established a secure connection with Compass, you can fetch the c
     }
     ```
 
-    The response contains a renewed client certificate signed by the Kyma Certificate Authority (CA), certificate chain, and the CA certificate. 
-    
+    The response contains a renewed client certificate signed by the Kyma Certificate Authority (CA), certificate chain, and the CA certificate.
+
 4. Decode the certificate chain.
 
-    The returned certificates and the certificate chain are base64-encoded and need to be decoded before use. 
+    The returned certificates and the certificate chain are base64-encoded and need to be decoded before use.
     To decode the certificate chain, run:
-    
+
     ```bash
-    base64 -d {CERTIFICATE_CHAIN} 
+    base64 -d {CERTIFICATE_CHAIN}
     ```
-    
->**NOTE:** To learn how to revoke a client certificate, read [this](#tutorials-revoke-a-client-certificate) tutorial.
+
+>**NOTE:** To learn how to revoke a client certificate, read the [tutorial](#tutorials-revoke-a-client-certificate).

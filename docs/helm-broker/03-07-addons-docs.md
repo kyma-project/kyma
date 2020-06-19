@@ -8,8 +8,7 @@ Using the Helm Broker, you can provide documentation for your addon and display 
 - Providing documentation for your addon
 - Providing documentation for objects that appear after provisioning your addon
 
->**NOTE:** Deliver documentation for your addons in Markdown files with specified metadata. To learn more about the metadata and content of the Markdown files, read [this](/components/service-catalog/#console-ui-views-specifications-in-the-console-ui-markdown-documents) document. For more information about the currently supported types of assets, read [this](/components/rafter/#overview-overview-rafter-in-kyma) document.
-<!-- Check if the links work once Rafter is already in Kyma. -->
+>**NOTE:** Deliver documentation for your addons in Markdown files with specified metadata. For more information, read about [metadata and content](/components/service-catalog/#console-ui-views-specifications-in-the-console-ui-markdown-documents) of the Markdown files, and see the [supported types of assets](/components/rafter/#overview-overview-rafter-in-kyma).
 
 ## Provide documentation for your addon
 

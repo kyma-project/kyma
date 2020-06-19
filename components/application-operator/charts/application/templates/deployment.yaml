@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-application-gateway
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
@@ -64,6 +65,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-event-service
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Release.Name }}-event-service
     release: {{ .Release.Name }}

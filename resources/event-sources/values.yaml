@@ -1,5 +1,3 @@
-resources/event-sources/templates/500-sources-controller:
-  yaml:
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project

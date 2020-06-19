@@ -5,6 +5,7 @@ deployment:
   securityContext:
     runAsUser: 2000
   strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  nodeSelector: {}
 
 imagePullSecrets: []
 nameOverride: ""
@@ -88,6 +89,20 @@ avs:
   externalTesterAccessId: "TBD"
   groupId: "TBD"
   parentId: "TBD"
+  # if set - creates tester with provided service name
+  # if empty - defaults service name to tester name
+  internalTesterService: ""
+  externalTesterService: ""
+  # List of tags to bind to testers.
+  # Example: 
+  #  - content: tag-A
+  #    tag_id: 1
+  #    tag_name: value-A
+  #  - content: tag-B
+  #    tag_id: 2
+  #    tag_name: value-B
+  internalTesterTags: {}
+  externalTesterTags: {}
 
 lms:
   secretName: "lms-creds"

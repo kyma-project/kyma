@@ -13,7 +13,7 @@ To configure the Rafter chart, override the default values of its `values.yaml` 
 
 This table lists the configurable parameters, their descriptions, and default values.
 
->**NOTE:** You can define all **envs** either by providing them as inline values or using the **valueFrom** object. See [this](https://github.com/kyma-project/rafter/tree/master/charts/rafter-controller-manager#change-values-for-envs-parameters) document for reference.
+>**NOTE:** You can define all **envs** either by providing them as inline values or using the **valueFrom** object. See the [example](https://github.com/kyma-project/rafter/tree/master/charts/rafter-controller-manager#change-values-for-envs-parameters) for reference.
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
@@ -30,8 +30,8 @@ This table lists the configurable parameters, their descriptions, and default va
 | **controller-manager.pod.resources.requests.memory** | Requests for memory resources. | `32Mi` |
 | **controller-manager.envs.clusterAssetGroup.relistInterval** | Time intervals in which the Rafter Controller Manager verifies the ClusterAssetGroup for changes. | `5m` |
 | **controller-manager.envs.assetGroup.relistInterval** | Time intervals in which the Rafter Controller Manager verifies the AssetGroup for changes. | `5m` |
-| **controller-manager.envs.clusterBucket.region** | Regional location of the ClusterBucket in a given cloud storage. Use one of [these](https://github.com/kyma-project/kyma/blob/master/resources/cluster-essentials/templates/rafter.clusterbuckets.crd.yaml#L52) regions. | `us-east-1` |
-| **controller-manager.envs.bucket.region** | Regional location of the bucket in a given cloud storage. Use one of [these](https://github.com/kyma-project/kyma/blob/master/resources/cluster-essentials/templates/rafter.buckets.crd.yaml#L52) regions. | `us-east-1` |
+| **controller-manager.envs.clusterBucket.region** | Regional location of the ClusterBucket in a given cloud storage. Use one of the available [regions](https://github.com/kyma-project/kyma/blob/master/resources/cluster-essentials/templates/rafter.clusterbuckets.crd.yaml#L52). | `us-east-1` |
+| **controller-manager.envs.bucket.region** | Regional location of the bucket in a given cloud storage. Use one of the available [regions](https://github.com/kyma-project/kyma/blob/master/resources/cluster-essentials/templates/rafter.buckets.crd.yaml#L52). | `us-east-1` |
 | **controller-manager.envs.clusterBucket.maxConcurrentReconciles** | Maximum number of cluster bucket concurrent reconciles which will run. | `1` |
 | **controller-manager.envs.bucket.maxConcurrentReconciles** | Maximum number of bucket concurrent reconciles which will run. | `1` |
 | **controller-manager.envs.clusterAsset.maxConcurrentReconciles** | Maximum number of cluster asset concurrent reconciles which will run. | `1` |

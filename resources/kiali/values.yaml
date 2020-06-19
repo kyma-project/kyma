@@ -2,6 +2,8 @@
 tests:
   enabled: true
 
+nodeSelector: {}
+
 global:
   isLocalEnv: false
   istio:
@@ -20,6 +22,7 @@ kcproxy:
   inPort: 3000
   clientId: kiali
   clientSecret: hiFWLWqIxw5d3gl
+  nodeSelector: {}
   image:
     repository: bitnami/keycloak-gatekeeper
     tag: 9.0.3
@@ -281,7 +284,7 @@ kiali:
     #
     # A set of node labels that dictate onto which node the Kiali pod will be deployed.
     #    ---
-    #    node_selector: {}
+      node_selector: {}
     #
     # Because an ingress into a cluster can vary wildly in its desired configuration,
     # this setting provides a way to override complete portions of the ingress resource

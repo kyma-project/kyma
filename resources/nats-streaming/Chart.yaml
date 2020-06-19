@@ -2,3 +2,7 @@ apiVersion: v1
 description: NATS Streaming Helm chart
 name: nats-streaming
 version: 0.1.0
+appVersion: 0.11.0
+keywords:
+  - eventing
+  - nats-streaming

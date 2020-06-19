@@ -43,6 +43,9 @@ spec:
               containerPort: {{ .Values.service.ports.httpProfiling.targetPort }}
             - name: {{ .Values.service.ports.httpsWebhook.name }}
               containerPort: {{ .Values.service.ports.httpsWebhook.targetPort }}
+          envFrom:
+            - configMapRef:
+                name: {{ template "webhook.fullname" . }}-envs
           env:
             # Because of the serverless webhook is based on the knative webhook we have to set the following configuration envs:
             # SYSTEM_NAMESPACE, METRICS_DOMAIN, CONFIG_OBSERVABILITY_NAME
@@ -54,30 +57,5 @@ spec:
               {{ include "tplValue" ( dict "value" .Values.container.envs.metricsDomain "context" . ) | nindent 14 }}
             - name: CONFIG_OBSERVABILITY_NAME
               {{ include "tplValue" ( dict "value" .Values.container.envs.configObservabilityName "context" . ) | nindent 14 }}
-            - name: WEBHOOK_SERVICE_NAME
-              {{ include "tplValue" ( dict "value" .Values.container.envs.webhookServiceName "context" . ) | nindent 14 }}
-            - name: WEBHOOK_SECRET_NAME
-              {{ include "tplValue" ( dict "value" .Values.container.envs.webhookSecretName "context" . ) | nindent 14 }}
-            - name: WEBHOOK_PORT
-              {{ include "tplValue" ( dict "value" .Values.container.envs.webhookPort "context" . ) | nindent 14 }}
-            - name: WEBHOOK_VALIDATION_MIN_REQUEST_CPU
-              {{ include "tplValue" ( dict "value" .Values.container.envs.minRequestCpu "context" . ) | nindent 14 }}
-            - name: WEBHOOK_VALIDATION_MIN_REQUEST_MEMORY
-              {{ include "tplValue" ( dict "value" .Values.container.envs.minRequestMemory "context" . ) | nindent 14 }}
-            - name: WEBHOOK_VALIDATION_MIN_REPLICAS_VALUE
-              {{ include "tplValue" ( dict "value" .Values.container.envs.minReplicasValue "context" . ) | nindent 14 }}
-            - name: WEBHOOK_VALIDATION_RESERVED_ENVS
-              {{ include "tplValue" ( dict "value" .Values.container.envs.reservedEnvs "context" . ) | nindent 14 }}
-            - name: WEBHOOK_DEFAULTING_REQUEST_CPU
-              {{ include "tplValue" ( dict "value" .Values.container.envs.requestCpu "context" . ) | nindent 14 }}
-            - name: WEBHOOK_DEFAULTING_REQUEST_MEMORY
-              {{ include "tplValue" ( dict "value" .Values.container.envs.requestMemory "context" . ) | nindent 14 }}
-            - name: WEBHOOK_DEFAULTING_LIMITS_CPU
-              {{ include "tplValue" ( dict "value" .Values.container.envs.limitsCpu "context" . ) | nindent 14 }}
-            - name: WEBHOOK_DEFAULTING_LIMITS_MEMORY
-              {{ include "tplValue" ( dict "value" .Values.container.envs.limitsMemory "context" . ) | nindent 14 }}
-            - name: WEBHOOK_DEFAULTING_MINREPLICAS
-              {{ include "tplValue" ( dict "value" .Values.container.envs.minReplicas "context" . ) | nindent 14 }}
-            - name: WEBHOOK_DEFAULTING_MAXREPLICAS
-              {{ include "tplValue" ( dict "value" .Values.container.envs.maxReplicas "context" . ) | nindent 14 }}
+
             

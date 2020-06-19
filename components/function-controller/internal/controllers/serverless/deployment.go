@@ -15,6 +15,18 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
+const (
+	// Progressing:
+	// NewRSAvailableReason is added in a deployment when its newest replica set is made available
+	// ie. the number of new pods that have passed readiness checks and run for at least minReadySeconds
+	// is at least the minimum available pods that need to run for the deployment.
+	NewRSAvailableReason = "NewReplicaSetAvailable"
+
+	// Available:
+	// MinimumReplicasAvailable is added in a deployment when it has its minimum replicas required available.
+	MinimumReplicasAvailable = "MinimumReplicasAvailable"
+)
+
 func (r *FunctionReconciler) isOnDeploymentChange(instance *serverlessv1alpha1.Function, deployments []appsv1.Deployment) bool {
 	expectedDeployment := r.buildDeployment(instance)
 	resourceOk := len(deployments) == 1 && r.equalDeployments(deployments[0], expectedDeployment)
@@ -98,7 +110,7 @@ func (r *FunctionReconciler) updateDeploymentStatus(ctx context.Context, log log
 			Reason:             serverlessv1alpha1.ConditionReasonDeploymentFailed,
 			Message:            fmt.Sprintf("Deployment step failed, too many deployments found, needed 1 got: %d", len(deployments)),
 		})
-	case r.isDeploymentInCondition(deployments[0], appsv1.DeploymentAvailable):
+	case r.isDeploymentReady(deployments[0]):
 		log.Info(fmt.Sprintf("Deployment %s is ready", deployments[0].GetName()))
 		return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionRunning,
@@ -107,7 +119,7 @@ func (r *FunctionReconciler) updateDeploymentStatus(ctx context.Context, log log
 			Reason:             serverlessv1alpha1.ConditionReasonDeploymentReady,
 			Message:            fmt.Sprintf("Deployment %s is ready", deployments[0].GetName()),
 		})
-	case r.isDeploymentInCondition(deployments[0], appsv1.DeploymentProgressing):
+	case r.hasDeploymentConditionTrueStatus(deployments[0], appsv1.DeploymentProgressing):
 		log.Info(fmt.Sprintf("Deployment %s is not ready yet", deployments[0].GetName()))
 		return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionRunning,
@@ -132,13 +144,27 @@ func (r *FunctionReconciler) updateDeploymentStatus(ctx context.Context, log log
 	}
 }
 
-func (r *FunctionReconciler) isDeploymentInCondition(deployment appsv1.Deployment, conditionType appsv1.DeploymentConditionType) bool {
+func (r *FunctionReconciler) isDeploymentReady(deployment appsv1.Deployment) bool {
+	return r.hasDeploymentConditionTrueStatusWithReason(deployment, appsv1.DeploymentAvailable, MinimumReplicasAvailable) &&
+		r.hasDeploymentConditionTrueStatusWithReason(deployment, appsv1.DeploymentProgressing, NewRSAvailableReason)
+}
+
+func (r *FunctionReconciler) hasDeploymentConditionTrueStatus(deployment appsv1.Deployment, conditionType appsv1.DeploymentConditionType) bool {
 	for _, condition := range deployment.Status.Conditions {
 		if condition.Type == conditionType {
 			return condition.Status == corev1.ConditionTrue
 		}
 	}
+	return false
+}
 
+func (r *FunctionReconciler) hasDeploymentConditionTrueStatusWithReason(deployment appsv1.Deployment, conditionType appsv1.DeploymentConditionType, reason string) bool {
+	for _, condition := range deployment.Status.Conditions {
+		if condition.Type == conditionType {
+			return condition.Status == corev1.ConditionTrue &&
+				condition.Reason == reason
+		}
+	}
 	return false
 }
 

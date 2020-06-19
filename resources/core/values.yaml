@@ -30,10 +30,10 @@ global:
     version: 6b4c356f
   xip_patch:
     dir:
-    version: PR-8619
+    version: d022112f
   e2e_external_solution:
     dir:
-    version: PR-8709
+    version: PR-8734
   e2e_external_solution_test_service:
     dir:
     version: PR-8483

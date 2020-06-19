@@ -13,7 +13,7 @@ This guide shows you how to register a service of your external solution in Kyma
 
 1. To register a service with a Basic Authentication-secured API, follow this template to prepare the request body:
 
-   >**NOTE:** Follow [this](#tutorials-register-a-secured-api) tutorial to learn how to register APIs secured with different security schemes or protected against cross-site request forgery (CSRF) attacks.
+   >**NOTE:** Follow the [tutorial](#tutorials-register-a-secured-api) to learn how to register APIs secured with different security schemes or protected against cross-site request forgery (CSRF) attacks.
 
    ```json
    {
@@ -111,7 +111,7 @@ This guide shows you how to register a service of your external solution in Kyma
    ```
 
 2. Include the request body you prepared in the following call to register a service:
-   
+
    ```bash
    curl -X POST -d '{YOUR_REQUEST_BODY}' https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
    ```
@@ -123,7 +123,7 @@ This guide shows you how to register a service of your external solution in Kyma
    ```
 
 ### Check the details of a registered service
-   
+
 ```bash
 curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
@@ -132,7 +132,7 @@ curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{YOUR_SERV
 
 The Application Registry allows you to pass API specifications in a form of specification URLs.
 
-To register an API with a specification URL, replace `api.spec` with `api.specificationUrl`. 
+To register an API with a specification URL, replace `api.spec` with `api.specificationUrl`.
 
 >**NOTE:** If both api.spec and api.specificationUrl are provided, api.spec will be used due to its higher priority.
 
@@ -191,7 +191,7 @@ To register an API with a specification URL secured with OAuth, add a `specifica
 | **clientId** | OAuth client ID |
 | **clientSecret** | OAuth client Secret |
 | **requestParameters.headers** | Custom request headers (optional)|   
-| **requestParameters.queryParameters** | Custom query parameters (optional)| 
+| **requestParameters.queryParameters** | Custom query parameters (optional)|
 
 This is an example of the `api` section of the request body for an API with a specification URL secured with OAuth:
 
@@ -217,7 +217,7 @@ This is an example of the `api` section of the request body for an API with a sp
     }
 ```
 
-## Use custom headers and query parameters for fetching API specification from URL 
+## Use custom headers and query parameters for fetching API specification from URL
 
 You can specify additional headers and query parameters to inject to requests made to the specification URL.
 

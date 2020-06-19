@@ -42,6 +42,7 @@ func (am *KymaActionManager) RemoveActionLabel(name string, namespace string) er
 		if getErr != nil {
 			log.Println("Error on getting installation object")
 			log.Println(getErr)
+			return getErr
 		}
 
 		installationCopy := instObj.DeepCopy()

@@ -7,7 +7,7 @@ This tutorial shows how you can bind a sample instance of the Redis service to a
 
 To create the binding, you will use ServiceBinding and ServiceBindingUsage custom resources (CRs) managed by the Service Catalog.
 
->**NOTE:** To learn more about binding Service Instances to applications in Kyma, read [this](/components/service-catalog/#details-provisioning-and-binding) document.
+>**NOTE:** See the document on [provisioning and binding](/components/service-catalog/#details-provisioning-and-binding) to learn more about binding Service Instances to applications in Kyma.
 
 ## Prerequisites
 
@@ -25,115 +25,115 @@ Follows these steps:
 
 1. Export these variables:
 
-    ```bash
-    export NAME={FUNCTION_NAME}
-    export NAMESPACE={FUNCTION_NAMESPACE}
-    ```
+   ```bash
+   export NAME={FUNCTION_NAME}
+   export NAMESPACE={FUNCTION_NAMESPACE}
+   ```
 
-    > **NOTE:** Function takes the name from the Function CR name. The ServiceInstance, ServiceBinding, and ServiceBindingUsage CRs can have different names, but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
+   > **NOTE:** Function takes the name from the Function CR name. The ServiceInstance, ServiceBinding, and ServiceBindingUsage CRs can have different names, but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 
-    > **NOTE:** If you already have a Redis instance provisioned on your cluster, move directly to point 6 to create a Service Binding.
+   > **NOTE:** If you already have a Redis instance provisioned on your cluster, move directly to point 6 to create a Service Binding.
 
 2. Provision an Addon CR with the Redis service:
 
-    ```yaml
-    cat <<EOF | kubectl apply -f  -
-    apiVersion: addons.kyma-project.io/v1alpha1
-    kind: AddonsConfiguration
-    metadata:
-      name: $NAME
-      namespace: $NAMESPACE
-    spec:
-      reprocessRequest: 0
-      repositories:
-      - url: https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml
-    EOF
-    ```
+   ```yaml
+   cat <<EOF | kubectl apply -f  -
+   apiVersion: addons.kyma-project.io/v1alpha1
+   kind: AddonsConfiguration
+   metadata:
+     name: $NAME
+     namespace: $NAMESPACE
+   spec:
+     reprocessRequest: 0
+     repositories:
+     - url: https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml
+   EOF
+   ```
 
 3. Check if the Addon CR was created successfully. The CR phase should state `Ready`:
 
-    ```bash
-    kubectl get addons $NAME -n $NAMESPACE -o=jsonpath="{.status.phase}"
-    ```
+   ```bash
+   kubectl get addons $NAME -n $NAMESPACE -o=jsonpath="{.status.phase}"
+   ```
 
 4. Create a ServiceInstance CR. You will use the provisioned [Redis](https://redis.io/) service with its `micro` plan:
 
-    ```yaml
-    cat <<EOF | kubectl apply -f -
-    apiVersion: servicecatalog.k8s.io/v1beta1
-    kind: ServiceInstance
-    metadata:
-      name: $NAME
-      namespace: $NAMESPACE
-    spec:
-      serviceClassExternalName: redis
-      servicePlanExternalName: micro
-      parameters:
-        imagePullPolicy: Always
-    EOF    
-    ```
+   ```yaml
+   cat <<EOF | kubectl apply -f -
+   apiVersion: servicecatalog.k8s.io/v1beta1
+   kind: ServiceInstance
+   metadata:
+     name: $NAME
+     namespace: $NAMESPACE
+   spec:
+     serviceClassExternalName: redis
+     servicePlanExternalName: micro
+     parameters:
+       imagePullPolicy: Always
+   EOF
+   ```
 
 5. Check if the ServiceInstance CR was created successfully. The last condition in the CR status should state `Ready True`:
 
-    ```bash
-    kubectl get serviceinstance $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
-    ```
+   ```bash
+   kubectl get serviceinstance $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
+   ```
 
 6. Create a ServiceBinding CR that points to the newly created Service Instance in the **spec.instanceRef** field:
 
-    ```yaml
-    cat <<EOF | kubectl apply -f -
-    apiVersion: servicecatalog.k8s.io/v1beta1
-    kind: ServiceBinding
-    metadata:
-      name: $NAME
-      namespace: $NAMESPACE
-    spec:
-      instanceRef:
-        name: $NAME
-    EOF    
-    ```
+   ```yaml
+   cat <<EOF | kubectl apply -f -
+   apiVersion: servicecatalog.k8s.io/v1beta1
+   kind: ServiceBinding
+   metadata:
+     name: $NAME
+     namespace: $NAMESPACE
+   spec:
+     instanceRef:
+       name: $NAME
+   EOF
+   ```
 
-    > **NOTE:** If you use an existing Service Instance, change **spec.instanceRef.name** to the name of your Service Instance.
+   > **NOTE:** If you use an existing Service Instance, change **spec.instanceRef.name** to the name of your Service Instance.
 
 7. Check if the ServiceBinding CR was created successfully. The last condition in the CR status should state `Ready True`:
 
-    ```bash
-    kubectl get servicebinding $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
-    ```
+   ```bash
+   kubectl get servicebinding $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
+   ```
 
 8. Create a ServiceBindingUsage CR:
 
-    ```yaml
-    cat <<EOF | kubectl apply -f -
-    apiVersion: servicecatalog.kyma-project.io/v1alpha1
-    kind: ServiceBindingUsage
-    metadata:
-      name: $NAME
-      namespace: $NAMESPACE
-    spec:
-      serviceBindingRef:
-        name: $NAME
-      usedBy:
-        kind: serverless-function
-        name: $NAME
-      parameters:
-        envPrefix:
-          name: "REDIS_"
-    EOF
-    ```
+   ```yaml
+   cat <<EOF | kubectl apply -f -
+   apiVersion: servicecatalog.kyma-project.io/v1alpha1
+   kind: ServiceBindingUsage
+   metadata:
+     name: $NAME
+     namespace: $NAMESPACE
+   spec:
+     serviceBindingRef:
+       name: $NAME
+     usedBy:
+       kind: serverless-function
+       name: $NAME
+     parameters:
+       envPrefix:
+         name: "REDIS_"
+   EOF
+   ```
 
-    - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the Service Binding you have just created and **spec.usedBy** points to the Function. More specifically, **spec.usedBy** refers to the name of the related KService CR (`name: $NAME`) and the cluster-specific [UsageKind CR](https://kyma-project.io/docs/components/service-catalog/#custom-resource-usage-kind) (`kind: serverless-function`) that defines how Secrets should be injected to your Function when creating a Service Binding.
+   - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the Service Binding you have just created and **spec.usedBy** points to the Function. More specifically, **spec.usedBy** refers to the name of the Function and the cluster-specific [UsageKind CR](https://kyma-project.io/docs/components/service-catalog/#custom-resource-usage-kind) (`kind: serverless-function`) that defines how Secrets should be injected to your Function when creating a Service Binding.
 
-    - The **spec.parameters.envPrefix.name** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a Service Binding. In our example, **envPrefix** is `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
+   - The **spec.parameters.envPrefix.name** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a Service Binding. In our example, **envPrefix** is `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
 
-        > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
+     > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
 9. Check if the ServiceBindingUsage CR was created successfully. The last condition in the CR status should state `Ready True`:
 
-    ```bash
-    kubectl get servicebindingusage $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
-    ```
+   ```bash
+   kubectl get servicebindingusage $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
+   ```
 
 10. Retrieve and decode Secret details from the Service Binding:
 
@@ -149,7 +149,7 @@ Follows these steps:
     REDIS_PASSWORD: 1tvDcINZvp
     ```
 
-    > **NOTE:** If you added the **REDIS_** prefix for environmental variables in step 6, all variables will start with it. For example, the **PORT** variable will take the form of **REDIS_PORT**.
+    > **NOTE:** If you added the **REDIS\_** prefix for environmental variables in step 6, all variables will start with it. For example, the **PORT** variable will take the form of **REDIS_PORT**.
 
     </details>
     <details>
@@ -173,7 +173,7 @@ Follow these steps:
 
 4. Select **Add** to confirm changes.
 
-    You will see that the Addon has the `Ready` status.
+   You will see that the Addon has the `Ready` status.
 
 ### Create a Service Instance
 
@@ -183,11 +183,11 @@ Follow these steps:
 
 3. Change the **Name** to match the Function, select `micro` from the **Plan** drop-down list, and set **Image pull policy** to `Always`.
 
-    > **NOTE:** The Service Instance, Service Binding, and Service Binding Usage can have different names than the Function, but it is recommended that all related resources share a common name.
+   > **NOTE:** The Service Instance, Service Binding, and Service Binding Usage can have different names than the Function, but it is recommended that all related resources share a common name.
 
 4. Select **Create** to confirm changes.
 
-    Wait until the status of the instance changes from `PROVISIONING` to `RUNNING`.
+   Wait until the status of the instance changes from `PROVISIONING` to `RUNNING`.
 
 ### Bind the Function to the Service Instance
 
@@ -201,11 +201,12 @@ Follow these steps:
 
 The message appears on the screen confirming that the Service Binding was successfully created, and you will see it in the **Service Bindings** section in your Function, along with environment variable names.
 
->**NOTE:** The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a Service Binding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
+> **NOTE:** The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a Service Binding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
 
 > **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
     </details>
+
 </div>
 
 ## Test the Function
@@ -214,16 +215,16 @@ To test if the Secret has been properly connected to the Function:
 
 1. Change the Function's code to:​
 
-    ```js
-    module.exports = {
-      main: function (event, context) {
-        return "Redis port: " + process.env.REDIS_PORT;
-      }
-    }
-    ```
+   ```js
+   module.exports = {
+     main: function (event, context) {
+       return "Redis port: " + process.env.REDIS_PORT;
+     },
+   };
+   ```
 
 2. Expose the Function through an [API Rule](#tutorials-expose-a-function-with-an-api-rule), and access the Function's external address. You should get this result:
 
-    ```text
-    Redis port: 6379
-    ```
+   ```text
+   Redis port: 6379
+   ```

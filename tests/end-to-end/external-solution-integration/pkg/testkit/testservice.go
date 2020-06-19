@@ -29,8 +29,8 @@ const (
 	testServiceNamePrefix   = "ctr-svc"
 	testServicePort         = 8090
 	labelKey                = "component"
-	healthEndpointFormat    = "https://%s.%s/health"
-	endpointFormat          = "https://%s.%s"
+	healthEndpointFormat    = "http://%s.%s:%d/health"
+	endpointFormat          = "http://%s.%s:%d"
 	inClusterEndpointFormat = "http://%s.%s.svc.cluster.local:%v"
 	gateway                 = "kyma-gateway.kyma-system.svc.cluster.local"
 )
@@ -157,7 +157,7 @@ func (ts *TestService) DeleteTestService() error {
 }
 
 func (ts *TestService) GetTestServiceURL() string {
-	return fmt.Sprintf(endpointFormat, ts.testServiceName, ts.domain)
+	return fmt.Sprintf(endpointFormat, ts.testServiceName, ts.namespace, testServicePort)
 }
 
 func (ts *TestService) GetInClusterTestServiceURL() string {
@@ -165,7 +165,7 @@ func (ts *TestService) GetInClusterTestServiceURL() string {
 }
 
 func (ts *TestService) getHealthEndpointURL() string {
-	return fmt.Sprintf(healthEndpointFormat, ts.testServiceName, ts.domain)
+	return fmt.Sprintf(healthEndpointFormat, ts.testServiceName, ts.namespace, testServicePort)
 }
 
 func (ts *TestService) createDeployment() error {

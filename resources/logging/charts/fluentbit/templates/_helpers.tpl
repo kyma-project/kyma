@@ -76,9 +76,6 @@ Common labels
 {{- define "fluent-bit.labels" -}}
 helm.sh/chart: {{ include "fluent-bit.chart" . }}
 {{ include "fluent-bit.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 

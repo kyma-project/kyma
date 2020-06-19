@@ -5,7 +5,7 @@ type: Tutorials
 
 This tutorial is intended for the developers who want to quickly learn how to deploy a sample service and test it with the Kyma cluster.
 
-This tutorial uses a standalone sample service written in the [Go](http://golang.org) language.
+This tutorial uses a standalone sample service written in the [Go language](http://golang.org).
 
 ## Prerequisites
 

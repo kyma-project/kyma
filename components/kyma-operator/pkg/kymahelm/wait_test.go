@@ -5,18 +5,22 @@ import (
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
 )
 
 func TestWaitForCondition(t *testing.T) {
 
-	const testReleaseName = "some"
+	const testReleaseName = "someRelease"
+	const testReleaseNamespace = "someNamespace"
+	testRelNmspcName := NamespacedName{
+		Name:      testReleaseName,
+		Namespace: testReleaseNamespace,
+	}
 
-	mockReleaseStatusFn := ReleaseStatusFunc(func(releaseName string) (*rls.GetReleaseStatusResponse, error) {
-		if releaseName == testReleaseName {
+	mockReleaseStatusFn := ReleaseStatusFunc(func(nn NamespacedName) (*ReleaseStatus, error) {
+		if nn.Name == testReleaseName {
 			return nil, nil
 		}
-		return nil, errors.New("Unknown revision")
+		return nil, errors.New("Unknown release")
 	})
 
 	Convey("Client.WaitForCondition function should", t, func() {
@@ -27,14 +31,14 @@ func TestWaitForCondition(t *testing.T) {
 			//given
 			count := 0
 			c := &Client{}
-			predicateFn := func(*rls.GetReleaseStatusResponse, error) (bool, error) {
+			predicateFn := func(*ReleaseStatus, error) (bool, error) {
 				count++
 				//always succeeds
 				return true, nil
 			}
 
 			//when
-			success, err := c.WaitForCondition(testReleaseName, predicateFn, commonOptions...)
+			success, err := c.WaitForCondition(testRelNmspcName, predicateFn, commonOptions...)
 
 			//then
 			So(err, ShouldBeNil)
@@ -51,7 +55,7 @@ func TestWaitForCondition(t *testing.T) {
 			predicateFn := succeedAtCountPredicateFn(&count, succeedAtCount)
 
 			//when
-			success, err := c.WaitForCondition(testReleaseName, predicateFn, commonOptions...)
+			success, err := c.WaitForCondition(testRelNmspcName, predicateFn, commonOptions...)
 
 			//then
 			So(err, ShouldBeNil)
@@ -69,7 +73,7 @@ func TestWaitForCondition(t *testing.T) {
 			predicateFn := succeedAtCountPredicateFn(&count, succeedAtCount)
 
 			//when
-			success, err := c.WaitForCondition(testReleaseName, predicateFn, commonOptions...)
+			success, err := c.WaitForCondition(testRelNmspcName, predicateFn, commonOptions...)
 
 			//then
 			So(err, ShouldBeNil)
@@ -86,7 +90,7 @@ func TestWaitForCondition(t *testing.T) {
 			predicateFn := alwaysFailPredicateFn(&count)
 
 			//when
-			b, err := c.WaitForCondition(testReleaseName, predicateFn, commonOptions...)
+			b, err := c.WaitForCondition(testRelNmspcName, predicateFn, commonOptions...)
 
 			//then
 			So(err, ShouldBeNil)
@@ -100,7 +104,7 @@ func TestWaitForCondition(t *testing.T) {
 			const failAtCount = 4
 
 			c := &Client{}
-			failAtCountPredicateFn := func(*rls.GetReleaseStatusResponse, error) (bool, error) {
+			failAtCountPredicateFn := func(*ReleaseStatus, error) (bool, error) {
 				if count == failAtCount {
 					return false, errors.New("Predicate error occured")
 				}
@@ -109,7 +113,7 @@ func TestWaitForCondition(t *testing.T) {
 			}
 
 			//when
-			b, err := c.WaitForCondition(testReleaseName, failAtCountPredicateFn, commonOptions...)
+			b, err := c.WaitForCondition(testRelNmspcName, failAtCountPredicateFn, commonOptions...)
 
 			//then
 			So(err, ShouldNotBeNil)
@@ -125,7 +129,7 @@ func TestWaitForCondition(t *testing.T) {
 			count := initialCountValue
 			c := &Client{}
 
-			failUntilErrorPredicateFn := func(resp *rls.GetReleaseStatusResponse, err error) (bool, error) {
+			failUntilErrorPredicateFn := func(relStatus *ReleaseStatus, err error) (bool, error) {
 				count++
 				if err != nil {
 					So(err.Error(), ShouldContainSubstring, "Release status function error occured")
@@ -134,15 +138,15 @@ func TestWaitForCondition(t *testing.T) {
 				return false, nil
 			}
 
-			relStatusWithErrAtCountFn := func(releaseName string) (*rls.GetReleaseStatusResponse, error) {
+			relStatusWithErrAtCountFn := func(nn NamespacedName) (*ReleaseStatus, error) {
 				if count == expectedRetries {
 					return nil, errors.New("Release status function error occured")
 				}
-				return nil, nil
+				return &ReleaseStatus{}, nil
 			}
 
 			//when
-			b, err := c.WaitForCondition(testReleaseName, failUntilErrorPredicateFn, ReleaseStatusFunc(relStatusWithErrAtCountFn), SleepTimeSecs(0), MaxIterations(10))
+			b, err := c.WaitForCondition(testRelNmspcName, failUntilErrorPredicateFn, ReleaseStatusFunc(relStatusWithErrAtCountFn), SleepTimeSecs(0), MaxIterations(10))
 
 			//then
 			So(err, ShouldBeNil)
@@ -161,7 +165,7 @@ func TestWaitForCondition(t *testing.T) {
 			c := &Client{}
 
 			//when
-			b, err := c.WaitForCondition(testReleaseName, alwaysFailPredicateFn(&count), SleepTimeSecs(0), mockReleaseStatusFn)
+			b, err := c.WaitForCondition(testRelNmspcName, alwaysFailPredicateFn(&count), SleepTimeSecs(0), mockReleaseStatusFn)
 
 			//then
 			So(err, ShouldBeNil)
@@ -172,15 +176,15 @@ func TestWaitForCondition(t *testing.T) {
 	})
 }
 
-func alwaysFailPredicateFn(count *int) func(*rls.GetReleaseStatusResponse, error) (bool, error) {
-	return func(*rls.GetReleaseStatusResponse, error) (bool, error) {
+func alwaysFailPredicateFn(count *int) func(*ReleaseStatus, error) (bool, error) {
+	return func(*ReleaseStatus, error) (bool, error) {
 		(*count)++
 		return false, nil
 	}
 }
 
-func succeedAtCountPredicateFn(count *int, atValue int) func(*rls.GetReleaseStatusResponse, error) (bool, error) {
-	return func(*rls.GetReleaseStatusResponse, error) (bool, error) {
+func succeedAtCountPredicateFn(count *int, atValue int) func(*ReleaseStatus, error) (bool, error) {
+	return func(*ReleaseStatus, error) (bool, error) {
 		if (*count) == atValue {
 			return true, nil
 		}

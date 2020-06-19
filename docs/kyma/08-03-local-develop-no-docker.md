@@ -9,7 +9,7 @@ This tutorial shows how to use this feature, using the service example implement
 
 ## Prerequisites
 
-Install [Go](https://golang.org/dl/).
+Install [Go tools](https://golang.org/dl/).
 
 ## Steps
 
@@ -35,7 +35,7 @@ Install [Go](https://golang.org/dl/).
 
 ### Mount the example directory into Minikube
 
-For this step, you need a running local Kyma instance. Read [this](#installation-install-kyma-locally-from-the-release) document to learn how to install Kyma locally.
+For this step, you need a running local Kyma instance. Read the [installation document](#installation-install-kyma-locally-from-the-release) to learn how to install Kyma locally.
 
 1. Open the terminal window. Do not close it until the development finishes.
 2. Mount your local drive into Minikube:
