@@ -61,4 +61,5 @@ Follow these steps:
     kyma install -o {azure-secret.yaml} -c {installer-cr-azure-eventhubs.yaml.tpl}
     ```
   >**NOTE**: Use `-o` instead of `-c` if you're using Kyma CLI 1.13 or lower.
+  
   >**TIP**: If you want to set up Kafka Channel as a default Channel, follow the [tutorial](#tutorials-set-up-a-default-channel).
