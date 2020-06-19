@@ -330,7 +330,7 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
 				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
-				serverlessv1alpha1.FunctionResourceLabel: serverlessv1alpha1.FunctionResourceLabelDeploymentValue,
+				serverlessv1alpha1.FunctionResourceLabel:  serverlessv1alpha1.FunctionResourceLabelDeploymentValue,
 				"test-some":                               "test-label",
 			},
 		},
