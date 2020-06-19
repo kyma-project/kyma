@@ -20,6 +20,6 @@ spec:
       protocol: {{ .Values.metrics.manager.port.protocol }}
       targetPort: {{ .Values.metrics.manager.port.targerPort }}
   selector:
-    app: {{ template "name" . }}-deployment
-    app.kubernetes.io/name: {{ template "name" . }}-deployment
+    app: {{ template "name" . }}
+    app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/instance: "{{ .Release.Name }}"

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "rafterAsyncAPIService.fullname" . }}
+  name: {{ include "rafterAsyncAPIService.deployment.fullname" . }}
   labels:
     app.kubernetes.io/name: {{ include "rafterAsyncAPIService.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

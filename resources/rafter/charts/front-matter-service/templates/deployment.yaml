@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "rafterFrontMatterService.fullname" . }}
+  name: {{ include "rafterFrontMatterService.deployment.fullname" . }}
   labels:
     app.kubernetes.io/name: {{ include "rafterFrontMatterService.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
