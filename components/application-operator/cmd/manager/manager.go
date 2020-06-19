@@ -160,4 +160,5 @@ func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient
 	releaseManager := appRelease.NewApplicationReleaseManager(helmClient, appClient.ApplicationconnectorV1alpha1().Applications(), overridesDefaults, options.namespace)
 
 	return releaseManager, nil
+	test
 }
