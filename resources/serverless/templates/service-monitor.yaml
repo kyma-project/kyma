@@ -13,7 +13,7 @@ spec:
       interval: "{{ .Values.metrics.serviceMonitor.scrapeInterval }}"
   selector:
     matchLabels:
-      app: {{ template "name" . }}-deployment
-      app.kubernetes.io/name: {{ template "name" . }}-deployment
+      app: {{ template "name" . }}
+      app.kubernetes.io/name: {{ template "name" . }}
       app.kubernetes.io/instance: "{{ .Release.Name }}"
 {{- end }}
