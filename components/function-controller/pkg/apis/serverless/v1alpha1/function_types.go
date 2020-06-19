@@ -51,6 +51,7 @@ const (
 	ConditionReasonConfigMapUpdated               ConditionReason = "ConfigMapUpdated"
 	ConditionReasonJobFailed                      ConditionReason = "JobFailed"
 	ConditionReasonJobCreated                     ConditionReason = "JobCreated"
+	ConditionReasonJobUpdated                     ConditionReason = "JobUpdated"
 	ConditionReasonJobRunning                     ConditionReason = "JobRunning"
 	ConditionReasonJobsDeleted                    ConditionReason = "JobsDeleted"
 	ConditionReasonJobFinished                    ConditionReason = "JobFinished"

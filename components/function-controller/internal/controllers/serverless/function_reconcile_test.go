@@ -27,6 +27,8 @@ const (
 	testBindingLabel2     = "use-ec7cd950-9c2b-45a4-9f63-556fd8ea07f5"
 	testBindingLabelValue = "146000"
 	conditionLen          = 3
+	addedLabelKey         = "that-label"
+	addedLabelValue       = "wasnt-here"
 )
 
 var _ = ginkgo.Describe("Function", func() {
@@ -549,86 +551,341 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(hpaList.Items[0].Spec.ScaleTargetRef.Name).To(gomega.Equal(deployList.Items[0].Name), "hpa should target proper deployment")
 	})
 
-	ginkgo.It("should behave correctly on label addition and subtraction", func() {
-		ginkgo.By("creating cm")
-		_, err := reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
+	ginkgo.Context("label operations", func() {
+		ginkgo.It("should behave correctly on label addition and subtraction", func() {
+			ginkgo.By("creating cm")
+			_, err := reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
 
-		ginkgo.By("creating job")
-		_, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
+			ginkgo.By("creating job")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
 
-		function := &serverlessv1alpha1.Function{}
-		gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+			function := &serverlessv1alpha1.Function{}
+			gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 
-		jobList := &batchv1.JobList{}
-		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, jobList)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(jobList.Items).To(gomega.HaveLen(1))
+			jobList := &batchv1.JobList{}
+			err = resourceClient.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, jobList)
+			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(jobList.Items).To(gomega.HaveLen(1))
 
-		job := &batchv1.Job{}
-		gomega.Expect(resourceClient.Get(context.TODO(), types.NamespacedName{Namespace: jobList.Items[0].GetNamespace(), Name: jobList.Items[0].GetName()}, job)).To(gomega.Succeed())
-		gomega.Expect(job).ToNot(gomega.BeNil())
-		job.Status.Succeeded = 1
-		now := metav1.Now()
-		job.Status.CompletionTime = &now
-		gomega.Expect(resourceClient.Status().Update(context.TODO(), job)).To(gomega.Succeed())
+			job := &batchv1.Job{}
+			gomega.Expect(resourceClient.Get(context.TODO(), types.NamespacedName{Namespace: jobList.Items[0].GetNamespace(), Name: jobList.Items[0].GetName()}, job)).To(gomega.Succeed())
+			gomega.Expect(job).ToNot(gomega.BeNil())
+			job.Status.Succeeded = 1
+			now := metav1.Now()
+			job.Status.CompletionTime = &now
+			gomega.Expect(resourceClient.Status().Update(context.TODO(), job)).To(gomega.Succeed())
 
-		ginkgo.By("job finished")
-		_, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
+			ginkgo.By("job finished")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
 
-		ginkgo.By("creating deployment")
-		_, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
+			ginkgo.By("creating deployment")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
 
-		ginkgo.By("creating svc")
-		_, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
+			ginkgo.By("creating svc")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
 
-		ginkgo.By("creating hpa")
-		_, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
+			ginkgo.By("creating hpa")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
 
-		ginkgo.By("deployment ready")
-		deployments := &appsv1.DeploymentList{}
-		gomega.Expect(resourceClient.ListByLabel(context.TODO(), request.Namespace, fnLabels, deployments)).To(gomega.Succeed())
-		gomega.Expect(len(deployments.Items)).To(gomega.Equal(1))
+			ginkgo.By("deployment ready")
+			deployments := &appsv1.DeploymentList{}
+			gomega.Expect(resourceClient.ListByLabel(context.TODO(), request.Namespace, fnLabels, deployments)).To(gomega.Succeed())
+			gomega.Expect(len(deployments.Items)).To(gomega.Equal(1))
 
-		deployment := &deployments.Items[0]
-		deployment.Status.Conditions = []appsv1.DeploymentCondition{
-			{Type: appsv1.DeploymentAvailable, Status: corev1.ConditionTrue, Reason: MinimumReplicasAvailable},
-			{Type: appsv1.DeploymentProgressing, Status: corev1.ConditionTrue, Reason: NewRSAvailableReason},
-		}
-		gomega.Expect(resourceClient.Status().Update(context.TODO(), deployment)).To(gomega.Succeed())
+			deployment := &deployments.Items[0]
+			deployment.Status.Conditions = []appsv1.DeploymentCondition{
+				{Type: appsv1.DeploymentAvailable, Status: corev1.ConditionTrue, Reason: MinimumReplicasAvailable},
+				{Type: appsv1.DeploymentProgressing, Status: corev1.ConditionTrue, Reason: NewRSAvailableReason},
+			}
+			gomega.Expect(resourceClient.Status().Update(context.TODO(), deployment)).To(gomega.Succeed())
 
-		_, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
 
-		ginkgo.By("updating function metadata.labels")
-		gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		gomega.Expect(function.Labels).To(gomega.BeNil())
+			ginkgo.By("updating function metadata.labels")
+			function = &serverlessv1alpha1.Function{}
+			gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+			gomega.Expect(function.Labels).To(gomega.BeNil())
 
-		functionWithLabels := function.DeepCopy()
-		functionWithLabels.Labels = map[string]string{
-			"that-label": "wasnt-here",
-		}
-		gomega.Expect(resourceClient.Update(context.TODO(), functionWithLabels)).To(gomega.Succeed())
+			functionWithLabels := function.DeepCopy()
+			functionWithLabels.Labels = map[string]string{
+				addedLabelKey: addedLabelValue,
+			}
 
-		gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		gomega.Expect(function.Labels).NotTo(gomega.BeNil())
+			gomega.Expect(resourceClient.Update(context.TODO(), functionWithLabels)).To(gomega.Succeed())
 
-		ginkgo.By("updating configmap")
-		_, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
+			function = &serverlessv1alpha1.Function{}
+			gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+			gomega.Expect(function.Labels).NotTo(gomega.BeNil())
 
-		ginkgo.By("updating job")
-		_, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
+			ginkgo.By("updating configmap")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
 
-		ginkgo.By("updating job")
-		_, err = reconciler.Reconcile(request)
-		gomega.Expect(err).NotTo(gomega.BeNil())
+			configMapList := &corev1.ConfigMapList{}
+			err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
+			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(configMapList.Items).To(gomega.HaveLen(1))
+
+			cmLabelVal, ok := configMapList.Items[0].Labels[addedLabelKey]
+			gomega.Expect(ok).To(gomega.BeTrue())
+			gomega.Expect(cmLabelVal).To(gomega.Equal(addedLabelValue))
+
+			ginkgo.By("updating job")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			function = &serverlessv1alpha1.Function{}
+			gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+			gomega.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
+			gomega.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonJobUpdated))
+
+			jobList = &batchv1.JobList{}
+			err = resourceClient.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, jobList)
+			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(jobList.Items).To(gomega.HaveLen(1))
+
+			jobLabelVal, ok := jobList.Items[0].Labels[addedLabelKey]
+			gomega.Expect(ok).To(gomega.BeTrue())
+			gomega.Expect(jobLabelVal).To(gomega.Equal(addedLabelValue))
+
+			ginkgo.By("reconciling job to make sure it's already finished")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			function = &serverlessv1alpha1.Function{}
+			gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+			gomega.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
+			gomega.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonJobFinished))
+
+			ginkgo.By("updating deployment")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			deployList := &appsv1.DeploymentList{}
+			err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, deployList)
+			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(deployList.Items).To(gomega.HaveLen(1))
+
+			deployLabelVal, ok := deployList.Items[0].Labels[addedLabelKey]
+			gomega.Expect(ok).To(gomega.BeTrue())
+			gomega.Expect(deployLabelVal).To(gomega.Equal(addedLabelValue))
+
+			ginkgo.By("updating service")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			svcList := &corev1.ServiceList{}
+			err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, svcList)
+			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(svcList.Items).To(gomega.HaveLen(1))
+
+			svcLabelVal, ok := svcList.Items[0].Labels[addedLabelKey]
+			gomega.Expect(ok).To(gomega.BeTrue())
+			gomega.Expect(svcLabelVal).To(gomega.Equal(addedLabelValue))
+
+			ginkgo.By("updating hpa")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			hpaList := &autoscalingv1.HorizontalPodAutoscalerList{}
+			err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
+			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(hpaList.Items).To(gomega.HaveLen(1))
+
+			hpaLabelVal, ok := hpaList.Items[0].Labels[addedLabelKey]
+			gomega.Expect(ok).To(gomega.BeTrue())
+			gomega.Expect(hpaLabelVal).To(gomega.Equal(addedLabelValue))
+
+			ginkgo.By("status ready")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			function = &serverlessv1alpha1.Function{}
+			gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+			gomega.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
+			gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+			gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+			gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
+
+			gomega.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentReady))
+
+			ginkgo.By("getting rid of formerly added labels")
+			gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+			gomega.Expect(function.Labels).NotTo(gomega.BeNil())
+
+			functionWithoutLabels := function.DeepCopy()
+			functionWithoutLabels.Labels = nil
+			gomega.Expect(resourceClient.Update(context.TODO(), functionWithoutLabels)).To(gomega.Succeed())
+
+			function = &serverlessv1alpha1.Function{}
+			gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+			gomega.Expect(function.Labels).To(gomega.BeNil())
+
+			ginkgo.By("reconciling again -> configmap")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			configMapList = &corev1.ConfigMapList{}
+			err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
+			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(configMapList.Items).To(gomega.HaveLen(1))
+
+			_, ok = configMapList.Items[0].Labels[addedLabelKey]
+			gomega.Expect(ok).To(gomega.BeFalse())
+
+			ginkgo.By("reconciling again -> job")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			jobList = &batchv1.JobList{}
+			err = resourceClient.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, jobList)
+			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(jobList.Items).To(gomega.HaveLen(1))
+
+			_, ok = jobList.Items[0].Labels[addedLabelKey]
+			gomega.Expect(ok).To(gomega.BeFalse())
+
+			ginkgo.By("reconciling again -> job finished")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			ginkgo.By("reconciling again -> deployment")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			deployList = &appsv1.DeploymentList{}
+			err = resourceClient.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, deployList)
+			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(deployList.Items).To(gomega.HaveLen(1))
+
+			_, ok = deployList.Items[0].Labels[addedLabelKey]
+			gomega.Expect(ok).To(gomega.BeFalse())
+
+			ginkgo.By("reconciling again -> service")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			svcList = &corev1.ServiceList{}
+			err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, svcList)
+			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(svcList.Items).To(gomega.HaveLen(1))
+
+			_, ok = svcList.Items[0].Labels[addedLabelKey]
+			gomega.Expect(ok).To(gomega.BeFalse())
+
+			ginkgo.By("reconciling again -> hpa")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			hpaList = &autoscalingv1.HorizontalPodAutoscalerList{}
+			err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
+			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(hpaList.Items).To(gomega.HaveLen(1))
+
+			_, ok = hpaList.Items[0].Labels[addedLabelKey]
+			gomega.Expect(ok).To(gomega.BeFalse())
+
+			ginkgo.By("reconciling again -> deployment ready")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			function = &serverlessv1alpha1.Function{}
+			gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+			gomega.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
+			gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+			gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+			gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
+
+			gomega.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentReady))
+		})
+		ginkgo.It("should behave correctly on label addition when job is in building phase", func() {
+			ginkgo.By("creating cm")
+			_, err := reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			ginkgo.By("creating job")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			function := &serverlessv1alpha1.Function{}
+			gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+
+			jobList := &batchv1.JobList{}
+			err = resourceClient.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, jobList)
+			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(jobList.Items).To(gomega.HaveLen(1))
+
+			ginkgo.By("updating function metadata.labels")
+			function = &serverlessv1alpha1.Function{}
+			gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+			gomega.Expect(function.Labels).To(gomega.BeNil())
+
+			functionWithLabels := function.DeepCopy()
+			functionWithLabels.Labels = map[string]string{
+				"that-label": "wasnt-here",
+			}
+			gomega.Expect(resourceClient.Update(context.TODO(), functionWithLabels)).To(gomega.Succeed())
+
+			function = &serverlessv1alpha1.Function{}
+			gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+			gomega.Expect(function.Labels).NotTo(gomega.BeNil())
+
+			ginkgo.By("updating configmap")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			ginkgo.By("updating job")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			ginkgo.By("job's finished")
+
+			job := &batchv1.Job{}
+			gomega.Expect(resourceClient.Get(context.TODO(), types.NamespacedName{Namespace: jobList.Items[0].GetNamespace(), Name: jobList.Items[0].GetName()}, job)).To(gomega.Succeed())
+			gomega.Expect(job).ToNot(gomega.BeNil())
+			job.Status.Succeeded = 1
+			now := metav1.Now()
+			job.Status.CompletionTime = &now
+			gomega.Expect(resourceClient.Status().Update(context.TODO(), job)).To(gomega.Succeed())
+
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			ginkgo.By("creating deployment")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			ginkgo.By("creating svc")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			ginkgo.By("creating hpa")
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+
+			ginkgo.By("deployment ready")
+			deployments := &appsv1.DeploymentList{}
+			gomega.Expect(resourceClient.ListByLabel(context.TODO(), request.Namespace, fnLabels, deployments)).To(gomega.Succeed())
+			gomega.Expect(len(deployments.Items)).To(gomega.Equal(1))
+
+			deployment := &deployments.Items[0]
+			deployment.Status.Conditions = []appsv1.DeploymentCondition{
+				{Type: appsv1.DeploymentAvailable, Status: corev1.ConditionTrue, Reason: MinimumReplicasAvailable},
+				{Type: appsv1.DeploymentProgressing, Status: corev1.ConditionTrue, Reason: NewRSAvailableReason},
+			}
+			gomega.Expect(resourceClient.Status().Update(context.TODO(), deployment)).To(gomega.Succeed())
+
+			_, err = reconciler.Reconcile(request)
+			gomega.Expect(err).To(gomega.BeNil())
+		})
+
 	})
 
 	ginkgo.It("should handle reconcilation lags", func() {

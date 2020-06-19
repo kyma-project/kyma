@@ -89,6 +89,7 @@ func (r *FunctionReconciler) updateService(ctx context.Context, log logr.Logger,
 func (r *FunctionReconciler) deleteExcessServices(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger, services []corev1.Service) (ctrl.Result, error) {
 	// services do not support deletecollection
 	// you can check this by `kubectl api-resources -o wide | grep services`
+	// also https://github.com/kubernetes/kubernetes/issues/68468#issuecomment-419981870
 
 	log.Info("Deleting excess Services")
 
