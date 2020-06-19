@@ -105,7 +105,7 @@ Processing of a Function CR can succeed, continue, or fail for one of these reas
 | `ConfigMapUpdated`               | `ConfigurationReady` | The existing ConfigMap was updated after changes in the Function CR name, its source code or dependencies.         |
 | `JobFailed`                      | `BuildReady`         | The image with the Function's configuration could not be created due to an error.                                  |
 | `JobCreated`                     | `BuildReady`         | The Kubernetes Job resource that builds the Function image was created.                                            |
-| `JobUpdated`                     | `BuildReady`         | The existing Job was updated after changing the Function's metadata and spec fields, which are not affecting the way of building the Function image, like labels. |
+| `JobUpdated`                     | `BuildReady`         | The existing Job was updated after changing the Function's metadata or spec fields which do not affect the way of building the Function image, such as labels. |
 | `JobRunning`                     | `BuildReady`         | The Job is in progress.                                                                                            |
 | `JobsDeleted`                    | `BuildReady`         | Previous Jobs responsible for building Function images were deleted.                                               |
 | `JobFinished`                    | `BuildReady`         | The Job was finished and the Function's image was uploaded to the Docker Registry.                                 |
