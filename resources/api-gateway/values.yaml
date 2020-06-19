@@ -79,7 +79,7 @@ tests:
   enabled: true
   image:
     registry: "eu.gcr.io/kyma-project"
-    version: "PR-8691"
+    version: d022112f
   env:
     testUser: "admin-user"
     timeout: 120

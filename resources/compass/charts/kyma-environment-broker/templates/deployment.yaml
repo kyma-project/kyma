@@ -205,6 +205,26 @@ spec:
                 secretKeyRef:
                   key: externalTesterAccessId
                   name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_INTERNAL_TESTER_SERVICE
+              valueFrom:
+                secretKeyRef:
+                  key: internalTesterService
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_EXTERNAL_TESTER_SERVICE
+              valueFrom:
+                secretKeyRef:
+                  key: externalTesterService
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_INTERNAL_TESTER_TAGS
+              valueFrom:
+                secretKeyRef:
+                  key: internalTesterTags
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_EXTERNAL_TESTER_TAGS
+              valueFrom:
+                secretKeyRef:
+                  key: externalTesterTags
+                  name: {{ .Values.avs.secretName }}
             - name: APP_AVS_GROUP_ID
               valueFrom:
                 secretKeyRef:

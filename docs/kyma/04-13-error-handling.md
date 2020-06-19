@@ -3,7 +3,7 @@ title: Error handling
 type: Installation
 ---
 
-Kyma Operator features a retry mechanism to handle temporary issues such as Tiller unavailability or a prolonged process of creating a resource path for custom resources in the Kubernetes API Server. 
+Kyma Operator features a retry mechanism to handle temporary issues such as prolonged process of creating a resource path for custom resources in the Kubernetes API Server. 
 If an error occurs while processing a component, Kyma Operator restores the initial state of that component and retries the step. Specific behavior of the controller depends on the nature of the operation that was interrupted by an error.
 
 ## Installation error

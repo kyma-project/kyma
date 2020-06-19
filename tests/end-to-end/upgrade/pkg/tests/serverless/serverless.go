@@ -27,7 +27,7 @@ const (
 	limitCPU               = "30m"
 	requestCPU             = "10m"
 	limitMemory            = "30Mi"
-	requestMemory          = "10Mi"
+	requestMemory          = "16Mi"
 
 	testTimeout  = 4 * time.Minute
 	waitInterval = 15 * time.Second
