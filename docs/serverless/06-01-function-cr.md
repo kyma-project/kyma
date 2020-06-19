@@ -103,9 +103,9 @@ Processing of a Function CR can succeed, continue, or fail for one of these reas
 | -------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `ConfigMapCreated`               | `ConfigurationReady` | A new ConfigMap was created based on the Function CR definition.                                                   |
 | `ConfigMapUpdated`               | `ConfigurationReady` | The existing ConfigMap was updated after changes in the Function CR name, its source code or dependencies.         |
-| `ConfigMapError`                 | `ConfigurationReady` | The ConfigMap could not be created or updated due to an error.                                                     |
 | `JobFailed`                      | `BuildReady`         | The image with the Function's configuration could not be created due to an error.                                  |
 | `JobCreated`                     | `BuildReady`         | The Kubernetes Job resource that builds the Function image was created.                                            |
+| `JobUpdated`                     | `BuildReady`         | The existing Job was updated after changing the Function's metadata and spec fields, which are not affecting the way of building the Function image, like labels. |
 | `JobRunning`                     | `BuildReady`         | The Job is in progress.                                                                                            |
 | `JobsDeleted`                    | `BuildReady`         | Previous Jobs responsible for building Function images were deleted.                                               |
 | `JobFinished`                    | `BuildReady`         | The Job was finished and the Function's image was uploaded to the Docker Registry.                                 |
@@ -116,10 +116,8 @@ Processing of a Function CR can succeed, continue, or fail for one of these reas
 | `DeploymentReady`                | `Running`            | The Function was deployed and is ready.                                                                            |
 | `ServiceCreated`                 | `Running`            | A new Service referencing the Function's Deployment was created.                                                   |
 | `ServiceUpdated`                 | `Running`            | The existing Service was updated after applying required changes.                                                  |
-| `ServiceError`                   | `Running`            | There are issues with the Kubernetes Service that relate to configuration.                                                                   |
 | `HorizontalPodAutoscalerCreated` | `Running`            | A new HorizontalPodScaler referencing the Function's Deployment was created.                                       |
 | `HorizontalPodAutoscalerUpdated` | `Running`            | The existing HorizontalPodScaler was updated after applying required changes.                                      |
-| `HorizontalPodAutoscalerError`   | `Running`            | There are issues with the HorizontalPodAutoscaler that relate to configuration.                                                           |
 
 ## Related resources and components
 
