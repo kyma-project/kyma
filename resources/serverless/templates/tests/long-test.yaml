@@ -50,7 +50,8 @@ spec:
               ---
               EOF
               ) \
-              && kubectl wait --for=condition=Running functions.serverless.kyma-project.io/{{ .Values.tests.long.name }} -n {{ .Values.tests.long.namespace }}
+              && kubectl wait --for=condition=Running functions.serverless.kyma-project.io/{{ .Values.tests.long.name }} -n {{ .Values.tests.long.namespace }} --timeout={{ .Values.tests.long.initTimeout }} \
+              || ( kubectl -n {{ .Values.tests.long.namespace }} describe functions.serverless.kyma-project.io {{ .Values.tests.long.name }}; exit 1 ) 
       containers:
         - name: {{ include "tests.name" . }}
           image: "{{ .Values.tests.long.image.repository  }}:{{ .Values.tests.long.image.tag }}"
