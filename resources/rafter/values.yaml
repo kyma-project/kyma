@@ -23,12 +23,15 @@ tests:
 controller-manager:
   enabled: true
 
-  fullnameOverride: "rafter-ctrl-mngr"
+  fullnameOverride: "rafter-controller-manager"
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-controller-manager
     tag: 1a89277a
     pullPolicy: IfNotPresent
+
+  deployment:
+    fullnameOverride: "rafter-ctrl-mngr"
 
   pod:
     annotations:
@@ -59,7 +62,7 @@ controller-manager:
         {
           "metadataExtractors":[
             {
-              "name": "rafter-front-matter-svc",
+              "name": "rafter-front-matter-service",
               "namespace": "{{ .Release.Namespace }}",
               "endpoint": "/v1/extract",
               "filter": "\\.md$"
@@ -70,14 +73,14 @@ controller-manager:
         {
           "validations":[
             {
-              "name": "rafter-asyncapi-svc",
+              "name": "rafter-asyncapi-service",
               "namespace": "{{ .Release.Namespace }}",
               "endpoint": "/v1/validate"
             }
           ],
           "mutations":[
             {
-              "name": "rafter-asyncapi-svc",
+              "name": "rafter-asyncapi-service",
               "namespace": "{{ .Release.Namespace }}",
               "endpoint": "/v1/convert"
             }
@@ -232,7 +235,7 @@ controller-manager:
 upload-service:
   enabled: true
 
-  fullnameOverride: "rafter-upload-svc"
+  fullnameOverride: "rafter-upload-service"
 
   minio:
     enabled: false
@@ -247,6 +250,7 @@ upload-service:
     pullPolicy: IfNotPresent
 
   deployment:
+    fullnameOverride: "rafter-upload-svc"
     extraProperties:
       strategy:
         type: RollingUpdate
@@ -345,7 +349,7 @@ upload-service:
 front-matter-service:
   enabled: true
 
-  fullnameOverride: "rafter-front-matter-svc"
+  fullnameOverride: "rafter-front-matter-service"
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-front-matter-service
@@ -353,6 +357,7 @@ front-matter-service:
     pullPolicy: IfNotPresent
 
   deployment:
+    fullnameOverride: "rafter-front-matter-svc"
     extraProperties:
       strategy:
         type: RollingUpdate
@@ -381,7 +386,7 @@ front-matter-service:
 asyncapi-service:
   enabled: true
 
-  fullnameOverride: "rafter-asyncapi-svc"
+  fullnameOverride: "rafter-asyncapi-service"
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-asyncapi-service
@@ -389,6 +394,7 @@ asyncapi-service:
     pullPolicy: IfNotPresent
 
   deployment:
+    fullnameOverride: "rafter-asyncapi-svc"
     extraProperties:
       strategy:
         type: RollingUpdate

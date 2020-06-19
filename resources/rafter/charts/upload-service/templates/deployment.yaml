@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "rafterUploadService.fullname" . }}
+  name: {{ include "rafterUploadService.deployment.fullname" . }}
   labels:
     app.kubernetes.io/name: {{ include "rafterUploadService.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
