@@ -636,6 +636,7 @@ var _ = ginkgo.Describe("Function", func() {
 			err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
 			gomega.Expect(err).To(gomega.BeNil())
 			gomega.Expect(configMapList.Items).To(gomega.HaveLen(1))
+			gomega.Expect(configMapList.Items[0].Labels).To(gomega.HaveLen(4))
 
 			cmLabelVal, ok := configMapList.Items[0].Labels[addedLabelKey]
 			gomega.Expect(ok).To(gomega.BeTrue())
@@ -654,6 +655,7 @@ var _ = ginkgo.Describe("Function", func() {
 			err = resourceClient.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, jobList)
 			gomega.Expect(err).To(gomega.BeNil())
 			gomega.Expect(jobList.Items).To(gomega.HaveLen(1))
+			gomega.Expect(jobList.Items[0].Labels).To(gomega.HaveLen(4))
 
 			jobLabelVal, ok := jobList.Items[0].Labels[addedLabelKey]
 			gomega.Expect(ok).To(gomega.BeTrue())
@@ -676,6 +678,7 @@ var _ = ginkgo.Describe("Function", func() {
 			err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, deployList)
 			gomega.Expect(err).To(gomega.BeNil())
 			gomega.Expect(deployList.Items).To(gomega.HaveLen(1))
+			gomega.Expect(deployList.Items[0].Labels).To(gomega.HaveLen(4))
 
 			deployLabelVal, ok := deployList.Items[0].Labels[addedLabelKey]
 			gomega.Expect(ok).To(gomega.BeTrue())
@@ -689,6 +692,7 @@ var _ = ginkgo.Describe("Function", func() {
 			err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, svcList)
 			gomega.Expect(err).To(gomega.BeNil())
 			gomega.Expect(svcList.Items).To(gomega.HaveLen(1))
+			gomega.Expect(svcList.Items[0].Labels).To(gomega.HaveLen(4))
 
 			svcLabelVal, ok := svcList.Items[0].Labels[addedLabelKey]
 			gomega.Expect(ok).To(gomega.BeTrue())
@@ -702,6 +706,7 @@ var _ = ginkgo.Describe("Function", func() {
 			err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
 			gomega.Expect(err).To(gomega.BeNil())
 			gomega.Expect(hpaList.Items).To(gomega.HaveLen(1))
+			gomega.Expect(hpaList.Items[0].Labels).To(gomega.HaveLen(4))
 
 			hpaLabelVal, ok := hpaList.Items[0].Labels[addedLabelKey]
 			gomega.Expect(ok).To(gomega.BeTrue())

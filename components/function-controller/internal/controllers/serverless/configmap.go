@@ -61,6 +61,7 @@ func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Fu
 	configurationStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)
 
 	if len(deployments) == 1 &&
+		len(configMaps) == 1 &&
 		deployments[0].Spec.Template.Spec.Containers[0].Image == image &&
 		configurationStatus != corev1.ConditionUnknown &&
 		r.mapsEqual(configMaps[0].Labels, r.functionLabels(instance)) {
