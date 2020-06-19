@@ -147,10 +147,11 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(deployment).ToNot(gomega.BeNil())
 		gomega.Expect(deployment.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
 		gomega.Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(gomega.Equal(reconciler.buildExternalImageAddress(function)))
-		gomega.Expect(deployment.Spec.Template.Labels).To(gomega.HaveLen(6)) // function-name, managed-by, uuid + 3
+		gomega.Expect(deployment.Spec.Template.Labels).To(gomega.HaveLen(7))
 		gomega.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionNameLabel]).To(gomega.Equal(function.Name))
 		gomega.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionManagedByLabel]).To(gomega.Equal("function-controller"))
 		gomega.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionUUIDLabel]).To(gomega.Equal(string(function.UID)))
+		gomega.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionResourceLabel]).To(gomega.Equal("deployment"))
 		gomega.Expect(deployment.Spec.Template.Labels[testBindingLabel1]).To(gomega.Equal("foobar"))
 		gomega.Expect(deployment.Spec.Template.Labels[testBindingLabel2]).To(gomega.Equal(testBindingLabelValue))
 		gomega.Expect(deployment.Spec.Template.Labels["foo"]).To(gomega.Equal("bar"))
@@ -177,6 +178,9 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(svc.Spec.Ports).To(gomega.HaveLen(1))
 		gomega.Expect(svc.Spec.Ports[0].Name).To(gomega.Equal("http"))
 		gomega.Expect(svc.Spec.Ports[0].TargetPort).To(gomega.Equal(intstr.FromInt(8080)))
+
+		gomega.Expect(labels.AreLabelsInWhiteList(svc.Spec.Selector, job.Spec.Template.Labels)).To(gomega.BeFalse(), "svc selector should not catch job pods")
+		gomega.Expect(svc.Spec.Selector).To(gomega.Equal(deployment.Spec.Selector.MatchLabels))
 
 		ginkgo.By("hpa creation")
 		result, err = reconciler.Reconcile(request)

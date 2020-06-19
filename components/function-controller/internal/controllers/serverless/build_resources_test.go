@@ -291,6 +291,7 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
 				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
+				serverlessv1alpha1.FunctionResourceLabel:  "deployment",
 			},
 		},
 		{
@@ -308,6 +309,28 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
 				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
+				serverlessv1alpha1.FunctionResourceLabel:  "deployment",
+				"test-some":                               "test-label",
+			},
+		},
+		{
+			name: "Should not overwrite internal labels",
+			args: args{instance: &serverlessv1alpha1.Function{ObjectMeta: metav1.ObjectMeta{
+				Name: "fn-name",
+				UID:  "fn-uuid",
+			},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					Labels: map[string]string{
+						"test-some":                              "test-label",
+						serverlessv1alpha1.FunctionResourceLabel: "job",
+						serverlessv1alpha1.FunctionNameLabel:     "some-other-name",
+					},
+				}}},
+			want: map[string]string{
+				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
+				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
+				serverlessv1alpha1.FunctionResourceLabel:  "deployment",
 				"test-some":                               "test-label",
 			},
 		},
@@ -318,7 +341,6 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 			r := &FunctionReconciler{}
 			got := r.podLabels(tt.args.instance)
 			g.Expect(got).To(gomega.Equal(tt.want))
-			g.Expect(got).To(gomega.HaveLen(len(tt.args.instance.Spec.Labels) + 3))
 		})
 	}
 }
