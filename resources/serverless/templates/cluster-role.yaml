@@ -12,6 +12,7 @@ rules:
   verbs:
   - create
   - delete
+  - deletecollection
   - get
   - list
   - patch
@@ -76,6 +77,7 @@ rules:
   - services
   verbs:
   - create
+  - delete
   - get
   - list
   - update
@@ -87,6 +89,7 @@ rules:
   verbs:
   - create
   - delete
+  - deletecollection
   - get
   - list
   - patch
@@ -104,6 +107,7 @@ rules:
   - horizontalpodautoscalers
   verbs:
   - create
+  - deletecollection
   - get
   - list
   - update
