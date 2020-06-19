@@ -9,7 +9,7 @@ controller:
     healthPort: 8090
 
 tests:
-  enabled: true
+  enabled: false
   image:
     pullPolicy: IfNotPresent
   gateway:
