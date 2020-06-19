@@ -449,7 +449,7 @@ spec:
                     external
                   type: boolean
                 host:
-                  description: URL on which the service will be visible
+                  description: Target hostname or FQDN of the service. If only a hostname is provided, the default domain name will be used.
                   maxLength: 256
                   minLength: 3
                   pattern: ^([a-zA-Z0-9][a-zA-Z0-9-_]*\.)*[a-zA-Z0-9]*[a-zA-Z0-9-_]*[[a-zA-Z0-9]+$
