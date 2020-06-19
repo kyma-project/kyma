@@ -31,7 +31,7 @@ If release name contains chart name it will be used as a full name.
 */}}
 {{- define "rafterAsyncAPIService.deployment.fullname" -}}
 {{- if .Values.deployment.fullnameOverride -}}
-{{- .Values..deployment.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- .Values.deployment.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
