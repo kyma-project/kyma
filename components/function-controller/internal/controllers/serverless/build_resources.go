@@ -17,7 +17,6 @@ import (
 const (
 	destinationArg        = "--destination"
 	functionContainerName = "lambda"
-	resourceLabelValue    = "deployment"
 )
 
 func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
@@ -273,7 +272,7 @@ func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha1
 }
 
 func (r *FunctionReconciler) deploymentSelectorLabels(instance *serverlessv1alpha1.Function) map[string]string {
-	return r.mergeLabels(map[string]string{serverlessv1alpha1.FunctionResourceLabel: resourceLabelValue}, r.internalFunctionLabels(instance))
+	return r.mergeLabels(map[string]string{serverlessv1alpha1.FunctionResourceLabel: serverlessv1alpha1.FunctionResourceLabelDeploymentValue}, r.internalFunctionLabels(instance))
 }
 
 func (r *FunctionReconciler) podLabels(instance *serverlessv1alpha1.Function) map[string]string {

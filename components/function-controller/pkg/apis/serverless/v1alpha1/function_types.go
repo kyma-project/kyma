@@ -30,10 +30,11 @@ type FunctionSpec struct {
 }
 
 const (
-	FunctionNameLabel      = "serverless.kyma-project.io/function-name"
-	FunctionManagedByLabel = "serverless.kyma-project.io/managed-by"
-	FunctionUUIDLabel      = "serverless.kyma-project.io/uuid"
-	FunctionResourceLabel  = "serverless.kyma-project.io/resource"
+	FunctionNameLabel                    = "serverless.kyma-project.io/function-name"
+	FunctionManagedByLabel               = "serverless.kyma-project.io/managed-by"
+	FunctionUUIDLabel                    = "serverless.kyma-project.io/uuid"
+	FunctionResourceLabel                = "serverless.kyma-project.io/resource"
+	FunctionResourceLabelDeploymentValue = "deployment"
 )
 
 // ConditionType defines condition of function.
