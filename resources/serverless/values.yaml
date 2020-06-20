@@ -75,11 +75,11 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-8838"
+    tag: "1cc47db6"
     pullPolicy: IfNotPresent
   functionRuntimeNodejs12:
     repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-    tag: "7dd25b42"
+    tag: "1cc47db6"
 
 deployment:
   replicas: 1
