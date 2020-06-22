@@ -19,6 +19,7 @@ knativeMigration:
 tests:
   enabled: true
   long:
+    initTimeout: 120s
     resources:
       requests:
         memory: 128Mi
