@@ -70,19 +70,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: service-catalog-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: service-catalog
-    kyma-project.io/installation: ""
-data:
-  etcd-stateful.etcd.resources.limits.memory: 256Mi
-  etcd-stateful.replicaCount: "1"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: helm-broker-overrides
   namespace: kyma-installer
   labels:

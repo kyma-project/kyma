@@ -196,6 +196,66 @@ func TestFunctionReconciler_equalHorizontalPodAutoscalers(t *testing.T) {
 			},
 			want: false,
 		},
+		{
+			name: "should be false if ref name is different",
+			args: args{
+				existing: autoscalingv1.HorizontalPodAutoscaler{
+					Spec: autoscalingv1.HorizontalPodAutoscalerSpec{
+						MinReplicas:                    &two,
+						MaxReplicas:                    10,
+						TargetCPUUtilizationPercentage: &fifty,
+						ScaleTargetRef: autoscalingv1.CrossVersionObjectReference{
+							Kind:       "Deployment",
+							Name:       "deploy2",
+							APIVersion: "apps/v1",
+						},
+					},
+				},
+				expected: autoscalingv1.HorizontalPodAutoscaler{
+					Spec: autoscalingv1.HorizontalPodAutoscalerSpec{
+						MinReplicas:                    &two,
+						MaxReplicas:                    10,
+						TargetCPUUtilizationPercentage: &fifty,
+						ScaleTargetRef: autoscalingv1.CrossVersionObjectReference{
+							Kind:       "Deployment",
+							Name:       "deploy1",
+							APIVersion: "apps/v1",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "should be true if ref name is the same",
+			args: args{
+				existing: autoscalingv1.HorizontalPodAutoscaler{
+					Spec: autoscalingv1.HorizontalPodAutoscalerSpec{
+						MinReplicas:                    &two,
+						MaxReplicas:                    10,
+						TargetCPUUtilizationPercentage: &fifty,
+						ScaleTargetRef: autoscalingv1.CrossVersionObjectReference{
+							Kind:       "Deployment",
+							Name:       "deploy-name",
+							APIVersion: "apps/v1",
+						},
+					},
+				},
+				expected: autoscalingv1.HorizontalPodAutoscaler{
+					Spec: autoscalingv1.HorizontalPodAutoscalerSpec{
+						MinReplicas:                    &two,
+						MaxReplicas:                    10,
+						TargetCPUUtilizationPercentage: &fifty,
+						ScaleTargetRef: autoscalingv1.CrossVersionObjectReference{
+							Kind:       "Deployment",
+							Name:       "deploy-name",
+							APIVersion: "apps/v1",
+						},
+					},
+				},
+			},
+			want: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -23,7 +23,7 @@ global:
       version: "d068b250"
     director:
       dir:
-      version: "6e1e3182"
+      version: "10e777a1"
     gateway:
       dir:
       version: "53b12181"
@@ -35,7 +35,7 @@ global:
       version: "778b2bb3"
     provisioner:
       dir:
-      version: "64f737ad"
+      version: "904c3b06"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -53,7 +53,7 @@ global:
     tests:
       director:
         dir:
-        version: "5d59cd98"
+        version: "7ad99081"
       connector:
         dir:
         version: "d068b250"

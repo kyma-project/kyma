@@ -1,12 +1,17 @@
 package serverless
 
 import (
+	"context"
 	"testing"
 
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource/automock"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 func TestFunctionReconciler_equalServices(t *testing.T) {
@@ -404,4 +409,52 @@ func TestFunctionReconciler_equalServices(t *testing.T) {
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
+}
+
+func TestFunctionReconciler_deleteExcessServices(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+
+		instance := &serverlessv1alpha1.Function{
+			ObjectMeta: metav1.ObjectMeta{Name: "fn-name"},
+		}
+		services := []corev1.Service{
+			{ObjectMeta: metav1.ObjectMeta{Name: "fn-name"}},
+			{ObjectMeta: metav1.ObjectMeta{Name: "fn-some-other-name"}},
+		}
+		logf := log.Log
+
+		client := new(automock.Client)
+		client.On("Delete", context.TODO(), &services[1]).Return(nil).Once()
+		defer client.AssertExpectations(t)
+		r := &FunctionReconciler{client: client}
+
+		_, err := r.deleteExcessServices(context.TODO(), instance, logf, services)
+		g.Expect(err).To(gomega.Succeed())
+
+		g.Expect(client.Calls).To(gomega.HaveLen(1), "delete should happen only for service which has different name than it's parent fn")
+	})
+	t.Run("should delete both svc that have different name than fn", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+
+		instance := &serverlessv1alpha1.Function{
+			ObjectMeta: metav1.ObjectMeta{Name: "fn-name"},
+		}
+		services := []corev1.Service{
+			{ObjectMeta: metav1.ObjectMeta{Name: "fn-other-name"}},
+			{ObjectMeta: metav1.ObjectMeta{Name: "fn-some-other-name"}},
+		}
+		logf := log.Log
+
+		client := new(automock.Client)
+		client.On("Delete", context.TODO(), &services[0]).Return(nil).Once()
+		client.On("Delete", context.TODO(), &services[1]).Return(nil).Once()
+		defer client.AssertExpectations(t)
+		r := &FunctionReconciler{client: client}
+
+		_, err := r.deleteExcessServices(context.TODO(), instance, logf, services)
+		g.Expect(err).To(gomega.Succeed())
+
+		g.Expect(client.Calls).To(gomega.HaveLen(2), "delete should happen only for service which has different name than it's parent fn")
+	})
 }

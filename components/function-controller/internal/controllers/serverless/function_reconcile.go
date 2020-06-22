@@ -49,14 +49,14 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 // Reconcile reads that state of the cluster for a Function object and makes changes based on the state read and what is in the Function.Spec
 // +kubebuilder:rbac:groups="serverless.kyma-project.io",resources=functions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="serverless.kyma-project.io",resources=functions/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups="apps",resources=deployments,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="apps",resources=deployments,verbs=get;list;watch;create;update;patch;delete;deletecollection
 // +kubebuilder:rbac:groups="apps",resources=deployments/status,verbs=get
 // +kubebuilder:rbac:groups="batch",resources=jobs,verbs=get;list;watch;create;update;patch;delete;deletecollection
 // +kubebuilder:rbac:groups="batch",resources=jobs/status,verbs=get
-// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update
+// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;deletecollection
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
-// +kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update
-// +kubebuilder:rbac:groups="autoscaling",resources=horizontalpodautoscalers,verbs=get;list;watch;create;update
+// +kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;delete
+// +kubebuilder:rbac:groups="autoscaling",resources=horizontalpodautoscalers,verbs=get;list;watch;create;update;deletecollection
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
@@ -76,31 +76,31 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	}
 
 	var configMaps corev1.ConfigMapList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &configMaps); err != nil {
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &configMaps); err != nil {
 		log.Error(err, "Cannot list ConfigMaps")
 		return ctrl.Result{}, err
 	}
 
 	var jobs batchv1.JobList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &jobs); err != nil {
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &jobs); err != nil {
 		log.Error(err, "Cannot list Jobs")
 		return ctrl.Result{}, err
 	}
 
 	var deployments appsv1.DeploymentList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &deployments); err != nil {
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &deployments); err != nil {
 		log.Error(err, "Cannot list Deployments")
 		return ctrl.Result{}, err
 	}
 
 	var services corev1.ServiceList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &services); err != nil {
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &services); err != nil {
 		log.Error(err, "Cannot list Services")
 		return ctrl.Result{}, err
 	}
 
 	var hpas autoscalingv1.HorizontalPodAutoscalerList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.functionLabels(instance), &hpas); err != nil {
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &hpas); err != nil {
 		log.Error(err, "Cannot list HorizotalPodAutoscalers")
 		return ctrl.Result{}, err
 	}

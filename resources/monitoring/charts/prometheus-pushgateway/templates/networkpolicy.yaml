@@ -10,8 +10,10 @@ metadata:
 {{- fail "One of `allowAll` or `customSelectors` must be specified." }}
 {{- end }}
   labels:
-    {{ include "prometheus-pushgateway.labels" . | indent 4 }}
-{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" .Values.podLabels) .  }}
+    {{ include "prometheus-pushgateway.labels" . | nindent 4}}
+    {{- if .Values.serviceAccountLabels -}}
+    {{ toYaml .Values.serviceAccountLabels | indent 4 }}
+    {{- end -}}
 spec:
   podSelector:
     matchLabels:
