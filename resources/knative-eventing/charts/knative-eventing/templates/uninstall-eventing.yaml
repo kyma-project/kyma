@@ -64,7 +64,7 @@ metadata:
   name: {{ .Release.Name }}-cr-delete
   namespace: {{ .Release.Namespace }}
   labels:
-    kyma-project.io/app: "eventing-uninstall"
+    kyma-project.io/uninstall: eventing
   annotations:
     helm.sh/hook: pre-delete
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
@@ -79,7 +79,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
-        kyma-project.io/app: "eventing-uninstall"
+        kyma-project.io/uninstall: eventing
       name: {{ .Release.Name }}-cr-delete
     spec:
       serviceAccountName: {{ .Release.Name }}-cr-delete
