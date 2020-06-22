@@ -94,10 +94,15 @@ func (ar *apiRuleResolver) CreateAPIRule(ctx context.Context, name string, names
 func (ar *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan *gqlschema.APIRuleEvent, error) {
 	channel := make(chan *gqlschema.APIRuleEvent, 1)
 	filter := func(apiRule *v1alpha1.APIRule) bool {
-		if serviceName == nil {
-			return apiRule != nil && apiRule.Namespace == namespace
+		if apiRule == nil {
+			return false
 		}
-		return apiRule != nil && apiRule.Namespace == namespace && apiRule.Spec.Service.Name == serviceName
+
+		namespaceCondition := apiRule.Namespace == namespace
+		if serviceName == nil {
+			return namespaceCondition
+		}
+		return namespaceCondition && apiRule.Spec.Service != nil && apiRule.Spec.Service.Name != nil && *apiRule.Spec.Service.Name == *serviceName
 	}
 
 	apiRuleListener := listener.NewApiRule(channel, filter, ar.apiRuleCon, ApiRuleUnstructuredExtractor{})

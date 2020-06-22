@@ -14,7 +14,6 @@ import (
 )
 
 func TestApiRuleService_List(t *testing.T) {
-
 	name1 := "test-apiRule1"
 	namespace := "test-namespace"
 	hostname := "test-hostname1"
@@ -37,7 +36,8 @@ func TestApiRuleService_List(t *testing.T) {
 
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		result, err := service.List(namespace, nil, nil)
@@ -55,7 +55,8 @@ func TestApiRuleService_List(t *testing.T) {
 
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		result, err := service.List(namespace, nil, &hostname)
@@ -73,7 +74,8 @@ func TestApiRuleService_List(t *testing.T) {
 
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		result, err := service.List(namespace, &serviceName, nil)
@@ -91,7 +93,8 @@ func TestApiRuleService_List(t *testing.T) {
 
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		result, err := service.List(namespace, &serviceName, nil)
@@ -116,7 +119,8 @@ func TestApiService_Find(t *testing.T) {
 
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, apiRule1)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		result, err := service.Find(name, namespace)
@@ -128,7 +132,8 @@ func TestApiService_Find(t *testing.T) {
 	t.Run("Should return nil if not found", func(t *testing.T) {
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		result, err := service.Find(name, namespace)
@@ -152,7 +157,8 @@ func TestApiService_Create(t *testing.T) {
 	t.Run("Should create an APIRule", func(t *testing.T) {
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		result, err := service.Create(newRule)
@@ -166,7 +172,8 @@ func TestApiService_Create(t *testing.T) {
 
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, existingApiRule)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		_, err = service.Create(newRule)
@@ -191,7 +198,8 @@ func TestApiRuleService_Update(t *testing.T) {
 
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, existingApiRule)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		result, err := service.Update(newRule)
@@ -204,7 +212,8 @@ func TestApiRuleService_Update(t *testing.T) {
 	t.Run("Should throw an error if APIRule doesn't exists", func(t *testing.T) {
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		_, err = service.Update(newRule)
@@ -218,7 +227,8 @@ func TestApiRuleService_Subscribe(t *testing.T) {
 	t.Run("Simple", func(t *testing.T) {
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		apiRuleListener := listener.NewApiRule(nil, nil, nil, nil)
@@ -228,7 +238,8 @@ func TestApiRuleService_Subscribe(t *testing.T) {
 	t.Run("Duplicated", func(t *testing.T) {
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		apiRuleListener := listener.NewApiRule(nil, nil, nil, nil)
@@ -239,7 +250,8 @@ func TestApiRuleService_Subscribe(t *testing.T) {
 	t.Run("Multiple", func(t *testing.T) {
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		apiRuleListener1 := listener.NewApiRule(nil, nil, nil, nil)
@@ -252,7 +264,8 @@ func TestApiRuleService_Subscribe(t *testing.T) {
 	t.Run("Nil", func(t *testing.T) {
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		service.Subscribe(nil)
@@ -263,7 +276,8 @@ func TestApiRuleService_Unubscribe(t *testing.T) {
 	t.Run("Simple", func(t *testing.T) {
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		apiRuleListener := listener.NewApiRule(nil, nil, nil, nil)
@@ -275,7 +289,8 @@ func TestApiRuleService_Unubscribe(t *testing.T) {
 	t.Run("Duplicated", func(t *testing.T) {
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		apiRuleListener := listener.NewApiRule(nil, nil, nil, nil)
@@ -288,7 +303,8 @@ func TestApiRuleService_Unubscribe(t *testing.T) {
 	t.Run("Multiple", func(t *testing.T) {
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		apiRuleListener1 := listener.NewApiRule(nil, nil, nil, nil)
@@ -303,7 +319,8 @@ func TestApiRuleService_Unubscribe(t *testing.T) {
 	t.Run("Nil", func(t *testing.T) {
 		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
-		service := NewService(serviceFactory)
+		service, err := NewService(serviceFactory)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		service.Unsubscribe(nil)

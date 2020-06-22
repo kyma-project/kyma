@@ -1,13 +1,24 @@
 package apigateway
 
 import (
+	"fmt"
+
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	notifierRes "github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	"github.com/pkg/errors"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/tools/cache"
+)
+
+const (
+	Namespace_Index                       = "namespace"
+	Namespace_Service_Name_Index          = "namespace/serviceName"
+	Namespace_Hostname_Index              = "namespace/hostname"
+	Namespace_Service_Name_Hostname_Index = "namespace/serviceName/hostname"
 )
 
 var apiRulesGroupVersionResource = schema.GroupVersionResource{
@@ -18,43 +29,74 @@ var apiRulesGroupVersionResource = schema.GroupVersionResource{
 
 type Service struct {
 	*resource.Service
-	notifier notifierRes.Notifier
+	notifier  notifierRes.Notifier
+	extractor *ApiRuleUnstructuredExtractor
 }
 
-func NewService(serviceFactory *resource.ServiceFactory) *Service {
-	notifier := notifierRes.NewNotifier()
-	return &Service{
-		Service:  serviceFactory.ForResource(apiRulesGroupVersionResource),
-		notifier: notifier,
+func NewService(serviceFactory *resource.ServiceFactory) (*Service, error) {
+	svc := &Service{
+		Service:   serviceFactory.ForResource(apiRulesGroupVersionResource),
+		extractor: &ApiRuleUnstructuredExtractor{},
 	}
+
+	err := svc.AddIndexers(cache.Indexers{
+		Namespace_Service_Name_Hostname_Index: func(obj interface{}) ([]string, error) {
+			entity, err := svc.extractor.Do(obj)
+			if err != nil || entity == nil || entity.Spec.Service == nil || entity.Spec.Service.Name == nil || entity.Spec.Service.Host == nil {
+				return nil, errors.New("Cannot convert item")
+			}
+			return []string{fmt.Sprintf("%s/%s/%s", entity.Namespace, *entity.Spec.Service.Name, *entity.Spec.Service.Host)}, nil
+		},
+		Namespace_Service_Name_Index: func(obj interface{}) ([]string, error) {
+			entity, err := svc.extractor.Do(obj)
+			if err != nil || entity == nil || entity.Spec.Service == nil || entity.Spec.Service.Name == nil {
+				return nil, errors.New("Cannot convert item")
+			}
+			return []string{fmt.Sprintf("%s/%s", entity.Namespace, *entity.Spec.Service.Name)}, nil
+		},
+		Namespace_Hostname_Index: func(obj interface{}) ([]string, error) {
+			entity, err := svc.extractor.Do(obj)
+			if err != nil || entity == nil || entity.Spec.Service == nil || entity.Spec.Service.Host == nil {
+				return nil, errors.New("Cannot convert item")
+			}
+			return []string{fmt.Sprintf("%s/%s", entity.Namespace, *entity.Spec.Service.Host)}, nil
+		},
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "while adding indexers")
+	}
+
+	notifier := notifierRes.NewNotifier()
+	svc.Informer.AddEventHandler(notifier)
+	svc.notifier = notifier
+
+	return svc, nil
 }
 
 func (svc *Service) List(namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error) {
-	items := make([]*v1alpha1.APIRule, 0)
-	err := svc.ListInIndex("namespace", namespace, &items)
+	var items []interface{}
+	var err error
+	if serviceName != nil && hostname != nil {
+		items, err = svc.Informer.GetIndexer().ByIndex(Namespace_Service_Name_Hostname_Index, fmt.Sprintf("%s/%s/%s", namespace, *serviceName, *hostname))
+	} else if serviceName != nil {
+		items, err = svc.Informer.GetIndexer().ByIndex(Namespace_Service_Name_Index, fmt.Sprintf("%s/%s", namespace, *serviceName))
+	} else if hostname != nil {
+		items, err = svc.Informer.GetIndexer().ByIndex(Namespace_Hostname_Index, fmt.Sprintf("%s/%s", namespace, *hostname))
+	} else {
+		items, err = svc.Informer.GetIndexer().ByIndex(Namespace_Index, namespace)
+	}
 	if err != nil {
 		return nil, err
 	}
 
 	var apiRules []*v1alpha1.APIRule
 	for _, item := range items {
-		match := true
-		if serviceName != nil {
-			if *serviceName != *item.Spec.Service.Name {
-				match = false
-			}
+		trigger, err := svc.extractor.Do(item)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Incorrect item type: %T, should be: *%s", item, pretty.APIRule)
 		}
-		if hostname != nil {
-			if *hostname != *item.Spec.Service.Host {
-				match = false
-			}
-		}
-
-		if match {
-			apiRules = append(apiRules, item)
-		}
+		apiRules = append(apiRules, trigger)
 	}
-
 	return apiRules, nil
 }
 

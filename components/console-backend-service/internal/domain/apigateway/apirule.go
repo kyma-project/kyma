@@ -3,6 +3,9 @@ package apigateway
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway/pretty"
+	"github.com/pkg/errors"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway/disabled"
@@ -31,7 +34,10 @@ func New(serviceFactory *resource.ServiceFactory) (*PluggableResolver, error) {
 }
 
 func (r *PluggableResolver) Enable() error {
-	apiRuleService := NewService(r.serviceFactory)
+	apiRuleService, err := NewService(r.serviceFactory)
+	if err != nil {
+		return errors.Wrapf(err, "while creating %s service", pretty.APIRule)
+	}
 	apiRuleResolver, err := newApiRuleResolver(apiRuleService)
 	if err != nil {
 		return err
