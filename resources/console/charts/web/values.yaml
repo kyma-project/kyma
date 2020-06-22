@@ -17,9 +17,8 @@ cluster:
     kubernetes-dashboard
 compass_mfs:
   image:
-    dir: null
     pullPolicy: IfNotPresent
-    tag: e0146b08
+    tag: PR-1861
   service:
     externalPort: 8888
     internalPort: 8888
@@ -28,7 +27,7 @@ compass_mfs:
 console:
   image:
     pullPolicy: IfNotPresent
-    tag: "de7b06b8"
+    tag: "PR-1861"
   service:
     externalPort: 80
     internalPort: 8080
@@ -37,7 +36,7 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: 206d3dbc
+    tag: PR-1861
   service:
     externalPort: 80
     internalPort: 80
