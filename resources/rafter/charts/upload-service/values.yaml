@@ -21,6 +21,7 @@ image:
   pullPolicy: IfNotPresent
 
 deployment:
+  fullnameOverride:
   labels: {}
   annotations: {}
   replicas: 1

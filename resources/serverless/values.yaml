@@ -61,14 +61,6 @@ global:
     app.kubernetes.io/managed-by: "{{ .Release.Service }}"
     app.kubernetes.io/version: "{{ .Values.images.manager.tag }}"
     helm.sh/chart: "{{ include \"chart\" . }}"
-  commonMatchLabels:
-    app: "{{ template \"name\" . }}"
-    version: "21757b11"
-    app.kubernetes.io/name: "{{ template \"name\" . }}"
-    app.kubernetes.io/instance: "{{ .Release.Name }}"
-    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
-    app.kubernetes.io/version: "21757b11"
-    helm.sh/chart: "{{ include \"chart\" . }}"
   dockerServicePort: 5000
   ingress:
     domainName:
@@ -100,7 +92,7 @@ containers:
     resources:
       limits:
         cpu: 100m
-        memory: 64Mi
+        memory: 126Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
       requests:
         cpu: 10m
         memory: 32Mi
