@@ -91,11 +91,11 @@ func (svc *Service) List(namespace string, serviceName *string, hostname *string
 
 	var apiRules []*v1alpha1.APIRule
 	for _, item := range items {
-		trigger, err := svc.extractor.Do(item)
+		apiRule, err := svc.extractor.Do(item)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Incorrect item type: %T, should be: *%s", item, pretty.APIRule)
 		}
-		apiRules = append(apiRules, trigger)
+		apiRules = append(apiRules, apiRule)
 	}
 	return apiRules, nil
 }
