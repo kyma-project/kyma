@@ -160,11 +160,11 @@ spec:
               type: object
             maxReplicas:
               format: int32
-              minimum: 0
+              minimum: 1
               type: integer
             minReplicas:
               format: int32
-              minimum: 0
+              minimum: 1
               type: integer
             resources:
               description: ResourceRequirements describes the compute resource requirements.

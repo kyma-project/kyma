@@ -25,14 +25,7 @@ func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logge
 	case len(services) == 0:
 		return r.createService(ctx, log, instance, newSvc)
 	case len(services) > 1:
-		log.Info("Too many Services for function")
-		return r.updateStatus(ctx, ctrl.Result{RequeueAfter: r.config.RequeueDuration}, instance, serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionRunning,
-			Status:             corev1.ConditionFalse,
-			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonServiceError,
-			Message:            fmt.Sprintf("Service step failed, too many Services found, needed 1 but got %d", len(services)),
-		})
+		return r.deleteExcessServices(ctx, instance, log, services)
 	case !r.equalServices(services[0], newSvc):
 		return r.updateService(ctx, log, instance, services[0], newSvc)
 	default:
@@ -91,4 +84,30 @@ func (r *FunctionReconciler) updateService(ctx context.Context, log logr.Logger,
 		Reason:             serverlessv1alpha1.ConditionReasonServiceUpdated,
 		Message:            fmt.Sprintf("Service %s updated", svc.GetName()),
 	})
+}
+
+func (r *FunctionReconciler) deleteExcessServices(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger, services []corev1.Service) (ctrl.Result, error) {
+	// services do not support deletecollection
+	// you can check this by `kubectl api-resources -o wide | grep services`
+	// also https://github.com/kubernetes/kubernetes/issues/68468#issuecomment-419981870
+
+	log.Info("Deleting excess Services")
+
+	for i, _ := range services {
+		svc := services[i]
+		if svc.GetName() == instance.GetName() {
+			continue
+		}
+
+		log.Info(fmt.Sprintf("Deleting Service %s", svc.GetName()))
+
+		err := r.client.Delete(ctx, &services[i])
+		if err != nil {
+			log.Error(err, fmt.Sprintf("Cannot delete excess Service %s", svc.GetName()))
+			return ctrl.Result{}, err
+		}
+	}
+
+	log.Info("Excess Services deleted")
+	return ctrl.Result{}, nil
 }

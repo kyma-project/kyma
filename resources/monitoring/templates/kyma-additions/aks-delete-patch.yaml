@@ -87,7 +87,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: aks-delete-kubelet-monitoring-kyma-patch
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
           command: ["/scripts/aks-del-patch.sh"]
           volumeMounts:
             - name: aks-delete-kubelet-monitoring-kyma-patch

@@ -242,29 +242,23 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 ## Install Kyma
 
-1. Install Tiller on the cluster you provisioned:
-
-   ```bash
-   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
-   ```
-
    >**NOTE**: If you want to use the Kyma production profile, see the following documents before you go to the next step:
    >* [Istio production profile](/components/service-mesh/#configuration-service-mesh-production-profile)
    >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-profiles)
 
-2. Deploy Kyma:
+1. Deploy Kyma:
 
     ```bash
     kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-installer-cluster.yaml
     ```
 
-3. Check if the Pods of Tiller and the Kyma Installer are running:
+2. Check if the Pod of the Kyma Installer is running:
 
     ```bash
-    kubectl get pods --all-namespaces
+    kubectl get pods -n kyma-installer
     ```
 
-4. To watch the installation progress, run:
+3. To watch the installation progress, run:
 
     ```bash
     while true; do \
@@ -322,4 +316,4 @@ For Linux with Chrome, run:
     kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
     ```
 
-If you need to use Helm to manage your Kubernetes resources, complete the [additional configuration](#installation-use-helm) after you finish the installation.
+If you need to use Helm to manage your Kubernetes resources, read the [additional configuration](#installation-use-helm) document.

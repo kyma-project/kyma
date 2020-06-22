@@ -25,11 +25,10 @@ func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Functio
 		configMapFunction: instance.Spec.Source,
 		configMapDeps:     r.sanitizeDependencies(instance.Spec.Deps),
 	}
-	labels := r.functionLabels(instance)
 
 	return corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Labels:       labels,
+			Labels:       r.functionLabels(instance),
 			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
 			Namespace:    instance.GetNamespace(),
 		},
@@ -161,7 +160,7 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 		Spec: appsv1.DeploymentSpec{
 			Replicas: instance.Spec.MinReplicas,
 			Selector: &metav1.LabelSelector{
-				MatchLabels: r.internalFunctionLabels(instance), // this has to match spec.template.objectmeta.Labels
+				MatchLabels: r.deploymentSelectorLabels(instance), // this has to match spec.template.objectmeta.Labels
 				// and also it has to be immutable
 			},
 			Template: corev1.PodTemplateSpec{
@@ -199,7 +198,7 @@ func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function)
 				Port:       80,
 				Protocol:   corev1.ProtocolTCP,
 			}},
-			Selector: r.internalFunctionLabels(instance),
+			Selector: r.deploymentSelectorLabels(instance),
 		},
 	}
 }
@@ -272,8 +271,12 @@ func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha1
 	return labels
 }
 
+func (r *FunctionReconciler) deploymentSelectorLabels(instance *serverlessv1alpha1.Function) map[string]string {
+	return r.mergeLabels(map[string]string{serverlessv1alpha1.FunctionResourceLabel: serverlessv1alpha1.FunctionResourceLabelDeploymentValue}, r.internalFunctionLabels(instance))
+}
+
 func (r *FunctionReconciler) podLabels(instance *serverlessv1alpha1.Function) map[string]string {
-	return r.mergeLabels(instance.Spec.Labels, r.internalFunctionLabels(instance))
+	return r.mergeLabels(instance.Spec.Labels, r.deploymentSelectorLabels(instance))
 }
 
 func (r *FunctionReconciler) mergeLabels(labelsCollection ...map[string]string) map[string]string {

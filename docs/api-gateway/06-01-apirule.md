@@ -42,7 +42,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.gateway** | **YES** | Specifies the Istio Gateway. |
 | **spec.service.name** | **YES** | Specifies the name of the exposed service. |
 | **spec.service.port** | **YES** | Specifies the communication port of the exposed service. |
-| **spec.service.host** | **YES** | Specifies the service's communication address for inbound external traffic. |
+| **spec.service.host** | **YES** | Specifies the service's communication address for inbound external traffic. If only the leftmost label is provided, the default domain name will be used. |
 | **spec.rules** | **YES** | Specifies the array of Oathkeeper access rules. |
 | **spec.rules.path** | **YES** | Specifies the path of the exposed service. |
 | **spec.rules.methods** | **NO** | Specifies the list of HTTP request methods available for **spec.rules.path**. |

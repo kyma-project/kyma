@@ -51,6 +51,20 @@ func (_m *Client) CreateWithReference(ctx context.Context, parent resource.Objec
 	return r0
 }
 
+// Delete provides a mock function with given fields: ctx, resourceType
+func (_m *Client) Delete(ctx context.Context, resourceType resource.Object) error {
+	ret := _m.Called(ctx, resourceType)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, resource.Object) error); ok {
+		r0 = rf(ctx, resourceType)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // DeleteAllBySelector provides a mock function with given fields: ctx, resourceType, namespace, selector
 func (_m *Client) DeleteAllBySelector(ctx context.Context, resourceType resource.Object, namespace string, selector labels.Selector) error {
 	ret := _m.Called(ctx, resourceType, namespace, selector)

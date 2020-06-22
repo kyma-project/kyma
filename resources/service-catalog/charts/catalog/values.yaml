@@ -97,7 +97,7 @@ controllerManager:
       memory: 35Mi
     limits:
       cpu: 100m
-      memory: 45Mi
+      memory: 128Mi
   # Attributes of the controller's service resource
   service:
     # Type of service; valid values are "LoadBalancer", "NodePort" and "ClusterIP"
@@ -128,4 +128,4 @@ securityContext: {}
 
 ## images for migration process
 migration:
-  alpineKcImage: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
+  alpineKcImage: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff

@@ -10,4 +10,4 @@ kyma:
 istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
-    tag: "PR-8619"
+    tag: d022112f

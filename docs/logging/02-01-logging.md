@@ -13,6 +13,6 @@ This document provides an overview of the logging architecture in Kyma.
 5. The Loki server processes the log data and stores it in the log store. The labels are stored in the index store.
 6. The user queries the logs using the following tools:
 
-    * Grafana dashboards to analyze and visualize logs.
+    * Grafana dashboards to analyze and visualize logs fetched and processed by Loki. 
     * API clients to query log data using the [HTTP API](https://github.com/grafana/loki/blob/master/docs/api.md) for Loki.
     * Log UI, accessed from the Kyma Console, to display and analyze logs.

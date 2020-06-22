@@ -8,7 +8,7 @@ tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/rafter-test"
-    tag: bb02aafc
+    tag: 7dd25b42
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
@@ -29,6 +29,9 @@ controller-manager:
     repository: eu.gcr.io/kyma-project/rafter-controller-manager
     tag: 1a89277a
     pullPolicy: IfNotPresent
+
+  deployment:
+    fullnameOverride: "rafter-ctrl-mngr"
 
   pod:
     annotations:
@@ -188,7 +191,7 @@ controller-manager:
     enabled: true
 
     image:
-      tag: RELEASE.2019-10-12T01-39-57Z-1e7dba13
+      tag: RELEASE.2019-10-12T01-39-57Z-a67baaa0
       repository: eu.gcr.io/kyma-project/incubator/develop/minio/minio
 
     persistence:
@@ -247,6 +250,7 @@ upload-service:
     pullPolicy: IfNotPresent
 
   deployment:
+    fullnameOverride: "rafter-upload-svc"
     extraProperties:
       strategy:
         type: RollingUpdate
@@ -334,7 +338,7 @@ upload-service:
         pullPolicy: IfNotPresent
       minioClient:
         repository: eu.gcr.io/kyma-project/incubator/develop/minio/mc
-        tag: RELEASE.2019-04-03T17-59-57Z-23f7500f
+        tag: RELEASE.2019-04-03T17-59-57Z-a67baaa0
         pullPolicy: IfNotPresent
     pre:
       minioDeploymentRefName:
@@ -353,6 +357,7 @@ front-matter-service:
     pullPolicy: IfNotPresent
 
   deployment:
+    fullnameOverride: "rafter-front-matter-svc"
     extraProperties:
       strategy:
         type: RollingUpdate
@@ -389,6 +394,7 @@ asyncapi-service:
     pullPolicy: IfNotPresent
 
   deployment:
+    fullnameOverride: "rafter-asyncapi-svc"
     extraProperties:
       strategy:
         type: RollingUpdate
