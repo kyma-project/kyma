@@ -74,7 +74,7 @@ spec:
         sidecar.istio.io/inject: "false"
       name: {{ .Release.Name }}-rc-delete
       labels:
-        app: "event-sources-delete"
+        kyma-project.io/app: "eventing-uninstall"
     spec:
       serviceAccountName: {{ .Release.Name }}-rc-delete
       restartPolicy: Never
