@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
-seconds=48    #wait 4mins till "knative-eventing" namespace will be created by another Helm3 installer. Helm3 default timeout 5mins
 counter=0
-until [ $counter -gt $seconds ]; do
+until [ $counter -gt 3 ]; do  # it tries 3 times to solve the "Terminating" status
   timestamp=`date`
-  if kubectl get ns | grep knative-eventing; then
-    echo "[$timestamp] knative-eventing found"
-    break
+  if errormessage=`kubectl create ns knative-eventing 2>&1`; then
+    echo "[$timestamp] OK: knative-eventing created"
+    exit 0
+  elif echo "$errormessage" | grep 'already exists'; then
+    echo "[$timestamp] OK: knative-eventing already exists"
+    exit 0
   else
-    echo "[$timestamp] knative-eventing not found"
+    echo "[$timestamp] ERROR: knative-eventing creation failed"
   fi
   sleep 5
   ((counter++))
 done
+exit 1
