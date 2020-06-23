@@ -55,13 +55,15 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
+      labels:
+        kyma-project.io/install: eventing
     spec:
       serviceAccountName: {{ .Release.Name }}-ns-check
       restartPolicy: Never
       terminationGracePeriodSeconds: 0
       containers:
         - name: {{ .Release.Name }}-pre-install
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
           imagePullPolicy: IfNotPresent
 
           command:
