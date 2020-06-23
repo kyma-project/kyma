@@ -294,7 +294,7 @@ alertmanager:
     ## Image of Alertmanager
     ##
     image:
-      repository: quay.io/prometheus/alertmanager
+      repository: eu.gcr.io/kyma-project/external/quay.io/prometheus/alertmanager
       tag: v0.20.0
 
     ## If true then the user will be responsible to provide a secret with alertmanager configuration
@@ -1222,20 +1222,20 @@ prometheusOperator:
   ## Prometheus-operator image
   ##
   image:
-    repository: quay.io/coreos/prometheus-operator
+    repository: eu.gcr.io/kyma-project/external/quay.io/coreos/prometheus-operator
     tag: v0.38.0
     pullPolicy: IfNotPresent
 
   ## Configmap-reload image to use for reloading configmaps
   ##
   configmapReloadImage:
-    repository: quay.io/coreos/configmap-reload
+    repository: eu.gcr.io/kyma-project/external/quay.io/coreos/configmap-reload
     tag: v0.0.1
 
   ## Prometheus-config-reloader image to use for config and rule reloading
   ##
   prometheusConfigReloaderImage:
-    repository: quay.io/coreos/prometheus-config-reloader
+    repository: eu.gcr.io/kyma-project/external/quay.io/coreos/prometheus-config-reloader
     tag: v0.38.0
 
   ## Set the prometheus config reloader side-car CPU limit
@@ -1460,7 +1460,7 @@ prometheus:
     ## Image of Prometheus.
     ##
     image:
-      repository: quay.io/prometheus/prometheus
+      repository: eu.gcr.io/kyma-project/external/quay.io/prometheus/prometheus
       tag: v2.17.1
 
     ## Tolerations for use with node taints
