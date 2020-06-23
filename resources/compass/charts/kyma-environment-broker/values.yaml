@@ -61,13 +61,13 @@ kymaVersion: "9c738f01"
 kymaVersionOnDemand: "false"
 
 enablePlans: "azure,gcp"
-defaultGardenerShootPurpose: "development"
 
 gardener:
   project: "kyma-dev" # Gardener project connected to SA for HAP credentials lookup
   kubeconfigPath: "/gardener/kubeconfig/kubeconfig"
   secretName: "gardener-credentials"
   kubernetesVersion: "1.16.9"
+  defaultShootPurpose: "development"
 
 # It is used to provide own creds for Service Manager instead of using the one provided by external system
 # who execute provision call on Kyma Environment Broker. You can define `overrideMode` to be one of: Always, WhenNotSentInRequest, Never

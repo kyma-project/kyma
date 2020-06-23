@@ -48,12 +48,12 @@ spec:
               value: "false"
             - name: APP_BROKER_ENABLE_PLANS
               value: "{{ .Values.enablePlans }}"
-            - name: APP_BROKER_DEFAULT_GARDENER_SHOOT_PURPOSE
-              value: "{{ .Values.defaultGardenerShootPurpose }}"
             - name: APP_PROVISIONING_URL
               value: "{{ .Values.provisioner.URL }}"
             - name: APP_PROVISIONING_TIMEOUT
               value: "{{ .Values.provisioner.timeout }}"
+            - name: APP_PROVISIONING_DEFAULT_GARDENER_SHOOT_PURPOSE
+              value: "{{ .Values.gardener.defaultShootPurpose }}"
             - name: APP_PORT
               value: "{{ .Values.broker.port }}"
             - name: APP_STATUS_PORT
