@@ -37,7 +37,8 @@ func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Functio
 }
 
 func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, configMapName string) batchv1.Job {
-	imageName := r.buildInternalImageAddress(instance)
+	// imageName := r.buildInternalImageAddress(instance)
+	imageName := r.buildExternalImageAddress(instance)
 	one := int32(1)
 	zero := int32(0)
 
@@ -80,32 +81,16 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 						{
 							Name: "credentials",
 							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{SecretName: r.config.ImagePullSecretName},
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: "serverless-image-pull-secret", //r.config.ImagePullSecretName,
+									Items: []corev1.KeyToPath{
+										{
+											Key:  ".dockerconfigjson",
+											Path: "config.json",
+										},
+									},
+								},
 							},
-						},
-						{
-							Name:         "tekton-home",
-							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
-						},
-						{
-							Name:         "tekton-workspace",
-							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
-						},
-					},
-					InitContainers: []corev1.Container{
-						{
-							Name:    "credential-initializer",
-							Image:   r.config.Build.CredsInitImage,
-							Command: []string{"/ko-app/creds-init"},
-							Args:    []string{fmt.Sprintf("-basic-docker=credentials=https://index.docker.io/v1/")},
-							Env: []corev1.EnvVar{
-								{Name: "HOME", Value: "/tekton/home"},
-							},
-							VolumeMounts: []corev1.VolumeMount{
-								{Name: "tekton-home", ReadOnly: false, MountPath: "/tekton/home"},
-								{Name: "credentials", ReadOnly: false, MountPath: "/tekton/creds-secrets/credentials"},
-							},
-							ImagePullPolicy: corev1.PullIfNotPresent,
 						},
 					},
 					Containers: []corev1.Container{
@@ -129,11 +114,11 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/package.json", SubPath: "package.json"},
 								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/handler.js", SubPath: "handler.js"},
 								{Name: "runtime", ReadOnly: true, MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile"},
-								{Name: "tekton-home", ReadOnly: false, MountPath: "/tekton/home"},
+								{Name: "credentials", ReadOnly: true, MountPath: "/docker/.docker"},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
-								{Name: "DOCKER_CONFIG", Value: "/tekton/home/.docker/"},
+								{Name: "DOCKER_CONFIG", Value: "/docker/.docker/"},
 							},
 						},
 					},
@@ -240,7 +225,7 @@ func (r *FunctionReconciler) defaultReplicas(spec serverlessv1alpha1.FunctionSpe
 
 func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
 	imageTag := r.calculateImageTag(instance)
-	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.ExternalAddress, instance.Namespace, instance.Name, imageTag)
+	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.Address, instance.Namespace, instance.Name, imageTag)
 }
 
 func (r *FunctionReconciler) buildExternalImageAddress(instance *serverlessv1alpha1.Function) string {
