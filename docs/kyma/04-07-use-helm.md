@@ -30,5 +30,3 @@ kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.he
 Additionally, you must add the `--tls` flag to every Helm command you run.
 
 Helm v2 is a legacy mechanism. It will be removed in future releases.
-
-
