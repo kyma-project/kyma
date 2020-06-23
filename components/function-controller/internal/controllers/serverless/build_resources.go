@@ -97,7 +97,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 							Name:    "credential-initializer",
 							Image:   r.config.Build.CredsInitImage,
 							Command: []string{"/ko-app/creds-init"},
-							Args:    []string{fmt.Sprintf("-basic-docker=credentials=https://index.docker.io/v2/")},
+							Args:    []string{fmt.Sprintf("-basic-docker=credentials=https://index.docker.io/v1/")},
 							Env: []corev1.EnvVar{
 								{Name: "HOME", Value: "/tekton/home"},
 							},
