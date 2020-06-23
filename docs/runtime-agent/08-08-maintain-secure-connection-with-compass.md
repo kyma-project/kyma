@@ -8,7 +8,7 @@ After you have established a secure connection with Compass, you can fetch the c
 ## Prerequisites
 
 - [OpenSSL toolkit](https://www.openssl.org/docs/man1.0.2/apps/openssl.html) to create a Certificate Signing Request (CSR), keys, and certificates which meet high security standards
-- [Compass](https://github.com/kyma-incubator/compass) (version 1.8 or higher)
+- [Compass](https://github.com/kyma-incubator/compass)
 - Registered Application
 - Runtime connected to Compass
 - [Established secure connection with Compass](#tutorials-establish-a-secure-connection-with-compass)
