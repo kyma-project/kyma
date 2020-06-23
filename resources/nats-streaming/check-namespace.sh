@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-seconds=240    #seconds to wait till "knative-eventing namespace" will be created by another Helm 3 installer
+seconds=48    #wait 4mins till "knative-eventing" namespace will be created by another Helm3 installer. Helm3 default timeout 5mins
 counter=0
 until [ $counter -gt $seconds ]; do
   timestamp=`date`
@@ -9,6 +9,6 @@ until [ $counter -gt $seconds ]; do
   else
     echo "[$timestamp] knative-eventing not found"
   fi
-  sleep 1
+  sleep 5
   ((counter++))
 done
