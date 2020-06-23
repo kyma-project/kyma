@@ -19,10 +19,10 @@ type FunctionSpec struct {
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 
-	// +kubebuilder:validation:Minimum:=0
+	// +kubebuilder:validation:Minimum:=1
 	MinReplicas *int32 `json:"minReplicas,omitempty"`
 
-	// +kubebuilder:validation:Minimum:=0
+	// +kubebuilder:validation:Minimum:=1
 	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
 
 	// +optional
@@ -30,9 +30,11 @@ type FunctionSpec struct {
 }
 
 const (
-	FunctionNameLabel      = "serverless.kyma-project.io/function-name"
-	FunctionManagedByLabel = "serverless.kyma-project.io/managed-by"
-	FunctionUUIDLabel      = "serverless.kyma-project.io/uuid"
+	FunctionNameLabel                    = "serverless.kyma-project.io/function-name"
+	FunctionManagedByLabel               = "serverless.kyma-project.io/managed-by"
+	FunctionUUIDLabel                    = "serverless.kyma-project.io/uuid"
+	FunctionResourceLabel                = "serverless.kyma-project.io/resource"
+	FunctionResourceLabelDeploymentValue = "deployment"
 )
 
 // ConditionType defines condition of function.
@@ -49,9 +51,9 @@ type ConditionReason string
 const (
 	ConditionReasonConfigMapCreated               ConditionReason = "ConfigMapCreated"
 	ConditionReasonConfigMapUpdated               ConditionReason = "ConfigMapUpdated"
-	ConditionReasonConfigMapError                 ConditionReason = "ConfigMapError"
 	ConditionReasonJobFailed                      ConditionReason = "JobFailed"
 	ConditionReasonJobCreated                     ConditionReason = "JobCreated"
+	ConditionReasonJobUpdated                     ConditionReason = "JobUpdated"
 	ConditionReasonJobRunning                     ConditionReason = "JobRunning"
 	ConditionReasonJobsDeleted                    ConditionReason = "JobsDeleted"
 	ConditionReasonJobFinished                    ConditionReason = "JobFinished"
@@ -62,10 +64,8 @@ const (
 	ConditionReasonDeploymentReady                ConditionReason = "DeploymentReady"
 	ConditionReasonServiceCreated                 ConditionReason = "ServiceCreated"
 	ConditionReasonServiceUpdated                 ConditionReason = "ServiceUpdated"
-	ConditionReasonServiceError                   ConditionReason = "ServiceError"
 	ConditionReasonHorizontalPodAutoscalerCreated ConditionReason = "HorizontalPodAutoscalerCreated"
 	ConditionReasonHorizontalPodAutoscalerUpdated ConditionReason = "HorizontalPodAutoscalerUpdated"
-	ConditionReasonHorizontalPodAutoscalerError   ConditionReason = "HorizontalPodAutoscalerError"
 )
 
 type Condition struct {

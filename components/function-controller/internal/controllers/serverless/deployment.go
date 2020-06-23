@@ -10,6 +10,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apilabels "k8s.io/apimachinery/pkg/labels"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -40,6 +41,8 @@ func (r *FunctionReconciler) onDeploymentChange(ctx context.Context, log logr.Lo
 	switch {
 	case len(deployments) == 0:
 		return r.createDeployment(ctx, log, instance, newDeployment)
+	case len(deployments) > 1: // this step is needed, as sometimes informers lag behind reality, and then we create 2 (or more) deployments by accident
+		return r.deleteAllDeployments(ctx, instance, log)
 	case !r.equalDeployments(deployments[0], newDeployment):
 		return r.updateDeployment(ctx, log, instance, deployments[0], newDeployment)
 	default:
@@ -101,15 +104,6 @@ func (r *FunctionReconciler) updateDeploymentStatus(ctx context.Context, log log
 	// this step is both in onDeploymentChange and as last step in reconcile
 	// it's checked here in onDeploymentChange to prevent nasty data races, where somehow deployment becomes ready before we
 	// trigger next reconcile loop, in which we should create svc
-	case len(deployments) > 1:
-		log.Info("Deployment failed")
-		return r.updateStatus(ctx, ctrl.Result{RequeueAfter: r.config.RequeueDuration}, instance, serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionRunning,
-			Status:             corev1.ConditionFalse,
-			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonDeploymentFailed,
-			Message:            fmt.Sprintf("Deployment step failed, too many deployments found, needed 1 got: %d", len(deployments)),
-		})
 	case r.isDeploymentReady(deployments[0]):
 		log.Info(fmt.Sprintf("Deployment %s is ready", deployments[0].GetName()))
 		return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
@@ -173,4 +167,16 @@ func equalResources(existing, expected corev1.ResourceRequirements) bool {
 		existing.Requests.Cpu().Equal(*expected.Requests.Cpu()) &&
 		existing.Limits.Memory().Equal(*expected.Limits.Memory()) &&
 		existing.Limits.Cpu().Equal(*expected.Limits.Cpu())
+}
+
+func (r *FunctionReconciler) deleteAllDeployments(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (ctrl.Result, error) {
+	log.Info("Deleting all underlying Deployments")
+	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
+	if err := r.client.DeleteAllBySelector(ctx, &appsv1.Deployment{}, instance.GetNamespace(), selector); err != nil {
+		log.Error(err, "Cannot delete underlying Deployments")
+		return ctrl.Result{}, err
+	}
+
+	log.Info("Underlying Deployments deleted")
+	return ctrl.Result{}, nil
 }

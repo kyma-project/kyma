@@ -47,11 +47,7 @@ spec:
           - name: APP_HOST
             value: "0.0.0.0"
           - name: APP_ALLOWED_ORIGINS
-            {{- if .Values.global.isLocalEnv }}
             value: "https://*.{{ .Values.global.ingress.domainName }},*.svc.cluster.local:44134,http://console-dev.{{ .Values.global.ingress.domainName }}:*"
-            {{- else }}
-            value: "https://*.{{ .Values.global.ingress.domainName }},*.svc.cluster.local:44134"
-            {{- end }}
           - name: APP_VERBOSE
             value: "true"
           - name: APP_SYSTEM_NAMESPACES

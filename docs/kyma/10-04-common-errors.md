@@ -15,13 +15,13 @@ Follow these steps to identify the failing job:
 
 1. Get the installed Helm releases which correspond to components:
   ```
-  helm ls --tls
+  helm list --all-namespaces --all
   ```
   A high number of revisions may suggest that a component was reinstalled several times. If a release has the status different to `Deployed`, the component wasn't installed.
 
 2. Get component details:
   ```
-  helm status {RELEASE_NAME} --tls
+  helm status {RELEASE_NAME} -n {RELEASE_NAMESPACE}
   ```
   Pods with not all containers in `READY` state can cause the error.
 
@@ -37,27 +37,14 @@ If the installation fails and the feedback you get from the console output isn't
 
 To list all of the available Helm releases, run:
 ```
-helm list --tls
+helm list --all-namespaces
 ```
 To inspect a release and its logged errors, run:
 ```
-helm history {RELEASE_NAME} --tls
+helm history {RELEASE_NAME} -n {RELEASE_NAMESPACE}
 ```
 
 >**NOTE:** Names of Helm releases correspond to names of Kyma components.
-
-## The server could not find the requested resource
-
-During the installation process, you may encounter the `server could not find the requested resource` error that reports a misspelled CRD name:
-```
-Details: Helm install error: rpc error: code = Unknown desc = release compass failed: the server could not find the requested resource (post gatewaies.networking.istio.io)
-```
-Tiller in older versions prepares names plurals using a set of rules, instead of reading them from the CRD. This method does not always produce the correct plural form. For example, for `gateway` it produces `gatewaies` instead of `gateways`.
-
-To resolve this error, upgrade Tiller. Run:
-```
-kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{YOUR_KYMA_VERSION}/installation/resources/tiller.yaml
-```
 
 ## Maximum number of retries reached
 

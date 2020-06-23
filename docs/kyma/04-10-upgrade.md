@@ -34,12 +34,9 @@ Follow these steps:
 3. Delete the existing `kyma-installer` deployment.
    ```bash
    kubectl delete deployment kyma-installer -n kyma-installer
-   ```
-4. Once the deployment is deleted, upgrade Tiller. Run:
-   ```bash
-   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{NEW_KYMA_VERSION}/installation/resources/tiller.yaml
-   ```
-5. Trigger the upgrade:
+
+   ``` 
+4. Trigger the upgrade:
 
     <div tabs name="trigger-the-upgrade" group="upgrade-kyma">
       <details>
