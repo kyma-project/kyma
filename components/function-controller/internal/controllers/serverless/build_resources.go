@@ -97,7 +97,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 							Name:    "credential-initializer",
 							Image:   r.config.Build.CredsInitImage,
 							Command: []string{"/ko-app/creds-init"},
-							Args:    []string{fmt.Sprintf("-basic-docker=credentials=%s", imageName)},
+							Args:    []string{fmt.Sprintf("-basic-docker=credentials=https://index.docker.io/v2/%s", imageName)},
 							Env: []corev1.EnvVar{
 								{Name: "HOME", Value: "/tekton/home"},
 							},
@@ -240,7 +240,7 @@ func (r *FunctionReconciler) defaultReplicas(spec serverlessv1alpha1.FunctionSpe
 
 func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
 	imageTag := r.calculateImageTag(instance)
-	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.Address, instance.Namespace, instance.Name, imageTag)
+	return fmt.Sprintf("%s-%s:%s", instance.Namespace, instance.Name, imageTag)
 }
 
 func (r *FunctionReconciler) buildExternalImageAddress(instance *serverlessv1alpha1.Function) string {
