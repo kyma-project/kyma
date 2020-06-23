@@ -1229,7 +1229,7 @@ prometheusOperator:
   ## Configmap-reload image to use for reloading configmaps
   ##
   configmapReloadImage:
-    repository: eu.gcr.io/kyma-project/external/eu.gcr.io/kyma-project/external/quay.io/coreos/configmap-reload
+    repository: eu.gcr.io/kyma-project/external/quay.io/coreos/configmap-reload
     tag: v0.0.1
 
   ## Prometheus-config-reloader image to use for config and rule reloading
