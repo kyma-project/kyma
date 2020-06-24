@@ -1,6 +1,7 @@
 dependencies:
   - name: controller-manager
     condition: controller-manager.enabled
+    version: 0.1.0
   - name: upload-service
     condition: upload-service.enabled
   - name: front-matter-service
