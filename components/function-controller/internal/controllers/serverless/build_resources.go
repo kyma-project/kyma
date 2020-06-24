@@ -77,6 +77,20 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 								},
 							},
 						},
+						{
+							Name: "credentials",
+							VolumeSource: corev1.VolumeSource{
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: r.config.ImagePullSecretName,
+									Items: []corev1.KeyToPath{
+										{
+											Key:  ".dockerconfigjson",
+											Path: "config.json",
+										},
+									},
+								},
+							},
+						},
 					},
 					Containers: []corev1.Container{
 						{
@@ -99,7 +113,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/package.json", SubPath: "package.json"},
 								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/handler.js", SubPath: "handler.js"},
 								{Name: "runtime", ReadOnly: true, MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile"},
-								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
+								{Name: "credentials", ReadOnly: true, MountPath: "/docker/.docker"},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
@@ -114,11 +128,11 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 		},
 	}
 
-	if r.config.Docker.InternalRegistryEnabled {
-		r.adjustJobForInternalRegistry(&job, imageName)
-	} else {
-		r.adjustJobForExternalRegistry(&job)
-	}
+	//if r.config.Docker.InternalRegistryEnabled {
+	//	r.adjustJobForInternalRegistry(&job, imageName)
+	//} else {
+	//	r.adjustJobForExternalRegistry(&job)
+	//}
 
 	return job
 }
@@ -234,7 +248,7 @@ func (r *FunctionReconciler) buildExternalImageAddress(instance *serverlessv1alp
 }
 
 func (r *FunctionReconciler) adjustJobForInternalRegistry(job *batchv1.Job, imageName string) {
-	volumes := []corev1.Volume{
+	job.Spec.Template.Spec.Volumes = append(job.Spec.Template.Spec.Volumes, []corev1.Volume{
 		{
 			Name:         "credentials",
 			VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
@@ -245,8 +259,7 @@ func (r *FunctionReconciler) adjustJobForInternalRegistry(job *batchv1.Job, imag
 				Secret: &corev1.SecretVolumeSource{SecretName: r.config.ImageCredentialsSecretName},
 			},
 		},
-	}
-	job.Spec.Template.Spec.Volumes = append(job.Spec.Template.Spec.Volumes, volumes...)
+	}...)
 
 	job.Spec.Template.Spec.InitContainers = []corev1.Container{
 		{
