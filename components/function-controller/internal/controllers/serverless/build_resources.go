@@ -37,12 +37,11 @@ func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Functio
 }
 
 func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, configMapName string) batchv1.Job {
-	// imageName := r.buildInternalImageAddress(instance)
-	imageName := r.buildExternalImageAddress(instance)
+	imageName := r.buildImageAddressForPush(instance)
 	one := int32(1)
 	zero := int32(0)
 
-	return batchv1.Job{
+	job := batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-build-", instance.GetName()),
 			Namespace:    instance.GetNamespace(),
@@ -75,20 +74,6 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{Name: r.config.Build.RuntimeConfigMapName},
-								},
-							},
-						},
-						{
-							Name: "credentials",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: "serverless-image-pull-secret", //r.config.ImagePullSecretName,
-									Items: []corev1.KeyToPath{
-										{
-											Key:  ".dockerconfigjson",
-											Path: "config.json",
-										},
-									},
 								},
 							},
 						},
@@ -128,6 +113,14 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 			},
 		},
 	}
+
+	if r.config.Docker.InternalRegistryEnabled {
+		r.adjustJobForInternalRegistry(job, imageName)
+	} else {
+		r.adjustJobForExternalRegistry(job)
+	}
+
+	return job
 }
 
 func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function) appsv1.Deployment {
@@ -223,14 +216,71 @@ func (r *FunctionReconciler) defaultReplicas(spec serverlessv1alpha1.FunctionSpe
 	return min, max
 }
 
+func (r *FunctionReconciler) buildImageAddressForPush(instance *serverlessv1alpha1.Function) string {
+	if r.config.Docker.InternalRegistryEnabled {
+		return r.buildInternalImageAddress(instance)
+	}
+	r.buildExternalImageAddress(instance)
+}
+
 func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
 	imageTag := r.calculateImageTag(instance)
-	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.Address, instance.Namespace, instance.Name, imageTag)
+	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.InternalAddress, instance.Namespace, instance.Name, imageTag)
 }
 
 func (r *FunctionReconciler) buildExternalImageAddress(instance *serverlessv1alpha1.Function) string {
 	imageTag := r.calculateImageTag(instance)
 	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.ExternalAddress, instance.Namespace, instance.Name, imageTag)
+}
+
+func (r *FunctionReconciler) adjustJobForInternalRegistry(job batchv1.Job, imageName string) {
+	volumes := []corev1.Volume{
+		{
+			Name: "secret-creds",
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{SecretName: r.config.ImageCredentialsSecretName},
+			},
+		},
+		{
+			Name:         "credentials",
+			VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+		},
+	}
+	job.Spec.Template.Spec.Volumes = append(job.Spec.Template.Spec.Volumes, volumes...)
+
+	job.Spec.Template.Spec.InitContainers = []corev1.Container{
+		{
+			Name:    "credential-initializer",
+			Image:   r.config.Build.CredsInitImage,
+			Command: []string{"/ko-app/creds-init"},
+			Args:    []string{fmt.Sprintf("-basic-docker=credentials=http://%s", imageName)},
+			Env: []corev1.EnvVar{
+				{Name: "HOME", Value: "/docker"},
+			},
+			VolumeMounts: []corev1.VolumeMount{
+				{Name: "credentials", ReadOnly: false, MountPath: "/docker"},
+				{Name: "secret-creds", ReadOnly: false, MountPath: "/tekton/creds-secrets/credentials"},
+			},
+			ImagePullPolicy: corev1.PullIfNotPresent,
+		},
+	}
+}
+
+func (r *FunctionReconciler) adjustJobForExternalRegistry(job batchv1.Job) {
+	job.Spec.Template.Spec.Volumes = append(job.Spec.Template.Spec.Volumes, corev1.Volume{
+		Name: "credentials",
+		VolumeSource: corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: r.config.ImagePullSecretName,
+				Items: []corev1.KeyToPath{
+					{
+						Key:  ".dockerconfigjson",
+						Path: "config.json",
+					},
+				},
+			},
+		},
+	})
 }
 
 func (r *FunctionReconciler) sanitizeDependencies(dependencies string) string {

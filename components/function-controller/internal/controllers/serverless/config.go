@@ -7,7 +7,8 @@ import (
 )
 
 type FunctionConfig struct {
-	ImagePullSecretName            string        `envconfig:"default=serverless-registry-credentials"`
+	ImageCredentialsSecretName     string        `envconfig:"default=serverless-registry-credentials"`
+	ImagePullSecretName            string        `envconfig:"default=serverless-image-pull-secret"`
 	ImagePullAccountName           string        `envconfig:"default=serverless"`
 	TargetCPUUtilizationPercentage int32         `envconfig:"default=50"`
 	RequeueDuration                time.Duration `envconfig:"default=1m"`
@@ -31,6 +32,7 @@ type BuildConfig struct {
 }
 
 type DockerConfig struct {
-	Address         string `envconfig:"default=serverless-docker-registry.kyma-system.svc.cluster.local:5000"`
-	ExternalAddress string `envconfig:"default=registry.kyma.local"`
+	InternalRegistryEnabled bool   `envconfig:"default=true"`
+	InternalAddress         string `envconfig:"default=serverless-docker-registry.kyma-system.svc.cluster.local:5000"`
+	ExternalAddress         string `envconfig:"default=registry.kyma.local"`
 }
