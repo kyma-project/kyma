@@ -4,7 +4,10 @@ dependencies:
     version: 0.1.0
   - name: upload-service
     condition: upload-service.enabled
+    version: 0.1.0
   - name: front-matter-service
     condition: front-matter-service.enabled
+    version: 0.1.0
   - name: asyncapi-service
     condition: asyncapi-service.enabled
+    version: 0.1.0
