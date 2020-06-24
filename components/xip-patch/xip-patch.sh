@@ -64,12 +64,36 @@ createOverridesConfigMap() {
                          --from-literal global.environment.gardener="$GARDENER_ENVIRONMENT") \
 
     if [[ "$GARDENER_ENVIRONMENT" == true ]]; then
+        cat << EOF > /tmp/overrides.yaml
+        global:
+          ingress:
+            domainName: "$INGRESS_DOMAIN"
+            tlsCrt: "$INGRESS_TLS_CERT"
+            tlsKey: "$INGRESS_TLS_KEY"
+          environment:
+            gardener: "$GARDENER_ENVIRONMENT"
+          tlsCrt: "$INGRESS_TLS_CERT"
+          tlsKey: "$INGRESS_TLS_KEY"
+EOF
+
+        kubectl create cm net-global-overrides-transformed -n kyma-installer  --from-file /tmp/overrides.yaml -o yaml --dry-run | kubectl apply -f -
+
         kubectl create configmap net-global-overrides ${COMMON_PARAMS} \
         --from-literal global.domainName="$INGRESS_DOMAIN" \
         --from-literal global.tlsCrt="$INGRESS_TLS_CERT" \
         --from-literal global.tlsKey="$INGRESS_TLS_KEY" \
         -n kyma-installer -o yaml --dry-run | kubectl apply -f -
     else
+        cat << EOF > /tmp/overrides.yaml
+        global:
+          ingress:
+            domainName: "$INGRESS_DOMAIN"
+            tlsCrt: "$INGRESS_TLS_CERT"
+            tlsKey: "$INGRESS_TLS_KEY"
+          environment:
+            gardener: "$GARDENER_ENVIRONMENT"
+EOF
+        kubectl create cm net-global-overrides-transformed -n kyma-installer --from-file /tmp/overrides.yaml -o yaml --dry-run | kubectl apply -f -
         kubectl create configmap net-global-overrides ${COMMON_PARAMS} \
         -n kyma-installer -o yaml --dry-run | kubectl apply -f -
     fi
