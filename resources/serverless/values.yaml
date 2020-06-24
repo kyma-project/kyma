@@ -116,9 +116,9 @@ containers:
         value: 5m
       namespaceExcludedNames:
         value: "istio-system,knative-eventing,knative-serving,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
-      imageCredentialsSecretName:
+      imageRegistryCredentialsSecretName:
         value: "{{ template \"fullname\" . }}-registry-credentials"
-      imagePullSecretName:
+      imageRegistryDockerConfigSecretName:
         value: "{{ template \"fullname\" . }}-registry-docker-config"
       imagePullAccountName:
         value: "{{ template \"fullname\" . }}"
