@@ -8,7 +8,7 @@ images:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   ui:
-    version: PR-1861
+    version: 7786ce94
 mf:
   host: compass-mf
 service:
