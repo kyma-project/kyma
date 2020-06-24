@@ -1,5 +1,7 @@
 dependencies:
 - name: service-binding-usage-controller
   condition: service-binding-usage-controller.enabled
+  version: 0.1.0
 - name: service-catalog-ui
   condition: catalog-ui.enabled
+  version: 0.1.0
