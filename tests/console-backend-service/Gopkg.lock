@@ -411,9 +411,10 @@
   version = "v2.2.7"
 
 [[projects]]
-  digest = "1:759855d98a898d7d6a091b89b9c85c03d6efd673c44e15561d716543f4e88f31"
+  digest = "1:061024a203efbf02654d4aa55d69cd10d1f8985dada4cbafe5d6ce1b6914d22a"
   name = "k8s.io/api"
   packages = [
+    "admissionregistration/v1",
     "admissionregistration/v1beta1",
     "apps/v1",
     "apps/v1beta1",
@@ -433,6 +434,7 @@
     "coordination/v1",
     "coordination/v1beta1",
     "core/v1",
+    "discovery/v1alpha1",
     "events/v1beta1",
     "extensions/v1beta1",
     "networking/v1",
@@ -452,11 +454,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "7cf5895f2711098d7d9527db0a4a49fb0dff7de2"
-  version = "kubernetes-1.15.0"
+  revision = "6287e2b171401931686bb9a4d1c769343f712343"
+  version = "kubernetes-1.16.10"
 
 [[projects]]
-  digest = "1:dfc7ec6140bd0770e9c637175b839598637e322759ef7860322a38dccbb094be"
+  digest = "1:b4ff51d8de3c0a1eb179009de5f0628af1d84af80a32e38e514b00ad0e4adfa1"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -496,11 +498,11 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
-  revision = "1799e75a07195de9460b8ef7300883499f12127b"
-  version = "kubernetes-1.15.0"
+  revision = "9402b4926e83cddfcac78460d5dca7ae87c1dc49"
+  version = "kubernetes-1.16.10"
 
 [[projects]]
-  digest = "1:c1eeb8b1fff5a8e8470fd55cdf5634b9d71270f6a16ae382c9430eca2cf67f96"
+  digest = "1:18bb561c3f6c80fc7d3d11c82d96b4434d4819716bb0c135a1f7eda5540831b0"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -534,8 +536,8 @@
     "util/keyutil",
   ]
   pruneopts = "NUT"
-  revision = "78d2af792babf2dd937ba2e2a8d99c753a5eda89"
-  version = "kubernetes-1.15.0"
+  revision = "0f69009510c3f4630de40c7b7f9034f2a2728023"
+  version = "kubernetes-1.16.10"
 
 [[projects]]
   digest = "1:c0693cb981f43d82a767a3217b7640a4bdb341731d3814b38602f4e5dc4f01b3"
