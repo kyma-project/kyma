@@ -9,9 +9,9 @@ VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
 
 test: 
 	@echo "Tests are not to be run at this stage."
-	
+
 verify:: errcheck
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
-	@echo "resources/core"
+	@echo "resources/console"
