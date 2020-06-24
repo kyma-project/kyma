@@ -99,7 +99,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/package.json", SubPath: "package.json"},
 								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/handler.js", SubPath: "handler.js"},
 								{Name: "runtime", ReadOnly: true, MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile"},
-								{Name: "credentials", ReadOnly: true, MountPath: "/docker/.docker"},
+								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
@@ -275,7 +275,7 @@ func (r *FunctionReconciler) adjustJobForExternalRegistry(job *batchv1.Job) {
 				Items: []corev1.KeyToPath{
 					{
 						Key:  ".dockerconfigjson",
-						Path: "config.json",
+						Path: ".docker/config.json",
 					},
 				},
 			},
