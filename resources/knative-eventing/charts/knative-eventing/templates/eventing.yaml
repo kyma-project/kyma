@@ -2872,6 +2872,13 @@ webhooks:
   failurePolicy: Fail
   name: webhook.eventing.knative.dev
   sideEffects: None
+  namespaceSelector:
+    matchExpressions:
+      - key: gardener.cloud/purpose
+        operator: NotIn
+        values:
+          - kube-system
+  timeoutSeconds: 10
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
@@ -2889,6 +2896,13 @@ webhooks:
   failurePolicy: Fail
   name: validation.webhook.eventing.knative.dev
   sideEffects: None
+  namespaceSelector:
+    matchExpressions:
+      - key: gardener.cloud/purpose
+        operator: NotIn
+        values:
+          - kube-system
+  timeoutSeconds: 10
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
@@ -2909,7 +2923,12 @@ webhooks:
     matchExpressions:
     - key: eventing.knative.dev/release
       operator: Exists
+    - key: gardener.cloud/purpose
+      operator: NotIn
+      values:
+        - kube-system
   sideEffects: None
+  timeoutSeconds: 10
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
@@ -2927,6 +2946,13 @@ webhooks:
   failurePolicy: Fail
   name: sinkbindings.webhook.sources.knative.dev
   sideEffects: None
+  namespaceSelector:
+    matchExpressions:
+      - key: gardener.cloud/purpose
+        operator: NotIn
+        values:
+          - kube-system
+  timeoutSeconds: 10
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
@@ -2944,6 +2970,13 @@ webhooks:
   failurePolicy: Fail
   name: legacysinkbindings.webhook.sources.knative.dev
   sideEffects: None
+  namespaceSelector:
+    matchExpressions:
+      - key: gardener.cloud/purpose
+        operator: NotIn
+        values:
+          - kube-system
+  timeoutSeconds: 10
 ---
 apiVersion: v1
 kind: Secret
