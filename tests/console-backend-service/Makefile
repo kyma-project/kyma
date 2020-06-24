@@ -7,6 +7,9 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 
 VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
 
+test: 
+	@echo "Tests are not to be run at this stage."
+	
 verify:: errcheck
 
 .PHONY: path-to-referenced-charts
