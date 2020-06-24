@@ -33,7 +33,7 @@ type BuildConfig struct {
 
 type DockerConfig struct {
 	InternalRegistryEnabled bool   `envconfig:"default=true"`
-	InternalRegistryAddress string `envconfig:"default=serverless-docker-registry.kyma-system.svc.cluster.local:5000"`
+	InternalServerAddress   string `envconfig:"default=serverless-docker-registry.kyma-system.svc.cluster.local:5000"`
+	ServerAddress           string `envconfig:"default=registry.kyma.local"`
 	RegistryAddress         string `envconfig:"default=registry.kyma.local"`
-	ImageAddress            string `envconfig:"default=registry.kyma.local"`
 }

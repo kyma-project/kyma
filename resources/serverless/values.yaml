@@ -177,9 +177,9 @@ dockerRegistry:
   enableInternal: true
   username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
   password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json-key.json
-  internalRegistryAddress: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:5000"
+  internalServerAddress: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:5000"
+  serverAddress: "registry.{{ .Values.global.ingress.domainName -}}"
   registryAddress: "registry.{{ .Values.global.ingress.domainName -}}"
-  imageAddress: "registry.{{ .Values.global.ingress.domainName -}}"
 
 docker-registry:
   fullnameOverride: "serverless-docker-registry"

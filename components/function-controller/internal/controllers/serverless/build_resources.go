@@ -224,12 +224,12 @@ func (r *FunctionReconciler) buildImageAddressForPush(instance *serverlessv1alph
 
 func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
 	imageTag := r.calculateImageTag(instance)
-	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.InternalRegistryAddress, instance.Namespace, instance.Name, imageTag)
+	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.InternalServerAddress, instance.Namespace, instance.Name, imageTag)
 }
 
 func (r *FunctionReconciler) buildImageAddress(instance *serverlessv1alpha1.Function) string {
 	imageTag := r.calculateImageTag(instance)
-	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.ImageAddress, instance.Namespace, instance.Name, imageTag)
+	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.RegistryAddress, instance.Namespace, instance.Name, imageTag)
 }
 
 func (r *FunctionReconciler) adjustJobForInternalRegistry(job *batchv1.Job, imageName string) {
