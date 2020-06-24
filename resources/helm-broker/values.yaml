@@ -25,7 +25,7 @@ ctrl:
 broker:
   resources:
     limits:
-      memory: 96Mi
+      memory: 120Mi
       cpu: 60m
     requests:
       memory: 64Mi
@@ -48,11 +48,11 @@ global:
     pullPolicy: IfNotPresent
   # paths to docker images
   helm_broker:
-    dir: /pr/
-    version: "PR-110"
+    dir: /develop/
+    version: "28626733"
   helm_controller:
-    dir: /pr/
-    version: "PR-110"
+    dir: /develop/
+    version: "28626733"
   # etcd port uses by helm broker
   etcdClientPort: 2379
 
