@@ -124,9 +124,8 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 }
 
 func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function) appsv1.Deployment {
-	imageName := r.buildExternalImageAddress(instance)
+	imageName := r.buildImageAddress(instance)
 	deploymentLabels := r.functionLabels(instance)
-
 	podLabels := r.podLabels(instance)
 
 	return appsv1.Deployment{
@@ -220,17 +219,17 @@ func (r *FunctionReconciler) buildImageAddressForPush(instance *serverlessv1alph
 	if r.config.Docker.InternalRegistryEnabled {
 		return r.buildInternalImageAddress(instance)
 	}
-	return r.buildExternalImageAddress(instance)
+	return r.buildImageAddress(instance)
 }
 
 func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
 	imageTag := r.calculateImageTag(instance)
-	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.InternalAddress, instance.Namespace, instance.Name, imageTag)
+	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.InternalRegistryAddress, instance.Namespace, instance.Name, imageTag)
 }
 
-func (r *FunctionReconciler) buildExternalImageAddress(instance *serverlessv1alpha1.Function) string {
+func (r *FunctionReconciler) buildImageAddress(instance *serverlessv1alpha1.Function) string {
 	imageTag := r.calculateImageTag(instance)
-	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.ExternalAddress, instance.Namespace, instance.Name, imageTag)
+	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.ImageAddress, instance.Namespace, instance.Name, imageTag)
 }
 
 func (r *FunctionReconciler) adjustJobForInternalRegistry(job *batchv1.Job, imageName string) {
