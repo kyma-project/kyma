@@ -177,7 +177,7 @@ dockerRegistry:
   enableInternal: true
   username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
   password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json-key.json
-  internalRegistry: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}"
+  internalRegistry: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:5000"
   externalRegistry: "registry.{{ .Values.global.ingress.domainName -}}"
 
 docker-registry:
