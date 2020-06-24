@@ -31,7 +31,7 @@ rules:
   verbs: ["list", "delete"]
 - apiGroups: ["apiextensions.k8s.io"]
   resources: ["customresourcedefinitions"]
-  verbs: ["list"]
+  verbs: ["get", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -58,7 +58,7 @@ metadata:
   name: {{ .Release.Name }}-cr-delete
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Release.Name }}-cr-delete
+    kyma-project.io/uninstall: eventing
   annotations:
     helm.sh/hook: pre-delete
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
@@ -72,13 +72,15 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
+      labels:
+        kyma-project.io/uninstall: eventing
       name: {{ .Release.Name }}-cr-delete
     spec:
       serviceAccountName: {{ .Release.Name }}-cr-delete
       restartPolicy: Never
       containers:
         - name: {{ .Release.Name }}-cr-delete
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
           command:
             - "/bin/bash"
           args:

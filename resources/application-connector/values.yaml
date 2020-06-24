@@ -38,9 +38,9 @@ global:
   connection_token_handler_tests:
     version: "fbf1000b"
   event_service:
-    version: "08b6fe17"
+    version: "PR-8874"
   event_service_integration_tests:
-    version: "3bf47c25"
+    version: "PR-8874"
   application_gateway:
     version: "d39b80d4"
   application_gateway_tests:
