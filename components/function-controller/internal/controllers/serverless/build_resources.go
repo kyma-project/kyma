@@ -115,9 +115,9 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 	}
 
 	if r.config.Docker.InternalRegistryEnabled {
-		r.adjustJobForInternalRegistry(job, imageName)
+		r.adjustJobForInternalRegistry(&job, imageName)
 	} else {
-		r.adjustJobForExternalRegistry(job)
+		r.adjustJobForExternalRegistry(&job)
 	}
 
 	return job
@@ -233,17 +233,17 @@ func (r *FunctionReconciler) buildExternalImageAddress(instance *serverlessv1alp
 	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.ExternalAddress, instance.Namespace, instance.Name, imageTag)
 }
 
-func (r *FunctionReconciler) adjustJobForInternalRegistry(job batchv1.Job, imageName string) {
+func (r *FunctionReconciler) adjustJobForInternalRegistry(job *batchv1.Job, imageName string) {
 	volumes := []corev1.Volume{
+		{
+			Name:         "credentials",
+			VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+		},
 		{
 			Name: "secret-creds",
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{SecretName: r.config.ImageCredentialsSecretName},
 			},
-		},
-		{
-			Name:         "credentials",
-			VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 		},
 	}
 	job.Spec.Template.Spec.Volumes = append(job.Spec.Template.Spec.Volumes, volumes...)
@@ -266,7 +266,7 @@ func (r *FunctionReconciler) adjustJobForInternalRegistry(job batchv1.Job, image
 	}
 }
 
-func (r *FunctionReconciler) adjustJobForExternalRegistry(job batchv1.Job) {
+func (r *FunctionReconciler) adjustJobForExternalRegistry(job *batchv1.Job) {
 	job.Spec.Template.Spec.Volumes = append(job.Spec.Template.Spec.Volumes, corev1.Volume{
 		Name: "credentials",
 		VolumeSource: corev1.VolumeSource{
