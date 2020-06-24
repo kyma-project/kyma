@@ -77,20 +77,6 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 								},
 							},
 						},
-						{
-							Name: "credentials",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: r.config.ImagePullSecretName,
-									Items: []corev1.KeyToPath{
-										{
-											Key:  ".dockerconfigjson",
-											Path: "config.json",
-										},
-									},
-								},
-							},
-						},
 					},
 					Containers: []corev1.Container{
 						{
@@ -113,7 +99,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/package.json", SubPath: "package.json"},
 								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/handler.js", SubPath: "handler.js"},
 								{Name: "runtime", ReadOnly: true, MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile"},
-								{Name: "credentials", ReadOnly: true, MountPath: "/docker/.docker"},
+								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
@@ -128,11 +114,11 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 		},
 	}
 
-	//if r.config.Docker.InternalRegistryEnabled {
-	//	r.adjustJobForInternalRegistry(&job, imageName)
-	//} else {
-	//	r.adjustJobForExternalRegistry(&job)
-	//}
+	if r.config.Docker.InternalRegistryEnabled {
+		r.adjustJobForInternalRegistry(&job, imageName)
+	} else {
+		r.adjustJobForExternalRegistry(&job)
+	}
 
 	return job
 }
@@ -254,9 +240,9 @@ func (r *FunctionReconciler) adjustJobForInternalRegistry(job *batchv1.Job, imag
 			VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 		},
 		{
-			Name: "secret-creds",
+			Name: "registry-credentials",
 			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{SecretName: r.config.ImageCredentialsSecretName},
+				Secret: &corev1.SecretVolumeSource{SecretName: r.config.ImageRegistryCredentialsSecretName},
 			},
 		},
 	}...)
@@ -272,7 +258,7 @@ func (r *FunctionReconciler) adjustJobForInternalRegistry(job *batchv1.Job, imag
 			},
 			VolumeMounts: []corev1.VolumeMount{
 				{Name: "credentials", ReadOnly: false, MountPath: "/docker"},
-				{Name: "secret-creds", ReadOnly: false, MountPath: "/tekton/creds-secrets/credentials"},
+				{Name: "registry-credentials", ReadOnly: false, MountPath: "/tekton/creds-secrets/credentials"},
 			},
 			ImagePullPolicy: corev1.PullIfNotPresent,
 		},
@@ -284,7 +270,7 @@ func (r *FunctionReconciler) adjustJobForExternalRegistry(job *batchv1.Job) {
 		Name: "credentials",
 		VolumeSource: corev1.VolumeSource{
 			Secret: &corev1.SecretVolumeSource{
-				SecretName: r.config.ImagePullSecretName,
+				SecretName: r.config.ImageRegistryDockerConfigSecretName,
 				Items: []corev1.KeyToPath{
 					{
 						Key:  ".dockerconfigjson",
