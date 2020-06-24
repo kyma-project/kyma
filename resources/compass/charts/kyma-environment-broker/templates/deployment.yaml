@@ -52,6 +52,8 @@ spec:
               value: "{{ .Values.provisioner.URL }}"
             - name: APP_PROVISIONING_TIMEOUT
               value: "{{ .Values.provisioner.timeout }}"
+            - name: APP_PROVISIONING_DEFAULT_GARDENER_SHOOT_PURPOSE
+              value: "{{ .Values.gardener.defaultShootPurpose }}"
             - name: APP_PORT
               value: "{{ .Values.broker.port }}"
             - name: APP_STATUS_PORT
