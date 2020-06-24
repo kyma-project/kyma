@@ -220,7 +220,7 @@ func (r *FunctionReconciler) buildImageAddressForPush(instance *serverlessv1alph
 	if r.config.Docker.InternalRegistryEnabled {
 		return r.buildInternalImageAddress(instance)
 	}
-	r.buildExternalImageAddress(instance)
+	return r.buildExternalImageAddress(instance)
 }
 
 func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
