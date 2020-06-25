@@ -1,4 +1,21 @@
-name: helm-broker
-description: Helm service-broker deployment chart.
-version: 0.6.0
 apiVersion: v1
+name: helm-broker
+description: Helm broker deployment chart.
+version: 0.7.0
+appVersion: 1.0.0
+home: https://github.com/kyma-project/helm-broker
+maintainers:
+  - name: mszostok
+    email: mateusz.szostok@sap.com
+    url: https://github.com/mszostok/
+  - name: pk85
+    email: piotr.kopczynski@sap.com
+    url: https://github.com/pk85/
+  - name: piotrmiskiewicz
+    email: piotr.miskiewicz@sap.com
+  - name: jasiu001
+    email: piotr.jasiak@sap.com
+  - name: polskikiel
+    email: michal.kempski@sap.com
+  - name: ksputo
+    email: kamil.sputo@sap.com
