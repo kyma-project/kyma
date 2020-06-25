@@ -19,14 +19,14 @@ metadata:
   name: eventing-controller
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: eventing-controller
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 subjects:
   - kind: ServiceAccount
     name: eventing-controller
@@ -41,7 +41,7 @@ kind: ClusterRoleBinding
 metadata:
   name: eventing-controller-resolver
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 subjects:
   - kind: ServiceAccount
     name: eventing-controller
@@ -56,7 +56,7 @@ kind: ClusterRoleBinding
 metadata:
   name: eventing-controller-source-observer
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 subjects:
   - kind: ServiceAccount
     name: eventing-controller
@@ -71,7 +71,7 @@ kind: ClusterRoleBinding
 metadata:
   name: eventing-controller-sources-controller
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 subjects:
   - kind: ServiceAccount
     name: eventing-controller
@@ -86,7 +86,7 @@ kind: ClusterRoleBinding
 metadata:
   name: eventing-controller-manipulator
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 subjects:
   - kind: ServiceAccount
     name: eventing-controller
@@ -97,7 +97,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 
 ---
-# Copyright 2018 The Knative Authors
+# Copyright 2020 The Knative Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -114,24 +114,24 @@ roleRef:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: pingsource-jobrunner
+  name: pingsource-mt-adapter
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: pingsource-jobrunner
+  name: knative-eventing-pingsource-mt-adapter
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 subjects:
   - kind: ServiceAccount
-    name: pingsource-jobrunner
+    name: pingsource-mt-adapter
     namespace: knative-eventing
 roleRef:
   kind: ClusterRole
-  name: knative-eventing-jobrunner
+  name: knative-eventing-pingsource-mt-adapter
   apiGroup: rbac.authorization.k8s.io
 
 ---
@@ -155,14 +155,14 @@ metadata:
   name: eventing-webhook
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: eventing-webhook
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 subjects:
   - kind: ServiceAccount
     name: eventing-webhook
@@ -177,7 +177,7 @@ kind: ClusterRoleBinding
 metadata:
   name: eventing-webhook-resolver
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 subjects:
   - kind: ServiceAccount
     name: eventing-webhook
@@ -192,7 +192,7 @@ kind: ClusterRoleBinding
 metadata:
   name: eventing-webhook-podspecable-binding
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 subjects:
   - kind: ServiceAccount
     name: eventing-webhook
@@ -223,11 +223,11 @@ metadata:
   name: config-br-default-channel
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 data:
   channelTemplateSpec: |
-    apiVersion: messaging.knative.dev/v1alpha1
-    kind: InMemoryChannel
+    apiVersion: {{ .Values.channel.default.apiVersion }}
+    kind: {{ .Values.channel.default.kind }}
 
 ---
 # Copyright 2020 The Knative Authors
@@ -250,12 +250,12 @@ metadata:
   name: config-br-defaults
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 data:
   # Configuration for defaulting channels that do not specify CRD implementations.
   default-br-config: |
     clusterDefault:
-      brokerClass: ChannelBasedBroker
+      brokerClass: MTChannelBasedBroker
       apiVersion: v1
       kind: ConfigMap
       name: config-br-default-channel
@@ -282,17 +282,12 @@ metadata:
   name: default-ch-webhook
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 data:
   # Configuration for defaulting channels that do not specify CRD implementations.
   default-ch-config: |
-    clusterDefault:
-      apiVersion: messaging.knative.dev/v1beta1
-      kind: InMemoryChannel
-    namespaceDefaults:
-      some-namespace:
-        apiVersion: messaging.knative.dev/v1beta1
-        kind: InMemoryChannel
+    apiVersion: {{ .Values.channel.default.apiVersion }}
+    kind: {{ .Values.channel.default.kind }}
 
 ---
 # Copyright 2018 The Knative Authors
@@ -315,13 +310,8 @@ metadata:
   name: config-leader-election
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 data:
-  # An inactive but valid configuration follows; see example.
-  resourceLock: "leases"
-  leaseDuration: "15s"
-  renewDeadline: "10s"
-  retryPeriod: "2s"
   _example: |
     ################################
     #                              #
@@ -385,7 +375,7 @@ metadata:
   name: config-logging
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     knative.dev/config-propagation: original
     knative.dev/config-category: eventing
 data:
@@ -437,7 +427,7 @@ metadata:
   name: config-observability
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     knative.dev/config-propagation: original
     knative.dev/config-category: eventing
 data:
@@ -506,7 +496,7 @@ metadata:
   name: config-tracing
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     knative.dev/config-propagation: original
     knative.dev/config-category: eventing
 data:
@@ -565,7 +555,7 @@ metadata:
   name: eventing-controller
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 spec:
   replicas: 1
   selector:
@@ -575,13 +565,13 @@ spec:
     metadata:
       labels:
         app: eventing-controller
-        eventing.knative.dev/release: "v0.14.1"
+        eventing.knative.dev/release: "v0.15.1"
     spec:
       serviceAccountName: eventing-controller
       containers:
         - name: eventing-controller
           terminationMessagePolicy: FallbackToLogsOnError
-          image: gcr.io/knative-releases/knative.dev/eventing/cmd/controller@sha256:a3d2615e670221278f4a73911de3573ff44f3ffdbbe94f496e0dc6253f878371
+          image: gcr.io/knative-releases/knative.dev/eventing/cmd/controller@sha256:e22a23e05e8344e5126c10737625270db3d32f36da67c6e8b6020fa777723571
           resources:
             requests:
               cpu: 100m
@@ -599,12 +589,12 @@ spec:
               value: knative.dev/eventing
             - # PingSource
               name: PING_IMAGE
-              value: gcr.io/knative-releases/knative.dev/eventing/cmd/ping/adapter@sha256:034475c5983b63e38efad77b47f29d0d09e7a01bee861c4474255ed1d85bb48a
-            - name: JOB_RUNNER_IMAGE
-              value: gcr.io/knative-releases/knative.dev/eventing/cmd/ping/jobrunner@sha256:d0add2dde81ddb0c9e436a19f224daf876915f6fc73ac5deebbe221c15de392a
+              value: gcr.io/knative-releases/knative.dev/eventing/cmd/ping@sha256:d6fc16b77a8682dfba7305ac8c19f43e284e565bb7e49a72663e30291ad861e7
+            - name: MT_PING_IMAGE
+              value: gcr.io/knative-releases/knative.dev/eventing/cmd/mtping@sha256:241b67af3851850d069f320c731c62617182eb8553c12df6ccf359a6ce9f02ee
             - # APIServerSource
               name: APISERVER_RA_IMAGE
-              value: gcr.io/knative-releases/knative.dev/eventing/cmd/apiserver_receive_adapter@sha256:1c9c81406aea892967b1f6d59ff1327249676d48a824eaf9bc9a9d58cd10a772
+              value: gcr.io/knative-releases/knative.dev/eventing/cmd/apiserver_receive_adapter@sha256:e1026918aa15f2f188bacd49b13355d9dc99c6c5420d8c91500999deb4fae411
           securityContext:
             allowPrivilegeEscalation: false
           ports:
@@ -634,7 +624,7 @@ metadata:
   name: eventing-webhook
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 spec:
   replicas: 1
   selector:
@@ -651,7 +641,7 @@ spec:
           terminationMessagePolicy: FallbackToLogsOnError
           # This is the Go import path for the binary that is containerized
           # and substituted here.
-          image: gcr.io/knative-releases/knative.dev/eventing/cmd/webhook@sha256:29a1745f6171e98e1823753bf5dd60dd1a5511f564bf760d6099a79faf1b0637
+          image: gcr.io/knative-releases/knative.dev/eventing/cmd/webhook@sha256:88c21c79a606e5feb03f43739cece8ab9ea59831af5aa7fe17c07659e2d44342
           resources:
             requests:
               # taken from serving.
@@ -690,12 +680,21 @@ spec:
               containerPort: 9090
             - name: profiling
               containerPort: 8008
+          readinessProbe: &probe
+            periodSeconds: 1
+            httpGet:
+              scheme: HTTPS
+              port: 8443
+              httpHeaders:
+                - name: k-kubelet-probe
+                  value: "webhook"
+          livenessProbe: *probe
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     role: eventing-webhook
   name: eventing-webhook
   namespace: knative-eventing
@@ -727,7 +726,7 @@ kind: CustomResourceDefinition
 metadata:
   creationTimestamp: null
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     eventing.knative.dev/source: "true"
     duck.knative.dev/source: "true"
     knative.dev/crd-install: "true"
@@ -812,7 +811,7 @@ kind: CustomResourceDefinition
 metadata:
   name: brokers.eventing.knative.dev
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     knative.dev/crd-install: "true"
     duck.knative.dev/addressable: "true"
 spec:
@@ -886,7 +885,7 @@ kind: CustomResourceDefinition
 metadata:
   name: channels.messaging.knative.dev
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     knative.dev/crd-install: "true"
     messaging.knative.dev/subscribable: "true"
     duck.knative.dev/addressable: "true"
@@ -929,7 +928,7 @@ spec:
   versions:
     - name: v1alpha1
       served: true
-      storage: true
+      storage: false
       schema:
         openAPIV3Schema:
           type: object
@@ -1010,7 +1009,7 @@ spec:
               x-kubernetes-preserve-unknown-fields: true
     - name: v1beta1
       served: true
-      storage: false
+      storage: true
       schema:
         openAPIV3Schema:
           type: object
@@ -1041,7 +1040,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     eventing.knative.dev/source: "true"
     duck.knative.dev/source: "true"
     knative.dev/crd-install: "true"
@@ -1105,7 +1104,7 @@ kind: CustomResourceDefinition
 metadata:
   name: eventtypes.eventing.knative.dev
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     knative.dev/crd-install: "true"
 spec:
   group: eventing.knative.dev
@@ -1120,6 +1119,12 @@ spec:
   scope: Namespaced
   subresources:
     status: {}
+  conversion:
+    strategy: Webhook
+    webhookClientConfig:
+      service:
+        name: eventing-webhook
+        namespace: knative-eventing
   preserveUnknownFields: false
   validation:
     openAPIV3Schema:
@@ -1155,10 +1160,10 @@ spec:
   versions:
     - name: v1alpha1
       served: true
-      storage: true
+      storage: false
     - name: v1beta1
       served: true
-      storage: false
+      storage: true
 
 ---
 # Copyright 2019 The Knative Authors
@@ -1179,7 +1184,7 @@ kind: CustomResourceDefinition
 metadata:
   name: parallels.flows.knative.dev
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     knative.dev/crd-install: "true"
     duck.knative.dev/addressable: "true"
 spec:
@@ -1227,10 +1232,10 @@ spec:
   versions:
     - name: v1alpha1
       served: true
-      storage: true
+      storage: false
     - name: v1beta1
       served: true
-      storage: false
+      storage: true
 
 ---
 # Copyright 2020 The Knative Authors
@@ -1251,7 +1256,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     eventing.knative.dev/source: "true"
     duck.knative.dev/source: "true"
     knative.dev/crd-install: "true"
@@ -1330,7 +1335,7 @@ kind: CustomResourceDefinition
 metadata:
   name: sequences.flows.knative.dev
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     knative.dev/crd-install: "true"
     duck.knative.dev/addressable: "true"
 spec:
@@ -1378,10 +1383,10 @@ spec:
   versions:
     - name: v1alpha1
       served: true
-      storage: true
+      storage: false
     - name: v1beta1
       served: true
-      storage: false
+      storage: true
 
 ---
 # Copyright 2020 The Knative Authors
@@ -1402,7 +1407,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     eventing.knative.dev/source: "true"
     duck.knative.dev/source: "true"
     duck.knative.dev/binding: "true"
@@ -1477,7 +1482,7 @@ kind: CustomResourceDefinition
 metadata:
   name: subscriptions.messaging.knative.dev
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     knative.dev/crd-install: "true"
 spec:
   group: messaging.knative.dev
@@ -1609,10 +1614,10 @@ spec:
   versions:
     - name: v1alpha1
       served: true
-      storage: true
+      storage: false
     - name: v1beta1
       served: true
-      storage: false
+      storage: true
 
 ---
 # Copyright 2019 The Knative Authors
@@ -1634,7 +1639,7 @@ kind: CustomResourceDefinition
 metadata:
   name: triggers.eventing.knative.dev
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     knative.dev/crd-install: "true"
 spec:
   group: eventing.knative.dev
@@ -1675,7 +1680,7 @@ spec:
   versions:
     - name: v1alpha1
       served: true
-      storage: true
+      storage: false
       schema:
         openAPIV3Schema:
           type: object
@@ -1740,7 +1745,7 @@ spec:
               x-kubernetes-preserve-unknown-fields: true
     - name: v1beta1
       served: true
-      storage: false
+      storage: true
       schema:
         openAPIV3Schema:
           type: object
@@ -1818,7 +1823,7 @@ kind: ClusterRole
 metadata:
   name: addressable-resolver
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 aggregationRule:
   clusterRoleSelectors:
     - matchLabels:
@@ -1830,7 +1835,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: service-addressable-resolver
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     duck.knative.dev/addressable: "true"
 # Do not use this role directly. These rules will be added to the "addressable-resolver" role.
 rules:
@@ -1848,7 +1853,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: serving-addressable-resolver
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     duck.knative.dev/addressable: "true"
 # Do not use this role directly. These rules will be added to the "addressable-resolver" role.
 rules:
@@ -1869,7 +1874,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: channel-addressable-resolver
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     duck.knative.dev/addressable: "true"
 # Do not use this role directly. These rules will be added to the "addressable-resolver" role.
 rules:
@@ -1894,7 +1899,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: broker-addressable-resolver
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     duck.knative.dev/addressable: "true"
 # Do not use this role directly. These rules will be added to the "addressable-resolver" role.
 rules:
@@ -1913,7 +1918,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: messaging-addressable-resolver
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     duck.knative.dev/addressable: "true"
 # Do not use this role directly. These rules will be added to the "addressable-resolver" role.
 rules:
@@ -1934,7 +1939,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: flows-addressable-resolver
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     duck.knative.dev/addressable: "true"
 # Do not use this role directly. These rules will be added to the "addressable-resolver" role.
 rules:
@@ -1970,7 +1975,7 @@ kind: ClusterRole
 metadata:
   name: eventing-broker-filter
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 rules:
   - apiGroups:
       - ""
@@ -1995,7 +2000,7 @@ kind: ClusterRole
 metadata:
   name: eventing-broker-ingress
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 rules:
   - apiGroups:
       - ""
@@ -2011,7 +2016,7 @@ kind: ClusterRole
 metadata:
   name: eventing-config-reader
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 rules:
   - apiGroups:
       - ""
@@ -2043,12 +2048,34 @@ kind: ClusterRole
 metadata:
   name: channelable-manipulator
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 aggregationRule:
   clusterRoleSelectors:
     - matchLabels:
         duck.knative.dev/channelable: "true"
 rules: [] # Rules are automatically filled in by the controller manager.
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: meta-channelable-manipulator
+  labels:
+    eventing.knative.dev/release: "v0.15.1"
+    duck.knative.dev/channelable: "true"
+# Do not use this role directly. These rules will be added to the "channelable-manipulator" role.
+rules:
+  - apiGroups:
+      - messaging.knative.dev
+    resources:
+      - channels
+      - channels/status
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - patch
 
 ---
 # Copyright 2019 The Knative Authors
@@ -2070,7 +2097,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: knative-eventing-namespaced-admin
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
 rules:
   - apiGroups: ["eventing.knative.dev"]
@@ -2082,7 +2109,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: knative-messaging-namespaced-admin
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
 rules:
   - apiGroups: ["messaging.knative.dev"]
@@ -2094,7 +2121,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: knative-flows-namespaced-admin
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
 rules:
   - apiGroups: ["flows.knative.dev"]
@@ -2106,7 +2133,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: knative-sources-namespaced-admin
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
 rules:
   - apiGroups: ["sources.knative.dev"]
@@ -2119,7 +2146,7 @@ metadata:
   name: knative-eventing-namespaced-edit
   labels:
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 rules:
   - apiGroups: ["eventing.knative.dev", "messaging.knative.dev", "flows.knative.dev"]
     resources: ["*"]
@@ -2131,7 +2158,7 @@ metadata:
   name: knative-eventing-namespaced-view
   labels:
     rbac.authorization.k8s.io/aggregate-to-view: "true"
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 rules:
   - apiGroups: ["eventing.knative.dev", "messaging.knative.dev", "sources.knative.dev",
                 flows.knative.dev]
@@ -2158,7 +2185,7 @@ kind: ClusterRole
 metadata:
   name: knative-eventing-controller
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 rules:
   - apiGroups:
       - ""
@@ -2184,6 +2211,13 @@ rules:
     resources:
       - "deployments"
     verbs: *everything
+  - # PingSource controller manipulates Deployment owner reference
+    apiGroups:
+      - "apps"
+    resources:
+      - "deployments/finalizers"
+    verbs:
+      - "update"
   - # The namespace annotation controller needs to manipulate RoleBindings.
     apiGroups:
       - "rbac.authorization.k8s.io"
@@ -2259,7 +2293,7 @@ rules:
       - "watch"
 
 ---
-# Copyright 2019 The Knative Authors
+# Copyright 2020 The Knative Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -2276,9 +2310,9 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: knative-eventing-jobrunner
+  name: knative-eventing-pingsource-mt-adapter
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 rules:
   - apiGroups:
       - ""
@@ -2333,7 +2367,7 @@ kind: ClusterRole
 metadata:
   name: podspecable-binding
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 aggregationRule:
   clusterRoleSelectors:
     - matchLabels:
@@ -2345,7 +2379,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: builtin-podspecable-binding
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     duck.knative.dev/podspecable: "true"
 # Do not use this role directly. These rules will be added to the "podspecable-binding role.
 rules:
@@ -2391,7 +2425,7 @@ kind: ClusterRole
 metadata:
   name: source-observer
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 aggregationRule:
   clusterRoleSelectors:
     - matchLabels:
@@ -2403,7 +2437,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: eventing-sources-source-observer
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     duck.knative.dev/source: "true"
 # Do not use this role directly. These rules will be added to the "source-observer" role.
 rules:
@@ -2439,7 +2473,7 @@ kind: ClusterRole
 metadata:
   name: knative-eventing-sources-controller
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 rules:
   - apiGroups:
       - ""
@@ -2524,7 +2558,7 @@ kind: ClusterRole
 metadata:
   name: knative-eventing-webhook
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 rules:
   - # For watching logging configuration and getting certs.
     apiGroups:
@@ -2540,12 +2574,14 @@ rules:
       - ""
     resources:
       - "secrets"
+      - "namespaces"
     verbs:
       - "get"
       - "create"
       - "update"
       - "list"
       - "watch"
+      - "patch"
   - # For getting our Deployment so we can decorate with ownerref.
     apiGroups:
       - "apps"
@@ -2607,7 +2643,7 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: config.webhook.eventing.knative.dev
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 webhooks:
   - admissionReviewVersions:
       - v1beta1
@@ -2622,6 +2658,7 @@ webhooks:
       matchExpressions:
         - key: eventing.knative.dev/release
           operator: Exists
+    timeoutSeconds: 2
 
 ---
 # Copyright 2018 The Knative Authors
@@ -2643,7 +2680,7 @@ kind: MutatingWebhookConfiguration
 metadata:
   name: webhook.eventing.knative.dev
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 webhooks:
   - admissionReviewVersions:
       - v1beta1
@@ -2654,6 +2691,7 @@ webhooks:
     sideEffects: None
     failurePolicy: Fail
     name: webhook.eventing.knative.dev
+    timeoutSeconds: 2
 
 ---
 # Copyright 2018 The Knative Authors
@@ -2675,7 +2713,7 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: validation.webhook.eventing.knative.dev
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 webhooks:
   - admissionReviewVersions:
       - v1beta1
@@ -2686,6 +2724,7 @@ webhooks:
     sideEffects: None
     failurePolicy: Fail
     name: validation.webhook.eventing.knative.dev
+    timeoutSeconds: 2
 
 ---
 # Copyright 2018 The Knative Authors
@@ -2708,7 +2747,7 @@ metadata:
   name: eventing-webhook-certs
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 # The data is populated at install time.
 
 ---
@@ -2731,7 +2770,7 @@ kind: MutatingWebhookConfiguration
 metadata:
   name: sinkbindings.webhook.sources.knative.dev
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 webhooks:
   - admissionReviewVersions:
       - v1beta1
@@ -2742,10 +2781,11 @@ webhooks:
     failurePolicy: Fail
     sideEffects: None
     name: sinkbindings.webhook.sources.knative.dev
+    timeoutSeconds: 2
 
 ---
 ---
-# channel-broker.yaml
+# deprecated-channel-broker.yaml
 # Copyright 2020 The Knative Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -2765,7 +2805,7 @@ kind: ClusterRoleBinding
 metadata:
   name: eventing-channel-broker-controller
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 subjects:
   - kind: ServiceAccount
     name: eventing-controller
@@ -2795,7 +2835,7 @@ kind: ClusterRole
 metadata:
   name: knative-eventing-channel-broker-controller
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 rules:
   - # Configs resources and status we care about.
     apiGroups:
@@ -2856,7 +2896,7 @@ kind: CustomResourceDefinition
 metadata:
   name: configmappropagations.configs.internal.knative.dev
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     knative.dev/crd-install: "true"
 spec:
   group: configs.internal.knative.dev
@@ -2918,7 +2958,7 @@ metadata:
   name: broker-controller
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 spec:
   replicas: 1
   selector:
@@ -2928,13 +2968,13 @@ spec:
     metadata:
       labels:
         app: broker-controller
-        eventing.knative.dev/release: "v0.14.1"
+        eventing.knative.dev/release: "v0.15.1"
     spec:
       serviceAccountName: eventing-controller
       containers:
-        - name: eventing-controller
+        - name: broker-controller
           terminationMessagePolicy: FallbackToLogsOnError
-          image: gcr.io/knative-releases/knative.dev/eventing/cmd/channel_broker@sha256:9545f1af4ad301484a76e3ed572b463c6cf6ccdf8177ec1246a23df85ddb431b
+          image: gcr.io/knative-releases/knative.dev/eventing/cmd/channel_broker@sha256:cd2cee6463842c547a14ff0f62806370959b9e16a6fc82409c7781462a06c4bf
           resources:
             requests:
               cpu: 100m
@@ -2952,11 +2992,11 @@ spec:
               value: knative.dev/eventing
             - # Broker
               name: BROKER_INGRESS_IMAGE
-              value: gcr.io/knative-releases/knative.dev/eventing/cmd/broker/ingress@sha256:b21bdb9f9a452f4f7fdb5e31602c9cf5f46f6367cf98fe9d1f85425fc46ec040
+              value: gcr.io/knative-releases/knative.dev/eventing/cmd/broker/ingress@sha256:09e5ea1b066a8dea31de60ed46c323a48dd87323994a48e37c0c2d632e6982f5
             - name: BROKER_INGRESS_SERVICE_ACCOUNT
               value: eventing-broker-ingress
             - name: BROKER_FILTER_IMAGE
-              value: gcr.io/knative-releases/knative.dev/eventing/cmd/broker/filter@sha256:734d62030f539e1dfd2ea48faa0452fd61a1883279da7b9ad60885241a3e4fef
+              value: gcr.io/knative-releases/knative.dev/eventing/cmd/broker/filter@sha256:508a24a308f833f63b55dd8724942be02f1751c15b23ac6eef21af0b0cfe3ca1
             - name: BROKER_FILTER_SERVICE_ACCOUNT
               value: eventing-broker-filter
             - name: BROKER_IMAGE_PULL_SECRET_NAME
@@ -2968,200 +3008,6 @@ spec:
               containerPort: 9090
             - name: profiling
               containerPort: 8008
-
----
-# Copyright 2018 The Knative Authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: broker-controller
-  namespace: knative-eventing
-  labels:
-    eventing.knative.dev/release: "v0.14.1"
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: broker-controller
-  template:
-    metadata:
-      labels:
-        app: broker-controller
-        eventing.knative.dev/release: "v0.14.1"
-    spec:
-      serviceAccountName: eventing-controller
-      containers:
-        - name: eventing-controller
-          terminationMessagePolicy: FallbackToLogsOnError
-          image: gcr.io/knative-releases/knative.dev/eventing/cmd/channel_broker@sha256:9545f1af4ad301484a76e3ed572b463c6cf6ccdf8177ec1246a23df85ddb431b
-          resources:
-            requests:
-              cpu: 100m
-              memory: 100Mi
-          env:
-            - name: SYSTEM_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-            - name: CONFIG_LOGGING_NAME
-              value: config-logging
-            - name: CONFIG_OBSERVABILITY_NAME
-              value: config-observability
-            - name: METRICS_DOMAIN
-              value: knative.dev/eventing
-            - # Broker
-              name: BROKER_INGRESS_IMAGE
-              value: gcr.io/knative-releases/knative.dev/eventing/cmd/broker/ingress@sha256:b21bdb9f9a452f4f7fdb5e31602c9cf5f46f6367cf98fe9d1f85425fc46ec040
-            - name: BROKER_INGRESS_SERVICE_ACCOUNT
-              value: eventing-broker-ingress
-            - name: BROKER_FILTER_IMAGE
-              value: gcr.io/knative-releases/knative.dev/eventing/cmd/broker/filter@sha256:734d62030f539e1dfd2ea48faa0452fd61a1883279da7b9ad60885241a3e4fef
-            - name: BROKER_FILTER_SERVICE_ACCOUNT
-              value: eventing-broker-filter
-            - name: BROKER_IMAGE_PULL_SECRET_NAME
-              value:
-          securityContext:
-            allowPrivilegeEscalation: false
-          ports:
-            - name: metrics
-              containerPort: 9090
-            - name: profiling
-              containerPort: 8008
-
----
-# Copyright 2020 The Knative Authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: configmappropagations.configs.internal.knative.dev
-  labels:
-    eventing.knative.dev/release: "v0.14.1"
-    knative.dev/crd-install: "true"
-spec:
-  group: configs.internal.knative.dev
-  versions:
-    - name: v1alpha1
-      served: true
-      storage: true
-  names:
-    kind: ConfigMapPropagation
-    plural: configmappropagations
-    singular: configmappropagation
-    categories:
-      - knative-internal
-    shortNames:
-      - kcmp
-      - cmp
-  scope: Namespaced
-  subresources:
-    status: {}
-  additionalPrinterColumns:
-    - name: Ready
-      type: string
-      JSONPath: ".status.conditions[?(@.type==\"Ready\")].status"
-    - name: Reason
-      type: string
-      JSONPath: ".status.conditions[?(@.type==\"Ready\")].reason"
-    - name: OriginalNamespace
-      type: string
-      JSONPath: ".spec.originalNamespace"
-  validation:
-    openAPIV3Schema:
-      properties:
-        spec:
-          required:
-            - originalNamespace
-          properties:
-            originalNamespace:
-              type: string
-              description: "The namespace where original ConfigMaps exist in."
-
----
-# Copyright 2020 The Knative Authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: knative-eventing-channel-broker-controller
-  labels:
-    eventing.knative.dev/release: "v0.14.1"
-rules:
-  - # Configs resources and status we care about.
-    apiGroups:
-      - "configs.internal.knative.dev"
-    resources:
-      - "configmappropagations"
-      - "configmappropagations/status"
-    verbs:
-      - "get"
-      - "list"
-      - "create"
-      - "update"
-      - "delete"
-      - "patch"
-      - "watch"
-  - apiGroups:
-      - "configs.internal.knative.dev"
-    resources:
-      - "configmappropagations/finalizers"
-    verbs:
-      - "update"
-  - apiGroups:
-      - ""
-    resources:
-      - "namespaces/finalizers"
-    verbs:
-      - "update"
-  - apiGroups:
-      - coordination.k8s.io
-    resources:
-      - leases
-    verbs:
-      - "get"
-      - "list"
-      - "create"
-      - "update"
-      - "delete"
-      - "patch"
-      - "watch"
 
 ---
 ---
@@ -3184,7 +3030,7 @@ kind: ClusterRole
 metadata:
   name: knative-eventing-mt-channel-broker-controller
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 rules:
   - # Configs resources and status we care about.
     apiGroups:
@@ -3225,7 +3071,7 @@ kind: ClusterRole
 metadata:
   name: knative-eventing-mt-broker-filter
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 rules:
   - apiGroups:
       - eventing.knative.dev
@@ -3265,7 +3111,7 @@ metadata:
   name: mt-broker-filter
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 
 ---
 # Copyright 2020 The Knative Authors
@@ -3286,7 +3132,7 @@ kind: ClusterRole
 metadata:
   name: knative-eventing-mt-broker-ingress
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 rules:
   - apiGroups:
       - ""
@@ -3317,7 +3163,7 @@ metadata:
   name: mt-broker-ingress
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 
 ---
 # Copyright 2020 The Knative Authors
@@ -3339,7 +3185,7 @@ kind: ClusterRoleBinding
 metadata:
   name: eventing-mt-channel-broker-controller
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 subjects:
   - kind: ServiceAccount
     name: eventing-controller
@@ -3369,7 +3215,7 @@ kind: ClusterRoleBinding
 metadata:
   name: knative-eventing-mt-broker-filter
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 subjects:
   - kind: ServiceAccount
     name: mt-broker-filter
@@ -3399,7 +3245,7 @@ kind: ClusterRoleBinding
 metadata:
   name: knative-eventing-mt-broker-ingress
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 subjects:
   - kind: ServiceAccount
     name: mt-broker-ingress
@@ -3430,7 +3276,7 @@ metadata:
   name: broker-filter
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 spec:
   selector:
     matchLabels:
@@ -3439,13 +3285,13 @@ spec:
     metadata:
       labels:
         eventing.knative.dev/brokerRole: filter
-        eventing.knative.dev/release: "v0.14.1"
+        eventing.knative.dev/release: "v0.15.1"
     spec:
       serviceAccountName: mt-broker-filter
       containers:
         - name: filter
           terminationMessagePolicy: FallbackToLogsOnError
-          image: gcr.io/knative-releases/knative.dev/eventing/cmd/mtbroker/filter@sha256:ef88a5da1231048720553a6631b2f4b66a8e4cfb44b105c62fa6127b623c394e
+          image: gcr.io/knative-releases/knative.dev/eventing/cmd/mtbroker/filter@sha256:d1280e3194016843d6817540355e4ba415197a55f21de67d8b64bcb535c72452
           livenessProbe:
             failureThreshold: 3
             httpGet:
@@ -3501,7 +3347,7 @@ kind: Service
 metadata:
   labels:
     eventing.knative.dev/brokerRole: filter
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
   name: broker-filter
   namespace: knative-eventing
 spec:
@@ -3538,7 +3384,7 @@ metadata:
   name: broker-ingress
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 spec:
   selector:
     matchLabels:
@@ -3547,13 +3393,13 @@ spec:
     metadata:
       labels:
         eventing.knative.dev/brokerRole: ingress
-        eventing.knative.dev/release: "v0.14.1"
+        eventing.knative.dev/release: "v0.15.1"
     spec:
       serviceAccountName: mt-broker-ingress
       containers:
         - name: ingress
           terminationMessagePolicy: FallbackToLogsOnError
-          image: gcr.io/knative-releases/knative.dev/eventing/cmd/mtbroker/ingress@sha256:79c71f7f5fe9c4c73c627a43841efe079f97c21630e9a18bcf389fc124ee41a7
+          image: gcr.io/knative-releases/knative.dev/eventing/cmd/mtbroker/ingress@sha256:505575200a6aa053b0773cc566153882a9c31658da6fdd7aa41e26fc4c5f258a
           livenessProbe:
             failureThreshold: 3
             httpGet:
@@ -3609,7 +3455,7 @@ kind: Service
 metadata:
   labels:
     eventing.knative.dev/brokerRole: ingress
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
   name: broker-ingress
   namespace: knative-eventing
 spec:
@@ -3646,7 +3492,7 @@ metadata:
   name: mt-broker-controller
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 spec:
   replicas: 1
   selector:
@@ -3656,297 +3502,13 @@ spec:
     metadata:
       labels:
         app: mt-broker-controller
-        eventing.knative.dev/release: "v0.14.1"
+        eventing.knative.dev/release: "v0.15.1"
     spec:
       serviceAccountName: eventing-controller
       containers:
-        - name: eventing-controller
+        - name: mt-broker-controller
           terminationMessagePolicy: FallbackToLogsOnError
-          image: gcr.io/knative-releases/knative.dev/eventing/cmd/mtchannel_broker@sha256:3907ef032d0787a3381b8881caed5696a533d948e1c539fc5aed1466e802af48
-          resources:
-            requests:
-              cpu: 100m
-              memory: 100Mi
-          env:
-            - name: SYSTEM_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-            - name: CONFIG_LOGGING_NAME
-              value: config-logging
-            - name: CONFIG_OBSERVABILITY_NAME
-              value: config-observability
-            - name: METRICS_DOMAIN
-              value: knative.dev/eventing
-            - # Due to the trivial per-Broker cost, we _can_ inject Brokers into every
-              # namespace by default. To change this default simply change this
-              # to "true".  To opt namespaces out of Broker injection, label
-              # them with:
-              #    knative-eventing-injection: disabled
-              name: BROKER_INJECTION_DEFAULT
-              value: "false"
-          securityContext:
-            allowPrivilegeEscalation: false
-          ports:
-            - name: metrics
-              containerPort: 9090
-            - name: profiling
-              containerPort: 8008
-
----
-# Copyright 2020 The Knative Authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: broker-filter
-  namespace: knative-eventing
-  labels:
-    eventing.knative.dev/release: "v0.14.1"
-spec:
-  selector:
-    matchLabels:
-      eventing.knative.dev/brokerRole: filter
-  template:
-    metadata:
-      labels:
-        eventing.knative.dev/brokerRole: filter
-        eventing.knative.dev/release: "v0.14.1"
-    spec:
-      serviceAccountName: mt-broker-filter
-      containers:
-        - name: filter
-          terminationMessagePolicy: FallbackToLogsOnError
-          image: gcr.io/knative-releases/knative.dev/eventing/cmd/mtbroker/filter@sha256:ef88a5da1231048720553a6631b2f4b66a8e4cfb44b105c62fa6127b623c394e
-          livenessProbe:
-            failureThreshold: 3
-            httpGet:
-              path: /healthz
-              port: 8080
-              scheme: HTTP
-            initialDelaySeconds: 5
-            periodSeconds: 2
-            successThreshold: 1
-            timeoutSeconds: 1
-          resources:
-            requests:
-              cpu: 100m
-              memory: 100Mi
-          ports:
-            - containerPort: 8080
-              name: http
-              protocol: TCP
-            - containerPort: 9090
-              name: metrics
-              protocol: TCP
-          terminationMessagePath: /dev/termination-log
-          env:
-            - name: SYSTEM_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-            - name: NAMESPACE
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.namespace
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.name
-            - name: CONTAINER_NAME
-              value: filter
-            - name: CONFIG_LOGGING_NAME
-              value: config-logging
-            - name: CONFIG_OBSERVABILITY_NAME
-              value: config-observability
-            - name: METRICS_DOMAIN
-              value: knative.dev/internal/eventing
-            - name: FILTER_PORT
-              value: "8080"
-          securityContext:
-            allowPrivilegeEscalation: false
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    eventing.knative.dev/brokerRole: filter
-    eventing.knative.dev/release: "v0.14.1"
-  name: broker-filter
-  namespace: knative-eventing
-spec:
-  ports:
-    - name: http
-      port: 80
-      protocol: TCP
-      targetPort: 8080
-    - name: http-metrics
-      port: 9090
-      protocol: TCP
-      targetPort: 9090
-  selector:
-    eventing.knative.dev/brokerRole: filter
-
----
-# Copyright 2020 The Knative Authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: broker-ingress
-  namespace: knative-eventing
-  labels:
-    eventing.knative.dev/release: "v0.14.1"
-spec:
-  selector:
-    matchLabels:
-      eventing.knative.dev/brokerRole: ingress
-  template:
-    metadata:
-      labels:
-        eventing.knative.dev/brokerRole: ingress
-        eventing.knative.dev/release: "v0.14.1"
-    spec:
-      serviceAccountName: mt-broker-ingress
-      containers:
-        - name: ingress
-          terminationMessagePolicy: FallbackToLogsOnError
-          image: gcr.io/knative-releases/knative.dev/eventing/cmd/mtbroker/ingress@sha256:79c71f7f5fe9c4c73c627a43841efe079f97c21630e9a18bcf389fc124ee41a7
-          livenessProbe:
-            failureThreshold: 3
-            httpGet:
-              path: /healthz
-              port: 8080
-              scheme: HTTP
-            initialDelaySeconds: 5
-            periodSeconds: 2
-            successThreshold: 1
-            timeoutSeconds: 1
-          resources:
-            requests:
-              cpu: 100m
-              memory: 100Mi
-          ports:
-            - containerPort: 8080
-              name: http
-              protocol: TCP
-            - containerPort: 9090
-              name: metrics
-              protocol: TCP
-          terminationMessagePath: /dev/termination-log
-          env:
-            - name: SYSTEM_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-            - name: NAMESPACE
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.namespace
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.name
-            - name: CONTAINER_NAME
-              value: ingress
-            - name: CONFIG_LOGGING_NAME
-              value: config-logging
-            - name: CONFIG_OBSERVABILITY_NAME
-              value: config-observability
-            - name: METRICS_DOMAIN
-              value: knative.dev/internal/eventing
-            - name: INGRESS_PORT
-              value: "8080"
-          securityContext:
-            allowPrivilegeEscalation: false
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    eventing.knative.dev/brokerRole: ingress
-    eventing.knative.dev/release: "v0.14.1"
-  name: broker-ingress
-  namespace: knative-eventing
-spec:
-  ports:
-    - name: http
-      port: 80
-      protocol: TCP
-      targetPort: 8080
-    - name: http-metrics
-      port: 9090
-      protocol: TCP
-      targetPort: 9090
-  selector:
-    eventing.knative.dev/brokerRole: ingress
-
----
-# Copyright 2020 The Knative Authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mt-broker-controller
-  namespace: knative-eventing
-  labels:
-    eventing.knative.dev/release: "v0.14.1"
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mt-broker-controller
-  template:
-    metadata:
-      labels:
-        app: mt-broker-controller
-        eventing.knative.dev/release: "v0.14.1"
-    spec:
-      serviceAccountName: eventing-controller
-      containers:
-        - name: eventing-controller
-          terminationMessagePolicy: FallbackToLogsOnError
-          image: gcr.io/knative-releases/knative.dev/eventing/cmd/mtchannel_broker@sha256:3907ef032d0787a3381b8881caed5696a533d948e1c539fc5aed1466e802af48
+          image: gcr.io/knative-releases/knative.dev/eventing/cmd/mtchannel_broker@sha256:04f3dc50d6b05fbf05685537b60ab0a18eb5f6f1029de0046d03284f3a855128
           resources:
             requests:
               cpu: 100m
@@ -4017,291 +3579,6 @@ spec:
         target:
           type: Utilization
           averageUtilization: 70
-
----
-apiVersion: autoscaling/v2beta2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: broker-ingress-hpa
-  namespace: knative-eventing
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: broker-ingress
-  minReplicas: 1
-  maxReplicas: 10
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 70
----
-apiVersion: autoscaling/v2beta2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: broker-filter-hpa
-  namespace: knative-eventing
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: broker-filter
-  minReplicas: 1
-  maxReplicas: 10
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 70
-
----
-# Copyright 2020 The Knative Authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: knative-eventing-mt-channel-broker-controller
-  labels:
-    eventing.knative.dev/release: "v0.14.1"
-rules:
-  - # Configs resources and status we care about.
-    apiGroups:
-      - ""
-    resources:
-      - "namespaces/finalizers"
-    verbs:
-      - "update"
-  - apiGroups:
-      - coordination.k8s.io
-    resources:
-      - leases
-    verbs:
-      - "get"
-      - "list"
-      - "create"
-      - "update"
-      - "delete"
-      - "patch"
-      - "watch"
-
----
-# Copyright 2020 The Knative Authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: eventing-mt-channel-broker-controller
-  labels:
-    eventing.knative.dev/release: "v0.14.1"
-subjects:
-  - kind: ServiceAccount
-    name: eventing-controller
-    namespace: knative-eventing
-roleRef:
-  kind: ClusterRole
-  name: knative-eventing-mt-channel-broker-controller
-  apiGroup: rbac.authorization.k8s.io
-
----
-# Copyright 2020 The Knative Authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: knative-eventing-mt-broker-filter
-  labels:
-    eventing.knative.dev/release: "v0.14.1"
-rules:
-  - apiGroups:
-      - eventing.knative.dev
-    resources:
-      - triggers
-      - triggers/status
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - ""
-    resources:
-      - "configmaps"
-    verbs:
-      - get
-      - list
-      - watch
-
----
-# Copyright 2020 The Knative Authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: knative-eventing-mt-broker-filter
-  labels:
-    eventing.knative.dev/release: "v0.14.1"
-subjects:
-  - kind: ServiceAccount
-    name: mt-broker-filter
-    namespace: knative-eventing
-roleRef:
-  kind: ClusterRole
-  name: knative-eventing-mt-broker-filter
-  apiGroup: rbac.authorization.k8s.io
-
----
-# Copyright 2020 The Knative Authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: mt-broker-filter
-  namespace: knative-eventing
-  labels:
-    eventing.knative.dev/release: "v0.14.1"
-
----
-# Copyright 2020 The Knative Authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: knative-eventing-mt-broker-ingress
-  labels:
-    eventing.knative.dev/release: "v0.14.1"
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - "configmaps"
-    verbs:
-      - get
-      - list
-      - watch
-
----
-# Copyright 2020 The Knative Authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: knative-eventing-mt-broker-ingress
-  labels:
-    eventing.knative.dev/release: "v0.14.1"
-subjects:
-  - kind: ServiceAccount
-    name: mt-broker-ingress
-    namespace: knative-eventing
-roleRef:
-  kind: ClusterRole
-  name: knative-eventing-mt-broker-ingress
-  apiGroup: rbac.authorization.k8s.io
-
----
-# Copyright 2020 The Knative Authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: mt-broker-ingress
-  namespace: knative-eventing
-  labels:
-    eventing.knative.dev/release: "v0.14.1"
 
 ---
 ---
@@ -4326,7 +3603,7 @@ metadata:
   name: config-imc-event-dispatcher
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 data:
   MaxIdleConnections: "1000"
   MaxIdleConnectionsPerHost: "100"
@@ -4351,7 +3628,7 @@ kind: ClusterRole
 metadata:
   name: imc-addressable-resolver
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     duck.knative.dev/addressable: "true"
 # Do not use this role directly. These rules will be added to the "addressable-resolver" role.
 rules:
@@ -4385,7 +3662,7 @@ kind: ClusterRole
 metadata:
   name: imc-channelable-manipulator
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     duck.knative.dev/channelable: "true"
 # Do not use this role directly. These rules will be added to the "channelable-manipulator" role.
 rules:
@@ -4422,7 +3699,7 @@ kind: ClusterRole
 metadata:
   name: imc-controller
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 rules:
   - apiGroups:
       - messaging.knative.dev
@@ -4518,7 +3795,7 @@ kind: ClusterRole
 metadata:
   name: imc-dispatcher
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 rules:
   - apiGroups:
       - messaging.knative.dev
@@ -4583,7 +3860,7 @@ metadata:
   name: imc-dispatcher
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     messaging.knative.dev/channel: in-memory-channel
     messaging.knative.dev/role: dispatcher
 spec:
@@ -4617,7 +3894,7 @@ metadata:
   name: imc-dispatcher
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 
 ---
 # Copyright 2019 The Knative Authors
@@ -4639,7 +3916,7 @@ metadata:
   name: imc-controller
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 
 ---
 # Copyright 2019 The Knative Authors
@@ -4660,7 +3937,7 @@ kind: ClusterRoleBinding
 metadata:
   name: imc-controller
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 subjects:
   - kind: ServiceAccount
     name: imc-controller
@@ -4690,7 +3967,7 @@ kind: ClusterRoleBinding
 metadata:
   name: imc-dispatcher
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 subjects:
   - kind: ServiceAccount
     name: imc-dispatcher
@@ -4719,7 +3996,7 @@ kind: CustomResourceDefinition
 metadata:
   name: inmemorychannels.messaging.knative.dev
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
     knative.dev/crd-install: "true"
     messaging.knative.dev/subscribable: "true"
     duck.knative.dev/addressable: "true"
@@ -4770,10 +4047,10 @@ spec:
   versions:
     - name: v1alpha1
       served: true
-      storage: true
+      storage: false
     - name: v1beta1
       served: true
-      storage: false
+      storage: true
 
 ---
 # Copyright 2019 The Knative Authors
@@ -4796,7 +4073,7 @@ metadata:
   name: imc-controller
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 spec:
   replicas: 1
   selector:
@@ -4810,7 +4087,7 @@ spec:
       serviceAccountName: imc-controller
       containers:
         - name: controller
-          image: gcr.io/knative-releases/knative.dev/eventing/cmd/in_memory/channel_controller@sha256:7ee5a2c40ee723d6c539393eff5de8d3db567b7f974ce7a56058e344e6df2496
+          image: gcr.io/knative-releases/knative.dev/eventing/cmd/in_memory/channel_controller@sha256:5a42c1c71b56eec1d755ee808ebe190df4a82bd03be5fb6682aff6dbbd337189
           env:
             - name: CONFIG_LOGGING_NAME
               value: config-logging
@@ -4823,7 +4100,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: DISPATCHER_IMAGE
-              value: gcr.io/knative-releases/knative.dev/eventing/cmd/in_memory/channel_dispatcher@sha256:8c7cd35f84a3eae51e914fd227fe572dc8f8f8f8aac95e867bf6fcce0de6563d
+              value: gcr.io/knative-releases/knative.dev/eventing/cmd/in_memory/channel_dispatcher@sha256:e7c35b3b1e6ad777661bc5c5361011af42779c7faf917c365ac8af339f51d35e
           securityContext:
             allowPrivilegeEscalation: false
           ports:
@@ -4853,7 +4130,7 @@ metadata:
   name: imc-dispatcher
   namespace: knative-eventing
   labels:
-    eventing.knative.dev/release: "v0.14.1"
+    eventing.knative.dev/release: "v0.15.1"
 spec:
   replicas: 1
   selector:
@@ -4867,7 +4144,7 @@ spec:
       serviceAccountName: imc-dispatcher
       containers:
         - name: dispatcher
-          image: gcr.io/knative-releases/knative.dev/eventing/cmd/in_memory/channel_dispatcher@sha256:8c7cd35f84a3eae51e914fd227fe572dc8f8f8f8aac95e867bf6fcce0de6563d
+          image: gcr.io/knative-releases/knative.dev/eventing/cmd/in_memory/channel_dispatcher@sha256:e7c35b3b1e6ad777661bc5c5361011af42779c7faf917c365ac8af339f51d35e
           env:
             - name: CONFIG_LOGGING_NAME
               value: config-logging
@@ -4882,14 +4159,5 @@ spec:
           ports:
             - containerPort: 9090
               name: metrics
-          resources:
-            # Set resource requests and limits based on the benchmarking results in
-            # https://github.com/knative/eventing/issues/2311#issuecomment-565311345
-            requests:
-              cpu: 1000m
-              memory: 256Mi
-            limits:
-              cpu: 2200m
-              memory: 2048Mi
 
 ---
