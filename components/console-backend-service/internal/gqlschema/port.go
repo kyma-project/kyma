@@ -1,9 +1,10 @@
 package gqlschema
 
 import (
+	"io"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/pkg/errors"
-	"io"
 )
 
 func MarshalPort(port uint32) graphql.Marshaler {

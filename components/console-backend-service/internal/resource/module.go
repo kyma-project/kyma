@@ -11,7 +11,7 @@ type ServiceCreators map[schema.GroupVersionResource]ServiceCreator
 type Module struct {
 	*module.Pluggable
 	serviceCreators ServiceCreators
-	services map[schema.GroupVersionResource]*GenericService
+	services        map[schema.GroupVersionResource]*GenericService
 
 	// Module should receive ServiceFactory in Enable, as it is needed (and should be needed) only there,
 	// but I don't want to touch module.PluggableModule interface right now
@@ -20,10 +20,10 @@ type Module struct {
 
 func NewModule(name string, factory *GenericServiceFactory, serviceCreators ServiceCreators) *Module {
 	return &Module{
-		Pluggable: module.NewPluggable(name),
+		Pluggable:       module.NewPluggable(name),
 		serviceCreators: serviceCreators,
-		services: make(map[schema.GroupVersionResource]*GenericService),
-		factory: factory,
+		services:        make(map[schema.GroupVersionResource]*GenericService),
+		factory:         factory,
 	}
 }
 

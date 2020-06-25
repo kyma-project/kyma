@@ -1,9 +1,10 @@
 package gqlschema
 
 import (
+	"io"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/pkg/errors"
-	"io"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 

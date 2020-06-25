@@ -9,7 +9,6 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-
 var apiRulesKind = "APIRule"
 var apiRulesGroupVersionResource = schema.GroupVersionResource{
 	Version:  v1alpha1.GroupVersion.Version,
@@ -43,7 +42,7 @@ func NewService(serviceFactory *resource.GenericServiceFactory) (*resource.Gener
 	service := serviceFactory.ForResource(apiRulesGroupVersionResource)
 	err := service.AddIndexers(cache.Indexers{
 		apiRulesServiceIndex: func(obj interface{}) ([]string, error) {
-			rule  := &v1alpha1.APIRule{}
+			rule := &v1alpha1.APIRule{}
 			err := resource.FromUnstructured(obj.(*unstructured.Unstructured), rule)
 			if err != nil {
 				return nil, err
@@ -51,7 +50,7 @@ func NewService(serviceFactory *resource.GenericServiceFactory) (*resource.Gener
 			return []string{apiRulesServiceIndexKey(rule.Namespace, rule.Spec.Service.Name)}, nil
 		},
 		apiRulesHostnameIndex: func(obj interface{}) ([]string, error) {
-			rule  := &v1alpha1.APIRule{}
+			rule := &v1alpha1.APIRule{}
 			err := resource.FromUnstructured(obj.(*unstructured.Unstructured), rule)
 			if err != nil {
 				return nil, err
@@ -59,7 +58,7 @@ func NewService(serviceFactory *resource.GenericServiceFactory) (*resource.Gener
 			return []string{apiRulesHostnameIndexKey(rule.Namespace, rule.Spec.Service.Host)}, nil
 		},
 		apiRulesServiceAndHostnameIndex: func(obj interface{}) ([]string, error) {
-			rule  := &v1alpha1.APIRule{}
+			rule := &v1alpha1.APIRule{}
 			err := resource.FromUnstructured(obj.(*unstructured.Unstructured), rule)
 			if err != nil {
 				return nil, err
@@ -99,4 +98,3 @@ func (h *EventHandler) Notify(eventType gqlschema.SubscriptionEventType) {
 		APIRule: h.res,
 	}
 }
-

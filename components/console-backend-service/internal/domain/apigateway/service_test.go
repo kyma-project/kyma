@@ -2,11 +2,12 @@ package apigateway
 
 import (
 	"context"
+	"testing"
+
 	resourceFake "github.com/kyma-project/kyma/components/console-backend-service/internal/resource/fake"
 	rulev1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"testing"
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	"github.com/stretchr/testify/assert"

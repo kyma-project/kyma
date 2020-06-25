@@ -2,6 +2,7 @@ package apigateway
 
 import (
 	"context"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"

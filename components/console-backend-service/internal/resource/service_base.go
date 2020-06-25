@@ -2,6 +2,7 @@ package resource
 
 import (
 	"fmt"
+
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -102,7 +103,6 @@ func (s *enabledServiceBase) Apply(obj interface{}, result interface{}) error {
 	if err != nil {
 		return err
 	}
-
 
 	var updated *unstructured.Unstructured
 	if u.GetNamespace() == "" {
