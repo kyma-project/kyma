@@ -35,7 +35,7 @@ func TestApiRuleService_List(t *testing.T) {
 		apiRule2 := fixTestApiRule(name2, "different-namespace", hostname, serviceName, servicePort2, gateway2)
 		apiRule3 := fixTestApiRule(name3, namespace, hostname, serviceName, servicePort3, gateway3)
 
-		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
+		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
 		require.NoError(t, err)
 
 		service := New(serviceFactory)
@@ -57,7 +57,7 @@ func TestApiRuleService_List(t *testing.T) {
 		apiRule2 := fixTestApiRule(name2, "different-namespace", hostname, serviceName, servicePort2, gateway2)
 		apiRule3 := fixTestApiRule(name3, namespace, "different-hostname", serviceName, servicePort3, gateway3)
 
-		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
+		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
 		require.NoError(t, err)
 
 		service := New(serviceFactory)
@@ -79,7 +79,7 @@ func TestApiRuleService_List(t *testing.T) {
 		apiRule2 := fixTestApiRule(name2, "different-namespace", hostname, serviceName, servicePort2, gateway2)
 		apiRule3 := fixTestApiRule(name3, namespace, hostname, "different-service-name", servicePort3, gateway3)
 
-		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
+		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
 		require.NoError(t, err)
 
 		service := New(serviceFactory)
@@ -101,7 +101,7 @@ func TestApiRuleService_List(t *testing.T) {
 		apiRule2 := fixTestApiRule(name2, "different-namespace", hostname, serviceName, servicePort2, gateway2)
 		apiRule3 := fixTestApiRule(name3, namespace, hostname, "different-service-name", servicePort3, gateway3)
 
-		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
+		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
 		require.NoError(t, err)
 
 		service := New(serviceFactory)
@@ -130,7 +130,7 @@ func TestApiService_Find(t *testing.T) {
 	t.Run("Should find an APIRule", func(t *testing.T) {
 		apiRule1 := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1)
 
-		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, apiRule1)
+		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, apiRule1)
 		require.NoError(t, err)
 
 		service := New(serviceFactory)
@@ -146,7 +146,7 @@ func TestApiService_Find(t *testing.T) {
 	})
 
 	t.Run("Should return error if not found", func(t *testing.T) {
-		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
+		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
 
 		service := New(serviceFactory)
@@ -172,7 +172,7 @@ func TestApiService_Create(t *testing.T) {
 	newRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1)
 
 	t.Run("Should create an APIRule", func(t *testing.T) {
-		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
+		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
 		service := New(serviceFactory)
 		err = service.Enable()
@@ -189,7 +189,7 @@ func TestApiService_Create(t *testing.T) {
 	t.Run("Should throw an error if APIRule already exists", func(t *testing.T) {
 		existingApiRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1)
 
-		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, existingApiRule)
+		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, existingApiRule)
 		require.NoError(t, err)
 		service := New(serviceFactory)
 		err = service.Enable()
@@ -217,7 +217,7 @@ func TestApiRuleService_Update(t *testing.T) {
 	t.Run("Should update an APIRule", func(t *testing.T) {
 		existingApiRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1)
 
-		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, existingApiRule)
+		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, existingApiRule)
 		require.NoError(t, err)
 
 		service := New(serviceFactory)
@@ -234,7 +234,7 @@ func TestApiRuleService_Update(t *testing.T) {
 	})
 
 	t.Run("Should throw an error if APIRule doesn't exists", func(t *testing.T) {
-		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
+		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
 
 		service := New(serviceFactory)
@@ -259,7 +259,7 @@ func TestApiRuleService_Update(t *testing.T) {
 //
 //	newRule := fixTestApiRule(name, namespace, "new-hostname", "service", servicePort1, "gateway")
 //
-//	serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
+//	serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme)
 //	require.NoError(t, err)
 //
 //	service := New(serviceFactory)
