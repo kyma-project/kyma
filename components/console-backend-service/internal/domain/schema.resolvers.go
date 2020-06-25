@@ -5,6 +5,7 @@ package domain
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
@@ -154,11 +155,11 @@ func (r *mutationResolver) AddAddonsConfigurationRepository(ctx context.Context,
 }
 
 func (r *mutationResolver) RemoveAddonsConfigurationRepository(ctx context.Context, name string, namespace string, urls []string) (*gqlschema.AddonsConfiguration, error) {
-	return r.sca.Resolver.RemoveAddonsConfigurationRepositories(ctx, name, namespace, urls)
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) ResyncAddonsConfiguration(ctx context.Context, name string, namespace string) (*gqlschema.AddonsConfiguration, error) {
-	return r.sca.Resolver.ResyncAddonsConfiguration(ctx, name, namespace)
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) CreateApplication(ctx context.Context, name string, description *string, labels gqlschema.Labels) (*gqlschema.ApplicationMutationOutput, error) {
@@ -219,14 +220,6 @@ func (r *mutationResolver) UpdateConfigMap(ctx context.Context, name string, nam
 
 func (r *mutationResolver) DeleteConfigMap(ctx context.Context, name string, namespace string) (*gqlschema.ConfigMap, error) {
 	return r.k8s.DeleteConfigMapMutation(ctx, name, namespace)
-}
-
-func (r *mutationResolver) CreateIDPPreset(ctx context.Context, name string, issuer string, jwksURI string) (*gqlschema.IDPPreset, error) {
-	return r.authentication.CreateIDPPresetMutation(ctx, name, issuer, jwksURI)
-}
-
-func (r *mutationResolver) DeleteIDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
-	return r.authentication.DeleteIDPPresetMutation(ctx, name)
 }
 
 func (r *mutationResolver) UpdateService(ctx context.Context, name string, namespace string, service gqlschema.JSON) (*gqlschema.Service, error) {
@@ -438,11 +431,11 @@ func (r *queryResolver) ResourceQuotasStatus(ctx context.Context, namespace stri
 }
 
 func (r *queryResolver) EventActivations(ctx context.Context, namespace string) ([]*gqlschema.EventActivation, error) {
-	return r.app.Resolver.EventActivationsQuery(ctx, namespace)
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) LimitRanges(ctx context.Context, namespace string) ([]*gqlschema.LimitRange, error) {
-	return r.k8s.LimitRangesQuery(ctx, namespace)
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) BackendModules(ctx context.Context) ([]*gqlschema.BackendModule, error) {
@@ -455,14 +448,6 @@ func (r *queryResolver) Secret(ctx context.Context, name string, namespace strin
 
 func (r *queryResolver) Secrets(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.Secret, error) {
 	return r.k8s.SecretsQuery(ctx, namespace, first, offset)
-}
-
-func (r *queryResolver) IDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
-	return r.authentication.IDPPresetQuery(ctx, name)
-}
-
-func (r *queryResolver) IDPPresets(ctx context.Context, first *int, offset *int) ([]*gqlschema.IDPPreset, error) {
-	return r.authentication.IDPPresetsQuery(ctx, first, offset)
 }
 
 func (r *queryResolver) MicroFrontends(ctx context.Context, namespace string) ([]*gqlschema.MicroFrontend, error) {

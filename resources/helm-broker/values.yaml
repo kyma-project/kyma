@@ -25,10 +25,10 @@ ctrl:
 broker:
   resources:
     limits:
-      memory: 76Mi
+      memory: 120Mi
       cpu: 60m
     requests:
-      memory: 32Mi
+      memory: 64Mi
       cpu: 30m
   tillerTLSInsecure: true
   tillerTLSEnabled: true
@@ -49,10 +49,10 @@ global:
   # paths to docker images
   helm_broker:
     dir: /develop/
-    version: "fae23724"
+    version: "28626733"
   helm_controller:
     dir: /develop/
-    version: "fae23724"
+    version: "28626733"
   # etcd port uses by helm broker
   etcdClientPort: 2379
 

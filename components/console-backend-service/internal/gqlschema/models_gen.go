@@ -366,12 +366,6 @@ type FunctionStatus struct {
 	Message *string             `json:"message"`
 }
 
-type IDPPreset struct {
-	Name    string `json:"name"`
-	Issuer  string `json:"issuer"`
-	JwksURI string `json:"jwksUri"`
-}
-
 type LimitRange struct {
 	Name   string            `json:"name"`
 	Limits []*LimitRangeItem `json:"limits"`

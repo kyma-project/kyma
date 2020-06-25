@@ -219,9 +219,6 @@ components/etcd-tls-setup-job/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksp
 /components/console-backend-service/internal/domain/serverless @michal-hudy @aerfio @pPrecel @magicmatatjahu
 /components/console-backend-service/internal/domain/rafter @michal-hudy @aerfio @pPrecel @magicmatatjahu
 
-# IDPPreset Component
-/components/idppreset/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
 # Connector Service Component
 /components/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
