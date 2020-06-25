@@ -7,7 +7,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/cache"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource_v2"
 )
 
 
@@ -45,7 +44,7 @@ func NewService(serviceFactory *resource.GenericServiceFactory) (*resource.Gener
 	err := service.AddIndexers(cache.Indexers{
 		apiRulesServiceIndex: func(obj interface{}) ([]string, error) {
 			rule  := &v1alpha1.APIRule{}
-			err := resource_v2.FromUnstructured(obj.(*unstructured.Unstructured), rule)
+			err := resource.FromUnstructured(obj.(*unstructured.Unstructured), rule)
 			if err != nil {
 				return nil, err
 			}
