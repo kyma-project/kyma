@@ -5,10 +5,11 @@ metadata:
   name: {{ template "fullname" . }}-tests
   labels:
     app: {{ .Chart.Name }}-tests
-    app.kubernetes.io/name: {{ .Chart.Name }}-tests
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   disableConcurrency: false
   template:
@@ -36,13 +37,13 @@ spec:
         - name: APP_KYMA_VERSION
           value: {{ .Values.tests.kyma.version }}
         - name: APP_QUERY_LOGGING
-          value: "{{ .Values.tests.queryLogging }}"
+          value: {{ .Values.tests.queryLogging | quote }}
         - name: APP_DIRECTOR_CLIENT_URL
           value: "https://{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}/director/graphql"
         - name: APP_DIRECTOR_CLIENT_NAMESPACE
           value: {{ .Release.Namespace }}
         - name: APP_DIRECTOR_CLIENT_OAUTH_CREDENTIALS_SECRET_NAME
-          value: "{{ .Values.global.provisioner.secrets.integrationSystemCredentials.name }}"
+          value: {{ .Values.global.provisioner.secrets.integrationSystemCredentials.name | quote }}
         command:
         - "/bin/sh"
         args:

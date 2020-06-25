@@ -17,7 +17,7 @@ import (
 //go:generate mockery -name=gqlClusterServiceBrokerConverter -output=automock -outpkg=automock -case=underscore
 type gqlClusterServiceBrokerConverter interface {
 	ToGQL(in *v1beta1.ClusterServiceBroker) (*gqlschema.ClusterServiceBroker, error)
-	ToGQLs(in []*v1beta1.ClusterServiceBroker) ([]gqlschema.ClusterServiceBroker, error)
+	ToGQLs(in []*v1beta1.ClusterServiceBroker) ([]*gqlschema.ClusterServiceBroker, error)
 }
 
 //go:generate mockery -name=clusterServiceBrokerSvc -output=automock -outpkg=automock -case=underscore
@@ -40,7 +40,7 @@ func newClusterServiceBrokerResolver(clusterServiceBrokerSvc clusterServiceBroke
 	}
 }
 
-func (r *clusterServiceBrokerResolver) ClusterServiceBrokersQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.ClusterServiceBroker, error) {
+func (r *clusterServiceBrokerResolver) ClusterServiceBrokersQuery(ctx context.Context, first *int, offset *int) ([]*gqlschema.ClusterServiceBroker, error) {
 	items, err := r.clusterServiceBrokerSvc.List(pager.PagingParams{
 		First:  first,
 		Offset: offset,
@@ -79,8 +79,8 @@ func (r *clusterServiceBrokerResolver) ClusterServiceBrokerQuery(ctx context.Con
 	return result, nil
 }
 
-func (r *clusterServiceBrokerResolver) ClusterServiceBrokerEventSubscription(ctx context.Context) (<-chan gqlschema.ClusterServiceBrokerEvent, error) {
-	channel := make(chan gqlschema.ClusterServiceBrokerEvent, 1)
+func (r *clusterServiceBrokerResolver) ClusterServiceBrokerEventSubscription(ctx context.Context) (<-chan *gqlschema.ClusterServiceBrokerEvent, error) {
+	channel := make(chan *gqlschema.ClusterServiceBrokerEvent, 1)
 	filter := func(entity *v1beta1.ClusterServiceBroker) bool {
 		return true
 	}

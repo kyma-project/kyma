@@ -48,10 +48,20 @@ The longest name that gets created adds and extra 37 characters, so truncation s
 {{- define "prometheus-operator.labels" }}
 chart: {{ template "prometheus-operator.chartref" . }}
 release: {{ $.Release.Name | quote }}
-heritage: {{ $.Release.Service | quote }}
 {{- if .Values.commonLabels}}
 {{ toYaml .Values.commonLabels }}
 {{- end }}
+helm.sh/chart: {{ include "prometheus-operator.chartref" . }}
+{{ include "prometheus-operator.selectorLabels" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "prometheus-operator.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "prometheus-operator.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/* Create the name of prometheus-operator service account to use */}}

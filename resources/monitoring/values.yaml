@@ -11,7 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: PR-8156
+    version: 7e73540b
     tests:
       enabled: true
 
@@ -41,8 +41,8 @@ global:
   imagePullSecrets: []
   # - name: "image-pull-secret"
 
-resourceSelector: 
-  namespaces: 
+resourceSelector:
+  namespaces:
 
 # Default values for prometheus-operator.
 # This is a YAML-formatted file.
@@ -103,8 +103,10 @@ defaultRules:
 
 ## Provide custom recording or alerting rules to be deployed into the cluster.
 ##
-additionalPrometheusRules: []
-#  - name: my-rule-file
+additionalPrometheusRules: |-
+#  custom_rule:
+#    additionalLabels:
+#      some: label
 #    groups:
 #      - name: my_group
 #        rules:
@@ -292,7 +294,7 @@ alertmanager:
     ## Image of Alertmanager
     ##
     image:
-      repository: quay.io/prometheus/alertmanager
+      repository: eu.gcr.io/kyma-project/external/quay.io/prometheus/alertmanager
       tag: v0.20.0
 
     ## If true then the user will be responsible to provide a secret with alertmanager configuration
@@ -953,7 +955,7 @@ kubeStateMetrics:
     ##
     metricRelabelings:
     - sourceLabels: [ __name__ ]
-      regex: ^(kube_daemonset_status_current_number_scheduled|kube_daemonset_status_desired_number_scheduled|kube_daemonset_status_number_misscheduled|kube_daemonset_status_number_ready|kube_deployment_metadata_generation|kube_deployment_spec_replicas|kube_deployment_status_observed_generation|kube_deployment_status_replicas|kube_deployment_status_replicas_available|kube_hpa_spec_max_replicas|kube_hpa_status_current_replicas|kube_hpa_status_desired_replicas|kube_job_spec_completions|kube_job_status_succeeded|kube_namespace_labels|kube_node_status_allocatable|kube_node_status_allocatable_cpu_cores|kube_node_status_allocatable_memory_bytes|kube_node_status_capacity|kube_node_status_condition|kube_persistentvolume_status_phase|kube_pod_container_info|kube_pod_container_resource_limits|kube_pod_container_resource_limits_cpu_cores|kube_pod_container_resource_limits_memory_bytes|kube_pod_container_resource_requests|kube_pod_container_resource_requests_memory_bytes|kube_pod_container_resource_requests_cpu_cores|kube_pod_container_status_restarts_total|kube_pod_container_status_running|kube_pod_container_status_waiting|kube_pod_info|kube_pod_labels|kube_pod_owner|kube_pod_status_phase|kube_replicaset_owner|kube_resourcequota|kube_service_labels|kube_statefulset_metadata_generation|kube_statefulset_replicas|kube_statefulset_status_current_revision|kube_statefulset_status_observed_generation|kube_statefulset_status_replicas|kube_statefulset_status_update_revision)$
+      regex: ^(kube_daemonset_status_current_number_scheduled|kube_daemonset_status_desired_number_scheduled|kube_daemonset_status_number_misscheduled|kube_daemonset_status_number_ready|kube_deployment_metadata_generation|kube_deployment_spec_replicas|kube_deployment_status_observed_generation|kube_deployment_status_replicas|kube_deployment_status_replicas_available|kube_hpa_spec_max_replicas|kube_hpa_status_current_replicas|kube_hpa_status_desired_replicas|kube_job_spec_completions|kube_job_status_succeeded|kube_namespace_labels|kube_node_status_allocatable|kube_node_status_allocatable_cpu_cores|kube_node_status_allocatable_memory_bytes|kube_node_status_capacity|kube_node_status_condition|kube_persistentvolume_status_phase|kube_pod_container_info|kube_pod_container_resource_limits|kube_pod_container_resource_limits_cpu_cores|kube_pod_container_resource_limits_memory_bytes|kube_pod_container_resource_requests|kube_pod_container_resource_requests_memory_bytes|kube_pod_container_resource_requests_cpu_cores|kube_pod_container_status_restarts_total|kube_pod_container_status_running|kube_pod_container_status_waiting|kube_pod_info|kube_pod_labels|kube_pod_owner|kube_pod_status_phase|kube_replicaset_owner|kube_resourcequota|kube_service_labels|kube_statefulset_metadata_generation|kube_statefulset_replicas|kube_statefulset_status_current_revision|kube_statefulset_status_observed_generation|kube_statefulset_status_replicas|kube_statefulset_status_update_revision|kube_job_complete|kube_job_failed|kube_job_status_completion_time|kube_job_status_start_time|kube_pod_container_status_waiting_reason|kube_pod_container_status_terminated_reason)$
       action: keep
 
     # 	relabel configs to apply to samples before ingestion.
@@ -1220,20 +1222,20 @@ prometheusOperator:
   ## Prometheus-operator image
   ##
   image:
-    repository: quay.io/coreos/prometheus-operator
+    repository: eu.gcr.io/kyma-project/external/quay.io/coreos/prometheus-operator
     tag: v0.38.0
     pullPolicy: IfNotPresent
 
   ## Configmap-reload image to use for reloading configmaps
   ##
   configmapReloadImage:
-    repository: quay.io/coreos/configmap-reload
+    repository: eu.gcr.io/kyma-project/external/quay.io/coreos/configmap-reload
     tag: v0.0.1
 
   ## Prometheus-config-reloader image to use for config and rule reloading
   ##
   prometheusConfigReloaderImage:
-    repository: quay.io/coreos/prometheus-config-reloader
+    repository: eu.gcr.io/kyma-project/external/quay.io/coreos/prometheus-config-reloader
     tag: v0.38.0
 
   ## Set the prometheus config reloader side-car CPU limit
@@ -1458,7 +1460,7 @@ prometheus:
     ## Image of Prometheus.
     ##
     image:
-      repository: quay.io/prometheus/prometheus
+      repository: eu.gcr.io/kyma-project/external/quay.io/prometheus/prometheus
       tag: v2.17.1
 
     ## Tolerations for use with node taints
@@ -1568,13 +1570,12 @@ prometheus:
     ## prometheus resource to be created with selectors based on values in the helm deployment,
     ## which will also match the servicemonitors created
     ##
-    serviceMonitorSelectorNilUsesHelmValues: true
+    serviceMonitorSelectorNilUsesHelmValues: false
 
     ## ServiceMonitors to be selected for target discovery.
     ## If {}, select all ServiceMonitors
     ##
-    serviceMonitorSelector:
-      any: true
+    serviceMonitorSelector: {}
     ## Example which selects ServiceMonitors with label "prometheus" set to "somelabel"
     # serviceMonitorSelector:
     #   matchLabels:
@@ -1583,8 +1584,7 @@ prometheus:
     ## Namespaces to be selected for ServiceMonitor discovery.
     ## See https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#namespaceselector for usage
     ##
-    serviceMonitorNamespaceSelector:
-      any: true
+    serviceMonitorNamespaceSelector: {}
 
     ## If true, a nil or {} value for prometheus.prometheusSpec.podMonitorSelector will cause the
     ## prometheus resource to be created with selectors based on values in the helm deployment,
@@ -1825,8 +1825,7 @@ prometheus:
   - name: istio-mixer
     additionalLabels:
       prometheus: monitoring
-    selector:
-      istio: mixer
+    selector: {}
     namespaceSelector:
       matchNames:
         - istio-system
@@ -1968,3 +1967,6 @@ prometheus:
     ## https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#podmetricsendpoint
     ##
     # podMetricsEndpoints: []
+
+pushgateway:
+  enabled: false

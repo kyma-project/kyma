@@ -6,10 +6,7 @@ kind: Deployment
 metadata:
   name: {{ template "kiali.name" . }}-operator
   labels:
-    app: {{ template "kiali.name" . }}-operator
-    chart: {{ template "kiali.chart" . }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    {{- include "kiali.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
@@ -22,6 +19,10 @@ spec:
         app: {{ template "kiali.name" . }}-operator
     spec:
       serviceAccountName: {{ template "kiali.name" . }}-operator
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      {{- end }}
       containers:
       - name: operator
         image: "{{ .Values.kiali.operator.image.repository }}:{{ .Values.kiali.operator.image.tag }}"
@@ -42,8 +43,6 @@ spec:
               fieldPath: metadata.namespace
         - name: OPERATOR_NAME
           value: "{{ template "kiali.name" . }}-operator"
-        - name: ANSIBLE_DEBUG_LOGS
-          value: "True"
         resources:
 {{ toYaml .Values.kiali.operator.resources | indent 10 }}
       volumes:

@@ -25,10 +25,10 @@ ctrl:
 broker:
   resources:
     limits:
-      memory: 76Mi
+      memory: 120Mi
       cpu: 60m
     requests:
-      memory: 32Mi
+      memory: 64Mi
       cpu: 30m
   tillerTLSInsecure: true
   tillerTLSEnabled: true
@@ -49,17 +49,14 @@ global:
   # paths to docker images
   helm_broker:
     dir: /develop/
-    version: "ced706ae"
+    version: "28626733"
   helm_controller:
     dir: /develop/
-    version: "ced706ae"
+    version: "28626733"
   # etcd port uses by helm broker
   etcdClientPort: 2379
 
   # Additional values for sub-charts and extras
-  addons_ui:
-    dir:
-    version: "49294757"
   istio:
     gateway:
       name: kyma-gateway
@@ -73,3 +70,10 @@ global:
       - "bitbucket.org/"
     additionalDevelopMode:
       - "http://"
+
+  ingress:
+    domainName: "TBD"
+  helm:
+    tls:
+      crt: "TBD"
+      key: "TBD"

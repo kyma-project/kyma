@@ -14,7 +14,7 @@ import (
 func TestResourceQuotaStatusResolver_ResourceQuotaStatus_HappyPath(t *testing.T) {
 	// GIVEN
 	statusChecker := automock.NewResourceQuotaStatusChecker()
-	statusChecker.On("CheckResourceQuotaStatus", fixNamespaceName()).Return(gqlschema.ResourceQuotasStatus{Exceeded: false}, nil)
+	statusChecker.On("CheckResourceQuotaStatus", fixNamespaceName()).Return(&gqlschema.ResourceQuotasStatus{Exceeded: false}, nil)
 
 	resolver := newResourceQuotaStatusResolver(statusChecker)
 
@@ -29,7 +29,7 @@ func TestResourceQuotaStatusResolver_ResourceQuotaStatus_HappyPath(t *testing.T)
 func TestResourceQuotaStatusResolver_ResourceQuotaStatus_Error(t *testing.T) {
 	// GIVEN
 	statusChecker := automock.NewResourceQuotaStatusChecker()
-	statusChecker.On("CheckResourceQuotaStatus", fixNamespaceName()).Return(gqlschema.ResourceQuotasStatus{}, errors.New("something went wrong"))
+	statusChecker.On("CheckResourceQuotaStatus", fixNamespaceName()).Return(&gqlschema.ResourceQuotasStatus{}, errors.New("something went wrong"))
 
 	resolver := newResourceQuotaStatusResolver(statusChecker)
 
@@ -38,5 +38,5 @@ func TestResourceQuotaStatusResolver_ResourceQuotaStatus_Error(t *testing.T) {
 
 	// THEN
 	require.Error(t, err)
-	assert.Empty(t, status.ExceededQuotas)
+	assert.Nil(t, status)
 }

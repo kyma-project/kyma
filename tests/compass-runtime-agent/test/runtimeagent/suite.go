@@ -40,7 +40,6 @@ import (
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
-	helmapirelease "k8s.io/helm/pkg/proto/hapi/release"
 )
 
 const (
@@ -240,7 +239,9 @@ func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T, applicationNam
 			return false
 		}
 
-		return app.Status.InstallationStatus.Status == helmapirelease.Status_DEPLOYED.String()
+		logrus.Infof("Application Installation status is: %s", app.Status.InstallationStatus.Status)
+
+		return app.Status.InstallationStatus.Status == "deployed"
 	})
 
 	require.NoError(t, err)

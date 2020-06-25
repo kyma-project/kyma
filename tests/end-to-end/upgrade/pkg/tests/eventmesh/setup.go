@@ -8,7 +8,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	. "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh/helpers"
 )
 
 const (
@@ -52,54 +52,54 @@ func newEventMeshFlow(e *EventMeshUpgradeTest,
 }
 
 func (f *eventMeshFlow) CreateApplication() error {
-	return CreateApplication(f.appConnectorInterface, f.applicationName,
-		WithAccessLabel(f.applicationName),
-		WithEventService(f.serviceInstanceName),
+	return helpers.CreateApplication(f.appConnectorInterface, f.applicationName,
+		helpers.WithAccessLabel(f.applicationName),
+		helpers.WithEventService(f.serviceInstanceName),
 	)
 }
 
 func (f *eventMeshFlow) CreateSubscriber() error {
-	return CreateSubscriber(f.k8sInterface, f.subscriberName, f.namespace)
+	return helpers.CreateSubscriber(f.k8sInterface, f.subscriberName, f.namespace, helpers.WithSubscriberImage(f.subscriberImage))
 }
 
 func (f *eventMeshFlow) WaitForSubscriber() error {
-	return WaitForSubscriber(f.k8sInterface, f.subscriberName, f.namespace)
+	return helpers.WaitForSubscriber(f.k8sInterface, f.subscriberName, f.namespace)
 }
 
 func (f *eventMeshFlow) WaitForApplication() error {
-	return WaitForApplication(f.appConnectorInterface, f.messagingClient, f.servingClient, f.applicationName)
+	return helpers.WaitForApplication(f.appConnectorInterface, f.messagingClient, f.servingClient, f.applicationName)
 }
 
 func (f *eventMeshFlow) CreateApplicationMapping() error {
-	return CreateApplicationMapping(f.appBrokerCli, f.applicationName, f.namespace)
+	return helpers.CreateApplicationMapping(f.appBrokerCli, f.applicationName, f.namespace)
 }
 
 func (f *eventMeshFlow) CreateServiceInstance() error {
-	return CreateServiceInstance(f.scCli, f.serviceInstanceName, f.namespace)
+	return helpers.CreateServiceInstance(f.scCli, f.serviceInstanceName, f.namespace)
 }
 
 func (f *eventMeshFlow) CreateTrigger() error {
-	return CreateTrigger(f.eventingCli, f.subscriptionName, f.namespace,
-		WithFilter(f.eventTypeVersion, f.eventType, f.applicationName),
-		WithURISubscriber(fmt.Sprintf("http://%s.%s.svc.cluster.local:9000/v3/events", f.subscriberName, f.namespace)))
+	return helpers.CreateTrigger(f.eventingCli, f.subscriptionName, f.namespace,
+		helpers.WithFilter(f.eventTypeVersion, f.eventType, f.applicationName),
+		helpers.WithURISubscriber(fmt.Sprintf("http://%s.%s.svc.cluster.local:9000/ce", f.subscriberName, f.namespace)))
 }
 
 func (f *eventMeshFlow) CheckEvent() error {
-	return CheckEvent(fmt.Sprintf("http://%s.%s.svc.cluster.local:9000/v3/results", f.subscriberName, f.namespace), f.eventType, f.eventTypeVersion)
+	return helpers.CheckEvent(fmt.Sprintf("http://%s.%s.svc.cluster.local:9000/ce/%v/%v/%v", f.subscriberName, f.namespace, f.applicationName, f.eventType, f.eventTypeVersion))
 }
 
 func (f *eventMeshFlow) WaitForServiceInstance() error {
-	return WaitForServiceInstance(f.scCli, f.serviceInstanceName, f.namespace)
+	return helpers.WaitForServiceInstance(f.scCli, f.serviceInstanceName, f.namespace)
 }
 
 func (f *eventMeshFlow) WaitForBroker() error {
-	return WaitForBroker(f.eventingCli, f.brokerName, f.namespace, retry.Delay(10*time.Second), retry.DelayType(retry.FixedDelay), retry.Attempts(10))
+	return helpers.WaitForBroker(f.eventingCli, f.brokerName, f.namespace, retry.Delay(10*time.Second), retry.DelayType(retry.FixedDelay), retry.Attempts(10))
 }
 
 func (f *eventMeshFlow) WaitForTrigger() error {
-	return WaitForTrigger(f.eventingCli, f.subscriptionName, f.namespace)
+	return helpers.WaitForTrigger(f.eventingCli, f.subscriptionName, f.namespace)
 }
 
 func (f *eventMeshFlow) PublishTestEvent() error {
-	return SendEvent(fmt.Sprintf("http://%s-%s.%s.svc.cluster.local:%s/%s/v1/events", f.applicationName, eventServiceSuffix, integrationNamespace, eventServicePort, f.applicationName), f.eventType, f.eventTypeVersion)
+	return helpers.SendEvent(fmt.Sprintf("http://%s-%s.%s.svc.cluster.local:%s/%s/v1/events", f.applicationName, eventServiceSuffix, integrationNamespace, eventServicePort, f.applicationName), f.eventType, f.eventTypeVersion)
 }

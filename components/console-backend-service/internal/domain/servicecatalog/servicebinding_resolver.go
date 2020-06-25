@@ -28,7 +28,7 @@ func newServiceBindingResolver(op serviceBindingOperations) *serviceBindingResol
 	}
 }
 
-func (r *serviceBindingResolver) CreateServiceBindingMutation(ctx context.Context, serviceBindingName *string, serviceInstanceName, namespace string, parameters *gqlschema.JSON) (*gqlschema.CreateServiceBindingOutput, error) {
+func (r *serviceBindingResolver) CreateServiceBindingMutation(ctx context.Context, serviceBindingName *string, serviceInstanceName, namespace string, parameters gqlschema.JSON) (*gqlschema.CreateServiceBindingOutput, error) {
 	sbToCreate := &api.ServiceBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name.EmptyIfNil(serviceBindingName),
@@ -101,11 +101,11 @@ func (r *serviceBindingResolver) ServiceBindingsToInstanceQuery(ctx context.Cont
 		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(instanceName), gqlerror.WithNamespace(namespace))
 	}
 
-	return &out, nil
+	return out, nil
 }
 
-func (r *serviceBindingResolver) ServiceBindingEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBindingEvent, error) {
-	channel := make(chan gqlschema.ServiceBindingEvent, 1)
+func (r *serviceBindingResolver) ServiceBindingEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.ServiceBindingEvent, error) {
+	channel := make(chan *gqlschema.ServiceBindingEvent, 1)
 	filter := func(binding *api.ServiceBinding) bool {
 		return binding != nil && binding.Namespace == namespace
 	}

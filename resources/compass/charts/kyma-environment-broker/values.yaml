@@ -5,6 +5,7 @@ deployment:
   securityContext:
     runAsUser: 2000
   strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  nodeSelector: {}
 
 imagePullSecrets: []
 nameOverride: ""
@@ -14,9 +15,6 @@ manageSecrets: true
 
 broker:
   port: "8080"
-  username: "broker"
-  # password can be set manually by user. If empty then it will be randomized.
-  password: ""
   # serving health probes routes on statusPort
   statusPort: "8071"
   defaultRequestRegion: "cf-eu10"
@@ -69,6 +67,7 @@ gardener:
   kubeconfigPath: "/gardener/kubeconfig/kubeconfig"
   secretName: "gardener-credentials"
   kubernetesVersion: "1.16.9"
+  defaultShootPurpose: "development"
 
 # It is used to provide own creds for Service Manager instead of using the one provided by external system
 # who execute provision call on Kyma Environment Broker. You can define `overrideMode` to be one of: Always, WhenNotSentInRequest, Never
@@ -91,6 +90,20 @@ avs:
   externalTesterAccessId: "TBD"
   groupId: "TBD"
   parentId: "TBD"
+  # if set - creates tester with provided service name
+  # if empty - defaults service name to tester name
+  internalTesterService: ""
+  externalTesterService: ""
+  # List of tags to bind to testers.
+  # Example: 
+  #  - content: tag-A
+  #    tag_id: 1
+  #    tag_name: value-A
+  #  - content: tag-B
+  #    tag_id: 2
+  #    tag_name: value-B
+  internalTesterTags: {}
+  externalTesterTags: {}
 
 lms:
   secretName: "lms-creds"
@@ -102,6 +115,8 @@ lms:
   disabled: false
   # if set - always use this region, if empty - region is mapped from the OSB API request
   region: ""
+  # if false - failing LMS step does not break provisioning
+  mandatory: true
 
 ias:
   secretName: "ias-creds"
@@ -122,9 +137,17 @@ edp:
   secretName: "edp-creds"
 
 e2e:
+  provisioning:
+    timeout: "105m"
+  deprovisioning:
+    timeout: "90m"
   tenant:
     id: "d9994f8f-7e46-42a8-b2c1-1bfff8d2fe05"
   azure:
     configName: "e2e-runtime-config-azure"
   gcp:
     configName: "e2e-runtime-config-gcp"
+  upgrade:
+    timeout: "100m"
+    preUpgradeVersion: ""
+    targetVersion: "master-156dc1a5"

@@ -2,6 +2,7 @@ deployment:
   image:
     pullPolicy: IfNotPresent
   resources: {}
+  nodeSelector: {}
   args:
     token:
       length: 64

@@ -7,3 +7,4 @@ vendor/
 telepresence.log
 internal/gqlschema/gqlgen
 licenses/
+console-backend-service

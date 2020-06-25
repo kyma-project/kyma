@@ -4,14 +4,14 @@
 replicaCount: 1
 
 updateStrategy:
-  # type: RollingUpdate
-  # rollingUpdate:
+  type: Recreate
+  rollingUpdate: null
   #   maxSurge: 1
   #   maxUnavailable: 0
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/registry
-  tag: 2.7.1-1e7dba13
+  tag: 2.7.1-a67baaa0
   pullPolicy: IfNotPresent
 # imagePullSecrets:
     # - name: docker

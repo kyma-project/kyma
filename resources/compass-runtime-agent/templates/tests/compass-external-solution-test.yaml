@@ -49,8 +49,8 @@ spec:
               sleep 4
               exit $exit_code
           envFrom:
-              - configMapRef:
-                    name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
+              - secretRef:
+                    name: {{ .Values.compassRuntimeAgent.config.secret.name }}
                     optional: true
           env:
             - name: DIRECTOR_URL

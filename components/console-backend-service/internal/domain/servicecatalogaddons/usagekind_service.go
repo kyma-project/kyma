@@ -55,8 +55,8 @@ func (svc *usageKindService) List(params pager.PagingParams) ([]*v1alpha1.UsageK
 	return res, nil
 }
 
-func (svc *usageKindService) ListResources(namespace string) ([]gqlschema.BindableResourcesOutputItem, error) {
-	results := make([]gqlschema.BindableResourcesOutputItem, 0)
+func (svc *usageKindService) ListResources(namespace string) ([]*gqlschema.BindableResourcesOutputItem, error) {
+	results := make([]*gqlschema.BindableResourcesOutputItem, 0)
 	items := svc.informer.GetStore().List()
 
 	usageKinds, err := svc.extractUsageKinds(items)
@@ -71,7 +71,7 @@ func (svc *usageKindService) ListResources(namespace string) ([]gqlschema.Bindab
 			return nil, errors.Wrap(err, "while listing target resources")
 		}
 
-		results = append(results, gqlschema.BindableResourcesOutputItem{
+		results = append(results, &gqlschema.BindableResourcesOutputItem{
 			Kind:        uk.Name,
 			DisplayName: uk.Spec.DisplayName,
 			Resources:   ukResources,
@@ -97,10 +97,10 @@ type serializedUsageKind = struct {
 	Kind       string
 }
 
-func (svc *usageKindService) serializeUsageKinds(uks []*v1alpha1.UsageKind) []serializedUsageKind {
-	serialized := make([]serializedUsageKind, 0)
+func (svc *usageKindService) serializeUsageKinds(uks []*v1alpha1.UsageKind) []*serializedUsageKind {
+	serialized := make([]*serializedUsageKind, 0)
 	for _, uk := range uks {
-		serialized = append(serialized, serializedUsageKind{
+		serialized = append(serialized, &serializedUsageKind{
 			ApiVersion: fmt.Sprintf("%s/%s", strings.ToLower(uk.Spec.Resource.Group), strings.ToLower(uk.Spec.Resource.Version)),
 			Kind:       strings.ToLower(uk.Spec.Resource.Kind),
 		})
@@ -108,7 +108,7 @@ func (svc *usageKindService) serializeUsageKinds(uks []*v1alpha1.UsageKind) []se
 	return serialized
 }
 
-func (svc *usageKindService) listResourcesForUsageKind(uk *v1alpha1.UsageKind, serializedUks []serializedUsageKind, namespace string) ([]gqlschema.UsageKindResource, error) {
+func (svc *usageKindService) listResourcesForUsageKind(uk *v1alpha1.UsageKind, serializedUks []*serializedUsageKind, namespace string) ([]*gqlschema.UsageKindResource, error) {
 	list, err := svc.dynamicClient.Resource(schema.GroupVersionResource{
 		Version:  uk.Spec.Resource.Version,
 		Group:    uk.Spec.Resource.Group,
@@ -118,12 +118,12 @@ func (svc *usageKindService) listResourcesForUsageKind(uk *v1alpha1.UsageKind, s
 		return nil, errors.Wrap(err, "while listing target resources")
 	}
 
-	results := make([]gqlschema.UsageKindResource, 0)
+	results := make([]*gqlschema.UsageKindResource, 0)
 	for _, item := range list.Items {
 		if svc.omitResourceByOwnerRefs(serializedUks, item) {
 			continue
 		}
-		results = append(results, gqlschema.UsageKindResource{
+		results = append(results, &gqlschema.UsageKindResource{
 			Name:      item.GetName(),
 			Namespace: namespace,
 		})
@@ -132,7 +132,7 @@ func (svc *usageKindService) listResourcesForUsageKind(uk *v1alpha1.UsageKind, s
 	return results, nil
 }
 
-func (svc *usageKindService) omitResourceByOwnerRefs(uks []serializedUsageKind, item unstructured.Unstructured) bool {
+func (svc *usageKindService) omitResourceByOwnerRefs(uks []*serializedUsageKind, item unstructured.Unstructured) bool {
 	for _, uk := range uks {
 		for _, ref := range item.GetOwnerReferences() {
 			apiVersion := strings.ToLower(ref.APIVersion)
@@ -141,15 +141,7 @@ func (svc *usageKindService) omitResourceByOwnerRefs(uks []serializedUsageKind, 
 			if uk.ApiVersion == apiVersion && uk.Kind == kind {
 				return true
 			}
-			if svc.omitResourceByKServingOwnerRefs(apiVersion, kind) {
-				return true
-			}
 		}
 	}
 	return false
-}
-
-// This function is hardcoded by problem with checking appropriate apiVersion and kind of bindable resource from `serving.knative.dev` apiGroup in `ownerReferences` field of checking resource
-func (svc *usageKindService) omitResourceByKServingOwnerRefs(apiVersion, kind string) bool {
-	return strings.HasPrefix(apiVersion, "serving.knative.dev") && kind == "revision"
 }

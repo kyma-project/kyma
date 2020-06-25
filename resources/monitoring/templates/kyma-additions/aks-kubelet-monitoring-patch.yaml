@@ -14,7 +14,7 @@ data:
 
     if [[ "$(kubectl get nodes -l kubernetes.azure.com/role=agent)" ]]; then
       echo "AKS Cluster found, applying patch..."
-      kubectl delete servicemonitors.monitoring.coreos.com monitoring-kubelet -n kyma-system
+      kubectl delete servicemonitors.monitoring.coreos.com monitoring-kubelet -n kyma-system --ignore-not-found
       kubectl apply -f /scripts/patch.yaml
     else
         echo "No AKS Cluster found, skipping..."
@@ -25,9 +25,7 @@ data:
     metadata:
       labels:
         app: {{ template "prometheus-operator.name" . }}-kubelet
-        chart: {{template "prometheus-operator.chartref" . }}
-        heritage: {{ $.Release.Service }}
-        release: {{ $.Release.Name }}
+        {{- include "prometheus-operator.labels" . | nindent 4 }}
       name: {{ template "prometheus-operator.fullname" . }}-kubelet
       namespace: {{ $.Release.Namespace }}
     spec:
@@ -125,12 +123,19 @@ spec:
       restartPolicy: Never
       containers:
         - name: aks-kubelet-monitoring-kyma-patch
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
           command: ["/scripts/akspatch.sh"]
           volumeMounts:
             - name: aks-kubelet-monitoring-kyma-patch
               mountPath: /scripts
           terminationMessagePolicy: "FallbackToLogsOnError"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
       volumes:
         - name: aks-kubelet-monitoring-kyma-patch
           configMap:

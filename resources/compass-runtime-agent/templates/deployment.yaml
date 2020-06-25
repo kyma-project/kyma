@@ -19,7 +19,7 @@ spec:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
     spec:
-      serviceAccount: {{ .Chart.Name }}
+      serviceAccountName: {{ .Chart.Name }}
       containers:
         - name: {{ .Chart.Name }}
           ports:
@@ -30,8 +30,8 @@ spec:
           args:
             - "/compass-runtime-agent"
           env:
-            - name: APP_CONNECTION_CONFIG_MAP
-              value: "{{ .Values.compassRuntimeAgent.config.configMap.namespace }}/{{ .Values.compassRuntimeAgent.config.configMap.name }}"
+            - name: APP_AGENT_CONFIGURATION_SECRET
+              value: "{{ .Values.compassRuntimeAgent.config.secret.namespace }}/{{ .Values.compassRuntimeAgent.config.secret.name }}"
             - name: APP_CONTROLLER_SYNC_PERIOD
               value: "{{ .Values.compassRuntimeAgent.sync.controllerSyncPeriod }}"
             - name: APP_MINIMAL_COMPASS_SYNC_TIME

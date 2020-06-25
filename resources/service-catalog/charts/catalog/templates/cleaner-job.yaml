@@ -74,11 +74,10 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
   annotations:
-    helm.sh/hook: pre-delete
-    helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
 spec:
   backoffLimit: 3
-  activeDeadlineSeconds: 100
   template:
     metadata:
       annotations:
@@ -92,6 +91,8 @@ spec:
     spec:
       restartPolicy: Never
       serviceAccountName: clean-job-account
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
       containers:
         - name: service-catalog
           image: {{ .Values.image }}

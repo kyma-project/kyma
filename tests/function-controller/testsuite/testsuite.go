@@ -13,16 +13,18 @@ import (
 
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/addons"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/job"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/namespace"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/revision"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebinding"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebindingusage"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/serviceinstance"
@@ -54,7 +56,7 @@ type Config struct {
 	ServiceInstanceName     string        `envconfig:"default=test-service-instance"`
 	ServiceBindingName      string        `envconfig:"default=test-service-binding"`
 	ServiceBindingUsageName string        `envconfig:"default=test-service-binding-usage"`
-	UsageKindName           string        `envconfig:"default=knative-service"`
+	UsageKindName           string        `envconfig:"default=function"`
 	DomainName              string        `envconfig:"default=test-function"`
 	IngressHost             string        `envconfig:"default=kyma.local"`
 	DomainPort              uint32        `envconfig:"default=80"`
@@ -74,7 +76,7 @@ type TestSuite struct {
 	serviceinstance     *serviceinstance.ServiceInstance
 	servicebinding      *servicebinding.ServiceBinding
 	servicebindingusage *servicebindingusage.ServiceBindingUsage
-	revisions           *revision.Revision
+	jobs                *job.Job
 	t                   *testing.T
 	g                   *gomega.GomegaWithT
 	dynamicCli          dynamic.Interface
@@ -92,6 +94,11 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		return nil, errors.Wrap(err, "while creating K8s Dynamic client")
 	}
 
+	clientset, err := kubernetes.NewForConfig(restConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "while creating k8s clientset")
+	}
+
 	namespaceName := fmt.Sprintf("%s-%d", cfg.NamespaceBaseName, rand.Uint32())
 
 	container := shared.Container{
@@ -103,7 +110,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	}
 
 	ns := namespace.New(namespaceName, coreCli, container)
-	f := newFunction(dynamicCli, cfg.FunctionName, namespaceName, cfg.WaitTimeout, t, cfg.Verbose)
+	f := newFunction(cfg.FunctionName, container)
 	ar := apirule.New(cfg.APIRuleName, container)
 	br := broker.New(container)
 	tr := trigger.New(cfg.TriggerName, container)
@@ -111,7 +118,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	si := serviceinstance.New(cfg.ServiceInstanceName, container)
 	sb := servicebinding.New(cfg.ServiceBindingName, container)
 	sbu := servicebindingusage.New(cfg.ServiceBindingUsageName, cfg.UsageKindName, container)
-	revList := revision.New(cfg.FunctionName, container)
+	jobList := job.New(cfg.FunctionName, clientset.BatchV1(), container)
 
 	return &TestSuite{
 		namespace:           ns,
@@ -123,7 +130,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		serviceinstance:     si,
 		servicebinding:      sb,
 		servicebindingusage: sbu,
-		revisions:           revList,
+		jobs:                jobList,
 		t:                   t,
 		g:                   g,
 		dynamicCli:          dynamicCli,
@@ -136,6 +143,10 @@ func (t *TestSuite) Run() {
 	ns, err := t.namespace.Create()
 	failOnError(t.g, err)
 
+	t.t.Log("Creating function without body should be rejected by the webhook")
+	err = t.function.Create(&functionData{})
+	t.g.Expect(err).NotTo(gomega.BeNil())
+
 	t.t.Log("Creating function...")
 	functionDetails := t.getFunction(helloWorld)
 	err = t.function.Create(functionDetails)
@@ -143,6 +154,12 @@ func (t *TestSuite) Run() {
 
 	t.t.Log("Waiting for function to have ready phase...")
 	err = t.function.WaitForStatusRunning()
+	failOnError(t.g, err)
+
+	t.t.Log("Checking function after defaulting and validation")
+	function, err := t.function.get()
+	failOnError(t.g, err)
+	err = t.checkDefaultedFunction(function)
 	failOnError(t.g, err)
 
 	t.t.Log("Creating addons configuration...")
@@ -244,14 +261,6 @@ func (t *TestSuite) Run() {
 
 	t.t.Log("Testing injection of env variables via gateway")
 	err = t.pollForAnswer(fnGatewayURL, redisEnvPing, answerForEnvPing)
-	failOnError(t.g, err)
-
-	t.t.Log("Testing cleanup of stale revisions")
-	err = t.revisions.WaitForRevisionCleanup()
-	failOnError(t.g, err)
-
-	t.t.Log("Testing that remaining revision is the newest one")
-	err = t.revisions.VerifyConfigurationGeneration(3) // 1 update caused from fn update, one from servicebindingusage
 	failOnError(t.g, err)
 }
 
@@ -376,4 +385,53 @@ func (t *TestSuite) pollForAnswer(url, payloadStr, expected string) error {
 			t.t.Logf("Got: %q, correct...", body)
 			return true, nil
 		}, done)
+}
+
+func (t *TestSuite) LogResources() {
+	fn, err := t.function.get()
+	if err != nil {
+		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
+	}
+
+	jobs, err := t.jobs.List()
+	if err != nil {
+		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
+	}
+
+	fnStatusYaml, err := t.prettyYaml(fn.Status)
+	if err != nil {
+		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
+	}
+
+	var jobStatusYaml string
+	switch len(jobs.Items) {
+	case 0:
+		t.t.Log("no job resources matching needed labels")
+		jobStatusYaml = "no job resources matching needed labels"
+	default:
+		jobStatusYaml, err = t.prettyYaml(jobs.Items[0].Status)
+		if err != nil {
+			t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
+		}
+
+	}
+
+	t.t.Logf(`Pretty printed resources:
+---
+Function's status:
+%s
+---
+Job's status:
+%s
+---
+`, fnStatusYaml, jobStatusYaml)
+}
+
+func (t *TestSuite) prettyYaml(resource interface{}) (string, error) {
+	out, err := yaml.Marshal(resource)
+	if err != nil {
+		return "", err
+	}
+
+	return string(out), nil
 }

@@ -21,7 +21,7 @@ func TestServiceListener_OnAdd(t *testing.T) {
 		service := new(v1.Service)
 		converter := automock.NewGQLServiceConverter()
 
-		channel := make(chan gqlschema.ServiceEvent, 1)
+		channel := make(chan *gqlschema.ServiceEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", service).Return(gqlService, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -33,7 +33,7 @@ func TestServiceListener_OnAdd(t *testing.T) {
 
 		// then
 		assert.Equal(gqlschema.SubscriptionEventTypeAdd, result.Type)
-		assert.Equal(*gqlService, result.Service)
+		assert.Equal(gqlService, result.Service)
 	})
 
 	t.Run("Filtered out", func(t *testing.T) {
@@ -96,7 +96,7 @@ func TestServiceListener_OnDelete(t *testing.T) {
 		service := new(v1.Service)
 		converter := automock.NewGQLServiceConverter()
 
-		channel := make(chan gqlschema.ServiceEvent, 1)
+		channel := make(chan *gqlschema.ServiceEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", service).Return(gqlService, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -108,7 +108,7 @@ func TestServiceListener_OnDelete(t *testing.T) {
 
 		// then
 		assert.Equal(gqlschema.SubscriptionEventTypeDelete, result.Type)
-		assert.Equal(*gqlService, result.Service)
+		assert.Equal(gqlService, result.Service)
 
 	})
 
@@ -172,7 +172,7 @@ func TestServiceListener_OnUpdate(t *testing.T) {
 		service := new(v1.Service)
 		converter := automock.NewGQLServiceConverter()
 
-		channel := make(chan gqlschema.ServiceEvent, 1)
+		channel := make(chan *gqlschema.ServiceEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", service).Return(gqlService, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -184,7 +184,7 @@ func TestServiceListener_OnUpdate(t *testing.T) {
 
 		// then
 		assert.Equal(gqlschema.SubscriptionEventTypeUpdate, result.Type)
-		assert.Equal(*gqlService, result.Service)
+		assert.Equal(gqlService, result.Service)
 
 	})
 

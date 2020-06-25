@@ -5,7 +5,7 @@ type: Installation
 
 This installation guide explains how you can quickly deploy Kyma on a cluster with a wildcard DNS provided by [`xip.io`](http://xip.io) using a GitHub release of your choice.
 
->**TIP:** An xip.io domain is not recommended for production. If you want to expose the Kyma cluster on your own domain, follow [this](#installation-use-your-own-domain) installation guide. To install Kyma using your own image instead of a GitHub release, follow [these](#installation-use-your-own-kyma-installer-image) instructions.
+>**TIP:** An xip.io domain is not recommended for production. If you want to expose the Kyma cluster on your own domain, follow the [installation guide](#installation-use-your-own-domain). To install Kyma using your own image instead of a GitHub release, follow the [instructions](#installation-use-your-own-kyma-installer-image).
 
 ## Prerequisites
 
@@ -19,7 +19,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 
->**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). The Kyma production profile requires at least `n1-standard-8` machines, but it is recommended to use the `c2-standard-8` type. Create these machines when you complete the **Prepare the cluster** step. 
+>**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). The Kyma production profile requires at least `n1-standard-8` machines, but it is recommended to use the `c2-standard-8` type. Create these machines when you complete the **Prepare the cluster** step.
 
   </details>
   <details>
@@ -31,7 +31,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
->**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general). The Kyma production profile requires at least `Standard_F8s_v2` machines, but it is recommended to use the `Standard_D8_v3` type. Create these machines when you complete the **Prepare the cluster** step. 
+>**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general). The Kyma production profile requires at least `Standard_F8s_v2` machines, but it is recommended to use the `Standard_D8_v3` type. Create these machines when you complete the **Prepare the cluster** step.
 
   </details>
   <details>
@@ -64,7 +64,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 ## Choose the release to install
 
-1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to install.
+1. Go to [Kyma releases](https://github.com/kyma-project/kyma/releases/) and choose the release you want to install.
 
 2. Export the release version as an environment variable:
 
@@ -156,7 +156,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/azure-crb-for-healthz.yaml
     ```
 
->**CAUTION:** If you define your own Kubernetes jobs on the AKS cluster, follow [this](/components/service-mesh/#troubleshooting-kubernetes-jobs-fail-on-aks) troubleshooting guide to avoid jobs running endlessly on AKS deployments of Kyma.
+>**CAUTION:** If you define your own Kubernetes jobs on the AKS cluster, follow the [troubleshooting guide](/components/service-mesh/#troubleshooting-kubernetes-jobs-fail-on-aks) to avoid jobs running endlessly on AKS deployments of Kyma.
 
   </details>
   <details>
@@ -170,7 +170,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
     * For GCP:
       * Create a project in Gardener.
-      * Add a [new service account and roles](https://gardener.cloud/050-tutorials/content/howto/gardener_gcp/#create-a-new-serviceaccount-and-assign-roles).
+      * Add a [new service account and roles](https://gardener.cloud/documentation/050-tutorials/content/howto/gardener_gcp/#create-a-new-serviceaccount-and-assign-roles).
       * Add the GCP Secret under **Secrets** in the Gardener dashboard.
       * Add the service account and download Gardener's `kubeconfig` file.
 
@@ -181,7 +181,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 2. Provision the cluster using the [Kyma CLI](https://github.com/kyma-project/cli).
 
-   >**NOTE**: Kyma offers the production profile which requires a different machine type. Specify it using the `--type` flag. For more details, see [this](/components/service-mesh/#configuration-service-mesh-production-profile) document.
+   >**NOTE**: Kyma offers the [production profile](/components/service-mesh/#configuration-service-mesh-production-profile) which requires a different machine type. Specify it using the `--type` flag.
 
 
    To provision a GKE cluster, run:
@@ -195,7 +195,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
    ```
    kyma provision gardener --target-provider azure -n {cluster_name} -p {project_name} -s {kyma_gardener_azure_secret_name} -c {path_to_gardener_kubeconfig} -t Standard_D2_v3 --region westeurope --disk-size 35 --disk-type Standard_LRS --extra vnetcidr="10.250.0.0/19"
    ```
-   For a complete list of flags and their descriptions, see [this](https://github.com/kyma-project/cli/blob/master/docs/gen-docs/kyma_provision_gardener.md) document.
+   See the complete [list of flags and their descriptions](https://github.com/kyma-project/cli/blob/master/docs/gen-docs/kyma_provision_gardener.md).
 
 3. After you provision the cluster, its `kubeconfig` file will be downloaded and automatically set as the current context.
 
@@ -242,29 +242,23 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 ## Install Kyma
 
-1. Install Tiller on the cluster you provisioned:
-
-   ```bash
-   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
-   ```
-   
    >**NOTE**: If you want to use the Kyma production profile, see the following documents before you go to the next step:
    >* [Istio production profile](/components/service-mesh/#configuration-service-mesh-production-profile)
    >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-profiles)
 
-2. Deploy Kyma:
+1. Deploy Kyma:
 
     ```bash
     kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-installer-cluster.yaml
     ```
 
-3. Check if the Pods of Tiller and the Kyma Installer are running:
+2. Check if the Pod of the Kyma Installer is running:
 
     ```bash
-    kubectl get pods --all-namespaces
+    kubectl get pods -n kyma-installer
     ```
 
-4. To watch the installation progress, run:
+3. To watch the installation progress, run:
 
     ```bash
     while true; do \
@@ -307,7 +301,7 @@ For Linux with Chrome, run:
 1. To get the address of the cluster's Console, check the host of the Console's virtual service. The name of the host of this virtual service corresponds to the Console URL. To get the virtual service host, run:
 
     ```bash
-    kubectl get virtualservice core-console -n kyma-system -o jsonpath='{ .spec.hosts[0] }'
+    kubectl get virtualservice console-web -n kyma-system -o jsonpath='{ .spec.hosts[0] }'
     ```
 
 2. Access your cluster under this address:
@@ -322,4 +316,4 @@ For Linux with Chrome, run:
     kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
     ```
 
-If you need to use Helm to manage your Kubernetes resources, complete the [additional configuration](#installation-use-helm) after you finish the installation.
+If you need to use Helm to manage your Kubernetes resources, read the [additional configuration](#installation-use-helm) document.

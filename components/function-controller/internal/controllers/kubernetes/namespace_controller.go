@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -50,6 +49,9 @@ func (r *NamespaceReconciler) predicate() predicate.Predicate {
 			}
 			return !isExcludedNamespace(namespace.Name, r.config.BaseNamespace, r.config.ExcludedNamespaces)
 		},
+		GenericFunc: func(genericEvent event.GenericEvent) bool {
+			return false
+		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
 			return false
 		},
@@ -60,8 +62,8 @@ func (r *NamespaceReconciler) predicate() predicate.Predicate {
 }
 
 // Reconcile reads that state of the cluster for a Namespace object and updates other resources based on it
-// +kubebuilder:rbac:groups=core,resources=namespaces,verbs=get;list;watch
-// +kubebuilder:rbac:groups=core,resources=configmaps;secrets;serviceaccounts,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=configmaps;secrets;serviceaccounts,verbs=get;list;watch;create;update;patch;delete
 
 func (r *NamespaceReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -69,10 +71,7 @@ func (r *NamespaceReconciler) Reconcile(request ctrl.Request) (ctrl.Result, erro
 
 	instance := &corev1.Namespace{}
 	if err := r.client.Get(ctx, request.NamespacedName, instance); err != nil {
-		if errors.IsNotFound(err) {
-			return ctrl.Result{}, nil
-		}
-		return ctrl.Result{}, err
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	logger := r.Log.WithValues("name", instance.GetName())

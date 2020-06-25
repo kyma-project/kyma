@@ -21,7 +21,7 @@ Follow these steps:
 
   **NOTE**: You can use [Confluent Cloud](https://www.confluent.io/confluent-cloud) or install Kafka [locally](https://kafka.apache.org/quickstart), but bear in mind that these configurations are experimental.
 
-3. Export the variables. To retrieve the credentials, go to Azure Portal > **All services** > **Event Hubs** and select your Event Hub. 
+3. Export the variables. To retrieve the credentials, go to Azure Portal > **All services** > **Event Hubs** and select your Event Hub.
 
   ```bash
   $ export kafkaBrokersHost={BROKER_URL_HOST}
@@ -54,10 +54,12 @@ Follow these steps:
     environment.kafkaProvider: $kafkaProvider
   ```
 
-  >**NOTE:** For additional values, see [this](https://github.com/kyma-incubator/knative-kafka/blob/master/resources/knative-kafka/values.yaml) file.
+  >**NOTE:** For additional values, see the [`values.yaml`](https://github.com/kyma-incubator/knative-kafka/blob/master/resources/knative-kafka/values.yaml) file.
 
-5. Use Kyma CLI to install Kyma with the override to the `installer-cr-azure-eventhubs.yaml.tpl` installer file located [here](installation/resources/installer-cr-azure-eventhubs.yaml.tpl).
+5. Use Kyma CLI to install Kyma with the override to the [`installer-cr-azure-eventhubs.yaml.tpl`](installation/resources/installer-cr-azure-eventhubs.yaml.tpl) installer file.
     ```bash
-    kyma install -o {azure-secret.yaml} -o {installer-cr-azure-eventhubs.yaml.tpl}
+    kyma install -o {azure-secret.yaml} -c {installer-cr-azure-eventhubs.yaml.tpl}
     ```
-  >**TIP**: If you want to set up Kafka Channel as a default Channel, follow [this](#tutorials-set-up-a-default-channel) tutorial.
+  >**NOTE**: Use `-o` instead of `-c` if you're using Kyma CLI 1.13 or lower.
+  
+  >**TIP**: If you want to set up Kafka Channel as a default Channel, follow the [tutorial](#tutorials-set-up-a-default-channel).

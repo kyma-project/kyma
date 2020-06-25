@@ -4,11 +4,39 @@
 
 fullnameOverride: "serverless"
 
+injectCerts:
+  image:
+    repository: 'eu.gcr.io/kyma-project/test-infra/alpine-kubectl'
+    tag: 'v20200617-32c1f3ff'
+    pullPolicy: IfNotPresent
+
+knativeMigration:
+  image:
+    repository: 'eu.gcr.io/kyma-project/test-infra/alpine-kubectl'
+    tag: 'v20200617-32c1f3ff'
+    pullPolicy: IfNotPresent
+
 tests:
   enabled: true
+  long:
+    initTimeout: 120s
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 100m
+      limits:
+        memory: 256Mi
+        cpu: 200m
+    image:
+      repository: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl"
+      tag: "v20200617-32c1f3ff"
+      pullPolicy: IfNotPresent
+    namespace: "long-running-function-test"
+    name: longrun
+
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-8379"
+    tag: "7dd25b42"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -40,15 +68,11 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "21757b11"
-    pullPolicy: IfNotPresent
-  kubeRbacProxy:
-    repository: "gcr.io/kubebuilder/kube-rbac-proxy"
-    tag: "v0.5.0"
+    tag: "1cc47db6"
     pullPolicy: IfNotPresent
   functionRuntimeNodejs12:
     repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-    tag: "a62f4a7f"  
+    tag: "1cc47db6"
 
 deployment:
   replicas: 1
@@ -68,7 +92,7 @@ containers:
     resources:
       limits:
         cpu: 100m
-        memory: 64Mi
+        memory: 126Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
       requests:
         cpu: 10m
         memory: 32Mi
@@ -96,63 +120,38 @@ containers:
         value: "{{ template \"fullname\" . }}-registry-credentials"
       imagePullAccountName:
         value: "{{ template \"fullname\" . }}"
+      targetCPUUtilizationPercentage:
+        value: "50"
       kserviceRequeueDuration:
         value: 5m
       functionRequeueDuration:
         value: 5m
+      functionBuildExecutorArgs:
+        value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildExecutorImage:
-        value: gcr.io/kaniko-project/executor:v0.17.1
+        value: gcr.io/kaniko-project/executor:v0.22.0
       functionBuildCredsInitImage:
-        value: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.10.1
+        value: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.12.1
       functionDockerAddress:
         # TODO: I don't know why {{ .Values.global.dockerServicePort }} doesn't work. It is rendered as {{\n  .Values.global.dockerServicePort }}
         # value: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}"
         value: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:5000"
       functionDockerExternalAddress:
         value: "registry.{{ .Values.global.ingress.domainName -}}"
-  kubeRbacProxy:
-    resources:
-      limits:
-        cpu: 60m
-        memory: 60Mi
-      requests:
-        cpu: 10m
-        memory: 16Mi
-    extraProperties: {}
 
 services:
   manager:
     type: ClusterIP
-    port:
-      name: http
-      targerPort: 9876
-      port: 443
-      protocol: TCP
-    labels: {}
-    annotations: {}
-  authProxy:
-    type: ClusterIP
-    port:
-      name: https
-      port: 8443
-      targerPort: 8443
-      protocol: TCP
     labels: {}
     annotations: {}
 
 metrics:
-  enabled: false
+  enabled: true
   manager:
     port:
       name: http-metrics
       port: 8080
       targerPort: 8080
-      protocol: TCP
-  authProxy:
-    port:
-      name: https
-      port: 8443
-      targerPort: 8443
       protocol: TCP
   serviceMonitor:
     create: true
@@ -194,6 +193,9 @@ clusterMicroFrontend:
 grafanaDashboard:
   enabled: true
 
+usageKind:
+  name: serverless-function
+
 docker-registry:
   enabled: true
   fullnameOverride: "serverless-docker-registry"
@@ -214,3 +216,7 @@ docker-registry:
             path: password.txt
     - name: htpasswd-data
       emptyDir: {}
+
+webhook:
+  enabled: true
+  fullnameOverride: "serverless-webhook"

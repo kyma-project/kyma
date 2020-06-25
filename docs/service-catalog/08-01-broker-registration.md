@@ -65,7 +65,7 @@ This tutorial shows you how to register a broker in the Service Catalog. The bro
     }
     ```
 
-7. View Service Classes that this broker provides:
+7. View ServiceClasses that this broker provides:
   * To check the ClusterServiceClasses, run:
       ```
      kubectl get clusterserviceclasses
@@ -75,7 +75,7 @@ This tutorial shows you how to register a broker in the Service Catalog. The bro
       kubectl get serviceclasses -n ups-broker
       ```
 
-      These are the UPS Broker Service Classes:
+      These are the UPS Broker ServiceClasses:
       ```
       NAME                                   EXTERNAL NAME
       4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468   user-provided-service

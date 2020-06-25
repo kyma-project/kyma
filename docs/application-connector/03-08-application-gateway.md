@@ -3,7 +3,7 @@ title: Application Gateway
 type: Details
 ---
 
->**CAUTION:** This document describes the Application Gateway working in the alternative Compass [mode](#architecture-application-connector-components-application-operator). To read about the Application Gateway working in the default legacy mode, see [this](#architecture-application-gateway) document.
+>**CAUTION:** This document describes the Application Gateway working in the alternative Compass [mode](#architecture-application-connector-components-application-operator). See the [architecture](#architecture-application-gateway) to learn about the Application Gateway working in the default legacy mode.
 
 The Application Gateway is an intermediary component between a Function or a service and an external API.
 

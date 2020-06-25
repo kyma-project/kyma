@@ -6,16 +6,23 @@ metadata:
   name: {{ .Chart.Name }}
   labels:
     app: {{ .Chart.Name }}-tests
-    app.kubernetes.io/name: {{ .Chart.Name }}-tests
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   disableConcurrency: true
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
+      labels:
+        release: {{ .Release.Name }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        app.kubernetes.io/name: {{ template "name" . }}-tests
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       serviceAccountName: {{ .Chart.Name }}-tests
       {{ if .Values.global.isLocalEnv }}
@@ -27,15 +34,15 @@ spec:
       {{ end }}
       containers:
         - name: tests
-          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.tests.application_connector_tests.image.dir }}application-connector-tests:{{ .Values.tests.application_connector_tests.image.version }}
+          image: {{ .Values.global.containerRegistry.path }}/application-connector-tests:{{ .Values.tests.application_connector_tests.image.version }}
           imagePullPolicy: {{ .Values.tests.application_connector_tests.image.pullPolicy }}
           env:
           - name: NAMESPACE
             value: {{ .Values.global.namespace }}
           - name: SKIP_SSL_VERIFY
-            value: "{{ .Values.tests.application_connector_tests.skipSslVerify }}"
+            value: {{ .Values.tests.application_connector_tests.skipSslVerify | quote }}
           - name: CENTRAL
-            value: "{{ .Values.tests.application_connector_tests.connector_service.central }}"
+            value: {{ .Values.tests.application_connector_tests.connector_service.central | quote }}
       restartPolicy: Never
 {{- end }}
 {{- end }}

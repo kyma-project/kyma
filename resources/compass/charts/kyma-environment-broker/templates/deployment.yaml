@@ -37,6 +37,8 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+      nodeSelector: 
+        {{- toYaml .Values.deployment.nodeSelector | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.kyma_environment_broker.dir }}kyma-environment-broker:{{ .Values.global.images.kyma_environment_broker.version }}"
@@ -50,17 +52,12 @@ spec:
               value: "{{ .Values.provisioner.URL }}"
             - name: APP_PROVISIONING_TIMEOUT
               value: "{{ .Values.provisioner.timeout }}"
+            - name: APP_PROVISIONING_DEFAULT_GARDENER_SHOOT_PURPOSE
+              value: "{{ .Values.gardener.defaultShootPurpose }}"
             - name: APP_PORT
               value: "{{ .Values.broker.port }}"
             - name: APP_STATUS_PORT
               value: "{{ .Values.broker.statusPort }}"
-            - name: APP_AUTH_USERNAME
-              value: "{{ .Values.broker.username }}"
-            - name: APP_AUTH_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "kyma-env-broker.fullname" . }}
-                  key: broker-password
             - name: APP_DIRECTOR_NAMESPACE
               value: "{{ .Release.Namespace }}"
             - name: APP_DIRECTOR_DEFAULT_TENANT
@@ -81,6 +78,8 @@ spec:
               value: "{{ .Values.lms.samlTenant }}"
             - name: APP_LMS_DISABLED
               value: "{{ .Values.lms.disabled }}"
+            - name: APP_LMS_MANDATORY
+              value: "{{ .Values.lms.mandatory }}"
             - name: APP_LMS_REGION
               value: "{{ .Values.lms.region }}"
             - name: APP_LMS_TOKEN
@@ -208,6 +207,26 @@ spec:
                 secretKeyRef:
                   key: externalTesterAccessId
                   name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_INTERNAL_TESTER_SERVICE
+              valueFrom:
+                secretKeyRef:
+                  key: internalTesterService
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_EXTERNAL_TESTER_SERVICE
+              valueFrom:
+                secretKeyRef:
+                  key: externalTesterService
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_INTERNAL_TESTER_TAGS
+              valueFrom:
+                secretKeyRef:
+                  key: internalTesterTags
+                  name: {{ .Values.avs.secretName }}
+            - name: APP_AVS_EXTERNAL_TESTER_TAGS
+              valueFrom:
+                secretKeyRef:
+                  key: externalTesterTags
+                  name: {{ .Values.avs.secretName }}
             - name: APP_AVS_GROUP_ID
               valueFrom:
                 secretKeyRef:
@@ -232,6 +251,26 @@ spec:
               value: {{ .Values.gardener.kubernetesVersion }}
             - name: APP_DEFAULT_REQUEST_REGION
               value: "{{ .Values.broker.defaultRequestRegion }}"
+            - name: APP_AUDITLOG_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.global.auditlog.configMapName }}
+                  key: auditlog-url-basic
+            - name: APP_AUDITLOG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.auditlog.secretName }}
+                  key: auditlog-user
+            - name: APP_AUDITLOG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.auditlog.secretName }}
+                  key: auditlog-password
+            - name: APP_AUDITLOG_TENANT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.global.auditlog.configMapName }}
+                  key: auditlog-tenant
           ports:
             - name: http
               containerPort: {{ .Values.broker.port }}
@@ -252,6 +291,8 @@ spec:
               readOnly: true
             - mountPath: /config
               name: config-volume
+            - mountPath: /auditlog-script
+              name: auditlog-script
           {{if eq .Values.global.database.embedded.enabled false}}
             - name: cloudsql-instance-credentials
               mountPath: /secrets/cloudsql-instance-credentials
@@ -285,3 +326,6 @@ spec:
       - name: gardener-kubeconfig
         secret:
           secretName: {{ .Values.gardener.secretName }}
+      - name: auditlog-script
+        configMap:
+          name: {{ .Values.global.auditlog.script.configMapName }}

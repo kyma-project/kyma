@@ -93,7 +93,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: monitoring-dns-patch
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200310-5f52f407
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
           command: ["/scripts/dnspatch.sh"]
           volumeMounts:
             - name: monitoring-dns-patch

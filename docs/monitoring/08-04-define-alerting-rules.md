@@ -52,7 +52,7 @@ Follow these steps to create an alerting rule:
    | **rules.annotations.description** | Provides the alert details. | `CPU temperature is equal to or greater than 75 degrees Celsius` |
    | **rules.annotations.summary** | Provides a short alert summary. | `CPU temperature is too high` |
 
-   For more details on defining alerting rules, see [this](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/) document.
+   For more details on defining alerting rules, see the [Prometheus documentation](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/).
 
 2. Deploy the alerting rule:
 
@@ -68,8 +68,8 @@ Follow these steps to create an alerting rule:
 
 4. Go to [`http://localhost:9090/rules`](http://localhost:9090/rules) to view the rule in the dashboard.
 
-   ![](./assets/rules-dashboard.png)
+   ![Rule on the dashboard](./assets/rules-dashboard.png)
 
 5. Go to [`http://localhost:9090/alerts`](http://localhost:9090/alerts) to see if the alert fires appropriately.
 
-   ![](./assets/fired-alert.png)
+   ![Alert on the dashboard](./assets/fired-alert.png)

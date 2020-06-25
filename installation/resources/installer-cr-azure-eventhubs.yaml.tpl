@@ -22,8 +22,6 @@ spec:
       namespace: "kyma-installer"
     - name: "istio-kyma-patch"
       namespace: "istio-system"
-    - name: "knative-serving-init"
-      namespace: "knative-serving"
     - name: "knative-serving"
       namespace: "knative-serving"
     - name: "knative-eventing"
@@ -67,6 +65,8 @@ spec:
     - name: "monitoring"
       namespace: "kyma-system"
     - name: "kiali"
+      namespace: "kyma-system"
+    - name: "console"
       namespace: "kyma-system"
 
     #- name: "compass"

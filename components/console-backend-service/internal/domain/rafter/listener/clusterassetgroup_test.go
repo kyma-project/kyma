@@ -17,7 +17,7 @@ func TestClusterAssetGroup_OnAdd(t *testing.T) {
 		clusterAssetGroup := new(v1beta1.ClusterAssetGroup)
 		converter := automock.NewGqlClusterAssetGroupConverter()
 
-		channel := make(chan gqlschema.ClusterAssetGroupEvent, 1)
+		channel := make(chan *gqlschema.ClusterAssetGroupEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", clusterAssetGroup).Return(gqlClusterAssetGroup, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -29,7 +29,7 @@ func TestClusterAssetGroup_OnAdd(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeAdd, result.Type)
-		assert.Equal(t, *gqlClusterAssetGroup, result.ClusterAssetGroup)
+		assert.Equal(t, gqlClusterAssetGroup, result.ClusterAssetGroup)
 	})
 
 	t.Run("Filtered out", func(t *testing.T) {
@@ -77,7 +77,7 @@ func TestClusterAssetGroup_OnDelete(t *testing.T) {
 		clusterAssetGroup := new(v1beta1.ClusterAssetGroup)
 		converter := automock.NewGqlClusterAssetGroupConverter()
 
-		channel := make(chan gqlschema.ClusterAssetGroupEvent, 1)
+		channel := make(chan *gqlschema.ClusterAssetGroupEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", clusterAssetGroup).Return(gqlClusterAssetGroup, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -89,7 +89,7 @@ func TestClusterAssetGroup_OnDelete(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeDelete, result.Type)
-		assert.Equal(t, *gqlClusterAssetGroup, result.ClusterAssetGroup)
+		assert.Equal(t, gqlClusterAssetGroup, result.ClusterAssetGroup)
 
 	})
 
@@ -138,7 +138,7 @@ func TestClusterAssetGroup_OnUpdate(t *testing.T) {
 		clusterAssetGroup := new(v1beta1.ClusterAssetGroup)
 		converter := automock.NewGqlClusterAssetGroupConverter()
 
-		channel := make(chan gqlschema.ClusterAssetGroupEvent, 1)
+		channel := make(chan *gqlschema.ClusterAssetGroupEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", clusterAssetGroup).Return(gqlAssetGroup, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -150,7 +150,7 @@ func TestClusterAssetGroup_OnUpdate(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeUpdate, result.Type)
-		assert.Equal(t, *gqlAssetGroup, result.ClusterAssetGroup)
+		assert.Equal(t, gqlAssetGroup, result.ClusterAssetGroup)
 
 	})
 

@@ -8,11 +8,21 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
-  type: ClusterIP
+  type: {{ .Values.controllerManager.service.type }}
+  {{- if eq .Values.controllerManager.service.type "ClusterIP" }}
+  {{- if .Values.controllerManager.service.clusterIP }}
+  clusterIP: {{ .Values.controllerManager.service.clusterIP }}
+  {{- end }}
+  {{- end }}
   selector:
     app: {{ template "fullname" . }}-controller-manager
   ports:
-  - name: secure
+  - name: https-secure
     protocol: TCP
     port: 443
     targetPort: 8444
+    {{- if eq .Values.controllerManager.service.type "NodePort" }}
+    nodePort: {{ .Values.controllerManager.service.nodePort.securePort }}
+    {{ else }}
+    nodePort: null
+    {{ end }}

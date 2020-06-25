@@ -37,14 +37,15 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		dynamic.Resource(apiRuleRes).Namespace(s.testID),
 		s.Domain,
 		s.testID,
+		s.testServiceImage,
 	)
 	state := s.NewState()
 
 	return []step.Step{
 		testsuite.NewConnectApplication(connector, state, s.ApplicationTenant, s.ApplicationGroup),
-		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.LambdaPayload, state),
+		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.FunctionPayload, state),
 		testsuite.NewCheckCounterPod(testService, 1),
-		testsuite.NewSendEventToMesh(s.testID, helpers.LambdaPayload, state),
+		testsuite.NewSendEventToMesh(s.testID, helpers.FunctionPayload, state),
 		testsuite.NewCheckCounterPod(testService, 2),
 	}, nil
 }

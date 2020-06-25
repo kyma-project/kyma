@@ -10,6 +10,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
+//go:generate mockery -name=Client -output=automock -outpkg=automock -case=underscore
 type Client interface {
 	Create(ctx context.Context, object Object) error
 	CreateWithReference(ctx context.Context, parent Object, object Object) error
@@ -17,6 +18,7 @@ type Client interface {
 	Get(ctx context.Context, key ctrlclient.ObjectKey, object Object) error
 	ListByLabel(ctx context.Context, namespace string, labels map[string]string, object runtime.Object) error
 	DeleteAllBySelector(ctx context.Context, resourceType Object, namespace string, selector apilabels.Selector) error
+	Delete(ctx context.Context, resourceType Object) error
 	Status() ctrlclient.StatusWriter
 }
 
@@ -28,6 +30,7 @@ type K8sClient interface {
 	List(context.Context, runtime.Object, ...ctrlclient.ListOption) error
 	DeleteAllOf(context.Context, runtime.Object, ...ctrlclient.DeleteAllOfOption) error
 	Status() ctrlclient.StatusWriter
+	Delete(ctx context.Context, obj runtime.Object, opts ...ctrlclient.DeleteOption) error
 }
 
 type Object interface {
@@ -40,6 +43,13 @@ var _ Client = &client{}
 type client struct {
 	k8sClient K8sClient
 	schema    *runtime.Scheme
+}
+
+func (c *client) Delete(ctx context.Context, obj Object) error {
+	propagationPolicy := metav1.DeletePropagationBackground
+	return c.k8sClient.Delete(ctx, obj, &ctrlclient.DeleteOptions{
+		PropagationPolicy: &propagationPolicy,
+	})
 }
 
 func New(k8sClient K8sClient, schema *runtime.Scheme) Client {

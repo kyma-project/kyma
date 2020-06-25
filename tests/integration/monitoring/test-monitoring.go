@@ -18,7 +18,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/kyma-project/kyma/tests/integration/monitoring/promAPI"
+	"github.com/kyma-project/kyma/tests/integration/monitoring/prom"
 )
 
 const prometheusURL = "http://monitoring-prometheus.kyma-system:9090"
@@ -127,7 +127,8 @@ func testPodsAreReady() {
 
 func testTargetsAreHealthy() {
 	timeout := time.After(3 * time.Minute)
-	tick := time.NewTicker(30 * time.Second)
+	tick := time.NewTicker(5 * time.Second)
+
 	var timeoutMessage string
 	for {
 		select {
@@ -135,11 +136,10 @@ func testTargetsAreHealthy() {
 			tick.Stop()
 			log.Fatal(timeoutMessage)
 		case <-tick.C:
-			var resp promAPI.TargetsResponse
+			var resp prom.TargetsResponse
 			url := fmt.Sprintf("%s/api/v1/targets", prometheusURL)
 			respBody, statusCode := doGet(url)
-			err := json.Unmarshal([]byte(respBody), &resp)
-			if err != nil {
+			if err := json.Unmarshal([]byte(respBody), &resp); err != nil {
 				log.Fatalf("Error unmarshalling response: %v.\nResponse body: %s", err, respBody)
 			}
 			if statusCode != 200 || resp.Status != "success" {
@@ -149,9 +149,16 @@ func testTargetsAreHealthy() {
 			allTargetsAreHealthy := true
 			timeoutMessage = ""
 			for _, target := range activeTargets {
+				if shouldIgnoreTarget(target.Labels) {
+					continue
+				}
 				if target.Health != "up" {
 					allTargetsAreHealthy = false
-					timeoutMessage += fmt.Sprintf("Target with job=%s and instance=%s is not healthy\n", target.Labels.Job, target.Labels.Instance)
+					timeoutMessage += "The following target is not healthy:\n"
+					for label, value := range target.Labels {
+						timeoutMessage += fmt.Sprintf("- %s=%s\n", label, value)
+					}
+					timeoutMessage += fmt.Sprintf("- errorMessage: %s", target.LastError)
 				}
 			}
 			if allTargetsAreHealthy {
@@ -163,9 +170,24 @@ func testTargetsAreHealthy() {
 
 }
 
+func shouldIgnoreTarget(target prom.Labels) bool {
+	var jobsToBeIgnored = []string{
+		// Note: These targets will be tested here: https://github.com/kyma-project/kyma/issues/6457
+		"knative-eventing/knative-eventing-event-mesh-dashboard-broker",
+		"knative-eventing/knative-eventing-event-mesh-dashboard-httpsource",
+	}
+
+	for _, j := range jobsToBeIgnored {
+		if target["job"] == j {
+			return true
+		}
+	}
+	return false
+}
+
 func testRulesAreHealthy() {
 	timeout := time.After(3 * time.Minute)
-	tick := time.NewTicker(30 * time.Second)
+	tick := time.NewTicker(5 * time.Second)
 	var timeoutMessage string
 	for {
 		select {
@@ -173,11 +195,10 @@ func testRulesAreHealthy() {
 			tick.Stop()
 			log.Fatal(timeoutMessage)
 		case <-tick.C:
-			var resp promAPI.AlertResponse
+			var resp prom.AlertResponse
 			url := fmt.Sprintf("%s/api/v1/rules", prometheusURL)
 			respBody, statusCode := doGet(url)
-			err := json.Unmarshal([]byte(respBody), &resp)
-			if err != nil {
+			if err := json.Unmarshal([]byte(respBody), &resp); err != nil {
 				log.Fatalf("Error unmarshalling response: %v.\nResponse body: %s", err, respBody)
 			}
 			if statusCode != 200 || resp.Status != "success" {

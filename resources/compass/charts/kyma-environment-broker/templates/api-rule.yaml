@@ -9,10 +9,6 @@ spec:
     port: {{ .Values.service.port }}
     host: {{ .Values.host }}.{{ .Values.global.ingress.domainName }}
   rules:
-    - path: /v2/.*
-      methods: ["GET", "PUT", "DELETE"]
-      accessStrategies:
-        - handler: noop
     - path: /oauth/([^/]+/)?v2/.*
       methods: ["GET", "PUT", "DELETE"]
       accessStrategies:

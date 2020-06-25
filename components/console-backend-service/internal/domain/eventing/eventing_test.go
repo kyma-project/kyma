@@ -48,7 +48,7 @@ func checkInternalMethod(t *testing.T, resolver *PluggableContainer, enabled boo
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
-	val, err := resolver.Resolver.CreateTrigger(ctx, "test", fixTrigger(), []gqlschema.OwnerReference{})
+	val, err := resolver.Resolver.CreateTrigger(ctx, "test", fixTrigger(), []*gqlschema.OwnerReference{})
 	if enabled {
 		require.NoError(t, err)
 	} else {
@@ -77,7 +77,7 @@ func fixTrigger() gqlschema.TriggerCreateInput {
 		Name:      &name,
 		Namespace: "Namespace",
 		Broker:    "default",
-		Subscriber: gqlschema.SubscriberInput{
+		Subscriber: &gqlschema.SubscriberInput{
 			URI: &uri,
 		},
 	}

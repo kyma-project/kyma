@@ -32,12 +32,11 @@ This guide explains how to deploy Kyma on a cluster using your own domain.
 - A domain for your [Azure Kubernetes Service](https://azure.microsoft.com/services/kubernetes-service/) (AKS) cluster
 - [Microsoft Azure](https://azure.microsoft.com)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
-- Tiller 2.10.0 or higher
 - [Docker](https://www.docker.com/)
 - A [Docker Hub](https://hub.docker.com/) account
 - [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
->**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general). The Kyma production profile requires at least `Standard_F8s_v2` machines, but it is recommended to use the `Standard_D8_v3` type. Create these machines when you complete the **Prepare the cluster** step. 
+>**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general). The Kyma production profile requires at least `Standard_F8s_v2` machines, but it is recommended to use the `Standard_D8_v3` type. Create these machines when you complete the **Prepare the cluster** step.
 
   </details>
 
@@ -45,7 +44,7 @@ This guide explains how to deploy Kyma on a cluster using your own domain.
 
 ## Choose the release to install
 
-1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to install.
+1. Go to [Kyma releases](https://github.com/kyma-project/kyma/releases/) and choose the release you want to install.
 
 2. Export the release version as an environment variable. Run:
 
@@ -346,7 +345,7 @@ Get the TLS certificate:
    && kubectl label configmap owndomain-overrides -n kyma-installer installer=overrides
    ```
 
->**TIP:** An example config map is available [here](./assets/owndomain-overrides.yaml).
+>**TIP:** See a [sample ConfigMap](./assets/owndomain-overrides.yaml) for reference.
 
   </details>
   <details>
@@ -402,7 +401,7 @@ Get the TLS certificate:
     && kubectl label configmap owndomain-overrides -n kyma-installer installer=overrides
     ```
 
->**CAUTION:** If you define your own Kubernetes jobs on the AKS cluster, follow [this](/components/service-mesh/#troubleshooting-kubernetes-jobs-fail-on-aks) troubleshooting guide to avoid jobs running endlessly on AKS deployments of Kyma.
+>**CAUTION:** If you define your own Kubernetes jobs on the AKS cluster, follow the [troubleshooting guide](/components/service-mesh/#troubleshooting-kubernetes-jobs-fail-on-aks) to avoid jobs running endlessly on AKS deployments of Kyma.
 
   </details>
 
@@ -410,28 +409,23 @@ Get the TLS certificate:
 
 ## Install Kyma
 
-1. Install Tiller on the cluster you provisioned. Run:
-
-   ```bash
-   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
-   ```
    >**NOTE**: If you want to use the Kyma production profile, see the following documents before you go to the next step:
       >* [Istio production profile](/components/service-mesh/#configuration-service-mesh-production-profile)
       >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-profiles)
 
-2. Deploy Kyma. Run:
+1. Deploy Kyma. Run:
 
     ```bash
     kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-installer-cluster.yaml
     ```
 
-3. Check if the Pods of Tiller and the Kyma Installer are running:
+2. Check if the Pod of the Kyma Installer is running:
 
     ```bash
-    kubectl get pods --all-namespaces
+    kubectl get pods -n kyma-installer
     ```
 
-4. To watch the installation progress, run:
+3. To watch the installation progress, run:
 
     ```bash
     while true; do \
@@ -501,7 +495,7 @@ az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n apiserver.
 1. To get the address of the cluster's Console, check the host of the Console's virtual service. The name of the host of this virtual service corresponds to the Console URL. To get the virtual service host, run:
 
     ```bash
-    kubectl get virtualservice core-console -n kyma-system -o jsonpath='{ .spec.hosts[0] }'
+    kubectl get virtualservice console-web -n kyma-system -o jsonpath='{ .spec.hosts[0] }'
     ```
 
 2. Access your cluster under this address:

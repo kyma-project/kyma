@@ -9,8 +9,11 @@ metadata:
 spec:
   endpoints:
     - path: /metrics
-      port: {{ .Values.metrics.authProxy.port.name }}
+      port: {{ .Values.metrics.manager.port.name }}
       interval: "{{ .Values.metrics.serviceMonitor.scrapeInterval }}"
   selector:
-    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+    matchLabels:
+      app: {{ template "name" . }}
+      app.kubernetes.io/name: {{ template "name" . }}
+      app.kubernetes.io/instance: "{{ .Release.Name }}"
 {{- end }}

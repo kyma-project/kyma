@@ -40,6 +40,27 @@ func (_m *K8sClient) Create(_a0 context.Context, _a1 runtime.Object, _a2 ...clie
 	return r0
 }
 
+// Delete provides a mock function with given fields: ctx, obj, opts
+func (_m *K8sClient) Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOption) error {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, obj)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, runtime.Object, ...client.DeleteOption) error); ok {
+		r0 = rf(ctx, obj, opts...)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // DeleteAllOf provides a mock function with given fields: _a0, _a1, _a2
 func (_m *K8sClient) DeleteAllOf(_a0 context.Context, _a1 runtime.Object, _a2 ...client.DeleteAllOfOption) error {
 	_va := make([]interface{}, len(_a2))

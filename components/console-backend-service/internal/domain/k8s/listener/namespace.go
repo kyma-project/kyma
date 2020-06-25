@@ -14,13 +14,13 @@ type namespaceConverter interface {
 }
 
 type Namespace struct {
-	channel       chan<- gqlschema.NamespaceEvent
+	channel       chan<- *gqlschema.NamespaceEvent
 	filter        func(namespace *v1.Namespace) bool
 	converter     namespaceConverter
 	sysNamespaces []string
 }
 
-func NewNamespace(channel chan<- gqlschema.NamespaceEvent, filter func(namespace *v1.Namespace) bool, converter namespaceConverter, sysNamespaces []string) *Namespace {
+func NewNamespace(channel chan<- *gqlschema.NamespaceEvent, filter func(namespace *v1.Namespace) bool, converter namespaceConverter, sysNamespaces []string) *Namespace {
 	return &Namespace{
 		channel:       channel,
 		filter:        filter,
@@ -61,9 +61,9 @@ func (l *Namespace) notify(eventType gqlschema.SubscriptionEventType, namespace 
 		return
 	}
 
-	event := gqlschema.NamespaceEvent{
+	event := &gqlschema.NamespaceEvent{
 		Type:      eventType,
-		Namespace: *gqlNamespace,
+		Namespace: gqlNamespace,
 	}
 
 	l.channel <- event

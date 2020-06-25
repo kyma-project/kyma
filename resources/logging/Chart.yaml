@@ -1,7 +1,8 @@
-name: logging
-version: 0.3.0
-description: "Helm Chart for Kyma logging"
 apiVersion: v1
+name: logging
+version: 0.30.0
+kubeVersion: "^1.10.0-0"
+description: "Helm Chart for Kyma logging"
 keywords:
   - logging
   - loki

@@ -29,7 +29,7 @@ func newUsageKindResolver(svc usageKindServices) *usageKindResolver {
 	}
 }
 
-func (rsv *usageKindResolver) ListUsageKinds(ctx context.Context, first *int, offset *int) ([]gqlschema.UsageKind, error) {
+func (rsv *usageKindResolver) ListUsageKinds(ctx context.Context, first *int, offset *int) ([]*gqlschema.UsageKind, error) {
 	res, err := rsv.svc.List(pager.PagingParams{First: first, Offset: offset})
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s", pretty.UsageKinds))

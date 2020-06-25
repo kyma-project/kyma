@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "webhook.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 4 }}
+spec:
+  ports:
+    - name: {{ .Values.service.ports.httpMetrics.name }}
+      port: {{ .Values.service.ports.httpMetrics.port }}
+      targetPort: {{ .Values.service.ports.httpMetrics.targetPort }}
+    - name: {{ .Values.service.ports.httpProfiling.name }}
+      port: {{ .Values.service.ports.httpProfiling.port }}
+      targetPort: {{ .Values.service.ports.httpProfiling.targetPort }}
+    - name: {{ .Values.service.ports.httpsWebhook.name }}
+      port: {{ .Values.service.ports.httpsWebhook.port }}
+      targetPort: {{ .Values.service.ports.httpsWebhook.targetPort }}
+  selector:
+    app: {{ template "webhook.fullname" . }}
+    app.kubernetes.io/name: {{ template "webhook.fullname" . }}
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    role: webhook

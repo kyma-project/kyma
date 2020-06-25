@@ -6,10 +6,7 @@ kind: ClusterRole
 metadata:
   name: {{ template "kiali.name" . }}-operator
   labels:
-    app: {{ template "kiali.name" . }}-operator
-    chart: {{ template "kiali.chart" . }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    {{- include "kiali.labels" . | nindent 4 }}
 rules:
 - apiGroups: [""]
   resources:
@@ -226,7 +223,7 @@ rules:
   - security.istio.io
   resources: ["*"]
   verbs:
-{{- if .Values.kiali.spec.deployment.view_only_mode }}
+{{- if not .Values.kiali.spec.deployment.view_only_mode }}
   - create
   - delete
   - patch
@@ -238,7 +235,7 @@ rules:
   resources:
   - servicemeshpolicies
   verbs:
-{{- if .Values.kiali.spec.deployment.view_only_mode }}
+{{- if not .Values.kiali.spec.deployment.view_only_mode }}
   - create
   - delete
   - patch
@@ -250,7 +247,7 @@ rules:
   resources:
   - servicemeshrbacconfigs
   verbs:
-{{- if .Values.kiali.spec.deployment.view_only_mode }}
+{{- if not .Values.kiali.spec.deployment.view_only_mode }}
   - create
   - delete
   - patch
@@ -285,7 +282,7 @@ rules:
   resources:
   - experiments
   verbs:
-{{- if .Values.kiali.spec.deployment.view_only_mode }}
+{{- if not .Values.kiali.spec.deployment.view_only_mode }}
   - create
   - delete
   - patch

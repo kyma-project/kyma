@@ -3,16 +3,11 @@ replicaCount: 1
 rbacJob:
   image:
     repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20200310-5f52f407"
-
-apiMigratorJob:
-  image:
-    repository: eu.gcr.io/kyma-project/api-gateway-migrator
-    tag: "274e49ce"
+    tag: "v20200617-32c1f3ff"
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
-  tag: "978664da"
+  tag: "d419f5a4"
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -70,7 +65,12 @@ config:
 
   # Configure node tolerations.
   tolerations: []
-  annotations: {}
+  annotations:
+    sidecar.istio.io/inject: "false"
+
+  # Port configuration
+  ports:
+    metrics: 8080
 
 # Configure node affinity
 affinity: {}
@@ -79,7 +79,7 @@ tests:
   enabled: true
   image:
     registry: "eu.gcr.io/kyma-project"
-    version: "8256adfe"
+    version: d022112f
   env:
     testUser: "admin-user"
     timeout: 120
@@ -87,3 +87,5 @@ tests:
     jwtTimeout: "30s"
     jwtMaxAttempts: 5
     jwtDelay: 5
+    gatewayName: "kyma-gateway"
+    gatewayNamespace: "kyma-system"

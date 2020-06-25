@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
@@ -237,7 +238,7 @@ func (c *ServiceBindingUsageController) triggerServiceBindingUsageReconciliation
 		toUpdate := sbu.DeepCopy()
 		toUpdate.Spec.ReprocessRequest = toUpdate.Spec.ReprocessRequest + 1
 
-		_, err = c.bindingUsageClient.ServiceBindingUsages(toUpdate.Namespace).Update(toUpdate)
+		_, err = c.bindingUsageClient.ServiceBindingUsages(toUpdate.Namespace).Update(context.TODO(), toUpdate, metaV1.UpdateOptions{})
 		if err != nil {
 			c.log.Errorf("Error updating ServiceBindingUsage %s/%s", toUpdate.Namespace, toUpdate.Name)
 			return
@@ -500,7 +501,7 @@ func (c *ServiceBindingUsageController) ensureOwnerRef(newUsage *sbuTypes.Servic
 		UID:        binding.UID,
 	})
 
-	if _, err := c.bindingUsageClient.ServiceBindingUsages(newUsage.Namespace).Update(newUsage); err != nil {
+	if _, err := c.bindingUsageClient.ServiceBindingUsages(newUsage.Namespace).Update(context.TODO(), newUsage, metaV1.UpdateOptions{}); err != nil {
 		return errors.Wrapf(err, "while updating %s", pretty.ServiceBindingUsageName(newUsage))
 	}
 
@@ -520,7 +521,7 @@ func (c *ServiceBindingUsageController) ensureOwnerRefNotExists(newUsage *sbuTyp
 	}
 
 	newUsage.OwnerReferences = ownerReferences
-	if _, err := c.bindingUsageClient.ServiceBindingUsages(newUsage.Namespace).Update(newUsage); err != nil {
+	if _, err := c.bindingUsageClient.ServiceBindingUsages(newUsage.Namespace).Update(context.TODO(), newUsage, metaV1.UpdateOptions{}); err != nil {
 		return errors.Wrapf(err, "while updating %s", pretty.ServiceBindingUsageName(newUsage))
 	}
 
@@ -659,7 +660,7 @@ func (c *ServiceBindingUsageController) isLabelsEqual(lSource labelsOrigin, labe
 func (c *ServiceBindingUsageController) updateStatus(bUsage *sbuTypes.ServiceBindingUsage, condition sbuTypes.ServiceBindingUsageCondition) error {
 	copyUsage := bUsage.DeepCopy()
 	sbuStatus.SetUsageCondition(&copyUsage.Status, condition)
-	_, err := c.bindingUsageClient.ServiceBindingUsages(copyUsage.Namespace).Update(copyUsage)
+	_, err := c.bindingUsageClient.ServiceBindingUsages(copyUsage.Namespace).Update(context.TODO(), copyUsage, metaV1.UpdateOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "while updating status of %s", pretty.ServiceBindingUsageName(copyUsage))
 	}

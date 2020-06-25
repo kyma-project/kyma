@@ -3,8 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "jaeger-operator.fullname" . }}-kcproxy
   labels:
-    app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
-    app.kubernetes.io/component: kcproxy 
+{{ include "jaeger-operator.labels" . | indent 4 }}
 spec:
   replicas: {{ .Values.kcproxy.replicaCount }}
   selector:
@@ -24,6 +23,10 @@ spec:
           hostnames:
           - "dex.{{ .Values.global.ingress.domainName }}"
       {{- end }}
+      {{- if .Values.kcproxy.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.kcproxy.nodeSelector | indent 8 }}
+      {{- end }}
       containers:
       - image: "{{ .Values.kcproxy.image.repository }}:{{ .Values.kcproxy.image.tag }}"
         imagePullPolicy: {{ .Values.kcproxy.image.pullPolicy }}
@@ -39,7 +42,8 @@ spec:
         - --verbose=false
         - --listen=0.0.0.0:{{ .Values.kcproxy.inPort }}
         - --upstream-url=http://{{ template "jaeger-operator.fullname" . }}-jaeger-query:{{ .Values.jaeger.kyma.uiPort }}
-        - --enable-logging=true
+        - --enable-logging=false
+        - --enable-json-logging=true
         - --secure-cookie=true
         - --enable-authorization-cookies=false
         - --enable-token-header=false

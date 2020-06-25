@@ -58,7 +58,7 @@ func (a *APIRule) Create(name, host string, port uint32) (string, error) {
 					AccessStrategies: []*apiruleTypes.Authenticator{
 						{
 							Handler: &apiruleTypes.Handler{
-								Name: "noop",
+								Name: "allow",
 							},
 						},
 					},

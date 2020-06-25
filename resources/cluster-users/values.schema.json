@@ -324,9 +324,6 @@
             "dex": [
               "dex.coreos.com"
             ],
-            "kubeless": [
-              "kubeless.io"
-            ],
             "rafter": [
               "rafter.kyma-project.io"
             ],
@@ -339,6 +336,12 @@
               "caching.internal.knative.dev",
               "autoscaling.internal.knative.dev",
               "serving.knative.dev"
+            ],
+            "kymaEventing": [
+              "knativekafka.kyma-project.io",
+              "sources.kyma-project.io",
+              "messaging.knative.dev",
+              "eventing.knative.dev"
             ],
             "addons": [
               "addons.kyma-project.io"
@@ -400,6 +403,12 @@
                 "autoscaling.internal.knative.dev",
                 "serving.knative.dev"
               ],
+              "kymaEventing": [
+                "knativekafka.kyma-project.io",
+                "sources.kyma-project.io",
+                "messaging.knative.dev",
+                "eventing.knative.dev"
+              ],
               "addons": [
                 "addons.kyma-project.io"
               ],
@@ -435,9 +444,6 @@
               ],
               "dex": [
                 "dex.coreos.com"
-              ],
-              "kubeless": [
-                "kubeless.io"
               ]
             }
           ],
@@ -691,26 +697,32 @@
                 ]
               }
             },
-            "kubeless": {
-              "$id": "#/properties/clusterRoles/properties/apiGroups/properties/kubeless",
+            "kymaEventing": {
+              "$id": "#/properties/clusterRoles/properties/apiGroups/properties/kymaEventing",
               "type": "array",
-              "title": "The Kubeless Schema",
+              "title": "The KymaEventing Schema",
               "description": "",
               "default": [],
               "examples": [
                 [
-                  "kubeless.io"
+                  "knativekafka.kyma-project.io",
+                  "sources.kyma-project.io",
+                  "messaging.knative.dev",
+                  "eventing.knative.dev"
                 ]
               ],
               "additionalItems": true,
               "items": {
-                "$id": "#/properties/clusterRoles/properties/apiGroups/properties/kubeless/items",
+                "$id": "#/properties/clusterRoles/properties/apiGroups/properties/kymaEventing/items",
                 "type": "string",
                 "title": "The Items Schema",
                 "description": "",
                 "default": "",
                 "examples": [
-                  "kubeless.io"
+                  "knativekafka.kyma-project.io",
+                  "sources.kyma-project.io",
+                  "messaging.knative.dev",
+                  "eventing.knative.dev"
                 ]
               }
             }

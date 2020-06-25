@@ -22,31 +22,31 @@ func (c *eventActivationConverter) ToGQL(in *v1alpha1.EventActivation) *gqlschem
 	}
 }
 
-func (c *eventActivationConverter) ToGQLs(in []*v1alpha1.EventActivation) []gqlschema.EventActivation {
-	var result []gqlschema.EventActivation
+func (c *eventActivationConverter) ToGQLs(in []*v1alpha1.EventActivation) []*gqlschema.EventActivation {
+	var result []*gqlschema.EventActivation
 	for _, item := range in {
 		converted := c.ToGQL(item)
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 
 	return result
 }
 
-func (c *eventActivationConverter) ToGQLEvents(in *spec.AsyncAPISpec) []gqlschema.EventActivationEvent {
+func (c *eventActivationConverter) ToGQLEvents(in *spec.AsyncAPISpec) []*gqlschema.EventActivationEvent {
 	if in == nil {
-		return []gqlschema.EventActivationEvent{}
+		return nil
 	}
 
-	var events []gqlschema.EventActivationEvent
+	var events []*gqlschema.EventActivationEvent
 	for k, channel := range in.Data.Channels {
 		if !c.isSubscribeEvent(channel) {
 			continue
 		}
 
 		eventType, version := c.getEventVersionedType(k)
-		events = append(events, gqlschema.EventActivationEvent{
+		events = append(events, &gqlschema.EventActivationEvent{
 			EventType:   eventType,
 			Version:     version,
 			Description: c.getSummary(channel),

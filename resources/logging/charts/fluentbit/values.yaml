@@ -28,7 +28,7 @@ nameOverride:
 # If specified, these labels are applied in place of the default "app" label.
 defaultLabels: {}
 
-# Whether to apply labels specific to Helm: chart, release, heritage.
+# Whether to apply labels specific to Helm: chart, release.
 helmLabels:
   enabled: true
 
@@ -49,7 +49,7 @@ image:
     # Path to the Docker image on a specific Docker registry.
     repository: eu.gcr.io/kyma-project/incubator/develop/fluent-bit
     # Version of the Docker image.
-    tag: 1.4.2-3f555ab6
+    tag: 1.4.6-8073d63b
     # imagePullPolicy for the container: 'IfNotPresent' or 'Always'.
     pullPolicy: IfNotPresent
 

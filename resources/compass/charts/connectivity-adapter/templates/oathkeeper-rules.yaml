@@ -3,6 +3,12 @@ kind: Rule
 metadata:
   name: compass-connectivity-adapter-one-time-tokens
   namespace: {{ .Release.Namespace }}
+  labels:
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   description: Configuration of oathkeeper for secure endpoint of connectivity adapter for one time tokens
   upstream:
@@ -27,6 +33,12 @@ apiVersion: oathkeeper.ory.sh/v1alpha1
 kind: Rule
 metadata:
   name: compass-connectivity-adapter-certs
+  labels:
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   description: Configuration of oathkeeper for secure endpoint of connectivity adapter for mtls
   upstream:

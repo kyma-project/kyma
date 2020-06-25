@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -52,6 +51,13 @@ func (r *ConfigMapReconciler) predicate() predicate.Predicate {
 			}
 			return r.svc.IsBase(runtime)
 		},
+		GenericFunc: func(e event.GenericEvent) bool {
+			runtime, ok := e.Object.(*corev1.ConfigMap)
+			if !ok {
+				return false
+			}
+			return r.svc.IsBase(runtime)
+		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
 			return false
 		},
@@ -59,8 +65,8 @@ func (r *ConfigMapReconciler) predicate() predicate.Predicate {
 }
 
 // Reconcile reads that state of the cluster for a ConfigMap object and makes changes based
-// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=core,resources=namespaces,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;list;watch
 
 func (r *ConfigMapReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -68,10 +74,7 @@ func (r *ConfigMapReconciler) Reconcile(request ctrl.Request) (ctrl.Result, erro
 
 	instance := &corev1.ConfigMap{}
 	if err := r.client.Get(ctx, request.NamespacedName, instance); err != nil {
-		if errors.IsNotFound(err) {
-			return ctrl.Result{}, nil
-		}
-		return ctrl.Result{}, err
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 	r.client.Status()
 

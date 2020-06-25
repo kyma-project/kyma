@@ -9,36 +9,11 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - events
-  verbs:
-  - create
-  - patch
-- apiGroups:
-  - batch
-  resources:
-  - jobs
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - batch
-  resources:
-  - jobs/status
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resources:
   - configmaps
   verbs:
   - create
   - delete
+  - deletecollection
   - get
   - list
   - patch
@@ -58,6 +33,13 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
 - apiGroups:
   - ""
   resources:
@@ -91,6 +73,66 @@ rules:
   - update
   - watch
 - apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments/status
+  verbs:
+  - get
+- apiGroups:
+  - autoscaling
+  resources:
+  - horizontalpodautoscalers
+  verbs:
+  - create
+  - deletecollection
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs/status
+  verbs:
+  - get
+- apiGroups:
   - serverless.kyma-project.io
   resources:
   - functions
@@ -110,37 +152,3 @@ rules:
   - get
   - patch
   - update
-- apiGroups:
-  - serving.knative.dev
-  resources:
-  - revisions
-  verbs:
-  - deletecollection
-  - get
-  - list
-  - watch
-- apiGroups:
-  - serving.knative.dev
-  resources:
-  - revisions
-  - services
-  verbs:
-  - get
-- apiGroups:
-  - serving.knative.dev
-  resources:
-  - services
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - serving.knative.dev
-  resources:
-  - services/status
-  verbs:
-  - get

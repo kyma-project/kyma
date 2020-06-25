@@ -154,8 +154,6 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-rafter-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-view: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-view: "true"
 rules: []
 
 ---
@@ -211,9 +209,29 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-dex-edit: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-ory-edit: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-edit: "true"
 rules: []
+
+---
+################################################################################
+# kyma-snapshots = manage volume snapshots for backups.
+################################################################################
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-snapshots
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-snapshots: "true"
+  annotations:
+    helm.sh/hook-weight: "0"
+rules:
+- apiGroups:
+    - "snapshot.storage.k8s.io"
+  resources:
+    - "volumesnapshots"
+  verbs:
+{{ toYaml .Values.clusterRoles.verbs.edit | indent 4 }}
 
 ---
 ##########################################################################################
@@ -260,7 +278,7 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-admin: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-admin: "true"
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-snapshots: "true"
 rules: []
 
 ---
@@ -304,7 +322,7 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-ory-admin: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-admin: "true"
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-snapshots: "true"
 rules: []
 
 ---

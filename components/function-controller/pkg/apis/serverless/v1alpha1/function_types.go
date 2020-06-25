@@ -19,10 +19,10 @@ type FunctionSpec struct {
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 
-	// +kubebuilder:validation:Minimum:=0
+	// +kubebuilder:validation:Minimum:=1
 	MinReplicas *int32 `json:"minReplicas,omitempty"`
 
-	// +kubebuilder:validation:Minimum:=0
+	// +kubebuilder:validation:Minimum:=1
 	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
 
 	// +optional
@@ -30,9 +30,11 @@ type FunctionSpec struct {
 }
 
 const (
-	FunctionNameLabel      = "serverless.kyma-project.io/function-name"
-	FunctionManagedByLabel = "serverless.kyma-project.io/managed-by"
-	FunctionUUIDLabel      = "serverless.kyma-project.io/uuid"
+	FunctionNameLabel                    = "serverless.kyma-project.io/function-name"
+	FunctionManagedByLabel               = "serverless.kyma-project.io/managed-by"
+	FunctionUUIDLabel                    = "serverless.kyma-project.io/uuid"
+	FunctionResourceLabel                = "serverless.kyma-project.io/resource"
+	FunctionResourceLabelDeploymentValue = "deployment"
 )
 
 // ConditionType defines condition of function.
@@ -47,19 +49,23 @@ const (
 type ConditionReason string
 
 const (
-	ConditionReasonConfigMapCreated ConditionReason = "ConfigMapCreated"
-	ConditionReasonConfigMapUpdated ConditionReason = "ConfigMapUpdated"
-	ConditionReasonConfigMapError   ConditionReason = "ConfigMapError"
-	ConditionReasonJobFailed        ConditionReason = "JobFailed"
-	ConditionReasonJobCreated       ConditionReason = "JobCreated"
-	ConditionReasonJobRunning       ConditionReason = "JobRunning"
-	ConditionReasonJobsDeleted      ConditionReason = "JobsDeleted"
-	ConditionReasonJobFinished      ConditionReason = "JobFinished"
-	ConditionReasonServiceCreated   ConditionReason = "ServiceCreated"
-	ConditionReasonServiceUpdated   ConditionReason = "ServiceUpdated"
-	ConditionReasonServiceFailed    ConditionReason = "ServiceFailed"
-	ConditionReasonServiceWaiting   ConditionReason = "ServiceWaiting"
-	ConditionReasonServiceReady     ConditionReason = "ServiceReady"
+	ConditionReasonConfigMapCreated               ConditionReason = "ConfigMapCreated"
+	ConditionReasonConfigMapUpdated               ConditionReason = "ConfigMapUpdated"
+	ConditionReasonJobFailed                      ConditionReason = "JobFailed"
+	ConditionReasonJobCreated                     ConditionReason = "JobCreated"
+	ConditionReasonJobUpdated                     ConditionReason = "JobUpdated"
+	ConditionReasonJobRunning                     ConditionReason = "JobRunning"
+	ConditionReasonJobsDeleted                    ConditionReason = "JobsDeleted"
+	ConditionReasonJobFinished                    ConditionReason = "JobFinished"
+	ConditionReasonDeploymentCreated              ConditionReason = "DeploymentCreated"
+	ConditionReasonDeploymentUpdated              ConditionReason = "DeploymentUpdated"
+	ConditionReasonDeploymentFailed               ConditionReason = "DeploymentFailed"
+	ConditionReasonDeploymentWaiting              ConditionReason = "DeploymentWaiting"
+	ConditionReasonDeploymentReady                ConditionReason = "DeploymentReady"
+	ConditionReasonServiceCreated                 ConditionReason = "ServiceCreated"
+	ConditionReasonServiceUpdated                 ConditionReason = "ServiceUpdated"
+	ConditionReasonHorizontalPodAutoscalerCreated ConditionReason = "HorizontalPodAutoscalerCreated"
+	ConditionReasonHorizontalPodAutoscalerUpdated ConditionReason = "HorizontalPodAutoscalerUpdated"
 )
 
 type Condition struct {

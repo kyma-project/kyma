@@ -14,28 +14,28 @@ global:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir:
-      version: "2a54a16c"
+      version: "904c3b06"
     connectivity_adapter:
       dir:
-      version: "93462f94"
+      version: "904c3b06"
     pairing_adapter:
       dir:
-      version: "9fae2df7"
+      version: "904c3b06"
     director:
       dir:
-      version: "a2a2a07e"
+      version: "b13e7fe9"
     gateway:
       dir:
-      version: "93462f94"
+      version: "904c3b06"
     healthchecker:
       dir:
-      version: "109f4dc2"
+      version: "904c3b06"
     schema_migrator:
       dir:
-      version: "a2a2a07e"
+      version: "aa7a78c7"
     provisioner:
       dir:
-      version: "3f19fcd3"
+      version: "aa7a78c7"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -43,26 +43,29 @@ global:
       version: "0a651695"
     kyma_environment_broker:
       dir:
-      version: "13332e7c"
+      version: "2b814b26"
     external_services_mock:
       dir:
-      version: "105e8ff0"
+      version: "904c3b06"
+    metris:
+      dir:
+      version: "904c3b06"
     tests:
       director:
         dir:
-        version: "105e8ff0"
+        version: "b13e7fe9"
       connector:
         dir:
-        version: "9cebaf5c"
+        version: "d068b250"
       provisioner:
         dir:
-        version: "56a6adc1"
+        version: "8fb2e53b"
       e2e_provisioning:
         dir:
-        version: "ef98664d"
+        version: "9103d980"
       connectivity_adapter:
         dir:
-        version: "9fae2df7"
+        version: "d068b250"
   isLocalEnv: false
   oauth2:
     host: oauth2
@@ -86,6 +89,10 @@ global:
   auditlog:
     configMapName: "compass-gateway-auditlog-config"
     secretName: "compass-gateway-auditlog-secret"
+    script:
+      configMapName: "auditlog-script"
+
+  enableCompassDefaultScenarioAssignment: true
 
   tenantConfig:
     useDefaultTenants: true
@@ -117,6 +124,7 @@ global:
     revocation:
       configmap:
         name: revocations-config
+        namespace: "{{ .Release.Namespace }}"
     # If key and certificate are not provided they will be generated
     caKey: ""
     caCertificate: ""
@@ -219,7 +227,7 @@ global:
     host: ory-oathkeeper-proxy.kyma-system.svc.cluster.local
     port: 4455
     idTokenConfig:
-      claims: '{"scopes": "{{ print .Extra.scope }}", "tenant": "{{ print .Extra.tenant }}", "consumerID": "{{ print .Extra.consumerID}}", "consumerType": "{{ print .Extra.consumerType }}"}'
+      claims: '{"scopes": "{{ print .Extra.scope }}", "tenant": "{{ print .Extra.tenant }}", "externalTenant": "{{ print .Extra.externalTenant }}", "consumerID": "{{ print .Extra.consumerID}}", "consumerType": "{{ print .Extra.consumerType }}"}'
     mutators:
       runtimeMappingService:
         config:
@@ -272,9 +280,14 @@ global:
       maxOpenConnections: 1
       maxIdleConnections: 1
 
-  enableCompassDefaultScenarioAssignment: true
+  metrics:
+    enabled: true
+    pushEndpoint: http://monitoring-prometheus-pushgateway.kyma-system.svc.cluster.local:9091
 
   externalServicesMock:
+    enabled: false
+
+  metris:
     enabled: false
 
 pairing-adapter:

@@ -1,4 +1,4 @@
-FROM alpine:3.11
+FROM alpine:3.12
 LABEL source=git@github.com:kyma-project/kyma.git
 
 WORKDIR /nats-streaming/

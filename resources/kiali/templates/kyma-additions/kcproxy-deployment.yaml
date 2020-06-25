@@ -4,10 +4,7 @@ metadata:
   name: {{ template "kiali.name" . }}-kcproxy
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "kiali.name" . }}-kcproxy
-    chart: {{ template "kiali.chart" . }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+    {{- include "kiali.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.kcproxy.replicaCount }}
   selector:
@@ -25,6 +22,10 @@ spec:
           hostnames:
           - "dex.{{ .Values.global.ingress.domainName }}"
       {{- end }}
+      {{- if .Values.kcproxy.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.kcproxy.nodeSelector | indent 8 }}
+      {{- end }}
       containers:
       - image: "{{ .Values.kcproxy.image.repository }}:{{ .Values.kcproxy.image.tag }}"
         imagePullPolicy: {{ .Values.kcproxy.image.pullPolicy }}
@@ -40,7 +41,8 @@ spec:
         - --verbose=false
         - --listen=0.0.0.0:{{ .Values.kcproxy.inPort }}
         - --upstream-url=http://{{ template "kiali.name" . }}:{{ .Values.kiali.spec.server.port }}
-        - --enable-logging=true
+        - --enable-logging=false
+        - --enable-json-logging=true
         - --secure-cookie=true
         - --enable-authorization-cookies=false
         - --enable-token-header=false

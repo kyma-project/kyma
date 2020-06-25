@@ -1,3 +1,5 @@
+{{- if not (.Capabilities.APIVersions.Has "serviceplans.servicecatalog.k8s.io/v1beta1") }}
+{{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -7,6 +9,10 @@ metadata:
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
+  versions:
+  - name: v1beta1
+    storage: true
+    served: true
   scope: Namespaced
   names:
     plural: serviceplans
@@ -25,9 +31,12 @@ spec:
       JSONPath: .spec.serviceBrokerName
     - name: Class
       type: string
-      JSONPath: .spec.serviceClassRef.Name
+      JSONPath: .spec.serviceClassRef.name
     - name: Age
       type: date
       JSONPath: .metadata.creationTimestamp
   subresources:
     status: {}
+
+{{- end }}
+{{- end }}

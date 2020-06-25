@@ -5,8 +5,6 @@ name: serverless
 version: 0.1.0
 keywords:
   - kyma
-  - knative
-  - knative-serving
   - function
   - serverless
   - docker-registry
@@ -21,4 +19,5 @@ maintainers:
     email: "filip.strozik@outlook.com"
   - name: magicmatatjahu
     email: "urbanczyk.maciej.95@gmail.com"
-    
+  - name: m00g3n
+    email: "marcin.witalis@gmail.com"

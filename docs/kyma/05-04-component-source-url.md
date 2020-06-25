@@ -9,7 +9,7 @@ To install a component using an external URL as the source, you must add the **s
 
 The address must expose the `Chart.yaml` of the component directly. This means that for Git repositories or archives that do not store this file at the top level, you must specify the path to the file.
 
-To specify the exact location of the `Chart.yaml`, append it to the URL beginning with two backslashes `//` to indicate the path within the archive or repository. See these sample entries for components with user-defined source URLs from the Installation CR for more details:
+To specify the exact location of the `Chart.yaml`, append it to the URL beginning with two backslashes `//` to indicate the path within the archive or repository. See these sample entries for components with user-defined source URLs from the [Installation CR](#custom-resource-installation) for more details:
 
 <div tabs>
   <details>
@@ -34,7 +34,7 @@ To specify the exact location of the `Chart.yaml`, append it to the URL beginnin
         url: https://hosting.com/your-user/files/kyma-custom-ory.zip//kyma-custom/resources/ory
     ```
 
-    >**NOTE:** If the access to the URL is secured with a basic authentication mechanism, prepend the login and password to the URL following the `login:password@` format, for example: `https://user:pass@hosting.com/your-user/files/kyma-custom-ory.zip` For more details, see [this](https://github.com/hashicorp/go-getter#http-http) document.
+    >**NOTE:** If the access to the URL is secured with a [basic authentication mechanism](https://github.com/hashicorp/go-getter#http-http), prepend the login and password to the URL following the `login:password@` format, for example: `https://user:pass@hosting.com/your-user/files/kyma-custom-ory.zip`.
 
   </details>
   <details>
@@ -64,7 +64,6 @@ To specify the exact location of the `Chart.yaml`, append it to the URL beginnin
 
 </div>
 
->**NOTE:** Read [this](#custom-resource-installation) document to learn more about the Installation CR.
 
 ### Error handling and retry policy
 

@@ -46,7 +46,7 @@ type serviceInstanceSvc interface {
 //go:generate mockery -name=gqlServiceInstanceConverter -inpkg -case=underscore
 type gqlServiceInstanceConverter interface {
 	ToGQL(in *v1beta1.ServiceInstance) (*gqlschema.ServiceInstance, error)
-	ToGQLs(in []*v1beta1.ServiceInstance) ([]gqlschema.ServiceInstance, error)
+	ToGQLs(in []*v1beta1.ServiceInstance) ([]*gqlschema.ServiceInstance, error)
 	GQLCreateInputToInstanceCreateParameters(in *gqlschema.ServiceInstanceCreateInput, namespace string) *serviceInstanceCreateParameters
 	ServiceStatusTypeToGQLStatusType(in status.ServiceInstanceStatusType) gqlschema.InstanceStatusType
 	GQLStatusTypeToServiceStatusType(in gqlschema.InstanceStatusType) status.ServiceInstanceStatusType
@@ -59,7 +59,7 @@ type gqlServiceInstanceConverter interface {
 //go:generate mockery -name=gqlClusterServicePlanConverter  -output=automock -outpkg=automock -case=underscore
 type gqlClusterServicePlanConverter interface {
 	ToGQL(item *v1beta1.ClusterServicePlan) (*gqlschema.ClusterServicePlan, error)
-	ToGQLs(in []*v1beta1.ClusterServicePlan) ([]gqlschema.ClusterServicePlan, error)
+	ToGQLs(in []*v1beta1.ClusterServicePlan) ([]*gqlschema.ClusterServicePlan, error)
 }
 
 // ServicePlan
@@ -67,7 +67,7 @@ type gqlClusterServicePlanConverter interface {
 //go:generate mockery -name=gqlServicePlanConverter  -output=automock -outpkg=automock -case=underscore
 type gqlServicePlanConverter interface {
 	ToGQL(item *v1beta1.ServicePlan) (*gqlschema.ServicePlan, error)
-	ToGQLs(in []*v1beta1.ServicePlan) ([]gqlschema.ServicePlan, error)
+	ToGQLs(in []*v1beta1.ServicePlan) ([]*gqlschema.ServicePlan, error)
 }
 
 // Binding

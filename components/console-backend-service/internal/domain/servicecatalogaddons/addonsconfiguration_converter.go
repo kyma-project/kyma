@@ -12,16 +12,21 @@ func (c *addonsConfigurationConverter) ToGQL(item *v1alpha1.AddonsConfiguration)
 		return nil
 	}
 
-	var urls []string
-	var repositories []gqlschema.AddonsConfigurationRepository
+	urls := []string{}
+	repositories := []*gqlschema.AddonsConfigurationRepository{}
 	for _, repo := range item.Spec.Repositories {
 		urls = append(urls, repo.URL)
 		repositories = append(repositories, parseRepository(repo))
 	}
 
+	labels := item.Labels
+	if labels == nil {
+		labels = gqlschema.Labels{}
+	}
+
 	addonsCfg := gqlschema.AddonsConfiguration{
 		Name:         item.Name,
-		Labels:       item.Labels,
+		Labels:       labels,
 		Urls:         urls,
 		Status:       parseStatus(item.Status.CommonAddonsConfigurationStatus),
 		Repositories: repositories,
@@ -30,18 +35,18 @@ func (c *addonsConfigurationConverter) ToGQL(item *v1alpha1.AddonsConfiguration)
 	return &addonsCfg
 }
 
-func (c *addonsConfigurationConverter) ToGQLs(in []*v1alpha1.AddonsConfiguration) []gqlschema.AddonsConfiguration {
-	var result []gqlschema.AddonsConfiguration
+func (c *addonsConfigurationConverter) ToGQLs(in []*v1alpha1.AddonsConfiguration) []*gqlschema.AddonsConfiguration {
+	var result []*gqlschema.AddonsConfiguration
 	for _, u := range in {
 		converted := c.ToGQL(u)
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result
 }
 
-func parseRepository(repo v1alpha1.SpecRepository) gqlschema.AddonsConfigurationRepository {
+func parseRepository(repo v1alpha1.SpecRepository) *gqlschema.AddonsConfigurationRepository {
 	secretRef := &gqlschema.ResourceRef{}
 	if repo.SecretRef != nil {
 		secretRef.Name = repo.SecretRef.Name
@@ -49,18 +54,18 @@ func parseRepository(repo v1alpha1.SpecRepository) gqlschema.AddonsConfiguration
 	} else {
 		secretRef = nil
 	}
-	return gqlschema.AddonsConfigurationRepository{
+	return &gqlschema.AddonsConfigurationRepository{
 		URL:       repo.URL,
 		SecretRef: secretRef,
 	}
 }
 
-func parseStatus(status v1alpha1.CommonAddonsConfigurationStatus) gqlschema.AddonsConfigurationStatus {
-	var repositories []gqlschema.AddonsConfigurationStatusRepository
+func parseStatus(status v1alpha1.CommonAddonsConfigurationStatus) *gqlschema.AddonsConfigurationStatus {
+	repositories := []*gqlschema.AddonsConfigurationStatusRepository{}
 	for _, repo := range status.Repositories {
-		var addons []gqlschema.AddonsConfigurationStatusAddons
+		addons := make([]*gqlschema.AddonsConfigurationStatusAddons, 0)
 		for _, addon := range repo.Addons {
-			addons = append(addons, gqlschema.AddonsConfigurationStatusAddons{
+			addons = append(addons, &gqlschema.AddonsConfigurationStatusAddons{
 				Status:  string(addon.Status),
 				Name:    addon.Name,
 				Version: addon.Version,
@@ -68,7 +73,7 @@ func parseStatus(status v1alpha1.CommonAddonsConfigurationStatus) gqlschema.Addo
 				Reason:  string(addon.Reason),
 			})
 		}
-		repositories = append(repositories, gqlschema.AddonsConfigurationStatusRepository{
+		repositories = append(repositories, &gqlschema.AddonsConfigurationStatusRepository{
 			Status:  string(repo.Status),
 			URL:     repo.URL,
 			Addons:  addons,
@@ -76,7 +81,7 @@ func parseStatus(status v1alpha1.CommonAddonsConfigurationStatus) gqlschema.Addo
 			Reason:  string(repo.Reason),
 		})
 	}
-	return gqlschema.AddonsConfigurationStatus{
+	return &gqlschema.AddonsConfigurationStatus{
 		Phase:        string(status.Phase),
 		Repositories: repositories,
 	}

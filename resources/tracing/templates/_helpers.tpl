@@ -36,13 +36,25 @@ Create the name of the service account to use
 {{- end -}}
 
 {{/*
+Common labels
+*/}}
+{{- define "jaeger-operator.labels" -}}
+helm.sh/chart: {{ include "jaeger-operator.chart" . }}
+{{ include "jaeger-operator.selectorLabels" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "jaeger-operator.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-operator
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "jaeger-operator.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
-
-{{/* Generate basic labels */}}
-{{- define "jaeger-operator.labels" }}
-app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-operator
-{{- end }}

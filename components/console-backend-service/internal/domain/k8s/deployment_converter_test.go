@@ -23,12 +23,12 @@ func TestDeploymentConverter_ToGQL(t *testing.T) {
 			CreationTimestamp: zeroTimeStamp,
 			Namespace:         "namespace",
 			Labels:            gqlschema.Labels{"test": "ok", "ok": "test"},
-			Status: gqlschema.DeploymentStatus{
+			Status: &gqlschema.DeploymentStatus{
 				Replicas:          1,
 				AvailableReplicas: 1,
 				ReadyReplicas:     1,
 				UpdatedReplicas:   1,
-				Conditions: []gqlschema.DeploymentCondition{
+				Conditions: []*gqlschema.DeploymentCondition{
 					{
 						Status:  "True",
 						Type:    "Available",
@@ -37,7 +37,7 @@ func TestDeploymentConverter_ToGQL(t *testing.T) {
 					},
 				},
 			},
-			Containers: []gqlschema.Container{
+			Containers: []*gqlschema.Container{
 				{
 					Name:  "test",
 					Image: "image",

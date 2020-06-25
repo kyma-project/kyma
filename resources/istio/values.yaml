@@ -5,9 +5,9 @@ kyma:
     - kube-system
   labelJob:
     image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20200310-5f52f407"
+    tag: "v20200617-32c1f3ff"
 
 istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
-    tag: "ce7e3510"
+    tag: d022112f

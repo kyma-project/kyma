@@ -5,12 +5,18 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func AssertFuncAtMost(t *testing.T, fn func() error, duration time.Duration) {
+func RequireFuncAtMost(t *testing.T, fn func() error, duration time.Duration) {
 	t.Helper()
 	require.NoError(t, FuncAtMost(fn, duration))
+}
+
+func AssertFuncAtMost(t *testing.T, fn func() error, duration time.Duration) {
+	t.Helper()
+	assert.NoError(t, FuncAtMost(fn, duration))
 }
 
 func FuncAtMost(fn func() error, duration time.Duration) error {

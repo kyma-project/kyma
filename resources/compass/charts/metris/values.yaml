@@ -1,0 +1,76 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  # these override the values from global chart
+  repository: ""
+  tag: ""
+  pullSecrets: []
+  pullPolicy: IfNotPresent
+
+resources: {}
+  # requests:
+  #   memory: "64Mi"
+  #   cpu: "50m"
+  # limits:
+  #   memory: "250Mi"
+  #   cpu: "200m"
+
+nodeSelector: {}
+
+securityContext:
+  runAsUser: 1001
+
+podAnnotations:
+  sidecar.istio.io/inject: "false"
+
+loglevel: info
+port: 8080
+serviceAccount:
+  enabled: true
+  ## Name of an already existing service account. Setting this value disables the automatic service account creation.
+  # name:
+
+gardener:
+  secretName: "gardener-credentials"
+
+provider:
+  pollinterval: "1m"
+  workers: 5
+
+edp:
+  datastream:
+    name: "TBD"
+    namespace: "TBD"
+    version: 1
+    env: "TBD"
+  token: "TBD"
+  url: "TBD"
+  workers: 5
+
+metrics:
+  enabled: false
+  port: 8080
+  service:
+    type: ClusterIP
+    annotations: {}
+    loadBalancerIP:
+  serviceMonitor:
+    enabled: false
+    additionalLabels: {}
+    # namespace: monitoring
+    # interval: 30s
+    # scrapeTimeout: 10s
+
+# Define custom environment variables to pass to metris
+  # — name: ENV_VAR1
+  #   value: test1
+  # - name: ENV_VAR2
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: secretname
+  #       key: secretkey
+extraEnv: []
+
+# Define custom arguments to pass to metris container
+extraArgs: []

@@ -2,11 +2,14 @@
 tests:
   enabled: true
 
+nodeSelector: {}
+
 global:
   isLocalEnv: false
   istio:
     gateway:
       name: kyma-gateway
+      namespace: kyma-system
   containerRegistry:
     path: eu.gcr.io/kyma-project
   alpine_net:
@@ -19,6 +22,7 @@ kcproxy:
   inPort: 3000
   clientId: kiali
   clientSecret: hiFWLWqIxw5d3gl
+  nodeSelector: {}
   image:
     repository: bitnami/keycloak-gatekeeper
     tag: 9.0.3
@@ -34,8 +38,8 @@ kcproxy:
 kiali:
   operator:
     image:
-      repository: quay.io/kiali/kiali-operator
-      tag: v1.17.0
+      repository: eu.gcr.io/kyma-project/incubator/develop/kiali-operator
+      tag: 1.18.0-cf9593a2
       pullPolicy: IfNotPresent
     resources:
       limits:
@@ -242,7 +246,7 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-      image_name: "quay.io/kiali/kiali"
+      image_name: "eu.gcr.io/kyma-project/incubator/develop/kiali"
     #
     # The Kubernetes pull policy for the Kiali deployment.
     # This is overridden to be "Always" if image_version is set to "latest".
@@ -266,7 +270,7 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-      image_version: "v1.17.0"
+      image_version: "1.18.1-51638f19"
     #
     # Determines if the Kiali endpoint should be exposed externally.
     # If true, an Ingress will be created if on Kubernetes or a Route if on OpenShift.
@@ -280,7 +284,7 @@ kiali:
     #
     # A set of node labels that dictate onto which node the Kiali pod will be deployed.
     #    ---
-    #    node_selector: {}
+      node_selector: {}
     #
     # Because an ingress into a cluster can vary wildly in its desired configuration,
     # this setting provides a way to override complete portions of the ingress resource
@@ -587,7 +591,7 @@ kiali:
 
     ##########
     #  ---
-    #  kubernetes_config:
+    kubernetes_config:
     #
     # The Burst value of the Kubernetes client.
     #    ---
@@ -635,7 +639,7 @@ kiali:
     #
     # The QPS value of the Kubernetes client.
     #    ---
-    #    qps: 175
+      qps: 50
     #
 
     ##########

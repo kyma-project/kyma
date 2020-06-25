@@ -4,7 +4,7 @@ type: Troubleshooting
 ---
 
 By default, the **PILOT_TRACE_SAMPLING** value in the [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) is set to `1`, where `100` is the maximum value. This means that only 1 out of 100 requests is sent to Jaeger for trace recording.
-To change this system behavior, you can override the existing settings or change the value in the runtime. 
+To change this system behavior, you can override the existing settings or change the value in the Runtime.
 
 ## Create an override
 
@@ -41,11 +41,11 @@ EOF
 
 2. Proceed with the installation. Once the installation starts, the Kyma Operator will generate the override based on the ConfigMap and set the value of **PILOT_TRACE_SAMPLING** to `60`.
 
-    >**NOTE:** If you add the override in the runtime, run the following command to trigger the update:
+    >**NOTE:** If you add the override in the Runtime, run the following command to trigger the update:
     > ```bash
     > kubectl -n default label installation/kyma-installation action=install
     > ```
 
-## Define the value in the runtime
+## Define the value in the Runtime
 
-If you have already installed Kyma and do not want to trigger any updates, edit the `istio-pilot` deployment to set the desired value for **PILOT_TRACE_SAMPLING**. For detailed instructions, see [this](https://istio.io/docs/tasks/observability/distributed-tracing/overview/#trace-sampling) document.
+If you have already installed Kyma and do not want to trigger any updates, edit the `istio-pilot` deployment to set the desired value for **PILOT_TRACE_SAMPLING**. For detailed instructions, see the [Istio documentation](https://istio.io/docs/tasks/observability/distributed-tracing/configurability/#trace-sampling).
