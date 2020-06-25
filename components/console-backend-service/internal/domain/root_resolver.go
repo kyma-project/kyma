@@ -312,14 +312,6 @@ func (r *mutationResolver) DisableApplication(ctx context.Context, application s
 	return r.app.Resolver.DisableApplicationMutation(ctx, application, namespace)
 }
 
-func (r *mutationResolver) CreateIDPPreset(ctx context.Context, name string, issuer string, jwksURI string) (*gqlschema.IDPPreset, error) {
-	return r.authentication.CreateIDPPresetMutation(ctx, name, issuer, jwksURI)
-}
-
-func (r *mutationResolver) DeleteIDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
-	return r.authentication.DeleteIDPPresetMutation(ctx, name)
-}
-
 func (r *mutationResolver) CreateApplication(ctx context.Context, name string, description *string, labels gqlschema.Labels) (*gqlschema.ApplicationMutationOutput, error) {
 	return r.app.Resolver.CreateApplication(ctx, name, description, labels)
 }
@@ -616,14 +608,6 @@ func (r *queryResolver) APIRule(ctx context.Context, name string, namespace stri
 
 func (r *queryResolver) APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*gqlschema.APIRule, error) {
 	return r.ag.APIRulesQuery(ctx, namespace, serviceName, hostname)
-}
-
-func (r *queryResolver) IDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
-	return r.authentication.IDPPresetQuery(ctx, name)
-}
-
-func (r *queryResolver) IDPPresets(ctx context.Context, first *int, offset *int) ([]*gqlschema.IDPPreset, error) {
-	return r.authentication.IDPPresetsQuery(ctx, first, offset)
 }
 
 func (r *queryResolver) BackendModules(ctx context.Context) ([]*gqlschema.BackendModule, error) {
