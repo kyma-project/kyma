@@ -39,7 +39,7 @@ type Service struct {
 	*resource.Service
 }
 
-func NewService(serviceFactory *resource.ServiceFactory) (*resource.Service, error) {
+func NewService(serviceFactory *resource.GenericServiceFactory) (*resource.GenericService, error) {
 	service := serviceFactory.ForResource(apiRulesGroupVersionResource)
 	err := service.AddIndexers(cache.Indexers{
 		apiRulesServiceIndex: func(obj interface{}) ([]string, error) {

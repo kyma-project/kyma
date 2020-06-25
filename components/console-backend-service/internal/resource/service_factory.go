@@ -8,36 +8,36 @@ import (
 	"time"
 )
 
-type ServiceFactory struct {
+type GenericServiceFactory struct {
 	Client          dynamic.Interface
 	InformerFactory dynamicinformer.DynamicSharedInformerFactory
 }
 
-func NewServiceFactoryForConfig(config *rest.Config, informerResyncPeriod time.Duration) (*ServiceFactory, error) {
+func NewGenericServiceFactoryForConfig(config *rest.Config, informerResyncPeriod time.Duration) (*GenericServiceFactory, error) {
 	dynamicClient, err := dynamic.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
 
 	informerFactory := dynamicinformer.NewDynamicSharedInformerFactory(dynamicClient, informerResyncPeriod)
-	return NewServiceFactory(dynamicClient, informerFactory), nil
+	return NewGenericServiceFactory(dynamicClient, informerFactory), nil
 }
 
-func NewServiceFactory(client dynamic.Interface, informerFactory dynamicinformer.DynamicSharedInformerFactory) *ServiceFactory {
-	return &ServiceFactory{
+func NewGenericServiceFactory(client dynamic.Interface, informerFactory dynamicinformer.DynamicSharedInformerFactory) *GenericServiceFactory {
+	return &GenericServiceFactory{
 		Client:          client,
 		InformerFactory: informerFactory,
 	}
 }
 
-func (f *ServiceFactory) ForResource(gvr schema.GroupVersionResource) *Service {
+func (f *GenericServiceFactory) ForResource(gvr schema.GroupVersionResource) *GenericService {
 	notifier := NewNotifier()
 	informer := f.
 		InformerFactory.
 		ForResource(gvr).
 		Informer()
 	informer.AddEventHandler(notifier)
-	return &Service{
+	return &GenericService{
 		ServiceBase: &enabledServiceBase{
 			Client:   f.Client.Resource(gvr),
 			Informer: informer,
