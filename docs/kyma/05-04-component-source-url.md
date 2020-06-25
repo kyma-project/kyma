@@ -25,7 +25,6 @@ To specify the exact location of the `Chart.yaml`, append it to the URL beginnin
         url: https://hosting.com/your-user/files/kyma-custom-ory.zip
     ```
 
-
   - Archive with `Chart.yaml` deeper in the file structure:
     ```
     - name: "ory"
@@ -63,7 +62,6 @@ To specify the exact location of the `Chart.yaml`, append it to the URL beginnin
   </details>
 
 </div>
-
 
 ### Error handling and retry policy
 
