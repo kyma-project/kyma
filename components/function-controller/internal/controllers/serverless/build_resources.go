@@ -37,11 +37,17 @@ func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Functio
 }
 
 func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, configMapName string) batchv1.Job {
-	imageName := r.buildImageAddressForPush(instance)
 	one := int32(1)
 	zero := int32(0)
 
-	job := batchv1.Job{
+	imageName := r.buildImageAddressForPush(instance)
+	args := r.config.Build.ProdExecutorArgs
+	if r.config.Docker.InternalRegistryEnabled {
+		args = r.config.Build.DevExecutorArgs
+	}
+	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), "--context=dir:///workspace")
+
+	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-build-", instance.GetName()),
 			Namespace:    instance.GetNamespace(),
@@ -96,7 +102,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 						{
 							Name:  "executor",
 							Image: r.config.Build.ExecutorImage,
-							Args:  append(r.config.Build.ExecutorArgs, fmt.Sprintf("%s=%s", destinationArg, imageName), "--context=dir:///workspace"),
+							Args:  args,
 							Resources: corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceMemory: r.config.Build.LimitsMemoryValue,
@@ -127,14 +133,6 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 			},
 		},
 	}
-
-	//if r.config.Docker.InternalRegistryEnabled {
-	//	r.adjustJobForInternalRegistry(&job, imageName)
-	//} else {
-	//	r.adjustJobForExternalRegistry(&job)
-	//}
-
-	return job
 }
 
 func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function) appsv1.Deployment {
@@ -244,55 +242,6 @@ func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alp
 func (r *FunctionReconciler) buildImageAddress(instance *serverlessv1alpha1.Function) string {
 	imageTag := r.calculateImageTag(instance)
 	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.RegistryAddress, instance.Namespace, instance.Name, imageTag)
-}
-
-func (r *FunctionReconciler) adjustJobForInternalRegistry(job *batchv1.Job, imageName string) {
-	job.Spec.Template.Spec.Volumes = append(job.Spec.Template.Spec.Volumes, []corev1.Volume{
-		{
-			Name:         "credentials",
-			VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
-		},
-		{
-			Name: "registry-credentials",
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{SecretName: r.config.ImageRegistryCredentialsSecretName},
-			},
-		},
-	}...)
-
-	job.Spec.Template.Spec.InitContainers = []corev1.Container{
-		{
-			Name:    "credential-initializer",
-			Image:   r.config.Build.CredsInitImage,
-			Command: []string{"/ko-app/creds-init"},
-			Args:    []string{fmt.Sprintf("-basic-docker=registry-credentials=http://%s", imageName)},
-			Env: []corev1.EnvVar{
-				{Name: "HOME", Value: "/docker"},
-			},
-			VolumeMounts: []corev1.VolumeMount{
-				{Name: "credentials", ReadOnly: false, MountPath: "/docker"},
-				{Name: "registry-credentials", ReadOnly: false, MountPath: "/tekton/creds-secrets/credentials"},
-			},
-			ImagePullPolicy: corev1.PullIfNotPresent,
-		},
-	}
-}
-
-func (r *FunctionReconciler) adjustJobForExternalRegistry(job *batchv1.Job) {
-	job.Spec.Template.Spec.Volumes = append(job.Spec.Template.Spec.Volumes, corev1.Volume{
-		Name: "credentials",
-		VolumeSource: corev1.VolumeSource{
-			Secret: &corev1.SecretVolumeSource{
-				SecretName: r.config.ImageRegistryDockerConfigSecretName,
-				Items: []corev1.KeyToPath{
-					{
-						Key:  ".dockerconfigjson",
-						Path: ".docker/config.json",
-					},
-				},
-			},
-		},
-	})
 }
 
 func (r *FunctionReconciler) sanitizeDependencies(dependencies string) string {

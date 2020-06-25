@@ -116,8 +116,6 @@ containers:
         value: 5m
       namespaceExcludedNames:
         value: "istio-system,knative-eventing,knative-serving,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
-      imageRegistryCredentialsSecretName:
-        value: "{{ template \"fullname\" . }}-registry-credentials"
       imageRegistryDockerConfigSecretName:
         value: "{{ template \"fullname\" . }}-registry-docker-config"
       imagePullAccountName:
@@ -128,12 +126,12 @@ containers:
         value: 5m
       functionRequeueDuration:
         value: 5m
-      functionBuildExecutorArgs:
+      functionDevBuildExecutorArgs:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
+      functionProdBuildExecutorArgs:
+        value: "--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v0.22.0
-      functionBuildCredsInitImage:
-        value: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.12.1
 
 services:
   manager:
@@ -177,7 +175,7 @@ dockerRegistry:
   enableInternal: true
   username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
   password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json-key.json
-  internalServerAddress: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:5000"
+  internalServerAddress: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}"
   serverAddress: "registry.{{ .Values.global.ingress.domainName -}}"
   registryAddress: "registry.{{ .Values.global.ingress.domainName -}}"
 
