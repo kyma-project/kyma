@@ -10,8 +10,8 @@ There are three types of OSBA fields:
 * Optional fields which you can but do not have to define
 * Conventions which are proposed fields that can be passed in the **metadata** object
 
-The Service Catalog is OSBA-compliant, which means that you can register a Service Class that has only the mandatory fields.
-However, it is recommended to provide more detailed Service Class definitions for better user experience.
+The Service Catalog is OSBA-compliant, which means that you can register a ServiceClass that has only the mandatory fields.
+However, it is recommended to provide more detailed ServiceClass definitions for better user experience.
 
 In the Kyma Console UI, there are two types of views:
 - Catalog view

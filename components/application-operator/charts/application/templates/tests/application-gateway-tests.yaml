@@ -4,7 +4,7 @@ kind: Pod
 metadata:
   name: {{.Release.Name }}-application-gateway-tests
   annotations:
-    helm.sh/hook: test-success
+    helm.sh/hook: test
     sidecar.istio.io/inject: "false"
   labels:
     helm-chart-test: "true"

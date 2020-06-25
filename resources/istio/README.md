@@ -123,9 +123,9 @@ The chart deploys pods that consume minimum resources as specified in the resour
 
 The installation of Istio ships with reasonable defaults. There may be circumstances in which defaults require overrides.
 
-Istio offers an Istio Control Plane CR, which is used to configure the installation. The currently exposed options can be found [here](https://istio.io/pt-br/docs/reference/config/istio.operator.v1alpha12.pb/). Provide the whole configuration as an [override](https://kyma-project.io/docs/#configuration-helm-overrides-for-kyma-installation).
+Istio offers an Istio Control Plane CR, which is used to configure the installation. The currently exposed options can be found [here](https://istio.io/latest/docs/reference/config/istio.operator.v1alpha1/#IstioOperatorSpec). Provide the whole configuration as an [override](https://kyma-project.io/docs/#configuration-helm-overrides-for-kyma-installation).
 
-Some options still can be provided by overriding Helm values. However, it is not recommended. The currently exposed options can be found [here](https://istio.io/pt-br/docs/reference/config/installation-options/). Use `--set key=value` argument during the `helm install` command to do so, or add them to the overrides Config Map. Multiple `--set` operations may be used in the same Helm operation.
+Some options still can be provided by overriding Helm values. However, it is not recommended. Use `--set key=value` argument during the `helm install` command to do so, or add them to the overrides Config Map. Multiple `--set` operations may be used in the same Helm operation.
 
 ## Uninstalling the Chart
 

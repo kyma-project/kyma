@@ -21,7 +21,7 @@ type Scenario struct {
 func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 	pflag.StringVar(&s.Domain, "domain", "kyma.local", "domain")
 	pflag.StringVar(&s.TestID, "testID", "external-solution-test", "domain")
-	pflag.BoolVar(&s.SkipSSLVerify, "SkipSSLVerify", false, "Skip verification of service SSL certificates")
+	pflag.BoolVar(&s.SkipSSLVerify, "skipSSLVerify", false, "Skip verification of service SSL certificates")
 	pflag.StringVar(&s.ApplicationTenant, "applicationTenant", "", "Application CR Tenant")
 	pflag.StringVar(&s.ApplicationGroup, "applicationGroup", "", "Application CR Group")
 	pflag.StringVar(&s.TestServiceImage, "testServiceImage", "eu.gcr.io/kyma-project/event-subscriber-tools:PR-8483", "TestServiceImage")

@@ -70,19 +70,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: service-catalog-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: service-catalog
-    kyma-project.io/installation: ""
-data:
-  etcd-stateful.etcd.resources.limits.memory: 256Mi
-  etcd-stateful.replicaCount: "1"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: helm-broker-overrides
   namespace: kyma-installer
   labels:
@@ -212,3 +199,25 @@ data:
   containers.manager.envs.buildLimitsMemory.value: "400Mi"
   # TODO: Solve a problem with DNS
   tests.enabled: "false"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: knative-serving-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: knative-serving
+    kyma-project.io/installation: ""
+data:
+  networking_istio.resources.requests.cpu: "10m"
+  networking_istio.resources.requests.memory: "100Mi"
+  activator.resources.requests.cpu: "100m"
+  activator.resources.requests.memory: "100Mi"
+  autoscaler.resources.requests.cpu: "10m"
+  autoscaler.resources.requests.memory: "100Mi"
+  autoscaler_hpa.resources.requests.cpu: "10m"
+  autoscaler_hpa.resources.requests.memory: "100Mi"
+  controller.resources.requests.cpu: "30m"
+  controller.resources.requests.memory: "100Mi"

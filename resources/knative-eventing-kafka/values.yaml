@@ -61,6 +61,6 @@ controller:
   cpuLimit: 100m
 
 test:
-  dir:
-  version: 4d20063e
+  dir: ''
+  version: PR-8874
   enabled: true

@@ -38,6 +38,8 @@ spec:
             - "{{ .Values.global.oauth2.host }}.{{ .Values.global.ingress.domainName }}"
       {{ end }}
       serviceAccountName: {{ template "fullname" . }}
+      nodeSelector: 
+        {{- toYaml .Values.deployment.nodeSelector | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.provisioner.dir }}compass-provisioner:{{ .Values.global.images.provisioner.version }}

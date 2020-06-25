@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"k8s.io/helm/pkg/proto/hapi/release"
+	"helm.sh/helm/v3/pkg/release"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	mocks2 "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/gateway/mocks"
@@ -38,7 +38,7 @@ func TestServiceInstanceReconciler_Reconcile(t *testing.T) {
 	t.Run("should deploy Gateway when first Service Instance is created in namespace", func(t *testing.T) {
 		//given
 		gatewayDeployer := &mocks2.GatewayManager{}
-		gatewayDeployer.On("GatewayExists", namespace).Return(false, release.Status_UNKNOWN, nil)
+		gatewayDeployer.On("GatewayExists", namespace).Return(false, release.StatusUnknown, nil)
 		gatewayDeployer.On("InstallGateway", namespace).Return(nil)
 
 		amClient := &mocks.ServiceInstanceManagerClient{}
@@ -93,7 +93,7 @@ func TestServiceInstanceReconciler_Reconcile(t *testing.T) {
 	t.Run("should not deploy Gateway when second Service Instance is created in namespace and Gateway already exists", func(t *testing.T) {
 		//given
 		gatewayDeployer := &mocks2.GatewayManager{}
-		gatewayDeployer.On("GatewayExists", namespace).Return(true, release.Status_DEPLOYED, nil)
+		gatewayDeployer.On("GatewayExists", namespace).Return(true, release.StatusDeployed, nil)
 
 		amClient := &mocks.ServiceInstanceManagerClient{}
 

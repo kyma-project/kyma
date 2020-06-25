@@ -7,14 +7,36 @@ fullnameOverride: "serverless"
 injectCerts:
   image:
     repository: 'eu.gcr.io/kyma-project/test-infra/alpine-kubectl'
-    tag: 'v20200507-070ff576'
+    tag: 'v20200617-32c1f3ff'
+    pullPolicy: IfNotPresent
+
+knativeMigration:
+  image:
+    repository: 'eu.gcr.io/kyma-project/test-infra/alpine-kubectl'
+    tag: 'v20200617-32c1f3ff'
     pullPolicy: IfNotPresent
 
 tests:
   enabled: true
+  long:
+    initTimeout: 120s
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 100m
+      limits:
+        memory: 256Mi
+        cpu: 200m
+    image:
+      repository: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl"
+      tag: "v20200617-32c1f3ff"
+      pullPolicy: IfNotPresent
+    namespace: "long-running-function-test"
+    name: longrun
+
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-8651"
+    tag: "7dd25b42"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -39,14 +61,6 @@ global:
     app.kubernetes.io/managed-by: "{{ .Release.Service }}"
     app.kubernetes.io/version: "{{ .Values.images.manager.tag }}"
     helm.sh/chart: "{{ include \"chart\" . }}"
-  commonMatchLabels:
-    app: "{{ template \"name\" . }}"
-    version: "21757b11"
-    app.kubernetes.io/name: "{{ template \"name\" . }}"
-    app.kubernetes.io/instance: "{{ .Release.Name }}"
-    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
-    app.kubernetes.io/version: "21757b11"
-    helm.sh/chart: "{{ include \"chart\" . }}"
   dockerServicePort: 5000
   ingress:
     domainName:
@@ -54,11 +68,11 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-8744"
+    tag: "1cc47db6"
     pullPolicy: IfNotPresent
   functionRuntimeNodejs12:
     repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-    tag: "a62f4a7f"
+    tag: "1cc47db6"
 
 deployment:
   replicas: 1
@@ -78,7 +92,7 @@ containers:
     resources:
       limits:
         cpu: 100m
-        memory: 64Mi
+        memory: 126Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
       requests:
         cpu: 10m
         memory: 32Mi

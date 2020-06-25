@@ -20,8 +20,8 @@ metadata:
   name: my-test-function
 spec:
   env:
-  - name: PERSON_NAME
-    value: "John"
+    - name: PERSON_NAME
+      value: "John"
   deps: |
     {
       "name": "hellowithdeps",
@@ -42,7 +42,7 @@ spec:
       memory: 1Gi
     requests:
       cpu: 500m
-      memory: 500Mi  
+      memory: 500Mi
   source: |
     module.exports = {
       main: function(event, context) {
@@ -53,8 +53,8 @@ spec:
   status:
     conditions:
       - lastTransitionTime: "2020-04-14T08:17:11Z"
-        message: "Function my-test-function is ready"
-        reason: ServiceReady
+        message: "Deployment my-test-function-nxjdp is ready"
+        reason: DeploymentReady
         status: "True"
         type: Running
       - lastTransitionTime: "2020-04-14T08:16:55Z"
@@ -75,57 +75,64 @@ spec:
 
 This table lists all the possible properties of a given resource together with their descriptions:
 
-| Property | Required | Description |
-|----------|:---------:|-------------|
-| **metadata.name** | Yes | Specifies the name of the CR. |
-| **metadata.namespace** | No | Defines the Namespace in which the CR is available. It is set to `default` unless you specify otherwise. |
-| **spec.env** | No | Specifies environment variables you need to export for the Function. |
-| **spec.deps** | No | Specifies the Function's dependencies. |
-| **spec.labels** | No | Specifies the Function's Pod labels. |
-| **spec.minReplicas** | No | Defines the minimum number of Function's Pods to run at a time. |
-| **spec.maxReplicas** | No | Defines the maximum number of Function's Pods to run at a time. |
-| **spec.resources.limits.cpu** | No | Defines the maximum number of CPUs available for the Function's Pod to use. |
-| **spec.resources.limits.memory** | No | Defines the maximum amount of memory available for the Function's Pod to use. |
-| **spec.resources.requests.cpu** | No |  Specifies the number of CPUs requested by the Function's Pod to operate. |
-| **spec.resources.requests.memory** | No |  Specifies the amount of memory requested by the Function's Pod to operate. |
-| **spec.source** | Yes | Provides the Function's source code. |
-| **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the Function's condition status changed from one to another. |
-| **status.conditions.message** | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.  |
-| **status.conditions.reason** | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. All status reasons are in camelCase. |
-| **status.conditions.status** | Not applicable | Describes the status of processing the Function CR by the Function Controller. It can be `True` for success, `False` for failure, or `Unknown` if the CR processing is still in progress. If the status of all conditions is `True`, the overall status of the Function CR is ready. |
-| **status.conditions.type** | Not applicable | Describes a substage of the Function CR processing. There are three condition types that a Function has to meet to be ready: `ConfigurationReady`, `BuildReady`, and `Running`. When displaying the Function status in the terminal, these types are shown under `CONFIGURED`, `BUILT`, and `RUNNING` columns respectively. All condition types can change asynchronously depending on the type of Function modification, but all three need to be in the `True` status for the Function to be considered successfully processed. |
+| Property                                 |    Required    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ---------------------------------------- | :------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **metadata.name**                        |      Yes       | Specifies the name of the CR.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **metadata.namespace**                   |       No       | Defines the Namespace in which the CR is available. It is set to `default` unless you specify otherwise.                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **spec.env**                             |       No       | Specifies environment variables you need to export for the Function.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **spec.deps**                            |       No       | Specifies the Function's dependencies.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **spec.labels**                          |       No       | Specifies the Function's Pod labels.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **spec.minReplicas**                     |       No       | Defines the minimum number of Function's Pods to run at a time.                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **spec.maxReplicas**                     |       No       | Defines the maximum number of Function's Pods to run at a time.                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **spec.resources.limits.cpu**            |       No       | Defines the maximum number of CPUs available for the Function's Pod to use.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **spec.resources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Function's Pod to use.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **spec.resources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the Function's Pod to operate.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **spec.resources.requests.memory**       |       No       | Specifies the amount of memory requested by the Function's Pod to operate.                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **spec.source**                          |      Yes       | Provides the Function's source code.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the Function's condition status changed from one to another.                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **status.conditions.message**            | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **status.conditions.reason**             | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. All status reasons are in camelCase.                                                                                                                                                                                                                                                                                                   |
+| **status.conditions.status**             | Not applicable | Describes the status of processing the Function CR by the Function Controller. It can be `True` for success, `False` for failure, or `Unknown` if the CR processing is still in progress. If the status of all conditions is `True`, the overall status of the Function CR is ready.                                                                                                                                                                                                                                              |
+| **status.conditions.type**               | Not applicable | Describes a substage of the Function CR processing. There are three condition types that a Function has to meet to be ready: `ConfigurationReady`, `BuildReady`, and `Running`. When displaying the Function status in the terminal, these types are shown under `CONFIGURED`, `BUILT`, and `RUNNING` columns respectively. All condition types can change asynchronously depending on the type of Function modification, but all three need to be in the `True` status for the Function to be considered successfully processed. |
 
 ### Status reasons
 
 Processing of a Function CR can succeed, continue, or fail for one of these reasons:
 
-| Reason | Type | Description |
-| --------- | ------------- | ----------- |----------- |
-| `ConfigMapCreated` | `ConfigurationReady` | A new ConfigMap was created based on the Function CR definition. |
-| `ConfigMapUpdated` | `ConfigurationReady` | The existing ConfigMap was updated after changes in the Function CR name, its source code or dependencies. |
-| `ConfigMapError` | `ConfigurationReady` | The ConfigMap could not be created or updated due to an error. |
-| `JobFailed` | `BuildReady` | The image with the Function's configuration could not be created due to an error. |
-| `JobCreated` | `BuildReady` | The Kubernetes Job resource that builds the Function image was created. |
-| `JobRunning` | `BuildReady` | The Job is in progress.  |
-| `JobsDeleted` | `BuildReady` | Previous Jobs responsible for building Function images were deleted. |
-| `JobFinished` | `BuildReady` | The Job was finished and the Function's image was uploaded to the Docker Registry. |
-| `ServiceCreated` | `Running` | A new KService referencing the Function's image was created. |
-| `ServiceUpdated` | `Running` | The existing KService was updated after such changes as the Function's image, scaling parameters, variables, or labels. |
-| `ServiceFailed` | `Running` | The Function's Pod crashed or could not start due to an error. |
-| `ServiceWaiting` | `Running` | Creation or update of the KService is in progress. |
-| `ServiceReady` | `Running` | The Function was deployed in the Namespace. |
+| Reason                           | Type                 | Description                                                                                                        |
+| -------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `ConfigMapCreated`               | `ConfigurationReady` | A new ConfigMap was created based on the Function CR definition.                                                   |
+| `ConfigMapUpdated`               | `ConfigurationReady` | The existing ConfigMap was updated after changes in the Function CR name, its source code or dependencies.         |
+| `JobFailed`                      | `BuildReady`         | The image with the Function's configuration could not be created due to an error.                                  |
+| `JobCreated`                     | `BuildReady`         | The Kubernetes Job resource that builds the Function image was created.                                            |
+| `JobUpdated`                     | `BuildReady`         | The existing Job was updated after changing the Function's metadata or spec fields that do not affect the way of building the Function image, such as labels. |
+| `JobRunning`                     | `BuildReady`         | The Job is in progress.                                                                                            |
+| `JobsDeleted`                    | `BuildReady`         | Previous Jobs responsible for building Function images were deleted.                                               |
+| `JobFinished`                    | `BuildReady`         | The Job was finished and the Function's image was uploaded to the Docker Registry.                                 |
+| `DeploymentCreated`              | `Running`            | A new Deployment referencing the Function's image was created.                                                     |
+| `DeploymentUpdated`              | `Running`            | The existing Deployment was updated after changing the Function's image, scaling parameters, variables, or labels. |
+| `DeploymentFailed`               | `Running`            | The Function's Pod crashed or could not start due to an error.                                                     |
+| `DeploymentWaiting`              | `Running`            | The Function was deployed and is waiting for the Deployment to be ready.                                           |
+| `DeploymentReady`                | `Running`            | The Function was deployed and is ready.                                                                            |
+| `ServiceCreated`                 | `Running`            | A new Service referencing the Function's Deployment was created.                                                   |
+| `ServiceUpdated`                 | `Running`            | The existing Service was updated after applying required changes.                                                  |
+| `HorizontalPodAutoscalerCreated` | `Running`            | A new HorizontalPodScaler referencing the Function's Deployment was created.                                       |
+| `HorizontalPodAutoscalerUpdated` | `Running`            | The existing HorizontalPodScaler was updated after applying required changes.                                      |
 
 ## Related resources and components
 
-The Function custom resource relies on these Kubernetes and [Knative Serving](https://knative.dev/docs/serving/) resources:
+The Function custom resource relies on these Kubernetes resources:
 
-| Resource | Description |
-|----------|-------------|
-|[KService CR](https://github.com/knative/docs/blob/master/docs/serving/spec/knative-api-specification-1.0.md#service) | Orchestrates the deployment and availability of the Function.|
-|[Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) | Builds an image with the Function code on a runtime. |
+| Resource                                                                                              | Description                                                                           |
+| ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/)                             | Stores the Function's source code and dependencies.                                   |
+| [Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/)              | Builds an image with the Function's code in a runtime.                                |
+| [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)                   | Serves the Function's image as a microservice.                                        |
+| [Service](https://kubernetes.io/docs/concepts/services-networking/service/)                           | Exposes the Function's Deployment as a network service inside the Kubernetes cluster. |
+| [HorizontalPodAutoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) | Automatically scales the number of Function's Pods.                                   |
 
 These components use this CR:
 
-| Component   |   Description |
-|-------------|---------------|
-| Function Controller |  Uses the Function CR for the detailed Function definition, including the environment on which it should run. |
+| Component           | Description                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Function Controller | Uses the Function CR for the detailed Function definition, including the environment on which it should run. |

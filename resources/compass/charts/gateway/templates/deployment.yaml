@@ -20,6 +20,8 @@ spec:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
     spec:
+      nodeSelector: 
+        {{- toYaml .Values.deployment.nodeSelector | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.gateway.dir }}compass-gateway:{{ .Values.global.images.gateway.version }}

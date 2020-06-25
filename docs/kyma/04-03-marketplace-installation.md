@@ -29,4 +29,4 @@ Follow these steps to quickly install Kyma through the GCP Marketplace:
 
 8. Access the cluster using the link and login details provided in the **Kyma info** section on the **Application details** page.
 
-   >**TIP:** Watch [this](https://www.youtube.com/watch?v=hxVhQqI1B5A) video for a walkthrough of the installation process.
+   >**TIP:** Watch the [video](https://www.youtube.com/watch?v=hxVhQqI1B5A) for a walkthrough of the installation process.

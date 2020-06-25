@@ -25,12 +25,12 @@ If the installation is successful but a component does not behave in the expecte
 
 Run this command to list all of the available Helm releases:
 ```
-helm list --tls
+helm list --all-namespaces --all
 ```
 
 Run this command to get more detailed information about a given release:
 ```
-helm status {RELEASE_NAME} --tls
+helm status {RELEASE_NAME} -n {RELEASE_NAMESPACE}
 ```
 >**NOTE:** Names of Helm releases correspond to names of Kyma components.
 
@@ -53,4 +53,4 @@ minikube ssh -- docker run -i --rm --privileged --pid=host debian nsenter -t 1 -
 ## Errors after restarting Kyma on Minikube
 
 If you restart Kyma using unauthorized methods, such as triggering the installation when a Minikube cluster with Kyma is already running, the cluster might become unresponsive which can be fixed by reinstalling Kyma.
-To prevent such behavior, stop and restart Kyma using only the method described [here](#installation-install-kyma-locally-stop-and-restart-kyma-without-reinstalling).
+To prevent such behavior, [stop and restart Kyma](#installation-install-kyma-locally-stop-and-restart-kyma-without-reinstalling) using only the method described.

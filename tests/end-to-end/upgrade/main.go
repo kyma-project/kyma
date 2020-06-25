@@ -32,16 +32,17 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
 	dex "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/fetch-dex-token"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/injector"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/ui"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/waiter"
+
+	//"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/logging"
 	apigateway "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-gateway"
 	applicationoperator "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/application-operator"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh"
-
-	//"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/logging"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/rafter"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/serverless"
 	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/ui"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/waiter"
 )
 
 // Config holds application configuration
@@ -55,6 +56,7 @@ type Config struct {
 	TestingAddonsURL       string
 	WorkingNamespace       string `envconfig:"default=e2e-upgrade-test"`
 	TestsInfoConfigMapName string `envconfig:"default=upgrade-tests-info"`
+	EventSubscriberImage   string
 }
 
 const (
@@ -145,7 +147,8 @@ func main() {
 		"ApiGatewayUpgradeTest":           apigateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
 		"ApplicationOperatorUpgradeTest":  applicationoperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
-		"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli),
+		"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli, cfg.EventSubscriberImage),
+		"ServerlessUpgradeTest":           serverless.New(dynamicCli),
 		//"LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
 	}
 	tRegistry, err := runner.NewConfigMapTestRegistry(k8sCli, cfg.WorkingNamespace, cfg.TestsInfoConfigMapName)

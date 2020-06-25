@@ -10,25 +10,15 @@ import (
 
 const (
 	namespaceEnvName               = "NAMESPACE"
-	tillerHostEnvName              = "TILLER_HOST"
-	helmTLSKeyFileEnvName          = "HELM_TLS_KEY_FILE"
-	helmTLSCertificateFileEnvName  = "HELM_TLS_CERTIFICATE_FILE"
-	tillerTLSSkipVerifyEnvName     = "TILLER_TLS_SKIP_VERIFY"
+	helmDriverEnvName              = "HELM_DRIVER"
 	gatewayOncePerNamespaceEnvName = "GATEWAY_DEPLOYED_PER_NAMESPACE"
-
-	installationTimeoutEnvName = "INSTALLATION_TIMEOUT_SECONDS"
-
-	defaultHelmTLSKeyFile         = "/etc/certs/tls.key"
-	defaultHelmTLSCertificateFile = "/etc/certs/tls.crt"
-	defaultInstallationTimeout    = 180
+	installationTimeoutEnvName     = "INSTALLATION_TIMEOUT_SECONDS"
+	defaultInstallationTimeout     = 180
 )
 
 type TestConfig struct {
 	Namespace                  string
-	TillerHost                 string
-	TillerTLSKeyFile           string
-	TillerTLSCertificateFile   string
-	TillerTLSSkipVerify        bool
+	HelmDriver                 string
 	InstallationTimeoutSeconds int
 	GatewayOncePerNamespace    bool
 }
@@ -39,31 +29,13 @@ func ReadConfig() (TestConfig, error) {
 		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", namespaceEnvName))
 	}
 
-	tillerHost, found := os.LookupEnv(tillerHostEnvName)
+	helmDriver, found := os.LookupEnv(helmDriverEnvName)
 	if !found {
-		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", tillerHostEnvName))
-	}
-
-	helmTLSKeyFile, found := os.LookupEnv(helmTLSKeyFileEnvName)
-	if !found {
-		log.Printf("failed to read %s environment variable, using default value %s", helmTLSKeyFileEnvName, defaultHelmTLSKeyFile)
-		helmTLSKeyFile = defaultHelmTLSKeyFile
-	}
-
-	helmTLSCertificateFile, found := os.LookupEnv(helmTLSCertificateFileEnvName)
-	if !found {
-		log.Printf("failed to read %s environment variable, using default value %s", helmTLSCertificateFileEnvName, defaultHelmTLSCertificateFile)
-		helmTLSCertificateFile = defaultHelmTLSCertificateFile
-	}
-
-	tillerTLSSkipVerify := true
-	sv, found := os.LookupEnv(tillerTLSSkipVerifyEnvName)
-	if found {
-		tillerTLSSkipVerify, _ = strconv.ParseBool(sv)
+		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", helmDriverEnvName))
 	}
 
 	gatewayOncePerNamespace := false
-	sv, found = os.LookupEnv(gatewayOncePerNamespaceEnvName)
+	sv, found := os.LookupEnv(gatewayOncePerNamespaceEnvName)
 	if found {
 		gatewayOncePerNamespace, _ = strconv.ParseBool(sv)
 	}
@@ -82,10 +54,7 @@ func ReadConfig() (TestConfig, error) {
 
 	config := TestConfig{
 		Namespace:                  namespace,
-		TillerHost:                 tillerHost,
-		TillerTLSKeyFile:           helmTLSKeyFile,
-		TillerTLSCertificateFile:   helmTLSCertificateFile,
-		TillerTLSSkipVerify:        tillerTLSSkipVerify,
+		HelmDriver:                 helmDriver,
 		InstallationTimeoutSeconds: timeoutValue,
 		GatewayOncePerNamespace:    gatewayOncePerNamespace,
 	}

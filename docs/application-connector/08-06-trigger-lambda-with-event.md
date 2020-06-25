@@ -23,7 +23,7 @@ To create a simple Function and trigger it with an event, you must first registe
 
 2. Register a service with events in the desired Application. Use the example AsyncAPI specification.
 
-   > **NOTE:** See [this](#tutorials-register-a-service) tutorial to learn how to register a service.
+   > **NOTE:** See the [tutorial](#tutorials-register-a-service) to learn how to register a service.
 
    ```json
    {

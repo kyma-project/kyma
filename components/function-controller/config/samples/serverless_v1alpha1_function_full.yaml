@@ -1,0 +1,20 @@
+apiVersion: serverless.kyma-project.io/v1alpha1
+kind: Function
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: function-webhook-defaults
+spec:
+  labels:
+    podLabel1: data1
+  source: |
+    module.exports = {
+        main: function(event, context) {
+          return 'Hello World'
+        }
+      }
+  minReplicas: 1
+  maxReplicas: 2
+  env:
+    - name: "DATA"
+      value: "123"

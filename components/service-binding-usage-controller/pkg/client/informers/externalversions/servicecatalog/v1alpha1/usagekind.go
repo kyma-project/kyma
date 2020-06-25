@@ -3,6 +3,7 @@
 package v1alpha1
 
 import (
+	"context"
 	time "time"
 
 	servicecatalogv1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
@@ -44,13 +45,13 @@ func NewFilteredUsageKindInformer(client versioned.Interface, resyncPeriod time.
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ServicecatalogV1alpha1().UsageKinds().List(options)
+				return client.ServicecatalogV1alpha1().UsageKinds().List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ServicecatalogV1alpha1().UsageKinds().Watch(options)
+				return client.ServicecatalogV1alpha1().UsageKinds().Watch(context.TODO(), options)
 			},
 		},
 		&servicecatalogv1alpha1.UsageKind{},

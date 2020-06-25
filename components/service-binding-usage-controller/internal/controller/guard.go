@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"time"
 
 	sbuClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
@@ -103,7 +104,7 @@ func (g *guard) Process() {
 			continue
 		}
 
-		sbuItem, err := g.client.ServiceBindingUsages(namespace).Get(name, v1.GetOptions{})
+		sbuItem, err := g.client.ServiceBindingUsages(namespace).Get(context.TODO(), name, v1.GetOptions{})
 		if err != nil {
 			g.log.Errorf("Cannot get ServiceBindingUsage %s/%s inside guard, got error: %v", namespace, name, err)
 			continue
@@ -121,7 +122,7 @@ func (g *guard) Process() {
 			g.log.Infof("Guard updates ServiceBindingUsage %s/%s (UsageKind %s: %q not exist)", namespace, name, sbuItem.Spec.UsedBy.Kind, sbuItem.Spec.UsedBy.Name)
 			toUpdate := sbuItem.DeepCopy()
 			toUpdate.Spec.ReprocessRequest = sbuItem.Spec.ReprocessRequest + 1
-			_, err = g.client.ServiceBindingUsages(toUpdate.Namespace).Update(toUpdate)
+			_, err = g.client.ServiceBindingUsages(toUpdate.Namespace).Update(context.TODO(), toUpdate, v1.UpdateOptions{})
 			if err != nil {
 				g.log.Errorf("Guard cannot update ServiceBindingUsage for %s/%s key: %q", namespace, name, err)
 			}

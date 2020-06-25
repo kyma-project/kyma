@@ -1,30 +1,45 @@
+
+networking_istio:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1000m
+      memory: 1000Mi
+activator:
+  resources:
+    requests:
+      cpu: 300m
+      memory: 60Mi
+    limits:
+      cpu: 1000m
+      memory: 600Mi
+autoscaler:
+  resources:
+    requests:
+      cpu: 30m
+      memory: 40Mi
+    limits:
+      cpu: 300m
+      memory: 400Mi
+autoscaler_hpa:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1000m
+      memory: 1000Mi
+controller:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1000m
+      memory: 1000Mi
 knative_serving:
-  minikube:
-    networking_istio:
-      resources:
-        requests:
-          cpu: 10m
-          memory: 100Mi
-    activator:
-      resources:
-        requests:
-          cpu: 100m
-          memory: 100Mi
-    autoscaler:
-      resources:
-        requests:
-          cpu: 10m
-          memory: 100Mi
-    autoscaler_hpa:
-      resources:
-        requests:
-          cpu: 10m
-          memory: 100Mi
-    controller:
-      resources:
-        requests:
-          cpu: 30m
-          memory: 100Mi
   podmonitor:
     enabled: false
     labels:
@@ -42,7 +57,7 @@ global:
     path: eu.gcr.io/kyma-project
   test_knative_serving_acceptance:
     dir: 
-    version: "PR-8732"
+    version: "7dd25b42"
   ingress:
     domainName:
 

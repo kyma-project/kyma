@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}-controller-manager
+  name: {{ template "fullname" . }}-ctrl-mngr
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
@@ -15,7 +15,9 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "tplValue" ( dict "value" .Values.global.commonMatchLabels "context" . ) | nindent 6 }}
+      app: {{ template "name" . }}
+      app.kubernetes.io/name: {{ template "name" . }}
+      app.kubernetes.io/instance: "{{ .Release.Name }}"
   replicas: {{ .Values.deployment.replicas }}
   {{- if .Values.deployment.extraProperties }}
   {{ include "tplValue" ( dict "value" .Values.deployment.extraProperties "context" . ) | nindent 2 }}
@@ -23,7 +25,9 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "tplValue" ( dict "value" .Values.global.commonMatchLabels "context" . ) | nindent 8 }}
+        app: {{ template "name" . }}
+        app.kubernetes.io/name: {{ template "name" . }}
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
       {{- if .Values.pod.labels }}
         {{ include "tplValue" ( dict "value" .Values.pod.labels "context" . ) | nindent 8 }}
       {{- end }}
