@@ -1,7 +1,7 @@
 apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
-  tag: {{ .Chart.AppVersion }}-distroless
+  #  tag: 1.4.7-distroless
   autoInjection:
     components:
       injector:
@@ -20,9 +20,6 @@ spec:
           tolerations: []
     enabled: true
   cni:
-    components:
-      cni:
-        enabled: false
     enabled: false
   configManagement:
     components:
@@ -80,10 +77,6 @@ spec:
             - kind: Deployment
               name: istio-ingressgateway
               patches:
-                - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:80].hostPort
-                  value: 80
-                - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:443].hostPort
-                  value: 443
   policy:
     components:
       policy:
@@ -104,8 +97,6 @@ spec:
     enabled: true
   security:
     components:
-      certManager:
-        enabled: false
       citadel:
         enabled: true
         k8s:
@@ -286,3 +277,4 @@ spec:
       rewriteAppHTTPProbe: true
     tracing:
       enabled: false
+

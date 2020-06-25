@@ -1,6 +1,6 @@
 #!/bin/bash -e
 if [ -f "/etc/istio/overrides.yaml" ]; then
-  #New way: just merge default IstioControlPlane definition with a user-provided one.
+  echo "New way: just merge default IstioControlPlane definition with a user-provided one."
   yq merge -a -x /etc/istio/config.yaml /etc/istio/overrides.yaml > /etc/combo.yaml
   kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}" \
     --from-file /etc/istio/config.yaml \
@@ -10,7 +10,7 @@ if [ -f "/etc/istio/overrides.yaml" ]; then
   printf "istioctl manifest apply -f /etc/combo.yaml\n"
   istioctl manifest apply -f /etc/combo.yaml
 else
-  #Old way: apply single-value Helm overrides using `istioctl --set "key=val"`
+  echo 'Old way: apply single-value Helm overrides using `istioctl --set "key=val"`'
   overrides=$(kubectl get cm --all-namespaces -l "installer=overrides,component=istio" -o go-template --template='{{ range .items }}{{ range $key, $value := .data }}{{ if ne $key "kyma_istio_control_plane" }}{{ printf "%s: %s\n" $key . }}{{ end }}{{ end }}{{ end }}' )
   overrides_transformed=""
 
@@ -57,8 +57,17 @@ else
     done <<< "$overrides"
   fi
 
+  printf "\n=== print original configuration ===============================================\n"
+  istioctl version
   printf "istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}\n"
-  istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}
+  printf "\n=== print IstioOperator configuration ==========================================\n"
+  cat /etc/istio/istioOperator-draft.yaml
+  printf "\n=== generate new configuration =================================================\n"
+  echo istioctl manifest generate -f /etc/istio/istioOperator-draft.yaml --set "values.mixer.telemetry.loadshedding.mode=disabled" --set "values.mixer.policy.autoscaleEnabled=false" --set "components.policy.k8s.resources.limits.cpu=500m" --set "components.policy.k8s.resources.limits.memory=2048Mi" --set "components.policy.k8s.resources.requests.cpu=300m" --set "components.policy.k8s.resources.requests.memory=512Mi" --set "values.mixer.telemetry.autoscaleEnabled=false" --set "components.telemetry.k8s.resources.limits.cpu=500m" --set "components.telemetry.k8s.resources.limits.memory=2048Mi" --set "components.telemetry.k8s.resources.requests.cpu=300m" --set "components.telemetry.k8s.resources.requests.memory=512Mi" --set "values.pilot.autoscaleEnabled=false" --set "components.pilot.k8s.resources.limits.cpu=500m" --set "components.pilot.k8s.resources.limits.memory=1024Mi" --set "components.pilot.k8s.resources.requests.cpu=250m" --set "components.pilot.k8s.resources.requests.memory=512Mi"
+  istioctl manifest generate -f /etc/istio/istioOperator-draft.yaml --set "values.mixer.telemetry.loadshedding.mode=disabled" --set "values.mixer.policy.autoscaleEnabled=false" --set "components.policy.k8s.resources.limits.cpu=500m" --set "components.policy.k8s.resources.limits.memory=2048Mi" --set "components.policy.k8s.resources.requests.cpu=300m" --set "components.policy.k8s.resources.requests.memory=512Mi" --set "values.mixer.telemetry.autoscaleEnabled=false" --set "components.telemetry.k8s.resources.limits.cpu=500m" --set "components.telemetry.k8s.resources.limits.memory=2048Mi" --set "components.telemetry.k8s.resources.requests.cpu=300m" --set "components.telemetry.k8s.resources.requests.memory=512Mi" --set "values.pilot.autoscaleEnabled=false" --set "components.pilot.k8s.resources.limits.cpu=500m" --set "components.pilot.k8s.resources.limits.memory=1024Mi" --set "components.pilot.k8s.resources.requests.cpu=250m" --set "components.pilot.k8s.resources.requests.memory=512Mi" > padu.yaml
+  cat padu.yaml
+  printf "\n=== apply new configuration ====================================================\n"
+  kubectl apply -f padu.yaml
 fi
 
 while [ "$(kubectl get po -n istio-system -l app=sidecarInjectorWebhook -o jsonpath='{ .items[0].status.phase}')" != "Running" ]

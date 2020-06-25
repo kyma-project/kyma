@@ -9,5 +9,5 @@ kyma:
 
 istio:
   installer:
-    image: eu.gcr.io/kyma-project/istio-installer
-    tag: d022112f
+    image: tsmsap/istio-installer
+    tag: v24-h10-03
