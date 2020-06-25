@@ -1,4 +1,5 @@
 # in case of changes please test this on GKE, Azure and Gardener
+{{- if .Values.dockerRegistry.enableInternal }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -51,3 +52,4 @@ data:
     cat "${CERT_FILE}" > "${DIR}/ca.crt"
     echo "Done."
     exit 0
+{{- end }}
