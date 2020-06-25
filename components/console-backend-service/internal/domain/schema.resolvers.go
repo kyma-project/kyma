@@ -5,7 +5,6 @@ package domain
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
@@ -155,11 +154,11 @@ func (r *mutationResolver) AddAddonsConfigurationRepository(ctx context.Context,
 }
 
 func (r *mutationResolver) RemoveAddonsConfigurationRepository(ctx context.Context, name string, namespace string, urls []string) (*gqlschema.AddonsConfiguration, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.sca.Resolver.RemoveAddonsConfigurationRepositories(ctx, name, namespace, urls)
 }
 
 func (r *mutationResolver) ResyncAddonsConfiguration(ctx context.Context, name string, namespace string) (*gqlschema.AddonsConfiguration, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.sca.Resolver.ResyncAddonsConfiguration(ctx, name, namespace)
 }
 
 func (r *mutationResolver) CreateApplication(ctx context.Context, name string, description *string, labels gqlschema.Labels) (*gqlschema.ApplicationMutationOutput, error) {
@@ -431,11 +430,11 @@ func (r *queryResolver) ResourceQuotasStatus(ctx context.Context, namespace stri
 }
 
 func (r *queryResolver) EventActivations(ctx context.Context, namespace string) ([]*gqlschema.EventActivation, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.app.Resolver.EventActivationsQuery(ctx, namespace)
 }
 
 func (r *queryResolver) LimitRanges(ctx context.Context, namespace string) ([]*gqlschema.LimitRange, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.k8s.LimitRangesQuery(ctx, namespace)
 }
 
 func (r *queryResolver) BackendModules(ctx context.Context) ([]*gqlschema.BackendModule, error) {

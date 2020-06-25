@@ -36,13 +36,13 @@ type Resolver struct {
 	ui  *ui.Resolver
 	k8s *k8s.Resolver
 
-	sc             *servicecatalog.PluggableContainer
-	sca            *servicecatalogaddons.PluggableContainer
-	app            *application.PluggableContainer
-	rafter         *rafter.PluggableContainer
-	ag             *apigateway.Resolver
-	serverless     *serverless.PluggableContainer
-	eventing       *eventing.PluggableContainer
+	sc         *servicecatalog.PluggableContainer
+	sca        *servicecatalogaddons.PluggableContainer
+	app        *application.PluggableContainer
+	rafter     *rafter.PluggableContainer
+	ag         *apigateway.Resolver
+	serverless *serverless.PluggableContainer
+	eventing   *eventing.PluggableContainer
 }
 
 func GetRandomNumber() time.Duration {
@@ -111,15 +111,15 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	makePluggable(eventingResolver)
 
 	return &Resolver{
-		k8s:            k8sResolver,
-		ui:             uiContainer.Resolver,
-		sc:             scContainer,
-		sca:            scaContainer,
-		app:            appContainer,
-		rafter:         rafterContainer,
-		ag:             agResolver,
-		serverless:     serverlessResolver,
-		eventing:       eventingResolver,
+		k8s:        k8sResolver,
+		ui:         uiContainer.Resolver,
+		sc:         scContainer,
+		sca:        scaContainer,
+		app:        appContainer,
+		rafter:     rafterContainer,
+		ag:         agResolver,
+		serverless: serverlessResolver,
+		eventing:   eventingResolver,
 	}, nil
 }
 
