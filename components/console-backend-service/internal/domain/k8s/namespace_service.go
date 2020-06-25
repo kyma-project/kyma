@@ -70,10 +70,6 @@ func (svc *namespaceService) Find(name string) (*v1.Namespace, error) {
 
 func (svc *namespaceService) Create(name string, labels gqlschema.Labels) (*v1.Namespace, error) {
 	namespace := v1.Namespace{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "authentication.kyma-project.io/v1alpha1",
-			Kind:       "Namespace",
-		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   name,
 			Labels: labels,

@@ -20,7 +20,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/authentication"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog"
@@ -40,7 +39,6 @@ type RootResolver struct {
 	app            *application.PluggableContainer
 	rafter         *rafter.PluggableContainer
 	ag             *apigateway.PluggableResolver
-	authentication *authentication.PluggableResolver
 	serverless     *serverless.PluggableContainer
 	eventing       *eventing.PluggableContainer
 }
@@ -109,12 +107,6 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	}
 	makePluggable(eventingResolver)
 
-	authenticationResolver, err := authentication.New(restConfig, informerResyncPeriod+GetRandomNumber())
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing authentication resolver")
-	}
-	makePluggable(authenticationResolver)
-
 	return &RootResolver{
 		k8s:            k8sResolver,
 		ui:             uiContainer.Resolver,
@@ -125,7 +117,6 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 		ag:             agResolver,
 		serverless:     serverlessResolver,
 		eventing:       eventingResolver,
-		authentication: authenticationResolver,
 	}, nil
 }
 
@@ -143,7 +134,6 @@ func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.ag.StopCacheSyncOnClose(stopCh)
 	r.eventing.StopCacheSyncOnClose(stopCh)
 	r.serverless.StopCacheSyncOnClose(stopCh)
-	r.authentication.StopCacheSyncOnClose(stopCh)
 }
 
 func (r *RootResolver) Deployment() gqlschema.DeploymentResolver {
