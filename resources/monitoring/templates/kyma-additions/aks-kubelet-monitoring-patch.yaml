@@ -25,7 +25,7 @@ data:
     metadata:
       labels:
         app: {{ template "prometheus-operator.name" . }}-kubelet
-        {{- include "prometheus-operator.labels" . | nindent 4 }}
+        {{- include "prometheus-operator.labels" . | indent 8 }}
       name: {{ template "prometheus-operator.fullname" . }}-kubelet
       namespace: {{ $.Release.Namespace }}
     spec:
