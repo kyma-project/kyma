@@ -77,6 +77,20 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 								},
 							},
 						},
+						{
+							Name: "credentials",
+							VolumeSource: corev1.VolumeSource{
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: r.config.ImageRegistryDockerConfigSecretName,
+									Items: []corev1.KeyToPath{
+										{
+											Key:  ".dockerconfigjson",
+											Path: ".docker/config.json",
+										},
+									},
+								},
+							},
+						},
 					},
 					Containers: []corev1.Container{
 						{
@@ -114,11 +128,11 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 		},
 	}
 
-	if r.config.Docker.InternalRegistryEnabled {
-		r.adjustJobForInternalRegistry(&job, imageName)
-	} else {
-		r.adjustJobForExternalRegistry(&job)
-	}
+	//if r.config.Docker.InternalRegistryEnabled {
+	//	r.adjustJobForInternalRegistry(&job, imageName)
+	//} else {
+	//	r.adjustJobForExternalRegistry(&job)
+	//}
 
 	return job
 }
