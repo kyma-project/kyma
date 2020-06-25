@@ -8,7 +8,7 @@ type Resolver struct {
 	*resource.Module
 }
 
-func New(factory *resource.ServiceFactory) *Resolver {
+func New(factory *resource.GenericServiceFactory) *Resolver {
 	module := resource.NewModule("apigateway", factory, resource.ServiceCreators{
 		apiRulesGroupVersionResource: NewService,
 	})
@@ -18,6 +18,6 @@ func New(factory *resource.ServiceFactory) *Resolver {
 	}
 }
 
-func (r *Resolver) Service() *resource.Service {
+func (r *Resolver) Service() *resource.GenericService {
 	return r.Module.Service(apiRulesGroupVersionResource)
 }

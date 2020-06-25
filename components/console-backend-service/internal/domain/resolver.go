@@ -11,7 +11,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless"
 
@@ -29,6 +28,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/rest"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 )
 
 //go:generate go run github.com/99designs/gqlgen
@@ -56,6 +56,10 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod+GetRandomNumber())
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing service factory")
+	}
+	genericServiceFactory, err := resource.NewGenericServiceFactoryForConfig(restConfig, informerResyncPeriod+GetRandomNumber())
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing generic service factory")
 	}
 
 	uiContainer, err := ui.New(restConfig, informerResyncPeriod+GetRandomNumber())
@@ -93,7 +97,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}
 
-	agResolver := apigateway.New(serviceFactory)
+	agResolver := apigateway.New(genericServiceFactory)
 	makePluggable(agResolver)
 
 	serverlessResolver, err := serverless.New(serviceFactory, serverlessCfg, scaContainer.ServiceCatalogAddonsRetriever)
