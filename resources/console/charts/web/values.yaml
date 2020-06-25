@@ -19,7 +19,7 @@ compass_mfs:
   image:
     dir: null
     pullPolicy: IfNotPresent
-    tag: e0146b08
+    tag: PR-1862
   service:
     externalPort: 8888
     internalPort: 8888
@@ -37,7 +37,7 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: 206d3dbc
+    tag: PR-1862
   service:
     externalPort: 80
     internalPort: 80
