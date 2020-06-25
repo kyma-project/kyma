@@ -251,7 +251,7 @@ func (r *FunctionReconciler) adjustJobForInternalRegistry(job *batchv1.Job, imag
 			Name:    "credential-initializer",
 			Image:   r.config.Build.CredsInitImage,
 			Command: []string{"/ko-app/creds-init"},
-			Args:    []string{fmt.Sprintf("-basic-docker=credentials=http://%s", imageName)},
+			Args:    []string{fmt.Sprintf("-basic-docker=registry-credentials=http://%s", imageName)},
 			Env: []corev1.EnvVar{
 				{Name: "HOME", Value: "/docker"},
 			},
