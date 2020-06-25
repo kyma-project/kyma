@@ -4,26 +4,10 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.4
+    controller-gen.kubebuilder.io/version: (devel)
   creationTimestamp: null
   name: functions.serverless.kyma-project.io
 spec:
-  additionalPrinterColumns:
-  - JSONPath: .status.conditions[?(@.type=='ConfigurationReady')].status
-    name: Configured
-    type: string
-  - JSONPath: .status.conditions[?(@.type=='BuildReady')].status
-    name: Built
-    type: string
-  - JSONPath: .status.conditions[?(@.type=='Running')].status
-    name: Running
-    type: string
-  - JSONPath: .metadata.generation
-    name: Version
-    type: integer
-  - JSONPath: .metadata.creationTimestamp
-    name: Age
-    type: date
   group: serverless.kyma-project.io
   names:
     kind: Function
@@ -35,6 +19,7 @@ spec:
     status: {}
   validation:
     openAPIV3Schema:
+      description: Function is the Schema for the functions API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -122,9 +107,13 @@ spec:
                               for env vars'
                             type: string
                           divisor:
+                            anyOf:
+                            - type: integer
+                            - type: string
                             description: Specifies the output format of the exposed
                               resources, defaults to "1"
-                            type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
                           resource:
                             description: 'Required: resource to select'
                             type: string
@@ -171,13 +160,21 @@ spec:
               properties:
                 limits:
                   additionalProperties:
-                    type: string
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
                   description: 'Limits describes the maximum amount of compute resources
                     allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                   type: object
                 requests:
                   additionalProperties:
-                    type: string
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
                   description: 'Requests describes the minimum amount of compute resources
                     required. If Requests is omitted for a container, it defaults
                     to Limits if that is explicitly specified, otherwise to an implementation-defined
@@ -220,6 +217,9 @@ spec:
   - name: v1alpha1
     served: true
     storage: true
+  - name: v1alpha2
+    served: true
+    storage: false
 status:
   acceptedNames:
     kind: ""
