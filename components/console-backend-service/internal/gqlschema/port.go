@@ -1,6 +1,7 @@
 package gqlschema
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -9,13 +10,13 @@ import (
 
 func MarshalPort(port uint32) graphql.Marshaler {
 	return graphql.WriterFunc(func(w io.Writer) {
-		_, _ = w.Write([]byte(string(port)))
+		_, _ = w.Write([]byte(fmt.Sprintf("%d", port)))
 	})
 
 }
 
 func UnmarshalPort(v interface{}) (uint32, error) {
-	in, ok := v.(int)
+	in, ok := v.(int64)
 	if !ok {
 		return 0, errors.New("Invalid RawExtension type, expected int")
 	}
