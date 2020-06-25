@@ -14,10 +14,10 @@ global:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir:
-      version: "PR-1453"
+      version: "7f9b1eb5"
     connectivity_adapter:
       dir:
-      version: "PR-1453"
+      version: "7f9b1eb5"
     pairing_adapter:
       dir:
       version: "904c3b06"
@@ -35,7 +35,7 @@ global:
       version: "aa7a78c7"
     provisioner:
       dir:
-      version: "PR-1453"
+      version: "7f9b1eb5"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -56,16 +56,16 @@ global:
         version: "b13e7fe9"
       connector:
         dir:
-        version: "PR-1453"
+        version: "7f9b1eb5"
       provisioner:
         dir:
-        version: "PR-1453"
+        version: "7f9b1eb5"
       e2e_provisioning:
         dir:
         version: "9103d980"
       connectivity_adapter:
         dir:
-        version: "PR-1453"
+        version: "7f9b1eb5"
   isLocalEnv: false
   oauth2:
     host: oauth2
