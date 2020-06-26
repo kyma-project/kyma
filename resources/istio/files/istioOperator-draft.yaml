@@ -56,9 +56,6 @@ spec:
         - name: ISTIO_META_ROUTER_MODE
           value: sni-dnat
         nodeSelector: {}
-        overlays:
-        - kind: Deployment
-          name: istio-ingressgateway
         podAnnotations: {}
         resources:
           limits:
@@ -67,8 +64,6 @@ spec:
           requests:
             cpu: 100m
             memory: 96Mi
-        service:
-          type: NodePort
         strategy:
           rollingUpdate:
             maxSurge: 1
