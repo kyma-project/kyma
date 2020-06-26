@@ -119,7 +119,7 @@ Create a Google service account that has a private key and the **Storage Admin**
 6. Export the private key as an environment variable:
 
     ```bash
-    export GCS_KEY_JSON=$(< "${SECRET_FILE}")
+    export GCS_KEY_JSON=$(< "$SECRET_FILE" base64 | tr -d '\n')
     ```
 
   </details>
@@ -196,7 +196,7 @@ Create an Azure Container Registry and a service principal. Follow these steps:
 
 ### Override Serverless configuration
 
-Apply the following ConfigMap with an override to a cluster or Minikube. Run:
+Apply the following Secret with an override to a cluster or Minikube. Run:
 
 <div tabs name="override" group="external-docker-registry">
   <details>
@@ -207,7 +207,7 @@ Apply the following ConfigMap with an override to a cluster or Minikube. Run:
 ```bash
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
 metadata:
   name: serverless-overrides
   namespace: kyma-installer
@@ -216,11 +216,11 @@ metadata:
     component: serverless
     kyma-project.io/installation: ""
 data:
-  dockerRegistry.enableInternal: false
-  dockerRegistry.username: "${USERNAME}"
-  dockerRegistry.password: "${PASSWORD}"
-  dockerRegistry.serverAddress: "${SERVER_ADDRESS}"
-  dockerRegistry.registryAddress: "${REGISTRY_ADDRESS}"
+  dockerRegistry.enableInternal: $(echo "false" | base64)
+  dockerRegistry.username: $(echo "${USERNAME}" | base64)
+  dockerRegistry.password: $(echo "${PASSWORD}" | base64)
+  dockerRegistry.serverAddress: $(echo "${SERVER_ADDRESS}" | base64)
+  dockerRegistry.registryAddress: $(echo "${REGISTRY_ADDRESS}" | base64)
 EOF
 ```
 
@@ -233,7 +233,7 @@ EOF
 ```bash
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
 metadata:
   name: serverless-overrides
   namespace: kyma-installer
@@ -242,11 +242,11 @@ metadata:
     component: serverless
     kyma-project.io/installation: ""
 data:
-  dockerRegistry.enableInternal: false
-  dockerRegistry.username: "_json_key"
+  dockerRegistry.enableInternal: $(echo "false" | base64)
+  dockerRegistry.username: $(echo "_json_key" | base64)
   dockerRegistry.password: "${GCS_KEY_JSON}"
-  dockerRegistry.serverAddress: "${SERVER_ADDRESS}"
-  dockerRegistry.registryAddress: "${SERVER_ADDRESS}/${PROJECT}"
+  dockerRegistry.serverAddress: $(echo "${SERVER_ADDRESS}" | base64)
+  dockerRegistry.registryAddress: $(echo "${SERVER_ADDRESS}/${PROJECT}" | base64)
 EOF
 ```
 
@@ -259,7 +259,7 @@ EOF
 ```bash
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
 metadata:
   name: serverless-overrides
   namespace: kyma-installer
@@ -268,18 +268,18 @@ metadata:
     component: serverless
     kyma-project.io/installation: ""
 data:
-  dockerRegistry.enableInternal: false
-  dockerRegistry.username: "${SP_APP_ID}"
-  dockerRegistry.password: "${SP_PASSWORD}"
-  dockerRegistry.serverAddress: "${AZ_REGISTRY_NAME}.${SERVER_ADDRESS}"
-  dockerRegistry.registryAddress: "${AZ_REGISTRY_NAME}.${SERVER_ADDRESS}"
+  dockerRegistry.enableInternal: $(echo "false" | base64)
+  dockerRegistry.username: $(echo "${SP_APP_ID}" | base64)
+  dockerRegistry.password: $(echo "${SP_PASSWORD}" | base64)
+  dockerRegistry.serverAddress: $(echo "${AZ_REGISTRY_NAME}.${SERVER_ADDRESS}" | base64)
+  dockerRegistry.registryAddress: $(echo "${AZ_REGISTRY_NAME}.${SERVER_ADDRESS}" | base64)
 EOF
 ```
 
   </details>
 </div>
 
-> **CAUTION:** If you want to set external Docker Registry before you install Kyma, you need to manually add the ConfigMap to the `installer-config-local.yaml.tpl` (local installation) or `installer-config-production.yaml.tpl` (production installation) template located under the `installation/resources` subfolder before you run the installation script.
+> **CAUTION:** If you want to set external Docker Registry before you install Kyma, you need to manually add the Secret to the `installer-config-local.yaml.tpl` (local installation) or `installer-config-production.yaml.tpl` (production installation) template located under the `installation/resources` subfolder before you run the installation script.
 
 ### Trigger installation
 
