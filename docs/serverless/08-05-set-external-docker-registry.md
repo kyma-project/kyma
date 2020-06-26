@@ -1,9 +1,13 @@
 ---
-title: Set external Docker Registry
+title: Set an external Docker registry
 type: Tutorials
 ---
 
-By default, you install Kyma with Serverless with internal (running on cluster) Docker Registry. This tutorial shows how to set external Docker Registry from different cloud providers using an [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation).
+By default, you install Kyma with Serverless that uses the internal Docker registry running on a cluster. This tutorial shows how to switch to an external Docker registry from various cloud providers using an [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation), like:
+
+- [Docker Hub](https://hub.docker.com/)
+- [Google Container Registry (GCR)](https://cloud.google.com/container-registry)
+- [Azure Container Registry (ACR)](https://azure.microsoft.com/en-us/services/container-registry/)
 
 ## Prerequisites
 
@@ -27,8 +31,8 @@ By default, you install Kyma with Serverless with internal (running on cluster) 
 
   </details>
   <details>
-  <summary label="azure-cr">
-  Azure CR
+  <summary label="acr">
+  ACR
   </summary>
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
@@ -70,7 +74,7 @@ By default, you install Kyma with Serverless with internal (running on cluster) 
   GCR
   </summary>
 
-Create a Google service account that has a private key and the **Storage Admin** role permissions. Follow these steps:
+To use Google Container Registry (GCR), create a Google service account that has a private key and the **Storage Admin** role permissions. Follow these steps:
 
 1. Run the `export {VARIABLE}={value}` command to set up the following environment variables, where:
 
@@ -79,7 +83,7 @@ Create a Google service account that has a private key and the **Storage Admin**
     - **PROJECT** is the GCP project ID.
     - **SECRET_FILE** is the path to the private key.
     - **ROLE** is the **Storage Admin** role bound to the service account.
-    - **SERVER_ADDRESS** is the server address of Docker Registry.
+    - **SERVER_ADDRESS** is the server address of the Docker registry.
 
     Example:
 
@@ -124,21 +128,21 @@ Create a Google service account that has a private key and the **Storage Admin**
 
   </details>
   <details>
-  <summary label="azure-cr">
-  Azure CR
+  <summary label="acr">
+  ACR
   </summary>
 
-Create an Azure Container Registry and a service principal. Follow these steps:
+Create an Azure Container Registry (ACR) and a service principal. Follow these steps:
 
 1. Run the `export {VARIABLE}={value}` command to set up the following environment variables, where:
 
-    - **AZ_REGISTRY_NAME** is the name of an Azure Container Registry.
+    - **AZ_REGISTRY_NAME** is the name of the ACR.
     - **AZ_RESOURCE_GROUP** is the name of the resource group.
     - **AZ_RESOURCE_GROUP_LOCATION** is the location of the resource group.
     - **AZ_SUBSCRIPTION_ID** is the ID of the Azure subscription.
     - **AZ_SERVICE_PRINCIPAL_NAME** is the name of the Azure service principal.
     - **ROLE** is the **acrpush** role bound to the service principal.
-    - **SERVER_ADDRESS** is the server address of Docker Registry.
+    - **SERVER_ADDRESS** is the server address of the Docker registry.
 
     Example:
 
@@ -164,26 +168,26 @@ Create an Azure Container Registry and a service principal. Follow these steps:
     az group create --name ${AZ_RESOURCE_GROUP} --location ${AZ_RESOURCE_GROUP_LOCATION} --subscription ${AZ_SUBSCRIPTION_ID}
     ```
 
-4. Create a Azure Container Registry. Run:
+4. Create an ACR. Run:
 
     ```bash
     az acr create --name ${AZ_REGISTRY_NAME} --resource-group ${AZ_RESOURCE_GROUP} --subscription ${AZ_SUBSCRIPTION_ID} --sku {Basic, Classic, Premium, Standard}
     ```
 
-5. Obtain the full Azure CR ID. Run:
+5. Obtain the full ACR ID. Run:
 
     ```bash
     export AZ_REGISTRY_ID=$(az acr show --name ${AZ_REGISTRY_NAME} --query id --output tsv)
     ```
 
-6. Create the service principal with rights scoped to the Azure CR. Run:
+6. Create a service principal with rights scoped to the ACR. Run:
 
     ```bash
     export SP_PASSWORD=$(az ad sp create-for-rbac --name http://${AZ_SERVICE_PRINCIPAL_NAME} --scopes ${AZ_REGISTRY_ID} --role ${ROLE} --query password --output tsv)
     export SP_APP_ID=$(az ad sp show --id http://${AZ_SERVICE_PRINCIPAL_NAME} --query appId --output tsv)
     ```
 
-   Or assign the desired role to the existing service principal. Run:
+   Alternatively, assign the desired role to the existing service principal. Run:
 
     ```bash
     export SP_APP_ID=$(az ad sp show --id http://${AZ_SERVICE_PRINCIPAL_NAME} --query appId --output tsv)
@@ -252,8 +256,8 @@ EOF
 
   </details>
   <details>
-  <summary label="azure-cr">
-  Azure CR
+  <summary label="acr">
+  ACR
   </summary>
 
 ```bash
@@ -279,11 +283,11 @@ EOF
   </details>
 </div>
 
-> **CAUTION:** If you want to set external Docker Registry before you install Kyma, you need to manually add the Secret to the `installer-config-local.yaml.tpl` (local installation) or `installer-config-production.yaml.tpl` (production installation) template located under the `installation/resources` subfolder before you run the installation script.
+> **CAUTION:** If you want to set an external Docker registry before you install Kyma, you need to manually add the Secret to the `installer-config-local.yaml.tpl` (local installation) or `installer-config-production.yaml.tpl` (production installation) template located under the `installation/resources` subfolder before you run the installation script.
 
 ### Trigger installation
 
-Trigger Kyma installation or update by labeling the Installation custom resource. Run:
+Trigger Kyma installation or update it by labeling the Installation custom resource. Run:
 
 ```bash
 kubectl -n default label installation/kyma-installation action=install
