@@ -99,7 +99,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     ```bash
     kyma provision gke -c {SERVICE_ACCOUNT_KEY_FILE_PATH} -n $CLUSTER_NAME -l $GCP_ZONE -p $GCP_PROJECT
     ```
-   >**NOTE**: Kyma offers the production profile. Change the value of `machine-type` to `n1-standard-8` or `c2-standard-8` if you want to use it.
+   >**NOTE**: Kyma offers the production profile. Pass the flag `-t` to Kyma CLI with `n1-standard-8` or `c2-standard-8` if you want to use it.
 
 4. Configure kubectl to use your new cluster:
 
@@ -147,7 +147,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     ```bash
     kyma provision aks -c {YOUR_CREDENTIALS_FILE_PATH} -n $CLUSTER_NAME -p $RS_GROUP -l $REGION
     ```
-   >**NOTE**: Kyma offers the production profile. Change the value of `node-vm-size` to `Standard_F8s_v2` or `Standard_D8_v3` if you want to use it.
+   >**NOTE**: Kyma offers the production profile. Pass the flag `-t` to Kyma CLI with `Standard_F8s_v2` or `Standard_D8_v3` if you want to use it.
 
 5. Add additional privileges to be able to access readiness probes endpoints on your AKS cluster:
 
