@@ -123,6 +123,7 @@ Create a Google service account that has a private key and the **Storage Admin**
     ```
 
   </details>
+  <details>
   <summary label="azure-cr">
   Azure CR
   </summary>
@@ -250,6 +251,7 @@ EOF
 ```
 
   </details>
+  <details>
   <summary label="azure-cr">
   Azure CR
   </summary>
