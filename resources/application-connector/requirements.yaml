@@ -5,7 +5,6 @@ dependencies:
   version: 0.0.1
 - name: application-registry
   version: 0.0.1
-  condition: application_registry.enabled
 - name: connection-token-handler
   condition: connection_token_handler.enabled
   version: 0.0.1
