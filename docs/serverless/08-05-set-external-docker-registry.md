@@ -7,7 +7,36 @@ By default, you install Kyma with Serverless with internal (running on cluster) 
 
 ## Prerequisites
 
+<div tabs name="prerequisites" group="external-docker-registry">
+  <details>
+  <summary label="docker-hub">
+  Docker Hub
+  </summary>
+
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+
+  </details>
+  <details>
+  <summary label="gcr">
+  GCR
+  </summary>
+
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- [gcloud](https://cloud.google.com/sdk/gcloud/)
+- [Google Cloud Platform (GCP)](https://cloud.google.com) project
+
+  </details>
+  <details>
+  <summary label="azure-cr">
+  Azure CR
+  </summary>
+
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure)
+- [Microsoft Azure](http://azure.com) subscription
+
+  </details>
+</div>
 
 ## Steps
 
@@ -66,31 +95,31 @@ Create a Google service account that has a private key and the **Storage Admin**
 2. When you communicate with Google Cloud for the first time, set the context for your Google Cloud project. Run this command:
 
     ```bash
-    gcloud config set project $PROJECT
+    gcloud config set project ${PROJECT}
     ```
 
 3. Create a service account. Run:
 
     ```bash
-    gcloud iam service-accounts create $SA_NAME --display-name $SA_DISPLAY_NAME
+    gcloud iam service-accounts create ${SA_NAME} --display-name ${SA_DISPLAY_NAME}
     ```
 
 4. Add a policy binding for the **Storage Admin** role to the service account. Run:
 
     ```bash
-    gcloud projects add-iam-policy-binding $PROJECT --member=serviceAccount:$SA_NAME@$PROJECT.iam.gserviceaccount.com --role=$ROLE
+    gcloud projects add-iam-policy-binding ${PROJECT} --member=serviceAccount:${SA_NAME}@${PROJECT}.iam.gserviceaccount.com --role=${ROLE}
     ```
 
 5. Create a private key for the service account:
 
     ```bash
-    gcloud iam service-accounts keys create $SECRET_FILE --iam-account=$SA_NAME@$PROJECT.iam.gserviceaccount.com
+    gcloud iam service-accounts keys create ${SECRET_FILE} --iam-account=${SA_NAME}@${PROJECT}.iam.gserviceaccount.com
     ```
 
 6. Export the private key as an environment variable:
 
     ```bash
-    export GCS_KEY_JSON=$(< "$SECRET_FILE")
+    export GCS_KEY_JSON=$(< "${SECRET_FILE}")
     ```
 
   </details>
@@ -102,10 +131,12 @@ Create an Azure Container Registry and a service principal. Follow these steps:
 
 1. Run the `export {VARIABLE}={value}` command to set up the following environment variables, where:
 
-    - **AZ_REGISTRY** is the name of the storage account.
+    - **AZ_REGISTRY_NAME** is the name of an Azure Container Registry.
     - **AZ_RESOURCE_GROUP** is the name of the resource group.
     - **AZ_RESOURCE_GROUP_LOCATION** is the location of the resource group.
     - **AZ_SUBSCRIPTION_ID** is the ID of the Azure subscription.
+    - **AZ_SERVICE_PRINCIPAL_NAME** is the name of the Azure service principal.
+    - **ROLE** is the **acrpush** role bound to the service principal.
     - **SERVER_ADDRESS** is the server address of Docker Registry.
 
     Example:
@@ -115,6 +146,8 @@ Create an Azure Container Registry and a service principal. Follow these steps:
     export AZ_RESOURCE_GROUP=my-resource-group
     export AZ_RESOURCE_GROUP_LOCATION=westeurope
     export AZ_SUBSCRIPTION_ID=123456-123456-123456-1234567
+    export AZ_SERVICE_PRINCIPAL_NAME=acr-service-principal
+    export ROLE=acrpush
     export SERVER_ADDRESS=azurecr.io
     ```
 
@@ -130,10 +163,31 @@ Create an Azure Container Registry and a service principal. Follow these steps:
     az group create --name ${AZ_RESOURCE_GROUP} --location ${AZ_RESOURCE_GROUP_LOCATION} --subscription ${AZ_SUBSCRIPTION_ID}
     ```
 
-3. Create a Azure Container Registry. Run:
+4. Create a Azure Container Registry. Run:
 
     ```bash
     az acr create --name ${AZ_REGISTRY_NAME} --resource-group ${AZ_RESOURCE_GROUP} --subscription ${AZ_SUBSCRIPTION_ID} --sku {Basic, Classic, Premium, Standard}
+    ```
+
+5. Obtain the full Azure CR ID. Run:
+
+    ```bash
+    export AZ_REGISTRY_ID=$(az acr show --name ${AZ_REGISTRY_NAME} --query id --output tsv)
+    ```
+
+6. Create the service principal with rights scoped to the Azure CR. Run:
+
+    ```bash
+    export SP_PASSWORD=$(az ad sp create-for-rbac --name http://${AZ_SERVICE_PRINCIPAL_NAME} --scopes ${AZ_REGISTRY_ID} --role ${ROLE} --query password --output tsv)
+    export SP_APP_ID=$(az ad sp show --id http://${AZ_SERVICE_PRINCIPAL_NAME} --query appId --output tsv)
+    ```
+
+   Or assign the desired role to the existing service principal. Run:
+
+    ```bash
+    export SP_APP_ID=$(az ad sp show --id http://${AZ_SERVICE_PRINCIPAL_NAME} --query appId --output tsv)
+    export SP_PASSWORD=$(az ad sp show --id http://${AZ_SERVICE_PRINCIPAL_NAME} --query password --output tsv)
+    az role assignment create --assignee ${SP_APP_ID} --scope ${AZ_REGISTRY_ID} --role ${ROLE}
     ```
 
   </details>
