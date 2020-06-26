@@ -25,8 +25,7 @@ type BuildConfig struct {
 	LimitsMemory         string            `envconfig:"default=1Gi"`
 	LimitsMemoryValue    resource.Quantity `envconfig:"-"`
 	RuntimeConfigMapName string            `envconfig:"default=dockerfile-nodejs-12"`
-	DevExecutorArgs      []string          `envconfig:"default=--insecure;--skip-tls-verify;--skip-unused-stages;--log-format=text;--cache=true"`
-	ProdExecutorArgs     []string          `envconfig:"default=--skip-unused-stages;--log-format=text;--cache=true"`
+	ExecutorArgs         []string          `envconfig:"default=--insecure;--skip-tls-verify;--skip-unused-stages;--log-format=text;--cache=true"`
 	ExecutorImage        string            `envconfig:"default=gcr.io/kaniko-project/executor:v0.22.0"`
 }
 

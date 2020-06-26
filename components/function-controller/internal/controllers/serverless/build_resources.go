@@ -41,10 +41,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 	zero := int32(0)
 
 	imageName := r.buildImageAddressForPush(instance)
-	args := r.config.Build.ProdExecutorArgs
-	if r.config.Docker.InternalRegistryEnabled {
-		args = r.config.Build.DevExecutorArgs
-	}
+	args := r.config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), "--context=dir:///workspace")
 
 	return batchv1.Job{
