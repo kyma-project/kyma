@@ -3,7 +3,7 @@ title: Set an external Docker registry
 type: Tutorials
 ---
 
-By default, you install Kyma with Serverless that uses the internal Docker registry running on a cluster. This tutorial shows how to switch to an external Docker registry from various cloud providers using an [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation), like:
+By default, you install Kyma with Serverless that uses the internal Docker registry running on a cluster. This tutorial shows how to switch to an external Docker registry from one of these cloud providers using an [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation):
 
 - [Docker Hub](https://hub.docker.com/)
 - [Google Container Registry (GCR)](https://cloud.google.com/container-registry)
@@ -54,10 +54,12 @@ By default, you install Kyma with Serverless that uses the internal Docker regis
 
 1. Run the `export {VARIABLE}={value}` command to set up the following environment variables, where:
 
-    - **USERNAME** is the name of account in Docker Hub.
-    - **PASSWORD** is the password for account in Docker Hub.
-    - **SERVER_ADDRESS** is the server address of Docker Hub. At the moment Kyma supports only `https://index.docker.io/v1/` server address.
-    - **REGISTRY_ADDRESS** is the registry address in Docker Hub (usually this is an account name).
+    - **USERNAME** is the name of the account in the Docker Hub.
+    - **PASSWORD** is the password for the account in the Docker Hub.
+    - **SERVER_ADDRESS** is the server address of the Docker Hub. At the moment, Kyma only supports the `https://index.docker.io/v1/` server address.
+    - **REGISTRY_ADDRESS** is the registry address in the Docker Hub.
+    
+    > **TIP:** Usually the Docker registry address is the same as the account name.
 
     Example:
 
@@ -74,7 +76,7 @@ By default, you install Kyma with Serverless that uses the internal Docker regis
   GCR
   </summary>
 
-To use Google Container Registry (GCR), create a Google service account that has a private key and the **Storage Admin** role permissions. Follow these steps:
+To use GCR, create a Google service account that has a private key and the **Storage Admin** role permissions. Follow these steps:
 
 1. Run the `export {VARIABLE}={value}` command to set up the following environment variables, where:
 
@@ -132,7 +134,7 @@ To use Google Container Registry (GCR), create a Google service account that has
   ACR
   </summary>
 
-Create an Azure Container Registry (ACR) and a service principal. Follow these steps:
+Create an ACR and a service principal. Follow these steps:
 
 1. Run the `export {VARIABLE}={value}` command to set up the following environment variables, where:
 
@@ -283,7 +285,7 @@ EOF
   </details>
 </div>
 
-> **CAUTION:** If you want to set an external Docker registry before you install Kyma, you need to manually add the Secret to the `installer-config-local.yaml.tpl` (local installation) or `installer-config-production.yaml.tpl` (production installation) template located under the `installation/resources` subfolder before you run the installation script.
+> **CAUTION:** If you want to set an external Docker registry before you install Kyma, manually add the Secret to the `installer-config-local.yaml.tpl` (local installation) or `installer-config-production.yaml.tpl` (production installation) template located under the `installation/resources` subfolder before you run the installation script.
 
 ### Trigger installation
 
