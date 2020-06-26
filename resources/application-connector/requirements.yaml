@@ -4,7 +4,10 @@ dependencies:
 - name: application-registry
 - name: connection-token-handler
   condition: connection_token_handler.enabled
+  version: 0.0.1
 - name: connector-service
   condition: connector_service.enabled
+  version: 0.0.1
 - name: connectivity-certs-controller
   condition: connectivity_certs_controller.enabled
+  version: 0.0.1
