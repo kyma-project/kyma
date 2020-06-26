@@ -2874,11 +2874,8 @@ webhooks:
   sideEffects: None
   namespaceSelector:
     matchExpressions:
-      - key: gardener.cloud/purpose
-        operator: NotIn
-        values:
-          - kube-system
-  timeoutSeconds: 10
+{{ toYaml .Values.webhook.webhookMatchExp | indent 4 }}
+  timeoutSeconds: {{ .Values.webhook.timeout }}
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
@@ -2898,11 +2895,8 @@ webhooks:
   sideEffects: None
   namespaceSelector:
     matchExpressions:
-      - key: gardener.cloud/purpose
-        operator: NotIn
-        values:
-          - kube-system
-  timeoutSeconds: 10
+{{ toYaml .Values.webhook.webhookMatchExp | indent 4 }}
+  timeoutSeconds: {{ .Values.webhook.timeout }}
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
@@ -2923,12 +2917,9 @@ webhooks:
     matchExpressions:
     - key: eventing.knative.dev/release
       operator: Exists
-    - key: gardener.cloud/purpose
-      operator: NotIn
-      values:
-        - kube-system
+{{ toYaml .Values.webhook.webhookMatchExp | indent 4 }}
   sideEffects: None
-  timeoutSeconds: 10
+  timeoutSeconds: {{ .Values.webhook.timeout }}
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
@@ -2948,11 +2939,8 @@ webhooks:
   sideEffects: None
   namespaceSelector:
     matchExpressions:
-      - key: gardener.cloud/purpose
-        operator: NotIn
-        values:
-          - kube-system
-  timeoutSeconds: 10
+{{ toYaml .Values.webhook.webhookMatchExp | indent 4 }}
+  timeoutSeconds: {{ .Values.webhook.timeout }}
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
@@ -2972,11 +2960,8 @@ webhooks:
   sideEffects: None
   namespaceSelector:
     matchExpressions:
-      - key: gardener.cloud/purpose
-        operator: NotIn
-        values:
-          - kube-system
-  timeoutSeconds: 10
+{{ toYaml .Values.webhook.webhookMatchExp | indent 4 }}
+  timeoutSeconds: {{ .Values.webhook.timeout }}
 ---
 apiVersion: v1
 kind: Secret
