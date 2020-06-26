@@ -1,2 +1,3 @@
 dependencies:
   - name: knative-provisioner-natss
+    version: 0.0.1
