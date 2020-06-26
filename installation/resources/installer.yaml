@@ -184,20 +184,6 @@ spec:
         args:
           - -overrideLogFile=/app/overrides.txt
           - -helmDebugMode=true
-        volumeMounts:
-          - mountPath: /etc/certs
-            name: helm-certs
-            readOnly: true
-      volumes:
-      - name: helm-certs
-        secret:
-          secretName: helm-secret
-          optional: true
-          items:
-            - key: global.helm.tls.crt
-              path: tls.crt
-            - key: global.helm.tls.key
-              path: tls.key
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
