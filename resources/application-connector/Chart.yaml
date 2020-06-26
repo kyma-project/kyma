@@ -4,11 +4,3 @@ name: application-connector
 version: 0.0.2
 keywords:
   - Application Connector
-dependencies:
-  - name: application-broker
-    version: 0.1.1
-  - name: application-operator
-    version: 0.0.1
-  - name: application-registry
-    version: 0.0.1
-    condition: application_registry.enabled
