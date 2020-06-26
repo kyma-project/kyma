@@ -142,16 +142,10 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     TENANT_ID = {YOUR_TENANT_ID}
     ```
 
-    Then, export the path to this file as an environment variable:
-
-    ```bash
-    export CREDENTIALS_FILE={YOUR_CREDENTIALS_FILE_PATH}
-    ```
-
 4. Create an AKS cluster:
 
     ```bash
-    kyma provision aks -c $CREDENTIALS_FILE -n $CLUSTER_NAME -p $RS_GROUP -l $REGION
+    kyma provision aks -c {YOUR_CREDENTIALS_FILE_PATH} -n $CLUSTER_NAME -p $RS_GROUP -l $REGION
     ```
    >**NOTE**: Kyma offers the production profile. Change the value of `node-vm-size` to `Standard_F8s_v2` or `Standard_D8_v3` if you want to use it.
 
