@@ -77,10 +77,14 @@ Follow these steps:
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/accenture.svg" alt="Accenture" width="300" height="70" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/netconomy.svg" alt="NETCONOMY" width="300" height="70" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/neteleven.svg" alt="neteleven" width="250" height="60" />
+  </p>
+  <p align="center">
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/arithnea.svg" alt="ARITHNEA" width="300" height="130" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/digital_lights.svg" alt="Digital Lights" width="200" height="130" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/FAIR_LOGO_HEADER.svg" alt="FAIR" width="300" height="130" />
-  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/arineo.svg" alt="Arineo" width="300" height="45" />
-  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/dotsource.svg" alt="dotSource" width="300" height="45" />
-  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/softicious.svg" alt="Softicious" width="300" height="45" />
+  </p>
+  <p align="center">
+  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/arineo.svg" alt="Arineo" width="250" height="40" />
+  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/dotsource.svg" alt="dotSource" width="250" height="40" />
+  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/softicious.svg" alt="Softicious" width="250" height="40" />
 </p>
