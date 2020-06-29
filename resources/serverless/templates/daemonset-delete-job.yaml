@@ -1,4 +1,3 @@
-{{- if .Values.dockerRegistry.enableInternal }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -112,4 +111,3 @@ spec:
         volumeMounts:
           - name: delete-script
             mountPath: /config
-{{- end }}
