@@ -11,8 +11,14 @@ func main() {
 	if err != nil {
 		panic(errors.Wrap(err, "during creating gitops manager"))
 	}
-
-	commit, err := mgr.GetLastCommit("https://github.com/go-git/go-git", "pr-1152", nil)
+	config := gitops.Config{
+		RepoUrl: "https://github.com/kyma-project/kyma",
+		Branch: "master",
+		ActualCommit: "",
+		BaseDir: "",
+		Secret: nil,
+	}
+	commit, _, err := mgr.CheckBranchChanges(config)
 	if err != nil {
 		panic(errors.Wrap(err, "during getting latest commit from branch"))
 	}

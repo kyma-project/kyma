@@ -12,13 +12,21 @@ import (
 )
 
 const (
-	usernameKey = "login"
-	passwordKey = "token"
+	usernameKey = "username"
+	passwordKey = "password"
 )
 
 //go:generate mockery -name=GitOperator -output=automock -outpkg=automock -case=underscore
 type GitOperator interface {
 	Clone(s storage.Storer, worktree billy.Filesystem, o *git.CloneOptions) (*git.Repository, error)
+}
+
+type Config struct {
+	RepoUrl      string
+	Branch       string
+	ActualCommit string
+	BaseDir      string
+	Secret       map[string]interface{}
 }
 
 type Manager struct {
@@ -29,41 +37,36 @@ func NewManager(operator GitOperator) (*Manager, error) {
 	return &Manager{gitOperator: operator}, nil
 }
 
-func (g *Manager) GetLastCommit(repoUrl, branch string, secret map[string]interface{}) (string, error) {
-
-	auth, err := convertToBasicAuth(secret)
+func (g *Manager) CheckBranchChanges(config Config) (commitHash string, changesOccurred bool, err error) {
+	auth, err := convertToBasicAuth(config.Secret)
 	if err != nil {
-		return "", errors.Wrap(err, "while parsing auth fields")
+		return commitHash, changesOccurred, errors.Wrap(err, "while parsing auth fields")
 	}
 
 	repo, err := g.gitOperator.Clone(memory.NewStorage(), nil, &git.CloneOptions{
-		URL:               repoUrl,
-		ReferenceName:     plumbing.NewBranchReferenceName(branch),
-		Auth:              auth,
-		SingleBranch:      true,
-		NoCheckout:        true,
-		Tags:              git.NoTags,
+		URL:           config.RepoUrl,
+		ReferenceName: plumbing.NewBranchReferenceName(config.Branch),
+		Auth:          auth,
+		SingleBranch:  true,
+		NoCheckout:    true,
+		Tags:          git.NoTags,
 	})
 	if err != nil {
-		return "", errors.Wrapf(err, "while cloning repository: %s, branch: %s", repoUrl, branch)
+		return commitHash, changesOccurred, errors.Wrapf(err, "while cloning repository: %s, branch: %s", config.RepoUrl, config.Branch)
 	}
 
 	head, err := repo.Head()
 	if err != nil {
-		return "", errors.Wrapf(err, "while getting HEAD reference for repository: %s, branch: %s", repoUrl, branch)
+		return commitHash, changesOccurred, errors.Wrapf(err, "while getting HEAD reference for repository: %s, branch: %s", config.RepoUrl, config.Branch)
 	}
 
-	cIter, err := repo.Log(&git.LogOptions{From: head.Hash()})
-	if err != nil {
-		return "", errors.Wrapf(err, "while listing commit history for repository: %s, branch: %s", repoUrl, branch)
+	commitHash = head.Hash().String()
+
+	if commitHash != config.ActualCommit {
+		changesOccurred = true
 	}
 
-	commit, err := cIter.Next()
-	if err != nil {
-		return "", errors.Wrapf(err, "while getting last commit for repository: %s, branch: %s", repoUrl, branch)
-	}
-
-	return commit.Hash.String(), nil
+	return commitHash, changesOccurred, nil
 }
 
 func convertToBasicAuth(secret map[string]interface{}) (*http.BasicAuth, error) {
