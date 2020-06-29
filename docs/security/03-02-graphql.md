@@ -32,7 +32,7 @@ This is an example GraphQL action implemented in Kyma out of the box.
   microFrontends(namespace: String!): [MicroFrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
   ```
 
-This query secures the access to [MicroFrontend](https://kyma-project.io/docs/components/console/#custom-resource-micro-frontend) custom resources with specific names. To access it, the user must be bound to a role that allows to access:
+This query secures the access to [MicroFrontend](/components/console/#custom-resource-micro-frontend) custom resources with specific names. To access it, the user must be bound to a role that allows to access:
   - resources of the MicroFrontend kind
   - the Kubernetes verb `list`
   - the `ui.kyma-project.io` apiGroup
