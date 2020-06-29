@@ -18,7 +18,7 @@ cluster:
 compass_mfs:
   image:
     pullPolicy: IfNotPresent
-    tag: 7786ce94
+    tag: ba19dbb9
   service:
     externalPort: 8888
     internalPort: 8888
@@ -27,7 +27,7 @@ compass_mfs:
 console:
   image:
     pullPolicy: IfNotPresent
-    tag: "7786ce94"
+    tag: ab4b99d4
   service:
     externalPort: 80
     internalPort: 8080
@@ -36,7 +36,7 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: 7786ce94
+    tag: 4031af15
   service:
     externalPort: 80
     internalPort: 80
