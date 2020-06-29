@@ -9,3 +9,5 @@ image:
 testServiceImage:
   dir:
   version: PR-8483
+
+# trigger upgrade tests

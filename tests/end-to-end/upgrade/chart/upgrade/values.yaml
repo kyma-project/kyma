@@ -22,3 +22,5 @@ authorizationPolicy:
   consoleBackendService:
     namespace: kyma-system
     serviceAccount: console-backend
+
+# trigger upgrade tests
