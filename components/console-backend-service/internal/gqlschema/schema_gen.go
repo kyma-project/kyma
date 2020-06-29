@@ -480,12 +480,6 @@ type ComplexityRoot struct {
 		Reason  func(childComplexity int) int
 	}
 
-	IDPPreset struct {
-		Issuer  func(childComplexity int) int
-		JwksURI func(childComplexity int) int
-		Name    func(childComplexity int) int
-	}
-
 	LimitRange struct {
 		Limits func(childComplexity int) int
 		Name   func(childComplexity int) int
@@ -530,7 +524,6 @@ type ComplexityRoot struct {
 		CreateApplication                          func(childComplexity int, name string, description *string, labels Labels) int
 		CreateClusterAddonsConfiguration           func(childComplexity int, name string, repositories []*AddonsConfigurationRepositoryInput, urls []string, labels Labels) int
 		CreateFunction                             func(childComplexity int, name string, namespace string, params FunctionMutationInput) int
-		CreateIDPPreset                            func(childComplexity int, name string, issuer string, jwksURI string) int
 		CreateLimitRange                           func(childComplexity int, namespace string, name string, limitRange LimitRangeInput) int
 		CreateManyTriggers                         func(childComplexity int, namespace string, triggers []*TriggerCreateInput, ownerRef []*OwnerReference) int
 		CreateNamespace                            func(childComplexity int, name string, labels Labels) int
@@ -546,7 +539,6 @@ type ComplexityRoot struct {
 		DeleteClusterAddonsConfiguration           func(childComplexity int, name string) int
 		DeleteConfigMap                            func(childComplexity int, name string, namespace string) int
 		DeleteFunction                             func(childComplexity int, namespace string, function FunctionMetadataInput) int
-		DeleteIDPPreset                            func(childComplexity int, name string) int
 		DeleteManyFunctions                        func(childComplexity int, namespace string, functions []*FunctionMetadataInput) int
 		DeleteManyTriggers                         func(childComplexity int, namespace string, triggers []*TriggerMetadataInput) int
 		DeleteNamespace                            func(childComplexity int, name string) int
@@ -651,8 +643,6 @@ type ComplexityRoot struct {
 		EventActivations            func(childComplexity int, namespace string) int
 		Function                    func(childComplexity int, name string, namespace string) int
 		Functions                   func(childComplexity int, namespace string) int
-		IDPPreset                   func(childComplexity int, name string) int
-		IDPPresets                  func(childComplexity int, first *int, offset *int) int
 		LimitRanges                 func(childComplexity int, namespace string) int
 		MicroFrontends              func(childComplexity int, namespace string) int
 		Namespace                   func(childComplexity int, name string) int
@@ -1084,8 +1074,6 @@ type MutationResolver interface {
 	CreateResourceQuota(ctx context.Context, namespace string, name string, resourceQuota ResourceQuotaInput) (*ResourceQuota, error)
 	UpdateConfigMap(ctx context.Context, name string, namespace string, configMap JSON) (*ConfigMap, error)
 	DeleteConfigMap(ctx context.Context, name string, namespace string) (*ConfigMap, error)
-	CreateIDPPreset(ctx context.Context, name string, issuer string, jwksURI string) (*IDPPreset, error)
-	DeleteIDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	UpdateService(ctx context.Context, name string, namespace string, service JSON) (*Service, error)
 	DeleteService(ctx context.Context, name string, namespace string) (*Service, error)
 	CreateNamespace(ctx context.Context, name string, labels Labels) (*NamespaceMutationOutput, error)
@@ -1152,8 +1140,6 @@ type QueryResolver interface {
 	BackendModules(ctx context.Context) ([]*BackendModule, error)
 	Secret(ctx context.Context, name string, namespace string) (*Secret, error)
 	Secrets(ctx context.Context, namespace string, first *int, offset *int) ([]*Secret, error)
-	IDPPreset(ctx context.Context, name string) (*IDPPreset, error)
-	IDPPresets(ctx context.Context, first *int, offset *int) ([]*IDPPreset, error)
 	MicroFrontends(ctx context.Context, namespace string) ([]*MicroFrontend, error)
 	ClusterMicroFrontends(ctx context.Context) ([]*ClusterMicroFrontend, error)
 	SelfSubjectRules(ctx context.Context, namespace *string) ([]*ResourceRule, error)
@@ -2878,27 +2864,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.FunctionStatus.Reason(childComplexity), true
 
-	case "IDPPreset.issuer":
-		if e.complexity.IDPPreset.Issuer == nil {
-			break
-		}
-
-		return e.complexity.IDPPreset.Issuer(childComplexity), true
-
-	case "IDPPreset.jwksUri":
-		if e.complexity.IDPPreset.JwksURI == nil {
-			break
-		}
-
-		return e.complexity.IDPPreset.JwksURI(childComplexity), true
-
-	case "IDPPreset.name":
-		if e.complexity.IDPPreset.Name == nil {
-			break
-		}
-
-		return e.complexity.IDPPreset.Name(childComplexity), true
-
 	case "LimitRange.limits":
 		if e.complexity.LimitRange.Limits == nil {
 			break
@@ -3119,18 +3084,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateFunction(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(FunctionMutationInput)), true
 
-	case "Mutation.createIDPPreset":
-		if e.complexity.Mutation.CreateIDPPreset == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createIDPPreset_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateIDPPreset(childComplexity, args["name"].(string), args["issuer"].(string), args["jwksUri"].(string)), true
-
 	case "Mutation.createLimitRange":
 		if e.complexity.Mutation.CreateLimitRange == nil {
 			break
@@ -3310,18 +3263,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteFunction(childComplexity, args["namespace"].(string), args["function"].(FunctionMetadataInput)), true
-
-	case "Mutation.deleteIDPPreset":
-		if e.complexity.Mutation.DeleteIDPPreset == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_deleteIDPPreset_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DeleteIDPPreset(childComplexity, args["name"].(string)), true
 
 	case "Mutation.deleteManyFunctions":
 		if e.complexity.Mutation.DeleteManyFunctions == nil {
@@ -4163,30 +4104,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Functions(childComplexity, args["namespace"].(string)), true
-
-	case "Query.IDPPreset":
-		if e.complexity.Query.IDPPreset == nil {
-			break
-		}
-
-		args, err := ec.field_Query_IDPPreset_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.IDPPreset(childComplexity, args["name"].(string)), true
-
-	case "Query.IDPPresets":
-		if e.complexity.Query.IDPPresets == nil {
-			break
-		}
-
-		args, err := ec.field_Query_IDPPresets_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.IDPPresets(childComplexity, args["first"].(*int), args["offset"].(*int)), true
 
 	case "Query.limitRanges":
 		if e.complexity.Query.LimitRanges == nil {
@@ -6821,14 +6738,6 @@ type BindableResourcesOutputItem {
     resources: [UsageKindResource!]!
 }
 
-# IDP PRESETS
-
-type IDPPreset {
-    name: String!
-    issuer: String!
-    jwksUri: String!
-}
-
 # API Gateway Controller
 
 type APIRule {
@@ -7219,9 +7128,6 @@ type Query {
     secret(name: String!, namespace: String!): Secret @HasAccess(attributes: {resource: "secrets", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     secrets(namespace: String!, first: Int, offset: Int): [Secret!]!  @HasAccess(attributes: {resource: "secrets", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
-    IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
-    IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
-
     microFrontends(namespace: String!): [MicroFrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
     clusterMicroFrontends: [ClusterMicroFrontend!]! @HasAccess(attributes: {resource: "clustermicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
 
@@ -7284,10 +7190,7 @@ type Mutation {
 
     updateConfigMap(name: String!, namespace: String!, configMap: JSON!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "update", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
     deleteConfigMap(name: String!, namespace: String!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "delete", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
-
-    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
-    deleteIDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
-
+    
     updateService(name: String!, namespace: String!, service: JSON!): Service @HasAccess(attributes: {resource: "services", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 
@@ -7734,36 +7637,6 @@ func (ec *executionContext) field_Mutation_createFunction_args(ctx context.Conte
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_createIDPPreset_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["issuer"]; ok {
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["issuer"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["jwksUri"]; ok {
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["jwksUri"] = arg2
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_createLimitRange_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -8123,20 +7996,6 @@ func (ec *executionContext) field_Mutation_deleteFunction_args(ctx context.Conte
 		}
 	}
 	args["function"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_deleteIDPPreset_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg0
 	return args, nil
 }
 
@@ -9043,42 +8902,6 @@ func (ec *executionContext) field_Query_APIRules_args(ctx context.Context, rawAr
 		}
 	}
 	args["hostname"] = arg2
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_IDPPreset_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_IDPPresets_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["first"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["offset"]; ok {
-		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["offset"] = arg1
 	return args, nil
 }
 
@@ -18136,108 +17959,6 @@ func (ec *executionContext) _FunctionStatus_message(ctx context.Context, field g
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _IDPPreset_name(ctx context.Context, field graphql.CollectedField, obj *IDPPreset) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "IDPPreset",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _IDPPreset_issuer(ctx context.Context, field graphql.CollectedField, obj *IDPPreset) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "IDPPreset",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Issuer, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _IDPPreset_jwksUri(ctx context.Context, field graphql.CollectedField, obj *IDPPreset) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "IDPPreset",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.JwksURI, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _LimitRange_name(ctx context.Context, field graphql.CollectedField, obj *LimitRange) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -21207,130 +20928,6 @@ func (ec *executionContext) _Mutation_deleteConfigMap(ctx context.Context, field
 	res := resTmp.(*ConfigMap)
 	fc.Result = res
 	return ec.marshalOConfigMap2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐConfigMap(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_createIDPPreset(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createIDPPreset_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().CreateIDPPreset(rctx, args["name"].(string), args["issuer"].(string), args["jwksUri"].(string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "authentication.kyma-project.io", "apiVersion": "v1alpha1", "resource": "idppresets", "verb": "create"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*IDPPreset); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.IDPPreset`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*IDPPreset)
-	fc.Result = res
-	return ec.marshalOIDPPreset2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐIDPPreset(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_deleteIDPPreset(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_deleteIDPPreset_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().DeleteIDPPreset(rctx, args["name"].(string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "authentication.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "resource": "idppresets", "verb": "delete"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*IDPPreset); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.IDPPreset`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*IDPPreset)
-	fc.Result = res
-	return ec.marshalOIDPPreset2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐIDPPreset(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updateService(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -26056,133 +25653,6 @@ func (ec *executionContext) _Query_secrets(ctx context.Context, field graphql.Co
 	res := resTmp.([]*Secret)
 	fc.Result = res
 	return ec.marshalNSecret2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSecretᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_IDPPreset(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_IDPPreset_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().IDPPreset(rctx, args["name"].(string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "authentication.kyma-project.io", "apiVersion": "v1alpha1", "resource": "idppresets", "verb": "get"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*IDPPreset); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.IDPPreset`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*IDPPreset)
-	fc.Result = res
-	return ec.marshalOIDPPreset2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐIDPPreset(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_IDPPresets(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_IDPPresets_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().IDPPresets(rctx, args["first"].(*int), args["offset"].(*int))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "authentication.kyma-project.io", "apiVersion": "v1alpha1", "resource": "idppresets", "verb": "list"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*IDPPreset); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.IDPPreset`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*IDPPreset)
-	fc.Result = res
-	return ec.marshalNIDPPreset2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐIDPPresetᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_microFrontends(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -38293,43 +37763,6 @@ func (ec *executionContext) _FunctionStatus(ctx context.Context, sel ast.Selecti
 	return out
 }
 
-var iDPPresetImplementors = []string{"IDPPreset"}
-
-func (ec *executionContext) _IDPPreset(ctx context.Context, sel ast.SelectionSet, obj *IDPPreset) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, iDPPresetImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("IDPPreset")
-		case "name":
-			out.Values[i] = ec._IDPPreset_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "issuer":
-			out.Values[i] = ec._IDPPreset_issuer(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "jwksUri":
-			out.Values[i] = ec._IDPPreset_jwksUri(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var limitRangeImplementors = []string{"LimitRange"}
 
 func (ec *executionContext) _LimitRange(ctx context.Context, sel ast.SelectionSet, obj *LimitRange) graphql.Marshaler {
@@ -38644,10 +38077,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_updateConfigMap(ctx, field)
 		case "deleteConfigMap":
 			out.Values[i] = ec._Mutation_deleteConfigMap(ctx, field)
-		case "createIDPPreset":
-			out.Values[i] = ec._Mutation_createIDPPreset(ctx, field)
-		case "deleteIDPPreset":
-			out.Values[i] = ec._Mutation_deleteIDPPreset(ctx, field)
 		case "updateService":
 			out.Values[i] = ec._Mutation_updateService(ctx, field)
 		case "deleteService":
@@ -39552,31 +38981,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_secrets(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "IDPPreset":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_IDPPreset(ctx, field)
-				return res
-			})
-		case "IDPPresets":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_IDPPresets(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -43699,57 +43103,6 @@ func (ec *executionContext) marshalNFunctionStatus2ᚖgithubᚗcomᚋkymaᚑproj
 	return ec._FunctionStatus(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNIDPPreset2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐIDPPreset(ctx context.Context, sel ast.SelectionSet, v IDPPreset) graphql.Marshaler {
-	return ec._IDPPreset(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNIDPPreset2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐIDPPresetᚄ(ctx context.Context, sel ast.SelectionSet, v []*IDPPreset) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNIDPPreset2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐIDPPreset(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) marshalNIDPPreset2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐIDPPreset(ctx context.Context, sel ast.SelectionSet, v *IDPPreset) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._IDPPreset(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNInstanceStatusType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐInstanceStatusType(ctx context.Context, v interface{}) (InstanceStatusType, error) {
 	var res InstanceStatusType
 	return res, res.UnmarshalGQL(v)
@@ -46546,17 +45899,6 @@ func (ec *executionContext) marshalOFunctionReasonType2ᚖgithubᚗcomᚋkymaᚑ
 		return graphql.Null
 	}
 	return v
-}
-
-func (ec *executionContext) marshalOIDPPreset2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐIDPPreset(ctx context.Context, sel ast.SelectionSet, v IDPPreset) graphql.Marshaler {
-	return ec._IDPPreset(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOIDPPreset2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐIDPPreset(ctx context.Context, sel ast.SelectionSet, v *IDPPreset) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._IDPPreset(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOInstanceStatusType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐInstanceStatusType(ctx context.Context, v interface{}) (InstanceStatusType, error) {
