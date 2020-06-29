@@ -33,10 +33,10 @@ global:
     version: d022112f
   e2e_external_solution:
     dir:
-    version: PR-8734
+    version: f932f301
   e2e_external_solution_test_service:
     dir:
-    version: PR-8483
+    version: 9913ea21
   disableLegacyConnectivity: false
 
 tests:
