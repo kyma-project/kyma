@@ -2,6 +2,7 @@ package gitops
 
 import (
 	"fmt"
+
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -33,8 +34,8 @@ type Manager struct {
 	gitOperator GitOperator
 }
 
-func NewManager(operator GitOperator) (*Manager, error) {
-	return &Manager{gitOperator: operator}, nil
+func NewManager(operator GitOperator) *Manager {
+	return &Manager{gitOperator: operator}
 }
 
 func (g *Manager) CheckBranchChanges(config Config) (commitHash string, changesOccurred bool, err error) {
@@ -71,7 +72,7 @@ func (g *Manager) CheckBranchChanges(config Config) (commitHash string, changesO
 
 func convertToBasicAuth(secret map[string]interface{}) (*http.BasicAuth, error) {
 	if secret == nil {
-		return nil, nil
+		return &http.BasicAuth{}, nil
 	}
 
 	username, ok := secret[usernameKey].(string)
