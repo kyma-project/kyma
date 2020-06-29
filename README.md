@@ -82,5 +82,4 @@ Follow these steps:
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/arineo.svg" alt="Arineo" width="250" height="40" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/neteleven.svg" alt="neteleven" width="250" height="40" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/dotsource.svg" alt="dotSource" width="250" height="40" />
-  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/softicious.svg" alt="Softicious" width="250" height="40" />
 </p>
