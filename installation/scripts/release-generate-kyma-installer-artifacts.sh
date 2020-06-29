@@ -48,18 +48,6 @@ function generateClusterArtifact() {
     rm -rf ${TMP_CLUSTER_CR}
 }
 
-function generateCompassDependenciesClusterArtifact() {
-    TMP_COMPASS_DEP_CLUSTER_CR=$(mktemp)
-
-    ${CURRENT_DIR}/create-cr.sh --url "" --output "${TMP_COMPASS_DEP_CLUSTER_CR}" --version 0.0.1 --crtpl_path "${INSTALLER_COMPASS_DEP_CLUSTER_CR_PATH}"
-
-    ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER_YAML_PATH} ${TMP_COMPASS_DEP_CLUSTER_CR} \
-      | sed -E ";s;image: eu.gcr.io\/kyma-project\/develop\/installer:.+;image: eu.gcr.io/kyma-project/${KYMA_INSTALLER_PUSH_DIR}kyma-installer:${KYMA_INSTALLER_VERSION};" \
-      > ${ARTIFACTS_DIR}/kyma-installer-cluster-compass-dependencies.yaml
-
-    rm -rf ${TMP_COMPASS_DEP_CLUSTER_CR}
-}
-
 function generateRuntimeClusterArtifact() {
     TMP_RUNTIME_CLUSTER_CR=$(mktemp)
 
@@ -74,5 +62,4 @@ function generateRuntimeClusterArtifact() {
 
 generateLocalArtifact
 generateClusterArtifact
-generateCompassDependenciesClusterArtifact
 generateRuntimeClusterArtifact
