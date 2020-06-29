@@ -151,7 +151,7 @@ Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/isti
       gateways.istio-ingressgateway.autoscaleMax: "10"
     ```
 
-  3. Install Kyma on the cluster providing this file's path to Kyma CLI using the `-o` flag.
+  3. Install Kyma on the cluster providing this file's path using the `-o` flag.
 
   </details>
   <details>

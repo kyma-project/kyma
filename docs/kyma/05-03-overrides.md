@@ -81,7 +81,7 @@ data:
   controller-manager.minio.resources.limits.cpu: 250m #increased from 100m
 ```
 
-While installing Kyma, provide Kyma CLI with the file path via `-o` flag. Once the installation starts, the Kyma Operator generates overrides based on the ConfigMap entries. The system uses the values of `512Mi` instead of the default `128Mi` for MinIO memory and `250m` instead of `100m` for MinIO CPU from the chart's `values.yaml` file.
+While installing Kyma, provide the file path using the `-o` flag. Once the installation starts, the Kyma Operator generates overrides based on the ConfigMap entries. The system uses the value of `512Mi` instead of the default `128Mi` for MinIO memory and `250m` instead of `100m` for MinIO CPU from the chart's `values.yaml` file.
 
 For overrides that the system should keep in Secrets, just define a Secret object instead of a ConfigMap with the same key and a base64-encoded value. Be sure to label the Secret.
 
@@ -138,7 +138,7 @@ Notice that the user-provided override key now contains two parts:
 - The chart "path" inside the top-level `application-connector` chart called `connector-service`
 - The original template value reference from the chart without the `.Values.` prefix, `deployment.args.appTokenExpirationMinutes`
 
-While installing Kyma, provide Kyma CLI with the file path via `-o` flag. Once the installation starts, the Kyma Operator generates overrides based on the ConfigMap entries. The system uses the value of `10` instead of the default value of `5` from the `values.yaml` chart file.
+While installing Kyma, provide the file path using the `-o` flag. Once the installation starts, the Kyma Operator generates overrides based on the ConfigMap entries. The system uses the value of `10` instead of the default value of `5` from the `values.yaml` chart file.
 
 ## Global overrides
 

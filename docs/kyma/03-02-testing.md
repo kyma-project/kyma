@@ -78,12 +78,12 @@ To run all tests deployed on a Kyma cluster using [Kyma CLI](https://github.com/
 kyma test run
 ```
 
->**WARNING:** The kubeconfig file downloaded from UI does not grant enough privileges to run a test using Kyma CLI. You should instead use the kubeconfig from the cloud provider.
+>**WARNING:** The `kubeconfig` file downloaded from UI does not grant enough privileges to run a test using Kyma CLI. Instead, use the `kubeconfig` file from the cloud provider.
 
 Internally, the ClusterTestSuite resource is defined. It fetches all TestDefinitions and executes them.
 
 ### Run tests manually
-To run tests manually, you can pass the desired test names to Kyma CLI. To list all the deployed TestDefinition:
+To run tests manually, you can pass test names to Kyma CLI explicitly. To list all the deployed TestDefinition sets, run:
 
 ```bash
 kyma test definitions

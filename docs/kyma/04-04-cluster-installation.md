@@ -84,7 +84,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   GKE
   </summary>
 
-1. Create a service account and a service account key as json following [these steps](https://github.com/kyma-incubator/hydroform/blob/master/provision/examples/gcp/README.md#configure-gcp).
+1. Create a service account and a service account key as JSON following [these steps](https://github.com/kyma-incubator/hydroform/blob/master/provision/examples/gcp/README.md#configure-gcp).
 
 2. Export the cluster name, the name of your GCP project, and the [zone](https://cloud.google.com/compute/docs/regions-zones/) you want to deploy to as environment variables:
 
@@ -99,7 +99,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     ```bash
     kyma provision gke -c {SERVICE_ACCOUNT_KEY_FILE_PATH} -n $CLUSTER_NAME -l $GCP_ZONE -p $GCP_PROJECT
     ```
-   >**NOTE**: Kyma offers the production profile. Pass the flag `-t` to Kyma CLI with `n1-standard-8` or `c2-standard-8` if you want to use it.
+   >**NOTE**: Kyma offers the production profile. Pass the `-t` flag to Kyma CLI with the `n1-standard-8` or `c2-standard-8` value if you want to use it.
 
 4. Configure kubectl to use your new cluster:
 
@@ -133,7 +133,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     az group create --name $RS_GROUP --location $REGION
     ```
 
-3. Create a [service principle](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal#manually-create-a-service-principal) on Azure. Create a TOML file with the Azure Client ID, Client Secret, Subscription ID and Tenant ID:
+3. Create a [service principle](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal#manually-create-a-service-principal) on Azure. Create a TOML file with the Azure Client ID, Client Secret, Subscription ID, and Tenant ID:
 
     ```toml
     CLIENT_ID = {YOUR_APP_ID}
@@ -253,7 +253,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 ### Access the cluster
 
-1. To open the cluster's Console on your default browser, you can run,
+1. To open the cluster's Console on your default browser, run:
 
     ```bash
     kyma console

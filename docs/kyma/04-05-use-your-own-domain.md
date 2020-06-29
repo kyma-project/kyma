@@ -310,7 +310,7 @@ Get the TLS certificate:
   GKE
   </summary>
 
-1. Create a service account and a service account key as json following [these steps](https://github.com/kyma-incubator/hydroform/blob/master/provision/examples/gcp/README.md#configure-gcp).
+1. Create a service account and a service account key as JSON following [these steps](https://github.com/kyma-incubator/hydroform/blob/master/provision/examples/gcp/README.md#configure-gcp).
 
 2. Export the cluster name, the name of your GCP project, and the [zone](https://cloud.google.com/compute/docs/regions-zones/) you want to deploy to as environment variables:
 
@@ -374,7 +374,7 @@ Get the TLS certificate:
     ```bash
     kyma provision aks -c {YOUR_CREDENTIALS_FILE_PATH} -n $CLUSTER_NAME -p $RS_GROUP -l $REGION
     ```
-   >**NOTE**: Kyma offers the production profile. Pass the flag `-t` to Kyma CLI with `Standard_F8s_v2` or `Standard_D8_v3` if you want to use it.
+   >**NOTE**: Kyma offers a production profile. Pass the flag `-t` to Kyma CLI with `Standard_F8s_v2` or `Standard_D8_v3` if you want to use it.
 
 5. Add additional privileges to be able to access readiness probes endpoints on your AKS cluster.
 
@@ -449,7 +449,7 @@ az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n apiserver.
 
 ### Access the cluster
 
-1. To open the cluster's Console on your default browser, you can run,
+1. To open the cluster's Console in your default browser, run:
 
     ```bash
     kyma console

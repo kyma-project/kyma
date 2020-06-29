@@ -35,7 +35,7 @@ You can provide a custom list of components to Kyma CLI during the installation.
 
 ### Installation from the release
 
-1. Create a file with the list of components you desire to install. You can copy and paste most of the components from the regular [installation file](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster.yaml.tpl#L14), then modify the list as you like. An example file can look like:
+1. Create a file with the list of components you desire to install. You can copy and paste most of the components from the regular [installation file](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster.yaml.tpl#L14), then modify the list as you like. An example file can look like the following:
 
 ```yaml
 components:
@@ -55,7 +55,7 @@ components:
     namespace: "knative-eventing"
 ```
 
-2. Follow the installation steps to [install Kyma locally from the release](#installation-install-kyma-locally) or [install Kyma on a cluster](#installation-install-kyma-on-a-cluster). While installing, provide Kyma CLI with the path to the component list file via `-c` flag.
+2. Follow the installation steps to [install Kyma locally from the release](#installation-install-kyma-locally) or [install Kyma on a cluster](#installation-install-kyma-on-a-cluster). While installing, provide the path to the component list file using the `-c` flag.
 
 ### Installation from sources
 
