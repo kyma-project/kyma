@@ -18,7 +18,7 @@ cluster:
 compass_mfs:
   image:
     pullPolicy: IfNotPresent
-    tag: 4031af15
+    tag: ba19dbb9
   service:
     externalPort: 8888
     internalPort: 8888
