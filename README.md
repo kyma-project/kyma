@@ -81,6 +81,6 @@ Follow these steps:
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/digital_lights.svg" alt="Digital Lights" width="200" height="130" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/FAIR_LOGO_HEADER.svg" alt="FAIR" width="300" height="130" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/arineo.svg" alt="Arineo" width="250" height="40" />
-  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/dotsource.svg" alt="dotSource" width="250" height="50" />
+  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/dotsource.svg" alt="dotSource" width="250" height="45" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/softicious.svg" alt="Softicious" width="250" height="40" />
 </p>
