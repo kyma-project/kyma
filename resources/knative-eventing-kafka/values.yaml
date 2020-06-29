@@ -62,5 +62,5 @@ controller:
 
 test:
   dir: ''
-  version: 4d20063e
+  version: PR-8874
   enabled: true

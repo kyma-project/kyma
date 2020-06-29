@@ -29,13 +29,13 @@ See the [GraphQL schema](https://github.com/kyma-project/kyma/blob/master/compon
 This is an example GraphQL action implemented in Kyma out of the box.
 
   ```
-  IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+  microFrontends(namespace: String!): [MicroFrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
   ```
 
-This query secures the access to [IDPPreset](#custom-resource-idppreset) custom resources with specific names. To access it, the user must be bound to a role that allows to access:
-  - resources of the IDPPreset kind
-  - the Kubernetes verb `get`
-  - the `authentication.kyma-project.io` apiGroup
+This query secures the access to [MicroFrontend](/components/console/#custom-resource-micro-frontend) custom resources with specific names. To access it, the user must be bound to a role that allows to access:
+  - resources of the MicroFrontend kind
+  - the Kubernetes verb `list`
+  - the `ui.kyma-project.io` apiGroup
 
 
 To allow access specifically to the example query, create this RBAC role in the cluster and bind it to a user or a client:
@@ -44,11 +44,11 @@ To allow access specifically to the example query, create this RBAC role in the 
   apiVersion: rbac.authorization.k8s.io/v1beta1
   kind: Role
   metadata:
-    name: kyma-idpp-query-example
+    name: kyma-microfrontends-query-example
   rules:
-  - apiGroups: ["authentication.kyma-project.io"]
-    resources: ["idppresets"]
-    verbs: ["get"]
+  - apiGroups: ["ui.kyma-project.io"]
+    resources: ["microfrontends"]
+    verbs: ["list"]
   ```
 
 > **NOTE:** Read also about [RBAC authorization in a Kubernetes cluster](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
