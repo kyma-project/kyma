@@ -1,6 +1,7 @@
 package gqlschema
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -16,9 +17,18 @@ func MarshalPort(port uint32) graphql.Marshaler {
 }
 
 func UnmarshalPort(v interface{}) (uint32, error) {
-	in, ok := v.(int64)
-	if !ok {
-		return 0, errors.New("Invalid RawExtension type, expected int")
+	var in int64
+	switch v.(type) {
+	case int:
+		in, _ = v.(int64)
+	case json.Number:
+		val, err := v.(json.Number).Int64()
+		if err != nil {
+			return 0, errors.New("Invalid Port type, expected int")
+		}
+		in = val
+	default:
+		return 0, errors.New("Invalid Port type, expected int")
 	}
 
 	if in < 0 || in > 65535 {

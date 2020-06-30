@@ -14,8 +14,8 @@ func (r *mutationResolver) CreateAPIRule(ctx context.Context, name string, names
 	return r.ag.CreateAPIRule(ctx, name, namespace, params)
 }
 
-func (r *mutationResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
-	return r.ag.UpdateAPIRule(ctx, name, namespace, params)
+func (r *mutationResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, generation int, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
+	return r.ag.UpdateAPIRule(ctx, name, namespace, int64(generation), params)
 }
 
 func (r *mutationResolver) DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {

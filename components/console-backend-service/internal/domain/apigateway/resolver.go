@@ -2,7 +2,7 @@ package apigateway
 
 import (
 	"context"
-
+	"errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
@@ -78,9 +78,13 @@ func (r *Resolver) APIRuleEventSubscription(ctx context.Context, namespace strin
 	return channel, nil
 }
 
-func (r *Resolver) UpdateAPIRule(ctx context.Context, name string, namespace string, newSpec v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
+func (r *Resolver) UpdateAPIRule(ctx context.Context, name string, namespace string, generation int64, newSpec v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
 	result := &v1alpha1.APIRule{}
 	err := r.Service().UpdateInNamespace(name, namespace, result, func() error {
+		if result.Generation > generation {
+			return errors.New("resource already modified")
+		}
+
 		result.Spec = newSpec
 		return nil
 	})
@@ -88,7 +92,7 @@ func (r *Resolver) UpdateAPIRule(ctx context.Context, name string, namespace str
 }
 
 func (r *Resolver) DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {
-	var result *v1alpha1.APIRule
+	result := &v1alpha1.APIRule{}
 	err := r.Service().DeleteInNamespace(namespace, name, result)
 	return result, err
 }

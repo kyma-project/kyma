@@ -129,7 +129,7 @@ func (s *enabledServiceBase) deleteListener(listener *Listener) {
 	s.notifier.DeleteListener(listener)
 }
 
-func (s *enabledServiceBase) DeleteInNamespace(namespace, name string) error {
+func (s *enabledServiceBase) DeleteInNamespace(name, namespace string) error {
 	return s.Client.Namespace(namespace).Delete(name, &v1.DeleteOptions{})
 }
 
