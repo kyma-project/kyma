@@ -54,9 +54,7 @@ The value for this override must be a single string containing a valid definitio
 
 See the following example that customizes settings for the `policy` and `pilot` components of Istio:
 
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    ---
+    ```yaml
     apiVersion: v1
     kind: ConfigMap
     metadata:
@@ -119,8 +117,9 @@ See the following example that customizes settings for the `policy` and `pilot` 
                       maxUnavailable: 0
                   tolerations: []
             enabled: true
-    EOF
     ```
+
+While installing, don't forget to provide Kyma CLI with this file's path via `-o` flag.
 
 Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) documentation for details about available options.
   </details>
@@ -130,10 +129,9 @@ Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/isti
   </summary>
 
   1. Create a Kubernetes cluster for Kyma installation.
-  2. Apply an override that forces the Istio Service Mesh to use the production profile:
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    ---
+  2. Create an override file that forces the Istio Service Mesh to use the production profile:
+
+    ```yaml
     apiVersion: v1
     kind: ConfigMap
     metadata:
@@ -151,9 +149,9 @@ Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/isti
 
       gateways.istio-ingressgateway.autoscaleMin: "3"
       gateways.istio-ingressgateway.autoscaleMax: "10"
-    EOF
     ```
-  3. Install Kyma on the cluster.
+
+  3. Install Kyma on the cluster providing this file's path using the `-o` flag.
 
   </details>
   <details>
@@ -162,6 +160,7 @@ Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/isti
   </summary>
 
   1. Apply an override that forces the Istio Service Mesh to use the production profile:
+
     ```bash
     cat <<EOF | kubectl apply -f -
     ---
@@ -184,6 +183,7 @@ Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/isti
       gateways.istio-ingressgateway.autoscaleMax: "10"
     EOF
     ```
+
   2. Run the [cluster update process](/root/kyma/#installation-update-kyma).
 
   </details>
