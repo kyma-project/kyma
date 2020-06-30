@@ -32,11 +32,11 @@ type Config struct {
 }
 
 type Operator struct {
-	gitOperator GitInterface
+	gitInterface GitInterface
 }
 
 func NewOperator() *Operator {
-	return &Operator{gitOperator: NewGit()}
+	return &Operator{gitInterface: NewGit()}
 }
 
 func (g *Operator) CheckBranchChanges(config Config) (commitHash string, changesOccurred bool, err error) {
@@ -45,7 +45,7 @@ func (g *Operator) CheckBranchChanges(config Config) (commitHash string, changes
 		return commitHash, changesOccurred, errors.Wrap(err, "while parsing auth fields")
 	}
 
-	repo, err := g.gitOperator.Clone(memory.NewStorage(), nil, &git.CloneOptions{
+	repo, err := g.gitInterface.Clone(memory.NewStorage(), nil, &git.CloneOptions{
 		URL:           config.RepoUrl,
 		ReferenceName: plumbing.NewBranchReferenceName(config.Branch),
 		Auth:          auth,
@@ -77,7 +77,7 @@ func (o *Operator) CloneRepoFromCommit(path, repoUrl, commit string, auth map[st
 		return "", errors.Wrap(err, "while parsing auth fields")
 	}
 
-	repo, err := o.gitOperator.PlainClone(path, false, &git.CloneOptions{
+	repo, err := o.gitInterface.PlainClone(path, false, &git.CloneOptions{
 		URL:  repoUrl,
 		Auth: basicAuth,
 	})
