@@ -63,7 +63,7 @@ func TestGetLastCommit(t *testing.T) {
 				Branch:       "master",
 				ActualCommit: "1234",
 				BaseDir:      "",
-				Secret:       map[string]interface{}{},
+				Secret:       map[string]string{},
 			},
 			expectedCommit: gomega.HaveLen(0),
 			expectedIsOk:   gomega.BeFalse(),
@@ -75,7 +75,7 @@ func TestGetLastCommit(t *testing.T) {
 				Branch:       "master",
 				ActualCommit: "1234",
 				BaseDir:      "",
-				Secret:       map[string]interface{}{"login": "test", "test": "test", "test-2": "test"},
+				Secret:       map[string]string{"login": "test", "test": "test", "test-2": "test"},
 			},
 			expectedCommit: gomega.HaveLen(0),
 			expectedIsOk:   gomega.BeFalse(),
@@ -142,16 +142,16 @@ func TestGetLastCommit(t *testing.T) {
 	}
 }
 
-func fixCloneOptions(url, branch string, auth map[string]interface{}) *git.CloneOptions {
+func fixCloneOptions(url, branch string, auth map[string]string) *git.CloneOptions {
 	basicAuth := &http.BasicAuth{}
 	if auth != nil {
 		username := ""
 		password := ""
 		if key, ok := auth[usernameKey]; ok {
-			username = key.(string)
+			username = key
 		}
 		if key, ok := auth[passwordKey]; ok {
-			password = key.(string)
+			password = key
 		}
 		basicAuth = &http.BasicAuth{
 			Username: username,
