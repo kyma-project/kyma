@@ -27,7 +27,7 @@ type Config struct {
 	Branch       string
 	ActualCommit string
 	BaseDir      string
-	Secret       map[string]interface{}
+	Secret       map[string]string
 }
 
 type Operator struct {
@@ -70,17 +70,17 @@ func (g *Operator) CheckBranchChanges(config Config) (commitHash string, changes
 	return commitHash, changesOccurred, nil
 }
 
-func convertToBasicAuth(secret map[string]interface{}) (*http.BasicAuth, error) {
+func convertToBasicAuth(secret map[string]string) (*http.BasicAuth, error) {
 	if secret == nil {
 		return &http.BasicAuth{}, nil
 	}
 
-	username, ok := secret[usernameKey].(string)
+	username, ok := secret[usernameKey]
 	if !ok {
 		return nil, fmt.Errorf("missing field %s", usernameKey)
 	}
 
-	password, ok := secret[passwordKey].(string)
+	password, ok := secret[passwordKey]
 	if !ok {
 		return nil, fmt.Errorf("missing field %s", passwordKey)
 	}
