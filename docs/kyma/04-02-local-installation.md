@@ -82,7 +82,7 @@ Kyma comes with a local wildcard self-signed `server.crt` certificate. The `kyma
 
 >**NOTE:** Mozilla Firefox uses its own certificate keychain. If you want to access the Console UI though Firefox, add the Kyma wildcard certificate to the certificate keychain of the browser. To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. See the [Java environment](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) as an example.
 
-1. After the installation is completed, you can access the Console UI. To open the the Console UI on your default browser, run:
+1. After the installation is completed, you can access the Console UI. To open the the Console UI in your default browser, run:
 
    ```bash
    kyma console
