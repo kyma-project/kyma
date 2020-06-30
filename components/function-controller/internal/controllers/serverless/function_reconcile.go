@@ -206,3 +206,13 @@ func syncSource(instance *v1alpha1.Function) bool {
 			instance.Spec.Repository.Dockerfile != instance.Status.Repository.Dockerfile ||
 			instance.Spec.Source != instance.Status.Source)
 }
+
+func syncSource(instance *v1alpha1.Function) bool {
+	return instance.Spec.SourceType == v1alpha1.Git &&
+		(instance.Spec.Repository.Commit == "" && instance.Status.Repository.Commit == "" ||
+			instance.Spec.Repository.Commit != instance.Status.Repository.Commit ||
+			instance.Spec.Repository.Branch != instance.Status.Repository.Branch ||
+			instance.Spec.Repository.BaseDir != instance.Status.Repository.BaseDir ||
+			instance.Spec.Repository.Dockerfile != instance.Status.Repository.Dockerfile ||
+			instance.Spec.Source != instance.Status.Source)
+}
