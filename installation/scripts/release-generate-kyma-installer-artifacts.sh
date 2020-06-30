@@ -18,9 +18,7 @@ INSTALLER_YAML_PATH="${RESOURCES_DIR}/installer.yaml"
 INSTALLER_LOCAL_CONFIG_PATH="${RESOURCES_DIR}/installer-config-local.yaml.tpl"
 INSTALLER_LOCAL_CR_PATH="${RESOURCES_DIR}/installer-cr.yaml.tpl"
 INSTALLER_CLUSTER_CR_PATH="${RESOURCES_DIR}/installer-cr-cluster.yaml.tpl"
-INSTALLER_COMPASS_CLUSTER_CR_PATH="${RESOURCES_DIR}/installer-cr-cluster-compass.yaml.tpl"
 INSTALLER_RUNTIME_CLUSTER_CR_PATH="${RESOURCES_DIR}/installer-cr-cluster-runtime.yaml.tpl"
-INSTALLER_COMPASS_DEP_CLUSTER_CR_PATH="${RESOURCES_DIR}/installer-cr-cluster-compass-dependencies.yaml.tpl"
 
 function generateLocalArtifact() {
     TMP_LOCAL_CR=$(mktemp)
