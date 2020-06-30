@@ -76,7 +76,6 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) 
 							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 						},
 						{
-							Name: "workspace",
 							VolumeSource: corev1.VolumeSource{
 								EmptyDir: &corev1.EmptyDirVolumeSource{},
 							},
