@@ -83,7 +83,46 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) 
 						},
 					},
 					InitContainers: []corev1.Container{
-						//TODO repo-fetching-init-container goes here
+						{
+							Name:  "repo-fetcher",
+							Image: "eu.gcr.io/kyma-project/function-build-init@sha256:447f279ba68ebb157505826bff3e77a9b71815d314e56bfdfbea47dc8a3701ae",
+							Env: []corev1.EnvVar{
+								{
+									Name:  "APP_REPOSITORY_URL",
+									Value: instance.Spec.Source,
+								},
+								{
+									Name:  "APP_REPOSITORY_COMMIT",
+									Value: instance.Spec.Repository.Commit,
+								},
+								{
+									Name:  "APP_MOUNT_PATH",
+									Value: instance.Spec.Repository.BaseDir,
+								},
+								{
+									Name: "APP_REPOSITORY_USERNAME",
+									ValueFrom: &corev1.EnvVarSource{
+										SecretKeyRef: &corev1.SecretKeySelector{
+											LocalObjectReference: corev1.LocalObjectReference{
+												Name: instance.ObjectMeta.Name,
+											},
+											Key: "REPOSITORY_USERNAME",
+										},
+									},
+								},
+								{
+									Name: "APP_REPOSITORY_PASSWORD",
+									ValueFrom: &corev1.EnvVarSource{
+										SecretKeyRef: &corev1.SecretKeySelector{
+											LocalObjectReference: corev1.LocalObjectReference{
+												Name: instance.ObjectMeta.Name,
+											},
+											Key: "REPOSITORY_PASSWORD",
+										},
+									},
+								},
+							},
+						},
 						{
 							Name:    "credential-initializer",
 							Image:   r.config.Build.CredsInitImage,
