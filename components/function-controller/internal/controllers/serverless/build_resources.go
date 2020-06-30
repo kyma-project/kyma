@@ -103,7 +103,10 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) 
 						{
 							Name:  "executor",
 							Image: r.config.Build.ExecutorImage,
-							Args:  append(r.config.Build.ExecutorArgs, fmt.Sprintf("%s=%s", destinationArg, imageName), "--context=dir:///workspace"),
+							Args: append(r.config.Build.ExecutorArgs,
+								fmt.Sprintf("%s=%s", destinationArg, imageName),
+								"--context=dir:///workspace",
+								fmt.Sprintf("--dockerfile=%s", instance.Spec.Repository.Dockerfile)),
 							Resources: corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceMemory: r.config.Build.LimitsMemoryValue,
