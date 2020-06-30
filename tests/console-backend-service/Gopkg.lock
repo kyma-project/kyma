@@ -34,6 +34,14 @@
   version = "v4.5.0"
 
 [[projects]]
+  digest = "1:81466b4218bf6adddac2572a30ac733a9255919bc2f470b4827a317bd4ee1756"
+  name = "github.com/ghodss/yaml"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:53becd66889185091b58ea3fc49294996f2179fb05a89702f4de7d15e581b509"
   name = "github.com/go-logr/logr"
   packages = ["."]
@@ -137,6 +145,14 @@
   revision = "e14f8d59a22d460d56c5ee92507cd94c78fbf274"
 
 [[projects]]
+  digest = "1:a3998f85665bdf805d519735e658c0e0125bd67b57bb15e414a5a9e360e32455"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "edb144dfd453055e1e49a3d8b410a660b5a87613"
+  version = "v1.0.3"
+
+[[projects]]
   digest = "1:a5553de4763c96654ce6e92593c75bb5f53dc6f0df63ca3022945c6c364b3b82"
   name = "github.com/kubernetes-incubator/service-catalog"
   packages = [
@@ -232,6 +248,14 @@
   pruneopts = "NUT"
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:1dbbefdedbdb89fc0073bfa0df49e0f117f9d901fe265c24552b72473cc5a650"
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "60c74ad9be0d874af0ab0daef6ab07c5c5911f0d"
+  version = "v1.6.0"
 
 [[projects]]
   digest = "1:d115708a27806831d1babbc6f28a7478ddf8e32a7095507c816e2515fb03a810"
@@ -488,6 +512,14 @@
   version = "kubernetes-1.15.0"
 
 [[projects]]
+  branch = "release-1.12"
+  digest = "1:9d15b3b19ff07702451e28152bde999bbf216a3fc22cf0760ac8a78bf8e568a6"
+  name = "k8s.io/cli-runtime"
+  packages = ["pkg/genericclioptions/printers"]
+  pruneopts = "NUT"
+  revision = "1d4f3e836fd24e95c1457ce8d096f5ab5107054a"
+
+[[projects]]
   digest = "1:c1eeb8b1fff5a8e8470fd55cdf5634b9d71270f6a16ae382c9430eca2cf67f96"
   name = "k8s.io/client-go"
   packages = [
@@ -583,6 +615,7 @@
     "github.com/machinebox/graphql",
     "github.com/mitchellh/mapstructure",
     "github.com/pkg/errors",
+    "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
     "github.com/vrischmann/envconfig",
@@ -598,6 +631,7 @@
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apimachinery/pkg/util/wait",
+    "k8s.io/cli-runtime/pkg/genericclioptions/printers",
     "k8s.io/client-go/dynamic",
     "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/kubernetes/typed/apps/v1",
