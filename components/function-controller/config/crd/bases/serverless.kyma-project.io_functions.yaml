@@ -36,8 +36,16 @@ spec:
         spec:
           description: FunctionSpec defines the desired state of Function
           properties:
+            baseDir:
+              type: string
+            branch:
+              type: string
+            commit:
+              type: string
             deps:
               description: Deps defines the dependencies for a function
+              type: string
+            dockerfile:
               type: string
             env:
               description: Env defines an array of key value pairs need to be used
@@ -184,8 +192,11 @@ spec:
             source:
               description: Source defines the source code of a function
               type: string
+            type:
+              type: string
           required:
           - source
+          - type
           type: object
         status:
           description: 'FunctionStatus defines the observed state of FuncSONPath:
@@ -210,6 +221,8 @@ spec:
                 - status
                 type: object
               type: array
+            currentRevision:
+              type: string
           type: object
       type: object
   version: v1alpha1

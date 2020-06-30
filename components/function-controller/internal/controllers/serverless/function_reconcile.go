@@ -2,18 +2,21 @@ package serverless
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
@@ -105,11 +108,48 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, err
 	}
 
+	var revision string
+	syncSource := instance.Spec.Repository.Commit != instance.Status.CurrentRevision &&
+		instance.Spec.SourceType != v1alpha1.Git
+
+	if syncSource {
+		var secret *corev1.Secret
+		var err error
+
+		if err = r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: instance.Spec.Source}, secret); err != nil {
+			return ctrl.Result{}, err
+		}
+
+		cfg := &Config{
+			RepoUrl:      instance.Spec.Source,
+			Branch:       instance.Spec.Repository.Branch,
+			ActualCommit: instance.Spec.Repository.Commit,
+			BaseDir:      instance.Spec.Repository.BaseDir,
+			Secret:       secret.StringData,
+		}
+		revision, syncSource, err = chekForUpdate(cfg)
+
+		if err != nil {
+			return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+				Type:               serverlessv1alpha1.ConditionConfigurationReady,
+				Status:             corev1.ConditionTrue,
+				LastTransitionTime: metav1.Now(),
+				Reason:             v1alpha1.ConditionReasonSourceUpdateFailed,
+				Message:            fmt.Sprintf("Sources update failed: %v", instance.Name),
+			})
+		}
+	}
+
 	switch {
-	case r.isOnConfigMapChange(instance, configMaps.Items, deployments.Items):
+	case syncSource:
+		return r.onSourceChange(ctx, log, instance, revision)
+	case instance.Spec.SourceType != v1alpha1.Git && r.isOnConfigMapChange(instance, configMaps.Items, deployments.Items):
 		return r.onConfigMapChange(ctx, log, instance, configMaps.Items)
 	case r.isOnJobChange(instance, jobs.Items, deployments.Items):
-		return r.onJobChange(ctx, log, instance, configMaps.Items[0].GetName(), jobs.Items)
+		if instance.Spec.SourceType != v1alpha1.Git {
+			return r.onJobChange(ctx, log, instance, configMaps.Items[0].GetName(), jobs.Items)
+		}
+		panic("not implemented yet")
 	case r.isOnDeploymentChange(instance, deployments.Items):
 		return r.onDeploymentChange(ctx, log, instance, deployments.Items)
 	case r.isOnServiceChange(instance, services.Items):
@@ -119,4 +159,30 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	default:
 		return r.updateDeploymentStatus(ctx, log, instance, deployments.Items, corev1.ConditionTrue)
 	}
+}
+
+func (r *FunctionReconciler) shouldNoIgnoreSourceUpgradeCheck(instance *serverlessv1alpha1.Function) bool {
+	return instance.Spec.Repository.Commit != instance.Status.CurrentRevision
+}
+
+func (r *FunctionReconciler) onSourceChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, revision string) (ctrl.Result, error) {
+	return r.updateStatus2(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+		Type:               serverlessv1alpha1.ConditionConfigurationReady,
+		Status:             corev1.ConditionTrue,
+		LastTransitionTime: metav1.Now(),
+		Reason:             v1alpha1.ConditionReasonSourceUpdated,
+		Message:            fmt.Sprintf("Sources %s updated", instance.Name),
+	}, revision)
+}
+
+func chekForUpdate(config *Config) (string, bool, error) {
+	panic("not implemented yet")
+}
+
+type Config struct {
+	RepoUrl      string
+	Branch       string
+	ActualCommit string
+	BaseDir      string
+	Secret       map[string]string
 }

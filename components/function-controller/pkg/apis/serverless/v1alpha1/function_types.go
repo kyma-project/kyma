@@ -5,6 +5,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type SourceType string
+
+const (
+	Git SourceType = "git"
+)
+
 // FunctionSpec defines the desired state of Function
 type FunctionSpec struct {
 	// Source defines the source code of a function
@@ -27,6 +33,10 @@ type FunctionSpec struct {
 
 	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
+
+	SourceType SourceType `json:"type"`
+
+	Repository Repository `json:",inline,omitempty"`
 }
 
 const (
@@ -51,6 +61,8 @@ type ConditionReason string
 const (
 	ConditionReasonConfigMapCreated               ConditionReason = "ConfigMapCreated"
 	ConditionReasonConfigMapUpdated               ConditionReason = "ConfigMapUpdated"
+	ConditionReasonSourceUpdated                  ConditionReason = "SourceUpdated"
+	ConditionReasonSourceUpdateFailed             ConditionReason = "SourceUpdateFailed"
 	ConditionReasonJobFailed                      ConditionReason = "JobFailed"
 	ConditionReasonJobCreated                     ConditionReason = "JobCreated"
 	ConditionReasonJobUpdated                     ConditionReason = "JobUpdated"
@@ -78,7 +90,15 @@ type Condition struct {
 
 // FunctionStatus defines the observed state of FuncSONPath: .status.phase
 type FunctionStatus struct {
-	Conditions []Condition `json:"conditions,omitempty"`
+	Conditions      []Condition `json:"conditions,omitempty"`
+	CurrentRevision string      `json:"currentRevision,omitempty"`
+}
+
+type Repository struct {
+	BaseDir    string `json:"baseDir,omitempty"`
+	Dockerfile string `json:"dockerfile,omitempty"`
+	Commit     string `json:"commit,omitempty"`
+	Branch     string `json:"branch,omitempty"`
 }
 
 // Function is the Schema for the functions API

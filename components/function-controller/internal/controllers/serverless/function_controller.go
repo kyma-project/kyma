@@ -65,11 +65,12 @@ func (r *FunctionReconciler) calculateImageTag(instance *serverlessv1alpha1.Func
 	return fmt.Sprintf("%x", hash)
 }
 
-func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) (ctrl.Result, error) {
+func (r *FunctionReconciler) updateStatus2(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition, currentRevision string) (ctrl.Result, error) {
 	condition.LastTransitionTime = metav1.Now()
 
 	service := instance.DeepCopy()
 	service.Status.Conditions = r.updateCondition(service.Status.Conditions, condition)
+	service.Status.CurrentRevision = currentRevision
 
 	if r.equalConditions(instance.Status.Conditions, service.Status.Conditions) {
 		return result, nil
@@ -87,6 +88,10 @@ func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Resul
 	r.recorder.Event(instance, eventType, string(condition.Reason), condition.Message)
 
 	return result, nil
+}
+
+func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) (ctrl.Result, error) {
+	return r.updateStatus2(ctx, result, instance, condition, "")
 }
 
 func (r *FunctionReconciler) updateCondition(conditions []serverlessv1alpha1.Condition, condition serverlessv1alpha1.Condition) []serverlessv1alpha1.Condition {
