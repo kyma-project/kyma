@@ -12,7 +12,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/gitops/automock"
+	"github.com/kyma-project/kyma/components/function-controller/internal/gitops/automock"
 	"github.com/onsi/gomega"
 )
 
@@ -113,11 +113,11 @@ func TestGetLastCommit(t *testing.T) {
 			tmpDir, _ := ioutil.TempDir(os.TempDir(), TmpPrefix)
 			defer os.RemoveAll(tmpDir)
 
-			operator := &automock.GitOperator{}
-			mgr := NewManager(operator)
+			git := &automock.GitInterface{}
+			operator := Operator{gitOperator: git}
 			lastCommit := ""
 			g := gomega.NewWithT(t)
-			call := operator.On("Clone", memory.NewStorage(), nil,
+			call := git.On("Clone", memory.NewStorage(), nil,
 				fixCloneOptions(testData.config.RepoUrl, testData.config.Branch, testData.config.Secret))
 
 			if testData.withoutRepo {
@@ -129,7 +129,7 @@ func TestGetLastCommit(t *testing.T) {
 			}
 
 			// when
-			hash, isOk, err := mgr.CheckBranchChanges(testData.config)
+			hash, isOk, err := operator.CheckBranchChanges(testData.config)
 
 			//then
 			g.Expect(hash).To(testData.expectedCommit)

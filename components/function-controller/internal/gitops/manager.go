@@ -17,8 +17,8 @@ const (
 	passwordKey = "password"
 )
 
-//go:generate mockery -name=GitOperator -output=automock -outpkg=automock -case=underscore
-type GitOperator interface {
+//go:generate mockery -name=GitInterface -output=automock -outpkg=automock -case=underscore
+type GitInterface interface {
 	Clone(s storage.Storer, worktree billy.Filesystem, o *git.CloneOptions) (*git.Repository, error)
 }
 
@@ -30,15 +30,15 @@ type Config struct {
 	Secret       map[string]interface{}
 }
 
-type Manager struct {
-	gitOperator GitOperator
+type Operator struct {
+	gitOperator GitInterface
 }
 
-func NewManager(operator GitOperator) *Manager {
-	return &Manager{gitOperator: operator}
+func NewOperator() *Operator {
+	return &Operator{gitOperator: NewGit()}
 }
 
-func (g *Manager) CheckBranchChanges(config Config) (commitHash string, changesOccurred bool, err error) {
+func (g *Operator) CheckBranchChanges(config Config) (commitHash string, changesOccurred bool, err error) {
 	auth, err := convertToBasicAuth(config.Secret)
 	if err != nil {
 		return commitHash, changesOccurred, errors.Wrap(err, "while parsing auth fields")
