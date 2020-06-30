@@ -6,6 +6,7 @@ import (
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -14,12 +15,14 @@ func ForServiceInstanceReady(instanceName, namespace string, svcatCli *clientset
 	return waiter.WaitAtMost(func() (bool, error) {
 		instance, err := svcatCli.ServicecatalogV1beta1().ServiceInstances(namespace).Get(instanceName, metav1.GetOptions{})
 		if err != nil || instance == nil {
+			shared.LogInstanceAndBrokersReport(instanceName, namespace, svcatCli)
 			return false, err
 		}
 
 		conditions := instance.Status.Conditions
 		for _, cond := range conditions {
 			if cond.Type == v1beta1.ServiceInstanceConditionReady {
+				shared.LogInstanceAndBrokersReport(instanceName, namespace, svcatCli)
 				return cond.Status == v1beta1.ConditionTrue, nil
 			}
 		}
@@ -36,6 +39,7 @@ func ForServiceInstanceDeletion(instanceName, namespace string, svcatCli *client
 			return true, nil
 		}
 		if err != nil {
+			shared.LogInstanceAndBrokersReport(instanceName, namespace, svcatCli)
 			return false, err
 		}
 
