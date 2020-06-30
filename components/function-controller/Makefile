@@ -24,7 +24,7 @@ GOBIN=$(shell go env GOBIN)
 endif
 
 verify:: mod-verify
-release: build-function-runtime-image push-function-runtime-image build-function-webhook push-function-webhook build-image push-image
+release: build-function-runtime-image push-function-runtime-image build-function-webhook push-function-webhook build-function-build-init push-function-build-init build-image push-image
 
 
 resolve-local:
