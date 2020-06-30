@@ -2,6 +2,7 @@ package gitops
 
 import (
 	"fmt"
+
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -77,8 +78,8 @@ func (o *Operator) CloneRepoFromCommit(path, repoUrl, commit string, auth map[st
 	}
 
 	repo, err := o.gitOperator.PlainClone(path, false, &git.CloneOptions{
-		URL:               repoUrl,
-		Auth:              basicAuth,
+		URL:  repoUrl,
+		Auth: basicAuth,
 	})
 	if err != nil {
 		return commitHash, errors.Wrapf(err, "while cloning repository: %s", repoUrl)
@@ -90,7 +91,7 @@ func (o *Operator) CloneRepoFromCommit(path, repoUrl, commit string, auth map[st
 	}
 
 	err = tree.Checkout(&git.CheckoutOptions{
-		Hash:   plumbing.NewHash(commit),
+		Hash: plumbing.NewHash(commit),
 	})
 	if err != nil {
 		return "", errors.Wrapf(err, "while checkout repository: %s, to commit: %s", repoUrl, commit)

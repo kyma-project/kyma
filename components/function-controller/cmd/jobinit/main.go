@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/gitops"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
