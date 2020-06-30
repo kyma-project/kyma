@@ -15,3 +15,7 @@ func NewGit() *Git {
 func (o *Git) Clone(storage storage.Storer, worktree billy.Filesystem, options *git.CloneOptions) (*git.Repository, error) {
 	return git.Clone(storage, worktree, options)
 }
+
+func (o *Git) PlainClone(path string, isBare bool, options *git.CloneOptions) (*git.Repository, error) {
+	return git.PlainClone(path, isBare, options)
+}

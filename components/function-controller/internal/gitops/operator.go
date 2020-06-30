@@ -2,7 +2,6 @@ package gitops
 
 import (
 	"fmt"
-
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -20,6 +19,7 @@ const (
 //go:generate mockery -name=GitInterface -output=automock -outpkg=automock -case=underscore
 type GitInterface interface {
 	Clone(s storage.Storer, worktree billy.Filesystem, o *git.CloneOptions) (*git.Repository, error)
+	PlainClone(path string, isBare bool, options *git.CloneOptions) (*git.Repository, error)
 }
 
 type Config struct {
@@ -68,6 +68,51 @@ func (g *Operator) CheckBranchChanges(config Config) (commitHash string, changes
 	}
 
 	return commitHash, changesOccurred, nil
+}
+
+func (o *Operator) CloneRepoFromCommit(path, repoUrl, commit string, auth map[string]string) (commitHash string, err error) {
+	basicAuth, err := convertToBasicAuth(auth)
+	if err != nil {
+		return "", errors.Wrap(err, "while parsing auth fields")
+	}
+
+	repo, err := o.gitOperator.PlainClone(path, false, &git.CloneOptions{
+		URL:               repoUrl,
+		Auth:              basicAuth,
+	})
+	if err != nil {
+		return commitHash, errors.Wrapf(err, "while cloning repository: %s", repoUrl)
+	}
+
+	tree, err := repo.Worktree()
+	if err != nil {
+		return "", errors.Wrapf(err, "while getting WorkTree reference for repository: %s", repoUrl)
+	}
+
+	err = tree.Checkout(&git.CheckoutOptions{
+		Hash:   plumbing.NewHash(commit),
+	})
+	if err != nil {
+		return "", errors.Wrapf(err, "while checkout repository: %s, to commit: %s", repoUrl, commit)
+	}
+
+	head, err := repo.Head()
+	if err != nil {
+		return commitHash, errors.Wrapf(err, "while getting HEAD reference for repository: %s", repoUrl)
+	}
+
+	commitHash = head.Hash().String()
+
+	return head.Hash().String(), err
+}
+
+func (o *Operator) ConvertToMap(username, password string) (auth map[string]string) {
+	if username != "" && password != "" {
+		auth = map[string]string{}
+		auth[usernameKey] = username
+		auth[passwordKey] = password
+	}
+	return auth
 }
 
 func convertToBasicAuth(secret map[string]string) (*http.BasicAuth, error) {
