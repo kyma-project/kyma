@@ -7,7 +7,7 @@ This tutorial shows how to reconnect the Runtime Agent with Compass after the es
 
 ## Prerequisites
 
-- Compass (version matching the Runtime Agent)
+- [Compass](https://github.com/kyma-incubator/compass)
 - [ConfigMap created](#tutorials-configure-runtime-agent-with-compass)
 
 ## Steps
