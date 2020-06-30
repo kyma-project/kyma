@@ -15,6 +15,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/gitops"
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -119,7 +120,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 			return ctrl.Result{}, err
 		}
 
-		cfg := &Config{
+		cfg := &gitops.Config{
 			RepoUrl:      instance.Spec.Source,
 			Branch:       instance.Spec.Repository.Branch,
 			ActualCommit: instance.Spec.Repository.Commit,
@@ -172,16 +173,9 @@ func (r *FunctionReconciler) onSourceChange(ctx context.Context, log logr.Logger
 	}, repository)
 }
 
-func chekForUpdate(config *Config) (string, bool, error) {
-	panic("not implemented yet")
-}
-
-type Config struct {
-	RepoUrl      string
-	Branch       string
-	ActualCommit string
-	BaseDir      string
-	Secret       map[string]string
+func chekForUpdate(config *gitops.Config) (string, bool, error) {
+	opr := gitops.NewOperator()
+	return opr.CheckBranchChanges(*config)
 }
 
 func syncSource(instance *v1alpha1.Function) bool {
