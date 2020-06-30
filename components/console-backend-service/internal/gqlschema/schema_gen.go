@@ -5939,7 +5939,9 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	&ast.Source{Name: "internal/gqlschema/apigateway.graphql", Input: `type APIRule @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule"){
+	&ast.Source{Name: "internal/gqlschema/apigateway.graphql", Input: `scalar APIRuleAccessStrategyInput @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRuleAccessStrategyInput")
+
+type APIRule @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule"){
     name: String!
     spec: APIRuleSpec!
     status: APIRuleStatuses!
@@ -6043,8 +6045,6 @@ scalar ApplicationMappingService
 
 scalar Port @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Port")
 scalar Extension @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.RawExtension")
-
-scalar APIRuleAccessStrategyInput @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Authenticator")
 
 # Directives
 
@@ -41399,11 +41399,11 @@ func (ec *executionContext) marshalNAPIRuleAccessStrategy2ᚖgithubᚗcomᚋory�
 }
 
 func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, v interface{}) (v1alpha11.Authenticator, error) {
-	return UnmarshalAuthenticator(v)
+	return UnmarshalAPIRuleAccessStrategyInput(v)
 }
 
 func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v v1alpha11.Authenticator) graphql.Marshaler {
-	res := MarshalAuthenticator(v)
+	res := MarshalAPIRuleAccessStrategyInput(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")

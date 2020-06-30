@@ -12,7 +12,6 @@ scalar ApplicationMappingService
 
 scalar Port @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Port")
 scalar Extension @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.RawExtension")
-scalar APIRuleAccessStrategyInput @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Authenticator")
 
 # Directives
 
