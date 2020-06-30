@@ -16,6 +16,7 @@ This guide explains how to deploy Kyma on a cluster using your own domain.
   </summary>
 
 - A domain for your [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) (GKE) cluster
+- [Kyma CLI](https://github.com/kyma-project/cli)
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
@@ -30,6 +31,7 @@ This guide explains how to deploy Kyma on a cluster using your own domain.
   </summary>
 
 - A domain for your [Azure Kubernetes Service](https://azure.microsoft.com/services/kubernetes-service/) (AKS) cluster
+- [Kyma CLI](https://github.com/kyma-project/cli)
 - [Microsoft Azure](https://azure.microsoft.com)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 - [Docker](https://www.docker.com/)
@@ -308,44 +310,35 @@ Get the TLS certificate:
   GKE
   </summary>
 
-1. Select a name for your cluster. Export the cluster name and the [zone](https://cloud.google.com/compute/docs/regions-zones/) you want to deploy to as environment variables. Run:
+1. Create a service account and a service account key as JSON following [these steps](https://github.com/kyma-incubator/hydroform/blob/master/provision/examples/gcp/README.md#configure-gcp).
 
-   ```bash
-   export CLUSTER_NAME={YOUR_CLUSTER_NAME}
-   export GCP_ZONE={GCP_ZONE_TO_DEPLOY_TO}
-   ```
+2. Export the cluster name, the name of your GCP project, and the [zone](https://cloud.google.com/compute/docs/regions-zones/) you want to deploy to as environment variables:
 
-2. Create a cluster in the defined zone. Run:
+    ```bash
+    export CLUSTER_NAME={CLUSTER_NAME_YOU_WANT}
+    export GCP_PROJECT={YOUR_GCP_PROJECT}
+    export GCP_ZONE={GCP_ZONE_TO_DEPLOY_TO}
+    ```
 
-   ```bash
-   gcloud container --project "$GCP_PROJECT" clusters \
-   create "$CLUSTER_NAME" --zone "$GCP_ZONE" \
-   --cluster-version "1.15" --machine-type "n1-standard-4" \
-   --addons HorizontalPodAutoscaling,HttpLoadBalancing
-   ```
-    >**NOTE**: Kyma offers the production profile. Change the value of `machine-type` to `n1-standard-8` or `c2-standard-8` if you want to use it.
+3. Create a cluster in the defined zone:
 
-3. Configure kubectl to use your new cluster. Run:
+    ```bash
+    kyma provision gke -c {SERVICE_ACCOUNT_KEY_FILE_PATH} -n $CLUSTER_NAME -l $GCP_ZONE -p $GCP_PROJECT
+    ```
+   >**NOTE**: Kyma offers the production profile. Pass the flag `-t` to Kyma CLI with `n1-standard-8` or `c2-standard-8` if you want to use it.
 
-   ```bash
-   gcloud container clusters get-credentials $CLUSTER_NAME --zone $GCP_ZONE --project $GCP_PROJECT
-   ```
+4. Configure kubectl to use your new cluster:
 
-4. Add your account as the cluster administrator:
+    ```bash
+    gcloud container clusters get-credentials $CLUSTER_NAME --zone $GCP_ZONE --project $GCP_PROJECT
+    ```
 
-   ```bash
-   kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
-   ```
+5. Add your account as the cluster administrator:
 
-5. Install custom installation overrides for your DNS domain and TLC certifcates. Run:
-
-   ```bash
-   kubectl create namespace kyma-installer \
-   && kubectl create configmap owndomain-overrides -n kyma-installer --from-literal=global.domainName=$DOMAIN --from-literal=global.tlsCrt=$TLS_CERT --from-literal=global.tlsKey=$TLS_KEY \
-   && kubectl label configmap owndomain-overrides -n kyma-installer installer=overrides
-   ```
-
->**TIP:** See a [sample ConfigMap](./assets/owndomain-overrides.yaml) for reference.
+    ```bash
+    kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
+    ```
+    >**TIP:** See a [sample ConfigMap](./assets/owndomain-overrides.yaml) for reference.
 
   </details>
   <details>
@@ -367,41 +360,28 @@ Get the TLS certificate:
     az group create --name $RS_GROUP --location $REGION
     ```
 
-3. Create an AKS cluster. Run:
+3. Create a [service principle](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal#manually-create-a-service-principal) on Azure. Create a TOML file with the Azure Client ID, Client Secret, Subscription ID and Tenant ID:
+
+    ```toml
+    CLIENT_ID = {YOUR_CLIENT_ID}
+    CLIENT_SECRET = {YOUR_CLIENT_SECRET}
+    SUBSCRIPTION_ID = {YOUR_SUBSCRIPTION_ID}
+    TENANT_ID = {YOUR_TENANT_ID}
+    ```
+
+4. Create an AKS cluster:
 
     ```bash
-    az aks create \
-      --resource-group $RS_GROUP \
-      --name $CLUSTER_NAME \
-      --node-vm-size "Standard_D4_v3" \
-      --kubernetes-version 1.15.7 \
-      --enable-addons "monitoring,http_application_routing" \
-      --generate-ssh-keys \
-      --max-pods 110
+    kyma provision aks -c {YOUR_CREDENTIALS_FILE_PATH} -n $CLUSTER_NAME -p $RS_GROUP -l $REGION
     ```
-   >**NOTE**: Kyma offers the production profile. Change the value of `node-vm-size` to `Standard_F8s_v2` or `Standard_D8_v3` if you want to use it.
-
-4. To configure kubectl to use your new cluster, run:
-
-    ```bash
-    az aks get-credentials --resource-group $RS_GROUP --name $CLUSTER_NAME
-    ```
+   >**NOTE**: Kyma offers a production profile. Pass the flag `-t` to Kyma CLI with `Standard_F8s_v2` or `Standard_D8_v3` if you want to use it.
 
 5. Add additional privileges to be able to access readiness probes endpoints on your AKS cluster.
 
     ```bash
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_RELEASE_VERSION/installation/resources/azure-crb-for-healthz.yaml
     ```
-
-6. Install custom installation overrides for AKS, your DNS domain and TLC certifcates. Run:
-
-    ```bash
-    kubectl create namespace kyma-installer \
-    && kubectl create configmap owndomain-overrides -n kyma-installer --from-literal=global.domainName=$DOMAIN --from-literal=global.tlsCrt=$TLS_CERT --from-literal=global.tlsKey=$TLS_KEY \
-    && kubectl label configmap owndomain-overrides -n kyma-installer installer=overrides
-    ```
-
->**CAUTION:** If you define your own Kubernetes jobs on the AKS cluster, follow the [troubleshooting guide](/components/service-mesh/#troubleshooting-kubernetes-jobs-fail-on-aks) to avoid jobs running endlessly on AKS deployments of Kyma.
+    >**CAUTION:** If you define your own Kubernetes jobs on the AKS cluster, follow the [troubleshooting guide](/components/service-mesh/#troubleshooting-kubernetes-jobs-fail-on-aks) to avoid jobs running endlessly on AKS deployments of Kyma.
 
   </details>
 
@@ -413,34 +393,11 @@ Get the TLS certificate:
       >* [Istio production profile](/components/service-mesh/#configuration-service-mesh-production-profile)
       >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-profiles)
 
-1. Deploy Kyma. Run:
+1. Install Kyma using Kyma CLI:
 
     ```bash
-    kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-installer-cluster.yaml
+    kyma install -s $KYMA_VERSION --domain $DOMAIN --tlsCert $TLS_CERT --tlsKey $TLS_KEY
     ```
-
-2. Check if the Pod of the Kyma Installer is running:
-
-    ```bash
-    kubectl get pods -n kyma-installer
-    ```
-
-3. To watch the installation progress, run:
-
-    ```bash
-    while true; do \
-      kubectl -n default get installation/kyma-installation -o jsonpath="{'Status: '}{.status.state}{', description: '}{.status.description}"; echo; \
-      sleep 5; \
-    done
-    ```
-
-After the installation process is finished, the `Status: Installed, description: Kyma installed` message appears.
-
-If you receive an error, fetch the Kyma Installer logs using this command:
-
-```bash
-kubectl -n kyma-installer logs -l 'name=kyma-installer'
-```
 
 ## Configure DNS for the cluster load balancer
 
@@ -492,20 +449,16 @@ az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n apiserver.
 
 ### Access the cluster
 
-1. To get the address of the cluster's Console, check the host of the Console's virtual service. The name of the host of this virtual service corresponds to the Console URL. To get the virtual service host, run:
+1. To open the cluster's Console in your default browser, run:
 
     ```bash
-    kubectl get virtualservice console-web -n kyma-system -o jsonpath='{ .spec.hosts[0] }'
+    kyma console
     ```
 
-2. Access your cluster under this address:
-
-    ```bash
-    https://{VIRTUAL_SERVICE_HOST}
-    ```
-
-3. To log in to your cluster's Console UI, use the default `admin` static user. Click **Login with Email** and sign in with the **admin@kyma.cx** email address. Use the password contained in the `admin-user` Secret located in the `kyma-system` Namespace. To get the password, run:
+2. To log in to your cluster's Console UI, use the default `admin` static user. Click **Login with Email** and sign in with the **admin@kyma.cx** email address. Use the password printed after the installation. To get the password manually, you can also run:
 
     ```bash
     kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
     ```
+
+If you need to use Helm to manage your Kubernetes resources, read the [additional configuration](#installation-use-helm) document.

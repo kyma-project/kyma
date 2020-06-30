@@ -83,17 +83,16 @@ files:
   - path: "./kyma/docs/kyma/05-04-component-source-url.md"
     config:
       white-list-external: ["https://user:pass@hosting.com/your-user/files/kyma-custom-ory.zip"]
-  - path: "./kyma/docs/compass/08-07-establish-secure-connection-with-compass.md"
+  - path: "./kyma/docs/runtime-agent/08-07-establish-secure-connection-with-compass.md"
     config:
       white-list-external: ["https://compass.{CLUSTER_DOMAIN"]
   - path: "./kyma/docs/migration-guides/1.10-1.11.md"
     config:
       white-list-external: ["https://gateway.domain/APP_NAME/v1/events",
       "https://gateway.domain/APP_NAME/events"]
-  - path: "./kyma/docs/compass/08-01-basic-flow-tutorial.md"
+  - path: "./kyma/docs/runtime-agent/08-01-basic-flow-tutorial.md"
     config:
       white-list-external: ["https://compass.{CLUSTER_DOMAIN"]
   - path: "./kyma/docs/migration-guides/1.13-1.14.md"
     config:
       white-list-external: ["https://github.com/kyma-project/kyma/blob/release-1.14/docs/kyma/03-03-charts.md#migration-to-helm-v3"]
-      
