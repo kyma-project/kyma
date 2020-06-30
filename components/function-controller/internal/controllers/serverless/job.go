@@ -13,6 +13,7 @@ import (
 	apilabels "k8s.io/apimachinery/pkg/labels"
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
@@ -40,7 +41,14 @@ func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function
 }
 
 func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, configMapName string, jobs []batchv1.Job) (ctrl.Result, error) {
-	newJob := r.buildJob(instance, configMapName)
+	var newJob batchv1.Job
+	switch instance.Spec.SourceType {
+	case v1alpha1.Git:
+		newJob = r.buildGitJob(instance)
+	default:
+		newJob = r.buildJob(instance, configMapName)
+	}
+
 	jobsLen := len(jobs)
 
 	switch {

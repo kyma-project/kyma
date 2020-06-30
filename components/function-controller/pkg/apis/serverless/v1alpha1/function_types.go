@@ -90,8 +90,9 @@ type Condition struct {
 
 // FunctionStatus defines the observed state of FuncSONPath: .status.phase
 type FunctionStatus struct {
-	Conditions      []Condition `json:"conditions,omitempty"`
-	CurrentRevision string      `json:"currentRevision,omitempty"`
+	Conditions []Condition `json:"conditions,omitempty"`
+	Repository `json:",inline,omitempty"`
+	Source     string `json:"source,omitempty"`
 }
 
 type Repository struct {

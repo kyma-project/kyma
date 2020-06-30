@@ -109,8 +109,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	}
 
 	var revision string
-	syncSource := instance.Spec.Repository.Commit != instance.Status.CurrentRevision &&
-		instance.Spec.SourceType != v1alpha1.Git
+	syncSource := syncSource(instance)
 
 	if syncSource {
 		var secret *corev1.Secret
@@ -127,8 +126,8 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 			BaseDir:      instance.Spec.Repository.BaseDir,
 			Secret:       secret.StringData,
 		}
-		revision, syncSource, err = chekForUpdate(cfg)
 
+		revision, syncSource, err = chekForUpdate(cfg)
 		if err != nil {
 			return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 				Type:               serverlessv1alpha1.ConditionConfigurationReady,
@@ -142,14 +141,16 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	switch {
 	case syncSource:
-		return r.onSourceChange(ctx, log, instance, revision)
+		return r.onSourceChange(ctx, log, instance, &serverlessv1alpha1.Repository{
+			Branch:     instance.Spec.Repository.Branch,
+			Commit:     revision,
+			BaseDir:    instance.Spec.Repository.BaseDir,
+			Dockerfile: instance.Spec.Repository.Dockerfile,
+		})
 	case instance.Spec.SourceType != v1alpha1.Git && r.isOnConfigMapChange(instance, configMaps.Items, deployments.Items):
 		return r.onConfigMapChange(ctx, log, instance, configMaps.Items)
 	case r.isOnJobChange(instance, jobs.Items, deployments.Items):
-		if instance.Spec.SourceType != v1alpha1.Git {
-			return r.onJobChange(ctx, log, instance, configMaps.Items[0].GetName(), jobs.Items)
-		}
-		panic("not implemented yet")
+		return r.onJobChange(ctx, log, instance, configMaps.Items[0].GetName(), jobs.Items)
 	case r.isOnDeploymentChange(instance, deployments.Items):
 		return r.onDeploymentChange(ctx, log, instance, deployments.Items)
 	case r.isOnServiceChange(instance, services.Items):
@@ -161,18 +162,14 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	}
 }
 
-func (r *FunctionReconciler) shouldNoIgnoreSourceUpgradeCheck(instance *serverlessv1alpha1.Function) bool {
-	return instance.Spec.Repository.Commit != instance.Status.CurrentRevision
-}
-
-func (r *FunctionReconciler) onSourceChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, revision string) (ctrl.Result, error) {
+func (r *FunctionReconciler) onSourceChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository) (ctrl.Result, error) {
 	return r.updateStatus2(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionConfigurationReady,
 		Status:             corev1.ConditionTrue,
 		LastTransitionTime: metav1.Now(),
 		Reason:             v1alpha1.ConditionReasonSourceUpdated,
 		Message:            fmt.Sprintf("Sources %s updated", instance.Name),
-	}, revision)
+	}, repository)
 }
 
 func chekForUpdate(config *Config) (string, bool, error) {
@@ -185,4 +182,14 @@ type Config struct {
 	ActualCommit string
 	BaseDir      string
 	Secret       map[string]string
+}
+
+func syncSource(instance *v1alpha1.Function) bool {
+	return instance.Spec.SourceType == v1alpha1.Git &&
+		(instance.Spec.Repository.Commit == "" && instance.Status.Repository.Commit == "" ||
+			instance.Spec.Repository.Commit != instance.Status.Repository.Commit ||
+			instance.Spec.Repository.Branch != instance.Status.Repository.Branch ||
+			instance.Spec.Repository.BaseDir != instance.Status.Repository.BaseDir ||
+			instance.Spec.Repository.Dockerfile != instance.Status.Repository.Dockerfile ||
+			instance.Spec.Source != instance.Status.Source)
 }

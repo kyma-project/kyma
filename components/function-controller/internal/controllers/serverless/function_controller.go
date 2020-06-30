@@ -65,12 +65,20 @@ func (r *FunctionReconciler) calculateImageTag(instance *serverlessv1alpha1.Func
 	return fmt.Sprintf("%x", hash)
 }
 
-func (r *FunctionReconciler) updateStatus2(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition, currentRevision string) (ctrl.Result, error) {
+func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.Function) string {
+	hash := sha256.Sum256([]byte(fmt.Sprintf("%s-%s", instance.GetUID(), instance.Spec.Repository.Commit)))
+	return fmt.Sprintf("%x", hash)
+}
+
+func (r *FunctionReconciler) updateStatus2(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition, repository *serverlessv1alpha1.Repository) (ctrl.Result, error) {
 	condition.LastTransitionTime = metav1.Now()
 
 	service := instance.DeepCopy()
 	service.Status.Conditions = r.updateCondition(service.Status.Conditions, condition)
-	service.Status.CurrentRevision = currentRevision
+	if repository != nil {
+		service.Status.Repository = *repository
+	}
+	service.Status.Source = instance.Spec.Source
 
 	if r.equalConditions(instance.Status.Conditions, service.Status.Conditions) {
 		return result, nil
@@ -91,7 +99,7 @@ func (r *FunctionReconciler) updateStatus2(ctx context.Context, result ctrl.Resu
 }
 
 func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) (ctrl.Result, error) {
-	return r.updateStatus2(ctx, result, instance, condition, "")
+	return r.updateStatus2(ctx, result, instance, condition, nil)
 }
 
 func (r *FunctionReconciler) updateCondition(conditions []serverlessv1alpha1.Condition, condition serverlessv1alpha1.Condition) []serverlessv1alpha1.Condition {

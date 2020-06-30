@@ -202,6 +202,12 @@ spec:
           description: 'FunctionStatus defines the observed state of FuncSONPath:
             .status.phase'
           properties:
+            baseDir:
+              type: string
+            branch:
+              type: string
+            commit:
+              type: string
             conditions:
               items:
                 properties:
@@ -221,7 +227,9 @@ spec:
                 - status
                 type: object
               type: array
-            currentRevision:
+            dockerfile:
+              type: string
+            source:
               type: string
           type: object
       type: object
