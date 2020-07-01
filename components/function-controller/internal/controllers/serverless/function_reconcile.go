@@ -9,6 +9,7 @@ import (
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
@@ -115,9 +116,16 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	if syncSource {
 		var secret *corev1.Secret
 		var err error
+		credentials := map[string]string{}
 
 		if err = r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: instance.Spec.Source}, secret); err != nil {
-			return ctrl.Result{}, err
+			if !errors.IsNotFound(err) {
+				return ctrl.Result{}, err
+			}
+		}
+
+		if secret != nil {
+			credentials = secret.StringData
 		}
 
 		cfg := &gitops.Config{
@@ -125,7 +133,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 			Branch:       instance.Spec.Repository.Branch,
 			ActualCommit: instance.Spec.Repository.Commit,
 			BaseDir:      instance.Spec.Repository.BaseDir,
-			Secret:       secret.StringData,
+			Secret:       credentials,
 		}
 
 		revision, syncSource, err = chekForUpdate(cfg)
