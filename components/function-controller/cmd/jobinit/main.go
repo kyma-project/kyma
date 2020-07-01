@@ -30,11 +30,11 @@ func main() {
 	fmt.Println("Create new gitops operator...")
 	operator := gitops.NewOperator()
 
-	fmt.Println("Check for auth config...")
-	auth := operator.ConvertToMap(cfg.RepositoryUsername, cfg.RepositoryPassword)
+	//fmt.Println("Check for auth config...")
+	//auth := operator.ConvertToMap(cfg.RepositoryUsername, cfg.RepositoryPassword)
 
 	fmt.Printf("Clone repo from url: %s and commit: %s...\n", cfg.RepositoryUrl, cfg.RepositoryCommit)
-	commit, err := operator.CloneRepoFromCommit(cfg.MountPath, cfg.RepositoryUrl, cfg.RepositoryCommit, auth)
+	commit, err := operator.CloneRepoFromCommit(cfg.MountPath, cfg.RepositoryUrl, cfg.RepositoryCommit, nil/*auth*/)
 	if err != nil {
 		panic(errors.Wrapf(err, "while cloning repository: %s, from commit: %s", cfg.RepositoryUrl, cfg.RepositoryCommit))
 	}
