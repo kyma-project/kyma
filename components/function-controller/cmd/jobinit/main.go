@@ -19,14 +19,17 @@ type config struct {
 }
 
 func main() {
+	fmt.Println("Start repo fetcher...")
 	cfg := config{}
 	if err := envconfig.InitWithPrefix(&cfg, envPrefix); err != nil {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
 
+	fmt.Println("Check for auth config...")
 	operator := gitops.NewOperator()
 	auth := operator.ConvertToMap(cfg.RepositoryUsername, cfg.RepositoryPassword)
 
+	fmt.Printf("Clone repo from url: %s and commit: %s...", cfg.RepositoryUrl, cfg.RepositoryCommit)
 	commit, err := operator.CloneRepoFromCommit(cfg.MountPath, cfg.RepositoryUrl, cfg.RepositoryCommit, auth)
 	if err != nil {
 		panic(errors.Wrapf(err, "while cloning repository: %s, from commit: %s", cfg.RepositoryUrl, cfg.RepositoryCommit))
