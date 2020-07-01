@@ -1,7 +1,7 @@
 ---
 name: Support request
 about: Request support or ask a question relating to Kyma
-labels: support
+labels: support-request
 ---
 
 <!-- Thank you for your contribution. Before you submit the issue:
