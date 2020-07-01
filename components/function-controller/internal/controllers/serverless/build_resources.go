@@ -62,12 +62,6 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) 
 				Spec: corev1.PodSpec{
 					Volumes: []corev1.Volume{
 						{
-							Name: "repositoryCredentials",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{SecretName: instance.Spec.Source},
-							},
-						},
-						{
 							Name: "credentials",
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{SecretName: r.config.ImagePullSecretName},

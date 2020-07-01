@@ -114,17 +114,19 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	syncSource := syncSource(instance)
 
 	if syncSource {
-		var secret *corev1.Secret
+		var secret corev1.Secret
+		isSecretFound := true
 		var err error
-		credentials := map[string]string{}
+		var credentials map[string]string
 
-		if err = r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: instance.Spec.Source}, secret); err != nil {
+		if err = r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: instance.Name}, &secret); err != nil {
+			isSecretFound = false
 			if !errors.IsNotFound(err) {
 				return ctrl.Result{}, err
 			}
 		}
 
-		if secret != nil {
+		if isSecretFound {
 			credentials = secret.StringData
 		}
 
@@ -159,7 +161,11 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	case instance.Spec.SourceType != v1alpha1.Git && r.isOnConfigMapChange(instance, configMaps.Items, deployments.Items):
 		return r.onConfigMapChange(ctx, log, instance, configMaps.Items)
 	case r.isOnJobChange(instance, jobs.Items, deployments.Items):
-		return r.onJobChange(ctx, log, instance, configMaps.Items[0].GetName(), jobs.Items)
+		configMapName := ""
+		if len(configMaps.Items) > 0 {
+			configMapName = configMaps.Items[0].GetName()
+		}
+		return r.onJobChange(ctx, log, instance, configMapName, jobs.Items)
 	case r.isOnDeploymentChange(instance, deployments.Items):
 		return r.onDeploymentChange(ctx, log, instance, deployments.Items)
 	case r.isOnServiceChange(instance, services.Items):
@@ -182,6 +188,9 @@ func (r *FunctionReconciler) onSourceChange(ctx context.Context, log logr.Logger
 }
 
 func chekForUpdate(config *gitops.Config) (string, bool, error) {
+	if config.ActualCommit != "" {
+		return config.ActualCommit, true, nil
+	}
 	opr := gitops.NewOperator()
 	return opr.CheckBranchChanges(*config)
 }

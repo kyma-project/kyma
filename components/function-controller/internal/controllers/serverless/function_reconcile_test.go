@@ -61,15 +61,7 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionUnknown))
 		gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
 
-		gomega.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonConfigMapCreated))
-
-		configMapList := &corev1.ConfigMapList{}
-		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(configMapList.Items).To(gomega.HaveLen(1))
-		gomega.Expect(configMapList.Items[0].Data[configMapFunction]).To(gomega.Equal(function.Spec.Source))
-		gomega.Expect(configMapList.Items[0].Data[configMapHandler]).To(gomega.Equal("handler.main"))
-		gomega.Expect(configMapList.Items[0].Data[configMapDeps]).To(gomega.Equal("{}"))
+		gomega.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonSourceUpdated))
 
 		ginkgo.By("creating the Job")
 		result, err = reconciler.Reconcile(request)
@@ -245,12 +237,8 @@ var _ = ginkgo.Describe("Function", func() {
 	})
 
 	ginkgo.It("should set proper status on deployment fail", func() {
-		ginkgo.By("creating cm")
-		_, err := reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
-
 		ginkgo.By("creating job")
-		_, err = reconciler.Reconcile(request)
+		_, err := reconciler.Reconcile(request)
 		gomega.Expect(err).To(gomega.BeNil())
 
 		function := &serverlessv1alpha1.Function{}
@@ -317,38 +305,6 @@ var _ = ginkgo.Describe("Function", func() {
 
 		function := &serverlessv1alpha1.Function{}
 		gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-
-		configMapList := &corev1.ConfigMapList{}
-		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(configMapList.Items).To(gomega.HaveLen(1))
-
-		cm := configMapList.Items[0].DeepCopy()
-		cm.Name = "" // generateName will create this
-		cm.ResourceVersion = ""
-		cm.UID = ""
-		cm.CreationTimestamp = metav1.Time{}
-		gomega.Expect(resourceClient.Create(context.TODO(), cm)).To(gomega.Succeed())
-
-		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(configMapList.Items).To(gomega.HaveLen(2))
-
-		ginkgo.By("deleting all configMaps")
-		_, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
-
-		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(configMapList.Items).To(gomega.HaveLen(0))
-
-		ginkgo.By("creating configMap again")
-		_, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
-
-		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(configMapList.Items).To(gomega.HaveLen(1))
 
 		ginkgo.By("creating job")
 		_, err = reconciler.Reconcile(request)
@@ -628,20 +584,6 @@ var _ = ginkgo.Describe("Function", func() {
 			gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			gomega.Expect(function.Labels).NotTo(gomega.BeNil())
 
-			ginkgo.By("updating configmap")
-			_, err = reconciler.Reconcile(request)
-			gomega.Expect(err).To(gomega.BeNil())
-
-			configMapList := &corev1.ConfigMapList{}
-			err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
-			gomega.Expect(err).To(gomega.BeNil())
-			gomega.Expect(configMapList.Items).To(gomega.HaveLen(1))
-			gomega.Expect(configMapList.Items[0].Labels).To(gomega.HaveLen(4))
-
-			cmLabelVal, ok := configMapList.Items[0].Labels[addedLabelKey]
-			gomega.Expect(ok).To(gomega.BeTrue())
-			gomega.Expect(cmLabelVal).To(gomega.Equal(addedLabelValue))
-
 			ginkgo.By("updating job")
 			_, err = reconciler.Reconcile(request)
 			gomega.Expect(err).To(gomega.BeNil())
@@ -740,14 +682,6 @@ var _ = ginkgo.Describe("Function", func() {
 			ginkgo.By("reconciling again -> configmap")
 			_, err = reconciler.Reconcile(request)
 			gomega.Expect(err).To(gomega.BeNil())
-
-			configMapList = &corev1.ConfigMapList{}
-			err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
-			gomega.Expect(err).To(gomega.BeNil())
-			gomega.Expect(configMapList.Items).To(gomega.HaveLen(1))
-
-			_, ok = configMapList.Items[0].Labels[addedLabelKey]
-			gomega.Expect(ok).To(gomega.BeFalse())
 
 			ginkgo.By("reconciling again -> job")
 			_, err = reconciler.Reconcile(request)
