@@ -40,7 +40,6 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `tracing` | ✅ | ⛔️ |
 | `monitoring` | ✅ | ⛔️ |
 | `kiali` | ✅ | ⛔️ |
-| `compass` | ⛔️ | ⛔️ |
 | `compass-runtime-agent` | ⛔️ | ⛔️ |
 
 ## Installation guides
