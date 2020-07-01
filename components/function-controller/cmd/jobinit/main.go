@@ -25,8 +25,10 @@ func main() {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
 
-	fmt.Println("Check for auth config...")
+	fmt.Println("Create new gitops operator...")
 	operator := gitops.NewOperator()
+
+	fmt.Println("Check for auth config...")
 	auth := operator.ConvertToMap(cfg.RepositoryUsername, cfg.RepositoryPassword)
 
 	fmt.Printf("Clone repo from url: %s and commit: %s...", cfg.RepositoryUrl, cfg.RepositoryCommit)
