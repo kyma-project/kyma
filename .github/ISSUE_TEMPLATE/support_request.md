@@ -26,4 +26,4 @@ Describe where it appears, when it occurred, and what it affects.  -->
 
 **Steps to reproduce**
 
-<!-- List the steps to follow to reproduce the bug. Attach any files, links, code samples, or screenshots that could help in investigating the problem. -->
+<!-- Attach any files, links, code samples, or screenshots that are relevant. -->
