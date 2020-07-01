@@ -3,7 +3,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
+    helm.sh/hook-delete-policy: "before-hook-creation" # TODO: temp change for debugging
     helm.sh/hook: "post-install,post-upgrade"
     helm.sh/hook-weight: "10"
   name: istio-install-job
