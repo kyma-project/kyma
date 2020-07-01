@@ -1,5 +1,5 @@
 ---
-name: Consulting
+name: Support request
 about: Request support or ask a question relating to Kyma
 labels: consulting
 ---
