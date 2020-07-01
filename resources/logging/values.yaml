@@ -8,6 +8,7 @@ networkPolicy:
 serviceAccount:
   create: true
   name:
+  annotations: {}
 
 # enable tracing for debug, need install jaeger and specify right jaeger_agent_host
 tracing:
@@ -18,14 +19,11 @@ loki:
   podManagementPolicy: OrderedReady
   nameOverride: loki
   replicas: 1
-  minReadySeconds: 0
   terminationGracePeriodSeconds: 30
-  deploymentStrategy: RollingUpdate
-  port: 3100
-
   updateStrategy:
     type: RollingUpdate
 
+  ## Pod Labels
   podLabels: {}
 
   securityContext:
@@ -34,37 +32,33 @@ loki:
     runAsNonRoot: true
     runAsUser: 10001
 
+  ## Additional Loki container arguments, e.g. log level (debug, info, warn, error)
   extraArgs: {}
     # log.level: debug
 
   image:
     repository: grafana/loki
-    tag: v1.3.0
-    pullPolicy: Always # Always pull while in BETA
+    tag: 1.5.0
+    pullPolicy: IfNotPresent
 
-  # user: user
-  # password: pass
   service:
     port: 3100
-    scheme: http
-    #user: user
-    #password: pass
+    type: ClusterIP
+    nodePort:
     annotations:
       auth.istio.io/3100: NONE
-    #  prometheus.io/scrape: "true"
-    #  prometheus.io/port: "http-metrics"
     labels: {}
 
   readinessProbe:
     httpGet:
       path: /ready
-      port: http
+      port: http-metrics
     initialDelaySeconds: 45
 
   livenessProbe:
     httpGet:
       path: /ready
-      port: http
+      port: http-metrics
     initialDelaySeconds: 45
 
   resources:
@@ -79,62 +73,65 @@ loki:
   podAnnotations:
     sidecar.istio.io/inject: "true"
 
-  ## Deployment annotations
+  ## StatefulSet annotations
   annotations: {}
 
   ## Assign a PriorityClassName to pods if set
   # priorityClassName:
 
-  ## Node labels for pod assignment
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  #
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   nodeSelector: {}
 
   ## Tolerations for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
   tolerations: []
+
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ##
+  # pullSecrets:
+  #   - myRegistryKeySecretName
 
   ## Affinity for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-  ##
   affinity: {}
-    # podAntiAffinity:
-    #   requiredDuringSchedulingIgnoredDuringExecution:
-    #   - labelSelector:
-    #       matchExpressions:
-    #       - key: app
-    #         operator: In
-    #         values:
-    #         - loki
+  # podAntiAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #   - labelSelector:
+  #       matchExpressions:
+  #       - key: app
+  #         operator: In
+  #         values:
+  #         - loki
   #     topologyKey: "kubernetes.io/hostname"
 
-  ## Enable persistence using Persistent Volume Claims
-  ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+  ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
   ## If you set enabled as "True", you need :
   ## - create a pv which above 10Gi and has same namespace with loki
   ## - keep storageClassName same with below setting
   persistence:
     enabled: true
     accessModes:
-      - ReadWriteOnce
+    - ReadWriteOnce
     size: 10Gi
-    storageClassName: ""
-    # annotations: {}
+    annotations: {}
     # subPath: ""
     # existingClaim:
 
   config:
     auth_enabled: false
     ingester:
-      chunk_idle_period: 15m
+      chunk_idle_period: 3m
       chunk_block_size: 262144
+      chunk_retain_period: 1m
+      max_transfer_retries: 0
       lifecycler:
-        address: 127.0.0.1
         ring:
           kvstore:
             store: inmemory
           replication_factor: 1
+
         ## Different ring configs can be used. E.g. Consul
         # ring:
         #   store: consul
@@ -142,21 +139,21 @@ loki:
         #   consul:
         #     host: "consul:8500"
         #     prefix: ""
-        #     httpclienttimeout: "20s"
-        #     consistentreads: true
+        #     http_client_timeout: "20s"
+        #     consistent_reads: true
     limits_config:
       enforce_metric_name: false
       reject_old_samples: true
       reject_old_samples_max_age: 168h
     schema_config:
       configs:
-        - from: 2018-04-15
-          store: boltdb
-          object_store: filesystem
-          schema: v9
-          index:
-            prefix: index_
-            period: 24h
+      - from: 2018-04-15
+        store: boltdb
+        object_store: filesystem
+        schema: v9
+        index:
+          prefix: index_
+          period: 24h
     server:
       http_listen_port: 3100
     storage_config:
@@ -165,10 +162,63 @@ loki:
       filesystem:
         directory: /data/loki/chunks
     chunk_store_config:
-      max_look_back_period: 0
+      max_look_back_period: 0s
     table_manager:
-      retention_deletes_enabled: true 
+      retention_deletes_enabled: true
       retention_period: 24h
+
+  # The values to set in the PodDisruptionBudget spec
+  # If not set then a PodDisruptionBudget will not be created
+  podDisruptionBudget: {}
+  # minAvailable: 1
+  # maxUnavailable: 1
+
+  serviceMonitor:
+    enabled: false
+    interval: ""
+    additionalLabels: {}
+    # scrapeTimeout: 10s
+
+  initContainers: []
+  ## Init containers to be added to the loki pod.
+  # - name: my-init-container
+  #   image: busybox:latest
+  #   command: ['sh', '-c', 'echo hello']
+
+  extraContainers: []
+  ## Additional containers to be added to the loki pod.
+  # - name: reverse-proxy
+  #   image: angelbarrera92/basic-auth-reverse-proxy:dev
+  #   args:
+  #     - "serve"
+  #     - "--upstream=http://localhost:3100"
+  #     - "--auth-config=/etc/reverse-proxy-conf/authn.yaml"
+  #   ports:
+  #     - name: http
+  #       containerPort: 11811
+  #       protocol: TCP
+  #   volumeMounts:
+  #     - name: reverse-proxy-auth-config
+  #       mountPath: /etc/reverse-proxy-conf
+
+  extraVolumes: []
+  ## Additional volumes to the loki pod.
+  # - name: reverse-proxy-auth-config
+  #   secret:
+  #     secretName: reverse-proxy-auth-config
+
+  ## Extra volume mounts that will be added to the loki container
+  extraVolumeMounts: []
+
+  extraPorts: []
+  ## Additional ports to the loki services. Useful to expose extra container ports.
+  # - port: 11811
+  #   protocol: TCP
+  #   name: http
+  #   targetPort: http
+
+  # Extra env variables to pass to the loki container
+  env: []
 
 global:
   containerRegistry:
@@ -176,7 +226,7 @@ global:
   logging_integration_tests:
     name: logging-integration-tests
     dir: 
-    version: caa0bcb1
+    version: 04ed8025
     enabled: true
     env:
       testUser: "admin-user"

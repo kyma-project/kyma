@@ -53,14 +53,6 @@
   version = "v1.3.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:e2b86e41f3d669fc36b50d31d32d22c8ac656c75aa5ea89717ce7177e134ff2a"
-  name = "github.com/golang/glog"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
-
-[[projects]]
   digest = "1:796f9c63c68774a89eade387a8476e45ec2b34f5649b0726983204202c3649d6"
   name = "github.com/golang/protobuf"
   packages = [
@@ -171,7 +163,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:dc4403402dbc1d68cb90658bb71617db8ec045703e552f059419b339976750b3"
+  digest = "1:a1185d76fdf403af61adfe701b2f5823d198e150e4999b61b7be35fd6d902fbf"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/console-backend-service/pkg/apis/ui",
@@ -183,10 +175,6 @@
     "components/helm-broker/pkg/client/clientset/versioned",
     "components/helm-broker/pkg/client/clientset/versioned/scheme",
     "components/helm-broker/pkg/client/clientset/versioned/typed/addons/v1alpha1",
-    "components/idppreset/pkg/apis/authentication/v1alpha1",
-    "components/idppreset/pkg/client/clientset/versioned",
-    "components/idppreset/pkg/client/clientset/versioned/scheme",
-    "components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1",
   ]
   pruneopts = "NUT"
   revision = "f5d791b218819a0aecde663dedda1905d7c12bb5"
@@ -591,7 +579,6 @@
     "github.com/kyma-project/kyma/components/console-backend-service/pkg/apis/ui/v1alpha1",
     "github.com/kyma-project/kyma/components/console-backend-service/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/helm-broker/pkg/client/clientset/versioned",
-    "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned",
     "github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1",
     "github.com/machinebox/graphql",
     "github.com/mitchellh/mapstructure",

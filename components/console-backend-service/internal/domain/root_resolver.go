@@ -20,7 +20,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/authentication"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog"
@@ -35,14 +34,13 @@ type RootResolver struct {
 	ui  *ui.Resolver
 	k8s *k8s.Resolver
 
-	sc             *servicecatalog.PluggableContainer
-	sca            *servicecatalogaddons.PluggableContainer
-	app            *application.PluggableContainer
-	rafter         *rafter.PluggableContainer
-	ag             *apigateway.PluggableResolver
-	authentication *authentication.PluggableResolver
-	serverless     *serverless.PluggableContainer
-	eventing       *eventing.PluggableContainer
+	sc         *servicecatalog.PluggableContainer
+	sca        *servicecatalogaddons.PluggableContainer
+	app        *application.PluggableContainer
+	rafter     *rafter.PluggableContainer
+	ag         *apigateway.PluggableResolver
+	serverless *serverless.PluggableContainer
+	eventing   *eventing.PluggableContainer
 }
 
 func GetRandomNumber() time.Duration {
@@ -109,23 +107,16 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	}
 	makePluggable(eventingResolver)
 
-	authenticationResolver, err := authentication.New(restConfig, informerResyncPeriod+GetRandomNumber())
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing authentication resolver")
-	}
-	makePluggable(authenticationResolver)
-
 	return &RootResolver{
-		k8s:            k8sResolver,
-		ui:             uiContainer.Resolver,
-		sc:             scContainer,
-		sca:            scaContainer,
-		app:            appContainer,
-		rafter:         rafterContainer,
-		ag:             agResolver,
-		serverless:     serverlessResolver,
-		eventing:       eventingResolver,
-		authentication: authenticationResolver,
+		k8s:        k8sResolver,
+		ui:         uiContainer.Resolver,
+		sc:         scContainer,
+		sca:        scaContainer,
+		app:        appContainer,
+		rafter:     rafterContainer,
+		ag:         agResolver,
+		serverless: serverlessResolver,
+		eventing:   eventingResolver,
 	}, nil
 }
 
@@ -143,7 +134,6 @@ func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.ag.StopCacheSyncOnClose(stopCh)
 	r.eventing.StopCacheSyncOnClose(stopCh)
 	r.serverless.StopCacheSyncOnClose(stopCh)
-	r.authentication.StopCacheSyncOnClose(stopCh)
 }
 
 func (r *RootResolver) Deployment() gqlschema.DeploymentResolver {
@@ -310,14 +300,6 @@ func (r *mutationResolver) OverloadApplication(ctx context.Context, application 
 
 func (r *mutationResolver) DisableApplication(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error) {
 	return r.app.Resolver.DisableApplicationMutation(ctx, application, namespace)
-}
-
-func (r *mutationResolver) CreateIDPPreset(ctx context.Context, name string, issuer string, jwksURI string) (*gqlschema.IDPPreset, error) {
-	return r.authentication.CreateIDPPresetMutation(ctx, name, issuer, jwksURI)
-}
-
-func (r *mutationResolver) DeleteIDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
-	return r.authentication.DeleteIDPPresetMutation(ctx, name)
 }
 
 func (r *mutationResolver) CreateApplication(ctx context.Context, name string, description *string, labels gqlschema.Labels) (*gqlschema.ApplicationMutationOutput, error) {
@@ -616,14 +598,6 @@ func (r *queryResolver) APIRule(ctx context.Context, name string, namespace stri
 
 func (r *queryResolver) APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*gqlschema.APIRule, error) {
 	return r.ag.APIRulesQuery(ctx, namespace, serviceName, hostname)
-}
-
-func (r *queryResolver) IDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
-	return r.authentication.IDPPresetQuery(ctx, name)
-}
-
-func (r *queryResolver) IDPPresets(ctx context.Context, first *int, offset *int) ([]*gqlschema.IDPPreset, error) {
-	return r.authentication.IDPPresetsQuery(ctx, first, offset)
 }
 
 func (r *queryResolver) BackendModules(ctx context.Context) ([]*gqlschema.BackendModule, error) {
