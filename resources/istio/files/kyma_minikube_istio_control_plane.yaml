@@ -4,8 +4,7 @@ metadata:
   namespace: istio-system
 spec:
   hub: docker.io/istio
-  tag: 1.5.6
-
+  tag: {{ .Chart.AppVersion }}-distroless
   # Traffic management feature
   components:
     base:
