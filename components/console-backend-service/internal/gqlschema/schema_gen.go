@@ -5994,7 +5994,7 @@ input RuleInput @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alp
 
 type APIRuleAccessStrategy @goModel(model: "github.com/ory/oathkeeper-maester/api/v1alpha1.Authenticator") {
     name: String!
-    config: Extension!
+    config: Extension
 }
 
 #input APIRuleAccessStrategyInput @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRuleAccessStrategyInput") {
@@ -10383,14 +10383,11 @@ func (ec *executionContext) _APIRuleAccessStrategy_config(ctx context.Context, f
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*runtime.RawExtension)
 	fc.Result = res
-	return ec.marshalNExtension2ᚖk8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx, field.Selections, res)
+	return ec.marshalOExtension2ᚖk8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _APIRuleService_host(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Service) (ret graphql.Marshaler) {
@@ -35358,9 +35355,6 @@ func (ec *executionContext) _APIRuleAccessStrategy(ctx context.Context, sel ast.
 			}
 		case "config":
 			out.Values[i] = ec._APIRuleAccessStrategy_config(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -42927,38 +42921,6 @@ func (ec *executionContext) marshalNExceededQuota2ᚖgithubᚗcomᚋkymaᚑproje
 	return ec._ExceededQuota(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNExtension2k8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx context.Context, v interface{}) (runtime.RawExtension, error) {
-	return UnmarshalRawExtension(v)
-}
-
-func (ec *executionContext) marshalNExtension2k8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx context.Context, sel ast.SelectionSet, v runtime.RawExtension) graphql.Marshaler {
-	res := MarshalRawExtension(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
-}
-
-func (ec *executionContext) unmarshalNExtension2ᚖk8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx context.Context, v interface{}) (*runtime.RawExtension, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalNExtension2k8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx, v)
-	return &res, err
-}
-
-func (ec *executionContext) marshalNExtension2ᚖk8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx context.Context, sel ast.SelectionSet, v *runtime.RawExtension) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec.marshalNExtension2k8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx, sel, *v)
-}
-
 func (ec *executionContext) marshalNFile2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFile(ctx context.Context, sel ast.SelectionSet, v File) graphql.Marshaler {
 	return ec._File(ctx, sel, &v)
 }
@@ -45965,6 +45927,29 @@ func (ec *executionContext) marshalOEventActivationEvent2ᚕᚖgithubᚗcomᚋky
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) unmarshalOExtension2k8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx context.Context, v interface{}) (runtime.RawExtension, error) {
+	return UnmarshalRawExtension(v)
+}
+
+func (ec *executionContext) marshalOExtension2k8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx context.Context, sel ast.SelectionSet, v runtime.RawExtension) graphql.Marshaler {
+	return MarshalRawExtension(v)
+}
+
+func (ec *executionContext) unmarshalOExtension2ᚖk8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx context.Context, v interface{}) (*runtime.RawExtension, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOExtension2k8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOExtension2ᚖk8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx context.Context, sel ast.SelectionSet, v *runtime.RawExtension) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOExtension2k8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx, sel, *v)
 }
 
 func (ec *executionContext) marshalOFunction2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunction(ctx context.Context, sel ast.SelectionSet, v Function) graphql.Marshaler {

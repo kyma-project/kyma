@@ -45,7 +45,7 @@ input RuleInput @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alp
 
 type APIRuleAccessStrategy @goModel(model: "github.com/ory/oathkeeper-maester/api/v1alpha1.Authenticator") {
     name: String!
-    config: Extension!
+    config: Extension
 }
 
 #input APIRuleAccessStrategyInput @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRuleAccessStrategyInput") {

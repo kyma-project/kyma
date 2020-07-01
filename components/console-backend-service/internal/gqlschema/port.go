@@ -22,11 +22,11 @@ func UnmarshalPort(v interface{}) (uint32, error) {
 	case int:
 		in, _ = v.(int64)
 	case json.Number:
-		val, err := v.(json.Number).Int64()
+		var err error
+		in, err = v.(json.Number).Int64()
 		if err != nil {
 			return 0, errors.New("Invalid Port type, expected int")
 		}
-		in = val
 	default:
 		return 0, errors.New("Invalid Port type, expected int")
 	}
