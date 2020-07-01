@@ -12,6 +12,6 @@ START_TIME=$SECONDS
 sudo ${INSTALLATION_DIR}/cmd/run.sh --vm-driver "none"
 sudo ${INSTALLATION_DIR}/scripts/is-installed.sh --timeout 30m
 ELAPSED_TIME=$(($SECONDS - $START_TIME))
-echo "$(($ELAPSED_TIME / 60)) minutes and $(($ELAPSED_TIME % 60)) seconds elapsed."
+echo "Installation of Kyma took $(($ELAPSED_TIME / 60)) minutes and $(($ELAPSED_TIME % 60)) seconds."
 sudo ${INSTALLATION_DIR}/scripts/watch-pods.sh
 sudo ${INSTALLATION_DIR}/scripts/testing.sh
