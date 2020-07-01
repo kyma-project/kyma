@@ -1,6 +1,6 @@
 ---
 name: Consulting
-about: Ask a question or request for consultancy
+about: Request support or ask a question relating to Kyma
 labels: consulting
 ---
 
