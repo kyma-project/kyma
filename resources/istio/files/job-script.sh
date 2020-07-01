@@ -14,7 +14,7 @@
 #sleep 3
 #kubectl apply -f padu.yaml
 
-istioctl manifest apply -f /etc/istio/istioOperator-draft.yaml
+istioctl manifest apply -f /etc/istio/config.yaml
 
 #while [ "$(kubectl get po -n istio-system -l app=sidecarInjectorWebhook -o jsonpath='{ .items[0].status.phase}')" != "Running" ]
 #do
