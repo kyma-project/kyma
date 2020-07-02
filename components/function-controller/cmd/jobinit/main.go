@@ -24,7 +24,6 @@ func main() {
 	if err := envconfig.InitWithPrefix(&cfg, envPrefix); err != nil {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
-	
 	operator := gitops.NewOperator()
 
 	fmt.Println("Check for auth config...")
