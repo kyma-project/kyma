@@ -1,10 +1,10 @@
-apiVersion: authentication.istio.io/v1alpha1
-kind: Policy
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
 metadata:
   name: dex-service
 spec:
-  targets:
-  - name: dex-service
-  peers:
-  - mtls:
-      mode: "PERMISSIVE"
+  selector:
+    matchLabels:
+      app: dex
+  mtls:
+    mode: "PERMISSIVE"
