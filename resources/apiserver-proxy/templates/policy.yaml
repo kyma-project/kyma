@@ -9,5 +9,5 @@ spec:
   portLevelMtls:
     {{ .Values.port.secure }}:
       mode: PERMISSIVE
-    {{ .Values.port.metrics }}
+    {{ .Values.port.metrics }}:
       mode: PERMISSIVE
