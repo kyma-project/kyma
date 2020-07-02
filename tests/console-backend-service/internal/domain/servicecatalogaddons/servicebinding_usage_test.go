@@ -4,6 +4,7 @@ package servicecatalogaddons
 
 import (
 	"fmt"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"testing"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
@@ -131,7 +132,7 @@ type bindingUsageTestSuite struct {
 	gqlCli    *graphql.Client
 	svcatCli  *clientset.Clientset
 	t         *testing.T
-	k8sClient *kubernetes.Clientset
+	k8sClient *v1.CoreV1Client
 
 	givenBindingUsage shared.ServiceBindingUsage
 	givenInstance     shared.ServiceInstance
@@ -315,7 +316,7 @@ func (s *bindingUsageTestSuite) deleteServiceInstanceAndBinding() {
 	assert.NoError(s.t, err)
 
 	s.t.Log("Wait for instance deletion")
-	err = wait.ForServiceInstanceDeletion(s.givenBinding.Name, s.givenBinding.Namespace, s.svcatCli, k8sClient)
+	err = wait.ForServiceInstanceDeletion(s.givenBinding.Name, s.givenBinding.Namespace, s.svcatCli, s.k8sClient)
 	assert.NoError(s.t, err)
 }
 
