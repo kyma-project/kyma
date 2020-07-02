@@ -8,13 +8,11 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/cli-runtime/pkg/genericclioptions/printers"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
-
 )
 
 const (
-	serviceCatalogLabelSelector       = "app=service-catalog-catalog-controller-manager"
-	helmBrokerLabelSelector       = "app=helm-broker"
-
+	serviceCatalogLabelSelector = "app=service-catalog-catalog-controller-manager"
+	helmBrokerLabelSelector     = "app=helm-broker"
 )
 
 func LogReport(instanceName, namespace string, svcatCli *clientset.Clientset, k8sClient *v1.CoreV1Client) {
