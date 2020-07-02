@@ -75,46 +75,29 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) 
 							Name:         "tekton-workspace",
 							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 						},
+						{
+							Name: "workspace",
+							VolumeSource: corev1.VolumeSource{
+								EmptyDir: &corev1.EmptyDirVolumeSource{},
+							},
+						},
 					},
 					InitContainers: []corev1.Container{
 						{
-							Name:  "repo-fetcher",
-							Image: "eu.gcr.io/kyma-project/function-build-init@sha256:447f279ba68ebb157505826bff3e77a9b71815d314e56bfdfbea47dc8a3701ae",
-							Env: []corev1.EnvVar{
+							Name:            "repo-fetcher",
+							Image:           "alpine/git:latest",
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							VolumeMounts: []corev1.VolumeMount{
 								{
-									Name:  "APP_REPOSITORY_URL",
-									Value: instance.Spec.Source,
+									Name:      "workspace",
+									MountPath: "/workspace",
 								},
-								{
-									Name:  "APP_REPOSITORY_COMMIT",
-									Value: instance.Spec.Repository.Commit,
-								},
-								{
-									Name:  "APP_MOUNT_PATH",
-									Value: instance.Spec.Repository.BaseDir,
-								},
-								{
-									Name: "APP_REPOSITORY_USERNAME",
-									ValueFrom: &corev1.EnvVarSource{
-										SecretKeyRef: &corev1.SecretKeySelector{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: instance.ObjectMeta.Name,
-											},
-											Key: "REPOSITORY_USERNAME",
-										},
-									},
-								},
-								{
-									Name: "APP_REPOSITORY_PASSWORD",
-									ValueFrom: &corev1.EnvVarSource{
-										SecretKeyRef: &corev1.SecretKeySelector{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: instance.ObjectMeta.Name,
-											},
-											Key: "REPOSITORY_PASSWORD",
-										},
-									},
-								},
+							},
+							Args: []string{
+								"clone",
+								"--",
+								instance.Spec.Source,
+								"/workspace",
 							},
 						},
 						{
@@ -154,6 +137,10 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) 
 								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
 								// If COPY is not used, then the cache will not work
 								{Name: "tekton-home", ReadOnly: false, MountPath: "/tekton/home"},
+								{
+									Name:      "workspace",
+									MountPath: "/workspace",
+								},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
@@ -217,8 +204,10 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 							},
 						},
 						{
-							Name:         "tekton-home",
-							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+							Name: "tekton-home",
+							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{
+								Medium: "Memory",
+							}},
 						},
 						{
 							Name:         "tekton-workspace",
@@ -372,7 +361,13 @@ func (r *FunctionReconciler) defaultReplicas(spec serverlessv1alpha1.FunctionSpe
 }
 
 func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
-	imageTag := r.calculateImageTag(instance)
+	var imageTag string
+	if instance.Spec.SourceType == serverlessv1alpha1.Git {
+		imageTag = r.calculateGitImageTag(instance)
+	} else {
+		imageTag = r.calculateImageTag(instance)
+	}
+
 	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.Address, instance.Namespace, instance.Name, imageTag)
 }
 

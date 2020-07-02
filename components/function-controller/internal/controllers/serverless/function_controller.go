@@ -66,7 +66,7 @@ func (r *FunctionReconciler) calculateImageTag(instance *serverlessv1alpha1.Func
 }
 
 func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.Function) string {
-	hash := sha256.Sum256([]byte(fmt.Sprintf("%s-%s", instance.GetUID(), instance.Spec.Repository.Commit)))
+	hash := sha256.Sum256([]byte(fmt.Sprintf("%s-%s", instance.GetUID(), instance.Status.Repository.Commit)))
 	return fmt.Sprintf("%x", hash)
 }
 

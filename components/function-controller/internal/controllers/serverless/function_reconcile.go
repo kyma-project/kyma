@@ -138,6 +138,8 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 			Secret:       credentials,
 		}
 
+		log.Info(fmt.Sprintf("config: %v", instance))
+
 		revision, syncSource, err = chekForUpdate(cfg)
 		if err != nil {
 			return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
@@ -145,7 +147,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 				Status:             corev1.ConditionTrue,
 				LastTransitionTime: metav1.Now(),
 				Reason:             v1alpha1.ConditionReasonSourceUpdateFailed,
-				Message:            fmt.Sprintf("Sources update failed: %v", instance.Name),
+				Message:            fmt.Sprintf("Sources update failed: %v", err),
 			})
 		}
 	}

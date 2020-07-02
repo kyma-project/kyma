@@ -36,7 +36,7 @@ type FunctionSpec struct {
 
 	SourceType SourceType `json:"type"`
 
-	Repository Repository `json:",inline,omitempty"`
+	Repository `json:",inline,omitempty"`
 }
 
 const (
