@@ -86,7 +86,7 @@ Follows these steps:
 
 2. Go to the **Functions** view in the left navigation panel and select the Function you want to expose.
 
-3. Switch to the **Configuration** tab and select **Expose Function** in the **API Rules** section. A modal with the form will appear.
+3. Switch to the **Configuration** tab and select **Expose Function** in the **API Rules** section. A pop-up box with the form will appear on the screen.
 
 4. In the **General settings** section:
 
@@ -96,11 +96,11 @@ Follows these steps:
 
     - Enter **Hostname** to indicate the host on which you want to expose your Function.
 
-5. In the **Access strategies** section, leave the default settings, with `GET`, `POST`, `PUT`, `DELETE`, `PATCH` and `HEAD` methods and the `noop` handler selected.
+5. In the **Access strategies** section, leave the default settings with `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, and `HEAD` methods and the `noop` handler selected.
 
-6. Select **Create** to confirm changes. The modal with form will close.
+6. Select **Create** to confirm changes. The pop-up box with the form will close.
 
-7. Check if you can access the Function by selecting the HTTPS link under **Host** column for created API Rule.
+7. Check if you can access the Function by selecting the HTTPS link under the **Host** column for the newly created API Rule.
 
     </details>
 </div>
