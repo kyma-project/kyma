@@ -77,6 +77,10 @@ spec:
             - kind: Deployment
               name: istio-ingressgateway
               patches:
+                - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:80].hostPort
+                  value: 80
+                - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:443].hostPort
+                  value: 443
   policy:
     components:
       policy:

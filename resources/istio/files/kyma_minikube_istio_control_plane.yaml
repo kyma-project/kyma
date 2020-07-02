@@ -173,6 +173,7 @@ spec:
             name: tls
           - port: 31400
             name: tcp
+          type: NodePort
         hpaSpec:
           maxReplicas: 5
           minReplicas: 1
@@ -188,14 +189,22 @@ spec:
         resources:
           requests:
             cpu: 100m
-            memory: 128Mi
+            memory: 96Mi
           limits:
             cpu: 2000m
-            memory: 1024Mi
+            memory: 256Mi
         strategy:
           rollingUpdate:
             maxSurge: "100%"
-            maxUnavailable: "25%"
+            maxUnavailable: 0
+        overlays:
+        - kind: Deployment
+          name: istio-ingressgateway
+          patches:
+          - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:80].hostPort
+            value: 80
+          - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:443].hostPort
+            value: 443
 
     egressGateways:
     - name: istio-egressgateway
@@ -520,11 +529,11 @@ spec:
           mountPath: /etc/istio/egressgateway-ca-certs
 
       istio-ingressgateway:
-        autoscaleEnabled: true
+        autoscaleEnabled: false
         applicationPorts: ""
         debug: info
         domain: ""
-        type: LoadBalancer
+        type: NodePort
         zvpn:
           enabled: false
           suffix: global
