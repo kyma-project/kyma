@@ -1,6 +1,3 @@
-global:
-  isLocalEnv: false
-
 knative-eventing:
   tracing:
     enable: true

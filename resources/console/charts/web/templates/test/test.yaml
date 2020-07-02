@@ -1,4 +1,4 @@
-{{- if and ( .Values.test.acceptance.enabled ) ( .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" ) }}
+{{- if and ( .Values.test.acceptance.enabled ) ( .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" ) (not .Values.global.isLocalEnv) }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:

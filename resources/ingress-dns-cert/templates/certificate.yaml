@@ -1,0 +1,35 @@
+{{ if .Values.global.environment.gardener }}
+apiVersion: cert.gardener.cloud/v1alpha1
+kind: Certificate
+metadata:
+  name: kyma-tls-cert
+  namespace: istio-system
+spec:
+  commonName: '*.{{ .Values.global.ingress.domainName }}'
+  secretName: kyma-gateway-certs
+  secretRef:
+    name: kyma-gateway-certs
+    namespace: istio-system
+---
+{{ else}}
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: self-issuer
+  namespace: istio-system
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: kyma-tls-cert
+  namespace: istio-system
+spec:
+  secretName: kyma-gateway-certs
+  issuerRef:
+    # The issuer created previously
+    name: self-issuer
+  dnsNames:
+  - '*.{{ .Values.global.ingress.domainName }}'
+{{ end }}

@@ -2784,8 +2784,8 @@ spec:
             cpu: 200m
             memory: 200Mi
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: 50m
+            memory: 50Mi
         terminationMessagePolicy: FallbackToLogsOnError
         volumeMounts:
         - mountPath: /etc/config-logging
@@ -2844,8 +2844,8 @@ spec:
             cpu: 200m
             memory: 200Mi
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: 50m
+            memory: 50Mi
         volumeMounts:
         - mountPath: /etc/config-logging
           name: config-logging

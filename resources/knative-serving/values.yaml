@@ -10,35 +10,35 @@ networking_istio:
 activator:
   resources:
     requests:
-      cpu: 300m
+      cpu: 100m
       memory: 60Mi
     limits:
-      cpu: 1000m
-      memory: 600Mi
+      cpu: 500m
+      memory: 100Mi
 autoscaler:
   resources:
     requests:
       cpu: 30m
       memory: 40Mi
     limits:
-      cpu: 300m
-      memory: 400Mi
+      cpu: 100m
+      memory: 200Mi
 autoscaler_hpa:
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 100Mi
     limits:
-      cpu: 1000m
-      memory: 1000Mi
+      cpu: 400m
+      memory: 400Mi
 controller:
   resources:
     requests:
       cpu: 100m
       memory: 100Mi
     limits:
-      cpu: 1000m
-      memory: 1000Mi
+      cpu: 300m
+      memory: 400Mi
 knative_serving:
   podmonitor:
     enabled: false

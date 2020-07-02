@@ -1447,8 +1447,8 @@ spec:
           name: metrics-port
         resources:
           limits:
-            cpu: 200m
-            memory: 200Mi
+            cpu: 100m
+            memory: 100Mi
           requests:
             cpu: 20m
             memory: 20Mi
@@ -1537,8 +1537,8 @@ spec:
             cpu: 20m
             memory: 20Mi
           limits:
-            cpu: 200m
-            memory: 200Mi
+            cpu: 100m
+            memory: 100Mi
         env:
         - name: SYSTEM_NAMESPACE
           valueFrom:

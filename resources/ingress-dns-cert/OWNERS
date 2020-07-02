@@ -1,0 +1,7 @@
+approvers:
+  - pbochynski
+  - piotrmsc
+
+labels:
+- area/service-mesh
+- area/security

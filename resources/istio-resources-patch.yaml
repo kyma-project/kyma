@@ -1,0 +1,15 @@
+spec:
+  template:
+    spec:
+      "$setElementOrder/containers":
+      - name: mixer
+      - name: istio-proxy
+      containers:
+      - name: mixer
+        resources:
+          limits:
+            memory: 1Gi
+            cpu: 250m
+          requests:
+            memory: 100Mi
+            cpu: 50m
