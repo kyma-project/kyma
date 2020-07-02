@@ -11,13 +11,6 @@ import (
 
 type EventHandlerProvider func() EventHandler
 
-//type EventType string
-//const (
-//	EventTypeAdd = "ADD"
-//	EventTypeUpdate = "UPDATE"
-//	EventTypeDelete = "DELETE"
-//)
-
 type EventHandler interface {
 	K8sResource() interface{}
 	ShouldNotify() bool

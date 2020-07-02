@@ -74,6 +74,7 @@ func NewEventHandler(channel chan<- *gqlschema.APIRuleEvent, filter func(v1alpha
 		return &EventHandler{
 			channel: channel,
 			filter:  filter,
+			res:     &v1alpha1.APIRule{},
 		}
 	}
 }
