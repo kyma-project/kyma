@@ -90,6 +90,8 @@ hydra:
     existingSecret: "ory-hydra-credentials"
   hydra-maester:
     globalAccess: true
+    port:
+      metrics: 8080
 # Overrides for the Oathkeeper chart
 oathkeeper:
   kubectlJob:
@@ -190,6 +192,8 @@ oathkeeper:
         cpu: 50m
         memory: 64Mi
   oathkeeper-maester:
+    port:
+      metrics: 8080
     deployment:
       annotations:
         sidecar.istio.io/inject: "false"
