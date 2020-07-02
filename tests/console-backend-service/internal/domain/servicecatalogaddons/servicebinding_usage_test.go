@@ -4,8 +4,9 @@ package servicecatalogaddons
 
 import (
 	"fmt"
-	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"testing"
+
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 
