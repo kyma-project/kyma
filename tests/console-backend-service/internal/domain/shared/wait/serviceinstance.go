@@ -4,15 +4,13 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
 	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/waiter"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-func ForServiceInstanceReady(instanceName, namespace string, svcatCli *clientset.Clientset, k8sClient *v1.CoreV1Client) error {
-	err := waiter.WaitAtMost(func() (bool, error) {
+func ForServiceInstanceReady(instanceName, namespace string, svcatCli *clientset.Clientset) error {
+	return waiter.WaitAtMost(func() (bool, error) {
 		instance, err := svcatCli.ServicecatalogV1beta1().ServiceInstances(namespace).Get(instanceName, metav1.GetOptions{})
 		if err != nil || instance == nil {
 			return false, err
@@ -27,16 +25,10 @@ func ForServiceInstanceReady(instanceName, namespace string, svcatCli *clientset
 
 		return false, nil
 	}, tester.DefaultReadyTimeout)
-
-	if err != nil {
-		shared.LogReport(instanceName, namespace, svcatCli, k8sClient)
-	}
-
-	return err
 }
 
-func ForServiceInstanceDeletion(instanceName, namespace string, svcatCli *clientset.Clientset, k8sClient *v1.CoreV1Client) error {
-	err := waiter.WaitAtMost(func() (bool, error) {
+func ForServiceInstanceDeletion(instanceName, namespace string, svcatCli *clientset.Clientset) error {
+	return waiter.WaitAtMost(func() (bool, error) {
 		_, err := svcatCli.ServicecatalogV1beta1().ServiceInstances(namespace).Get(instanceName, metav1.GetOptions{})
 
 		if errors.IsNotFound(err) {
@@ -48,10 +40,4 @@ func ForServiceInstanceDeletion(instanceName, namespace string, svcatCli *client
 
 		return false, nil
 	}, tester.DefaultReadyTimeout)
-
-	if err != nil {
-		shared.LogReport(instanceName, namespace, svcatCli, k8sClient)
-	}
-
-	return err
 }

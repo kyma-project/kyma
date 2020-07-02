@@ -167,7 +167,10 @@ func (s *bindingUsageTestSuite) prepareInstanceAndBinding() {
 	require.NoError(s.t, err)
 
 	s.t.Log("Wait for Instance")
-	err = wait.ForServiceInstanceReady(s.givenInstance.Name, s.givenInstance.Namespace, s.svcatCli, s.k8sClient)
+	err = wait.ForServiceInstanceReady(s.givenInstance.Name, s.givenInstance.Namespace, s.svcatCli)
+	if err != nil {
+		shared.LogReport(s.givenInstance.Name, s.givenInstance.Namespace, s.svcatCli, s.k8sClient)
+	}
 	require.NoError(s.t, err)
 
 	s.t.Log("Create Binding")
@@ -317,7 +320,10 @@ func (s *bindingUsageTestSuite) deleteServiceInstanceAndBinding() {
 	assert.NoError(s.t, err)
 
 	s.t.Log("Wait for instance deletion")
-	err = wait.ForServiceInstanceDeletion(s.givenBinding.Name, s.givenBinding.Namespace, s.svcatCli, s.k8sClient)
+	err = wait.ForServiceInstanceDeletion(s.givenBinding.Name, s.givenBinding.Namespace, s.svcatCli)
+	if err != nil {
+		shared.LogReport(s.givenBinding.Name, s.givenBinding.Namespace, s.svcatCli, s.k8sClient)
+	}
 	assert.NoError(s.t, err)
 }
 

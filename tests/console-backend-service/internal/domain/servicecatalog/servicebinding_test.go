@@ -75,7 +75,10 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	_, err = createInstance(c, "name", instance, true)
 	require.NoError(t, err)
 
-	err = wait.ForServiceInstanceReady(instance.Name, instance.Namespace, svcatCli, k8sClient)
+	err = wait.ForServiceInstanceReady(instance.Name, instance.Namespace, svcatCli)
+	if err != nil {
+		shared.LogReport(instance.Name, instance.Namespace, svcatCli, k8sClient)
+	}
 	require.NoError(t, err)
 
 	t.Log("Create Binding")
@@ -145,7 +148,10 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	assert.NoError(t, err)
 
 	t.Log("Wait for instance deletion")
-	err = wait.ForServiceInstanceDeletion(instance.Name, instance.Namespace, svcatCli, k8sClient)
+	err = wait.ForServiceInstanceDeletion(instance.Name, instance.Namespace, svcatCli)
+	if err != nil {
+		shared.LogReport(instance.Name, instance.Namespace, svcatCli, k8sClient)
+	}
 	assert.NoError(t, err)
 
 	t.Log("Checking authorization directives...")
