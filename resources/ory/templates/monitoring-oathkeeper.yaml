@@ -9,8 +9,8 @@ spec:
     matchLabels:
       app: {{ include "ory.fullname" . }}-oathkeeper-maester-metrics
   portLevelMtls:
-    {{ .Values.oathkeeper.oathkeeper-maester.port.metrics }}:
-    mode: PERMISSIVE
+    8080:
+      mode: PERMISSIVE
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor

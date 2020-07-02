@@ -34,6 +34,6 @@ spec:
     matchLabels:
       app: {{ include "ory.name" . }}-hydra-maester-metrics
   portLevelMtls:
-    {{ .Values.hydra.hydra-maester.port.metrics }}:
-    mode: PERMISSIVE
+    8080:
+      mode: PERMISSIVE
 {{- end }}
