@@ -1,10 +1,10 @@
-apiVersion: authentication.istio.io/v1alpha1
-kind: Policy
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
 metadata:
   name: {{ template "grafana.fullname" . }}-policy
 spec:
-  targets:
-    - name: {{ template "grafana.fullname" . }}
-  peers:
-    - mtls:
-        mode: "PERMISSIVE"
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: grafana
+  mtls:
+    mode: "PERMISSIVE"
