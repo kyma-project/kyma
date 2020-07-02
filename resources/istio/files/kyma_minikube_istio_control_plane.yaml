@@ -288,11 +288,11 @@ spec:
         clusterDomain: "cluster.local"
         resources:
           requests:
-            cpu: 20m
-            memory: 32Mi
+            cpu: 10m
+            memory: 10Mi
           limits:
-            cpu: 200m
-            memory: 128Mi
+            cpu: 100m
+            memory: 50Mi
         concurrency: 2
         accessLogFile: ""
         accessLogFormat: ""
