@@ -10,7 +10,8 @@ console:
 
 global:
   isLocalEnv: false
-  knative: false
+  knative:
+    false
     # Change value below to your own GitHub user name if you want point to documentation sources from your fork
     # Example: kymaOrgName: "kyma-incubator"
   kymaOrgName: "kyma-project"
@@ -20,7 +21,7 @@ global:
     gateway:
       name: kyma-gateway
   ui_acceptance_tests:
-    version: e0146b08
+    version: 875335c4
   console_backend_service:
     version: e77f8c23
   console_backend_service_test:
