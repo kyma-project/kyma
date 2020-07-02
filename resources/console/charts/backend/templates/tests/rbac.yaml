@@ -29,7 +29,7 @@ rules:
     verbs: ["get", "create", "delete", "list", "watch"]
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["servicebrokers", "serviceinstances", "servicebindings"]
-    verbs: ["create", "get", "delete"]
+    verbs: ["create", "get", "delete", "list"]
     nonResourceURLs: []
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["clusterservicebrokers", "serviceclasses", "clusterserviceclasses", "serviceplans", "clusterserviceplans"]
