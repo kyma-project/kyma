@@ -7,7 +7,7 @@
 # Install k3d:
 # curl -s https://raw.githubusercontent.com/rancher/k3d/master/install.sh | bash
 
-SECONDS=0
+START_TIME=$SECONDS
 
 # Create Kyma cluster
 k3d create --publish 80:80 --publish 443:443 --enable-registry --registry-volume local_registry --registry-name registry.localhost --server-arg --no-deploy --server-arg traefik -n kyma -t 60
@@ -63,6 +63,7 @@ helm upgrade -i serverless serverless --set $LOCALREGISTRY -n kyma-system
 helm upgrade -i application-connector application-connector -n kyma-integration --set $OVERRIDES
 helm upgrade -i rafter rafter -n kyma-system --set $OVERRIDES
 helm upgrade -i service-catalog service-catalog -n kyma-system --set $OVERRIDES
+helm upgrade -i service-catalog-addons service-catalog-addons -n kyma-system --set $OVERRIDES
 
 
 # Install knative-eventing and knative-serving
@@ -78,7 +79,7 @@ helm upgrade -i event-sources event-sources -n kyma-system
 kubectl apply -f kyma-yaml/installer-local.yaml
 
 # Compute time taken to install
-duration=$SECONDS
+ELAPSED_TIME=$(($SECONDS - $START_TIME))
 
 # Download the certificate:
 kubectl get secret kyma-gateway-certs -n istio-system -o jsonpath='{.data.tls\.crt}' | base64 --decode > kyma.crt
@@ -94,4 +95,4 @@ echo `kubectl get virtualservice console-web -n kyma-system -o jsonpath='{ .spec
 echo 'User admin@kyma.cx, password:'
 echo `kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode`
 
-echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
+echo "$(($ELAPSED_TIME / 60)) minutes and $(($ELAPSED_TIME % 60)) seconds elapsed."

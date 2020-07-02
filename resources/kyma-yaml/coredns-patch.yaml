@@ -2,14 +2,13 @@ data:
   Corefile: |
     registry.localhost:53 {
         hosts {
-            172.23.0.2 registry.localhost
+            192.168.80.2 registry.localhost
         }
     }
     .:53 {
         errors
         health
-        rewrite name exact dex.local.kyma.pro. istio-ingressgateway.istio-system.svc.cluster.local
-        rewrite name exact minio.local.kyma.pro. istio-ingressgateway.istio-system.svc.cluster.local
+        rewrite name regex (.*)\.local\.kyma\.pro istio-ingressgateway.istio-system.svc.cluster.local
         ready
         kubernetes cluster.local in-addr.arpa ip6.arpa {
           pods insecure
