@@ -62,7 +62,7 @@ The following table lists the configurable parameters of the `gcloud-sqlproxy` c
 | Parameter                         | Description                             | Default                                                                                     |
 | --------------------------------- | --------------------------------------  | ---------------------------------------------------------                                   |
 | `image`                           | SQLProxy image                          | `gcr.io/cloudsql-docker/gce-proxy`                                                        |
-| `imageTag`                        | SQLProxy image tag                      | `1.16`                                                                                      |
+| `imageTag`                        | SQLProxy image tag                      | `1.17`                                                                                      |
 | `imagePullPolicy`                 | Image pull policy                       | `IfNotPresent`                                                                              |
 | `replicasCount`                   | Replicas count                          | `1`                                                                                         |
 | `serviceAccountKey`               | Service account key JSON file. Provide it encoded with base64 if no existing Secret is used to create a new Secret. | |
