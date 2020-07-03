@@ -1,4 +1,5 @@
 # minikube allows for insecure registries by default
+{{- if .Values.dockerRegistry.enableInternal }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -57,3 +58,4 @@ spec:
               cpu: 30m
               memory: 30Mi
       terminationGracePeriodSeconds: 30
+{{- end }}
