@@ -26,7 +26,7 @@ dep ensure -vendor-only
 Before you run the acceptance tests, export required environment variables with the following command:
 
 ```bash
-export KUBECONFIG=/Users/i333340/.kube/config && export ADMIN_EMAIL=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 --decode) && export ADMIN_PASSWORD=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode) && export READ_ONLY_USER_PASSWORD=$(kubectl get secret test-read-only-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode) && export READ_ONLY_USER_EMAIL=$(kubectl get secret test-read-only-user -n kyma-system -o jsonpath="{.data.email}" | base64 --decode) && export NO_RIGHTS_USER_PASSWORD=$(kubectl get secret test-no-rights-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode) && export NO_RIGHTS_USER_EMAIL=$(kubectl get secret test-no-rights-user -n kyma-system -o jsonpath="{.data.email}" | base64 --decode) && export TEST_TESTING_ADDONS_URL="https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml"
+export KUBECONFIG=/Users/${USER}/.kube/config && export ADMIN_EMAIL=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 --decode) && export ADMIN_PASSWORD=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode) && export READ_ONLY_USER_PASSWORD=$(kubectl get secret test-read-only-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode) && export READ_ONLY_USER_EMAIL=$(kubectl get secret test-read-only-user -n kyma-system -o jsonpath="{.data.email}" | base64 --decode) && export NO_RIGHTS_USER_PASSWORD=$(kubectl get secret test-no-rights-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode) && export NO_RIGHTS_USER_EMAIL=$(kubectl get secret test-no-rights-user -n kyma-system -o jsonpath="{.data.email}" | base64 --decode) && export TEST_TESTING_ADDONS_URL="https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml"
 ```
 
 Run acceptance tests using the following command:
@@ -40,8 +40,7 @@ Run acceptance tests using the following command:
 - against standalone Console Backend Service deployed on the local host:
 
   ```bash
-  
-   go test ./... -tags=acceptance -v -count=1 -p=1
+    GRAPHQL_ENDPOINT=http://localhost:3000/graphql go test ./... -tags=acceptance -v -count=1 -p=1
   ```
 
 - against the Console Backend Service deployed on the cluster with custom domain:
