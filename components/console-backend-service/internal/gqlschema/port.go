@@ -19,7 +19,7 @@ func MarshalPort(port uint32) graphql.Marshaler {
 func UnmarshalPort(v interface{}) (uint32, error) {
 	var in int64
 	switch v.(type) {
-	case int:
+	case int, int64:
 		in, _ = v.(int64)
 	case json.Number:
 		var err error
