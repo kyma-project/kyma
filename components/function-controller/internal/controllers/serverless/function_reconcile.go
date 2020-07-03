@@ -154,6 +154,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	switch {
 	case syncSource:
+		log.Info("sync required")
 		return r.onSourceChange(ctx, log, instance, &serverlessv1alpha1.Repository{
 			Branch:     instance.Spec.Repository.Branch,
 			Commit:     revision,

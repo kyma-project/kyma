@@ -84,19 +84,14 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) 
 					InitContainers: []corev1.Container{
 						{
 							Name:            "repo-fetcher",
-							Image:           "alpine/git:latest",
-							ImagePullPolicy: corev1.PullIfNotPresent,
+							Image:           "eu.gcr.io/kyma-project/function-build-init:PR-8924",
+							Env:             buildRepoFetcherEnvVars(instance),
+							ImagePullPolicy: corev1.PullAlways,
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "workspace",
 									MountPath: "/workspace",
 								},
-							},
-							Args: []string{
-								"clone",
-								"--",
-								instance.Spec.Source,
-								"/workspace",
 							},
 						},
 						{
@@ -149,6 +144,45 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) 
 					},
 					RestartPolicy:      corev1.RestartPolicyNever,
 					ServiceAccountName: r.config.ImagePullAccountName,
+				},
+			},
+		},
+	}
+}
+
+func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function) []corev1.EnvVar {
+	return []corev1.EnvVar{
+		{
+			Name:  "APP_REPOSITORY_URL",
+			Value: instance.Spec.Source,
+		},
+		{
+			Name:  "APP_REPOSITORY_COMMIT",
+			Value: instance.Spec.Repository.Commit,
+		},
+		{
+			Name:  "APP_MOUNT_PATH",
+			Value: instance.Spec.Repository.BaseDir,
+		},
+		{
+			Name: "APP_REPOSITORY_USERNAME",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: instance.ObjectMeta.Name,
+					},
+					Key: "REPOSITORY_USERNAME",
+				},
+			},
+		},
+		{
+			Name: "APP_REPOSITORY_PASSWORD",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: instance.ObjectMeta.Name,
+					},
+					Key: "REPOSITORY_PASSWORD",
 				},
 			},
 		},
