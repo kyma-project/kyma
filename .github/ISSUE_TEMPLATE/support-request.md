@@ -1,7 +1,7 @@
 ---
-name: Bug report
-about: Report a bug in the project
-labels: bug
+name: Support request
+about: Request support or ask a question relating to Kyma
+labels: support-request
 ---
 
 <!-- Thank you for your contribution. Before you submit the issue:
@@ -26,8 +26,4 @@ Describe where it appears, when it occurred, and what it affects.  -->
 
 **Steps to reproduce**
 
-<!-- List the steps to follow to reproduce the bug. Attach any files, links, code samples, or screenshots that could help in investigating the problem. -->
-
-**Troubleshooting**
-
-<!-- Describe the steps you have already taken to solve the issue. -->
+<!-- Attach any files, links, code samples, or screenshots that are relevant. -->

@@ -13,6 +13,16 @@ knative-eventing:
       # default channel to Natss
       apiVersion: messaging.knative.dev/v1alpha1
       kind: NatssChannel
+  webhook:
+    # default timeout for Mutating and Validating Webhooks
+    timeout: 30
+    # Additional matchExpressions for Webhook Configuration
+    webhookMatchExp:
+      - key: gardener.cloud/purpose
+        operator: NotIn
+        values:
+          - kube-system
+
 
 # PodMonitorSelector is configured here: resources/monitoring/templates/prometheus/prometheus.yaml
 event-mesh-dashboard:
