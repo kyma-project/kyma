@@ -12,4 +12,4 @@ kyma:
 istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
-    tag: PR-8962
+    tag: ff249b80
