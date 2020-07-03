@@ -35,5 +35,5 @@ func main() {
 		panic(errors.Wrapf(err, "while cloning repository: %s, from commit: %s", cfg.RepositoryUrl, cfg.RepositoryCommit))
 	}
 
-	fmt.Printf("Cloned repository: %s, from commit: %s", cfg.RepositoryUrl, commit)
+	fmt.Printf("Cloned repository: %s, from commit: %s, to path: %s", cfg.RepositoryUrl, commit, cfg.MountPath)
 }
