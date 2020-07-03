@@ -1,6 +1,7 @@
 ---
 name: Feature request
 about: Suggest an improvement to the project
+labels: enhancement
 ---
 
 <!-- Thank you for your contribution. Before you submit the issue:
