@@ -154,7 +154,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	switch {
 	case syncSource:
-		log.Info("sync required")
+		log.Info("sync required", instance)
 		return r.onSourceChange(ctx, log, instance, &serverlessv1alpha1.Repository{
 			Branch:     instance.Spec.Repository.Branch,
 			Commit:     revision,
@@ -210,10 +210,9 @@ func getLatestCommit(instance *serverlessv1alpha1.Function, credentials map[stri
 
 func syncSource(instance *v1alpha1.Function) bool {
 	return instance.Spec.SourceType == v1alpha1.Git &&
-		(instance.Spec.Repository.Commit == "" && instance.Status.Repository.Commit == "" ||
-			instance.Spec.Repository.Commit != instance.Status.Repository.Commit ||
-			instance.Spec.Repository.Branch != instance.Status.Repository.Branch ||
-			instance.Spec.Repository.BaseDir != instance.Status.Repository.BaseDir ||
+		(instance.Status.Repository.Commit == "" ||
+			(instance.Spec.Repository.Commit != "" && instance.Spec.Repository.Commit != instance.Status.Repository.Commit) ||
+			(instance.Spec.Repository.Branch != "" && instance.Spec.Repository.Branch != instance.Status.Repository.Branch) ||
 			instance.Spec.Repository.Dockerfile != instance.Status.Repository.Dockerfile ||
 			instance.Spec.Source != instance.Status.Source)
 }

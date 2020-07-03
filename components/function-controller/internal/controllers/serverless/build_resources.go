@@ -155,11 +155,11 @@ func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function) []corev1.Env
 	return []corev1.EnvVar{
 		{
 			Name:  "APP_REPOSITORY_URL",
-			Value: instance.Spec.Source,
+			Value: instance.Status.Source,
 		},
 		{
 			Name:  "APP_REPOSITORY_COMMIT",
-			Value: instance.Spec.Repository.Commit,
+			Value: instance.Status.Repository.Commit,
 		},
 		{
 			Name:  "APP_MOUNT_PATH",
