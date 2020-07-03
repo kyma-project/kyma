@@ -143,8 +143,8 @@ func Test_syncSource(t *testing.T) {
 				Spec: v1alpha1.FunctionSpec{
 					SourceType: v1alpha1.Git,
 					Repository: v1alpha1.Repository{
-						Commit:  "2",
-						Branch:  "branch",
+						Commit: "2",
+						Branch: "branch",
 					},
 				},
 				Status: v1alpha1.FunctionStatus{
@@ -161,7 +161,7 @@ func Test_syncSource(t *testing.T) {
 				Spec: v1alpha1.FunctionSpec{
 					SourceType: v1alpha1.Git,
 					Repository: v1alpha1.Repository{
-						Commit:  "2",
+						Commit:     "2",
 						Dockerfile: "dockerfile",
 					},
 				},

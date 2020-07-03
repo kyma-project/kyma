@@ -26,7 +26,7 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 			//Source: "module.exports = {main: function(event, context) {return 'Hello World.'}}",
 			//Deps:   "   ",
 			SourceType: serverlessv1alpha1.Git,
-			Source: "https://github.com/kyma-project/kyma" ,
+			Source:     "https://github.com/kyma-project/kyma",
 			Repository: serverlessv1alpha1.Repository{
 				BaseDir:    "/",
 				Dockerfile: "tests/service-catalog/Dokerfile",

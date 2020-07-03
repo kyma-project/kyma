@@ -190,12 +190,22 @@ func (r *FunctionReconciler) onSourceChange(ctx context.Context, log logr.Logger
 	}, repository)
 }
 
-func chekForUpdate(config *gitops.Config) (string, bool, error) {
-	if config.ActualCommit != "" {
-		return config.ActualCommit, true, nil
+func getLatestCommit(instance *serverlessv1alpha1.Function, credentials map[string]string) (string, error) {
+	if instance.Spec.Commit != "" {
+		return instance.Spec.Commit, nil
 	}
+
+	config := &gitops.Config{
+		RepoUrl:      instance.Spec.Source,
+		Branch:       instance.Spec.Repository.Branch,
+		ActualCommit: "",
+		BaseDir:      instance.Spec.Repository.BaseDir,
+		Secret:       credentials,
+	}
+
 	opr := gitops.NewOperator()
-	return opr.CheckBranchChanges(*config)
+	commit, _, err := opr.CheckBranchChanges(*config)
+	return commit, err
 }
 
 func syncSource(instance *v1alpha1.Function) bool {
