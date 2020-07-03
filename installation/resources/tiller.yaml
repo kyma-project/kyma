@@ -134,7 +134,7 @@ spec:
           readOnly: true
       containers:
       - name: tiller
-        image: gcr.io/kubernetes-helm/tiller:v2.16.6
+        image: gcr.io/kubernetes-helm/tiller:v2.16.9
         imagePullPolicy: IfNotPresent
         env:
         - name: TILLER_NAMESPACE
