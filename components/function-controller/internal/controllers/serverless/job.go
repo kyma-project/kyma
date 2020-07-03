@@ -17,7 +17,7 @@ import (
 )
 
 func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, jobs []batchv1.Job, deployments []appsv1.Deployment) bool {
-	image := r.buildExternalImageAddress(instance)
+	image := r.buildImageAddress(instance)
 	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
 	expectedJob := r.buildJob(instance, "")

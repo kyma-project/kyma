@@ -70,6 +70,12 @@ spec:
             - name: APP_LEADER_ELECTION_ENABLED
               value: "true"
           {{- end }}
+            - name: APP_FUNCTION_DOCKER_INTERNAL_REGISTRY_ENABLED
+              value: "{{ .Values.dockerRegistry.enableInternal }}"
+            - name: APP_FUNCTION_DOCKER_INTERNAL_SERVER_ADDRESS
+              value: "{{- include "tplValue" ( dict "value" .Values.dockerRegistry.internalServerAddress "context" . ) }}"
+            - name: APP_FUNCTION_DOCKER_REGISTRY_ADDRESS
+              value: "{{- include "tplValue" ( dict "value" .Values.dockerRegistry.registryAddress "context" . ) }}"
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_RUNTIME_CONFIG_MAP_NAME" "value" .Values.containers.manager.envs.runtimeConfigMapName "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_REQUESTS_CPU" "value" .Values.containers.manager.envs.buildRequestsCPU "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_REQUESTS_MEMORY" "value" .Values.containers.manager.envs.buildRequestsMemory "context" . ) | nindent 12 }}
@@ -80,14 +86,11 @@ spec:
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_SERVICE_ACCOUNT_REQUEUE_DURATION" "value" .Values.containers.manager.envs.serviceAccountRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KSERVICE_REQUEUE_DURATION" "value" .Values.containers.manager.envs.kserviceRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_EXCLUDED_NAMESPACES" "value" .Values.containers.manager.envs.namespaceExcludedNames "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_PULL_SECRET_NAME" "value" .Values.containers.manager.envs.imagePullSecretName "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_REGISTRY_DOCKER_CONFIG_SECRET_NAME" "value" .Values.containers.manager.envs.imageRegistryDockerConfigSecretName "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_PULL_ACCOUNT_NAME" "value" .Values.containers.manager.envs.imagePullAccountName "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_REQUEUE_DURATION" "value" .Values.containers.manager.envs.functionRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_EXECUTOR_ARGS" "value" .Values.containers.manager.envs.functionBuildExecutorArgs "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_EXECUTOR_IMAGE" "value" .Values.containers.manager.envs.functionBuildExecutorImage "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_CREDS_INIT_IMAGE" "value" .Values.containers.manager.envs.functionBuildCredsInitImage "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_DOCKER_ADDRESS" "value" .Values.containers.manager.envs.functionDockerAddress "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_DOCKER_EXTERNAL_ADDRESS" "value" .Values.containers.manager.envs.functionDockerExternalAddress "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_TARGET_CPU_UTILIZATION_PERCENTAGE" "value" .Values.containers.manager.envs.targetCPUUtilizationPercentage "context" . ) | nindent 12 }}
           {{- if .Values.containers.manager.extraProperties }}
           {{ include "tplValue" ( dict "value" .Values.containers.manager.extraProperties "context" . ) | nindent 10 }}

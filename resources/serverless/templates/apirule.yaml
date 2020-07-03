@@ -1,3 +1,4 @@
+{{- if .Values.dockerRegistry.enableInternal }}
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
@@ -16,3 +17,4 @@ spec:
       methods: ["GET"]
       accessStrategies:
         - handler: noop
+{{- end }}
