@@ -45,7 +45,7 @@ rules:
     verbs: ["create", "delete", "get", "update"]
   - apiGroups: [""]
     resources: ["namespaces", "pods", "configmaps"]
-    verbs: ["create", "get", "delete", "update"]
+    verbs: ["create", "get", "delete", "list", "update"]
     nonResourceURLs: []
   - apiGroups: [""]
     resources: ["services", "secrets"]
