@@ -17,6 +17,7 @@ import (
 const (
 	destinationArg        = "--destination"
 	functionContainerName = "lambda"
+	workspace             = "/workspace"
 )
 
 func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
@@ -162,7 +163,7 @@ func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function) []corev1.Env
 		},
 		{
 			Name:  "APP_MOUNT_PATH",
-			Value: instance.Spec.Repository.BaseDir,
+			Value: "/workspace",
 		},
 		{
 			Name: "APP_REPOSITORY_USERNAME",
