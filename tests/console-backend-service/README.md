@@ -40,7 +40,7 @@ Run acceptance tests using the following command:
 - against standalone Console Backend Service deployed on the local host:
 
   ```bash
-    GRAPHQL_ENDPOINT=http://localhost:3000/graphql go test ./... -tags=acceptance -v -count=1 -p=1
+  GRAPHQL_ENDPOINT=http://localhost:3000/graphql go test ./... -tags=acceptance -v -count=1 -p=1
   ```
 
 - against the Console Backend Service deployed on the cluster with custom domain:
