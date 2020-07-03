@@ -12,6 +12,9 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-tests
     spec:
       serviceAccountName: {{ .Chart.Name }}-tests
       {{- if .Values.global.isLocalEnv }}
