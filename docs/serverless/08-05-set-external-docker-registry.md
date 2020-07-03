@@ -285,7 +285,7 @@ EOF
   </details>
 </div>
 
-> **CAUTION:** If you want to set an external Docker registry before you install Kyma, manually add the Secret to the `installer-config-local.yaml.tpl` (local installation) or `installer-config-production.yaml.tpl` (production installation) template located under the `installation/resources` subfolder before you run the installation script.
+> **CAUTION:** If you want to set an external Docker registry before you install Kyma, manually apply the Secret to the cluster before you run the installation script.
 
 ### Trigger installation
 
