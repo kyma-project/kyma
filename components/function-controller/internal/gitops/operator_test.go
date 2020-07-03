@@ -28,96 +28,81 @@ func TestGetLastCommit(t *testing.T) {
 		commitsCount int
 
 		expectedCommit gomega.OmegaMatcher
-		expectedIsOk   gomega.OmegaMatcher
 		expectedErr    gomega.OmegaMatcher
 	}{
 		"should be ok": {
 			config: Config{
-				RepoUrl:      "https://github.com/kyma-project/kyma",
-				Branch:       "master",
-				ActualCommit: "1234",
-				BaseDir:      "",
-				Secret:       nil,
+				RepoUrl: "https://github.com/kyma-project/kyma",
+				Branch:  "master",
+				BaseDir: "",
+				Secret:  nil,
 			},
 			commitsCount:   1,
 			expectedCommit: gomega.HaveLen(40),
-			expectedIsOk:   gomega.BeTrue(),
 			expectedErr:    gomega.BeNil(),
 		},
 		"should be ok with auth": {
 			config: Config{
-				RepoUrl:      "https://github.com/kyma-project/kyma",
-				Branch:       "master",
-				ActualCommit: "1234",
-				BaseDir:      "",
-				Secret:       map[string]string{usernameKey: "test", passwordKey: "test"},
+				RepoUrl: "https://github.com/kyma-project/kyma",
+				Branch:  "master",
+				BaseDir: "",
+				Secret:  map[string]string{usernameKey: "test", passwordKey: "test"},
 			},
 			commitsCount:   1,
 			expectedCommit: gomega.HaveLen(40),
-			expectedIsOk:   gomega.BeTrue(),
 			expectedErr:    gomega.BeNil(),
 		},
 		"ok with many commits in repo": {
 			config: Config{
-				RepoUrl:      "https://github.com/kyma-project/kyma",
-				Branch:       "master",
-				ActualCommit: "1234",
-				BaseDir:      "",
-				Secret:       nil,
+				RepoUrl: "https://github.com/kyma-project/kyma",
+				Branch:  "master",
+				BaseDir: "",
+				Secret:  nil,
 			},
 			commitsCount:   10,
 			expectedCommit: gomega.HaveLen(40),
-			expectedIsOk:   gomega.BeTrue(),
 			expectedErr:    gomega.BeNil(),
 		},
 		"error on empty auth map": {
 			config: Config{
-				RepoUrl:      "https://github.com/kyma-project/kyma",
-				Branch:       "master",
-				ActualCommit: "1234",
-				BaseDir:      "",
-				Secret:       map[string]string{},
+				RepoUrl: "https://github.com/kyma-project/kyma",
+				Branch:  "master",
+				BaseDir: "",
+				Secret:  map[string]string{},
 			},
 			expectedCommit: gomega.HaveLen(0),
-			expectedIsOk:   gomega.BeFalse(),
 			expectedErr:    gomega.HaveOccurred(),
 		},
 		"error when incomplete auth map": {
 			config: Config{
-				RepoUrl:      "https://github.com/kyma-project/kyma",
-				Branch:       "master",
-				ActualCommit: "1234",
-				BaseDir:      "",
-				Secret:       map[string]string{usernameKey: "test", "test": "test", "test-2": "test"},
+				RepoUrl: "https://github.com/kyma-project/kyma",
+				Branch:  "master",
+				BaseDir: "",
+				Secret:  map[string]string{usernameKey: "test", "test": "test", "test-2": "test"},
 			},
 			expectedCommit: gomega.HaveLen(0),
-			expectedIsOk:   gomega.BeFalse(),
 			expectedErr:    gomega.HaveOccurred(),
 		},
 		"error when cloning repository": {
 			config: Config{
-				RepoUrl:      "https://github.com/kyma-project/kyma",
-				Branch:       "master",
-				ActualCommit: "1234",
-				BaseDir:      "",
-				Secret:       nil,
+				RepoUrl: "https://github.com/kyma-project/kyma",
+				Branch:  "master",
+				BaseDir: "",
+				Secret:  nil,
 			},
 			mockErr:        errors.New("test error"),
 			withoutRepo:    true,
 			expectedCommit: gomega.HaveLen(0),
-			expectedIsOk:   gomega.BeFalse(),
 			expectedErr:    gomega.HaveOccurred(),
 		},
 		"error when getting HEAD": {
 			config: Config{
-				RepoUrl:      "https://github.com/kyma-project/kyma",
-				Branch:       "master",
-				ActualCommit: "1234",
-				BaseDir:      "",
-				Secret:       nil,
+				RepoUrl: "https://github.com/kyma-project/kyma",
+				Branch:  "master",
+				BaseDir: "",
+				Secret:  nil,
 			},
 			expectedCommit: gomega.HaveLen(0),
-			expectedIsOk:   gomega.BeFalse(),
 			expectedErr:    gomega.HaveOccurred(),
 		},
 	} {
@@ -143,14 +128,13 @@ func TestGetLastCommit(t *testing.T) {
 			}
 
 			// when
-			hash, isOk, err := operator.CheckBranchChanges(testData.config)
+			hash, err := operator.GetLastCommit(testData.config)
 
 			//then
 			g.Expect(hash).To(testData.expectedCommit)
 			if hash != "" {
 				g.Expect(hash).To(gomega.Equal(lastCommit))
 			}
-			g.Expect(isOk).To(testData.expectedIsOk)
 			g.Expect(err).To(testData.expectedErr)
 		})
 	}

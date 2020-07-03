@@ -24,11 +24,10 @@ type GitInterface interface {
 }
 
 type Config struct {
-	RepoUrl      string
-	Branch       string
-	ActualCommit string
-	BaseDir      string
-	Secret       map[string]string
+	RepoUrl string
+	Branch  string
+	BaseDir string
+	Secret  map[string]string
 }
 
 type Operator struct {
@@ -39,10 +38,10 @@ func NewOperator() *Operator {
 	return &Operator{gitInterface: NewGit()}
 }
 
-func (g *Operator) CheckBranchChanges(config Config) (commitHash string, changesOccurred bool, err error) {
+func (g *Operator) GetLastCommit(config Config) (commitHash string, err error) {
 	auth, err := convertToBasicAuth(config.Secret)
 	if err != nil {
-		return commitHash, changesOccurred, errors.Wrap(err, "while parsing auth fields")
+		return commitHash, errors.Wrap(err, "while parsing auth fields")
 	}
 
 	repo, err := g.gitInterface.Clone(memory.NewStorage(), nil, &git.CloneOptions{
@@ -54,21 +53,17 @@ func (g *Operator) CheckBranchChanges(config Config) (commitHash string, changes
 		Tags:          git.NoTags,
 	})
 	if err != nil {
-		return commitHash, changesOccurred, errors.Wrapf(err, "while cloning repository: %s, branch: %s", config.RepoUrl, config.Branch)
+		return commitHash, errors.Wrapf(err, "while cloning repository: %s, branch: %s", config.RepoUrl, config.Branch)
 	}
 
 	head, err := repo.Head()
 	if err != nil {
-		return commitHash, changesOccurred, errors.Wrapf(err, "while getting HEAD reference for repository: %s, branch: %s", config.RepoUrl, config.Branch)
+		return commitHash, errors.Wrapf(err, "while getting HEAD reference for repository: %s, branch: %s", config.RepoUrl, config.Branch)
 	}
 
 	commitHash = head.Hash().String()
 
-	if commitHash != config.ActualCommit {
-		changesOccurred = true
-	}
-
-	return commitHash, changesOccurred, nil
+	return commitHash, nil
 }
 
 func (o *Operator) CloneRepoFromCommit(path, repoUrl, commit string, auth map[string]string) (commitHash string, err error) {
