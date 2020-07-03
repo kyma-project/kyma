@@ -12,6 +12,8 @@ metadata:
 spec:
   disableConcurrency: true
   template:
+    labels:
+      app: {{ .Chart.Name }}-tests
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
