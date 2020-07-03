@@ -61,7 +61,7 @@ func (r *Resolver) APIRuleEventSubscription(ctx context.Context, namespace strin
 	channel := make(chan *gqlschema.APIRuleEvent, 1)
 	filter := func(apiRule v1alpha1.APIRule) bool {
 		namespaceMatches := apiRule.Namespace == namespace
-		serviceNameMatches := serviceName == nil || apiRule.Spec.Service.Name == serviceName
+		serviceNameMatches := serviceName == nil || *serviceName == *apiRule.Spec.Service.Name
 		return namespaceMatches && serviceNameMatches
 	}
 
