@@ -17,11 +17,16 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
-func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, jobs []batchv1.Job, deployments []appsv1.Deployment) bool {
+func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, jobs []batchv1.Job, deployments []appsv1.Deployment, log logr.Logger) bool {
 	image := r.buildExternalImageAddress(instance)
 	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
-	expectedJob := r.buildJob(instance, "")
+	var expectedJob batchv1.Job
+	if instance.Spec.SourceType != v1alpha1.Git {
+		expectedJob = r.buildJob(instance, "")
+	} else {
+		expectedJob = r.buildGitJob(instance)
+	}
 
 	if len(deployments) == 1 &&
 		deployments[0].Spec.Template.Spec.Containers[0].Image == image &&

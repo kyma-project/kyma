@@ -23,14 +23,12 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 			Namespace: namespace,
 		},
 		Spec: serverlessv1alpha1.FunctionSpec{
-			//Source: "module.exports = {main: function(event, context) {return 'Hello World.'}}",
-			//Deps:   "   ",
 			SourceType: serverlessv1alpha1.Git,
-			Source:     "https://github.com/kyma-project/kyma",
+			Source:     "https://github.com/pPrecel/public-gitops",
 			Repository: serverlessv1alpha1.Repository{
 				BaseDir:    "/",
-				Dockerfile: "tests/service-catalog/Dokerfile",
-				Commit:     "800b0067091c35ee29f89d7075e02ae5658dd230",
+				Dockerfile: "deploy/Dockerfile",
+				Branch: "master",
 			},
 			Env: []corev1.EnvVar{
 				{

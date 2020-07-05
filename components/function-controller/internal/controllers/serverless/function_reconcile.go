@@ -5,6 +5,10 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
+	"github.com/kyma-project/kyma/components/function-controller/internal/gitops"
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -15,11 +19,6 @@ import (
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/kyma-project/kyma/components/function-controller/internal/gitops"
-	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 type FunctionReconciler struct {
@@ -74,7 +73,10 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	log := r.Log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "name", instance.GetName(), "namespace", instance.GetNamespace(), "version", instance.GetGeneration())
+	log := r.Log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind,
+		"name", instance.GetName(),
+		"namespace", instance.GetNamespace(),
+		"version", instance.GetGeneration())
 
 	if !instance.DeletionTimestamp.IsZero() {
 		return ctrl.Result{}, nil
@@ -82,6 +84,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	var configMaps corev1.ConfigMapList
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &configMaps); err != nil {
+		log.Error(err, "Cannot list ConfigMaps")
 		log.Error(err, "Cannot list ConfigMaps")
 		return ctrl.Result{}, err
 	}
@@ -110,10 +113,8 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, err
 	}
 
-	var revision string
-	syncSource := syncSource(instance)
-
-	if syncSource {
+	revision := instance.Spec.Commit
+	if instance.Spec.SourceType == v1alpha1.Git && revision == "" && instance.Spec.Repository.Branch != "" {
 		var secret corev1.Secret
 		isSecretFound := true
 		var err error
@@ -153,17 +154,17 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	}
 
 	switch {
-	case syncSource:
-		log.Info("sync required", instance)
-		return r.onSourceChange(ctx, log, instance, &serverlessv1alpha1.Repository{
-			Branch:     instance.Spec.Repository.Branch,
+	case isOnSourceChange(instance, revision):
+		repo := &serverlessv1alpha1.Repository{
+			Branch:     instance.Spec.Branch,
 			Commit:     revision,
 			BaseDir:    instance.Spec.Repository.BaseDir,
 			Dockerfile: instance.Spec.Repository.Dockerfile,
-		})
+		}
+		return r.onSourceChange(ctx, instance, repo)
 	case instance.Spec.SourceType != v1alpha1.Git && r.isOnConfigMapChange(instance, configMaps.Items, deployments.Items):
 		return r.onConfigMapChange(ctx, log, instance, configMaps.Items)
-	case r.isOnJobChange(instance, jobs.Items, deployments.Items):
+	case r.isOnJobChange(instance, jobs.Items, deployments.Items, log):
 		configMapName := ""
 		if len(configMaps.Items) > 0 {
 			configMapName = configMaps.Items[0].GetName()
@@ -180,7 +181,15 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	}
 }
 
-func (r *FunctionReconciler) onSourceChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository) (ctrl.Result, error) {
+func isOnSourceChange(instance *v1alpha1.Function, commit string) bool {
+	return instance.Status.Commit == "" ||
+		commit != instance.Status.Commit ||
+		instance.Spec.Branch != instance.Status.Branch ||
+		instance.Spec.Dockerfile != instance.Status.Dockerfile ||
+		instance.Spec.BaseDir != instance.Status.BaseDir
+}
+
+func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository) (ctrl.Result, error) {
 	return r.updateStatus2(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionConfigurationReady,
 		Status:             corev1.ConditionTrue,

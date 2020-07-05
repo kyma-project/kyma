@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -70,19 +69,25 @@ func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.F
 	return fmt.Sprintf("%x", hash)
 }
 
-func (r *FunctionReconciler) updateStatus2(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition, repository *serverlessv1alpha1.Repository) (ctrl.Result, error) {
+func (r *FunctionReconciler) updateStatus2(
+	ctx context.Context,
+	result ctrl.Result,
+	instance *serverlessv1alpha1.Function,
+	condition serverlessv1alpha1.Condition,
+	repository *serverlessv1alpha1.Repository) (ctrl.Result, error) {
 	condition.LastTransitionTime = metav1.Now()
 
 	service := instance.DeepCopy()
 	service.Status.Conditions = r.updateCondition(service.Status.Conditions, condition)
+
+	if r.equalConditions(instance.Status.Conditions, service.Status.Conditions) && instance.Spec.SourceType != serverlessv1alpha1.Git {
+		return result, nil
+	}
+
 	if repository != nil {
 		service.Status.Repository = *repository
 	}
 	service.Status.Source = instance.Spec.Source
-
-	if r.equalConditions(instance.Status.Conditions, service.Status.Conditions) {
-		return result, nil
-	}
 
 	if err := r.client.Status().Update(ctx, service); err != nil {
 		return ctrl.Result{}, err
