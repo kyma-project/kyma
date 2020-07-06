@@ -173,7 +173,7 @@ func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function) []corev1.Env
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: instance.ObjectMeta.Name,
 					},
-					Key: "REPOSITORY_USERNAME",
+					Key: "username",
 				},
 			},
 		},
@@ -184,7 +184,7 @@ func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function) []corev1.Env
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: instance.ObjectMeta.Name,
 					},
-					Key: "REPOSITORY_PASSWORD",
+					Key: "password",
 				},
 			},
 		},

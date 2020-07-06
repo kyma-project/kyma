@@ -28,7 +28,7 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 			Repository: serverlessv1alpha1.Repository{
 				BaseDir:    "/",
 				Dockerfile: "deploy/Dockerfile",
-				Branch: "master",
+				Branch:     "master",
 			},
 			Env: []corev1.EnvVar{
 				{

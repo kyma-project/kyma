@@ -1,9 +1,10 @@
 package serverless
 
 import (
+	"testing"
+
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/onsi/gomega"
-	"testing"
 )
 
 func Test_isOnSourceChange(t *testing.T) {

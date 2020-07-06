@@ -3,6 +3,8 @@ package serverless
 import (
 	"context"
 	"fmt"
+	"time"
+
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
@@ -17,7 +19,6 @@ import (
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	"time"
 )
 
 const (

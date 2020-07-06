@@ -176,10 +176,10 @@ func seekLatestCommit(instance *serverlessv1alpha1.Function, credentials map[str
 	}
 
 	config := &gitops.Config{
-		RepoUrl:      instance.Spec.Source,
-		Branch:       instance.Spec.Repository.Branch,
-		BaseDir:      instance.Spec.Repository.BaseDir,
-		Secret:       credentials,
+		RepoUrl: instance.Spec.Source,
+		Branch:  instance.Spec.Repository.Branch,
+		BaseDir: instance.Spec.Repository.BaseDir,
+		Secret:  credentials,
 	}
 
 	opr := gitops.NewOperator()
