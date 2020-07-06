@@ -199,7 +199,7 @@ func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serve
 	}, repository)
 }
 
-func getLatestCommit(instance *serverlessv1alpha1.Function, credentials map[string]string) (string, error) {
+func seekLatestCommit(instance *serverlessv1alpha1.Function, credentials map[string]string) (string, error) {
 	if instance.Spec.Commit != "" {
 		return instance.Spec.Commit, nil
 	}
