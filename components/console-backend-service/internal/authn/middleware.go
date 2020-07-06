@@ -27,12 +27,6 @@ func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 					glog.Errorf("Closing body failed due to an error: %s", err)
 				}
 			}()
-			contentType := r.Header.Get("Content-Type")
-			if contentType != "application/json" {
-				http.Error(w, "Unsupported Media Type", http.StatusUnsupportedMediaType)
-				return
-			}
-
 			wsProtocolHeader := r.Header.Get("sec-websocket-protocol")
 			if wsProtocolHeader != "" {
 				wsProtocolParts := strings.Split(wsProtocolHeader, ",")
@@ -44,6 +38,12 @@ func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 					wsProtocol, wsToken := strings.TrimSpace(wsProtocolParts[0]), strings.TrimSpace(wsProtocolParts[1])
 					r.Header.Set("Authorization", "Bearer "+wsToken)
 					r.Header.Set("sec-websocket-protocol", wsProtocol)
+				}
+			} else {
+				contentType := r.Header.Get("Content-Type")
+				if contentType != "application/json" {
+					http.Error(w, "Unsupported Media Type", http.StatusUnsupportedMediaType)
+					return
 				}
 			}
 

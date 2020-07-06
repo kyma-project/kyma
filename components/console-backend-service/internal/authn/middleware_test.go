@@ -24,7 +24,7 @@ func TestAuthMiddleware(t *testing.T) {
 		next := &mockHandler{}
 		response := httptest.NewRecorder()
 		response.Code = 0
-		middleware(next).ServeHTTP(response, newMalformedContentType())
+		middleware(next).ServeHTTP(response, newMalformedHttpRequest())
 
 		t.Run("Must not call authorizer", func(t *testing.T) {
 			assert.False(t, authenticated.Called)
@@ -216,22 +216,20 @@ func newHttpRequest() *http.Request {
 	return req
 }
 
+func newMalformedHttpRequest() *http.Request {
+	req := httptest.NewRequest("GET", "/graphql", strings.NewReader(""))
+	req.Header.Set("Content-Type", "application/xml")
+	return req
+}
+
 func newMalformedWebsocketRequest() *http.Request {
 	req := httptest.NewRequest("GET", "/graphql", strings.NewReader(""))
 	req.Header.Set("sec-websocket-protocol", "graphql, token, smth")
-	req.Header.Set("Content-Type", "application/json")
 	return req
 }
 
 func newWebsocketRequest() *http.Request {
 	req := httptest.NewRequest("GET", "/graphql", strings.NewReader(""))
 	req.Header.Set("sec-websocket-protocol", "graphql, token")
-	req.Header.Set("Content-Type", "application/json")
-	return req
-}
-
-func newMalformedContentType() *http.Request {
-	req := httptest.NewRequest("GET", "/graphql", strings.NewReader(""))
-	req.Header.Set("Content-Type", "application/xml")
 	return req
 }
