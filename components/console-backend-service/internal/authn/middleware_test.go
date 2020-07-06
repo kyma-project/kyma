@@ -18,6 +18,25 @@ func TestAuthMiddleware(t *testing.T) {
 
 	userInfo := user.DefaultInfo{Name: "Test User", UID: "deadbeef", Groups: []string{"admins", "testers"}}
 
+	t.Run("When HTTP request has malformed Content-Type header", func(t *testing.T) {
+		authenticated := &mockAuthenticator{Authorised: true, UserInfo: &userInfo}
+		middleware := AuthMiddleware(authenticated)
+		next := &mockHandler{}
+		response := httptest.NewRecorder()
+		response.Code = 0
+		middleware(next).ServeHTTP(response, newMalformedContentType())
+
+		t.Run("Must not call authorizer", func(t *testing.T) {
+			assert.False(t, authenticated.Called)
+		})
+		t.Run("Then next handler is not called", func(t *testing.T) {
+			assert.False(t, next.Called)
+		})
+		t.Run("Then request is rejected with status unsupported media type", func(t *testing.T) {
+			assert.Equal(t, http.StatusUnsupportedMediaType, response.Code)
+		})
+	})
+
 	t.Run("When HTTP request is unauthorised", func(t *testing.T) {
 		reject := &mockAuthenticator{Authorised: false}
 		middleware := AuthMiddleware(reject)
@@ -193,17 +212,26 @@ func (h *mockHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func newHttpRequest() *http.Request {
 	req := httptest.NewRequest("POST", "/graphql", strings.NewReader(""))
 	req.Header.Set("authorization", "Bearer token")
+	req.Header.Set("Content-Type", "application/json")
 	return req
 }
 
 func newMalformedWebsocketRequest() *http.Request {
 	req := httptest.NewRequest("GET", "/graphql", strings.NewReader(""))
 	req.Header.Set("sec-websocket-protocol", "graphql, token, smth")
+	req.Header.Set("Content-Type", "application/json")
 	return req
 }
 
 func newWebsocketRequest() *http.Request {
 	req := httptest.NewRequest("GET", "/graphql", strings.NewReader(""))
 	req.Header.Set("sec-websocket-protocol", "graphql, token")
+	req.Header.Set("Content-Type", "application/json")
+	return req
+}
+
+func newMalformedContentType() *http.Request {
+	req := httptest.NewRequest("GET", "/graphql", strings.NewReader(""))
+	req.Header.Set("Content-Type", "application/xml")
 	return req
 }
