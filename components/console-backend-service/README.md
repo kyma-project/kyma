@@ -80,7 +80,7 @@ dep ensure -vendor-only
 This project uses the [GQLGen](https://github.com/99designs/gqlgen) library, which improves development by generating code from the [GraphQL schema definition](internal/gqlschema/schema.graphql).
 
 1. Define types and their fields in `/internal/gqlschema/schema.graphql` using the [Schema Definition Language](http://graphql.org/learn/schema/).
-1. Execute the `go generate ./...` to run the code generator.
+1. From the project directory, run the code generator with the `go generate ./...` command.
 1. Navigate to the `/internal/gqlschema/` directory.
 1. Find newly generated methods in the `ResolverRoot` interface located in `./schema_gen.go`.
 1. Implement resolvers in specific domains according to the project structure and rules in this guide. Use generated models from `./models_gen.go` in your business logic. If you want to customize them, move them to a new file in the `gqlschema` package and include in the `./config.yml` file.
