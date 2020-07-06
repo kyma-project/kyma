@@ -104,10 +104,13 @@ func newInternalHandler(coreClientset kubernetes.Interface, serviceDefinitionSer
 		proxyConfigRepository := provider.NewSecretsProxyTargetConfigProvider(coreClientset.CoreV1().Secrets(options.namespace))
 
 		proxyConfig := proxy.Config{
-			SkipVerify:    options.skipVerify,
-			ProxyTimeout:  options.proxyTimeout,
-			Application:   options.application,
-			ProxyCacheTTL: options.proxyCacheTTL,
+			SkipVerify:              options.skipVerify,
+			ProxyTimeout:            options.proxyTimeout,
+			Application:             options.application,
+			ProxyCacheTTL:           options.proxyCacheTTL,
+			AnnotatePassportHeaders: options.annotatePassportHeaders,
+			RedisURL:                options.redisURL,
+			StorageKeyName:          options.storageKeyName,
 		}
 		proxyHandler := proxy.New(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, proxyConfig, proxyConfigRepository)
 

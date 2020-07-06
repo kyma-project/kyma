@@ -6,15 +6,18 @@ import (
 )
 
 type options struct {
-	externalAPIPort int
-	proxyPort       int
-	application     string
-	namespace       string
-	requestTimeout  int
-	skipVerify      bool
-	proxyTimeout    int
-	requestLogging  bool
-	proxyCacheTTL   int
+	externalAPIPort         int
+	proxyPort               int
+	application             string
+	namespace               string
+	requestTimeout          int
+	skipVerify              bool
+	proxyTimeout            int
+	requestLogging          bool
+	proxyCacheTTL           int
+	annotatePassportHeaders bool
+	storageKeyName          string
+	redisURL                string
 
 	namespacedGateway bool
 }
@@ -29,28 +32,33 @@ func parseArgs() *options {
 	proxyTimeout := flag.Int("proxyTimeout", 10, "Timeout for proxy call.")
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
 	proxyCacheTTL := flag.Int("proxyCacheTTL", 120, "TTL, in seconds, for proxy cache of Remote API information")
+	annotatePassportHeaders := flag.Bool("annotatePassportHeaders", false, "Flag to indicate if we should annotate passport headers to outgoing request")
+	redisURL := flag.String("redisURL", "", "REDIS URL for getting passport context")
+	storageKeyName := flag.String("storage-key-name", "x-request-id", "Storage key used for saving passport related headers")
 	namespacedGateway := flag.Bool("namespacedGateway", false, "Use Gateway in new configuration running as namespaced Gateway")
 
 	flag.Parse()
 
 	return &options{
-		externalAPIPort: *externalAPIPort,
-		proxyPort:       *proxyPort,
-		application:     *application,
-		namespace:       *namespace,
-		requestTimeout:  *requestTimeout,
-		skipVerify:      *skipVerify,
-		proxyTimeout:    *proxyTimeout,
-		requestLogging:  *requestLogging,
-		proxyCacheTTL:   *proxyCacheTTL,
-
-		namespacedGateway: *namespacedGateway,
+		externalAPIPort:         *externalAPIPort,
+		proxyPort:               *proxyPort,
+		application:             *application,
+		namespace:               *namespace,
+		requestTimeout:          *requestTimeout,
+		skipVerify:              *skipVerify,
+		proxyTimeout:            *proxyTimeout,
+		requestLogging:          *requestLogging,
+		proxyCacheTTL:           *proxyCacheTTL,
+		annotatePassportHeaders: *annotatePassportHeaders,
+		redisURL:                *redisURL,
+		storageKeyName:          *storageKeyName,
+		namespacedGateway:       *namespacedGateway,
 	}
 }
 
 func (o *options) String() string {
 	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --application=%s --namespace=%s --requestTimeout=%d --skipVerify=%v --proxyTimeout=%d"+
-		" --requestLogging=%t --proxyCacheTTL=%d --namespacedGateway=%t",
+		" --requestLogging=%t --proxyCacheTTL=%d --annotatePassportHeaders=%v --redisURL=%s --namespacedGateway=%t",
 		o.externalAPIPort, o.proxyPort, o.application, o.namespace, o.requestTimeout, o.skipVerify, o.proxyTimeout,
-		o.requestLogging, o.proxyCacheTTL, o.namespacedGateway)
+		o.requestLogging, o.proxyCacheTTL, o.annotatePassportHeaders, o.redisURL, o.namespacedGateway)
 }

@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-gateway/internal/proxy/passport"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/gorilla/mux"
@@ -34,8 +36,9 @@ type proxy struct {
 	proxyTimeout                 int
 	authorizationStrategyFactory authorization.StrategyFactory
 	csrfTokenStrategyFactory     csrf.TokenStrategyFactory
-
-	configRepository proxyconfig.TargetConfigProvider
+	passportAnnotater            *passport.RequestEnricher
+	storageKeyName               string
+	configRepository             proxyconfig.TargetConfigProvider
 }
 
 type ProxyHandler interface {
@@ -44,10 +47,13 @@ type ProxyHandler interface {
 }
 
 type Config struct {
-	SkipVerify    bool
-	ProxyTimeout  int
-	Application   string
-	ProxyCacheTTL int
+	SkipVerify              bool
+	ProxyTimeout            int
+	Application             string
+	ProxyCacheTTL           int
+	AnnotatePassportHeaders bool
+	RedisURL                string
+	StorageKeyName          string
 }
 
 // New creates proxy for handling user's services calls
@@ -57,6 +63,12 @@ func New(
 	csrfTokenStrategyFactory csrf.TokenStrategyFactory,
 	config Config,
 	configRepository proxyconfig.TargetConfigProvider) ProxyHandler {
+	var passportEnricher *passport.RequestEnricher
+	if config.AnnotatePassportHeaders {
+		passportEnricher = passport.New(config.RedisURL)
+	} else {
+		passportEnricher = nil
+	}
 	return &proxy{
 		nameResolver:                 k8sconsts.NewNameResolver(config.Application),
 		serviceDefService:            serviceDefService,
@@ -66,6 +78,8 @@ func New(
 		authorizationStrategyFactory: authorizationStrategyFactory,
 		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,
 		configRepository:             configRepository,
+		passportAnnotater:            passportEnricher,
+		storageKeyName:               config.StorageKeyName,
 	}
 }
 
@@ -87,6 +101,10 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	newRequest, cancel := p.setRequestTimeout(r)
 	defer cancel()
+
+	if p.passportAnnotater != nil {
+		p.passportAnnotater.AnnotatePassportHeaders(newRequest, p.storageKeyName)
+	}
 
 	err = p.addAuthorization(newRequest, cacheEntry)
 	if err != nil {
