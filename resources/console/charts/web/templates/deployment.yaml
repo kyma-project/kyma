@@ -60,20 +60,6 @@ spec:
               mountPath: /var/public/config
             - name: nginx
               mountPath: /usr/share/nginx-extended/
-        - name: compass-mfs
-          image: "{{ .Values.global.containerRegistry.path }}{{ .Values.compass_mfs.image.dir }}/compass:{{ .Values.compass_mfs.image.tag }}"
-          imagePullPolicy: {{ .Values.compass_mfs.image.pullPolicy }}
-          livenessProbe:
-            httpGet:
-              path: /healthz
-              port: {{ .Values.compass_mfs.statusPort }}
-            initialDelaySeconds: 10
-          ports:
-            - containerPort: {{ .Values.compass_mfs.statusPort }}
-            - containerPort: {{ .Values.compass_mfs.service.internalPort }}
-          volumeMounts:
-          - name: config
-            mountPath: /var/public/config
       volumes:
       - name: config
         configMap:

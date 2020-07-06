@@ -31,6 +31,10 @@
   name = "github.com/gogo/protobuf"
   version = "1.3.1"
 
+[[override]]
+  name = "knative.dev/serving"
+  version = "v0.15.2"
+
 [prune]
   go-tests = true
   unused-packages = true

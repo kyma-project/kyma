@@ -7,12 +7,12 @@ import (
 )
 
 type FunctionConfig struct {
-	ImagePullSecretName            string        `envconfig:"default=serverless-registry-credentials"`
-	ImagePullAccountName           string        `envconfig:"default=serverless"`
-	TargetCPUUtilizationPercentage int32         `envconfig:"default=50"`
-	RequeueDuration                time.Duration `envconfig:"default=1m"`
-	Build                          BuildConfig
-	Docker                         DockerConfig
+	ImageRegistryDockerConfigSecretName string        `envconfig:"default=serverless-image-pull-secret"`
+	ImagePullAccountName                string        `envconfig:"default=serverless"`
+	TargetCPUUtilizationPercentage      int32         `envconfig:"default=50"`
+	RequeueDuration                     time.Duration `envconfig:"default=1m"`
+	Build                               BuildConfig
+	Docker                              DockerConfig
 }
 
 type BuildConfig struct {
@@ -27,10 +27,10 @@ type BuildConfig struct {
 	RuntimeConfigMapName string            `envconfig:"default=dockerfile-nodejs-12"`
 	ExecutorArgs         []string          `envconfig:"default=--insecure;--skip-tls-verify;--skip-unused-stages;--log-format=text;--cache=true"`
 	ExecutorImage        string            `envconfig:"default=gcr.io/kaniko-project/executor:v0.22.0"`
-	CredsInitImage       string            `envconfig:"default=gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.12.1"`
 }
 
 type DockerConfig struct {
-	Address         string `envconfig:"default=serverless-docker-registry.kyma-system.svc.cluster.local:5000"`
-	ExternalAddress string `envconfig:"default=registry.kyma.local"`
+	InternalRegistryEnabled bool   `envconfig:"default=true"`
+	InternalServerAddress   string `envconfig:"default=serverless-docker-registry.kyma-system.svc.cluster.local:5000"`
+	RegistryAddress         string `envconfig:"default=registry.kyma.local"`
 }
