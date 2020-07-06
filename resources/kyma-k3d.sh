@@ -53,20 +53,27 @@ helm3 upgrade -i istio-kyma-patch istio-kyma-patch -n istio-system --set $OVERRI
 helm3 upgrade -i dex dex --set $OVERRIDES -n kyma-system 
 helm3 upgrade -i ory ory --set $OVERRIDES --set $ORY -n kyma-system 
 helm3 upgrade -i api-gateway api-gateway --set $OVERRIDES -n kyma-system 
-# helm3 upgrade -i rafter rafter --set $OVERRIDES -n kyma-system 
-# helm3 upgrade -i service-catalog service-catalog --set $OVERRIDES -n kyma-system 
-# helm3 upgrade -i service-catalog-addons service-catalog-addons --set $OVERRIDES -n kyma-system 
-# helm3 upgrade -i helm-broker helm-broker --set $OVERRIDES -n kyma-system 
-# helm3 upgrade -i nats-streaming nats-streaming --set $OVERRIDES -n natss 
+
+helm3 upgrade -i rafter rafter --set $OVERRIDES -n kyma-system 
+helm3 upgrade -i service-catalog service-catalog --set $OVERRIDES -n kyma-system 
+helm3 upgrade -i service-catalog-addons service-catalog-addons --set $OVERRIDES -n kyma-system 
+helm3 upgrade -i helm-broker helm-broker --set $OVERRIDES -n kyma-system 
 
 helm3 upgrade -i core core --set $OVERRIDES -n kyma-system 
 helm3 upgrade -i console console --set $OVERRIDES -n kyma-system 
 helm3 upgrade -i cluster-users cluster-users --set $OVERRIDES -n kyma-system 
 helm3 upgrade -i apiserver-proxy apiserver-proxy --set $OVERRIDES -n kyma-system 
 helm3 upgrade -i serverless serverless --set $LOCALREGISTRY -n kyma-system 
-#helm3 upgrade -i knative-provisioner-natss knative-provisioner-natss --set $OVERRIDES -n knative-eventing 
-#helm3 upgrade -i event-sources event-sources --set $OVERRIDES -n kyma-system 
-#helm3 upgrade -i application-connector application-connector --set $OVERRIDES -n kyma-integration 
+
+helm3 upgrade -i application-connector application-connector --set $OVERRIDES -n kyma-integration 
+
+# Install knative-eventing and knative-serving
+helm3 upgrade -i knative-serving knative-serving --set $OVERRIDES -n knative-serving 
+helm3 upgrade -i knative-eventing knative-eventing -n knative-eventing
+helm3 upgrade -i knative-provisioner-natss knative-provisioner-natss -n knative-eventing
+helm3 upgrade -i nats-streaming nats-streaming -n natss
+helm3 upgrade -i event-sources event-sources -n kyma-system
+
 
 # Create installer deployment scaled to 0 to get console running:
 kubectl apply -f kyma-yaml/installer-local.yaml

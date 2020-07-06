@@ -8,8 +8,7 @@ data:
     .:53 {
         errors
         health
-        rewrite name exact dex.local.kyma.pro. istio-ingressgateway.istio-system.svc.cluster.local
-        rewrite name exact minio.local.kyma.pro. istio-ingressgateway.istio-system.svc.cluster.local
+        rewrite name regex (.*)\.local\.kyma\.pro istio-ingressgateway.istio-system.svc.cluster.local
         ready
         kubernetes cluster.local in-addr.arpa ip6.arpa {
           pods insecure
