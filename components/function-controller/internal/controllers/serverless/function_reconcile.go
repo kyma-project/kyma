@@ -113,44 +113,15 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, err
 	}
 
-	revision := instance.Spec.Commit
-	if instance.Spec.SourceType == v1alpha1.Git && revision == "" && instance.Spec.Repository.Branch != "" {
-		var secret corev1.Secret
-		isSecretFound := true
-		var err error
-		var credentials map[string]string
-
-		if err = r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: instance.Name}, &secret); err != nil {
-			isSecretFound = false
-			if !errors.IsNotFound(err) {
-				return ctrl.Result{}, err
-			}
-		}
-
-		if isSecretFound {
-			credentials = secret.StringData
-		}
-
-		cfg := &gitops.Config{
-			RepoUrl:      instance.Spec.Source,
-			Branch:       instance.Spec.Repository.Branch,
-			ActualCommit: instance.Spec.Repository.Commit,
-			BaseDir:      instance.Spec.Repository.BaseDir,
-			Secret:       credentials,
-		}
-
-		log.Info(fmt.Sprintf("config: %v", instance))
-
-		revision, syncSource, err = chekForUpdate(cfg)
-		if err != nil {
-			return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
-				Type:               serverlessv1alpha1.ConditionConfigurationReady,
-				Status:             corev1.ConditionTrue,
-				LastTransitionTime: metav1.Now(),
-				Reason:             v1alpha1.ConditionReasonSourceUpdateFailed,
-				Message:            fmt.Sprintf("Sources update failed: %v", err),
-			})
-		}
+	revision, err := r.syncRevision(ctx, instance)
+	if err != nil {
+		return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+			Type:               serverlessv1alpha1.ConditionConfigurationReady,
+			Status:             corev1.ConditionTrue,
+			LastTransitionTime: metav1.Now(),
+			Reason:             v1alpha1.ConditionReasonSourceUpdateFailed,
+			Message:            fmt.Sprintf("Sources update failed: %v", err),
+		})
 	}
 
 	switch {
@@ -207,31 +178,38 @@ func seekLatestCommit(instance *serverlessv1alpha1.Function, credentials map[str
 	config := &gitops.Config{
 		RepoUrl:      instance.Spec.Source,
 		Branch:       instance.Spec.Repository.Branch,
-		ActualCommit: "",
 		BaseDir:      instance.Spec.Repository.BaseDir,
 		Secret:       credentials,
 	}
 
 	opr := gitops.NewOperator()
-	commit, _, err := opr.CheckBranchChanges(*config)
+	commit, err := opr.GetLastCommit(*config)
 	return commit, err
 }
 
-func syncSource(instance *v1alpha1.Function) bool {
-	return instance.Spec.SourceType == v1alpha1.Git &&
-		(instance.Status.Repository.Commit == "" ||
-			(instance.Spec.Repository.Commit != "" && instance.Spec.Repository.Commit != instance.Status.Repository.Commit) ||
-			(instance.Spec.Repository.Branch != "" && instance.Spec.Repository.Branch != instance.Status.Repository.Branch) ||
-			instance.Spec.Repository.Dockerfile != instance.Status.Repository.Dockerfile ||
-			instance.Spec.Source != instance.Status.Source)
-}
+func (r *FunctionReconciler) syncRevision(ctx context.Context, instance *v1alpha1.Function) (string, error) {
+	revision := instance.Spec.Commit
+	if instance.Spec.SourceType == v1alpha1.Git && revision == "" && instance.Spec.Repository.Branch != "" {
+		var secret corev1.Secret
+		isSecretFound := true
+		var err error
+		var credentials map[string]string
 
-func syncSource(instance *v1alpha1.Function) bool {
-	return instance.Spec.SourceType == v1alpha1.Git &&
-		(instance.Spec.Repository.Commit == "" && instance.Status.Repository.Commit == "" ||
-			instance.Spec.Repository.Commit != instance.Status.Repository.Commit ||
-			instance.Spec.Repository.Branch != instance.Status.Repository.Branch ||
-			instance.Spec.Repository.BaseDir != instance.Status.Repository.BaseDir ||
-			instance.Spec.Repository.Dockerfile != instance.Status.Repository.Dockerfile ||
-			instance.Spec.Source != instance.Status.Source)
+		if err = r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: instance.Name}, &secret); err != nil {
+			isSecretFound = false
+			if !errors.IsNotFound(err) {
+				return "", err
+			}
+		}
+
+		if isSecretFound {
+			credentials = secret.StringData
+		}
+
+		revision, err = seekLatestCommit(instance, credentials)
+		if err != nil {
+			return "", err
+		}
+	}
+	return revision, nil
 }

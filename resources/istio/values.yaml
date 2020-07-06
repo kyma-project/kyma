@@ -13,6 +13,3 @@ istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
     tag: d022112f
-
-global:
-  isLocalEnv: "false"

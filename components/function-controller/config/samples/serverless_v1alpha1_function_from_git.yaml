@@ -1,0 +1,10 @@
+apiVersion: serverless.kyma-project.io/v1alpha1
+kind: Function
+metadata:
+  name: newone
+spec:
+  source: "https://github.com/pPrecel/public-gitops"
+  baseDir: "/"
+  type: git
+  branch: "master"
+  dockerfile: "deploy/Dockerfile"

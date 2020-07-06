@@ -77,6 +77,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) 
 							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 						},
 						{
+							Name: "workspace",
 							VolumeSource: corev1.VolumeSource{
 								EmptyDir: &corev1.EmptyDirVolumeSource{},
 							},
@@ -268,10 +269,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 						{
 							Name:  "executor",
 							Image: r.config.Build.ExecutorImage,
-							Args: append(r.config.Build.ExecutorArgs,
-								fmt.Sprintf("%s=%s", destinationArg, imageName),
-								"--context=dir:///workspace",
-								fmt.Sprintf("--dockerfile=%s", instance.Spec.Repository.Dockerfile)),
+							Args:  append(r.config.Build.ExecutorArgs, fmt.Sprintf("%s=%s", destinationArg, imageName), "--context=dir:///workspace"),
 							Resources: corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceMemory: r.config.Build.LimitsMemoryValue,
