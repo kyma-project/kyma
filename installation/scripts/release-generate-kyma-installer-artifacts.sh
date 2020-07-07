@@ -32,6 +32,8 @@ function generateLocalArtifact() {
       > ${ARTIFACTS_DIR}/kyma-installer-local.yaml
 
     cp ${INSTALLER_LOCAL_CONFIG_PATH} ${ARTIFACTS_DIR}/kyma-config-local.yaml
+    cp ${INSTALLER_LOCAL_CR_PATH}  ${ARTIFACTS_DIR}/kyma-installer-cr.yaml
+    cp ${INSTALLER_YAML_PATH} ${ARTIFACTS_DIR}/installer.yaml
 
     rm -rf ${TMP_LOCAL_CR}
 }
@@ -45,6 +47,8 @@ function generateClusterArtifact() {
       | sed -E ";s;image: eu.gcr.io\/kyma-project\/develop\/installer:.+;image: eu.gcr.io/kyma-project/${KYMA_INSTALLER_PUSH_DIR}kyma-installer:${KYMA_INSTALLER_VERSION};" \
       > ${ARTIFACTS_DIR}/kyma-installer-cluster.yaml
 
+    cp ${INSTALLER_CLUSTER_CR_PATH}  ${ARTIFACTS_DIR}/installer-cr-cluster.yaml
+
     rm -rf ${TMP_CLUSTER_CR}
 }
 
@@ -56,6 +60,9 @@ function generateCompassClusterArtifact() {
     ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER_YAML_PATH} ${TMP_COMPASS_CLUSTER_CR} \
       | sed -E ";s;image: eu.gcr.io\/kyma-project\/develop\/installer:.+;image: eu.gcr.io/kyma-project/${KYMA_INSTALLER_PUSH_DIR}kyma-installer:${KYMA_INSTALLER_VERSION};" \
       > ${ARTIFACTS_DIR}/kyma-installer-cluster-compass.yaml
+
+    cp ${INSTALLER_COMPASS_CLUSTER_CR_PATH}  ${ARTIFACTS_DIR}/kyma-installer-cr.yaml
+
 
     rm -rf ${TMP_COMPASS_CLUSTER_CR}
 }
@@ -69,6 +76,8 @@ function generateCompassDependenciesClusterArtifact() {
       | sed -E ";s;image: eu.gcr.io\/kyma-project\/develop\/installer:.+;image: eu.gcr.io/kyma-project/${KYMA_INSTALLER_PUSH_DIR}kyma-installer:${KYMA_INSTALLER_VERSION};" \
       > ${ARTIFACTS_DIR}/kyma-installer-cluster-compass-dependencies.yaml
 
+    cp ${INSTALLER_COMPASS_DEP_CLUSTER_CR_PATH}  ${ARTIFACTS_DIR}/installer-cr-cluster-compass-dependencies.yaml
+
     rm -rf ${TMP_COMPASS_DEP_CLUSTER_CR}
 }
 
@@ -80,6 +89,10 @@ function generateRuntimeClusterArtifact() {
     ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER_YAML_PATH} ${TMP_RUNTIME_CLUSTER_CR} \
       | sed -E ";s;image: eu.gcr.io\/kyma-project\/develop\/installer:.+;image: eu.gcr.io/kyma-project/${KYMA_INSTALLER_PUSH_DIR}kyma-installer:${KYMA_INSTALLER_VERSION};" \
       > ${ARTIFACTS_DIR}/kyma-installer-cluster-runtime.yaml
+
+
+    cp ${INSTALLER_RUNTIME_CLUSTER_CR_PATH}  ${ARTIFACTS_DIR}/installer-cr-cluster-runtime.yaml
+
 
     rm -rf ${TMP_RUNTIME_CLUSTER_CR}
 }
