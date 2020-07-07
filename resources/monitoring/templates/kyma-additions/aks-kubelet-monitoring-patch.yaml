@@ -25,20 +25,30 @@ data:
     metadata:
       labels:
         app: {{ template "prometheus-operator.name" . }}-kubelet
-        {{- include "prometheus-operator.labels" . | indent 8 }}
+    {{- include "prometheus-operator.labels" . | indent 8 }}
       name: {{ template "prometheus-operator.fullname" . }}-kubelet
       namespace: {{ $.Release.Namespace }}
     spec:
       endpoints:
         - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
           honorLabels: true
-          port: http-metrics
-          scheme: http
+          port: https-metrics
+          scheme: https
+          tlsConfig:
+            caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            insecureSkipVerify: true
+          metricRelabelings:
+    {{ tpl (toYaml .Values.kubelet.serviceMonitor.metricRelabelings | indent 8) . }}
         - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
           honorLabels: true
           path: /metrics/cadvisor
-          port: http-metrics
-          scheme: http
+          port: https-metrics
+          scheme: https
+          tlsConfig:
+            caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            insecureSkipVerify: true
+          metricRelabelings:
+    {{ tpl (toYaml .Values.kubelet.serviceMonitor.cAdvisorMetricRelabelings | indent 8) . }}
       jobLabel: k8s-app
       namespaceSelector:
         matchNames:
