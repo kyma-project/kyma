@@ -27,6 +27,9 @@ spec:
   - match:
     - uri:
         regex: /.*
+    - headers:
+        content-type:
+          exact: application/json
     route:
     - destination:
         port:
