@@ -8,7 +8,13 @@
 # curl -s https://raw.githubusercontent.com/rancher/k3d/master/install.sh | bash
 
 START_TIME=$SECONDS
-
+function print_installed_time_for_component() {
+  local start_time=$1
+  local stop_time=$2
+  local component=$3
+  local ELAPSED_TIME=$(($stop_time - $start_time))
+  echo "${component} is installed in $(($ELAPSED_TIME / 60)) minutes and $(($ELAPSED_TIME % 60)) seconds."
+}
 # Create Kyma cluster
 k3d create --publish 80:80 --publish 443:443 --enable-registry --registry-volume local_registry --registry-name registry.localhost --server-arg --no-deploy --server-arg traefik -n kyma -t 60
 
@@ -41,37 +47,122 @@ kubectl create ns natss
 kubectl label ns istio-system istio-injection=disabled --overwrite
 kubectl label ns cert-manager istio-injection=disabled --overwrite
 
+start_time=$SECONDS
 helm upgrade -i cluster-essentials cluster-essentials --set $OVERRIDES -n kyma-system
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "cluster-essentials"
+
+start_time=$SECONDS
 helm upgrade -i testing testing --set $OVERRIDES -n kyma-system
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "testing"
+
 kubectl apply -f kyma-yaml/cert-manager.yaml
 kubectl -n kube-system patch cm coredns --patch "$(cat kyma-yaml/coredns-patch.yaml)"
+
+start_time=$SECONDS
 helm upgrade -i istio istio -n istio-system --set $OVERRIDES
-
 while [[ $(kubectl get pods -n istio-system -l istio=sidecar-injector -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for istio" && sleep 5; done
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "istio"
 
+start_time=$SECONDS
 helm upgrade -i ingress-dns-cert ingress-dns-cert --set $OVERRIDES -n istio-system
-helm upgrade -i istio-kyma-patch istio-kyma-patch -n istio-system --set $OVERRIDES
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "ingress-dns-cert"
 
+start_time=$SECONDS
+helm upgrade -i istio-kyma-patch istio-kyma-patch -n istio-system --set $OVERRIDES
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "istio-kyma-patch"
+
+start_time=$SECONDS
 helm upgrade -i dex dex --set $OVERRIDES -n kyma-system
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "dex"
+
+start_time=$SECONDS
 helm upgrade -i ory ory --set $OVERRIDES --set $ORY -n kyma-system
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "ory"
+
+start_time=$SECONDS
 helm upgrade -i api-gateway api-gateway --set $OVERRIDES -n kyma-system
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "api-gateway"
+
+start_time=$SECONDS
 helm upgrade -i core core --set $OVERRIDES -n kyma-system
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "core"
+
+start_time=$SECONDS
 helm upgrade -i console console --set $OVERRIDES -n kyma-system
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "console"
+
+start_time=$SECONDS
 helm upgrade -i cluster-users cluster-users --set $OVERRIDES -n kyma-system
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "cluster-users"
+
+start_time=$SECONDS
 helm upgrade -i apiserver-proxy apiserver-proxy --set $OVERRIDES -n kyma-system
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "apiserver-proxy"
+
+start_time=$SECONDS
 helm upgrade -i serverless serverless --set $LOCALREGISTRY -n kyma-system
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "serverless"
+
+start_time=$SECONDS
 helm upgrade -i application-connector application-connector -n kyma-integration --set $OVERRIDES
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "application-connector"
+
+start_time=$SECONDS
 helm upgrade -i rafter rafter -n kyma-system --set $OVERRIDES
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "rafter"
+
+start_time=$SECONDS
 helm upgrade -i service-catalog service-catalog -n kyma-system --set $OVERRIDES
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "service-catalog"
+
+start_time=$SECONDS
 helm upgrade -i service-catalog-addons service-catalog-addons -n kyma-system --set $OVERRIDES
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "service-catalog-addons service-catalog-addons"
 
 
 # Install knative-eventing and knative-serving
+start_time=$SECONDS
 helm upgrade -i knative-serving knative-serving -n knative-serving --set $OVERRIDES
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "knative-serving"
+
+start_time=$SECONDS
 helm upgrade -i knative-eventing knative-eventing -n knative-eventing
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "knative-eventing"
+
+start_time=$SECONDS
 helm upgrade -i knative-provisioner-natss knative-provisioner-natss -n knative-eventing
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "knative-provisioner-natss"
+
+start_time=$SECONDS
 helm upgrade -i nats-streaming nats-streaming -n natss
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "nats-streaming"
+
+start_time=$SECONDS
 helm upgrade -i event-sources event-sources -n kyma-system
+stop_time=$SECONDS
+print_installed_time_for_component "${start_time}" "${stop_time}" "event-sources"
+
 
 # Install Application connector
 
