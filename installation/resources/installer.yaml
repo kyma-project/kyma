@@ -176,6 +176,11 @@ spec:
               ${HELM_3_BINARY} 2to3 convert ${release}
             fi
           done < helm2-releases
+        resources:
+          limits:
+            memory: 1024Mi
+          requests:
+            memory: 512Mi
       containers:
       - name: kyma-installer-container
         image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
