@@ -8,7 +8,9 @@ import (
 	"strconv"
 	"time"
 
+	v1alpha11 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	v1 "knative.dev/pkg/apis/duck/v1"
 )
 
 type AddonsConfiguration struct {
@@ -433,15 +435,6 @@ type NavigationNode struct {
 	RequiredPermissions []*RequiredPermission `json:"requiredPermissions"`
 }
 
-type OwnerReference struct {
-	APIVersion         string `json:"apiVersion"`
-	BlockOwnerDeletion *bool  `json:"blockOwnerDeletion"`
-	Controller         *bool  `json:"controller"`
-	Kind               string `json:"kind"`
-	Name               string `json:"name"`
-	UID                string `json:"UID"`
-}
-
 type Pod struct {
 	Name              string            `json:"name"`
 	NodeName          string            `json:"nodeName"`
@@ -674,60 +667,17 @@ type ServiceStatus struct {
 	LoadBalancer *LoadBalancerStatus `json:"loadBalancer"`
 }
 
-type Subscriber struct {
-	URI *string        `json:"uri"`
-	Ref *SubscriberRef `json:"ref"`
-}
-
-type SubscriberInput struct {
-	URI *string             `json:"uri"`
-	Ref *SubscriberRefInput `json:"ref"`
-}
-
-type SubscriberRef struct {
-	APIVersion string `json:"apiVersion"`
-	Kind       string `json:"kind"`
-	Name       string `json:"name"`
-	Namespace  string `json:"namespace"`
-}
-
-type SubscriberRefInput struct {
-	APIVersion string `json:"apiVersion"`
-	Kind       string `json:"kind"`
-	Name       string `json:"name"`
-	Namespace  string `json:"namespace"`
-}
-
-type Trigger struct {
-	Name             string         `json:"name"`
-	Namespace        string         `json:"namespace"`
-	Broker           string         `json:"broker"`
-	FilterAttributes JSON           `json:"filterAttributes"`
-	Subscriber       *Subscriber    `json:"subscriber"`
-	Status           *TriggerStatus `json:"status"`
-}
-
 type TriggerCreateInput struct {
-	Name             *string          `json:"name"`
-	Namespace        string           `json:"namespace"`
-	Broker           string           `json:"broker"`
-	FilterAttributes JSON             `json:"filterAttributes"`
-	Subscriber       *SubscriberInput `json:"subscriber"`
+	Name             *string         `json:"name"`
+	Namespace        string          `json:"namespace"`
+	Broker           string          `json:"broker"`
+	FilterAttributes JSON            `json:"filterAttributes"`
+	Subscriber       *v1.Destination `json:"subscriber"`
 }
 
 type TriggerEvent struct {
 	Type    SubscriptionEventType `json:"type"`
-	Trigger *Trigger              `json:"trigger"`
-}
-
-type TriggerMetadata struct {
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
-}
-
-type TriggerMetadataInput struct {
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
+	Trigger *v1alpha11.Trigger    `json:"trigger"`
 }
 
 type TriggerStatus struct {
