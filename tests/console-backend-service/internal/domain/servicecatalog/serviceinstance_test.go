@@ -40,6 +40,7 @@ type instanceDeleteMutationResponse struct {
 }
 
 func TestServiceInstanceMutationsAndQueries(t *testing.T) {
+	t.Skip()
 	c, err := graphql.New()
 	require.NoError(t, err)
 
@@ -440,6 +441,7 @@ func instanceEventDetailsFields() string {
 }
 
 func checkInstanceFromClusterServiceClass(t *testing.T, expected, actual shared.ServiceInstance) {
+	t.Skip()
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 
@@ -456,6 +458,7 @@ func checkInstanceFromClusterServiceClass(t *testing.T, expected, actual shared.
 }
 
 func checkInstanceFromServiceClass(t *testing.T, expected, actual shared.ServiceInstance) {
+	t.Skip()
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 
@@ -473,6 +476,7 @@ func checkInstanceFromServiceClass(t *testing.T, expected, actual shared.Service
 }
 
 func assertInstanceFromClusterServiceClassExistsAndEqual(t *testing.T, expectedElement shared.ServiceInstance, arr []shared.ServiceInstance) {
+	t.Skip()
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
@@ -486,6 +490,7 @@ func assertInstanceFromClusterServiceClassExistsAndEqual(t *testing.T, expectedE
 }
 
 func assertInstanceFromServiceClassExistsAndEqual(t *testing.T, expectedElement shared.ServiceInstance, arr []shared.ServiceInstance) {
+	t.Skip()
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
@@ -516,6 +521,7 @@ func readInstanceEvent(sub *graphql.Subscription) (ServiceInstanceEvent, error) 
 }
 
 func checkInstanceEvent(t *testing.T, expected, actual ServiceInstanceEvent) {
+	t.Skip()
 	assert.Equal(t, expected.Type, actual.Type)
 	assert.Equal(t, expected.ServiceInstance.Name, actual.ServiceInstance.Name)
 }
