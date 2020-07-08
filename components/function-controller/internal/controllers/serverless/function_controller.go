@@ -25,7 +25,6 @@ var (
 		{Name: "FUNC_RUNTIME", Value: "nodejs12"},
 		{Name: "FUNC_PORT", Value: "8080"},
 		{Name: "NODE_PATH", Value: "$(KUBELESS_INSTALL_VOLUME)/node_modules"},
-		// investigate here
 	}
 )
 
