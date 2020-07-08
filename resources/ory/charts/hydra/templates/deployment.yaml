@@ -2,9 +2,18 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "hydra.fullname" . }}
+  {{- if .Release.Namespace }}
   namespace: {{ .Release.Namespace }}
+  {{- end }}
   labels:
 {{ include "hydra.labels" . | indent 4 }}
+    {{- with .Values.deployment.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.deployment.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -16,10 +25,14 @@ spec:
   template:
     metadata:
       labels:
+{{ include "hydra.labels" . | indent 8 }}
+        {{- with .Values.deployment.labels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
         app.kubernetes.io/name: {{ include "hydra.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-      {{- with .Values.deployment.annotations }}
       annotations:
+      {{- with .Values.deployment.annotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
@@ -33,18 +46,25 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["hydra"]
-          args: ["migrate", "sql", "-e", "--yes"]
+          args: ["migrate", "sql", "-e", "--yes", "--config", "/etc/config/config.yaml"]
+          volumeMounts:
+            - name: {{ include "hydra.name" . }}-config-volume
+              mountPath: /etc/config
+              readOnly: true
           env:
             - name: DSN
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "hydra.secretName" . }}
+                  name: {{ include "hydra.secretname" . }}
                   key: dsn
     {{- end}}
       volumes:
         - name: {{ include "hydra.name" . }}-config-volume
           configMap:
             name: {{ include "hydra.fullname" . }}
+      {{- if .Values.deployment.serviceAccountName  }}
+      serviceAccountName: {{ .Values.deployment.serviceAccountName }}
+      {{- end }
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -97,17 +117,17 @@ spec:
             - name: DSN
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "hydra.secretName" . }}
+                  name: {{ include "hydra.secretname" . }}
                   key: dsn
             - name: SECRETS_SYSTEM
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "hydra.secretName" . }}
+                  name: {{ include "hydra.secretname" . }}
                   key: secretsSystem
             - name: SECRETS_COOKIE
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "hydra.secretName" . }}
+                  name: {{ include "hydra.secretname" . }}
                   key: secretsCookie
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}

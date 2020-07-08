@@ -5,7 +5,7 @@ image:
   # ORY Hydra image
   repository: oryd/hydra
   # ORY Hydra version
-  tag: v1.5.2
+  tag: v1.4.6
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -26,6 +26,12 @@ service:
     type: ClusterIP
     # The service port
     port: 4444
+    # If you do want to specify annotations, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
+    annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+
   # Configures the Kubernetes service for the api port.
   admin:
     # En-/disable the service
@@ -34,6 +40,11 @@ service:
     type: ClusterIP
     # The service port
     port: 4445
+    # If you do want to specify annotations, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
+    annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
 
 # Configure ingress
 ingress:
@@ -86,6 +97,8 @@ hydra:
           - 172.16.0.0/12
           - 192.168.0.0/16
     secrets: {}
+    # Use a pre-existing secret (see secret.yaml for required fields)
+    # existingSecret: my-preexisting-secret
     urls:
       self: {}
 
@@ -109,6 +122,11 @@ deployment:
   #    cpu: 100m
   #  memory: 128Mi
 
+  labels: {}
+  #      If you do want to specify additional labels, uncomment the following
+  #      lines, adjust them as necessary, and remove the curly braces after 'labels:'.
+  #      e.g.  type: app
+
   annotations: {}
   #      If you do want to specify annotations, uncomment the following
   #      lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
@@ -123,12 +141,27 @@ deployment:
   # Configure node tolerations.
   tolerations: []
 
+  ## Specify the serviceAccountName value.
+  ## In some situations it is needed to provides specific permissions to Hydra deployments
+  ## Like for example installing Hydra on a cluster with a PosSecurityPolicy and Istio.
+  ## Uncoment if it is needed to provide a ServiceAccount for the Hydra deployment.
+  # serviceAccountName:
+
 # Configure node affinity
 affinity: {}
 
 # Configures controller setup
 maester:
   enabled: true
+  # Values for the hydra admin service arguments to hydra-maester
+  adminService: {}
+    # The service name value may need to be set if you use
+    # `fullnameOverride` for the parent chart
+    # name:
+
+    # You only need to set this port if you change the value for
+    # `service.admin.port` in the parent chart
+    # port:
 
 busybox:
   repository: busybox

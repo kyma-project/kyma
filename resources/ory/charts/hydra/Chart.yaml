@@ -1,6 +1,6 @@
-apiVersion: v1
-appVersion: "v1.0.0-rc.14_oryOS.12"
-description: A Helm chart for deployoing ORY Hydra in Kubernetes
+apiVersion: v2
+appVersion: "v1.4.6"
+description: A Helm chart for deploying ORY Hydra in Kubernetes
 name: hydra
 version: 0.0.1
 keywords:
@@ -19,3 +19,9 @@ maintainers: # (optional)
   - name: ORY Team
     email: hi@ory.sh
     url: https://www.ory.sh/
+type: application
+dependencies:
+  - name: hydra-maester
+    version: 0.0.5-alpha10
+    condition: maester.enabled
+    alias: maester

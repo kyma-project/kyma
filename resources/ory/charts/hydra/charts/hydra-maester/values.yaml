@@ -1,4 +1,4 @@
-replicaCount: 1
+  replicaCount: 1
 
 jobs:
   image:

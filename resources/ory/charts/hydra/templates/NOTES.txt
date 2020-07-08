@@ -1,3 +1,4 @@
+{{ include "hydra.check.override.consistency" . }}
 The ORY Hydra HTTP Public API is available via:
 {{- if .Values.ingress.public.enabled }}
 {{- range $host := .Values.ingress.public.hosts }}

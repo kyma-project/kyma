@@ -7,6 +7,4 @@ metadata:
 {{ include "hydra.labels" . | indent 4 }}
 data:
   "config.yaml": |
-  {{- with .Values.hydra.config -}}
-    {{- toYaml . | nindent 4 }}
-  {{- end -}}
+{{ include "hydra.configmap" . | nindent 4 }}
