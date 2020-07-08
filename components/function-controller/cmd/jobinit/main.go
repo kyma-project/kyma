@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/gitops"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
 )
@@ -19,21 +20,24 @@ type config struct {
 }
 
 func main() {
-	fmt.Println("Start repo fetcher...")
+	log.Println("Start repo fetcher...")
 	cfg := config{}
 	if err := envconfig.InitWithPrefix(&cfg, envPrefix); err != nil {
-		panic(errors.Wrap(err, "while reading env variables"))
+		log.Fatalln("while reading env variables")
 	}
-	operator := gitops.NewOperator()
+	operator := git.New()
 
-	fmt.Println("Check for auth config...")
-	auth := operator.ConvertToMap(cfg.RepositoryUsername, cfg.RepositoryPassword)
+	log.Println("Check for auth config...")
+	auth := &http.BasicAuth{
+		Username: cfg.RepositoryUsername,
+		Password: cfg.RepositoryPassword,
+	}
 
-	fmt.Printf("Clone repo from url: %s and commit: %s...\n", cfg.RepositoryUrl, cfg.RepositoryCommit)
-	commit, err := operator.CloneRepoFromCommit(cfg.MountPath, cfg.RepositoryUrl, cfg.RepositoryCommit, auth)
+	log.Printf("Clone repo from url: %s and commit: %s...\n", cfg.RepositoryUrl, cfg.RepositoryCommit)
+	commit, err := operator.Clone(cfg.MountPath, cfg.RepositoryUrl, cfg.RepositoryCommit, auth)
 	if err != nil {
-		panic(errors.Wrapf(err, "while cloning repository: %s, from commit: %s", cfg.RepositoryUrl, cfg.RepositoryCommit))
+		log.Fatalln(errors.Wrapf(err, "while cloning repository: %s, from commit: %s", cfg.RepositoryUrl, cfg.RepositoryCommit))
 	}
 
-	fmt.Printf("Cloned repository: %s, from commit: %s, to path: %s", cfg.RepositoryUrl, commit, cfg.MountPath)
+	log.Printf("Cloned repository: %s, from commit: %s, to path: %s", cfg.RepositoryUrl, commit, cfg.MountPath)
 }
