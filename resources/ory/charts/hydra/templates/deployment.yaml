@@ -57,14 +57,14 @@ spec:
                 secretKeyRef:
                   name: {{ include "hydra.secretname" . }}
                   key: dsn
-    {{- end}}
+    {{- end }}
       volumes:
         - name: {{ include "hydra.name" . }}-config-volume
           configMap:
             name: {{ include "hydra.fullname" . }}
       {{- if .Values.deployment.serviceAccountName  }}
       serviceAccountName: {{ .Values.deployment.serviceAccountName }}
-      {{- end }
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
