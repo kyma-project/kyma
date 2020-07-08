@@ -585,6 +585,7 @@ type Service {
     ports: [ServicePort!]!
     status: ServiceStatus!
     json: JSON!
+    UID: String!
 }
 
 type Pod {
