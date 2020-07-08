@@ -23,7 +23,7 @@ Follow these steps:
 1. Deploy the sample service to any of your Namespaces. Use the `stage` Namespace for this guide:
 
    ```bash
-   kubectl create -n stage -f https://raw.githubusercontent.com/kyma-project/examples/master/http-db-service/deployment/deployment.yaml
+   kubectl apply -n stage -f https://raw.githubusercontent.com/kyma-project/examples/master/http-db-service/deployment/deployment.yaml
    ```
 
 2. Create an unsecured API for your example service:
