@@ -6,6 +6,9 @@ metadata:
     duck.knative.dev/addressable: "true"
     knative.dev/crd-install: "true"
     messaging.knative.dev/subscribable: "true"
+    app.kubernetes.io/managed-by: "Helm"
+    meta.helm.sh/release-name: "knative-provisioner-natss"
+    meta.helm.sh/release-namespace: "knative-eventing"
   name: natsschannels.messaging.knative.dev
 spec:
   additionalPrinterColumns:

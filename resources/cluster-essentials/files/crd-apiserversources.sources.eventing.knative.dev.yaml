@@ -16,6 +16,9 @@ metadata:
     eventing.knative.dev/release: "v0.12.0"
     eventing.knative.dev/source: "true"
     knative.dev/crd-install: "true"
+    app.kubernetes.io/managed-by: "Helm"
+    meta.helm.sh/release-name: "knative-eventing"
+    meta.helm.sh/release-namespace: "knative-eventing"
   name: apiserversources.sources.eventing.knative.dev
 spec:
   additionalPrinterColumns:

@@ -8,7 +8,9 @@ metadata:
     app: knative-kafka
     app.kubernetes.io/name: knative-kafka
     app.kubernetes.io/instance: knative-kafka
-    app.kubernetes.io/managed-by: Tiller
+    app.kubernetes.io/managed-by: "Helm"
+    meta.helm.sh/release-name: "knative-eventing-kafka"
+    meta.helm.sh/release-namespace: "knative-eventing"
     helm.sh/chart: knative-kafka-0.0.1
   name: kafkachannels.knativekafka.kyma-project.io
 spec:

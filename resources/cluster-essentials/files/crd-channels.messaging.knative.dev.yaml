@@ -6,6 +6,9 @@ metadata:
     eventing.knative.dev/release: "v0.12.0"
     knative.dev/crd-install: "true"
     messaging.knative.dev/subscribable: "true"
+    app.kubernetes.io/managed-by: "Helm"
+    meta.helm.sh/release-name: "knative-eventing"
+    meta.helm.sh/release-namespace: "knative-eventing"
   name: channels.messaging.knative.dev
 spec:
   additionalPrinterColumns:

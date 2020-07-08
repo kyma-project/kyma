@@ -5,6 +5,9 @@ metadata:
     duck.knative.dev/addressable: "true"
     eventing.knative.dev/release: "v0.12.0"
     knative.dev/crd-install: "true"
+    app.kubernetes.io/managed-by: "Helm"
+    meta.helm.sh/release-name: "knative-eventing"
+    meta.helm.sh/release-namespace: "knative-eventing"
   name: sequences.flows.knative.dev
 spec:
   additionalPrinterColumns:
