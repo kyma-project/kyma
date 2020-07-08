@@ -15,7 +15,7 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **global.natsStreaming.persistence.enabled** | Enables / disables persisting events to a PersistentVolume | `true` |
+| **global.natsStreaming.persistence.enabled** | Enables / disables saving events to a PersistentVolume | `true` |
 | **global.natsStreaming.persistence.maxAge** | Specifies the time for which the given Event is stored in NATS Streaming. | `24h` |
 | **global.natsStreaming.persistence.size** | Specifies the size of the persistence volume in NATS Streaming. | `1Gi` |
 | **global.natsStreaming.resources.limits.memory** | Specifies the memory limits for NATS Streaming. | `256M` |
