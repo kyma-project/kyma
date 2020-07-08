@@ -1,16 +1,11 @@
 ---
 global:
   isLocalEnv: false
+
 kyma:
   namespaces2Label:
-    - istio-system
-    - kube-system
     - cert-manager
   labelJob:
     image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
     tag: "v20200617-32c1f3ff"
 
-istio:
-  installer:
-    image: eu.gcr.io/kyma-project/istio-installer
-    tag: ff249b80

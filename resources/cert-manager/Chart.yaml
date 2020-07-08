@@ -1,0 +1,6 @@
+name: cert-manager
+version: 0.0.1
+description: Kyma
+keywords:
+- kyma
+apiVersion: v1
