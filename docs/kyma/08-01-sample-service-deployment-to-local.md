@@ -63,7 +63,7 @@ Follow these steps:
 Run the following command:
 
    ```bash
-   kubectl apply -n stage -f https://raw.githubusercontent.com/kyma-project/examples/master/gateway/service/api-with-auth.yaml
+   kubectl apply -n stage -f https://raw.githubusercontent.com/kyma-project/examples/master/gateway/service/api-with-jwt.yaml
    ```
 
 After you apply this update, you must include a valid bearer ID token in the Authorization header to access the service.
