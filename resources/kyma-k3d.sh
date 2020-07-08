@@ -47,8 +47,6 @@ while [[ $(kubectl get pods -n istio-system -l istio=sidecar-injector -o 'jsonpa
 
 helm3 upgrade -i ingress-dns-cert ingress-dns-cert --set $OVERRIDES -n istio-system  
 helm3 upgrade -i istio-kyma-patch istio-kyma-patch -n istio-system --set $OVERRIDES 
-# helm3 upgrade -i knative-serving knative-serving -n knative-serving --set $OVERRIDES 
-# helm3 upgrade -i knative-eventing knative-eventing -n knative-eventing --set $OVERRIDES 
 
 helm3 upgrade -i dex dex --set $OVERRIDES -n kyma-system 
 helm3 upgrade -i ory ory --set $OVERRIDES --set $ORY -n kyma-system 
@@ -64,6 +62,7 @@ helm3 upgrade -i console console --set $OVERRIDES -n kyma-system
 helm3 upgrade -i cluster-users cluster-users --set $OVERRIDES -n kyma-system 
 helm3 upgrade -i apiserver-proxy apiserver-proxy --set $OVERRIDES -n kyma-system 
 helm3 upgrade -i serverless serverless --set $LOCALREGISTRY -n kyma-system 
+helm3 upgrade -i logging logging --set $OVERRIDES -n kyma-system 
 
 helm3 upgrade -i application-connector application-connector --set $OVERRIDES -n kyma-integration 
 
