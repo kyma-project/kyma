@@ -15,7 +15,10 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
+| **global.natsStreaming.persistence.enabled** | Enables / disables persisting events to a PersistentVolume | `true` |
 | **global.natsStreaming.persistence.maxAge** | Specifies the time for which the given Event is stored in NATS Streaming. | `24h` |
 | **global.natsStreaming.persistence.size** | Specifies the size of the persistence volume in NATS Streaming. | `1Gi` |
 | **global.natsStreaming.resources.limits.memory** | Specifies the memory limits for NATS Streaming. | `256M` |
 | **global.natsStreaming.channel.maxInactivity** | Specifies the time after which the autocleaner removes all backing resources related to a given Event type from the NATS Streaming database if there is no activity for this Event type. | `48h` |
+
+>**IMPORTANT:** If persistence is disabled `nats` will store undelivered messages in memory. All restarts of `nats` will lead to lost undelivered messages. Do NOT use this in a production setup!
