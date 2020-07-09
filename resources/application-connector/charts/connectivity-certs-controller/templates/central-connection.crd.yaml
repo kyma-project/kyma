@@ -1,6 +1,4 @@
 {{- if not .Values.global.disableLegacyConnectivity }}
-{{- if not (.Capabilities.APIVersions.Has "applicationconnector.kyma-project.io/v1alpha1/CentralConnection") }}
-{{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -32,6 +30,4 @@ spec:
           required:
             - managementInfoUrl
           type: object
-{{- end }}
-{{- end }}
 {{- end }}
