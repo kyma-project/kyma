@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const refsHeadsPrefix = "refs/heads/%s"
+const refsHeadsFormat = "refs/heads/%s"
 
 //go:generate mockery -name=Client -output=automock -outpkg=automock -case=underscore
 type Client interface {
@@ -22,16 +22,17 @@ type Git struct {
 }
 
 func New() *Git {
-	return &Git{client: newClient()}
+	return &Git{client: &client{}}
 }
 
-func (g *Git) LastCommit(repoUrl, branch string, auth transport.AuthMethod) (commitHash string, err error) {
+func (g *Git) LastCommit(repoUrl, branch string, auth transport.AuthMethod) (string, error) {
 	refs, err := g.client.ListRefs(repoUrl, auth)
 	if err != nil {
-		return commitHash, errors.Wrapf(err, "while listing remotes from repository: %s", repoUrl)
+		return "", errors.Wrapf(err, "while listing remotes from repository: %s", repoUrl)
 	}
 
-	pattern := fmt.Sprintf(refsHeadsPrefix, branch)
+	pattern := fmt.Sprintf(refsHeadsFormat, branch)
+	var commitHash string
 	for _, elem := range refs {
 		if elem.Name().String() == pattern {
 			commitHash = elem.Hash().String()

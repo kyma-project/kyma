@@ -10,10 +10,6 @@ import (
 
 type client struct{}
 
-func newClient() *client {
-	return &client{}
-}
-
 func (o *client) ListRefs(repoUrl string, auth transport.AuthMethod) ([]*plumbing.Reference, error) {
 	r := gogit.NewRemote(memory.NewStorage(), &config.RemoteConfig{
 		URLs: []string{repoUrl},
