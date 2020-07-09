@@ -10,7 +10,7 @@ To configure the Serverless Function, override the default values of enviromenta
 | **FUNC_TIMEOUT**       | Specifies the number of seconds to execute code before terminating execution. | Number | 180           |
 | **REQ_MB_LIMIT**       | Payload body size limit in megabytes                                          | Number | 1             |
 
-See [this file](https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js) to get deeper understanding of how exactly those values are used. That express app is internally used to run Functions.
+See [this file](https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js) to get deeper understanding of how exactly those values are used. This Express server is internally used to run Functions.
 
 See the example of a function with such environmental variables set:
 
