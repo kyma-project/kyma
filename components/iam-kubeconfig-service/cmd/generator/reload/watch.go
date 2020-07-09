@@ -73,7 +73,7 @@ func (w *watcher) watchFileEvents(ctx context.Context, wch <-chan fsnotify.Event
 	for {
 		select {
 		case ev := <-wch:
-			log.Infof("Watcher[%s]: watchFileEvents: %s", w.name, ev.String())
+			log.Debugf("Watcher[%s]: watchFileEvents: %s", w.name, ev.String())
 			if timer != nil {
 				//timer is already ticking. Once the timer is done, notification will be fired.
 				continue
