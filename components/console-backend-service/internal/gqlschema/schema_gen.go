@@ -20,7 +20,7 @@ import (
 	v1alpha12 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"knative.dev/pkg/apis"
@@ -6089,7 +6089,6 @@ input SubscriberRefInput @goModel(model: "knative.dev/pkg/apis/duck/v1.KReferenc
 
 input TriggerCreateInput {
     name: String
-    namespace: String!
     broker: String!
     filterAttributes: JSON
     subscriber: SubscriberInput!
@@ -35193,12 +35192,6 @@ func (ec *executionContext) unmarshalInputTriggerCreateInput(ctx context.Context
 		case "name":
 			var err error
 			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "namespace":
-			var err error
-			it.Namespace, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}

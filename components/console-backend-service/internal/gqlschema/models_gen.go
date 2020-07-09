@@ -10,7 +10,7 @@ import (
 
 	v1alpha11 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
-	v1 "knative.dev/pkg/apis/duck/v1"
+	"knative.dev/pkg/apis/duck/v1"
 )
 
 type AddonsConfiguration struct {
@@ -669,7 +669,6 @@ type ServiceStatus struct {
 
 type TriggerCreateInput struct {
 	Name             *string         `json:"name"`
-	Namespace        string          `json:"namespace"`
 	Broker           string          `json:"broker"`
 	FilterAttributes JSON            `json:"filterAttributes"`
 	Subscriber       *v1.Destination `json:"subscriber"`

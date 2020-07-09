@@ -48,7 +48,6 @@ input SubscriberRefInput @goModel(model: "knative.dev/pkg/apis/duck/v1.KReferenc
 
 input TriggerCreateInput {
     name: String
-    namespace: String!
     broker: String!
     filterAttributes: JSON
     subscriber: SubscriberInput!

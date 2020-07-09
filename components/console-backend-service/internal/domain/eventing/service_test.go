@@ -135,7 +135,6 @@ func TestTriggersService_Create(t *testing.T) {
 		var name = "trigger"
 		trigger, err := service.CreateTrigger(context.Background(), namespace, gqlschema.TriggerCreateInput{
 			Name:             &name,
-			Namespace:        namespace,
 			Broker:           "default",
 			FilterAttributes: nil,
 			Subscriber: &duckv1.Destination{
@@ -165,7 +164,6 @@ func TestTriggersService_Create(t *testing.T) {
 		var name = "trigger 1"
 		_, err = service.CreateTrigger(context.Background(), namespace, gqlschema.TriggerCreateInput{
 			Name:             &name,
-			Namespace:        namespace,
 			Broker:           "default",
 			FilterAttributes: nil,
 			Subscriber: &duckv1.Destination{
@@ -303,7 +301,6 @@ func createMockTrigger(name, namespace string, subscriber duckv1.Destination) *v
 func createMockTriggerInput(name string) *gqlschema.TriggerCreateInput {
 	return &gqlschema.TriggerCreateInput{
 		Name:             &name,
-		Namespace:        "default",
 		Broker:           "default",
 		FilterAttributes: nil,
 		Subscriber: &duckv1.Destination{

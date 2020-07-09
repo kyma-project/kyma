@@ -68,10 +68,8 @@ func (r *Resolver) FilterField(ctx context.Context, obj *v1alpha1.TriggerSpec) (
 	return attr, nil
 }
 
-// even though namespace argument is not used here, it's actually required - without it server errors with
-// Error while obtaining attributes for authorization: while extracting attributes: namespace in arguments found, but can't be converted to string
 func (r *Resolver) CreateTrigger(ctx context.Context, namespace string, in gqlschema.TriggerCreateInput, ownerRef []*v1.OwnerReference) (*v1alpha1.Trigger, error) {
-	trigger := r.buildTrigger(in, ownerRef)
+	trigger := r.buildTrigger(namespace, in, ownerRef)
 
 	result := &v1alpha1.Trigger{}
 	err := r.Service().Create(trigger, result)
@@ -144,7 +142,7 @@ func (r *Resolver) solveFilters(json gqlschema.JSON) *v1alpha1.TriggerFilter {
 	}
 }
 
-func (r *Resolver) buildTrigger(in gqlschema.TriggerCreateInput, ownerRef []*v1.OwnerReference) *v1alpha1.Trigger {
+func (r *Resolver) buildTrigger(namespace string, in gqlschema.TriggerCreateInput, ownerRef []*v1.OwnerReference) *v1alpha1.Trigger {
 	in = *r.checkTriggerName(&in)
 
 	meta := v1alpha1.SchemeGroupVersion.WithKind("Trigger")
@@ -155,7 +153,7 @@ func (r *Resolver) buildTrigger(in gqlschema.TriggerCreateInput, ownerRef []*v1.
 		},
 		ObjectMeta: v1.ObjectMeta{
 			Name:            *in.Name,
-			Namespace:       in.Namespace,
+			Namespace:       namespace,
 			OwnerReferences: []v1.OwnerReference{},
 		},
 		Spec: v1alpha1.TriggerSpec{
