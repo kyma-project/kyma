@@ -91,7 +91,7 @@ func (w *watcher) watchFileEvents(ctx context.Context, wch <-chan fsnotify.Event
 			timer.Stop()
 			timer = nil
 
-			glog.V(10).Infof("Watcher[%s]: watchFileEvents: notifying", w.name)
+			glog.Infof("Watcher[%s]: watchFileEvents: notifying", w.name)
 			w.notifyFunc()
 		case <-ctx.Done():
 			glog.Infof("Watcher[%s]: watchFileEvents has successfully terminated", w.name)
