@@ -66,6 +66,7 @@ github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a/go.mod h1:l
 github.com/asyncapi/converter-go v0.0.0-20190802111537-d8459b2bd403/go.mod h1:mpJYWYy+USNiLENQxiyGgRc3qtFPxYSWdSd/eS+R6bo=
 github.com/asyncapi/converter-go v0.0.0-20190916120412-39eeca5e9df5/go.mod h1:mpJYWYy+USNiLENQxiyGgRc3qtFPxYSWdSd/eS+R6bo=
 github.com/asyncapi/parser v0.0.0-20191002092055-f7b577d06d20/go.mod h1:MuJ++ZbwZV7Di4OtSGtgAe2whaMEZjYBPVnf8U/Qvo4=
+github.com/avast/retry-go v2.4.1+incompatible h1:WMHc0mwoz20UVmBYK89mUB/KFRlxO0p+s+sgpmJMviY=
 github.com/avast/retry-go v2.4.1+incompatible/go.mod h1:XtSnn+n/sHqQIpZ10K1qAevBhOOCWBLXXy3hyiqqBrY=
 github.com/aws/aws-sdk-go v1.16.26/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.23.20/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
@@ -347,6 +348,7 @@ github.com/kyma-incubator/api-gateway v0.0.0-20191125140217-295e8fcaa03f h1:rFF+
 github.com/kyma-incubator/api-gateway v0.0.0-20191125140217-295e8fcaa03f/go.mod h1:EwSqotNAjdWdMGQdE7hQaRF68MM2raDRJlRnBi9sltY=
 github.com/kyma-project/helm-broker v0.0.0-20190906085923-d07feb2d365a h1:G+lhfd6RaU+zZe5jOyWZFbjHPbJ6A61dgJpNNiXQ8b0=
 github.com/kyma-project/helm-broker v0.0.0-20190906085923-d07feb2d365a/go.mod h1:VFnkD5ddzF9s8qcY12DRzYOznJJlpMbSRWGRgM4P1XA=
+github.com/kyma-project/kyma v0.5.0 h1:msjpImAtZ3l+y6j+dHvOwF4Nm0J4IGJXRRBw7VwnqpA=
 github.com/kyma-project/kyma v0.5.1-0.20200609051543-f5997d4a36d6 h1:P3R3c4pewIa+IjzNldO9WRFA58s0r3WVqRxLK6feYc8=
 github.com/kyma-project/kyma v0.5.1-0.20200609051543-f5997d4a36d6/go.mod h1:cfj5AQwIOmmoXLZUhW3bIiaB66Z6vgjCYu7TRK3+1lc=
 github.com/kyma-project/kyma/components/function-controller v0.0.0-20200527102940-1579eff8c7a5 h1:Tp48gnKl5bhLwI384viCEwucqUevxywSK5EWFlGTidE=

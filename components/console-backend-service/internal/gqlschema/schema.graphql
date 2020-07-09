@@ -10,7 +10,17 @@ scalar Settings
 
 scalar ApplicationMappingService
 
+scalar Port @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Port")
+scalar Extension @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.RawExtension")
+
 # Directives
+
+directive @goModel(model: String, models: [String!]) on OBJECT
+    | INPUT_OBJECT
+    | SCALAR
+    | ENUM
+    | INTERFACE
+    | UNION
 
 directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
 
@@ -575,6 +585,7 @@ type Service {
     ports: [ServicePort!]!
     status: ServiceStatus!
     json: JSON!
+    UID: String!
 }
 
 type Pod {
@@ -620,11 +631,6 @@ type ServiceEvent {
 type SecretEvent {
     type: SubscriptionEventType!
     secret: Secret!
-}
-
-type ApiRuleEvent {
-    type: SubscriptionEventType!
-    apiRule: APIRule!
 }
 
 type ContainerState {
@@ -801,65 +807,6 @@ type BindableResourcesOutputItem {
     kind: String!
     displayName: String!
     resources: [UsageKindResource!]!
-}
-
-# API Gateway Controller
-
-type APIRule {
-    name: String!
-    service: APIRuleService!
-    gateway: String!
-    rules: [Rule!]!
-    status: APIRuleStatuses!
-}
-
-type APIRuleService{
-    host: String!
-    name: String!
-    port: Int!
-}
-
-type Rule {
-    path: String!
-    methods: [String!]!
-    accessStrategies: [APIRuleConfig!]!
-    mutators: [APIRuleConfig!]
-}
-
-type APIRuleConfig {
-    name: String!
-    config: JSON!
-}
-
-type APIRuleStatuses {
-    apiRuleStatus: APIRuleStatus
-    accessRuleStatus: APIRuleStatus
-    virtualServiceStatus: APIRuleStatus
-}
-
-type APIRuleStatus {
-    code: String!
-    desc: String
-}
-
-input APIRuleInput {
-    host: String!
-    serviceName: String!
-    servicePort: Int!
-    gateway: String!
-    rules: [RuleInput!]!
-}
-
-input RuleInput {
-    path: String!
-    methods: [String!]!
-    accessStrategies: [APIRuleConfigInput!]!
-    mutators: [APIRuleConfigInput!]
-}
-
-input APIRuleConfigInput {
-    name: String!
-    config: JSON!
 }
 
 # Backend Module
@@ -1156,9 +1103,6 @@ type Query {
     # The query returns all instance of the resources which could be bound (proper UsageKind exists).
     bindableResources(namespace: String!): [BindableResourcesOutputItem!]! @HasAccess(attributes: {resource: "usagekinds", verb: "list", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 
-    APIRules(namespace: String!, serviceName: String, hostname: String): [APIRule!]! @HasAccess(attributes: {resource: "apirules", verb: "list", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
-    APIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "get", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-
     application(name: String!): Application @HasAccess(attributes: {resource: "applications", verb: "get", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     applications(namespace: String, first: Int, offset: Int): [Application!]! @HasAccess(attributes: {resource: "applications", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
     connectorService(application: String!): ConnectorService! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
@@ -1263,10 +1207,6 @@ type Mutation {
     updateNamespace(name: String!, labels: Labels!): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
     deleteNamespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
 
-    createAPIRule(name: String!, namespace: String!, params: APIRuleInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-    updateAPIRule(name: String!, namespace: String!, params: APIRuleInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-    deleteAPIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-
     createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     createFunction(name: String!, namespace: String!, params: FunctionMutationInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
@@ -1304,7 +1244,6 @@ type Subscription {
     addonsConfigurationEvent(namespace: String!): AddonsConfigurationEvent! @HasAccess(attributes: {resource: "addonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
 
     # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
-    apiRuleEvent(namespace: String!, serviceName: String): ApiRuleEvent! @HasAccess(attributes: {resource: "apirules", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha", namespaceArg: "namespace"})
 
     namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 

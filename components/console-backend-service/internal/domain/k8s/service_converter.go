@@ -31,6 +31,7 @@ func (c *serviceConverter) ToGQL(in *v1.Service) (*gqlschema.Service, error) {
 		Ports:             toGQLSchemaServicePorts(in.Spec.Ports),
 		Status:            toGQLSchemaServiceStatus(in.Status),
 		JSON:              gqlJSON,
+		UID:               string(in.ObjectMeta.UID),
 	}, nil
 }
 

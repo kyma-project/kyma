@@ -30,7 +30,7 @@ spec:
       {{ end }}
       containers:
         - name: tests
-          image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.compassExternalSolutionTests.dir }}external-solution-end-to-end-tests:{{ .Values.global.images.compassExternalSolutionTests.version }}
+          image: {{ .Values.global.images.containerRegistry.path }}/external-solution-end-to-end-tests:{{ .Values.global.images.compassExternalSolutionTests.version }}
           imagePullPolicy: Always
           command:
             - "bin/sh"
@@ -56,7 +56,7 @@ spec:
             - name: DIRECTOR_URL
               value: "https://compass-gateway.{{ .Values.global.ingress.domainName }}/director"
             - name: DOMAIN
-              value: "{{ .Values.global.ingress.domainName }}"
+              value: {{ .Values.global.ingress.domainName | quote }}
             - name: DEX_SECRET_NAMESPACE
               value: {{ .Values.compassRuntimeAgent.resources.dexSecretNamespace }}
             - name: DEX_SECRET_NAME

@@ -7,7 +7,6 @@ require (
 	github.com/Shopify/sarama v1.26.0 // indirect
 	github.com/apache/thrift v0.13.0 // indirect
 	github.com/blang/semver v3.5.0+incompatible
-	github.com/coreos/etcd v3.3.15+incompatible // indirect
 	github.com/coreos/go-oidc v2.2.1+incompatible // indirect
 	github.com/docker/docker v1.13.1 // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect

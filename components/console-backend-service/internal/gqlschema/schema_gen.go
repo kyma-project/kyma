@@ -15,8 +15,11 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	v1alpha11 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -63,14 +66,13 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	APIRule struct {
-		Gateway func(childComplexity int) int
-		Name    func(childComplexity int) int
-		Rules   func(childComplexity int) int
-		Service func(childComplexity int) int
-		Status  func(childComplexity int) int
+		Generation func(childComplexity int) int
+		Name       func(childComplexity int) int
+		Spec       func(childComplexity int) int
+		Status     func(childComplexity int) int
 	}
 
-	APIRuleConfig struct {
+	APIRuleAccessStrategy struct {
 		Config func(childComplexity int) int
 		Name   func(childComplexity int) int
 	}
@@ -81,9 +83,15 @@ type ComplexityRoot struct {
 		Port func(childComplexity int) int
 	}
 
+	APIRuleSpec struct {
+		Gateway func(childComplexity int) int
+		Rules   func(childComplexity int) int
+		Service func(childComplexity int) int
+	}
+
 	APIRuleStatus struct {
-		Code func(childComplexity int) int
-		Desc func(childComplexity int) int
+		Code        func(childComplexity int) int
+		Description func(childComplexity int) int
 	}
 
 	APIRuleStatuses struct {
@@ -519,7 +527,7 @@ type ComplexityRoot struct {
 		AddAddonsConfigurationURLs                 func(childComplexity int, name string, namespace string, urls []string) int
 		AddClusterAddonsConfigurationRepository    func(childComplexity int, name string, repositories []*AddonsConfigurationRepositoryInput) int
 		AddClusterAddonsConfigurationURLs          func(childComplexity int, name string, urls []string) int
-		CreateAPIRule                              func(childComplexity int, name string, namespace string, params APIRuleInput) int
+		CreateAPIRule                              func(childComplexity int, name string, namespace string, params v1alpha1.APIRuleSpec) int
 		CreateAddonsConfiguration                  func(childComplexity int, name string, namespace string, repositories []*AddonsConfigurationRepositoryInput, urls []string, labels Labels) int
 		CreateApplication                          func(childComplexity int, name string, description *string, labels Labels) int
 		CreateClusterAddonsConfiguration           func(childComplexity int, name string, repositories []*AddonsConfigurationRepositoryInput, urls []string, labels Labels) int
@@ -560,7 +568,7 @@ type ComplexityRoot struct {
 		RemoveClusterAddonsConfigurationURLs       func(childComplexity int, name string, urls []string) int
 		ResyncAddonsConfiguration                  func(childComplexity int, name string, namespace string) int
 		ResyncClusterAddonsConfiguration           func(childComplexity int, name string) int
-		UpdateAPIRule                              func(childComplexity int, name string, namespace string, params APIRuleInput) int
+		UpdateAPIRule                              func(childComplexity int, name string, namespace string, generation int, params v1alpha1.APIRuleSpec) int
 		UpdateAddonsConfiguration                  func(childComplexity int, name string, namespace string, repositories []*AddonsConfigurationRepositoryInput, urls []string, labels Labels) int
 		UpdateApplication                          func(childComplexity int, name string, description *string, labels Labels) int
 		UpdateClusterAddonsConfiguration           func(childComplexity int, name string, repositories []*AddonsConfigurationRepositoryInput, urls []string, labels Labels) int
@@ -724,7 +732,6 @@ type ComplexityRoot struct {
 	Rule struct {
 		AccessStrategies func(childComplexity int) int
 		Methods          func(childComplexity int) int
-		Mutators         func(childComplexity int) int
 		Path             func(childComplexity int) int
 	}
 
@@ -752,6 +759,7 @@ type ComplexityRoot struct {
 		Name              func(childComplexity int) int
 		Ports             func(childComplexity int) int
 		Status            func(childComplexity int) int
+		UID               func(childComplexity int) int
 	}
 
 	ServiceBinding struct {
@@ -1079,9 +1087,6 @@ type MutationResolver interface {
 	CreateNamespace(ctx context.Context, name string, labels Labels) (*NamespaceMutationOutput, error)
 	UpdateNamespace(ctx context.Context, name string, labels Labels) (*NamespaceMutationOutput, error)
 	DeleteNamespace(ctx context.Context, name string) (*Namespace, error)
-	CreateAPIRule(ctx context.Context, name string, namespace string, params APIRuleInput) (*APIRule, error)
-	UpdateAPIRule(ctx context.Context, name string, namespace string, params APIRuleInput) (*APIRule, error)
-	DeleteAPIRule(ctx context.Context, name string, namespace string) (*APIRule, error)
 	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*LimitRange, error)
 	CreateFunction(ctx context.Context, name string, namespace string, params FunctionMutationInput) (*Function, error)
 	UpdateFunction(ctx context.Context, name string, namespace string, params FunctionMutationInput) (*Function, error)
@@ -1091,6 +1096,9 @@ type MutationResolver interface {
 	CreateManyTriggers(ctx context.Context, namespace string, triggers []*TriggerCreateInput, ownerRef []*OwnerReference) ([]*Trigger, error)
 	DeleteTrigger(ctx context.Context, namespace string, trigger TriggerMetadataInput) (*TriggerMetadata, error)
 	DeleteManyTriggers(ctx context.Context, namespace string, triggers []*TriggerMetadataInput) ([]*TriggerMetadata, error)
+	CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
+	UpdateAPIRule(ctx context.Context, name string, namespace string, generation int, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
+	DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
 }
 type NamespaceResolver interface {
 	Pods(ctx context.Context, obj *Namespace) ([]*Pod, error)
@@ -1116,8 +1124,6 @@ type QueryResolver interface {
 	ClusterAddonsConfigurations(ctx context.Context, first *int, offset *int) ([]*AddonsConfiguration, error)
 	AddonsConfigurations(ctx context.Context, namespace string, first *int, offset *int) ([]*AddonsConfiguration, error)
 	BindableResources(ctx context.Context, namespace string) ([]*BindableResourcesOutputItem, error)
-	APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*APIRule, error)
-	APIRule(ctx context.Context, name string, namespace string) (*APIRule, error)
 	Application(ctx context.Context, name string) (*Application, error)
 	Applications(ctx context.Context, namespace *string, first *int, offset *int) ([]*Application, error)
 	ConnectorService(ctx context.Context, application string) (*ConnectorService, error)
@@ -1146,6 +1152,8 @@ type QueryResolver interface {
 	Function(ctx context.Context, name string, namespace string) (*Function, error)
 	Functions(ctx context.Context, namespace string) ([]*Function, error)
 	Triggers(ctx context.Context, namespace string, subscriber *SubscriberInput) ([]*Trigger, error)
+	APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error)
+	APIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
 }
 type ServiceBindingResolver interface {
 	Secret(ctx context.Context, obj *ServiceBinding) (*Secret, error)
@@ -1189,10 +1197,10 @@ type SubscriptionResolver interface {
 	ConfigMapEvent(ctx context.Context, namespace string) (<-chan *ConfigMapEvent, error)
 	ClusterAddonsConfigurationEvent(ctx context.Context) (<-chan *ClusterAddonsConfigurationEvent, error)
 	AddonsConfigurationEvent(ctx context.Context, namespace string) (<-chan *AddonsConfigurationEvent, error)
-	APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan *APIRuleEvent, error)
 	NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan *NamespaceEvent, error)
 	FunctionEvent(ctx context.Context, namespace string, functionName *string) (<-chan *FunctionEvent, error)
 	TriggerEvent(ctx context.Context, namespace string, subscriber *SubscriberInput) (<-chan *TriggerEvent, error)
+	APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan *APIRuleEvent, error)
 }
 
 type executableSchema struct {
@@ -1210,12 +1218,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "APIRule.gateway":
-		if e.complexity.APIRule.Gateway == nil {
+	case "APIRule.generation":
+		if e.complexity.APIRule.Generation == nil {
 			break
 		}
 
-		return e.complexity.APIRule.Gateway(childComplexity), true
+		return e.complexity.APIRule.Generation(childComplexity), true
 
 	case "APIRule.name":
 		if e.complexity.APIRule.Name == nil {
@@ -1224,19 +1232,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.APIRule.Name(childComplexity), true
 
-	case "APIRule.rules":
-		if e.complexity.APIRule.Rules == nil {
+	case "APIRule.spec":
+		if e.complexity.APIRule.Spec == nil {
 			break
 		}
 
-		return e.complexity.APIRule.Rules(childComplexity), true
-
-	case "APIRule.service":
-		if e.complexity.APIRule.Service == nil {
-			break
-		}
-
-		return e.complexity.APIRule.Service(childComplexity), true
+		return e.complexity.APIRule.Spec(childComplexity), true
 
 	case "APIRule.status":
 		if e.complexity.APIRule.Status == nil {
@@ -1245,19 +1246,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.APIRule.Status(childComplexity), true
 
-	case "APIRuleConfig.config":
-		if e.complexity.APIRuleConfig.Config == nil {
+	case "APIRuleAccessStrategy.config":
+		if e.complexity.APIRuleAccessStrategy.Config == nil {
 			break
 		}
 
-		return e.complexity.APIRuleConfig.Config(childComplexity), true
+		return e.complexity.APIRuleAccessStrategy.Config(childComplexity), true
 
-	case "APIRuleConfig.name":
-		if e.complexity.APIRuleConfig.Name == nil {
+	case "APIRuleAccessStrategy.name":
+		if e.complexity.APIRuleAccessStrategy.Name == nil {
 			break
 		}
 
-		return e.complexity.APIRuleConfig.Name(childComplexity), true
+		return e.complexity.APIRuleAccessStrategy.Name(childComplexity), true
 
 	case "APIRuleService.host":
 		if e.complexity.APIRuleService.Host == nil {
@@ -1280,6 +1281,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.APIRuleService.Port(childComplexity), true
 
+	case "APIRuleSpec.gateway":
+		if e.complexity.APIRuleSpec.Gateway == nil {
+			break
+		}
+
+		return e.complexity.APIRuleSpec.Gateway(childComplexity), true
+
+	case "APIRuleSpec.rules":
+		if e.complexity.APIRuleSpec.Rules == nil {
+			break
+		}
+
+		return e.complexity.APIRuleSpec.Rules(childComplexity), true
+
+	case "APIRuleSpec.service":
+		if e.complexity.APIRuleSpec.Service == nil {
+			break
+		}
+
+		return e.complexity.APIRuleSpec.Service(childComplexity), true
+
 	case "APIRuleStatus.code":
 		if e.complexity.APIRuleStatus.Code == nil {
 			break
@@ -1287,12 +1309,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.APIRuleStatus.Code(childComplexity), true
 
-	case "APIRuleStatus.desc":
-		if e.complexity.APIRuleStatus.Desc == nil {
+	case "APIRuleStatus.description":
+		if e.complexity.APIRuleStatus.Description == nil {
 			break
 		}
 
-		return e.complexity.APIRuleStatus.Desc(childComplexity), true
+		return e.complexity.APIRuleStatus.Description(childComplexity), true
 
 	case "APIRuleStatuses.apiRuleStatus":
 		if e.complexity.APIRuleStatuses.APIRuleStatus == nil {
@@ -3034,7 +3056,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateAPIRule(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(APIRuleInput)), true
+		return e.complexity.Mutation.CreateAPIRule(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha1.APIRuleSpec)), true
 
 	case "Mutation.createAddonsConfiguration":
 		if e.complexity.Mutation.CreateAddonsConfiguration == nil {
@@ -3526,7 +3548,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateAPIRule(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(APIRuleInput)), true
+		return e.complexity.Mutation.UpdateAPIRule(childComplexity, args["name"].(string), args["namespace"].(string), args["generation"].(int), args["params"].(v1alpha1.APIRuleSpec)), true
 
 	case "Mutation.updateAddonsConfiguration":
 		if e.complexity.Mutation.UpdateAddonsConfiguration == nil {
@@ -4613,13 +4635,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Rule.Methods(childComplexity), true
 
-	case "Rule.mutators":
-		if e.complexity.Rule.Mutators == nil {
-			break
-		}
-
-		return e.complexity.Rule.Mutators(childComplexity), true
-
 	case "Rule.path":
 		if e.complexity.Rule.Path == nil {
 			break
@@ -4745,6 +4760,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Service.Status(childComplexity), true
+
+	case "Service.UID":
+		if e.complexity.Service.UID == nil {
+			break
+		}
+
+		return e.complexity.Service.UID(childComplexity), true
 
 	case "ServiceBinding.name":
 		if e.complexity.ServiceBinding.Name == nil {
@@ -5933,6 +5955,98 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
+	&ast.Source{Name: "internal/gqlschema/apigateway.graphql", Input: `scalar APIRuleAccessStrategyInput @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRuleAccessStrategyInput")
+
+type APIRule @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule"){
+    name: String!
+    spec: APIRuleSpec!
+    status: APIRuleStatuses!
+    generation: Int!
+}
+
+type APIRuleSpec @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleSpec") {
+    service: APIRuleService!
+    gateway: String!
+    rules: [Rule!]!
+}
+
+input APIRuleSpecInput @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleSpec") {
+    service: APIRuleServiceInput!
+    gateway: String!
+    rules: [RuleInput!]!
+}
+
+type APIRuleService @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Service") {
+    host: String!
+    name: String!
+    port: Port!
+}
+
+input APIRuleServiceInput @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Service") {
+    host: String!
+    name: String!
+    port: Port!
+}
+
+type Rule @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Rule") {
+    path: String!
+    methods: [String!]!
+    accessStrategies: [APIRuleAccessStrategy!]!
+}
+
+input RuleInput @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.Rule") {
+    path: String!
+    methods: [String!]!
+    accessStrategies: [APIRuleAccessStrategyInput!]!
+}
+
+type APIRuleAccessStrategy @goModel(model: "github.com/ory/oathkeeper-maester/api/v1alpha1.Authenticator") {
+    name: String!
+    config: Extension
+}
+
+#input APIRuleAccessStrategyInput @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRuleAccessStrategyInput") {
+#    name: String!
+#    config: Extension!
+#}
+
+type APIRuleStatuses @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleStatus") {
+    apiRuleStatus: APIRuleStatus
+    accessRuleStatus: APIRuleStatus
+    virtualServiceStatus: APIRuleStatus
+}
+
+type APIRuleStatus @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleResourceStatus") {
+    code: APIRuleStatusCode!
+    description: String
+}
+
+enum APIRuleStatusCode @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.StatusCode") {
+    OK
+    SKIPPED
+    ERROR
+}
+
+type ApiRuleEvent {
+    type: SubscriptionEventType!
+    apiRule: APIRule!
+}
+
+extend type Query {
+    APIRules(namespace: String!, serviceName: String, hostname: String): [APIRule!]! @HasAccess(attributes: {resource: "apirules", verb: "list", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    APIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "get", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+}
+
+extend type Mutation {
+    createAPIRule(name: String!, namespace: String!, params: APIRuleSpecInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    updateAPIRule(name: String!, namespace: String!, generation: Int!, params: APIRuleSpecInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    deleteAPIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+}
+
+extend type Subscription {
+    apiRuleEvent(namespace: String!, serviceName: String): ApiRuleEvent! @HasAccess(attributes: {resource: "apirules", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha", namespaceArg: "namespace"})
+}
+`, BuiltIn: false},
 	&ast.Source{Name: "internal/gqlschema/schema.graphql", Input: `# Scalars
 
 scalar JSON
@@ -5945,7 +6059,17 @@ scalar Settings
 
 scalar ApplicationMappingService
 
+scalar Port @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Port")
+scalar Extension @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.RawExtension")
+
 # Directives
+
+directive @goModel(model: String, models: [String!]) on OBJECT
+    | INPUT_OBJECT
+    | SCALAR
+    | ENUM
+    | INTERFACE
+    | UNION
 
 directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
 
@@ -6510,6 +6634,7 @@ type Service {
     ports: [ServicePort!]!
     status: ServiceStatus!
     json: JSON!
+    UID: String!
 }
 
 type Pod {
@@ -6555,11 +6680,6 @@ type ServiceEvent {
 type SecretEvent {
     type: SubscriptionEventType!
     secret: Secret!
-}
-
-type ApiRuleEvent {
-    type: SubscriptionEventType!
-    apiRule: APIRule!
 }
 
 type ContainerState {
@@ -6736,65 +6856,6 @@ type BindableResourcesOutputItem {
     kind: String!
     displayName: String!
     resources: [UsageKindResource!]!
-}
-
-# API Gateway Controller
-
-type APIRule {
-    name: String!
-    service: APIRuleService!
-    gateway: String!
-    rules: [Rule!]!
-    status: APIRuleStatuses!
-}
-
-type APIRuleService{
-    host: String!
-    name: String!
-    port: Int!
-}
-
-type Rule {
-    path: String!
-    methods: [String!]!
-    accessStrategies: [APIRuleConfig!]!
-    mutators: [APIRuleConfig!]
-}
-
-type APIRuleConfig {
-    name: String!
-    config: JSON!
-}
-
-type APIRuleStatuses {
-    apiRuleStatus: APIRuleStatus
-    accessRuleStatus: APIRuleStatus
-    virtualServiceStatus: APIRuleStatus
-}
-
-type APIRuleStatus {
-    code: String!
-    desc: String
-}
-
-input APIRuleInput {
-    host: String!
-    serviceName: String!
-    servicePort: Int!
-    gateway: String!
-    rules: [RuleInput!]!
-}
-
-input RuleInput {
-    path: String!
-    methods: [String!]!
-    accessStrategies: [APIRuleConfigInput!]!
-    mutators: [APIRuleConfigInput!]
-}
-
-input APIRuleConfigInput {
-    name: String!
-    config: JSON!
 }
 
 # Backend Module
@@ -7091,9 +7152,6 @@ type Query {
     # The query returns all instance of the resources which could be bound (proper UsageKind exists).
     bindableResources(namespace: String!): [BindableResourcesOutputItem!]! @HasAccess(attributes: {resource: "usagekinds", verb: "list", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 
-    APIRules(namespace: String!, serviceName: String, hostname: String): [APIRule!]! @HasAccess(attributes: {resource: "apirules", verb: "list", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
-    APIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "get", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-
     application(name: String!): Application @HasAccess(attributes: {resource: "applications", verb: "get", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     applications(namespace: String, first: Int, offset: Int): [Application!]! @HasAccess(attributes: {resource: "applications", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
     connectorService(application: String!): ConnectorService! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
@@ -7198,10 +7256,6 @@ type Mutation {
     updateNamespace(name: String!, labels: Labels!): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
     deleteNamespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
 
-    createAPIRule(name: String!, namespace: String!, params: APIRuleInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-    updateAPIRule(name: String!, namespace: String!, params: APIRuleInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-    deleteAPIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-
     createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     createFunction(name: String!, namespace: String!, params: FunctionMutationInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
@@ -7239,7 +7293,6 @@ type Subscription {
     addonsConfigurationEvent(namespace: String!): AddonsConfigurationEvent! @HasAccess(attributes: {resource: "addonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
 
     # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
-    apiRuleEvent(namespace: String!, serviceName: String): ApiRuleEvent! @HasAccess(attributes: {resource: "apirules", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha", namespaceArg: "namespace"})
 
     namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 
@@ -7482,9 +7535,9 @@ func (ec *executionContext) field_Mutation_createAPIRule_args(ctx context.Contex
 		}
 	}
 	args["namespace"] = arg1
-	var arg2 APIRuleInput
+	var arg2 v1alpha1.APIRuleSpec
 	if tmp, ok := rawArgs["params"]; ok {
-		arg2, err = ec.unmarshalNAPIRuleInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleInput(ctx, tmp)
+		arg2, err = ec.unmarshalNAPIRuleSpecInput2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -8512,14 +8565,22 @@ func (ec *executionContext) field_Mutation_updateAPIRule_args(ctx context.Contex
 		}
 	}
 	args["namespace"] = arg1
-	var arg2 APIRuleInput
-	if tmp, ok := rawArgs["params"]; ok {
-		arg2, err = ec.unmarshalNAPIRuleInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleInput(ctx, tmp)
+	var arg2 int
+	if tmp, ok := rawArgs["generation"]; ok {
+		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["params"] = arg2
+	args["generation"] = arg2
+	var arg3 v1alpha1.APIRuleSpec
+	if tmp, ok := rawArgs["params"]; ok {
+		arg3, err = ec.unmarshalNAPIRuleSpecInput2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["params"] = arg3
 	return args, nil
 }
 
@@ -10137,7 +10198,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _APIRule_name(ctx context.Context, field graphql.CollectedField, obj *APIRule) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRule_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.APIRule) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10171,7 +10232,7 @@ func (ec *executionContext) _APIRule_name(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _APIRule_service(ctx context.Context, field graphql.CollectedField, obj *APIRule) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRule_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.APIRule) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10188,7 +10249,7 @@ func (ec *executionContext) _APIRule_service(ctx context.Context, field graphql.
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Service, nil
+		return obj.Spec, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10200,80 +10261,12 @@ func (ec *executionContext) _APIRule_service(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*APIRuleService)
+	res := resTmp.(v1alpha1.APIRuleSpec)
 	fc.Result = res
-	return ec.marshalNAPIRuleService2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleService(ctx, field.Selections, res)
+	return ec.marshalNAPIRuleSpec2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleSpec(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _APIRule_gateway(ctx context.Context, field graphql.CollectedField, obj *APIRule) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "APIRule",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Gateway, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _APIRule_rules(ctx context.Context, field graphql.CollectedField, obj *APIRule) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "APIRule",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Rules, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*Rule)
-	fc.Result = res
-	return ec.marshalNRule2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRuleᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _APIRule_status(ctx context.Context, field graphql.CollectedField, obj *APIRule) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRule_status(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.APIRule) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10302,12 +10295,12 @@ func (ec *executionContext) _APIRule_status(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*APIRuleStatuses)
+	res := resTmp.(v1alpha1.APIRuleStatus)
 	fc.Result = res
-	return ec.marshalNAPIRuleStatuses2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleStatuses(ctx, field.Selections, res)
+	return ec.marshalNAPIRuleStatuses2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleStatus(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _APIRuleConfig_name(ctx context.Context, field graphql.CollectedField, obj *APIRuleConfig) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRule_generation(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.APIRule) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10315,7 +10308,41 @@ func (ec *executionContext) _APIRuleConfig_name(ctx context.Context, field graph
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "APIRuleConfig",
+		Object:   "APIRule",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Generation, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _APIRuleAccessStrategy_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.Authenticator) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "APIRuleAccessStrategy",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -10341,7 +10368,7 @@ func (ec *executionContext) _APIRuleConfig_name(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _APIRuleConfig_config(ctx context.Context, field graphql.CollectedField, obj *APIRuleConfig) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRuleAccessStrategy_config(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.Authenticator) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10349,7 +10376,7 @@ func (ec *executionContext) _APIRuleConfig_config(ctx context.Context, field gra
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "APIRuleConfig",
+		Object:   "APIRuleAccessStrategy",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -10365,17 +10392,14 @@ func (ec *executionContext) _APIRuleConfig_config(ctx context.Context, field gra
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(JSON)
+	res := resTmp.(*runtime.RawExtension)
 	fc.Result = res
-	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
+	return ec.marshalOExtension2ᚖk8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _APIRuleService_host(ctx context.Context, field graphql.CollectedField, obj *APIRuleService) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRuleService_host(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Service) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10404,12 +10428,12 @@ func (ec *executionContext) _APIRuleService_host(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _APIRuleService_name(ctx context.Context, field graphql.CollectedField, obj *APIRuleService) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRuleService_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Service) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10438,12 +10462,12 @@ func (ec *executionContext) _APIRuleService_name(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _APIRuleService_port(ctx context.Context, field graphql.CollectedField, obj *APIRuleService) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRuleService_port(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Service) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10472,12 +10496,114 @@ func (ec *executionContext) _APIRuleService_port(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(*uint32)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNPort2ᚖuint32(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _APIRuleStatus_code(ctx context.Context, field graphql.CollectedField, obj *APIRuleStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRuleSpec_service(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.APIRuleSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "APIRuleSpec",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Service, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.Service)
+	fc.Result = res
+	return ec.marshalNAPIRuleService2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐService(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _APIRuleSpec_gateway(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.APIRuleSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "APIRuleSpec",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Gateway, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalNString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _APIRuleSpec_rules(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.APIRuleSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "APIRuleSpec",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Rules, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]v1alpha1.Rule)
+	fc.Result = res
+	return ec.marshalNRule2ᚕgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐRuleᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _APIRuleStatus_code(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.APIRuleResourceStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10506,12 +10632,12 @@ func (ec *executionContext) _APIRuleStatus_code(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(v1alpha1.StatusCode)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNAPIRuleStatusCode2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐStatusCode(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _APIRuleStatus_desc(ctx context.Context, field graphql.CollectedField, obj *APIRuleStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRuleStatus_description(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.APIRuleResourceStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10528,7 +10654,7 @@ func (ec *executionContext) _APIRuleStatus_desc(ctx context.Context, field graph
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Desc, nil
+		return obj.Description, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10537,12 +10663,12 @@ func (ec *executionContext) _APIRuleStatus_desc(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _APIRuleStatuses_apiRuleStatus(ctx context.Context, field graphql.CollectedField, obj *APIRuleStatuses) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRuleStatuses_apiRuleStatus(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.APIRuleStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10568,12 +10694,12 @@ func (ec *executionContext) _APIRuleStatuses_apiRuleStatus(ctx context.Context, 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*APIRuleStatus)
+	res := resTmp.(*v1alpha1.APIRuleResourceStatus)
 	fc.Result = res
-	return ec.marshalOAPIRuleStatus2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleStatus(ctx, field.Selections, res)
+	return ec.marshalOAPIRuleStatus2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleResourceStatus(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _APIRuleStatuses_accessRuleStatus(ctx context.Context, field graphql.CollectedField, obj *APIRuleStatuses) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRuleStatuses_accessRuleStatus(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.APIRuleStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10599,12 +10725,12 @@ func (ec *executionContext) _APIRuleStatuses_accessRuleStatus(ctx context.Contex
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*APIRuleStatus)
+	res := resTmp.(*v1alpha1.APIRuleResourceStatus)
 	fc.Result = res
-	return ec.marshalOAPIRuleStatus2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleStatus(ctx, field.Selections, res)
+	return ec.marshalOAPIRuleStatus2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleResourceStatus(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _APIRuleStatuses_virtualServiceStatus(ctx context.Context, field graphql.CollectedField, obj *APIRuleStatuses) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRuleStatuses_virtualServiceStatus(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.APIRuleStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10630,9 +10756,9 @@ func (ec *executionContext) _APIRuleStatuses_virtualServiceStatus(ctx context.Co
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*APIRuleStatus)
+	res := resTmp.(*v1alpha1.APIRuleResourceStatus)
 	fc.Result = res
-	return ec.marshalOAPIRuleStatus2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleStatus(ctx, field.Selections, res)
+	return ec.marshalOAPIRuleStatus2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleResourceStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AddonsConfiguration_name(ctx context.Context, field graphql.CollectedField, obj *AddonsConfiguration) (ret graphql.Marshaler) {
@@ -11397,9 +11523,9 @@ func (ec *executionContext) _ApiRuleEvent_apiRule(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*APIRule)
+	res := resTmp.(*v1alpha1.APIRule)
 	fc.Result = res
-	return ec.marshalNAPIRule2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRule(ctx, field.Selections, res)
+	return ec.marshalNAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Application_name(ctx context.Context, field graphql.CollectedField, obj *Application) (ret graphql.Marshaler) {
@@ -21246,192 +21372,6 @@ func (ec *executionContext) _Mutation_deleteNamespace(ctx context.Context, field
 	return ec.marshalONamespace2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespace(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_createAPIRule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createAPIRule_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().CreateAPIRule(rctx, args["name"].(string), args["namespace"].(string), args["params"].(APIRuleInput))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "create"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*APIRule); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRule`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*APIRule)
-	fc.Result = res
-	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRule(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_updateAPIRule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_updateAPIRule_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().UpdateAPIRule(rctx, args["name"].(string), args["namespace"].(string), args["params"].(APIRuleInput))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "update"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*APIRule); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRule`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*APIRule)
-	fc.Result = res
-	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRule(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_deleteAPIRule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_deleteAPIRule_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().DeleteAPIRule(rctx, args["name"].(string), args["namespace"].(string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "delete"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*APIRule); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRule`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*APIRule)
-	fc.Result = res
-	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRule(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Mutation_createLimitRange(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -21988,6 +21928,192 @@ func (ec *executionContext) _Mutation_deleteManyTriggers(ctx context.Context, fi
 	res := resTmp.([]*TriggerMetadata)
 	fc.Result = res
 	return ec.marshalOTriggerMetadata2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐTriggerMetadataᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createAPIRule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createAPIRule_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CreateAPIRule(rctx, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha1.APIRuleSpec))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "create"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha1.APIRule); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.APIRule)
+	fc.Result = res
+	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateAPIRule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateAPIRule_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().UpdateAPIRule(rctx, args["name"].(string), args["namespace"].(string), args["generation"].(int), args["params"].(v1alpha1.APIRuleSpec))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "update"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha1.APIRule); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.APIRule)
+	fc.Result = res
+	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteAPIRule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteAPIRule_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().DeleteAPIRule(rctx, args["name"].(string), args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "delete"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha1.APIRule); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.APIRule)
+	fc.Result = res
+	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Namespace_name(ctx context.Context, field graphql.CollectedField, obj *Namespace) (ret graphql.Marshaler) {
@@ -24157,133 +24283,6 @@ func (ec *executionContext) _Query_bindableResources(ctx context.Context, field 
 	return ec.marshalNBindableResourcesOutputItem2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐBindableResourcesOutputItemᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_APIRules(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_APIRules_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().APIRules(rctx, args["namespace"].(string), args["serviceName"].(*string), args["hostname"].(*string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "apirules", "verb": "list"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*APIRule); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRule`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*APIRule)
-	fc.Result = res
-	return ec.marshalNAPIRule2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_APIRule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_APIRule_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().APIRule(rctx, args["name"].(string), args["namespace"].(string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "get"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*APIRule); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRule`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*APIRule)
-	fc.Result = res
-	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRule(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_application(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -26032,6 +26031,133 @@ func (ec *executionContext) _Query_triggers(ctx context.Context, field graphql.C
 	return ec.marshalOTrigger2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐTriggerᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_APIRules(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_APIRules_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().APIRules(rctx, args["namespace"].(string), args["serviceName"].(*string), args["hostname"].(*string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "apirules", "verb": "list"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*v1alpha1.APIRule); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*v1alpha1.APIRule)
+	fc.Result = res
+	return ec.marshalNAPIRule2ᚕᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_APIRule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_APIRule_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().APIRule(rctx, args["name"].(string), args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "apirules", "verb": "get"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha1.APIRule); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRule`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.APIRule)
+	fc.Result = res
+	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -26927,7 +27053,7 @@ func (ec *executionContext) _ResourceValues_cpu(ctx context.Context, field graph
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Rule_path(ctx context.Context, field graphql.CollectedField, obj *Rule) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rule_path(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Rule) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -26961,7 +27087,7 @@ func (ec *executionContext) _Rule_path(ctx context.Context, field graphql.Collec
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Rule_methods(ctx context.Context, field graphql.CollectedField, obj *Rule) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rule_methods(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Rule) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -26995,7 +27121,7 @@ func (ec *executionContext) _Rule_methods(ctx context.Context, field graphql.Col
 	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Rule_accessStrategies(ctx context.Context, field graphql.CollectedField, obj *Rule) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rule_accessStrategies(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Rule) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -27024,40 +27150,9 @@ func (ec *executionContext) _Rule_accessStrategies(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*APIRuleConfig)
+	res := resTmp.([]*v1alpha11.Authenticator)
 	fc.Result = res
-	return ec.marshalNAPIRuleConfig2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Rule_mutators(ctx context.Context, field graphql.CollectedField, obj *Rule) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Rule",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Mutators, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*APIRuleConfig)
-	fc.Result = res
-	return ec.marshalOAPIRuleConfig2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigᚄ(ctx, field.Selections, res)
+	return ec.marshalNAPIRuleAccessStrategy2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Secret_name(ctx context.Context, field graphql.CollectedField, obj *Secret) (ret graphql.Marshaler) {
@@ -27636,6 +27731,40 @@ func (ec *executionContext) _Service_json(ctx context.Context, field graphql.Col
 	res := resTmp.(JSON)
 	fc.Result = res
 	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Service_UID(ctx context.Context, field graphql.CollectedField, obj *Service) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Service",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ServiceBinding_name(ctx context.Context, field graphql.CollectedField, obj *ServiceBinding) (ret graphql.Marshaler) {
@@ -32211,81 +32340,6 @@ func (ec *executionContext) _Subscription_addonsConfigurationEvent(ctx context.C
 	}
 }
 
-func (ec *executionContext) _Subscription_apiRuleEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = nil
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Subscription",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Subscription_apiRuleEvent_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return nil
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Subscription().APIRuleEvent(rctx, args["namespace"].(string), args["serviceName"].(*string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha", "namespaceArg": "namespace", "resource": "apirules", "verb": "watch"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(<-chan *APIRuleEvent); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRuleEvent`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return nil
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return nil
-	}
-	return func() graphql.Marshaler {
-		res, ok := <-resTmp.(<-chan *APIRuleEvent)
-		if !ok {
-			return nil
-		}
-		return graphql.WriterFunc(func(w io.Writer) {
-			w.Write([]byte{'{'})
-			graphql.MarshalString(field.Alias).MarshalGQL(w)
-			w.Write([]byte{':'})
-			ec.marshalNApiRuleEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleEvent(ctx, field.Selections, res).MarshalGQL(w)
-			w.Write([]byte{'}'})
-		})
-	}
-}
-
 func (ec *executionContext) _Subscription_namespaceEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -32506,6 +32560,81 @@ func (ec *executionContext) _Subscription_triggerEvent(ctx context.Context, fiel
 			graphql.MarshalString(field.Alias).MarshalGQL(w)
 			w.Write([]byte{':'})
 			ec.marshalNTriggerEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐTriggerEvent(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) _Subscription_apiRuleEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Subscription_apiRuleEvent_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Subscription().APIRuleEvent(rctx, args["namespace"].(string), args["serviceName"].(*string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha", "namespaceArg": "namespace", "resource": "apirules", "verb": "watch"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(<-chan *APIRuleEvent); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRuleEvent`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *APIRuleEvent)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNApiRuleEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleEvent(ctx, field.Selections, res).MarshalGQL(w)
 			w.Write([]byte{'}'})
 		})
 	}
@@ -34373,21 +34502,27 @@ func (ec *executionContext) _enabledMappingService_services(ctx context.Context,
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputAPIRuleConfigInput(ctx context.Context, obj interface{}) (APIRuleConfigInput, error) {
-	var it APIRuleConfigInput
+func (ec *executionContext) unmarshalInputAPIRuleServiceInput(ctx context.Context, obj interface{}) (v1alpha1.Service, error) {
+	var it v1alpha1.Service
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
 		switch k {
-		case "name":
+		case "host":
 			var err error
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			it.Host, err = ec.unmarshalNString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "config":
+		case "name":
 			var err error
-			it.Config, err = ec.unmarshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, v)
+			it.Name, err = ec.unmarshalNString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "port":
+			var err error
+			it.Port, err = ec.unmarshalNPort2ᚖuint32(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -34397,39 +34532,27 @@ func (ec *executionContext) unmarshalInputAPIRuleConfigInput(ctx context.Context
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputAPIRuleInput(ctx context.Context, obj interface{}) (APIRuleInput, error) {
-	var it APIRuleInput
+func (ec *executionContext) unmarshalInputAPIRuleSpecInput(ctx context.Context, obj interface{}) (v1alpha1.APIRuleSpec, error) {
+	var it v1alpha1.APIRuleSpec
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
 		switch k {
-		case "host":
+		case "service":
 			var err error
-			it.Host, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "serviceName":
-			var err error
-			it.ServiceName, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "servicePort":
-			var err error
-			it.ServicePort, err = ec.unmarshalNInt2int(ctx, v)
+			it.Service, err = ec.unmarshalNAPIRuleServiceInput2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐService(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "gateway":
 			var err error
-			it.Gateway, err = ec.unmarshalNString2string(ctx, v)
+			it.Gateway, err = ec.unmarshalNString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "rules":
 			var err error
-			it.Rules, err = ec.unmarshalNRuleInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRuleInputᚄ(ctx, v)
+			it.Rules, err = ec.unmarshalNRuleInput2ᚕgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐRuleᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -34949,8 +35072,8 @@ func (ec *executionContext) unmarshalInputResourceValuesInput(ctx context.Contex
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputRuleInput(ctx context.Context, obj interface{}) (RuleInput, error) {
-	var it RuleInput
+func (ec *executionContext) unmarshalInputRuleInput(ctx context.Context, obj interface{}) (v1alpha1.Rule, error) {
+	var it v1alpha1.Rule
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -34969,13 +35092,7 @@ func (ec *executionContext) unmarshalInputRuleInput(ctx context.Context, obj int
 			}
 		case "accessStrategies":
 			var err error
-			it.AccessStrategies, err = ec.unmarshalNAPIRuleConfigInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInputᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "mutators":
-			var err error
-			it.Mutators, err = ec.unmarshalOAPIRuleConfigInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInputᚄ(ctx, v)
+			it.AccessStrategies, err = ec.unmarshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -35223,7 +35340,7 @@ func (ec *executionContext) unmarshalInputTriggerMetadataInput(ctx context.Conte
 
 var aPIRuleImplementors = []string{"APIRule"}
 
-func (ec *executionContext) _APIRule(ctx context.Context, sel ast.SelectionSet, obj *APIRule) graphql.Marshaler {
+func (ec *executionContext) _APIRule(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.APIRule) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, aPIRuleImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -35237,23 +35354,18 @@ func (ec *executionContext) _APIRule(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "service":
-			out.Values[i] = ec._APIRule_service(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "gateway":
-			out.Values[i] = ec._APIRule_gateway(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "rules":
-			out.Values[i] = ec._APIRule_rules(ctx, field, obj)
+		case "spec":
+			out.Values[i] = ec._APIRule_spec(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "status":
 			out.Values[i] = ec._APIRule_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "generation":
+			out.Values[i] = ec._APIRule_generation(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -35268,27 +35380,24 @@ func (ec *executionContext) _APIRule(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
-var aPIRuleConfigImplementors = []string{"APIRuleConfig"}
+var aPIRuleAccessStrategyImplementors = []string{"APIRuleAccessStrategy"}
 
-func (ec *executionContext) _APIRuleConfig(ctx context.Context, sel ast.SelectionSet, obj *APIRuleConfig) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, aPIRuleConfigImplementors)
+func (ec *executionContext) _APIRuleAccessStrategy(ctx context.Context, sel ast.SelectionSet, obj *v1alpha11.Authenticator) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, aPIRuleAccessStrategyImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("APIRuleConfig")
+			out.Values[i] = graphql.MarshalString("APIRuleAccessStrategy")
 		case "name":
-			out.Values[i] = ec._APIRuleConfig_name(ctx, field, obj)
+			out.Values[i] = ec._APIRuleAccessStrategy_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "config":
-			out.Values[i] = ec._APIRuleConfig_config(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			out.Values[i] = ec._APIRuleAccessStrategy_config(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -35302,7 +35411,7 @@ func (ec *executionContext) _APIRuleConfig(ctx context.Context, sel ast.Selectio
 
 var aPIRuleServiceImplementors = []string{"APIRuleService"}
 
-func (ec *executionContext) _APIRuleService(ctx context.Context, sel ast.SelectionSet, obj *APIRuleService) graphql.Marshaler {
+func (ec *executionContext) _APIRuleService(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.Service) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, aPIRuleServiceImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -35337,9 +35446,46 @@ func (ec *executionContext) _APIRuleService(ctx context.Context, sel ast.Selecti
 	return out
 }
 
+var aPIRuleSpecImplementors = []string{"APIRuleSpec"}
+
+func (ec *executionContext) _APIRuleSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.APIRuleSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, aPIRuleSpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("APIRuleSpec")
+		case "service":
+			out.Values[i] = ec._APIRuleSpec_service(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "gateway":
+			out.Values[i] = ec._APIRuleSpec_gateway(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "rules":
+			out.Values[i] = ec._APIRuleSpec_rules(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var aPIRuleStatusImplementors = []string{"APIRuleStatus"}
 
-func (ec *executionContext) _APIRuleStatus(ctx context.Context, sel ast.SelectionSet, obj *APIRuleStatus) graphql.Marshaler {
+func (ec *executionContext) _APIRuleStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.APIRuleResourceStatus) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, aPIRuleStatusImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -35353,8 +35499,8 @@ func (ec *executionContext) _APIRuleStatus(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "desc":
-			out.Values[i] = ec._APIRuleStatus_desc(ctx, field, obj)
+		case "description":
+			out.Values[i] = ec._APIRuleStatus_description(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -35368,7 +35514,7 @@ func (ec *executionContext) _APIRuleStatus(ctx context.Context, sel ast.Selectio
 
 var aPIRuleStatusesImplementors = []string{"APIRuleStatuses"}
 
-func (ec *executionContext) _APIRuleStatuses(ctx context.Context, sel ast.SelectionSet, obj *APIRuleStatuses) graphql.Marshaler {
+func (ec *executionContext) _APIRuleStatuses(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.APIRuleStatus) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, aPIRuleStatusesImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -38093,12 +38239,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "deleteNamespace":
 			out.Values[i] = ec._Mutation_deleteNamespace(ctx, field)
-		case "createAPIRule":
-			out.Values[i] = ec._Mutation_createAPIRule(ctx, field)
-		case "updateAPIRule":
-			out.Values[i] = ec._Mutation_updateAPIRule(ctx, field)
-		case "deleteAPIRule":
-			out.Values[i] = ec._Mutation_deleteAPIRule(ctx, field)
 		case "createLimitRange":
 			out.Values[i] = ec._Mutation_createLimitRange(ctx, field)
 		case "createFunction":
@@ -38117,6 +38257,12 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_deleteTrigger(ctx, field)
 		case "deleteManyTriggers":
 			out.Values[i] = ec._Mutation_deleteManyTriggers(ctx, field)
+		case "createAPIRule":
+			out.Values[i] = ec._Mutation_createAPIRule(ctx, field)
+		case "updateAPIRule":
+			out.Values[i] = ec._Mutation_updateAPIRule(ctx, field)
+		case "deleteAPIRule":
+			out.Values[i] = ec._Mutation_deleteAPIRule(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -38674,31 +38820,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "APIRules":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_APIRules(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "APIRule":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_APIRule(ctx, field)
-				return res
-			})
 		case "application":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -39064,6 +39185,31 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_triggers(ctx, field)
 				return res
 			})
+		case "APIRules":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_APIRules(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "APIRule":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_APIRule(ctx, field)
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -39358,7 +39504,7 @@ func (ec *executionContext) _ResourceValues(ctx context.Context, sel ast.Selecti
 
 var ruleImplementors = []string{"Rule"}
 
-func (ec *executionContext) _Rule(ctx context.Context, sel ast.SelectionSet, obj *Rule) graphql.Marshaler {
+func (ec *executionContext) _Rule(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.Rule) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, ruleImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -39382,8 +39528,6 @@ func (ec *executionContext) _Rule(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "mutators":
-			out.Values[i] = ec._Rule_mutators(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -39532,6 +39676,11 @@ func (ec *executionContext) _Service(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "json":
 			out.Values[i] = ec._Service_json(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "UID":
+			out.Values[i] = ec._Service_UID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -40677,14 +40826,14 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_clusterAddonsConfigurationEvent(ctx, fields[0])
 	case "addonsConfigurationEvent":
 		return ec._Subscription_addonsConfigurationEvent(ctx, fields[0])
-	case "apiRuleEvent":
-		return ec._Subscription_apiRuleEvent(ctx, fields[0])
 	case "namespaceEvent":
 		return ec._Subscription_namespaceEvent(ctx, fields[0])
 	case "functionEvent":
 		return ec._Subscription_functionEvent(ctx, fields[0])
 	case "triggerEvent":
 		return ec._Subscription_triggerEvent(ctx, fields[0])
+	case "apiRuleEvent":
+		return ec._Subscription_apiRuleEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -41244,11 +41393,11 @@ func (ec *executionContext) _enabledMappingService(ctx context.Context, sel ast.
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNAPIRule2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRule(ctx context.Context, sel ast.SelectionSet, v APIRule) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRule2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx context.Context, sel ast.SelectionSet, v v1alpha1.APIRule) graphql.Marshaler {
 	return ec._APIRule(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAPIRule2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleᚄ(ctx context.Context, sel ast.SelectionSet, v []*APIRule) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRule2ᚕᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha1.APIRule) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -41272,7 +41421,7 @@ func (ec *executionContext) marshalNAPIRule2ᚕᚖgithubᚗcomᚋkymaᚑproject�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNAPIRule2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRule(ctx, sel, v[i])
+			ret[i] = ec.marshalNAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -41285,7 +41434,7 @@ func (ec *executionContext) marshalNAPIRule2ᚕᚖgithubᚗcomᚋkymaᚑproject�
 	return ret
 }
 
-func (ec *executionContext) marshalNAPIRule2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRule(ctx context.Context, sel ast.SelectionSet, v *APIRule) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.APIRule) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -41295,11 +41444,11 @@ func (ec *executionContext) marshalNAPIRule2ᚖgithubᚗcomᚋkymaᚑprojectᚋk
 	return ec._APIRule(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAPIRuleConfig2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfig(ctx context.Context, sel ast.SelectionSet, v APIRuleConfig) graphql.Marshaler {
-	return ec._APIRuleConfig(ctx, sel, &v)
+func (ec *executionContext) marshalNAPIRuleAccessStrategy2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v v1alpha11.Authenticator) graphql.Marshaler {
+	return ec._APIRuleAccessStrategy(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAPIRuleConfig2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigᚄ(ctx context.Context, sel ast.SelectionSet, v []*APIRuleConfig) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRuleAccessStrategy2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha11.Authenticator) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -41323,7 +41472,7 @@ func (ec *executionContext) marshalNAPIRuleConfig2ᚕᚖgithubᚗcomᚋkymaᚑpr
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNAPIRuleConfig2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfig(ctx, sel, v[i])
+			ret[i] = ec.marshalNAPIRuleAccessStrategy2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -41336,21 +41485,31 @@ func (ec *executionContext) marshalNAPIRuleConfig2ᚕᚖgithubᚗcomᚋkymaᚑpr
 	return ret
 }
 
-func (ec *executionContext) marshalNAPIRuleConfig2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfig(ctx context.Context, sel ast.SelectionSet, v *APIRuleConfig) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRuleAccessStrategy2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v *v1alpha11.Authenticator) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	return ec._APIRuleConfig(ctx, sel, v)
+	return ec._APIRuleAccessStrategy(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNAPIRuleConfigInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInput(ctx context.Context, v interface{}) (APIRuleConfigInput, error) {
-	return ec.unmarshalInputAPIRuleConfigInput(ctx, v)
+func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, v interface{}) (v1alpha11.Authenticator, error) {
+	return UnmarshalAPIRuleAccessStrategyInput(v)
 }
 
-func (ec *executionContext) unmarshalNAPIRuleConfigInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInputᚄ(ctx context.Context, v interface{}) ([]*APIRuleConfigInput, error) {
+func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v v1alpha11.Authenticator) graphql.Marshaler {
+	res := MarshalAPIRuleAccessStrategyInput(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx context.Context, v interface{}) ([]*v1alpha11.Authenticator, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -41360,9 +41519,9 @@ func (ec *executionContext) unmarshalNAPIRuleConfigInput2ᚕᚖgithubᚗcomᚋky
 		}
 	}
 	var err error
-	res := make([]*APIRuleConfigInput, len(vSlice))
+	res := make([]*v1alpha11.Authenticator, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalNAPIRuleConfigInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -41370,23 +41529,38 @@ func (ec *executionContext) unmarshalNAPIRuleConfigInput2ᚕᚖgithubᚗcomᚋky
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNAPIRuleConfigInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInput(ctx context.Context, v interface{}) (*APIRuleConfigInput, error) {
+func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha11.Authenticator) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx, sel, v[i])
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, v interface{}) (*v1alpha11.Authenticator, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalNAPIRuleConfigInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInput(ctx, v)
+	res, err := ec.unmarshalNAPIRuleAccessStrategyInput2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx, v)
 	return &res, err
 }
 
-func (ec *executionContext) unmarshalNAPIRuleInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleInput(ctx context.Context, v interface{}) (APIRuleInput, error) {
-	return ec.unmarshalInputAPIRuleInput(ctx, v)
+func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v *v1alpha11.Authenticator) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec.marshalNAPIRuleAccessStrategyInput2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx, sel, *v)
 }
 
-func (ec *executionContext) marshalNAPIRuleService2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleService(ctx context.Context, sel ast.SelectionSet, v APIRuleService) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRuleService2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐService(ctx context.Context, sel ast.SelectionSet, v v1alpha1.Service) graphql.Marshaler {
 	return ec._APIRuleService(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAPIRuleService2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleService(ctx context.Context, sel ast.SelectionSet, v *APIRuleService) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRuleService2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐService(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.Service) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -41396,18 +41570,43 @@ func (ec *executionContext) marshalNAPIRuleService2ᚖgithubᚗcomᚋkymaᚑproj
 	return ec._APIRuleService(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAPIRuleStatuses2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleStatuses(ctx context.Context, sel ast.SelectionSet, v APIRuleStatuses) graphql.Marshaler {
-	return ec._APIRuleStatuses(ctx, sel, &v)
+func (ec *executionContext) unmarshalNAPIRuleServiceInput2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐService(ctx context.Context, v interface{}) (v1alpha1.Service, error) {
+	return ec.unmarshalInputAPIRuleServiceInput(ctx, v)
 }
 
-func (ec *executionContext) marshalNAPIRuleStatuses2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleStatuses(ctx context.Context, sel ast.SelectionSet, v *APIRuleStatuses) graphql.Marshaler {
+func (ec *executionContext) unmarshalNAPIRuleServiceInput2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐService(ctx context.Context, v interface{}) (*v1alpha1.Service, error) {
 	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNAPIRuleServiceInput2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐService(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalNAPIRuleSpec2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha1.APIRuleSpec) graphql.Marshaler {
+	return ec._APIRuleSpec(ctx, sel, &v)
+}
+
+func (ec *executionContext) unmarshalNAPIRuleSpecInput2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleSpec(ctx context.Context, v interface{}) (v1alpha1.APIRuleSpec, error) {
+	return ec.unmarshalInputAPIRuleSpecInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNAPIRuleStatusCode2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐStatusCode(ctx context.Context, v interface{}) (v1alpha1.StatusCode, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	return v1alpha1.StatusCode(tmp), err
+}
+
+func (ec *executionContext) marshalNAPIRuleStatusCode2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐStatusCode(ctx context.Context, sel ast.SelectionSet, v v1alpha1.StatusCode) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
 		}
-		return graphql.Null
 	}
-	return ec._APIRuleStatuses(ctx, sel, v)
+	return res
+}
+
+func (ec *executionContext) marshalNAPIRuleStatuses2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleStatus(ctx context.Context, sel ast.SelectionSet, v v1alpha1.APIRuleStatus) graphql.Marshaler {
+	return ec._APIRuleStatuses(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNAddonsConfiguration2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAddonsConfiguration(ctx context.Context, sel ast.SelectionSet, v AddonsConfiguration) graphql.Marshaler {
@@ -43126,6 +43325,20 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
+func (ec *executionContext) unmarshalNInt2int64(ctx context.Context, v interface{}) (int64, error) {
+	return graphql.UnmarshalInt64(v)
+}
+
+func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.SelectionSet, v int64) graphql.Marshaler {
+	res := graphql.MarshalInt64(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx context.Context, v interface{}) (JSON, error) {
 	if v == nil {
 		return nil, nil
@@ -43625,6 +43838,38 @@ func (ec *executionContext) marshalNPodStatusType2githubᚗcomᚋkymaᚑproject�
 	return v
 }
 
+func (ec *executionContext) unmarshalNPort2uint32(ctx context.Context, v interface{}) (uint32, error) {
+	return UnmarshalPort(v)
+}
+
+func (ec *executionContext) marshalNPort2uint32(ctx context.Context, sel ast.SelectionSet, v uint32) graphql.Marshaler {
+	res := MarshalPort(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNPort2ᚖuint32(ctx context.Context, v interface{}) (*uint32, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNPort2uint32(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalNPort2ᚖuint32(ctx context.Context, sel ast.SelectionSet, v *uint32) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec.marshalNPort2uint32(ctx, sel, *v)
+}
+
 func (ec *executionContext) marshalNReplicaSet2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐReplicaSet(ctx context.Context, sel ast.SelectionSet, v ReplicaSet) graphql.Marshaler {
 	return ec._ReplicaSet(ctx, sel, &v)
 }
@@ -43891,11 +44136,11 @@ func (ec *executionContext) unmarshalNResourceValuesInput2ᚖgithubᚗcomᚋkyma
 	return &res, err
 }
 
-func (ec *executionContext) marshalNRule2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRule(ctx context.Context, sel ast.SelectionSet, v Rule) graphql.Marshaler {
+func (ec *executionContext) marshalNRule2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐRule(ctx context.Context, sel ast.SelectionSet, v v1alpha1.Rule) graphql.Marshaler {
 	return ec._Rule(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNRule2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRuleᚄ(ctx context.Context, sel ast.SelectionSet, v []*Rule) graphql.Marshaler {
+func (ec *executionContext) marshalNRule2ᚕgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐRuleᚄ(ctx context.Context, sel ast.SelectionSet, v []v1alpha1.Rule) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -43919,7 +44164,7 @@ func (ec *executionContext) marshalNRule2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋk
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNRule2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRule(ctx, sel, v[i])
+			ret[i] = ec.marshalNRule2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐRule(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -43932,21 +44177,11 @@ func (ec *executionContext) marshalNRule2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋk
 	return ret
 }
 
-func (ec *executionContext) marshalNRule2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRule(ctx context.Context, sel ast.SelectionSet, v *Rule) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._Rule(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNRuleInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRuleInput(ctx context.Context, v interface{}) (RuleInput, error) {
+func (ec *executionContext) unmarshalNRuleInput2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐRule(ctx context.Context, v interface{}) (v1alpha1.Rule, error) {
 	return ec.unmarshalInputRuleInput(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNRuleInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRuleInputᚄ(ctx context.Context, v interface{}) ([]*RuleInput, error) {
+func (ec *executionContext) unmarshalNRuleInput2ᚕgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐRuleᚄ(ctx context.Context, v interface{}) ([]v1alpha1.Rule, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -43956,22 +44191,14 @@ func (ec *executionContext) unmarshalNRuleInput2ᚕᚖgithubᚗcomᚋkymaᚑproj
 		}
 	}
 	var err error
-	res := make([]*RuleInput, len(vSlice))
+	res := make([]v1alpha1.Rule, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalNRuleInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRuleInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNRuleInput2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐRule(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 	return res, nil
-}
-
-func (ec *executionContext) unmarshalNRuleInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRuleInput(ctx context.Context, v interface{}) (*RuleInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalNRuleInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRuleInput(ctx, v)
-	return &res, err
 }
 
 func (ec *executionContext) marshalNSecret2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSecret(ctx context.Context, sel ast.SelectionSet, v Secret) graphql.Marshaler {
@@ -44673,6 +44900,24 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 	return ret
 }
 
+func (ec *executionContext) unmarshalNString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNString2string(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalNString2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec.marshalNString2string(ctx, sel, *v)
+}
+
 func (ec *executionContext) marshalNSubscriber2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriber(ctx context.Context, sel ast.SelectionSet, v Subscriber) graphql.Marshaler {
 	return ec._Subscriber(ctx, sel, &v)
 }
@@ -45193,82 +45438,22 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOAPIRule2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRule(ctx context.Context, sel ast.SelectionSet, v APIRule) graphql.Marshaler {
+func (ec *executionContext) marshalOAPIRule2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx context.Context, sel ast.SelectionSet, v v1alpha1.APIRule) graphql.Marshaler {
 	return ec._APIRule(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRule(ctx context.Context, sel ast.SelectionSet, v *APIRule) graphql.Marshaler {
+func (ec *executionContext) marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.APIRule) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._APIRule(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOAPIRuleConfig2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigᚄ(ctx context.Context, sel ast.SelectionSet, v []*APIRuleConfig) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNAPIRuleConfig2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfig(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) unmarshalOAPIRuleConfigInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInputᚄ(ctx context.Context, v interface{}) ([]*APIRuleConfigInput, error) {
-	var vSlice []interface{}
-	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
-	}
-	var err error
-	res := make([]*APIRuleConfigInput, len(vSlice))
-	for i := range vSlice {
-		res[i], err = ec.unmarshalNAPIRuleConfigInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleConfigInput(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalOAPIRuleStatus2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleStatus(ctx context.Context, sel ast.SelectionSet, v APIRuleStatus) graphql.Marshaler {
+func (ec *executionContext) marshalOAPIRuleStatus2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleResourceStatus(ctx context.Context, sel ast.SelectionSet, v v1alpha1.APIRuleResourceStatus) graphql.Marshaler {
 	return ec._APIRuleStatus(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOAPIRuleStatus2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐAPIRuleStatus(ctx context.Context, sel ast.SelectionSet, v *APIRuleStatus) graphql.Marshaler {
+func (ec *executionContext) marshalOAPIRuleStatus2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRuleResourceStatus(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.APIRuleResourceStatus) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -45790,6 +45975,29 @@ func (ec *executionContext) marshalOEventActivationEvent2ᚕᚖgithubᚗcomᚋky
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) unmarshalOExtension2k8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx context.Context, v interface{}) (runtime.RawExtension, error) {
+	return UnmarshalRawExtension(v)
+}
+
+func (ec *executionContext) marshalOExtension2k8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx context.Context, sel ast.SelectionSet, v runtime.RawExtension) graphql.Marshaler {
+	return MarshalRawExtension(v)
+}
+
+func (ec *executionContext) unmarshalOExtension2ᚖk8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx context.Context, v interface{}) (*runtime.RawExtension, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOExtension2k8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOExtension2ᚖk8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx context.Context, sel ast.SelectionSet, v *runtime.RawExtension) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOExtension2k8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx, sel, *v)
 }
 
 func (ec *executionContext) marshalOFunction2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunction(ctx context.Context, sel ast.SelectionSet, v Function) graphql.Marshaler {

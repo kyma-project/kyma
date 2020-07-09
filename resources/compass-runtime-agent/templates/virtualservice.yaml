@@ -4,9 +4,11 @@ metadata:
   name: {{ .Chart.Name }}
   namespace: {{ .Values.global.namespace }}
   labels:
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   hosts:
     - compass-runtime-agent.{{ .Values.global.ingress.domainName }}

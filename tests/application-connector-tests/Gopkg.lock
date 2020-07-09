@@ -687,7 +687,7 @@
   revision = "94316e20e860e9df5bcdc547510f402395603080"
 
 [[projects]]
-  digest = "1:44d33bb45a7cf0e21dc077018f194a65449f1ef1aac3492bc062a07f0eef5b9b"
+  digest = "1:e76f2b03c13c6d694c9d1620844cbc4cf1e2d144c6ee012eb66dbe2e1ffb96ac"
   name = "knative.dev/serving"
   packages = [
     "pkg/apis/autoscaling",
@@ -702,8 +702,8 @@
     "pkg/autoscaler/config",
   ]
   pruneopts = "NUT"
-  revision = "f87352b72c48286f164838ddc6684c805ea082a9"
-  version = "v0.14.0"
+  revision = "b3e5e64e746b2c895b7503f979f73d3303d1204f"
+  version = "v0.15.2"
 
 [[projects]]
   digest = "1:68cd93696d4de06936c94bf0c510802140c2d3c956b557f3d001430d58cf676c"

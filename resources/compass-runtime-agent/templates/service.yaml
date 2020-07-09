@@ -6,6 +6,10 @@ metadata:
   labels:
     control-plane: {{ .Chart.Name }}
     controller-tools.k8s.io: "1.0"
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   selector:
     control-plane: {{ .Chart.Name }}
@@ -20,7 +24,10 @@ metadata:
   namespace: {{ .Values.global.namespace }}
   labels:
     release: {{ .Chart.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   type: ClusterIP
   ports:

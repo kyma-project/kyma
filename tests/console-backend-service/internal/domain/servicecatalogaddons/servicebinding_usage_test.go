@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"testing"
 
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
+
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
@@ -112,20 +114,26 @@ func TestServiceBindingUsageMutationsAndQueries(t *testing.T) {
 func newBindingUsageSuite(t *testing.T) *bindingUsageTestSuite {
 	c, err := graphql.New()
 	require.NoError(t, err)
+
+	k8sClient, _, err := client.NewClientWithConfig()
+	require.NoError(t, err)
+
 	svcatCli, _, err := client.NewServiceCatalogClientWithConfig()
 	require.NoError(t, err)
 
 	return &bindingUsageTestSuite{
-		gqlCli:   c,
-		svcatCli: svcatCli,
-		t:        t,
+		gqlCli:    c,
+		svcatCli:  svcatCli,
+		t:         t,
+		k8sClient: k8sClient,
 	}
 }
 
 type bindingUsageTestSuite struct {
-	gqlCli   *graphql.Client
-	svcatCli *clientset.Clientset
-	t        *testing.T
+	gqlCli    *graphql.Client
+	svcatCli  *clientset.Clientset
+	t         *testing.T
+	k8sClient *v1.CoreV1Client
 
 	givenBindingUsage shared.ServiceBindingUsage
 	givenInstance     shared.ServiceInstance
@@ -160,6 +168,9 @@ func (s *bindingUsageTestSuite) prepareInstanceAndBinding() {
 
 	s.t.Log("Wait for Instance")
 	err = wait.ForServiceInstanceReady(s.givenInstance.Name, s.givenInstance.Namespace, s.svcatCli)
+	if err != nil {
+		shared.LogReport(s.givenInstance.Name, s.givenInstance.Namespace, s.svcatCli, s.k8sClient)
+	}
 	require.NoError(s.t, err)
 
 	s.t.Log("Create Binding")
@@ -310,6 +321,9 @@ func (s *bindingUsageTestSuite) deleteServiceInstanceAndBinding() {
 
 	s.t.Log("Wait for instance deletion")
 	err = wait.ForServiceInstanceDeletion(s.givenBinding.Name, s.givenBinding.Namespace, s.svcatCli)
+	if err != nil {
+		shared.LogReport(s.givenBinding.Name, s.givenBinding.Namespace, s.svcatCli, s.k8sClient)
+	}
 	assert.NoError(s.t, err)
 }
 
