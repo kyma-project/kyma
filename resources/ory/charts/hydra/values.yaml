@@ -96,9 +96,7 @@ hydra:
           - 10.0.0.0/8
           - 172.16.0.0/12
           - 192.168.0.0/16
-    secrets:
-      system: ""
-      cookie: ""
+    secrets: {}
     # Use a pre-existing secret (see secret.yaml for required fields)
     # existingSecret: my-preexisting-secret
     urls:
