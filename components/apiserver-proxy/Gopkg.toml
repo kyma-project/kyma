@@ -37,8 +37,8 @@ required = [
   branch = "master"
 
 [[constraint]]
-  name = "github.com/fsnotify/fsnotify"
-  version = "v1.4.9"
+  name = "github.com/howeyc/fsnotify"
+  version = "0.9.0"
 
 [[constraint]]
   name = "github.com/spf13/pflag"
