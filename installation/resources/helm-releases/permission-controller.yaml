@@ -1,0 +1,19 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: permission-controller
+  namespace: kyma-system
+spec:
+  chart:     
+    git: https://github.com/piotrmsc/kyma.git
+    path: resources/permission-controller
+    ref: helm-operator
+  releaseName: permission-controller
+  valuesFrom:
+  - configMapKeyRef:
+      name: net-global-overrides-transformed
+      namespace: kyma-installer
+      key: overrides.yaml
+  values:
+    global:
+      isLocalEnv: false  

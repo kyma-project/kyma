@@ -1,0 +1,39 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: dex
+  namespace: kyma-system
+spec:
+  chart:     
+    git: https://github.com/kyma-project/kyma.git
+    path: resources/dex
+    ref: master  
+  releaseName: dex
+  valuesFrom:
+  - configMapKeyRef:
+      name: net-global-overrides-transformed
+      namespace: kyma-installer
+      key: overrides.yaml
+  # - configMapKeyRef:
+  #     name: net-global-overrides
+  #     namespace: kyma-installer
+  #     key: global.ingress.domainName
+  # - configMapKeyRef:
+  #     name: net-global-overrides
+  #     namespace: kyma-installer
+  #     key: global.domainName
+  # - configMapKeyRef:
+  #     name: net-global-overrides
+  #     namespace: kyma-installer
+  #     key: global.domainName
+  # - configMapKeyRef:
+  #     name: net-global-overrides
+  #     namespace: kyma-installer
+  #     key: global.ingress.tlsCrt
+  # - configMapKeyRef:
+  #     name: net-global-overrides
+  #     namespace: kyma-installer
+  #     key: global.ingress.tlsKey            
+  values:
+    global:
+      isLocalEnv: false  

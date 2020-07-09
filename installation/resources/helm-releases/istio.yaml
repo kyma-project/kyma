@@ -1,0 +1,15 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: istio
+  namespace: istio-system
+spec:
+  chart:     
+    git: https://github.com/kyma-project/kyma.git
+    path: resources/istio
+    ref: master  
+  releaseName: istio
+  values:
+    global:
+      isLocalEnv: false
+  targetNamespace: istio-system

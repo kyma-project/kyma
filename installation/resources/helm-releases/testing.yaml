@@ -1,0 +1,11 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: testing
+  namespace: kyma-system
+spec:
+  chart:     
+    git: https://github.com/kyma-project/kyma.git
+    path: resources/testing
+    ref: master
+  releaseName: testing

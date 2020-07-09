@@ -1,0 +1,19 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: knative-eventing
+  namespace: knative-eventing
+spec:
+  chart:     
+    git: https://github.com/piotrmsc/kyma.git
+    path: resources/knative-eventing
+    ref: helm-operator
+  releaseName: knative-eventing
+  valuesFrom:
+  - configMapKeyRef:
+      name: net-global-overrides-transformed
+      namespace: kyma-installer
+      key: overrides.yaml
+  values:
+    global:
+      isLocalEnv: false        

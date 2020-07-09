@@ -1,0 +1,39 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: service-catalog
+  namespace: kyma-system
+spec:
+  chart:     
+    git: https://github.com/piotrmsc/kyma.git
+    path: resources/service-catalog
+    ref: helm-operator
+  releaseName: service-catalog
+  valuesFrom:
+  - configMapKeyRef:
+      name: net-global-overrides-transformed
+      namespace: kyma-installer
+      key: overrides.yaml
+  values:
+    global:
+      isLocalEnv: false
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: service-catalog-addons
+  namespace: kyma-system
+spec:
+  chart:     
+    git: https://github.com/piotrmsc/kyma.git
+    path: resources/service-catalog-addons
+    ref: helm-operator
+  releaseName: service-catalog-addons
+  valuesFrom:
+  - configMapKeyRef:
+      name: net-global-overrides-transformed
+      namespace: kyma-installer
+      key: overrides.yaml
+  values:
+    global:
+      isLocalEnv: false      

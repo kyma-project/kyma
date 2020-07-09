@@ -1,0 +1,19 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: rafter
+  namespace: kyma-system
+spec:
+  chart:     
+    git: https://github.com/piotrmsc/kyma.git
+    path: resources/rafter
+    ref: helm-operator
+  releaseName: rafter
+  valuesFrom:
+  - configMapKeyRef:
+      name: net-global-overrides-transformed
+      namespace: kyma-installer
+      key: overrides.yaml
+  values:
+    global:
+      isLocalEnv: false  

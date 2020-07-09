@@ -1,0 +1,15 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: xip-patch
+  namespace: kyma-installer
+spec:
+  chart:     
+    git: https://github.com/piotrmsc/kyma.git
+    path: resources/xip-patch
+    ref: helm-operator  
+  releaseName: xip-patch
+  values:
+    global:
+      isLocalEnv: false
+  targetNamespace: kyma-installer

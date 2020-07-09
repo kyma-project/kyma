@@ -1,0 +1,11 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: cluster-essentials
+  namespace: kyma-system
+spec:
+  chart:     
+    git: https://github.com/kyma-project/kyma.git
+    path: resources/cluster-essentials
+    ref: master
+  releaseName: cluster-essentials

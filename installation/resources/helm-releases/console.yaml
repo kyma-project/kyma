@@ -1,0 +1,19 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: console
+  namespace: kyma-system
+spec:
+  chart:     
+    git: https://github.com/piotrmsc/kyma.git
+    path: resources/console
+    ref: helm-operator
+  releaseName: console
+  valuesFrom:
+  - configMapKeyRef:
+      name: net-global-overrides-transformed
+      namespace: kyma-installer
+      key: overrides.yaml
+  values:
+    global:
+      isLocalEnv: false  
