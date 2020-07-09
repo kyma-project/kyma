@@ -73,7 +73,7 @@ func (w *watcher) watchFileEvents(ctx context.Context, wch <-chan fsnotify.Event
 	for {
 		select {
 		case ev := <-wch:
-			glog.Infof("Watcher[%s]: watchFileEvents: %s", w.name, ev.String())
+			glog.V(10).Infof("Watcher[%s]: watchFileEvents: %s", w.name, ev.String())
 			if timer != nil {
 				//timer is already ticking. Once the timer is done, notification will be fired.
 				continue
@@ -91,7 +91,7 @@ func (w *watcher) watchFileEvents(ctx context.Context, wch <-chan fsnotify.Event
 			timer.Stop()
 			timer = nil
 
-			glog.Infof("Watcher[%s]: watchFileEvents: notifying", w.name)
+			glog.V(10).Infof("Watcher[%s]: watchFileEvents: notifying", w.name)
 			w.notifyFunc()
 		case <-ctx.Done():
 			glog.Infof("Watcher[%s]: watchFileEvents has successfully terminated", w.name)
