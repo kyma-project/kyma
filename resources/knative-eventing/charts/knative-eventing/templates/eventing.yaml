@@ -850,6 +850,7 @@ subjects:
   namespace: knative-eventing
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "sources.knative.dev/v1alpha1/ApiServerSource") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -1020,8 +1021,10 @@ spec:
     served: true
     storage: true
 {{- end }}
+{{- end }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "eventing.knative.dev/v1alpha1/Broker") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -1087,8 +1090,9 @@ spec:
     served: true
     storage: true
 {{- end }}
-
+{{- end }}
 ---
+{{- if not (.Capabilities.APIVersions.Has "messaging.knative.dev/v1alpha1/Channel") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -1193,8 +1197,10 @@ spec:
     served: true
     storage: true
 {{- end }}
+{{- end }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "eventing.knative.dev/v1alpha1/EventType") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -1268,8 +1274,10 @@ spec:
     served: true
     storage: true
 {{- end }}
+{{- end }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "flows.knative.dev/v1alpha1/Parallel") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -1491,8 +1499,10 @@ spec:
           - channelTemplate
   version: v1alpha1
 {{- end }}
+{{- end }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "flows.knative.dev/v1alpha1/Sequence") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -1638,8 +1648,10 @@ spec:
     served: true
     storage: true
 {{- end }}
+{{- end }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "sources.eventing.knative.dev/v1alpha1/ApiServerSource") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -1804,8 +1816,10 @@ spec:
     served: true
     storage: true
 {{- end }}
+{{- end }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "sources.eventing.knative.dev/v1alpha1/ContainerSource") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -1933,8 +1947,10 @@ spec:
     served: true
     storage: true
 {{- end  }}
+{{- end  }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "sources.eventing.knative.dev/v1alpha1/CronJobSource") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -2078,8 +2094,10 @@ spec:
     served: true
     storage: true
 {{- end  }}
+{{- end  }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "sources.eventing.knative.dev/v1alpha1/SinkBinding") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -2120,8 +2138,10 @@ spec:
     served: true
     storage: true
 {{- end  }}
+{{- end  }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "messaging.knative.dev/v1alpha1/Parallel") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -2317,8 +2337,10 @@ spec:
           - channelTemplate
   version: v1alpha1
 {{- end  }}
+{{- end  }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "messaging.knative.dev/v1alpha1/Sequence") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -2451,8 +2473,10 @@ spec:
     served: true
     storage: true
 {{- end  }}
+{{- end  }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "sources.knative.dev/v1alpha1/SinkBinding") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -2499,8 +2523,10 @@ spec:
     served: true
     storage: true
 {{- end  }}
+{{- end  }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "messaging.knative.dev/v1alpha1/Subscription") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -2618,8 +2644,10 @@ spec:
     served: true
     storage: true
 {{- end  }}
+{{- end  }}
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "eventing.knative.dev/v1alpha1/Trigger") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -2714,6 +2742,7 @@ spec:
   - name: v1alpha1
     served: true
     storage: true
+{{- end  }}
 {{- end  }}
 
 ---

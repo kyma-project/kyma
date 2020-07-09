@@ -342,6 +342,7 @@ spec:
           name: config-logging
 
 ---
+{{- if not (.Capabilities.APIVersions.Has "messaging.knative.dev/v1alpha1/NatssChannel") }}
 {{- if .Release.IsUpgrade }}
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -430,4 +431,5 @@ spec:
                   type: array
               type: object
   version: v1alpha1
+{{- end}}
 {{- end}}
