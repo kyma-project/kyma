@@ -36,7 +36,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		nil,
 		s.Domain,
 		s.TestID,
-		"", //no need for an image as we just want to reuse the existing service
+		"", // no need for an image as we just want to reuse the existing service
 	)
 
 	state := s.NewState()
@@ -48,11 +48,17 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 			testsuite.NewResetCounterPod(testService),
 			testsuite.NewSendEventToMesh(s.TestID, helpers.FunctionPayload, state),
 			testsuite.NewCheckCounterPod(testService, 1, retryOpts...),
-		),
+		).WithRetryOptions(
+			retry.Attempts(3),
+			retry.DelayType(retry.FixedDelay),
+			retry.Delay(500*time.Millisecond)),
 		step.Retry(
 			testsuite.NewResetCounterPod(testService),
 			testsuite.NewSendEventToCompatibilityLayer(s.TestID, helpers.FunctionPayload, state),
 			testsuite.NewCheckCounterPod(testService, 1, retryOpts...),
-		),
+		).WithRetryOptions(
+			retry.Attempts(3),
+			retry.DelayType(retry.FixedDelay),
+			retry.Delay(500*time.Millisecond)),
 	}, nil
 }
