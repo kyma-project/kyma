@@ -4,16 +4,10 @@ metadata:
   annotations:
     meta.helm.sh/release-name: core
     meta.helm.sh/release-namespace: kyma-system
-  generation: 1
   labels:
     app: core-test-external-solution
-    app.kubernetes.io/instance: core
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: core-test-external-solution
-    helm.sh/chart: core-0.0.1
     kyma-project.io/test-kind: e2e
   name: core-test-external-solution
-  selfLink: /apis/testing.kyma-project.io/v1alpha1/namespaces/kyma-system/testdefinitions/core-test-external-solution
 spec:
   disableConcurrency: false
   template:
