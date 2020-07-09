@@ -1,5 +1,5 @@
 ---
-title: Bind a Service Instance to a Function
+title: Bind a ServiceInstance to a Function
 type: Tutorials
 ---
 
@@ -7,7 +7,7 @@ This tutorial shows how you can bind a sample instance of the Redis service to a
 
 To create the binding, you will use ServiceBinding and ServiceBindingUsage custom resources (CRs) managed by the Service Catalog.
 
->**NOTE:** See the document on [provisioning and binding](/components/service-catalog/#details-provisioning-and-binding) to learn more about binding Service Instances to applications in Kyma.
+>**NOTE:** See the document on [provisioning and binding](/components/service-catalog/#details-provisioning-and-binding-flow) to learn more about binding ServiceInstances to applications in Kyma.
 
 ## Prerequisites
 
@@ -32,7 +32,7 @@ Follows these steps:
 
    > **NOTE:** Function takes the name from the Function CR name. The ServiceInstance, ServiceBinding, and ServiceBindingUsage CRs can have different names, but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 
-   > **NOTE:** If you already have a Redis instance provisioned on your cluster, move directly to point 6 to create a Service Binding.
+   > **NOTE:** If you already have a Redis instance provisioned on your cluster, move directly to point 6 to create a ServiceBinding.
 
 2. Provision an Addon CR with the Redis service:
 
@@ -79,7 +79,7 @@ Follows these steps:
    kubectl get serviceinstance $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
    ```
 
-6. Create a ServiceBinding CR that points to the newly created Service Instance in the **spec.instanceRef** field:
+6. Create a ServiceBinding CR that points to the newly created ServiceInstance in the **spec.instanceRef** field:
 
    ```yaml
    cat <<EOF | kubectl apply -f -
@@ -94,7 +94,7 @@ Follows these steps:
    EOF
    ```
 
-   > **NOTE:** If you use an existing Service Instance, change **spec.instanceRef.name** to the name of your Service Instance.
+   > **NOTE:** If you use an existing ServiceInstance, change **spec.instanceRef.name** to the name of your ServiceInstance.
 
 7. Check if the ServiceBinding CR was created successfully. The last condition in the CR status should state `Ready True`:
 
@@ -123,9 +123,9 @@ Follows these steps:
    EOF
    ```
 
-   - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the Service Binding you have just created and **spec.usedBy** points to the Function. More specifically, **spec.usedBy** refers to the name of the Function and the cluster-specific [UsageKind CR](https://kyma-project.io/docs/components/service-catalog/#custom-resource-usage-kind) (`kind: serverless-function`) that defines how Secrets should be injected to your Function when creating a Service Binding.
+   - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the ServiceBinding you have just created and **spec.usedBy** points to the Function. More specifically, **spec.usedBy** refers to the name of the Function and the cluster-specific [UsageKind CR](/components/service-catalog/#custom-resource-usage-kind) (`kind: serverless-function`) that defines how Secrets should be injected to your Function when creating a ServiceBinding.
 
-   - The **spec.parameters.envPrefix.name** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a Service Binding. In our example, **envPrefix** is `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
+   - The **spec.parameters.envPrefix.name** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a ServiceBinding. In our example, **envPrefix** is `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
 
      > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
@@ -135,7 +135,7 @@ Follows these steps:
    kubectl get servicebindingusage $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
    ```
 
-10. Retrieve and decode Secret details from the Service Binding:
+10. Retrieve and decode Secret details from the ServiceBinding:
 
     ```bash
     kubectl get secret $NAME -n $NAMESPACE -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
@@ -157,11 +157,11 @@ Follows these steps:
     Console UI
     </summary>
 
-To create a binding, you must first create a sample Service Instance to which you can bind the Function. Follow the sections and steps to complete this tutorial.
+To create a binding, you must first create a sample ServiceInstance to which you can bind the Function. Follow the sections and steps to complete this tutorial.
 
 ### Provision a Redis service using an Addon
 
-> **NOTE:** If you already have a Redis instance provisioned on your cluster, move directly to the **Bind the Function to the Service Instance** section.
+> **NOTE:** If you already have a Redis instance provisioned on your cluster, move directly to the **Bind the Function to the ServiceInstance** section.
 
 Follow these steps:
 
@@ -175,7 +175,7 @@ Follow these steps:
 
    You will see that the Addon has the `Ready` status.
 
-### Create a Service Instance
+### Create a ServiceInstance
 
 1. Go to the **Catalog** view where you can see the list of all available Addons and select **[Experimental] Redis**.
 
@@ -183,15 +183,15 @@ Follow these steps:
 
 3. Change the **Name** to match the Function, select `micro` from the **Plan** drop-down list, and set **Image pull policy** to `Always`.
 
-   > **NOTE:** The Service Instance, Service Binding, and Service Binding Usage can have different names than the Function, but it is recommended that all related resources share a common name.
+   > **NOTE:** The ServiceInstance, ServiceBinding, and ServiceBindingUsage can have different names than the Function, but it is recommended that all related resources share a common name.
 
 4. Select **Create** to confirm changes.
 
    Wait until the status of the instance changes from `PROVISIONING` to `RUNNING`.
 
-### Bind the Function to the Service Instance
+### Bind the Function to the ServiceInstance
 
-1. Go to the **Functions** view in the left navigation panel and select the Function you want to bind to the Service Instance.
+1. Go to the **Functions** view in the left navigation panel and select the Function you want to bind to the ServiceInstance.
 
 2. Switch to the **Configuration** tab and select **Create Service Binding** in the **Service Bindings** section.
 
@@ -199,9 +199,9 @@ Follow these steps:
 
 4. Select **Create** to confirm changes.
 
-The message appears on the screen confirming that the Service Binding was successfully created, and you will see it in the **Service Bindings** section in your Function, along with environment variable names.
+The message appears on the screen confirming that the ServiceBinding was successfully created, and you will see it in the **Service Bindings** section in your Function, along with environment variable names.
 
-> **NOTE:** The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a Service Binding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
+> **NOTE:** The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a ServiceBinding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
 
 > **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
