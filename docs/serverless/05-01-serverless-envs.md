@@ -1,18 +1,18 @@
 ---
-title: Environmental variables
+title: Environment variables
 type: Configuration
 ---
 
-To configure the Serverless Function, override the default values of enviromental variables:
+To configure the Serverless Function, override the default values of these environment variables:
 
-| Environmental variable | Description                                                                   | Unit   | Default value |
+| Environment variable | Description                                                                   | Unit   | Default value |
 | ---------------------- | ----------------------------------------------------------------------------- | ------ | ------------- |
-| **FUNC_TIMEOUT**       | Specifies the number of seconds to execute code before terminating execution. | Number | 180           |
-| **REQ_MB_LIMIT**       | Payload body size limit in megabytes                                          | Number | 1             |
+| **FUNC_TIMEOUT**       | Specifies the number of seconds in which a runtime must execute the code. | Number | `180`           |
+| **REQ_MB_LIMIT**       | Payload body size limit in megabytes                                          | Number |  `1`            |
 
 See [this file](https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js) to get deeper understanding of how exactly those values are used. This Express server is internally used to run Functions.
 
-See the example of a function with such environmental variables set:
+See the example of a Function with these environment variables set:
 
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha1
