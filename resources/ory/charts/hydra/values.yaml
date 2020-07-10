@@ -106,6 +106,8 @@ hydra:
   dangerousForceHttp: false
   dangerousAllowInsecureRedirectUrls: false
   # existingSecret: secret
+  maintenance:
+    image: {}
 
 deployment:
   strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
