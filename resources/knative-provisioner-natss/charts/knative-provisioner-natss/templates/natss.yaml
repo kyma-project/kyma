@@ -350,6 +350,8 @@ metadata:
     duck.knative.dev/addressable: "true"
     knative.dev/crd-install: "true"
     messaging.knative.dev/subscribable: "true"
+  annotations:
+    helm.sh/resource-policy: keep
   name: natsschannels.messaging.knative.dev
 spec:
   additionalPrinterColumns:

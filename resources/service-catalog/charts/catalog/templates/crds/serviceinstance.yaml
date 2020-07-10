@@ -4,6 +4,8 @@ metadata:
   name: serviceinstances.servicecatalog.k8s.io
   labels:
     svcat: "true"
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1

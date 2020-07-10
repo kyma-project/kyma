@@ -4,6 +4,8 @@ metadata:
   creationTimestamp: null
   labels:
     controller-tools.k8s.io: "1.0"
+  annotations:
+    helm.sh/resource-policy: keep
   name: clustertestsuites.testing.kyma-project.io
 spec:
   group: testing.kyma-project.io
