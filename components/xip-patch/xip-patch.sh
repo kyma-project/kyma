@@ -74,7 +74,7 @@ createOverridesConfigMap() {
             gardener: "$GARDENER_ENVIRONMENT"
           tlsCrt: "$INGRESS_TLS_CERT"
           tlsKey: "$INGRESS_TLS_KEY"
-          domainName: "$INGRESS_DOMAIN
+          domainName: "$INGRESS_DOMAIN"
 EOF
 
         kubectl create cm net-global-overrides-transformed -n kyma-installer  --from-file /tmp/overrides.yaml -o yaml --dry-run | kubectl apply -f -

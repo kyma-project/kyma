@@ -4,10 +4,10 @@ metadata:
   name: istio
   namespace: istio-system
 spec:
-  chart:     
-    git: https://github.com/kyma-project/kyma.git
+  chart:
+    git: https://github.com/piotrmsc/kyma.git
     path: resources/istio
-    ref: master  
+    ref: helm-operator
   releaseName: istio
   values:
     global:

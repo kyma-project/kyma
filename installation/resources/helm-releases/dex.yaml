@@ -4,10 +4,10 @@ metadata:
   name: dex
   namespace: kyma-system
 spec:
-  chart:     
-    git: https://github.com/kyma-project/kyma.git
+  chart:
+    git: https://github.com/piotrmsc/kyma.git
     path: resources/dex
-    ref: master  
+    ref: helm-operator
   releaseName: dex
   valuesFrom:
   - configMapKeyRef:

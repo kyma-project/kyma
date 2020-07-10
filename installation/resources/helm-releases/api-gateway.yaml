@@ -4,10 +4,10 @@ metadata:
   name: api-gateway
   namespace: kyma-system
 spec:
-  chart:     
+  chart:
     git: https://github.com/piotrmsc/kyma.git
     path: resources/api-gateway
-    ref: master  
+    ref: helm-operator
   releaseName: api-gateway
   valuesFrom:
   - configMapKeyRef:
