@@ -91,10 +91,11 @@ hydra:
     existingSecret: "ory-hydra-credentials"
   hydra-maester:
     globalAccess: true
-  maintenance:
-    image:
-      name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-      tag: "v20200617-32c1f3ff"
+    maintenance:
+      image:
+        name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
+        tag: "v20200617-32c1f3ff"
+
 # Overrides for the Oathkeeper chart
 oathkeeper:
   kubectlJob:

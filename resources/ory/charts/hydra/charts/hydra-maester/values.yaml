@@ -12,6 +12,11 @@ config:
   syncPeriod: 10h
 
 globalAccess: false
+
+maintenance:
+  image:
+    name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
+    tag: "v20200617-32c1f3ff"
 #The Controller have CREATE and READ access to all Secrets in the namespaces listed below.
 enabledNamespaces: []
 
