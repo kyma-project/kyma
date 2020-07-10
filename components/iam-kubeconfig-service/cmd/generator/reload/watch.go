@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/howeyc/fsnotify"
+	"github.com/fsnotify/fsnotify"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -44,7 +44,7 @@ func NewWatcher(name string, filePaths []string, evBatchDelaySeconds uint8, noti
 func (w *watcher) Run(ctx context.Context) {
 	log.Infof("Watcher [%s] starts watching for files: %v", w.name, w.filePaths)
 
-	watchFileEventsFunc := func(fEventChan <-chan *fsnotify.FileEvent) {
+	watchFileEventsFunc := func(fEventChan <-chan fsnotify.Event) {
 		w.watchFileEvents(ctx, fEventChan)
 	}
 
@@ -63,7 +63,7 @@ func (w *watcher) Run(ctx context.Context) {
 // The function batches changes so that related changes are processed together in a single step.
 // The function ensures that notifyFn() is called no more than one time per eventBatchDelaySeconds.
 // The function does not return until the the context is canceled.
-func (w *watcher) watchFileEvents(ctx context.Context, wch <-chan *fsnotify.FileEvent) {
+func (w *watcher) watchFileEvents(ctx context.Context, wch <-chan fsnotify.Event) {
 	minDelay := time.Second * time.Duration(w.eventBatchDelaySeconds)
 
 	// timer and channel for managing minDelay.
@@ -73,8 +73,13 @@ func (w *watcher) watchFileEvents(ctx context.Context, wch <-chan *fsnotify.File
 	for {
 		select {
 		case ev := <-wch:
-			log.Infof("Watcher[%s]: watchFileEvents: %s", w.name, ev.String())
+			log.Debugf("Watcher[%s]: watchFileEvents: %s", w.name, ev.String())
 			if timer != nil {
+				//timer is already ticking. Once the timer is done, notification will be fired.
+				continue
+			}
+			if ev.Op == fsnotify.Chmod {
+				//if the event is just chmod, DO NOT notify (there's no need to reload file)
 				continue
 			}
 			// create new timer
@@ -98,7 +103,7 @@ func (w *watcher) watchFileEvents(ctx context.Context, wch <-chan *fsnotify.File
 // watchForDirs configures a watch for every directory path in dirs.
 // It then invokes provided watchFunc with configured Watchers.
 // This function is blocking so it should be run in a goroutine.
-func (w *watcher) watchForDirs(dirs []string, watchFunc func(fEventChan <-chan *fsnotify.FileEvent)) {
+func (w *watcher) watchForDirs(dirs []string, watchFunc func(fEventChan <-chan fsnotify.Event)) {
 	fw, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Warningf("Watcher[%s]: failed to create a watcher for certificate files: %v", w.name, err)
@@ -111,14 +116,14 @@ func (w *watcher) watchForDirs(dirs []string, watchFunc func(fEventChan <-chan *
 	}()
 
 	for _, dir := range dirs {
-		if err := fw.Watch(dir); err != nil {
+		if err := fw.Add(dir); err != nil {
 			log.Warningf("Watcher[%s]: watching %s encountered an error %v", w.name, dir, err)
 			return
 		}
 		log.Infof("Watcher[%s]: watching %s for changes", w.name, dir)
 	}
 
-	watchFunc(fw.Event)
+	watchFunc(fw.Events)
 }
 
 //Extracts directory paths from provided filePaths list and returns a list of paths with duplicates removed.
