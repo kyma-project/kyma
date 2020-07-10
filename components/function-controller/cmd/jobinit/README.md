@@ -4,6 +4,8 @@ The JobInit is used as the init container for injecting git repository to the [b
 
 ### Environment variables
 
+JobInit uses these environment variables:
+
 | Variable                    | Description                                                                   | Default value |
 | --------------------------- | ----------------------------------------------------------------------------- | ------------- |
 | **APP_MOUNT_PATH**          | Destination path on which should be cloned the repository                     | `/workspace`
