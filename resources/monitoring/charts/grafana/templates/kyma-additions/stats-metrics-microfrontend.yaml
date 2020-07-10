@@ -10,13 +10,13 @@ metadata:
     {{- include "grafana.labels" . | nindent 4 }}
     app:  statsmetricsmicrofrontend
 spec:
-  displayName: Stats & Metrics
+  displayName: Metrics
   version: v1
   category: Diagnostics
   placement: cluster
   viewBaseUrl: https://grafana.{{ js .Values.global.ingress.domainName }}
   navigationNodes:
-    - label: Stats & Metrics
+    - label: Metrics
       navigationPath: ''
       viewUrl: ''
       externalLink: https://grafana.{{ js .Values.global.ingress.domainName }}
