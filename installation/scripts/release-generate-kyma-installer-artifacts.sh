@@ -61,7 +61,7 @@ function generateCompassClusterArtifact() {
       | sed -E ";s;image: eu.gcr.io\/kyma-project\/develop\/installer:.+;image: eu.gcr.io/kyma-project/${KYMA_INSTALLER_PUSH_DIR}kyma-installer:${KYMA_INSTALLER_VERSION};" \
       > ${ARTIFACTS_DIR}/kyma-installer-cluster-compass.yaml
 
-    cp ${INSTALLER_COMPASS_CLUSTER_CR_PATH}  ${ARTIFACTS_DIR}/kyma-installer-cr.yaml
+    cp ${INSTALLER_COMPASS_CLUSTER_CR_PATH}  ${ARTIFACTS_DIR}/installer-cr-cluster-compass.yaml
 
 
     rm -rf ${TMP_COMPASS_CLUSTER_CR}
