@@ -16,9 +16,14 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: httpsources.sources.kyma-project.io
+  annotations:
+    "helm.sh/resource-policy": keep
   labels:
     eventing.knative.dev/source: 'true'
     kyma-project.io/crd-install: 'true'
+    app.kubernetes.io/managed-by: "Helm"
+    meta.helm.sh/release-name: "event-sources"
+    meta.helm.sh/release-namespace: "kyma-system"
 spec:
   group: sources.kyma-project.io
   scope: Namespaced
