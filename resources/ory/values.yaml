@@ -59,6 +59,11 @@ hydra:
     admin:
       enabled: false
   deployment:
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: "50%"
+        maxUnavailable: "0%"
     resources:
       limits:
         cpu: 100m
