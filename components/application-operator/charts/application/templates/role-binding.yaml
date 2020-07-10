@@ -7,7 +7,10 @@ metadata:
   labels:
     app: {{.Release.Name }}-application-gateway
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -17,7 +20,10 @@ metadata:
   labels:
     app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
 - apiGroups: ["*"]
   resources: ["secrets"]
@@ -31,8 +37,10 @@ metadata:
   labels:
     app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-subjects:
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}subjects:
 - kind: User
   name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-application-gateway
   apiGroup: rbac.authorization.k8s.io
@@ -49,7 +57,10 @@ metadata:
   labels:
     app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications"]
@@ -63,7 +74,10 @@ metadata:
   labels:
     app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
   - kind: User
     name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-application-gateway
@@ -82,7 +96,10 @@ metadata:
   labels:
     app: {{.Release.Name }}-event-service
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -92,7 +109,10 @@ metadata:
   labels:
     app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
 - apiGroups: [""]
   resources: ["namespaces"]
@@ -110,7 +130,10 @@ metadata:
   labels:
     app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
 - kind: User
   name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-event-service
@@ -128,7 +151,10 @@ metadata:
   labels:
     app: {{ .Release.Name }}-connectivity-validator
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications"]
@@ -142,7 +168,10 @@ metadata:
   labels:
     app: {{ .Release.Name }}-connectivity-validator
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
   - kind: User
     name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-connectivity-validator

@@ -6,6 +6,10 @@ metadata:
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   selector:
     matchLabels:
@@ -25,7 +29,7 @@ spec:
           ports:
             - containerPort: {{ .Values.compassRuntimeAgent.healthCheck.port }}
               name: http-health
-          image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.runtimeAgent.dir }}compass-runtime-agent:{{ .Values.global.images.runtimeAgent.version }}
+          image: {{ .Values.global.images.containerRegistry.path }}/compass-runtime-agent:{{ .Values.global.images.runtimeAgent.version }}
           imagePullPolicy: {{ .Values.compassRuntimeAgent.image.pullPolicy }}
           args:
             - "/compass-runtime-agent"
@@ -33,35 +37,35 @@ spec:
             - name: APP_AGENT_CONFIGURATION_SECRET
               value: "{{ .Values.compassRuntimeAgent.config.secret.namespace }}/{{ .Values.compassRuntimeAgent.config.secret.name }}"
             - name: APP_CONTROLLER_SYNC_PERIOD
-              value: "{{ .Values.compassRuntimeAgent.sync.controllerSyncPeriod }}"
+              value: {{ .Values.compassRuntimeAgent.sync.controllerSyncPeriod | quote }}
             - name: APP_MINIMAL_COMPASS_SYNC_TIME
-              value: "{{ .Values.compassRuntimeAgent.sync.minimalConfigSyncTime }}"
+              value: {{ .Values.compassRuntimeAgent.sync.minimalConfigSyncTime | quote }}
             - name: APP_CERT_VALIDITY_RENEWAL_THRESHOLD
-              value: "{{ .Values.compassRuntimeAgent.certificates.renewal.validityThreshold }}"
+              value: {{ .Values.compassRuntimeAgent.certificates.renewal.validityThreshold | quote }}
             - name: APP_CLUSTER_CERTIFICATES_SECRET
               value: "{{ .Values.compassRuntimeAgent.certificates.clientCertificate.secret.namespace }}/{{ .Values.compassRuntimeAgent.certificates.clientCertificate.secret.name }}"
             - name: APP_CA_CERTIFICATES_SECRET
               value: "{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.namespace }}/{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.name }}"
             - name: APP_SKIP_COMPASS_TLS_VERIFY
-              value: "{{ .Values.compassRuntimeAgent.compass.skipTLSVerification }}"
+              value: {{ .Values.compassRuntimeAgent.compass.skipTLSVerification | quote }}
             - name: APP_GATEWAY_PORT
-              value: "{{ .Values.compassRuntimeAgent.resources.gatewayPort }}"
+              value: {{ .Values.compassRuntimeAgent.resources.gatewayPort | quote }}
             - name: APP_UPLOAD_SERVICE_URL
-              value: "{{ .Values.compassRuntimeAgent.resources.uploadServiceUrl }}"
+              value: {{ .Values.compassRuntimeAgent.resources.uploadServiceUrl | quote }}
             - name: APP_QUERY_LOGGING
-              value: "{{ .Values.compassRuntimeAgent.debug.queryLogging }}"
+              value: {{ .Values.compassRuntimeAgent.debug.queryLogging | quote }}
             - name: APP_METRICS_LOGGING_TIME_INTERVAL
-              value: "{{ .Values.compassRuntimeAgent.metrics.loggingTimeInterval }}"
+              value: {{ .Values.compassRuntimeAgent.metrics.loggingTimeInterval | quote }}
             - name: APP_RUNTIME_EVENTS_URL
               value: "https://gateway.{{ .Values.global.ingress.domainName }}"
             - name: APP_RUNTIME_CONSOLE_URL
               value: "https://console.{{ .Values.global.ingress.domainName }}"
             - name: APP_DIRECTOR_PROXY_PORT
-              value: "{{ .Values.compassRuntimeAgent.director.proxy.port }}"
+              value: {{ .Values.compassRuntimeAgent.director.proxy.port | quote }}
             - name: APP_DIRECTOR_PROXY_INSECURE_SKIP_VERIFY
-              value: "{{ .Values.compassRuntimeAgent.director.proxy.insecureSkipVerify }}"
+              value: {{ .Values.compassRuntimeAgent.director.proxy.insecureSkipVerify | quote }}
             - name: APP_HEALTH_PORT
-              value: "{{ .Values.compassRuntimeAgent.healthCheck.port }}"
+              value: {{ .Values.compassRuntimeAgent.healthCheck.port | quote }}
           livenessProbe:
             httpGet:
               port: {{ .Values.compassRuntimeAgent.healthCheck.port }}

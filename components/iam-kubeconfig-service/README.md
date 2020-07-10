@@ -34,6 +34,7 @@ Use the following arguments to configure the application:
 | oidc-groups-claim | No | `groups` | Identifier of groups in JWT claim. |
 | oidc-username-prefix | No | None | If provided, all users will be prefixed with this value to prevent conflicts with other authentication strategies. |
 | oidc-groups-prefix | No | None | If provided, all groups will be prefixed with this value to prevent conflicts with other authentication strategies. |
+| log-level | No | info | Configures logging level. Allowed values: trace, debug, info, warn, error, fatal, panic |
 
 ### Run a local version
 
