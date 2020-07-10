@@ -1,35 +1,36 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: servicebindings.servicecatalog.k8s.io
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: serviceplans.servicecatalog.k8s.io
   labels:
     svcat: "true"
 spec:
   group: servicecatalog.k8s.io
-  version: v1beta1
   versions:
   - name: v1beta1
     storage: true
     served: true
   scope: Namespaced
   names:
-    plural: servicebindings
-    singular: servicebinding
-    kind: ServiceBinding
+    plural: serviceplans
+    singular: serviceplan
+    kind: ServicePlan
     # categories is a list of grouped resources the custom resource belongs to.
     categories:
       - all
       - svcat
   additionalPrinterColumns:
-    - name: Service-Instance
+    - name: External-Name
       type: string
-      JSONPath: .spec.instanceRef.name
-    - name: Secret-Name
+      JSONPath: .spec.externalName
+    - name: Broker
       type: string
-      JSONPath: .spec.secretName
-    - name: Status
+      JSONPath: .spec.serviceBrokerName
+    - name: Class
       type: string
-      JSONPath: .status.lastConditionState
+      JSONPath: .spec.serviceClassRef.name
     - name: Age
       type: date
       JSONPath: .metadata.creationTimestamp
