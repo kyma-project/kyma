@@ -23,9 +23,8 @@ spec:
             - -c
             - |
               set -ex
-              kubectl delete pod -n kyma-system -l "app.kubernetes.io/name=hydra"
-              while [[ $(kubectl get pods -n kyma-system -l "app.kubernetes.io/name=hydra" -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') =~ "False" ]]; do 
-                sleep 10
-              done
-              kubectl delete pod -n kyma-system -l "app.kubernetes.io/name=hydra-maester"
+              HYDRA_DEPLOY=$(kubectl get deploy -n kyma-system -l "app.kubernetes.io/name=hydra" -o name)
+              kubectl set env -n {{ .Release.Namespace }} ${HYDRA_DEPLOY} sync=$(date +%Y%m%d)
+              kubectl rollout status -n {{ .Release.Namespace }} ${HYDRA_DEPLOY}
+              kubectl delete pod -n {{ .Release.Namespace }} -l "app.kubernetes.io/name=hydra-maester"
       restartPolicy: OnFailure
