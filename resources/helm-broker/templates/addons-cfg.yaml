@@ -1,0 +1,26 @@
+apiVersion: addons.kyma-project.io/v1alpha1
+kind: ClusterAddonsConfiguration
+metadata:
+  name: {{ .Values.defaultAddonsRepository.name | quote }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    addons.kyma-project.io/managed: "true"
+spec:
+  repositories:
+  - url: {{ .Values.defaultAddonsRepository.url | quote }}
+
+{{- range $repository := .Values.additionalAddonsRepositories }}
+---
+apiVersion: addons.kyma-project.io/v1alpha1
+kind: ClusterAddonsConfiguration
+metadata:
+  name: {{ $repository.name | quote }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ $.Chart.Name }}-{{ $.Chart.Version }}"
+    addons.kyma-project.io/managed: "true"
+spec:
+  repositories:
+  - url: {{ $repository.url | quote }}
+{{- end }}

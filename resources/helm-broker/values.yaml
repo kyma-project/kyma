@@ -36,7 +36,17 @@ broker:
   statusPort: 8071
   metricsPort: 8072
 
-defautlAddonsURL: "https://github.com/kyma-project/addons/releases/download/0.12.0/index.yaml"
+defaultAddonsRepository:
+  name: helm-repos-urls
+  url: "https://github.com/kyma-project/addons/releases/download/0.12.0/index.yaml"
+
+# List of additional addons repositories to configure
+# additionalAddonsRepositories:
+#   - name: mRepo1
+#     url: "github.com/myOrg/myRepo//addons/index.yaml?ref=0.x.0"
+#   - name: myRepo2
+#     url: "https://github.com/myOrg/myRepo/releases/download/0.x.0/index.yaml"
+additionalAddonsRepositories: {}
 
 global:
   containerRegistry:
