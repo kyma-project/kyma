@@ -46,6 +46,6 @@ func catchInterrupt() {
 	go func() {
 		<-c
 		deleteNamespace()
-		os.Exit(2)
+		os.Exit(1)
 	}()
 }

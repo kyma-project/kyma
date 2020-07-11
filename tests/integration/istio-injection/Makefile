@@ -8,7 +8,3 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 # test target is overriden, so it won't run actual tests
 test:
 	@echo -n ""
-
-.PHONY: path-to-referenced-charts
-path-to-referenced-charts:
-	@echo "resources/core"

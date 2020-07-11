@@ -7,7 +7,7 @@ WORKDIR ${SRC_DIR}
 #
 # Copy files
 #
-
+COPY ./licenses/ ${BASE_DIR}/licenses/
 COPY ./istioinjection ${SRC_DIR}/istioinjection/
 COPY ./vendor ${SRC_DIR}/vendor/
 
@@ -18,7 +18,7 @@ COPY ./vendor ${SRC_DIR}/vendor/
 RUN CGO_ENABLED=0 go test -c ./istioinjection/ -o /istioinjection.test
 RUN mkdir /test && mv /istioinjection.test /test/istioinjection.test
 
-FROM alpine:3.10
+FROM alpine:3.11.6
 
 LABEL source = git@github.com:kyma-project/kyma.git
 
