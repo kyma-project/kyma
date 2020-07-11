@@ -22,28 +22,28 @@ import (
 const HTTPDBSERVICE_IMAGE = "eu.gcr.io/kyma-project/example/http-db-service:0.0.6"
 
 func createNamespace() error {
-	log.Infof("Creating namespace '%s", namespace)
-	_, err := k8sClient.CoreV1().Namespaces().Create(&v1.Namespace{
+	log.Infof("Creating namespace '%s", testSuite.namespace)
+	_, err := testSuite.k8sClient.CoreV1().Namespaces().Create(&v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: namespace,
+			Name: testSuite.namespace,
 		},
 		Spec: v1.NamespaceSpec{},
 	})
 	if err != nil {
-		log.Errorf("Cannot create namespace '%s': %v", namespace, err)
+		log.Errorf("Cannot create namespace '%s': %v", testSuite.namespace, err)
 		return err
 	}
 	return nil
 }
 
 func deleteNamespace() {
-	log.Infof("Deleting namespace '%s", namespace)
+	log.Infof("Deleting namespace '%s", testSuite.namespace)
 	var deleteImmediately int64
-	err := k8sClient.CoreV1().Namespaces().Delete(namespace, &metav1.DeleteOptions{
+	err := testSuite.k8sClient.CoreV1().Namespaces().Delete(testSuite.namespace, &metav1.DeleteOptions{
 		GracePeriodSeconds: &deleteImmediately,
 	})
 	if err != nil {
-		log.Errorf("I have run the tests, but haven't cleaned up '%s': %v", namespace, err)
+		log.Errorf("I have run the tests, but haven't cleaned up '%s': %v", testSuite.namespace, err)
 	}
 }
 
@@ -66,9 +66,9 @@ func loadKubeConfigOrDie() *rest.Config {
 }
 
 func disableInjectionForNamespace(disable bool) {
-	ns, err := k8sClient.CoreV1().Namespaces().Get(namespace, metav1.GetOptions{})
+	ns, err := testSuite.k8sClient.CoreV1().Namespaces().Get(testSuite.namespace, metav1.GetOptions{})
 	if err != nil {
-		log.Errorf("Cannot get namespace '%s': %v", namespace, err)
+		log.Errorf("Cannot get namespace '%s': %v", testSuite.namespace, err)
 	}
 	if disable {
 		ns.ObjectMeta.Labels = map[string]string{
@@ -77,9 +77,9 @@ func disableInjectionForNamespace(disable bool) {
 	} else {
 		ns.ObjectMeta.Labels = map[string]string{}
 	}
-	_, err = k8sClient.CoreV1().Namespaces().Update(ns)
+	_, err = testSuite.k8sClient.CoreV1().Namespaces().Update(ns)
 	if err != nil {
-		log.Errorf("Cannot update namespace '%s': %v", namespace, err)
+		log.Errorf("Cannot update namespace '%s': %v", testSuite.namespace, err)
 	}
 }
 
@@ -95,7 +95,7 @@ func createDeployment(name string, disableSidecarInjection bool) (*appv1.Deploym
 	deployment := &appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: namespace,
+			Namespace: testSuite.namespace,
 			Labels:    labels,
 		},
 		Spec: appv1.DeploymentSpec{
@@ -125,7 +125,7 @@ func createDeployment(name string, disableSidecarInjection bool) (*appv1.Deploym
 			},
 		},
 	}
-	return k8sClient.AppsV1().Deployments(namespace).Create(deployment)
+	return testSuite.k8sClient.AppsV1().Deployments(testSuite.namespace).Create(deployment)
 }
 
 func getPods(appLabelValue string) (*v1.PodList, error) {
@@ -134,7 +134,7 @@ func getPods(appLabelValue string) (*v1.PodList, error) {
 
 	err = retry.Do(func() error {
 		// check if Pod list is empty, if it is, retry
-		pods, err = k8sClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app=" + appLabelValue})
+		pods, err = testSuite.k8sClient.CoreV1().Pods(testSuite.namespace).List(metav1.ListOptions{LabelSelector: "app=" + appLabelValue})
 		if err != nil {
 			return errors.Errorf("Cannot list the pods with label '%s': %v", appLabelValue, err)
 		}
@@ -154,12 +154,12 @@ func deleteDeployment(name string) {
 
 	err := retry.Do(func() error {
 		// Retry if deployment is not deleted
-		err := k8sClient.AppsV1().Deployments(namespace).Delete(name, &metav1.DeleteOptions{})
+		err := testSuite.k8sClient.AppsV1().Deployments(testSuite.namespace).Delete(name, &metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}
 
-		_, err = k8sClient.AppsV1().Deployments(namespace).Get(name, metav1.GetOptions{})
+		_, err = testSuite.k8sClient.AppsV1().Deployments(testSuite.namespace).Get(name, metav1.GetOptions{})
 		if err != nil && k8sErrors.IsNotFound(err) {
 			return nil
 		}
