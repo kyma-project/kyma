@@ -419,7 +419,7 @@ EOF
 
 ### Trigger installation
 
-Trigger Kyma installation or update by labeling the Installation custom resource. Run:
+Trigger Kyma installation or update it by labeling the Installation custom resource. Run:
 
 ```bash
 kubectl -n default label installation/kyma-installation action=install

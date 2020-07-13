@@ -1,7 +1,6 @@
 ---
 name: Bug report
 about: Report a bug in the project
-labels: bug
 ---
 
 <!-- Thank you for your contribution. Before you submit the issue:

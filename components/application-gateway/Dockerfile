@@ -1,4 +1,4 @@
-FROM golang:1.10-alpine as builder
+FROM golang:1.14-alpine as builder
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/application-gateway
 
@@ -16,7 +16,7 @@ FROM scratch
 LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-gateway .
+COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-gateway/applicationgateway .
 COPY --from=builder /app/licenses /app/licenses
 
 CMD ["/applicationgateway"]

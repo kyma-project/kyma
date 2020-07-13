@@ -27,6 +27,7 @@ const (
 	apiserverURLFlag  = "kube-config-url"
 	clusterCAFileFlag = "kube-config-ca-file"
 	oidcCAFileFlag    = "oidc-ca-file"
+	logLevelFlag      = "log-level"
 )
 
 func main() {
@@ -104,6 +105,7 @@ func readAppConfig() *appConfig {
 	oidcUsernamePrefixArg := flag.String("oidc-username-prefix", "", "OIDC: If provided, all users will be prefixed with this value to prevent conflicts with other authentication strategies")
 	oidcGroupsPrefixArg := flag.String("oidc-groups-prefix", "", "OIDC: If provided, all groups will be prefixed with this value to prevent conflicts with other authentication strategies")
 	oidcCAFileArg := flag.String(oidcCAFileFlag, "", "File with Certificate Authority of the Kubernetes cluster, also used for OIDC authentication")
+	logLevelArg := flag.String(logLevelFlag, "info", "Log level (trace, debug, info, warning, error, fatal and panic)")
 
 	var oidcSupportedSigningAlgsArg multiValFlag = []string{}
 	flag.Var(&oidcSupportedSigningAlgsArg, "oidc-supported-signing-algs", "OIDC supported signing algorithms")
@@ -140,6 +142,14 @@ func readAppConfig() *appConfig {
 	if errors {
 		flag.Usage()
 		os.Exit(1)
+	}
+
+	logLevel, err := log.ParseLevel(*logLevelArg)
+	if err == nil {
+		log.SetLevel(logLevel)
+	} else {
+		log.Error(err, ". Defaulting to \"info\"")
+		log.SetLevel(log.InfoLevel)
 	}
 
 	if len(oidcSupportedSigningAlgsArg) == 0 {

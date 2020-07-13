@@ -36,9 +36,8 @@ spec:
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
       containers:
-      {{- if .Values.controllerManager.healthcheck.enabled }}
       - name: healthcheck
-        image: eu.gcr.io/kyma-project/develop/service-catalog/health-proxy:0.0.1
+        image: eu.gcr.io/kyma-project/develop/service-catalog/health-proxy:0.0.2
         env:
           - name: PROXY_TARGET_URL
             value: "https://localhost:8444/"
@@ -53,7 +52,6 @@ spec:
           periodSeconds: 300
           successThreshold: 1
           timeoutSeconds: 5
-    {{- end }}
       - name: controller-manager
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
