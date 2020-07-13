@@ -95,7 +95,7 @@ When you run the test, these actions are performed in the order listed:
 
 ## Run the test locally
 
-Currently, the test cannot be executed locally, as it requires access to cluster internal resources. To build and run the test using Octopus, execute:
+Currently, the test cannot be executed locally, as it requires access to internal cluster resources. To build and run the test using Octopus, execute:
 `make clustertest`
 
 >**Requirements:** 
