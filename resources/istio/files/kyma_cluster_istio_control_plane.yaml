@@ -348,7 +348,7 @@ spec:
       certificates: []
       operatorManageWebhooks: false
       controlPlaneSecurityEnabled: true
-      disablePolicyChecks: false
+      disablePolicyChecks: true
       policyCheckFailOpen: false
       enableTracing: true
       tracer:
