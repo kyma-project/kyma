@@ -180,6 +180,7 @@ func fixNavigationNode(t *testing.T) v1alpha1.NavigationNode {
 				APIGroup: "apigroup",
 			},
 		},
+		viewGroup: "test-view-group",
 	}
 }
 

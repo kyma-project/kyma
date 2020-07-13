@@ -32,6 +32,7 @@ func (c *navigationNodeConverter) ToGQL(in *uiV1alpha1v.NavigationNode) (*gqlsch
 		Settings:            settingsGqlJSON,
 		ExternalLink:        &in.ExternalLink,
 		RequiredPermissions: requiredPermissions,
+		ViewGroup:           &in.ViewGroup,
 	}
 
 	return &navigationNode, nil

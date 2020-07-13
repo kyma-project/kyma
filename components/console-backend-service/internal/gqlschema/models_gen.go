@@ -431,6 +431,7 @@ type NavigationNode struct {
 	Settings            Settings              `json:"settings"`
 	ExternalLink        *string               `json:"externalLink"`
 	RequiredPermissions []*RequiredPermission `json:"requiredPermissions"`
+	ViewGroup           *string               `json:"viewGroup"`
 }
 
 type OwnerReference struct {

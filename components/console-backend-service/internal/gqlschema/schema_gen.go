@@ -609,6 +609,7 @@ type ComplexityRoot struct {
 		RequiredPermissions func(childComplexity int) int
 		Settings            func(childComplexity int) int
 		ShowInNavigation    func(childComplexity int) int
+		ViewGroup           func(childComplexity int) int
 		ViewURL             func(childComplexity int) int
 	}
 
@@ -3801,6 +3802,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.NavigationNode.ShowInNavigation(childComplexity), true
 
+	case "NavigationNode.viewGroup":
+		if e.complexity.NavigationNode.ViewGroup == nil {
+			break
+		}
+
+		return e.complexity.NavigationNode.ViewGroup(childComplexity), true
+
 	case "NavigationNode.viewUrl":
 		if e.complexity.NavigationNode.ViewURL == nil {
 			break
@@ -6005,11 +6013,6 @@ type APIRuleAccessStrategy @goModel(model: "github.com/ory/oathkeeper-maester/ap
     config: Extension
 }
 
-#input APIRuleAccessStrategyInput @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRuleAccessStrategyInput") {
-#    name: String!
-#    config: Extension!
-#}
-
 type APIRuleStatuses @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleStatus") {
     apiRuleStatus: APIRuleStatus
     accessRuleStatus: APIRuleStatus
@@ -6907,6 +6910,7 @@ type NavigationNode {
     settings: Settings!
     externalLink: String
     requiredPermissions: [RequiredPermission!]!
+    viewGroup: String
 }
 
 type RequiredPermission {
@@ -22760,6 +22764,37 @@ func (ec *executionContext) _NavigationNode_requiredPermissions(ctx context.Cont
 	return ec.marshalNRequiredPermission2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRequiredPermissionᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _NavigationNode_viewGroup(ctx context.Context, field graphql.CollectedField, obj *NavigationNode) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "NavigationNode",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ViewGroup, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Pod_name(ctx context.Context, field graphql.CollectedField, obj *Pod) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -38464,6 +38499,8 @@ func (ec *executionContext) _NavigationNode(ctx context.Context, sel ast.Selecti
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "viewGroup":
+			out.Values[i] = ec._NavigationNode_viewGroup(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

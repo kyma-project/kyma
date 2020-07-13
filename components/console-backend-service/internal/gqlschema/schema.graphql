@@ -858,6 +858,7 @@ type NavigationNode {
     settings: Settings!
     externalLink: String
     requiredPermissions: [RequiredPermission!]!
+    viewGroup: String
 }
 
 type RequiredPermission {
