@@ -13,7 +13,13 @@ rules:
     verbs: ["list", "delete"]
   - apiGroups: ["apps"]
     resources: ["deployments"]
+    verbs: ["list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
     verbs: ["list", "patch", "get", "watch"]
+    resourceNames: 
+      - {{ include "hydra-maester.fullname" . }}
+      - {{ include "hydra-maester.getHydraName" . }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

@@ -46,14 +46,22 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 
 
 {{/*
-Get Hydra admin service name
+Get Hydra name
 */}}
-{{- define "hydra-maester.adminService" -}}
+{{- define "hydra-maester.getHydraName" -}}
 {{- $fullName := include "hydra-maester.fullname" . -}}
 {{- $nameParts := split "-" $fullName }}
 {{- if eq $nameParts._0 $nameParts._1 -}}
-{{- printf "%s-admin" $nameParts._0 | trimSuffix "-" -}}
+{{- printf "%s" $nameParts._0 | trimSuffix "-" -}}
 {{- else -}}
-{{- printf "%s-%s-admin" $nameParts._0 $nameParts._1 | trimSuffix "-" -}}
+{{- printf "%s-%s" $nameParts._0 $nameParts._1 | trimSuffix "-" -}}
 {{- end -}}
+{{- end -}}
+
+{{/*
+Get Hydra admin service name
+*/}}
+{{- define "hydra-maester.adminService" -}}
+{{ $hydra := include "hydra-maester.getHydraName" . }}
+{{- printf "%s-admin" $hydra -}}
 {{- end -}}
