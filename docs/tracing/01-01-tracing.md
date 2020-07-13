@@ -6,4 +6,4 @@ The microservice architecture differs from the traditional monoliths in many asp
 
 Tracing in Kyma uses [Jaeger](https://www.jaegertracing.io/docs/) as a backend which serves as the query mechanism for displaying information about traces.
 
->**CAUTION:** Jaeger is designed for application tracing. Do not send any sensitive information on the traces, such as passwords or credit card numbers.
+>**CAUTION:** Jaeger is designed for application tracing. Traces should not carry sensitive information, such as passwords or credit card numbers.
