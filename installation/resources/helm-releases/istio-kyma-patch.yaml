@@ -10,7 +10,4 @@ spec:
     path: resources/istio-kyma-patch
     ref: helm-operator
   releaseName: istio-kyma-patch
-  values:
-    global:
-      isLocalEnv: false
   targetNamespace: istio-system

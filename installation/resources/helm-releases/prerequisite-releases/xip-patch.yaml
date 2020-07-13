@@ -9,7 +9,4 @@ spec:
     path: resources/xip-patch
     ref: helm-operator  
   releaseName: xip-patch
-  values:
-    global:
-      isLocalEnv: false
   targetNamespace: kyma-installer

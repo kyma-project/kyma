@@ -14,6 +14,3 @@ spec:
       name: net-global-overrides-transformed
       namespace: kyma-installer
       key: overrides.yaml
-  values:
-    global:
-      isLocalEnv: false

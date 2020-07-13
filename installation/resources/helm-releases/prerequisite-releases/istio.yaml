@@ -9,7 +9,4 @@ spec:
     path: resources/istio
     ref: helm-operator
   releaseName: istio
-  values:
-    global:
-      isLocalEnv: false
   targetNamespace: istio-system

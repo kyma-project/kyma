@@ -33,7 +33,4 @@ spec:
   # - configMapKeyRef:
   #     name: net-global-overrides
   #     namespace: kyma-installer
-  #     key: global.ingress.tlsKey            
-  values:
-    global:
-      isLocalEnv: false  
+  #     key: global.ingress.tlsKey
