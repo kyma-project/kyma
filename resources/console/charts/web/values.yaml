@@ -15,20 +15,10 @@ cluster:
     istio-system knative-eventing knative-serving kube-public kube-system
     kyma-installer kyma-integration kyma-system natss compass-system kube-node-lease
     kubernetes-dashboard
-compass_mfs:
-  image:
-    dir: null
-    pullPolicy: IfNotPresent
-    tag: e0146b08
-  service:
-    externalPort: 8888
-    internalPort: 8888
-    name: nginx
-  statusPort: 6082
 console:
   image:
     pullPolicy: IfNotPresent
-    tag: "de7b06b8"
+    tag: 165d891f
   service:
     externalPort: 80
     internalPort: 8080
@@ -37,7 +27,7 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: 206d3dbc
+    tag: 165d891f
   service:
     externalPort: 80
     internalPort: 80

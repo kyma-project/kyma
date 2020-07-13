@@ -47,8 +47,8 @@
                 },
                 "verbosity": {
                     "description": "Defines log severity level. The possible values range from 0-10.",
-                    "default": 10,
-                    "type": "number"
+                    "default": "10",
+                    "type": "string"
                 }
             }
         },
@@ -96,8 +96,8 @@
                 },
                 "verbosity": {
                     "description": "Defines log severity level. The possible values range from 0-10.",
-                    "default": 10,
-                    "type": "number"
+                    "default": "10",
+                    "type": "string"
                 },
                 "brokerRelistIntervalActivated": {
                     "description": "Specifies whether or not the controller supports a --broker-relist-interval flag. If this is set to true, brokerRelistInterval will be used as the value for that flag.",

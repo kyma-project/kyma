@@ -57,7 +57,7 @@ func (r *FunctionReconciler) updateConfigMap(ctx context.Context, log logr.Logge
 }
 
 func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Function, configMaps []corev1.ConfigMap, deployments []appsv1.Deployment) bool {
-	image := r.buildExternalImageAddress(instance)
+	image := r.buildImageAddress(instance)
 	configurationStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)
 
 	if len(deployments) == 1 &&

@@ -62,5 +62,5 @@ controller:
 
 test:
   dir: ''
-  version: 4d20063e
+  version: d4372526
   enabled: true

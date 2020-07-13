@@ -12,20 +12,22 @@ Serverless relies heavily on Kubernetes resources. It uses [Deployments](https:/
 
    > **NOTE:** Function Controller sets the Node.js 12 runtime by default.
 
-1. Before the Function can be saved or modified, it is first updated and then verified by the [defaulting and validation webhooks](#details-supported-webhooks) respectively.
+2. Before the Function can be saved or modified, it is first updated and then verified by the [defaulting and validation webhooks](#details-supported-webhooks) respectively.
 
-1. Function Controller (FC) detects the new, validated Function CR.
+3. Function Controller (FC) detects the new, validated Function CR.
 
-1. FC creates a ConfigMap with the Function definition.
+4. FC creates a ConfigMap with the Function definition.
 
-1. Based on the ConfigMap, FC creates a Kubernetes Job that triggers the creation of a Function image.
+5. Based on the ConfigMap, FC creates a Kubernetes Job that triggers the creation of a Function image.
 
-1. The Job creates a Pod which builds the production Docker image based on the Function's definition. The Job then pushes this image to a Docker registry.
+6. The Job creates a Pod which builds the production Docker image based on the Function's definition. The Job then pushes this image to a Docker registry.
 
-1. FC monitors the Job status. When the image creation finishes successfully, FC creates a Deployment that uses the newly built image.
+    > **NOTE:** Serverless offers a built-in internal Docker registry that is suitable for local development. For production purposes, switch to an [external Docker registry](#tutorials-set-an-external-docker-registry).
 
-1. FC creates a Service that points to the Deployment.
+7. FC monitors the Job status. When the image creation finishes successfully, FC creates a Deployment that uses the newly built image.
 
-1. FC creates a HorizontalPodAutoscaler that automatically scales the number of Pods in the Deployment based on the observed CPU utilization.
+8. FC creates a Service that points to the Deployment.
 
-1. FC waits for the Deployment to become ready.
+9. FC creates a HorizontalPodAutoscaler that automatically scales the number of Pods in the Deployment based on the observed CPU utilization.
+
+10. FC waits for the Deployment to become ready.

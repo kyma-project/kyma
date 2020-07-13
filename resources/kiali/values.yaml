@@ -15,7 +15,7 @@ global:
   alpine_net:
     name: alpine-net
     dir:
-    version: "2fbe4fd3"
+    version: "fab13c7c"
 
 kcproxy:
   replicaCount: 1
@@ -25,7 +25,7 @@ kcproxy:
   nodeSelector: {}
   image:
     repository: bitnami/keycloak-gatekeeper
-    tag: 9.0.3
+    tag: 10.0.0
     pullPolicy: IfNotPresent
   resources:
     limits:
@@ -39,7 +39,7 @@ kiali:
   operator:
     image:
       repository: eu.gcr.io/kyma-project/incubator/develop/kiali-operator
-      tag: 1.18.0-cf9593a2
+      tag: 1.20.0-88d8fada
       pullPolicy: IfNotPresent
     resources:
       limits:
@@ -270,7 +270,7 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-      image_version: "1.18.1-51638f19"
+      image_version: "1.20.0-88d8fada"
     #
     # Determines if the Kiali endpoint should be exposed externally.
     # If true, an Ingress will be created if on Kubernetes or a Route if on OpenShift.

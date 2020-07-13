@@ -11,7 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: 7e73540b
+    version: 04ed8025
     tests:
       enabled: true
 
@@ -294,8 +294,8 @@ alertmanager:
     ## Image of Alertmanager
     ##
     image:
-      repository: quay.io/prometheus/alertmanager
-      tag: v0.20.0
+      repository: eu.gcr.io/kyma-project/external/quay.io/prometheus/alertmanager
+      tag: v0.21.0
 
     ## If true then the user will be responsible to provide a secret with alertmanager configuration
     ## So when true the config part will be ignored (including templateFiles) and the one in the secret will be used
@@ -512,12 +512,19 @@ grafana:
   #   readOnly: true
 
   ## Configure additional grafana datasources
-  ## ref: http://docs.grafana.org/administration/provisioning/#datasources
+  ## ref: https://grafana.com/docs/grafana/latest/features/datasources/
   additionalDataSources:
     - name: Loki
       type: loki
       access: proxy
-      url: http://logging-loki:3100
+      url: http://logging-loki.kyma-system:3100
+      editable: true
+      jsonData:
+        maxLines: 1000
+    - name: Jaeger
+      type: jaeger
+      access: proxy
+      url: http://tracing-jaeger-query.kyma-system:16686
       editable: true
   # - name: prometheus-sample
   #   access: proxy
@@ -1222,20 +1229,20 @@ prometheusOperator:
   ## Prometheus-operator image
   ##
   image:
-    repository: quay.io/coreos/prometheus-operator
+    repository: eu.gcr.io/kyma-project/external/quay.io/coreos/prometheus-operator
     tag: v0.38.0
     pullPolicy: IfNotPresent
 
   ## Configmap-reload image to use for reloading configmaps
   ##
   configmapReloadImage:
-    repository: quay.io/coreos/configmap-reload
+    repository: eu.gcr.io/kyma-project/external/quay.io/coreos/configmap-reload
     tag: v0.0.1
 
   ## Prometheus-config-reloader image to use for config and rule reloading
   ##
   prometheusConfigReloaderImage:
-    repository: quay.io/coreos/prometheus-config-reloader
+    repository: eu.gcr.io/kyma-project/external/quay.io/coreos/prometheus-config-reloader
     tag: v0.38.0
 
   ## Set the prometheus config reloader side-car CPU limit
@@ -1460,7 +1467,7 @@ prometheus:
     ## Image of Prometheus.
     ##
     image:
-      repository: quay.io/prometheus/prometheus
+      repository: eu.gcr.io/kyma-project/external/quay.io/prometheus/prometheus
       tag: v2.17.1
 
     ## Tolerations for use with node taints

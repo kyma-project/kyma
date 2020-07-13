@@ -4,7 +4,9 @@ type: Installation
 ---
 
 When you install Kyma from a release, you use the release artifacts that already contain the Kyma Installer - a Docker image containing the combined binary of the Kyma Operator and the component charts from the `/resources` folder.
-If you install Kyma from sources and use the latest `master` branch, you must build the image yourself to prepare the configuration file for Kyma installation on a GKE or AKS cluster. You also require a new image if you add components and custom Helm charts that are not included in the `/resources` folder to the installation.
+If you  want to install Kyma from sources, you must build the image yourself. You also require a new image if you add components and custom Helm charts that are not included in the `/resources` folder to the installation.
+
+Alternatively, you can also install Kyma from the latest master or any previous master commit using Kyma CLI. See different [installation source options](https://github.com/kyma-project/cli/blob/master/docs/gen-docs/kyma_install.md#options).
 
 In addition to the tools required to install Kyma on a cluster, you also need:
 
@@ -49,31 +51,8 @@ In addition to the tools required to install Kyma on a cluster, you also need:
    docker push {YOUR_DOCKER_LOGIN}/kyma-installer
    ```
 
-4. Prepare the Kyma deployment file. Run this command:
+4. Install Kyma using your image. Run this command:
 
    ```bash
-   (cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) > my-kyma.yaml
+   kyma install -s {YOUR_DOCKER_LOGIN}/kyma-installer
    ```
-
-5. The output of this operation is the `my-kyma.yaml` file.
-Find the following section in `my-kyma.yaml` and modify it to fetch the image you prepared. Change the `image` attribute value to `{YOUR_DOCKER_LOGIN}/kyma-installer`:
-
-   ```yaml
-   spec:
-     template:
-       metadata:
-         labels:
-           name: kyma-installer
-       spec:
-         serviceAccountName: kyma-installer
-         containers:
-         - name: kyma-installer-container
-           image: {YOUR_DOCKER_LOGIN}/kyma-installer
-           imagePullPolicy: IfNotPresent
-   ```
-
-6. Use the `my-kyma.yaml` file to deploy Kyma. Choose the desired [installation option](#installation-overview) and run this command after you prepared the cluster:
-
-    ```bash
-    kubectl apply -f my-kyma.yaml
-    ```

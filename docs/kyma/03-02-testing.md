@@ -6,10 +6,12 @@ type: Details
 Kyma components use [Octopus](http://github.com/kyma-incubator/octopus) for testing.
 Octopus is a testing framework that allows you to run tests defined as Docker images on a running cluster.
 Octopus uses two CustomResourceDefinitions (CRDs):
+
 - TestDefinition, which defines your test as a Pod specification.
 - ClusterTestSuite, which defines a suite of tests to execute and how to execute them.
 
 ## Add a new test
+
 To add a new test, create a `yaml` file with TestDefinition CR in your chart. To comply with the convention, place it under the `tests` directory.
 See the exemplary chart structure for Dex:
 
@@ -69,68 +71,38 @@ spec:
 ```
 
 ## Tests execution
-To run all tests, use the `testing.sh` script located in the `/installation/scripts/` directory.
+
+To run all tests deployed on a Kyma cluster using [Kyma CLI](https://github.com/kyma-project/cli), run:
+
+```bash
+kyma test run
+```
+
+>**WARNING:** The `kubeconfig` file downloaded from UI does not grant enough privileges to run a test using Kyma CLI. Instead, use the `kubeconfig` file from the cloud provider.
+
 Internally, the ClusterTestSuite resource is defined. It fetches all TestDefinitions and executes them.
 
 ### Run tests manually
-To run tests manually, create your own ClusterTestSuite resource. See the following example:
+To run tests manually, you can pass test names to Kyma CLI explicitly. To list all the deployed TestDefinition sets, run:
 
-```yaml
-apiVersion: testing.kyma-project.io/v1alpha1
-kind: ClusterTestSuite
-metadata:
-  labels:
-    controller-tools.k8s.io: "1.0"
-  name: {my-suite}
-spec:
-  maxRetries: 0
-  concurrency: 1
-  count: 1
-```
-
-Creation of the suite triggers tests execution. See the current tests progress in the ClusterTestSuite status. Run:
 ```bash
- kubectl get cts {my-suite} -oyaml
- ```
-
-The sample output looks as follows:
+kyma test definitions
 ```
-apiVersion: testing.kyma-project.io/v1alpha1
-kind: ClusterTestSuite
-metadata:
-  name: {my-suite}
-spec:
-  concurrency: 1
-  count: 1
-  maxRetries: 0
-status:
-  conditions:
-  - status: "True"
-    type: Running
-  results:
-  - executions:
-    - completionTime: 2019-04-05T12:23:00Z
-      id: {my-suite}-test-dex-dex-connection-dex-0
-      podPhase: Succeeded
-      startTime: 2019-04-05T12:22:54Z
-    name: test-dex-dex-connection-dex
-    namespace: kyma-system
-    status: Succeeded
-  - executions:
-    - id: {my-suite}-test-core-core-ui-acceptance-0
-      podPhase: Running
-      startTime: 2019-04-05T12:37:53Z
-    name: test-core-core-ui-acceptance
-    namespace: kyma-system
-    status: Running
-  - executions: []
-    name: test-core-api-controller-0
-    namespace: kyma-system
-    status: NotYetScheduled
-  startTime: 2019-04-05T12:22:53Z
+
+Then, run only the desired tests by passing the TestDefinition names:
+
+```bash
+kyma test run <test-definition-1> <test-definition-2> ...
+```
+
+See the current tests progress in the ClusterTestSuite status. Run:
+
+```bash
+kyma test status
 ```
 
 The ID of the test execution is the same as the ID of the testing Pod. The testing Pod is created in the same Namespace as its TestDefinition. To get logs for a specific test, run the following command:
-```
-kubectl logs {execution-id} -n {test-def-namespace}
+
+```bash
+kyma test logs <test-suite-1> <test-suite-2> ...
 ```

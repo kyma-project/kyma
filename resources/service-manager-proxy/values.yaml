@@ -31,7 +31,7 @@ file:
 image:
   pullPolicy: IfNotPresent
   pullsecret: null
-  repository: quay.io/service-manager/sb-proxy-k8s
+  repository: eu.gcr.io/kyma-project/external/quay.io/service-manager/sb-proxy-k8s
   tag: v0.8.4
 replicaCount: 1
 securityContext: {}

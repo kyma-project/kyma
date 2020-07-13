@@ -19,8 +19,7 @@ if [[ $(kubectl get -n kube-system deploy tiller-deploy -o name) ]]; then
         kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.tls\\.crt']}" | base64 --decode > "$(helm home)/cert.pem"
         kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.tls\\.key']}" | base64 --decode > "$(helm home)/key.pem"
     else
-        echo "------> No HELM_2 Certs found, failing"
-        exit 1
+        exit 0
     fi
 else
     echo "------> No Tiller deployment found, exiting gracefully"

@@ -13,7 +13,6 @@ import (
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -54,6 +53,9 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	c, err := graphql.New()
 	require.NoError(t, err)
 
+	k8sClient, _, err := client.NewClientWithConfig()
+	require.NoError(t, err)
+
 	svcatCli, _, err := client.NewServiceCatalogClientWithConfig()
 	require.NoError(t, err)
 
@@ -74,6 +76,9 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	err = wait.ForServiceInstanceReady(instance.Name, instance.Namespace, svcatCli)
+	if err != nil {
+		shared.LogReport(instance.Name, instance.Namespace, svcatCli, k8sClient)
+	}
 	require.NoError(t, err)
 
 	t.Log("Create Binding")
@@ -144,6 +149,9 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 
 	t.Log("Wait for instance deletion")
 	err = wait.ForServiceInstanceDeletion(instance.Name, instance.Namespace, svcatCli)
+	if err != nil {
+		shared.LogReport(instance.Name, instance.Namespace, svcatCli, k8sClient)
+	}
 	assert.NoError(t, err)
 
 	t.Log("Checking authorization directives...")
