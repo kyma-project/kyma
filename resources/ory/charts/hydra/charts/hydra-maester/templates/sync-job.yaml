@@ -23,8 +23,13 @@ spec:
             - -c
             - |
               set -ex
-              HYDRA_DEPLOY=$(kubectl get deploy -n kyma-system -l "app.kubernetes.io/name=hydra" -o name)
-              kubectl set env -n {{ .Release.Namespace }} ${HYDRA_DEPLOY} sync=$(date +%Y%m%d)
-              kubectl rollout status -n {{ .Release.Namespace }} ${HYDRA_DEPLOY}
-              kubectl delete pod -n {{ .Release.Namespace }} -l "app.kubernetes.io/name=hydra-maester"
+              DEPLOYMENTS=( 
+                $(kubectl get deploy -n {{ .Release.Namespace }} -l "app.kubernetes.io/name=hydra" -o name) 
+                $(kubectl get deploy -n {{ .Release.Namespace }} -l "app.kubernetes.io/name=hydra-maester" -o name) 
+              )
+
+              for deploy in "${DEPLOYMENTS[@]}"; do
+                kubectl set env -n {{ .Release.Namespace }} ${deploy} sync=$(date "+%Y%m%d-%H%M%S")
+                  kubectl rollout status -n {{ .Release.Namespace }} ${deploy}
+              done
       restartPolicy: OnFailure
