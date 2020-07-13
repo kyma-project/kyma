@@ -7,6 +7,8 @@ webhook:
   verbosity: 6
   securityContext:
     runAsUser: 2000
+  pdb:
+    enabled: false
 
 controller:
   enabled: false
