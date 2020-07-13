@@ -63,7 +63,7 @@ type NavigationNode struct {
 	Settings            *runtime.RawExtension `json:"settings"`
 	RequiredPermissions []RequiredPermission  `json:"requiredPermissions"`
 	ExternalLink        string                `json:"externalLink"`
-	ViewGroup			string				  `json:"viewGroup"`
+	ViewGroup           string                `json:"viewGroup"`
 }
 
 type RequiredPermission struct {
