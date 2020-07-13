@@ -13,7 +13,7 @@ This Installation guide shows you how to quickly deploy Kyma locally on the MacO
 
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Docker](https://www.docker.com/get-started)
-- [Minikube](https://github.com/kubernetes/minikube) 1.6.2
+- [Minikube](https://github.com/kubernetes/minikube) 1.12.0
 
 Virtualization:
 
