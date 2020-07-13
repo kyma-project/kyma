@@ -63,7 +63,7 @@ container:
     minReplicasValue:
       value: "1"
     reservedEnvs:
-      value: "FUNC_RUNTIME,FUNC_HANDLER,FUNC_TIMEOUT,FUNC_PORT,MOD_NAME,NODE_PATH,REQ_MB_LIMIT,FUNC_MEMORY_LIMIT" # https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js
+      value: "FUNC_RUNTIME,FUNC_HANDLER,FUNC_PORT,MOD_NAME,NODE_PATH" # https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js
     requestCpu:
       value: "50m"
     requestMemory:

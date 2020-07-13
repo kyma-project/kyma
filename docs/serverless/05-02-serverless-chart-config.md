@@ -20,5 +20,3 @@ This table lists the configurable parameters, their descriptions, and default va
 | **containers.manager.envs.buildRequestsMemory** | Amount of memory requested by the image-building Pod to operate.      | `700Mi`       | `200Mi`           |
 | **containers.manager.envs.buildLimitsCPU**      | Maximum number of CPUs available for the image-building Pod to use.   | `1100m`       | `200m`            |
 | **containers.manager.envs.buildLimitsMemory**   | Maximum amount of memory available for the image-building Pod to use. | `1100Mi`      | `400Mi`           |
-
-<!-- write info about cpuUtilTarget% ?? -->
