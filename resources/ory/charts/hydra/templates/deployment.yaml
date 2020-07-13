@@ -33,7 +33,11 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["hydra"]
-          args: ["migrate", "sql", "-e", "--yes"]
+          args: ["migrate", "sql", "-e", "--yes", "--config", "/etc/config/config.yaml"]
+          volumeMounts:
+            - name: {{ include "hydra.name" . }}-config-volume
+              mountPath: /etc/config
+              readOnly: true
           env:
             - name: DSN
               valueFrom:
