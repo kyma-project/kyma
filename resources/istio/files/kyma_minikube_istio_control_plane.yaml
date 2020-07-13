@@ -33,9 +33,12 @@ spec:
           periodSeconds: 5
           timeoutSeconds: 5
         resources:
-          requests:
+          limits:
             cpu: 500m
-            memory: 2048Mi
+            memory: 1024Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
         strategy:
           rollingUpdate:
             maxSurge: "100%"
