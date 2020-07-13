@@ -58,7 +58,11 @@ if [[ ! $(kubectl get deployments.apps -n flux helm-operator) ]]; then
   installHelmOperator
 fi
 
+start=`date +%s`
 createNamespaces
 kubectl label ns kyma-installer istio-injection=disabled --overwrite
 installPrerequisites
 installKymaComponents
+bash ${CURRENT_DIR}/check-installation-status.sh
+end=`date +%s`
+echo "Execution time was `expr $end - $start` seconds."
