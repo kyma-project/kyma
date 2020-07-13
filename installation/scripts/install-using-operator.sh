@@ -7,7 +7,7 @@ function installHelmOperator {
   helm install  helm-operator fluxcd/helm-operator \
     --namespace flux \
     --set helm.versions=v3 \
-	  --set --git-timeout=10m \
+	  --set git.timeout=10m \
 	  --create-namespace
 
 	bash ${CURRENT_DIR}/is-ready.sh flux app helm-operator
