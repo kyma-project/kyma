@@ -39,7 +39,7 @@ func (in *ClusterMicroFrontend) DeepCopyObject() runtime.Object {
 func (in *ClusterMicroFrontendList) DeepCopyInto(out *ClusterMicroFrontendList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	in.ListMeta.DeepCopyInto(&out.ListMeta)
+	out.ListMeta = in.ListMeta
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]ClusterMicroFrontend, len(*in))
@@ -139,7 +139,7 @@ func (in *MicroFrontend) DeepCopyObject() runtime.Object {
 func (in *MicroFrontendList) DeepCopyInto(out *MicroFrontendList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	in.ListMeta.DeepCopyInto(&out.ListMeta)
+	out.ListMeta = in.ListMeta
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]MicroFrontend, len(*in))

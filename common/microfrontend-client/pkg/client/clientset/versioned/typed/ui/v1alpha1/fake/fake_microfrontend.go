@@ -103,7 +103,7 @@ func (c *FakeMicroFrontends) DeleteCollection(options *v1.DeleteOptions, listOpt
 // Patch applies the patch and returns the patched microFrontend.
 func (c *FakeMicroFrontends) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.MicroFrontend, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(microfrontendsResource, c.ns, name, pt, data, subresources...), &v1alpha1.MicroFrontend{})
+		Invokes(testing.NewPatchSubresourceAction(microfrontendsResource, c.ns, name, data, subresources...), &v1alpha1.MicroFrontend{})
 
 	if obj == nil {
 		return nil, err
