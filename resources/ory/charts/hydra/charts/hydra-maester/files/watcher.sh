@@ -12,7 +12,7 @@ function rollOut() {
 
   for deploy in "${DEPLOYMENTS[@]}"; do
     kubectl set env -n $NAMESPACE ${deploy} sync=$(date "+%Y%m%d-%H%M%S")
-      kubectl rollout status -n $NAMESPACE ${deploy}
+    kubectl rollout status -n $NAMESPACE ${deploy}
   done
 }
 
