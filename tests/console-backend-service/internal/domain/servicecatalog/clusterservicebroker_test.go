@@ -55,7 +55,7 @@ func TestClusterServiceBrokerQueries(t *testing.T) {
 	`
 
 	t.Run("MultipleResources", func(t *testing.T) {
-		t.Skip()
+		t.SkipNow()
 		req := fixClusterServiceBrokersRequest(resourceDetailsQuery)
 
 		var res clusterServiceBrokersQueryResponse
@@ -66,7 +66,7 @@ func TestClusterServiceBrokerQueries(t *testing.T) {
 	})
 
 	t.Run("SingleResource", func(t *testing.T) {
-		t.Skip()
+		t.SkipNow()
 		req := fixClusterServiceBrokerRequest(resourceDetailsQuery, expectedResource.Name)
 
 		var res clusterServiceBrokerQueryResponse

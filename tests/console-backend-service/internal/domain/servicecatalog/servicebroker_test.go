@@ -57,7 +57,7 @@ func TestServiceBrokerQueries(t *testing.T) {
 	`
 
 	t.Run("MultipleResources", func(t *testing.T) {
-		t.Skip()
+		t.SkipNow()
 		req := fixServiceBrokersRequest(resourceDetailsQuery, expectedResource)
 
 		var res serviceBrokersQueryResponse
@@ -68,14 +68,14 @@ func TestServiceBrokerQueries(t *testing.T) {
 	})
 
 	t.Run("SingleResource", func(t *testing.T) {
-		t.Skip()
+		t.SkipNow()
 		req := fixServiceBrokerRequest(resourceDetailsQuery, expectedResource)
 
 		var res serviceBrokerQueryResponse
 		err = c.Do(req, &res)
 
 		require.NoError(t, err)
-		// checkBroker(t, expectedResource, res.ServiceBroker)
+		checkBroker(t, expectedResource, res.ServiceBroker)
 	})
 
 	t.Log("Checking authorization directives...")
