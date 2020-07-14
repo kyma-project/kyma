@@ -27,6 +27,17 @@ function communicate_missing_override() {
   echo "${1} not provided via overrides. Looking for value in existing secrets..."
 }
 
+function rollOut() {
+  local DEPLOYMENTS=(
+    $(kubectl get deploy -n "${NAMESPACE}" -l "app.kubernetes.io/name=${1}" -o name)
+  )
+
+  for deploy in "${DEPLOYMENTS[@]}"; do
+    kubectl set env -n "${NAMESPACE}" "${deploy}" sync=$(date "+%Y%m%d-%H%M%S")
+    kubectl rollout status -n "${NAMESPACE}" "${deploy}"
+  done
+}
+
 {{- if .Values.global.ory.hydra.persistence.enabled }}
   {{- if .Values.global.ory.hydra.persistence.postgresql.enabled }}
 DB_TYPE="postgres"
@@ -108,4 +119,14 @@ EOF
 
 echo "Applying database secret"
 set -e
-echo "${SECRET}" | kubectl apply -f -
+OUTPUT=$(echo "${SECRET}" | kubectl apply -f -)
+
+if [[ ${OUTPUT} == *"configured"* ]]; then
+  echo "database secret has been modified. Restarting Hydra pods..."
+  rollOut "hydra"
+
+  echo "Hydra configured. Migrating existing OAuth2 client data..."
+  rollOut "hydra-maester"
+
+  echo "Hydra ready to use"
+fi
