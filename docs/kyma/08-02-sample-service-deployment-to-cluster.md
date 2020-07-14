@@ -84,7 +84,7 @@ Follow these steps:
 Run the following command:
 
    ```bash
-   curl -k https://raw.githubusercontent.com/kyma-project/examples/master/gateway/service/api-with-oauth2.yaml |  sed "s/.kyma.local/.$yourClusterDomain/" | kubectl apply -n stage -f -
+   curl -k https://raw.githubusercontent.com/kyma-project/examples/master/gateway/service/api-with-jwt.yaml |  sed "s/.kyma.local/.$yourClusterDomain/" | kubectl apply -n stage -f -
    ```
 
 After you apply this update, you must include a valid bearer ID token in the Authorization header to access the service.

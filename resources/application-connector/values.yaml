@@ -42,7 +42,7 @@ global:
   event_service_integration_tests:
     version: "PR-8874"
   application_gateway:
-    version: "d39b80d4"
+    version: "b06fbd6f"
   application_gateway_tests:
     version: "1272752c"
   application_registry:

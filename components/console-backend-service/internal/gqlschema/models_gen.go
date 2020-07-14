@@ -552,6 +552,7 @@ type Service struct {
 	Ports             []*ServicePort `json:"ports"`
 	Status            *ServiceStatus `json:"status"`
 	JSON              JSON           `json:"json"`
+	UID               string         `json:"UID"`
 }
 
 type ServiceBindingEvent struct {

@@ -766,6 +766,7 @@ type ComplexityRoot struct {
 		Name              func(childComplexity int) int
 		Ports             func(childComplexity int) int
 		Status            func(childComplexity int) int
+		UID               func(childComplexity int) int
 	}
 
 	ServiceBinding struct {
@@ -4772,6 +4773,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Service.Status(childComplexity), true
 
+	case "Service.UID":
+		if e.complexity.Service.UID == nil {
+			break
+		}
+
+		return e.complexity.Service.UID(childComplexity), true
+
 	case "ServiceBinding.name":
 		if e.complexity.ServiceBinding.Name == nil {
 			break
@@ -6711,6 +6719,7 @@ type Service {
     ports: [ServicePort!]!
     status: ServiceStatus!
     json: JSON!
+    UID: String!
 }
 
 type Pod {
@@ -27723,6 +27732,40 @@ func (ec *executionContext) _Service_json(ctx context.Context, field graphql.Col
 	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Service_UID(ctx context.Context, field graphql.CollectedField, obj *Service) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Service",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _ServiceBinding_name(ctx context.Context, field graphql.CollectedField, obj *ServiceBinding) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -39565,6 +39608,11 @@ func (ec *executionContext) _Service(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "json":
 			out.Values[i] = ec._Service_json(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "UID":
+			out.Values[i] = ec._Service_UID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
