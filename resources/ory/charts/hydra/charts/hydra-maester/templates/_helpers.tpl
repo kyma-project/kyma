@@ -62,6 +62,18 @@ Get Hydra name
 Get Hydra admin service name
 */}}
 {{- define "hydra-maester.adminService" -}}
-{{ $hydra := include "hydra-maester.getHydraName" . }}
+{{- $hydra := include "hydra-maester.getHydraName" . -}}
 {{- printf "%s-admin" $hydra -}}
+{{- end -}}
+
+{{/*
+Get Hydra secret name
+*/}}
+{{- define "hydra-maester.hydraSecret" -}}
+{{- if hasKey .Values.config "hydraSecret" -}}
+{{- printf "%s" .Values.config.hydraSecret -}}
+{{- else -}}
+{{- $hydra := include "hydra-maester.getHydraName" . -}}
+{{- printf "%s" $hydra -}}
+{{- end -}}
 {{- end -}}
