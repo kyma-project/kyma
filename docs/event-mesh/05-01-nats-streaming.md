@@ -21,4 +21,4 @@ This table lists the configurable parameters, their descriptions, and default va
 | **global.natsStreaming.resources.limits.memory** | Specifies the memory limits for NATS Streaming. | `256M` |
 | **global.natsStreaming.channel.maxInactivity** | Specifies the time after which the autocleaner removes all backing resources related to a given Event type from the NATS Streaming database if there is no activity for this Event type. | `48h` |
 
->**IMPORTANT:** If persistence is disabled `nats` will store undelivered messages in memory. All restarts of `nats` will lead to lost undelivered messages. Do NOT use this in a production setup!
+>**CAUTION:** If persistence is disabled, `nats` will store undelivered messages in memory. All restarts of `nats` will lead to the loss of undelivered messages. Do **not** use this in a production setup.
