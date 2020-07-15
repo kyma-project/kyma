@@ -28,14 +28,14 @@ var DisabledTracingConfig = &tracingconfig.Config{
 }
 
 func main() {
-	Main("http-source", eshttp.NewEnvConfig, eshttp.NewAdapter)
+	setupAdapter("http-source", eshttp.NewEnvConfig, eshttp.NewAdapter)
 }
 
 type Adapter interface {
 	Start(stopCh <-chan struct{}) error
 }
 
-func Main(component string, ector adapter.EnvConfigConstructor, ctor adapter.AdapterConstructor) {
+func setupAdapter(component string, ector adapter.EnvConfigConstructor, ctor adapter.AdapterConstructor) {
 	flag.Parse()
 
 	ctx := signals.NewContext()
