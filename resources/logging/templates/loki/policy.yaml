@@ -42,6 +42,7 @@ metadata:
   name: {{ template "loki.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
+  action: ALLOW
   selector:
     matchLabels:
       app: {{ template "loki.name" . }}
@@ -55,4 +56,24 @@ spec:
          - "/health"
          - "/ready"
          - "/metrics"
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  labels:
+    app: {{ template "loki.name" . }}
+    chart: {{ template "loki.chart" . }}
+    release: {{ .Release.Name }}
+  name: logging-fluentbit
+  namespace: kyma-system
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app: {{ template "loki.name" . }}
+  rules:
+  - from:
+    - source:
+        principals:
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ template "fluent-bit.serviceAccountName" . }}
 {{- end }}
