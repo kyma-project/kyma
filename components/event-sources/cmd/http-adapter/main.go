@@ -31,10 +31,6 @@ func main() {
 	setupAdapter("http-source", eshttp.NewEnvConfig, eshttp.NewAdapter)
 }
 
-type Adapter interface {
-	Start(stopCh <-chan struct{}) error
-}
-
 func setupAdapter(component string, ector adapter.EnvConfigConstructor, ctor adapter.AdapterConstructor) {
 	flag.Parse()
 
