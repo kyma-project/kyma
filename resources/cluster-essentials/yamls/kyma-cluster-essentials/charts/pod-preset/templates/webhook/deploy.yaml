@@ -1,0 +1,57 @@
+---
+# Source: kyma-cluster-essentials/charts/pod-preset/templates/webhook/deploy.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name-pod-preset-webhook
+  namespace: "default"
+  labels:
+    app: pod-preset-webhook
+    chart: pod-preset-0.1.0
+    release: release-name
+    heritage: Tiller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pod-preset-webhook
+      release: release-name
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+        checksum/config: a7ec2177851bd1e5faf8d0d6004600527c83d3e68228a840f5d3f4f6018c1e9b
+      labels:
+        app: pod-preset-webhook
+        release: release-name
+    spec:
+      serviceAccountName: release-name-pod-preset-webhook
+      containers:
+      - name: pod-preset-webhook
+        image: "eu.gcr.io/kyma-project/incubator/develop/podpreset-webhook:6fe6c8dc"
+        imagePullPolicy: IfNotPresent
+        args:
+        - -tls-cert-file=/keys/webhook.crt
+        - -tls-private-key-file=/keys/webhook.key
+        - -tls-server-port=8443
+        - -alsologtostderr
+        - -v
+        - "6"
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: webhook-cert
+          mountPath: /keys
+          readOnly: true
+      securityContext:
+        runAsUser: 2000
+        
+      volumes:
+      - name: webhook-cert
+        secret:
+          secretName: release-name-pod-preset-webhook-cert
+          items:
+          - key: tls.crt
+            path: webhook.crt
+          - key: tls.key
+            path: webhook.key

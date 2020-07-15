@@ -1,0 +1,10 @@
+---
+# Source: kyma-cluster-essentials/templates/ingress-tls-cert.yaml
+apiVersion: v1
+data:
+  "tls.crt": c2V0TWU=
+kind: Secret
+metadata:
+  name: ingress-tls-cert
+  namespace: kyma-system
+type: Opaque

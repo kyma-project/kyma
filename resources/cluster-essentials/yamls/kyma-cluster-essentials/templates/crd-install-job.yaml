@@ -1,0 +1,93 @@
+---
+# Source: kyma-cluster-essentials/templates/crd-install-job.yaml
+
+
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: default
+  name: release-name-crd-install
+  annotations:
+    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-weight": "10"
+spec:
+  activeDeadlineSeconds: 60
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: release-name-crd-install
+      restartPolicy: OnFailure
+      containers:
+      - name: release-name-install-crds
+        image: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff"
+        command:
+        - /bin/sh
+        - -c
+        args:
+        - |
+            
+            kubectl apply -f /etc/crd-0
+            
+            kubectl apply -f /etc/crd-1
+            
+            kubectl apply -f /etc/crd-2
+            
+            kubectl apply -f /etc/crd-3
+            
+            kubectl apply -f /etc/crd-4
+            
+        resources:
+          requests:
+            memory: 128Mi
+            cpu: 100m
+          limits:
+            memory: 256Mi
+            cpu: 200m
+        volumeMounts:
+        
+        - name: crd-0
+          mountPath: /etc/crd-0
+          readOnly: true
+        
+        - name: crd-1
+          mountPath: /etc/crd-1
+          readOnly: true
+        
+        - name: crd-2
+          mountPath: /etc/crd-2
+          readOnly: true
+        
+        - name: crd-3
+          mountPath: /etc/crd-3
+          readOnly: true
+        
+        - name: crd-4
+          mountPath: /etc/crd-4
+          readOnly: true
+        
+      volumes:
+      
+      - name: crd-0
+        configMap:
+          name: release-name-crd-0
+      
+      - name: crd-1
+        configMap:
+          name: release-name-crd-1
+      
+      - name: crd-2
+        configMap:
+          name: release-name-crd-2
+      
+      - name: crd-3
+        configMap:
+          name: release-name-crd-3
+      
+      - name: crd-4
+        configMap:
+          name: release-name-crd-4
+      

@@ -1,0 +1,12 @@
+---
+# Source: kyma-cluster-essentials/charts/pod-preset/templates/webhook/sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: release-name-pod-preset-webhook
+  namespace: "default"
+  labels:
+    app: pod-preset-webhook
+    chart: pod-preset-0.1.0
+    release: release-name
+    heritage: Tiller
