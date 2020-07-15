@@ -24,7 +24,7 @@ var triggersGroupVersionResource = schema.GroupVersionResource{
 
 var triggersSubscriberRefIndex = "subscriberRef"
 
-func triggersSubscriberRefIndexKey(namespace string, subscriberRef *v1.KReference) string {
+func createTriggersSubscriberRefIndexKey(namespace string, subscriberRef *v1.KReference) string {
 	if subscriberRef == nil {
 		return ""
 	}
@@ -38,11 +38,13 @@ func triggersSubscriberRefIndexKey(namespace string, subscriberRef *v1.KReferenc
 
 var triggersSubscriberURIIndex = "subscriberURI"
 
-func triggersSubscriberRefURIKey(namespace string, uri *apis.URL) string {
+func createTriggersSubscriberRefURIKey(namespace string, uri *apis.URL) string {
 	return fmt.Sprintf("%s/%s",
 		namespace,
 		uri.String())
 }
+
+var triggersSubscriberRefUriIndex = "subscriberRefURI"
 
 type Service struct {
 	*resource.Service
@@ -57,7 +59,7 @@ func NewService(serviceFactory *resource.GenericServiceFactory) (*resource.Gener
 			if err != nil {
 				return nil, err
 			}
-			return []string{triggersSubscriberRefIndexKey(trigger.Namespace, trigger.Spec.Subscriber.Ref)}, nil
+			return []string{createTriggersSubscriberRefIndexKey(trigger.Namespace, trigger.Spec.Subscriber.Ref)}, nil
 		},
 		triggersSubscriberURIIndex: func(obj interface{}) ([]string, error) {
 			trigger := &v1alpha1.Trigger{}
@@ -65,7 +67,7 @@ func NewService(serviceFactory *resource.GenericServiceFactory) (*resource.Gener
 			if err != nil {
 				return nil, err
 			}
-			return []string{triggersSubscriberRefURIKey(trigger.Namespace, trigger.Spec.Subscriber.URI)}, nil
+			return []string{createTriggersSubscriberRefURIKey(trigger.Namespace, trigger.Spec.Subscriber.URI)}, nil
 		},
 	})
 	return service, err

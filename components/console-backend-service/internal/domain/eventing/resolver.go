@@ -26,10 +26,10 @@ func (r *Resolver) TriggersQuery(ctx context.Context, namespace string, subscrib
 	if subscriber == nil {
 		err = r.Service().ListInNamespace(namespace, &items)
 	} else if subscriber.Ref != nil {
-		key := triggersSubscriberRefIndexKey(namespace, subscriber.Ref)
+		key := createTriggersSubscriberRefIndexKey(namespace, subscriber.Ref)
 		err = r.Service().ListByIndex(triggersSubscriberRefIndex, key, &items)
 	} else if subscriber.URI != nil {
-		key := triggersSubscriberRefURIKey(namespace, subscriber.URI)
+		key := createTriggersSubscriberRefURIKey(namespace, subscriber.URI)
 		err = r.Service().ListByIndex(triggersSubscriberURIIndex, key, &items)
 	} else {
 		return nil, errors.New("subscriber is not null but it is empty")
