@@ -18,7 +18,6 @@ import (
 	"knative.dev/pkg/profiling"
 	"knative.dev/pkg/signals"
 	"knative.dev/pkg/source"
-
 	tracingconfig "knative.dev/pkg/tracing/config"
 
 	eshttp "github.com/kyma-project/kyma/components/event-sources/adapter/http"
