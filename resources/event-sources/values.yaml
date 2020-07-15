@@ -9,4 +9,4 @@ global:
   httpAdapter:
     image: event-sources-http-adapter
     dir: ''
-    version: 08b6fe17
+    version: pr-9040
