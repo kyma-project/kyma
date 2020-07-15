@@ -25,7 +25,7 @@ type envConfig struct {
 
 	// PORT as required by knative serving runtime contract
 	Port           int  `envconfig:"PORT" required:"true" default:"8080"`
-	TracingEnabled bool `envconfig:"TRACING_ENABLED" default:"false"`
+	TracingEnabled bool `envconfig:"TRACING_ENABLED" default:"true"`
 }
 
 func (e *envConfig) GetSource() string {

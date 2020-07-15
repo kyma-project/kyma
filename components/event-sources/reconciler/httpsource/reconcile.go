@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strconv"
 
 	pkgerrors "github.com/pkg/errors"
 
@@ -83,6 +84,7 @@ const (
 	namespaceEnvVar     = "NAMESPACE"
 	metricsConfigEnvVar = "K_METRICS_CONFIG"
 	loggingConfigEnvVar = "K_LOGGING_CONFIG"
+	tracingEnvVar       = "TRACING_ENABLED"
 
 	// HTTP adapter specific
 	eventSourceEnvVar = "EVENT_SOURCE"
@@ -292,6 +294,7 @@ func (r *Reconciler) makeKnService(src *sourcesv1alpha1.HTTPSource,
 		object.WithEnvVar(namespaceEnvVar, src.Namespace),
 		object.WithEnvVar(metricsConfigEnvVar, metricsCfg),
 		object.WithEnvVar(loggingConfigEnvVar, loggingCfg),
+		object.WithEnvVar(tracingEnvVar, strconv.FormatBool(r.adapterEnvCfg.TracingEnabled)),
 		object.WithProbe(adapterHealthEndpoint),
 		object.WithControllerRef(src.ToOwner()),
 		object.WithLabel(routeconfig.VisibilityLabelKey, routeconfig.VisibilityClusterLocal),
