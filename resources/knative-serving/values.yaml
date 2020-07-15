@@ -65,8 +65,8 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_knative_serving_acceptance:
-    dir:
-    version: "7dd25b42"
+    dir: 
+    version: "PR-9045"
   ingress:
     domainName:
 
