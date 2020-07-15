@@ -25,7 +25,7 @@ data:
   {{- with $currentScope }}
   {{ if eq $idx (mod $pathIdx .Values.jobs.configMaps) }}
   {{ base $path }}: |-  
-  {{ .Files.Get (printf "files/%s" $path) | printf "%s" | indent 4 }}
+{{ .Files.Get (printf "files/%s" $path) | printf "%s" | indent 4 }}
   {{ end }}
   {{- end }}
 {{ end }}
