@@ -75,5 +75,6 @@ spec:
   - from:
     - source:
         principals:
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ template "fluent-bit.serviceAccountName" . }}
+        #TODO: "logging-fluent-bit" sa name is defined by fluentbit subchart. Find a proper way to refer to this name, instead of hard-coding it.
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/logging-fluent-bit
 {{- end }}
