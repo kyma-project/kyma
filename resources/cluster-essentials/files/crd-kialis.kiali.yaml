@@ -10,6 +10,8 @@ metadata:
   name: kialis.kiali.io
   labels:
     app: kiali-operator
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   group: kiali.io
   names:

@@ -2,7 +2,9 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   creationTimestamp: null
-  name: addonsconfigurations.addons.kyma-project.io
+  name: clusteraddonsconfigurations.addons.kyma-project.io
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   additionalPrinterColumns:
   - JSONPath: .status.phase
@@ -13,19 +15,16 @@ spec:
     type: date
   group: addons.kyma-project.io
   names:
-    categories:
-    - all
-    - addons
-    kind: AddonsConfiguration
-    listKind: AddonsConfigurationList
-    plural: addonsconfigurations
-    singular: addonsconfiguration
-  scope: Namespaced
+    kind: ClusterAddonsConfiguration
+    listKind: ClusterAddonsConfigurationList
+    plural: clusteraddonsconfigurations
+    singular: clusteraddonsconfiguration
+  scope: Cluster
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: AddonsConfiguration is the Schema for the addonsconfigurations
+      description: ClusterAddonsConfiguration is the Schema for the addonsconfigurations
         API
       properties:
         apiVersion:
@@ -41,7 +40,8 @@ spec:
         metadata:
           type: object
         spec:
-          description: AddonsConfigurationSpec defines the desired state of AddonsConfiguration
+          description: ClusterAddonsConfigurationSpec defines the desired state of
+            ClusterAddonsConfiguration
           properties:
             repositories:
               items:
@@ -77,7 +77,8 @@ spec:
           - repositories
           type: object
         status:
-          description: AddonsConfigurationStatus defines the observed state of AddonsConfiguration
+          description: ClusterAddonsConfigurationStatus defines the observed state
+            of ClusterAddonsConfiguration
           properties:
             lastProcessedTime:
               format: date-time

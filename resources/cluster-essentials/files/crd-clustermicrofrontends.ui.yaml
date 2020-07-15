@@ -1,17 +1,19 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: "microfrontends.ui.kyma-project.io"
+  name: "clustermicrofrontends.ui.kyma-project.io"
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   group: ui.kyma-project.io
   version: v1alpha1
-  scope: Namespaced
+  scope: Cluster
   names:
-    plural: "microfrontends"
-    singular: "microfrontend"
-    kind: MicroFrontend
+    plural: "clustermicrofrontends"
+    singular: "clustermicrofrontend"
+    kind: ClusterMicroFrontend
     shortNames:
-      - "mf"
+      - "cmf"
   validation:
     openAPIV3Schema:
       required:
@@ -20,7 +22,8 @@ spec:
         spec:
           type: object
           required:
-          - "navigationNodes"
+            - "placement"
+            - "navigationNodes"
           properties:
             appName:
               type: string
@@ -29,6 +32,9 @@ spec:
             version:
               type: string
               pattern: "[a-zA-Z0-9]+"
+            placement:
+              type: string
+              pattern: "^(environment|cluster|namespace)$"
             category:
               type: string
             viewBaseUrl:
