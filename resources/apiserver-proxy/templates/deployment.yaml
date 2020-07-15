@@ -11,7 +11,7 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 1  
+      maxUnavailable: 1
       maxSurge: 1
   template:
     metadata:
@@ -50,7 +50,7 @@ spec:
         - --tls-private-key-file=/etc/tls-cert/tls.key
         - --upstream=https://kubernetes.default
         - --logtostderr=true
-        - --v=10
+        - --v=9
         - --oidc-issuer=https://dex.{{ .Values.global.ingress.domainName }}
         - --oidc-clientID=kyma-client
         {{ if not .Values.global.environment.gardener }}

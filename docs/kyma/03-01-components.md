@@ -12,12 +12,13 @@ Kyma security enforces role-based access control (RBAC) in the cluster. [Dex](ht
 
 ## Service Catalog
 
-The Service Catalog lists all of the services available to Kyma users through the registered [Service Brokers](/components/service-catalog/#service-brokers-service-brokers). Use the Service Catalog to provision new services in the
+The Service Catalog lists all of the services available to Kyma users through the registered [Service Brokers](/components/service-catalog/#overview-service-brokers). Use the Service Catalog to provision new services in the
 Kyma [Kubernetes](https://kubernetes.io/) cluster and create bindings between the provisioned service and an application.
 
 ## Helm Broker
 
-The Helm Broker is a Service Broker which runs in the Kyma cluster and deploys Kubernetes native resources using [Helm](https://github.com/kubernetes/helm) and Kyma bundles. A bundle is an abstraction layer over a Helm chart which allows you to represent it as a ClusterServiceClass in the Service Catalog. Use bundles to install the [GCP Broker](/components/service-catalog#service-brokers-gcp-broker), [Azure Service Broker](/components/service-catalog#service-brokers-azure-service-broker) and the [AWS Service Broker](/components/service-catalog#service-brokers-aws-service-broker) in Kyma.
+The Helm Broker is a Service Broker which runs in the Kyma cluster and deploys Kubernetes native resources using [Helm](https://github.com/kubernetes/helm) and Kyma addons. An addon is an abstraction layer over a Helm chart which allows you to represent it as a ClusterServiceClass in the Service Catalog. Use addons to install GCP, Azure
+and AWS Service Brokers in Kyma.
 
 ## Application Connector
 

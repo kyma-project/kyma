@@ -47,4 +47,3 @@ spec:
   {{- end }}
   selector:
     {{- include "grafana.selectorLabels" . | nindent 4 }}
-
