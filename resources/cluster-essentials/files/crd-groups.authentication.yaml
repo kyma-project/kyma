@@ -2,6 +2,8 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: groups.authentication.kyma-project.io
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   group: authentication.kyma-project.io
   version: v1alpha1

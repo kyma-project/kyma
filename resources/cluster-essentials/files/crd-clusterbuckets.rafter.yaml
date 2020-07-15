@@ -2,7 +2,9 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   creationTimestamp: null
-  name: buckets.rafter.kyma-project.io
+  name: clusterbuckets.rafter.kyma-project.io
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   additionalPrinterColumns:
   - JSONPath: .status.phase
@@ -16,14 +18,14 @@ spec:
     type: date
   group: rafter.kyma-project.io
   names:
-    kind: Bucket
-    plural: buckets
-  scope: ""
+    kind: ClusterBucket
+    plural: clusterbuckets
+  scope: Cluster
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: Bucket is the Schema for the buckets API
+      description: ClusterBucket is the Schema for the clusterbuckets API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -38,7 +40,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: BucketSpec defines the desired state of Bucket
+          description: ClusterBucketSpec defines the desired state of ClusterBucket
           properties:
             policy:
               enum:
@@ -63,7 +65,7 @@ spec:
               type: string
           type: object
         status:
-          description: BucketStatus defines the observed state of Bucket
+          description: ClusterBucketStatus defines the observed state of ClusterBucket
           properties:
             lastHeartbeatTime:
               format: date-time

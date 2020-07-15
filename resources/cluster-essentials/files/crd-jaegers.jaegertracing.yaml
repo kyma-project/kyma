@@ -4,6 +4,8 @@ metadata:
   name: jaegers.jaegertracing.io
   labels:
     app: jaeger-operator
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   additionalPrinterColumns:
   - JSONPath: .status.phase
