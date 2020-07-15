@@ -261,22 +261,6 @@ func (r *mutationResolver) DeleteManyFunctions(ctx context.Context, namespace st
 	return r.serverless.Resolver.DeleteManyFunctions(ctx, namespace, functions)
 }
 
-func (r *mutationResolver) CreateTrigger(ctx context.Context, namespace string, trigger gqlschema.TriggerCreateInput, ownerRef []*gqlschema.OwnerReference) (*gqlschema.Trigger, error) {
-	return r.eventing.CreateTrigger(ctx, namespace, trigger, ownerRef)
-}
-
-func (r *mutationResolver) CreateManyTriggers(ctx context.Context, namespace string, triggers []*gqlschema.TriggerCreateInput, ownerRef []*gqlschema.OwnerReference) ([]*gqlschema.Trigger, error) {
-	return r.eventing.CreateManyTriggers(ctx, namespace, triggers, ownerRef)
-}
-
-func (r *mutationResolver) DeleteTrigger(ctx context.Context, namespace string, trigger gqlschema.TriggerMetadataInput) (*gqlschema.TriggerMetadata, error) {
-	return r.eventing.DeleteTrigger(ctx, namespace, trigger)
-}
-
-func (r *mutationResolver) DeleteManyTriggers(ctx context.Context, namespace string, triggers []*gqlschema.TriggerMetadataInput) ([]*gqlschema.TriggerMetadata, error) {
-	return r.eventing.DeleteManyTriggers(ctx, namespace, triggers)
-}
-
 func (r *namespaceResolver) Pods(ctx context.Context, obj *gqlschema.Namespace) ([]*gqlschema.Pod, error) {
 	return r.k8s.PodsQuery(ctx, obj.Name, nil, nil)
 }
@@ -469,10 +453,6 @@ func (r *queryResolver) Functions(ctx context.Context, namespace string) ([]*gql
 	return r.serverless.FunctionsQuery(ctx, namespace)
 }
 
-func (r *queryResolver) Triggers(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) ([]*gqlschema.Trigger, error) {
-	return r.eventing.TriggersQuery(ctx, namespace, subscriber)
-}
-
 func (r *serviceBindingResolver) Secret(ctx context.Context, obj *gqlschema.ServiceBinding) (*gqlschema.Secret, error) {
 	return r.k8s.SecretQuery(ctx, obj.SecretName, obj.Namespace)
 }
@@ -603,10 +583,6 @@ func (r *subscriptionResolver) NamespaceEvent(ctx context.Context, withSystemNam
 
 func (r *subscriptionResolver) FunctionEvent(ctx context.Context, namespace string, functionName *string) (<-chan *gqlschema.FunctionEvent, error) {
 	return r.serverless.FunctionEventSubscription(ctx, namespace, functionName)
-}
-
-func (r *subscriptionResolver) TriggerEvent(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) (<-chan *gqlschema.TriggerEvent, error) {
-	return r.eventing.TriggerEventSubscription(ctx, namespace, subscriber)
 }
 
 // Application returns gqlschema.ApplicationResolver implementation.
