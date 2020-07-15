@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -82,7 +83,7 @@ func (svc *resourceQuotaService) CreateResourceQuota(namespace string, name stri
 		},
 	}
 
-	result, err := svc.client.ResourceQuotas(namespace).Create(ResourceQuota)
+	result, err := svc.client.ResourceQuotas(namespace).Create(context.TODO(), ResourceQuota, metav1.CreateOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating resource quota")
 	}
@@ -134,7 +135,7 @@ func (svc *resourceQuotaService) ListPods(namespace string, labelSelector map[st
 
 	selector := strings.Join(selectors, ",")
 
-	pods, err := svc.client.Pods(namespace).List(metav1.ListOptions{
+	pods, err := svc.client.Pods(namespace).List(context.TODO(), metav1.ListOptions{
 		LabelSelector: selector,
 	})
 	if err != nil {

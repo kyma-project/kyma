@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
@@ -93,5 +94,5 @@ func (svc *limitRangeService) Create(namespace string, name string, limit gqlsch
 		},
 	}
 
-	return svc.client.LimitRanges(namespace).Create(&limitRange)
+	return svc.client.LimitRanges(namespace).Create(context.TODO(), &limitRange, metav1.CreateOptions{})
 }

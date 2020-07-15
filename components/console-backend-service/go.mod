@@ -55,15 +55,10 @@ require (
 	gopkg.in/square/go-jose.v2 v2.4.1 // indirect
 	k8s.io/api v0.18.3
 	k8s.io/apimachinery v0.18.3
-	k8s.io/apiserver v0.17.4
+	k8s.io/apiserver v0.18.2
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
 	knative.dev/eventing v0.13.1 // indirect
 	knative.dev/pkg v0.0.0-20200306005226-fc857aa77f79
 )
 
-replace (
-	github.com/kubernetes-sigs/service-catalog => github.com/kubernetes-sigs/service-catalog v0.2.2
-	k8s.io/api => k8s.io/api v0.17.4
-	k8s.io/apimachinery => k8s.io/apimachinery v0.17.4
-	k8s.io/client-go => k8s.io/client-go v0.17.4
-)
+replace k8s.io/client-go => k8s.io/client-go v0.18.3
