@@ -1528,7 +1528,7 @@ prometheus:
     ## reflected in the running Pods. To change the secrets mounted into the Prometheus Pods, the object must be deleted and recreated
     ## with the new list of secrets.
     ##
-    secrets: [ istio.monitoring-prometheus ]
+    secrets: []
 
     ## ConfigMaps is a list of ConfigMaps in the same namespace as the Prometheus object, which shall be mounted into the Prometheus Pods.
     ## The ConfigMaps are mounted into /etc/prometheus/configmaps/.
