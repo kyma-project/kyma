@@ -26,10 +26,6 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-      initContainers:
-        - name: wait-for-hydra
-          image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
-          command: ['sh', '-c', 'until nc -zv {{ include "hydra-maester.adminService" . }}.{{ .Release.Namespace }}.svc.cluster.local 4445; do echo waiting for hydra; sleep 10; done;']
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
