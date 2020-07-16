@@ -4,35 +4,6 @@
 
 {{ $currentScope := . }}
 
-{{ $filePaths := list }}
-{{ range $path, $_ := $files }}
-{{ $filePaths = append $filePaths (base $path) }}
-{{ end }}
-
-{{ range $idx, $_ := until $configMapLen }}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  {{- with $currentScope }}
-  namespace: {{ .Release.Namespace }}
-  name: {{ .Release.Name }}-crd-{{ $idx }}
-  {{- end }}
-  annotations:
-    "helm.sh/hook": "pre-install, pre-upgrade"
-    "helm.sh/hook-weight": "1"
-    "helm.sh/hook-delete-policy": "before-hook-creation"
-data:
-{{ range $pathIdx, $path := $filePaths }}
-  {{- with $currentScope }}
-  {{ if eq $idx (mod $pathIdx $configMapLen) }}
-  {{ base $path }}: |-  
-{{ .Files.Get (printf "files/%s" $path) | printf "%s" | indent 4 }}
-  {{ end }}
-  {{- end }}
-{{ end }}
----
-{{ end }}
-
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -71,11 +42,9 @@ spec:
             cpu: 200m
         volumeMounts:
         {{ range $idx, $_ := until $configMapLen }}
-        {{- with $currentScope }}
         - name: crd-{{ $idx }}
           mountPath: /etc/crd-{{ $idx }}
           readOnly: true
-        {{- end }}
         {{ end }}
       volumes:
       {{ range $idx, $_ := until $configMapLen }}
