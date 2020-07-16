@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: net-global-overrides
+  namespace: kyma-installer
   labels:
     installer: overrides
     kyma-project.io/installation: ""
@@ -13,6 +14,7 @@ data:
   global.ingress.tlsKey: ZHVtbXkK
   global.isLocalEnv: "true"
   global.minikubeIP: 127.0.0.1
+  global.isLocalProviderK3d: "true"
 ---
 apiVersion: v1
 data:
@@ -22,6 +24,7 @@ data:
 kind: ConfigMap
 metadata:
   name: ory-overrides
+  namespace: kyma-installer
   labels:
     component: ory
     installer: overrides

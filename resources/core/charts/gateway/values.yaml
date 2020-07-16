@@ -1,4 +1,5 @@
 global:
+  isLocalProviderK3d: false
   compass:
     mtls:
       secret:
