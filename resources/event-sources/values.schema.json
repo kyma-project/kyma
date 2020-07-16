@@ -20,7 +20,7 @@
         "httpAdapter": {
           "image": "event-sources-http-adapter",
           "dir": "",
-          "version": "08b6fe17"
+          "version": "08b6fe17",
           "tracingEnabled": "true"
         }
       }
@@ -51,7 +51,7 @@
           "httpAdapter": {
             "image": "event-sources-http-adapter",
             "dir": "",
-            "version": "08b6fe17"
+            "version": "08b6fe17",
             "tracingEnabled": "true"
           }
         }
@@ -205,7 +205,7 @@
               "examples": [
                 "08b6fe17"
               ]
-            }
+            },
             "tracingEnabled": {
               "$id": "#/properties/global/properties/httpAdapter/properties/tracingEnabled",
               "type": "string",

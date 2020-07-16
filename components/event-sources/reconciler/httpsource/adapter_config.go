@@ -42,8 +42,8 @@ type httpAdapterEnvConfig struct {
 	Image string `required:"true"`
 	// CloudEvents receiver port
 	Port int32 `default:"8080"`
-	// Tracing Enabled?
-	TracingEnabled bool `default:"true"`
+	// Tracing Enabled? (need so be snake case as the environment variable is derived from this name)
+	TracingEnabled bool `default:"true" split_words:"true"`
 }
 
 // updateAdapterMetricsConfig serializes the metrics config from a ConfigMap to
