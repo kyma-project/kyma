@@ -21,6 +21,7 @@
           "image": "event-sources-http-adapter",
           "dir": "",
           "version": "08b6fe17"
+          "tracingEnabled": "true"
         }
       }
     }
@@ -51,6 +52,7 @@
             "image": "event-sources-http-adapter",
             "dir": "",
             "version": "08b6fe17"
+            "tracingEnabled": "true"
           }
         }
       ],
@@ -169,7 +171,8 @@
           "required": [
             "image",
             "dir",
-            "version"
+            "version",
+            "tracingEnabled"
           ],
           "additionalProperties": true,
           "properties": {
@@ -201,6 +204,16 @@
               "default": "",
               "examples": [
                 "08b6fe17"
+              ]
+            }
+            "tracingEnabled": {
+              "$id": "#/properties/global/properties/httpAdapter/properties/tracingEnabled",
+              "type": "string",
+              "title": "The tracing enabled schema",
+              "description": "Switch to en/disable tracing in the http_adapter",
+              "default": "true",
+              "examples": [
+                "true"
               ]
             }
           }
