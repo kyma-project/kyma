@@ -23,14 +23,14 @@ global:
   alertTools:
     credentials:
       slack:
-        sendresolved: true
+        sendResolved: true
         apiurl: ""
         channel: ""
         matchExpression:
           severity: critical
         routes: |-
       victorOps:
-        sendresolved: true
+        sendResolved: true
         routingkey: ""
         apikey: ""
         matchExpression:
