@@ -57,6 +57,7 @@ func TestServiceBrokerQueries(t *testing.T) {
 	`
 
 	t.Run("MultipleResources", func(t *testing.T) {
+		t.SkipNow()
 		req := fixServiceBrokersRequest(resourceDetailsQuery, expectedResource)
 
 		var res serviceBrokersQueryResponse
@@ -67,6 +68,7 @@ func TestServiceBrokerQueries(t *testing.T) {
 	})
 
 	t.Run("SingleResource", func(t *testing.T) {
+		t.SkipNow()
 		req := fixServiceBrokerRequest(resourceDetailsQuery, expectedResource)
 
 		var res serviceBrokerQueryResponse

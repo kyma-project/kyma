@@ -47,6 +47,6 @@ func NewFakeGenericServiceFactory(addToScheme func(*runtime.Scheme) error, objec
 		}
 	}
 	client := dynamicFake.NewSimpleDynamicClient(scheme, result...)
-	informerFactory := dynamicinformer.NewDynamicSharedInformerFactory(client, 10)
+	informerFactory := dynamicinformer.NewDynamicSharedInformerFactory(client, time.Second)
 	return resource.NewGenericServiceFactory(client, informerFactory), nil
 }
