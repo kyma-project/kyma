@@ -10,22 +10,23 @@
 # curl -s https://raw.githubusercontent.com/rancher/k3d/master/install.sh | bash
 
 START_TIME=$SECONDS
+CLUSTER_NAME=kyma
 # Delete the old cluster if it exists
 k3d delete --keep-registry-volume -n kyma || true
 # Create Kyma cluster
-k3d create --publish 80:80 --publish 443:443 --enable-registry --registry-volume local_registry --registry-name registry.localhost --server-arg --no-deploy --server-arg traefik -n kyma -t 60
+k3d create --publish 80:80 --publish 443:443 --enable-registry --registry-volume local_registry --registry-name registry.localhost --server-arg --no-deploy --server-arg traefik -n $CLUSTER_NAME -t 60
 
 # Delete cluster with keep-registry-volume to cache docker images
 # k3d delete --keep-registry-volume -n kyma
 
-export KUBECONFIG="$(k3d get-kubeconfig -n='kyma')"
+export KUBECONFIG="$(k3d get-kubeconfig -n=$CLUSTER_NAME)"
 export DOMAIN=local.kyma.pro
 export GARDENER=false
 export REGISTRY_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' /k3d-registry)
 sed "s/REGISTRY_IP/$REGISTRY_IP/" kyma-yaml/coredns-patch.tpl >kyma-yaml/coredns-patch.yaml
 KYMA_SCRIPTS_DIR="../installation/scripts"
 KYMA_RESOURCES_DIR="../installation/resources"
-KYMA_INSTALLER_IMAGE="${KYMA_INSTALLER_IMAGE:-eu.gcr.io/kyma-project/kyma-operator:98e02519}"
+KYMA_INSTALLER_IMAGE="test/installer"
 INSTALLER_YAML="${KYMA_RESOURCES_DIR}/installer.yaml"
 
 # This file will be created by cert-manager (not needed anymore):
@@ -75,6 +76,9 @@ kubectl create configmap serverless-overrides \
       -n kyma-installer
 kubectl label cm serverless-overrides -n kyma-installer installer=overrides
 kubectl label cm serverless-overrides -n kyma-installer component=serverless
+
+docker build -t test/installer -f $GOPATH/src/github.com/kyma-project/kyma/tools/kyma-installer/kyma.Dockerfile ../
+k3d import-images -n "${CLUSTER_NAME}" "${KYMA_INSTALLER_IMAGE}"
 
 echo "Manual concatenating yamls"
 # shellcheck disable=SC2002

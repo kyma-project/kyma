@@ -13,7 +13,6 @@ data:
   global.ingress.tlsKey: ZHVtbXkK
   global.isLocalEnv: "true"
   global.minikubeIP: 127.0.0.1
-  creationTimestamp: null
 ---
 apiVersion: v1
 data:
