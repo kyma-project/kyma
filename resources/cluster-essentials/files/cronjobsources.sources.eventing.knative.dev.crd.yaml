@@ -6,6 +6,7 @@ metadata:
       [
         { "type": "dev.knative.cronjob.event" }
       ]
+    "helm.sh/resource-policy": keep
   labels:
     duck.knative.dev/source: "true"
     eventing.knative.dev/release: "v0.12.0"

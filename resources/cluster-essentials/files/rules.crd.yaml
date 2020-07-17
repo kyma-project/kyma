@@ -1,6 +1,8 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   name: rules.oathkeeper.ory.sh
 spec:
   group: oathkeeper.ory.sh
