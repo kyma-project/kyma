@@ -7,7 +7,7 @@ global:
       name: kyma-gateway
   acceptance_tests:
     dir:
-    version: 9569c996
+    version: baccaefa
   disableLegacyConnectivity: "false"
 test:
   acceptance:
