@@ -59,7 +59,7 @@ else
 
   istioctl version
   printf "istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}\n"
-  istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}
+  istioctl manifest apply -f /etc/istio/config.yaml --set "values.gateways.istio-ingressgateway.loadBalancerIP=34.90.21.217" #${overrides_transformed}
 fi
 
 
