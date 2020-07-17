@@ -60,7 +60,7 @@ else
   fi
 
   printf "istioctl verison: "
-  istioctl verison
+  istioctl version
   printf "config :"
   cat /etc/istio/config.yaml
   printf "istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}\n"
