@@ -1,18 +1,67 @@
 #!/bin/bash -e
-#printf "\n=== print IstioOperator configuration ==========================================\n"
-#cat /etc/istio/istioOperator-draft.yaml
-##printf "\n=== generate manifest from IstioOperator configuration =========================\n"
-##echo 'istioctl manifest generate -f /etc/istio/istioOperator-draft.yaml --set "values.global.jwtPolicy=first-party-jwt" --set "values.mixer.telemetry.loadshedding.mode=disabled" --set "values.mixer.policy.autoscaleEnabled=false" --set "components.policy.k8s.resources.limits.cpu=500m" --set "components.policy.k8s.resources.limits.memory=2048Mi" --set "components.policy.k8s.resources.requests.cpu=300m" --set "components.policy.k8s.resources.requests.memory=512Mi" --set "values.mixer.telemetry.autoscaleEnabled=false" --set "components.telemetry.k8s.resources.limits.cpu=500m" --set "components.telemetry.k8s.resources.limits.memory=2048Mi" --set "components.telemetry.k8s.resources.requests.cpu=300m" --set "components.telemetry.k8s.resources.requests.memory=512Mi" --set "values.pilot.autoscaleEnabled=false" --set "components.pilot.k8s.resources.limits.cpu=500m" --set "components.pilot.k8s.resources.limits.memory=1024Mi" --set "components.pilot.k8s.resources.requests.cpu=250m" --set "components.pilot.k8s.resources.requests.memory=512Mi" > padu.yaml'
-##istioctl manifest generate -f /etc/istio/istioOperator-draft.yaml       --set "values.global.jwtPolicy=first-party-jwt" --set "values.mixer.telemetry.loadshedding.mode=disabled" --set "values.mixer.policy.autoscaleEnabled=false" --set "components.policy.k8s.resources.limits.cpu=500m" --set "components.policy.k8s.resources.limits.memory=2048Mi" --set "components.policy.k8s.resources.requests.cpu=300m" --set "components.policy.k8s.resources.requests.memory=512Mi" --set "values.mixer.telemetry.autoscaleEnabled=false" --set "components.telemetry.k8s.resources.limits.cpu=500m" --set "components.telemetry.k8s.resources.limits.memory=2048Mi" --set "components.telemetry.k8s.resources.requests.cpu=300m" --set "components.telemetry.k8s.resources.requests.memory=512Mi" --set "values.pilot.autoscaleEnabled=false" --set "components.pilot.k8s.resources.limits.cpu=500m" --set "components.pilot.k8s.resources.limits.memory=1024Mi" --set "components.pilot.k8s.resources.requests.cpu=250m" --set "components.pilot.k8s.resources.requests.memory=512Mi" > padu.yaml
-#echo 'istioctl manifest generate -f /etc/istio/istioOperator-draft.yaml --set "values.global.jwtPolicy=first-party-jwt"' > padu.yaml
-#istioctl manifest generate -f /etc/istio/istioOperator-draft.yaml       --set "values.global.jwtPolicy=first-party-jwt" > padu.yaml
-#printf "\n=== display new manifest =======================================================\n"
-#cat padu.yaml
-#printf "\n=== apply new manifest =========================================================\n"
-#kubectl apply -f padu.yaml
-#printf "\n=== apply new manifest again after a few seconds (so apiserver is ready to handle crds) =========================================================\n"
-#sleep 3
-#kubectl apply -f padu.yaml
+if [ -f "/etc/istio/overrides.yaml" ]; then
+  #New way: just merge default IstioOperator definition with a user-provided one.
+#  TODO implement new way base on IstioOperator CR
+#  yq merge -a -x /etc/istio/config.yaml /etc/istio/overrides.yaml > /etc/combo.yaml
+#  kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}" \
+#    --from-file /etc/istio/config.yaml \
+#    --from-file /etc/istio/overrides.yaml \
+#    --from-file /etc/combo.yaml \
+#    -o yaml --dry-run | kubectl replace -f -
+#  printf "istioctl manifest apply -f /etc/combo.yaml\n"
+#  istioctl manifest apply -f /etc/combo.yaml
+  echo "Not implemented yet"
+else
+  #Old way: apply single-value Helm overrides using `istioctl --set "key=val"`
+  overrides=$(kubectl get cm --all-namespaces -l "installer=overrides,component=istio" -o go-template --template='{{ range .items }}{{ range $key, $value := .data }}{{ if ne $key "kyma_istio_control_plane" }}{{ printf "%s: %s\n" $key . }}{{ end }}{{ end }}{{ end }}' )
+  overrides_transformed=""
+
+  if [ ! -z "$overrides" ]; then
+    while IFS= read -r line; do
+      key=$(echo "$line" | cut -d ':' -f 1)
+      val=$(echo "$line" | cut -d ':' -f 2 | cut -d ' ' -f 2)
+
+      case $key in
+        pilot.resources* )
+          new_key=$(echo "$key" | cut -d '.' -f 2-)
+          key=$(echo "trafficManagement.components.pilot.k8s.$new_key")
+          ;;
+        mixer.loadshedding.mode* )
+          key=$(echo "values.mixer.telemetry.loadshedding.mode")
+          ;;
+        mixer.telemetry.resources* )
+          new_key=$(echo "$key" | cut -d '.' -f 3-)
+          key=$(echo "telemetry.components.telemetry.k8s.$new_key")
+          ;;
+        mixer.policy.resources* )
+          new_key=$(echo "$key" | cut -d '.' -f 3-)
+          key=$(echo "policy.components.policy.k8s.$new_key")
+          ;;
+        gateways.istio-ingressgateway.resources* )
+          new_key=$(echo "$key" | cut -d '.' -f 3-)
+          key=$(echo "gateways.components.ingressGateway.k8s.$new_key")
+          ;;
+        gateways.istio-ingressgateway.autoscaleMin* )
+          key=$(echo "gateways.components.ingressGateway.k8s.hpaSpec.minReplicas")
+          ;;
+        gateways.istio-ingressgateway.autoscaleMax*)
+          key=$(echo "gateways.components.ingressGateway.k8s.hpaSpec.maxReplicas")
+          ;;
+        * )
+          key=$(echo "values.$key")
+          ;;
+      esac
+
+      if [ -z "$val" ]; then
+        val=$(echo '""')
+      fi
+      overrides_transformed=$(printf "$overrides_transformed --set \"$key=$val\"")
+    done <<< "$overrides"
+  fi
+
+  printf "istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}\n"
+  istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}
+fi
 
 istioctl manifest apply -f /etc/istio/config.yaml
 
