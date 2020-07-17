@@ -46,6 +46,7 @@ else
           key=$(echo "gateways.components.ingressGateway.k8s.hpaSpec.maxReplicas")
           ;;
         * )
+          echo "$key"
           key=$(echo "values.$key")
           ;;
       esac
@@ -57,11 +58,9 @@ else
     done <<< "$overrides"
   fi
 
-  istioctl version
   printf "istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}\n"
-  istioctl manifest apply -f /etc/istio/config.yaml --set "values.gateways.istio-ingressgateway.loadBalancerIP=34.90.21.217" #${overrides_transformed}
+  istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}
 fi
-
 
 #while [ "$(kubectl get po -n istio-system -l app=sidecarInjectorWebhook -o jsonpath='{ .items[0].status.phase}')" != "Running" ]
 #do
