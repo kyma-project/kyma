@@ -53,7 +53,7 @@ else
       if [ -z "$val" ]; then
         val=$(echo '""')
       fi
-      overrides_transformed=$(printf "$overrides_transformed --set \"$key=$val\"")
+      overrides_transformed=$(printf "$overrides_transformed --set $key=$val")
     done <<< "$overrides"
   fi
 
