@@ -8,8 +8,6 @@ readonly NAMESPACE='{{ .Release.Namespace }}'
 readonly TARGET_SECRET_NAME='{{ include "ory.fullname" . }}-hydra-credentials'
 readonly LOCAL_SECRETS_DIR="/etc/secrets"
 
-trap "echo 'error' && exit 1" TERM
-
 function get_from_file () {
   cat "${LOCAL_SECRETS_DIR}/${1}" 2> /dev/null || { >&2 echo "File ${1} not found. This value will be generated unless it is required!" && return 1; }
 }
