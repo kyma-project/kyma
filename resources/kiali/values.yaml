@@ -24,7 +24,7 @@ kcproxy:
   clientSecret: hiFWLWqIxw5d3gl
   nodeSelector: {}
   image:
-    repository: bitnami/keycloak-gatekeeper
+    repository: eu.gcr.io/kyma-project/external/bitnami/keycloak-gatekeeper
     tag: 10.0.0
     pullPolicy: IfNotPresent
   resources:

@@ -35,7 +35,7 @@ jaeger:
   spec:
     strategy: allInOne #allInOne | production
     allInOne:
-      image: jaegertracing/all-in-one:1.17.1
+      image: eu.gcr.io/kyma-project/external/jaegertracing/all-in-one:1.17.1
       options:
         log-level: info
     storage:
@@ -109,8 +109,8 @@ kcproxy:
   clientSecret: oiEWUWOIEwedfgg
   nodeSelector: {}
   image:
-    repository: bitnami/keycloak-gatekeeper
-    tag: 9.0.3
+    repository: eu.gcr.io/kyma-project/external/bitnami/keycloak-gatekeeper
+    tag: 10.0.0
     pullPolicy: IfNotPresent
   resources:
     limits:
