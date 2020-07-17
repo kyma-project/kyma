@@ -59,6 +59,10 @@ else
     done <<< "$overrides"
   fi
 
+  printf "istioctl verison: "
+  istioctl verison
+  printf "config :"
+  cat /etc/istio/config.yaml
   printf "istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}\n"
   istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}
 fi
