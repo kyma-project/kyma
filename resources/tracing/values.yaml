@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/jaeger-operator
-  tag: 1.17.1-fe39dbe9
+  tag: 1.18.1-ff002438
   pullPolicy: IfNotPresent
   imagePullSecrets: []
 
@@ -35,7 +35,7 @@ jaeger:
   spec:
     strategy: allInOne #allInOne | production
     allInOne:
-      image: eu.gcr.io/kyma-project/external/jaegertracing/all-in-one:1.17.1
+      image: eu.gcr.io/kyma-project/external/jaegertracing/all-in-one:1.18.1
       options:
         log-level: info
     storage:
