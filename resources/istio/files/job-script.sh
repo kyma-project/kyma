@@ -1,16 +1,14 @@
 #!/bin/bash -e
 if [ -f "/etc/istio/overrides.yaml" ]; then
-  #New way: just merge default IstioOperator definition with a user-provided one.
-#  TODO implement new way base on IstioOperator CR
-#  yq merge -a -x /etc/istio/config.yaml /etc/istio/overrides.yaml > /etc/combo.yaml
-#  kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}" \
-#    --from-file /etc/istio/config.yaml \
-#    --from-file /etc/istio/overrides.yaml \
-#    --from-file /etc/combo.yaml \
-#    -o yaml --dry-run | kubectl replace -f -
-#  printf "istioctl manifest apply -f /etc/combo.yaml\n"
-#  istioctl manifest apply -f /etc/combo.yaml
-  echo "Not implemented yet"
+  #New way: just merge default IstioControlPlane definition with a user-provided one.
+  yq merge -a -x /etc/istio/config.yaml /etc/istio/overrides.yaml > /etc/combo.yaml
+  kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}" \
+    --from-file /etc/istio/config.yaml \
+    --from-file /etc/istio/overrides.yaml \
+    --from-file /etc/combo.yaml \
+    -o yaml --dry-run | kubectl replace -f -
+  printf "istioctl manifest apply -f /etc/combo.yaml\n"
+  istioctl manifest apply -f /etc/combo.yaml
 else
   #Old way: apply single-value Helm overrides using `istioctl --set "key=val"`
   overrides=$(kubectl get cm --all-namespaces -l "installer=overrides,component=istio" -o go-template --template='{{ range .items }}{{ range $key, $value := .data }}{{ if ne $key "kyma_istio_control_plane" }}{{ printf "%s: %s\n" $key . }}{{ end }}{{ end }}{{ end }}' )
@@ -59,10 +57,7 @@ else
     done <<< "$overrides"
   fi
 
-  printf "istioctl verison: "
   istioctl version
-  printf "config :"
-  cat /etc/istio/config.yaml
   printf "istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}\n"
   istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}
 fi
