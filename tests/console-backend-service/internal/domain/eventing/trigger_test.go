@@ -22,6 +22,8 @@ import (
 )
 
 func TestTriggerEventQueries(t *testing.T) {
+	t.Skip("skipping test")
+
 	c, err := graphql.New()
 	assert.NoError(t, err)
 
