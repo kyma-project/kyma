@@ -14,7 +14,7 @@ To configure the Serverless chart, override the default values of its `values.ya
 
 This table lists the configurable parameters, their descriptions, and default values for both cluster and local installations.
 
-> **CAUTION:** Limited memory and CPU resources on Minikube directly affects the Serverless functionality as you can process only a limited number of Functions at the same time, and their processing time is significantly longer. To process large workloads, we recommend using the cluster setup.
+> **NOTE:** Limited memory and CPU resources on Minikube directly affects the Serverless functionality as you can process only a limited number of Functions at the same time, and their processing time is significantly longer. To process large workloads, we recommend using the cluster setup.
 
 | Parameter                                       | Description                                                           | Default value | Minikube override |
 | ----------------------------------------------- | --------------------------------------------------------------------- | ------------- | ----------------- |
