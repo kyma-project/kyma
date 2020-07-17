@@ -46,7 +46,6 @@ else
           key=$(echo "gateways.components.ingressGateway.k8s.hpaSpec.maxReplicas")
           ;;
         * )
-          echo "$key"
           key=$(echo "values.$key")
           ;;
       esac
