@@ -9,6 +9,8 @@ By default, you install Kyma with Serverless that uses the internal Docker regis
 - [Google Container Registry (GCR)](https://cloud.google.com/container-registry)
 - [Azure Container Registry (ACR)](https://azure.microsoft.com/en-us/services/container-registry/)
 
+> **CAUTION:** Function images are not cached in the Docker Hub as this registry is not compatible with the caching logic defined in [Kaniko](https://cloud.google.com/cloud-build/docs/kaniko-cache) that Serverless uses for building images. 
+
 ## Prerequisites
 
 <div tabs name="prerequisites" group="external-docker-registry">
@@ -58,7 +60,7 @@ By default, you install Kyma with Serverless that uses the internal Docker regis
     - **PASSWORD** is the password for the account in the Docker Hub.
     - **SERVER_ADDRESS** is the server address of the Docker Hub. At the moment, Kyma only supports the `https://index.docker.io/v1/` server address.
     - **REGISTRY_ADDRESS** is the registry address in the Docker Hub.
-    
+
     > **TIP:** Usually the Docker registry address is the same as the account name.
 
     Example:
@@ -95,7 +97,7 @@ To use GCR, create a Google service account that has a private key and the **Sto
     export PROJECT=test-project-012345
     export SECRET_FILE=my-private-key-path
     export ROLE=roles/storage.admin
-    export SERVER_ADDRESS=grc.io
+    export SERVER_ADDRESS=gcr.io
     ```
 
 2. When you communicate with Google Cloud for the first time, set the context for your Google Cloud project. Run this command:
