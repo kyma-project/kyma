@@ -1,7 +1,5 @@
 package eventing
 
-import "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-
 type TriggerListQueryResponse struct {
 	Triggers []Trigger
 }
@@ -12,16 +10,16 @@ type TriggerEvent struct {
 }
 
 type Trigger struct {
-	Name  string `json:"name"`
-	Namespace  string `json:"namespace"`
-	Spec TriggerSpec `json:"spec""`
-	Status TriggerStatus `json:"status"`
+	Name      string        `json:"name"`
+	Namespace string        `json:"namespace"`
+	Spec      TriggerSpec   `json:"spec""`
+	Status    TriggerStatus `json:"status"`
 }
 
 type TriggerSpec struct {
-	Broker string `json:"broker"`
-	Filter map[string]interface{} `json:"filter"`
-	Subscriber Subscriber `json:"subscriber"`
+	Broker     string                 `json:"broker"`
+	Filter     map[string]interface{} `json:"filter"`
+	Subscriber Subscriber             `json:"subscriber"`
 }
 
 type Subscriber struct {
