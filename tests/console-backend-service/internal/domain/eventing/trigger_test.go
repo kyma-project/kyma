@@ -4,6 +4,7 @@ package eventing
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"testing"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
@@ -49,14 +50,25 @@ func TestTriggerEventQueries(t *testing.T) {
 	checkTriggerEvent(t, expectedEvent, event)
 
 	triggers, err := listTriggers(c, listTriggersArguments(namespaceName), triggerDetailsFields())
+	log.Debug(len(triggers.Triggers))
+	for _, element := range triggers.Triggers {
+		log.Debug(element.Name)
+	}
+
 	assert.NoError(t, err)
 
 	checkTriggerList(t, triggers, TriggerName)
 
 	err = mutationTrigger(c, "delete", deleteTriggerArguments(namespaceName), metadataDetailsFields())
 	assert.NoError(t, err)
+	fmt.Printf("DELETE %s\n", TriggerName)
+	log.Debug("DELETE %s\n", TriggerName)
 
 	triggers, err = listTriggers(c, listTriggersArguments(namespaceName), triggerDetailsFields())
+	log.Debug(len(triggers.Triggers))
+	for _, element := range triggers.Triggers {
+		log.Debug(element.Name)
+	}
 	assert.NoError(t, err)
 
 	checkTriggerList(t, triggers)
@@ -177,7 +189,7 @@ func createTriggerArguments(namespace string) string {
 				}
 			}
 		},
-	`, namespace, TriggerName, namespace, BrokerName, SubscriberAPIVersion, SubscriberKind, SubscriberName, namespace)
+	`, namespace, TriggerName, BrokerName, SubscriberAPIVersion, SubscriberKind, SubscriberName, namespace)
 }
 
 func createTriggerEventArguments(namespace string) string {
