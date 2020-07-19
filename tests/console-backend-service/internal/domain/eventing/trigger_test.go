@@ -177,7 +177,7 @@ func createTriggerArguments(namespace string) string {
 				}
 			}
 		},
-	`, namespace, TriggerName, namespace, BrokerName, SubscriberAPIVersion, SubscriberKind, SubscriberName, namespace)
+	`, namespace, TriggerName, BrokerName, SubscriberAPIVersion, SubscriberKind, SubscriberName, namespace)
 }
 
 func createTriggerEventArguments(namespace string) string {
