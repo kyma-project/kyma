@@ -22,8 +22,6 @@ import (
 )
 
 func TestTriggerEventQueries(t *testing.T) {
-	t.Skip("skipping test")
-
 	c, err := graphql.New()
 	assert.NoError(t, err)
 
@@ -169,7 +167,6 @@ func createTriggerArguments(namespace string) string {
 		namespace: "%s",
 		trigger: {
 			name: "%s",
-			namespace: "%s",
 			broker: "%s"
 			subscriber: {
 				ref: {
@@ -200,26 +197,25 @@ func createTriggerEventArguments(namespace string) string {
 func deleteTriggerArguments(namespace string) string {
 	return fmt.Sprintf(`
 		namespace: "%s"
-		trigger: {
-			name: "%s",
-			namespace: "%s",
-		}
-	`, namespace, TriggerName, namespace)
+		triggerName: "%s"
+	`, namespace, TriggerName)
 }
 
 func triggerDetailsFields() string {
 	return `
 		name
 		namespace
-		broker
-		filterAttributes
-		subscriber {
-			uri
-			ref {
-				apiVersion
-				kind
-				name
-				namespace
+		spec {
+			broker
+			filter
+			subscriber {
+				uri
+				ref {
+					apiVersion
+					kind
+					name
+					namespace
+				}
 			}
 		}
 		status {
