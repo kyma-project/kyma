@@ -188,6 +188,11 @@ spec:
         args:
           - -overrideLogFile=/app/overrides.txt
           - -helmDebugMode=true
+        resources:
+          requests:
+            memory: 512Mi
+          limits:
+            memory: 2Gi
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
