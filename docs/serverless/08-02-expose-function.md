@@ -84,9 +84,11 @@ Follows these steps:
 
 1. Select a Namespace from the drop-down list in the top navigation panel. Make sure the Namespace includes the Function that you want to expose through an API Rule.
 
-2. Go to the **API Rules** view at the bottom of the left navigation panel and select **Add API Rule**.
+2. Go to the **Functions** view in the left navigation panel and select the Function you want to expose.
 
-3. In the **General settings** section:
+3. Switch to the **Configuration** tab and select **Expose Function** in the **API Rules** section. A pop-up box with the form will appear on the screen.
+
+4. In the **General settings** section:
 
     - Enter the API Rule's **Name** matching the Function's name.
 
@@ -94,15 +96,11 @@ Follows these steps:
 
     - Enter **Hostname** to indicate the host on which you want to expose your Function.
 
-    - Select the Function from the drop-down list in the **Service** column.
+5. In the **Access strategies** section, leave the default settings with `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, and `HEAD` methods and the `noop` handler selected.
 
-4. In the **Access strategies** section, leave the default settings, with `GET`, `POST`, `PUT`, and `DELETE` methods and the `noop` handler selected.
+6. Select **Create** to confirm changes. The pop-up box with the form will close.
 
-5. Select **Create** to confirm changes.
-
-    The message appears on the screen confirming the changes were saved.
-
-6. In the API Rule's details view that opens up automatically, check if you can access the Function by selecting the HTTPS link under **Host**.
+7. Check if you can access the Function by selecting the HTTPS link under the **Host** column for the newly created API Rule.
 
     </details>
 </div>
