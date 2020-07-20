@@ -24,4 +24,4 @@ This table lists the configurable parameters, their descriptions, and default va
 | **global.isDevelopMode** | Defines whether to accept URL prefixes from the **global.urlRepoPrefixes.additionalDevelopMode** list. If set to `true`, the Helm Broker accepts the prefixes from the list. | `false` |
 | **global.urlRepoPrefixes.default** | Defines a list of accepted prefixes for repository URLs. | `'https://', 'git::', 'github.com/', 'bitbucket.org/'` |
 | **global.urlRepoPrefixes.additionalDevelopMode** | Defines a list of accepted prefixes for repository URLs when develop mode is enabled. | `'http://'` |
-| **additionalAddonsRepositories.myRepo** | A map of additional ClusterAddonsConfiguration repositories to create by default. The key gets used as name while the value gets used as URL for the repository. | `github.com/myOrg/myRepo//addons/index.yaml` |
+| **additionalAddonsRepositories.myRepo** | Provides a map of additional ClusterAddonsConfiguration repositories to create by default. The key is used as a name and the value is used as a URL for the repository. | `github.com/myOrg/myRepo//addons/index.yaml` |
