@@ -44,38 +44,7 @@ kubectl label ns kyma-installer kyma-project.io/installation="" --overwrite
 TLS_CERT=ZHVtbXkK
 TLS_KEY=ZHVtbXkK
 
-# Create overrides for net-global
-#kubectl create configmap net-global-overrides \
-#      --from-literal global.isLocalEnv="true" \
-#      --from-literal global.domainName="$DOMAIN" \
-#      --from-literal global.minikubeIP="127.0.0.1" \
-#      --from-literal global.ingress.domainName="$DOMAIN" \
-#      --from-literal global.ingress.tlsCrt=$TLS_CERT \
-#      --from-literal global.ingress.tlsKey=$TLS_KEY \
-#      --from-literal global.environment.gardener="$GARDENER" \
-#      --from-literal global.isLocalProviderK3d: "true" \
-#      -n kyma-installer
-#kubectl label cm net-global-overrides -n kyma-installer installer=overrides --overwrite
-#kubectl label cm net-global-overrides -n kyma-installer kyma-project.io/installation= --overwrite
-#
-## Create overrides for Ory
-#kubectl create configmap ory-overrides \
-#      --from-literal global.ory.hydra.persistence.enabled=false \
-#      --from-literal global.ory.hydra.persistence.postgresql.enabled=false \
-#      --from-literal hydra.hydra.autoMigrate=false \
-#      -n kyma-installer
-#kubectl label cm ory-overrides -n kyma-installer installer=overrides
-#kubectl label cm ory-overrides -n kyma-installer component=ory
-#
-## Create overrides for Serverless
-#kubectl create configmap serverless-overrides \
-#      --from-literal dockerRegistry.enableInternal=false \
-#      --from-literal dockerRegistry.serverAddress=registry.localhost:5000 \
-#      --from-literal dockerRegistry.registryAddress=registry.localhost:5000 \
-#      --from-literal global.ingress.domainName="$DOMAIN" \
-#      -n kyma-installer
-#kubectl label cm serverless-overrides -n kyma-installer installer=overrides
-#kubectl label cm serverless-overrides -n kyma-installer component=serverless
+# Applying overrides
 kubectl apply -f ../installation/resources/installer-config-k3d.yaml.tpl
 
 docker build -t test/installer -f $GOPATH/src/github.com/kyma-project/kyma/tools/kyma-installer/kyma.Dockerfile ../
