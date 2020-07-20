@@ -1,7 +1,9 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
+{{ if .Values.istio.rbac.enabled }}
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ .Chart.Name }}
   labels:
     app: {{ template "name" . }}
     release: {{ .Release.Name }}
@@ -17,4 +19,12 @@ spec:
   rules:
   - from:
     - source:
-        principals: ["cluster.local/ns/kyma-system/sa/service-catalog-controller-manager"]
+        principals:
+{{ tpl (toYaml .Values.istio.rbac.connectorServiceInternalApi.subjects | indent 10) . }}
+  - to:
+    - operation:
+        ports:
+        - "{{ .Values.service.externalapi.port }}"
+        - "9090" # http-metrics
+{{ end }}
+{{- end }}

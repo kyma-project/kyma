@@ -1,18 +1,21 @@
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: {{ template "fullname" . }}
+  name: all-users--graphql-manage-all
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "name" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
 spec:
   selector:
     matchLabels:
-      app: {{ template "fullname" . }}
+      app: {{ template "name" . }}
   action: ALLOW
   rules:
   - from:
     - source:
-        principals: ["cluster.local/ns/kyma-system/sa/service-catalog-controller-manager"]
+        principals: ["*"]
+    to:
+    - operation:
+        paths: ["/graphql"]

@@ -55,26 +55,27 @@ spec:
          paths:
          - "/health"
          - "/ready"
-         - "/metrics"
----
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  labels:
-    app: {{ template "loki.name" . }}
-    chart: {{ template "loki.chart" . }}
-    release: {{ .Release.Name }}
-  name: logging-fluentbit
-  namespace: kyma-system
-spec:
-  action: ALLOW
-  selector:
-    matchLabels:
-      app: {{ template "loki.name" . }}
-  rules:
-  - from:
-    - source:
-        principals:
-        #TODO: "logging-fluent-bit" sa name is defined by fluentbit subchart. Find a proper way to refer to this name, instead of hard-coding it.
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/logging-fluent-bit
+   - from:
+     - source:
+         principals:
+         - "cluster.local/ns/{{ .Release.Namespace }}/sa/{{ template "loki.serviceAccountName" . }}"
+         - "cluster.local/ns/kyma-system/sa/monitoring-grafana"
+         - "cluster.local/ns/kyma-system/sa/logging-fluent-bit"
+     to:
+     - operation:
+         paths: ["/metrics"]
+         methods: ["GET"]
+     when:
+     - key: "request.headers[User-Agent]"
+       values: ["Prometheus/*"]
+   - from:
+     - source:
+         principals:
+         - "cluster.local/ns/{{ .Release.Namespace }}/sa/{{ template "loki.serviceAccountName" . }}"
+         - "cluster.local/ns/kyma-system/sa/monitoring-grafana"
+         - "cluster.local/ns/kyma-system/sa/logging-fluent-bit"
+     to:
+     - operation:
+         paths: ["/api/*", "/loki/api/v1/*"]
+         methods: ["GET", "POST", "OPTIONS"]
 {{- end }}
