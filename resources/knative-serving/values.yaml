@@ -45,6 +45,15 @@ knative_serving:
     labels:
       # PodMonitorSelector is configured here: resources/monitoring/templates/prometheus/prometheus.yaml
       release: monitoring
+  webhook:
+    # default timeout for Mutating and Validating Webhooks
+    timeout: 10
+    # Additional matchExpressions for Webhook Configuration
+    webhookMatchExp:
+      - key: gardener.cloud/purpose
+        operator: NotIn
+        values:
+          - kube-system
 
 global:
   version: "v0.14.0"
@@ -56,7 +65,7 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_knative_serving_acceptance:
-    dir: 
+    dir:
     version: "7dd25b42"
   ingress:
     domainName:
