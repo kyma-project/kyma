@@ -1,14 +1,18 @@
----
-apiVersion: authentication.istio.io/v1alpha1
-kind: Policy
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
 metadata:
   name: zipkin
   labels:
-{{ include "jaeger-operator.labels" . | indent 4 }}
+    {{ include "jaeger-operator.labels" . | indent 4 }}
     app.kubernetes.io/component: zipkin
 spec:
-  targets:
-  - name: zipkin
-  peers:
-  - mtls:
-      mode: "PERMISSIVE"
+  selector:
+    matchLabels:
+      {{- if eq .Values.jaeger.spec.strategy "production" }}
+      app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-collector
+      {{- else }}
+      app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger
+      {{- end }}
+      app.kubernetes.io/instance: {{ template "jaeger-operator.fullname" . }}-jaeger
+  mtls:
+    mode: "PERMISSIVE"
