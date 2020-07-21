@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"testing"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
@@ -74,10 +72,6 @@ func TestServiceBrokerQueries(t *testing.T) {
 		var res serviceBrokerQueryResponse
 		err = c.Do(req, &res)
 
-		log.Debug(expectedResource)
-		log.Debugf(expectedResource.Name)
-		log.Debugf(expectedResource.Namespace)
-		log.Debugf("O:%v\n", expectedResource)
 		require.NoError(t, err)
 		checkBroker(t, expectedResource, res.ServiceBroker)
 	})
