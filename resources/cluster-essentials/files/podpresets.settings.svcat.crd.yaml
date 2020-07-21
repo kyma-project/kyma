@@ -1,0 +1,48 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: podpresets.settings.svcat.k8s.io
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  version: v1alpha1
+  group: settings.svcat.k8s.io
+  names:
+    kind: PodPreset
+    plural: podpresets
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            env:
+              items:
+                type: object
+              type: array
+            envFrom:
+              items:
+                type: object
+              type: array
+            selector:
+              type: object
+            volumeMounts:
+              items:
+                type: object
+              type: array
+            volumes:
+              items:
+                type: object
+              type: array
+          required:
+          - selector
+          type: object
+        status:
+          type: object
+      type: object

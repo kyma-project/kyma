@@ -1,0 +1,16 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: applicationmappings.applicationconnector.kyma-project.io
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  group: applicationconnector.kyma-project.io
+  version: v1alpha1
+  scope: Namespaced
+  names:
+    plural: applicationmappings
+    singular: applicationmapping
+    kind: ApplicationMapping
+    shortNames:
+    - am
