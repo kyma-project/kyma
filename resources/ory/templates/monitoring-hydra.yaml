@@ -32,8 +32,9 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: {{ include "ory.name" . }}-hydra-maester-metrics
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: hydra-maester
   portLevelMtls:
-    8080:
+    {{ .Values.hydra.hydra-maester.port.metrics }}:
       mode: PERMISSIVE
 {{- end }}

@@ -7,9 +7,10 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: {{ include "ory.fullname" . }}-oathkeeper-maester-metrics
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: oathkeeper
   portLevelMtls:
-    8080:
+    {{ .Values.oathkeeper.sidecar.port.metrics }}:
       mode: PERMISSIVE
 ---
 apiVersion: monitoring.coreos.com/v1
