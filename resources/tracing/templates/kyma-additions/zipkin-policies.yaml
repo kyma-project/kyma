@@ -3,7 +3,7 @@ kind: PeerAuthentication
 metadata:
   name: zipkin
   labels:
-    {{ include "jaeger-operator.labels" . | indent 4 }}
+{{ include "jaeger-operator.labels" . | indent 4 }}
     app.kubernetes.io/component: zipkin
 spec:
   selector:

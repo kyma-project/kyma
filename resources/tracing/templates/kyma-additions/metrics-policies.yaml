@@ -25,6 +25,7 @@ spec:
       app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger
   mtls:
     mode: "PERMISSIVE"
+{{- end }}
 {{- if eq .Values.jaeger.spec.strategy "production" }}
 ---
 apiVersion: security.istio.io/v1beta1
