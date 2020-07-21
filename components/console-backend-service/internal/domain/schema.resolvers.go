@@ -561,6 +561,10 @@ func (r *subscriptionResolver) PodEvent(ctx context.Context, namespace string) (
 	return r.k8s.PodEventSubscription(ctx, namespace)
 }
 
+func (r *subscriptionResolver) DeploymentEvent(ctx context.Context, namespace string) (<-chan *gqlschema.DeploymentEvent, error) {
+	return r.k8s.DeploymentEventSubscription(ctx, namespace)
+}
+
 func (r *subscriptionResolver) ServiceEvent(ctx context.Context, namespace string) (<-chan *gqlschema.ServiceEvent, error) {
 	return r.k8s.ServiceEventSubscription(ctx, namespace)
 }
