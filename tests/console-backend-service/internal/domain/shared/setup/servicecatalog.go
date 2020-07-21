@@ -44,7 +44,7 @@ func NewServiceCatalogConfigurer(namespace string, registerServiceBroker bool) (
 
 	nsConfigurer := configurer.NewNamespace(namespace, coreCli)
 
-	aInjector, err := injector.NewAddons("tets", cfg.TestingAddonsURL)
+	aInjector, err := injector.NewAddons("testing-addons-cbs", cfg.TestingAddonsURL)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating the addons configuration injector")
 	}
