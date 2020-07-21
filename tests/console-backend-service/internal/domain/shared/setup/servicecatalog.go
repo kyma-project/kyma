@@ -1,7 +1,6 @@
 package setup
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/hashicorp/go-multierror"
@@ -63,7 +62,7 @@ func NewServiceCatalogConfigurer(namespace string, registerServiceBroker bool) (
 func (c *ServiceCatalogConfigurer) Setup() error {
 	log.Println("Setting up tests...")
 
-	fmt.Println("setting up, c.NsConfigurer.Create")
+	log.Println("setting up, c.NsConfigurer.Create")
 	err := c.NsConfigurer.Create(nil)
 	if err != nil {
 		return errors.Wrap(err, "while creating namespace")
