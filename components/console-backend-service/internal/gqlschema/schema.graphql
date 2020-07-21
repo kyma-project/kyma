@@ -552,6 +552,11 @@ type Deployment {
     boundServiceInstanceNames: [String!]
 }
 
+type DeploymentEvent {
+    type: SubscriptionEventType!
+    deployment: Deployment!
+}
+
 enum ServiceProtocol {
     TCP
     UDP
@@ -1154,6 +1159,7 @@ type Subscription {
     applicationEvent: ApplicationEvent! @HasAccess(attributes: {resource: "applications", verb: "watch", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
 
     podEvent(namespace: String!): PodEvent! @HasAccess(attributes: {resource: "pods", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    deploymentEvent(namespace: String!): DeploymentEvent! @HasAccess(attributes: {resource: "deployments", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     configMapEvent(namespace: String!): ConfigMapEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 

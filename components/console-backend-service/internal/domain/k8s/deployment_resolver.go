@@ -3,6 +3,9 @@ package k8s
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
+
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	scPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/pretty"
@@ -20,6 +23,8 @@ type deploymentLister interface {
 	List(namespace string) ([]*v1.Deployment, error)
 	ListWithoutFunctions(namespace string) ([]*v1.Deployment, error)
 	Find(name, namespace string) (*v1.Deployment, error)
+	Subscribe(listener resource.Listener)
+	Unsubscribe(listener resource.Listener)
 }
 
 type deploymentResolver struct {
@@ -52,6 +57,24 @@ func (r *deploymentResolver) DeploymentsQuery(ctx context.Context, namespace str
 	}
 
 	return r.deploymentConverter.ToGQLs(deployments), nil
+}
+
+func (r *Resolver) DeploymentEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.DeploymentEvent, error) {
+	channel := make(chan *gqlschema.DeploymentEvent, 1)
+	filter := func(deployment *v1.Deployment) bool {
+		return deployment != nil && deployment.Namespace == namespace
+	}
+
+	deploymentListener := listener.NewDeployment(channel, filter, r.deploymentConverter)
+
+	r.deploymentResolver.deploymentLister.Subscribe(deploymentListener)
+	go func() {
+		defer close(channel)
+		defer r.deploymentResolver.deploymentLister.Unsubscribe(deploymentListener)
+		<-ctx.Done()
+	}()
+
+	return channel, nil
 }
 
 func (r *deploymentResolver) DeploymentBoundServiceInstanceNamesField(ctx context.Context, deployment *gqlschema.Deployment) ([]string, error) {

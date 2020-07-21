@@ -1,4 +1,0 @@
-dependencies:
-  - name: hydra-maester
-    version: 0.0.1
-    condition: maester.enabled

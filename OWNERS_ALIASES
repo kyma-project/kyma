@@ -21,14 +21,12 @@ aliases:
     - kwiatekus
     - dariadomagala
     - akucharska
-    - sjanota
   console-approvers:
     - parostatkiem
     - Wawrzyn321
     - kwiatekus
     - dariadomagala
     - akucharska
-    - sjanota
   knative-eventing-kafka-approvers:
     - rakesh-garimella
     - lilitgh
