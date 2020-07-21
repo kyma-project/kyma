@@ -62,7 +62,6 @@ func NewServiceCatalogConfigurer(namespace string, registerServiceBroker bool) (
 func (c *ServiceCatalogConfigurer) Setup() error {
 	log.Println("Setting up tests...")
 
-	log.Println("setting up, c.NsConfigurer.Create")
 	err := c.NsConfigurer.Create(nil)
 	if err != nil {
 		return errors.Wrap(err, "while creating namespace")
