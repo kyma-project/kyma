@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   name: add-ons-ui
   pullPolicy: IfNotPresent
-  version: 875335c4
+  version: baccaefa
 service:
   internalPort: 80
   externalPort: 80
