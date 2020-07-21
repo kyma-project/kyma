@@ -400,6 +400,11 @@ type ComplexityRoot struct {
 		Type                    func(childComplexity int) int
 	}
 
+	DeploymentEvent struct {
+		Deployment func(childComplexity int) int
+		Type       func(childComplexity int) int
+	}
+
 	DeploymentStatus struct {
 		AvailableReplicas func(childComplexity int) int
 		Conditions        func(childComplexity int) int
@@ -954,6 +959,7 @@ type ComplexityRoot struct {
 		ClusterAssetGroupEvent          func(childComplexity int) int
 		ClusterServiceBrokerEvent       func(childComplexity int) int
 		ConfigMapEvent                  func(childComplexity int, namespace string) int
+		DeploymentEvent                 func(childComplexity int, namespace string) int
 		FunctionEvent                   func(childComplexity int, namespace string, functionName *string) int
 		NamespaceEvent                  func(childComplexity int, withSystemNamespaces *bool) int
 		PodEvent                        func(childComplexity int, namespace string) int
@@ -1199,6 +1205,7 @@ type SubscriptionResolver interface {
 	ClusterServiceBrokerEvent(ctx context.Context) (<-chan *ClusterServiceBrokerEvent, error)
 	ApplicationEvent(ctx context.Context) (<-chan *ApplicationEvent, error)
 	PodEvent(ctx context.Context, namespace string) (<-chan *PodEvent, error)
+	DeploymentEvent(ctx context.Context, namespace string) (<-chan *DeploymentEvent, error)
 	ServiceEvent(ctx context.Context, namespace string) (<-chan *ServiceEvent, error)
 	ConfigMapEvent(ctx context.Context, namespace string) (<-chan *ConfigMapEvent, error)
 	ClusterAddonsConfigurationEvent(ctx context.Context) (<-chan *ClusterAddonsConfigurationEvent, error)
@@ -2547,6 +2554,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DeploymentCondition.Type(childComplexity), true
+
+	case "DeploymentEvent.deployment":
+		if e.complexity.DeploymentEvent.Deployment == nil {
+			break
+		}
+
+		return e.complexity.DeploymentEvent.Deployment(childComplexity), true
+
+	case "DeploymentEvent.type":
+		if e.complexity.DeploymentEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.DeploymentEvent.Type(childComplexity), true
 
 	case "DeploymentStatus.availableReplicas":
 		if e.complexity.DeploymentStatus.AvailableReplicas == nil {
@@ -5610,6 +5631,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Subscription.ConfigMapEvent(childComplexity, args["namespace"].(string)), true
 
+	case "Subscription.deploymentEvent":
+		if e.complexity.Subscription.DeploymentEvent == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_deploymentEvent_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.DeploymentEvent(childComplexity, args["namespace"].(string)), true
+
 	case "Subscription.functionEvent":
 		if e.complexity.Subscription.FunctionEvent == nil {
 			break
@@ -6684,6 +6717,11 @@ type Deployment {
     boundServiceInstanceNames: [String!]
 }
 
+type DeploymentEvent {
+    type: SubscriptionEventType!
+    deployment: Deployment!
+}
+
 enum ServiceProtocol {
     TCP
     UDP
@@ -7286,6 +7324,7 @@ type Subscription {
     applicationEvent: ApplicationEvent! @HasAccess(attributes: {resource: "applications", verb: "watch", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
 
     podEvent(namespace: String!): PodEvent! @HasAccess(attributes: {resource: "pods", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    deploymentEvent(namespace: String!): DeploymentEvent! @HasAccess(attributes: {resource: "deployments", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     configMapEvent(namespace: String!): ConfigMapEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
@@ -9990,6 +10029,20 @@ func (ec *executionContext) field_Subscription_assetGroupEvent_args(ctx context.
 }
 
 func (ec *executionContext) field_Subscription_configMapEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Subscription_deploymentEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -16403,6 +16456,74 @@ func (ec *executionContext) _DeploymentCondition_reason(ctx context.Context, fie
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DeploymentEvent_type(ctx context.Context, field graphql.CollectedField, obj *DeploymentEvent) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "DeploymentEvent",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	fc.Result = res
+	return ec.marshalNSubscriptionEventType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriptionEventType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DeploymentEvent_deployment(ctx context.Context, field graphql.CollectedField, obj *DeploymentEvent) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "DeploymentEvent",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Deployment, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Deployment)
+	fc.Result = res
+	return ec.marshalNDeployment2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐDeployment(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _DeploymentStatus_replicas(ctx context.Context, field graphql.CollectedField, obj *DeploymentStatus) (ret graphql.Marshaler) {
@@ -32046,6 +32167,81 @@ func (ec *executionContext) _Subscription_podEvent(ctx context.Context, field gr
 	}
 }
 
+func (ec *executionContext) _Subscription_deploymentEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Subscription_deploymentEvent_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Subscription().DeploymentEvent(rctx, args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "deployments", "verb": "watch"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(<-chan *DeploymentEvent); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.DeploymentEvent`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *DeploymentEvent)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNDeploymentEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐDeploymentEvent(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
 func (ec *executionContext) _Subscription_serviceEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -37273,6 +37469,38 @@ func (ec *executionContext) _DeploymentCondition(ctx context.Context, sel ast.Se
 	return out
 }
 
+var deploymentEventImplementors = []string{"DeploymentEvent"}
+
+func (ec *executionContext) _DeploymentEvent(ctx context.Context, sel ast.SelectionSet, obj *DeploymentEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, deploymentEventImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DeploymentEvent")
+		case "type":
+			out.Values[i] = ec._DeploymentEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deployment":
+			out.Values[i] = ec._DeploymentEvent_deployment(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var deploymentStatusImplementors = []string{"DeploymentStatus"}
 
 func (ec *executionContext) _DeploymentStatus(ctx context.Context, sel ast.SelectionSet, obj *DeploymentStatus) graphql.Marshaler {
@@ -40750,6 +40978,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_applicationEvent(ctx, fields[0])
 	case "podEvent":
 		return ec._Subscription_podEvent(ctx, fields[0])
+	case "deploymentEvent":
+		return ec._Subscription_deploymentEvent(ctx, fields[0])
 	case "serviceEvent":
 		return ec._Subscription_serviceEvent(ctx, fields[0])
 	case "configMapEvent":
@@ -42779,6 +43009,20 @@ func (ec *executionContext) marshalNDeploymentCondition2ᚖgithubᚗcomᚋkyma�
 		return graphql.Null
 	}
 	return ec._DeploymentCondition(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNDeploymentEvent2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐDeploymentEvent(ctx context.Context, sel ast.SelectionSet, v DeploymentEvent) graphql.Marshaler {
+	return ec._DeploymentEvent(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDeploymentEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐDeploymentEvent(ctx context.Context, sel ast.SelectionSet, v *DeploymentEvent) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._DeploymentEvent(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNDeploymentStatus2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐDeploymentStatus(ctx context.Context, sel ast.SelectionSet, v DeploymentStatus) graphql.Marshaler {

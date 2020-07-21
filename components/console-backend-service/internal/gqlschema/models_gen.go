@@ -239,6 +239,11 @@ type DeploymentCondition struct {
 	Reason                  string    `json:"reason"`
 }
 
+type DeploymentEvent struct {
+	Type       SubscriptionEventType `json:"type"`
+	Deployment *Deployment           `json:"deployment"`
+}
+
 type DeploymentStatus struct {
 	Replicas          int                    `json:"replicas"`
 	UpdatedReplicas   int                    `json:"updatedReplicas"`
