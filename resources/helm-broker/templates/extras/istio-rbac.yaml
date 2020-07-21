@@ -17,7 +17,7 @@ spec:
     - source:
         principals: ["cluster.local/ns/kyma-system/sa/service-catalog-controller-manager"]
   - to:
-    operation:
-      ports:
-      - "{{ .Values.broker.metricsPort }}"
-      - "{{ .Values.ctrl.internalPort }}"
+    - operation:
+        ports:
+        - "{{ .Values.broker.metricsPort }}"
+        - "{{ .Values.ctrl.internalPort }}"
