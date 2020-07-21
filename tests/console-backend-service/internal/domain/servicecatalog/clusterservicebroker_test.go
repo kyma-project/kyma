@@ -66,7 +66,6 @@ func TestClusterServiceBrokerQueries(t *testing.T) {
 	})
 
 	t.Run("SingleResource", func(t *testing.T) {
-		t.SkipNow()
 		req := fixClusterServiceBrokerRequest(resourceDetailsQuery, expectedResource.Name)
 
 		var res clusterServiceBrokerQueryResponse
