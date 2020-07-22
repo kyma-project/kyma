@@ -3,8 +3,13 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"net/http/httputil"
 	"testing"
+	"time"
+
+	"github.com/avast/retry-go"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -61,7 +66,7 @@ func TestGatewayEvents(t *testing.T) {
 		req.Header.Add("Content-Type", "application/json;charset=UTF-8")
 
 		// when
-		response, err := http.DefaultClient.Do(req)
+		response, err := doWithRetries(req)
 		require.NoError(t, err)
 
 		// then
@@ -87,7 +92,7 @@ func TestGatewayEvents(t *testing.T) {
 		require.NoError(t, err)
 
 		//when
-		response, err := http.DefaultClient.Do(req)
+		response, err := doWithRetries(req)
 		require.NoError(t, err)
 
 		//then
@@ -112,4 +117,30 @@ func containsEventName(events []Event, name string) bool {
 		}
 	}
 	return false
+}
+
+func doWithRetries(req *http.Request) (*http.Response, error) {
+	var response *http.Response
+	err := retry.Do(func() error {
+		var err error
+		response, err = http.DefaultClient.Do(req)
+		if err != nil {
+			return err
+		}
+
+		if response.StatusCode != http.StatusOK {
+			defer response.Body.Close()
+
+			dump, err := httputil.DumpResponse(response, true)
+			if err != nil {
+				dump = []byte("error while dumping response")
+			}
+
+			return fmt.Errorf("error while executing request, received status %s, %s", response.Status, dump)
+		}
+
+		return nil
+	}, retry.Delay(2*time.Second), retry.DelayType(retry.FixedDelay), retry.Attempts(5))
+
+	return response, err
 }
