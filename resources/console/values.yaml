@@ -25,4 +25,4 @@ global:
   console_backend_service:
     version: 8c067633
   console_backend_service_test:
-    version: 95a144eb
+    version: PR-9061
