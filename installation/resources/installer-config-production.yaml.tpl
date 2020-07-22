@@ -16,6 +16,7 @@ data:
   oathkeeper.deployment.resources.requests.cpu: "200m"
   hpa.oathkeeper.minReplicas: "3"
   hpa.oathkeeper.maxReplicas: "10"
+  hydra.replicaCount: "2"
 ---
 apiVersion: v1
 kind: ConfigMap
