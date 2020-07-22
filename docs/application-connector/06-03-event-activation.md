@@ -11,7 +11,7 @@ kubectl get crd eventactivations.applicationconnector.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample resource that allows you to consume events sent from the service with the `ac031e8c-9aa4-4cb7-8999-0d358726ffaa` ID in a `production` Namespace.
+This is a sample resource that allows you to consume events sent from the service with the `ac031e8c-9aa4-4cb7-8999-0d358726ffaa` ServiceClass ID in a `production` Namespace.
 
 ```yaml
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
