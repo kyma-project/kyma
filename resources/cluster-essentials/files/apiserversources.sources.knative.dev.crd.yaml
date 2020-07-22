@@ -11,6 +11,7 @@ metadata:
         { "type": "dev.knative.apiserver.ref.delete" },
         { "type": "dev.knative.apiserver.ref.update" }
       ]
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     duck.knative.dev/source: "true"

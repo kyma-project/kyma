@@ -277,6 +277,10 @@ webhooks:
       namespace: knative-serving
   failurePolicy: Fail
   name: webhook.serving.knative.dev
+  namespaceSelector:
+    matchExpressions:
+{{ toYaml .Values.knative_serving.webhook.webhookMatchExp | indent 4 }}
+  timeoutSeconds: {{ .Values.knative_serving.webhook.timeout }}
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
@@ -293,6 +297,10 @@ webhooks:
       namespace: knative-serving
   failurePolicy: Fail
   name: validation.webhook.serving.knative.dev
+  namespaceSelector:
+    matchExpressions:
+{{ toYaml .Values.knative_serving.webhook.webhookMatchExp | indent 4 }}
+  timeoutSeconds: {{ .Values.knative_serving.webhook.timeout }}
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
@@ -313,6 +321,7 @@ webhooks:
     matchExpressions:
     - key: serving.knative.dev/release
       operator: Exists
+  timeoutSeconds: {{ .Values.knative_serving.webhook.timeout }}
 ---
 apiVersion: v1
 kind: Secret
@@ -1475,6 +1484,7 @@ webhooks:
     matchExpressions:
     - {key: "serving.knative.dev/configuration", operator: Exists}
   name: webhook.istio.networking.internal.knative.dev
+  timeoutSeconds: {{ .Values.knative_serving.webhook.timeout }}
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
@@ -1496,6 +1506,7 @@ webhooks:
     matchExpressions:
     - key: serving.knative.dev/release
       operator: Exists
+  timeoutSeconds: {{ .Values.knative_serving.webhook.timeout }}
 ---
 apiVersion: v1
 kind: Secret
