@@ -80,10 +80,10 @@ func TestGatewayEvents(t *testing.T) {
 
 	t.Run("should get all subscribed events", func(t *testing.T) {
 		//given
-		client, e := NewTriggerClient()
-		require.NoError(t, e)
+		client, err := NewTriggerClient()
+		require.NoError(t, err)
 
-		err := client.Create(config.Namespace, config.Application, eventType)
+		err = client.Create(config.Namespace, config.Application, eventType)
 		require.NoError(t, err)
 
 		url := config.EventServiceUrl + "/" + config.Application + "/v1/events/subscribed"
@@ -106,7 +106,7 @@ func TestGatewayEvents(t *testing.T) {
 
 		//cleanup
 		err = client.Delete(config.Namespace)
-		require.NoError(t, e)
+		require.NoError(t, err)
 	})
 }
 
