@@ -5,7 +5,7 @@ metadata:
   name: {{ template "fluent-bit.fullname" . }}-metrics
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "fluent-bit.metaLabels" . | trim | nindent 4 }}
+    {{- include "fluent-bit.matchLabels" . | trim | nindent 6 }}
   annotations:
     {{- if .Values.globalAnnotations }}
     {{- toYaml .Values.globalAnnotations | trim | nindent 4 }}
