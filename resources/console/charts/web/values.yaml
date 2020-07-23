@@ -8,27 +8,15 @@ cluster:
   orgId: my-org-123
   orgName: My Organization
   runtimeAdminGroupName: runtimeAdmin
-  scope:
-    audience:server:client_id:kyma-client audience:server:client_id:console openid
+  scope: audience:server:client_id:kyma-client audience:server:client_id:console openid
     profile email groups
-  systemNamespaces:
-    istio-system knative-eventing knative-serving kube-public kube-system
+  systemNamespaces: istio-system knative-eventing knative-serving kube-public kube-system
     kyma-installer kyma-integration kyma-system natss compass-system kube-node-lease
     kubernetes-dashboard
-compass_mfs:
-  image:
-    dir: null
-    pullPolicy: IfNotPresent
-    tag: e0146b08
-  service:
-    externalPort: 8888
-    internalPort: 8888
-    name: nginx
-  statusPort: 6082
 console:
   image:
     pullPolicy: IfNotPresent
-    tag: "de7b06b8"
+    tag: a1e46113
   service:
     externalPort: 80
     internalPort: 8080
@@ -37,7 +25,7 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: 206d3dbc
+    tag: e6cf9326
   service:
     externalPort: 80
     internalPort: 80

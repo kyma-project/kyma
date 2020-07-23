@@ -1,4 +1,4 @@
-schema: internal/gqlschema/schema.graphql
+schema: internal/gqlschema/*.graphql
 
 # Let gqlgen know where to put the generated server
 exec:
@@ -9,6 +9,11 @@ exec:
 model:
   filename: internal/gqlschema/models_gen.go
   package: gqlschema
+
+resolver:
+  layout: follow-schema
+  dir: internal/domain
+  package: domain
 
 # Optional turns on binding to field names by tag provided
 struct_tag: json
@@ -137,3 +142,5 @@ models:
         resolver: true
       pods:
         resolver: true
+  APIRuleAccessStrategyInput:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRuleAccessStrategyInput"

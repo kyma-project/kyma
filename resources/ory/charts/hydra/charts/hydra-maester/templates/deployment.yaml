@@ -44,6 +44,17 @@ spec:
           ports:
             - containerPort: {{ .Values.port.metrics }}
               name: metrics
+        - name: watcher
+          image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+          volumeMounts:
+            - name: hydra-dsn
+              mountPath: /etc/secrets
+              readOnly: true
+          command:
+            - /bin/bash
+            - -c
+            - |
+{{ tpl (.Files.Get "files/watcher.sh" | printf "%s" | indent 14) . }}
       serviceAccountName: {{ include "hydra-maester.name" . }}-account
       nodeSelector:
       {{- with .Values.deployment.nodeSelector }}
@@ -57,3 +68,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+      volumes:
+        - name: hydra-dsn
+          secret:
+            secretName: {{ include "hydra-maester.hydraSecret" . }}

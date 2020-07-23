@@ -1,6 +1,3 @@
-{{- $embeddedCompassApiUrl :=  printf "https://compass-gateway.%s/runtime/director/graphql" .Values.global.ingress.domainName }}
-{{- $compassApiUrl := .Values.managementPlane.url | default $embeddedCompassApiUrl -}}
-{{- $compassDefaultTenant := .Values.cluster.compassDefaultTenant | default "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae" -}}
 {{- $defaultIdpJwksUri := .Values.cluster.defaultIdpJwksUri | default "http://dex-service.kyma-system.svc.cluster.local:5556/keys" -}}
 apiVersion: v1
 kind: ConfigMap
@@ -31,23 +28,14 @@ data:
       defaultIdpIssuer: 'https://dex.{{ js .Values.global.ingress.domainName }}',
       namespaceAdminGroupName: '{{ js .Values.cluster.namespaceAdminGroupName }}',
       runtimeAdminGroupName: '{{ js .Values.cluster.runtimeAdminGroupName }}',
-{{- if .Values.global.isLocalEnv }}
-      compassApiUrl: 'https://compass-gateway.{{ js .Values.global.ingress.domainName }}/director/graphql',
-      compassDefaultTenant: '{{ js $compassDefaultTenant }}',
-{{- else }}
-      compassApiUrl: '{{ js $compassApiUrl }}',      
-{{- end}}
       serverless: {
         functionUsageKind: "serverless-function",
         restrictedVariables: [
           'FUNC_RUNTIME',
           'FUNC_HANDLER',
-          'FUNC_TIMEOUT',
           'FUNC_PORT',
           'MOD_NAME',
-          'NODE_PATH',
-          'REQ_MB_LIMIT',
-          'FUNC_MEMORY_LIMIT'
+          'NODE_PATH'
         ],
         resources: {
           min: {

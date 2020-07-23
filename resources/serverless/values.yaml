@@ -36,7 +36,7 @@ tests:
 
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "7dd25b42"
+    tag: "cdf1bd64"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -68,7 +68,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "1cc47db6"
+    tag: "e2e41336"
     pullPolicy: IfNotPresent
   functionRuntimeNodejs12:
     repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
@@ -116,8 +116,8 @@ containers:
         value: 5m
       namespaceExcludedNames:
         value: "istio-system,knative-eventing,knative-serving,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
-      imagePullSecretName:
-        value: "{{ template \"fullname\" . }}-registry-credentials"
+      imageRegistryDockerConfigSecretName:
+        value: "{{ template \"fullname\" . }}-image-pull-secret"
       imagePullAccountName:
         value: "{{ template \"fullname\" . }}"
       targetCPUUtilizationPercentage:
@@ -130,14 +130,6 @@ containers:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v0.22.0
-      functionBuildCredsInitImage:
-        value: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.12.1
-      functionDockerAddress:
-        # TODO: I don't know why {{ .Values.global.dockerServicePort }} doesn't work. It is rendered as {{\n  .Values.global.dockerServicePort }}
-        # value: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}"
-        value: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:5000"
-      functionDockerExternalAddress:
-        value: "registry.{{ .Values.global.ingress.domainName -}}"
 
 services:
   manager:
@@ -165,25 +157,6 @@ metrics:
       prometheus.io/port: "8080"
       prometheus.io/path: "/metrics"
 
-config:
-  dockerRegistry: registry
-
-secret:
-  # registryAddress specifies which the web address (URL) of the registry to use the credentials
-  # registryAddress: https://eu.gcr.io
-  # build.knative.dev/docker-0: https://us.gcr.io
-  # build.knative.dev/docker-1: https://eu.gcr.io
-  # build.knative.dev/docker-2: https://asia.gcr.io
-  # build.knative.dev/docker-3: https://gcr.io
-  # build.knative.dev/docker-4: https://index.docker.io/v2/
-  registryUserName: "{{ randAlphaNum 20 | b64enc }}"
-  registryPassword: "{{ randAlphaNum 40 | b64enc }}"
-  # both username and password are inputs of
-  # docker run --entrypoint htpasswd registry:2 -Bbn user password
-  # Look at docker-registry.secrets.htpasswd
-  registry: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}"
-  externalRegistry: "registry.{{ .Values.global.ingress.domainName -}}"
-
 backendModule:
   enabled: true
 
@@ -196,8 +169,15 @@ grafanaDashboard:
 usageKind:
   name: serverless-function
 
+dockerRegistry:
+  enableInternal: true
+  username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
+  password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json key
+  internalServerAddress: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}"
+  serverAddress: "registry.{{ .Values.global.ingress.domainName -}}"
+  registryAddress: "registry.{{ .Values.global.ingress.domainName -}}"
+
 docker-registry:
-  enabled: true
   fullnameOverride: "serverless-docker-registry"
   secrets:
     haSharedSecret: "secret"

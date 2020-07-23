@@ -52,8 +52,8 @@ livenessProbe:
 # schedulerName: "default-scheduler"
 
 image:
-  repository: grafana/grafana
-  tag: 7.0.3
+  repository: eu.gcr.io/kyma-project/external/grafana/grafana
+  tag: 7.0.6
   pullPolicy: IfNotPresent
 
   ## Optionally specify an array of imagePullSecrets.
@@ -62,13 +62,6 @@ image:
   ##
   # pullSecrets:
   #   - myRegistrKeySecretName
-
-testFramework:
-  enabled: false
-  image: "bats/bats"
-  tag: "v1.1.0"
-  imagePullPolicy: IfNotPresent
-  securityContext: {}
 
 securityContext:
   runAsUser: 472
@@ -228,7 +221,7 @@ initChownData:
   ## initChownData container image
   ##
   image:
-    repository: busybox
+    repository: eu.gcr.io/kyma-project/external/busybox
     tag: "1.31.1"
     pullPolicy: IfNotPresent
 
@@ -494,8 +487,8 @@ smtp:
 ## Requires at least Grafana 5 to work and can't be used together with parameters dashboardProviders, datasources and dashboards
 sidecar:
   image:
-    repository: kiwigrid/k8s-sidecar
-    tag: 0.1.151
+    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-sidecar
+    tag: 0.1.157-9831a065
   imagePullPolicy: IfNotPresent
   resources: {}
 #   limits:

@@ -13,6 +13,10 @@ VERIFY_IGNORE := /vendor\|/mocks
 test:
 	@echo "Tests are not to be run at this stage."
 
+clustertest:
+	cat testdefinition.ko.yaml| KYMADOMAIN=$(shell kubectl get configmap net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.domainName}') envsubst | ko apply -n kyma-system -f -
+	kyma test run core-test-external-solution --watch
+
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
 	@echo "resources/core"

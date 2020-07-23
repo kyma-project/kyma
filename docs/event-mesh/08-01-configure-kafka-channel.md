@@ -9,7 +9,7 @@ Instead of the default Channel implementation, you can use the Knative-compatibl
 * Create a Secret which the controller uses to communicate with the cluster.
 * Install Kyma with the `knative-eventing-kafka` component to deploy the Kafka controller.
 
-**NOTE**: Although Event Hubs and Kafka are nearly identical as concepts, they use a different naming convention. To avoid confusion, read [this document](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-for-kafka-ecosystem-overview#kafka-and-event-hub-conceptual-mapping).
+>**NOTE**: Although Event Hubs and Kafka are nearly identical as concepts, they use a different naming convention. To avoid confusion, read [this document](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-for-kafka-ecosystem-overview#kafka-and-event-hub-conceptual-mapping).
 
 ## Steps
 
@@ -19,7 +19,7 @@ Follow these steps:
 
 2. Create an [Event Hub namespace](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-create#create-an-event-hubs-namespace) which is an Event Hub representation of the cluster.
 
-  **NOTE**: You can use [Confluent Cloud](https://www.confluent.io/confluent-cloud) or install Kafka [locally](https://kafka.apache.org/quickstart), but bear in mind that these configurations are experimental.
+  >**NOTE**: You can use [Confluent Cloud](https://www.confluent.io/confluent-cloud) or install Kafka [locally](https://kafka.apache.org/quickstart), but bear in mind that these configurations are experimental.
 
 3. Export the variables. To retrieve the credentials, go to Azure Portal > **All services** > **Event Hubs** and select your Event Hub.
 
@@ -61,5 +61,5 @@ Follow these steps:
     kyma install -o {azure-secret.yaml} -c {installer-cr-azure-eventhubs.yaml.tpl}
     ```
   >**NOTE**: Use `-o` instead of `-c` if you're using Kyma CLI 1.13 or lower.
-  
+
   >**TIP**: If you want to set up Kafka Channel as a default Channel, follow the [tutorial](#tutorials-set-up-a-default-channel).

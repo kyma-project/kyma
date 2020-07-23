@@ -4,7 +4,6 @@ import (
 	scClientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	uiClientset "github.com/kyma-project/kyma/components/console-backend-service/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/helm-broker/pkg/client/clientset/versioned"
-	idpClientset "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/dynamic"
 	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
@@ -52,20 +51,6 @@ func NewAddonsConfigurationsClientWithConfig() (*versioned.Clientset, *rest.Conf
 	}
 
 	return scCli, k8sConfig, nil
-}
-
-func NewIDPPresetClientWithConfig() (*idpClientset.Clientset, *rest.Config, error) {
-	k8sConfig, err := NewRestClientConfigFromEnv()
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "while creating new client with config")
-	}
-
-	idpCli, err := idpClientset.NewForConfig(k8sConfig)
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "while creating new client with config")
-	}
-
-	return idpCli, k8sConfig, nil
 }
 
 func NewUIClientWithConfig() (*uiClientset.Clientset, *rest.Config, error) {

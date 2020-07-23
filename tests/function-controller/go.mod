@@ -32,6 +32,8 @@ require (
 	sigs.k8s.io/controller-runtime v0.5.2
 )
 
+replace golang.org/x/text => golang.org/x/text v0.3.3
+
 // mismatch among fun-controller, knative enevting and knative serving...
 // try to delete it after update of eventing/serving
 replace knative.dev/pkg => knative.dev/pkg v0.0.0-20200113182502-b8dc5fbc6d2f

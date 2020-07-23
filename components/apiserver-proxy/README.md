@@ -48,3 +48,8 @@ Run all tests:
 ```bash
 go test -v ./...
 ```
+
+Run all tests with logging enabled:
+```bash
+go test -v ./... -args --logtostderr=true --v=10
+```

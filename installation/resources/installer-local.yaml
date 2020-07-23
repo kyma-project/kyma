@@ -116,90 +116,6 @@ spec:
     spec:
       serviceAccountName: kyma-installer
       initContainers:
-      - name: certhelper
-        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
-        terminationMessagePolicy: "FallbackToLogsOnError"
-        command:
-          - bash
-          - -c
-          - |
-            set -e
-            if [ -f "/etc/certs/tls.crt" ]; then
-              echo "Helm Certificate already exists, do nothing."
-              exit 0
-            fi
-
-            WORKING_DIR="/tmp/certs"
-            mkdir -p "${WORKING_DIR}"
-
-            cat <<EOF > "${WORKING_DIR}/openssl.cnf"
-            [ req ]
-            #default_bits   = 2048
-            #default_md   = sha256
-            #default_keyfile  = privkey.pem
-            distinguished_name  = req_distinguished_name
-            attributes    = req_attributes
-
-            [ req_distinguished_name ]
-            countryName     = Country Name (2 letter code)
-            countryName_min     = 2
-            countryName_max     = 2
-            stateOrProvinceName   = State or Province Name (full name)
-            localityName      = Locality Name (eg, city)
-            0.organizationName    = Organization Name (eg, company)
-            organizationalUnitName    = Organizational Unit Name (eg, section)
-            commonName      = Common Name (eg, fully qualified host name)
-            commonName_max      = 64
-            emailAddress      = Email Address
-            emailAddress_max    = 64
-
-            [ req_attributes ]
-            challengePassword   = A challenge password
-            challengePassword_min   = 4
-            challengePassword_max   = 20
-            [ v3_ca ]
-            basicConstraints = critical,CA:TRUE
-            subjectKeyIdentifier = hash
-            authorityKeyIdentifier = keyid:always,issuer:always
-            EOF
-
-            echo "---> Get Tiller CA"
-            if [[ $(kubectl get -n kube-system secret tiller-secret) ]] ; then
-              kubectl get -n kube-system secret tiller-secret -o jsonpath="{.data['ca\.crt']}" | base64 --decode > "${WORKING_DIR}/ca.crt"
-              kubectl get -n kube-system secret tiller-secret -o jsonpath="{.data['ca\.key']}" | base64 --decode > "${WORKING_DIR}/ca.key"
-            else
-              echo "Secret: tiller-secret does not exists!"
-              exit 1
-            fi
-
-            echo "---> Generate Helm key"
-            openssl genrsa -out "${WORKING_DIR}/helm.key.pem" 4096
-            openssl req -key "${WORKING_DIR}/helm.key.pem" -new -sha256 -out "${WORKING_DIR}/helm.csr.pem" -subj "/C=PL/ST=Gliwice/L=Gliwice/O=Helm Client/CN=helm-client"
-            openssl x509 -req -CA "${WORKING_DIR}/ca.crt" -CAkey "${WORKING_DIR}/ca.key" -CAcreateserial -in "${WORKING_DIR}/helm.csr.pem" -out "${WORKING_DIR}/helm.cert.pem" -days 365
-
-            echo "---> Create secrets in k8s"
-            cat << EOF > /tmp/secret.yaml
-            ---
-            apiVersion: v1
-            data:
-              global.helm.ca.crt: "$(base64 "${WORKING_DIR}/ca.crt" | tr -d '\n')"
-              global.helm.tls.crt: "$(base64 ${WORKING_DIR}/helm.cert.pem | tr -d '\n')"
-              global.helm.tls.key: "$(base64 ${WORKING_DIR}/helm.key.pem | tr -d '\n')"
-            kind: Secret
-            metadata:
-              creationTimestamp: null
-              labels:
-                installer: overrides
-                kyma-project.io/installation: ""
-              name: helm-secret
-              namespace: kyma-installer
-            type: Opaque
-            EOF
-            timeout 60s bash -c 'until kubectl create -f /tmp/secret.yaml ; do sleep 2; done'
-        volumeMounts:
-          - mountPath: /etc/certs
-            name: helm-certs
-            readOnly: true
       - name: 2to3
         image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
         terminationMessagePolicy: "FallbackToLogsOnError"
@@ -226,8 +142,7 @@ spec:
               kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.tls\\.crt']}" | base64 --decode > "$(helm home)/cert.pem"
               kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.tls\\.key']}" | base64 --decode > "$(helm home)/key.pem"
             else
-              echo "------> No HELM_2 Certs found, failing"
-              exit 1
+              exit 0
             fi
           else
             echo "------> No Tiller deployment found, exiting gracefully"
@@ -263,26 +178,17 @@ spec:
               ${HELM_3_BINARY} 2to3 convert ${release}
             fi
           done < helm2-releases
+        resources:
+          limits:
+            memory: 1024Mi
+          requests:
+            memory: 512Mi
       containers:
       - name: kyma-installer-container
         image: eu.gcr.io/kyma-project/develop/kyma-installer:63f27f76
         imagePullPolicy: IfNotPresent
         args:
           - -overrideLogFile=/app/overrides.txt
-        volumeMounts:
-          - mountPath: /etc/certs
-            name: helm-certs
-            readOnly: true
-      volumes:
-      - name: helm-certs
-        secret:
-          secretName: helm-secret
-          optional: true
-          items:
-            - key: global.helm.tls.crt
-              path: tls.crt
-            - key: global.helm.tls.key
-              path: tls.key
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1

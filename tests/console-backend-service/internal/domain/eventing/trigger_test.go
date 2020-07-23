@@ -167,7 +167,6 @@ func createTriggerArguments(namespace string) string {
 		namespace: "%s",
 		trigger: {
 			name: "%s",
-			namespace: "%s",
 			broker: "%s"
 			subscriber: {
 				ref: {
@@ -178,7 +177,7 @@ func createTriggerArguments(namespace string) string {
 				}
 			}
 		},
-	`, namespace, TriggerName, namespace, BrokerName, SubscriberAPIVersion, SubscriberKind, SubscriberName, namespace)
+	`, namespace, TriggerName, BrokerName, SubscriberAPIVersion, SubscriberKind, SubscriberName, namespace)
 }
 
 func createTriggerEventArguments(namespace string) string {
@@ -198,26 +197,25 @@ func createTriggerEventArguments(namespace string) string {
 func deleteTriggerArguments(namespace string) string {
 	return fmt.Sprintf(`
 		namespace: "%s"
-		trigger: {
-			name: "%s",
-			namespace: "%s",
-		}
-	`, namespace, TriggerName, namespace)
+		triggerName: "%s"
+	`, namespace, TriggerName)
 }
 
 func triggerDetailsFields() string {
 	return `
 		name
 		namespace
-		broker
-		filterAttributes
-		subscriber {
-			uri
-			ref {
-				apiVersion
-				kind
-				name
-				namespace
+		spec {
+			broker
+			filter
+			subscriber {
+				uri
+				ref {
+					apiVersion
+					kind
+					name
+					namespace
+				}
 			}
 		}
 		status {

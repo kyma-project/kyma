@@ -1,4 +1,5 @@
 e2e-external-integration-test
 .*
+!.ko.yaml
 !.gitignore
 licenses

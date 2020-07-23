@@ -40,7 +40,6 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `tracing` | ✅ | ⛔️ |
 | `monitoring` | ✅ | ⛔️ |
 | `kiali` | ✅ | ⛔️ |
-| `compass` | ⛔️ | ⛔️ |
 | `compass-runtime-agent` | ⛔️ | ⛔️ |
 
 ## Installation guides
@@ -54,6 +53,5 @@ Read the rest of the installation documents to learn how to:
 - [Disable the selected components' installation or install them separately](#configuration-custom-component-installation)
 - [Upgrade Kyma to a new version](#installation-upgrade-kyma)
 - [Update Kyma](#installation-update-kyma)
-- [Reinstall Kyma](#installation-reinstall-kyma)
 
 >**NOTE:** Make sure that the version of the documentation selected in the left pane of `kyma-project.io` matches the version of Kyma you're using.

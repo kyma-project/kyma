@@ -44,6 +44,19 @@ hpa:
       resource:
         name: cpu
         targetAverageUtilization: 80
+  hydra:
+    minReplicas: 1
+    maxReplicas: 3
+    cpu: 80
+    metrics:
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: 75
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: 80
 
 # Maintenance options
 maintenance:
@@ -59,6 +72,11 @@ hydra:
     admin:
       enabled: false
   deployment:
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: "50%"
+        maxUnavailable: "0%"
     resources:
       limits:
         cpu: 100m
@@ -80,6 +98,7 @@ hydra:
             - 10.0.0.0/8
             - 172.16.0.0/12
             - 192.168.0.0/16
+      secrets: {}
       urls:
         self: {}
       dsn: memory
@@ -90,6 +109,8 @@ hydra:
     existingSecret: "ory-hydra-credentials"
   hydra-maester:
     globalAccess: true
+    config:
+      hydraSecret: "ory-hydra-credentials"
 # Overrides for the Oathkeeper chart
 oathkeeper:
   kubectlJob:

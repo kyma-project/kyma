@@ -25,10 +25,10 @@ ctrl:
 broker:
   resources:
     limits:
-      memory: 120Mi
+      memory: 256Mi
       cpu: 60m
     requests:
-      memory: 64Mi
+      memory: 96Mi
       cpu: 30m
   tillerTLSInsecure: true
   tillerTLSEnabled: true
@@ -36,7 +36,13 @@ broker:
   statusPort: 8071
   metricsPort: 8072
 
-defautlAddonsURL: "https://github.com/kyma-project/addons/releases/download/0.12.0/index.yaml"
+defaultAddonsRepository: "https://github.com/kyma-project/addons/releases/download/0.13.0/index.yaml"
+
+# A map of additional addons repositories to configure. The key is used as the name of the created ClusterAddonsConfiguration.
+# additionalAddonsRepositories:
+#   myRepo1: "github.com/myOrg/myRepo//addons/index.yaml?ref=0.x.0"
+#   myRepo2: "https://github.com/myOrg/myRepo/releases/download/0.x.0/index.yaml"
+additionalAddonsRepositories: {}
 
 global:
   containerRegistry:
@@ -48,11 +54,11 @@ global:
     pullPolicy: IfNotPresent
   # paths to docker images
   helm_broker:
-    dir: /develop/
-    version: "28626733"
+    dir: "develop/"
+    version: "579b3ffc"
   helm_controller:
-    dir: /develop/
-    version: "28626733"
+    dir: "develop/"
+    version: "579b3ffc"
   # etcd port uses by helm broker
   etcdClientPort: 2379
 
