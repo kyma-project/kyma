@@ -1,0 +1,102 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
+{{- if .Release.IsUpgrade }}
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Chart.Name }}-migrate-ac-certs
+  namespace: kyma-integration
+  labels:
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Chart.Name }}-migrate-ac-certs
+  namespace: {{ .Values.jobs.installer.namespace }}
+  labels:
+    app: {{ .Chart.Name }}-migrate-ac-certs
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+rules:
+  - apiGroups: ["*"]
+    resources: ["secrets"]
+    verbs: ["create", "get", "update"]
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Chart.Name }}-migrate-ac-certs
+  namespace: {{ .Values.jobs.installer.namespace }}
+  labels:
+    app: {{ .Chart.Name }}-migrate-ac-certs
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Chart.Name }}-migrate-ac-certs
+    namespace: kyma-integration
+roleRef:
+  kind: Role
+  name: {{ .Chart.Name }}-migrate-ac-certs
+  apiGroup: rbac.authorization.k8s.io
+---
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-migrate-ac-certs
+  namespace: kyma-integration
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      name: {{ .Chart.Name }}-migrate-ac-certs
+      annotations:
+        sidecar.istio.io/inject: “false”
+    spec:
+      serviceAccountName: {{ .Chart.Name }}-migrate-ac-certs
+      restartPolicy: Never
+      containers:
+        - name: {{ .Chart.Name }}-migrate-ac-certs
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200309-9a88ce97
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - |
+              CERT={{ .Values.global.applicationConnectorCa }}
+              KEY={{ .Values.global.applicationConnectorCaKey }}
+
+              if [[ "$CERT" != "" ]] && [[ "$KEY" != "" ]] ; then
+                echo "Overrides for Application Connector already present"
+                exit 0
+              fi
+
+              kubectl create secret generic -n {{ .Values.jobs.installer.namespace }} application-connector-overrides \
+                  --from-file global.applicationConnectorCa=/etc/application-connector-certs/ca.crt \
+                  --from-file global.applicationConnectorCaKey=/etc/application-connector-certs/ca.key --dry-run -oyaml | kubectl apply -f -
+          volumeMounts:
+            - name: cert
+              mountPath: /etc/application-connector-certs/
+      volumes:
+        - name: cert
+          secret:
+            secretName: connector-service-app-ca
+
+{{- end }}
+{{- end }}
