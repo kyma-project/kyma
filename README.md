@@ -9,7 +9,9 @@
 
 ## Overview
 
-**Kyma** `/kee-ma/` is a platform for extending applications with microservices and [serverless](https://kyma-project.io/docs/components/serverless/#overview-overview) Functions. It provides CLI and UI through which you can connect your application to a Kubernetes cluster and expose the application's API or events securely thanks to the in-built [Application Connector](https://kyma-project.io/docs/components/application-connector/#overview-overview). You can then implement the business logic you require by creating microservices or serverless Functions, and triggering them to react to particular events or calls to your application's API. To limit the time spent on coding, use the in-built cloud services from the [Service Catalog](https://kyma-project.io/docs/master/components/service-catalog/#overview-service-catalog), exposed by [Service Brokers](https://kyma-project.io/docs/master/components/service-catalog/#overview-service-brokers) from such cloud providers as GCP, Azure, and AWS.
+**Kyma** `/kee-ma/` is a platform for extending applications with microservices and [serverless](https://kyma-project.io/docs/components/serverless/#overview-overview) Functions. It provides CLI and UI through which you can connect your application to a Kubernetes cluster. You can also expose the application's API or events securely thanks to the built-in [Application Connector](https://kyma-project.io/docs/components/application-connector/#overview-overview). You can then implement the business logic you require by creating microservices or serverless Functions. Trigger them to react to particular events or calls to your application's API.
+
+To limit the time spent on coding, use the built-in cloud services from [Service Catalog](https://kyma-project.io/docs/master/components/service-catalog/#overview-service-catalog), exposed by [Service Brokers](https://kyma-project.io/docs/master/components/service-catalog/#overview-service-brokers) from such cloud providers as GCP, Azure, and AWS.
 
 <p align="center">
 <a href="https://youtu.be/kP7mSELIxXw">
@@ -82,6 +84,7 @@ Follow these steps:
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/arithnea.svg" alt="ARITHNEA" width="300" height="130" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/digital_lights.svg" alt="Digital Lights" width="200" height="130" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/FAIR_LOGO_HEADER.svg" alt="FAIR" width="300" height="130" />
+  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/Sybit-Logo.svg" alt="FAIR" width="300" height="130" />
 </p>
 <p align="center">
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/arineo.svg" alt="Arineo" width="250" height="40" />

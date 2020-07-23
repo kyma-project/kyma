@@ -30,7 +30,7 @@ require (
 	github.com/kyma-project/kyma/components/function-controller v0.0.0-20200527102940-1579eff8c7a5
 	github.com/kyma-project/rafter v0.0.0-20200402080904-a0157e52e150
 	github.com/moby/moby v1.13.1
-	github.com/onsi/gomega v1.9.0
+	github.com/onsi/gomega v1.9.0 // indirect
 	github.com/opentracing-contrib/go-observer v0.0.0-20170622124052-a52f23424492 // indirect
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/openzipkin-contrib/zipkin-go-opentracing v0.3.5 // indirect
@@ -63,4 +63,7 @@ require (
 	knative.dev/pkg v0.0.0-20200306005226-fc857aa77f79
 )
 
-replace k8s.io/client-go => k8s.io/client-go v0.17.4
+replace (
+	golang.org/x/text => golang.org/x/text v0.3.3
+	k8s.io/client-go => k8s.io/client-go v0.17.4
+)

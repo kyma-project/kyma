@@ -24,7 +24,7 @@ GOBIN=$(shell go env GOBIN)
 endif
 
 verify:: mod-verify
-release: build-function-runtime-image push-function-runtime-image build-function-webhook push-function-webhook build-image push-image
+release: build-function-runtime-image push-function-runtime-image build-function-webhook push-function-webhook build-function-build-init push-function-build-init build-image push-image
 
 
 resolve-local:
@@ -140,6 +140,19 @@ build-function-runtime-image:
 push-function-runtime-image:
 	docker tag $(FUNCTION_RUNTIME_IMAGE_NODEJS12) $(FUNCTION_RUNTIME_NODEJS12_IMG_NAME):$(DOCKER_TAG)
 	docker push $(FUNCTION_RUNTIME_NODEJS12_IMG_NAME):$(DOCKER_TAG)
+
+######## builder init container image
+
+JOBINIT_NAME = function-build-init
+JOBINIT_IMG_NAME = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(JOBINIT_NAME)
+
+.PHONY: build-function-build-init push-function-build-init
+build-function-build-init:
+	docker build -t $(JOBINIT_NAME) -f $(ROOT)/deploy/jobinit/Dockerfile .
+
+push-function-build-init:
+	docker tag $(JOBINIT_NAME) $(JOBINIT_IMG_NAME):$(DOCKER_TAG)
+	docker push $(JOBINIT_IMG_NAME):$(DOCKER_TAG)
 
 $(eval $(call buildpack-mount,resolve))
 $(eval $(call buildpack-mount,mod-verify))
