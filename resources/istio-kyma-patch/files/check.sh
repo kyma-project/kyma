@@ -55,7 +55,22 @@ function require_istio_system() {
     kubectl get namespace istio-system >/dev/null
 }
 
-function check_mtls_enabled() {
+function check_mtls_enabled_v1() {
+  log "--> Check global mTLS"
+  local mTLS=$(kubectl get meshpolicy default -o jsonpath='{.spec.peers[0].mtls.mode}')
+  local status=$?
+  if [[ "$?" != 0 ]]; then
+    log "----> MeshPolicy istio-system/default not found!" red
+    exit 1
+  fi
+  if [[ "${mTLS}" != "STRICT" ]]; then
+    log "----> mTLS must be \"STRICT\"" red
+    exit 1
+  fi
+  log "----> mTLS is enabled" green
+}
+
+function check_mtls_enabled_v2() {
   log "--> Check global mTLS"
   local mTLS=$(kubectl get PeerAuthentication -n istio-system default -o jsonpath='{.spec.mtls.mode}')
   local status=$?
@@ -157,7 +172,7 @@ function check_requirements() {
 
 require_istio_system
 require_istio_version
-check_mtls_enabled
+check_mtls_enabled_v1
 check_requirements
 check_policy_checks
 check_sidecar_injector
