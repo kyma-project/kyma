@@ -14,5 +14,5 @@ This document provides an overview of the logging architecture in Kyma.
 6. The user queries the logs using the following tools:
 
     * Grafana dashboards to analyze and visualize logs fetched and processed by Loki. 
-    * API clients to query log data using the [HTTP API](https://github.com/grafana/loki/blob/master/docs/api.md) for Loki.
+    * API clients to query log data using the [HTTP API](https://github.com/grafana/loki/blob/master/docs/sources/api/_index.md) for Loki.
     * Log UI, accessed from the Kyma Console, to display and analyze logs.
