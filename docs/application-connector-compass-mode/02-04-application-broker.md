@@ -32,11 +32,11 @@ This ServicePlan has a **bindable** parameter set to `true`, which means that yo
 
 ![API ServicePlan](./assets/005-AB-API-service-plan.svg)
 
-### Get Application credentials
+### Generating API credentials
 
-Follow these steps to request credentials for your ServiceInstance:
+This section describes in detail how the API credentials are generated.
 
-1. Create a ServiceInstance.
+1. User creates a ServiceInstance.
 2. Service Catalog sends a provisioning request to the Application Broker.
 3. Application Broker requests credentials for a ServiceInstance. The request is processed through the Director proxy exposed by Runtime Agent to Director.
 >**NOTE:** Director proxy is secured by [Istio RBAC](https://github.com/kyma-project/kyma/blob/master/resources/compass-runtime-agent/templates/istio-rbac.yaml) and only Application Broker can access it.
