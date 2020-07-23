@@ -47,7 +47,7 @@ spec:
 
     # Policy feature
     policy:
-      enabled: false
+      enabled: true
       k8s:
         hpaSpec:
           maxReplicas: 5
@@ -348,7 +348,7 @@ spec:
       certificates: []
       operatorManageWebhooks: false
       controlPlaneSecurityEnabled: true
-      disablePolicyChecks: true
+      disablePolicyChecks: false
       policyCheckFailOpen: false
       enableTracing: true
       tracer:
