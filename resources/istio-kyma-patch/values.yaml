@@ -8,4 +8,4 @@ global:
   istio_kyma_patch:
     dir:
     version: d022112f
-  required_istio_version: 1.5.8
+  required_istio_version: 1.5.8-distroless
