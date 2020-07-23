@@ -61,14 +61,5 @@ else
   istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}
 fi
 
-#while [ "$(kubectl get po -n istio-system -l app=sidecarInjectorWebhook -o jsonpath='{ .items[0].status.phase}')" != "Running" ]
-#do
-#  echo "sidecar injector still not running. Waiting..."
-#  sleep 1s
-#done
-#echo "sidecar injector is running"
-#echo "patching api-server destination rule"
-#kubectl patch destinationrules.networking.istio.io -n istio-system api-server --type merge --patch '{"spec": {"trafficPolicy": { "connectionPool" : { "tcp": {"connectTimeout": "30s"}}}}}'
-
 echo "Apply custom kyma manifests"
 kubectl apply -f /etc/manifests
