@@ -29,9 +29,3 @@ spec:
 
 {{- end}}
 {{- end}}
-
-tests:
-  enabled: true
-  image:
-    name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    version: v20200617-32c1f3ff
