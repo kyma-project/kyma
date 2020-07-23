@@ -4,7 +4,7 @@ metadata:
   name: istio-kyma-patch
   annotations:
     helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    # helm.sh/hook-delete-policy: hook-succeeded
 spec:
   backoffLimit: 1
   template:
@@ -17,7 +17,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: istio-kyma-patch
-        image: tsmsap/istio-kyma-patch:istio1.5
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.istio_kyma_patch.dir }}istio-kyma-patch:{{ .Values.global.istio_kyma_patch.version }}
         volumeMounts:
         - name: config-volume
           mountPath: /etc/config

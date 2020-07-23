@@ -15,3 +15,6 @@ rules:
 - apiGroups: ["authentication.istio.io"]
   resources: ["policies"]
   verbs: ["*"]
+- apiGroups: ["security.istio.io"]
+  resources: ["peerauthentications"]
+  verbs: ["*"]

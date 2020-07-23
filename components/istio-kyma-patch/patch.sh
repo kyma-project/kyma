@@ -56,12 +56,16 @@ function require_istio_system() {
 }
 
 function check_mtls_enabled() {
-    # TODO: rethink how that should be done
-    local mTLS=$(kubectl get meshpolicy default -o jsonpath='{.spec.peers[0].mtls.mode}')
-    if [[ "${mTLS}" != "STRICT" ]] && [[ "${mTLS}" != "" ]]; then
-        log "mTLS must be \"STRICT\"" red
-        exit 1
-    fi
+  local mTLS=$(kubectl get PeerAuthentication -n istio-system default -o jsonpath='{.spec.mtls.mode}')
+  local status=$?
+  if [[ "$?" != 0 ]]; then
+    log "PeerAuthentication istio-system/default not found!" red
+    exit 1
+  fi
+  if [[ "${mTLS}" != "STRICT" ]]; then
+    log "mTLS must be \"STRICT\"" red
+    exit 1
+  fi
 }
 
 function check_policy_checks(){
