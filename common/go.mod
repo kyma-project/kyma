@@ -1,4 +1,4 @@
-module github.com/kyma-project/kyma/common
+module github.com/dariadomagala/kyma/common
 
 go 1.14
 
