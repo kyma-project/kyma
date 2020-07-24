@@ -2,7 +2,9 @@ package testsuite
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 )
 
@@ -41,7 +43,13 @@ func (s ConnectApplication) Run() error {
 		return err
 	}
 
-	certInfo, err := s.connector.GetInfo(infoURL)
+	certInfo, err := func() (info *testkit.InfoResponse, err error) {
+		err = retry.Do(func() error {
+			info, err = s.connector.GetInfo(infoURL)
+			return err
+		})
+		return info, err
+	}()
 	if err != nil {
 		return err
 	}
@@ -56,7 +64,13 @@ func (s ConnectApplication) Run() error {
 		return err
 	}
 
-	chain, err := s.connector.GetCertificate(certInfo.CertUrl, csr)
+	chain, err := func() (chain []*x509.Certificate, err error) {
+		err = retry.Do(func() error {
+			chain, err = s.connector.GetCertificate(certInfo.CertUrl, csr)
+			return err
+		})
+		return chain, err
+	}()
 	if err != nil {
 		return err
 	}
