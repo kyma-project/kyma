@@ -7,7 +7,7 @@ To access a Function within the cluster, use the `{function-name}.{namespace}.sv
 
 ![Expose a Function service](./assets/api-rules.svg)
 
-> **NOTE:** If you are using Minikube, before you can access the function you have to add the endpoint to the Minikube ip entry in /etc/hosts file (administrator rights are required to make changes in this file).
+> **NOTE:** If you are using Minikube, before you can access the function you have to add the endpoint to the Minikube IP entry in /etc/hosts file (administrator rights are required to make changes in this file).
 
 1. Create the APIRule CR where you specify the Function to expose, define an [Oathkeeper Access Rule](/components/api-gateway/#details-available-security-options) to secure it, and list which HTTP request methods you want to enable for it.
 

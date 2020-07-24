@@ -76,7 +76,7 @@ Follows these steps:
     curl https://$NAME.$DOMAIN
     ```
    
-   >**NOTE:** If you are using Minikube, make sure that you've added the endpoint to the Minikube entry in /etc/hosts file. 
+   >**NOTE:** If you are using Minikube, make sure that you've added the endpoint to the Minikube IP entry in /etc/hosts file. 
 
     </details>
     <details>
@@ -103,6 +103,6 @@ Follows these steps:
 6. Select **Create** to confirm changes. The pop-up box with the form will close.
 
 7. Check if you can access the Function by selecting the HTTPS link under the **Host** column for the newly created API Rule.
-    >**NOTE:** If you are using Minikube, make sure that you've added the endpoint to the Minikube entry in /etc/hosts file.
+    >**NOTE:** If you are using Minikube, make sure that you've added the endpoint to the Minikube IP entry in /etc/hosts file.
     </details>
 </div>
