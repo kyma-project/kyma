@@ -223,15 +223,15 @@ data:
   output-cp-logging.conf: |
     [OUTPUT]
         Name http
-        Match loki.*
-        Host {{ .Values.conf.Output.CloudLogging.host }}
-        Port {{ .Values.conf.Output.CloudLogging.port }}
-        HTTP_User {{ .Values.conf.Output.CloudLogging.http_user }}
-        HTTP_Passwd {{ .Values.conf.Output.CloudLogging.http_password }}
-        tls {{ .Values.conf.Output.CloudLogging.tls }}
-        tls.verify {{ .Values.conf.Output.CloudLogging.tls_verify }}
-        tls.debug {{ .Values.conf.Output.CloudLogging.tls_debug }}
-        URI {{ .Values.conf.Output.CloudLogging.uri }}
+        Match {{ .Values.conf.Output.CloudLogging.Match }}
+        Host {{ .Values.backend.cplogging.host }}
+        Port {{ .Values.backend.cplogging.port }}
+        HTTP_User {{ .Values.backend.cplogging.http_user }}
+        HTTP_Passwd {{ .Values.backend.cplogging.http_passwd }}
+        tls {{ .Values.backend.cplogging.tls }}
+        tls.verify {{ .Values.backend.cplogging.tls_verify }}
+        tls.debug {{ .Values.backend.cplogging.tls_debug }}
+        URI {{ .Values.backend.cplogging.uri }}
         Format {{ .Values.conf.Output.CloudLogging.format }}
 {{- end }}
 {{- if .Values.conf.extra }}

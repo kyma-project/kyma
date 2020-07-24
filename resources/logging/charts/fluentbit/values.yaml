@@ -133,14 +133,7 @@ conf:
       Index: flb_logs_write
     CloudLogging:
       enabled: false
-      host: fluentd-***
-      port: 443
-      http_user:
-      http_password:
-      tls: true
-      tls_verify: false
-      tls_debug: 1
-      uri: /
+      Match: loki.*
       format: json
     loki:
       enabled: true
@@ -229,6 +222,15 @@ backend:
     key_passwd: ""
     # TLS debugging levels = 1-5
     tls_debug: 1
+  cplogging:
+    host: fluentd-***
+    port: 443
+    http_user:
+    http_passwd:
+    tls: true
+    tls_verify: false
+    tls_debug: 1
+    uri: /
   forward:
     host: log-forwarder
     port: 24224
