@@ -95,6 +95,7 @@ spec:
 
           volumeMounts:
             - name: cert
+              readOnly: true
               mountPath: /etc/application-connector-certs/
       volumes:
         - name: cert
