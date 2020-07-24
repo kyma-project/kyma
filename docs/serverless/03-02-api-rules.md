@@ -7,13 +7,13 @@ To access a Function within the cluster, use the `{function-name}.{namespace}.sv
 
 ![Expose a Function service](./assets/api-rules.svg)
 
-> **NOTE:** If you are using Minikube, before you can access the function you have to add the endpoint to the Minikube IP entry in /etc/hosts file (administrator rights are required to make changes in this file).
-
 1. Create the APIRule CR where you specify the Function to expose, define an [Oathkeeper Access Rule](/components/api-gateway/#details-available-security-options) to secure it, and list which HTTP request methods you want to enable for it.
 
 1. The API Gateway Controller detects a new APIRule CR and reads its definition.
 
 1. The API Gateway Controller creates an Istio Virtual Service and Access Rules according to details specified in the CR. Such a Function service is available under the `{host-name}.{domain}` endpoint, such as `my-function.kyma.local`.
+
+> **NOTE:** If you are using Minikube, before you can access the function you have to add the endpoint to the Minikube IP entry in /etc/hosts file (administrator rights are required to make changes in this file).
 
 This way you can specify multiple API Rules with different authentication methods for a single Function service.
 
