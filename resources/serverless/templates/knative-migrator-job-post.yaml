@@ -9,7 +9,7 @@ metadata:
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
 data:
   knative-migration: |-
 {{ include (print $.Template.BasePath "/_helper_knative_migration.txt") . | indent 4 }}
@@ -23,7 +23,7 @@ metadata:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
   annotations:
     helm.sh/hook: post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "0"
 ---
 kind: ClusterRole
@@ -34,7 +34,7 @@ metadata:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
   annotations:
     helm.sh/hook: post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups: ["serving.knative.dev"]
@@ -58,7 +58,7 @@ metadata:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
   annotations:
     helm.sh/hook: post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "0"
 subjects:
 - kind: ServiceAccount
@@ -79,7 +79,7 @@ metadata:
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-weight: "1"
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
 spec:
   template:
     metadata:
