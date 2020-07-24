@@ -29,7 +29,7 @@ metadata:
 rules:
   - apiGroups: ["*"]
     resources: ["secrets"]
-    verbs: ["create", "get", "update"]
+    verbs: ["create", "get", "update", "patch"]
 
 ---
 kind: RoleBinding
