@@ -21,6 +21,6 @@ spec:
   - to:
     - operation:
         ports:
-        - 443 # compass-runtime-agent-service
-        - {{ .Values.compassRuntimeAgent.healthCheck.port }}
-        - {{ .Values.compassRuntimeAgent.healthCheck.proxyStatusPort }}
+        - "443" # compass-runtime-agent-service
+        - "{{ .Values.compassRuntimeAgent.healthCheck.port }}"
+        - "{{ .Values.compassRuntimeAgent.healthCheck.proxyStatusPort }}"
