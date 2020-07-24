@@ -14,8 +14,12 @@ echo -e "${NC}"
 ##
 # GO MOD VENDOR
 ##
-go mod vendor
-vendorResult=$?
+
+goVersion=$(go version)
+echo "$goVersion"
+
+echo "? go mod vendor"
+vendorResult=$(go mod vendor)
 if [[ ${vendorResult} != 0 ]]; then
 	echo -e "${RED}✗ go mod vendor${NC}\n$vendorResult${NC}"
 	exit 1
