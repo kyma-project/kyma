@@ -19,7 +19,7 @@ goVersion=$(go version)
 echo -e "$goVersion"
 
 echo "? go mod vendor"
-vendorResult=$(go mod vendor)
+vendorResult=$(GO111MODULE=on go mod vendor)
 if [[ ${vendorResult} != 0 ]]; then
 	echo -e "${RED}✗ go mod vendor${NC}\n$vendorResult${NC}"
 	exit 1
@@ -30,7 +30,7 @@ fi
 # GO MOD VERIFY
 ##
 echo "? go mod verify"
-verifyResult=$(go mod verify)
+verifyResult=$(GO111MODULE=on go mod verify)
 if [[ $? != 0 ]]; then
 	echo -e "${RED}✗ go mod verify\n$verifyResult${NC}"
 	exit 1
