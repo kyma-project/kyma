@@ -84,6 +84,7 @@ Follow these steps:
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/arithnea.svg" alt="ARITHNEA" width="300" height="130" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/digital_lights.svg" alt="Digital Lights" width="200" height="130" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/FAIR_LOGO_HEADER.svg" alt="FAIR" width="300" height="130" />
+  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/Sybit-Logo.svg" alt="FAIR" width="300" height="130" />
 </p>
 <p align="center">
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/arineo.svg" alt="Arineo" width="250" height="40" />
