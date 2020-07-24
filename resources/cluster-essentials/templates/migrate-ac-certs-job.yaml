@@ -90,6 +90,9 @@ spec:
               kubectl create secret generic -n {{ .Values.jobs.installer.namespace }} application-connector-overrides \
                   --from-file global.applicationConnectorCa=/etc/application-connector-certs/ca.crt \
                   --from-file global.applicationConnectorCaKey=/etc/application-connector-certs/ca.key --dry-run -oyaml | kubectl apply -f -
+
+              kubectl label secret -n {{ .Values.jobs.installer.namespace }} application-connector-overrides "kyma-project.io/installation=" "installer=overrides"
+
           volumeMounts:
             - name: cert
               mountPath: /etc/application-connector-certs/
