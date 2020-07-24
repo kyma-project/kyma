@@ -1,8 +1,13 @@
 package serverless
 
 import (
+	"context"
 	"path/filepath"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
@@ -60,6 +65,17 @@ var _ = ginkgo.BeforeSuite(func(done ginkgo.Done) {
 
 	err = envconfig.InitWithPrefix(&config, "TEST")
 	gomega.Expect(err).NotTo(gomega.HaveOccurred())
+
+	rtm := serverlessv1alpha1.Nodejs12
+	runtimeDockerfileConfigMap := corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "dockerfile-nodejs-12",
+			Labels: map[string]string{kubernetes.ConfigLabel: "runtime",
+				kubernetes.RuntimeLabel: string(rtm)},
+			Namespace: "tutaj",
+		},
+	}
+	gomega.Expect(resourceClient.Create(context.TODO(), &runtimeDockerfileConfigMap)).To(gomega.Succeed())
 
 	close(done)
 }, 60)

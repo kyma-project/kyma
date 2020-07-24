@@ -2,8 +2,11 @@ package serverless
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-logr/logr"
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
+	fnRuntime "github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -87,6 +90,20 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, err
 	}
 
+	var runtimeConfigMap corev1.ConfigMapList
+	labels := map[string]string{
+		kubernetes.ConfigLabel:  "runtime",
+		kubernetes.RuntimeLabel: string(instance.Spec.Runtime),
+	}
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), labels, &runtimeConfigMap); err != nil {
+		log.Error(err, "Cannot list runtime configmap")
+		return ctrl.Result{}, err
+	}
+
+	if len(runtimeConfigMap.Items) != 1 {
+		return ctrl.Result{}, fmt.Errorf("Expected one config map, found %d, with labels: %+v", len(runtimeConfigMap.Items), labels)
+	}
+
 	var deployments appsv1.DeploymentList
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &deployments); err != nil {
 		log.Error(err, "Cannot list Deployments")
@@ -105,13 +122,16 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, err
 	}
 
+	rtmCfg := fnRuntime.GetRuntimeConfig(instance.Spec.Runtime)
+	rtm := fnRuntime.GetRuntime(instance.Spec.Runtime)
+
 	switch {
-	case r.isOnConfigMapChange(instance, configMaps.Items, deployments.Items):
-		return r.onConfigMapChange(ctx, log, instance, configMaps.Items)
-	case r.isOnJobChange(instance, jobs.Items, deployments.Items):
-		return r.onJobChange(ctx, log, instance, configMaps.Items[0].GetName(), jobs.Items)
-	case r.isOnDeploymentChange(instance, deployments.Items):
-		return r.onDeploymentChange(ctx, log, instance, deployments.Items)
+	case r.isOnConfigMapChange(instance, rtm, configMaps.Items, deployments.Items):
+		return r.onConfigMapChange(ctx, log, instance, rtm, configMaps.Items)
+	case r.isOnJobChange(ctx, instance, rtmCfg, jobs.Items, deployments.Items):
+		return r.onJobChange(ctx, log, instance, rtmCfg, configMaps.Items[0].GetName(), jobs.Items)
+	case r.isOnDeploymentChange(ctx, instance, rtmCfg, deployments.Items):
+		return r.onDeploymentChange(ctx, log, instance, rtmCfg, deployments.Items)
 	case r.isOnServiceChange(instance, services.Items):
 		return r.onServiceChange(ctx, log, instance, services.Items)
 	case r.isOnHorizontalPodAutoscalerChange(instance, hpas.Items, deployments.Items):

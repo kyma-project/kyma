@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
+
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -16,11 +18,11 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
-func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, jobs []batchv1.Job, deployments []appsv1.Deployment) bool {
+func (r *FunctionReconciler) isOnJobChange(ctx context.Context, instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, deployments []appsv1.Deployment) bool {
 	image := r.buildImageAddress(instance)
 	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
-	expectedJob := r.buildJob(instance, "")
+	expectedJob := r.buildJob(instance, rtmCfg, "")
 
 	if len(deployments) == 1 &&
 		deployments[0].Spec.Template.Spec.Containers[0].Image == image &&
@@ -39,8 +41,8 @@ func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function
 		buildStatus == corev1.ConditionFalse
 }
 
-func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, configMapName string, jobs []batchv1.Job) (ctrl.Result, error) {
-	newJob := r.buildJob(instance, configMapName)
+func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, configMapName string, jobs []batchv1.Job) (ctrl.Result, error) {
+	newJob := r.buildJob(instance, rtmCfg, configMapName)
 	jobsLen := len(jobs)
 
 	switch {

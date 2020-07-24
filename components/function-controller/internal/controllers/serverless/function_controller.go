@@ -13,18 +13,15 @@ import (
 )
 
 const (
-	configMapFunction = "handler.js"
-	configMapHandler  = "handler.main"
-	configMapDeps     = "package.json"
+	FunctionSourceKey = "source"
+	FunctionDepsKey   = "dependencies"
 )
 
 var (
 	envVarsForDeployment = []corev1.EnvVar{
 		{Name: "FUNC_HANDLER", Value: "main"},
 		{Name: "MOD_NAME", Value: "handler"},
-		{Name: "FUNC_RUNTIME", Value: "nodejs12"},
 		{Name: "FUNC_PORT", Value: "8080"},
-		{Name: "NODE_PATH", Value: "$(KUBELESS_INSTALL_VOLUME)/node_modules"},
 	}
 )
 

@@ -7,12 +7,18 @@ import (
 
 type SourceType string
 
-// +kubebuilder:validation:Enum=nodejs-12
+//+kubebuilder:validation:Enum=nodejs12;nodejs10;python37
+
 type Runtime string
 
 const (
-	SourceTypeGit   SourceType = "git"
-	RuntimeNodeJS12 Runtime    = "nodejs-12"
+	SourceTypeGit SourceType = "git"
+)
+
+const (
+	Nodejs12 Runtime = "nodejs12"
+	Nodejs10 Runtime = "nodejs10"
+	Python37 Runtime = "python37"
 )
 
 // FunctionSpec defines the desired state of Function
@@ -22,6 +28,9 @@ type FunctionSpec struct {
 
 	// Deps defines the dependencies for a function
 	Deps string `json:"deps,omitempty"`
+
+	// +optional
+	Runtime Runtime `json:"runtime,omitempty"`
 
 	// Env defines an array of key value pairs need to be used as env variable for a function
 	Env []corev1.EnvVar `json:"env,omitempty"`

@@ -1,29 +1,30 @@
 package serverless
 
 import (
+	"context"
 	"fmt"
-	"strings"
+	"path"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 const (
 	destinationArg        = "--destination"
 	functionContainerName = "lambda"
+	baseDir               = "/workspace/src/"
 )
 
-func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
+func (r *FunctionReconciler) buildConfigMap(ctx context.Context, instance *serverlessv1alpha1.Function, rtm runtime.Runtime) corev1.ConfigMap {
 	data := map[string]string{
-		configMapHandler:  configMapHandler,
-		configMapFunction: instance.Spec.Source,
-		configMapDeps:     r.sanitizeDependencies(instance.Spec.Deps),
+		FunctionSourceKey: instance.Spec.Source,
+		FunctionDepsKey:   rtm.SanitizeDependencies(instance.Spec.Deps),
 	}
 
 	return corev1.ConfigMap{
@@ -36,7 +37,7 @@ func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Functio
 	}
 }
 
-func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, configMapName string) batchv1.Job {
+func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, configMapName string) batchv1.Job {
 	one := int32(1)
 	zero := int32(0)
 
@@ -76,7 +77,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 							Name: "runtime",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: r.config.Build.RuntimeConfigMapName},
+									LocalObjectReference: corev1.LocalObjectReference{Name: rtmConfig.DockerfileConfigMapName},
 								},
 							},
 						},
@@ -113,8 +114,8 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 							VolumeMounts: []corev1.VolumeMount{
 								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
 								// If COPY is not used, then the cache will not work
-								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/package.json", SubPath: "package.json"},
-								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/handler.js", SubPath: "handler.js"},
+								{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.DependencyFile), SubPath: FunctionDepsKey},
+								{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.FunctionFile), SubPath: FunctionSourceKey},
 								{Name: "runtime", ReadOnly: true, MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile"},
 								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
 							},
@@ -132,10 +133,13 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 	}
 }
 
-func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function) appsv1.Deployment {
+func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config) appsv1.Deployment {
 	imageName := r.buildImageAddress(instance)
 	deploymentLabels := r.functionLabels(instance)
 	podLabels := r.podLabels(instance)
+
+	envs := append(instance.Spec.Env, rtmConfig.RuntimeEnvs...)
+	envs = append(envs, envVarsForDeployment...)
 
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -158,7 +162,7 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 						{
 							Name:            functionContainerName,
 							Image:           imageName,
-							Env:             append(instance.Spec.Env, envVarsForDeployment...),
+							Env:             envs,
 							Resources:       instance.Spec.Resources,
 							ImagePullPolicy: corev1.PullIfNotPresent,
 						},
@@ -239,15 +243,6 @@ func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alp
 func (r *FunctionReconciler) buildImageAddress(instance *serverlessv1alpha1.Function) string {
 	imageTag := r.calculateImageTag(instance)
 	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.RegistryAddress, instance.Namespace, instance.Name, imageTag)
-}
-
-func (r *FunctionReconciler) sanitizeDependencies(dependencies string) string {
-	result := "{}"
-	if strings.Trim(dependencies, " ") != "" {
-		result = dependencies
-	}
-
-	return result
 }
 
 func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Function) map[string]string {
