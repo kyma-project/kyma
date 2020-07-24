@@ -139,6 +139,7 @@ conf:
       http_password:
       tls: true
       tls_verify: false
+      tls_debug: 1
       uri: /
       format: json
     loki:
