@@ -5,6 +5,8 @@ type: Details
 
 To access a Function within the cluster, use the `{function-name}.{namespace}.svc.cluster.local` endpoint, such as `test-function.default.svc.cluster.local`. To expose a Function outside the cluster, you must create an [APIRule custom resource (CR)](/components/api-gateway#custom-resource-api-rule):
 
+> **NOTE:** If you are using Minikube, before you can access the function you have to add the endpoint to the Minikube ip entry in /etc/hosts file (administrator rights are required to make changes in this file).
+
 ![Expose a Function service](./assets/api-rules.svg)
 
 1. Create the APIRule CR where you specify the Function to expose, define an [Oathkeeper Access Rule](/components/api-gateway/#details-available-security-options) to secure it, and list which HTTP request methods you want to enable for it.
