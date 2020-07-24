@@ -305,9 +305,9 @@ spec:
         privileged: false
         enableCoreDump: false
         statusPort: 15020
-        readinessInitialDelaySeconds: 1
-        readinessPeriodSeconds: 2
-        readinessFailureThreshold: 30
+        readinessInitialDelaySeconds: 5
+        readinessPeriodSeconds: 5
+        readinessFailureThreshold: 40
         includeIPRanges: "*"
         excludeIPRanges: ""
         excludeOutboundPorts: ""
