@@ -12,25 +12,25 @@ echo "GOPATH:" + ${GOPATH}
 echo -e "${NC}"
 
 ##
-# DEP ENSURE
+# GO MOD VENDOR
 ##
-dep ensure -v --vendor-only
-ensureResult=$?
-if [[ ${ensureResult} != 0 ]]; then
-	echo -e "${RED}✗ dep ensure -v --vendor-only${NC}\n$ensureResult${NC}"
+go mod vendor
+vendorResult=$?
+if [[ ${vendorResult} != 0 ]]; then
+	echo -e "${RED}✗ go mod vendor${NC}\n$vendorResult${NC}"
 	exit 1
-else echo -e "${GREEN}√ dep ensure -v --vendor-only${NC}"
+else echo -e "${GREEN}√ go mod vendor${NC}"
 fi
 
 ##
-# DEP STATUS
+# GO MOD VERIFY
 ##
-echo "? dep status"
-depResult=$(dep status -v)
+echo "? go mod verify"
+verifyResult=$(go mod verify)
 if [[ $? != 0 ]]; then
-	echo -e "${RED}✗ dep status\n$depResult${NC}"
+	echo -e "${RED}✗ go mod verify\n$verifyResult${NC}"
 	exit 1
-else echo -e "${GREEN}√ dep status${NC}"
+else echo -e "${GREEN}√ go mod verify${NC}"
 fi
 
 ##
