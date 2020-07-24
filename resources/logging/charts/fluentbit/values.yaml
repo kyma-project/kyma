@@ -131,6 +131,16 @@ conf:
       Replace_Dots: On
       Logstash_Format: On
       Index: flb_logs_write
+    CloudLogging:
+      enabled: false
+      host: fluentd-***
+      port: 443
+      http_user:
+      http_password:
+      tls: true
+      tls_verify: false
+      uri: /
+      format: json
     loki:
       enabled: true
       serviceName: "logging-loki"
