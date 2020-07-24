@@ -108,7 +108,9 @@ func (s *DeployFunction) Run() error {
 		return err
 	}
 
-	if err := retry.Do(s.isFunctionReady); err != nil {
+	if err := retry.Do(s.isFunctionReady,
+		retry.DelayType(retry.BackOffDelay),
+		retry.Attempts(10)); err != nil {
 		return errors.Wrap(err, "function not ready")
 	}
 
