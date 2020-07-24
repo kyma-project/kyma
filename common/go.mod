@@ -13,7 +13,6 @@ require (
 	google.golang.org/appengine v1.6.2 // indirect
 	k8s.io/apimachinery v0.18.3
 	k8s.io/client-go v0.18.3
-	k8s.io/code-generator v0.0.0-00010101000000-000000000000
 )
 
 replace k8s.io/code-generator => k8s.io/code-generator v0.18.6
