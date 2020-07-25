@@ -1,17 +1,6 @@
 apiVersion: v1
+description: Kyma component 'istio'
 name: istio
-version: 1.4.10
-appVersion: 1.4.10
-tillerVersion: ">=2.7.2-0"
-description: Helm chart for all istio components
-keywords:
-  - istio
-  - security
-  - sidecarInjectorWebhook
-  - mixer
-  - pilot
-  - galley
-sources:
-  - http://github.com/istio/istio
-engine: gotpl
-icon: https://istio.io/favicons/android-192x192.png
+version: 1.0.0
+home: https://kyma-project.io
+icon: https://github.com/kyma-project/kyma/blob/master/logo.png?raw=true
