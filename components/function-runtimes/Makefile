@@ -1,10 +1,4 @@
-# PKG = github.com/kyma-project/kyma/components/function-controller
 ROOT :=  $(shell pwd)
-# APP_NAME = function-controller
-# APP_PATH = components/$(APP_NAME)
-# BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20200124-69faeef6
-# SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
-# include $(SCRIPTS_DIR)/generic-make-go.mk
 
 release: build-images push-images
 

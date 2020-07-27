@@ -56,25 +56,14 @@ mod-verify-local:
 # Run tests
 test-local: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
 test-local: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
-test-local: generate-local manifests
+test-local: generate-local
 	GO111MODULE=on go test -v -race -coverprofile=/tmp/artifacts/cover.out -mod vendor ./...
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
 
 # Install CRDs into a cluster
 install: manifests
-	kustomize build config/crd | kubectl apply -f -
-
-# Uninstall CRDs from a cluster
-uninstall: manifests
-	kustomize build config/crd | kubectl delete -f -
-
-undeploy: uninstall
-	kustomize build config/default | kubectl delete  -f -
-
-# Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-deploy: install manifests
-	kubectl apply -k config/default
+	kubectl apply -f ./config/crd/bases
 
 # Generate manifests e.g. CRD, RBAC etc.
 .PHONY: manifests
@@ -137,44 +126,6 @@ build-function-webhook:
 push-function-webhook:
 	docker tag $(WEBHOOK_NAME) $(WEBHOOK_IMG_NAME):$(DOCKER_TAG)
 	docker push $(WEBHOOK_IMG_NAME):$(DOCKER_TAG)
-
-######## function runtime image
-
-## nodejs12
-FUNCTION_RUNTIME_IMAGE_NODEJS12 = function-runtime-nodejs12
-FUNCTION_RUNTIME_NODEJS12_IMG_NAME=$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(FUNCTION_RUNTIME_IMAGE_NODEJS12)
-
-.PHONY: build-function-runtime-nodejs12-image push-function-runtime-nodejs12-image
-build-function-runtime-nodejs12-image:
-	docker build -t $(FUNCTION_RUNTIME_IMAGE_NODEJS12) $(ROOT)/deploy/function-runtime-image/nodejs12/
-
-push-function-runtime-nodejs12-image:
-	docker tag $(FUNCTION_RUNTIME_IMAGE_NODEJS12) $(FUNCTION_RUNTIME_NODEJS12_IMG_NAME):$(DOCKER_TAG)
-	docker push $(FUNCTION_RUNTIME_NODEJS12_IMG_NAME):$(DOCKER_TAG)
-
-## nodejs10
-FUNCTION_RUNTIME_IMAGE_NODEJS10 = function-runtime-nodejs10
-FUNCTION_RUNTIME_NODEJS10_IMG_NAME=$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(FUNCTION_RUNTIME_IMAGE_NODEJS10)
-
-.PHONY: build-function-runtime-nodejs10-image push-function-runtime-nodejs10-image
-build-function-runtime-nodejs10-image:
-	docker build -t $(FUNCTION_RUNTIME_IMAGE_NODEJS10) $(ROOT)/deploy/function-runtime-image/nodejs10/
-
-push-function-runtime-nodejs10-image:
-	docker tag $(FUNCTION_RUNTIME_IMAGE_NODEJS10) $(FUNCTION_RUNTIME_NODEJS10_IMG_NAME):$(DOCKER_TAG)
-	docker push $(FUNCTION_RUNTIME_NODEJS10_IMG_NAME):$(DOCKER_TAG)
-
-## python38
-FUNCTION_RUNTIME_IMAGE_PYTHON38 = function-runtime-python38
-FUNCTION_RUNTIME_PYTHON38_IMG_NAME=$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(FUNCTION_RUNTIME_IMAGE_PYTHON38)
-
-.PHONY: build-function-runtime-python38-image push-function-runtime-python38-image
-build-function-runtime-python38-image:
-	docker build -t $(FUNCTION_RUNTIME_IMAGE_PYTHON38) $(ROOT)/deploy/function-runtime-image/python38/
-
-push-function-runtime-python38-image:
-	docker tag $(FUNCTION_RUNTIME_IMAGE_PYTHON38) $(FUNCTION_RUNTIME_PYTHON38_IMG_NAME):$(DOCKER_TAG)
-	docker push $(FUNCTION_RUNTIME_PYTHON38_IMG_NAME):$(DOCKER_TAG)
 
 ######## builder init container image
 
