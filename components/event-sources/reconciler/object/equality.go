@@ -169,7 +169,7 @@ func containerEqual(c1, c2 *corev1.Container) bool {
 		}
 	}
 
-	if !reflect.DeepEqual(c1.Env, c2.Env) {
+	if !envEqual(c1.Env, c2.Env) {
 		return false
 	}
 
@@ -177,6 +177,22 @@ func containerEqual(c1, c2 *corev1.Container) bool {
 		return false
 	}
 
+	return true
+}
+
+func envEqual(e1, e2 []corev1.EnvVar) bool {
+	if len(e1) != len(e2) {
+		return false
+	}
+EV1:
+	for _, ev1 := range e1 {
+		for _, ev2 := range e2 {
+			if reflect.DeepEqual(ev1, ev2) {
+				continue EV1
+			}
+		}
+		return false
+	}
 	return true
 }
 
