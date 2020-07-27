@@ -5,7 +5,7 @@ metadata:
   annotations:
     helm.sh/hook: "pre-upgrade"
     helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
   labels:
     job: pre-upgrade-delete-vs-rafter-minio
 ---
@@ -19,7 +19,7 @@ metadata:
   annotations:
     helm.sh/hook: "pre-upgrade"
     helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
 rules:
 - apiGroups:
   - networking.istio.io
@@ -37,7 +37,7 @@ metadata:
   annotations:
     helm.sh/hook: "pre-upgrade"
     helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -62,7 +62,7 @@ metadata:
   annotations:
     helm.sh/hook: "pre-upgrade"
     helm.sh/hook-weight: "1"
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
   labels:
     job: pre-upgrade-delete-vs-rafter-minio
   name: pre-upgrade-delete-vs-rafter-minio
@@ -73,7 +73,7 @@ metadata:
   annotations:
     helm.sh/hook: "pre-upgrade"
     helm.sh/hook-weight: "2"
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
   labels:
     job: pre-upgrade-delete-vs-rafter-minio
   name: pre-upgrade-delete-vs-rafter-minio

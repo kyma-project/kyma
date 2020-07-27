@@ -12,7 +12,7 @@ metadata:
   annotations:
     helm.sh/hook: pre-upgrade,post-upgrade
     helm.sh/hook-weight: "-1"
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
 data:
   initialize: |-
   {{ include (print $.Template.BasePath "/_helper_migrate_buckets.txt") . | indent 4 }}
@@ -42,7 +42,7 @@ metadata:
   name: {{ include "rafterUploadService.fullname" . }}-migrator
   annotations:
     helm.sh/hook: pre-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "1"
 subjects:
   - kind: ServiceAccount
@@ -59,7 +59,7 @@ metadata:
   name: {{ include "rafterUploadService.fullname" . }}-migrator
   annotations:
     helm.sh/hook: pre-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "1"
 rules:
   - apiGroups: ["apps"]
@@ -73,7 +73,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: pre-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "1"
 ---
 apiVersion: batch/v1
@@ -88,7 +88,7 @@ metadata:
   annotations:
     helm.sh/hook: pre-upgrade
     helm.sh/hook-weight: "2"
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
 spec:
   template:
     metadata:
@@ -166,7 +166,7 @@ metadata:
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
 spec:
   template:
     metadata:
@@ -222,7 +222,7 @@ metadata:
   name: {{ include "rafterUploadService.fullname" . }}-migrator-delete-pvc
   annotations:
     helm.sh/hook: post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "1"
 subjects:
   - kind: ServiceAccount
@@ -239,7 +239,7 @@ metadata:
   name: {{ include "rafterUploadService.fullname" . }}-migrator-delete-pvc
   annotations:
     helm.sh/hook: post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "1"
 rules:
   - apiGroups: [""]
@@ -253,7 +253,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "1"
 ---
 apiVersion: batch/v1
@@ -268,7 +268,7 @@ metadata:
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-weight: "2"
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
 spec:
   template:
     metadata:
