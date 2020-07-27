@@ -45,7 +45,7 @@ This API is in the alpha version, but it's going to replace Helm-based approach 
 Kyma provides the default IstioOperator configurations for local (Minikube) and cluster installations.
 You can add a custom Istio Operator definition that overrides the default settings.
 The definition you provide may be a partial one (you don't have to specify all options). In that case it will be merged with the defaults.
-In order to provide a custom Istio Operator configuration, define a Kyma Installation override with the //TODO: zmiana na operator `kyma_istio_control_plane` key.kyma-istio-control-plane-config
+In order to provide a custom Istio Operator configuration, define a Kyma Installation override with the //TODO: change to operator `kyma_istio_control_plane` key.
 The value for this override must be a single string containing a valid definition of the IstioOperator custom resource, in the YAML format.
 
 >**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
@@ -65,8 +65,8 @@ See the following example that customizes settings for the `policy` and `pilot` 
         component: istio
         kyma-project.io/installation: ""
     data:
-    //TODO: zmiana nazwy na kyma_istio_operator?
-    //TODO: Przykład legitny
+    //TODO: kyma_istio_operator?
+    //TODO: Change example
       kyma_istio_control_plane: |-
         apiVersion: install.istio.io/v1alpha2
         kind: IstioControlPlane
@@ -131,7 +131,7 @@ Refer to the [IstioOperator API](https://istio.io/docs/reference/config/istio.op
   </summary>
 
   1. Create a Kubernetes cluster for Kyma installation.
-  //TODO jak będzie production profile
+  //TODO when production profile is done
   2. Create an override file that forces the Istio Service Mesh to use the production profile:
 
     ```yaml
@@ -162,7 +162,7 @@ Refer to the [IstioOperator API](https://istio.io/docs/reference/config/istio.op
   Enable production profile in a running cluster
   </summary>
 
-//TODO: jak będzie production profile to uzupełnić (zmienić, mamy ten plik gotowy przecież)
+//TODO: when production profile is done
   1. Apply an override that forces the Istio Service Mesh to use the production profile:
 
     ```bash

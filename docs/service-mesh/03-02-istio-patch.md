@@ -12,7 +12,7 @@ As a core component, Istio is installed with every Kyma deployment by default. T
   - Mutual TLS (mTLS) policy is enabled and set to `strict`.
   - [Istio policy enforcement](https://istio.io/docs/tasks/policy-enforcement/enabling-policy/) is enabled.
   - Automatic sidecar injection is enabled.
-  //TODO: czy tu mają być inne crd?
+  //TODO: other crd? maybe specify where to find them?
   - Istio `policies.authentication.istio.io` CustomResourceDefinition (CRD) is present in the system.
 
 If the Istio deployment fails to meet any of these criteria, the patch fails, which results in a failed installation. In such case, get the Istio Patch logs to find out which criteria the Istio deployment didn't meet. Run:
