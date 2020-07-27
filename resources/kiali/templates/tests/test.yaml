@@ -24,7 +24,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: tests
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.alpine_net.dir }}{{ .Values.global.alpine_net.name }}:{{ .Values.global.alpine_net.version }}
+        image: {{ .Values.tests.image.name }}:{{ .Values.tests.image.version }}
         imagePullPolicy: "{{ .Values.global.imagePullPolicy }}"
         command: ['curl']
         args: ['-k', 'https://kiali.{{ .Values.global.ingress.domainName }}']

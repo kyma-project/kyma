@@ -23,6 +23,7 @@ global:
   ui_acceptance_tests:
     version: 875335c4
   console_backend_service:
-    version: 8c067633
+    version: 8bddbb53
   console_backend_service_test:
-    version: PR-9061
+    version: 8bddbb53
+    
