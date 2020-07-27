@@ -1,6 +1,6 @@
 FROM kubeless/nodejs@sha256:aa819e9bee6c22db0b137595ac45765ef1cad64d0dc09502a008ce4446c607ef as source
 
-FROM node:10.33.0-alpine3.11
+FROM node:10.22.0-alpine3.11
 
 LABEL source = git@github.com:kyma-project/kyma.git
 
