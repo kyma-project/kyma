@@ -27,7 +27,19 @@ type FunctionSpec struct {
 
 	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
+
+	// +optional
+	Runtime *Runtime `json:"runtime,omitempty"`
 }
+
+type Runtime string
+
+const (
+	Nodejs12 Runtime = "nodejs12"
+	Nodejs10 Runtime = "nodejs10"
+	Python38 Runtime = "python38"
+)
+
 
 const (
 	FunctionNameLabel                    = "serverless.kyma-project.io/function-name"

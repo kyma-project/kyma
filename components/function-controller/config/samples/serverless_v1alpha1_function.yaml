@@ -2,12 +2,10 @@ apiVersion: serverless.kyma-project.io/v1alpha1
 kind: Function
 metadata:
   name: demo
-  labels:
-    foo: bar
 spec:
+  maxReplicas: 1
   source: |
-    module.exports = {
-        main: function(event, context) {
-          return 'Hello World'
-        }
-      }
+    def main(event, context):
+        return "hello world3"
+  deps: |
+    djtest==0.1.7

@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	configMapFunction = "handler.js"
-	configMapHandler  = "handler.main"
-	configMapDeps     = "package.json"
+	configMapFunction = "source"
+	// configMapHandler  = "handler.main"
+	configMapDeps     = "dependencies"
 )
 
 var (

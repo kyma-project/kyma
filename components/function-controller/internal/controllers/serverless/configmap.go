@@ -70,8 +70,7 @@ func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Fu
 
 	return !(len(configMaps) == 1 &&
 		instance.Spec.Source == configMaps[0].Data[configMapFunction] &&
-		r.sanitizeDependencies(instance.Spec.Deps) == configMaps[0].Data[configMapDeps] &&
-		configMaps[0].Data[configMapHandler] == configMapHandler &&
+		instance.Spec.Deps == configMaps[0].Data[configMapDeps] &&
 		configurationStatus == corev1.ConditionTrue &&
 		r.mapsEqual(configMaps[0].Labels, r.functionLabels(instance)))
 }

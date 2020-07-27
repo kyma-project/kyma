@@ -28,8 +28,8 @@ func (fn *Function) Validate(ctx context.Context) (errors *apis.FieldError) {
 	return errors.Also(
 		fn.validateObjectMeta(ctx),
 		spec.validateSource(ctx),
-		spec.validateDeps(ctx),
-		spec.validateEnv(ctx),
+		// spec.validateDeps(ctx),
+		// spec.validateEnv(ctx),
 		spec.validateLabels(ctx),
 		spec.validateReplicas(ctx),
 		spec.validateResources(ctx),

@@ -184,6 +184,8 @@ spec:
                     value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                   type: object
               type: object
+            runtime:
+              type: string
             source:
               description: Source defines the source code of a function
               type: string

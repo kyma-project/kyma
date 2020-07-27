@@ -21,9 +21,11 @@ const (
 
 func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
 	data := map[string]string{
-		configMapHandler:  configMapHandler,
-		configMapFunction: instance.Spec.Source,
-		configMapDeps:     r.sanitizeDependencies(instance.Spec.Deps),
+		// configMapHandler:  configMapHandler,
+		// configMapFunction: instance.Spec.Source,
+		"source":       instance.Spec.Source,
+		"dependencies": instance.Spec.Deps,
+		// configMapDeps:     r.sanitizeDependencies(instance.Spec.Deps),
 	}
 
 	return corev1.ConfigMap{
@@ -68,6 +70,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 							Name: "sources",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
+									Items: []corev1.KeyToPath{},
 									LocalObjectReference: corev1.LocalObjectReference{Name: configMapName},
 								},
 							},
@@ -76,7 +79,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 							Name: "runtime",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: r.config.Build.RuntimeConfigMapName},
+									LocalObjectReference: corev1.LocalObjectReference{Name: "dockerfile-python-38"},
 								},
 							},
 						},
@@ -113,8 +116,8 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 							VolumeMounts: []corev1.VolumeMount{
 								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
 								// If COPY is not used, then the cache will not work
-								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/package.json", SubPath: "package.json"},
-								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/handler.js", SubPath: "handler.js"},
+								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/requirements.txt", SubPath: "dependencies"},
+								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/handler.py", SubPath: "source"},
 								{Name: "runtime", ReadOnly: true, MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile"},
 								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
 							},
