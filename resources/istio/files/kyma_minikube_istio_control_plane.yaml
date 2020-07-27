@@ -293,10 +293,10 @@ spec:
         clusterDomain: "cluster.local"
         resources:
           requests:
-            cpu: 10m
+            cpu: 20m
             memory: 10Mi
           limits:
-            cpu: 100m
+            cpu: 150m
             memory: 50Mi
         concurrency: 2
         accessLogFile: ""
