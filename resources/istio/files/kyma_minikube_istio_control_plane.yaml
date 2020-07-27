@@ -452,7 +452,7 @@ spec:
       v2:
         enabled: false
         prometheus:
-          enabled: true
+          enabled: false
         stackdriver:
           enabled: false
           logging: false

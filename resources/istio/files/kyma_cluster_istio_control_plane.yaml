@@ -285,10 +285,10 @@ spec:
         clusterDomain: "cluster.local"
         resources:
           requests:
-            cpu: 20m
-            memory: 32Mi
+            cpu: 50m
+            memory: 64Mi
           limits:
-            cpu: 200m
+            cpu: 250m
             memory: 128Mi
         concurrency: 2
         accessLogFile: ""
@@ -444,7 +444,7 @@ spec:
       v2:
         enabled: false
         prometheus:
-          enabled: true
+          enabled: false
         stackdriver:
           enabled: false
           logging: false
