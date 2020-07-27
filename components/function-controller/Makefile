@@ -24,7 +24,17 @@ GOBIN=$(shell go env GOBIN)
 endif
 
 verify:: mod-verify
-release: build-function-runtime-image push-function-runtime-image build-function-webhook push-function-webhook build-function-build-init push-function-build-init build-image push-image
+release: build-function-runtime-nodejs12-image \
+	build-function-runtime-nodejs10-image \
+	build-function-runtime-python38-image \
+	push-function-runtime-nodejs12-image \
+	push-function-runtime-nodejs10-image \
+	push-function-runtime-python38-image \
+	build-function-webhook \
+	push-function-webhook \
+	build-function-build-init \
+	push-function-build-init \
+	build-image push-image
 
 
 resolve-local:
@@ -130,16 +140,41 @@ push-function-webhook:
 
 ######## function runtime image
 
+## nodejs12
 FUNCTION_RUNTIME_IMAGE_NODEJS12 = function-runtime-nodejs12
 FUNCTION_RUNTIME_NODEJS12_IMG_NAME=$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(FUNCTION_RUNTIME_IMAGE_NODEJS12)
 
-.PHONY: build-function-runtime-image push-function-runtime-image
-build-function-runtime-image:
+.PHONY: build-function-runtime-nodejs12-image push-function-runtime-nodejs12-image
+build-function-runtime-nodejs12-image:
 	docker build -t $(FUNCTION_RUNTIME_IMAGE_NODEJS12) $(ROOT)/deploy/function-runtime-image/nodejs12/
 
-push-function-runtime-image:
+push-function-runtime-nodejs12-image:
 	docker tag $(FUNCTION_RUNTIME_IMAGE_NODEJS12) $(FUNCTION_RUNTIME_NODEJS12_IMG_NAME):$(DOCKER_TAG)
 	docker push $(FUNCTION_RUNTIME_NODEJS12_IMG_NAME):$(DOCKER_TAG)
+
+## nodejs10
+FUNCTION_RUNTIME_IMAGE_NODEJS10 = function-runtime-nodejs10
+FUNCTION_RUNTIME_NODEJS10_IMG_NAME=$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(FUNCTION_RUNTIME_IMAGE_NODEJS10)
+
+.PHONY: build-function-runtime-nodejs10-image push-function-runtime-nodejs10-image
+build-function-runtime-nodejs10-image:
+	docker build -t $(FUNCTION_RUNTIME_IMAGE_NODEJS10) $(ROOT)/deploy/function-runtime-image/nodejs10/
+
+push-function-runtime-nodejs10-image:
+	docker tag $(FUNCTION_RUNTIME_IMAGE_NODEJS10) $(FUNCTION_RUNTIME_NODEJS10_IMG_NAME):$(DOCKER_TAG)
+	docker push $(FUNCTION_RUNTIME_NODEJS10_IMG_NAME):$(DOCKER_TAG)
+
+## python38
+FUNCTION_RUNTIME_IMAGE_PYTHON38 = function-runtime-python38
+FUNCTION_RUNTIME_PYTHON38=$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(FUNCTION_RUNTIME_IMAGE_PYTHON38)
+
+.PHONY: build-function-runtime-python38-image push-function-runtime-python38-image
+build-function-runtime-python38-image:
+	docker build -t $(FUNCTION_RUNTIME_IMAGE_PYTHON38) $(ROOT)/deploy/function-runtime-image/python38/
+
+push-function-runtime-python38-image:
+	docker tag $(FUNCTION_RUNTIME_IMAGE_PYTHON38) $(FUNCTION_RUNTIME_PYTHON38_IMG_NAME):$(DOCKER_TAG)
+	docker push $(FUNCTION_RUNTIME_PYTHON38_IMG_NAME):$(DOCKER_TAG)
 
 ######## builder init container image
 

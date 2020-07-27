@@ -73,6 +73,12 @@ images:
   functionRuntimeNodejs12:
     repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
     tag: "1cc47db6"
+  functionRuntimeNodejs10:
+    repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
+    tag: "tba"   
+  functionRuntimePython38:
+    repository: "eu.gcr.io/kyma-project/function-runtime-python38"
+    tag: "tba"  
 
 deployment:
   replicas: 1
