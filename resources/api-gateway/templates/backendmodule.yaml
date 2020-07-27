@@ -2,3 +2,8 @@ apiVersion: ui.kyma-project.io/v1alpha1
 kind: BackendModule
 metadata:
   name: apigateway
+---
+apiVersion: ui.kyma-project.io/v1alpha1
+kind: BackendModule
+metadata:
+  name: oauth

@@ -8,8 +8,9 @@ import (
 	"strconv"
 	"time"
 
-	v1alpha11 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	v1alpha12 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
 	v1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -440,6 +441,11 @@ type NavigationNode struct {
 	RequiredPermissions []*RequiredPermission `json:"requiredPermissions"`
 }
 
+type OAuth2ClientEvent struct {
+	Type   SubscriptionEventType   `json:"type"`
+	Client *v1alpha11.OAuth2Client `json:"client"`
+}
+
 type Pod struct {
 	Name              string            `json:"name"`
 	NodeName          string            `json:"nodeName"`
@@ -682,7 +688,7 @@ type TriggerCreateInput struct {
 
 type TriggerEvent struct {
 	Type    SubscriptionEventType `json:"type"`
-	Trigger *v1alpha11.Trigger    `json:"trigger"`
+	Trigger *v1alpha12.Trigger    `json:"trigger"`
 }
 
 type TriggerStatus struct {
