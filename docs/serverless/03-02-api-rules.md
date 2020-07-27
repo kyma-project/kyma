@@ -17,4 +17,4 @@ This way you can specify multiple API Rules with different authentication method
 
 > **TIP:** See the [tutorial](#tutorials-expose-a-function-with-an-api-rule) for a detailed example.
 
-> **NOTE:** If you are using Minikube, before you can access the function you have to add the endpoint to the Minikube IP entry in /etc/hosts file.
+> **NOTE:** If you are using Minikube, before you can access the function you must add the endpoint to the Minikube IP entry in the `/etc/hosts` file.
