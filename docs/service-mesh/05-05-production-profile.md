@@ -31,22 +31,22 @@ As the production profile is configured with increased performance it mind, the 
 
 ## Use the production profile
 
->**CAUTION:** Due to changes in the installation options in Istio, Helm-based configuration is now deprecated in favor of the new IstioControlPlane API. Please keep in mind that Helm overrides will be no longer supported in future Istio releases. Refer to [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) documentation for details.
+>**CAUTION:** Due to changes in the installation options in Istio, Helm-based configuration is now deprecated in favor of the new IstioOperator API. Please keep in mind that Helm overrides will be no longer supported in future Istio releases. Refer to [IstioOperator](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) documentation for details.
 
 You can deploy a Kyma cluster with Istio configured to use the production profile, or configure Istio in a running cluster to use the production profile. Follow these steps:
 
 <div tabs>
   <details>
   <summary>
-  Istio Control Plane API
+  Istio Operator API
   </summary>
-Istio installation in Kyma uses the [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) API.
+Istio installation in Kyma uses the [IstioOperator](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) API.
 This API is in the alpha version, but it's going to replace Helm-based approach in future Istio versions.
-Kyma provides the default IstioControlPlane configurations for local (Minikube) and cluster installations.
-You can add a custom control plane definition that overrides the default settings.
+Kyma provides the default IstioOperator configurations for local (Minikube) and cluster installations.
+You can add a custom Istio Operator definition that overrides the default settings.
 The definition you provide may be a partial one (you don't have to specify all options). In that case it will be merged with the defaults.
-In order to provide a custom IstioControlPlane configuration, define a Kyma Installation override with the `kyma_istio_control_plane` key.
-The value for this override must be a single string containing a valid definition of the IstioControlPlane custom resource, in the YAML format.
+In order to provide a custom Istio Operator configuration, define a Kyma Installation override with the //TODO: zmiana na operator `kyma_istio_control_plane` key.kyma-istio-control-plane-config
+The value for this override must be a single string containing a valid definition of the IstioOperator custom resource, in the YAML format.
 
 >**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
 >* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
@@ -58,13 +58,15 @@ See the following example that customizes settings for the `policy` and `pilot` 
     apiVersion: v1
     kind: ConfigMap
     metadata:
-      name: istio-control-plane-overrides
+      name: istio-operator-overrides
       namespace: kyma-installer
       labels:
         installer: overrides
         component: istio
         kyma-project.io/installation: ""
     data:
+    //TODO: zmiana nazwy na kyma_istio_operator?
+    //TODO: Przykład legitny
       kyma_istio_control_plane: |-
         apiVersion: install.istio.io/v1alpha2
         kind: IstioControlPlane
@@ -121,7 +123,7 @@ See the following example that customizes settings for the `policy` and `pilot` 
 
 While installing, don't forget to provide Kyma CLI with this file's path via `-o` flag.
 
-Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) documentation for details about available options.
+Refer to the [IstioOperator API](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) documentation for details about available options.
   </details>
   <details>
   <summary>
@@ -129,6 +131,7 @@ Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/isti
   </summary>
 
   1. Create a Kubernetes cluster for Kyma installation.
+  //TODO jak będzie production profile
   2. Create an override file that forces the Istio Service Mesh to use the production profile:
 
     ```yaml
@@ -159,6 +162,7 @@ Refer to the [IstioControlPlane API](https://istio.io/docs/reference/config/isti
   Enable production profile in a running cluster
   </summary>
 
+//TODO: jak będzie production profile to uzupełnić (zmienić, mamy ten plik gotowy przecież)
   1. Apply an override that forces the Istio Service Mesh to use the production profile:
 
     ```bash

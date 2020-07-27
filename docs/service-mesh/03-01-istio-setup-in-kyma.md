@@ -4,7 +4,7 @@ type: Details
 ---
 
 Istio in Kyma is installed with the help of the `istioctl` tool.
-The tool is driven by a configuration file containing an instance of [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) custom resource.
+The tool is driven by a configuration file containing an instance of [IstioOperator](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) custom resource.
 There are two configuration files — one for local installation on Minikube and one for cluster installations.
 The configurations are customized for Kyma and are stored in the `resources/istio` directory.
 
@@ -14,18 +14,14 @@ This list shows the available Istio components and the components enabled by def
 
 | Component | Enabled |
 | :--- | :---: |
+| Istiod | ✅ |
 | Gateways | ✅ |
-| Sidecar Injector | ✅ |
-| Galley | ✅ |
-| Mixer | ✅ |
-| Pilot | ✅ |
-| Security | ✅ |
-| Node agent | ⛔️ |
 | Grafana | ⛔️ |
 | Prometheus | ⛔️ |
-| Servicegraph | ⛔️ |
 | Tracing | ⛔️ |
 | Kiali | ⛔️ |
+
+>*NOTE*: In Istio 1.5, separate components are replaced by a single binary - Istiod. However, to ensure a smooth transition to the new version, Citadel, Policy and Telemetry still are deployed to the cluster.
 
 ## Kyma-specific configuration
 
@@ -39,3 +35,4 @@ These configuration changes are applied to customize Istio for use with Kyma:
 - Global tracing is set to use the Zipkin installation provided by Kyma.
 - Ingress Gateway is expanded to handle ports `80` and `443` for local Kyma deployments.
 - DestinationRules are created by default, which disables mTLS for the `istio-ingressgateway.istio-system.svc.cluster.local` service.
+- The `istio-sidecar-injector` Mutating Webhook Configuration is patched to exclude Gardener resources in the kube-system namespace and the timeout is set to 10 seconds.
