@@ -8,7 +8,7 @@ metadata:
     serverless.kyma-project.io/runtime: nodejs12
 data:
   Dockerfile: |-
-    FROM {{ .Values.images.functionRuntimeNodejs12.repository}}:{{ .Values.images.functionRuntimeNodejs12.tag }}
+    FROM {{ .Values.images.runtimes.nodejs12.repository}}:{{ .Values.images.runtimes.nodejs12.tag }}
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
     
@@ -28,7 +28,7 @@ metadata:
     serverless.kyma-project.io/runtime: nodejs10
 data:
   Dockerfile: |-
-    FROM {{ .Values.images.functionRuntimeNodejs10.repository}}:{{ .Values.images.functionRuntimeNodejs10.tag }}
+    FROM {{ .Values.images.runtimes.nodejs10.repository}}:{{ .Values.images.runtimes.nodejs10.tag }}
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
     
@@ -48,7 +48,7 @@ metadata:
     serverless.kyma-project.io/runtime: python38
 data:
   Dockerfile: |-
-    FROM {{ .Values.images.functionRuntimePython38.repository}}:{{ .Values.images.functionRuntimePython38.tag }}
+    FROM {{ .Values.images.runtimes.python38.repository}}:{{ .Values.images.runtimes.python38.tag }}
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
     
