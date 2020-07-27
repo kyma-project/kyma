@@ -166,7 +166,7 @@ push-function-runtime-nodejs10-image:
 
 ## python38
 FUNCTION_RUNTIME_IMAGE_PYTHON38 = function-runtime-python38
-FUNCTION_RUNTIME_PYTHON38=$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(FUNCTION_RUNTIME_IMAGE_PYTHON38)
+FUNCTION_RUNTIME_PYTHON38_IMG_NAME=$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(FUNCTION_RUNTIME_IMAGE_PYTHON38)
 
 .PHONY: build-function-runtime-python38-image push-function-runtime-python38-image
 build-function-runtime-python38-image:
