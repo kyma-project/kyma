@@ -24,13 +24,7 @@ GOBIN=$(shell go env GOBIN)
 endif
 
 verify:: mod-verify
-release: build-function-runtime-nodejs12-image \
-	build-function-runtime-nodejs10-image \
-	build-function-runtime-python38-image \
-	push-function-runtime-nodejs12-image \
-	push-function-runtime-nodejs10-image \
-	push-function-runtime-python38-image \
-	build-function-webhook \
+release: build-function-webhook \
 	push-function-webhook \
 	build-function-build-init \
 	push-function-build-init \
