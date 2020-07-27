@@ -2,8 +2,12 @@ package serverless
 
 import (
 	"context"
+	"fmt"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/go-logr/logr"
+	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -69,7 +73,10 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	log := r.Log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "name", instance.GetName(), "namespace", instance.GetNamespace(), "version", instance.GetGeneration())
+	log := r.Log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind,
+		"name", instance.GetName(),
+		"namespace", instance.GetNamespace(),
+		"version", instance.GetGeneration())
 
 	if !instance.DeletionTimestamp.IsZero() {
 		return ctrl.Result{}, nil
@@ -105,10 +112,30 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, err
 	}
 
+	revision, err := r.syncRevision(ctx, instance)
+	if err != nil {
+		return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+			Type:               serverlessv1alpha1.ConditionConfigurationReady,
+			Status:             corev1.ConditionTrue,
+			LastTransitionTime: metav1.Now(),
+			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
+			Message:            fmt.Sprintf("Sources update failed: %v", err),
+		})
+	}
+
 	switch {
-	case r.isOnConfigMapChange(instance, configMaps.Items, deployments.Items):
+	case instance.Spec.SourceType == serverlessv1alpha1.Git && isOnSourceChange(instance, revision):
+		return r.onSourceChange(ctx, instance, &serverlessv1alpha1.Repository{
+			Branch:     instance.Spec.Branch,
+			Commit:     revision,
+			BaseDir:    instance.Spec.Repository.BaseDir,
+			Dockerfile: instance.Spec.Repository.Dockerfile,
+		})
+	case instance.Spec.SourceType != serverlessv1alpha1.Git && r.isOnConfigMapChange(instance, configMaps.Items, deployments.Items):
 		return r.onConfigMapChange(ctx, log, instance, configMaps.Items)
-	case r.isOnJobChange(instance, jobs.Items, deployments.Items):
+	case instance.Spec.SourceType == serverlessv1alpha1.Git && r.isOnJobChange(instance, jobs.Items, deployments.Items):
+		return r.onJobChange(ctx, log, instance, "", jobs.Items)
+	case instance.Spec.SourceType != serverlessv1alpha1.Git && r.isOnJobChange(instance, jobs.Items, deployments.Items):
 		return r.onJobChange(ctx, log, instance, configMaps.Items[0].GetName(), jobs.Items)
 	case r.isOnDeploymentChange(instance, deployments.Items):
 		return r.onDeploymentChange(ctx, log, instance, deployments.Items)
@@ -119,4 +146,60 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	default:
 		return r.updateDeploymentStatus(ctx, log, instance, deployments.Items, corev1.ConditionTrue)
 	}
+}
+
+func isOnSourceChange(instance *serverlessv1alpha1.Function, commit string) bool {
+	return instance.Status.Commit == "" ||
+		commit != instance.Status.Commit ||
+		instance.Spec.Branch != instance.Status.Branch ||
+		instance.Spec.Dockerfile != instance.Status.Dockerfile ||
+		instance.Spec.BaseDir != instance.Status.BaseDir
+}
+
+func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository) (ctrl.Result, error) {
+	return r.updateStatus2(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+		Type:               serverlessv1alpha1.ConditionConfigurationReady,
+		Status:             corev1.ConditionTrue,
+		LastTransitionTime: metav1.Now(),
+		Reason:             serverlessv1alpha1.ConditionReasonSourceUpdated,
+		Message:            fmt.Sprintf("Sources %s updated", instance.Name),
+	}, repository)
+}
+
+var gitOperator = git.New()
+
+func seekLatestCommit(instance *serverlessv1alpha1.Function, credentials map[string]string) (string, error) {
+	if instance.Spec.Commit != "" {
+		return instance.Spec.Commit, nil
+	}
+
+	commit, err := gitOperator.LastCommit(instance.Spec.Source, instance.Spec.Repository.Branch, nil)
+	return commit, err
+}
+
+func (r *FunctionReconciler) syncRevision(ctx context.Context, instance *serverlessv1alpha1.Function) (string, error) {
+	revision := instance.Spec.Commit
+	if instance.Spec.SourceType == serverlessv1alpha1.Git && revision == "" && instance.Spec.Repository.Branch != "" {
+		var secret corev1.Secret
+		isSecretFound := true
+		var err error
+		var credentials map[string]string
+
+		if err = r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: instance.Name}, &secret); err != nil {
+			isSecretFound = false
+			if !errors.IsNotFound(err) {
+				return "", err
+			}
+		}
+
+		if isSecretFound {
+			credentials = secret.StringData
+		}
+
+		revision, err = seekLatestCommit(instance, credentials)
+		if err != nil {
+			return "", err
+		}
+	}
+	return revision, nil
 }

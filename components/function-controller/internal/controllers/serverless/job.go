@@ -3,10 +3,10 @@ package serverless
 import (
 	"context"
 	"fmt"
+	appsv1 "k8s.io/api/apps/v1"
 	"strings"
 
 	"github.com/go-logr/logr"
-	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,7 +20,12 @@ func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function
 	image := r.buildImageAddress(instance)
 	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
-	expectedJob := r.buildJob(instance, "")
+	var expectedJob batchv1.Job
+	if instance.Spec.SourceType != serverlessv1alpha1.Git {
+		expectedJob = r.buildJob(instance, "")
+	} else {
+		expectedJob = r.buildGitJob(instance)
+	}
 
 	if len(deployments) == 1 &&
 		deployments[0].Spec.Template.Spec.Containers[0].Image == image &&
@@ -40,7 +45,13 @@ func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function
 }
 
 func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, configMapName string, jobs []batchv1.Job) (ctrl.Result, error) {
-	newJob := r.buildJob(instance, configMapName)
+	var newJob batchv1.Job
+	switch instance.Spec.SourceType {
+	case serverlessv1alpha1.Git:
+		newJob = r.buildGitJob(instance)
+	default:
+		newJob = r.buildJob(instance, configMapName)
+	}
 	jobsLen := len(jobs)
 
 	switch {
