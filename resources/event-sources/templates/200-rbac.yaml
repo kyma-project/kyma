@@ -85,3 +85,9 @@ roleRef:
   kind: ClusterRole
   name: {{ template "controller-manager.fullname" . }}
   apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "controller-manager.fullname" . }}-debug
+  namespace: kyma-system
