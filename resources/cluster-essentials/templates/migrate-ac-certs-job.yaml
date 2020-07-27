@@ -1,5 +1,6 @@
 {{- if not .Values.global.disableLegacyConnectivity }}
 {{- if .Release.IsUpgrade }}
+{{- if not ( and .Values.global.applicationConnectorCa .Values.global.applicationConnectorCaKey ) }}
 
 apiVersion: v1
 kind: ServiceAccount
@@ -79,14 +80,6 @@ spec:
             - -c
           args:
             - |
-              CERT={{ .Values.global.applicationConnectorCa }}
-              KEY={{ .Values.global.applicationConnectorCaKey }}
-
-              if [[ "$CERT" != "" ]] && [[ "$KEY" != "" ]] ; then
-                echo "Overrides for Application Connector already present"
-                exit 0
-              fi
-
               kubectl create secret generic -n {{ .Values.jobs.installer.namespace }} application-connector-overrides \
                   --from-literal global.applicationConnectorCa="$(cat /etc/application-connector-certs/ca.crt | base64 -w 0)" \
                   --from-literal global.applicationConnectorCaKey="$(cat /etc/application-connector-certs/ca.key | base64 -w 0)" --dry-run -oyaml | kubectl apply -f -
@@ -101,6 +94,6 @@ spec:
         - name: cert
           secret:
             secretName: connector-service-app-ca
-
+{{- end }}
 {{- end }}
 {{- end }}
