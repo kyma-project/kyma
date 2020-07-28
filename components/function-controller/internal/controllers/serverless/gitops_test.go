@@ -154,8 +154,8 @@ func Test_isOnSourceChange(t *testing.T) {
 				Spec: v1alpha1.FunctionSpec{
 					SourceType: v1alpha1.Git,
 					Repository: v1alpha1.Repository{
-						Commit:     "2",
-						Dockerfile: "dockerfile",
+						Commit:  "2",
+						Runtime: v1alpha1.NodeJS12,
 					},
 				},
 				Status: v1alpha1.FunctionStatus{

@@ -61,8 +61,6 @@ spec:
             deps:
               description: Deps defines the dependencies for a function
               type: string
-            dockerfile:
-              type: string
             env:
               description: Env defines an array of key value pairs need to be used
                 as env variable for a function

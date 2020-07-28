@@ -127,10 +127,10 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	switch {
 	case instance.Spec.SourceType == serverlessv1alpha1.Git && isOnSourceChange(instance, revision):
 		return r.onSourceChange(ctx, instance, &serverlessv1alpha1.Repository{
-			Branch:     instance.Spec.Branch,
-			Commit:     revision,
-			BaseDir:    instance.Spec.Repository.BaseDir,
-			Dockerfile: instance.Spec.Repository.Dockerfile,
+			Branch:  instance.Spec.Branch,
+			Commit:  revision,
+			BaseDir: instance.Spec.Repository.BaseDir,
+			Runtime: instance.Spec.Repository.Runtime,
 		})
 	case instance.Spec.SourceType != serverlessv1alpha1.Git && r.isOnConfigMapChange(instance, configMaps.Items, deployments.Items):
 		return r.onConfigMapChange(ctx, log, instance, configMaps.Items)
@@ -153,7 +153,7 @@ func isOnSourceChange(instance *serverlessv1alpha1.Function, commit string) bool
 	return instance.Status.Commit == "" ||
 		commit != instance.Status.Commit ||
 		instance.Spec.Branch != instance.Status.Branch ||
-		instance.Spec.Dockerfile != instance.Status.Dockerfile ||
+		instance.Spec.Runtime != instance.Status.Runtime ||
 		instance.Spec.BaseDir != instance.Status.BaseDir
 }
 

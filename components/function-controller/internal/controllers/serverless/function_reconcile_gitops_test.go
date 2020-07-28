@@ -38,9 +38,9 @@ var _ = ginkgo.Describe("Function", func() {
 				SourceType: serverlessv1alpha1.Git,
 				Source:     "https://github.com/pPrecel/public-gitops",
 				Repository: serverlessv1alpha1.Repository{
-					BaseDir:    "/",
-					Dockerfile: "deploy/Dockerfile",
-					Branch:     "master",
+					BaseDir: "/",
+					Runtime: serverlessv1alpha1.NodeJS12,
+					Branch:  "master",
 				},
 				Env: []corev1.EnvVar{
 					{
