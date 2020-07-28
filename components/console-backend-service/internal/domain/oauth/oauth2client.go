@@ -9,7 +9,7 @@ type Resolver struct {
 }
 
 func New(factory *resource.GenericServiceFactory) *Resolver {
-	module := resource.NewModule("oauth", factory, resource.ServiceCreators{
+	module := resource.NewModule("apigateway", factory, resource.ServiceCreators{
 		oAuth2ClientGroupVersionResource: NewService,
 	})
 
