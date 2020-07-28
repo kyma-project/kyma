@@ -89,5 +89,5 @@ roleRef:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ template "controller-manager.fullname" . }}-debug
+  name: {{ template "controller-manager.fullname" . }}-foo
   namespace: kyma-system
