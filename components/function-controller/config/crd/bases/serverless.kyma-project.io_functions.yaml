@@ -35,6 +35,7 @@ spec:
     status: {}
   validation:
     openAPIV3Schema:
+      description: Function is the Schema for the functions API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
