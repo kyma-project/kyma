@@ -230,3 +230,7 @@ global:
     enabled: true
     env:
       testUser: "admin-user"
+    istio:
+      gateway:
+        name: kyma-gateway
+        namespace: kyma-system
