@@ -15,9 +15,6 @@ echo -e "${NC}"
 # GO MOD VENDOR
 ##
 
-goVersion=$(go version)
-echo -e "$goVersion"
-
 echo "? go mod vendor"
 GO111MODULE=on go mod vendor
 vendorResult=$?
