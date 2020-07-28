@@ -38,7 +38,7 @@ spec:
       source: mock # Application name
   subscriber:
     ref:
-      apiVersion: serving.knative.dev/v1
+      apiVersion: v1
       kind: Service
       name: test-function # Function name
 ```
