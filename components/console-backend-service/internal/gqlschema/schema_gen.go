@@ -630,11 +630,16 @@ type ComplexityRoot struct {
 	}
 
 	OAuth2Client struct {
+		Error      func(childComplexity int) int
 		Generation func(childComplexity int) int
 		Name       func(childComplexity int) int
 		Namespace  func(childComplexity int) int
 		Spec       func(childComplexity int) int
-		Status     func(childComplexity int) int
+	}
+
+	OAuth2ClientError struct {
+		Code        func(childComplexity int) int
+		Description func(childComplexity int) int
 	}
 
 	OAuth2ClientEvent struct {
@@ -647,11 +652,6 @@ type ComplexityRoot struct {
 		ResponseTypes func(childComplexity int) int
 		Scope         func(childComplexity int) int
 		SecretName    func(childComplexity int) int
-	}
-
-	OAuth2ClientStatus struct {
-		Code        func(childComplexity int) int
-		Description func(childComplexity int) int
 	}
 
 	Pod struct {
@@ -1154,7 +1154,7 @@ type NamespaceResolver interface {
 	Applications(ctx context.Context, obj *Namespace) ([]string, error)
 }
 type OAuth2ClientResolver interface {
-	Status(ctx context.Context, obj *v1alpha11.OAuth2Client) (*v1alpha11.ReconciliationError, error)
+	Error(ctx context.Context, obj *v1alpha11.OAuth2Client) (*v1alpha11.ReconciliationError, error)
 }
 type QueryResolver interface {
 	ClusterAssetGroups(ctx context.Context, viewContext *string, groupName *string) ([]*ClusterAssetGroup, error)
@@ -3919,6 +3919,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.NavigationNode.ViewURL(childComplexity), true
 
+	case "OAuth2Client.error":
+		if e.complexity.OAuth2Client.Error == nil {
+			break
+		}
+
+		return e.complexity.OAuth2Client.Error(childComplexity), true
+
 	case "OAuth2Client.generation":
 		if e.complexity.OAuth2Client.Generation == nil {
 			break
@@ -3947,12 +3954,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.OAuth2Client.Spec(childComplexity), true
 
-	case "OAuth2Client.status":
-		if e.complexity.OAuth2Client.Status == nil {
+	case "OAuth2ClientError.code":
+		if e.complexity.OAuth2ClientError.Code == nil {
 			break
 		}
 
-		return e.complexity.OAuth2Client.Status(childComplexity), true
+		return e.complexity.OAuth2ClientError.Code(childComplexity), true
+
+	case "OAuth2ClientError.description":
+		if e.complexity.OAuth2ClientError.Description == nil {
+			break
+		}
+
+		return e.complexity.OAuth2ClientError.Description(childComplexity), true
 
 	case "OAuth2ClientEvent.client":
 		if e.complexity.OAuth2ClientEvent.Client == nil {
@@ -3995,20 +4009,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.OAuth2ClientSpec.SecretName(childComplexity), true
-
-	case "OAuth2ClientStatus.code":
-		if e.complexity.OAuth2ClientStatus.Code == nil {
-			break
-		}
-
-		return e.complexity.OAuth2ClientStatus.Code(childComplexity), true
-
-	case "OAuth2ClientStatus.description":
-		if e.complexity.OAuth2ClientStatus.Description == nil {
-			break
-		}
-
-		return e.complexity.OAuth2ClientStatus.Description(childComplexity), true
 
 	case "Pod.containerStates":
 		if e.complexity.Pod.ContainerStates == nil {
@@ -6379,11 +6379,11 @@ type OAuth2Client @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.OAu
 	name: String!
 	generation: Int!
 
-	status: OAuth2ClientStatus!
+	error: OAuth2ClientError
 	spec: OAuth2ClientSpec!
 }
 
-type OAuth2ClientStatus @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.ReconciliationError") {
+type OAuth2ClientError @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.ReconciliationError") {
 	code: StatusCode
 	description: String
 }
@@ -6408,18 +6408,18 @@ type OAuth2ClientEvent {
 }
 
 extend type Query {
-	oAuth2Clients(namespace: String!): [OAuth2Client!]! @HasAccess(attributes: {resource: "OAuth2Clients", verb: "list", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
-	oAuth2Client(name: String!, namespace: String!): OAuth2Client @HasAccess(attributes: {resource: "OAuth2Clients", verb: "get", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+	oAuth2Clients(namespace: String!): [OAuth2Client!]! @HasAccess(attributes: {resource: "OAuth2Clients", verb: "list", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+	oAuth2Client(name: String!, namespace: String!): OAuth2Client @HasAccess(attributes: {resource: "OAuth2Clients", verb: "get", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
 }
 
 extend type Mutation {
-	createOAuth2Client(name: String!, namespace: String!, params: OAuth2ClientSpecInput!): OAuth2Client @HasAccess(attributes: {resource: "OAuth2Clients", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-	updateOAuth2Client(name: String!, namespace: String!, generation: Int!, params: OAuth2ClientSpecInput!): OAuth2Client @HasAccess(attributes: {resource: "OAuth2Clients", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-	deleteOAuth2Client(name: String!, namespace: String!): OAuth2Client @HasAccess(attributes: {resource: "OAuth2Clients", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+	createOAuth2Client(name: String!, namespace: String!, params: OAuth2ClientSpecInput!): OAuth2Client @HasAccess(attributes: {resource: "OAuth2Clients", verb: "create", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+	updateOAuth2Client(name: String!, namespace: String!, generation: Int!, params: OAuth2ClientSpecInput!): OAuth2Client @HasAccess(attributes: {resource: "OAuth2Clients", verb: "update", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+	deleteOAuth2Client(name: String!, namespace: String!): OAuth2Client @HasAccess(attributes: {resource: "OAuth2Clients", verb: "delete", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
 }
 
 extend type Subscription {
-	oAuth2ClientEvent(namespace: String!): OAuth2ClientEvent! @HasAccess(attributes: {resource: "OAuth2Clients", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha", namespaceArg: "namespace"})
+	oAuth2ClientEvent(namespace: String!): OAuth2ClientEvent! @HasAccess(attributes: {resource: "OAuth2Clients", verb: "watch", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha", namespaceArg: "namespace"})
 }
 
 `, BuiltIn: false},
@@ -22664,7 +22664,7 @@ func (ec *executionContext) _Mutation_createOAuth2Client(ctx context.Context, fi
 			return ec.resolvers.Mutation().CreateOAuth2Client(rctx, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha11.OAuth2ClientSpec))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "create"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "hydra.ory.sh", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "create"})
 			if err != nil {
 				return nil, err
 			}
@@ -22726,7 +22726,7 @@ func (ec *executionContext) _Mutation_updateOAuth2Client(ctx context.Context, fi
 			return ec.resolvers.Mutation().UpdateOAuth2Client(rctx, args["name"].(string), args["namespace"].(string), args["generation"].(int), args["params"].(v1alpha11.OAuth2ClientSpec))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "update"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "hydra.ory.sh", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "update"})
 			if err != nil {
 				return nil, err
 			}
@@ -22788,7 +22788,7 @@ func (ec *executionContext) _Mutation_deleteOAuth2Client(ctx context.Context, fi
 			return ec.resolvers.Mutation().DeleteOAuth2Client(rctx, args["name"].(string), args["namespace"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "delete"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "hydra.ory.sh", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "delete"})
 			if err != nil {
 				return nil, err
 			}
@@ -23568,7 +23568,7 @@ func (ec *executionContext) _OAuth2Client_generation(ctx context.Context, field 
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _OAuth2Client_status(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.OAuth2Client) (ret graphql.Marshaler) {
+func (ec *executionContext) _OAuth2Client_error(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.OAuth2Client) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -23585,21 +23585,18 @@ func (ec *executionContext) _OAuth2Client_status(ctx context.Context, field grap
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.OAuth2Client().Status(rctx, obj)
+		return ec.resolvers.OAuth2Client().Error(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*v1alpha11.ReconciliationError)
 	fc.Result = res
-	return ec.marshalNOAuth2ClientStatus2ᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐReconciliationError(ctx, field.Selections, res)
+	return ec.marshalOOAuth2ClientError2ᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐReconciliationError(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _OAuth2Client_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.OAuth2Client) (ret graphql.Marshaler) {
@@ -23634,6 +23631,68 @@ func (ec *executionContext) _OAuth2Client_spec(ctx context.Context, field graphq
 	res := resTmp.(v1alpha11.OAuth2ClientSpec)
 	fc.Result = res
 	return ec.marshalNOAuth2ClientSpec2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2ClientSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OAuth2ClientError_code(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.ReconciliationError) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OAuth2ClientError",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha11.StatusCode)
+	fc.Result = res
+	return ec.marshalOStatusCode2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐStatusCode(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OAuth2ClientError_description(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.ReconciliationError) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OAuth2ClientError",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _OAuth2ClientEvent_type(ctx context.Context, field graphql.CollectedField, obj *OAuth2ClientEvent) (ret graphql.Marshaler) {
@@ -23838,68 +23897,6 @@ func (ec *executionContext) _OAuth2ClientSpec_secretName(ctx context.Context, fi
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _OAuth2ClientStatus_code(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.ReconciliationError) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "OAuth2ClientStatus",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Code, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(v1alpha11.StatusCode)
-	fc.Result = res
-	return ec.marshalOStatusCode2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐStatusCode(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _OAuth2ClientStatus_description(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.ReconciliationError) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "OAuth2ClientStatus",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Pod_name(ctx context.Context, field graphql.CollectedField, obj *Pod) (ret graphql.Marshaler) {
@@ -27328,7 +27325,7 @@ func (ec *executionContext) _Query_oAuth2Clients(ctx context.Context, field grap
 			return ec.resolvers.Query().OAuth2Clients(rctx, args["namespace"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "list"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "hydra.ory.sh", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "list"})
 			if err != nil {
 				return nil, err
 			}
@@ -27393,7 +27390,7 @@ func (ec *executionContext) _Query_oAuth2Client(ctx context.Context, field graph
 			return ec.resolvers.Query().OAuth2Client(rctx, args["name"].(string), args["namespace"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "get"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "hydra.ory.sh", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "get"})
 			if err != nil {
 				return nil, err
 			}
@@ -34012,7 +34009,7 @@ func (ec *executionContext) _Subscription_oAuth2ClientEvent(ctx context.Context,
 			return ec.resolvers.Subscription().OAuth2ClientEvent(rctx, args["namespace"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "gateway.kyma-project.io", "apiVersion": "v1alpha", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "watch"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "hydra.ory.sh", "apiVersion": "v1alpha", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "watch"})
 			if err != nil {
 				return nil, err
 			}
@@ -39927,7 +39924,7 @@ func (ec *executionContext) _OAuth2Client(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "status":
+		case "error":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -39935,10 +39932,7 @@ func (ec *executionContext) _OAuth2Client(ctx context.Context, sel ast.Selection
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._OAuth2Client_status(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
+				res = ec._OAuth2Client_error(ctx, field, obj)
 				return res
 			})
 		case "spec":
@@ -39946,6 +39940,32 @@ func (ec *executionContext) _OAuth2Client(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var oAuth2ClientErrorImplementors = []string{"OAuth2ClientError"}
+
+func (ec *executionContext) _OAuth2ClientError(ctx context.Context, sel ast.SelectionSet, obj *v1alpha11.ReconciliationError) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, oAuth2ClientErrorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("OAuth2ClientError")
+		case "code":
+			out.Values[i] = ec._OAuth2ClientError_code(ctx, field, obj)
+		case "description":
+			out.Values[i] = ec._OAuth2ClientError_description(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -40020,32 +40040,6 @@ func (ec *executionContext) _OAuth2ClientSpec(ctx context.Context, sel ast.Selec
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var oAuth2ClientStatusImplementors = []string{"OAuth2ClientStatus"}
-
-func (ec *executionContext) _OAuth2ClientStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha11.ReconciliationError) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, oAuth2ClientStatusImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("OAuth2ClientStatus")
-		case "code":
-			out.Values[i] = ec._OAuth2ClientStatus_code(ctx, field, obj)
-		case "description":
-			out.Values[i] = ec._OAuth2ClientStatus_description(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -45504,20 +45498,6 @@ func (ec *executionContext) unmarshalNOAuth2ClientSpecInput2githubᚗcomᚋory�
 	return ec.unmarshalInputOAuth2ClientSpecInput(ctx, v)
 }
 
-func (ec *executionContext) marshalNOAuth2ClientStatus2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐReconciliationError(ctx context.Context, sel ast.SelectionSet, v v1alpha11.ReconciliationError) graphql.Marshaler {
-	return ec._OAuth2ClientStatus(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNOAuth2ClientStatus2ᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐReconciliationError(ctx context.Context, sel ast.SelectionSet, v *v1alpha11.ReconciliationError) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._OAuth2ClientStatus(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNOwnerReference2k8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReference(ctx context.Context, v interface{}) (v1.OwnerReference, error) {
 	return ec.unmarshalInputOwnerReference(ctx, v)
 }
@@ -48004,6 +47984,17 @@ func (ec *executionContext) marshalOOAuth2Client2ᚖgithubᚗcomᚋoryᚋhydra�
 		return graphql.Null
 	}
 	return ec._OAuth2Client(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOOAuth2ClientError2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐReconciliationError(ctx context.Context, sel ast.SelectionSet, v v1alpha11.ReconciliationError) graphql.Marshaler {
+	return ec._OAuth2ClientError(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOOAuth2ClientError2ᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐReconciliationError(ctx context.Context, sel ast.SelectionSet, v *v1alpha11.ReconciliationError) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._OAuth2ClientError(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOOwnerReference2ᚕᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReferenceᚄ(ctx context.Context, v interface{}) ([]*v1.OwnerReference, error) {

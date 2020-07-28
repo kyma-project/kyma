@@ -87,6 +87,9 @@ func (r *Resolver) OAuth2ClientSubscription(ctx context.Context, namespace strin
 	return channel, nil
 }
 
-func (r *Resolver) StatusField(ctx context.Context, obj *v1alpha1.OAuth2Client) (*v1alpha1.ReconciliationError, error) {
+func (r *Resolver) ErrorField(ctx context.Context, obj *v1alpha1.OAuth2Client) (*v1alpha1.ReconciliationError, error) {
+	if obj.Status.ReconciliationError.Code == "" {
+		return nil, nil
+	}
 	return &obj.Status.ReconciliationError, nil
 }

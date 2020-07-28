@@ -9,11 +9,11 @@ type OAuth2Client @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.OAu
 	name: String!
 	generation: Int!
 
-	status: OAuth2ClientStatus!
+	error: OAuth2ClientError
 	spec: OAuth2ClientSpec!
 }
 
-type OAuth2ClientStatus @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.ReconciliationError") {
+type OAuth2ClientError @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.ReconciliationError") {
 	code: StatusCode
 	description: String
 }

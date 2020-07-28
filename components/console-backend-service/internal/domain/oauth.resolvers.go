@@ -22,8 +22,8 @@ func (r *mutationResolver) DeleteOAuth2Client(ctx context.Context, name string, 
 	return r.oauth.DeleteOAuth2Client(ctx, name, namespace)
 }
 
-func (r *oAuth2ClientResolver) Status(ctx context.Context, obj *v1alpha1.OAuth2Client) (*v1alpha1.ReconciliationError, error) {
-	return r.oauth.StatusField(ctx, obj)
+func (r *oAuth2ClientResolver) Error(ctx context.Context, obj *v1alpha1.OAuth2Client) (*v1alpha1.ReconciliationError, error) {
+	return r.oauth.ErrorField(ctx, obj)
 }
 
 func (r *queryResolver) OAuth2Clients(ctx context.Context, namespace string) ([]*v1alpha1.OAuth2Client, error) {
