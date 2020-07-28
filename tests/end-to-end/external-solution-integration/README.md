@@ -95,18 +95,11 @@ When you run the test, these actions are performed in the order listed:
 
 ## Run the test locally
 
-### Run against Kyma cluster on Minikube
-1. Add an entry to your system's `/etc/hosts` that maps the `ctr-svc-{testID}.kyma.local` to `minikube cluster IP`. For example, for `compass-e2e-test`, map `ctr-svc-compass-e2e-test.kyma.local`.
-2. Set required ENVs
-3. Run the test using the following command:
-    ```
-    go run ./cmd/runner {test-name}
-    ```
+Currently, the test cannot be executed locally, as it requires access to internal cluster resources. To build and run the test using Octopus, execute:
+`make clustertest`
 
-### Run against Kyma cluster in the cloud
-Run the test using the following command:
-```
-go run ./cmd/runner e2e --domain {CLUSTER_DOMAIN}
-```
+>**Requirements:** 
+  kyma-cli github.com/kyma-project/cli
+  ko github.com/google/ko
 
 >**TIP:** If you are running the test on a cluster with invalid or self-signed SSL certificates, use the `--skipSSLVerify` flag.

@@ -1,3 +1,9 @@
+{{ $files := .Files.Glob "files/**.yaml" }}
+{{ $fileLen := len $files }}
+{{ $configMapLen := int (add1 (div $fileLen .Values.jobs.crdsInConfigMap)) }}
+
+{{ $currentScope := . }}
+
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -15,14 +21,18 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: {{ .Release.Name }}-crd-install
+      restartPolicy: OnFailure
       containers:
       - name: {{ .Release.Name }}-install-crds
         image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
-        volumeMounts:
-        - name: crd-all
-          mountPath: /etc/crd
-          readOnly: true
-        command: [ "kubectl", "apply", "-f", "/etc/crd" ]
+        command:
+        - /bin/sh
+        - -c
+        args:
+        - |
+            {{ range $idx, $_ := until $configMapLen }}
+            kubectl apply -f /etc/crd-{{ $idx }}
+            {{ end }}
         resources:
           requests:
             memory: 128Mi
@@ -30,8 +40,17 @@ spec:
           limits:
             memory: 256Mi
             cpu: 200m
+        volumeMounts:
+        {{ range $idx, $_ := until $configMapLen }}
+        - name: crd-{{ $idx }}
+          mountPath: /etc/crd-{{ $idx }}
+          readOnly: true
+        {{ end }}
       volumes:
-      - name: crd-all
+      {{ range $idx, $_ := until $configMapLen }}
+      {{- with $currentScope }}
+      - name: crd-{{ $idx }}
         configMap:
-          name: {{ .Release.Name }}-crd-all
-      restartPolicy: OnFailure
+          name: {{ .Release.Name }}-crd-{{ $idx }}
+      {{- end }}
+      {{ end }}

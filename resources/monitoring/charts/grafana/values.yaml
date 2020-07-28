@@ -52,7 +52,7 @@ livenessProbe:
 # schedulerName: "default-scheduler"
 
 image:
-  repository: grafana/grafana
+  repository: eu.gcr.io/kyma-project/external/grafana/grafana
   tag: 7.0.6
   pullPolicy: IfNotPresent
 
@@ -221,7 +221,7 @@ initChownData:
   ## initChownData container image
   ##
   image:
-    repository: busybox
+    repository: eu.gcr.io/kyma-project/external/busybox
     tag: "1.31.1"
     pullPolicy: IfNotPresent
 

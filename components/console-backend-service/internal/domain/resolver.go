@@ -42,7 +42,7 @@ type Resolver struct {
 	rafter     *rafter.PluggableContainer
 	ag         *apigateway.Resolver
 	serverless *serverless.PluggableContainer
-	eventing   *eventing.PluggableContainer
+	eventing   *eventing.Resolver
 }
 
 func GetRandomNumber() time.Duration {
@@ -104,10 +104,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	}
 	makePluggable(serverlessResolver)
 
-	eventingResolver, err := eventing.New(serviceFactory)
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing eventing resolver")
-	}
+	eventingResolver := eventing.New(genericServiceFactory)
 	makePluggable(eventingResolver)
 
 	return &Resolver{

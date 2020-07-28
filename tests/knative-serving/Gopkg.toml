@@ -26,3 +26,7 @@ required = ["github.com/kyma-project/kyma/common"]
 [[override]]
   name = "golang.org/x/crypto"
   revision = "69ecbb4d6d5dab05e49161c6e77ea40a030884e1"
+
+[[override]]
+  name = "golang.org/x/text"
+  version="v0.3.3"

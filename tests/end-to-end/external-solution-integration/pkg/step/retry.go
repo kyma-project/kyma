@@ -10,7 +10,8 @@ import (
 )
 
 type Retried struct {
-	steps []Step
+	steps   []Step
+	options []retry.Option
 }
 
 func (r *Retried) Name() string {
@@ -31,7 +32,7 @@ func (r *Retried) Run() error {
 			}
 		}
 		return nil
-	})
+	}, r.options...)
 }
 
 func (r *Retried) Cleanup() error {
@@ -45,4 +46,9 @@ func (r *Retried) Cleanup() error {
 
 func Retry(steps ...Step) *Retried {
 	return &Retried{steps: steps}
+}
+
+func (r *Retried) WithRetryOptions(options ...retry.Option) *Retried {
+	r.options = options
+	return r
 }
