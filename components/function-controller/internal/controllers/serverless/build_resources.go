@@ -216,6 +216,14 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) 
 							},
 						},
 						{
+							Name: "runtime",
+							VolumeSource: corev1.VolumeSource{
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									LocalObjectReference: corev1.LocalObjectReference{Name: r.config.Build.RuntimeConfigMapName},
+								},
+							},
+						},
+						{
 							Name:         "workspace",
 							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 						},
@@ -254,6 +262,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) 
 								// If COPY is not used, then the cache will not work
 								{Name: "workspace", ReadOnly: true, MountPath: workspace},
 								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
+								{Name: "runtime", ReadOnly: true, MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile"},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
