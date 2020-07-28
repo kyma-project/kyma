@@ -74,7 +74,7 @@ spec:
               args:
               - "-c"
               - "echo 'Console Smoke Tests start procedure triggered \U0001F680'\nnpm run
-                test:cluster\nexit_code=$?\necho \"Exit code is $exit_code\"\necho '\U0001F480killing
+                test:cluster\nexit_code=$?\necho \"Exit code is $exit_code\"\necho '\U0001F480 killing
                 pilot-agent... \U0001F52B'\ncurl -XPOST http://127.0.0.1:15020/quitquitquit\nsleep
                 4\nexit $exit_code\n"
           restartPolicy: Never
