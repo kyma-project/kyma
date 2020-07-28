@@ -101,7 +101,7 @@ type FunctionStatus struct {
 }
 
 type Repository struct {
-	BaseDir string  `json:"baseDir,omitempty"`
+	BaseDir string `json:"baseDir,omitempty"`
 	Runtime Runtime `json:"runtime,omitempty"`
 	Commit  string  `json:"commit,omitempty"`
 	Branch  string  `json:"branch,omitempty"`
