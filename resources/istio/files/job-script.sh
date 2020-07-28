@@ -45,6 +45,15 @@ else
         gateways.istio-ingressgateway.autoscaleMax*)
           key=$(echo "gateways.components.ingressGateway.k8s.hpaSpec.maxReplicas")
           ;;
+        policy.components.policy.k8s.hpaSpec.minReplicas*)
+          key=$(echo "policy.components.policy.k8s.hpaSpec.minReplicas")
+          ;;
+        telemetry.components.telemetry.k8s.hpaSpec.minReplicas*)
+          key=$(echo "telemetry.components.telemetry.k8s.hpaSpec.minReplicas")
+          ;;
+        trafficManagement.components.pilot.k8s.hpaSpec.minReplicas*)
+          key=$(echo "trafficManagement.components.pilot.k8s.hpaSpec.minReplicas")
+          ;;
         * )
           key=$(echo "values.$key")
           ;;
