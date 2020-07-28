@@ -1,69 +1,40 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: aks-kubelet-monitoring-kyma-patch
+  name: aks-kubelet-monitoring-cleanup-patch
   namespace: kyma-system
   annotations:
-    helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "0"
 data:
-  akspatch.sh: |
+  akspatchcleanup.sh: |
     #!/usr/bin/env sh
     set -e
 
     if [[ "$(kubectl get nodes -l kubernetes.azure.com/role=agent)" ]]; then
       echo "AKS Cluster found, applying patch..."
       kubectl delete servicemonitors.monitoring.coreos.com monitoring-kubelet -n kyma-system --ignore-not-found
-      kubectl apply -f /scripts/patch.yaml
     else
         echo "No AKS Cluster found, skipping..."
     fi
-  patch.yaml: |
-    apiVersion: monitoring.coreos.com/v1
-    kind: ServiceMonitor
-    metadata:
-      labels:
-        app: {{ template "prometheus-operator.name" . }}-kubelet
-        {{- include "prometheus-operator.labels" . | indent 8 }}
-      name: {{ template "prometheus-operator.fullname" . }}-kubelet
-      namespace: {{ $.Release.Namespace }}
-    spec:
-      endpoints:
-        - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
-          honorLabels: true
-          port: http-metrics
-          scheme: http
-        - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
-          honorLabels: true
-          path: /metrics/cadvisor
-          port: http-metrics
-          scheme: http
-      jobLabel: k8s-app
-      namespaceSelector:
-        matchNames:
-          - kube-system
-      selector:
-        matchLabels:
-          k8s-app: kubelet
-
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: aks-kubelet-monitoring-kyma-patch
+  name: aks-kubelet-monitoring-cleanup-patch
   annotations:
-    helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "0"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: aks-kubelet-monitoring-kyma-patch
+  name: aks-kubelet-monitoring-cleanup-patch
   annotations:
-    helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "0"
 rules:
   - apiGroups: [""]
@@ -85,28 +56,28 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: aks-kubelet-monitoring-kyma-patch
+  name: aks-kubelet-monitoring-cleanup-patch
   annotations:
-    helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "0"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: aks-kubelet-monitoring-kyma-patch
+  name: aks-kubelet-monitoring-cleanup-patch
 subjects:
   - kind: ServiceAccount
-    name: aks-kubelet-monitoring-kyma-patch
+    name: aks-kubelet-monitoring-cleanup-patch
     namespace: kyma-system
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: aks-kubelet-monitoring-kyma-patch
+  name: aks-kubelet-monitoring-cleanup-patch
   namespace: kyma-system
   annotations:
-    helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     sidecar.istio.io/inject: "false"
     helm.sh/hook-weight: "9"
 spec:
@@ -115,18 +86,18 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
-      name: aks-kubelet-monitoring-kyma-patch
+      name: aks-kubelet-monitoring-cleanup-patch
       labels:
-        app: aks-kubelet-monitoring-kyma-patch
+        app: aks-kubelet-monitoring-cleanup-patch
     spec:
-      serviceAccountName: aks-kubelet-monitoring-kyma-patch
+      serviceAccountName: aks-kubelet-monitoring-cleanup-patch
       restartPolicy: Never
       containers:
-        - name: aks-kubelet-monitoring-kyma-patch
+        - name: aks-kubelet-monitoring-cleanup-patch
           image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
-          command: ["/scripts/akspatch.sh"]
+          command: ["/scripts/akspatchcleanup.sh"]
           volumeMounts:
-            - name: aks-kubelet-monitoring-kyma-patch
+            - name: aks-kubelet-monitoring-cleanup-patch
               mountPath: /scripts
           terminationMessagePolicy: "FallbackToLogsOnError"
           resources:
@@ -137,8 +108,8 @@ spec:
               cpu: 200m
               memory: 128Mi
       volumes:
-        - name: aks-kubelet-monitoring-kyma-patch
+        - name: aks-kubelet-monitoring-cleanup-patch
           configMap:
-            name: aks-kubelet-monitoring-kyma-patch
+            name: aks-kubelet-monitoring-cleanup-patch
             defaultMode: 0744
 

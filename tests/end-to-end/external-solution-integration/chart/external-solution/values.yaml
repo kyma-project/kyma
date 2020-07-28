@@ -9,3 +9,6 @@ image:
 testServiceImage:
   dir:
   version: PR-8483
+
+tests:
+  enabled: false
