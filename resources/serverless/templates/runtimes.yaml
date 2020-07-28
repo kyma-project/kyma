@@ -41,14 +41,14 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dockerfile-python-38
+  name: dockerfile-python-37
   namespace: {{ .Release.Namespace }}
   labels:
     serverless.kyma-project.io/config: runtime
-    serverless.kyma-project.io/runtime: python38
+    serverless.kyma-project.io/runtime: python37
 data:
   Dockerfile: |-
-    FROM {{ .Values.images.runtimes.python38.repository}}:{{ .Values.images.runtimes.python38.tag }}
+    FROM {{ .Values.images.runtimes.python37.repository}}:{{ .Values.images.runtimes.python37.tag }}
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
     

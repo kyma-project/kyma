@@ -77,8 +77,8 @@ images:
     nodejs10:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
       tag: "tba"
-    python38:
-      repository: "eu.gcr.io/kyma-project/function-runtime-python38"
+    python37:
+      repository: "eu.gcr.io/kyma-project/function-runtime-python37"
       tag: "tba"
 
 deployment:
