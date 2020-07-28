@@ -35,11 +35,11 @@ var _ = ginkgo.Describe("Function", func() {
 				Namespace: namespace,
 			},
 			Spec: serverlessv1alpha1.FunctionSpec{
-				SourceType: serverlessv1alpha1.Git,
+				SourceType: serverlessv1alpha1.SourceTypeGit,
 				Source:     "https://github.com/pPrecel/public-gitops",
 				Repository: serverlessv1alpha1.Repository{
 					BaseDir: "/",
-					Runtime: serverlessv1alpha1.NodeJS12,
+					Runtime: serverlessv1alpha1.RuntimeNodeJS12,
 					Branch:  "master",
 				},
 				Env: []corev1.EnvVar{

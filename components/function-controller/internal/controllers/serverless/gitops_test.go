@@ -18,7 +18,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			desc: "new function",
 			fn: v1alpha1.Function{
 				Spec: v1alpha1.FunctionSpec{
-					SourceType: v1alpha1.Git,
+					SourceType: v1alpha1.SourceTypeGit,
 				},
 			},
 			expectedResult: true,
@@ -27,7 +27,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			desc: "new function fixed on commit",
 			fn: v1alpha1.Function{
 				Spec: v1alpha1.FunctionSpec{
-					SourceType: v1alpha1.Git,
+					SourceType: v1alpha1.SourceTypeGit,
 					Repository: v1alpha1.Repository{
 						Commit: "1",
 					},
@@ -39,7 +39,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			desc: "new function follow head",
 			fn: v1alpha1.Function{
 				Spec: v1alpha1.FunctionSpec{
-					SourceType: v1alpha1.Git,
+					SourceType: v1alpha1.SourceTypeGit,
 					Repository: v1alpha1.Repository{
 						Commit: "1",
 					},
@@ -51,7 +51,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			desc: "function did not change",
 			fn: v1alpha1.Function{
 				Spec: v1alpha1.FunctionSpec{
-					SourceType: v1alpha1.Git,
+					SourceType: v1alpha1.SourceTypeGit,
 					Repository: v1alpha1.Repository{
 						Commit: "1",
 					},
@@ -69,7 +69,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			desc: "function change fixed revision",
 			fn: v1alpha1.Function{
 				Spec: v1alpha1.FunctionSpec{
-					SourceType: v1alpha1.Git,
+					SourceType: v1alpha1.SourceTypeGit,
 					Repository: v1alpha1.Repository{
 						Commit: "2",
 					},
@@ -98,7 +98,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			desc: "function change source",
 			fn: v1alpha1.Function{
 				Spec: v1alpha1.FunctionSpec{
-					SourceType: v1alpha1.Git,
+					SourceType: v1alpha1.SourceTypeGit,
 					Repository: v1alpha1.Repository{
 						Commit: "1",
 					},
@@ -116,7 +116,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			desc: "function change base dir",
 			fn: v1alpha1.Function{
 				Spec: v1alpha1.FunctionSpec{
-					SourceType: v1alpha1.Git,
+					SourceType: v1alpha1.SourceTypeGit,
 					Repository: v1alpha1.Repository{
 						Commit:  "2",
 						BaseDir: "base_dir",
@@ -134,7 +134,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			desc: "function change branch",
 			fn: v1alpha1.Function{
 				Spec: v1alpha1.FunctionSpec{
-					SourceType: v1alpha1.Git,
+					SourceType: v1alpha1.SourceTypeGit,
 					Repository: v1alpha1.Repository{
 						Commit: "2",
 						Branch: "branch",
@@ -152,10 +152,10 @@ func Test_isOnSourceChange(t *testing.T) {
 			desc: "function change dockerfile",
 			fn: v1alpha1.Function{
 				Spec: v1alpha1.FunctionSpec{
-					SourceType: v1alpha1.Git,
+					SourceType: v1alpha1.SourceTypeGit,
 					Repository: v1alpha1.Repository{
 						Commit:  "2",
-						Runtime: v1alpha1.NodeJS12,
+						Runtime: v1alpha1.RuntimeNodeJS12,
 					},
 				},
 				Status: v1alpha1.FunctionStatus{

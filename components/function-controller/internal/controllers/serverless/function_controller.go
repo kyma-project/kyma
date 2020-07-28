@@ -83,7 +83,7 @@ func (r *FunctionReconciler) updateStatus2(
 	service := instance.DeepCopy()
 	service.Status.Conditions = r.updateCondition(service.Status.Conditions, condition)
 
-	if r.equalConditions(instance.Status.Conditions, service.Status.Conditions) && instance.Spec.SourceType != serverlessv1alpha1.Git {
+	if r.equalConditions(instance.Status.Conditions, service.Status.Conditions) && instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit {
 		return result, nil
 	}
 

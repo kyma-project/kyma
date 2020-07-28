@@ -125,18 +125,18 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	}
 
 	switch {
-	case instance.Spec.SourceType == serverlessv1alpha1.Git && isOnSourceChange(instance, revision):
+	case instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit && isOnSourceChange(instance, revision):
 		return r.onSourceChange(ctx, instance, &serverlessv1alpha1.Repository{
 			Branch:  instance.Spec.Branch,
 			Commit:  revision,
 			BaseDir: instance.Spec.Repository.BaseDir,
 			Runtime: instance.Spec.Repository.Runtime,
 		})
-	case instance.Spec.SourceType != serverlessv1alpha1.Git && r.isOnConfigMapChange(instance, configMaps.Items, deployments.Items):
+	case instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit && r.isOnConfigMapChange(instance, configMaps.Items, deployments.Items):
 		return r.onConfigMapChange(ctx, log, instance, configMaps.Items)
-	case instance.Spec.SourceType == serverlessv1alpha1.Git && r.isOnJobChange(instance, jobs.Items, deployments.Items):
+	case instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, jobs.Items, deployments.Items):
 		return r.onJobChange(ctx, log, instance, "", jobs.Items)
-	case instance.Spec.SourceType != serverlessv1alpha1.Git && r.isOnJobChange(instance, jobs.Items, deployments.Items):
+	case instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, jobs.Items, deployments.Items):
 		return r.onJobChange(ctx, log, instance, configMaps.Items[0].GetName(), jobs.Items)
 	case r.isOnDeploymentChange(instance, deployments.Items):
 		return r.onDeploymentChange(ctx, log, instance, deployments.Items)
@@ -180,7 +180,7 @@ func seekLatestCommit(instance *serverlessv1alpha1.Function, credentials map[str
 
 func (r *FunctionReconciler) syncRevision(ctx context.Context, instance *serverlessv1alpha1.Function) (string, error) {
 	revision := instance.Spec.Commit
-	if instance.Spec.SourceType == serverlessv1alpha1.Git && revision == "" && instance.Spec.Repository.Branch != "" {
+	if instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit && revision == "" && instance.Spec.Repository.Branch != "" {
 		var secret corev1.Secret
 		isSecretFound := true
 		var err error

@@ -22,7 +22,7 @@ func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function
 	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
 	var expectedJob batchv1.Job
-	if instance.Spec.SourceType != serverlessv1alpha1.Git {
+	if instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit {
 		expectedJob = r.buildJob(instance, "")
 	} else {
 		expectedJob = r.buildGitJob(instance)
@@ -48,7 +48,7 @@ func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function
 func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, configMapName string, jobs []batchv1.Job) (ctrl.Result, error) {
 	var newJob batchv1.Job
 	switch instance.Spec.SourceType {
-	case serverlessv1alpha1.Git:
+	case serverlessv1alpha1.SourceTypeGit:
 		newJob = r.buildGitJob(instance)
 	default:
 		newJob = r.buildJob(instance, configMapName)

@@ -379,7 +379,7 @@ func (r *FunctionReconciler) buildImageAddressForPush(instance *serverlessv1alph
 
 func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
 	var imageTag string
-	if instance.Spec.SourceType == serverlessv1alpha1.Git {
+	if instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit {
 		imageTag = r.calculateGitImageTag(instance)
 	} else {
 		imageTag = r.calculateImageTag(instance)
@@ -390,7 +390,7 @@ func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alp
 
 func (r *FunctionReconciler) buildImageAddress(instance *serverlessv1alpha1.Function) string {
 	var imageTag string
-	if instance.Spec.SourceType == serverlessv1alpha1.Git {
+	if instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit {
 		imageTag = r.calculateGitImageTag(instance)
 	} else {
 		imageTag = r.calculateImageTag(instance)
