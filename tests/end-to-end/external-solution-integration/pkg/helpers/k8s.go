@@ -39,10 +39,10 @@ func InClusterEndpoint(name, namespace string, port int) string {
 // AwaitResourceDeleted retries until the resources cannot be found any more
 func AwaitResourceDeleted(check func() (interface{}, error)) error {
 	return retry.Do(func() error {
-		_, err := check()
+		t, err := check()
 
 		if err == nil {
-			return errors.New("resource still exists")
+			return errors.New(fmt.Sprintf("resource still exists: %T", t))
 		}
 
 		if !k8serrors.IsNotFound(err) {

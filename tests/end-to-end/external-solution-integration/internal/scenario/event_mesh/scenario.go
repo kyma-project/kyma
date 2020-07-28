@@ -35,5 +35,8 @@ func (s *Scenario) AddFlags(set *pflag.FlagSet) {
 func (s *Scenario) RunnerOpts() []step.RunnerOption {
 	runnerOpts := s.prepare.RunnerOpts()
 	runnerOpts = append(runnerOpts, s.evaluate.RunnerOpts()...)
-	return append(runnerOpts, step.WithCleanupDefault(step.CleanupModeYes))
+	return append(runnerOpts,
+		step.WithCleanupDefault(step.CleanupModeYes),
+		step.WithCleanupBehavior(step.CleanupBehaviorAllSteps),
+	)
 }

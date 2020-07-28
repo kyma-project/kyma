@@ -53,17 +53,6 @@ func (s *CreateServiceBinding) Run() error {
 	return retry.Do(s.isServiceBindingReady)
 }
 
-// Cleanup removes all resources that may possibly created by the step
-func (s *CreateServiceBinding) Cleanup() error {
-	err := s.serviceBindings.Delete(s.name, &metav1.DeleteOptions{})
-	if err != nil {
-		return err
-	}
-
-	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
-		return s.serviceBindings.Get(s.name, metav1.GetOptions{})
-	})
-}
 func (s *CreateServiceBinding) isServiceBindingReady() error {
 	sb, err := s.serviceBindings.Get(s.name, metav1.GetOptions{})
 	if err != nil {
@@ -78,5 +67,45 @@ func (s *CreateServiceBinding) isServiceBindingReady() error {
 			break
 		}
 	}
+	return nil
+}
+
+// Cleanup removes all resources that may possibly created by the step
+func (s *CreateServiceBinding) Cleanup() error {
+	err := s.serviceBindings.Delete(s.name, &metav1.DeleteOptions{})
+	if err != nil {
+		if e := s.forceCleanup(); e != nil {
+			return errors.Wrapf(err, "while deleting service binding: %s with force cleanup error: %w", s.name, e)
+		}
+		return errors.Wrapf(err, "while deleting service binding: %s", s.name)
+	}
+
+	check := func() (interface{}, error) { return s.serviceBindings.Get(s.name, metav1.GetOptions{}) }
+	if err := helpers.AwaitResourceDeleted(check); err == nil {
+		return nil
+	}
+
+	return s.forceCleanup()
+}
+
+// forceCleanup clears the service binding finalizes list
+// only if the service binding was marked for deletion and the finalizers list is not empty
+func (s *CreateServiceBinding) forceCleanup() error {
+	sb, err := s.serviceBindings.Get(s.name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	// skip cleanup if the service binding is not marked for deletion or the finalizers list is empty
+	if sb.DeletionTimestamp == nil || len(sb.Finalizers) == 0 {
+		return nil
+	}
+
+	sb = sb.DeepCopy()
+	sb.Finalizers = []string{}
+	if _, err = s.serviceBindings.Update(sb); err != nil {
+		return err
+	}
+
 	return nil
 }

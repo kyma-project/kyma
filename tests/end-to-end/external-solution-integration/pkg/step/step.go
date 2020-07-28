@@ -19,8 +19,9 @@ type Step interface {
 
 // Runner executes steps in safe manner
 type Runner struct {
-	log     *logrus.Logger
-	cleanup CleanupMode
+	log             *logrus.Logger
+	cleanup         CleanupMode
+	cleanupBehavior CleanupBehavior
 }
 
 type RunnerOption func(runner *Runner)
@@ -31,14 +32,21 @@ func WithCleanupDefault(mode CleanupMode) RunnerOption {
 	}
 }
 
+func WithCleanupBehavior(behavior CleanupBehavior) RunnerOption {
+	return func(runner *Runner) {
+		runner.cleanupBehavior = behavior
+	}
+}
+
 // NewRunner returns new runner
 func NewRunner(opts ...RunnerOption) *Runner {
 	log := logrus.New()
 	log.SetReportCaller(false)
 
 	runner := &Runner{
-		log:     log,
-		cleanup: CleanupModeYes,
+		log:             log,
+		cleanup:         CleanupModeYes,
+		cleanupBehavior: CleanupBehaviorStartedStepsOnly,
 	}
 	for _, opt := range opts {
 		opt(runner)
@@ -56,7 +64,11 @@ func (r *Runner) Run(steps []Step, skipCleanup bool) error {
 
 	defer func() {
 		if !skipCleanup {
-			r.Cleanup(steps[0:(startedStep + 1)])
+			if r.cleanupBehavior == CleanupBehaviorAllSteps {
+				r.Cleanup(steps)
+			} else {
+				r.Cleanup(steps[0:(startedStep + 1)])
+			}
 		}
 	}()
 
@@ -100,3 +112,10 @@ func isNotFound(err error) bool {
 	})
 	return isNotFound
 }
+
+type CleanupBehavior string
+
+const (
+	CleanupBehaviorAllSteps         CleanupBehavior = "all"
+	CleanupBehaviorStartedStepsOnly CleanupBehavior = "started-only"
+)

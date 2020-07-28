@@ -95,14 +95,40 @@ func (s *CreateLegacyServiceInstance) isServiceInstanceCreated() error {
 
 // Cleanup removes all resources that may possibly created by the step
 func (s *CreateLegacyServiceInstance) Cleanup() error {
-	err := retry.Do(func() error {
-		return s.serviceInstances.Delete(s.instanceName, &v1.DeleteOptions{})
-	})
+	err := retry.Do(func() error { return s.serviceInstances.Delete(s.name, &v1.DeleteOptions{}) })
 	if err != nil {
-		return errors.Wrapf(err, "while deleting service instance: %s", s.instanceName)
+		if e := s.forceCleanup(); e != nil {
+			return errors.Wrapf(err, "while deleting service instance: %s with force cleanup error: %w", s.name, e)
+		}
+		return errors.Wrapf(err, "while deleting service instance: %s", s.name)
 	}
 
-	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
-		return s.serviceInstances.Get(s.name, v1.GetOptions{})
-	})
+	check := func() (interface{}, error) { return s.serviceInstances.Get(s.name, v1.GetOptions{}) }
+	if err := helpers.AwaitResourceDeleted(check); err == nil {
+		return nil
+	}
+
+	return s.forceCleanup()
+}
+
+// forceCleanup clears the service instance finalizes list
+// only if the service instance was marked for deletion and the finalizers list is not empty
+func (s *CreateLegacyServiceInstance) forceCleanup() error {
+	si, err := s.serviceInstances.Get(s.name, v1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	// skip cleanup if the service instance is not marked for deletion or the finalizers list is empty
+	if si.DeletionTimestamp == nil || len(si.Finalizers) == 0 {
+		return nil
+	}
+
+	si = si.DeepCopy()
+	si.Finalizers = []string{}
+	if _, err = s.serviceInstances.Update(si); err != nil {
+		return err
+	}
+
+	return nil
 }
