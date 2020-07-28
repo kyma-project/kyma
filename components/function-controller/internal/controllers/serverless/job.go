@@ -3,8 +3,9 @@ package serverless
 import (
 	"context"
 	"fmt"
-	appsv1 "k8s.io/api/apps/v1"
 	"strings"
+
+	appsv1 "k8s.io/api/apps/v1"
 
 	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
