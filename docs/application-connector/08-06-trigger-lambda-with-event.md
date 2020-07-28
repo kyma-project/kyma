@@ -165,7 +165,6 @@ To create a simple Function and trigger it with an event, you must first registe
          apiVersion: v1
          kind: Service
          name: my-events-function
-         namespace: $NAMESPACE
    EOF
    ```
 
