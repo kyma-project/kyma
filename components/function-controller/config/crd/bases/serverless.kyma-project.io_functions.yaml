@@ -204,6 +204,8 @@ spec:
                   type: object
               type: object
             runtime:
+              enum:
+              - nodejs-12
               type: string
             source:
               description: Source defines the source code of a function
@@ -212,7 +214,6 @@ spec:
               type: string
           required:
           - source
-          - type
           type: object
         status:
           description: 'FunctionStatus defines the observed state of FuncSONPath:
@@ -244,6 +245,8 @@ spec:
                 type: object
               type: array
             runtime:
+              enum:
+              - nodejs-12
               type: string
             source:
               type: string

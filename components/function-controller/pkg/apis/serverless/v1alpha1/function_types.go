@@ -7,11 +7,12 @@ import (
 
 type SourceType string
 
+// +kubebuilder:validation:Enum=nodejs-12
 type Runtime string
 
 const (
-	Git      SourceType = "git"
-	NodeJS12 Runtime    = "nodejs-12"
+	SourceTypeGit   SourceType = "git"
+	RuntimeNodeJS12 Runtime    = "nodejs-12"
 )
 
 // FunctionSpec defines the desired state of Function
@@ -37,6 +38,7 @@ type FunctionSpec struct {
 	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
 
+	// +optional
 	SourceType SourceType `json:"type"`
 
 	Repository `json:",inline,omitempty"`
@@ -113,7 +115,7 @@ type Repository struct {
 // +kubebuilder:printcolumn:name="Running",type="string",JSONPath=".status.conditions[?(@.type=='Running')].status"
 // +kubebuilder:printcolumn:name="Version",type="integer",JSONPath=".metadata.generation"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
-// +kubebuilder:storageversion
+
 type Function struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
