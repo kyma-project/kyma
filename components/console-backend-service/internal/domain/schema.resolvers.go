@@ -314,7 +314,7 @@ func (r *queryResolver) ServiceBrokers(ctx context.Context, namespace string, fi
 }
 
 func (r *queryResolver) ServiceBroker(ctx context.Context, name string, namespace string) (*gqlschema.ServiceBroker, error) {
-	return r.sc.Resolver.ServiceBrokerQuery(ctx, namespace, name)
+	return r.sc.Resolver.ServiceBrokerQuery(ctx, name, namespace)
 }
 
 func (r *queryResolver) ServiceBindingUsage(ctx context.Context, name string, namespace string) (*gqlschema.ServiceBindingUsage, error) {

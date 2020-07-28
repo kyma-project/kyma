@@ -47,7 +47,6 @@ To use the structured content mode, run:
 ```bash
 curl -v -d '{
     "specversion" : "1.0",
-    "type": "foo",
     "source": "will be replaced",
     "type": "foo",
     "eventtypeversion": "0.3",
@@ -62,7 +61,6 @@ To use the binary content mode, run:
 ```bash
 curl -v \
     -H "ce-specversion: 1.0" \
-    -H "ce-type: foo" \
     -H "ce-source: will be replaced" \
     -H "ce-type: foo" \
     -H "ce-eventtypeversion: 0.3" \
