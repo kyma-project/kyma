@@ -21,17 +21,35 @@ type Git struct {
 	client Client
 }
 
+type Options struct {
+	URL       string
+	Reference string
+	Auth      *AuthOptions
+}
+
+type RepositoryAuthType string
+
+const (
+	RepositoryAuthBasic  RepositoryAuthType = "basic"
+	RepositoryAuthSSHKey                    = "key"
+)
+
 func New() *Git {
 	return &Git{client: &client{}}
 }
 
-func (g *Git) LastCommit(repoUrl, branch string, auth transport.AuthMethod) (string, error) {
-	refs, err := g.client.ListRefs(repoUrl, auth)
+func (g *Git) LastCommit(options Options) (string, error) {
+	authMethod, err := options.Auth.ToAuthMethod()
 	if err != nil {
-		return "", errors.Wrapf(err, "while listing remotes from repository: %s", repoUrl)
+		return "", errors.Wrap(err, "while parsing auth fields")
 	}
 
-	pattern := fmt.Sprintf(refsHeadsFormat, branch)
+	refs, err := g.client.ListRefs(options.URL, authMethod)
+	if err != nil {
+		return "", errors.Wrapf(err, "while listing remotes from repository: %s", options.URL)
+	}
+
+	pattern := fmt.Sprintf(refsHeadsFormat, options.Reference)
 	var commitHash string
 	for _, elem := range refs {
 		if elem.Name().String() == pattern {
@@ -39,36 +57,41 @@ func (g *Git) LastCommit(repoUrl, branch string, auth transport.AuthMethod) (str
 		}
 	}
 	if commitHash == "" {
-		err = fmt.Errorf("branch %s don't exist with pattern %s", branch, pattern)
+		err = fmt.Errorf("branch %s don't exist with pattern %s", options.Reference, pattern)
 	}
 
 	return commitHash, err
 }
 
-func (o *Git) Clone(path, repoUrl, commit string, auth transport.AuthMethod) (string, error) {
-	repo, err := o.client.PlainClone(path, false, &gogit.CloneOptions{
-		URL:  repoUrl,
-		Auth: auth,
+func (g *Git) Clone(path string, options Options) (string, error) {
+	authMethod, err := options.Auth.ToAuthMethod()
+	if err != nil {
+		return "", errors.Wrap(err, "while parsing auth fields")
+	}
+
+	repo, err := g.client.PlainClone(path, false, &gogit.CloneOptions{
+		URL:  options.URL,
+		Auth: authMethod,
 	})
 	if err != nil {
-		return "", errors.Wrapf(err, "while cloning repository: %s", repoUrl)
+		return "", errors.Wrapf(err, "while cloning repository: %s", options.URL)
 	}
 
 	tree, err := repo.Worktree()
 	if err != nil {
-		return "", errors.Wrapf(err, "while getting WorkTree reference for repository: %s", repoUrl)
+		return "", errors.Wrapf(err, "while getting WorkTree reference for repository: %s", options.URL)
 	}
 
 	err = tree.Checkout(&gogit.CheckoutOptions{
-		Hash: plumbing.NewHash(commit),
+		Hash: plumbing.NewHash(options.Reference),
 	})
 	if err != nil {
-		return "", errors.Wrapf(err, "while checkout repository: %s, to commit: %s", repoUrl, commit)
+		return "", errors.Wrapf(err, "while checkout repository: %s, to commit: %s", options.URL, options.Reference)
 	}
 
 	head, err := repo.Head()
 	if err != nil {
-		return "", errors.Wrapf(err, "while getting HEAD reference for repository: %s", repoUrl)
+		return "", errors.Wrapf(err, "while getting HEAD reference for repository: %s", options.URL)
 	}
 
 	return head.Hash().String(), err

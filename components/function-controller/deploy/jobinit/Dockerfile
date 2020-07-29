@@ -25,16 +25,15 @@ RUN go build -ldflags "-s -w" -a -o jobinit cmd/jobinit/main.go \
 && mv ./jobinit /app/jobinit \
 && if [ -f ${BASE_APP_DIR}/licenses ]; then mv ${BASE_APP_DIR}/licenses /app/licenses; fi
 
-# get latest CA certs
-FROM alpine:latest as certs
-RUN apk --update add ca-certificates
-
 # result container
-FROM scratch
+FROM alpine:3.12
+
+RUN apk add --no-cache \
+  openssh-client \
+  ca-certificates
 
 LABEL source = git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /app /app
-COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 ENTRYPOINT ["/app/jobinit"]

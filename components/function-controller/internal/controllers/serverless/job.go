@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/git"
+
 	appsv1 "k8s.io/api/apps/v1"
 
 	"github.com/go-logr/logr"
@@ -17,7 +19,7 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
-func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, jobs []batchv1.Job, deployments []appsv1.Deployment) bool {
+func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, jobs []batchv1.Job, deployments []appsv1.Deployment, gitOptions git.Options) bool {
 	image := r.buildImageAddress(instance)
 	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
@@ -25,7 +27,7 @@ func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function
 	if instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit {
 		expectedJob = r.buildJob(instance, "")
 	} else {
-		expectedJob = r.buildGitJob(instance)
+		expectedJob = r.buildGitJob(instance, gitOptions)
 	}
 
 	if len(deployments) == 1 &&
@@ -60,8 +62,8 @@ func (r *FunctionReconciler) changeJob(ctx context.Context, log logr.Logger, ins
 	}
 }
 
-func (r *FunctionReconciler) onGitJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, jobs []batchv1.Job) (ctrl.Result, error) {
-	newJob := r.buildGitJob(instance)
+func (r *FunctionReconciler) onGitJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, jobs []batchv1.Job, gitOptions git.Options) (ctrl.Result, error) {
+	newJob := r.buildGitJob(instance, gitOptions)
 	return r.changeJob(ctx, log, instance, newJob, jobs)
 }
 func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, configMapName string, jobs []batchv1.Job) (ctrl.Result, error) {
@@ -97,7 +99,7 @@ func (r *FunctionReconciler) createJob(ctx context.Context, log logr.Logger, ins
 	}
 	log.Info(fmt.Sprintf("Job %s created", job.GetName()))
 
-	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+	return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionBuildReady,
 		Status:             corev1.ConditionUnknown,
 		LastTransitionTime: metav1.Now(),
@@ -115,7 +117,7 @@ func (r *FunctionReconciler) deleteJobs(ctx context.Context, log logr.Logger, in
 	}
 	log.Info("Old Jobs deleted")
 
-	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+	return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionBuildReady,
 		Status:             corev1.ConditionUnknown,
 		LastTransitionTime: metav1.Now(),
@@ -128,7 +130,7 @@ func (r *FunctionReconciler) updateBuildStatus(ctx context.Context, log logr.Log
 	switch {
 	case job.Status.CompletionTime != nil:
 		log.Info(fmt.Sprintf("Job %s finished", job.GetName()))
-		return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionBuildReady,
 			Status:             corev1.ConditionTrue,
 			LastTransitionTime: metav1.Now(),
@@ -137,7 +139,7 @@ func (r *FunctionReconciler) updateBuildStatus(ctx context.Context, log logr.Log
 		})
 	case job.Status.Failed < 1:
 		log.Info(fmt.Sprintf("Job %s is still in progress", job.GetName()))
-		return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionBuildReady,
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
@@ -146,7 +148,7 @@ func (r *FunctionReconciler) updateBuildStatus(ctx context.Context, log logr.Log
 		})
 	default:
 		log.Info(fmt.Sprintf("Job %s failed", job.GetName()))
-		return r.updateStatus(ctx, ctrl.Result{RequeueAfter: r.config.RequeueDuration}, instance, serverlessv1alpha1.Condition{
+		return r.updateStatusWithoutRepository(ctx, ctrl.Result{RequeueAfter: r.config.RequeueDuration}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionBuildReady,
 			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),
@@ -167,7 +169,7 @@ func (r *FunctionReconciler) updateJobLabels(ctx context.Context, log logr.Logge
 	}
 	log.Info(fmt.Sprintf("Job %s updated", newJob.GetName()))
 
-	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+	return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionBuildReady,
 		Status:             corev1.ConditionUnknown,
 		LastTransitionTime: metav1.Now(),
