@@ -2,6 +2,7 @@ package git
 
 import (
 	"fmt"
+	"strings"
 
 	gogit "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -9,7 +10,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-const refsHeadsFormat = "refs/heads/%s"
+const (
+	refsHeadsFormat = "refs/heads/%s"
+	refsTagsFormat  = "refs/tags/%s"
+)
 
 //go:generate mockery -name=Client -output=automock -outpkg=automock -case=underscore
 type Client interface {
@@ -39,6 +43,10 @@ func New() *Git {
 }
 
 func (g *Git) LastCommit(options Options) (string, error) {
+	if plumbing.IsHash(options.Reference) {
+		return options.Reference, nil
+	}
+
 	authMethod, err := options.Auth.ToAuthMethod()
 	if err != nil {
 		return "", errors.Wrap(err, "while parsing auth fields")
@@ -49,15 +57,17 @@ func (g *Git) LastCommit(options Options) (string, error) {
 		return "", errors.Wrapf(err, "while listing remotes from repository: %s", options.URL)
 	}
 
-	pattern := fmt.Sprintf(refsHeadsFormat, options.Reference)
+	headPattern := fmt.Sprintf(refsHeadsFormat, options.Reference)
+	tagPattern := fmt.Sprintf(refsTagsFormat, options.Reference)
 	var commitHash string
 	for _, elem := range refs {
-		if elem.Name().String() == pattern {
+		if strings.EqualFold(elem.Name().String(), headPattern) ||
+			strings.EqualFold(elem.Name().String(), tagPattern) {
 			commitHash = elem.Hash().String()
 		}
 	}
 	if commitHash == "" {
-		err = fmt.Errorf("branch %s don't exist with pattern %s", options.Reference, pattern)
+		err = fmt.Errorf("reference %s don't exist with given patterns: %s | %s", options.Reference, headPattern, tagPattern)
 	}
 
 	return commitHash, err
@@ -82,8 +92,13 @@ func (g *Git) Clone(path string, options Options) (string, error) {
 		return "", errors.Wrapf(err, "while getting WorkTree reference for repository: %s", options.URL)
 	}
 
+	commit, err := g.LastCommit(options)
+	if err != nil {
+		return "", err
+	}
+
 	err = tree.Checkout(&gogit.CheckoutOptions{
-		Hash: plumbing.NewHash(options.Reference),
+		Hash: plumbing.NewHash(commit),
 	})
 	if err != nil {
 		return "", errors.Wrapf(err, "while checkout repository: %s, to commit: %s", options.URL, options.Reference)
