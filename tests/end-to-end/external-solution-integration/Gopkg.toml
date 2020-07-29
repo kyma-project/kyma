@@ -24,7 +24,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  branch = "release-1.12"
+  revision = "fef17299e2faa5082815bf35b8723f7f2799b733"
 
 [[constraint]]
   name = "knative.dev/eventing"
