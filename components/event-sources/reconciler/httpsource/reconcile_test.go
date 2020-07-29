@@ -58,17 +58,18 @@ import (
 )
 
 const (
-	tNs          = "testns"
-	tName        = "test"
-	tUID         = types.UID("00000000-0000-0000-0000-000000000000")
-	tImg         = "sources.kyma-project.io/http:latest"
-	tPort        = 8080
-	tSinkURI     = "http://" + tName + "-kn-channel." + tNs + ".svc.cluster.local"
-	tSource      = "varkes"
-	tRevision    = "varkes-foo"
-	tPolicy      = "varkes-foo-private"
-	tRevisionSvc = "varkes-foo-private"
-	tTargetPort  = "http-usermetric"
+	tNs             = "testns"
+	tName           = "test"
+	tUID            = types.UID("00000000-0000-0000-0000-000000000000")
+	tImg            = "sources.kyma-project.io/http:latest"
+	tPort           = 8080
+	tSinkURI        = "http://" + tName + "-kn-channel." + tNs + ".svc.cluster.local"
+	tTracingEnabled = true
+	tSource         = "varkes"
+	tRevision       = "varkes-foo"
+	tPolicy         = "varkes-foo-private"
+	tRevisionSvc    = "varkes-foo-private"
+	tTargetPort     = "http-usermetric"
 
 	tMetricsDomain = "testing"
 )
@@ -111,11 +112,13 @@ var tEnvVars = []corev1.EnvVar{
 		Value: `{"Domain":"` + tMetricsDomain + `",` +
 			`"Component":"` + component + `",` +
 			`"PrometheusPort":` + strconv.Itoa(adapterMetricsPort) + `,` +
-
 			`"ConfigMap":{"metrics.backend":"prometheus"}}`,
 	}, {
 		Name:  loggingConfigEnvVar,
 		Value: `{"zap-logger-config":"{\"level\": \"info\"}"}`,
+	}, {
+		Name:  tracingEnvVar,
+		Value: strconv.FormatBool(tTracingEnabled),
 	},
 }
 
@@ -375,8 +378,9 @@ func TestReconcile(t *testing.T) {
 		r := &Reconciler{
 			Base: rb,
 			adapterEnvCfg: &httpAdapterEnvConfig{
-				Image: tImg,
-				Port:  tPort,
+				Image:          tImg,
+				Port:           tPort,
+				TracingEnabled: tTracingEnabled,
 			},
 			httpsourceLister: ls.GetHTTPSourceLister(),
 			ksvcLister:       ls.GetServiceLister(),

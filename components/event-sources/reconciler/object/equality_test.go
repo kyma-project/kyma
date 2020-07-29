@@ -492,6 +492,111 @@ func TestProbeEqual(t *testing.T) {
 	}
 }
 
+func TestEnvEqual(t *testing.T) {
+
+	testCases := map[string]struct {
+		a      []corev1.EnvVar
+		b      []corev1.EnvVar
+		expect bool
+	}{
+		"equal": {
+			[]corev1.EnvVar{
+				{
+					Name:  "a",
+					Value: "a",
+				},
+				{
+					Name:  "b",
+					Value: "b",
+				},
+			},
+			[]corev1.EnvVar{
+				{
+					Name:  "a",
+					Value: "a",
+				},
+				{
+					Name:  "b",
+					Value: "b",
+				},
+			},
+			true,
+		},
+		"equal different order": {
+			[]corev1.EnvVar{
+				{
+					Name:  "a",
+					Value: "a",
+				},
+				{
+					Name:  "b",
+					Value: "b",
+				},
+			},
+			[]corev1.EnvVar{
+				{
+					Name:  "b",
+					Value: "b",
+				},
+				{
+					Name:  "a",
+					Value: "a",
+				},
+			},
+			true,
+		},
+		"different same length": {
+			[]corev1.EnvVar{
+				{
+					Name:  "a",
+					Value: "a",
+				},
+				{
+					Name:  "b",
+					Value: "b",
+				},
+			},
+			[]corev1.EnvVar{
+				{
+					Name:  "a",
+					Value: "a",
+				},
+				{
+					Name:  "c",
+					Value: "c",
+				},
+			},
+			false,
+		},
+		"different with different length": {
+			[]corev1.EnvVar{
+				{
+					Name:  "a",
+					Value: "a",
+				},
+				{
+					Name:  "b",
+					Value: "b",
+				},
+			},
+			[]corev1.EnvVar{
+				{
+					Name:  "a",
+					Value: "a",
+				},
+			},
+			false,
+		},
+	}
+
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			if envEqual(tc.a, tc.b) != tc.expect {
+				t.Errorf("Expected output to be %t", tc.expect)
+			}
+		})
+	}
+}
 func TestHandlerEqual(t *testing.T) {
 	cs := fixtureKsvc.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers
 
