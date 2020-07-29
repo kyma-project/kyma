@@ -279,6 +279,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-snapshots: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-serverless-configmap-get: "true"
 rules: []
 
 ---

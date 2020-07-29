@@ -1,0 +1,21 @@
+---
+#Get access to serverless-webhook-envs configmap
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-serverless-serverless-webhook-envs-configmap-get
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-serverless-configmap-get: "true"
+  annotations:
+    helm.sh/hook-weight: "0"
+rules:
+- apiGroups:
+    - ""
+  resources:
+    - "configmaps"
+  resourceNames: 
+    - "serverless-webhook-envs"  
+  verbs:
+    - "get"
