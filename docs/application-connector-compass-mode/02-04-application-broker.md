@@ -27,8 +27,8 @@ This ServicePlan has a **bindable** parameter set to `true`, which means that yo
   * ServiceBinding contains a Secret with a gateway URL required to connect to the given API. The gateway URL is specified under the **sanitized({API\_NAME}_{API_ID})_GATEWAY_URL** field. To learn more about sanitization, refer to the [sanitization function](https://github.com/kyma-project/kyma/blob/master/components/application-broker/internal/broker/bind_creds_renderer.go#L109).
 >**NOTE:** If you want to call the Application directly, skipping the Application Gateway component, use **sanitized({API\_NAME}_{API_ID})_TARGET_URL** with the corresponding **CONFIGURATION** and **CREDENTIALS_TYPE**. For more information, read the document about [proxy configuration](https://kyma-project.io/docs/components/application-connector#details-application-gateway-proxy-configuration).
   * ServiceBindingUsage injects the Secret, together with the label given during the registration process, to the Function or service.
-4. The service or Function calls the API through the Application Connector. The Application Connector verifies the label to check if you have the authorization to access this API. _[ask Framefrogs about 4 and 5 - about the labels]_
-5. After verifying the label, the Application Connector allows you to access the Application API.
+4. The service or Function calls the API through the Application Gateway, allowing you to access the Application API.
+5. The Application Gateway enriches the call with the necessary credentials, which it fetches from Secrets created by Service Catalog.
 
 ![API ServicePlan](./assets/005-AB-API-service-plan.svg)
 
