@@ -260,7 +260,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) 
 							VolumeMounts: []corev1.VolumeMount{
 								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
 								// If COPY is not used, then the cache will not work
-								{Name: "workspace", ReadOnly: true, MountPath: workspace},
+								{Name: "workspace", MountPath: workspace},
 								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
 								{Name: "runtime", ReadOnly: true, MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile"},
 							},

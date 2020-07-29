@@ -3,8 +3,8 @@ kind: Function
 metadata:
   name: newone
 spec:
-  source: "https://github.com/pPrecel/public-gitops"
+  source: "https://github.com/m00g3n/public-gitops"
   baseDir: "/"
   type: git
   branch: "master"
-  dockerfile: "deploy/Dockerfile"
+  runtime: "nodejs-12"
