@@ -38,9 +38,9 @@ var _ = ginkgo.Describe("Function", func() {
 				SourceType: serverlessv1alpha1.SourceTypeGit,
 				Source:     fmt.Sprintf("%s-%d", name, suffix),
 				Repository: serverlessv1alpha1.Repository{
-					BaseDir: "/",
-					Runtime: serverlessv1alpha1.RuntimeNodeJS12,
-					Branch:  "master",
+					BaseDir:   "/",
+					Runtime:   serverlessv1alpha1.RuntimeNodeJS12,
+					Reference: "master",
 				},
 				Env: []corev1.EnvVar{
 					{
@@ -176,7 +176,7 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonJobFinished))
 
 		ginkgo.By("change function branch")
-		function.Spec.Branch = "newone"
+		function.Spec.Reference = "newone"
 		gomega.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
 
 		result, err = reconciler.Reconcile(request)
@@ -189,7 +189,7 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(function.Status.Conditions).To(gomega.HaveLen(2))
 		gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
 		gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
-		gomega.Expect(function.Status.Branch).To(gomega.Equal("newone"))
+		gomega.Expect(function.Status.Reference).To(gomega.Equal("newone"))
 		gomega.Expect(function.Status.Commit).To(gomega.Equal("a376218bdcd705cc39aa7ce7f310769fab6d51c9"))
 
 		ginkgo.By("delete the old Job")
