@@ -68,6 +68,7 @@ func TestGatewayEvents(t *testing.T) {
 		// when
 		response, err := doWithRetries(req)
 		require.NoError(t, err)
+		defer response.Body.Close()
 
 		// then
 		var publishResponse PublishResponse
@@ -94,6 +95,7 @@ func TestGatewayEvents(t *testing.T) {
 		//when
 		response, err := doWithRetries(req)
 		require.NoError(t, err)
+		defer response.Body.Close()
 
 		//then
 		var events SubscribedEvents
