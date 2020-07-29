@@ -366,7 +366,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:65654f7d7ee7491f75738c96a0973515f9e7917c8d9fc1e5c158ee3e9904b93a"
+  digest = "1:1b9a76259042427b7fc4b06e09419c22f7c2aea2d79a09f769d5daa8b41c246f"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -383,6 +383,7 @@
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "components/function-controller/pkg/apis/serverless/v1alpha1",
+    "components/kyma-operator/pkg/env",
     "components/kyma-operator/pkg/overrides",
     "components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "components/service-binding-usage-controller/pkg/apis/settings/v1alpha1",
@@ -392,8 +393,7 @@
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "6e80a312e0a244470f87c82e397ed6f3c88244b0"
-  version = "1.13.0"
+  revision = "fef17299e2faa5082815bf35b8723f7f2799b733"
 
 [[projects]]
   digest = "1:76d6dcdd415f38b171f2a8f8e3f6727ac6f039fb5445024279c33b89bfa0c034"
@@ -1234,7 +1234,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4780b87cdd61ee79d7075cebd4572409154d5aaca982534c2bf9a43f68203858"
+  digest = "1:ca058fd88cc2b35d5b0332fcc5384094eec7627448696642d87e453b55f3c80f"
   name = "knative.dev/pkg"
   packages = [
     "apis",
@@ -1255,6 +1255,7 @@
     "profiling",
     "ptr",
     "tracker",
+    "webhook/resourcesemantics",
   ]
   pruneopts = "UT"
   revision = "5e3431e56176359316416c5952dcb7797299248f"
