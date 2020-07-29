@@ -38,100 +38,10 @@ You can deploy a Kyma cluster with Istio configured to use the production profil
 <div tabs>
   <details>
   <summary>
-  Istio Operator API
-  </summary>
-Istio installation in Kyma uses the [IstioOperator](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) API.
-This API is in the alpha version, but it's going to replace Helm-based approach in future Istio versions.
-Kyma provides the default IstioOperator configurations for local (Minikube) and cluster installations.
-You can add a custom Istio Operator definition that overrides the default settings.
-The definition you provide may be a partial one (you don't have to specify all options). In that case it will be merged with the defaults.
-In order to provide a custom Istio Operator configuration, define a Kyma Installation override with the //TODO: change to operator `kyma_istio_control_plane` key.
-The value for this override must be a single string containing a valid definition of the IstioOperator custom resource, in the YAML format.
-
->**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
->* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
->* [Top-level charts overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation-top-level-charts-overrides).
-
-See the following example that customizes settings for the `policy` and `pilot` components of Istio:
-
-    ```yaml
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: istio-operator-overrides
-      namespace: kyma-installer
-      labels:
-        installer: overrides
-        component: istio
-        kyma-project.io/installation: ""
-    data:
-    //TODO: kyma_istio_operator?
-    //TODO: Change example
-      kyma_istio_control_plane: |-
-        apiVersion: install.istio.io/v1alpha2
-        kind: IstioControlPlane
-        spec:
-          policy:
-            components:
-              policy:
-                enabled: true
-                k8s:
-                  replicaCount: 1
-                  resources:
-                    limits:
-                      cpu: 543m
-                      memory: 2048Mi
-                    requests:
-                      cpu: 321m
-                      memory: 512Mi
-                  strategy:
-                    rollingUpdate:
-                      maxSurge: 1
-                      maxUnavailable: 0
-            enabled: true
-          trafficManagement:
-            components:
-              pilot:
-                enabled: true
-                k8s:
-                  affinity:
-                    podAntiAffinity:
-                      preferredDuringSchedulingIgnoredDuringExecution: []
-                      requiredDuringSchedulingIgnoredDuringExecution: []
-                  env:
-                    - name: GODEBUG
-                      value: gctrace=1
-                    - name: PILOT_HTTP10
-                      value: "1"
-                    - name: PILOT_PUSH_THROTTLE
-                      value: "100"
-                  nodeSelector: {}
-                  resources:
-                    limits:
-                      cpu: 567m
-                      memory: 1024Mi
-                    requests:
-                      cpu: 234m
-                      memory: 512Mi
-                  strategy:
-                    rollingUpdate:
-                      maxSurge: 1
-                      maxUnavailable: 0
-                  tolerations: []
-            enabled: true
-    ```
-
-While installing, don't forget to provide Kyma CLI with this file's path via `-o` flag.
-
-Refer to the [IstioOperator API](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) documentation for details about available options.
-  </details>
-  <details>
-  <summary>
   Install Kyma with production-ready Istio
   </summary>
 
   1. Create a Kubernetes cluster for Kyma installation.
-  //TODO when production profile is done
   2. Create an override file that forces the Istio Service Mesh to use the production profile:
 
     ```yaml
@@ -145,16 +55,32 @@ Refer to the [IstioOperator API](https://istio.io/docs/reference/config/istio.op
         component: istio
         kyma-project.io/installation: ""
     data:
-      global.proxy.resources.requests.cpu: "150m"
-      global.proxy.resources.requests.memory: "128Mi"
-      global.proxy.resources.limits.cpu: "500m"
-      global.proxy.resources.limits.memory: "1024Mi"
-
-      gateways.istio-ingressgateway.autoscaleMin: "3"
-      gateways.istio-ingressgateway.autoscaleMax: "10"
+      kyma_istio_control_plane: |-
+        apiVersion: install.istio.io/v1alpha1
+        kind: IstioOperator
+        metadata:
+          namespace: istio-system
+        spec:
+          components:
+            ingressGateways:
+            - name: istio-ingressgateway
+              k8s:
+                hpaSpec:
+                  maxReplicas: 10
+                  minReplicas: 3
+          values:
+            global:
+              proxy:
+                resources:
+                  requests:
+                    cpu: 150m
+                    memory: 128Mi
+                  limits:
+                    cpu: 500m
+                    memory: 1024Mi
     ```
 
-  3. Install Kyma on the cluster providing this file's path using the `-o` flag.
+  3. Use Kyma CLI to install Kyma on the cluster providing this file's path using the `-o` flag.
 
   </details>
   <details>
@@ -162,7 +88,6 @@ Refer to the [IstioOperator API](https://istio.io/docs/reference/config/istio.op
   Enable production profile in a running cluster
   </summary>
 
-//TODO: when production profile is done
   1. Apply an override that forces the Istio Service Mesh to use the production profile:
 
     ```bash
@@ -178,13 +103,29 @@ Refer to the [IstioOperator API](https://istio.io/docs/reference/config/istio.op
         component: istio
         kyma-project.io/installation: ""
     data:
-      global.proxy.resources.requests.cpu: "150m"
-      global.proxy.resources.requests.memory: "128Mi"
-      global.proxy.resources.limits.cpu: "500m"
-      global.proxy.resources.limits.memory: "1024Mi"
-
-      gateways.istio-ingressgateway.autoscaleMin: "3"
-      gateways.istio-ingressgateway.autoscaleMax: "10"
+      kyma_istio_control_plane: |-
+        apiVersion: install.istio.io/v1alpha1
+        kind: IstioOperator
+        metadata:
+          namespace: istio-system
+        spec:
+          components:
+            ingressGateways:
+            - name: istio-ingressgateway
+              k8s:
+                hpaSpec:
+                  maxReplicas: 10
+                  minReplicas: 3
+          values:
+            global:
+              proxy:
+                resources:
+                  requests:
+                    cpu: 150m
+                    memory: 128Mi
+                  limits:
+                    cpu: 500m
+                    memory: 1024Mi
     EOF
     ```
 
