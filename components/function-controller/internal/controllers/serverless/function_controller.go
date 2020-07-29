@@ -63,8 +63,8 @@ func (r *FunctionReconciler) calculateImageTag(instance *serverlessv1alpha1.Func
 	return fmt.Sprintf("%x", hash)
 }
 
-func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) (ctrl.Result, error) {
-	return r.updateStatus2(ctx, result, instance, condition, nil)
+func (r *FunctionReconciler) updateStatusWithoutRepository(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) (ctrl.Result, error) {
+	return r.updateStatus(ctx, result, instance, condition, nil)
 }
 
 func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.Function) string {
@@ -72,7 +72,7 @@ func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.F
 	return fmt.Sprintf("%x", hash)
 }
 
-func (r *FunctionReconciler) updateStatus2(
+func (r *FunctionReconciler) updateStatus(
 	ctx context.Context,
 	result ctrl.Result,
 	instance *serverlessv1alpha1.Function,
