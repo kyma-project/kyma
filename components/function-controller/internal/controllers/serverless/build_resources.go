@@ -395,8 +395,7 @@ func (r *FunctionReconciler) buildImageAddress(instance *serverlessv1alpha1.Func
 	} else {
 		imageTag = r.calculateImageTag(instance)
 	}
-
-	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.InternalServerAddress, instance.Namespace, instance.Name, imageTag)
+	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.RegistryAddress, instance.Namespace, instance.Name, imageTag)
 }
 
 func (r *FunctionReconciler) sanitizeDependencies(dependencies string) string {

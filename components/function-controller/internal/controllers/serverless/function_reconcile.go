@@ -135,7 +135,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	case instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit && r.isOnConfigMapChange(instance, configMaps.Items, deployments.Items):
 		return r.onConfigMapChange(ctx, log, instance, configMaps.Items)
 	case instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, jobs.Items, deployments.Items):
-		return r.onJobChange(ctx, log, instance, "", jobs.Items)
+		return r.onGitJobChange(ctx, log, instance, jobs.Items)
 	case instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, jobs.Items, deployments.Items):
 		return r.onJobChange(ctx, log, instance, configMaps.Items[0].GetName(), jobs.Items)
 	case r.isOnDeploymentChange(instance, deployments.Items):
