@@ -3,6 +3,8 @@ title: Istio RBAC configuration
 type: Details
 ---
 
+//TODO: Decide what to do with this part of docu
+
 As a core component, Istio is installed with Kyma by default. The ClusterRbacConfig custom resource (CR), which defines the global behavior of Istio, is created as a part of the installation process.
 
 The default Istio RBAC configuration is defined in the [`config.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/istio-rbac/templates/rbac-config.yaml) file. 

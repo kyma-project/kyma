@@ -4,9 +4,13 @@ type: Configuration
 ---
 Istio installation in Kyma uses the [IstioOperator](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) API.
 Kyma provides the default IstioOperator configurations for local (Minikube) and cluster installations.
+
 You can add a custom Istio Operator definition that overrides the default settings.
+
 The definition you provide may be a partial one (you don't have to specify all options). In that case it will be merged with the defaults.
+
 In order to provide a custom Istio Operator configuration, define a Kyma Installation override with the //TODO: change to operator `kyma_istio_control_plane` key.
+
 The value for this override must be a single string containing a valid definition of the IstioOperator custom resource, in the YAML format.
 
 >**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
@@ -48,6 +52,6 @@ See the following example that customizes settings for the `policy` and `pilot` 
                   value: "20"
     ```
 
-While installing, don't forget to provide Kyma CLI with this file's path via `-o` flag.
+While installing with Kyma CLI, don't forget to provide this file's path via `-o` flag.
 
 Refer to the [IstioOperator API](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) documentation for details about available options.
