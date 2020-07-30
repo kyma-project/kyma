@@ -12,7 +12,7 @@ if [ -f "/etc/istio/overrides.yaml" ]; then
   istioctl manifest apply -f /etc/combo.yaml
 else
   #Old way: apply single-value Helm overrides using `istioctl --set "key=val"`
-  overrides=$(kubectl get cm --all-namespaces -l "installer=overrides,component=istio" -o go-template --template='{{ range .items }}{{ range $key, $value := .data }}{{ if ne $key "kyma_istio_control_plane" }}{{ printf "%s: %s\n" $key . }}{{ end }}{{ end }}{{ end }}' )
+  overrides=$(kubectl get cm --all-namespaces -l "installer=overrides,component=istio" -o go-template --template='{{ range .items }}{{ range $key, $value := .data }}{{ if ne $key "kyma_istio_operator" }}{{ printf "%s: %s\n" $key . }}{{ end }}{{ end }}{{ end }}' )
   overrides_transformed=""
 
   if [ ! -z "$overrides" ]; then
