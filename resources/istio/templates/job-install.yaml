@@ -32,11 +32,11 @@ spec:
           - name: NAMESPACE
             value: "{{ .Release.Namespace }}"
           - name: CONFIGMAP_NAME
-            value: kyma-istio-control-plane-config
+            value: kyma-istio-operator-config
       volumes:
       - name: config
         configMap:
-          name: kyma-istio-control-plane-config
+          name: kyma-istio-operator-config
       - name: manifests
         configMap:
           name: kyma-extra-manifests
