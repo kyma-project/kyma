@@ -1,10 +1,6 @@
 apiVersion: serverless.kyma-project.io/v1alpha1
-kind: Function
+kind: GitRepository
 metadata:
-  name: newone
+  name: sample
 spec:
-  source: "https://github.com/m00g3n/public-gitops"
-  baseDir: "/"
-  type: git
-  branch: "master"
-  runtime: "nodejs-12"
+  url: "https://github.com/kyma-project/kyma.git"
