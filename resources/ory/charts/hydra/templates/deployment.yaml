@@ -130,12 +130,3 @@ spec:
     tolerations:
       {{- toYaml . | nindent 8 }}
     {{- end }}
-
-
-- name: OAUTH2_ISSUER_URL
-  value: "https://oauth2.kyma.local"
-
-
-# edit env
-- name: URLS_SELF_ISSUER
-  value: https://oauth2.kyma.local
