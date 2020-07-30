@@ -9,7 +9,7 @@ You can add a custom Istio Operator definition that overrides the default settin
 
 The definition you provide may be a partial one (you don't have to specify all options). In that case it will be merged with the defaults.
 
-In order to provide a custom Istio Operator configuration, define a Kyma Installation override with the //TODO: change to operator `kyma_istio_control_plane` key.
+In order to provide a custom Istio Operator configuration, define a Kyma Installation override with the `kyma_istio_operator` key.
 
 The value for this override must be a single string containing a valid definition of the IstioOperator custom resource, in the YAML format.
 
@@ -30,7 +30,7 @@ See the following example that customizes settings for the `policy` and `pilot` 
         component: istio
         kyma-project.io/installation: ""
     data:
-      kyma_istio_control_plane: |-
+      kyma_istio_operator: |-
         apiVersion: install.istio.io/v1alpha1
         kind: IstioOperator
         metadata:
