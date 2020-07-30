@@ -6,8 +6,8 @@ nameOverride:
 fullnameOverride:
 
 image:
-  repository: "wookieeteam/function-webhook"
-  tag: "001"
+  repository: "eu.gcr.io/kyma-project/function-webhook"
+  tag: "30e97752"
   pullPolicy: IfNotPresent
 
 commonLabels:
