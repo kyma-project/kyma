@@ -2,7 +2,7 @@
 title: Overview
 ---
 
->**CAUTION:** Documentation in this directory is under development so some information may not be up-to-date.
+>**CAUTION:** Documentation in this directory is under development, so some information may not be up-to-date.
 
 The Application Connector (AC) is a custom, in-house built Kyma component that allows you to connect with external solutions. No matter if you want to integrate an on-premise or a cloud system, the integration process does not change, which allows to avoid any configuration or network-related problems.
 
