@@ -22,7 +22,7 @@ var config FunctionConfig
 var resourceClient resource.Client
 var testEnv *envtest.Environment
 
-func TestGitops(t *testing.T) {
+func TestAPIs(t *testing.T) {
 	gomega.RegisterFailHandler(ginkgo.Fail)
 
 	ginkgo.RunSpecsWithDefaultAndCustomReporters(t,
