@@ -42,7 +42,7 @@ This section describes in detail how the API credentials are generated.
 3. Application Broker requests credentials for a ServiceInstance. The request is processed through the Director proxy exposed by Runtime Agent to Director.
     >**NOTE:** The Director proxy is secured by [Istio RBAC](https://github.com/kyma-project/kyma/blob/master/resources/compass-runtime-agent/templates/istio-rbac.yaml) and only Application Broker can access it.
 
-4. Application Broker polls credential status with 20 minutes timeout. The polling is completed when the credential status is either `SUCCEEDED` or `FAILED`.
+4. Application Broker polls credential status with a 20 minute timeout. The polling is completed when the credential status is either `SUCCEEDED` or `FAILED`.
 
 ![Credentials flow](./assets/api-credentials-flow.svg)
 
