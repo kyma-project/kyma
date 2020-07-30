@@ -13,6 +13,7 @@ metadata:
 spec:
   template:
     spec:
+      disableConcurrency: true
       serviceAccountName: {{ .Chart.Name }}-tests
       {{- if .Values.global.isLocalEnv }}
       hostAliases:
