@@ -14,4 +14,5 @@ keywords:
 sources:
   - http://github.com/istio/istio
 engine: gotpl
-icon: https://istio.io/favicons/android-192x192.png
+home: https://kyma-project.io
+icon: https://github.com/kyma-project/kyma/blob/master/logo.png?raw=true
