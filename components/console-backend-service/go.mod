@@ -16,18 +16,16 @@ require (
 	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/websocket v1.4.1
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
-	github.com/hashicorp/golang-lru v0.5.4 // indirect
-	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/jcmturner/gofork v1.0.0 // indirect
-	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/klauspost/compress v1.9.8 // indirect
 	github.com/knative/eventing v0.13.1
 	github.com/kubernetes-sigs/service-catalog v0.3.0
 	github.com/kyma-incubator/api-gateway v0.0.0-20191125140217-295e8fcaa03f
 	github.com/kyma-project/helm-broker v0.0.0-20190906085923-d07feb2d365a
-	github.com/kyma-project/kyma v0.5.1-0.20200728090904-a97553e08b6f
+	github.com/kyma-project/kyma v0.5.1-0.20200728090904-a97553e08b6f // indirect
 	github.com/kyma-project/kyma/common v0.0.0-20200728090904-a97553e08b6f
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20200714105925-5f69675217a5
+	github.com/kyma-project/kyma/components/application-broker v0.0.0-00010101000000-000000000000
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20200728090904-a97553e08b6f
 	github.com/kyma-project/kyma/components/function-controller v0.0.0-20200527102940-1579eff8c7a5
 	github.com/kyma-project/kyma/components/service-binding-usage-controller v0.0.0-20200714105925-5f69675217a5
 	github.com/kyma-project/rafter v0.0.0-20200402080904-a0157e52e150
@@ -42,16 +40,10 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20190826022208-cac0b30c2563 // indirect
-	github.com/robfig/cron v1.2.0 // indirect
 	github.com/rs/cors v1.7.0
 	github.com/stretchr/testify v1.5.1
 	github.com/vektah/gqlparser/v2 v2.0.1
 	github.com/vrischmann/envconfig v1.2.0
-	go.uber.org/multierr v1.5.0 // indirect
-	go.uber.org/zap v1.14.0 // indirect
-	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
-	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
-	google.golang.org/appengine v1.6.5 // indirect
 	gopkg.in/jcmturner/gokrb5.v7 v7.4.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.4.1 // indirect
 	k8s.io/api v0.18.3
@@ -63,6 +55,8 @@ require (
 )
 
 replace (
+	github.com/kyma-project/kyma => github.com/dariadomagala/kyma v0.0.0-20200728111423-5e2635ec3b9c
+	github.com/kyma-project/kyma/components/application-broker => github.com/dariadomagala/kyma/components/application-broker v0.0.0-20200728111423-5e2635ec3b9c
 	golang.org/x/text => golang.org/x/text v0.3.3
 	k8s.io/client-go => k8s.io/client-go v0.18.3
 )
