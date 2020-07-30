@@ -10,7 +10,7 @@ The Application Broker (AB) workflow consists of the following steps:
 3. The Application Broker creates an `application-broker` Service Broker (SB) inside the Namespace in which the AM is created. This Service Broker contains data of all services provided by the activated Applications. There is always only one `application-broker` Service Broker per Namespace, even if there are more AMs.
 >**NOTE:** The Application Broker is the sole component that manages the `application-broker` Service Broker. The user should not create or delete this resource.
 
-4. The Service Catalog fetches services with their plans that the `application-broker` Service Broker exposes.
+4. The Service Catalog fetches services and their plans that the `application-broker` Service Broker exposes.
 5. The Service Catalog creates a ServiceClass with the corresponding ServicePlans for each service received from the Service Broker.
 
 ![AB architecture](./assets/004-AB-architecture.svg)
