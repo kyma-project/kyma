@@ -50,7 +50,7 @@ Application Broker uses these credentials during the binding action. To use anot
 
 ## Provisioning and binding for an event ServicePlan
 
-This ServicePlan has a **bindable** parameter set to `false` which means that after provisioning a ServiceInstance in a Namespace, given events are ready to use for all services. The provisioning workflow for an event ServicePlan consists of the following steps:
+This ServicePlan has a **bindable** parameter set to `false`, which means that after provisioning a ServiceInstance in a Namespace, given events are ready to use for all services. The provisioning workflow for an event ServicePlan consists of the following steps:
 
 1. Select a given ServiceClass with an event ServicePlan from the Service Catalog.
 2. Provision this ServiceClass with the chosen event ServicePlan by creating a ServiceInstance in the given Namespace.
