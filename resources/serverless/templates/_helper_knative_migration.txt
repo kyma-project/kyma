@@ -45,7 +45,9 @@ patchResources() {
     do
       local functionName="$(echo ${function} | jq -r '.metadata.name')"
       local functionNamespace="$(echo ${function} | jq -r '.metadata.namespace')"
-
+      if [ "${subscriberNamespace}" == "null" ]; then
+        subscriberNamespace="default"
+      fi
       if [ "${subscriberName}" == "${functionName}" ] && [ "${subscriberNamespace}" == "${functionNamespace}" ]; then
         patchSingleTrigger "${trigger}"
       fi
