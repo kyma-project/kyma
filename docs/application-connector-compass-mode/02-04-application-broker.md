@@ -19,7 +19,8 @@ When this process is complete, you can provision and bind your services.
 
 ## Provisioning and binding for an API ServicePlan
 
-This ServicePlan has a **bindable** parameter set to `true`, which means that you have to provision a ServiceInstance and bind it to the service or Function to connect to the given API. The provisioning and binding workflow for an API ServicePlan consists of the following steps:
+This ServicePlan has a **bindable** parameter set to `true`, which means that you have to provision a ServiceInstance and bind it to the service or Function to connect to a given API. 
+The provisioning and binding workflow for an API ServicePlan consists of the following steps:
 
 1. Select an API ServiceClass and choose an API ServicePlan from the Service Catalog.
 2. Provision the ServiceClass with the chosen API ServicePlan by creating its ServiceInstance in a Namespace.
