@@ -1,0 +1,21 @@
+{{- if .Capabilities.APIVersions.Has "networking.istio.io/v1alpha3" }}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "login-consent.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  gateways:
+    - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
+  hosts:
+    - {{ include "login-consent.fullname" . }}.{{ .Values.global.ingress.domainName }}
+  http:
+    - match:
+        - uri:
+            regex: /.*
+      route:
+        - destination:
+            host: {{ include "login-consent.fullname" . }}
+            port:
+              number: {{ .Values.service.port }}
+{{ end }}

@@ -93,11 +93,6 @@ spec:
             periodSeconds: 10
             failureThreshold: 10
           env:
-            {{- $issuer := include "hydra.config.urls.issuer" . -}}
-            {{- if $issuer }}
-            - name: URLS_SELF_ISSUER
-              value: {{ $issuer | quote }}
-            {{- end }}
             - name: DSN
               valueFrom:
                 secretKeyRef:
@@ -113,6 +108,14 @@ spec:
                 secretKeyRef:
                   name: {{ template "hydra.secretName" . }}
                   key: secretsCookie
+            - name: OAUTH2_CONSENT_URL
+              value: "https://ory-login-consent.{{ .Values.global.ingress.domainName }}/consent"
+            - name: OAUTH2_LOGIN_URL
+              value: "https://ory-login-consent.{{ .Values.global.ingress.domainName }}/login"
+            - name: URLS_SELF_ISSUER
+              value: "https://oauth2.{{ .Values.global.ingress.domainName }}"
+            - name: OAUTH2_ISSUER_URL
+              value: "https://oauth2.{{ .Values.global.ingress.domainName }}"
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
       {{- with .Values.deployment.nodeSelector }}
@@ -127,3 +130,12 @@ spec:
     tolerations:
       {{- toYaml . | nindent 8 }}
     {{- end }}
+
+
+- name: OAUTH2_ISSUER_URL
+  value: "https://oauth2.kyma.local"
+
+
+# edit env
+- name: URLS_SELF_ISSUER
+  value: https://oauth2.kyma.local

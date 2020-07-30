@@ -6,6 +6,11 @@ containerPort: 5556
 
 oidc:
   staticClientsBase: |-
+    - id: hydra-consent-app
+      secret: example-app-secret
+      name: 'Hydra login&consent app'
+      redirectURIs:
+      - 'https://ory-login-consent.{{ .Values.global.ingress.domainName }}/callback'
     - id: kyma-client
       name: 'Kyma Client'
       redirectURIs:
