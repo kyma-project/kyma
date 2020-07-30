@@ -904,5 +904,4 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(result.Requeue).To(gomega.BeFalse())
 		gomega.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
 	})
-
 })
