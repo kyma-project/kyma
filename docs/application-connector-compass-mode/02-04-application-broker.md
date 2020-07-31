@@ -11,7 +11,7 @@ The Application Broker (AB) workflow consists of the following steps:
 >**NOTE:** The Application Broker is the sole component that manages the `application-broker` Service Broker. The user should not create or delete this resource.
 
 4. The Service Catalog fetches services and their plans that the `application-broker` Service Broker exposes.
-5. The Service Catalog creates a ServiceClass with the corresponding ServicePlans for each service received from the Service Broker.
+5. The Service Catalog creates a ServiceClass with its corresponding ServicePlans for each service received from the Service Broker.
 
 ![AB architecture](./assets/004-AB-architecture.svg)
 
