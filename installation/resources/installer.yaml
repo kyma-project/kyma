@@ -148,8 +148,9 @@ spec:
           fi
 
           echo "---> Get current releases"
+          set -o pipefail
           ${HELM_2_BINARY} ls --tls --all --output json | jq '.Releases[] | .Name + " " + .Namespace + " " + .Chart' | tr -d '"' > helm2-releases
-
+          set +o pipefail
           if [[ ! $(${HELM_3_BINARY} plugin list | grep '2to3') ]]; then
             echo "---> Get migration plugin"
             ${HELM_3_BINARY} plugin install https://github.com/helm/helm-2to3.git
