@@ -24,7 +24,7 @@ spec:
           - -c
           - |
             echo 'TESTING start'
-            sleep 20
+            sleep 40
             e2e-upgrade-test --action executeTests
             exit_code=$?
             echo exit_code is $exit_code
