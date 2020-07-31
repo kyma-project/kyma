@@ -8,7 +8,7 @@ metadata:
     {{- include "prometheus-test.labels" . | nindent 4 }}
     app: {{ .Chart.Name }}-tests
 spec:
-  disableConcurrency: false
+  disableConcurrency: true
   template:
     metadata:
       annotations:

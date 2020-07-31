@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "chart" . }}
 spec:
-  disableConcurrency: {{ .Values.tests.disableConcurrency }}
+  disableConcurrency: true
   template:
     metadata:
       annotations:
