@@ -13,7 +13,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
-  disableConcurrency: false
+  disableConcurrency: true
   template:
     metadata:
       annotations:
