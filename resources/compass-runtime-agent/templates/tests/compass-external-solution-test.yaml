@@ -40,7 +40,7 @@ spec:
             - "-c"
             - |
               echo 'TESTING start'
-              sleep 10
+              sleep 40
               /e2e compass-e2e \
               --domain {{ .Values.global.ingress.domainName }} \
               --skipSSLVerify

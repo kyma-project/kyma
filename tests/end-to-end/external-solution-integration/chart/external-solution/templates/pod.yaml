@@ -23,7 +23,7 @@ spec:
       - -c
       - |
         echo 'TESTING start'
-        sleep 20
+        sleep 40
         /e2e e2e-prepare \
         --domain {{ .Values.domain }} \
         --testID {{ .Release.Name }}-external-solution \
