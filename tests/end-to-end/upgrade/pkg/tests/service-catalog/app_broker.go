@@ -14,8 +14,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
+	k8sCoreTypes "k8s.io/api/core/v1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	"bufio"
+	"errors"
 )
 
 const (
@@ -69,7 +72,8 @@ type appBrokerFlow struct {
 
 // CreateResources creates resources needed for e2e upgrade test
 func (ut *AppBrokerUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	return ut.newFlow(stop, log, namespace).CreateResources()
+	f := ut.newFlow(stop, log, namespace)
+	return f.CreateResources()
 }
 
 // TestResources tests resources after upgrade
@@ -93,6 +97,7 @@ func (ut *AppBrokerUpgradeTest) newFlow(stop <-chan struct{}, log logrus.FieldLo
 		appConnectorInterface: ut.AppConnectorInterface,
 		scInterface:           ut.ServiceCatalogInterface,
 		messagingInterface:    ut.MessagingInterface,
+		k8sInterface:          ut.K8sInterface,
 	}
 }
 
@@ -144,13 +149,15 @@ func (f *appBrokerFlow) TestResources() error {
 			return err
 		}
 	}
-	return nil
+	f.reportLogs()
+	return errors.New("test")
 }
 
 func (f *appBrokerFlow) logReport() {
 	f.logK8SReport()
 	f.logServiceCatalogAndBindingUsageReport()
 	f.logApplicationReport()
+	f.reportLogs()
 }
 
 func (f *appBrokerFlow) deleteApplication() error {
@@ -451,3 +458,53 @@ func (f *appBrokerFlow) logApplicationReport() {
 	applications, err := f.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().List(metav1.ListOptions{})
 	f.report("Applications", applications, err)
 }
+
+func (f *appBrokerFlow) logFromPod(namespace, labelSelector, container string) {
+	pods, err := f.k8sInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{
+		LabelSelector: labelSelector,
+	})
+	if err != nil {
+		f.log.Errorf("unable to fetch %s logs: %s", labelSelector, err.Error())
+		return
+	}
+	if len(pods.Items) == 0 {
+		f.log.Errorf("could not find %s pod", labelSelector)
+		return
+	}
+
+	var tailLines int64 = 512
+	for _, p := range pods.Items {
+		func() {
+			req := f.k8sInterface.CoreV1().Pods(namespace).
+				GetLogs(p.Name, &k8sCoreTypes.PodLogOptions{
+				Container: container,
+				TailLines: &tailLines,
+			})
+			readCloser, err := req.Stream()
+			if err != nil {
+				return
+			}
+			defer readCloser.Close()
+
+			rd := bufio.NewReader(readCloser)
+			for {
+				line, _, err := rd.ReadLine()
+				if err != nil {
+					f.log.Warnf("error while reading logs: %s", err.Error())
+					return
+				}
+				f.log.Infof(string(line))
+			}
+			return
+		}()
+
+	}
+}
+
+func (f *appBrokerFlow) reportLogs() {
+	f.log.Infof("Application Broker logs:")
+	f.logFromPod(integrationNamespace, "app=application-broker", "ctrl")
+	f.log.Infof("Service Binding Usage Controller logs:")
+	f.logFromPod("kyma-system", "app=service-catalog-addons-service-binding-usage-controller", "service-binding-usage-controller")
+}
+
