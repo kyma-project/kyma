@@ -38,7 +38,7 @@ tests:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
     tag: "cdf1bd64"
     pullPolicy: IfNotPresent
-  disableConcurrency: false
+  disableConcurrency: true
   restartPolicy: Never
   resources:
     requests:
