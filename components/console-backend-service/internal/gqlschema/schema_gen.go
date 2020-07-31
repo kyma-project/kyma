@@ -5997,11 +5997,6 @@ type APIRuleAccessStrategy @goModel(model: "github.com/ory/oathkeeper-maester/ap
     config: Extension
 }
 
-#input APIRuleAccessStrategyInput @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRuleAccessStrategyInput") {
-#    name: String!
-#    config: Extension!
-#}
-
 type APIRuleStatuses @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleStatus") {
     apiRuleStatus: APIRuleStatus
     accessRuleStatus: APIRuleStatus
@@ -7149,7 +7144,7 @@ type Query {
 
     # Depends on 'application'
     namespaces(withSystemNamespaces: Boolean, withInactiveStatus: Boolean): [Namespace!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
-    namespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "get", apiGroup: "", apiVersion: "v1"})
+    namespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "get", apiGroup: "", apiVersion: "v1",namespaceArg: "name"})
 
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]! @HasAccess(attributes: {resource: "deployments", verb: "list", apiGroup: "apps", apiVersion: "v1beta2", namespaceArg: "namespace"})
     versionInfo: VersionInfo!
@@ -24559,7 +24554,7 @@ func (ec *executionContext) _Query_namespace(ctx context.Context, field graphql.
 			return ec.resolvers.Query().Namespace(rctx, args["name"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "namespaces", "verb": "get"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "name", "resource": "namespaces", "verb": "get"})
 			if err != nil {
 				return nil, err
 			}
