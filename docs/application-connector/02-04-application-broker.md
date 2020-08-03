@@ -40,7 +40,7 @@ This ServiceClass has a **bindable** parameter set to `false` which means that a
 2. Provision this ServiceClass by creating a ServiceInstance in the given Namespace.
 3. During the provisioning process, the [EventActivation](/components/application-connector/#custom-resource-event-activation) resource is created together with the ServiceInstance. This resource allows you to create a Trigger from the Kyma Console.
 4. The Application sends an event to the Application Connector.
-5. When the Trigger receives the event, it triggers the Function based on the paramertes defined for a Trigger.
+5. When the Trigger receives the event, it triggers the Function based on the parameters defined for a Trigger.
 
 For more information, read about [event processing and delivery](/components/event-mesh/#details-event-processing-and-delivery).
 
