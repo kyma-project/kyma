@@ -183,7 +183,7 @@ spec:
             memory: 512Mi
       containers:
       - name: kyma-installer-container
-        image: jakkab/kyma-installer:dex4
+        image: jakkab/kyma-installer:dex5
         imagePullPolicy: IfNotPresent
         args:
           - -overrideLogFile=/app/overrides.txt
