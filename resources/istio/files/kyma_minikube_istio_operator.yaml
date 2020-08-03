@@ -46,7 +46,7 @@ spec:
 
     # Policy feature
     policy:
-      enabled: true
+      enabled: false
       k8s:
         replicaCount: 1
         resources:
@@ -85,7 +85,7 @@ spec:
 
     # Telemetry feature
     telemetry:
-      enabled: true
+      enabled: false
       k8s:
         env:
         - name: POD_NAMESPACE
@@ -122,7 +122,7 @@ spec:
 
     # Security feature
     citadel:
-      enabled: true
+      enabled: false
       k8s:
         strategy:
           rollingUpdate:
@@ -460,9 +460,9 @@ spec:
     telemetry:
       enabled: true
       v1:
-        enabled: true
-      v2:
         enabled: false
+      v2:
+        enabled: true
         prometheus:
           enabled: false
         stackdriver:
