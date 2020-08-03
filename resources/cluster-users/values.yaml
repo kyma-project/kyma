@@ -26,6 +26,8 @@ clusterRoles:
       - "settings.k8s.io"
       - "metrics.k8s.io"
       - "coordination.k8s.io"
+      - "validatingwebhookconfigurations.admissionregistration.k8s.io"
+      - "mutatingwebhookconfigurations.admissionregistration.k8s.io"
     istio:
       - "authentication.istio.io"
       - "config.istio.io"
