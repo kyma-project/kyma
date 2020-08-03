@@ -25,7 +25,7 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: 8bb6c2b5
+    tag: 199b2fcb
   service:
     externalPort: 80
     internalPort: 80
@@ -36,7 +36,7 @@ replicaCount: 1
 resources: {}
 test:
   acceptance:
-    enabled: true
+    enabled: false
     ui:
       # tests uses chromium that require more memory
       limits:

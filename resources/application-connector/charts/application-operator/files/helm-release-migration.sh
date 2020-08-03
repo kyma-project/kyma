@@ -36,8 +36,9 @@ if [[ ! $(${HELM_3_BINARY} plugin list | grep '2to3') ]]; then
 fi
 
 echo "---> Get current releases "
-
+set -o pipefail
 ${HELM_2_BINARY} ls --tls --all --output json | jq '.Releases[] | .Name + " " + .Namespace + " " + .Chart' | tr -d '"' > helm2-all-releases
+set +o pipefail
 
 echo "---> Migrate Gateway and Application releases"
 while read line; do

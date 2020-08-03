@@ -10,6 +10,14 @@
   version = "v0.3.1"
 
 [[projects]]
+  digest = "1:49bb655587fa61c5b986d03c0b5b2a7c163683bc5d1379f32927bbb86f461115"
+  name = "github.com/avast/retry-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a8f6dc7e8f46a5d11c01d9da1e887bb5a51fd107"
+  version = "v2.6.0"
+
+[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -541,6 +549,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/avast/retry-go",
     "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",

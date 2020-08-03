@@ -214,6 +214,7 @@ func (hc *Client) UpgradeRelease(chartDir string, nn NamespacedName, values over
 	upgrade.Wait = true
 	upgrade.ReuseValues = false
 	upgrade.Recreate = false
+	upgrade.MaxHistory = hc.maxHistory
 
 	hc.PrintOverrides(values, nn.Name, "update")
 

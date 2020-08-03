@@ -50,39 +50,6 @@ func (h *handler) startSink(t *testing.T) string {
 	return sinkURI
 }
 
-type config struct {
-	sinkURI       string
-	namespace     string
-	metricsConfig string
-	loggingConfig string
-	source        string
-	port          int
-}
-
-func (c config) GetSinkURI() string {
-	return c.sinkURI
-}
-
-func (c config) GetNamespace() string {
-	return c.namespace
-}
-
-func (c config) GetMetricsConfigJson() string {
-	return c.metricsConfig
-}
-
-func (c config) GetLoggingConfigJson() string {
-	return c.loggingConfig
-}
-
-func (c config) GetSource() string {
-	return c.source
-}
-
-func (c config) GetPort() int {
-	return c.port
-}
-
 // Send a valid cloudevent to adapter using cloudevents sdk client
 // ensure source is replaced by adapter
 func TestAdapter_ValidCloudEvents(t *testing.T) {
@@ -170,11 +137,13 @@ func TestAdapter_ValidCloudEvents(t *testing.T) {
 			adapterPort := startPort + idx
 			adapterURI := fmt.Sprintf("http://localhost:%d", adapterPort)
 
-			c := config{
-				sinkURI:   sinkURI,
-				namespace: "foo",
-				source:    "guenther",
-				port:      adapterPort,
+			c := &envConfig{
+				EnvConfig: adapter.EnvConfig{
+					SinkURI:   sinkURI,
+					Namespace: "foo",
+				},
+				EventSource: "guenther",
+				Port:        adapterPort,
 			}
 
 			// start http-adapter
@@ -349,12 +318,13 @@ func TestAdapter_ReceiveBrokenEvent(t *testing.T) {
 			adapterPort := startPort - idx - 1
 			adapterURI := fmt.Sprintf("http://localhost:%d", adapterPort)
 
-			c := config{
-				sinkURI:   sinkURI,
-				namespace: "foo",
-
-				source: "guenther",
-				port:   adapterPort,
+			c := &envConfig{
+				EnvConfig: adapter.EnvConfig{
+					SinkURI:   sinkURI,
+					Namespace: "foo",
+				},
+				EventSource: "guenther",
+				Port:        adapterPort,
 			}
 
 			// start http-adapter
@@ -379,7 +349,7 @@ func TestAdapter_ReceiveBrokenEvent(t *testing.T) {
 func TestAdapterShutdown(t *testing.T) {
 	timeout := time.Second * 10
 
-	c := config{}
+	c := &envConfig{}
 
 	ctx := context.Background()
 	// used to simulate sending a stop signal
@@ -462,7 +432,7 @@ func waitAdapterReady(t *testing.T, adapterURI string) {
 }
 
 // startHttpAdapter starts the adapter with a cloudevents client configured with the test sink as target
-func startHttpAdapter(t *testing.T, c config, ctx context.Context) *adapter.Adapter {
+func startHttpAdapter(t *testing.T, c adapter.EnvConfigAccessor, ctx context.Context) *adapter.Adapter {
 	sinkClient, err := kncloudevents.NewDefaultClient(c.GetSinkURI())
 	if err != nil {
 		t.Fatal("error building cloud event client", zap.Error(err))

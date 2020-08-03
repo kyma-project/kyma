@@ -1,7 +1,9 @@
 
 tests:
   enabled: true
-
+  image:
+    name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
+    version: v20200703-d5c97fa6
 nodeSelector: {}
 
 global:
@@ -12,10 +14,6 @@ global:
       namespace: kyma-system
   containerRegistry:
     path: eu.gcr.io/kyma-project
-  alpine_net:
-    name: alpine-net
-    dir:
-    version: "fab13c7c"
 
 kcproxy:
   replicaCount: 1
