@@ -69,18 +69,19 @@ This error can occur if you use Go version 1.11.5 or lower on macOS. Try upgradi
 
 ### Install dependencies
 
-This project uses `dep` as a dependency manager. To install all required dependencies, use the following command:
+This project uses `go modules` as a dependency manager. To install all required dependencies, use the following commands:
 
 ```bash
-dep ensure -vendor-only
+go mod download
+go mod vendor
 ```
 
 #### Generate code from GraphQL schema
 
 This project uses the [GQLGen](https://github.com/99designs/gqlgen) library, which improves development by generating code from the [GraphQL schema definition](internal/gqlschema/schema.graphql).
 
-1. Define types and their fields in `/internal/gqlschema/schema.graphql` using the [Schema Definition Language](http://graphql.org/learn/schema/).
-1. From the project directory, run the code generator with the `go generate ./...` command.
+1. Define types and their fields in `/internal/gqlschema/*.graphql` files using the [Schema Definition Language](http://graphql.org/learn/schema/).
+1. From the project directory, run the code generator with the `go run github.com/99designs/gqlgen ./internal/domain` command.
 1. Navigate to the `/internal/gqlschema/` directory.
 1. Find newly generated methods in the `ResolverRoot` interface located in `./schema_gen.go`.
 1. Implement resolvers in specific domains according to the project structure and rules in this guide. Use generated models from `./models_gen.go` in your business logic. If you want to customize them, move them to a new file in the `gqlschema` package and include in the `./config.yml` file.
