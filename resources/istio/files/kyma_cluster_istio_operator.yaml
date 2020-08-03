@@ -13,6 +13,9 @@ spec:
     pilot:
       enabled: true
       k8s:
+        hpaSpec:
+          maxReplicas: 5
+          minReplicas: 2
         env:
         - name: PILOT_HTTP10
           value: "1"
