@@ -9,7 +9,7 @@ spec:
   ports:
     - port: {{ .Values.service.port }}
       name: http-{{ include "login-consent.fullname" . }}
-      targetPort: http
+      targetPort: 3000
       protocol: TCP
   selector:
     {{- include "login-consent.selectorLabels" . | nindent 4 }}
