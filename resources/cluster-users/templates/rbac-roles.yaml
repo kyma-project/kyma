@@ -47,6 +47,14 @@ rules:
     - namespaces
   verbs:
     - "list"
+- apiGroups:
+    - ""
+  resources:
+    - "configmaps"
+  resourceNames: 
+    - "serverless-webhook-envs"  
+  verbs:
+    - "get"
 - nonResourceURLs:
     - "*" #give access to all non resource urls
   verbs:

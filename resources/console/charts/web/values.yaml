@@ -36,7 +36,7 @@ replicaCount: 1
 resources: {}
 test:
   acceptance:
-    enabled: true
+    enabled: false
     ui:
       # tests uses chromium that require more memory
       limits:
