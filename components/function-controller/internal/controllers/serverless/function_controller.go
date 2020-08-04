@@ -64,14 +64,33 @@ func (r *FunctionReconciler) calculateImageTag(instance *serverlessv1alpha1.Func
 }
 
 func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) (ctrl.Result, error) {
+	return r.updateStatus2(ctx, result, instance, condition, nil)
+}
+
+func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.Function) string {
+	hash := sha256.Sum256([]byte(fmt.Sprintf("%s-%s", instance.GetUID(), instance.Status.Repository.Commit)))
+	return fmt.Sprintf("%x", hash)
+}
+
+func (r *FunctionReconciler) updateStatus2(
+	ctx context.Context,
+	result ctrl.Result,
+	instance *serverlessv1alpha1.Function,
+	condition serverlessv1alpha1.Condition,
+	repository *serverlessv1alpha1.Repository) (ctrl.Result, error) {
 	condition.LastTransitionTime = metav1.Now()
 
 	service := instance.DeepCopy()
 	service.Status.Conditions = r.updateCondition(service.Status.Conditions, condition)
 
-	if r.equalConditions(instance.Status.Conditions, service.Status.Conditions) {
+	if r.equalConditions(instance.Status.Conditions, service.Status.Conditions) && instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit {
 		return result, nil
 	}
+
+	if repository != nil {
+		service.Status.Repository = *repository
+	}
+	service.Status.Source = instance.Spec.Source
 
 	if err := r.client.Status().Update(ctx, service); err != nil {
 		return ctrl.Result{}, err

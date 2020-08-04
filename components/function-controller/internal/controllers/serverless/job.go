@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
+
+	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,7 +21,12 @@ func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function
 	image := r.buildImageAddress(instance)
 	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
-	expectedJob := r.buildJob(instance, "")
+	var expectedJob batchv1.Job
+	if instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit {
+		expectedJob = r.buildJob(instance, "")
+	} else {
+		expectedJob = r.buildGitJob(instance)
+	}
 
 	if len(deployments) == 1 &&
 		deployments[0].Spec.Template.Spec.Containers[0].Image == image &&
@@ -39,8 +45,7 @@ func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function
 		buildStatus == corev1.ConditionFalse
 }
 
-func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, configMapName string, jobs []batchv1.Job) (ctrl.Result, error) {
-	newJob := r.buildJob(instance, configMapName)
+func (r *FunctionReconciler) changeJob(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, newJob batchv1.Job, jobs []batchv1.Job) (ctrl.Result, error) {
 	jobsLen := len(jobs)
 
 	switch {
@@ -53,6 +58,15 @@ func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, i
 	default:
 		return r.updateBuildStatus(ctx, log, instance, jobs[0])
 	}
+}
+
+func (r *FunctionReconciler) onGitJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, jobs []batchv1.Job) (ctrl.Result, error) {
+	newJob := r.buildGitJob(instance)
+	return r.changeJob(ctx, log, instance, newJob, jobs)
+}
+func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, configMapName string, jobs []batchv1.Job) (ctrl.Result, error) {
+	newJob := r.buildJob(instance, configMapName)
+	return r.changeJob(ctx, log, instance, newJob, jobs)
 }
 
 func (r *FunctionReconciler) equalJobs(existing batchv1.Job, expected batchv1.Job) bool {
