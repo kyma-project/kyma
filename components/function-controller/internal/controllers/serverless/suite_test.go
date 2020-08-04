@@ -36,7 +36,6 @@ var _ = ginkgo.BeforeSuite(func(done ginkgo.Done) {
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("..", "..", "..", "config", "crd", "bases"),
-			filepath.Join("..", "..", "..", "config", "crd", "crds-thirdparty"),
 		},
 		ErrorIfCRDPathMissing: true,
 	}
