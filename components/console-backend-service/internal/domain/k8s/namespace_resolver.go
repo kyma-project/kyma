@@ -117,7 +117,7 @@ func (r *Resolver) HealthyPodsCountField(ctx context.Context, obj *gqlschema.Nam
 	})
 
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while counting %s from namespace %s", pretty.Pods, obj.Name))
+		glog.Error(errors.Wrapf(err, "while listing %s from namespace %s", pretty.Pods, obj.Name))
 		return 0, gqlerror.New(err, pretty.Pods, gqlerror.WithNamespace(obj.Name))
 	}
 
