@@ -33,6 +33,8 @@ As the production profile is configured with increased performance it mind, the 
 
 You can deploy a Kyma cluster with Istio configured to use the production profile, or configure Istio in a running cluster to use the production profile. Follow these steps:
 
+>**TIP:** Read the [Istio custom configuration](##configuration-istio-custom-configuration) section to learn how to provide your own overrides. 
+
 <div tabs>
   <details>
   <summary>

@@ -3,7 +3,7 @@ title: Istio RBAC configuration
 type: Details
 ---
 
-//TODO: Decide what to do with this part of docu
+>**WARNING:** Istio RBAC is deprecated. Support for this feature will be soon discontinued. Use the new [Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/) instead.
 
 As a core component, Istio is installed with Kyma by default. The ClusterRbacConfig custom resource (CR), which defines the global behavior of Istio, is created as a part of the installation process.
 
