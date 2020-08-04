@@ -15,19 +15,22 @@ This list shows the available Istio components and the components enabled by def
 | Component | Enabled |
 | :--- | :---: |
 | Istiod | ✅ |
-| Gateways | ✅ |
-| Sidecar Injector | ⛔ |	
+| Pilot | ⛔ |
+| Policy | ✅ |
+| Telemetry | ✅ |	
+| Citadel | ✅ |	
+| Node Agent | ⛔ |	
 | Galley | ⛔ |	
-| Mixer | ⛔ |	
-| Pilot | ⛔ |	
-| Security | ✅ |	
-| Node agent | ⛔️ |
+| Sidecar Injector | ⛔️ |	
+| Ingress Gateway | ✅️ |
+| Egress Gateway | ⛔️ |
+| CNI | ⛔️ |
 | Grafana | ⛔️ |
 | Prometheus | ⛔️ |
 | Tracing | ⛔️ |
 | Kiali | ⛔️ |
 
->*NOTE*: In Istio 1.5, separate components are replaced by a single binary - Istiod. However, to ensure a smooth transition to the new version, Citadel, Policy and Telemetry still are deployed to the cluster.
+>*NOTE*: In Istio 1.5, separate components like Pilot or Sidecar Injector are replaced by a single binary - Istiod. However, to ensure a smooth transition to the new version, Citadel, Policy and Telemetry still are deployed to the cluster.
 
 ## Kyma-specific configuration
 
