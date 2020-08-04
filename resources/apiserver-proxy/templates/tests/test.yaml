@@ -34,7 +34,7 @@ spec:
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy_integration_tests.dir }}apiserver-proxy-integration-tests:{{ .Values.global.apiserver_proxy_integration_tests.version }}
         imagePullPolicy: Always
         command: ["/bin/bash"]
-        args: ["-c", "sleep 40; ./test.sh; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 5; exit $exit_code;"]
+        args: ["-c", "sleep 20; ./test.sh; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 5; exit $exit_code;"]
         env:
             - name: POD_NAME
               valueFrom:

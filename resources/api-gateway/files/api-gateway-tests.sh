@@ -1,5 +1,5 @@
 #!/bin/bash
-sleep 40
+sleep 20
 
 ./app.test
 exit_code=$?

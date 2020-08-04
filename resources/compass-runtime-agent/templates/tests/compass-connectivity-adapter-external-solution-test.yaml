@@ -42,7 +42,7 @@ spec:
             - "-c"
             - |
               echo 'TESTING start'
-              sleep 40
+              sleep 20
               /e2e connectivity-adapter-e2e \
               --domain {{ .Values.global.ingress.domainName }} \
               --skipSSLVerify

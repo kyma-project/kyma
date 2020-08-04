@@ -23,7 +23,7 @@ spec:
       - -c
       - |
         echo 'TESTING start'
-        sleep 40
+        sleep 20
         e2e-upgrade-test --action prepareData
         exit_code=$?
         echo exit_code is $exit_code

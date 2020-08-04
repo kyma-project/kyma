@@ -20,7 +20,7 @@ spec:
         - -c
         - |
           echo 'TESTING start'
-          sleep 40
+          sleep 20
           /ko-app/runner e2e-event-mesh \
           --domain $KYMADOMAIN \
           --testID e2e-event-mesh \
