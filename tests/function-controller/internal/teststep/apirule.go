@@ -8,21 +8,17 @@ import (
 
 type APIRule struct {
 	apirule     *apirule.APIRule
-	name        string
+	stepName    string
 	serviceName string
 	domainName  string
 	domainPort  uint32
 }
 
 func (A APIRule) Name() string {
-	return A.name
+	return A.stepName
 }
 
 func (A APIRule) Run() error {
-	//            "host": "lucky-cancer.wookiee-2596996162.hudy.ninja",
-	//    host: test.lucky-cancer.wookiee.hudy.ninja
-	//domainHost := fmt.Sprintf("%s-%d.%s", t.cfg.DomainName, rand.Uint32(), t.cfg.domainName)
-
 	domainHost := fmt.Sprintf("%s.%s", A.serviceName, A.domainName)
 	if _, err := A.apirule.Create(A.serviceName, domainHost, A.domainPort); err != nil {
 		return err
@@ -32,13 +28,13 @@ func (A APIRule) Run() error {
 }
 
 func (A APIRule) Cleanup() error {
-	return nil
+	return A.apirule.Delete()
 }
 
-func NewAPIRule(rule *apirule.APIRule, name, serviceName, domainName string, domainPort uint32) APIRule {
+func NewAPIRule(rule *apirule.APIRule, stepName, serviceName, domainName string, domainPort uint32) APIRule {
 	return APIRule{
 		apirule:     rule,
-		name:        name,
+		stepName:    stepName,
 		serviceName: serviceName,
 		domainName:  domainName,
 		domainPort:  domainPort,

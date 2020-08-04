@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/scenarios"
+	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/dynamic"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"math/rand"
@@ -42,8 +43,10 @@ func TestFunctionController(t *testing.T) {
 }
 
 func TestRefactored(t *testing.T) {
+	logger := logrus.New()
+	logrus.SetOutput(logger.Writer())
 
-
+	logger.Infof("Logrus pisze: %s", "Lubie cie")
 	restConfig := controllerruntime.GetConfigOrDie()
 	coreCli := corev1.NewForConfigOrDie(restConfig)
 
