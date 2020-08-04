@@ -13,11 +13,10 @@ trap on_error ERR
 readonly KYMA_PROJECT_IO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 readonly WEBSITE_DIR="website"
-readonly WEBSITE_REPO="https://github.com/kyma-project/website"
+readonly WEBSITE_REPO="https://github.com/magicmatatjahu/website"
 
 readonly BUILD_DIR="${KYMA_PROJECT_IO_DIR}/${WEBSITE_DIR}"
 readonly PUBLIC_DIR="${KYMA_PROJECT_IO_DIR}/${WEBSITE_DIR}/public"
-
 readonly DOCS_DIR="$( cd "${KYMA_PROJECT_IO_DIR}/../docs" && pwd )"
 
 # Colors
@@ -41,11 +40,13 @@ remove-cached-content() {
 }
 
 copy-website-repo() {
-  git clone -b "master" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
+  git clone -b "603-upstream-docs" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
 }
 
 build-preview() {
-  export PREVIEW_SOURCE_DIR="${KYMA_PROJECT_IO_DIR}/.."
+  export APP_PREVIEW_SOURCE_DIR="${KYMA_PROJECT_IO_DIR}/.."
+  export APP_DOCS_BRANCHES="preview"
+  export APP_PREPARE_FOR_REPO="kyma"
   make -C "${BUILD_DIR}" netlify-docs-preview
 }
 
