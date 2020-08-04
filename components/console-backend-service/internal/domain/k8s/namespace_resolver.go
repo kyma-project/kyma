@@ -3,6 +3,8 @@ package k8s
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
+
 	"github.com/golang/glog"
 	appPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
@@ -33,6 +35,7 @@ type namespaceResolver struct {
 	namespaceConverter namespaceConverter
 	systemNamespaces   []string
 	podService         podSvc
+	gqlPodConverter    podConverter
 }
 
 func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string, podService podSvc) *namespaceResolver {
@@ -42,10 +45,11 @@ func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.Applica
 		namespaceConverter: *newNamespaceConverter(systemNamespaces),
 		systemNamespaces:   systemNamespaces,
 		podService:         podService,
+		gqlPodConverter:    podConverter{},
 	}
 }
 
-func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]*gqlschema.Namespace, error) {
+func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]*gqlschema.NamespaceListItem, error) {
 	namespaces, err := r.namespaceSvc.List()
 
 	if err != nil {
@@ -90,6 +94,60 @@ func (r *namespaceResolver) ApplicationsField(ctx context.Context, obj *gqlschem
 	}
 
 	return appNames, nil
+}
+
+func (r *Resolver) PodsCountField(ctx context.Context, obj *gqlschema.NamespaceListItem) (int, error) {
+	pods, err := r.podSvc.List(obj.Name, pager.PagingParams{
+		First:  nil,
+		Offset: nil,
+	})
+
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while counting %s from namespace %s", pretty.Pods, obj.Name))
+		return 0, gqlerror.New(err, pretty.Pods, gqlerror.WithNamespace(obj.Name))
+	}
+
+	return len(pods), nil
+}
+
+func (r *Resolver) HealthyPodsCountField(ctx context.Context, obj *gqlschema.NamespaceListItem) (int, error) {
+	pods, err := r.podSvc.List(obj.Name, pager.PagingParams{
+		First:  nil,
+		Offset: nil,
+	})
+
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while counting %s from namespace %s", pretty.Pods, obj.Name))
+		return 0, gqlerror.New(err, pretty.Pods, gqlerror.WithNamespace(obj.Name))
+	}
+
+	count := 0
+	for _, pod := range pods {
+		status := r.gqlPodConverter.podStatusPhaseToGQLStatusType(pod.Status.Phase)
+		if status == "RUNNING" || status == "SUCCEEDED" {
+			count++
+		}
+	}
+
+	return count, nil
+}
+
+func (r *Resolver) ApplicationsCountField(ctx context.Context, obj *gqlschema.NamespaceListItem) (*int, error) {
+	if obj == nil {
+		return nil, errors.New("Cannot get application field for namespace")
+	}
+
+	items, err := r.appRetriever.Application().ListInNamespace(obj.Name)
+	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return nil, nil
+		}
+
+		return nil, errors.Wrapf(err, "while listing %s for namespace %s", appPretty.Application, obj.Name)
+	}
+
+	count := len(items)
+	return &count, nil
 }
 
 func (r *namespaceResolver) NamespaceQuery(ctx context.Context, name string) (*gqlschema.Namespace, error) {
