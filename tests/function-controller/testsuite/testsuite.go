@@ -3,6 +3,7 @@ package testsuite
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 	"io"
 	"io/ioutil"
 	"math/rand"
@@ -68,7 +69,7 @@ type Config struct {
 
 type TestSuite struct {
 	namespace           *namespace.Namespace
-	function            *function
+	function            *function.Function
 	apiRule             *apirule.APIRule
 	broker              *broker.Broker
 	trigger             *trigger.Trigger
@@ -110,7 +111,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	}
 
 	ns := namespace.New(namespaceName, coreCli, container)
-	f := newFunction(cfg.FunctionName, container)
+	f := function.NewFunction(cfg.FunctionName, container)
 	ar := apirule.New(cfg.APIRuleName, container)
 	br := broker.New(container)
 	tr := trigger.New(cfg.TriggerName, container)
@@ -144,7 +145,7 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Creating function without body should be rejected by the webhook")
-	err = t.function.Create(&functionData{})
+	err = t.function.Create(&function.FunctionData{})
 	t.g.Expect(err).NotTo(gomega.BeNil())
 
 	t.t.Log("Creating function...")
@@ -157,7 +158,7 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Checking function after defaulting and validation")
-	function, err := t.function.get()
+	function, err := t.function.Get()
 	failOnError(t.g, err)
 	err = t.checkDefaultedFunction(function)
 	failOnError(t.g, err)
@@ -388,7 +389,7 @@ func (t *TestSuite) pollForAnswer(url, payloadStr, expected string) error {
 }
 
 func (t *TestSuite) LogResources() {
-	fn, err := t.function.get()
+	fn, err := t.function.Get()
 	if err != nil {
 		t.t.Logf("%v", errors.Wrap(err, "while logging resource"))
 	}

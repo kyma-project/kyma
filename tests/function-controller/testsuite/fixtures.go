@@ -5,18 +5,19 @@ import (
 	"errors"
 	"fmt"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 	"text/template"
 )
 
-func (t *TestSuite) getFunction(value string) *functionData {
-	return &functionData{
+func (t *TestSuite) getFunction(value string) *function.FunctionData {
+	return &function.FunctionData{
 		Body: fmt.Sprintf(`module.exports = { main: function(event, context) { return "%s" } }`, value),
 		Deps: `{ "name": "hellowithoutdeps", "version": "0.0.1", "dependencies": { } }`,
 	}
 }
 
-func (t *TestSuite) getUpdatedFunction() *functionData {
-	return &functionData{
+func (t *TestSuite) getUpdatedFunction() *function.FunctionData {
+	return &function.FunctionData{
 		// such a function tests simultaneously importing external lib, the fact that it was triggered (by using counter) and passing argument to function in event
 		Body:        getBodyString(),
 		Deps:        `{ "name": "hellowithdeps", "version": "0.0.1", "dependencies": { "lodash": "^4.17.5" } }`,

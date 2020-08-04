@@ -2,6 +2,7 @@ package apirule
 
 import (
 	"context"
+	"k8s.io/client-go/dynamic"
 	"time"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -34,6 +35,17 @@ func New(name string, c shared.Container) *APIRule {
 		waitTimeout: c.WaitTimeout,
 		log:         c.Log,
 		verbose:     c.Verbose,
+	}
+}
+
+func New2(name, namespace string, log shared.Logger, dynamicCli dynamic.Interface) *APIRule {
+	return &APIRule{
+		resCli:      resource.New(dynamicCli, apiruleTypes.GroupVersion.WithResource("apirules"), namespace, log, false),
+		name:        name,
+		namespace:   namespace,
+		waitTimeout: 15 * time.Minute,
+		log:         log,
+		verbose:     true,
 	}
 }
 

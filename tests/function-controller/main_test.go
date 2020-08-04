@@ -1,6 +1,10 @@
 package main
 
 import (
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	"github.com/kyma-project/kyma/tests/function-controller/internal/scenarios"
+	"k8s.io/client-go/dynamic"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"math/rand"
 	"testing"
 	"time"
@@ -35,6 +39,31 @@ func TestFunctionController(t *testing.T) {
 	defer testSuite.Cleanup()
 	defer testSuite.LogResources()
 	testSuite.Run()
+}
+
+func TestRefactored(t *testing.T) {
+
+
+	restConfig := controllerruntime.GetConfigOrDie()
+	coreCli := corev1.NewForConfigOrDie(restConfig)
+
+	dynamicCli, err := dynamic.NewForConfig(restConfig)
+
+	g := gomega.NewGomegaWithT(t)
+
+	config := &scenarios.Config{
+		Log:        t,
+		CoreCli:    coreCli,
+		DynamicCLI: dynamicCli,
+	}
+
+	steps := scenarios.Steps(config)
+
+	runner := step.NewRunner()
+
+	err = runner.Execute(steps)
+	failOnError(g, err)
+
 }
 
 func loadConfig(prefix string) (config, error) {

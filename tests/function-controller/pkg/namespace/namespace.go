@@ -31,6 +31,10 @@ type Namespace struct {
 func New(name string, coreCli typedcorev1.CoreV1Interface, container shared.Container) *Namespace {
 	return &Namespace{coreCli: coreCli, name: name, log: container.Log, verbose: container.Verbose}
 }
+func New2(name string, coreCli typedcorev1.CoreV1Interface, log shared.Logger) *Namespace {
+	return &Namespace{coreCli: coreCli, name: name, log: log}
+}
+
 
 func (n Namespace) GetName() string {
 	return n.name
