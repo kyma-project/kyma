@@ -14,6 +14,8 @@ spec:
     - match:
         - uri:
             exact: "/oauth2/introspect"
+        - uri:
+            prefix: "/keys"
       route:
         - destination:
             host: {{ include "hydra.fullname" . }}-hydra-admin
