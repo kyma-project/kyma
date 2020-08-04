@@ -5,7 +5,7 @@ type: Installation
 
 >**CAUTION:** Before you upgrade your Kyma deployment to a newer version, check the release notes of the target release for migration guides. If the target release comes with a migration guide, make sure to follow it closely. If you upgrade to a newer release without performing the steps described in the migration guide, you can compromise the functionality of your cluster or make it unusable altogether.
 
-Upgrading Kyma is the process of migrating from one version of the software to a newer release. This operation depends on [release artifacts](https://github.com/kyma-project/kyma/releases) listed in the **Assets** section of the GitHub releases page and migration guides delivered with the target release.
+Upgrading Kyma is the process of migrating from one version of the software to a newer release. This operation depends on release artifacts listed in the target release folder of the [GCS bucket](https://storage.cloud.google.com/kyma-prow-artifacts/) and migration guides delivered with the target release.
 
 To upgrade to a version that is several releases newer than the version you're currently using, you must move up to the desired release incrementally. You can skip patch releases.
 
