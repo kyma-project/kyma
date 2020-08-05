@@ -42,6 +42,37 @@ func (f newFunction) Cleanup() error {
 
 var _ step.Step = newFunction{}
 var _ step.Step = updateFunc{}
+var _ step.Step = EmptyFunction{}
+
+type EmptyFunction struct {
+	name string
+	fn   *function.Function
+}
+
+func NewEmptyFunction(fn *function.Function) step.Step {
+	return &EmptyFunction{
+		name: "Creating function without body should be rejected by the webhook",
+		fn:   fn,
+	}
+}
+
+func (e EmptyFunction) Name() string {
+	return e.name
+}
+
+func (e EmptyFunction) Run() error {
+	err := e.fn.Create(&function.FunctionData{})
+	if err == nil {
+		return errors.New("Creating empty funciton should return error, but got nild")
+	}
+	return nil
+}
+
+func (e EmptyFunction) Cleanup() error {
+	return nil
+}
+
+
 
 type updateFunc struct {
 	name     string

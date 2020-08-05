@@ -5,12 +5,15 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/function-controller/internal/teststep"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/addons"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"k8s.io/client-go/dynamic"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"time"
+	"net/url"
+
+	//"time"
 )
 
 type Scenario struct {
@@ -36,25 +39,42 @@ func Steps(config *Config) []step.Step {
 		apiRule: apirule.New2("nodejs12", namespace, config.Log, config.DynamicCLI),
 		name:    "nodejs12-test",
 	}
+	addon := addons.New2(config.Log, "test-addon", namespace, config.DynamicCLI)
+	addonURL, err := url.Parse("https://github.com/kyma-project/addons/releases/download/0.13.0/index-testing.yaml")
+	if err != nil {
+		panic(err)
+	}
 
-	ingressHost := "lucky-cancer.wookiee.hudy.ninja"
+	domainName := "lucky-cancer.wookiee.hudy.ninja"
+	expectedPythonURL := fmt.Sprintf("http://%s.%s", pythonFunc.name, domainName)
+	expectedNodeJSURL := fmt.Sprintf("http://%s.%s", nodejs12Func.name, domainName)
 	return []step.Step{
-		teststep.NewNamespaceStep(config.Log, config.CoreCli, namespace),
+		//teststep.NewNamespaceStep(config.Log, config.CoreCli, namespace),
+		teststep.NewAddonConfiguration("Create Addon configuration", addon, addonURL),
+		step.Parallel(
+			teststep.NewEmptyFunction(function.NewFunction2("empty function", namespace, config.DynamicCLI, config.Log)),
+			teststep.NewSerialSteps(config.Log, "Python 3.7 Function tests",
+				//teststep.CreateFunction(config.Log, pythonFunc.fn, pythonFunc.name, pythonFunctionBody("Hello From Python")),
+				teststep.NewDefaultedFunctionCheck(pythonFunc.fn),
+				//teststep.NewAPIRule(pythonFunc.apiRule, "python api rule", pythonFunc.name, domainName, 80),
+				teststep.NewCheck(config.Log, "python function check", expectedPythonURL, "Hello From Python"),
+			),
+			teststep.NewSerialSteps(config.Log, "Node JS 12 Function tests",
+				//teststep.CreateFunction(config.Log, nodejs12Func.fn, nodejs12Func.name, nodejsFunctionBody("Hello From Nodejs12")),
+				//teststep.NewAPIRule(nodejs12Func.apiRule, "nodejs api rule", nodejs12Func.name, domainName, 80)
+				teststep.NewCheck(config.Log, "NodeJS function check", expectedNodeJSURL, "Hello From Nodejs12"),
+			),
+		),
 
-		step.Parallel(teststep.CreateFunction(config.Log, pythonFunc.fn, pythonFunc.name, pythonFunctionBody("Hello From Python")),
-			teststep.CreateFunction(config.Log, nodejs12Func.fn, nodejs12Func.name, nodejsFunctionBody("Hello From Nodejs12"))),
-		step.Parallel(teststep.NewAPIRule(pythonFunc.apiRule, "python api rule", pythonFunc.name, ingressHost, 80),
-			teststep.NewAPIRule(nodejs12Func.apiRule, "nodejs api rule", nodejs12Func.name, ingressHost, 80)),
-		step.Parallel(),
-		//teststep.UpdateFunction(config.Log, nodejs10Fn, fnName, nodeFnData),
-		teststep.NewPause(10 * time.Minute),
+		//teststep.NewPause(10 * time.Minute),
 	}
 }
 
 type FunctionConfig struct {
-	fn      *function.Function
-	apiRule *apirule.APIRule
-	name    string
+	fn          *function.Function
+	apiRule     *apirule.APIRule
+	name        string
+	expectedMsg string
 }
 
 func pythonFunctionBody(msg string) function.FunctionData {

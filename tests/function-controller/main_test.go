@@ -62,7 +62,7 @@ func TestRefactored(t *testing.T) {
 
 	steps := scenarios.Steps(config)
 
-	runner := step.NewRunner()
+	runner := step.NewRunner(step.WithCleanupDefault(step.CleanupModeNo))
 
 	err = runner.Execute(steps)
 	failOnError(g, err)

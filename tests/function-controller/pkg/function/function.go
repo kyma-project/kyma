@@ -48,7 +48,7 @@ func NewFunction2(name, namespace string, dynamicCli dynamic.Interface, log shar
 		namespace:   namespace,
 		waitTimeout: 15 * time.Minute,
 		log:         log,
-		verbose:     true,
+		verbose:     false,
 	}
 }
 

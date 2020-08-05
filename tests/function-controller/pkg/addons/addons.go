@@ -2,6 +2,7 @@ package addons
 
 import (
 	"context"
+	"k8s.io/client-go/dynamic"
 	"time"
 
 	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
@@ -33,6 +34,16 @@ func New(name string, c shared.Container) *AddonConfiguration {
 		namespace:   c.Namespace,
 		waitTimeout: c.WaitTimeout,
 		log:         c.Log,
+	}
+}
+
+func New2(log shared.Logger, name, namespace string, dynamicCLI dynamic.Interface) *AddonConfiguration {
+	return &AddonConfiguration{
+		resCli:      resource.New(dynamicCLI, v1alpha1.SchemeGroupVersion.WithResource("addonsconfigurations"), namespace, log, false),
+		name:        name,
+		namespace:   namespace,
+		waitTimeout: 10 * time.Minute,
+		log:         log,
 	}
 }
 
