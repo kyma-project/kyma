@@ -10,7 +10,7 @@ spec:
   hosts:
   - "dex.{{ .Values.global.ingress.domainName }}"
   gateways:
-  - {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}
+  - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
   http:
   - match:
     - uri:
