@@ -40,11 +40,13 @@ const (
 	fixtureChannelPath    = "../../test/fixtures/channel.json"
 	fixturePolicyPath     = "../../test/fixtures/policy.json"
 	fixtureDeploymentPath = "../../test/fixtures/deployment.json"
+	fixtureServicePath    = "../../test/fixtures/service.json"
 )
 
 var fixtureChannel *messagingv1alpha1.Channel
 var fixtureDeployment *appsv1.Deployment
 var fixturePolicy *authenticationv1alpha1.Policy
+var fixtureService *corev1.Service
 
 func TestMain(m *testing.M) {
 	var err error
@@ -61,6 +63,11 @@ func TestMain(m *testing.M) {
 
 	fixtureDeployment = &appsv1.Deployment{}
 	if err = loadFixture(fixtureDeploymentPath, fixtureDeployment); err != nil {
+		panic(errors.Wrap(err, "loading Deployment from fixtures"))
+	}
+
+	fixtureService = &corev1.Service{}
+	if err = loadFixture(fixtureServicePath, fixtureService); err != nil {
 		panic(errors.Wrap(err, "loading Deployment from fixtures"))
 	}
 
@@ -243,6 +250,92 @@ func TestDeploymentEqual(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestServiceEqual(t *testing.T) {
+	svc := fixtureService
+
+	if !serviceEqual(nil, nil) {
+		t.Error("Two nil elements should be equal")
+	}
+
+	testCases := map[string]struct {
+		prep   func() *corev1.Service
+		expect bool
+	}{
+		"not equal when one element is nil": {
+			func() *corev1.Service {
+				return nil
+			},
+			false,
+		},
+		"not equal when labels differ": {
+			func() *corev1.Service {
+				svcCopy := svc.DeepCopy()
+				svcCopy.Labels["foo"] += "test"
+				return svcCopy
+			},
+			false,
+		},
+		"not equal when annotations differ": {
+			func() *corev1.Service {
+				svcCopy := svc.DeepCopy()
+				svcCopy.Annotations = map[string]string{"a": "b"}
+				return svcCopy
+			},
+			false,
+		},
+		"not equal when type differs": {
+			func() *corev1.Service {
+				svcCopy := svc.DeepCopy()
+				svcCopy.Spec.Type = corev1.ServiceTypeExternalName
+				return svcCopy
+			},
+			false,
+		},
+		"equal when type gets defaulted": {
+			func() *corev1.Service {
+				svcCopy := svc.DeepCopy()
+				svcCopy.Spec.Type = ""
+				return svcCopy
+			},
+			true,
+		},
+		"not equal when ClusterIP differs": {
+			func() *corev1.Service {
+				svcCopy := svc.DeepCopy()
+				svcCopy.Spec.ClusterIP = "1.1.1.1"
+				return svcCopy
+			},
+			false,
+		},
+		"not equal when Ports differs": {
+			func() *corev1.Service {
+				svcCopy := svc.DeepCopy()
+				svcCopy.Spec.Ports = []corev1.ServicePort{}
+				return svcCopy
+			},
+			false,
+		},
+		"not equal when selector differs": {
+			func() *corev1.Service {
+				svcCopy := svc.DeepCopy()
+				svcCopy.Spec.Selector = map[string]string{"a": "b"}
+				return svcCopy
+			},
+			false,
+		},
+	}
+
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			testService := tc.prep()
+			if serviceEqual(testService, svc) != tc.expect {
+				t.Errorf("Expected output to be %t", tc.expect)
+			}
+		})
+	}
+
 }
 
 func TestPodSpecEqual(t *testing.T) {

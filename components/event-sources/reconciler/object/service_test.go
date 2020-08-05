@@ -3,11 +3,10 @@ package object
 import (
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 const (
@@ -45,6 +44,38 @@ func TestNewService(t *testing.T) {
 			Selector: map[string]string{
 				tSelLabelKey: tSelLabelValue,
 			},
+		},
+	}
+
+	if d := cmp.Diff(expectedService, service); d != "" {
+		t.Errorf("Unexpected diff: (-:expect, +:got) %s", d)
+	}
+}
+
+func TestApplyExistingServiceAttributes(t *testing.T) {
+	existingService := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:       tNs,
+			Name:            tName,
+			ResourceVersion: "1",
+		},
+		Spec: corev1.ServiceSpec{
+			ClusterIP: "1.1.1.1",
+		},
+	}
+
+	// Service with empty spec, status, annotations, ...
+	service := NewService(tNs, tName)
+	ApplyExistingServiceAttributes(existingService, service)
+
+	expectedService := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:       tNs,
+			Name:            tName,
+			ResourceVersion: "1",
+		},
+		Spec: corev1.ServiceSpec{
+			ClusterIP: "1.1.1.1",
 		},
 	}
 

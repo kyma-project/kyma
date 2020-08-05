@@ -27,8 +27,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	tPodLabelKey   = "podlabelkey"
+	tPodLabelValue = "podlabelvalue"
+	tContainerName = "testname"
+)
+
 func TestNewDeployment(t *testing.T) {
 	const img = "registry/image:tag"
+	var replicas int32 = 3
 
 	deployment := NewDeployment(tNs, tName,
 		WithPort(8080),
@@ -37,6 +44,10 @@ func TestNewDeployment(t *testing.T) {
 		WithPort(8081),
 		WithProbe("/are/you/alive", 8080),
 		WithEnvVar("TEST_ENV2", "val2"),
+		WithPodLabel(tPodLabelKey, tPodLabelValue),
+		WithName(tContainerName),
+		WithMatchLabelsSelector(tPodLabelKey, tPodLabelValue),
+		WithReplicas(3),
 	)
 
 	expectDeployment := &appsv1.Deployment{
@@ -45,9 +56,14 @@ func TestNewDeployment(t *testing.T) {
 			Name:      tName,
 		},
 		Spec: appsv1.DeploymentSpec{
+			Replicas: &replicas,
+			Selector: &metav1.LabelSelector{MatchLabels: map[string]string{tPodLabelKey: tPodLabelValue}},
 			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{tPodLabelKey: tPodLabelValue}},
 				Spec: corev1.PodSpec{
+
 					Containers: []corev1.Container{{
+						Name:  tContainerName,
 						Image: img,
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: 8080,

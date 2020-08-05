@@ -147,7 +147,22 @@ func serviceEqual(s1, s2 *corev1.Service) bool {
 		return false
 	}
 
+	spec1, spec2 := s1.Spec, s2.Spec
+	if getServiceType(spec1.Type) != getServiceType(spec2.Type) {
+		return false
+	}
+
+	if spec1.ClusterIP != spec2.ClusterIP {
+		return false
+	}
 	return true
+}
+
+func getServiceType(typ corev1.ServiceType) corev1.ServiceType {
+	if typ == "" {
+		return corev1.ServiceTypeClusterIP
+	}
+	return typ
 }
 
 // podSpecEqual asserts the equality of two PodSpec objects.
