@@ -118,7 +118,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	if err != nil {
 		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionConfigurationReady,
-			Status:             corev1.ConditionTrue,
+			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
 			Message:            fmt.Sprintf("Sources update failed: %v", err),
@@ -129,7 +129,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	if err != nil {
 		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionConfigurationReady,
-			Status:             corev1.ConditionTrue,
+			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
 			Message:            fmt.Sprintf("Sources update failed: %v", err),
@@ -137,7 +137,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	}
 
 	switch {
-	case instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit && isOnSourceChange(instance, revision):
+	case instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit && r.isOnSourceChange(instance, revision):
 		return r.onSourceChange(ctx, instance, &serverlessv1alpha1.Repository{
 			Branch:  instance.Spec.Branch,
 			Commit:  revision,
@@ -161,12 +161,13 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	}
 }
 
-func isOnSourceChange(instance *serverlessv1alpha1.Function, commit string) bool {
+func (r *FunctionReconciler) isOnSourceChange(instance *serverlessv1alpha1.Function, commit string) bool {
 	return instance.Status.Commit == "" ||
 		commit != instance.Status.Commit ||
 		instance.Spec.Branch != instance.Status.Branch ||
 		instance.Spec.Runtime != instance.Status.Runtime ||
-		instance.Spec.BaseDir != instance.Status.BaseDir
+		instance.Spec.BaseDir != instance.Status.BaseDir ||
+		r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady) == corev1.ConditionFalse
 }
 
 func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository) (ctrl.Result, error) {
