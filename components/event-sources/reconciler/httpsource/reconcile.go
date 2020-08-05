@@ -85,6 +85,8 @@ const (
 	adapterContainerName = "source"
 	portName             = "http-cloudevents"
 	externalPort         = 80
+	metricsPort          = 9092
+	metricsPortName      = "http-usermetric"
 
 	// HTTP adapter specific
 	eventSourceEnvVar = "EVENT_SOURCE"
@@ -335,7 +337,8 @@ func (r *Reconciler) makeDeployment(src *sourcesv1alpha1.HTTPSource,
 		object.WithReplicas(1),
 		object.WithName(adapterContainerName),
 		object.WithImage(r.adapterEnvCfg.Image),
-		object.WithPort(r.adapterEnvCfg.Port),
+		object.WithPort(r.adapterEnvCfg.Port, portName),
+		object.WithPort(metricsPort, metricsPortName),
 		object.WithEnvVar(eventSourceEnvVar, src.Spec.Source),
 		object.WithEnvVar(sinkURIEnvVar, sinkURI),
 		object.WithEnvVar(namespaceEnvVar, src.Namespace),
@@ -367,7 +370,9 @@ func (r *Reconciler) makeService(src *sourcesv1alpha1.HTTPSource) *corev1.Servic
 		object.WithControllerRef(src.ToOwner()),
 		object.WithSelector(applicationNameLabelKey, src.Name),
 		object.WithServicePort(portName, externalPort, int(r.adapterEnvCfg.Port)),
+		object.WithServicePort(metricsPortName, metricsPort, metricsPort),
 		object.WithLabel(applicationNameLabelKey, src.Name),
+		object.WithLabel(dashboardLabelKey, dashboardLabelValue),
 	)
 }
 

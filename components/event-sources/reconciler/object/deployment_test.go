@@ -30,6 +30,8 @@ const (
 	tPodLabelKey   = "podlabelkey"
 	tPodLabelValue = "podlabelvalue"
 	tContainerName = "testname"
+	tPortName1     = "first"
+	tPortName2     = "second"
 )
 
 func TestNewDeployment(t *testing.T) {
@@ -37,10 +39,10 @@ func TestNewDeployment(t *testing.T) {
 	var replicas int32 = 3
 
 	deployment := NewDeployment(tNs, tName,
-		WithPort(8080),
+		WithPort(8080, tPortName1),
 		WithImage(img),
 		WithEnvVar("TEST_ENV1", "val1"),
-		WithPort(8081),
+		WithPort(8081, tPortName2),
 		WithProbe("/are/you/alive", 8080),
 		WithEnvVar("TEST_ENV2", "val2"),
 		WithPodLabel(tPodLabelKey, tPodLabelValue),
@@ -66,8 +68,10 @@ func TestNewDeployment(t *testing.T) {
 						Image: img,
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: 8080,
+							Name:          tPortName1,
 						}, {
 							ContainerPort: 8081,
+							Name:          tPortName2,
 						}},
 						Env: []corev1.EnvVar{{
 							Name:  "TEST_ENV1",

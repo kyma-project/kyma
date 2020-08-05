@@ -561,8 +561,14 @@ func newDeployment() *appsv1.Deployment {
 					Containers: []corev1.Container{{
 						Image: tImg,
 						Ports: []corev1.ContainerPort{{
+							Name:          portName,
 							ContainerPort: tPort,
-						}},
+						},
+							{
+								Name:          metricsPortName,
+								ContainerPort: metricsPort,
+							},
+						},
 						Name: adapterContainerName,
 						Env:  tEnvVars,
 						ReadinessProbe: &corev1.Probe{
@@ -601,15 +607,21 @@ func newService() *corev1.Service {
 			Namespace: tNs,
 			Name:      tName,
 			Labels: map[string]string{
+				dashboardLabelKey:       dashboardLabelValue,
 				applicationNameLabelKey: tName,
 			},
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
 				{
-					Name:       tHttpPortName,
+					Name:       portName,
 					Port:       tExternalPort,
 					TargetPort: intstr.FromInt(tPort),
+				},
+				{
+					Name:       metricsPortName,
+					Port:       metricsPort,
+					TargetPort: intstr.FromInt(metricsPort),
 				},
 			},
 			Selector: tChLabels,

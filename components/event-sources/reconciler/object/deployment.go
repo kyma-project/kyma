@@ -73,13 +73,14 @@ func WithReplicas(replicas int) ObjectOption {
 }
 
 // WithPort sets the container port of a Service.
-func WithPort(port int32) ObjectOption {
+func WithPort(port int32, name string) ObjectOption {
 	return func(o metav1.Object) {
 		d := o.(*appsv1.Deployment)
 		ports := &firstDeploymentContainer(d).Ports
 
 		*ports = append(*ports, corev1.ContainerPort{
 			ContainerPort: port,
+			Name:          name,
 		})
 	}
 }
