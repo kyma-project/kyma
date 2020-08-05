@@ -25,14 +25,12 @@ import (
 	"testing"
 
 	"github.com/pkg/errors"
+	authenticationv1alpha1api "istio.io/api/authentication/v1alpha1"
+	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-
-	authenticationv1alpha1api "istio.io/api/authentication/v1alpha1"
-	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 )
 

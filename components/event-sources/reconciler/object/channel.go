@@ -18,7 +18,6 @@ package object
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 )
 

@@ -21,21 +21,18 @@ import (
 	"context"
 
 	"github.com/kelseyhightower/envconfig"
-
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/cache"
-
 	messaginginformersv1alpha1 "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/channel"
 	"knative.dev/eventing/pkg/reconciler"
+	deploymentinformer "knative.dev/pkg/client/injection/kube/informers/apps/v1/deployment"
+	serviceinformer "knative.dev/pkg/client/injection/kube/informers/core/v1/service"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/logging"
 	"knative.dev/pkg/metrics"
 	"knative.dev/pkg/resolver"
-
-	deploymentinformer "knative.dev/pkg/client/injection/kube/informers/apps/v1/deployment"
-	serviceinformer "knative.dev/pkg/client/injection/kube/informers/core/v1/service"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	sourcesscheme "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/scheme"

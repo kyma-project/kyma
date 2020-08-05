@@ -18,7 +18,6 @@ package httpsource
 
 import (
 	corev1 "k8s.io/api/core/v1"
-
 	"knative.dev/pkg/logging"
 	"knative.dev/pkg/metrics"
 )

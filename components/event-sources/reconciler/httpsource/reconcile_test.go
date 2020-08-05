@@ -36,6 +36,8 @@ import (
 	"knative.dev/pkg/apis"
 	duckv1alpha1 "knative.dev/pkg/apis/duck/v1alpha1"
 	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
+	"knative.dev/pkg/client/injection/ducks/duck/v1/addressable"
+	_ "knative.dev/pkg/client/injection/ducks/duck/v1/addressable/fake"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/logging"
@@ -43,9 +45,6 @@ import (
 	"knative.dev/pkg/ptr"
 	rt "knative.dev/pkg/reconciler/testing"
 	"knative.dev/pkg/resolver"
-
-	"knative.dev/pkg/client/injection/ducks/duck/v1/addressable"
-	_ "knative.dev/pkg/client/injection/ducks/duck/v1/addressable/fake"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	fakesourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
