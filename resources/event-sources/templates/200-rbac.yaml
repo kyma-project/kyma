@@ -18,6 +18,7 @@ rules:
       - list
       - create
       - update
+      - watch
   - apiGroups:
       - apps
     resources:
@@ -27,6 +28,7 @@ rules:
       - list
       - create
       - update
+      - watch
 
   # Metrics/logging configs
   - apiGroups:
