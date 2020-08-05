@@ -31,9 +31,7 @@ rules:
       - get
       - list
       - create
-      - delete
       - update
-      - patch
   - apiGroups:
       - apps
     resources:
@@ -42,9 +40,7 @@ rules:
       - get
       - list
       - create
-      - delete
       - update
-      - patch
   # Metrics/logging configs
   - apiGroups:
       - ""
@@ -67,16 +63,6 @@ rules:
     resources:
       - httpsources/status
     verbs:
-      - update
-  # Deployments
-  - apiGroups:
-      - serving.knative.dev
-    resources:
-      - services
-    verbs:
-      - list
-      - watch
-      - create
       - update
   # Channels
   - apiGroups:
