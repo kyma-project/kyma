@@ -50,7 +50,7 @@ func ApplyExistingPolicyAttributes(src, dst *authenticationv1alpha1.Policy) {
 	dst.ResourceVersion = src.ResourceVersion
 }
 
-// WithTarget sets the target name of the Policy for a Knative Service which
+// WithTarget sets the target name of the Policy for a Deployment which
 // has metrics end-point
 func WithTarget(target string) ObjectOption {
 	return func(o metav1.Object) {

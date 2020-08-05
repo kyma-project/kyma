@@ -33,8 +33,9 @@ import (
 	"knative.dev/pkg/logging"
 	"knative.dev/pkg/metrics"
 	"knative.dev/pkg/resolver"
-	servingclient "knative.dev/serving/pkg/client/injection/client"
-	knserviceinformersv1alpha1 "knative.dev/serving/pkg/client/injection/informers/serving/v1alpha1/service"
+
+	deploymentinformer "knative.dev/pkg/client/injection/kube/informers/apps/v1/deployment"
+	serviceinformer "knative.dev/pkg/client/injection/kube/informers/core/v1/service"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	sourcesscheme "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/scheme"
@@ -65,20 +66,21 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	envconfig.MustProcess("http_adapter", adapterEnvCfg)
 
 	httpSourceInformer := httpsourceinformersv1alpha1.Get(ctx)
-	knServiceInformer := knserviceinformersv1alpha1.Get(ctx)
+	deploymentInformer := deploymentinformer.Get(ctx)
 	chInformer := messaginginformersv1alpha1.Get(ctx)
 	policyInformer := policyinformersv1alpha1.Get(ctx)
+	serviceInformer := serviceinformer.Get(ctx)
 
 	rb := reconciler.NewBase(ctx, controllerAgentName, cmw)
 	r := &Reconciler{
 		Base:             rb,
 		adapterEnvCfg:    adapterEnvCfg,
 		httpsourceLister: httpSourceInformer.Lister(),
-		ksvcLister:       knServiceInformer.Lister(),
+		deploymentLister: deploymentInformer.Lister(),
 		chLister:         chInformer.Lister(),
 		policyLister:     policyInformer.Lister(),
+		serviceLister:    serviceInformer.Lister(),
 		sourcesClient:    sourcesclient.Get(ctx).SourcesV1alpha1(),
-		servingClient:    servingclient.Get(ctx).ServingV1alpha1(),
 		messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
 		authClient:       istioclient.Get(ctx).AuthenticationV1alpha1(),
 	}
@@ -94,11 +96,11 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		FilterFunc: controller.Filter(sourcesv1alpha1.HTTPSourceGVK()),
 		Handler:    controller.HandleAll(impl.EnqueueControllerOf),
 	}
-	knServiceInformer.Informer().AddEventHandler(eventHandler)
 
+	deploymentInformer.Informer().AddEventHandler(eventHandler)
 	chInformer.Informer().AddEventHandler(eventHandler)
-
 	policyInformer.Informer().AddEventHandler(eventHandler)
+	serviceInformer.Informer().AddEventHandler(eventHandler)
 
 	// watch for changes to metrics/logging configs
 

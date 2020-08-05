@@ -23,6 +23,28 @@ kind: ClusterRole
 metadata:
   name: event-sources-controller-manager
 rules:
+  - apiGroups:
+      - ""
+    resources:
+      - services
+    verbs:
+      - get
+      - list
+      - create
+      - delete
+      - update
+      - patch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - get
+      - list
+      - create
+      - delete
+      - update
+      - patch
   # Metrics/logging configs
   - apiGroups:
       - ""
@@ -46,7 +68,7 @@ rules:
       - httpsources/status
     verbs:
       - update
-  # Knative Services
+  # Deployments
   - apiGroups:
       - serving.knative.dev
     resources:

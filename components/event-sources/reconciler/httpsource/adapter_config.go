@@ -26,7 +26,6 @@ import (
 const (
 	component = "httpsource"
 
-	// Ports 9090-9091 are reserved for the Serving queue proxy (knative.dev/serving/pkg/apis/networking)
 	adapterMetricsPort = 9092
 
 	dashboardLabelKey   = "kyma-project.io/dashboard"

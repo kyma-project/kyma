@@ -25,7 +25,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
-
 	fakeeventingclient "knative.dev/eventing/pkg/client/injection/client/fake"
 	fakelegacyclient "knative.dev/eventing/pkg/legacyclient/injection/client/fake"
 	fakekubeclient "knative.dev/pkg/client/injection/kube/client/fake"
@@ -34,7 +33,6 @@ import (
 	"knative.dev/pkg/logging"
 	logtesting "knative.dev/pkg/logging/testing"
 	rt "knative.dev/pkg/reconciler/testing"
-	fakeservingclient "knative.dev/serving/pkg/client/injection/client/fake"
 
 	fakesourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
 	fakeistioclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/client/fake"
@@ -61,7 +59,6 @@ func MakeFactory(ctor Ctor) rt.Factory {
 		ctx = logging.WithLogger(ctx, logtesting.TestLogger(t))
 
 		ctx, sourcesClient := fakesourcesclient.With(ctx, ls.GetSourcesObjects()...)
-		ctx, servingClient := fakeservingclient.With(ctx, ls.GetServingObjects()...)
 		ctx, eventingClient := fakeeventingclient.With(ctx, ls.GetEventingObjects()...)
 		ctx, legacyClient := fakelegacyclient.With(ctx, ls.GetLegacyObjects()...)
 		ctx, istioClient := fakeistioclient.With(ctx, ls.GetIstioObjects()...)
@@ -69,7 +66,11 @@ func MakeFactory(ctor Ctor) rt.Factory {
 		ctx, _ = fakedynamicclient.With(ctx, scheme,
 			ToUnstructured(t, scheme, ls.GetEventingObjects())...)
 		// also inject fake k8s client which is accessed by reconciler.Base
-		ctx, _ = fakekubeclient.With(ctx)
+		// ctx, appsclient := fakekubeclient.With(ctx, ls.GetAppsObjects()...)
+		// ctx, coreclient := fakekubeclient.With(ctx, ls.GetCoreObjects()...)
+		k8sobjects := ls.GetCoreObjects()
+		k8sobjects = append(k8sobjects, ls.GetAppsObjects()...)
+		ctx, kubeClient := fakekubeclient.With(ctx, k8sobjects...)
 
 		eventRecorder := record.NewFakeRecorder(maxEventBufferSize)
 		ctx = controller.WithEventRecorder(ctx, eventRecorder)
@@ -77,7 +78,8 @@ func MakeFactory(ctor Ctor) rt.Factory {
 		// set up Controller from fakes
 		c := ctor(t, ctx, &ls)
 
-		actionRecorderList := rt.ActionRecorderList{sourcesClient, servingClient, eventingClient, istioClient, legacyClient}
+		// actionRecorderList := rt.ActionRecorderList{sourcesClient, eventingClient, istioClient, legacyClient, appsclient, coreclient}
+		actionRecorderList := rt.ActionRecorderList{sourcesClient, eventingClient, istioClient, legacyClient, kubeClient}
 		eventList := rt.EventList{Recorder: eventRecorder}
 		statsReporter := &rt.FakeStatsReporter{}
 

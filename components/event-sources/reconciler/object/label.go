@@ -19,7 +19,6 @@ package object
 import (
 	"knative.dev/eventing/pkg/apis/messaging"
 	"knative.dev/pkg/apis"
-	"knative.dev/serving/pkg/apis/serving"
 )
 
 // List of annotations set on Knative Messaging objects by the Knative Eventing
@@ -31,7 +30,6 @@ var knativeMessagingAnnotations = []string{
 
 // List of annotations set on Knative Serving objects by the Knative Serving
 // admission webhook.
-var knativeServingAnnotations = []string{
-	serving.GroupName + apis.CreatorAnnotationSuffix,
-	serving.GroupName + apis.UpdaterAnnotationSuffix,
+var deploymentAnnotations = []string{
+	"deployment.kubernetes.io/revision",
 }
