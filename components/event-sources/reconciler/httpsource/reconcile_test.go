@@ -62,11 +62,9 @@ const (
 	tSinkURI        = "http://" + tName + "-kn-channel." + tNs + ".svc.cluster.local"
 	tTracingEnabled = true
 	tSource         = "varkes"
-	tRevision       = "varkes-foo"
 	tPolicy         = "test"
 	tRevisionSvc    = "test"
 	tTargetPort     = "http-usermetric"
-	tHttpPortName   = "http-cloudevents"
 
 	tMetricsDomain = "testing"
 )

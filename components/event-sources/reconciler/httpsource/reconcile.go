@@ -83,7 +83,7 @@ const (
 	tracingEnvVar        = "TRACING_ENABLED"
 	adapterPortEnvVar    = "PORT"
 	adapterContainerName = "source"
-	portName             = "http-cloudevents"
+	portName             = "http-cloudevent"
 	externalPort         = 80
 	metricsPort          = 9092
 	metricsPortName      = "http-usermetric"

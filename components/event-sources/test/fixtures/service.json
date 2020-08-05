@@ -26,7 +26,7 @@
     "clusterIP": "10.3.246.21",
     "ports": [
       {
-        "name": "http-cloudevents",
+        "name": "http-cloudevent",
         "port": 80,
         "protocol": "TCP",
         "targetPort": 8080
