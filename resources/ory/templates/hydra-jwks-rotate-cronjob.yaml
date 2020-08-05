@@ -1,0 +1,38 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hydra-jwks-rotator
+  namespace: kyma-system
+spec:
+  schedule: "4 * * * *"
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: "rotate-keys"
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: keyr
+              image: jakkab/hydracurl:v0.0.0
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  until curl --head localhost:15000; do echo Waiting for Sidecar; sleep 3; done;
+                  echo "Sidecar available";
+                  sleep 3;
+                  hydra keys create hydra.openid.id-token -a RS256 --skip-tls-verify --fail-after=2m
+              volumeMounts:
+                - name: config-volume
+                  mountPath: /etc/config
+                  readOnly: true
+              env:
+                - name: HYDRA_ADMIN_URL
+                  value: "http://ory-hydra-admin.kyma-system:4445"
+          volumes:
+            - name: config-volume
+              configMap:
+                name: ory-hydra
