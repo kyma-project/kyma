@@ -17,7 +17,6 @@ require (
 	github.com/gorilla/websocket v1.4.1
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
-	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/jcmturner/gofork v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/klauspost/compress v1.9.8 // indirect
@@ -41,14 +40,13 @@ require (
 	github.com/rcrowley/go-metrics v0.0.0-20190826022208-cac0b30c2563 // indirect
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/rs/cors v1.7.0
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.5.1
 	github.com/vektah/gqlparser/v2 v2.0.1
 	github.com/vrischmann/envconfig v1.2.0
 	go.uber.org/multierr v1.5.0 // indirect
 	go.uber.org/zap v1.14.0 // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
-	golang.org/x/sys v0.0.0-20200124204421-9fbb57f87de9 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
@@ -59,10 +57,11 @@ require (
 	k8s.io/apiserver v0.17.4
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
 	knative.dev/eventing v0.13.1 // indirect
-	knative.dev/pkg v0.0.0-20200306005226-fc857aa77f79
+	knative.dev/pkg v0.0.0-20200306230727-a56a6ea3fa56
 )
 
 replace (
+	github.com/kyma-project/kyma/components/function-controller => ../function-controller
 	golang.org/x/text => golang.org/x/text v0.3.3
 	k8s.io/client-go => k8s.io/client-go v0.17.4
 )

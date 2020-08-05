@@ -294,6 +294,7 @@ type Function struct {
 	Env          []*FunctionEnv     `json:"env"`
 	Replicas     *FunctionReplicas  `json:"replicas"`
 	Resources    *FunctionResources `json:"resources"`
+	Runtime      string             `json:"runtime"`
 	Status       *FunctionStatus    `json:"status"`
 }
 
@@ -345,6 +346,7 @@ type FunctionMutationInput struct {
 	Env          []*FunctionEnvInput     `json:"env"`
 	Replicas     *FunctionReplicasInput  `json:"replicas"`
 	Resources    *FunctionResourcesInput `json:"resources"`
+	Runtime      string                  `json:"runtime"`
 }
 
 type FunctionReplicas struct {

@@ -4,7 +4,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.3.0
+    controller-gen.kubebuilder.io/version: v0.2.4
   creationTimestamp: null
   name: functions.serverless.kyma-project.io
 spec:
@@ -128,13 +128,9 @@ spec:
                               for env vars'
                             type: string
                           divisor:
-                            anyOf:
-                            - type: integer
-                            - type: string
                             description: Specifies the output format of the exposed
                               resources, defaults to "1"
-                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                            x-kubernetes-int-or-string: true
+                            type: string
                           resource:
                             description: 'Required: resource to select'
                             type: string
@@ -181,21 +177,13 @@ spec:
               properties:
                 limits:
                   additionalProperties:
-                    anyOf:
-                    - type: integer
-                    - type: string
-                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                    x-kubernetes-int-or-string: true
+                    type: string
                   description: 'Limits describes the maximum amount of compute resources
                     allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                   type: object
                 requests:
                   additionalProperties:
-                    anyOf:
-                    - type: integer
-                    - type: string
-                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                    x-kubernetes-int-or-string: true
+                    type: string
                   description: 'Requests describes the minimum amount of compute resources
                     required. If Requests is omitted for a container, it defaults
                     to Limits if that is explicitly specified, otherwise to an implementation-defined
@@ -203,8 +191,15 @@ spec:
                   type: object
               type: object
             runtime:
-              enum:
-              - nodejs-12
+              allOf:
+              - enum:
+                - nodejs12
+                - nodejs10
+                - python37
+              - enum:
+                - nodejs12
+                - nodejs10
+                - python37
               type: string
             source:
               description: Source defines the source code of a function
@@ -245,7 +240,9 @@ spec:
               type: array
             runtime:
               enum:
-              - nodejs-12
+              - nodejs12
+              - nodejs10
+              - python37
               type: string
             source:
               type: string

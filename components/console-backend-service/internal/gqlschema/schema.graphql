@@ -896,6 +896,7 @@ type Function {
     env: [FunctionEnv!]!
     replicas: FunctionReplicas!
     resources: FunctionResources!
+    runtime: String!
 
     # status
     status: FunctionStatus!
@@ -970,7 +971,7 @@ enum FunctionPhaseType {
 enum FunctionReasonType {
     CONFIG # ConfigMap
     JOB # K8S Job
-    SERVICE # KNative Service
+    SERVICE # Deployment + Service + hpa
 }
 
 input FunctionMutationInput {
@@ -980,6 +981,7 @@ input FunctionMutationInput {
     env: [FunctionEnvInput!]!
     replicas: FunctionReplicasInput!
     resources: FunctionResourcesInput!
+    runtime: String!
 }
 
 type FunctionMetadata {
