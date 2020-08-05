@@ -22,7 +22,7 @@ spec:
           - /bin/bash
           - -c
           - |
-        {{.Files.Get "files/check.sh" | printf "%s" | indent 16}}
+{{.Files.Get "files/check.sh" | printf "%s" | indent 16}}
         volumeMounts:
         - name: config-volume
           mountPath: /etc/config
