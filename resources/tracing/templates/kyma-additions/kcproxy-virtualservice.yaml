@@ -8,7 +8,7 @@ spec:
   hosts:
   - jaeger.{{ .Values.global.ingress.domainName }}
   gateways:
-  - {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}.svc.cluster.local
+  - {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}
   http:
   - route:
     - destination:
