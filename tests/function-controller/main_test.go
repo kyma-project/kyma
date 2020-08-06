@@ -66,7 +66,24 @@ func TestRefactored(t *testing.T) {
 
 	err = runner.Execute(steps)
 	failOnError(g, err)
+}
 
+func TestRefactoredBig(t *testing.T) {
+	rand.Seed(time.Now().UnixNano())
+
+	g := gomega.NewGomegaWithT(t)
+
+	cfg, err := loadConfig("APP")
+	failOnError(g, err)
+
+	restConfig := controllerruntime.GetConfigOrDie()
+	failOnError(g, err)
+
+	steps := scenarios.NewBigStep(restConfig, cfg.Test, t, g)
+	runner := step.NewRunner(step.WithCleanupDefault(step.CleanupModeNo))
+
+	err = runner.Execute(steps)
+	failOnError(g, err)
 }
 
 func loadConfig(prefix string) (config, error) {

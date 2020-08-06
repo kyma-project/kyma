@@ -7,11 +7,24 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/internal/teststep"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/addons"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/job"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/namespace"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebinding"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebindingusage"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/serviceinstance"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/trigger"
+	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
+	"github.com/onsi/gomega"
+	"github.com/pkg/errors"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/rest"
 	"net/url"
+	"testing"
 
 	//"time"
 )
@@ -54,20 +67,114 @@ func Steps(config *Config) []step.Step {
 		step.Parallel(
 			teststep.NewEmptyFunction(function.NewFunction2("empty function", namespace, config.DynamicCLI, config.Log)),
 			teststep.NewSerialSteps(config.Log, "Python 3.7 Function tests",
-				//teststep.CreateFunction(config.Log, pythonFunc.fn, pythonFunc.name, pythonFunctionBody("Hello From Python")),
+				teststep.CreateFunction(config.Log, pythonFunc.fn, pythonFunc.name, pythonFunctionBody("Hello From Python")),
 				teststep.NewDefaultedFunctionCheck(pythonFunc.fn),
-				//teststep.NewAPIRule(pythonFunc.apiRule, "python api rule", pythonFunc.name, domainName, 80),
+				teststep.NewAPIRule(pythonFunc.apiRule, "python api rule", pythonFunc.name, domainName, 80),
 				teststep.NewCheck(config.Log, "python function check", expectedPythonURL, "Hello From Python"),
 			),
 			teststep.NewSerialSteps(config.Log, "Node JS 12 Function tests",
-				//teststep.CreateFunction(config.Log, nodejs12Func.fn, nodejs12Func.name, nodejsFunctionBody("Hello From Nodejs12")),
-				//teststep.NewAPIRule(nodejs12Func.apiRule, "nodejs api rule", nodejs12Func.name, domainName, 80)
+				teststep.CreateFunction(config.Log, nodejs12Func.fn, nodejs12Func.name, nodejsFunctionBody("Hello From Nodejs12")),
+				teststep.NewAPIRule(nodejs12Func.apiRule, "nodejs api rule", nodejs12Func.name, domainName, 80),
 				teststep.NewCheck(config.Log, "NodeJS function check", expectedNodeJSURL, "Hello From Nodejs12"),
 			),
 		),
 
 		//teststep.NewPause(10 * time.Minute),
 	}
+}
+
+func NewBigStep(restConfig *rest.Config, cfg testsuite.Config, t *testing.T, g *gomega.GomegaWithT) []step.Step {
+	cfg.NamespaceBaseName = "old-big-test"
+	cfg.NamespaceBaseName = "test-parallel"
+	cfg.IngressHost = "lucky-cancer.wookiee.hudy.ninja"
+	nodejs12Cfg := modifyConfig(cfg, "nodejs")
+	python37Cfg := modifyConfig(cfg, "python")
+
+	nodejs, err := getTestDef(restConfig, nodejs12Cfg, t, g)
+	python, err := getTestDef(restConfig, python37Cfg, t, g)
+	g.Expect(err).Should(gomega.BeNil())
+
+	coreCli, err := typedcorev1.NewForConfig(restConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	return []step.Step{
+		teststep.NewNamespaceStep(python.T, coreCli, cfg.NamespaceBaseName),
+		step.Parallel(teststep.NewFunctionTest(nodejs, "nodejs test"),
+			teststep.NewFunctionTest(python, "python test")),
+	}
+}
+
+func modifyConfig(cfg testsuite.Config, runtime string) testsuite.Config {
+	newCfg := cfg
+
+	newCfg.FunctionName = runtime
+	newCfg.APIRuleName = fmt.Sprintf("%s-rule", runtime)
+	newCfg.TriggerName = fmt.Sprintf("%s-trigger", runtime)
+	newCfg.AddonName = fmt.Sprintf("%s-addon", runtime)
+	newCfg.ServiceInstanceName = fmt.Sprintf("%s-service-instance", runtime)
+	newCfg.ServiceBindingName = fmt.Sprintf("%s-service-binding", runtime)
+	newCfg.ServiceBindingUsageName = fmt.Sprintf("%s-service-binding-usage", runtime)
+	newCfg.DomainName = fmt.Sprintf("%s-function", runtime)
+
+	return newCfg
+}
+
+func getTestDef(restConfig *rest.Config, cfg testsuite.Config, t *testing.T, g *gomega.GomegaWithT) (*testsuite.TestSuite, error) {
+	coreCli, err := typedcorev1.NewForConfig(restConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "while creating K8s Core client")
+	}
+
+	dynamicCli, err := dynamic.NewForConfig(restConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "while creating K8s Dynamic client")
+	}
+
+	clientset, err := kubernetes.NewForConfig(restConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "while creating k8s clientset")
+	}
+
+	//namespaceName := fmt.Sprintf("%s-%d", cfg.NamespaceBaseName, rand.Uint32())
+	namespaceName := cfg.NamespaceBaseName
+
+	container := shared.Container{
+		DynamicCli:  dynamicCli,
+		Namespace:   namespaceName,
+		WaitTimeout: cfg.WaitTimeout,
+		Verbose:     cfg.Verbose,
+		Log:         t,
+	}
+
+	ns := namespace.New(namespaceName, coreCli, container)
+	f := function.NewFunction(cfg.FunctionName, container)
+	ar := apirule.New(cfg.APIRuleName, container)
+	br := broker.New(container)
+	tr := trigger.New(cfg.TriggerName, container)
+	ac := addons.New(cfg.AddonName, container)
+	si := serviceinstance.New(cfg.ServiceInstanceName, container)
+	sb := servicebinding.New(cfg.ServiceBindingName, container)
+	sbu := servicebindingusage.New(cfg.ServiceBindingUsageName, cfg.UsageKindName, container)
+	jobList := job.New(cfg.FunctionName, clientset.BatchV1(), container)
+
+	return &testsuite.TestSuite{
+		Namespace:           ns,
+		Function:            f,
+		ApiRule:             ar,
+		Broker:              br,
+		Trigger:             tr,
+		AddonsConfig:        ac,
+		Serviceinstance:     si,
+		Servicebinding:      sb,
+		Servicebindingusage: sbu,
+		Jobs:                jobList,
+		T:                   t,
+		G:                   g,
+		DynamicCli:          dynamicCli,
+		Cfg:                 cfg,
+	}, nil
 }
 
 type FunctionConfig struct {

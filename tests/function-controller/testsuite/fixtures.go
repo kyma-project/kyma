@@ -9,26 +9,26 @@ import (
 	"text/template"
 )
 
-func (t *TestSuite) getFunction(value string) *function.FunctionData {
+func (t *TestSuite) GetFunction(value string) *function.FunctionData {
 	return &function.FunctionData{
-		Body: fmt.Sprintf(`module.exports = { main: function(event, context) { return "%s" } }`, value),
+		Body: fmt.Sprintf(`module.exports = { main: Function(event, context) { return "%s" } }`, value),
 		Deps: `{ "name": "hellowithoutdeps", "version": "0.0.1", "dependencies": { } }`,
 	}
 }
 
-func (t *TestSuite) getUpdatedFunction() *function.FunctionData {
+func (t *TestSuite) GetUpdatedFunction() *function.FunctionData {
 	return &function.FunctionData{
-		// such a function tests simultaneously importing external lib, the fact that it was triggered (by using counter) and passing argument to function in event
-		Body:        getBodyString(),
+		// such a Function tests simultaneously importing external lib, the fact that it was triggered (by using counter) and passing argument to Function in event
+		Body:        GetBodyString(),
 		Deps:        `{ "name": "hellowithdeps", "version": "0.0.1", "dependencies": { "lodash": "^4.17.5" } }`,
 		MaxReplicas: 2,
 		MinReplicas: 1,
 	}
 }
 
-func (t *TestSuite) checkDefaultedFunction(function *serverlessv1alpha1.Function) error {
+func (t *TestSuite) CheckDefaultedFunction(function *serverlessv1alpha1.Function) error {
 	if function == nil {
-		return errors.New("function can't be nil")
+		return errors.New("Function can'T be nil")
 	}
 
 	spec := function.Spec
@@ -44,7 +44,7 @@ func (t *TestSuite) checkDefaultedFunction(function *serverlessv1alpha1.Function
 	return nil
 }
 
-func getBodyString() string {
+func GetBodyString() string {
 	t := template.Must(template.New("body").Parse(
 		`
 const _ = require("lodash");
@@ -53,7 +53,7 @@ let counter = 0;
 let eventCounter = 0;
 
 module.exports = {
-  main: function (event, context) {
+  main: Function (event, context) {
     try {
       counter = _.add(counter, 1);
 	  console.log(event.data)
