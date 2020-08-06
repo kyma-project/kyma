@@ -2,6 +2,7 @@ package serverless
 
 import (
 	"fmt"
+	"path"
 	"strings"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
@@ -219,6 +220,7 @@ func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function, gitOptions g
 func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, gitOptions git.Options) batchv1.Job {
 	imageName := r.buildInternalImageAddress(instance)
 	args := r.config.Build.ExecutorArgs
+	// sourcePath := path.Join(workspaceMountPath, "src", instance.Spec.BaseDir)
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
 
 	one := int32(1)
@@ -301,11 +303,11 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 								},
 							},
 							VolumeMounts: []corev1.VolumeMount{
-								{Name: "workspace", MountPath: workspaceMountPath},
 								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
 								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
 								// If COPY is not used, then the cache will not work
-								{Name: "runtime", ReadOnly: true, MountPath: fmt.Sprintf("%s/Dockerfile", workspaceMountPath), SubPath: "Dockerfile"},
+								{Name: "workspace", MountPath: path.Join(workspaceMountPath, "src"), SubPath: strings.TrimPrefix(instance.Spec.BaseDir, "/")},
+								{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
