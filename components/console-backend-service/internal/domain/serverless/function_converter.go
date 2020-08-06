@@ -57,8 +57,8 @@ func (c *functionConverter) ToGQL(function *v1alpha1.Function) (*gqlschema.Funct
 		Env:          envVariables,
 		Replicas:     replicas,
 		Resources:    resources,
-		Runtime:      string(function.Spec.Runtime),
-		SourceType:   string(function.Spec.SourceType),
+		Runtime:      stringPtr(string(function.Spec.Runtime)),
+		SourceType:   stringPtr(string(function.Spec.SourceType)),
 		Status:       status,
 	}, nil
 }
@@ -108,8 +108,6 @@ func (c *functionConverter) ToFunction(name, namespace string, in gqlschema.Func
 			Resources:   resources,
 			MinReplicas: minReplicas,
 			MaxReplicas: maxReplicas,
-			Runtime:     v1alpha1.Runtime(in.Runtime),
-			SourceType:  v1alpha1.SourceType(in.SourceType),
 		},
 	}, nil
 }
@@ -176,10 +174,14 @@ func (c *functionConverter) toGQLReplicas(minReplicas, maxReplicas *int32) *gqls
 	}
 }
 
-func (c *functionConverter) toGQLResources(resources v1.ResourceRequirements) *gqlschema.FunctionResources {
-	stringPtr := func(str string) *string {
-		return &str
+func stringPtr(str string) *string {
+	if str == "" {
+		return nil
 	}
+	return &str
+}
+
+func (c *functionConverter) toGQLResources(resources v1.ResourceRequirements) *gqlschema.FunctionResources {
 	extractResourceValues := func(item v1.ResourceList) *gqlschema.ResourceValues {
 		rv := &gqlschema.ResourceValues{}
 		if item, ok := item[v1.ResourceMemory]; ok {

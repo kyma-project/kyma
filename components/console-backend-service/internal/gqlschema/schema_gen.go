@@ -7077,8 +7077,8 @@ type Function {
     env: [FunctionEnv!]!
     replicas: FunctionReplicas!
     resources: FunctionResources!
-    runtime: String!
-    sourceType: String!
+    runtime: String
+    sourceType: String
 
     # status
     status: FunctionStatus!
@@ -7163,8 +7163,8 @@ input FunctionMutationInput {
     env: [FunctionEnvInput!]!
     replicas: FunctionReplicasInput!
     resources: FunctionResourcesInput!
-    runtime: String!
-    sourceType: String!
+    runtime: String
+    sourceType: String
 }
 
 type FunctionMetadata {
@@ -17621,14 +17621,11 @@ func (ec *executionContext) _Function_runtime(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Function_sourceType(ctx context.Context, field graphql.CollectedField, obj *Function) (ret graphql.Marshaler) {
@@ -17655,14 +17652,11 @@ func (ec *executionContext) _Function_sourceType(ctx context.Context, field grap
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Function_status(ctx context.Context, field graphql.CollectedField, obj *Function) (ret graphql.Marshaler) {
@@ -35020,13 +35014,13 @@ func (ec *executionContext) unmarshalInputFunctionMutationInput(ctx context.Cont
 			}
 		case "runtime":
 			var err error
-			it.Runtime, err = ec.unmarshalNString2string(ctx, v)
+			it.Runtime, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "sourceType":
 			var err error
-			it.SourceType, err = ec.unmarshalNString2string(ctx, v)
+			it.SourceType, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -37929,14 +37923,8 @@ func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "runtime":
 			out.Values[i] = ec._Function_runtime(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "sourceType":
 			out.Values[i] = ec._Function_sourceType(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "status":
 			out.Values[i] = ec._Function_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

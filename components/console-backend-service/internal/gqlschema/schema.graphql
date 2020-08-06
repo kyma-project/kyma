@@ -896,8 +896,8 @@ type Function {
     env: [FunctionEnv!]!
     replicas: FunctionReplicas!
     resources: FunctionResources!
-    runtime: String!
-    sourceType: String!
+    runtime: String
+    sourceType: String
 
     # status
     status: FunctionStatus!
@@ -982,8 +982,8 @@ input FunctionMutationInput {
     env: [FunctionEnvInput!]!
     replicas: FunctionReplicasInput!
     resources: FunctionResourcesInput!
-    runtime: String!
-    sourceType: String!
+    runtime: String
+    sourceType: String
 }
 
 type FunctionMetadata {

@@ -63,7 +63,7 @@ func TestToUnstructured(t *testing.T) {
 			map[string]interface{}{
 				"source":    "",
 				"resources": map[string]interface{}{},
-				"type":      "", // why did I have to add this here? question to anyone who does the review
+				"type":      "",
 			},
 			map[string]interface{}{},
 		)
