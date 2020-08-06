@@ -15,7 +15,7 @@ webhooks:
       name: {{ template "pod-preset.fullname" . }}-webhook
       namespace: "{{ .Release.Namespace }}"
       path: /mutating-pods
-  failurePolicy: Ignore
+  failurePolicy: Fail
   name: podpresets.settings.svcat.k8s.io
   rules:
   - apiGroups:
