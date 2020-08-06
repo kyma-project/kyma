@@ -192,7 +192,7 @@ data:
       "steppedLine": false,
       "targets": [
       {
-        "expr": "rate(revision_app_request_count{configuration_name=\"$app\",container_name=\"queue-proxy\",namespace_name=\"kyma-integration\",response_code_class=\"2xx\",revision_name=~\"$app-.*\",service_name=~\"$app\"}[5m])",
+        "expr": "rate(httpsource_event_count{container=\"source\",namespace=\"kyma-integration\",response_code_class=\"2xx\",event_source=\"$app\"}[5m])",
         "format": "time_series",
         "hide": false,
         "instant": false,
@@ -201,13 +201,13 @@ data:
         "refId": "A"
       },
       {
-        "expr": "rate(revision_app_request_count{configuration_name=\"$app\",container_name=\"queue-proxy\",namespace_name=\"kyma-integration\",response_code_class=\"4xx\",revision_name=~\"$app-.*\",service_name=~\"$app\"}[5m])",
+        "expr": "rate(httpsource_event_count{container=\"source\",namespace=\"kyma-integration\",response_code_class=\"4xx\",event_source=\"$app\"}[5m])",
         "hide": false,
         "legendFormat": "4XX",
         "refId": "B"
       },
       {
-        "expr": "rate(revision_app_request_count{configuration_name=\"$app\",container_name=\"queue-proxy\",namespace_name=\"kyma-integration\",response_code_class=\"5xx\",revision_name=~\"$app-.*\",service_name=~\"$app\"}[5m])",
+        "expr": "rate(httpsource_event_count{container=\"source\",namespace=\"kyma-integration\",response_code_class=\"5xx\",event_source=\"$app\"}[5m])",
         "hide": false,
         "legendFormat": "5XX",
         "refId": "C"
@@ -307,17 +307,17 @@ data:
         "format": "time_series",
         "instant": false,
         "intervalFactor": 1,
-        "legendFormat": "2XX ({{`{{ event_type }}`}})",
+        "legendFormat": "2XX ({{ event_type }})",
         "refId": "A"
       },
       {
         "expr": "sum by(event_type)(rate(broker_ingress_event_count{broker_name=\"default\",namespace_name=\"$namespace\",response_code=\"202\",response_code_class=\"4xx\"}[5m]))",
-        "legendFormat": "4XX ({{`{{ event_type }}`}})",
+        "legendFormat": "4XX ({{ event_type }})",
         "refId": "B"
       },
       {
         "expr": "sum by(event_type)(rate(broker_ingress_event_count{broker_name=\"default\",namespace_name=\"$namespace\",response_code=\"202\",response_code_class=\"5xx\"}[5m]))",
-        "legendFormat": "5XX ({{`{{ event_type }}`}})",
+        "legendFormat": "5XX ({{ event_type }})",
         "refId": "C"
       }
       ],
@@ -415,18 +415,18 @@ data:
         "hide": false,
         "instant": false,
         "intervalFactor": 1,
-        "legendFormat": "2XX ({{`{{ filter_type }}`}})",
+        "legendFormat": "2XX ({{ filter_type }})",
         "refId": "A"
       },
       {
         "expr": "sum by(filter_type)(rate(broker_filter_event_count{broker_name=\"default\",namespace_name=\"$namespace\",response_code_class=\"4xx\",response_code!=\"417\"}[5m]))",
         "hide": false,
-        "legendFormat": "4XX ({{`{{ filter_type }}`}})",
+        "legendFormat": "4XX ({{ filter_type }})",
         "refId": "B"
       },
       {
         "expr": "sum by(filter_type)(rate(broker_filter_event_count{broker_name=\"default\",namespace_name=\"$namespace\",response_code_class=\"5xx\"}[5m]))",
-        "legendFormat": "5XX ({{`{{ filter_type }}`}})",
+        "legendFormat": "5XX ({{ filter_type }})",
         "refId": "C"
       }
       ],
@@ -473,7 +473,7 @@ data:
     }
     ],
     "refresh": false,
-    "schemaVersion": 21,
+    "schemaVersion": 25,
     "style": "dark",
     "tags": [
       "kyma",
@@ -484,8 +484,9 @@ data:
       {
         "allValue": null,
         "current": {
-          "text": "mocks",
-          "value": "mocks"
+          "selected": true,
+          "text": "test",
+          "value": "test"
         },
         "datasource": "Prometheus",
         "definition": "query_result(kube_pod_info{pod=~\"default-broker-ingress.*\"} or kube_pod_info{pod=~\"application-broker.*\"})",
@@ -539,7 +540,6 @@ data:
     },
     "timepicker": {
       "refresh_intervals": [
-        "5s",
         "10s",
         "30s",
         "1m",
