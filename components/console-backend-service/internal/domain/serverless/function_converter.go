@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/pretty"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 
 //go:generate mockery -name=gqlFunctionConverter -output=automock -outpkg=automock -case=underscore
@@ -56,6 +57,8 @@ func (c *functionConverter) ToGQL(function *v1alpha1.Function) (*gqlschema.Funct
 		Env:          envVariables,
 		Replicas:     replicas,
 		Resources:    resources,
+		Runtime:      string(function.Spec.Runtime),
+		SourceType:   string(function.Spec.SourceType),
 		Status:       status,
 	}, nil
 }
@@ -105,6 +108,8 @@ func (c *functionConverter) ToFunction(name, namespace string, in gqlschema.Func
 			Resources:   resources,
 			MinReplicas: minReplicas,
 			MaxReplicas: maxReplicas,
+			Runtime:     v1alpha1.Runtime(in.Runtime),
+			SourceType:  v1alpha1.SourceType(in.SourceType),
 		},
 	}, nil
 }

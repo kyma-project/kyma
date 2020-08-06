@@ -307,31 +307,31 @@ type ClusterServiceClass {
 }
 
 type ServicePlan {
-  name: String!
-  namespace: String!
-  displayName: String
-  externalName: String!
-  description: String!
-  relatedServiceClassName: String!
-  instanceCreateParameterSchema: JSON
-  bindingCreateParameterSchema: JSON
+    name: String!
+    namespace: String!
+    displayName: String
+    externalName: String!
+    description: String!
+    relatedServiceClassName: String!
+    instanceCreateParameterSchema: JSON
+    bindingCreateParameterSchema: JSON
 
-  # Depends on rafter domain
-  clusterAssetGroup: ClusterAssetGroup
-  assetGroup: AssetGroup
+    # Depends on rafter domain
+    clusterAssetGroup: ClusterAssetGroup
+    assetGroup: AssetGroup
 }
 
 type ClusterServicePlan {
-  name: String!
-  displayName: String
-  externalName: String!
-  description: String!
-  relatedClusterServiceClassName: String!
-  instanceCreateParameterSchema: JSON
-  bindingCreateParameterSchema: JSON
+    name: String!
+    displayName: String
+    externalName: String!
+    description: String!
+    relatedClusterServiceClassName: String!
+    instanceCreateParameterSchema: JSON
+    bindingCreateParameterSchema: JSON
 
-  # Depends on rafter domain
-  clusterAssetGroup: ClusterAssetGroup
+    # Depends on rafter domain
+    clusterAssetGroup: ClusterAssetGroup
 }
 
 type ServiceBroker {
@@ -886,9 +886,9 @@ type ResourceRule {
 type Function {
     # meta
     name: String!
-	namespace: String!
-	UID: String!
-	labels: Labels!
+    namespace: String!
+    UID: String!
+    labels: Labels!
 
     # spec
     source: String!
@@ -897,6 +897,7 @@ type Function {
     replicas: FunctionReplicas!
     resources: FunctionResources!
     runtime: String!
+    sourceType: String!
 
     # status
     status: FunctionStatus!
@@ -982,6 +983,7 @@ input FunctionMutationInput {
     replicas: FunctionReplicasInput!
     resources: FunctionResourcesInput!
     runtime: String!
+    sourceType: String!
 }
 
 type FunctionMetadata {
@@ -1128,7 +1130,7 @@ type Mutation {
 
     updateConfigMap(name: String!, namespace: String!, configMap: JSON!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "update", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
     deleteConfigMap(name: String!, namespace: String!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "delete", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
-    
+
     updateService(name: String!, namespace: String!, service: JSON!): Service @HasAccess(attributes: {resource: "services", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 

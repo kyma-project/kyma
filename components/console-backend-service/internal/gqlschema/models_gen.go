@@ -295,6 +295,7 @@ type Function struct {
 	Replicas     *FunctionReplicas  `json:"replicas"`
 	Resources    *FunctionResources `json:"resources"`
 	Runtime      string             `json:"runtime"`
+	SourceType   string             `json:"sourceType"`
 	Status       *FunctionStatus    `json:"status"`
 }
 
@@ -347,6 +348,7 @@ type FunctionMutationInput struct {
 	Replicas     *FunctionReplicasInput  `json:"replicas"`
 	Resources    *FunctionResourcesInput `json:"resources"`
 	Runtime      string                  `json:"runtime"`
+	SourceType   string                  `json:"sourceType"`
 }
 
 type FunctionReplicas struct {

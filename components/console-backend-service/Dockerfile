@@ -5,19 +5,19 @@ ENV GO111MODULE on
 
 WORKDIR ${BASE_APP_DIR}
 
-COPY ./go.mod ./go.sum ./
+#COPY ./go.mod ./go.sum ./
 
 # cache deps before building and copying source so that we don't need to re-download as much
 # and so that source changes don't invalidate our downloaded layer
-RUN go mod download
+#RUN go mod download
 
 COPY . .
 
 # Run tests
-RUN make verify
+#RUN make verify
 
 # Build app
-RUN make build
+#RUN make build
 
 # Copy built app
 RUN mkdir /app

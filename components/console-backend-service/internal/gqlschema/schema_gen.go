@@ -458,6 +458,7 @@ type ComplexityRoot struct {
 		Resources    func(childComplexity int) int
 		Runtime      func(childComplexity int) int
 		Source       func(childComplexity int) int
+		SourceType   func(childComplexity int) int
 		Status       func(childComplexity int) int
 		UID          func(childComplexity int) int
 	}
@@ -2786,6 +2787,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Function.Source(childComplexity), true
+
+	case "Function.sourceType":
+		if e.complexity.Function.SourceType == nil {
+			break
+		}
+
+		return e.complexity.Function.SourceType(childComplexity), true
 
 	case "Function.status":
 		if e.complexity.Function.Status == nil {
@@ -6480,31 +6488,31 @@ type ClusterServiceClass {
 }
 
 type ServicePlan {
-  name: String!
-  namespace: String!
-  displayName: String
-  externalName: String!
-  description: String!
-  relatedServiceClassName: String!
-  instanceCreateParameterSchema: JSON
-  bindingCreateParameterSchema: JSON
+    name: String!
+    namespace: String!
+    displayName: String
+    externalName: String!
+    description: String!
+    relatedServiceClassName: String!
+    instanceCreateParameterSchema: JSON
+    bindingCreateParameterSchema: JSON
 
-  # Depends on rafter domain
-  clusterAssetGroup: ClusterAssetGroup
-  assetGroup: AssetGroup
+    # Depends on rafter domain
+    clusterAssetGroup: ClusterAssetGroup
+    assetGroup: AssetGroup
 }
 
 type ClusterServicePlan {
-  name: String!
-  displayName: String
-  externalName: String!
-  description: String!
-  relatedClusterServiceClassName: String!
-  instanceCreateParameterSchema: JSON
-  bindingCreateParameterSchema: JSON
+    name: String!
+    displayName: String
+    externalName: String!
+    description: String!
+    relatedClusterServiceClassName: String!
+    instanceCreateParameterSchema: JSON
+    bindingCreateParameterSchema: JSON
 
-  # Depends on rafter domain
-  clusterAssetGroup: ClusterAssetGroup
+    # Depends on rafter domain
+    clusterAssetGroup: ClusterAssetGroup
 }
 
 type ServiceBroker {
@@ -7059,9 +7067,9 @@ type ResourceRule {
 type Function {
     # meta
     name: String!
-	namespace: String!
-	UID: String!
-	labels: Labels!
+    namespace: String!
+    UID: String!
+    labels: Labels!
 
     # spec
     source: String!
@@ -7070,6 +7078,7 @@ type Function {
     replicas: FunctionReplicas!
     resources: FunctionResources!
     runtime: String!
+    sourceType: String!
 
     # status
     status: FunctionStatus!
@@ -7155,6 +7164,7 @@ input FunctionMutationInput {
     replicas: FunctionReplicasInput!
     resources: FunctionResourcesInput!
     runtime: String!
+    sourceType: String!
 }
 
 type FunctionMetadata {
@@ -7301,7 +7311,7 @@ type Mutation {
 
     updateConfigMap(name: String!, namespace: String!, configMap: JSON!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "update", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
     deleteConfigMap(name: String!, namespace: String!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "delete", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
-    
+
     updateService(name: String!, namespace: String!, service: JSON!): Service @HasAccess(attributes: {resource: "services", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 
@@ -17605,6 +17615,40 @@ func (ec *executionContext) _Function_runtime(ctx context.Context, field graphql
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Runtime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Function_sourceType(ctx context.Context, field graphql.CollectedField, obj *Function) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Function",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SourceType, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -34980,6 +35024,12 @@ func (ec *executionContext) unmarshalInputFunctionMutationInput(ctx context.Cont
 			if err != nil {
 				return it, err
 			}
+		case "sourceType":
+			var err error
+			it.SourceType, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -37879,6 +37929,11 @@ func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "runtime":
 			out.Values[i] = ec._Function_runtime(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "sourceType":
+			out.Values[i] = ec._Function_sourceType(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
