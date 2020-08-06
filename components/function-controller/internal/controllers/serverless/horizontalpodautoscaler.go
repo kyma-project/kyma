@@ -68,7 +68,7 @@ func (r *FunctionReconciler) createHorizontalPodAutoscaler(ctx context.Context, 
 	}
 	log.Info(fmt.Sprintf("HorizontalPodAutoscaler %s created", hpa.GetName()))
 
-	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+	return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionRunning,
 		Status:             corev1.ConditionUnknown,
 		LastTransitionTime: metav1.Now(),
@@ -89,7 +89,7 @@ func (r *FunctionReconciler) updateHorizontalPodAutoscaler(ctx context.Context, 
 	}
 	log.Info(fmt.Sprintf("HorizontalPodAutoscaler %s updated", hpaCopy.GetName()))
 
-	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+	return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionRunning,
 		Status:             corev1.ConditionUnknown,
 		LastTransitionTime: metav1.Now(),

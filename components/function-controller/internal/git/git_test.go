@@ -10,8 +10,6 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
-	"github.com/go-git/go-git/v5/plumbing/transport"
-	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git/automock"
 	"github.com/onsi/gomega"
 )
@@ -26,7 +24,7 @@ func TestLastCommit(t *testing.T) {
 	for testName, testData := range map[string]struct {
 		repoUrl    string
 		repoBranch string
-		repoAuth   transport.AuthMethod
+		repoAuth   *AuthOptions
 		mockErr    error
 		mockRefs   []*plumbing.Reference
 
@@ -48,23 +46,14 @@ func TestLastCommit(t *testing.T) {
 		"should be ok with auth": {
 			repoUrl:    "https://github.com/kyma-project/kyma",
 			repoBranch: "master",
-			repoAuth: &http.BasicAuth{
-				Username: "test",
-				Password: "test",
+			repoAuth: &AuthOptions{
+				Type: "basic",
+				Credentials: map[string]string{
+					"username": "test",
+					"password": "test",
+				},
 			},
 			mockErr: nil,
-			mockRefs: []*plumbing.Reference{
-				plumbing.NewHashReference("refs/heads/master", exampleHash),
-			},
-
-			expectedCommit: gomega.Equal(exampleHash.String()),
-			expectedErr:    gomega.BeNil(),
-		},
-		"ok when on empty auth": {
-			repoUrl:    "https://github.com/kyma-project/kyma",
-			repoBranch: "master",
-			repoAuth:   &http.BasicAuth{},
-			mockErr:    nil,
 			mockRefs: []*plumbing.Reference{
 				plumbing.NewHashReference("refs/heads/master", exampleHash),
 			},
@@ -133,6 +122,18 @@ func TestLastCommit(t *testing.T) {
 			expectedCommit: gomega.HaveLen(0),
 			expectedErr:    gomega.HaveOccurred(),
 		},
+		"error when on invalid auth": {
+			repoUrl:    "https://github.com/kyma-project/kyma",
+			repoBranch: "master",
+			repoAuth:   &AuthOptions{},
+			mockErr:    nil,
+			mockRefs: []*plumbing.Reference{
+				plumbing.NewHashReference("refs/heads/master", exampleHash),
+			},
+
+			expectedCommit: gomega.HaveLen(0),
+			expectedErr:    gomega.HaveOccurred(),
+		},
 	} {
 		t.Run(testName, func(t *testing.T) {
 			// given
@@ -140,11 +141,17 @@ func TestLastCommit(t *testing.T) {
 
 			client := new(automock.Client)
 			git := Git{client: client}
-			client.On("ListRefs", testData.repoUrl, testData.repoAuth).
+			auth, _ := testData.repoAuth.ToAuthMethod()
+			client.On("ListRefs", testData.repoUrl, auth).
 				Return(testData.mockRefs, testData.mockErr).Once()
+			options := Options{
+				URL:       testData.repoUrl,
+				Reference: testData.repoBranch,
+				Auth:      testData.repoAuth,
+			}
 
 			// when
-			hash, err := git.LastCommit(testData.repoUrl, testData.repoBranch, testData.repoAuth)
+			hash, err := git.LastCommit(options)
 
 			//then
 			g.Expect(hash).To(testData.expectedCommit)
@@ -157,7 +164,7 @@ func TestClone(t *testing.T) {
 	for testName, testData := range map[string]struct {
 		repoUrl            string
 		repoCommitOverride string
-		repoAuth           transport.AuthMethod
+		repoAuth           *AuthOptions
 		mockErr            error
 		withoutRepo        bool
 		bareRepo           bool
@@ -176,9 +183,12 @@ func TestClone(t *testing.T) {
 		},
 		"should be ok with auth": {
 			repoUrl: "https://github.com/kyma-project/kyma",
-			repoAuth: &http.BasicAuth{
-				Username: "test",
-				Password: "test",
+			repoAuth: &AuthOptions{
+				Type: "basic",
+				Credentials: map[string]string{
+					"username": "test",
+					"password": "test",
+				},
 			},
 			commitsCount: 5,
 
@@ -211,6 +221,14 @@ func TestClone(t *testing.T) {
 			expectedErr:    gomega.HaveOccurred(),
 			expectedCommit: gomega.HaveLen(0),
 		},
+		"error on invalid auth": {
+			repoUrl:      "https://github.com/kyma-project/kyma",
+			repoAuth:     &AuthOptions{},
+			commitsCount: 5,
+
+			expectedErr:    gomega.HaveOccurred(),
+			expectedCommit: gomega.HaveLen(0),
+		},
 	} {
 		t.Run(testName, func(t *testing.T) {
 			// given
@@ -228,20 +246,21 @@ func TestClone(t *testing.T) {
 			if testData.repoCommitOverride != "" {
 				firstCommit = testData.repoCommitOverride
 			}
+			auth, _ := testData.repoAuth.ToAuthMethod()
 			gitMock.On("PlainClone", tmpDir, false, &git.CloneOptions{
 				URL:  testData.repoUrl,
-				Auth: testData.repoAuth,
+				Auth: auth,
 			}).
 				Return(repository, testData.mockErr)
 			operator := Git{client: gitMock}
+			options := Options{
+				URL:       testData.repoUrl,
+				Reference: firstCommit,
+				Auth:      testData.repoAuth,
+			}
 
 			// when
-			commit, err := operator.Clone(
-				tmpDir,
-				testData.repoUrl,
-				firstCommit,
-				testData.repoAuth,
-			)
+			commit, err := operator.Clone(tmpDir, options)
 
 			// then
 			g.Expect(commit).To(testData.expectedCommit)

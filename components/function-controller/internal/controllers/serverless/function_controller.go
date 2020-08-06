@@ -63,8 +63,8 @@ func (r *FunctionReconciler) calculateImageTag(instance *serverlessv1alpha1.Func
 	return fmt.Sprintf("%x", hash)
 }
 
-func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) (ctrl.Result, error) {
-	return r.updateStatus2(ctx, result, instance, condition, nil)
+func (r *FunctionReconciler) updateStatusWithoutRepository(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) (ctrl.Result, error) {
+	return r.updateStatus(ctx, result, instance, condition, nil)
 }
 
 func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.Function) string {
@@ -72,7 +72,7 @@ func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.F
 	return fmt.Sprintf("%x", hash)
 }
 
-func (r *FunctionReconciler) updateStatus2(
+func (r *FunctionReconciler) updateStatus(
 	ctx context.Context,
 	result ctrl.Result,
 	instance *serverlessv1alpha1.Function,
@@ -83,7 +83,12 @@ func (r *FunctionReconciler) updateStatus2(
 	service := instance.DeepCopy()
 	service.Status.Conditions = r.updateCondition(service.Status.Conditions, condition)
 
-	if r.equalConditions(instance.Status.Conditions, service.Status.Conditions) && instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit {
+	equalConditions := r.equalConditions(instance.Status.Conditions, service.Status.Conditions)
+	if equalConditions && instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit {
+		return result, nil
+	}
+	// checking if status changed in gitops flow
+	if equalConditions && r.equalRepositories(instance.Status.Repository, repository) {
 		return result, nil
 	}
 
@@ -140,6 +145,18 @@ func (r *FunctionReconciler) equalConditions(existing, expected []serverlessv1al
 	}
 
 	return true
+}
+
+func (r *FunctionReconciler) equalRepositories(existing serverlessv1alpha1.Repository, new *serverlessv1alpha1.Repository) bool {
+	if new == nil {
+		return true
+	}
+	expected := *new
+
+	return existing.Commit == expected.Commit &&
+		existing.Branch == expected.Branch &&
+		existing.BaseDir == expected.BaseDir &&
+		existing.Runtime == expected.Runtime
 }
 
 func (r *FunctionReconciler) getConditionStatus(conditions []serverlessv1alpha1.Condition, conditionType serverlessv1alpha1.ConditionType) corev1.ConditionStatus {
