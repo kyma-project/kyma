@@ -36,7 +36,7 @@ var _ = ginkgo.Describe("Function", func() {
 			},
 			Spec: serverlessv1alpha1.FunctionSpec{
 				SourceType: serverlessv1alpha1.SourceTypeGit,
-				Source:     "https://github.com/pPrecel/public-gitops",
+				Source:     fmt.Sprintf("%s-%d", name, suffix),
 				Repository: serverlessv1alpha1.Repository{
 					BaseDir: "/",
 					Runtime: serverlessv1alpha1.RuntimeNodeJS12,
@@ -64,6 +64,19 @@ var _ = ginkgo.Describe("Function", func() {
 		}
 	}
 
+	var newFixRepository = func(name, namespace string) *serverlessv1alpha1.GitRepository {
+		return &serverlessv1alpha1.GitRepository{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: namespace,
+			},
+			Spec: serverlessv1alpha1.GitRepositorySpec{
+				URL:  "https://github.com/m00g3n/public-gitops",
+				Auth: nil,
+			},
+		}
+	}
+
 	var (
 		reconciler *FunctionReconciler
 		request    ctrl.Request
@@ -77,6 +90,9 @@ var _ = ginkgo.Describe("Function", func() {
 
 		reconciler = NewFunction(resourceClient, log.Log, config, record.NewFakeRecorder(100))
 		fnLabels = reconciler.internalFunctionLabels(function)
+
+		repo := newFixRepository(function.GetName(), "tutaj-devops")
+		gomega.Expect(resourceClient.Create(context.TODO(), repo)).To(gomega.Succeed())
 	})
 
 	ginkgo.It("should handle reconcilation lags", func() {
@@ -88,7 +104,7 @@ var _ = ginkgo.Describe("Function", func() {
 	})
 
 	ginkgo.It("should successfully update Function", func() {
-		ginkgo.By("creating the ConfigMap")
+		ginkgo.By("creating the Function")
 		result, err := reconciler.Reconcile(request)
 		gomega.Expect(err).To(gomega.BeNil())
 		gomega.Expect(result.Requeue).To(gomega.BeFalse())
