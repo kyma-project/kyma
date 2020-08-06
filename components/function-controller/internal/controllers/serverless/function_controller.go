@@ -161,8 +161,7 @@ func (r *FunctionReconciler) equalRepositories(existing serverlessv1alpha1.Repos
 	}
 	expected := *new
 
-	return existing.Commit == expected.Commit &&
-		existing.Branch == expected.Branch &&
+	return existing.Reference == expected.Reference &&
 		existing.BaseDir == expected.BaseDir &&
 		existing.Runtime == expected.Runtime
 }
