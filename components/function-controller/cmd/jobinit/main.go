@@ -13,7 +13,7 @@ const envPrefix = "APP"
 type config struct {
 	RepositoryUrl      string
 	RepositoryCommit   string
-	MountPath          string                 `envconfig:"default=/workspace"`
+	MountPath          string                 `envconfig:"default=/workspace/src"`
 	RepositoryAuthType git.RepositoryAuthType `envconfig:"optional"`
 	RepositoryUsername string                 `envconfig:"optional"`
 	RepositoryPassword string                 `envconfig:"optional"`
