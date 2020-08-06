@@ -819,8 +819,8 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to describe Pods in ${SYSTEM_NAMESPACE}"
 	testDescribe "pods" "${SYSTEM_NAMESPACE}" "no"
 
-	echo "--> ${DEVELOPER_EMAIL} should NOT be able to get serverless-webhook-envs configmap in ${SYSTEM_NAMESPACE}"
-	testPermissions "get" "configmap/serverless-webhook-envs" "${NAMESPACE}" "no"
+	echo "--> ${DEVELOPER_EMAIL} should be able to get serverless-webhook-envs configmap in ${SYSTEM_NAMESPACE}"
+	testPermissions "get" "configmap/serverless-webhook-envs" "${NAMESPACE}" "yes"
 }
 
 function cleanup() {
