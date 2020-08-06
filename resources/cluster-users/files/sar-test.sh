@@ -438,7 +438,7 @@ function runTests() {
 	testPermissions "create" "servicebindings" "${NAMESPACE}" "yes"
 
 	echo "--> ${ADMIN_EMAIL} should be able to get serverless-webhook-envs configmap in ${NAMESPACE}"
-	testPermissions "get" "configmap serverless-webhook-envs" "${NAMESPACE}" "yes"
+	testPermissions "get" "configmap/serverless-webhook-envs" "${NAMESPACE}" "yes"
 
 	testRafter "${ADMIN_EMAIL}" "${NAMESPACE}" "yes"
 	testKnativeServing "${ADMIN_EMAIL}" "${NAMESPACE}" "yes"
@@ -486,7 +486,7 @@ function runTests() {
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "no"
 
 	echo "--> ${VIEW_EMAIL} should be able to get serverless-webhook-envs configmap"
-	testPermissions "get" "configmap serverless-webhook-envs" "${NAMESPACE}" "yes"
+	testPermissions "get" "configmap/serverless-webhook-envs" "${NAMESPACE}" "yes"
 
 	testRafter "${VIEW_EMAIL}" "${NAMESPACE}" "no"
 	testKnativeServing "${VIEW_EMAIL}" "${NAMESPACE}" "no"
@@ -673,7 +673,7 @@ function runTests() {
 	testPermissions "create" "servicebindings" "${CUSTOM_NAMESPACE}" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get serverless-webhook-envs configmap in ${CUSTOM_NAMESPACE}"
-	testPermissions "get" "configmap serverless-webhook-envs" "${NAMESPACE}" "yes"
+	testPermissions "get" "configmap/serverless-webhook-envs" "${NAMESPACE}" "yes"
 
   # namespace-admin role doesn't allow to create addonsconfigurations
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create addonsconfigurations in ${CUSTOM_NAMESPACE}"
@@ -820,7 +820,7 @@ function runTests() {
 	testDescribe "pods" "${SYSTEM_NAMESPACE}" "no"
 
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to get serverless-webhook-envs configmap in ${SYSTEM_NAMESPACE}"
-	testPermissions "get" "configmap serverless-webhook-envs" "${NAMESPACE}" "no"
+	testPermissions "get" "configmap/serverless-webhook-envs" "${NAMESPACE}" "no"
 }
 
 function cleanup() {
