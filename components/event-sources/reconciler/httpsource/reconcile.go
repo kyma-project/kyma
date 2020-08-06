@@ -352,6 +352,7 @@ func (r *Reconciler) makeDeployment(src *sourcesv1alpha1.HTTPSource,
 		object.WithMatchLabelsSelector(applicationNameLabelKey, src.Name),
 		object.WithPodLabel(applicationNameLabelKey, src.Name),
 		object.WithPodLabel(dashboardLabelKey, dashboardLabelValue),
+		object.WithPodLabel(eventSourceLabelKey, eventSourceLabelValue),
 	)
 }
 

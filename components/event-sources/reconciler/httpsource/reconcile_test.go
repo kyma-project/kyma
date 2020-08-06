@@ -552,6 +552,7 @@ func newDeployment() *appsv1.Deployment {
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						dashboardLabelKey:       dashboardLabelValue,
+						eventSourceLabelKey:     eventSourceLabelValue,
 						applicationNameLabelKey: tName,
 					},
 				},

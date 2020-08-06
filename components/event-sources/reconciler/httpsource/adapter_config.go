@@ -27,8 +27,10 @@ const (
 
 	adapterMetricsPort = 9092
 
-	dashboardLabelKey   = "kyma-project.io/dashboard"
-	dashboardLabelValue = "event-mesh"
+	dashboardLabelKey     = "kyma-project.io/dashboard"
+	dashboardLabelValue   = "event-mesh"
+	eventSourceLabelKey   = "kyma-project.io/eventsource"
+	eventSourceLabelValue = "http"
 )
 
 // httpAdapterEnvConfig contains properties used to configure the HTTP adapter.
