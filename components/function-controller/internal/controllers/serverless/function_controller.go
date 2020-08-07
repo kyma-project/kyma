@@ -95,7 +95,8 @@ func (r *FunctionReconciler) updateStatus(
 		return result, nil
 	}
 	// checking if status changed in gitops flow
-	if equalConditions && r.equalRepositories(instance.Status.Repository, repository) {
+	if equalConditions && r.equalRepositories(instance.Status.Repository, repository) &&
+		instance.Status.Commit == commit {
 		return result, nil
 	}
 
