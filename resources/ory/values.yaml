@@ -79,10 +79,10 @@ hydra:
         maxUnavailable: "0%"
     resources:
       limits:
-        cpu: 100m
+        cpu: 200m
         memory: 256Mi
       requests:
-        cpu: 50m
+        cpu: 100m
         memory: 128Mi
   hydra:
     # The ORY Hydra configuration. For a full list of available settings, check:
