@@ -8,6 +8,9 @@ image:
   tag: v1.4.6
   # Image pull policy
   pullPolicy: IfNotPresent
+  init:
+    repository: alpine
+    tag: "3.12"
 
 # Image pull secrets
 imagePullSecrets: []

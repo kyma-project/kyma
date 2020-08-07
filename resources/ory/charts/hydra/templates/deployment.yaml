@@ -30,7 +30,7 @@ spec:
     {{- if .Values.hydra.autoMigrate }}
       initContainers:
         - name: wait-for-db
-          image: alpine
+          image: "{{ .Values.image.init.repository }}:{{ .Values.image.init.tag }}"
           command:
             - /bin/sh
             - -c
