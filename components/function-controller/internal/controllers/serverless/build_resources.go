@@ -220,7 +220,6 @@ func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function, gitOptions g
 func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, gitOptions git.Options) batchv1.Job {
 	imageName := r.buildInternalImageAddress(instance)
 	args := r.config.Build.ExecutorArgs
-	// sourcePath := path.Join(workspaceMountPath, "src", instance.Spec.BaseDir)
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
 
 	one := int32(1)
