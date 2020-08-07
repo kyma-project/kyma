@@ -2322,7 +2322,7 @@ data:
             "30d"
             ]
         },
-        "timezone": "browser",
+        "timezone": "",
         "title": "Kyma / Kubernetes / Nodes",
         "uid": "hb7fSE0Za",
         "variables": {

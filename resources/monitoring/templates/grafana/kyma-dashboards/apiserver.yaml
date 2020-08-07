@@ -986,7 +986,7 @@ data:
           "30d"
         ]
       },
-      "timezone": "browser",
+      "timezone": "",
       "title": "Kyma / Kubernetes / API Server",
       "uid": "yz0lz_TWz",
       "version": 1

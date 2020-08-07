@@ -1596,7 +1596,7 @@ data:
           "30d"
         ]
       },
-      "timezone": "browser",
+      "timezone": "",
       "title": "Istio / Pilot",
       "uid": "3--MLVZZk",
       "version": 11

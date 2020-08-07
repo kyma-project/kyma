@@ -1931,7 +1931,7 @@ data:
           "30d"
         ]
       },
-      "timezone": "browser",
+      "timezone": "",
       "title": "Kyma / Monitoring / Grafana",
       "uid": "pdWvxcrZu",
       "version": 1

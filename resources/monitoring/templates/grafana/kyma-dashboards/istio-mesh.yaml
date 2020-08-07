@@ -1230,7 +1230,7 @@ data:
           "30d"
         ]
       },
-      "timezone": "browser",
+      "timezone": "",
       "title": "Istio / Mesh",
       "uid": "G8wLrJIZk",
       "version": 5
