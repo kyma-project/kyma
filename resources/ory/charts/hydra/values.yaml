@@ -8,9 +8,6 @@ image:
   tag: v1.4.6
   # Image pull policy
   pullPolicy: IfNotPresent
-  init:
-    repository: alpine
-    tag: "3.12"
 
 # Image pull secrets
 imagePullSecrets: []
@@ -135,4 +132,4 @@ maester:
 
 busybox:
   repository: busybox
-  tag: 1.31.1
+  tag: 1.32

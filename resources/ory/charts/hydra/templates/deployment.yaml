@@ -30,7 +30,7 @@ spec:
     {{- if .Values.hydra.autoMigrate }}
       initContainers:
         - name: wait-for-db
-          image: "{{ .Values.image.init.repository }}:{{ .Values.image.init.tag }}"
+          image: "{{ .Values.busybox.repository }}:{{ .Values.busybox.tag }}"
           command:
             - /bin/sh
             - -c
