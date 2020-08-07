@@ -20,28 +20,14 @@ import (
 	"knative.dev/pkg/signals"
 	"knative.dev/pkg/source"
 	pkgtracing "knative.dev/pkg/tracing"
-	tracingconfig "knative.dev/pkg/tracing/config"
 
 	eshttp "github.com/kyma-project/kyma/components/event-sources/adapter/http"
 )
-
-var DisabledTracingConfig = &tracingconfig.Config{
-	Backend:    tracingconfig.None,
-	SampleRate: 0.1,
-}
 
 const (
 	defaultMaxIdleConnections        = 1000
 	defaultMaxIdleConnectionsPerHost = 1000
 )
-
-var EnabledTracingConfig = &tracingconfig.Config{
-	Backend:              tracingconfig.Zipkin,
-	ZipkinEndpoint:       "",
-	StackdriverProjectID: "",
-	Debug:                false,
-	SampleRate:           0,
-}
 
 func main() {
 	setupAdapter("http-source", eshttp.NewEnvConfig, eshttp.NewAdapter)
@@ -113,8 +99,6 @@ func setupAdapter(component string, ector adapter.EnvConfigConstructor, ctor ada
 		logger.Error("error building statsreporter", zap.Error(err))
 	}
 
-	// tracingCfg := DisabledTracingConfig
-
 	options := []cloudeventshttp.Option{
 		cloudevents.WithBinaryEncoding(),
 		cloudevents.WithMiddleware(pkgtracing.HTTPSpanMiddleware),
@@ -122,12 +106,6 @@ func setupAdapter(component string, ector adapter.EnvConfigConstructor, ctor ada
 
 	switch v := env.(type) {
 	case eshttp.AdapterEnvConfigAccessor:
-		if v.IsTracingEnabled() {
-			// tracingCfg = EnabledTracingConfig
-			logger.Info("Tracing enabled")
-		} else {
-			logger.Info("Tracing disabled")
-		}
 		options = append(options, cloudevents.WithPort(v.GetPort()))
 		options = append(options, cloudevents.WithPath(eshttp.EndpointCE))
 		options = append(options, cloudevents.WithMiddleware(eshttp.WithReadinessMiddleware))
@@ -135,11 +113,6 @@ func setupAdapter(component string, ector adapter.EnvConfigConstructor, ctor ada
 		logger.Infof("Wrong ector type %v", v)
 		logger.Info("Tracing disabled")
 	}
-	// if err = tracing.SetupStaticPublishing(logger, "", tracingCfg); err != nil {
-	// 	// If tracing doesn't work, we will log an error, but allow the adapter
-	// 	// to continue to start.
-	// 	logger.Error("Error setting up trace publishing", zap.Error(err))
-	// }
 
 	httpTransport, err := cloudevents.NewHTTPTransport(
 		options...,

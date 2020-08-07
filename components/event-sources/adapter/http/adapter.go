@@ -24,8 +24,7 @@ type envConfig struct {
 	EventSource string `envconfig:"EVENT_SOURCE" required:"true"`
 
 	// PORT as required by knative serving runtime contract
-	Port           int  `envconfig:"PORT" required:"true" default:"8080"`
-	TracingEnabled bool `envconfig:"TRACING_ENABLED" default:"true"`
+	Port int `envconfig:"PORT" required:"true" default:"8080"`
 }
 
 func (e *envConfig) GetSource() string {
@@ -34,10 +33,6 @@ func (e *envConfig) GetSource() string {
 
 func (e *envConfig) GetPort() int {
 	return e.Port
-}
-
-func (e *envConfig) IsTracingEnabled() bool {
-	return e.TracingEnabled
 }
 
 type httpAdapter struct {
@@ -52,7 +47,6 @@ type AdapterEnvConfigAccessor interface {
 	adapter.EnvConfigAccessor
 	GetSource() string
 	GetPort() int
-	IsTracingEnabled() bool
 }
 
 const resourceGroup = "http." + sources.GroupName

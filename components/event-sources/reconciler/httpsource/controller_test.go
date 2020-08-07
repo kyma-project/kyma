@@ -47,7 +47,6 @@ import (
 )
 
 const adapterImageEnvVar = "HTTP_ADAPTER_IMAGE"
-const adapterTracingEnabledEnvVar = "HTTP_ADAPTER_TRACING_ENABLED"
 
 func TestNewController(t *testing.T) {
 	defer func() {
@@ -58,7 +57,6 @@ func TestNewController(t *testing.T) {
 
 	defer SetEnvVar(t, adapterImageEnvVar, "some-image")()
 	defer SetEnvVar(t, metrics.DomainEnv, "testing")()
-	defer SetEnvVar(t, adapterTracingEnabledEnvVar, "true")()
 
 	cmw := configmap.NewStaticWatcher(
 		NewConfigMap("", metrics.ConfigMapName()),

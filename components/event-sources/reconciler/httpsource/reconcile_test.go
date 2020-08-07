@@ -53,18 +53,17 @@ import (
 )
 
 const (
-	tNs             = "testns"
-	tName           = "test"
-	tUID            = types.UID("00000000-0000-0000-0000-000000000000")
-	tImg            = "sources.kyma-project.io/http:latest"
-	tExternalPort   = 80
-	tPort           = 8080
-	tSinkURI        = "http://" + tName + "-kn-channel." + tNs + ".svc.cluster.local"
-	tTracingEnabled = true
-	tSource         = "varkes"
-	tPolicy         = "test"
-	tRevisionSvc    = "test"
-	tTargetPort     = "http-usermetric"
+	tNs           = "testns"
+	tName         = "test"
+	tUID          = types.UID("00000000-0000-0000-0000-000000000000")
+	tImg          = "sources.kyma-project.io/http:latest"
+	tExternalPort = 80
+	tPort         = 8080
+	tSinkURI      = "http://" + tName + "-kn-channel." + tNs + ".svc.cluster.local"
+	tSource       = "varkes"
+	tPolicy       = "test"
+	tRevisionSvc  = "test"
+	tTargetPort   = "http-usermetric"
 
 	tMetricsDomain = "testing"
 )
@@ -111,9 +110,6 @@ var tEnvVars = []corev1.EnvVar{
 	}, {
 		Name:  loggingConfigEnvVar,
 		Value: `{"zap-logger-config":"{\"level\": \"info\"}"}`,
-	}, {
-		Name:  tracingEnvVar,
-		Value: strconv.FormatBool(tTracingEnabled),
 	}, {
 		Name:  adapterPortEnvVar,
 		Value: strconv.Itoa(adapterPort),
@@ -369,9 +365,8 @@ func TestReconcile(t *testing.T) {
 		r := &Reconciler{
 			Base: rb,
 			adapterEnvCfg: &httpAdapterEnvConfig{
-				Image:          tImg,
-				Port:           tPort,
-				TracingEnabled: tTracingEnabled,
+				Image: tImg,
+				Port:  tPort,
 			},
 			httpsourceLister: ls.GetHTTPSourceLister(),
 			deploymentLister: ls.GetDeploymentLister(),

@@ -80,7 +80,6 @@ const (
 	namespaceEnvVar      = "NAMESPACE"
 	metricsConfigEnvVar  = "K_METRICS_CONFIG"
 	loggingConfigEnvVar  = "K_LOGGING_CONFIG"
-	tracingEnvVar        = "TRACING_ENABLED"
 	adapterPortEnvVar    = "PORT"
 	adapterContainerName = "source"
 	portName             = "http-cloudevent"
@@ -344,7 +343,6 @@ func (r *Reconciler) makeDeployment(src *sourcesv1alpha1.HTTPSource,
 		object.WithEnvVar(namespaceEnvVar, src.Namespace),
 		object.WithEnvVar(metricsConfigEnvVar, metricsCfg),
 		object.WithEnvVar(loggingConfigEnvVar, loggingCfg),
-		object.WithEnvVar(tracingEnvVar, strconv.FormatBool(r.adapterEnvCfg.TracingEnabled)),
 		object.WithEnvVar(adapterPortEnvVar, strconv.Itoa(adapterPort)),
 		object.WithProbe(adapterHealthEndpoint, adapterPort),
 		object.WithControllerRef(src.ToOwner()),
