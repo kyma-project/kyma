@@ -307,17 +307,17 @@ data:
         "format": "time_series",
         "instant": false,
         "intervalFactor": 1,
-        "legendFormat": "2XX ({{ event_type }})",
+        "legendFormat": "2XX ({{`{{ event_type }}`}})",
         "refId": "A"
       },
       {
         "expr": "sum by(event_type)(rate(broker_ingress_event_count{broker_name=\"default\",namespace_name=\"$namespace\",response_code=\"202\",response_code_class=\"4xx\"}[5m]))",
-        "legendFormat": "4XX ({{ event_type }})",
+        "legendFormat": "4XX ({{`{{ event_type }}`}})",
         "refId": "B"
       },
       {
         "expr": "sum by(event_type)(rate(broker_ingress_event_count{broker_name=\"default\",namespace_name=\"$namespace\",response_code=\"202\",response_code_class=\"5xx\"}[5m]))",
-        "legendFormat": "5XX ({{ event_type }})",
+        "legendFormat": "5XX ({{`{{ event_type }}`}})",
         "refId": "C"
       }
       ],
@@ -415,18 +415,18 @@ data:
         "hide": false,
         "instant": false,
         "intervalFactor": 1,
-        "legendFormat": "2XX ({{ filter_type }})",
+        "legendFormat": "2XX ({{`{{ filter_type }}`}})",
         "refId": "A"
       },
       {
         "expr": "sum by(filter_type)(rate(broker_filter_event_count{broker_name=\"default\",namespace_name=\"$namespace\",response_code_class=\"4xx\",response_code!=\"417\"}[5m]))",
         "hide": false,
-        "legendFormat": "4XX ({{ filter_type }})",
+        "legendFormat": "4XX ({{`{{ filter_type }}`}})",
         "refId": "B"
       },
       {
         "expr": "sum by(filter_type)(rate(broker_filter_event_count{broker_name=\"default\",namespace_name=\"$namespace\",response_code_class=\"5xx\"}[5m]))",
-        "legendFormat": "5XX ({{ filter_type }})",
+        "legendFormat": "5XX ({{`{{ filter_type }}`}})",
         "refId": "C"
       }
       ],
@@ -473,7 +473,7 @@ data:
     }
     ],
     "refresh": false,
-    "schemaVersion": 25,
+    "schemaVersion": 21,
     "style": "dark",
     "tags": [
       "kyma",
