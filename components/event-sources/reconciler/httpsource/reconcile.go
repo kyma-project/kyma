@@ -285,7 +285,7 @@ func (r *Reconciler) getOrCreateChannel(src *sourcesv1alpha1.HTTPSource,
 	return ch, nil
 }
 
-// getOrCreatePolicy returns the existing Policy for a Revision of a KnativeService, or
+// getOrCreateService returns the existing Service for a Deployment, or
 // creates it if it is missing.
 func (r *Reconciler) getOrCreateService(src *sourcesv1alpha1.HTTPSource,
 	desiredService *corev1.Service) (*corev1.Service, error) {
