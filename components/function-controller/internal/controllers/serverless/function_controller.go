@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -68,7 +69,12 @@ func (r *FunctionReconciler) updateStatusWithoutRepository(ctx context.Context, 
 }
 
 func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.Function) string {
-	hash := sha256.Sum256([]byte(fmt.Sprintf("%s-%s", instance.GetUID(), instance.Status.Repository.Commit)))
+	data := strings.Join([]string{
+		string(instance.GetUID()),
+		instance.Status.Repository.Commit,
+		instance.Status.Repository.BaseDir,
+	}, "-")
+	hash := sha256.Sum256([]byte(data))
 	return fmt.Sprintf("%x", hash)
 }
 
