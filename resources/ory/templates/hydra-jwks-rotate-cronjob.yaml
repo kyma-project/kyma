@@ -4,7 +4,7 @@ metadata:
   name: hydra-jwks-rotator
   namespace: kyma-system
 spec:
-  schedule: "4 * * * *"
+  schedule: "0 * * * *"
   successfulJobsHistoryLimit: 1
   jobTemplate:
     spec:
