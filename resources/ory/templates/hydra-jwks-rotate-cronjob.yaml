@@ -13,10 +13,10 @@ spec:
           labels:
             app: "rotate-keys"
         spec:
-          restartPolicy: Never
+          restartPolicy: OnFailure
           containers:
             - name: keyr
-              image: jakkab/hydracurl:v0.0.0
+              image: oryd/hydra:v1.6.0-alpine
               command:
                 - /bin/bash
                 - -c

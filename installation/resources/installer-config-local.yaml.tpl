@@ -140,6 +140,8 @@ metadata:
     component: ory
     kyma-project.io/installation: ""
 data:
+  hydra.deployment.resources.limits.cpu: 100m
+  hydra.deployment.resources.requests.cpu: 50m
   global.ory.hydra.persistence.enabled: "false"
   global.ory.hydra.persistence.postgresql.enabled: "false"
   hydra.hydra.autoMigrate: "false"
