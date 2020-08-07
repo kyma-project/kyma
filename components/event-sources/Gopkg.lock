@@ -1477,7 +1477,6 @@
     "knative.dev/eventing/pkg/legacyclient/clientset/versioned/fake",
     "knative.dev/eventing/pkg/legacyclient/injection/client/fake",
     "knative.dev/eventing/pkg/reconciler",
-    "knative.dev/eventing/pkg/tracing",
     "knative.dev/eventing/pkg/utils",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/duck/v1alpha1",
@@ -1506,7 +1505,6 @@
     "knative.dev/pkg/source",
     "knative.dev/pkg/system",
     "knative.dev/pkg/tracing",
-    "knative.dev/pkg/tracing/config",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
