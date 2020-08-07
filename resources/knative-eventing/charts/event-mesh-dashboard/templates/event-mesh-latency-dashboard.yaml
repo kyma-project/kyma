@@ -83,8 +83,7 @@ data:
           "targets": [
             {
               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload_namespace=\"kyma-integration\",source_workload=~\".*-connectivity-validator\",destination_workload_namespace=\"kyma-integration\",destination_workload=~\".*-event-service\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
-              "interval": "",
-              "legendFormat": "{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)",
+              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
               "refId": "A"
             }
           ],
@@ -171,8 +170,7 @@ data:
           "targets": [
             {
               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload_namespace=\"kyma-integration\",source_workload=~\".*-event-service\",destination_workload_namespace=\"kyma-integration\",destination_workload=~\".*\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
-              "interval": "",
-              "legendFormat": "{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)",
+              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
               "refId": "A"
             }
           ],
@@ -261,8 +259,7 @@ data:
             {
               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload_namespace=\"kyma-integration\",source_workload=~\".*\",destination_workload_namespace=\"knative-eventing\",destination_workload=~\".*-dispatcher|knative-kafka-channel\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
               "hide": false,
-              "interval": "",
-              "legendFormat": "{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)",
+              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
               "refId": "A"
             }
           ],
@@ -350,7 +347,7 @@ data:
             {
               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload=~\"[a-z0-9-]+-dispatcher\",destination_workload=\"default-broker-ingress\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
               "hide": false,
-              "legendFormat": "{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)",
+              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
               "refId": "A"
             }
           ],
@@ -437,7 +434,7 @@ data:
           "targets": [
             {
               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload_namespace!=\"kyma-integration\",destination_workload=~\"[a-z0-9-]+-dispatcher|knative-kafka-channel\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
-              "legendFormat": "{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)",
+              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
               "refId": "A"
             }
           ],
@@ -524,7 +521,7 @@ data:
           "targets": [
             {
               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload=~\"[a-z0-9-]+-dispatcher\",destination_workload=\"default-broker-filter\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
-              "legendFormat": "{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)",
+              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
               "refId": "A"
             }
           ],
@@ -612,7 +609,7 @@ data:
             {
               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload=\"default-broker-filter\",destination_workload!~\"istio-.+|dex|unknown|[a-z0-9-]+-dispatcher\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
               "hide": false,
-              "legendFormat": "{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)",
+              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
               "refId": "A"
             }
           ],
