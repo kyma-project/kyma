@@ -22,7 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-// NewDeployment creates a Service object.
+// NewService creates a Service object.
 func NewService(ns, name string, opts ...ObjectOption) *corev1.Service {
 	s := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{

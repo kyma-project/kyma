@@ -66,8 +66,6 @@ func MakeFactory(ctor Ctor) rt.Factory {
 		ctx, _ = fakedynamicclient.With(ctx, scheme,
 			ToUnstructured(t, scheme, ls.GetEventingObjects())...)
 		// also inject fake k8s client which is accessed by reconciler.Base
-		// ctx, appsclient := fakekubeclient.With(ctx, ls.GetAppsObjects()...)
-		// ctx, coreclient := fakekubeclient.With(ctx, ls.GetCoreObjects()...)
 		k8sobjects := ls.GetCoreObjects()
 		k8sobjects = append(k8sobjects, ls.GetAppsObjects()...)
 		ctx, kubeClient := fakekubeclient.With(ctx, k8sobjects...)
@@ -78,7 +76,6 @@ func MakeFactory(ctor Ctor) rt.Factory {
 		// set up Controller from fakes
 		c := ctor(t, ctx, &ls)
 
-		// actionRecorderList := rt.ActionRecorderList{sourcesClient, eventingClient, istioClient, legacyClient, appsclient, coreclient}
 		actionRecorderList := rt.ActionRecorderList{sourcesClient, eventingClient, istioClient, legacyClient, kubeClient}
 		eventList := rt.EventList{Recorder: eventRecorder}
 		statsReporter := &rt.FakeStatsReporter{}
