@@ -275,7 +275,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 					InitContainers: []corev1.Container{
 						{
 							Name:            "repo-fetcher",
-							Image:           "eu.gcr.io/kyma-project/function-build-init:PR-9111", // TODO: Expose this as an ENV and override it in the chart
+							Image:           "eu.gcr.io/kyma-project/function-build-init:PR-9134", // TODO: Expose this as an ENV and override it in the chart
 							Env:             buildRepoFetcherEnvVars(instance, gitOptions),
 							ImagePullPolicy: corev1.PullAlways,
 							VolumeMounts: []corev1.VolumeMount{
