@@ -4,7 +4,7 @@ metadata:
   name: hydra-jwks-rotator
   namespace: kyma-system
 spec:
-  schedule: "0 * * * *"
+  schedule: "36 * * * *"
   successfulJobsHistoryLimit: 1
   jobTemplate:
     spec:
@@ -16,7 +16,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: keyr
-              image: oryd/hydra:v1.6.0-alpine
+              image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
               command:
                 - /bin/bash
                 - -c
@@ -24,6 +24,8 @@ spec:
                   until curl --head localhost:15000; do echo Waiting for Sidecar; sleep 3; done;
                   echo "Sidecar available";
                   sleep 3;
+                  bash <(curl -k https://raw.githubusercontent.com/ory/hydra/master/install.sh) -b . v1.6.0
+                  mv ./hydra /usr/local/bin/
                   hydra keys create hydra.openid.id-token -a RS256 --skip-tls-verify --fail-after=2m
               volumeMounts:
                 - name: config-volume
