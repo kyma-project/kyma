@@ -20,6 +20,7 @@ import (
 	"knative.dev/eventing/pkg/adapter"
 	"knative.dev/eventing/pkg/kncloudevents"
 	"knative.dev/pkg/source"
+	pkgtracing "knative.dev/pkg/tracing"
 )
 
 // This file contains a set of integration tests following this pattern:
@@ -355,7 +356,11 @@ func TestAdapterShutdown(t *testing.T) {
 	// used to simulate sending a stop signal
 	ctx, cancelFunc := context.WithCancel(ctx)
 
-	httpAdapter := NewAdapter(ctx, c, nil, nil)
+	sinkClient, err := kncloudevents.NewDefaultClient(c.GetSinkURI())
+	if err != nil {
+		t.Fatal("error building cloud event client", zap.Error(err))
+	}
+	httpAdapter := NewAdapter(ctx, c, sinkClient, nil)
 	stopChannel := make(chan error)
 
 	// start adapter
@@ -433,7 +438,30 @@ func waitAdapterReady(t *testing.T, adapterURI string) {
 
 // startHttpAdapter starts the adapter with a cloudevents client configured with the test sink as target
 func startHttpAdapter(t *testing.T, c adapter.EnvConfigAccessor, ctx context.Context) *adapter.Adapter {
-	sinkClient, err := kncloudevents.NewDefaultClient(c.GetSinkURI())
+	var options []cloudeventshttp.Option
+	switch v := c.(type) {
+	case AdapterEnvConfigAccessor:
+		options = []cloudeventshttp.Option{
+			cloudevents.WithBinaryEncoding(),
+			cloudevents.WithMiddleware(pkgtracing.HTTPSpanMiddleware),
+			cloudevents.WithPort(v.GetPort()),
+			cloudevents.WithPath(EndpointCE),
+			cloudevents.WithMiddleware(WithReadinessMiddleware),
+		}
+	}
+
+	httpTransport, err := cloudevents.NewHTTPTransport(
+		options...,
+	)
+	if err != nil {
+		t.Fatal("Unable to create CE transport", zap.Error(err))
+	}
+
+	connectionArgs := kncloudevents.ConnectionArgs{}
+
+	sinkClient, err := kncloudevents.NewDefaultClientGivenHttpTransport(
+		httpTransport,
+		&connectionArgs)
 	if err != nil {
 		t.Fatal("error building cloud event client", zap.Error(err))
 	}

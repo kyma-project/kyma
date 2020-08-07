@@ -7,24 +7,40 @@ import (
 	"net/http"
 	"time"
 
+	cloudevents "github.com/cloudevents/sdk-go"
+	cloudeventshttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
 	"github.com/kelseyhightower/envconfig"
 	"go.opencensus.io/stats/view"
 	"go.uber.org/zap"
 	"knative.dev/eventing/pkg/adapter"
 	"knative.dev/eventing/pkg/kncloudevents"
-	"knative.dev/eventing/pkg/tracing"
 	"knative.dev/pkg/logging"
 	"knative.dev/pkg/metrics"
 	"knative.dev/pkg/profiling"
 	"knative.dev/pkg/signals"
 	"knative.dev/pkg/source"
+	pkgtracing "knative.dev/pkg/tracing"
 	tracingconfig "knative.dev/pkg/tracing/config"
 
 	eshttp "github.com/kyma-project/kyma/components/event-sources/adapter/http"
 )
 
 var DisabledTracingConfig = &tracingconfig.Config{
-	Backend: tracingconfig.None,
+	Backend:    tracingconfig.None,
+	SampleRate: 0.1,
+}
+
+const (
+	defaultMaxIdleConnections        = 1000
+	defaultMaxIdleConnectionsPerHost = 1000
+)
+
+var EnabledTracingConfig = &tracingconfig.Config{
+	Backend:              tracingconfig.Zipkin,
+	ZipkinEndpoint:       "",
+	StackdriverProjectID: "",
+	Debug:                false,
+	SampleRate:           0,
 }
 
 func main() {
@@ -97,27 +113,56 @@ func setupAdapter(component string, ector adapter.EnvConfigConstructor, ctor ada
 		logger.Error("error building statsreporter", zap.Error(err))
 	}
 
-	tracingCfg := DisabledTracingConfig
+	// tracingCfg := DisabledTracingConfig
 
-	switch v := interface{}(ector).(type) {
+	options := []cloudeventshttp.Option{
+		cloudevents.WithBinaryEncoding(),
+		cloudevents.WithMiddleware(pkgtracing.HTTPSpanMiddleware),
+	}
+
+	switch v := env.(type) {
 	case eshttp.AdapterEnvConfigAccessor:
 		if v.IsTracingEnabled() {
-			tracingCfg = tracing.OnePercentSampling
+			// tracingCfg = EnabledTracingConfig
+			logger.Info("Tracing enabled")
+		} else {
+			logger.Info("Tracing disabled")
 		}
+		options = append(options, cloudevents.WithPort(v.GetPort()))
+		options = append(options, cloudevents.WithPath(eshttp.EndpointCE))
+		options = append(options, cloudevents.WithMiddleware(eshttp.WithReadinessMiddleware))
+	default:
+		logger.Infof("Wrong ector type %v", v)
+		logger.Info("Tracing disabled")
 	}
-	if err = tracing.SetupStaticPublishing(logger, "", tracingCfg); err != nil {
-		// If tracing doesn't work, we will log an error, but allow the adapter
-		// to continue to start.
-		logger.Error("Error setting up trace publishing", zap.Error(err))
+	// if err = tracing.SetupStaticPublishing(logger, "", tracingCfg); err != nil {
+	// 	// If tracing doesn't work, we will log an error, but allow the adapter
+	// 	// to continue to start.
+	// 	logger.Error("Error setting up trace publishing", zap.Error(err))
+	// }
+
+	httpTransport, err := cloudevents.NewHTTPTransport(
+		options...,
+	)
+	if err != nil {
+		logger.Fatal("Unable to create CE transport", zap.Error(err))
 	}
 
-	eventsClient, err := kncloudevents.NewDefaultClient(env.GetSinkURI())
+	connectionArgs := kncloudevents.ConnectionArgs{
+		MaxIdleConns:        defaultMaxIdleConnections,
+		MaxIdleConnsPerHost: defaultMaxIdleConnectionsPerHost,
+	}
+
+	ceClient, err := kncloudevents.NewDefaultClientGivenHttpTransport(
+		httpTransport,
+		&connectionArgs)
+
 	if err != nil {
 		logger.Fatal("error building cloud event client", zap.Error(err))
 	}
 
 	// Configuring the adapter
-	adptr := ctor(ctx, env, eventsClient, reporter)
+	adptr := ctor(ctx, env, ceClient, reporter)
 
 	logger.Info("Starting Receive Adapter", zap.Any("adapter", adptr))
 
