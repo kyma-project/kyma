@@ -20,6 +20,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/automock"
+	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
@@ -71,10 +73,48 @@ var _ = ginkgo.Describe("Function", func() {
 				Namespace: namespace,
 			},
 			Spec: serverlessv1alpha1.GitRepositorySpec{
-				URL:  "https://github.com/m00g3n/public-gitops",
-				Auth: nil,
+				URL: "https://mock.repo/kyma/test",
+				Auth: &serverlessv1alpha1.RepositoryAuth{
+					Type:       serverlessv1alpha1.RepositoryAuthBasic,
+					SecretName: name,
+				},
 			},
 		}
+	}
+
+	var newFixSecret = func(name, namespace string) *corev1.Secret {
+		return &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: namespace,
+			},
+			StringData: map[string]string{
+				"user":     "test",
+				"password": "test",
+			},
+		}
+	}
+
+	var fixMockGitOperator = func(secretName string) *automock.GitOperator {
+		options := git.Options{
+			URL:       "https://mock.repo/kyma/test",
+			Reference: "master",
+			Auth: &git.AuthOptions{
+				Type: git.RepositoryAuthBasic,
+				Credentials: map[string]string{
+					"user":     "test",
+					"password": "test",
+				},
+				SecretName: secretName,
+			},
+		}
+
+		mock := new(automock.GitOperator)
+		mock.On("LastCommit", options).Return("pierwszy-hash", nil)
+		options.Reference = "newone"
+		mock.On("LastCommit", options).Return("a376218bdcd705cc39aa7ce7f310769fab6d51c9", nil)
+
+		return mock
 	}
 
 	var (
@@ -89,10 +129,14 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
 
 		reconciler = NewFunction(resourceClient, log.Log, config, record.NewFakeRecorder(100))
+		reconciler.gitOperator = fixMockGitOperator(function.Name)
 		fnLabels = reconciler.internalFunctionLabels(function)
 
 		repo := newFixRepository(function.GetName(), "tutaj-devops")
 		gomega.Expect(resourceClient.Create(context.TODO(), repo)).To(gomega.Succeed())
+
+		secret := newFixSecret(function.Name, "tutaj-devops")
+		gomega.Expect(resourceClient.Create(context.TODO(), secret)).To(gomega.Succeed())
 	})
 
 	ginkgo.It("should handle reconcilation lags", func() {
