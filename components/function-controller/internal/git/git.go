@@ -58,14 +58,12 @@ func (g *Git) LastCommit(options Options) (string, error) {
 	}
 
 	headPattern := fmt.Sprintf(refsHeadsFormat, options.Reference)
-	tagPattern := fmt.Sprintf(refsTagsFormat, options.Reference)
 	for _, elem := range refs {
-		if strings.EqualFold(elem.Name().String(), headPattern) ||
-			strings.EqualFold(elem.Name().String(), tagPattern) {
+		if strings.EqualFold(elem.Name().String(), headPattern) {
 			return elem.Hash().String(), nil
 		}
 	}
-	return "", fmt.Errorf("reference %s doesn't exist with given patterns: %s | %s", options.Reference, headPattern, tagPattern)
+	return "", fmt.Errorf("reference not found: %s", options.Reference)
 }
 
 func (g *Git) Clone(path string, options Options) (string, error) {

@@ -106,8 +106,8 @@ func TestLastCommit(t *testing.T) {
 				plumbing.NewHashReference("refs/tags/1.13.0", exampleHash),
 			},
 
-			expectedCommit: gomega.Equal(exampleHash.String()),
-			expectedErr:    gomega.BeNil(),
+			expectedCommit: gomega.Equal(""),
+			expectedErr:    gomega.HaveOccurred(),
 		},
 		"error on no permissions to repo": {
 			repoUrl:  "https://github.com/kyma-project/kyma",
