@@ -8,14 +8,14 @@ WORKDIR ${SRC_DIR}
 # Copy files
 #
 COPY ./licenses/ ${BASE_DIR}/licenses/
-COPY ./istioinjection ${SRC_DIR}/istioinjection/
-COPY ./vendor ${SRC_DIR}/vendor/
+COPY . ${SRC_DIR}/
 
 #
 # Build app
 #
 
-RUN CGO_ENABLED=0 go test -c ./istioinjection/ -o /istioinjection.test
+RUN cd ${SRC_DIR}/istioinjection
+RUN GO111MODULE=on go mod vendor && CGO_ENABLED=0 go test -c ./istioinjection/ -o /istioinjection.test
 RUN mkdir /test && mv /istioinjection.test /test/istioinjection.test
 
 FROM alpine:3.11.6
