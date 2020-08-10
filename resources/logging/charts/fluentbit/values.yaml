@@ -279,17 +279,19 @@ existingConfigMap: ""
 
 # Extra volume mounts for the fluent-bit pod.
 # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-volume-storage/
-extraVolumeMounts: []
-# - name: volume
-#   mountPath: /var/tmp
+extraVolumeMounts: ""
+# extraVolumeMounts: |
+#   - name: volume
+#     mountPath: /var/tmp
 
 # Extra volumes containing additional files required for fluent-bit to work
 # (eg. CA certificates)
 # Ref: https://kubernetes.io/docs/concepts/storage/volumes/
-extraVolumes: []
-# - name: volume
-#   configMap:
-#     name: config
+extraVolumes: ""
+# extraVolumes: |
+#   - name: volume
+#     configMap:
+#       name: config
 
 # fluent-bit container resources
 resources:
