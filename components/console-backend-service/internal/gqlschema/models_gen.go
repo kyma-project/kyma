@@ -421,7 +421,7 @@ type MicroFrontend struct {
 
 type NamespaceEvent struct {
 	Type      SubscriptionEventType `json:"type"`
-	Namespace *Namespace            `json:"namespace"`
+	Namespace *NamespaceListItem    `json:"namespace"`
 }
 
 type NamespaceMutationOutput struct {
