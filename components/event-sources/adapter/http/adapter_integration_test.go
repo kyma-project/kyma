@@ -20,7 +20,6 @@ import (
 	"knative.dev/eventing/pkg/adapter"
 	"knative.dev/eventing/pkg/kncloudevents"
 	"knative.dev/pkg/source"
-	pkgtracing "knative.dev/pkg/tracing"
 )
 
 // This file contains a set of integration tests following this pattern:
@@ -438,29 +437,11 @@ func waitAdapterReady(t *testing.T, adapterURI string) {
 
 // startHttpAdapter starts the adapter with a cloudevents client configured with the test sink as target
 func startHttpAdapter(t *testing.T, c *envConfig, ctx context.Context) *adapter.Adapter {
-	options:= []cloudeventshttp.Option{
-		cloudevents.WithBinaryEncoding(),
-		cloudevents.WithMiddleware(pkgtracing.HTTPSpanMiddleware),
-		cloudevents.WithPort(c.GetPort()),
-		cloudevents.WithPath(EndpointCE),
-		cloudevents.WithMiddleware(WithReadinessMiddleware),
-	}
-
-	httpTransport, err := cloudevents.NewHTTPTransport(
-		options...,
-	)
+	sinkClient, err := NewCloudEventsClient(c.GetPort())
 	if err != nil {
-		t.Fatal("Unable to create CE transport", zap.Error(err))
+		t.Fatalf("error while creating sinkclient: %+v", err)
 	}
 
-	connectionArgs := kncloudevents.ConnectionArgs{}
-
-	sinkClient, err := kncloudevents.NewDefaultClientGivenHttpTransport(
-		httpTransport,
-		&connectionArgs)
-	if err != nil {
-		t.Fatal("error building cloud event client", zap.Error(err))
-	}
 	statsReporter, err := source.NewStatsReporter()
 	if err != nil {
 		t.Errorf("error building statsreporter: %v", err)

@@ -7,27 +7,19 @@ import (
 	"net/http"
 	"time"
 
-	cloudevents "github.com/cloudevents/sdk-go"
-	cloudeventshttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
 	"github.com/kelseyhightower/envconfig"
 	"go.opencensus.io/stats/view"
 	"go.uber.org/zap"
 	"knative.dev/eventing/pkg/adapter"
-	"knative.dev/eventing/pkg/kncloudevents"
 	"knative.dev/pkg/logging"
 	"knative.dev/pkg/metrics"
 	"knative.dev/pkg/profiling"
 	"knative.dev/pkg/signals"
 	"knative.dev/pkg/source"
-	pkgtracing "knative.dev/pkg/tracing"
 
 	eshttp "github.com/kyma-project/kyma/components/event-sources/adapter/http"
 )
 
-const (
-	defaultMaxIdleConnections        = 1000
-	defaultMaxIdleConnectionsPerHost = 1000
-)
 
 func main() {
 	setupAdapter("http-source", eshttp.NewEnvConfig, eshttp.NewAdapter)
@@ -99,39 +91,10 @@ func setupAdapter(component string, ector adapter.EnvConfigConstructor, ctor ada
 		logger.Error("error building statsreporter", zap.Error(err))
 	}
 
-	options := []cloudeventshttp.Option{
-		cloudevents.WithBinaryEncoding(),
-		cloudevents.WithMiddleware(pkgtracing.HTTPSpanMiddleware),
-	}
-
-	switch v := env.(type) {
-	case eshttp.AdapterEnvConfigAccessor:
-		options = append(options, cloudevents.WithPort(v.GetPort()))
-		options = append(options, cloudevents.WithPath(eshttp.EndpointCE))
-		options = append(options, cloudevents.WithMiddleware(eshttp.WithReadinessMiddleware))
-	default:
-		logger.Infof("Wrong ector type %v", v)
-		logger.Info("Tracing disabled")
-	}
-
-	httpTransport, err := cloudevents.NewHTTPTransport(
-		options...,
-	)
+	v := env.(eshttp.AdapterEnvConfigAccessor)
+	ceClient, err := eshttp.NewCloudEventsClient(v.GetPort())
 	if err != nil {
-		logger.Fatal("Unable to create CE transport", zap.Error(err))
-	}
-
-	connectionArgs := kncloudevents.ConnectionArgs{
-		MaxIdleConns:        defaultMaxIdleConnections,
-		MaxIdleConnsPerHost: defaultMaxIdleConnectionsPerHost,
-	}
-
-	ceClient, err := kncloudevents.NewDefaultClientGivenHttpTransport(
-		httpTransport,
-		&connectionArgs)
-
-	if err != nil {
-		logger.Fatal("error building cloud event client", zap.Error(err))
+		logger.Fatalf("Could not create cloudevents client: %+v", err)
 	}
 
 	// Configuring the adapter

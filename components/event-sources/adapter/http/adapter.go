@@ -8,13 +8,16 @@ import (
 	"net/url"
 
 	cloudevents "github.com/cloudevents/sdk-go"
+	cloudeventshttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
 	"github.com/pkg/errors"
 	"go.opencensus.io/trace"
 	"go.uber.org/zap"
 	"knative.dev/eventing/pkg/adapter"
+	"knative.dev/eventing/pkg/kncloudevents"
 	"knative.dev/eventing/pkg/utils"
 	"knative.dev/pkg/logging"
 	"knative.dev/pkg/source"
+	pkgtracing "knative.dev/pkg/tracing"
 
 	"github.com/kyma-project/kyma/components/event-sources/apis/sources"
 )
@@ -51,6 +54,11 @@ type AdapterEnvConfigAccessor interface {
 	GetPort() int
 }
 
+const (
+	defaultMaxIdleConnections        = 1000
+	defaultMaxIdleConnectionsPerHost = 1000
+)
+
 const resourceGroup = "http." + sources.GroupName
 
 const (
@@ -84,6 +92,38 @@ func NewAdapter(ctx context.Context, processed adapter.EnvConfigAccessor, ceClie
 		accessor:       accessor,
 		logger:         logging.FromContext(ctx).Desugar(),
 	}
+}
+
+// NewCloudEventsClient creates a new client for receiving and sending cloud events
+func NewCloudEventsClient(port int) (cloudevents.Client, error) {
+	options := []cloudeventshttp.Option{
+		cloudevents.WithBinaryEncoding(),
+		cloudevents.WithMiddleware(pkgtracing.HTTPSpanMiddleware),
+		cloudevents.WithPort(port),
+		cloudevents.WithPath(EndpointCE),
+		cloudevents.WithMiddleware(WithReadinessMiddleware),
+	}
+
+	httpTransport, err := cloudevents.NewHTTPTransport(
+		options...,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create CE transport: %+v", err)
+	}
+
+	connectionArgs := kncloudevents.ConnectionArgs{
+		MaxIdleConns:        defaultMaxIdleConnections,
+		MaxIdleConnsPerHost: defaultMaxIdleConnectionsPerHost,
+	}
+
+	ceClient, err := kncloudevents.NewDefaultClientGivenHttpTransport(
+		httpTransport,
+		&connectionArgs)
+
+	if err != nil {
+		return nil, fmt.Errorf("error building cloud event client: %+v", err)
+	}
+	return ceClient, nil
 }
 
 // Start is the entrypoint for the adapter and is called by sharedmain coming from pkg/adapter
