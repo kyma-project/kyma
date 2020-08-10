@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/compass-runtime-agent
 
-go 1.12
+go 1.14
 
 require (
 	cloud.google.com/go v0.44.3 // indirect
