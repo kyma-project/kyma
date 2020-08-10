@@ -267,8 +267,10 @@ env:
   GF_USERS_AUTO_ASSIGN_ORG: "true"
   GF_USERS_AUTO_ASSIGN_ORG_ROLE: Editor
   GF_USERS_DEFAULT_THEME: "dark"
+  GF_USERS_VIEWERS_CAN_EDIT: "true"
   # https://grafana.com/docs/grafana/latest/auth/overview/
   GF_AUTH_ANONYMOUS_ENABLED: "false"
+  GF_AUTH_ANONYMOUS_ORG_ROLE: "Editor"
   GF_AUTH_OAUTH_AUTO_LOGIN: "true"
   GF_AUTH_DISABLE_LOGIN_FORM: "true"
   # https://grafana.com/docs/grafana/latest/installation/configuration/#server
@@ -282,10 +284,14 @@ env:
   GF_AUTH_GENERIC_OAUTH_AUTH_URL: ""
   GF_AUTH_GENERIC_OAUTH_API_URL: ""
   GF_AUTH_GENERIC_OAUTH_ALLOWED_DOMAINS: ""
-  GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: "true"
+  GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: "false"
   # https://grafana.com/docs/grafana/latest/installation/configuration/#log
   GF_LOG_MODE: "console"
   GF_LOG_LEVEL: "warn"
+  # https://grafana.com/docs/grafana/latest/administration/configuration/#alerting
+  GF_ALERTING_ENABLED: "true"
+  # https://grafana.com/docs/grafana/latest/administration/configuration/#dashboards
+  GF_DASHBOARDS_MIN_REFRESH_INTERVAL: "10s"
 
 ## "valueFrom" environment variable references that will be added to deployment pods
 ## ref: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#envvarsource-v1-core
@@ -552,3 +558,22 @@ kyma:
   console:
     ## If true, a console backendmodule gets deployed which activates the linking to grafana in the console
     enabled: true
+
+  authProxy:
+    enabled: false
+    replicaCount: 1
+    clientId: "grafana"
+    clientSecret: "apie4eeX6hiC9ainieli"
+    nodeSelector: {}
+    port: 3000
+    image:
+      repository: eu.gcr.io/kyma-project/external/bitnami/keycloak-gatekeeper
+      tag: 10.0.0
+      pullPolicy: IfNotPresent
+    resources:
+      limits:
+        cpu: 50m
+        memory: 20Mi
+      requests:
+        cpu: 10m
+        memory: 5Mi
