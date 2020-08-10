@@ -437,17 +437,13 @@ func waitAdapterReady(t *testing.T, adapterURI string) {
 }
 
 // startHttpAdapter starts the adapter with a cloudevents client configured with the test sink as target
-func startHttpAdapter(t *testing.T, c adapter.EnvConfigAccessor, ctx context.Context) *adapter.Adapter {
-	var options []cloudeventshttp.Option
-	switch v := c.(type) {
-	case AdapterEnvConfigAccessor:
-		options = []cloudeventshttp.Option{
-			cloudevents.WithBinaryEncoding(),
-			cloudevents.WithMiddleware(pkgtracing.HTTPSpanMiddleware),
-			cloudevents.WithPort(v.GetPort()),
-			cloudevents.WithPath(EndpointCE),
-			cloudevents.WithMiddleware(WithReadinessMiddleware),
-		}
+func startHttpAdapter(t *testing.T, c *envConfig, ctx context.Context) *adapter.Adapter {
+	options:= []cloudeventshttp.Option{
+		cloudevents.WithBinaryEncoding(),
+		cloudevents.WithMiddleware(pkgtracing.HTTPSpanMiddleware),
+		cloudevents.WithPort(c.GetPort()),
+		cloudevents.WithPath(EndpointCE),
+		cloudevents.WithMiddleware(WithReadinessMiddleware),
 	}
 
 	httpTransport, err := cloudevents.NewHTTPTransport(

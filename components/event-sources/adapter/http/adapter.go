@@ -19,6 +19,8 @@ import (
 	"github.com/kyma-project/kyma/components/event-sources/apis/sources"
 )
 
+var _ adapter.EnvConfigAccessor = (*envConfig)(nil)
+
 type envConfig struct {
 	adapter.EnvConfig
 	EventSource string `envconfig:"EVENT_SOURCE" required:"true"`
@@ -86,21 +88,6 @@ func NewAdapter(ctx context.Context, processed adapter.EnvConfigAccessor, ceClie
 
 // Start is the entrypoint for the adapter and is called by sharedmain coming from pkg/adapter
 func (h *httpAdapter) Start(_ <-chan struct{}) error {
-
-	// t, err := cloudevents.NewHTTPTransport(
-	// 	cloudevents.WithPort(h.accessor.GetPort()),
-	// 	cloudevents.WithPath(EndpointCE),
-	// 	cloudevents.WithMiddleware(WithReadinessMiddleware),
-	// 	//cloudevents.WithMiddleware(tracing.HTTPSpanMiddleware),
-	// )
-	// if err != nil {
-	// 	return errors.Wrap(err, "failed to create transport")
-	// }
-
-	// c, err := cloudevents.NewClient(t)
-	// if err != nil {
-	// 	return errors.Wrap(err, "failed to create client")
-	// }
 
 	log.Printf("listening on :%d%s\n", h.accessor.GetPort(), EndpointCE)
 
