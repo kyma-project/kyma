@@ -1191,7 +1191,7 @@ data:
         }
       }
       ],
-      "refresh": "5s",
+      "refresh": "10s",
       "schemaVersion": 18,
       "style": "dark",
       "tags": [
@@ -1202,7 +1202,7 @@ data:
         "list": []
       },
       "time": {
-        "from": "now-5m",
+        "from": "now-1h",
         "to": "now"
       },
       "timepicker": {
@@ -1230,7 +1230,7 @@ data:
           "30d"
         ]
       },
-      "timezone": "browser",
+      "timezone": "",
       "title": "Istio / Mesh",
       "uid": "G8wLrJIZk",
       "version": 5
