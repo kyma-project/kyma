@@ -216,14 +216,14 @@ func TestFunctionReconciler_mergeLabels(t *testing.T) {
 		},
 		{
 			name: "should work with 1 map as argument",
-			args: args{labelsCollection: []map[string]string{{"key": "value"}}},
-			want: map[string]string{"key": "value"},
+			args: args{labelsCollection: []map[string]string{{"authTypeKey": "value"}}},
+			want: map[string]string{"authTypeKey": "value"},
 		},
 		{
 			name: "should work with multiple maps",
-			args: args{labelsCollection: []map[string]string{{"key": "value"}, {"key1": "value1"}, {"key2": "value2"}}},
+			args: args{labelsCollection: []map[string]string{{"authTypeKey": "value"}, {"key1": "value1"}, {"key2": "value2"}}},
 			want: map[string]string{
-				"key":  "value",
+				"authTypeKey":  "value",
 				"key1": "value1",
 				"key2": "value2",
 			},
@@ -362,7 +362,7 @@ func TestFunctionReconciler_functionLabels(t *testing.T) {
 						Name: "fn-name",
 						UID:  "fn-uuid",
 						Labels: map[string]string{
-							"some-key": "whatever-value",
+							"some-authTypeKey": "whatever-value",
 						}},
 				},
 			},
@@ -370,7 +370,7 @@ func TestFunctionReconciler_functionLabels(t *testing.T) {
 				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
-				"some-key":                                "whatever-value",
+				"some-authTypeKey":                                "whatever-value",
 			},
 		}, {
 			name: "should return 3 internal ones if there's no labels on fn",

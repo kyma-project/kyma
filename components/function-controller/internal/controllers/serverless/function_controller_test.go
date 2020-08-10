@@ -253,7 +253,7 @@ func TestFunctionReconciler_envsEqual(t *testing.T) {
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: "some-name",
 			},
-			Key:      "some-key",
+			Key:      "some-authTypeKey",
 			Optional: nil,
 		},
 	}

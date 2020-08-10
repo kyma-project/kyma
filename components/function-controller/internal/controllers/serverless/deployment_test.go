@@ -34,7 +34,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 				existing: appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: map[string]string{
-							"label-key": "label-value",
+							"label-authTypeKey": "label-value",
 						},
 					},
 					Spec: appsv1.DeploymentSpec{
@@ -42,7 +42,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 						Template: corev1.PodTemplateSpec{
 							ObjectMeta: metav1.ObjectMeta{
 								Labels: map[string]string{
-									"some-template-label-key": "some-template-label-val",
+									"some-template-label-authTypeKey": "some-template-label-val",
 								},
 							},
 							Spec: corev1.PodSpec{
@@ -72,7 +72,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 				expected: appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: map[string]string{
-							"label-key": "label-value",
+							"label-authTypeKey": "label-value",
 						},
 					},
 					Spec: appsv1.DeploymentSpec{
@@ -80,7 +80,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 						Template: corev1.PodTemplateSpec{
 							ObjectMeta: metav1.ObjectMeta{
 								Labels: map[string]string{
-									"some-template-label-key": "some-template-label-val",
+									"some-template-label-authTypeKey": "some-template-label-val",
 								},
 							},
 							Spec: corev1.PodSpec{
@@ -116,14 +116,14 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 				existing: appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: map[string]string{
-							"label-key": "label-value",
+							"label-authTypeKey": "label-value",
 						},
 					},
 					Spec: appsv1.DeploymentSpec{
 						Template: corev1.PodTemplateSpec{
 							ObjectMeta: metav1.ObjectMeta{
 								Labels: map[string]string{
-									"some-template-label-key": "some-template-label-val",
+									"some-template-label-authTypeKey": "some-template-label-val",
 								},
 							},
 							Spec: corev1.PodSpec{
@@ -153,7 +153,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 				expected: appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: map[string]string{
-							"label-key": "label-value",
+							"label-authTypeKey": "label-value",
 						},
 					},
 					Spec: appsv1.DeploymentSpec{
@@ -161,7 +161,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 						Template: corev1.PodTemplateSpec{
 							ObjectMeta: metav1.ObjectMeta{
 								Labels: map[string]string{
-									"some-template-label-key": "different-value", // that's different
+									"some-template-label-authTypeKey": "different-value", // that's different
 								},
 							},
 							Spec: corev1.PodSpec{
@@ -198,7 +198,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 				existing: appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: map[string]string{
-							"label-key": "label-value",
+							"label-authTypeKey": "label-value",
 						},
 					},
 					Spec: appsv1.DeploymentSpec{
@@ -213,7 +213,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 				expected: appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: map[string]string{
-							"label-key": "label-value",
+							"label-authTypeKey": "label-value",
 						},
 					},
 					Spec: appsv1.DeploymentSpec{
