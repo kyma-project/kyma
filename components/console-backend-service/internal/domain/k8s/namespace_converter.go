@@ -34,10 +34,29 @@ func (c *namespaceConverter) ToGQL(in *v1.Namespace) *gqlschema.Namespace {
 	}
 }
 
-func (c *namespaceConverter) ToGQLs(in []*v1.Namespace) []*gqlschema.Namespace {
-	var result []*gqlschema.Namespace
+func (c *namespaceConverter) ToListItemGQL(in *v1.Namespace) *gqlschema.NamespaceListItem {
+	if in == nil {
+		return nil
+	}
+
+	labels := map[string]string{}
+	if in.Labels != nil {
+		labels = in.Labels
+	}
+
+	isSystem := isSystemNamespace(*in, c.systemNamespaces)
+	return &gqlschema.NamespaceListItem{
+		Name:              in.Name,
+		Labels:            labels,
+		Status:            string(in.Status.Phase),
+		IsSystemNamespace: isSystem,
+	}
+}
+
+func (c *namespaceConverter) ToGQLs(in []*v1.Namespace) []*gqlschema.NamespaceListItem {
+	var result []*gqlschema.NamespaceListItem
 	for _, u := range in {
-		converted := c.ToGQL(u)
+		converted := c.ToListItemGQL(u)
 
 		if converted != nil {
 			result = append(result, converted)
