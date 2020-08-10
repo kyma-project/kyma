@@ -51,7 +51,7 @@ data:
   prometheus.prometheusSpec.retention: "30d"
   prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: "20Gi"
   prometheus.prometheusSpec.resources.limits.cpu: "600m"
-  prometheus.prometheusSpec.resources.limits.memory: "2Gi"
+  prometheus.prometheusSpec.resources.limits.memory: "3Gi"
   prometheus.prometheusSpec.resources.requests.cpu: "300m"
   prometheus.prometheusSpec.resources.requests.memory: "1Gi"
   alertmanager.alertmanagerSpec.retention: "240h"
