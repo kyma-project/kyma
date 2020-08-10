@@ -1635,9 +1635,9 @@ data:
         }
         ]
       },
-      "time":{
-        "from":"now-5m",
-        "to":"now"
+      "time": {
+          "from": "now-1h",
+          "to": "now"
       },
       "timepicker":{
         "refresh_intervals":[
