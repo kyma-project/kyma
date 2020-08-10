@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: kubagoryl/hydra-login
+  repository: colunira/hydra-login
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.0.9"
+  tag: "0.0.2"
 
 imagePullSecrets: []
 nameOverride: ""
