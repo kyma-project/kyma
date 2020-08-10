@@ -423,8 +423,8 @@ data:
         ]
       },
       "time": {
-          "from": "now-1h",
-          "to": "now"
+        "from": "now-1h",
+        "to": "now"
       },
       "refresh": "10s",
       "timepicker": {

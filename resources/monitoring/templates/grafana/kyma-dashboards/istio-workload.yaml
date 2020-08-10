@@ -2280,8 +2280,8 @@ data:
         ]
       },
       "time": {
-          "from": "now-1h",
-          "to": "now"
+        "from": "now-1h",
+        "to": "now"
       },
       "timepicker": {
         "refresh_intervals": [
