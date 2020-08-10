@@ -2,6 +2,7 @@ package serverless
 
 import (
 	"fmt"
+	"path"
 	"strings"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
@@ -143,7 +144,7 @@ func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function, gitOptions g
 		},
 		{
 			Name:  "APP_REPOSITORY_COMMIT",
-			Value: instance.Status.Repository.Commit,
+			Value: instance.Status.Repository.Reference,
 		},
 		{
 			Name:  "APP_MOUNT_PATH",
@@ -274,7 +275,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 					InitContainers: []corev1.Container{
 						{
 							Name:            "repo-fetcher",
-							Image:           "eu.gcr.io/kyma-project/function-build-init:PR-9111", // TODO: Expose this as an ENV and override it in the chart
+							Image:           "eu.gcr.io/kyma-project/function-build-init:PR-9134", // TODO: Expose this as an ENV and override it in the chart
 							Env:             buildRepoFetcherEnvVars(instance, gitOptions),
 							ImagePullPolicy: corev1.PullAlways,
 							VolumeMounts: []corev1.VolumeMount{
@@ -301,11 +302,11 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 								},
 							},
 							VolumeMounts: []corev1.VolumeMount{
-								{Name: "workspace", MountPath: workspaceMountPath},
 								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
 								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
 								// If COPY is not used, then the cache will not work
-								{Name: "runtime", ReadOnly: true, MountPath: fmt.Sprintf("%s/Dockerfile", workspaceMountPath), SubPath: "Dockerfile"},
+								{Name: "workspace", MountPath: path.Join(workspaceMountPath, "src"), SubPath: strings.TrimPrefix(instance.Spec.BaseDir, "/")},
+								{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{

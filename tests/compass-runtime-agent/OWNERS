@@ -1,16 +1,14 @@
 approvers:
-  - akgalwas 
-  - janmedrek 
-  - Szymongib 
-  - franpog859 
+  - akgalwas
+  - janmedrek
+  - Szymongib
+  - franpog859
   - Maladie
   - crabtree
   - rafalpotempa
 
 reviewers:
   - PK85
-  - aszecowka
-  - pkosiec
   - kfurgol
   - tgorgol
   - dbadura

@@ -56,6 +56,7 @@ type ResolverRoot interface {
 	EventActivation() EventActivationResolver
 	Mutation() MutationResolver
 	Namespace() NamespaceResolver
+	NamespaceListItem() NamespaceListItemResolver
 	Query() QueryResolver
 	ServiceBinding() ServiceBindingResolver
 	ServiceBindingUsage() ServiceBindingUsageResolver
@@ -608,6 +609,16 @@ type ComplexityRoot struct {
 		Type      func(childComplexity int) int
 	}
 
+	NamespaceListItem struct {
+		ApplicationsCount func(childComplexity int) int
+		HealthyPodsCount  func(childComplexity int) int
+		IsSystemNamespace func(childComplexity int) int
+		Labels            func(childComplexity int) int
+		Name              func(childComplexity int) int
+		PodsCount         func(childComplexity int) int
+		Status            func(childComplexity int) int
+	}
+
 	NamespaceMutationOutput struct {
 		Labels func(childComplexity int) int
 		Name   func(childComplexity int) int
@@ -1117,6 +1128,11 @@ type NamespaceResolver interface {
 	Deployments(ctx context.Context, obj *Namespace, excludeFunctions *bool) ([]*Deployment, error)
 	Applications(ctx context.Context, obj *Namespace) ([]string, error)
 }
+type NamespaceListItemResolver interface {
+	PodsCount(ctx context.Context, obj *NamespaceListItem) (int, error)
+	HealthyPodsCount(ctx context.Context, obj *NamespaceListItem) (int, error)
+	ApplicationsCount(ctx context.Context, obj *NamespaceListItem) (*int, error)
+}
 type QueryResolver interface {
 	ClusterAssetGroups(ctx context.Context, viewContext *string, groupName *string) ([]*ClusterAssetGroup, error)
 	ServiceInstance(ctx context.Context, name string, namespace string) (*ServiceInstance, error)
@@ -1139,7 +1155,7 @@ type QueryResolver interface {
 	Application(ctx context.Context, name string) (*Application, error)
 	Applications(ctx context.Context, namespace *string, first *int, offset *int) ([]*Application, error)
 	ConnectorService(ctx context.Context, application string) (*ConnectorService, error)
-	Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]*Namespace, error)
+	Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]*NamespaceListItem, error)
 	Namespace(ctx context.Context, name string) (*Namespace, error)
 	Deployments(ctx context.Context, namespace string, excludeFunctions *bool) ([]*Deployment, error)
 	VersionInfo(ctx context.Context) (*VersionInfo, error)
@@ -3770,6 +3786,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.NamespaceEvent.Type(childComplexity), true
+
+	case "NamespaceListItem.applicationsCount":
+		if e.complexity.NamespaceListItem.ApplicationsCount == nil {
+			break
+		}
+
+		return e.complexity.NamespaceListItem.ApplicationsCount(childComplexity), true
+
+	case "NamespaceListItem.healthyPodsCount":
+		if e.complexity.NamespaceListItem.HealthyPodsCount == nil {
+			break
+		}
+
+		return e.complexity.NamespaceListItem.HealthyPodsCount(childComplexity), true
+
+	case "NamespaceListItem.isSystemNamespace":
+		if e.complexity.NamespaceListItem.IsSystemNamespace == nil {
+			break
+		}
+
+		return e.complexity.NamespaceListItem.IsSystemNamespace(childComplexity), true
+
+	case "NamespaceListItem.labels":
+		if e.complexity.NamespaceListItem.Labels == nil {
+			break
+		}
+
+		return e.complexity.NamespaceListItem.Labels(childComplexity), true
+
+	case "NamespaceListItem.name":
+		if e.complexity.NamespaceListItem.Name == nil {
+			break
+		}
+
+		return e.complexity.NamespaceListItem.Name(childComplexity), true
+
+	case "NamespaceListItem.podsCount":
+		if e.complexity.NamespaceListItem.PodsCount == nil {
+			break
+		}
+
+		return e.complexity.NamespaceListItem.PodsCount(childComplexity), true
+
+	case "NamespaceListItem.status":
+		if e.complexity.NamespaceListItem.Status == nil {
+			break
+		}
+
+		return e.complexity.NamespaceListItem.Status(childComplexity), true
 
 	case "NamespaceMutationOutput.labels":
 		if e.complexity.NamespaceMutationOutput.Labels == nil {
@@ -6864,9 +6929,21 @@ type Namespace {
     applications: [String!]
 }
 
+type NamespaceListItem {
+    name: String!
+    labels: Labels
+    status: String!
+    isSystemNamespace: Boolean!
+    podsCount: Int!
+    healthyPodsCount: Int!
+
+    # Depends on application module
+    applicationsCount: Int
+}
+
 type NamespaceEvent {
     type: SubscriptionEventType!
-    namespace: Namespace!
+    namespace: NamespaceListItem!
 }
 
 type NamespaceMutationOutput {
@@ -7202,7 +7279,7 @@ type Query {
     connectorService(application: String!): ConnectorService! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
 
     # Depends on 'application'
-    namespaces(withSystemNamespaces: Boolean, withInactiveStatus: Boolean): [Namespace!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
+    namespaces(withSystemNamespaces: Boolean, withInactiveStatus: Boolean): [NamespaceListItem!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
     namespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
 
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]! @HasAccess(attributes: {resource: "deployments", verb: "list", apiGroup: "apps", apiVersion: "v1beta2", namespaceArg: "namespace"})
@@ -22538,9 +22615,241 @@ func (ec *executionContext) _NamespaceEvent_namespace(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*Namespace)
+	res := resTmp.(*NamespaceListItem)
 	fc.Result = res
-	return ec.marshalNNamespace2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespace(ctx, field.Selections, res)
+	return ec.marshalNNamespaceListItem2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespaceListItem(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _NamespaceListItem_name(ctx context.Context, field graphql.CollectedField, obj *NamespaceListItem) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "NamespaceListItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _NamespaceListItem_labels(ctx context.Context, field graphql.CollectedField, obj *NamespaceListItem) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "NamespaceListItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Labels, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(Labels)
+	fc.Result = res
+	return ec.marshalOLabels2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLabels(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _NamespaceListItem_status(ctx context.Context, field graphql.CollectedField, obj *NamespaceListItem) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "NamespaceListItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _NamespaceListItem_isSystemNamespace(ctx context.Context, field graphql.CollectedField, obj *NamespaceListItem) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "NamespaceListItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsSystemNamespace, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _NamespaceListItem_podsCount(ctx context.Context, field graphql.CollectedField, obj *NamespaceListItem) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "NamespaceListItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.NamespaceListItem().PodsCount(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _NamespaceListItem_healthyPodsCount(ctx context.Context, field graphql.CollectedField, obj *NamespaceListItem) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "NamespaceListItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.NamespaceListItem().HealthyPodsCount(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _NamespaceListItem_applicationsCount(ctx context.Context, field graphql.CollectedField, obj *NamespaceListItem) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "NamespaceListItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.NamespaceListItem().ApplicationsCount(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _NamespaceMutationOutput_name(ctx context.Context, field graphql.CollectedField, obj *NamespaceMutationOutput) (ret graphql.Marshaler) {
@@ -24640,10 +24949,10 @@ func (ec *executionContext) _Query_namespaces(ctx context.Context, field graphql
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.([]*Namespace); ok {
+		if data, ok := tmp.([]*NamespaceListItem); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Namespace`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.NamespaceListItem`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -24655,9 +24964,9 @@ func (ec *executionContext) _Query_namespaces(ctx context.Context, field graphql
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*Namespace)
+	res := resTmp.([]*NamespaceListItem)
 	fc.Result = res
-	return ec.marshalNNamespace2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespaceᚄ(ctx, field.Selections, res)
+	return ec.marshalNNamespaceListItem2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespaceListItemᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_namespace(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -38544,6 +38853,84 @@ func (ec *executionContext) _NamespaceEvent(ctx context.Context, sel ast.Selecti
 	return out
 }
 
+var namespaceListItemImplementors = []string{"NamespaceListItem"}
+
+func (ec *executionContext) _NamespaceListItem(ctx context.Context, sel ast.SelectionSet, obj *NamespaceListItem) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, namespaceListItemImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("NamespaceListItem")
+		case "name":
+			out.Values[i] = ec._NamespaceListItem_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "labels":
+			out.Values[i] = ec._NamespaceListItem_labels(ctx, field, obj)
+		case "status":
+			out.Values[i] = ec._NamespaceListItem_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "isSystemNamespace":
+			out.Values[i] = ec._NamespaceListItem_isSystemNamespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "podsCount":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._NamespaceListItem_podsCount(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "healthyPodsCount":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._NamespaceListItem_healthyPodsCount(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "applicationsCount":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._NamespaceListItem_applicationsCount(ctx, field, obj)
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var namespaceMutationOutputImplementors = []string{"NamespaceMutationOutput"}
 
 func (ec *executionContext) _NamespaceMutationOutput(ctx context.Context, sel ast.SelectionSet, obj *NamespaceMutationOutput) graphql.Marshaler {
@@ -43808,11 +44195,25 @@ func (ec *executionContext) marshalNMicroFrontend2ᚖgithubᚗcomᚋkymaᚑproje
 	return ec._MicroFrontend(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNNamespace2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespace(ctx context.Context, sel ast.SelectionSet, v Namespace) graphql.Marshaler {
-	return ec._Namespace(ctx, sel, &v)
+func (ec *executionContext) marshalNNamespaceEvent2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespaceEvent(ctx context.Context, sel ast.SelectionSet, v NamespaceEvent) graphql.Marshaler {
+	return ec._NamespaceEvent(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNNamespace2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespaceᚄ(ctx context.Context, sel ast.SelectionSet, v []*Namespace) graphql.Marshaler {
+func (ec *executionContext) marshalNNamespaceEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespaceEvent(ctx context.Context, sel ast.SelectionSet, v *NamespaceEvent) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._NamespaceEvent(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNNamespaceListItem2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespaceListItem(ctx context.Context, sel ast.SelectionSet, v NamespaceListItem) graphql.Marshaler {
+	return ec._NamespaceListItem(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNNamespaceListItem2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespaceListItemᚄ(ctx context.Context, sel ast.SelectionSet, v []*NamespaceListItem) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -43836,7 +44237,7 @@ func (ec *executionContext) marshalNNamespace2ᚕᚖgithubᚗcomᚋkymaᚑprojec
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNNamespace2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespace(ctx, sel, v[i])
+			ret[i] = ec.marshalNNamespaceListItem2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespaceListItem(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -43849,28 +44250,14 @@ func (ec *executionContext) marshalNNamespace2ᚕᚖgithubᚗcomᚋkymaᚑprojec
 	return ret
 }
 
-func (ec *executionContext) marshalNNamespace2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespace(ctx context.Context, sel ast.SelectionSet, v *Namespace) graphql.Marshaler {
+func (ec *executionContext) marshalNNamespaceListItem2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespaceListItem(ctx context.Context, sel ast.SelectionSet, v *NamespaceListItem) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	return ec._Namespace(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNNamespaceEvent2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespaceEvent(ctx context.Context, sel ast.SelectionSet, v NamespaceEvent) graphql.Marshaler {
-	return ec._NamespaceEvent(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNNamespaceEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespaceEvent(ctx context.Context, sel ast.SelectionSet, v *NamespaceEvent) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._NamespaceEvent(ctx, sel, v)
+	return ec._NamespaceListItem(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNNamespaceMutationOutput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespaceMutationOutput(ctx context.Context, sel ast.SelectionSet, v NamespaceMutationOutput) graphql.Marshaler {

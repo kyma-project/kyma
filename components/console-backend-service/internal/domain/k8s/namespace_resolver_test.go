@@ -25,21 +25,21 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 		name, inactiveName, systemName := "name", "inactive", "system"
 
 		k8sNamespace := fixNamespaceWithStatus(name, "Active")
-		gqlNamespace := gqlschema.Namespace{
+		gqlNamespace := gqlschema.NamespaceListItem{
 			Name:              name,
 			Status:            "Active",
 			IsSystemNamespace: false,
 			Labels:            gqlschema.Labels{},
 		}
 		k8sInactiveNamespace := fixNamespaceWithStatus(inactiveName, "Terminating")
-		gqlInactiveNamespace := gqlschema.Namespace{
+		gqlInactiveNamespace := gqlschema.NamespaceListItem{
 			Name:              inactiveName,
 			Status:            "Terminating",
 			IsSystemNamespace: false,
 			Labels:            gqlschema.Labels{},
 		}
 		k8sSystemNamespace := fixNamespaceWithStatus(systemName, "Active")
-		gqlSystemNamespace := gqlschema.Namespace{
+		gqlSystemNamespace := gqlschema.NamespaceListItem{
 			Name:              systemName,
 			Status:            "Active",
 			IsSystemNamespace: true,
@@ -58,7 +58,7 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 
 		// check with default values
 		result, err := resolver.NamespacesQuery(nil, nil, nil)
-		expected := []*gqlschema.Namespace{
+		expected := []*gqlschema.NamespaceListItem{
 			&gqlNamespace,
 		}
 
@@ -69,7 +69,7 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 
 		// check with system namespaces
 		result, err = resolver.NamespacesQuery(nil, &trueBool, nil)
-		expected = []*gqlschema.Namespace{
+		expected = []*gqlschema.NamespaceListItem{
 			&gqlNamespace, &gqlSystemNamespace,
 		}
 
@@ -78,7 +78,7 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 
 		// check with inactive namespaces
 		result, err = resolver.NamespacesQuery(nil, nil, &trueBool)
-		expected = []*gqlschema.Namespace{
+		expected = []*gqlschema.NamespaceListItem{
 			&gqlNamespace, &gqlInactiveNamespace,
 		}
 
@@ -88,7 +88,7 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 
 	t.Run("Empty", func(t *testing.T) {
 		resources := []*v1.Namespace{}
-		expected := []*gqlschema.Namespace(nil)
+		expected := []*gqlschema.NamespaceListItem(nil)
 		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
 		svc.On("List").Return(resources, nil).Once()

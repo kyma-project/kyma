@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -64,11 +65,16 @@ func (r *FunctionReconciler) calculateImageTag(instance *serverlessv1alpha1.Func
 }
 
 func (r *FunctionReconciler) updateStatusWithoutRepository(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) (ctrl.Result, error) {
-	return r.updateStatus(ctx, result, instance, condition, nil)
+	return r.updateStatus(ctx, result, instance, condition, nil, "")
 }
 
 func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.Function) string {
-	hash := sha256.Sum256([]byte(fmt.Sprintf("%s-%s", instance.GetUID(), instance.Status.Repository.Commit)))
+	data := strings.Join([]string{
+		string(instance.GetUID()),
+		instance.Status.Commit,
+		instance.Status.Repository.BaseDir,
+	}, "-")
+	hash := sha256.Sum256([]byte(data))
 	return fmt.Sprintf("%x", hash)
 }
 
@@ -77,7 +83,8 @@ func (r *FunctionReconciler) updateStatus(
 	result ctrl.Result,
 	instance *serverlessv1alpha1.Function,
 	condition serverlessv1alpha1.Condition,
-	repository *serverlessv1alpha1.Repository) (ctrl.Result, error) {
+	repository *serverlessv1alpha1.Repository,
+	commit string) (ctrl.Result, error) {
 	condition.LastTransitionTime = metav1.Now()
 
 	service := instance.DeepCopy()
@@ -88,15 +95,17 @@ func (r *FunctionReconciler) updateStatus(
 		return result, nil
 	}
 	// checking if status changed in gitops flow
-	if equalConditions && r.equalRepositories(instance.Status.Repository, repository) {
+	if equalConditions && r.equalRepositories(instance.Status.Repository, repository) &&
+		instance.Status.Commit == commit {
 		return result, nil
 	}
 
 	if repository != nil {
 		service.Status.Repository = *repository
+		service.Status.Commit = commit
 	}
-	service.Status.Source = instance.Spec.Source
 
+	service.Status.Source = instance.Spec.Source
 	if err := r.client.Status().Update(ctx, service); err != nil {
 		return ctrl.Result{}, err
 	}
@@ -153,8 +162,7 @@ func (r *FunctionReconciler) equalRepositories(existing serverlessv1alpha1.Repos
 	}
 	expected := *new
 
-	return existing.Commit == expected.Commit &&
-		existing.Branch == expected.Branch &&
+	return existing.Reference == expected.Reference &&
 		existing.BaseDir == expected.BaseDir &&
 		existing.Runtime == expected.Runtime
 }
