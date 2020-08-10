@@ -18,7 +18,8 @@ func main() {
 	hydraCfg := login.NewHydraConfig(hydraAddr, hydraPort)
 
 	m := http.NewServeMux()
-	m.HandleFunc("/", hydraCfg.Login)
+	m.HandleFunc("/login", hydraCfg.Login)
+	m.HandleFunc("/callback", hydraCfg.Callback)
 
 	srv := &http.Server{
 		Addr:    ":8080",

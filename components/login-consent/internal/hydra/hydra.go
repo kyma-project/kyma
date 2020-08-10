@@ -1,15 +1,18 @@
 package hydra
 
-import (
-	"context"
-	"time"
-)
+import hydraAPI "github.com/ory/hydra-client-go/models"
 
-func GetLoginRequest(ctx context.Context, ch chan<- string, challenge string) {
-	select {
-	case <-time.After(time.Second * 3):
-		ch <- "Successful result."
-	case <-ctx.Done():
-		close(ch)
+func GetLoginRequest(challenge string) hydraAPI.LoginRequest {
+	f := false
+	return hydraAPI.LoginRequest{
+		Challenge: &challenge,
+		Skip:      &f,
+	}
+}
+
+func AcceptLoginRequest(challenge string, request hydraAPI.AcceptLoginRequest) hydraAPI.CompletedRequest {
+	addr := "url.com"
+	return hydraAPI.CompletedRequest{
+		RedirectTo: &addr,
 	}
 }
