@@ -284,7 +284,7 @@ env:
   GF_AUTH_GENERIC_OAUTH_AUTH_URL: ""
   GF_AUTH_GENERIC_OAUTH_API_URL: ""
   GF_AUTH_GENERIC_OAUTH_ALLOWED_DOMAINS: ""
-  GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: "false"
+  GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: "true"
   # https://grafana.com/docs/grafana/latest/installation/configuration/#log
   GF_LOG_MODE: "console"
   GF_LOG_LEVEL: "warn"
