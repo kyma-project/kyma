@@ -29,7 +29,7 @@ type data struct {
 
 var (
 	authTypeBasic = "basic"
-	authTypeKey   = "authTypeKey"
+	authTypeKey   = "key"
 )
 
 var testData = []data{
