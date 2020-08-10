@@ -29,7 +29,7 @@ func Test_isOnSourceChange(t *testing.T) {
 				Spec: v1alpha1.FunctionSpec{
 					SourceType: v1alpha1.SourceTypeGit,
 					Repository: v1alpha1.Repository{
-						Commit: "1",
+						Reference: "1",
 					},
 				},
 			},
@@ -41,7 +41,7 @@ func Test_isOnSourceChange(t *testing.T) {
 				Spec: v1alpha1.FunctionSpec{
 					SourceType: v1alpha1.SourceTypeGit,
 					Repository: v1alpha1.Repository{
-						Commit: "1",
+						Reference: "1",
 					},
 				},
 			},
@@ -53,13 +53,14 @@ func Test_isOnSourceChange(t *testing.T) {
 				Spec: v1alpha1.FunctionSpec{
 					SourceType: v1alpha1.SourceTypeGit,
 					Repository: v1alpha1.Repository{
-						Commit: "1",
+						Reference: "1",
 					},
 				},
 				Status: v1alpha1.FunctionStatus{
 					Repository: v1alpha1.Repository{
-						Commit: "1",
+						Reference: "1",
 					},
+					Commit: "1",
 				},
 			},
 			revision:       "1",
@@ -71,12 +72,12 @@ func Test_isOnSourceChange(t *testing.T) {
 				Spec: v1alpha1.FunctionSpec{
 					SourceType: v1alpha1.SourceTypeGit,
 					Repository: v1alpha1.Repository{
-						Commit: "2",
+						Reference: "2",
 					},
 				},
 				Status: v1alpha1.FunctionStatus{
 					Repository: v1alpha1.Repository{
-						Commit: "1",
+						Reference: "1",
 					},
 				},
 			},
@@ -87,7 +88,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			fn: v1alpha1.Function{
 				Status: v1alpha1.FunctionStatus{
 					Repository: v1alpha1.Repository{
-						Commit: "1",
+						Reference: "1",
 					},
 				},
 			},
@@ -100,13 +101,13 @@ func Test_isOnSourceChange(t *testing.T) {
 				Spec: v1alpha1.FunctionSpec{
 					SourceType: v1alpha1.SourceTypeGit,
 					Repository: v1alpha1.Repository{
-						Commit: "1",
+						Reference: "1",
 					},
 					Source: "new_src",
 				},
 				Status: v1alpha1.FunctionStatus{
 					Repository: v1alpha1.Repository{
-						Commit: "1",
+						Reference: "1",
 					},
 				},
 			},
@@ -118,13 +119,13 @@ func Test_isOnSourceChange(t *testing.T) {
 				Spec: v1alpha1.FunctionSpec{
 					SourceType: v1alpha1.SourceTypeGit,
 					Repository: v1alpha1.Repository{
-						Commit:  "2",
-						BaseDir: "base_dir",
+						Reference: "2",
+						BaseDir:   "base_dir",
 					},
 				},
 				Status: v1alpha1.FunctionStatus{
 					Repository: v1alpha1.Repository{
-						Commit: "2",
+						Reference: "2",
 					},
 				},
 			},
@@ -136,13 +137,12 @@ func Test_isOnSourceChange(t *testing.T) {
 				Spec: v1alpha1.FunctionSpec{
 					SourceType: v1alpha1.SourceTypeGit,
 					Repository: v1alpha1.Repository{
-						Commit: "2",
-						Branch: "branch",
+						Reference: "branch",
 					},
 				},
 				Status: v1alpha1.FunctionStatus{
 					Repository: v1alpha1.Repository{
-						Commit: "2",
+						Reference: "2",
 					},
 				},
 			},
@@ -154,13 +154,13 @@ func Test_isOnSourceChange(t *testing.T) {
 				Spec: v1alpha1.FunctionSpec{
 					SourceType: v1alpha1.SourceTypeGit,
 					Repository: v1alpha1.Repository{
-						Commit:  "2",
-						Runtime: v1alpha1.RuntimeNodeJS12,
+						Reference: "2",
+						Runtime:   v1alpha1.RuntimeNodeJS12,
 					},
 				},
 				Status: v1alpha1.FunctionStatus{
 					Repository: v1alpha1.Repository{
-						Commit: "2",
+						Reference: "2",
 					},
 				},
 			},
@@ -171,7 +171,8 @@ func Test_isOnSourceChange(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			actual := isOnSourceChange(&tC.fn, tC.revision)
+			r := FunctionReconciler{}
+			actual := r.isOnSourceChange(&tC.fn, tC.revision)
 			g.Expect(actual).To(gomega.Equal(tC.expectedResult))
 		})
 	}

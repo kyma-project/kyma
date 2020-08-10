@@ -4,38 +4,38 @@ import (
 	"context"
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/kyma-project/kyma/components/function-controller/internal/git"
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
 	"github.com/go-logr/logr"
-	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 type FunctionReconciler struct {
-	Log      logr.Logger
-	client   resource.Client
-	recorder record.EventRecorder
-	config   FunctionConfig
-	scheme   *runtime.Scheme
+	Log         logr.Logger
+	client      resource.Client
+	recorder    record.EventRecorder
+	config      FunctionConfig
+	scheme      *runtime.Scheme
+	gitOperator *git.Git
 }
 
 func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, recorder record.EventRecorder) *FunctionReconciler {
 	return &FunctionReconciler{
-		client:   client,
-		Log:      log.WithName("controllers").WithName("function"),
-		config:   config,
-		recorder: recorder,
+		client:      client,
+		Log:         log.WithName("controllers").WithName("function"),
+		config:      config,
+		recorder:    recorder,
+		gitOperator: git.New(),
 	}
 }
 
@@ -54,6 +54,7 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 // Reconcile reads that state of the cluster for a Function object and makes changes based on the state read and what is in the Function.Spec
 // +kubebuilder:rbac:groups="serverless.kyma-project.io",resources=functions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="serverless.kyma-project.io",resources=functions/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups="serverless.kyma-project.io",resources=gitrepositories,verbs=get
 // +kubebuilder:rbac:groups="apps",resources=deployments,verbs=get;list;watch;create;update;patch;delete;deletecollection
 // +kubebuilder:rbac:groups="apps",resources=deployments/status,verbs=get
 // +kubebuilder:rbac:groups="batch",resources=jobs,verbs=get;list;watch;create;update;patch;delete;deletecollection
@@ -113,11 +114,22 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, err
 	}
 
-	revision, err := r.syncRevision(ctx, instance)
+	gitOptions, err := r.readGITOptions(ctx, instance)
 	if err != nil {
-		return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionConfigurationReady,
-			Status:             corev1.ConditionTrue,
+			Status:             corev1.ConditionFalse,
+			LastTransitionTime: metav1.Now(),
+			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
+			Message:            fmt.Sprintf("Sources update failed: %v", err),
+		})
+	}
+
+	revision, err := r.syncRevision(instance, gitOptions)
+	if err != nil {
+		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+			Type:               serverlessv1alpha1.ConditionConfigurationReady,
+			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
 			Message:            fmt.Sprintf("Sources update failed: %v", err),
@@ -125,18 +137,17 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	}
 
 	switch {
-	case instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit && isOnSourceChange(instance, revision):
+	case instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit && r.isOnSourceChange(instance, revision):
 		return r.onSourceChange(ctx, instance, &serverlessv1alpha1.Repository{
-			Branch:  instance.Spec.Branch,
-			Commit:  revision,
-			BaseDir: instance.Spec.Repository.BaseDir,
-			Runtime: instance.Spec.Repository.Runtime,
-		})
+			Reference: instance.Spec.Reference,
+			BaseDir:   instance.Spec.Repository.BaseDir,
+			Runtime:   instance.Spec.Repository.Runtime,
+		}, revision)
 	case instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit && r.isOnConfigMapChange(instance, configMaps.Items, deployments.Items):
 		return r.onConfigMapChange(ctx, log, instance, configMaps.Items)
-	case instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, jobs.Items, deployments.Items):
-		return r.onGitJobChange(ctx, log, instance, jobs.Items)
-	case instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, jobs.Items, deployments.Items):
+	case instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, jobs.Items, deployments.Items, gitOptions):
+		return r.onGitJobChange(ctx, log, instance, jobs.Items, gitOptions)
+	case instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, jobs.Items, deployments.Items, git.Options{}):
 		return r.onJobChange(ctx, log, instance, configMaps.Items[0].GetName(), jobs.Items)
 	case r.isOnDeploymentChange(instance, deployments.Items):
 		return r.onDeploymentChange(ctx, log, instance, deployments.Items)
@@ -149,58 +160,70 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	}
 }
 
-func isOnSourceChange(instance *serverlessv1alpha1.Function, commit string) bool {
+func (r *FunctionReconciler) isOnSourceChange(instance *serverlessv1alpha1.Function, commit string) bool {
 	return instance.Status.Commit == "" ||
 		commit != instance.Status.Commit ||
-		instance.Spec.Branch != instance.Status.Branch ||
+		instance.Spec.Reference != instance.Status.Reference ||
 		instance.Spec.Runtime != instance.Status.Runtime ||
-		instance.Spec.BaseDir != instance.Status.BaseDir
+		instance.Spec.BaseDir != instance.Status.BaseDir ||
+		r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady) == corev1.ConditionFalse
 }
 
-func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository) (ctrl.Result, error) {
-	return r.updateStatus2(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository, commit string) (ctrl.Result, error) {
+	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionConfigurationReady,
 		Status:             corev1.ConditionTrue,
 		LastTransitionTime: metav1.Now(),
 		Reason:             serverlessv1alpha1.ConditionReasonSourceUpdated,
 		Message:            fmt.Sprintf("Sources %s updated", instance.Name),
-	}, repository)
+	}, repository, commit)
 }
 
-var gitOperator = git.New()
+func (r *FunctionReconciler) syncRevision(instance *serverlessv1alpha1.Function, options git.Options) (string, error) {
+	if instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit {
+		return r.gitOperator.LastCommit(options)
+	}
+	return "", nil
+}
 
-func seekLatestCommit(instance *serverlessv1alpha1.Function, credentials map[string]string) (string, error) {
-	if instance.Spec.Commit != "" {
-		return instance.Spec.Commit, nil
+func (r *FunctionReconciler) readGITOptions(ctx context.Context, instance *serverlessv1alpha1.Function) (git.Options, error) {
+	if instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit {
+		return git.Options{}, nil
 	}
 
-	commit, err := gitOperator.LastCommit(instance.Spec.Source, instance.Spec.Repository.Branch, nil)
-	return commit, err
-}
+	var gitRepository serverlessv1alpha1.GitRepository
+	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: instance.Spec.Source}, &gitRepository); err != nil {
+		return git.Options{}, err
+	}
 
-func (r *FunctionReconciler) syncRevision(ctx context.Context, instance *serverlessv1alpha1.Function) (string, error) {
-	revision := instance.Spec.Commit
-	if instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit && revision == "" && instance.Spec.Repository.Branch != "" {
+	var auth *git.AuthOptions
+	if gitRepository.Spec.Auth != nil {
 		var secret corev1.Secret
-		isSecretFound := true
-		var err error
-		var credentials map[string]string
-
-		if err = r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: instance.Name}, &secret); err != nil {
-			isSecretFound = false
-			if !errors.IsNotFound(err) {
-				return "", err
-			}
+		if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: gitRepository.Spec.Auth.SecretName}, &secret); err != nil {
+			return git.Options{}, err
 		}
-
-		if isSecretFound {
-			credentials = secret.StringData
-		}
-
-		revision, err = seekLatestCommit(instance, credentials)
-		if err != nil {
-			return "", err
+		auth = &git.AuthOptions{
+			Type:        git.RepositoryAuthType(gitRepository.Spec.Auth.Type),
+			Credentials: r.readSecretData(secret.Data),
+			SecretName:  gitRepository.Spec.Auth.SecretName,
 		}
 	}
-	return revision, nil
+
+	if instance.Spec.Reference == "" {
+		return git.Options{}, fmt.Errorf("reference has to specified")
+	}
+
+	return git.Options{
+		URL:       gitRepository.Spec.URL,
+		Reference: instance.Spec.Reference,
+		Auth:      auth,
+	}, nil
+}
+
+func (r *FunctionReconciler) readSecretData(data map[string][]byte) map[string]string {
+	output := make(map[string]string)
+	for k, v := range data {
+		output[k] = string(v)
+	}
+	return output
 }

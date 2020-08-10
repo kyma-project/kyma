@@ -699,9 +699,21 @@ type Namespace {
     applications: [String!]
 }
 
+type NamespaceListItem {
+    name: String!
+    labels: Labels
+    status: String!
+    isSystemNamespace: Boolean!
+    podsCount: Int!
+    healthyPodsCount: Int!
+
+    # Depends on application module
+    applicationsCount: Int
+}
+
 type NamespaceEvent {
     type: SubscriptionEventType!
-    namespace: Namespace!
+    namespace: NamespaceListItem!
 }
 
 type NamespaceMutationOutput {
@@ -1037,7 +1049,7 @@ type Query {
     connectorService(application: String!): ConnectorService! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
 
     # Depends on 'application'
-    namespaces(withSystemNamespaces: Boolean, withInactiveStatus: Boolean): [Namespace!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
+    namespaces(withSystemNamespaces: Boolean, withInactiveStatus: Boolean): [NamespaceListItem!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
     namespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
 
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]! @HasAccess(attributes: {resource: "deployments", verb: "list", apiGroup: "apps", apiVersion: "v1beta2", namespaceArg: "namespace"})
