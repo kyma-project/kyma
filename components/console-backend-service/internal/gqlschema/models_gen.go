@@ -11,7 +11,7 @@ import (
 	v1alpha12 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
-	v1 "knative.dev/pkg/apis/duck/v1"
+	"knative.dev/pkg/apis/duck/v1"
 )
 
 type AddonsConfiguration struct {
@@ -422,7 +422,7 @@ type MicroFrontend struct {
 
 type NamespaceEvent struct {
 	Type      SubscriptionEventType `json:"type"`
-	Namespace *Namespace            `json:"namespace"`
+	Namespace *NamespaceListItem    `json:"namespace"`
 }
 
 type NamespaceMutationOutput struct {

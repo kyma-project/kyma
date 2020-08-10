@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Script for build preview of this repo like in https://kyma-project.io/docs/ on every PR.
-# For more information, please contact with: @michal-hudy @m00g3n @aerfio @pPrecel @magicmatatjahu
+# For more information, please contact with: @m00g3n @aerfio @pPrecel @magicmatatjahu
 
 set -eo pipefail
 
@@ -45,7 +45,7 @@ copy-website-repo() {
 }
 
 build-preview() {
-  export PREVIEW_SOURCE_DIR="${KYMA_PROJECT_IO_DIR}/.." 
+  export PREVIEW_SOURCE_DIR="${KYMA_PROJECT_IO_DIR}/.."
   make -C "${BUILD_DIR}" netlify-docs-preview
 }
 

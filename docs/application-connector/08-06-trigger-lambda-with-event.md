@@ -162,10 +162,9 @@ To create a simple Function and trigger it with an event, you must first registe
          type: exampleevent
      subscriber:
        ref:
-         apiVersion: serving.knative.dev/v1
+         apiVersion: v1
          kind: Service
          name: my-events-function
-         namespace: $NAMESPACE
    EOF
    ```
 

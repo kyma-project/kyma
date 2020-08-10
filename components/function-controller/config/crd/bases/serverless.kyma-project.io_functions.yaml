@@ -51,6 +51,8 @@ spec:
         spec:
           description: FunctionSpec defines the desired state of Function
           properties:
+            baseDir:
+              type: string
             deps:
               description: Deps defines the dependencies for a function
               type: string
@@ -166,6 +168,8 @@ spec:
               format: int32
               minimum: 1
               type: integer
+            reference:
+              type: string
             resources:
               description: ResourceRequirements describes the compute resource requirements.
               properties:
@@ -184,8 +188,14 @@ spec:
                     value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                   type: object
               type: object
+            runtime:
+              enum:
+              - nodejs-12
+              type: string
             source:
               description: Source defines the source code of a function
+              type: string
+            type:
               type: string
           required:
           - source
@@ -194,6 +204,10 @@ spec:
           description: 'FunctionStatus defines the observed state of FuncSONPath:
             .status.phase'
           properties:
+            baseDir:
+              type: string
+            commit:
+              type: string
             conditions:
               items:
                 properties:
@@ -213,6 +227,14 @@ spec:
                 - status
                 type: object
               type: array
+            reference:
+              type: string
+            runtime:
+              enum:
+              - nodejs-12
+              type: string
+            source:
+              type: string
           type: object
       type: object
   version: v1alpha1

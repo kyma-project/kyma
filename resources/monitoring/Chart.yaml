@@ -1,13 +1,7 @@
 apiVersion: v1
+description: Kyma component 'monitoring'
 name: monitoring
-description: Monitoring chart based on kube-prometheus
-engine: gotpl
-version: 8.12.6
-tillerVersion: ">=2.12.0"
-sources:
-  - https://github.com/coreos/kube-prometheus
-  - https://github.com/coreos/prometheus-operator
-  - https://coreos.com/operators/prometheus
-keywords:
-- monitoring
-- kyma
+version: 1.0.0
+# version: 8.12.6
+home: https://kyma-project.io
+icon: https://github.com/kyma-project/kyma/blob/master/logo.png?raw=true

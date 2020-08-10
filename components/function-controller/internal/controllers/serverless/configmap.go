@@ -24,7 +24,7 @@ func (r *FunctionReconciler) createConfigMap(ctx context.Context, log logr.Logge
 	}
 	log.Info(fmt.Sprintf("ConfigMap %s created", configMap.GetName()))
 
-	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+	return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionConfigurationReady,
 		Status:             corev1.ConditionTrue,
 		LastTransitionTime: metav1.Now(),
@@ -47,7 +47,7 @@ func (r *FunctionReconciler) updateConfigMap(ctx context.Context, log logr.Logge
 	}
 	log.Info(fmt.Sprintf("ConfigMap %s updated", configMap.GetName()))
 
-	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+	return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionConfigurationReady,
 		Status:             corev1.ConditionTrue,
 		LastTransitionTime: metav1.Now(),

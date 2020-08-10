@@ -3,6 +3,8 @@
 package fake
 
 import (
+	"context"
+
 	v1alpha1 "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -23,7 +25,7 @@ var microfrontendsResource = schema.GroupVersionResource{Group: "ui.kyma-project
 var microfrontendsKind = schema.GroupVersionKind{Group: "ui.kyma-project.io", Version: "v1alpha1", Kind: "MicroFrontend"}
 
 // Get takes name of the microFrontend, and returns the corresponding microFrontend object, and an error if there is any.
-func (c *FakeMicroFrontends) Get(name string, options v1.GetOptions) (result *v1alpha1.MicroFrontend, err error) {
+func (c *FakeMicroFrontends) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.MicroFrontend, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(microfrontendsResource, c.ns, name), &v1alpha1.MicroFrontend{})
 
@@ -34,7 +36,7 @@ func (c *FakeMicroFrontends) Get(name string, options v1.GetOptions) (result *v1
 }
 
 // List takes label and field selectors, and returns the list of MicroFrontends that match those selectors.
-func (c *FakeMicroFrontends) List(opts v1.ListOptions) (result *v1alpha1.MicroFrontendList, err error) {
+func (c *FakeMicroFrontends) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.MicroFrontendList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(microfrontendsResource, microfrontendsKind, c.ns, opts), &v1alpha1.MicroFrontendList{})
 
@@ -56,14 +58,14 @@ func (c *FakeMicroFrontends) List(opts v1.ListOptions) (result *v1alpha1.MicroFr
 }
 
 // Watch returns a watch.Interface that watches the requested microFrontends.
-func (c *FakeMicroFrontends) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeMicroFrontends) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(microfrontendsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a microFrontend and creates it.  Returns the server's representation of the microFrontend, and an error, if there is any.
-func (c *FakeMicroFrontends) Create(microFrontend *v1alpha1.MicroFrontend) (result *v1alpha1.MicroFrontend, err error) {
+func (c *FakeMicroFrontends) Create(ctx context.Context, microFrontend *v1alpha1.MicroFrontend, opts v1.CreateOptions) (result *v1alpha1.MicroFrontend, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewCreateAction(microfrontendsResource, c.ns, microFrontend), &v1alpha1.MicroFrontend{})
 
@@ -74,7 +76,7 @@ func (c *FakeMicroFrontends) Create(microFrontend *v1alpha1.MicroFrontend) (resu
 }
 
 // Update takes the representation of a microFrontend and updates it. Returns the server's representation of the microFrontend, and an error, if there is any.
-func (c *FakeMicroFrontends) Update(microFrontend *v1alpha1.MicroFrontend) (result *v1alpha1.MicroFrontend, err error) {
+func (c *FakeMicroFrontends) Update(ctx context.Context, microFrontend *v1alpha1.MicroFrontend, opts v1.UpdateOptions) (result *v1alpha1.MicroFrontend, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateAction(microfrontendsResource, c.ns, microFrontend), &v1alpha1.MicroFrontend{})
 
@@ -85,7 +87,7 @@ func (c *FakeMicroFrontends) Update(microFrontend *v1alpha1.MicroFrontend) (resu
 }
 
 // Delete takes name of the microFrontend and deletes it. Returns an error if one occurs.
-func (c *FakeMicroFrontends) Delete(name string, options *v1.DeleteOptions) error {
+func (c *FakeMicroFrontends) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
 		Invokes(testing.NewDeleteAction(microfrontendsResource, c.ns, name), &v1alpha1.MicroFrontend{})
 
@@ -93,15 +95,15 @@ func (c *FakeMicroFrontends) Delete(name string, options *v1.DeleteOptions) erro
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeMicroFrontends) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(microfrontendsResource, c.ns, listOptions)
+func (c *FakeMicroFrontends) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+	action := testing.NewDeleteCollectionAction(microfrontendsResource, c.ns, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.MicroFrontendList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched microFrontend.
-func (c *FakeMicroFrontends) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.MicroFrontend, err error) {
+func (c *FakeMicroFrontends) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.MicroFrontend, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(microfrontendsResource, c.ns, name, pt, data, subresources...), &v1alpha1.MicroFrontend{})
 
