@@ -1785,7 +1785,7 @@ data:
         }
       }
       ],
-      "refresh": "5s",
+      "refresh": "10s",
       "schemaVersion": 16,
       "style": "dark",
       "tags": [

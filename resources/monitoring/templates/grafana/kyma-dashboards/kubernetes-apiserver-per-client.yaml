@@ -426,6 +426,7 @@ data:
         "from": "now-6h",
         "to": "now"
       },
+      "refresh": "10s",
       "timepicker": {
         "refresh_intervals": [
           "5s",
