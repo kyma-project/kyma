@@ -261,22 +261,6 @@ func (r *mutationResolver) DeleteManyFunctions(ctx context.Context, namespace st
 	return r.serverless.Resolver.DeleteManyFunctions(ctx, namespace, functions)
 }
 
-func (r *mutationResolver) CreateTrigger(ctx context.Context, namespace string, trigger gqlschema.TriggerCreateInput, ownerRef []*gqlschema.OwnerReference) (*gqlschema.Trigger, error) {
-	return r.eventing.CreateTrigger(ctx, namespace, trigger, ownerRef)
-}
-
-func (r *mutationResolver) CreateManyTriggers(ctx context.Context, namespace string, triggers []*gqlschema.TriggerCreateInput, ownerRef []*gqlschema.OwnerReference) ([]*gqlschema.Trigger, error) {
-	return r.eventing.CreateManyTriggers(ctx, namespace, triggers, ownerRef)
-}
-
-func (r *mutationResolver) DeleteTrigger(ctx context.Context, namespace string, trigger gqlschema.TriggerMetadataInput) (*gqlschema.TriggerMetadata, error) {
-	return r.eventing.DeleteTrigger(ctx, namespace, trigger)
-}
-
-func (r *mutationResolver) DeleteManyTriggers(ctx context.Context, namespace string, triggers []*gqlschema.TriggerMetadataInput) ([]*gqlschema.TriggerMetadata, error) {
-	return r.eventing.DeleteManyTriggers(ctx, namespace, triggers)
-}
-
 func (r *namespaceResolver) Pods(ctx context.Context, obj *gqlschema.Namespace) ([]*gqlschema.Pod, error) {
 	return r.k8s.PodsQuery(ctx, obj.Name, nil, nil)
 }
@@ -287,6 +271,18 @@ func (r *namespaceResolver) Deployments(ctx context.Context, obj *gqlschema.Name
 
 func (r *namespaceResolver) Applications(ctx context.Context, obj *gqlschema.Namespace) ([]string, error) {
 	return r.k8s.ApplicationsField(ctx, obj)
+}
+
+func (r *namespaceListItemResolver) PodsCount(ctx context.Context, obj *gqlschema.NamespaceListItem) (int, error) {
+	return r.k8s.PodsCountField(ctx, obj)
+}
+
+func (r *namespaceListItemResolver) HealthyPodsCount(ctx context.Context, obj *gqlschema.NamespaceListItem) (int, error) {
+	return r.k8s.HealthyPodsCountField(ctx, obj)
+}
+
+func (r *namespaceListItemResolver) ApplicationsCount(ctx context.Context, obj *gqlschema.NamespaceListItem) (*int, error) {
+	return r.k8s.ApplicationsCountField(ctx, obj)
 }
 
 func (r *queryResolver) ClusterAssetGroups(ctx context.Context, viewContext *string, groupName *string) ([]*gqlschema.ClusterAssetGroup, error) {
@@ -330,7 +326,7 @@ func (r *queryResolver) ServiceBrokers(ctx context.Context, namespace string, fi
 }
 
 func (r *queryResolver) ServiceBroker(ctx context.Context, name string, namespace string) (*gqlschema.ServiceBroker, error) {
-	return r.sc.Resolver.ServiceBrokerQuery(ctx, namespace, name)
+	return r.sc.Resolver.ServiceBrokerQuery(ctx, name, namespace)
 }
 
 func (r *queryResolver) ServiceBindingUsage(ctx context.Context, name string, namespace string) (*gqlschema.ServiceBindingUsage, error) {
@@ -373,7 +369,7 @@ func (r *queryResolver) ConnectorService(ctx context.Context, application string
 	return r.app.Resolver.ConnectorServiceQuery(ctx, application)
 }
 
-func (r *queryResolver) Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]*gqlschema.Namespace, error) {
+func (r *queryResolver) Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]*gqlschema.NamespaceListItem, error) {
 	return r.k8s.NamespacesQuery(ctx, withSystemNamespaces, withInactiveStatus)
 }
 
@@ -467,10 +463,6 @@ func (r *queryResolver) Function(ctx context.Context, name string, namespace str
 
 func (r *queryResolver) Functions(ctx context.Context, namespace string) ([]*gqlschema.Function, error) {
 	return r.serverless.FunctionsQuery(ctx, namespace)
-}
-
-func (r *queryResolver) Triggers(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) ([]*gqlschema.Trigger, error) {
-	return r.eventing.TriggersQuery(ctx, namespace, subscriber)
 }
 
 func (r *serviceBindingResolver) Secret(ctx context.Context, obj *gqlschema.ServiceBinding) (*gqlschema.Secret, error) {
@@ -581,6 +573,10 @@ func (r *subscriptionResolver) PodEvent(ctx context.Context, namespace string) (
 	return r.k8s.PodEventSubscription(ctx, namespace)
 }
 
+func (r *subscriptionResolver) DeploymentEvent(ctx context.Context, namespace string) (<-chan *gqlschema.DeploymentEvent, error) {
+	return r.k8s.DeploymentEventSubscription(ctx, namespace)
+}
+
 func (r *subscriptionResolver) ServiceEvent(ctx context.Context, namespace string) (<-chan *gqlschema.ServiceEvent, error) {
 	return r.k8s.ServiceEventSubscription(ctx, namespace)
 }
@@ -603,10 +599,6 @@ func (r *subscriptionResolver) NamespaceEvent(ctx context.Context, withSystemNam
 
 func (r *subscriptionResolver) FunctionEvent(ctx context.Context, namespace string, functionName *string) (<-chan *gqlschema.FunctionEvent, error) {
 	return r.serverless.FunctionEventSubscription(ctx, namespace, functionName)
-}
-
-func (r *subscriptionResolver) TriggerEvent(ctx context.Context, namespace string, subscriber *gqlschema.SubscriberInput) (<-chan *gqlschema.TriggerEvent, error) {
-	return r.eventing.TriggerEventSubscription(ctx, namespace, subscriber)
 }
 
 // Application returns gqlschema.ApplicationResolver implementation.
@@ -650,6 +642,11 @@ func (r *Resolver) Mutation() gqlschema.MutationResolver { return &mutationResol
 // Namespace returns gqlschema.NamespaceResolver implementation.
 func (r *Resolver) Namespace() gqlschema.NamespaceResolver { return &namespaceResolver{r} }
 
+// NamespaceListItem returns gqlschema.NamespaceListItemResolver implementation.
+func (r *Resolver) NamespaceListItem() gqlschema.NamespaceListItemResolver {
+	return &namespaceListItemResolver{r}
+}
+
 // Query returns gqlschema.QueryResolver implementation.
 func (r *Resolver) Query() gqlschema.QueryResolver { return &queryResolver{r} }
 
@@ -688,6 +685,7 @@ type deploymentResolver struct{ *Resolver }
 type eventActivationResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type namespaceResolver struct{ *Resolver }
+type namespaceListItemResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type serviceBindingResolver struct{ *Resolver }
 type serviceBindingUsageResolver struct{ *Resolver }

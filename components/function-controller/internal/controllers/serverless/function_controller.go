@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,9 +23,7 @@ var (
 	envVarsForDeployment = []corev1.EnvVar{
 		{Name: "FUNC_HANDLER", Value: "main"},
 		{Name: "MOD_NAME", Value: "handler"},
-		{Name: "FUNC_TIMEOUT", Value: "180"},
 		{Name: "FUNC_RUNTIME", Value: "nodejs12"},
-		// {Name: "FUNC_MEMORY_LIMIT", Value: "128Mi"},
 		{Name: "FUNC_PORT", Value: "8080"},
 		{Name: "NODE_PATH", Value: "$(KUBELESS_INSTALL_VOLUME)/node_modules"},
 	}
@@ -65,15 +64,44 @@ func (r *FunctionReconciler) calculateImageTag(instance *serverlessv1alpha1.Func
 	return fmt.Sprintf("%x", hash)
 }
 
-func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) (ctrl.Result, error) {
+func (r *FunctionReconciler) updateStatusWithoutRepository(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) (ctrl.Result, error) {
+	return r.updateStatus(ctx, result, instance, condition, nil)
+}
+
+func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.Function) string {
+	data := strings.Join([]string{
+		string(instance.GetUID()),
+		instance.Status.Repository.Commit,
+		instance.Status.Repository.BaseDir,
+	}, "-")
+	hash := sha256.Sum256([]byte(data))
+	return fmt.Sprintf("%x", hash)
+}
+
+func (r *FunctionReconciler) updateStatus(
+	ctx context.Context,
+	result ctrl.Result,
+	instance *serverlessv1alpha1.Function,
+	condition serverlessv1alpha1.Condition,
+	repository *serverlessv1alpha1.Repository) (ctrl.Result, error) {
 	condition.LastTransitionTime = metav1.Now()
 
 	service := instance.DeepCopy()
 	service.Status.Conditions = r.updateCondition(service.Status.Conditions, condition)
 
-	if r.equalConditions(instance.Status.Conditions, service.Status.Conditions) {
+	equalConditions := r.equalConditions(instance.Status.Conditions, service.Status.Conditions)
+	if equalConditions && instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit {
 		return result, nil
 	}
+	// checking if status changed in gitops flow
+	if equalConditions && r.equalRepositories(instance.Status.Repository, repository) {
+		return result, nil
+	}
+
+	if repository != nil {
+		service.Status.Repository = *repository
+	}
+	service.Status.Source = instance.Spec.Source
 
 	if err := r.client.Status().Update(ctx, service); err != nil {
 		return ctrl.Result{}, err
@@ -123,6 +151,18 @@ func (r *FunctionReconciler) equalConditions(existing, expected []serverlessv1al
 	}
 
 	return true
+}
+
+func (r *FunctionReconciler) equalRepositories(existing serverlessv1alpha1.Repository, new *serverlessv1alpha1.Repository) bool {
+	if new == nil {
+		return true
+	}
+	expected := *new
+
+	return existing.Commit == expected.Commit &&
+		existing.Branch == expected.Branch &&
+		existing.BaseDir == expected.BaseDir &&
+		existing.Runtime == expected.Runtime
 }
 
 func (r *FunctionReconciler) getConditionStatus(conditions []serverlessv1alpha1.Condition, conditionType serverlessv1alpha1.ConditionType) corev1.ConditionStatus {

@@ -157,7 +157,7 @@ func (s *DeployFunction) isFunctionReady() error {
 	}
 
 	if !s.isReady(function) {
-		return errors.New("function is not ready yet")
+		return fmt.Errorf("function is not ready yet: %+v \n", function)
 	}
 
 	return nil

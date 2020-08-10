@@ -17,7 +17,7 @@ metadata:
 spec:
   limits:
   - max:
-      memory: 1024Mi # Maximum memory that a container can request
+      memory: 2048Mi # Maximum memory that a container can request
     default:
       # If a container does not specify memory limit, this default value will be applied.
       # If a container tries to allocate more memory, container will be OOM killed.
@@ -148,8 +148,9 @@ spec:
           fi
 
           echo "---> Get current releases"
+          set -o pipefail
           ${HELM_2_BINARY} ls --tls --all --output json | jq '.Releases[] | .Name + " " + .Namespace + " " + .Chart' | tr -d '"' > helm2-releases
-
+          set +o pipefail
           if [[ ! $(${HELM_3_BINARY} plugin list | grep '2to3') ]]; then
             echo "---> Get migration plugin"
             ${HELM_3_BINARY} plugin install https://github.com/helm/helm-2to3.git
@@ -188,6 +189,11 @@ spec:
         args:
           - -overrideLogFile=/app/overrides.txt
           - -helmDebugMode=true
+        resources:
+          requests:
+            memory: 512Mi
+          limits:
+            memory: 2Gi
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1

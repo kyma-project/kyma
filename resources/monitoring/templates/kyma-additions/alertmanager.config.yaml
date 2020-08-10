@@ -47,7 +47,7 @@ receivers:
 - name: "victorOps"
   victorops_configs:
   - api_key: {{ .Values.global.alertTools.credentials.victorOps.apikey | quote }}
-    send_resolved: true
+    send_resolved: {{ .Values.global.alertTools.credentials.victorOps.sendResolved }}
     api_url: https://alert.victorops.com/integrations/generic/20131114/alert/
     routing_key: {{ .Values.global.alertTools.credentials.victorOps.routingkey | quote }}
     state_message: 'Alert: {{`{{ .CommonLabels.alertname }}`}}. Summary:{{`{{ .CommonAnnotations.message }}`}}. RawData: {{`{{ .CommonLabels }}`}}'
@@ -59,7 +59,7 @@ receivers:
 - name: "slack"
   slack_configs:
   - channel: {{ .Values.global.alertTools.credentials.slack.channel | quote }}
-    send_resolved: true
+    send_resolved: {{ .Values.global.alertTools.credentials.slack.sendResolved }}
     api_url: {{ .Values.global.alertTools.credentials.slack.apiurl | quote }}
     icon_emoji: ":ghost:"
     title: '{{`{{ template "__subject" . }}`}} ({{ .Values.global.ingress.domainName }})'

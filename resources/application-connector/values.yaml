@@ -40,7 +40,7 @@ global:
   event_service:
     version: "PR-8874"
   event_service_integration_tests:
-    version: "PR-8874"
+    version: "PR-9085"
   application_gateway:
     version: "b06fbd6f"
   application_gateway_tests:
@@ -76,5 +76,5 @@ tests:
       central: false
     skipSslVerify: true
     image:
-      version: "5afd3227"
+      version: "PR-9123"
       pullPolicy: IfNotPresent

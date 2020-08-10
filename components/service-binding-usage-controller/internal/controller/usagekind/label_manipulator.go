@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"errors"
-
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -41,24 +39,6 @@ func (lm *labelManipulator) EnsureLabelsAreDeleted(res *unstructured.Unstructure
 	}
 
 	return nil
-}
-
-func (lm *labelManipulator) DetectLabelsConflicts(res *unstructured.Unstructured, labelsToCheck map[string]string) ([]string, error) {
-	labels, err := lm.findOrCreateLabelsField(res)
-	if err != nil {
-		return nil, err
-	}
-
-	result := make([]string, 0)
-	for k := range labelsToCheck {
-		if _, exist := labels[k]; exist {
-			result = append(result, k)
-		}
-	}
-	if len(result) != 0 {
-		return result, errors.New("labels conflicts detected")
-	}
-	return nil, nil
 }
 
 func (lm *labelManipulator) findOrCreateLabelsField(res *unstructured.Unstructured) (map[string]interface{}, error) {

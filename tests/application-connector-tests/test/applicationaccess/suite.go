@@ -231,7 +231,8 @@ func (ts *TestSuite) ShouldAccessApplication(t *testing.T, credentials connector
 			return false, nil
 		}
 
-		if errorResponse.Code == http.StatusServiceUnavailable || errorResponse.Code == http.StatusNotFound {
+		// Event Service returns 500 when Event Mesh is not ready, therefore retry on any error status
+		if errorResponse.Code != http.StatusOK {
 			t.Logf("Event Service not ready, received %d status", errorResponse.Code)
 			return true, nil
 		}

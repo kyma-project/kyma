@@ -18,7 +18,7 @@ The Application Connectivity Validator verifies the subject of the client certif
 
 ## Connector Service
 
->**CAUTION:** With [Compass](https://github.com/kyma-incubator/compass) being the target API for the Application Connectivity topics, this component's API has been deprecated. To learn how to install Compass and integrate with it, refer to the [Compass documentation](https://github.com/kyma-incubator/compass/blob/master/docs/compass/04-01-installation.md) or to the [Director GraphQL schema](https://github.com/kyma-incubator/compass/blob/master/components/director/pkg/graphql/schema.graphql) directly. Backward compatibility is being preserved via the introduction of [Connectivity Adapter](https://github.com/kyma-incubator/compass/tree/master/components/connectivity-adapter).
+>**CAUTION:** With [Compass](https://github.com/kyma-incubator/compass) being the target API for the Application Connectivity topics, this component's API has been deprecated. To learn how to install Compass and integrate with it, refer to the [Compass documentation](https://kyma-project.io/docs/components/compass/#installation-enable-compass-in-kyma) or to the [Director GraphQL schema](https://github.com/kyma-incubator/compass/blob/master/components/director/pkg/graphql/schema.graphql) directly. Backward compatibility is being preserved via the introduction of [Connectivity Adapter](https://github.com/kyma-incubator/compass/tree/master/components/connectivity-adapter).
 
 The Connector Service:
 
@@ -28,7 +28,7 @@ The Connector Service:
 
 ## Application Registry
 
->**CAUTION:** With [Compass](https://github.com/kyma-incubator/compass) being the target API for the Application Connectivity topics, this component's API has been deprecated. To learn how to install Compass and integrate with it, refer to the [Compass documentation](https://github.com/kyma-incubator/compass/blob/master/docs/compass/04-01-installation.md) or to the [Director GraphQL schema](https://github.com/kyma-incubator/compass/blob/master/components/director/pkg/graphql/schema.graphql) directly. Backward compatibility is being preserved via the introduction of [Connectivity Adapter](https://github.com/kyma-incubator/compass/tree/master/components/connectivity-adapter).
+>**CAUTION:** With [Compass](https://github.com/kyma-incubator/compass) being the target API for the Application Connectivity topics, this component's API has been deprecated. To learn how to install Compass and integrate with it, refer to the [Compass documentation](https://kyma-project.io/docs/components/compass/#installation-enable-compass-in-kyma) or to the [Director GraphQL schema](https://github.com/kyma-incubator/compass/blob/master/components/director/pkg/graphql/schema.graphql) directly. Backward compatibility is being preserved via the introduction of [Connectivity Adapter](https://github.com/kyma-incubator/compass/tree/master/components/connectivity-adapter).
 
 The Application Registry saves and reads the APIs and Event Catalog metadata of the connected external solution in the [Application](#custom-resource-application) custom resource.
 The system creates a new Kubernetes service for each registered API.
@@ -48,13 +48,13 @@ All Applications are instances of the Application custom resource, which also st
 
 ## Application Broker
 
-The Application Broker (AB) watches all [Application](#custom-resource-application) custom resources. These custom resources contain definitions of the external solutions’ APIs and events. The AB exposes those APIs and events definitions as ServiceClasses to the Service Catalog. Create an ApplicationMapping to provision those ServiceClasses and enable them for Kyma services. This allows you to extend the functionality of existing systems.
+The Application Broker (AB) watches all [Application](#custom-resource-application) custom resources. These custom resources contain definitions of the external solutions’ APIs and events. The AB exposes those APIs and events definitions as ServiceClasses to the Service Catalog. Create an ApplicationMapping to be able to provision those ServiceClasses and enable them for Kyma services. This allows you to extend the functionality of existing systems.
 
 The AB implements the [Open Service Broker API](https://www.openservicebrokerapi.org/). For more details, see the [Service Brokers documentation](/components/service-catalog/#overview-service-brokers).
 
 ## Application Operator
 
-The Application Operator (AO) can work in two modes. In the default legacy mode, the AO listens for creating or deleting the [Application](#custom-resource-application) custom resources and acts accordingly, either provisioning or deprovisioning an instance of the Application Gateway and the Event Service for every custom resource. In the alternative Compass mode, it listens for an additional resource, [ServiceInstance](/components/service-catalog/#architecture-resources). In this mode, it provisions an instance of the Application Gateway once per Namespace. That means that there is always only one Application Gateway per Namespace, even if there are more ServiceInstances and Applications. The Application Gateway gets deleted with the last ServiceInstance in that Namespace. The Compass mode is enabled by setting the **gatewayOncePerNamespace** [feature flag](https://github.com/kyma-project/kyma/blob/master/components/application-operator/README.md#usage) to true.  
+The Application Operator (AO) can work in two modes. In the default legacy mode, the AO listens for creating or deleting the [Application](#custom-resource-application) custom resources and acts accordingly, either provisioning or deprovisioning an instance of the Application Gateway and the Event Service for every custom resource. In the alternative Compass mode, it listens for an additional resource, [ServiceInstance](service-catalog#details-resources). In this mode, it provisions an instance of the Application Gateway once per Namespace. That means that there is always only one Application Gateway per Namespace, even if there are more ServiceInstances and Applications. The Application Gateway gets deleted with the last ServiceInstance in that Namespace. The Compass mode is enabled by setting the **gatewayOncePerNamespace** [feature flag](https://github.com/kyma-project/kyma/blob/master/components/application-operator/README.md#usage) to true.  
 
 >**NOTE:** Every Application custom resource corresponds to a single Application to which you can connect an external solution.
 

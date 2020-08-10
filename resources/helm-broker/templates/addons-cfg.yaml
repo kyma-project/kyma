@@ -1,0 +1,28 @@
+apiVersion: addons.kyma-project.io/v1alpha1
+kind: ClusterAddonsConfiguration
+metadata:
+  name: "helm-repos-urls"
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    addons.kyma-project.io/managed: "true"
+spec:
+  repositories:
+  - url: {{ .Values.defaultAddonsRepository | quote }}
+
+{{- range $name, $url := .Values.additionalAddonsRepositories }}
+{{- if $url }}
+---
+apiVersion: addons.kyma-project.io/v1alpha1
+kind: ClusterAddonsConfiguration
+metadata:
+  name: {{ $name | quote }}
+  labels:
+    app: {{ template "fullname" $ }}
+    chart: "{{ $.Chart.Name }}-{{ $.Chart.Version }}"
+    addons.kyma-project.io/managed: "true"
+spec:
+  repositories:
+  - url: {{ $url | quote }}
+{{- end }}
+{{- end }}

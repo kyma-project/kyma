@@ -51,7 +51,7 @@ func (r *FunctionReconciler) createService(ctx context.Context, log logr.Logger,
 	}
 	log.Info(fmt.Sprintf("Service %s created", service.GetName()))
 
-	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+	return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionRunning,
 		Status:             corev1.ConditionUnknown,
 		LastTransitionTime: metav1.Now(),
@@ -77,7 +77,7 @@ func (r *FunctionReconciler) updateService(ctx context.Context, log logr.Logger,
 	}
 	log.Info(fmt.Sprintf("Service %s updated", svc.GetName()))
 
-	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+	return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionRunning,
 		Status:             corev1.ConditionUnknown,
 		LastTransitionTime: metav1.Now(),

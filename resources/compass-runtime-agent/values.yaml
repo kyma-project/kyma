@@ -7,7 +7,7 @@ global:
     runtimeAgentTests:
       version: "1066324c"
     compassExternalSolutionTests:
-      version: "PR-8734"
+      version: "PR-9175"
   istio:
     gateway:
       name: kyma-gateway

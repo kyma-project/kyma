@@ -8,7 +8,6 @@ require (
 	github.com/apache/thrift v0.13.0 // indirect
 	github.com/blang/semver v3.5.0+incompatible
 	github.com/coreos/go-oidc v2.2.1+incompatible // indirect
-	github.com/docker/docker v1.13.1 // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
@@ -29,8 +28,8 @@ require (
 	github.com/kyma-project/kyma v0.5.1-0.20200609051543-f5997d4a36d6
 	github.com/kyma-project/kyma/components/function-controller v0.0.0-20200527102940-1579eff8c7a5
 	github.com/kyma-project/rafter v0.0.0-20200402080904-a0157e52e150
-	github.com/moby/moby v1.13.1
-	github.com/onsi/gomega v1.9.0
+	github.com/moby/moby v17.12.0-ce-rc1.0.20200618181300-9dc6525e6118+incompatible
+	github.com/onsi/gomega v1.9.0 // indirect
 	github.com/opentracing-contrib/go-observer v0.0.0-20170622124052-a52f23424492 // indirect
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/openzipkin-contrib/zipkin-go-opentracing v0.3.5 // indirect
@@ -63,4 +62,7 @@ require (
 	knative.dev/pkg v0.0.0-20200306005226-fc857aa77f79
 )
 
-replace k8s.io/client-go => k8s.io/client-go v0.17.4
+replace (
+	golang.org/x/text => golang.org/x/text v0.3.3
+	k8s.io/client-go => k8s.io/client-go v0.17.4
+)
