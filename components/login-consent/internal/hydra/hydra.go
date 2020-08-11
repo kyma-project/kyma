@@ -144,7 +144,7 @@ func (c *Client) get(flow, challenge string, output interface{}) (*http.Response
 	return c.do(req, output)
 }
 
-func (c *Client) put(flow, action, challenge string, body interface{}, output interface{}) (*http.Response, error) {
+func (c *Client) put(flow, action, challenge string, body, output interface{}) (*http.Response, error) {
 
 	relPath := path.Join(requestsEndpoint, flow, action)
 
