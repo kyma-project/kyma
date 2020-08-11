@@ -72,8 +72,7 @@ type appBrokerFlow struct {
 
 // CreateResources creates resources needed for e2e upgrade test
 func (ut *AppBrokerUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	f := ut.newFlow(stop, log, namespace)
-	return f.CreateResources()
+	return ut.newFlow(stop, log, namespace).CreateResources()
 }
 
 // TestResources tests resources after upgrade
@@ -149,8 +148,7 @@ func (f *appBrokerFlow) TestResources() error {
 			return err
 		}
 	}
-	f.reportLogs()
-	return errors.New("test")
+	return nil
 }
 
 func (f *appBrokerFlow) logReport() {
