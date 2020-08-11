@@ -6,7 +6,6 @@ import (
 	"github.com/kyma-project/kyma/components/login-consent/internal/endpoints"
 	log "github.com/sirupsen/logrus"
 	"net/http"
-	"os"
 )
 
 func main() {
@@ -32,11 +31,13 @@ func main() {
 	scopes := []string{"email", "openid", "profile", "groups"}
 	authn, err := endpoints.NewAuthenticator(dexAddress, clientID, clientSecret, redirectURL, scopes)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Error(err)
 	}
 
-	cfg := endpoints.NewConfig(hydraAddr, hydraPort, authn)
+	cfg, err := endpoints.New(hydraAddr, hydraPort, authn)
+	if err != nil {
+		log.Error(err)
+	}
 
 	m := http.NewServeMux()
 	m.HandleFunc("/login", cfg.Login)

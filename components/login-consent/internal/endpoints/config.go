@@ -2,14 +2,19 @@ package endpoints
 
 import (
 	"context"
+	"fmt"
 	"github.com/coreos/go-oidc"
+	"github.com/kyma-project/kyma/components/login-consent/internal/hydra"
 	"golang.org/x/oauth2"
+	"net/http"
+	"net/url"
 )
 
 type Config struct {
-	hydraAddr     string
-	hydraPort     string
+	client        hydra.Client
 	authenticator *Authenticator
+	challenge     string
+	state         string
 }
 
 type Authenticator struct {
@@ -40,10 +45,15 @@ func NewAuthenticator(dexAddress string, clientID string, clientSecret string, r
 	}, nil
 }
 
-func NewConfig(hydraAddr string, hydraPort string, authn *Authenticator) *Config {
-	return &Config{
-		hydraAddr:     hydraAddr,
-		hydraPort:     hydraPort,
-		authenticator: authn,
+func New(hydraAddr string, hydraPort string, authn *Authenticator) (*Config, error) {
+	rawHydraURL := fmt.Sprintf("%s:%s", hydraAddr, hydraPort)
+	hydraURL, err := url.Parse(rawHydraURL)
+	if err != nil {
+		return nil, err
 	}
+
+	return &Config{
+		client:        hydra.NewClient(&http.Client{}, *hydraURL, "https"),
+		authenticator: authn,
+	}, nil
 }

@@ -2,8 +2,6 @@ package endpoints
 
 import (
 	"github.com/coreos/go-oidc"
-	"github.com/kyma-project/kyma/components/login-consent/internal/hydra"
-	hydraAPI "github.com/ory/hydra-client-go/models"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -53,16 +51,16 @@ func (cfg *Config) Callback(w http.ResponseWriter, req *http.Request) {
 	//	return
 	//}
 
-	acceptLoginRequest := hydraAPI.AcceptLoginRequest{
-		Context:     idToken,
-		Remember:    idToken.Expiry.IsZero(),
-		RememberFor: 3600,
-		Subject:     &idToken.Subject,
-	}
-
-	hydraResp := hydra.AcceptLoginRequest(challenge, acceptLoginRequest)
-
-	http.Redirect(w, req, *hydraResp.RedirectTo, http.StatusFound)
+	//acceptLoginRequest := hydraAPI.AcceptLoginRequest{
+	//	Context:     idToken,
+	//	Remember:    idToken.Expiry.IsZero(),
+	//	RememberFor: 3600,
+	//	Subject:     &idToken.Subject,
+	//}
+	//
+	//hydraResp := hydra.AcceptLoginRequest(cfg.challenge, acceptLoginRequest)
+	//
+	//http.Redirect(w, req, *hydraResp.RedirectTo, http.StatusFound)
 
 	//data, err := json.MarshalIndent(resp, "", "    ")
 	//if err != nil {

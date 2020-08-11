@@ -2,11 +2,12 @@ package endpoints
 
 import (
 	"errors"
-	"github.com/kyma-project/kyma/components/login-consent/internal/hydra"
 	hydraAPI "github.com/ory/hydra-client-go/models"
 	log "github.com/sirupsen/logrus"
+	"math/rand"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 var challenge string
@@ -14,6 +15,7 @@ var challenge string
 func (cfg *Config) Login(w http.ResponseWriter, req *http.Request) {
 	var err error
 	challenge, err = getLoginChallenge(req.URL.Query())
+	//cfg.challenge = challenge
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		w.WriteHeader(http.StatusBadRequest)
@@ -21,16 +23,30 @@ func (cfg *Config) Login(w http.ResponseWriter, req *http.Request) {
 	}
 
 	log.Info("Fetching login request from Hydra")
-	loginReq := hydra.GetLoginRequest(challenge)
+	loginReq, err := cfg.client.GetLoginRequest(cfg.challenge)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	var redirectTo string
 	if *loginReq.Skip == true {
 		log.Info("Accepting login request")
-		response := hydra.AcceptLoginRequest(challenge, hydraAPI.AcceptLoginRequest{
+
+		body := &hydraAPI.AcceptLoginRequest{
 			Remember:    true,
 			RememberFor: 30,
 			Subject:     nil,
-		})
+		}
+
+		response, err := cfg.client.AcceptLoginRequest(challenge, body)
+		if err != nil {
+			w.Write([]byte(err.Error()))
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		redirectTo = *response.RedirectTo
 	} else {
 		log.Info("Showing dex login page")
@@ -48,4 +64,16 @@ func getLoginChallenge(query url.Values) (string, error) {
 	}
 
 	return challenges[0], nil
+}
+
+func generateRandomString(length int) string {
+	rand.Seed(time.Now().UnixNano())
+
+	letterRunes := []rune("abcdefghijklmnopqrstuvwxyz")
+
+	b := make([]rune, length)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
 }
