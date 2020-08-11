@@ -82,8 +82,8 @@ spec:
           mountPath: /secure/forward-tls-ca.crt
           subPath: forward-tls-ca.crt
 {{- end }}
-{{- if .Values.extraVolumeMounts }}
-        {{- toYaml .Values.extraVolumeMounts | trim | nindent 8 }}
+{{- with .Values.extraVolumeMounts }}
+        {{- tpl . $ | nindent 8}}
 {{- end }}
 {{- if .Values.prometheusPushGateway.enabled }}
       - name: metrics-collector
@@ -175,8 +175,8 @@ spec:
           items:
           - key: cron
             path: metrics
-{{- end }}
-{{- if .Values.extraVolumes }}
-      {{- toYaml .Values.extraVolumes | trim | nindent 6 }}
+{{- end }} 
+{{- with .Values.extraVolumes }}
+      {{- tpl . $ | nindent 6}}
 {{- end }}
 {{- end }}

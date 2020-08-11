@@ -97,14 +97,14 @@ type Condition struct {
 type FunctionStatus struct {
 	Conditions []Condition `json:"conditions,omitempty"`
 	Repository `json:",inline,omitempty"`
+	Commit     string `json:"commit,omitempty"`
 	Source     string `json:"source,omitempty"`
 }
 
 type Repository struct {
-	BaseDir string  `json:"baseDir,omitempty"`
-	Runtime Runtime `json:"runtime,omitempty"`
-	Commit  string  `json:"commit,omitempty"`
-	Branch  string  `json:"branch,omitempty"`
+	BaseDir   string  `json:"baseDir,omitempty"`
+	Runtime   Runtime `json:"runtime,omitempty"`
+	Reference string  `json:"reference,omitempty"`
 }
 
 // Function is the Schema for the functions API

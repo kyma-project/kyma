@@ -947,7 +947,7 @@ data:
           }
         }
       ],
-      "refresh": "5s",
+      "refresh": "10s",
       "schemaVersion": 21,
       "style": "dark",
       "tags": [
@@ -958,7 +958,7 @@ data:
         "list": []
       },
       "time": {
-        "from": "now-30m",
+        "from": "now-1h",
         "to": "now"
       },
       "timepicker": {
@@ -986,7 +986,7 @@ data:
           "30d"
         ]
       },
-      "timezone": "browser",
+      "timezone": "",
       "title": "Kyma / Kubernetes / API Server",
       "uid": "yz0lz_TWz",
       "version": 1

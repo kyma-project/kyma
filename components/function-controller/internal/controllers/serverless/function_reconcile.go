@@ -20,13 +20,19 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+//go:generate mockery -name=GitOperator -output=automock -outpkg=automock -case=underscore
+type GitOperator interface {
+	LastCommit(options git.Options) (string, error)
+	Clone(path string, options git.Options) (string, error)
+}
+
 type FunctionReconciler struct {
 	Log         logr.Logger
 	client      resource.Client
 	recorder    record.EventRecorder
 	config      FunctionConfig
 	scheme      *runtime.Scheme
-	gitOperator *git.Git
+	gitOperator GitOperator
 }
 
 func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, recorder record.EventRecorder) *FunctionReconciler {
@@ -139,11 +145,10 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	switch {
 	case instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit && r.isOnSourceChange(instance, revision):
 		return r.onSourceChange(ctx, instance, &serverlessv1alpha1.Repository{
-			Branch:  instance.Spec.Branch,
-			Commit:  revision,
-			BaseDir: instance.Spec.Repository.BaseDir,
-			Runtime: instance.Spec.Repository.Runtime,
-		})
+			Reference: instance.Spec.Reference,
+			BaseDir:   instance.Spec.Repository.BaseDir,
+			Runtime:   instance.Spec.Repository.Runtime,
+		}, revision)
 	case instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit && r.isOnConfigMapChange(instance, configMaps.Items, deployments.Items):
 		return r.onConfigMapChange(ctx, log, instance, configMaps.Items)
 	case instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, jobs.Items, deployments.Items, gitOptions):
@@ -164,28 +169,27 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 func (r *FunctionReconciler) isOnSourceChange(instance *serverlessv1alpha1.Function, commit string) bool {
 	return instance.Status.Commit == "" ||
 		commit != instance.Status.Commit ||
-		instance.Spec.Branch != instance.Status.Branch ||
+		instance.Spec.Reference != instance.Status.Reference ||
 		instance.Spec.Runtime != instance.Status.Runtime ||
 		instance.Spec.BaseDir != instance.Status.BaseDir ||
 		r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady) == corev1.ConditionFalse
 }
 
-func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository) (ctrl.Result, error) {
+func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository, commit string) (ctrl.Result, error) {
 	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionConfigurationReady,
 		Status:             corev1.ConditionTrue,
 		LastTransitionTime: metav1.Now(),
 		Reason:             serverlessv1alpha1.ConditionReasonSourceUpdated,
 		Message:            fmt.Sprintf("Sources %s updated", instance.Name),
-	}, repository)
+	}, repository, commit)
 }
 
 func (r *FunctionReconciler) syncRevision(instance *serverlessv1alpha1.Function, options git.Options) (string, error) {
-	revision := instance.Spec.Commit
-	if instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit && revision == "" && instance.Spec.Branch != "" {
+	if instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit {
 		return r.gitOperator.LastCommit(options)
 	}
-	return revision, nil
+	return "", nil
 }
 
 func (r *FunctionReconciler) readGITOptions(ctx context.Context, instance *serverlessv1alpha1.Function) (git.Options, error) {
@@ -211,18 +215,13 @@ func (r *FunctionReconciler) readGITOptions(ctx context.Context, instance *serve
 		}
 	}
 
-	var reference string
-	if instance.Spec.Commit != "" {
-		reference = instance.Spec.Commit
-	} else if instance.Spec.Branch != "" {
-		reference = instance.Spec.Branch
-	} else {
-		return git.Options{}, fmt.Errorf("either Commit or Branch has to specified")
+	if instance.Spec.Reference == "" {
+		return git.Options{}, fmt.Errorf("reference has to specified")
 	}
 
 	return git.Options{
 		URL:       gitRepository.Spec.URL,
-		Reference: reference,
+		Reference: instance.Spec.Reference,
 		Auth:      auth,
 	}, nil
 }
