@@ -4,6 +4,8 @@
 
 fullnameOverride: "serverless"
 
+# change anything here just to see gke job
+
 injectCerts:
   image:
     repository: 'eu.gcr.io/kyma-project/test-infra/alpine-kubectl'
