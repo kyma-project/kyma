@@ -43,7 +43,7 @@ Follow these instructions to install Kyma from a release or from sources:
      ```bash
      kyma install
      ```
-     >**NOTE:** If you want to install a specific release version, go to the [GCS bucket](https://storage.cloud.google.com/kyma-prow-artifacts/) to find out more about available releases. Use the release version as a parameter when calling `kyma install --source {KYMA_RELEASE}`.
+     >**NOTE:** If you want to install a specific release version, go to the [GitHub releases page](https://github.com/kyma-project/kyma/releases) to find out more about available releases. Use the release version as a parameter when calling `kyma install --source {KYMA_RELEASE}`.
 
   </details>
   <details>

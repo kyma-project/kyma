@@ -5,7 +5,7 @@ type: Installation
 
 >**CAUTION:** Before you upgrade your Kyma deployment to a newer version, check the release notes of the target release for migration guides. If the target release comes with a migration guide, make sure to follow it closely. If you upgrade to a newer release without performing the steps described in the migration guide, you can compromise the functionality of your cluster or make it unusable altogether.
 
-Upgrading Kyma is the process of migrating from one version of the software to a newer release. This operation depends on release artifacts listed in the target release folder of the [GCS bucket](https://storage.cloud.google.com/kyma-prow-artifacts/) and migration guides delivered with the target release.
+Upgrading Kyma is the process of migrating from one version of the software to a newer release. This operation depends on release artifacts of target release and migration guides delivered with the target release. 
 
 To upgrade to a version that is several releases newer than the version you're currently using, you must move up to the desired release incrementally. You can skip patch releases.
 
@@ -44,16 +44,40 @@ Follow these steps:
       Local deployment
       </summary>
 
-      - Download the `kyma-config-local.yaml` artifact. Run this command to apply the overrides required by the new release to your Minikube cluster:
+      - Download the `kyma-config-local.yaml` artifact using following command. Replace `RELEASE_VERSION` with desired version.
+
+      ```
+      curl -LO https://storage.googleapis.com/kyma-prow-artifacts/{RELEASE_VERSION}/kyma-config-local.yaml
+      ```
+
+      Run this command to apply the overrides required by the new release to your Minikube cluster:
+
       ```
       kubectl apply -f {KYMA-CONFIG-LOCAL-FILE}
       ```
 
       >**NOTE:** If you customized your deployment and its overrides, download the `kyma-config-local.yaml` artifact and compare your changes to the overrides of the target release. Merge your changes if necessary.
 
-      - Download the `kyma-installer-local.yaml` artifact and apply it to the cluster to upgrade Kyma. Run:
+      - Download the `kyma-installer.yaml` artifact using following command. Replace `RELEASE_VERSION` with desired version:
       ```
-      kubectl apply -f {KYMA-INSTALLER-LOCAL-FILE}
+      https://storage.googleapis.com/kyma-prow-artifacts/{KYMA_RELEASE}/installer.yaml
+      ```
+
+      Run this command to apply the installer file to your Minikube cluster:
+      
+      ```
+      kubectl apply -f {INSTALLER-FILE}
+      ```
+
+      - Download the `kyma-installer-cr.yaml` artifact using following command. Replace `RELEASE_VERSION` with desired version.:
+      ```
+      https://storage.googleapis.com/kyma-prow-artifacts/{KYMA_RELEASE}/kyma-installer-cr.yaml
+      ```
+
+      Run this command to apply the installer file to your Minikube cluster:
+      
+      ```
+      kubectl apply -f {INSTALLER-CR-FILE}
       ```
 
       </details>
@@ -64,10 +88,27 @@ Follow these steps:
 
       >**NOTE:** Before you upgrade a cluster deployment, check if the overrides changed names in the version you're upgrading to.
 
-      Download the `kyma-installer-cluster.yaml` artifact and apply it to the cluster to upgrade Kyma. Run:
+      - Download the `kyma-installer.yaml` artifact using following command. Replace `RELEASE_VERSION` with desired version:
 
       ```
-      kubectl apply -f {KYMA-INSTALLER-CLUSTER-FILE}
+      https://storage.googleapis.com/kyma-prow-artifacts/{KYMA_RELEASE}/installer.yaml
+      ```
+
+      Run this command to apply the installer file to your cluster:
+      
+      ```
+      kubectl apply -f {INSTALLER-FILE}
+      ```
+
+      - Download the `kyma-installer-cr-cluster.yaml` artifact using following command. Replace `RELEASE_VERSION` with desired version.:
+      ```
+      https://storage.googleapis.com/kyma-prow-artifacts/{KYMA_RELEASE}/kyma-installer-cr-cluster.yaml
+      ```
+
+      Run this command to apply the installer file to your cluster:
+      
+      ```
+      kubectl apply -f {KYMA-INSTALLER-CR-CLUSTER-FILE}
       ```
 
       </details>
