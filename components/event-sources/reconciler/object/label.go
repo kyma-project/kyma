@@ -28,8 +28,7 @@ var knativeMessagingAnnotations = []string{
 	messaging.GroupName + apis.UpdaterAnnotationSuffix,
 }
 
-// List of annotations set on Knative Serving objects by the Knative Serving
-// admission webhook.
+// List of annotations set on Deployment objects
 var deploymentAnnotations = []string{
 	"deployment.kubernetes.io/revision",
 }

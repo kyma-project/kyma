@@ -108,7 +108,7 @@ func NewCloudEventsClient(port int) (cloudevents.Client, error) {
 		options...,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("unable to create CE transport: %+v", err)
+		return nil, errors.Wrap(err, "failed to create transport")
 	}
 
 	connectionArgs := kncloudevents.ConnectionArgs{
@@ -121,7 +121,7 @@ func NewCloudEventsClient(port int) (cloudevents.Client, error) {
 		&connectionArgs)
 
 	if err != nil {
-		return nil, fmt.Errorf("error building cloud event client: %+v", err)
+		return nil, errors.Wrap(err, "failed to create client")
 	}
 	return ceClient, nil
 }

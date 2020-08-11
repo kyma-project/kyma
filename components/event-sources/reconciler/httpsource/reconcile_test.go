@@ -158,7 +158,7 @@ func TestReconcile(t *testing.T) {
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSource(Deployed, WithSink, WithPolicy, WithService),
-				newDeploymentReady(),
+				newDeploymentAvailable(),
 				newChannelReady(),
 				newPolicyWithSpec(),
 				newService(),
@@ -173,7 +173,7 @@ func TestReconcile(t *testing.T) {
 			Objects: []runtime.Object{
 				newSource(Deployed, WithSink, WithPolicy, WithService),
 				func() *appsv1.Deployment {
-					deploy := newDeploymentReady()
+					deploy := newDeploymentAvailable()
 					deploy.Labels["some-label"] = "unexpected"
 					return deploy
 				}(),
@@ -183,7 +183,7 @@ func TestReconcile(t *testing.T) {
 			},
 			WantCreates: nil,
 			WantUpdates: []k8stesting.UpdateActionImpl{{
-				Object: newDeploymentReady(),
+				Object: newDeploymentAvailable(),
 			}},
 			WantStatusUpdates: nil,
 			WantEvents: []string{
@@ -198,7 +198,7 @@ func TestReconcile(t *testing.T) {
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSource(Deployed, WithoutSink),
-				newDeploymentReady(),
+				newDeploymentAvailable(),
 			},
 			WantCreates: []runtime.Object{
 				newChannelNotReady(),
@@ -214,7 +214,7 @@ func TestReconcile(t *testing.T) {
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSource(Deployed, WithSink, WithPolicy, WithService),
-				newDeploymentReady(),
+				newDeploymentAvailable(),
 				func() *messagingv1alpha1.Channel {
 					ch := newChannelReady()
 					ch.Labels["some-label"] = "unexpected"
@@ -232,15 +232,15 @@ func TestReconcile(t *testing.T) {
 				rt.Eventf(corev1.EventTypeNormal, string(updateReason), "Updated Channel %q", tName),
 			},
 		},
-		//
+
 		/* Policy synchronization */
 
 		{
-			Name: "Policy missing when deployment not ready",
+			Name: "Policy missing when deployment not available",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSource(NotDeployed, WithSink, WithoutPolicy, WithService),
-				newDeploymentNotReady(),
+				newDeploymentNotAvailable(),
 				newChannelReady(),
 				newService(),
 			},
@@ -254,7 +254,7 @@ func TestReconcile(t *testing.T) {
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSource(Deployed, WithSink, WithPolicy, WithService),
-				newDeploymentReady(),
+				newDeploymentAvailable(),
 				newChannelReady(),
 				newService(),
 			},
@@ -272,7 +272,7 @@ func TestReconcile(t *testing.T) {
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSource(NotDeployed, WithSink, WithoutPolicy, WithService),
-				newDeploymentNotReady(),
+				newDeploymentNotAvailable(),
 				newChannelReady(),
 				newService(),
 			},
@@ -286,7 +286,7 @@ func TestReconcile(t *testing.T) {
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSource(NotDeployed, WithSink, WithService, WithPolicy),
-				newDeploymentReady(),
+				newDeploymentAvailable(),
 				newChannelReady(),
 				newPolicyWithSpec(),
 				newService(),
@@ -303,7 +303,7 @@ func TestReconcile(t *testing.T) {
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSource(Deployed, WithSink, WithService, WithoutPolicy),
-				newDeploymentNotReady(),
+				newDeploymentNotAvailable(),
 				newChannelReady(),
 				newService(),
 			},
@@ -319,7 +319,7 @@ func TestReconcile(t *testing.T) {
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSource(Deployed, WithoutSink, WithoutPolicy, WithService),
-				newDeploymentReady(),
+				newDeploymentAvailable(),
 				newChannelReady(),
 				newService(),
 			},
@@ -339,7 +339,7 @@ func TestReconcile(t *testing.T) {
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSource(Deployed, WithSink, WithService),
-				newDeploymentReady(),
+				newDeploymentAvailable(),
 				newChannelNotReady(),
 				newService(),
 			},
@@ -437,11 +437,11 @@ func WithoutPolicy(src *sourcesv1alpha1.HTTPSource) {
 }
 
 func Deployed(src *sourcesv1alpha1.HTTPSource) {
-	src.Status.PropagateDeploymentReady(newDeploymentReady())
+	src.Status.PropagateDeploymentReady(newDeploymentAvailable())
 }
 
 func NotDeployed(src *sourcesv1alpha1.HTTPSource) {
-	src.Status.PropagateDeploymentReady(newDeploymentNotReady())
+	src.Status.PropagateDeploymentReady(newDeploymentNotAvailable())
 }
 
 // newChannel returns a test Channel object with pre-filled metadata.
@@ -581,15 +581,15 @@ func newDeployment() *appsv1.Deployment {
 	}
 }
 
-// Ready: True
-func newDeploymentReady() *appsv1.Deployment {
+// Available: True
+func newDeploymentAvailable() *appsv1.Deployment {
 	deploy := newDeployment()
 	deploy.Status.AvailableReplicas = 1
 	return deploy
 }
 
-// Ready: False
-func newDeploymentNotReady() *appsv1.Deployment {
+// Available: False
+func newDeploymentNotAvailable() *appsv1.Deployment {
 	deploy := newDeployment()
 	deploy.Status.AvailableReplicas = 0
 	return deploy
