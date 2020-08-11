@@ -20,13 +20,19 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+//go:generate mockery -name=GitOperator -output=automock -outpkg=automock -case=underscore
+type GitOperator interface {
+	LastCommit(options git.Options) (string, error)
+	Clone(path string, options git.Options) (string, error)
+}
+
 type FunctionReconciler struct {
 	Log         logr.Logger
 	client      resource.Client
 	recorder    record.EventRecorder
 	config      FunctionConfig
 	scheme      *runtime.Scheme
-	gitOperator *git.Git
+	gitOperator GitOperator
 }
 
 func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, recorder record.EventRecorder) *FunctionReconciler {
