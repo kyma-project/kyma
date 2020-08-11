@@ -91,6 +91,12 @@ func (c *functionConverter) ToFunction(name, namespace string, in gqlschema.Func
 	envVariables := c.fromGQLEnv(in.Env)
 	minReplicas, maxReplicas := c.fromGQLReplicas(in.Replicas)
 
+
+	runtime:=v1alpha1.Runtime("")
+	if in.Runtime!=nil{
+		runtime = v1alpha1.Runtime(*in.Runtime)
+	}
+
 	return &v1alpha1.Function{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "serverless.kyma-project.io/v1alpha1",
@@ -108,6 +114,7 @@ func (c *functionConverter) ToFunction(name, namespace string, in gqlschema.Func
 			Resources:   resources,
 			MinReplicas: minReplicas,
 			MaxReplicas: maxReplicas,
+			Runtime:     runtime,
 		},
 	}, nil
 }
