@@ -29,6 +29,24 @@ spec:
     {{- end }}
     {{- if .Values.hydra.autoMigrate }}
       initContainers:
+        - name: wait-for-db
+          image: "{{ .Values.busybox.repository }}:{{ .Values.busybox.tag }}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              export DB_URL=$(echo $DSN | cut -d '@' -f2 | cut -d ':' -f1)
+              export DB_PORT=$(echo $DSN | cut -d '@' -f2 | cut -d ':' -f2 | cut -d '/' -f1)
+              until nc -zv -w 5 $DB_URL $DB_PORT; do
+                echo "$DB_URL not yet ready"
+                sleep 5
+              done
+          env:
+            - name: DSN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "hydra.secretName" . }}
+                  key: dsn
         - name: {{ .Chart.Name }}-automigrate
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
