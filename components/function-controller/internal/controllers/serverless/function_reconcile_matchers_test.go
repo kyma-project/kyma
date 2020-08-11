@@ -1,6 +1,7 @@
 package serverless
 
 import (
+	v1 "k8s.io/api/apps/v1"
 	"time"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -87,5 +88,28 @@ func haveStatusReference(expected string) gtypes.GomegaMatcher {
 func haveStatusCommit(expected string) gtypes.GomegaMatcher {
 	return gomega.WithTransform(func(fn *serverlessv1alpha1.Function) string {
 		return fn.Status.Commit
+	}, gomega.Equal(expected))
+}
+
+func haveSpecificContainer0Image(expected string) gtypes.GomegaMatcher {
+	return gomega.And(
+		gomega.WithTransform(func(d *v1.Deployment) int {
+			return len(d.Spec.Template.Spec.Containers)
+		}, gomega.BeNumerically(">=", 0)),
+		gomega.WithTransform(func(d *v1.Deployment) string {
+			return d.Spec.Template.Spec.Containers[0].Image
+		}, gomega.Equal(expected)),
+	)
+}
+
+func haveLabelWithValue(key, value interface{}) gtypes.GomegaMatcher {
+	return gomega.WithTransform(func(d *v1.Deployment) map[string]string {
+		return d.Spec.Template.Labels
+	}, gomega.HaveKeyWithValue(key, value))
+}
+
+func haveLabelLen(expected int) gtypes.GomegaMatcher {
+	return gomega.WithTransform(func(d *v1.Deployment) int {
+		return len(d.Spec.Template.Labels)
 	}, gomega.Equal(expected))
 }

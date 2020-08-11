@@ -366,19 +366,21 @@ var _ = ginkgo.Describe("Function", func() {
 				deployments := &appsv1.DeploymentList{}
 				gomega.Expect(resourceClient.ListByLabel(context.TODO(), request.Namespace, fnLabels, deployments)).To(gomega.Succeed())
 				gomega.Expect(len(deployments.Items)).To(gomega.Equal(1))
+
 				deployment := &deployments.Items[0]
-				//TODO extract to matchers
-				gomega.Expect(deployment).ToNot(gomega.BeNil())
-				gomega.Expect(deployment.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
-				gomega.Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(gomega.Equal(reconciler.buildImageAddress(function)))
-				gomega.Expect(deployment.Spec.Template.Labels).To(gomega.HaveLen(7))
-				gomega.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionNameLabel]).To(gomega.Equal(function.Name))
-				gomega.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionManagedByLabel]).To(gomega.Equal("function-controller"))
-				gomega.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionUUIDLabel]).To(gomega.Equal(string(function.UID)))
-				gomega.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionResourceLabel]).To(gomega.Equal(serverlessv1alpha1.FunctionResourceLabelDeploymentValue))
-				gomega.Expect(deployment.Spec.Template.Labels[testBindingLabel1]).To(gomega.Equal("foobar"))
-				gomega.Expect(deployment.Spec.Template.Labels[testBindingLabel2]).To(gomega.Equal(testBindingLabelValue))
-				gomega.Expect(deployment.Spec.Template.Labels["foo"]).To(gomega.Equal("bar"))
+				expectedImage := reconciler.buildImageAddress(function)
+				gomega.Expect(deployment).To(gomega.And(
+					gomega.Not(gomega.BeNil()),
+					haveSpecificContainer0Image(expectedImage),
+					haveLabelLen(7),
+					haveLabelWithValue(serverlessv1alpha1.FunctionNameLabel, function.Name),
+					haveLabelWithValue(serverlessv1alpha1.FunctionManagedByLabel, "function-controller"),
+					haveLabelWithValue(serverlessv1alpha1.FunctionUUIDLabel, string(function.UID)),
+					haveLabelWithValue(serverlessv1alpha1.FunctionResourceLabel, serverlessv1alpha1.FunctionResourceLabelDeploymentValue),
+					haveLabelWithValue(testBindingLabel1, "foobar"),
+					haveLabelWithValue(testBindingLabel2, testBindingLabelValue),
+					haveLabelWithValue("foo", "bar"),
+				))
 
 				ginkgo.By("service creation")
 				gomega.Ω(reconciler.Reconcile(request)).To(beOKReconcileResult)
