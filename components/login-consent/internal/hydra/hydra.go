@@ -2,7 +2,6 @@ package hydra
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	hydraAPI "github.com/ory/hydra-client-go/models"
@@ -98,7 +97,7 @@ func (c *client) GetConsentRequest(challenge string) (*hydraAPI.ConsentRequest, 
 func (c *client) AcceptConsentRequest(challenge string, body io.ReadCloser) (*hydraAPI.AcceptConsentRequest, error) {
 	output := new(hydraAPI.AcceptConsentRequest)
 
-	resp, err := c.put("consent", "accept", challenge, body, output)
+	resp, err := c.put(consentFlow, actionAccept, challenge, body, output)
 	if err != nil {
 		return nil, err
 	}
