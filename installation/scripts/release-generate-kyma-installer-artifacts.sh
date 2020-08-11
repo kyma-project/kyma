@@ -60,7 +60,7 @@ function generateRuntimeClusterArtifact() {
       > ${ARTIFACTS_DIR}/kyma-installer-cluster-runtime.yaml
 
 
-    cp ${INSTALLER_RUNTIME_CLUSTER_CR_PATH}  ${ARTIFACTS_DIR}/installer-cr-cluster-runtime.yaml
+    cp ${INSTALLER_RUNTIME_CLUSTER_CR_PATH}  ${ARTIFACTS_DIR}/kyma-installer-cr-cluster-runtime.yaml
 
 
     rm -rf ${TMP_RUNTIME_CLUSTER_CR}
