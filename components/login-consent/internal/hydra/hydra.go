@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	httpheaders "github.com/go-http-utils/headers"
 	hydraAPI "github.com/ory/hydra-client-go/models"
 	"io"
 	"net/http"
@@ -17,25 +18,28 @@ const (
 
 	actionAccept = "accept"
 	actionReject = "reject"
+
+	requestsEndpoint = "/oauth2/auth/requests"
+
+	fmtChallenge = "%s_challenge"
 )
 
-type client struct {
-	hydraURL           url.URL
-	mockTLSTermination bool
-	httpClient         *http.Client
-	ForwardedProto     string
+type Client struct {
+	hydraURL       url.URL
+	httpClient     *http.Client
+	ForwardedProto string
 }
 
-func NewClient(httpClient *http.Client, url url.URL, mockTLSTermination bool) client {
-	return client{
-		hydraURL:           url,
-		mockTLSTermination: mockTLSTermination,
-		httpClient:         httpClient,
+func NewClient(httpClient *http.Client, url url.URL, forwardedProto string) Client {
+	return Client{
+		hydraURL:       url,
+		httpClient:     httpClient,
+		ForwardedProto: forwardedProto,
 	}
 }
 
-func (c *client) GetLoginRequest(challenge string) (*hydraAPI.LoginRequest, error) {
-	output := &hydraAPI.LoginRequest{}
+func (c *Client) GetLoginRequest(challenge string) (*hydraAPI.LoginRequest, error) {
+	output := new(hydraAPI.LoginRequest)
 
 	resp, err := c.get(loginFlow, challenge, output)
 	if err != nil {
@@ -49,8 +53,8 @@ func (c *client) GetLoginRequest(challenge string) (*hydraAPI.LoginRequest, erro
 	return output, nil
 }
 
-func (c *client) AcceptLoginRequest(challenge string, body io.ReadCloser) (*hydraAPI.AcceptLoginRequest, error) {
-	output := &hydraAPI.AcceptLoginRequest{}
+func (c *Client) AcceptLoginRequest(challenge string, body *hydraAPI.AcceptLoginRequest) (*hydraAPI.CompletedRequest, error) {
+	output := new(hydraAPI.CompletedRequest)
 
 	resp, err := c.put(loginFlow, actionAccept, challenge, body, output)
 	if err != nil {
@@ -64,8 +68,8 @@ func (c *client) AcceptLoginRequest(challenge string, body io.ReadCloser) (*hydr
 	return output, nil
 }
 
-func (c *client) RejectLoginRequest(challenge string, body io.ReadCloser) (*hydraAPI.RejectRequest, error) {
-	output := &hydraAPI.RejectRequest{}
+func (c *Client) RejectLoginRequest(challenge string, body *hydraAPI.RejectRequest) (*hydraAPI.CompletedRequest, error) {
+	output := new(hydraAPI.CompletedRequest)
 
 	resp, err := c.put(loginFlow, actionReject, challenge, body, output)
 	if err != nil {
@@ -79,8 +83,8 @@ func (c *client) RejectLoginRequest(challenge string, body io.ReadCloser) (*hydr
 	return output, nil
 }
 
-func (c *client) GetConsentRequest(challenge string) (*hydraAPI.ConsentRequest, error) {
-	output := &hydraAPI.ConsentRequest{}
+func (c *Client) GetConsentRequest(challenge string) (*hydraAPI.ConsentRequest, error) {
+	output := new(hydraAPI.ConsentRequest)
 
 	resp, err := c.get(consentFlow, challenge, output)
 	if err != nil {
@@ -94,8 +98,8 @@ func (c *client) GetConsentRequest(challenge string) (*hydraAPI.ConsentRequest, 
 	return output, nil
 }
 
-func (c *client) AcceptConsentRequest(challenge string, body io.ReadCloser) (*hydraAPI.AcceptConsentRequest, error) {
-	output := new(hydraAPI.AcceptConsentRequest)
+func (c *Client) AcceptConsentRequest(challenge string, body *hydraAPI.AcceptConsentRequest) (*hydraAPI.CompletedRequest, error) {
+	output := new(hydraAPI.CompletedRequest)
 
 	resp, err := c.put(consentFlow, actionAccept, challenge, body, output)
 	if err != nil {
@@ -109,10 +113,10 @@ func (c *client) AcceptConsentRequest(challenge string, body io.ReadCloser) (*hy
 	return output, nil
 }
 
-func (c *client) RejectConsentRequest(challenge string, body io.ReadCloser) (*hydraAPI.RejectRequest, error) {
-	output := new(hydraAPI.RejectRequest)
+func (c *Client) RejectConsentRequest(challenge string, rejectRequest *hydraAPI.RejectRequest) (*hydraAPI.CompletedRequest, error) {
+	output := new(hydraAPI.CompletedRequest)
 
-	resp, err := c.put(consentFlow, actionReject, challenge, body, output)
+	resp, err := c.put(consentFlow, actionReject, challenge, rejectRequest, output)
 	if err != nil {
 		return nil, err
 	}
@@ -124,18 +128,51 @@ func (c *client) RejectConsentRequest(challenge string, body io.ReadCloser) (*hy
 	return output, nil
 }
 
-func (c *client) get(flow, challenge string, output interface{}) (*http.Response, error) {
+func (c *Client) get(flow, challenge string, output interface{}) (*http.Response, error) {
 
+	relPath := path.Join(requestsEndpoint, flow)
+
+	params := map[string]string{
+		fmt.Sprintf(fmtChallenge, flow): challenge,
+	}
+
+	req, err := c.newRequest(http.MethodGet, relPath, params, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.do(req, output)
 }
 
-func (c *client) put(flow, action, challenge string, body io.ReadCloser, output interface{}) (*http.Response, error) {
+func (c *Client) put(flow, action, challenge string, body interface{}, output interface{}) (*http.Response, error) {
 
+	relPath := path.Join(requestsEndpoint, flow, action)
+
+	params := map[string]string{
+		fmt.Sprintf(fmtChallenge, flow): challenge,
+	}
+
+	req, err := c.newRequest(http.MethodPost, relPath, params, body)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.do(req, output)
 }
 
-func (c *client) newRequest(method, relativePath string, body interface{}) (*http.Request, error) {
+func (c *Client) newRequest(method, relativePath string, params map[string]string, body interface{}) (*http.Request, error) {
+
+	headers := map[string]string{
+		httpheaders.Accept: "application/json",
+	}
+
+	if c.ForwardedProto != "" {
+		headers[httpheaders.XForwardedProto] = c.ForwardedProto
+	}
 
 	var buf io.ReadWriter
 	if body != nil {
+		headers[httpheaders.ContentType] = "application/json"
 		buf = new(bytes.Buffer)
 		err := json.NewEncoder(buf).Encode(body)
 		if err != nil {
@@ -151,19 +188,21 @@ func (c *client) newRequest(method, relativePath string, body interface{}) (*htt
 		return nil, err
 	}
 
-	if c.ForwardedProto != "" {
-		req.Header.Add("X-Forwarded-Proto", c.ForwardedProto)
+	for h, v := range headers {
+		req.Header.Set(h, v)
 	}
 
-	if body != nil {
-		req.Header.Set("Content-Type", "application/json")
+	q := req.URL.Query()
+	for p, v := range params {
+		q.Add(p, v)
 	}
-	req.Header.Set("Accept", "application/json")
+
+	req.URL.RawQuery = q.Encode()
 
 	return req, nil
 }
 
-func (c *client) do(req *http.Request, v interface{}) (*http.Response, error) {
+func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
