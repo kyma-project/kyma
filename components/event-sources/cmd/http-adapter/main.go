@@ -94,7 +94,7 @@ func setupAdapter(component string, ector adapter.EnvConfigConstructor, ctor ada
 	v := env.(eshttp.AdapterEnvConfigAccessor)
 	ceClient, err := eshttp.NewCloudEventsClient(v.GetPort())
 	if err != nil {
-		logger.Fatalf("Could not create cloudevents client: %+v", err)
+		logger.Fatal("Could not create cloudevents client", zap.Error(err))
 	}
 
 	// Configuring the adapter
