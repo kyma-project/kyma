@@ -1,8 +1,9 @@
 package serverless
 
 import (
-	v1 "k8s.io/api/apps/v1"
 	"time"
+
+	v1 "k8s.io/api/apps/v1"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/onsi/gomega"
