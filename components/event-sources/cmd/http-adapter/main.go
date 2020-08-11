@@ -20,7 +20,6 @@ import (
 	eshttp "github.com/kyma-project/kyma/components/event-sources/adapter/http"
 )
 
-
 func main() {
 	setupAdapter("http-source", eshttp.NewEnvConfig, eshttp.NewAdapter)
 }
