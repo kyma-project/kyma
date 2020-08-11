@@ -585,6 +585,10 @@ func (r *subscriptionResolver) ConfigMapEvent(ctx context.Context, namespace str
 	return r.k8s.ConfigMapEventSubscription(ctx, namespace)
 }
 
+func (r *subscriptionResolver) SecretEvent(ctx context.Context, namespace string) (<-chan *gqlschema.SecretEvent, error) {
+	return r.k8s.SecretEventSubscription(ctx, namespace)
+}
+
 func (r *subscriptionResolver) ClusterAddonsConfigurationEvent(ctx context.Context) (<-chan *gqlschema.ClusterAddonsConfigurationEvent, error) {
 	return r.sca.Resolver.ClusterAddonsConfigurationEventSubscription(ctx)
 }

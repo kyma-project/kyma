@@ -1007,6 +1007,7 @@ type ComplexityRoot struct {
 		NamespaceEvent                  func(childComplexity int, withSystemNamespaces *bool) int
 		OAuth2ClientEvent               func(childComplexity int, namespace string) int
 		PodEvent                        func(childComplexity int, namespace string) int
+		SecretEvent                     func(childComplexity int, namespace string) int
 		ServiceBindingEvent             func(childComplexity int, namespace string) int
 		ServiceBindingUsageEvent        func(childComplexity int, namespace string, resourceKind *string, resourceName *string) int
 		ServiceBrokerEvent              func(childComplexity int, namespace string) int
@@ -1265,6 +1266,7 @@ type SubscriptionResolver interface {
 	DeploymentEvent(ctx context.Context, namespace string) (<-chan *DeploymentEvent, error)
 	ServiceEvent(ctx context.Context, namespace string) (<-chan *ServiceEvent, error)
 	ConfigMapEvent(ctx context.Context, namespace string) (<-chan *ConfigMapEvent, error)
+	SecretEvent(ctx context.Context, namespace string) (<-chan *SecretEvent, error)
 	ClusterAddonsConfigurationEvent(ctx context.Context) (<-chan *ClusterAddonsConfigurationEvent, error)
 	AddonsConfigurationEvent(ctx context.Context, namespace string) (<-chan *AddonsConfigurationEvent, error)
 	NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan *NamespaceEvent, error)
@@ -5949,6 +5951,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Subscription.PodEvent(childComplexity, args["namespace"].(string)), true
 
+	case "Subscription.secretEvent":
+		if e.complexity.Subscription.SecretEvent == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_secretEvent_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.SecretEvent(childComplexity, args["namespace"].(string)), true
+
 	case "Subscription.serviceBindingEvent":
 		if e.complexity.Subscription.ServiceBindingEvent == nil {
 			break
@@ -7664,6 +7678,7 @@ type Subscription {
     deploymentEvent(namespace: String!): DeploymentEvent! @HasAccess(attributes: {resource: "deployments", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     configMapEvent(namespace: String!): ConfigMapEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    secretEvent(namespace: String!): SecretEvent! @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     clusterAddonsConfigurationEvent: ClusterAddonsConfigurationEvent! @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
     addonsConfigurationEvent(namespace: String!): AddonsConfigurationEvent! @HasAccess(attributes: {resource: "addonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
@@ -10570,6 +10585,20 @@ func (ec *executionContext) field_Subscription_oAuth2ClientEvent_args(ctx contex
 }
 
 func (ec *executionContext) field_Subscription_podEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Subscription_secretEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -33847,6 +33876,81 @@ func (ec *executionContext) _Subscription_configMapEvent(ctx context.Context, fi
 	}
 }
 
+func (ec *executionContext) _Subscription_secretEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Subscription_secretEvent_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Subscription().SecretEvent(rctx, args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "secrets", "verb": "watch"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(<-chan *SecretEvent); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.SecretEvent`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *SecretEvent)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNSecretEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSecretEvent(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
 func (ec *executionContext) _Subscription_clusterAddonsConfigurationEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -42812,6 +42916,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_serviceEvent(ctx, fields[0])
 	case "configMapEvent":
 		return ec._Subscription_configMapEvent(ctx, fields[0])
+	case "secretEvent":
+		return ec._Subscription_secretEvent(ctx, fields[0])
 	case "clusterAddonsConfigurationEvent":
 		return ec._Subscription_clusterAddonsConfigurationEvent(ctx, fields[0])
 	case "addonsConfigurationEvent":
@@ -46427,6 +46533,20 @@ func (ec *executionContext) marshalNSecret2ᚖgithubᚗcomᚋkymaᚑprojectᚋky
 		return graphql.Null
 	}
 	return ec._Secret(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNSecretEvent2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSecretEvent(ctx context.Context, sel ast.SelectionSet, v SecretEvent) graphql.Marshaler {
+	return ec._SecretEvent(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSecretEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSecretEvent(ctx context.Context, sel ast.SelectionSet, v *SecretEvent) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._SecretEvent(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNService2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐService(ctx context.Context, sel ast.SelectionSet, v Service) graphql.Marshaler {
