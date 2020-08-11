@@ -27,14 +27,14 @@ const (
 type Client struct {
 	hydraURL       url.URL
 	httpClient     *http.Client
-	ForwardedProto string
+	forwardedProto string
 }
 
 func NewClient(httpClient *http.Client, url url.URL, forwardedProto string) Client {
 	return Client{
 		hydraURL:       url,
 		httpClient:     httpClient,
-		ForwardedProto: forwardedProto,
+		forwardedProto: forwardedProto,
 	}
 }
 
@@ -166,8 +166,8 @@ func (c *Client) newRequest(method, relativePath string, params map[string]strin
 		httpheaders.Accept: "application/json",
 	}
 
-	if c.ForwardedProto != "" {
-		headers[httpheaders.XForwardedProto] = c.ForwardedProto
+	if c.forwardedProto != "" {
+		headers[httpheaders.XForwardedProto] = c.forwardedProto
 	}
 
 	var buf io.ReadWriter
