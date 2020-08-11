@@ -24,21 +24,21 @@ const (
 	fmtChallenge = "%s_challenge"
 )
 
-type Client struct {
+type LoginConsentClient struct {
 	hydraURL       url.URL
 	httpClient     *http.Client
 	forwardedProto string
 }
 
-func NewClient(httpClient *http.Client, url url.URL, forwardedProto string) Client {
-	return Client{
+func NewClient(httpClient *http.Client, url url.URL, forwardedProto string) LoginConsentClient {
+	return LoginConsentClient{
 		hydraURL:       url,
 		httpClient:     httpClient,
 		forwardedProto: forwardedProto,
 	}
 }
 
-func (c *Client) GetLoginRequest(challenge string) (*hydraAPI.LoginRequest, error) {
+func (c *LoginConsentClient) GetLoginRequest(challenge string) (*hydraAPI.LoginRequest, error) {
 	output := new(hydraAPI.LoginRequest)
 
 	resp, err := c.get(loginFlow, challenge, output)
@@ -53,7 +53,7 @@ func (c *Client) GetLoginRequest(challenge string) (*hydraAPI.LoginRequest, erro
 	return output, nil
 }
 
-func (c *Client) AcceptLoginRequest(challenge string, body *hydraAPI.AcceptLoginRequest) (*hydraAPI.CompletedRequest, error) {
+func (c *LoginConsentClient) AcceptLoginRequest(challenge string, body *hydraAPI.AcceptLoginRequest) (*hydraAPI.CompletedRequest, error) {
 	output := new(hydraAPI.CompletedRequest)
 
 	resp, err := c.put(loginFlow, actionAccept, challenge, body, output)
@@ -68,7 +68,7 @@ func (c *Client) AcceptLoginRequest(challenge string, body *hydraAPI.AcceptLogin
 	return output, nil
 }
 
-func (c *Client) RejectLoginRequest(challenge string, body *hydraAPI.RejectRequest) (*hydraAPI.CompletedRequest, error) {
+func (c *LoginConsentClient) RejectLoginRequest(challenge string, body *hydraAPI.RejectRequest) (*hydraAPI.CompletedRequest, error) {
 	output := new(hydraAPI.CompletedRequest)
 
 	resp, err := c.put(loginFlow, actionReject, challenge, body, output)
@@ -77,13 +77,13 @@ func (c *Client) RejectLoginRequest(challenge string, body *hydraAPI.RejectReque
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("accept login request failed: %s", resp.Status)
+		return nil, fmt.Errorf("reject login request failed: %s", resp.Status)
 	}
 
 	return output, nil
 }
 
-func (c *Client) GetConsentRequest(challenge string) (*hydraAPI.ConsentRequest, error) {
+func (c *LoginConsentClient) GetConsentRequest(challenge string) (*hydraAPI.ConsentRequest, error) {
 	output := new(hydraAPI.ConsentRequest)
 
 	resp, err := c.get(consentFlow, challenge, output)
@@ -92,13 +92,13 @@ func (c *Client) GetConsentRequest(challenge string) (*hydraAPI.ConsentRequest, 
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("accept login request failed: %s", resp.Status)
+		return nil, fmt.Errorf("get consent request failed: %s", resp.Status)
 	}
 
 	return output, nil
 }
 
-func (c *Client) AcceptConsentRequest(challenge string, body *hydraAPI.AcceptConsentRequest) (*hydraAPI.CompletedRequest, error) {
+func (c *LoginConsentClient) AcceptConsentRequest(challenge string, body *hydraAPI.AcceptConsentRequest) (*hydraAPI.CompletedRequest, error) {
 	output := new(hydraAPI.CompletedRequest)
 
 	resp, err := c.put(consentFlow, actionAccept, challenge, body, output)
@@ -107,13 +107,13 @@ func (c *Client) AcceptConsentRequest(challenge string, body *hydraAPI.AcceptCon
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("accept login request failed: %s", resp.Status)
+		return nil, fmt.Errorf("accept consent request failed: %s", resp.Status)
 	}
 
 	return output, nil
 }
 
-func (c *Client) RejectConsentRequest(challenge string, rejectRequest *hydraAPI.RejectRequest) (*hydraAPI.CompletedRequest, error) {
+func (c *LoginConsentClient) RejectConsentRequest(challenge string, rejectRequest *hydraAPI.RejectRequest) (*hydraAPI.CompletedRequest, error) {
 	output := new(hydraAPI.CompletedRequest)
 
 	resp, err := c.put(consentFlow, actionReject, challenge, rejectRequest, output)
@@ -122,13 +122,13 @@ func (c *Client) RejectConsentRequest(challenge string, rejectRequest *hydraAPI.
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("accept login request failed: %s", resp.Status)
+		return nil, fmt.Errorf("reject consent request failed: %s", resp.Status)
 	}
 
 	return output, nil
 }
 
-func (c *Client) get(flow, challenge string, output interface{}) (*http.Response, error) {
+func (c *LoginConsentClient) get(flow, challenge string, output interface{}) (*http.Response, error) {
 
 	relPath := path.Join(requestsEndpoint, flow)
 
@@ -144,7 +144,7 @@ func (c *Client) get(flow, challenge string, output interface{}) (*http.Response
 	return c.do(req, output)
 }
 
-func (c *Client) put(flow, action, challenge string, body, output interface{}) (*http.Response, error) {
+func (c *LoginConsentClient) put(flow, action, challenge string, body, output interface{}) (*http.Response, error) {
 
 	relPath := path.Join(requestsEndpoint, flow, action)
 
@@ -160,7 +160,7 @@ func (c *Client) put(flow, action, challenge string, body, output interface{}) (
 	return c.do(req, output)
 }
 
-func (c *Client) newRequest(method, relativePath string, params map[string]string, body interface{}) (*http.Request, error) {
+func (c *LoginConsentClient) newRequest(method, relativePath string, params map[string]string, body interface{}) (*http.Request, error) {
 
 	headers := map[string]string{
 		httpheaders.Accept: "application/json",
@@ -199,10 +199,14 @@ func (c *Client) newRequest(method, relativePath string, params map[string]strin
 
 	req.URL.RawQuery = q.Encode()
 
+	fmt.Println(req.URL.RawPath)
+	fmt.Println(req.URL.RawQuery)
+	fmt.Println(req.URL.Path)
+
 	return req, nil
 }
 
-func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
+func (c *LoginConsentClient) do(req *http.Request, v interface{}) (*http.Response, error) {
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
