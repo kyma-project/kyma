@@ -69,5 +69,5 @@ func (cfg *Config) Callback(w http.ResponseWriter, req *http.Request) {
 	//}
 
 	//TODO: say hello to hydra instead of writing the token down
-	//w.Write([]byte("ok"))
+	w.Write([]byte("ok"))
 }

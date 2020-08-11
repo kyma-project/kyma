@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"github.com/coreos/go-oidc"
 	"github.com/kyma-project/kyma/components/login-consent/internal/hydra"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 	"net/http"
 	"net/url"
 )
 
 type Config struct {
-	client        hydra.Client
+	client        hydra.LoginConsentClient
 	authenticator *Authenticator
 	challenge     string
 	state         string
@@ -46,9 +47,11 @@ func NewAuthenticator(dexAddress string, clientID string, clientSecret string, r
 }
 
 func New(hydraAddr string, hydraPort string, authn *Authenticator) (*Config, error) {
-	rawHydraURL := fmt.Sprintf("%s:%s", hydraAddr, hydraPort)
+	rawHydraURL := fmt.Sprintf("%s:%s/", hydraAddr, hydraPort)
+	log.Info(rawHydraURL)
 	hydraURL, err := url.Parse(rawHydraURL)
 	if err != nil {
+		log.Errorf("failed to parse Hydra url: %s", err)
 		return nil, err
 	}
 
