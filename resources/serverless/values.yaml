@@ -4,7 +4,7 @@
 
 fullnameOverride: "serverless"
 
-# change anything here just to see gke job
+# change anything here just to see gke job on prow
 
 injectCerts:
   image:
