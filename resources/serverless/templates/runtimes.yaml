@@ -12,9 +12,8 @@ data:
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
     
-    COPY /src/package.json $KUBELESS_INSTALL_VOLUME/package.json
+    COPY /src $KUBELESS_INSTALL_VOLUME
     RUN /kubeless-npm-install.sh
-    COPY /src/handler.js $KUBELESS_INSTALL_VOLUME/handler.js
 
     USER 1000
 ---
@@ -32,9 +31,8 @@ data:
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
     
-    COPY /src/package.json $KUBELESS_INSTALL_VOLUME/package.json
+    COPY /src $KUBELESS_INSTALL_VOLUME
     RUN /kubeless-npm-install.sh
-    COPY /src/handler.js $KUBELESS_INSTALL_VOLUME/handler.js
 
     USER 1000
 ---
@@ -52,8 +50,7 @@ data:
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
     
-    COPY /src/requirements.txt /requirements.txt
+    COPY /src /
     RUN pip install -r /requirements.txt
-    COPY /src/handler.py /handler.py
 
     USER 1000
