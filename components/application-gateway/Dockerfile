@@ -5,20 +5,14 @@ WORKDIR $DOCK_PKG_DIR
 
 COPY go.mod .
 COPY go.sum .
-
 RUN go mod download
 
 COPY . $DOCK_PKG_DIR
 COPY ./licenses/ /app/licenses
 
-COPY go.mod .
-COPY go.sum .
-RUN go mod download
-
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o applicationgateway ./cmd/applicationgateway
 
 FROM alpine:3.10 as certs
-
 RUN apk add -U --no-cache ca-certificates
 
 FROM scratch

@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/tests/application-operator-tests
 
-go 1.13
+go 1.14
 
 require (
 	github.com/docker/go-metrics v0.0.1 // indirect

@@ -1,4 +1,4 @@
-FROM golang:1.13-alpine as builder
+FROM golang:1.14-alpine as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/application-operator-tests
 
@@ -14,7 +14,7 @@ RUN CGO_ENABLED=0 go test -o applicationcontroller.test -c ./test/applicationcon
 RUN CGO_ENABLED=0 go test -o serviceinstancecontroller.test -c ./test/serviceinstancecontroller/tests
 RUN CGO_ENABLED=0 go test -o applicationtests.test -c ./test/application/tests
 
-FROM alpine:3.10
+FROM alpine:3.12
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
