@@ -1319,7 +1319,7 @@ data:
                 "30d"
             ]
         },
-        "timezone": "utc",
+        "timezone": "",
         "title": "Kubernetes / CoreDNS",
         "uid": "vkQ0UHxik",
         "version": 1

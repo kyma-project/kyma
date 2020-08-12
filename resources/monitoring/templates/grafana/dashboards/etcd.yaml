@@ -1107,7 +1107,7 @@ data:
                 "30d"
             ]
         },
-        "timezone": "browser",
+        "timezone": "",
         "title": "etcd",
         "version": 215
     }

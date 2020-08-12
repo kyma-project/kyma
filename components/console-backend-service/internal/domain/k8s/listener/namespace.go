@@ -10,7 +10,7 @@ import (
 
 //go:generate mockery -name=namespaceConverter -output=automock -outpkg=automock -case=underscore
 type namespaceConverter interface {
-	ToGQL(in *v1.Namespace) *gqlschema.Namespace
+	ToListItemGQL(in *v1.Namespace) *gqlschema.NamespaceListItem
 }
 
 type Namespace struct {
@@ -55,7 +55,7 @@ func (l *Namespace) onEvent(eventType gqlschema.SubscriptionEventType, object in
 
 func (l *Namespace) notify(eventType gqlschema.SubscriptionEventType, namespace *v1.Namespace) {
 
-	gqlNamespace := l.converter.ToGQL(namespace)
+	gqlNamespace := l.converter.ToListItemGQL(namespace)
 
 	if gqlNamespace == nil {
 		return

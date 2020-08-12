@@ -273,6 +273,18 @@ func (r *namespaceResolver) Applications(ctx context.Context, obj *gqlschema.Nam
 	return r.k8s.ApplicationsField(ctx, obj)
 }
 
+func (r *namespaceListItemResolver) PodsCount(ctx context.Context, obj *gqlschema.NamespaceListItem) (int, error) {
+	return r.k8s.PodsCountField(ctx, obj)
+}
+
+func (r *namespaceListItemResolver) HealthyPodsCount(ctx context.Context, obj *gqlschema.NamespaceListItem) (int, error) {
+	return r.k8s.HealthyPodsCountField(ctx, obj)
+}
+
+func (r *namespaceListItemResolver) ApplicationsCount(ctx context.Context, obj *gqlschema.NamespaceListItem) (*int, error) {
+	return r.k8s.ApplicationsCountField(ctx, obj)
+}
+
 func (r *queryResolver) ClusterAssetGroups(ctx context.Context, viewContext *string, groupName *string) ([]*gqlschema.ClusterAssetGroup, error) {
 	return r.rafter.Resolver.ClusterAssetGroupsQuery(ctx, viewContext, groupName)
 }
@@ -357,7 +369,7 @@ func (r *queryResolver) ConnectorService(ctx context.Context, application string
 	return r.app.Resolver.ConnectorServiceQuery(ctx, application)
 }
 
-func (r *queryResolver) Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]*gqlschema.Namespace, error) {
+func (r *queryResolver) Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]*gqlschema.NamespaceListItem, error) {
 	return r.k8s.NamespacesQuery(ctx, withSystemNamespaces, withInactiveStatus)
 }
 
@@ -630,6 +642,11 @@ func (r *Resolver) Mutation() gqlschema.MutationResolver { return &mutationResol
 // Namespace returns gqlschema.NamespaceResolver implementation.
 func (r *Resolver) Namespace() gqlschema.NamespaceResolver { return &namespaceResolver{r} }
 
+// NamespaceListItem returns gqlschema.NamespaceListItemResolver implementation.
+func (r *Resolver) NamespaceListItem() gqlschema.NamespaceListItemResolver {
+	return &namespaceListItemResolver{r}
+}
+
 // Query returns gqlschema.QueryResolver implementation.
 func (r *Resolver) Query() gqlschema.QueryResolver { return &queryResolver{r} }
 
@@ -668,6 +685,7 @@ type deploymentResolver struct{ *Resolver }
 type eventActivationResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type namespaceResolver struct{ *Resolver }
+type namespaceListItemResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type serviceBindingResolver struct{ *Resolver }
 type serviceBindingUsageResolver struct{ *Resolver }

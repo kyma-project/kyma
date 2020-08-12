@@ -70,9 +70,16 @@ images:
     repository: "eu.gcr.io/kyma-project/function-controller"
     tag: "e2e41336"
     pullPolicy: IfNotPresent
-  functionRuntimeNodejs12:
-    repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-    tag: "1cc47db6"
+  runtimes:
+    nodejs12:
+      repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
+      tag: "1cc47db6"
+    nodejs10:
+      repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
+      tag: "tba"
+    python37:
+      repository: "eu.gcr.io/kyma-project/function-runtime-python37"
+      tag: "tba"
 
 deployment:
   replicas: 1

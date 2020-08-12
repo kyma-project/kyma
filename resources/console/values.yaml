@@ -21,9 +21,9 @@ global:
     gateway:
       name: kyma-gateway
   ui_acceptance_tests:
-    version: PR-1903
+    version: deabc685
   console_backend_service:
-    version: ef1c0f3d
+    version: e828d345
   console_backend_service_test:
     version: 8bddbb53
     
