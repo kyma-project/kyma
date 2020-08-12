@@ -3,6 +3,8 @@ package serverless
 import (
 	"context"
 	"fmt"
+	"math/rand"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/automock"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -17,7 +19,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/tools/record"
-	"math/rand"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
