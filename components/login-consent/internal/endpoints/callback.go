@@ -2,19 +2,20 @@ package endpoints
 
 import (
 	"github.com/coreos/go-oidc"
+	hydraAPI "github.com/ory/hydra-client-go/models"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
 func (cfg *Config) Callback(w http.ResponseWriter, req *http.Request) {
 	log.Info("Checking state match")
-	if req.URL.Query().Get("state") != "state" {
+	if req.URL.Query().Get("state") != state {
 		http.Error(w, "state did not match", http.StatusBadRequest)
 		return
 	}
 
 	log.Info("Exchanging code for token")
-	token, err := cfg.Authenticator.clientConfig.Exchange(cfg.Authenticator.ctx, req.URL.Query().Get("code"))
+	token, err := cfg.authenticator.clientConfig.Exchange(cfg.authenticator.ctx, req.URL.Query().Get("code"))
 	if err != nil {
 		log.Printf("no token found: %v", err)
 		w.WriteHeader(http.StatusUnauthorized)
@@ -29,11 +30,11 @@ func (cfg *Config) Callback(w http.ResponseWriter, req *http.Request) {
 	log.Infof("Raw: %s", rawIDToken)
 
 	oidcConfig := &oidc.Config{
-		ClientID: cfg.Authenticator.clientConfig.ClientID, //TODO provide proper data here
+		ClientID: cfg.authenticator.clientConfig.ClientID, //TODO provide proper data here
 	}
 
 	log.Info("Verifying ID Token")
-	idToken, err := cfg.Authenticator.provider.Verifier(oidcConfig).Verify(cfg.Authenticator.ctx, rawIDToken)
+	idToken, err := cfg.authenticator.provider.Verifier(oidcConfig).Verify(cfg.authenticator.ctx, rawIDToken)
 	if err != nil {
 		http.Error(w, "Failed to verify ID Token: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -51,16 +52,21 @@ func (cfg *Config) Callback(w http.ResponseWriter, req *http.Request) {
 	//	return
 	//}
 
-	//acceptLoginRequest := hydraAPI.AcceptLoginRequest{
-	//	Context:     idToken,
-	//	Remember:    idToken.Expiry.IsZero(),
-	//	RememberFor: 3600,
-	//	Subject:     &idToken.Subject,
-	//}
-	//
-	//hydraResp := hydra.AcceptLoginRequest(cfg.challenge, acceptLoginRequest)
-	//
-	//http.Redirect(w, req, *hydraResp.RedirectTo, http.StatusFound)
+	acceptLoginRequest := &hydraAPI.AcceptLoginRequest{
+		Context:     idToken,
+		Remember:    idToken.Expiry.IsZero(),
+		RememberFor: 3600,
+		Subject:     &idToken.Subject,
+	}
+
+	hydraResp, err := cfg.client.AcceptLoginRequest(challenge, acceptLoginRequest)
+	if err != nil {
+		log.Errorf("While accepting login request: %s", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	http.Redirect(w, req, *hydraResp.RedirectTo, http.StatusFound)
 
 	//data, err := json.MarshalIndent(resp, "", "    ")
 	//if err != nil {
@@ -68,6 +74,6 @@ func (cfg *Config) Callback(w http.ResponseWriter, req *http.Request) {
 	//	return
 	//}
 
-	//TODO: say hello to hydra instead of writing the token down
-	w.Write([]byte("ok"))
+	////TODO: say hello to hydra instead of writing the token down
+	//w.Write([]byte("ok"))
 }

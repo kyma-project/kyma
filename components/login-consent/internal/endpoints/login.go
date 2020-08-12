@@ -11,6 +11,7 @@ import (
 )
 
 var challenge string
+var state = generateRandomString(16)
 
 func (cfg *Config) Login(w http.ResponseWriter, req *http.Request) {
 	var err error
@@ -22,7 +23,7 @@ func (cfg *Config) Login(w http.ResponseWriter, req *http.Request) {
 	}
 
 	log.Info("Fetching login request from Hydra")
-	loginReq, err := cfg.Client.GetLoginRequest(challenge)
+	loginReq, err := cfg.client.GetLoginRequest(challenge)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		w.WriteHeader(http.StatusBadRequest)
@@ -39,7 +40,7 @@ func (cfg *Config) Login(w http.ResponseWriter, req *http.Request) {
 			Subject:     nil,
 		}
 
-		response, err := cfg.Client.AcceptLoginRequest(challenge, body)
+		response, err := cfg.client.AcceptLoginRequest(challenge, body)
 		if err != nil {
 			w.Write([]byte(err.Error()))
 			w.WriteHeader(http.StatusInternalServerError)
@@ -48,14 +49,8 @@ func (cfg *Config) Login(w http.ResponseWriter, req *http.Request) {
 
 		redirectTo = *response.RedirectTo
 	} else {
-		log.Info("Showing dex login page")
-		log.Infof("Cfg:")
-		log.Info(cfg)
-		log.Infof("Client:")
-		log.Info(cfg.Client)
-		log.Infof("Authenticator:")
-		log.Info(cfg.Authenticator)
-		redirectTo = cfg.Authenticator.clientConfig.AuthCodeURL("state")
+
+		redirectTo = cfg.authenticator.clientConfig.AuthCodeURL(state)
 	}
 
 	http.Redirect(w, req, redirectTo, http.StatusFound)

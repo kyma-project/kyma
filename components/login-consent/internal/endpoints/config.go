@@ -12,8 +12,8 @@ import (
 )
 
 type Config struct {
-	Client        hydra.LoginConsentClient
-	Authenticator *Authenticator
+	client        hydra.LoginConsentClient
+	authenticator *Authenticator
 }
 
 type Authenticator struct {
@@ -54,7 +54,7 @@ func New(hydraAddr string, hydraPort string, authn *Authenticator) (*Config, err
 	}
 
 	return &Config{
-		Client:        hydra.NewClient(&http.Client{}, *hydraURL, "https"),
-		Authenticator: authn,
+		client:        hydra.NewClient(&http.Client{}, *hydraURL, "https"),
+		authenticator: authn,
 	}, nil
 }
