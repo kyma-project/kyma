@@ -30,11 +30,11 @@ global:
   application_operator_tests:
     version: "1066324c"
   connector_service:
-    version: "4e3576cd"
+    version: "PR-9214"
   connector_service_tests:
     version: "27eff119"
   connection_token_handler:
-    version: "fbf1000b"
+    version: "PR-9214"
   connection_token_handler_tests:
     version: "fbf1000b"
   event_service:
@@ -52,11 +52,11 @@ global:
   application_broker:
     version: "1acc510b"
   application_connectivity_certs_setup_job:
-    version: "fbf1000b"
+    version: "PR-9214"
   application_connectivity_validator:
     version: "PR-9214"
   connectivity_certs_controller:
-    version: "fbf1000b"
+    version: "PR-9214"
 
 application_connectivity_certs_setup_job:
   secrets:
