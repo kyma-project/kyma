@@ -30,7 +30,7 @@ function generateLocalArtifact() {
       > ${ARTIFACTS_DIR}/kyma-installer-local.yaml
 
     cp ${INSTALLER_LOCAL_CONFIG_PATH} ${ARTIFACTS_DIR}/kyma-config-local.yaml
-    cp ${INSTALLER_LOCAL_CR_PATH}  ${ARTIFACTS_DIR}/kyma-installer-cr.yaml
+    cp ${INSTALLER_LOCAL_CR_PATH}  ${ARTIFACTS_DIR}/kyma-installer-cr-local.yaml
     cp ${INSTALLER_YAML_PATH} ${ARTIFACTS_DIR}/kyma-installer.yaml
 
     rm -rf ${TMP_LOCAL_CR}

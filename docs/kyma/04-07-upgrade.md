@@ -58,10 +58,10 @@ Follow these steps:
       kubectl apply -f {INSTALLER-FILE}
       ```
 
-      - Download the `kyma-installer-cr.yaml` artifact. Run this command to apply the installer custom resources required by the new release to your Minikube cluster:
+      - Download the `kyma-installer-cr-local.yaml` artifact. Run this command to apply the installer custom resources required by the new release to your Minikube cluster:
       
       ```
-      kubectl apply -f {INSTALLER-CR-FILE}
+      kubectl apply -f {KYAM-INSTALLER-CR-LOCAl-FILE}
       ```
 
       </details>
