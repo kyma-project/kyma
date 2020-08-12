@@ -7,6 +7,7 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 
+COPY ./licenses/ /app/licenses
 COPY . $DOCK_PKG_DIR
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o appconnectivitycertssetupjob .
