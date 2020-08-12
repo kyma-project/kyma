@@ -4,7 +4,7 @@ metadata:
   labels:
     rafter.kyma-project.io/view-context: docs-ui
     rafter.kyma-project.io/group-name: components
-    rafter.kyma-project.io/order: "1"
+    rafter.kyma-project.io/order: "100"
   name: security-v2
 spec:
   displayName: "Security v2"
