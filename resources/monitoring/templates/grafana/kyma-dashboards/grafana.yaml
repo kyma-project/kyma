@@ -1837,7 +1837,7 @@ data:
           }
         }
       ],
-      "refresh": false,
+      "refresh": "10s",
       "schemaVersion": 21,
       "style": "dark",
       "tags": [
@@ -1903,7 +1903,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-15m",
+        "from": "now-1h",
         "to": "now"
       },
       "timepicker": {
@@ -1931,7 +1931,7 @@ data:
           "30d"
         ]
       },
-      "timezone": "browser",
+      "timezone": "",
       "title": "Kyma / Monitoring / Grafana",
       "uid": "pdWvxcrZu",
       "version": 1

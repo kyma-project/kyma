@@ -115,7 +115,7 @@ func (ut *UpgradeTest) isApplicationReady() (bool, error) {
 		return false, err
 	}
 
-	return application.Status.InstallationStatus.Status == "DEPLOYED", nil
+	return application.Status.InstallationStatus.Status == "deployed", nil
 }
 
 func (ut *UpgradeTest) getImagesConfigFromOperatorOpts() (appImagesConfig, error) {
