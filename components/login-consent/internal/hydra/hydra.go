@@ -152,7 +152,7 @@ func (c *LoginConsentClient) put(flow, action, challenge string, body, output in
 		fmt.Sprintf(fmtChallenge, flow): challenge,
 	}
 
-	req, err := c.newRequest(http.MethodPost, relPath, params, body)
+	req, err := c.newRequest(http.MethodPut, relPath, params, body)
 	if err != nil {
 		return nil, err
 	}
