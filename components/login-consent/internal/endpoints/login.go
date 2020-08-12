@@ -15,7 +15,6 @@ var challenge string
 func (cfg *Config) Login(w http.ResponseWriter, req *http.Request) {
 	var err error
 	challenge, err = getLoginChallenge(req.URL.Query())
-	//cfg.challenge = challenge
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		w.WriteHeader(http.StatusBadRequest)
@@ -23,7 +22,7 @@ func (cfg *Config) Login(w http.ResponseWriter, req *http.Request) {
 	}
 
 	log.Info("Fetching login request from Hydra")
-	loginReq, err := cfg.client.GetLoginRequest(cfg.challenge)
+	loginReq, err := cfg.Client.GetLoginRequest(challenge)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		w.WriteHeader(http.StatusBadRequest)
@@ -40,7 +39,7 @@ func (cfg *Config) Login(w http.ResponseWriter, req *http.Request) {
 			Subject:     nil,
 		}
 
-		response, err := cfg.client.AcceptLoginRequest(challenge, body)
+		response, err := cfg.Client.AcceptLoginRequest(challenge, body)
 		if err != nil {
 			w.Write([]byte(err.Error()))
 			w.WriteHeader(http.StatusInternalServerError)
@@ -50,7 +49,13 @@ func (cfg *Config) Login(w http.ResponseWriter, req *http.Request) {
 		redirectTo = *response.RedirectTo
 	} else {
 		log.Info("Showing dex login page")
-		redirectTo = cfg.authenticator.clientConfig.AuthCodeURL("state")
+		log.Infof("Cfg:")
+		log.Info(cfg)
+		log.Infof("Client:")
+		log.Info(cfg.Client)
+		log.Infof("Authenticator:")
+		log.Info(cfg.Authenticator)
+		redirectTo = cfg.Authenticator.clientConfig.AuthCodeURL("state")
 	}
 
 	http.Redirect(w, req, redirectTo, http.StatusFound)

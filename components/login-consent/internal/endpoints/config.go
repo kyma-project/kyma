@@ -12,10 +12,8 @@ import (
 )
 
 type Config struct {
-	client        hydra.LoginConsentClient
-	authenticator *Authenticator
-	challenge     string
-	state         string
+	Client        hydra.LoginConsentClient
+	Authenticator *Authenticator
 }
 
 type Authenticator struct {
@@ -28,6 +26,7 @@ func NewAuthenticator(dexAddress string, clientID string, clientSecret string, r
 	ctx := context.Background()
 	provider, err := oidc.NewProvider(ctx, dexAddress)
 	if err != nil {
+		log.Info(err)
 		return nil, err
 	}
 
@@ -48,7 +47,6 @@ func NewAuthenticator(dexAddress string, clientID string, clientSecret string, r
 
 func New(hydraAddr string, hydraPort string, authn *Authenticator) (*Config, error) {
 	rawHydraURL := fmt.Sprintf("%s:%s/", hydraAddr, hydraPort)
-	log.Info(rawHydraURL)
 	hydraURL, err := url.Parse(rawHydraURL)
 	if err != nil {
 		log.Errorf("failed to parse Hydra url: %s", err)
@@ -56,7 +54,7 @@ func New(hydraAddr string, hydraPort string, authn *Authenticator) (*Config, err
 	}
 
 	return &Config{
-		client:        hydra.NewClient(&http.Client{}, *hydraURL, "https"),
-		authenticator: authn,
+		Client:        hydra.NewClient(&http.Client{}, *hydraURL, "https"),
+		Authenticator: authn,
 	}, nil
 }

@@ -14,7 +14,7 @@ func (cfg *Config) Callback(w http.ResponseWriter, req *http.Request) {
 	}
 
 	log.Info("Exchanging code for token")
-	token, err := cfg.authenticator.clientConfig.Exchange(cfg.authenticator.ctx, req.URL.Query().Get("code"))
+	token, err := cfg.Authenticator.clientConfig.Exchange(cfg.Authenticator.ctx, req.URL.Query().Get("code"))
 	if err != nil {
 		log.Printf("no token found: %v", err)
 		w.WriteHeader(http.StatusUnauthorized)
@@ -29,11 +29,11 @@ func (cfg *Config) Callback(w http.ResponseWriter, req *http.Request) {
 	log.Infof("Raw: %s", rawIDToken)
 
 	oidcConfig := &oidc.Config{
-		ClientID: cfg.authenticator.clientConfig.ClientID, //TODO provide proper data here
+		ClientID: cfg.Authenticator.clientConfig.ClientID, //TODO provide proper data here
 	}
 
 	log.Info("Verifying ID Token")
-	idToken, err := cfg.authenticator.provider.Verifier(oidcConfig).Verify(cfg.authenticator.ctx, rawIDToken)
+	idToken, err := cfg.Authenticator.provider.Verifier(oidcConfig).Verify(cfg.Authenticator.ctx, rawIDToken)
 	if err != nil {
 		http.Error(w, "Failed to verify ID Token: "+err.Error(), http.StatusInternalServerError)
 		return

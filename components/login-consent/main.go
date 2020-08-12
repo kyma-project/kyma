@@ -6,6 +6,7 @@ import (
 	"github.com/kyma-project/kyma/components/login-consent/internal/endpoints"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -22,8 +23,8 @@ func main() {
 	flag.StringVar(&hydraAddr, "hydra-address", "http://ory-hydra-admin.kyma-system.svc.cluster.local", "Hydra administrative endpoint address")
 	flag.StringVar(&hydraPort, "hydra-port", "4445", "Hydra administrative endpoint port")
 	flag.StringVar(&dexAddress, "dex-address", "https://dex.jk6.goatz.shoot.canary.k8s-hana.ondemand.com", "Dex address")
-	flag.StringVar(&clientID, "client-id", "go-consent-app", "Client ID")
-	flag.StringVar(&clientSecret, "client-secret", "go-consent-secret", "Client secret")
+	flag.StringVar(&clientID, "client-id", "go-consent-app", "client ID")
+	flag.StringVar(&clientSecret, "client-secret", "go-consent-secret", "client secret")
 
 	flag.Parse()
 
@@ -32,11 +33,13 @@ func main() {
 	authn, err := endpoints.NewAuthenticator(dexAddress, clientID, clientSecret, redirectURL, scopes)
 	if err != nil {
 		log.Error(err)
+		os.Exit(1)
 	}
 
 	cfg, err := endpoints.New(hydraAddr, hydraPort, authn)
 	if err != nil {
 		log.Error(err)
+		os.Exit(1)
 	}
 
 	m := http.NewServeMux()

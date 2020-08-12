@@ -6,7 +6,6 @@ import (
 	"fmt"
 	httpheaders "github.com/go-http-utils/headers"
 	hydraAPI "github.com/ory/hydra-client-go/models"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"net/url"
@@ -199,8 +198,6 @@ func (c *LoginConsentClient) newRequest(method, relativePath string, params map[
 	}
 
 	req.URL.RawQuery = q.Encode()
-
-	fmt.Println(req.URL)
 
 	return req, nil
 }
