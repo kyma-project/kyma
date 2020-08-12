@@ -1,4 +1,0 @@
----
-title: Troubleshooting
-type: Troubleshooting
----

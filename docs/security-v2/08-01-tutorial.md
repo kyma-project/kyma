@@ -1,4 +1,0 @@
----
-title: Tutorial
-type: Tutorials
----
