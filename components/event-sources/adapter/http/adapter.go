@@ -63,7 +63,7 @@ const resourceGroup = "http." + sources.GroupName
 
 const (
 	// endpoint for cloudevents
-	EndpointCE = "/"
+	endpointCE = "/"
 	// endpoint for readiness check
 	endpointReadiness = "/healthz"
 )
@@ -100,7 +100,7 @@ func NewCloudEventsClient(port int) (cloudevents.Client, error) {
 		cloudevents.WithBinaryEncoding(),
 		cloudevents.WithMiddleware(pkgtracing.HTTPSpanMiddleware),
 		cloudevents.WithPort(port),
-		cloudevents.WithPath(EndpointCE),
+		cloudevents.WithPath(endpointCE),
 		cloudevents.WithMiddleware(WithReadinessMiddleware),
 	}
 
@@ -129,7 +129,7 @@ func NewCloudEventsClient(port int) (cloudevents.Client, error) {
 // Start is the entrypoint for the adapter and is called by sharedmain coming from pkg/adapter
 func (h *httpAdapter) Start(_ <-chan struct{}) error {
 
-	log.Printf("listening on :%d%s\n", h.accessor.GetPort(), EndpointCE)
+	log.Printf("listening on :%d%s\n", h.accessor.GetPort(), endpointCE)
 
 	// note about graceful shutdown:
 	// TLDR; StartReceiver unblocks as soon as a stop signal is received

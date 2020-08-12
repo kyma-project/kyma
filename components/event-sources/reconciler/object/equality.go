@@ -231,13 +231,14 @@ func probeEqual(p1, p2 *corev1.Probe) bool {
 		return false
 	}
 
-	if p1.InitialDelaySeconds != p2.InitialDelaySeconds ||
-		p1.TimeoutSeconds != p2.TimeoutSeconds && !(p1.TimeoutSeconds == 0 || p2.TimeoutSeconds == 0) ||
-		p1.PeriodSeconds != p2.PeriodSeconds && !(p1.PeriodSeconds == 0 || p2.PeriodSeconds == 0) ||
-		// Knative sets a default when that value is 0
-		p1.SuccessThreshold != p2.SuccessThreshold && !(p1.SuccessThreshold == 0 || p2.SuccessThreshold == 0) ||
-		p1.FailureThreshold != p2.FailureThreshold && !(p1.FailureThreshold == 0 || p2.FailureThreshold == 0) {
+	isInitialDelaySecondsEqual := p1.InitialDelaySeconds != p2.InitialDelaySeconds
+	isTimeoutSecondsEqual := p1.TimeoutSeconds != p2.TimeoutSeconds && p1.TimeoutSeconds != 0 && p2.TimeoutSeconds != 0
+	isPeriodSecondsEqual := p1.PeriodSeconds != p2.PeriodSeconds && p1.PeriodSeconds != 0 && p2.PeriodSeconds != 0
+	// Knative sets a default when that value is 0
+	isSuccessThresholdEqual := p1.SuccessThreshold != p2.SuccessThreshold && p1.SuccessThreshold != 0 && p2.SuccessThreshold != 0
+	isFailureThresholdEqual := p1.FailureThreshold != p2.FailureThreshold && p1.FailureThreshold != 0 && p2.FailureThreshold != 0
 
+	if isInitialDelaySecondsEqual || isTimeoutSecondsEqual || isPeriodSecondsEqual || isSuccessThresholdEqual || isFailureThresholdEqual {
 		return false
 	}
 

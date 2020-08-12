@@ -23,7 +23,7 @@ func TestNewChannel(t *testing.T) {
 	}
 }
 
-func TestAppApplyExistingChannelAttributes(t *testing.T) {
+func TestApplyExistingChannelAttributes(t *testing.T) {
 	existingChannel := &messagingv1alpha1.Channel{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:       tNs,

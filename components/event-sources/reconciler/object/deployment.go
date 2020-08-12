@@ -106,7 +106,7 @@ func WithProbe(path string, port int) ObjectOption {
 				HTTPGet: &corev1.HTTPGetAction{
 					Path: path,
 					Port: intstr.FromInt(port),
-					// setting port explicitely is illegal in a Deployment
+					// setting port explicitly is illegal in a Deployment
 				},
 			},
 		}
@@ -123,7 +123,7 @@ func firstDeploymentContainer(d *appsv1.Deployment) *corev1.Container {
 	return &(*containers)[0]
 }
 
-// ApplyExistingDeploymentAttributes copies some important attributes from a given
+// ApplyExistingDeploymentAttributes copies some important annotations from a given
 // source Service to a destination Service.
 func ApplyExistingDeploymentAttributes(src, dst *appsv1.Deployment) {
 	// resourceVersion must be returned to the API server
