@@ -10,10 +10,12 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
+	res "github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/iosafety"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 
@@ -63,12 +65,12 @@ type applicationService struct {
 func newApplicationService(cfg Config, aCli dynamic.NamespaceableResourceInterface, mCli dynamic.NamespaceableResourceInterface, mInformer cache.SharedIndexInformer, appInformer cache.SharedIndexInformer) (*applicationService, error) {
 	err := mInformer.AddIndexers(cache.Indexers{
 		appMappingNameIndex: func(obj interface{}) ([]string, error) {
-			mapping, ok := obj.(*mappingTypes.ApplicationMapping)
-			if !ok {
-				return nil, errors.New("cannot convert item")
+			m := &mappingTypes.ApplicationMapping{}
+			err := res.FromUnstructured(obj.(*unstructured.Unstructured), m)
+			if err != nil {
+				return nil, errors.Wrapf(err, "while converting applicationMapping")
 			}
-
-			return []string{mapping.Name}, nil
+			return []string{m.Name}, nil
 		},
 	})
 	if err != nil {
