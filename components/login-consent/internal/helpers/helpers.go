@@ -2,11 +2,11 @@ package helpers
 
 import (
 	"errors"
-	"net/url"
+	"net/http"
 )
 
-func GetLoginChallenge(query url.Values) (string, error) {
-	challenges, ok := query["login_challenge"]
+func GetLoginChallenge(req *http.Request) (string, error) {
+	challenges, ok := req.URL.Query()["login_challenge"]
 	if !ok || len(challenges[0]) < 1 {
 		return "", errors.New("login_challenge not found")
 	}
