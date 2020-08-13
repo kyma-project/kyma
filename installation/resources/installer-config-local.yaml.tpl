@@ -143,6 +143,8 @@ data:
   global.ory.hydra.persistence.enabled: "false"
   global.ory.hydra.persistence.postgresql.enabled: "false"
   hydra.hydra.autoMigrate: "false"
+  hydra.deployment.resources.requests.cpu: "50m"
+  hydra.deployment.resources.limits.cpu: "150m"
 ---
 apiVersion: v1
 kind: ConfigMap

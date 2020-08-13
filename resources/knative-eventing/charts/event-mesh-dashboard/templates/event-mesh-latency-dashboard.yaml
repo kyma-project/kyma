@@ -651,7 +651,7 @@ data:
           "targets": [
             {
               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload=~\"[a-z0-9-]+-dispatcher\",destination_workload=\"default-broker-filter\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
-              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}`",
+              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
               "refId": "A"
             }
           ],

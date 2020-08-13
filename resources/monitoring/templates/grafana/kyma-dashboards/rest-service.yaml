@@ -1364,7 +1364,7 @@ data:
           }
         }
       ],
-      "refresh": false,
+      "refresh": "10s",
       "schemaVersion": 16,
       "style": "dark",
       "tags": [
@@ -1430,7 +1430,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-2h",
+        "from": "now-1h",
         "to": "now"
       },
       "timepicker": {
