@@ -96,9 +96,6 @@ files:
   - path: "./kyma/docs/migration-guides/1.13-1.14.md"
     config:
       white-list-external: ["https://github.com/kyma-project/kyma/blob/release-1.14/docs/kyma/03-03-charts.md#migration-to-helm-v3"]
-  - path: "./kyma/docs/security-v2/03-01-iam-kubeconfig-service.md"
-    config:
-      white-list-external: ["https://configurations-generator.{YOUR_CLUSTER_DOMAIN"]
-  - path: "./kyma/docs/security-v2/08-03-add-connector.md"
+  - path: "./kyma/docs/security-v2/08-04-add-connector.md"
     config:
       white-list-external: ["https://dex.{CLUSTER_DOMAIN}/callback"]
