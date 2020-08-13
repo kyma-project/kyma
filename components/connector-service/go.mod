@@ -27,3 +27,7 @@ require (
 	k8s.io/client-go v0.16.10
 	k8s.io/utils v0.0.0-20191114200735-6ca3b61696b6 // indirect
 )
+
+replace (
+	github.com/prometheus/client_golang => github.com/prometheus/client_golang v0.8.0
+)

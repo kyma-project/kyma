@@ -1,6 +1,7 @@
 package externalapi
 
 import (
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
@@ -85,7 +86,7 @@ func TestServiceDetailsValidator(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 
@@ -105,7 +106,7 @@ func TestServiceDetailsValidator(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 
@@ -125,7 +126,7 @@ func TestServiceDetailsValidator(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 
@@ -145,7 +146,7 @@ func TestServiceDetailsValidator(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 }
@@ -166,7 +167,7 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 
@@ -188,7 +189,7 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 
@@ -224,7 +225,7 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 }
@@ -279,7 +280,7 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 
@@ -308,7 +309,7 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 
@@ -338,7 +339,7 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 }
@@ -392,7 +393,7 @@ func TestServiceDetailsValidator_API_Basic(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 
@@ -420,7 +421,7 @@ func TestServiceDetailsValidator_API_Basic(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 }
@@ -498,7 +499,7 @@ func TestServiceDetailsValidator_Specification_OAuth(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 
@@ -525,7 +526,7 @@ func TestServiceDetailsValidator_Specification_OAuth(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 
@@ -553,7 +554,7 @@ func TestServiceDetailsValidator_Specification_OAuth(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 }
@@ -605,7 +606,7 @@ func TestServiceDetailsValidator_Specification_Basic(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 
@@ -631,7 +632,7 @@ func TestServiceDetailsValidator_Specification_Basic(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 }
@@ -654,7 +655,7 @@ func TestServiceDetailsValidator_Events(t *testing.T) {
 		err := validator.Validate(serviceDetails)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 }

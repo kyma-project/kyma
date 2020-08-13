@@ -3,7 +3,7 @@ module github.com/kyma-project/kyma/components/application-registry
 go 1.14
 
 require (
-	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496
+	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535
 	github.com/go-openapi/spec v0.19.4
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/gorilla/mux v1.7.4
@@ -30,5 +30,6 @@ require (
 
 replace (
 	github.com/kyma-project/kyma/components/application-gateway => github.com/franpog859/kyma/components/application-gateway v0.0.0-20200812095246-cd67ce3de73c
+	github.com/prometheus/client_golang => github.com/prometheus/client_golang v0.8.0
 	k8s.io/client-go => k8s.io/client-go v0.17.2
 )
