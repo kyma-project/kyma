@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -31,7 +32,7 @@ type GatewayManager interface {
 
 //go:generate mockery -name ServiceInstanceClient
 type ServiceInstanceClient interface {
-	List(opts metav1.ListOptions) (*v1beta12.ServiceInstanceList, error)
+	List(ctx context.Context, opts metav1.ListOptions) (*v1beta12.ServiceInstanceList, error)
 }
 
 func NewGatewayManager(helmClient kymahelm.HelmClient, overrides OverridesData, serviceInstanceClient ServiceInstanceClient) GatewayManager {
@@ -108,7 +109,7 @@ func (g *gatewayManager) UpgradeGateways() error {
 }
 
 func (g *gatewayManager) getUniqueServiceInstanceNamespaces() ([]string, error) {
-	list, err := g.serviceInstanceClient.List(metav1.ListOptions{})
+	list, err := g.serviceInstanceClient.List(context.Background(), metav1.ListOptions{})
 
 	if err != nil {
 		return nil, errors.Errorf("Error listing Service Instances: %s", err.Error())
