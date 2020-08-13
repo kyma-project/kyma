@@ -39,8 +39,6 @@ The [Marketing mock](https://github.com/SAP-samples/xf-addons/tree/master/addons
 
 ## Steps
 
-[Diagram](LINK)
-
 1. Connect the external SAP Marketing Cloud - Mock application.
 2. Add a Redis service as an addon.
 3. Create a ServiceInstance CR for the Redis service so you can bind it later with your microservice and Function.
@@ -52,3 +50,7 @@ The [Marketing mock](https://github.com/SAP-samples/xf-addons/tree/master/addons
 9. Expose the Function through the APIRule CR on HTTP endpoints. This way it will be available for other services outside the cluster.
 10. Bind a Function to the Redis service by creating ServiceBinding and ServiceBindingUsage CRs.
 11. Trigger your Function to react to the **bo.interaction.created** event from the mock application. Send the event and see if the Function reacts to it by saving its details in the Redis database.
+
+As a result, you get two scenarios of the same flow - a microservice and a Function that are triggered by new order events from the Marketing mock and send order data to the Redis database:
+
+![Order flow](./assets/order-flow.svg)
