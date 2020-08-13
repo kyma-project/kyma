@@ -6976,9 +6976,9 @@ type LimitRange {
 
 type LimitRangeItem {
     limitType: LimitType!
-    max: ResourceType!
-    default: ResourceType!
-    defaultRequest: ResourceType!
+    max: ResourceType
+    default: ResourceType
+    defaultRequest: ResourceType
 }
 
 input LimitRangeInput {
@@ -7682,8 +7682,6 @@ type Subscription {
 
     clusterAddonsConfigurationEvent: ClusterAddonsConfigurationEvent! @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
     addonsConfigurationEvent(namespace: String!): AddonsConfigurationEvent! @HasAccess(attributes: {resource: "addonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
-
-    # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
 
     namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 
@@ -18837,14 +18835,11 @@ func (ec *executionContext) _LimitRangeItem_max(ctx context.Context, field graph
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*ResourceType)
 	fc.Result = res
-	return ec.marshalNResourceType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx, field.Selections, res)
+	return ec.marshalOResourceType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _LimitRangeItem_default(ctx context.Context, field graphql.CollectedField, obj *LimitRangeItem) (ret graphql.Marshaler) {
@@ -18871,14 +18866,11 @@ func (ec *executionContext) _LimitRangeItem_default(ctx context.Context, field g
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*ResourceType)
 	fc.Result = res
-	return ec.marshalNResourceType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx, field.Selections, res)
+	return ec.marshalOResourceType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _LimitRangeItem_defaultRequest(ctx context.Context, field graphql.CollectedField, obj *LimitRangeItem) (ret graphql.Marshaler) {
@@ -18905,14 +18897,11 @@ func (ec *executionContext) _LimitRangeItem_defaultRequest(ctx context.Context, 
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*ResourceType)
 	fc.Result = res
-	return ec.marshalNResourceType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx, field.Selections, res)
+	return ec.marshalOResourceType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _LoadBalancerIngress_ip(ctx context.Context, field graphql.CollectedField, obj *LoadBalancerIngress) (ret graphql.Marshaler) {
@@ -39789,19 +39778,10 @@ func (ec *executionContext) _LimitRangeItem(ctx context.Context, sel ast.Selecti
 			}
 		case "max":
 			out.Values[i] = ec._LimitRangeItem_max(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "default":
 			out.Values[i] = ec._LimitRangeItem_default(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "defaultRequest":
 			out.Values[i] = ec._LimitRangeItem_defaultRequest(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -46335,20 +46315,6 @@ func (ec *executionContext) marshalNResourceRule2ᚖgithubᚗcomᚋkymaᚑprojec
 	return ec._ResourceRule(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNResourceType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx context.Context, sel ast.SelectionSet, v ResourceType) graphql.Marshaler {
-	return ec._ResourceType(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNResourceType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx context.Context, sel ast.SelectionSet, v *ResourceType) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._ResourceType(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalNResourceValues2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceValues(ctx context.Context, sel ast.SelectionSet, v ResourceValues) graphql.Marshaler {
 	return ec._ResourceValues(ctx, sel, &v)
 }
@@ -48578,6 +48544,17 @@ func (ec *executionContext) unmarshalOResourceRefInput2ᚖgithubᚗcomᚋkymaᚑ
 	}
 	res, err := ec.unmarshalOResourceRefInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceRefInput(ctx, v)
 	return &res, err
+}
+
+func (ec *executionContext) marshalOResourceType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx context.Context, sel ast.SelectionSet, v ResourceType) graphql.Marshaler {
+	return ec._ResourceType(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOResourceType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx context.Context, sel ast.SelectionSet, v *ResourceType) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ResourceType(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOSecret2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSecret(ctx context.Context, sel ast.SelectionSet, v Secret) graphql.Marshaler {
