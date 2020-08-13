@@ -25,7 +25,9 @@ These guides show what you can do with Kyma running on a cluster of your choice.
 
 Let's introduce the main actors that will lead us through the guides. These are our own examples, mock applications, and experimental services:
 
-- [`orders-service`](https://github.com/kazydek/examples/tree/master/orders-service) is a sample application (microservice) written in Go. It can expose HTTP endpoints used to create and read basic order JSON entities. The service can run with either an in-memory database that is enabled by default or an external, Redis database. On the basis of it, we will show how you can use Kyma to deploy your own microservice, expose it on HTTP endpoints to make it available for external services, and bind it to an actual database service (Redis).
+- [Orders service](https://github.com/kazydek/examples/tree/master/orders-service) is a sample application (microservice) written in Go. It can expose HTTP endpoints used to create and read basic order JSON entities. The service can run with either an in-memory database that is enabled by default or an external, Redis database. On the basis of it, we will show how you can use Kyma to deploy your own microservice, expose it on HTTP endpoints to make it available for external services, and bind it to an actual database service (Redis).
+
+- Function - _TODO_
 
 - [Redis addon](https://github.com/kyma-project/addons/tree/master/addons/redis-0.0.3) is basically a bundle of two Redis services available in two plans: `micro` and `enterprise`. We will connect it to Kyma thanks to Helm Broker and expose it in the Kyma cluster as an addon under Service Catalog. The Redis service represents an open source, in-memory data structure store, used as a database, cache and message broker. For the purpose of these guides, we will use the `micro` plan with the in-memory storage to demonstrate how it can replace the default memory of our microservice.
 
