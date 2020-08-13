@@ -62,9 +62,9 @@ rules:
       - patch
       - update
   - apiGroups:
-      - "authentication.istio.io"
+      - "security.istio.io"
     resources:
-      - policies
+      - peerauthentication
     verbs:
       - create
       - patch
