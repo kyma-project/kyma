@@ -5,10 +5,9 @@
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
-  name: statsmetricsmicrofrontend
+  name: {{ template "grafana.name" . }}-metrics
   labels:
     {{- include "grafana.labels" . | nindent 4 }}
-    app:  statsmetricsmicrofrontend
 spec:
   displayName: Metrics
   version: v1
