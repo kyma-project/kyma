@@ -25,17 +25,11 @@ These guides show what you can do with Kyma running on a cluster of your choice.
 
 Let's introduce the main actors that will lead us through the guides. These are our own examples, mock applications, and experimental services:
 
-### Orders service
+- [`orders-service`](https://github.com/kazydek/examples/tree/master/orders-service) is a sample application (microservice) written in Go. It can expose HTTP endpoints used to create and read basic order JSON entities. The service can run with either an in-memory database that is enabled by default or an external, Redis database. On the basis of it, we will show how you can use Kyma to deploy your own microservice, expose it on HTTP endpoints to make it available for external services, and bind it to an actual database service (Redis).
 
-[`orders-service`](https://github.com/kazydek/examples/tree/master/orders-service) is a sample application (microservice) written in Go. It can expose HTTP endpoints used to create and read basic order JSON entities. The service can run with either an in-memory database that is enabled by default or an external, Redis database. On the basis of it, we will show how you can use Kyma to deploy your own microservice, expose it on HTTP endpoints to make it available for external services, and bind it to an actual database service (Redis).
+- [Redis addon](https://github.com/kyma-project/addons/tree/master/addons/redis-0.0.3) is basically a bundle of two Redis services available in two plans: `micro` and `enterprise`. We will connect it to Kyma thanks to Helm Broker and expose it in the Kyma cluster as an addon under Service Catalog. The Redis service represents an open source, in-memory data structure store, used as a database, cache and message broker. For the purpose of these guides, we will use the `micro` plan with the in-memory storage to demonstrate how it can replace the default memory of our microservice.
 
-### Redis addon
-
-[Redis addon](https://github.com/kyma-project/addons/tree/master/addons/redis-0.0.3) is basically a bundle of two Redis services available in two plans: `micro` and `enterprise`. We will connect it to Kyma thanks to Helm Broker and expose it in the Kyma cluster as an addon under Service Catalog. The Redis service represents an open source, in-memory data structure store, used as a database, cache and message broker. For the purpose of these guides, we will use the `micro` plan with the in-memory storage to demonstrate how it can replace the default memory of our microservice.
-
-### Marketing mock
-
-The [Marketing mock](https://github.com/SAP-samples/xf-addons/tree/master/addons/marketing-mock-0.1.0) is to act as a sample external and monolithic application which we want to extend with Kyma. It is based on the [Varkes](https://github.com/kyma-incubator/varkes) project and is also available in the form of an addon. It will simulate how you can pair an external application with Kyma and expose its APIs and Events. In our guides, we will use its **bo.interaction.created** event.
+- [Marketing mock](https://github.com/SAP-samples/xf-addons/tree/master/addons/marketing-mock-0.1.0) is to act as a sample external and monolithic application which we want to extend with Kyma. It is based on the [Varkes](https://github.com/kyma-incubator/varkes) project and is also available in the form of an addon. It will simulate how you can pair an external application with Kyma and expose its APIs and Events. In our guides, we will use its **bo.interaction.created** event.
 
 ## Steps
 
