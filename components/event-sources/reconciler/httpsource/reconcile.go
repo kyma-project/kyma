@@ -80,7 +80,7 @@ const adapterPort = 8080
 
 const (
 	applicationNameLabelKey = "application-name"
-	applicationLabelKey = "app"
+	applicationLabelKey     = "app"
 )
 
 // Reconcile compares the actual state of a HTTPSource object referenced by key
