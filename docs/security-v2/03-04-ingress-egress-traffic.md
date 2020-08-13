@@ -11,10 +11,31 @@ The current setup of the main gateway can be found [here](https://github.com/kym
 - The gateway listens on port `80` and `443`
 - Port `80` is automatically redirected to `443`
 - The TLS connection requires at least `TLSV1_1`, meaning `TLSV1_0` is rejected
-- Accepted cipher suites: ECDHE-RSA-CHACHA20-POLY1305, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-SHA, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-SHA
+- Accepted cipher suites: `ECDHE-RSA-CHACHA20-POLY1305`, `ECDHE-RSA-AES256-GCM-SHA384`, `ECDHE-RSA-AES256-SHA`, `ECDHE-RSA-AES128-GCM-SHA256`, `ECDHE-RSA-AES128-SHA`
 
 ## TLS Managmenet
+Kyma works on the basis of a bring your own domain/certificates model, meaning we expect the user to supply the certificate and key during installation. This can be achieved using the installation overrides, for example by creating the following configmap before the installation. This value is then propagated in the cluster for all component that require it.
 
+```yaml
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-certificate-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    kyma-project.io/installation: ""
+data:
+  global.tlsCrt: "CERT"
+  global.tlsKey: "CERT_KEY"
+```
+
+>**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
+>* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
+>* [Top-level charts overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation-top-level-charts-overrides)
+
+However, if this is not supplied, then a demo setup is assumed using the DNS-as-a-Service provider [xip.io](http://xip.io/), and a self-signed certificate.
 
 ## Egress
 Currently no Egress limitations are implemented, meaning that all applications deployed in the Kyma cluster can access outside resources without limitations.
