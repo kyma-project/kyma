@@ -3,10 +3,10 @@ title: How to start
 type: Getting Started
 ---
 
-This set of Getting Started guides aims to demonstrate the basic functionalities offered by Kyma:
-- Its integration and connectivity feature brought in by [Application Connector](https://kyma-project.io/docs/components/application-connector/). With Kyma you can connect external applications and expose their API and events in Kyma.
-- Its extensibility feature provided by [Service Catalog](https://kyma-project.io/docs/components/service-catalog/). You can use its built-in portfolio of external services in your applications.
-- Its application runtime feature supported by [Serverless](https://kyma-project.io/docs/components/serverless/) where you can build microservices and functions to interact with external services and applications to perform a given business logic.
+This set of Getting Started guides aims to demonstrate the basic functionalities offered by Kyma its:
+- **Integration and connectivity** feature brought in by [Application Connector](https://kyma-project.io/docs/components/application-connector/). With Kyma you can connect external applications and expose their API and events in Kyma.
+- **Extensibility** feature provided by [Service Catalog](https://kyma-project.io/docs/components/service-catalog/). You can use its built-in portfolio of external services in your applications.
+- **Application runtime** feature supported by [Serverless](https://kyma-project.io/docs/components/serverless/) where you can build microservices and functions to interact with external services and applications to perform a given business logic.
 
 Having these features in mind, we will:
 1. Connect a mock application as an addon to Kyma and use one of its events sent whenever an order is created in an application by a user.
