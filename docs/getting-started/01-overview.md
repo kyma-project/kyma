@@ -35,6 +35,8 @@ Let's introduce the main actors that will lead us through the guides. These are 
 
 ## Steps
 
+The guides cover these steps:
+
 1. Connect the external SAP Marketing Cloud - Mock application.
 2. Add a Redis service as an addon.
 3. Create a ServiceInstance CR for the Redis service so you can bind it later with your microservice and Function.
