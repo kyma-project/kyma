@@ -533,6 +533,7 @@ func newDeployment() *appsv1.Deployment {
 						dashboardLabelKey:       dashboardLabelValue,
 						eventSourceLabelKey:     eventSourceLabelValue,
 						applicationNameLabelKey: tName,
+						applicationLabelKey:     tName,
 					},
 				},
 				Spec: corev1.PodSpec{

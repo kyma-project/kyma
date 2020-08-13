@@ -78,7 +78,10 @@ const (
 const adapterHealthEndpoint = "/healthz"
 const adapterPort = 8080
 
-const applicationNameLabelKey = "application-name"
+const (
+	applicationNameLabelKey = "application-name"
+	applicationLabelKey = "app"
+)
 
 // Reconcile compares the actual state of a HTTPSource object referenced by key
 // with its desired state, and attempts to converge the two.
@@ -333,6 +336,7 @@ func (r *Reconciler) makeDeployment(src *sourcesv1alpha1.HTTPSource,
 		object.WithLabel(applicationNameLabelKey, src.Name),
 		object.WithMatchLabelsSelector(applicationNameLabelKey, src.Name),
 		object.WithPodLabel(applicationNameLabelKey, src.Name),
+		object.WithPodLabel(applicationLabelKey, src.Name),
 		object.WithPodLabel(dashboardLabelKey, dashboardLabelValue),
 		object.WithPodLabel(eventSourceLabelKey, eventSourceLabelValue),
 	)
