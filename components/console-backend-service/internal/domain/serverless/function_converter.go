@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
@@ -91,9 +92,10 @@ func (c *functionConverter) ToFunction(name, namespace string, in gqlschema.Func
 	envVariables := c.fromGQLEnv(in.Env)
 	minReplicas, maxReplicas := c.fromGQLReplicas(in.Replicas)
 
+	glog.Info(fmt.Sprintf("%+v\n", in.Runtime))
 
-	runtime:=v1alpha1.Runtime("")
-	if in.Runtime!=nil{
+	runtime := v1alpha1.Runtime("")
+	if in.Runtime != nil {
 		runtime = v1alpha1.Runtime(*in.Runtime)
 	}
 
