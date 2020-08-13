@@ -3,7 +3,6 @@ package http
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 
@@ -129,7 +128,7 @@ func NewCloudEventsClient(port int) (cloudevents.Client, error) {
 // Start is the entrypoint for the adapter and is called by sharedmain coming from pkg/adapter
 func (h *httpAdapter) Start(_ <-chan struct{}) error {
 
-	log.Printf("listening on :%d%s\n", h.accessor.GetPort(), endpointCE)
+	h.logger.Info("listening on", zap.String("address", fmt.Sprintf("%d%s", h.accessor.GetPort(), endpointCE)))
 
 	// note about graceful shutdown:
 	// TLDR; StartReceiver unblocks as soon as a stop signal is received
