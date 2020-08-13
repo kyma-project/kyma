@@ -7,12 +7,14 @@ import (
 
 type SourceType string
 
-// +kubebuilder:validation:Enum=nodejs-12
+// +kubebuilder:validation:Enum=nodejs-12;nodejs-10;python-37
 type Runtime string
 
 const (
 	SourceTypeGit   SourceType = "git"
 	RuntimeNodeJS12 Runtime    = "nodejs-12"
+	RuntimeNodeJS10 Runtime    = "nodejs-10"
+	RuntimePython37 Runtime    = "python-37"
 )
 
 // FunctionSpec defines the desired state of Function
