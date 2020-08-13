@@ -7,6 +7,11 @@ import (
 	"net/http"
 )
 
+type loginContext struct {
+	accessToken string
+	idToken     string
+}
+
 func (cfg *Config) Consent(w http.ResponseWriter, req *http.Request) {
 
 	challenge, err := helpers.GetLConsentChallenge(req)
@@ -29,29 +34,33 @@ func (cfg *Config) Consent(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	log.Infof("consentReqContext: %s", consentReq.Context)
+
+	//var loginContext loginContext
+
 	var redirectTo string
 	//if consentReq.Skip {
-		log.Info("Accepting consent request")
-		completedReq, err := cfg.client.AcceptConsentRequest(challenge, &models.AcceptConsentRequest{
-			GrantScope:               consentReq.RequestedScope,
-			GrantAccessTokenAudience: consentReq.RequestedAccessTokenAudience,
-			Session: &models.ConsentRequestSession{
-				// ???
-			},
-		})
+	log.Info("Accepting consent request")
+	completedReq, err := cfg.client.AcceptConsentRequest(challenge, &models.AcceptConsentRequest{
+		GrantScope:               consentReq.RequestedScope,
+		GrantAccessTokenAudience: consentReq.RequestedAccessTokenAudience,
+		Session: &models.ConsentRequestSession{
+			IDToken: consentReq.Context,
+		},
+	})
 
-		if err != nil {
-			w.Write([]byte(err.Error()))
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-		redirectTo = *completedReq.RedirectTo
-		http.Redirect(w, req, redirectTo, http.StatusFound)
+	redirectTo = *completedReq.RedirectTo
+	http.Redirect(w, req, redirectTo, http.StatusFound)
 
 	//} else {
-		//requestedScope := consentReq.RequestedScope
-		//log.Println(requestedScope)
-		//display consent page here - grant permissions
+	//requestedScope := consentReq.RequestedScope
+	//log.Println(requestedScope)
+	//display consent page here - grant permissions
 	//}
 }

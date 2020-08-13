@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"errors"
 	"github.com/coreos/go-oidc"
 	hydraAPI "github.com/ory/hydra-client-go/models"
 	log "github.com/sirupsen/logrus"
@@ -8,23 +9,38 @@ import (
 )
 
 func (cfg *Config) Callback(w http.ResponseWriter, req *http.Request) {
-	log.Info("Checking state match")
+	log.Info("checking state match")
 	if req.URL.Query().Get("state") != state {
-		http.Error(w, "state did not match", http.StatusBadRequest)
+		redirect, err := cfg.rejectLoginRequest(errors.New("state doesn't match"), http.StatusUnauthorized)
+		if err != nil {
+			log.Errorf("failed to reject the login request: %s", err)
+			return
+		}
+		http.Redirect(w, req, redirect, http.StatusUnauthorized)
 		return
 	}
 
-	log.Info("Exchanging code for token")
+	log.Info("exchanging code for token")
 	token, err := cfg.authenticator.clientConfig.Exchange(cfg.authenticator.ctx, req.URL.Query().Get("code"))
 	if err != nil {
-		log.Printf("no token found: %v", err)
-		w.WriteHeader(http.StatusUnauthorized)
+		redirect, err := cfg.rejectLoginRequest(err, http.StatusUnauthorized)
+		if err != nil {
+			log.Errorf("failed to reject the login request: %s", err)
+			return
+		}
+		http.Redirect(w, req, redirect, http.StatusUnauthorized)
+		return
 		return
 	}
 
 	rawIDToken, ok := token.Extra("id_token").(string)
 	if !ok {
-		http.Error(w, "No id_token field in oauth2 token.", http.StatusInternalServerError)
+		redirect, err := cfg.rejectLoginRequest(errors.New("no id_token field in oauth2 token"), http.StatusInternalServerError)
+		if err != nil {
+			log.Errorf("failed to reject the login request: %s", err)
+			return
+		}
+		http.Redirect(w, req, redirect, http.StatusInternalServerError)
 		return
 	}
 	log.Infof("Raw: %s", rawIDToken)
@@ -33,47 +49,55 @@ func (cfg *Config) Callback(w http.ResponseWriter, req *http.Request) {
 		ClientID: cfg.authenticator.clientConfig.ClientID, //TODO provide proper data here
 	}
 
-	log.Info("Verifying ID Token")
+	log.Info("verifying ID Token...")
 	idToken, err := cfg.authenticator.provider.Verifier(oidcConfig).Verify(cfg.authenticator.ctx, rawIDToken)
 	if err != nil {
-		http.Error(w, "Failed to verify ID Token: "+err.Error(), http.StatusInternalServerError)
+		redirect, err := cfg.rejectLoginRequest(err, http.StatusInternalServerError)
+		if err != nil {
+			log.Errorf("failed to reject the login request: %s", err)
+			return
+		}
+		http.Redirect(w, req, redirect, http.StatusInternalServerError)
 		return
 	}
-	log.Infof("Ready: %s", idToken)
 
-	//resp := struct {
-	//	OAuth2Token   *oauth2.Token
-	//	IDTokenClaims *json.RawMessage
-	//}{token, new(json.RawMessage)}
-	//
-	//log.Infof("Verifier response: %s", resp)
-	//if err := idToken.Claims(&resp.IDTokenClaims); err != nil {
-	//	http.Error(w, err.Error(), http.StatusInternalServerError)
-	//	return
-	//}
+	log.Infof("token verified")
 
+	var claims struct {
+		Email         string   `json:"email""`
+		EmailVerified bool     `json:"email_verified""`
+		Name          string   `json:"name""`
+		Groups        []string `json:"groups,omitempty"`
+	}
+
+	if err := idToken.Claims(&claims); err != nil {
+		redirect, err := cfg.rejectLoginRequest(err, http.StatusUnauthorized)
+		if err != nil {
+			log.Errorf("failed to reject the login request: %s", err)
+			return
+		}
+		http.Redirect(w, req, redirect, http.StatusUnauthorized)
+		return
+	}
 	acceptLoginRequest := &hydraAPI.AcceptLoginRequest{
-		Context:     idToken,
-		Remember:    idToken.Expiry.IsZero(),
+		Context:     claims,
+		Remember:    false, //TODO: change this later
 		RememberFor: 3600,
 		Subject:     &idToken.Subject,
 	}
 
+	log.Infof("accepting login request")
 	hydraResp, err := cfg.client.AcceptLoginRequest(challenge, acceptLoginRequest)
 	if err != nil {
-		log.Errorf("While accepting login request: %s", err)
-		w.WriteHeader(http.StatusUnauthorized)
+		redirect, err := cfg.rejectLoginRequest(err, http.StatusUnauthorized)
+		if err != nil {
+			log.Errorf("failed to reject the login request: %s", err)
+			return
+		}
+		http.Redirect(w, req, redirect, http.StatusUnauthorized)
 		return
 	}
 
+	log.Infof("Redirecting to: %s", *hydraResp.RedirectTo)
 	http.Redirect(w, req, *hydraResp.RedirectTo, http.StatusFound)
-
-	//data, err := json.MarshalIndent(resp, "", "    ")
-	//if err != nil {
-	//	http.Error(w, err.Error(), http.StatusInternalServerError)
-	//	return
-	//}
-
-	////TODO: say hello to hydra instead of writing the token down
-	//w.Write([]byte("ok"))
 }
