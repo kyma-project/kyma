@@ -9,7 +9,7 @@ import (
 
 func (cfg *Config) Consent(w http.ResponseWriter, req *http.Request) {
 
-	challenge, err := helpers.GetLoginChallenge(req)
+	challenge, err := helpers.GetLConsentChallenge(req)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		w.WriteHeader(http.StatusBadRequest)
