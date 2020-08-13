@@ -64,7 +64,8 @@ rules:
   - apiGroups:
       - "security.istio.io"
     resources:
-      - peerauthentication
+      - peerauthentications
+      - authorisationpolicies
     verbs:
       - create
       - patch
