@@ -30,7 +30,7 @@ func (cfg *Config) Consent(w http.ResponseWriter, req *http.Request) {
 	}
 
 	var redirectTo string
-	if consentReq.Skip {
+	//if consentReq.Skip {
 		log.Info("Accepting consent request")
 		completedReq, err := cfg.client.AcceptConsentRequest(challenge, &models.AcceptConsentRequest{
 			GrantScope:               consentReq.RequestedScope,
@@ -49,9 +49,9 @@ func (cfg *Config) Consent(w http.ResponseWriter, req *http.Request) {
 		redirectTo = *completedReq.RedirectTo
 		http.Redirect(w, req, redirectTo, http.StatusFound)
 
-	} else {
-		requestedScope := consentReq.RequestedScope
-		log.Println(requestedScope)
+	//} else {
+		//requestedScope := consentReq.RequestedScope
+		//log.Println(requestedScope)
 		//display consent page here - grant permissions
-	}
+	//}
 }
