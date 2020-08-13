@@ -2,6 +2,8 @@ package ui
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/ui/extractor"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	uiV1alpha1v "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/ui/pretty"
@@ -10,6 +12,7 @@ import (
 
 type microFrontendService struct {
 	informer cache.SharedIndexInformer
+	extractor extractor.MFUnstructuredExtractor
 }
 
 func newMicroFrontendService(informer cache.SharedIndexInformer) *microFrontendService {
@@ -26,11 +29,15 @@ func (svc *microFrontendService) List(namespace string) ([]*uiV1alpha1v.MicroFro
 
 	var microFrontends []*uiV1alpha1v.MicroFrontend
 	for _, item := range items {
-		microFrontend, ok := item.(*uiV1alpha1v.MicroFrontend)
+		microFrontend, ok := item.(*unstructured.Unstructured)
 		if !ok {
 			return nil, fmt.Errorf("Incorrect item type: %T, should be: *%s", item, pretty.MicroFrontend)
 		}
-		microFrontends = append(microFrontends, microFrontend)
+		formattedMF, err := svc.extractor.FromUnstructured(microFrontend)
+		if err != nil {
+			return nil, err
+		}
+		microFrontends = append(microFrontends, formattedMF)
 	}
 
 	return microFrontends, nil
