@@ -271,6 +271,7 @@ func (svc *applicationService) Enable(namespace, name string, services []*gqlsch
 		},
 		Spec: mappingTypes.ApplicationMappingSpec{
 			Services: mappingServices,
+
 		},
 	})
 
@@ -278,7 +279,7 @@ func (svc *applicationService) Enable(namespace, name string, services []*gqlsch
 		return &mappingTypes.ApplicationMapping{}, err
 	}
 
-	created, err := svc.mCli.Create(m, metav1.CreateOptions{})
+	created, err := svc.mCli.Namespace(namespace).Create(m, metav1.CreateOptions{})
 
 	if err != nil {
 		return &mappingTypes.ApplicationMapping{}, err
@@ -310,7 +311,7 @@ func (svc *applicationService) UpdateApplicationMapping(namespace, name string, 
 		return nil, err
 	}
 
-	updated, err := svc.mCli.Update(u, metav1.UpdateOptions{})
+	updated, err := svc.mCli.Namespace(namespace).Update(u, metav1.UpdateOptions{})
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "while updating %s [%s]", pretty.ApplicationMapping, name)
