@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -16,11 +15,12 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/client-go/rest"
 
-	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	mappingClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamicinformer"
 	"k8s.io/client-go/dynamic"
 	k8sClient "k8s.io/client-go/kubernetes"
 
+	mappingInformer "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/disabled"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/gateway"
@@ -56,18 +56,18 @@ type PluggableContainer struct {
 
 	Resolver               Resolver
 	ApplicationRetriever   *applicationRetriever
-	mappingInformerFactory dynamicinformer.DynamicSharedInformerFactory
+	mappingInformerFactory mappingInformer.SharedInformerFactory
 	appInformerFactory     dynamicinformer.DynamicSharedInformerFactory
 	gatewayService         *gateway.Service
 }
 
 func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Duration, rafterRetriever shared.RafterRetriever) (*PluggableContainer, error) {
-	mappingCli, err := dynamic.NewForConfig(restConfig)
+	mCli, err := mappingClient.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing application broker Clientset")
 	}
 
-	appCli, err := dynamic.NewForConfig(restConfig)
+	aCli, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing application operator Clientset")
 	}
@@ -79,8 +79,8 @@ func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Durati
 
 	container := &PluggableContainer{
 		cfg: &resolverConfig{
-			appClient:            appCli,
-			mappingClient:        mappingCli,
+			appClient:            aCli,
+			mappingClient:        mCli,
 			k8sCli:               k8sCli,
 			cfg:                  reCfg,
 			informerResyncPeriod: informerResyncPeriod,
@@ -99,47 +99,32 @@ func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Durati
 
 func (r *PluggableContainer) Enable() error {
 	informerResyncPeriod := r.cfg.informerResyncPeriod
-	mappingCli := r.cfg.mappingClient
-	appCli := r.cfg.appClient
+	mCli := r.cfg.mappingClient
+	aCli := r.cfg.appClient
 	kCli := r.cfg.k8sCli
 
 	reCfg := r.cfg.cfg
 
-	// Application
-	r.appInformerFactory = dynamicinformer.NewDynamicSharedInformerFactory(appCli, informerResyncPeriod)
-	appInformer := r.appInformerFactory.ForResource(schema.GroupVersionResource{
-		Version:  v1alpha1.SchemeGroupVersion.Version,
-		Group:    v1alpha1.SchemeGroupVersion.Group,
-		Resource: "applications",
-	}).Informer()
-
-	appClient := appCli.Resource(schema.GroupVersionResource{
-		Version:  v1alpha1.SchemeGroupVersion.Version,
-		Group:    v1alpha1.SchemeGroupVersion.Group,
-		Resource: "applications",
-	})
-
 	// ApplicationMapping
-	r.mappingInformerFactory = dynamicinformer.NewDynamicSharedInformerFactory(mappingCli, informerResyncPeriod)
-	mappingInformer := r.mappingInformerFactory.ForResource(schema.GroupVersionResource{
-		Version:  mappingTypes.SchemeGroupVersion.Version,
-		Group:    mappingTypes.SchemeGroupVersion.Group,
-		Resource: "applicationmappings",
+	r.mappingInformerFactory = mappingInformer.NewSharedInformerFactory(mCli, informerResyncPeriod)
+	mInformerGroup := r.mappingInformerFactory.Applicationconnector().V1alpha1()
+	mInformer := mInformerGroup.ApplicationMappings().Informer()
+	mLister := mInformerGroup.ApplicationMappings().Lister()
+
+	// Application
+	r.appInformerFactory = dynamicinformer.NewDynamicSharedInformerFactory(aCli, informerResyncPeriod)
+	aInformer := r.appInformerFactory.ForResource(schema.GroupVersionResource{
+		Version:  v1alpha1.SchemeGroupVersion.Version,
+		Group:    v1alpha1.SchemeGroupVersion.Group,
+		Resource: "applications",
 	}).Informer()
 
-	mappingClient := mappingCli.Resource(schema.GroupVersionResource{
-		Version:  mappingTypes.SchemeGroupVersion.Version,
-		Group:    mappingTypes.SchemeGroupVersion.Group,
-		Resource: "applicationmappings",
+	aResourceClient := aCli.Resource(schema.GroupVersionResource{
+		Version:  v1alpha1.SchemeGroupVersion.Version,
+		Group:    v1alpha1.SchemeGroupVersion.Group,
+		Resource: "applications",
 	})
-
-	fmt.Println(schema.GroupVersionResource{
-		Version:  mappingTypes.SchemeGroupVersion.Version,
-		Group:    mappingTypes.SchemeGroupVersion.Group,
-		Resource: "applicationmappings",
-	})
-
-	appService, err := newApplicationService(reCfg, appClient, mappingClient, mappingInformer, appInformer)
+	appService, err := newApplicationService(reCfg, aResourceClient, mCli.ApplicationconnectorV1alpha1(), mInformer, mLister, aInformer)
 	if err != nil {
 		return errors.Wrap(err, "while creating Application Service")
 	}
@@ -150,7 +135,7 @@ func (r *PluggableContainer) Enable() error {
 	}
 	r.gatewayService = gatewayService
 
-	eventActivationService := newEventActivationService(mappingInformer)
+	eventActivationService := newEventActivationService(mInformerGroup.EventActivations().Informer())
 
 	r.Pluggable.EnableAndSyncCache(func(stopCh chan struct{}) {
 		r.mappingInformerFactory.Start(stopCh)
@@ -185,7 +170,7 @@ func (r *PluggableContainer) Disable() error {
 
 type resolverConfig struct {
 	cfg                  Config
-	mappingClient        dynamic.Interface
+	mappingClient        mappingClient.Interface
 	appClient            dynamic.Interface
 	k8sCli               k8sClient.Interface
 	informerResyncPeriod time.Duration
