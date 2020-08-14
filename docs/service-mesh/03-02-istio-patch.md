@@ -8,7 +8,7 @@ As a core component, Istio is installed with every Kyma deployment by default. T
 1. Istio is installed using the official charts from the currently supported release. The charts reside in the `resources/istio` directory.
 
 2. A custom Istio Patch job runs and checks if the detected Istio deployment meets the following criteria:
-  - A specific version of Istio is installed. The required version is defined in the [`values`](https://github.com/kyma-project/kyma/blob/master/resources/istio-kyma-patch/values.yaml#L11) file.
+  - A specific version of Istio is installed. The required version is defined in the [`values`](https://github.com/kyma-project/kyma/blob/master/resources/istio-kyma-patch/values.yaml) file.
   - Mutual TLS (mTLS) policy is enabled and set to `strict`.
   - [Istio policy enforcement](https://istio.io/docs/tasks/policy-enforcement/enabling-policy/) is enabled.
   - Automatic sidecar injection is enabled.
