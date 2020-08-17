@@ -355,7 +355,11 @@ func TestAdapterShutdown(t *testing.T) {
 	// used to simulate sending a stop signal
 	ctx, cancelFunc := context.WithCancel(ctx)
 
-	httpAdapter := NewAdapter(ctx, c, nil, nil)
+	sinkClient, err := kncloudevents.NewDefaultClient(c.GetSinkURI())
+	if err != nil {
+		t.Fatal("error building cloud event client", zap.Error(err))
+	}
+	httpAdapter := NewAdapter(ctx, c, sinkClient, nil)
 	stopChannel := make(chan error)
 
 	// start adapter
@@ -432,11 +436,12 @@ func waitAdapterReady(t *testing.T, adapterURI string) {
 }
 
 // startHttpAdapter starts the adapter with a cloudevents client configured with the test sink as target
-func startHttpAdapter(t *testing.T, c adapter.EnvConfigAccessor, ctx context.Context) *adapter.Adapter {
-	sinkClient, err := kncloudevents.NewDefaultClient(c.GetSinkURI())
+func startHttpAdapter(t *testing.T, c *envConfig, ctx context.Context) *adapter.Adapter {
+	sinkClient, err := NewCloudEventsClient(c.GetPort())
 	if err != nil {
-		t.Fatal("error building cloud event client", zap.Error(err))
+		t.Fatalf("error while creating sinkclient: %+v", err)
 	}
+
 	statsReporter, err := source.NewStatsReporter()
 	if err != nil {
 		t.Errorf("error building statsreporter: %v", err)
