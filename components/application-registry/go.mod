@@ -29,6 +29,7 @@ require (
 )
 
 replace (
+	github.com/asaskevich/govalidator => github.com/asaskevich/govalidator v0.0.0-20180315120708-ccb8e960c48f
 	github.com/kyma-project/kyma/components/application-gateway => github.com/franpog859/kyma/components/application-gateway v0.0.0-20200812095246-cd67ce3de73c
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v0.8.0
 	k8s.io/client-go => k8s.io/client-go v0.17.2
