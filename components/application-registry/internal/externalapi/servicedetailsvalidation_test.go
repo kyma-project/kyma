@@ -1,8 +1,9 @@
 package externalapi
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/stretchr/testify/assert"
