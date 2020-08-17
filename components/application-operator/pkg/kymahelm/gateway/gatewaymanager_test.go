@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -207,7 +208,7 @@ func TestGatewayManager_UpgradeGateways(t *testing.T) {
 		helmClient.On("UpdateReleaseFromChart", gatewayChartDirectory, gatewayName, namespace, expectedOverrides).Return(response, nil).Once()
 
 		scClient := &mocks.ServiceInstanceClient{}
-		scClient.On("List", metav1.ListOptions{}).Return(serviceInstanceList, nil)
+		scClient.On("List", context.Background(), metav1.ListOptions{}).Return(serviceInstanceList, nil)
 
 		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, scClient)
 
@@ -253,7 +254,7 @@ func TestGatewayManager_UpgradeGateways(t *testing.T) {
 		helmClient.On("UpdateReleaseFromChart", gatewayChartDirectory, mock.AnythingOfType("string"), mock.AnythingOfType("string"), expectedOverrides).Return(response, nil).Twice()
 
 		scClient := &mocks.ServiceInstanceClient{}
-		scClient.On("List", metav1.ListOptions{}).Return(serviceInstanceList, nil)
+		scClient.On("List", context.Background(), metav1.ListOptions{}).Return(serviceInstanceList, nil)
 
 		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, scClient)
 
@@ -270,7 +271,7 @@ func TestGatewayManager_UpgradeGateways(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 
 		scClient := &mocks.ServiceInstanceClient{}
-		scClient.On("List", metav1.ListOptions{}).Return(nil, errors.New("some error"))
+		scClient.On("List", context.Background(), metav1.ListOptions{}).Return(nil, errors.New("some error"))
 
 		gatewayManager := NewGatewayManager(helmClient, OverridesData{}, scClient)
 
