@@ -28,15 +28,15 @@ global:
   application_operator:
     version: "PR-9214"
   application_operator_tests:
-    version: "1066324c"
+    version: "PR-9214"
   connector_service:
     version: "PR-9214"
   connector_service_tests:
-    version: "27eff119"
+    version: "PR-9214"
   connection_token_handler:
     version: "PR-9214"
   connection_token_handler_tests:
-    version: "fbf1000b"
+    version: "PR-9214"
   event_service:
     version: "PR-8874"
   event_service_integration_tests:
@@ -44,9 +44,9 @@ global:
   application_gateway:
     version: "PR-9214"
   application_gateway_tests:
-    version: "1272752c"
+    version: "PR-9214"
   application_registry:
-    version: "4bd4dbfb"
+    version: "PR-9214"
   application_registry_tests:
     version: "c608dbf3"
   application_broker:
