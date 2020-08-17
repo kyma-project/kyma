@@ -45,15 +45,23 @@ Follow these steps:
       </summary>
 
       - Download the `kyma-config-local.yaml` artifact. Run this command to apply the overrides required by the new release to your Minikube cluster:
+
       ```
       kubectl apply -f {KYMA-CONFIG-LOCAL-FILE}
       ```
 
       >**NOTE:** If you customized your deployment and its overrides, download the `kyma-config-local.yaml` artifact and compare your changes to the overrides of the target release. Merge your changes if necessary.
 
-      - Download the `kyma-installer-local.yaml` artifact and apply it to the cluster to upgrade Kyma. Run:
+      - Download the `kyma-installer.yaml` artifact. Run this command to apply the installer required by the new release to your Minikube cluster:
+      
       ```
-      kubectl apply -f {KYMA-INSTALLER-LOCAL-FILE}
+      kubectl apply -f {INSTALLER-FILE}
+      ```
+
+      - Download the `kyma-installer-cr-local.yaml` artifact. Run this command to apply the installer custom resources required by the new release to your Minikube cluster:
+      
+      ```
+      kubectl apply -f {KYMA-INSTALLER-CR-LOCAL-FILE}
       ```
 
       </details>
@@ -64,10 +72,16 @@ Follow these steps:
 
       >**NOTE:** Before you upgrade a cluster deployment, check if the overrides changed names in the version you're upgrading to.
 
-      Download the `kyma-installer-cluster.yaml` artifact and apply it to the cluster to upgrade Kyma. Run:
-
+      - Download the `kyma-installer.yaml` artifact. Run this command to apply the installer required by the new release to your cluster:
+      
       ```
-      kubectl apply -f {KYMA-INSTALLER-CLUSTER-FILE}
+      kubectl apply -f {INSTALLER-FILE}
+      ```
+
+      - Download the `kyma-installer-cr-cluster.yaml` artifact. Run this command to apply the installer custom resource required by the new release to your cluster:
+      
+      ```
+      kubectl apply -f {KYMA-INSTALLER-CR-CLUSTER-FILE}
       ```
 
       </details>

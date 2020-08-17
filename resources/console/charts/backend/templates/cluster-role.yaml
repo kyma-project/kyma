@@ -62,3 +62,6 @@ rules:
   - apiGroups: ["eventing.knative.dev"]
     resources: ["triggers"]
     verbs: ["get", "create", "delete", "list", "watch"]
+  - apiGroups: ["hydra.ory.sh"]
+    resources: ["oauth2clients"]
+    verbs: ["list", "get", "create", "update", "delete", "watch"]

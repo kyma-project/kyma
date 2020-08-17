@@ -9,7 +9,6 @@ import (
 
 	eventingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
-	servingclientset "knative.dev/serving/pkg/client/clientset/versioned"
 
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
@@ -25,6 +24,7 @@ import (
 	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
@@ -116,8 +116,8 @@ func main() {
 	dexConfig, err := getDexConfigFromCluster(k8sCli, cfg.DexUserSecret, cfg.DexNamespace, domainName)
 	fatalOnError(err, "while reading dex config from cluster")
 
-	servingCli, err := servingclientset.NewForConfig(k8sConfig)
-	fatalOnError(err, "while generating knative serving client")
+	sourcesCli, err := sourcesv1alpha1.NewForConfig(k8sConfig)
+	fatalOnError(err, "while generating sources client")
 
 	eventingCli, err := eventingclientv1alpha1.NewForConfig(k8sConfig)
 	fatalOnError(err, "while generating knative eventing client")
@@ -147,7 +147,7 @@ func main() {
 		"ApiGatewayUpgradeTest":           apigateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
 		"ApplicationOperatorUpgradeTest":  applicationoperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
-		"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, servingCli, appBrokerCli, scCli, eventingCli, cfg.EventSubscriberImage),
+		"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, sourcesCli, appBrokerCli, scCli, eventingCli, cfg.EventSubscriberImage),
 		"ServerlessUpgradeTest":           serverless.New(dynamicCli),
 		//"LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
 	}

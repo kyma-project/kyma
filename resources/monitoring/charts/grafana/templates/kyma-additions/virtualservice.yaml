@@ -28,6 +28,10 @@ spec:
     route:
     - destination:
         port:
-          number: 80
-        host: {{ printf "%s-%s" $releaseName "grafana" | trunc 63 }}
+          number: {{ .Values.service.port }}
+{{- if .Values.kyma.authProxy.enabled }}
+        host: {{ template "grafana.fullname" . }}-secured
+{{- else }}
+        host: {{ template "grafana.fullname" . }}
+{{- end -}}
 {{- end }}
