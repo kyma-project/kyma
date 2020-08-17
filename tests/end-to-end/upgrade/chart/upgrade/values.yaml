@@ -3,7 +3,7 @@ containerRegistry:
 
 subscriberimage:
   dir:
-  version: PR-8483
+  version: 9913ea21
 
 image:
   dir:
