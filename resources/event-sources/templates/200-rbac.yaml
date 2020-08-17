@@ -9,6 +9,27 @@ kind: ClusterRole
 metadata:
   name: {{ template "controller-manager.fullname" . }}
 rules:
+  - apiGroups:
+      - ""
+    resources:
+      - services
+    verbs:
+      - get
+      - list
+      - create
+      - update
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - get
+      - list
+      - create
+      - update
+      - watch
+
   # Metrics/logging configs
   - apiGroups:
       - ""
@@ -31,16 +52,6 @@ rules:
     resources:
       - httpsources/status
     verbs:
-      - update
-  # Knative Services
-  - apiGroups:
-      - serving.knative.dev
-    resources:
-      - services
-    verbs:
-      - list
-      - watch
-      - create
       - update
   # Channels
   - apiGroups:

@@ -16,9 +16,6 @@ required = [
 
 # Direct dependencies
 [[constraint]]
-  name = "knative.dev/serving"
-  branch = "release-0.12"
-[[constraint]]
   name = "knative.dev/pkg"
   branch = "release-0.12"
 [[constraint]]
