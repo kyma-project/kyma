@@ -1,0 +1,54 @@
+scalar GrantType @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.GrantType")
+
+scalar ResponseType @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.ResponseType")
+
+scalar StatusCode @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.StatusCode")
+
+type OAuth2Client @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.OAuth2Client") {
+	namespace: String!
+	name: String!
+	generation: Int!
+
+	error: OAuth2ClientError
+	spec: OAuth2ClientSpec!
+}
+
+type OAuth2ClientError @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.ReconciliationError") {
+	code: StatusCode
+	description: String
+}
+
+type OAuth2ClientSpec @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.OAuth2ClientSpec") {
+	grantTypes: [GrantType!]!
+	responseTypes: [ResponseType!]!
+	scope: String!
+	secretName: String!
+}
+
+input OAuth2ClientSpecInput @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.OAuth2ClientSpec") {
+	grantTypes: [GrantType!]!
+	responseTypes: [ResponseType!]!
+	scope: String!
+	secretName: String!
+}
+
+type OAuth2ClientEvent {
+	type: SubscriptionEventType!
+	client: OAuth2Client!
+}
+
+extend type Query {
+	oAuth2Clients(namespace: String!): [OAuth2Client!]! @HasAccess(attributes: {resource: "OAuth2Clients", verb: "list", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+	oAuth2Client(name: String!, namespace: String!): OAuth2Client @HasAccess(attributes: {resource: "OAuth2Clients", verb: "get", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+}
+
+extend type Mutation {
+	createOAuth2Client(name: String!, namespace: String!, params: OAuth2ClientSpecInput!): OAuth2Client @HasAccess(attributes: {resource: "OAuth2Clients", verb: "create", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+	updateOAuth2Client(name: String!, namespace: String!, generation: Int!, params: OAuth2ClientSpecInput!): OAuth2Client @HasAccess(attributes: {resource: "OAuth2Clients", verb: "update", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+	deleteOAuth2Client(name: String!, namespace: String!): OAuth2Client @HasAccess(attributes: {resource: "OAuth2Clients", verb: "delete", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+}
+
+extend type Subscription {
+	oAuth2ClientEvent(namespace: String!): OAuth2ClientEvent! @HasAccess(attributes: {resource: "OAuth2Clients", verb: "watch", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha", namespaceArg: "namespace"})
+}
+
