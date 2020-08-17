@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -128,12 +127,6 @@ func (r *PluggableContainer) Enable() error {
 	}).Informer()
 
 	mappingClient := mappingCli.Resource(schema.GroupVersionResource{
-		Version:  mappingTypes.SchemeGroupVersion.Version,
-		Group:    mappingTypes.SchemeGroupVersion.Group,
-		Resource: "applicationmappings",
-	})
-
-	fmt.Println(schema.GroupVersionResource{
 		Version:  mappingTypes.SchemeGroupVersion.Version,
 		Group:    mappingTypes.SchemeGroupVersion.Group,
 		Resource: "applicationmappings",
