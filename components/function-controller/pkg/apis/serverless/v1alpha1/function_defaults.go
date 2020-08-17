@@ -13,17 +13,21 @@ var _ resourcesemantics.GenericCRD = (*Function)(nil)
 const DefaultingConfigKey = "defaulting-config"
 
 type DefaultingConfig struct {
-	RequestCpu    string `envconfig:"default=50m"`
-	RequestMemory string `envconfig:"default=64Mi"`
-	LimitsCpu     string `envconfig:"default=100m"`
-	LimitsMemory  string `envconfig:"default=128Mi"`
-	MinReplicas   int32  `envconfig:"default=1"`
-	MaxReplicas   int32  `envconfig:"default=1"`
+	RequestCpu    string  `envconfig:"default=50m"`
+	RequestMemory string  `envconfig:"default=64Mi"`
+	LimitsCpu     string  `envconfig:"default=100m"`
+	LimitsMemory  string  `envconfig:"default=128Mi"`
+	MinReplicas   int32   `envconfig:"default=1"`
+	MaxReplicas   int32   `envconfig:"default=1"`
+	Runtime       Runtime `envconfig:"default=nodejs12"`
 }
 
 func (fn *Function) SetDefaults(ctx context.Context) {
-	fn.Spec.defaultResources(ctx)
+	config := ctx.Value(DefaultingConfigKey).(DefaultingConfig)
+
 	fn.Spec.defaultReplicas(ctx)
+	fn.Spec.defaultResources(ctx)
+	fn.Spec.defaultRuntime(config)
 }
 
 func (spec *FunctionSpec) defaultReplicas(ctx context.Context) {
@@ -87,5 +91,11 @@ func (spec *FunctionSpec) defaultResources(ctx context.Context) {
 		}
 
 		spec.Resources.Limits[corev1.ResourceCPU] = newRerource
+	}
+}
+
+func (spec *FunctionSpec) defaultRuntime(config DefaultingConfig) {
+	if spec.Runtime == "" {
+		spec.Runtime = config.Runtime
 	}
 }

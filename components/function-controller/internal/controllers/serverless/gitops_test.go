@@ -19,6 +19,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			fn: v1alpha1.Function{
 				Spec: v1alpha1.FunctionSpec{
 					SourceType: v1alpha1.SourceTypeGit,
+					Runtime:    v1alpha1.Nodejs12,
 				},
 			},
 			expectedResult: true,
@@ -31,6 +32,7 @@ func Test_isOnSourceChange(t *testing.T) {
 					Repository: v1alpha1.Repository{
 						Reference: "1",
 					},
+					Runtime: v1alpha1.Nodejs12,
 				},
 			},
 			expectedResult: true,
@@ -43,6 +45,7 @@ func Test_isOnSourceChange(t *testing.T) {
 					Repository: v1alpha1.Repository{
 						Reference: "1",
 					},
+					Runtime: v1alpha1.Nodejs12,
 				},
 			},
 			expectedResult: true,
@@ -55,12 +58,14 @@ func Test_isOnSourceChange(t *testing.T) {
 					Repository: v1alpha1.Repository{
 						Reference: "1",
 					},
+					Runtime: v1alpha1.Nodejs12,
 				},
 				Status: v1alpha1.FunctionStatus{
 					Repository: v1alpha1.Repository{
 						Reference: "1",
 					},
-					Commit: "1",
+					Commit:  "1",
+					Runtime: v1alpha1.Nodejs12,
 				},
 			},
 			revision:       "1",
@@ -74,6 +79,7 @@ func Test_isOnSourceChange(t *testing.T) {
 					Repository: v1alpha1.Repository{
 						Reference: "2",
 					},
+					Runtime: v1alpha1.Nodejs12,
 				},
 				Status: v1alpha1.FunctionStatus{
 					Repository: v1alpha1.Repository{
@@ -153,9 +159,9 @@ func Test_isOnSourceChange(t *testing.T) {
 			fn: v1alpha1.Function{
 				Spec: v1alpha1.FunctionSpec{
 					SourceType: v1alpha1.SourceTypeGit,
+					Runtime:    v1alpha1.Nodejs12,
 					Repository: v1alpha1.Repository{
 						Reference: "2",
-						Runtime:   v1alpha1.RuntimeNodeJS12,
 					},
 				},
 				Status: v1alpha1.FunctionStatus{

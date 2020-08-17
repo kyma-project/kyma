@@ -18,6 +18,9 @@ spec:
   - JSONPath: .status.conditions[?(@.type=='Running')].status
     name: Running
     type: string
+  - JSONPath: .status.runtime
+    name: Runtime
+    type: string
   - JSONPath: .metadata.generation
     name: Version
     type: integer
@@ -190,12 +193,14 @@ spec:
               type: object
             runtime:
               enum:
-              - nodejs-12
+              - nodejs12
+              - nodejs10
+              - python37
               type: string
             source:
               description: Source defines the source code of a function
               type: string
-            type:
+            sourceType:
               type: string
           required:
           - source
@@ -231,10 +236,14 @@ spec:
               type: string
             runtime:
               enum:
-              - nodejs-12
+              - nodejs12
+              - nodejs10
+              - python37
               type: string
             source:
               type: string
+          required:
+          - runtime
           type: object
       type: object
   version: v1alpha1

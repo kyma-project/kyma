@@ -14,18 +14,16 @@ import (
 )
 
 const (
-	configMapFunction = "handler.js"
-	configMapHandler  = "handler.main"
-	configMapDeps     = "package.json"
+	FunctionSourceKey = "source"
+	FunctionDepsKey   = "dependencies"
 )
 
 var (
+	// shared between all runtimes
 	envVarsForDeployment = []corev1.EnvVar{
 		{Name: "FUNC_HANDLER", Value: "main"},
 		{Name: "MOD_NAME", Value: "handler"},
-		{Name: "FUNC_RUNTIME", Value: "nodejs12"},
 		{Name: "FUNC_PORT", Value: "8080"},
-		{Name: "NODE_PATH", Value: "$(KUBELESS_INSTALL_VOLUME)/node_modules"},
 	}
 )
 
@@ -59,7 +57,12 @@ func (r *FunctionReconciler) envsEqual(existing, expected []corev1.EnvVar) bool 
 }
 
 func (r *FunctionReconciler) calculateImageTag(instance *serverlessv1alpha1.Function) string {
-	hash := sha256.Sum256([]byte(fmt.Sprintf("%s-%s-%s", instance.GetUID(), instance.Spec.Source, instance.Spec.Deps)))
+	hash := sha256.Sum256([]byte(strings.Join([]string{
+		string(instance.GetUID()),
+		instance.Spec.Source,
+		instance.Spec.Deps,
+		string(instance.Status.Runtime),
+	}, "-")))
 
 	return fmt.Sprintf("%x", hash)
 }
@@ -73,18 +76,13 @@ func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.F
 		string(instance.GetUID()),
 		instance.Status.Commit,
 		instance.Status.Repository.BaseDir,
+		string(instance.Status.Runtime),
 	}, "-")
 	hash := sha256.Sum256([]byte(data))
 	return fmt.Sprintf("%x", hash)
 }
 
-func (r *FunctionReconciler) updateStatus(
-	ctx context.Context,
-	result ctrl.Result,
-	instance *serverlessv1alpha1.Function,
-	condition serverlessv1alpha1.Condition,
-	repository *serverlessv1alpha1.Repository,
-	commit string) (ctrl.Result, error) {
+func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition, repository *serverlessv1alpha1.Repository, commit string) (ctrl.Result, error) {
 	condition.LastTransitionTime = metav1.Now()
 
 	service := instance.DeepCopy()
@@ -106,6 +104,8 @@ func (r *FunctionReconciler) updateStatus(
 	}
 
 	service.Status.Source = instance.Spec.Source
+	service.Status.Runtime = instance.Spec.Runtime
+
 	if err := r.client.Status().Update(ctx, service); err != nil {
 		return ctrl.Result{}, err
 	}
@@ -163,8 +163,7 @@ func (r *FunctionReconciler) equalRepositories(existing serverlessv1alpha1.Repos
 	expected := *new
 
 	return existing.Reference == expected.Reference &&
-		existing.BaseDir == expected.BaseDir &&
-		existing.Runtime == expected.Runtime
+		existing.BaseDir == expected.BaseDir
 }
 
 func (r *FunctionReconciler) getConditionStatus(conditions []serverlessv1alpha1.Condition, conditionType serverlessv1alpha1.ConditionType) corev1.ConditionStatus {
