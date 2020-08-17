@@ -1,10 +1,11 @@
 package endpoints
 
 import (
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/login-consent/internal/helpers"
 	"github.com/ory/hydra-client-go/models"
 	log "github.com/sirupsen/logrus"
-	"net/http"
 )
 
 type loginContext struct {
@@ -14,7 +15,9 @@ type loginContext struct {
 
 func (cfg *Config) Consent(w http.ResponseWriter, req *http.Request) {
 
+	log.Infof("DEBUG: Consent endpoint hit with req.URL: %s", req.URL.String())
 	challenge, err := helpers.GetLConsentChallenge(req)
+
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		w.WriteHeader(http.StatusBadRequest)
@@ -56,6 +59,7 @@ func (cfg *Config) Consent(w http.ResponseWriter, req *http.Request) {
 	}
 
 	redirectTo = *completedReq.RedirectTo
+	log.Infof("DEBUG: redirecting to: %s", redirectTo)
 	http.Redirect(w, req, redirectTo, http.StatusFound)
 
 	//} else {

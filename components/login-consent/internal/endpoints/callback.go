@@ -2,14 +2,18 @@ package endpoints
 
 import (
 	"errors"
+	"net/http"
+
 	"github.com/coreos/go-oidc"
 	hydraAPI "github.com/ory/hydra-client-go/models"
 	log "github.com/sirupsen/logrus"
-	"net/http"
 )
 
 func (cfg *Config) Callback(w http.ResponseWriter, req *http.Request) {
+
+	log.Infof("DEBUG: Callback endpoint hit with req.URL: %s", req.URL.String())
 	log.Info("checking state match")
+
 	if req.URL.Query().Get("state") != state {
 		redirect, err := cfg.rejectLoginRequest(errors.New("state doesn't match"), http.StatusUnauthorized)
 		if err != nil {
