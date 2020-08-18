@@ -53,7 +53,8 @@ func (cfg *Config) Callback(w http.ResponseWriter, req *http.Request) {
 		ClientID: cfg.authenticator.tokenSupport.ClientID()}
 
 	log.Info("verifying ID Token...")
-	idToken, err := cfg.authenticator.tokenSupport.Verifier(oidcConfig).Verify(cfg.authenticator.ctx, rawIDToken)
+	//idToken, err := cfg.authenticator.tokenSupport.Verifier(oidcConfig).Verify(cfg.authenticator.ctx, rawIDToken)
+	idToken, err := cfg.authenticator.tokenSupport.Verify(oidcConfig, cfg.authenticator.ctx, rawIDToken)
 	if err != nil {
 		redirect, err := cfg.rejectLoginRequest(err, http.StatusInternalServerError)
 		if err != nil {
