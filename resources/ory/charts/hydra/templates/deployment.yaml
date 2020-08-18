@@ -108,7 +108,7 @@ spec:
                 secretKeyRef:
                   name: {{ template "hydra.secretName" . }}
                   key: secretsCookie
-            - name: OAUTH2_CONSENT_PROVIDER
+            - name: OAUTH2_CONSENT_URL
               value: "https://ory-login-consent.{{ .Values.global.ingress.domainName }}/consent"
             - name: OAUTH2_LOGIN_URL
               value: "https://ory-login-consent.{{ .Values.global.ingress.domainName }}/login"
