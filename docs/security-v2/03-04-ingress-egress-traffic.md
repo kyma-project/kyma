@@ -1,5 +1,5 @@
 ---
-title: Ingress ans Egress traffic
+title: Ingress and Egress traffic
 type: Details
 ---
 
