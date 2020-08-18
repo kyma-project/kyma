@@ -21,7 +21,7 @@ global:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
     # Example: clusterAssetGroupsVersion: "release-0.9"
-    clusterAssetGroupsVersion: release-1.15.0-rc1
+    clusterAssetGroupsVersion: release-1.15.0
   namespace_controller:
     dir: develop/
     version: 8a10f0ed
