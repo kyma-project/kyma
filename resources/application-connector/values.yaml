@@ -28,7 +28,7 @@ global:
   application_operator:
     version: "8392259f"
   application_operator_tests:
-    version: "1066324c"
+    version: "8c81ea09"
   connector_service:
     version: "4e3576cd"
   connector_service_tests:
