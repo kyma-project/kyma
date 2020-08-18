@@ -247,18 +247,6 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 				Spec: corev1.PodSpec{
 					Volumes: []corev1.Volume{
 						{
-							Name:         "workspace",
-							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
-						},
-						{
-							Name: "runtime",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: rtmConfig.DockerfileConfigMapName},
-								},
-							},
-						},
-						{
 							Name: "credentials",
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
@@ -271,6 +259,18 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 									},
 								},
 							},
+						},
+						{
+							Name: "runtime",
+							VolumeSource: corev1.VolumeSource{
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									LocalObjectReference: corev1.LocalObjectReference{Name: rtmConfig.DockerfileConfigMapName},
+								},
+							},
+						},
+						{
+							Name:         "workspace",
+							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 						},
 					},
 					InitContainers: []corev1.Container{
