@@ -34,7 +34,6 @@ func (cfg *Config) Callback(w http.ResponseWriter, req *http.Request) {
 		}
 		http.Redirect(w, req, redirect, http.StatusUnauthorized)
 		return
-		return
 	}
 
 	rawIDToken, ok := token.Extra("id_token").(string)
@@ -50,10 +49,10 @@ func (cfg *Config) Callback(w http.ResponseWriter, req *http.Request) {
 	log.Infof("Raw: %s", rawIDToken)
 
 	oidcConfig := &oidc.Config{
-		ClientID: cfg.authenticator.tokenSupport.ClientID()}
+		ClientID: cfg.authenticator.tokenSupport.ClientID(),
+	}
 
 	log.Info("verifying ID Token...")
-	//idToken, err := cfg.authenticator.tokenSupport.Verifier(oidcConfig).Verify(cfg.authenticator.ctx, rawIDToken)
 	idToken, err := cfg.authenticator.tokenSupport.Verify(oidcConfig, cfg.authenticator.ctx, rawIDToken)
 	if err != nil {
 		redirect, err := cfg.rejectLoginRequest(err, http.StatusInternalServerError)
