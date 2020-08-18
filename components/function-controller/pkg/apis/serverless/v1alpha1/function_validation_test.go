@@ -263,12 +263,12 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			err := envconfig.Init(config)
 			g.Expect(err).ShouldNot(gomega.HaveOccurred())
 
-			ctx := context.WithValue(nil, ValidationConfigKey, *config)
+			ctx := context.WithValue(context.Background(), ValidationConfigKey, *config)
 
 			// when
 			errs := testData.givenFunc.Validate(ctx)
 
-			//then
+			// then
 			g.Expect(errs).To(testData.expectedError)
 			if testData.specifiedExpectedError != nil {
 				g.Expect(errs.Error()).To(testData.specifiedExpectedError)
