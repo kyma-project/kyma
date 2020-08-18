@@ -128,7 +128,7 @@ func (c *k8sResourcesClient) CreateDummyApplication(ctx context.Context, name st
 		Spec:       spec,
 	}
 
-	options := metav1.CreateOptions{} // this may require more thinking
+	options := metav1.CreateOptions{}
 
 	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Create(ctx, dummyApp, options)
 }
