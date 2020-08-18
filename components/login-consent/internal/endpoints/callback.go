@@ -67,9 +67,9 @@ func (cfg *Config) Callback(w http.ResponseWriter, req *http.Request) {
 	log.Infof("token verified")
 
 	var claims struct {
-		Email         string   `json:"email""`
-		EmailVerified bool     `json:"email_verified""`
-		Name          string   `json:"name""`
+		Email         string   `json:"email"`
+		EmailVerified bool     `json:"email_verified"`
+		Name          string   `json:"name"`
 		Groups        []string `json:"groups,omitempty"`
 	}
 
