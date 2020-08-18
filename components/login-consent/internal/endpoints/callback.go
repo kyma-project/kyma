@@ -91,7 +91,7 @@ func (cfg *Config) Callback(w http.ResponseWriter, req *http.Request) {
 	}
 
 	log.Infof("accepting login request")
-	hydraResp, err := cfg.client.AcceptLoginRequest(challenge, acceptLoginRequest)
+	hydraResp, err := cfg.hydraClient.AcceptLoginRequest(challenge, acceptLoginRequest)
 	if err != nil {
 		redirect, err := cfg.rejectLoginRequest(err, http.StatusUnauthorized)
 		if err != nil {

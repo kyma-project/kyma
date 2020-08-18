@@ -30,7 +30,7 @@ func (cfg *Config) Consent(w http.ResponseWriter, req *http.Request) {
 	}
 
 	log.Info("Fetching consent request from Hydra")
-	consentReq, err := cfg.client.GetConsentRequest(challenge)
+	consentReq, err := cfg.hydraClient.GetConsentRequest(challenge)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		w.WriteHeader(http.StatusBadRequest)
@@ -44,7 +44,7 @@ func (cfg *Config) Consent(w http.ResponseWriter, req *http.Request) {
 	var redirectTo string
 	//if consentReq.Skip {
 	log.Info("Accepting consent request")
-	completedReq, err := cfg.client.AcceptConsentRequest(challenge, &models.AcceptConsentRequest{
+	completedReq, err := cfg.hydraClient.AcceptConsentRequest(challenge, &models.AcceptConsentRequest{
 		GrantScope:               consentReq.RequestedScope,
 		GrantAccessTokenAudience: consentReq.RequestedAccessTokenAudience,
 		Session: &models.ConsentRequestSession{

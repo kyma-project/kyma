@@ -1,12 +1,16 @@
 package endpoints
 
 import (
-	hydraAPI "github.com/ory/hydra-client-go/models"
 	"math/rand"
 	"time"
+
+	hydraAPI "github.com/ory/hydra-client-go/models"
 )
 
+//BUG: This will be overwritten by any two concurrent user requests!
 var challenge string
+
+//BUG: State should be generated for every login flow, not once.
 var state = generateRandomString(16)
 
 func (cfg *Config) rejectLoginRequest(err error, statusCode int64) (string, error) {
@@ -17,7 +21,7 @@ func (cfg *Config) rejectLoginRequest(err error, statusCode int64) (string, erro
 		ErrorHint:        "",
 		StatusCode:       statusCode,
 	}
-	res, e := cfg.client.RejectLoginRequest(challenge, body)
+	res, e := cfg.hydraClient.RejectLoginRequest(challenge, body)
 	if e != nil {
 		return "", e
 	}

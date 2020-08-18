@@ -4,9 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/kyma-project/kyma/components/login-consent/internal/endpoints"
+	"github.com/kyma-project/kyma/components/login-consent/internal/hydra"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -37,6 +39,7 @@ func main() {
 	log.Info("clientID: ", clientID)
 	log.Info("clientSecret: ", clientSecret)
 
+	//Setup Authenticator
 	redirectURL := fmt.Sprintf("%s/callback", appAddress)
 	scopes := []string{"email", "openid", "profile", "groups"}
 	authn, err := endpoints.NewAuthenticator(dexAddress, clientID, clientSecret, redirectURL, scopes)
@@ -45,7 +48,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	cfg, err := endpoints.New(hydraAddr, hydraPort, authn)
+	//Setup Hydra Client
+	rawHydraURL := fmt.Sprintf("%s:%s/", hydraAddr, hydraPort)
+	hydraURL, err := url.Parse(rawHydraURL)
+	if err != nil {
+		log.Errorf("failed to parse Hydra url: %s", err)
+		os.Exit(1)
+	}
+	hydraClient := hydra.NewClient(&http.Client{}, *hydraURL, "https")
+
+	cfg, err := endpoints.New(&hydraClient, authn)
 	if err != nil {
 		log.Error(err)
 		os.Exit(1)

@@ -17,6 +17,7 @@ func (cfg *Config) Login(w http.ResponseWriter, req *http.Request) {
 		redirect, err := cfg.rejectLoginRequest(err, http.StatusBadRequest)
 		if err != nil {
 			log.Errorf("failed to reject the login request: %s", err)
+			//TODO: We don't send anything to the user?
 			return
 		}
 		http.Redirect(w, req, redirect, http.StatusBadRequest)
@@ -26,11 +27,12 @@ func (cfg *Config) Login(w http.ResponseWriter, req *http.Request) {
 	log.Infof("DEBUG: Login endpoint: LoginChallenge: %s", challenge)
 
 	log.Info("Fetching login request from Hydra")
-	loginReq, err := cfg.client.GetLoginRequest(challenge)
+	loginReq, err := cfg.hydraClient.GetLoginRequest(challenge)
 	if err != nil {
 		redirect, err := cfg.rejectLoginRequest(err, http.StatusBadRequest)
 		if err != nil {
 			log.Errorf("failed to reject the login request: %s", err)
+			//TODO: We don't send anything to the user?
 			return
 		}
 		http.Redirect(w, req, redirect, http.StatusBadRequest)
@@ -47,7 +49,7 @@ func (cfg *Config) Login(w http.ResponseWriter, req *http.Request) {
 			Subject:     nil,
 		}
 
-		response, err := cfg.client.AcceptLoginRequest(challenge, body)
+		response, err := cfg.hydraClient.AcceptLoginRequest(challenge, body)
 		if err != nil {
 			redirect, err := cfg.rejectLoginRequest(err, http.StatusBadRequest)
 			if err != nil {

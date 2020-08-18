@@ -5,6 +5,8 @@ go 1.13
 require (
 	github.com/coreos/go-oidc v2.2.1+incompatible
 	github.com/go-http-utils/headers v0.0.0-20181008091004-fed159eddc2a
+	github.com/onsi/ginkgo v1.14.0
+	github.com/onsi/gomega v1.10.1
 	github.com/ory/hydra-client-go v1.6.0
 	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
 	github.com/sirupsen/logrus v1.6.0
