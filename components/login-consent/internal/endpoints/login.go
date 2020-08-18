@@ -62,7 +62,7 @@ func (cfg *Config) Login(w http.ResponseWriter, req *http.Request) {
 
 		redirectTo = *response.RedirectTo
 	} else {
-		redirectTo = cfg.authenticator.clientConfig.AuthCodeURL(state)
+		redirectTo = cfg.authenticator.tokenSupport.AuthCodeURL(state)
 	}
 
 	log.Infof("redirecting to: %s", redirectTo)
