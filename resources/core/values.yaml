@@ -33,7 +33,7 @@ global:
     version: d022112f
   e2e_external_solution:
     dir:
-    version: "PR-9175"
+    version: "1a5b13b8"
   e2e_external_solution_test_service:
     dir:
     version: 9913ea21

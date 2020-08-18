@@ -38,9 +38,9 @@ global:
   connection_token_handler_tests:
     version: "PR-9214"
   event_service:
-    version: "PR-8874"
+    version: "d4372526"
   event_service_integration_tests:
-    version: "PR-9085"
+    version: "2c51c024"
   application_gateway:
     version: "PR-9214"
   application_gateway_tests:
@@ -76,5 +76,5 @@ tests:
       central: false
     skipSslVerify: true
     image:
-      version: "PR-9123"
+      version: "c9ff90c3"
       pullPolicy: IfNotPresent
