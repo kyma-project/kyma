@@ -70,16 +70,10 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 				Spec: corev1.PodSpec{
 					Volumes: []corev1.Volume{
 						{
-							Name: "credentials",
+							Name: "sources",
 							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: r.config.ImageRegistryDockerConfigSecretName,
-									Items: []corev1.KeyToPath{
-										{
-											Key:  ".dockerconfigjson",
-											Path: ".docker/config.json",
-										},
-									},
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									LocalObjectReference: corev1.LocalObjectReference{Name: configMapName},
 								},
 							},
 						},
@@ -92,10 +86,16 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 							},
 						},
 						{
-							Name: "sources",
+							Name: "credentials",
 							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: configMapName},
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: r.config.ImageRegistryDockerConfigSecretName,
+									Items: []corev1.KeyToPath{
+										{
+											Key:  ".dockerconfigjson",
+											Path: ".docker/config.json",
+										},
+									},
 								},
 							},
 						},
