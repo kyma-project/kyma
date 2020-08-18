@@ -1,8 +1,9 @@
 package ui
 
 import (
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"time"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"k8s.io/client-go/dynamic"
 

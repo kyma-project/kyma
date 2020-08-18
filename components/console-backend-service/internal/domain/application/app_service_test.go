@@ -9,6 +9,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/listener"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamicinformer"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -18,13 +21,10 @@ import (
 
 	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	mappingFakeCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1/fake"
 	mappingInformer "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions"
 	appTypes "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/stretchr/testify/assert"
@@ -56,7 +56,7 @@ func TestServiceListNamespacesForApplicationSuccess(t *testing.T) {
 
 	aInformer := createApplicationFakeInformer(dynamicClient)
 
-	svc, err := application.NewApplicationService(application.Config{}, nil, nil, mInformer, nil, aInformer)
+	svc, err := application.NewApplicationService(application.Config{}, nil, nil, mInformer, aInformer)
 	require.NoError(t, err)
 
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, mInformer)
@@ -90,7 +90,7 @@ func TestServiceFindApplicationSuccess(t *testing.T) {
 	require.NoError(t, err)
 	aInformer := createApplicationFakeInformer(dynamicClient)
 
-	svc, err := application.NewApplicationService(application.Config{}, nil, nil, mInformer, nil, aInformer)
+	svc, err := application.NewApplicationService(application.Config{}, nil, nil, mInformer, aInformer)
 	require.NoError(t, err)
 
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, mInformer)
@@ -119,7 +119,7 @@ func TestServiceFindApplicationFail(t *testing.T) {
 	require.NoError(t, err)
 	aInformer := createApplicationFakeInformer(dynamicClient)
 
-	svc, err := application.NewApplicationService(application.Config{}, nil, nil, mInformer, nil, aInformer)
+	svc, err := application.NewApplicationService(application.Config{}, nil, nil, mInformer, aInformer)
 	require.NoError(t, err)
 
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, mInformer)
@@ -149,7 +149,7 @@ func TestServiceListAllApplicationsSuccess(t *testing.T) {
 	require.NoError(t, err)
 	aInformer := createApplicationFakeInformer(dynamicClient)
 
-	svc, err := application.NewApplicationService(application.Config{}, nil, nil, mInformer, nil, aInformer)
+	svc, err := application.NewApplicationService(application.Config{}, nil, nil, mInformer, aInformer)
 	require.NoError(t, err)
 
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, mInformer)
@@ -180,14 +180,13 @@ func TestServiceListApplicationsInNamespaceSuccess(t *testing.T) {
 
 	mInformerFactory := mappingInformer.NewSharedInformerFactory(mCli, 0)
 	mInformer := mInformerFactory.Applicationconnector().V1alpha1().ApplicationMappings().Informer()
-	mLister := mInformerFactory.Applicationconnector().V1alpha1().ApplicationMappings().Lister()
 
 	// Application
 	dynamicClient, err := newDynamicClient(fixAppA, fixAppB)
 	require.NoError(t, err)
 	aInformer := createApplicationFakeInformer(dynamicClient)
 
-	svc, err := application.NewApplicationService(application.Config{}, nil, nil, mInformer, mLister, aInformer)
+	svc, err := application.NewApplicationService(application.Config{}, nil, nil, mInformer, aInformer)
 	require.NoError(t, err)
 
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, mInformer)
@@ -222,13 +221,12 @@ func TestApplicationService_ListApplicationMapping(t *testing.T) {
 	mCli := mappingFakeCli.NewSimpleClientset(&fixMappingAppA, &fixMappingAppAo, &fixMappingAppB, &fixMappingAppBo)
 	mInformerFactory := mappingInformer.NewSharedInformerFactory(mCli, 0)
 	mInformer := mInformerFactory.Applicationconnector().V1alpha1().ApplicationMappings().Informer()
-	mLister := mInformerFactory.Applicationconnector().V1alpha1().ApplicationMappings().Lister()
 
 	dynamicClient, err := newDynamicClient(fixApp)
 	require.NoError(t, err)
 	aInformer := createApplicationFakeInformer(dynamicClient)
 
-	svc, err := application.NewApplicationService(application.Config{}, nil, nil, mInformer, mLister, aInformer)
+	svc, err := application.NewApplicationService(application.Config{}, nil, nil, mInformer, aInformer)
 	require.NoError(t, err)
 
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, mInformer)
@@ -255,7 +253,7 @@ func TestGetConnectionURLSuccess(t *testing.T) {
 		},
 	}
 
-	svc, err := application.NewApplicationService(cfg, nil, nil, newDummyInformer(), nil, newDummyInformer())
+	svc, err := application.NewApplicationService(cfg, nil, nil, newDummyInformer(), newDummyInformer())
 	require.NoError(t, err)
 	// when
 	gotURL, err := svc.GetConnectionURL("fixApplicationName")
@@ -274,7 +272,7 @@ func TestGetConnectionURLFailure(t *testing.T) {
 			},
 		}
 
-		svc, err := application.NewApplicationService(cfg, nil, nil, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(cfg, nil, nil, newDummyInformer(), newDummyInformer())
 		require.NoError(t, err)
 
 		// when
@@ -297,7 +295,7 @@ func TestGetConnectionURLFailure(t *testing.T) {
 			},
 		}
 
-		svc, err := application.NewApplicationService(cfg, nil, nil, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(cfg, nil, nil, newDummyInformer(), newDummyInformer())
 		require.NoError(t, err)
 
 		// when
@@ -320,7 +318,7 @@ func TestGetConnectionURLFailure(t *testing.T) {
 			},
 		}
 
-		svc, err := application.NewApplicationService(cfg, nil, nil, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(cfg, nil, nil, newDummyInformer(), newDummyInformer())
 		require.NoError(t, err)
 
 		// when
@@ -343,7 +341,7 @@ func TestApplicationService_Create(t *testing.T) {
 	dynamicClient, err := newDynamicClient()
 	require.NoError(t, err)
 	aCli := createApplicationDynamicClient(dynamicClient)
-	svc, err := application.NewApplicationService(application.Config{}, aCli, nil, newDummyInformer(), nil, newDummyInformer())
+	svc, err := application.NewApplicationService(application.Config{}, aCli, nil, newDummyInformer(), newDummyInformer())
 	require.NoError(t, err)
 
 	// WHEN
@@ -362,7 +360,7 @@ func TestApplicationService_Delete(t *testing.T) {
 	dynamicClient, err := newDynamicClient(fixApplicationCR(fixName))
 	require.NoError(t, err)
 	aCli := createApplicationDynamicClient(dynamicClient)
-	svc, err := application.NewApplicationService(application.Config{}, aCli, nil, newDummyInformer(), nil, newDummyInformer())
+	svc, err := application.NewApplicationService(application.Config{}, aCli, nil, newDummyInformer(), newDummyInformer())
 	require.NoError(t, err)
 
 	// WHEN
@@ -390,7 +388,7 @@ func TestApplicationService_Update(t *testing.T) {
 
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, aInformer)
 
-	svc, err := application.NewApplicationService(application.Config{}, aCli, nil, newDummyInformer(), nil, aInformer)
+	svc, err := application.NewApplicationService(application.Config{}, aCli, nil, newDummyInformer(), aInformer)
 	require.NoError(t, err)
 
 	// WHEN
@@ -422,7 +420,7 @@ func TestApplicationService_Update_ErrorInRetryLoop(t *testing.T) {
 
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, aInformer)
 
-	svc, err := application.NewApplicationService(application.Config{}, aCli, nil, newDummyInformer(), nil, aInformer)
+	svc, err := application.NewApplicationService(application.Config{}, aCli, nil, newDummyInformer(), aInformer)
 	require.NoError(t, err)
 
 	// WHEN
@@ -457,7 +455,7 @@ func TestApplicationService_Update_SuccessAfterRetry(t *testing.T) {
 
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, aInformer)
 
-	svc, err := application.NewApplicationService(application.Config{}, aCli, nil, newDummyInformer(), nil, aInformer)
+	svc, err := application.NewApplicationService(application.Config{}, aCli, nil, newDummyInformer(), aInformer)
 	require.NoError(t, err)
 
 	// WHEN
@@ -479,10 +477,9 @@ func TestApplicationService_Enable(t *testing.T) {
 		dynamicClient, err := newDynamicClient()
 		require.NoError(t, err)
 		aCli := createApplicationDynamicClient(dynamicClient)
+		mCli := createMappingDynamicClient(dynamicClient)
 
-		mCli := fake.FakeApplicationMappings{Fake: &fake.FakeApplicationconnectorV1alpha1{&dynamicClient.Fake}}
-
-		svc, err := application.NewApplicationService(application.Config{}, aCli, mCli.Fake, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(application.Config{}, aCli, mCli, newDummyInformer(), newDummyInformer())
 		require.NoError(t, err)
 		serviceID := "173626e3-4a8b-4d65-8847-a0bf31e674e8"
 		services := []*gqlschema.ApplicationMappingService{
@@ -508,9 +505,9 @@ func TestApplicationService_Enable(t *testing.T) {
 		dynamicClient, err := newDynamicClient()
 		require.NoError(t, err)
 		aCli := createApplicationDynamicClient(dynamicClient)
-		mCli := fake.FakeApplicationMappings{Fake: &fake.FakeApplicationconnectorV1alpha1{&dynamicClient.Fake}}
+		mCli := createMappingDynamicClient(dynamicClient)
 
-		svc, err := application.NewApplicationService(application.Config{}, aCli, mCli.Fake, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(application.Config{}, aCli, mCli, newDummyInformer(), newDummyInformer())
 		require.NoError(t, err)
 		services := []*gqlschema.ApplicationMappingService{}
 
@@ -530,9 +527,9 @@ func TestApplicationService_Enable(t *testing.T) {
 		dynamicClient, err := newDynamicClient()
 		require.NoError(t, err)
 		aCli := createApplicationDynamicClient(dynamicClient)
-		mCli := fake.FakeApplicationMappings{Fake: &fake.FakeApplicationconnectorV1alpha1{&dynamicClient.Fake}}
+		mCli := createMappingDynamicClient(dynamicClient)
 
-		svc, err := application.NewApplicationService(application.Config{}, aCli, mCli.Fake, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(application.Config{}, aCli, mCli, newDummyInformer(), newDummyInformer())
 		require.NoError(t, err)
 
 		// WHEN
@@ -556,9 +553,12 @@ func TestApplicationService_UpdateApplicationMapping(t *testing.T) {
 		dynamicClient, err := newDynamicClient()
 		require.NoError(t, err)
 		aCli := createApplicationDynamicClient(dynamicClient)
-		mCli := fake.FakeApplicationMappings{Fake: &fake.FakeApplicationconnectorV1alpha1{&dynamicClient.Fake}}
+		mCli := createMappingDynamicClient(dynamicClient)
+		//mCli := fake.FakeApplicationMappings{Fake: &fake.FakeApplicationconnectorV1alpha1{Fake: &dynamicClient.Fake}}
+		aInformer := createApplicationFakeInformer(dynamicClient)
+		mInformer := createMappingFakeInformer(dynamicClient)
 
-		svc, err := application.NewApplicationService(application.Config{}, aCli, mCli.Fake, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(application.Config{}, aCli, mCli, mInformer, aInformer)
 		require.NoError(t, err)
 		serviceIDOne := "47f8ec38-7bee-400a-8e3e-fcf238e4d916"
 		serviceIDTwo := "63d1125b-1451-4122-82f1-54e482248b33"
@@ -597,9 +597,9 @@ func TestApplicationService_UpdateApplicationMapping(t *testing.T) {
 		dynamicClient, err := newDynamicClient()
 		require.NoError(t, err)
 		aCli := createApplicationDynamicClient(dynamicClient)
-		mCli := fake.FakeApplicationMappings{Fake: &fake.FakeApplicationconnectorV1alpha1{&dynamicClient.Fake}}
+		mCli := createMappingDynamicClient(dynamicClient)
 
-		svc, err := application.NewApplicationService(application.Config{}, aCli, mCli.Fake, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(application.Config{}, aCli, mCli, newDummyInformer(), newDummyInformer())
 		require.NoError(t, err)
 
 		services := []*gqlschema.ApplicationMappingService{
@@ -631,9 +631,9 @@ func TestApplicationService_UpdateApplicationMapping(t *testing.T) {
 		dynamicClient, err := newDynamicClient()
 		require.NoError(t, err)
 		aCli := createApplicationDynamicClient(dynamicClient)
-		mCli := fake.FakeApplicationMappings{Fake: &fake.FakeApplicationconnectorV1alpha1{&dynamicClient.Fake}}
+		mCli := createMappingDynamicClient(dynamicClient)
 
-		svc, err := application.NewApplicationService(application.Config{}, aCli, mCli.Fake, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(application.Config{}, aCli, mCli, newDummyInformer(), newDummyInformer())
 		require.NoError(t, err)
 
 		services := []*gqlschema.ApplicationMappingService{
@@ -659,14 +659,14 @@ func TestApplicationService_UpdateApplicationMapping(t *testing.T) {
 
 func TestApplicationService_Subscribe(t *testing.T) {
 	t.Run("Simple", func(t *testing.T) {
-		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), newDummyInformer())
 		require.NoError(t, err)
 		appListener := listener.NewApplication(nil, nil, nil)
 		svc.Subscribe(appListener)
 	})
 
 	t.Run("Duplicated", func(t *testing.T) {
-		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), newDummyInformer())
 		require.NoError(t, err)
 		appLister := listener.NewApplication(nil, nil, nil)
 
@@ -675,7 +675,7 @@ func TestApplicationService_Subscribe(t *testing.T) {
 	})
 
 	t.Run("Multiple", func(t *testing.T) {
-		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), newDummyInformer())
 		require.NoError(t, err)
 		appListerA := listener.NewApplication(nil, nil, nil)
 		appListerB := listener.NewApplication(nil, nil, nil)
@@ -685,7 +685,7 @@ func TestApplicationService_Subscribe(t *testing.T) {
 	})
 
 	t.Run("Nil", func(t *testing.T) {
-		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), newDummyInformer())
 		require.NoError(t, err)
 
 		svc.Subscribe(nil)
@@ -694,7 +694,7 @@ func TestApplicationService_Subscribe(t *testing.T) {
 
 func TestApplicationService_Unsubscribe(t *testing.T) {
 	t.Run("Existing", func(t *testing.T) {
-		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), newDummyInformer())
 		require.NoError(t, err)
 		appLister := listener.NewApplication(nil, nil, nil)
 		svc.Subscribe(appLister)
@@ -703,7 +703,7 @@ func TestApplicationService_Unsubscribe(t *testing.T) {
 	})
 
 	t.Run("Duplicated", func(t *testing.T) {
-		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), newDummyInformer())
 		require.NoError(t, err)
 		appLister := listener.NewApplication(nil, nil, nil)
 		svc.Subscribe(appLister)
@@ -713,7 +713,7 @@ func TestApplicationService_Unsubscribe(t *testing.T) {
 	})
 
 	t.Run("Multiple", func(t *testing.T) {
-		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), newDummyInformer())
 		require.NoError(t, err)
 		appListerA := listener.NewApplication(nil, nil, nil)
 		appListerB := listener.NewApplication(nil, nil, nil)
@@ -724,7 +724,7 @@ func TestApplicationService_Unsubscribe(t *testing.T) {
 	})
 
 	t.Run("Nil", func(t *testing.T) {
-		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), nil, newDummyInformer())
+		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), newDummyInformer())
 		require.NoError(t, err)
 
 		svc.Unsubscribe(nil)
@@ -778,12 +778,29 @@ func createApplicationDynamicClient(dynamicClient dynamic.Interface) dynamic.Nam
 	})
 }
 
+func createMappingDynamicClient(dynamicClient dynamic.Interface) dynamic.NamespaceableResourceInterface {
+	return dynamicClient.Resource(schema.GroupVersionResource{
+		Version:  mappingTypes.SchemeGroupVersion.Version,
+		Group:    mappingTypes.SchemeGroupVersion.Group,
+		Resource: "ApplicationMapping",
+	})
+}
+
 func createApplicationFakeInformer(dynamic dynamic.Interface) cache.SharedIndexInformer {
 	appInformerFactory := dynamicinformer.NewDynamicSharedInformerFactory(dynamic, informerResyncPeriod)
 	return appInformerFactory.ForResource(schema.GroupVersionResource{
-		Version:  appTypes.SchemeGroupVersion.Version,
+		Version:  mappingTypes.SchemeGroupVersion.Version,
 		Group:    appTypes.SchemeGroupVersion.Group,
 		Resource: "applications",
+	}).Informer()
+}
+
+func createMappingFakeInformer(dynamic dynamic.Interface) cache.SharedIndexInformer {
+	mappingInformerFactory := dynamicinformer.NewDynamicSharedInformerFactory(dynamic, informerResyncPeriod)
+	return mappingInformerFactory.ForResource(schema.GroupVersionResource{
+		Version:  mappingTypes.SchemeGroupVersion.Version,
+		Group:    mappingTypes.SchemeGroupVersion.Group,
+		Resource: "ApplicationMapping",
 	}).Informer()
 }
 

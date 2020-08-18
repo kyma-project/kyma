@@ -66,9 +66,13 @@ func newApplicationService(cfg Config, aCli dynamic.NamespaceableResourceInterfa
 	err := mInformer.AddIndexers(cache.Indexers{
 		appMappingNameIndex: func(obj interface{}) ([]string, error) {
 			m := &mappingTypes.ApplicationMapping{}
-			err := res.FromUnstructured(obj.(*unstructured.Unstructured), m)
+			u, err := res.ToUnstructured(obj)
 			if err != nil {
-				return nil, errors.Wrapf(err, "while converting applicationMapping")
+				return nil, errors.Wrapf(err, "while converting applicationMapping obj to unstructured")
+			}
+			err = res.FromUnstructured(u, m)
+			if err != nil {
+				return nil, errors.Wrapf(err, "while converting unstructured to applicationMapping")
 			}
 			return []string{m.Name}, nil
 		},
@@ -177,9 +181,14 @@ func (svc *applicationService) ListNamespacesFor(appName string) ([]string, erro
 
 	nsList := make([]string, 0, len(mappingObjs))
 	for _, item := range mappingObjs {
-		appMapping, ok := item.(*mappingTypes.ApplicationMapping)
-		if !ok {
-			return nil, fmt.Errorf("incorrect item type: %T, should be: 'ApplicationMapping' in version 'v1alpha1'", item)
+		unstructured, err := res.ToUnstructured(item)
+		if err != nil {
+			return nil, errors.Wrapf(err, "while converting mappingObj to unstructured")
+		}
+		appMapping := &mappingTypes.ApplicationMapping{}
+		err = res.FromUnstructured(unstructured, appMapping)
+		if err != nil {
+			return nil, errors.Wrapf(err, "while converting ApplicationMapping from unstructured")
 		}
 		nsList = append(nsList, appMapping.Namespace)
 	}
@@ -271,7 +280,6 @@ func (svc *applicationService) Enable(namespace, name string, services []*gqlsch
 		},
 		Spec: mappingTypes.ApplicationMappingSpec{
 			Services: mappingServices,
-
 		},
 	})
 
