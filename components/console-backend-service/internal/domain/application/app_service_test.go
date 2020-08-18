@@ -44,7 +44,7 @@ func TestServiceListNamespacesForApplicationSuccess(t *testing.T) {
 	fixMapping := fixApplicationMappingCR(fixMappingName, "production")
 
 	// Mapping
-	mCli := mappingFakeCli.NewSimpleClientset(&fixMapping)
+	mCli := mappingFakeCli.NewSimpleClientset(fixMapping)
 
 	mInformerFactory := mappingInformer.NewSharedInformerFactory(mCli, 0)
 	mInformer := mInformerFactory.Applicationconnector().V1alpha1().ApplicationMappings().Informer()
@@ -176,7 +176,7 @@ func TestServiceListApplicationsInNamespaceSuccess(t *testing.T) {
 	fixMappingAppB := fixApplicationMappingCR("app-name-b", fixNamespace)
 
 	// Mapping
-	mCli := mappingFakeCli.NewSimpleClientset(&fixMappingAppA, &fixMappingAppB)
+	mCli := mappingFakeCli.NewSimpleClientset(fixMappingAppA, fixMappingAppB)
 
 	mInformerFactory := mappingInformer.NewSharedInformerFactory(mCli, 0)
 	mInformer := mInformerFactory.Applicationconnector().V1alpha1().ApplicationMappings().Informer()
@@ -218,7 +218,7 @@ func TestApplicationService_ListApplicationMapping(t *testing.T) {
 	fixMappingAppB := fixApplicationMappingCR("app-name-b", fixNamespace)
 	fixMappingAppBo := fixApplicationMappingCR("app-name-b", fixOtherNamespace)
 
-	mCli := mappingFakeCli.NewSimpleClientset(&fixMappingAppA, &fixMappingAppAo, &fixMappingAppB, &fixMappingAppBo)
+	mCli := mappingFakeCli.NewSimpleClientset(fixMappingAppA, fixMappingAppAo, fixMappingAppB, fixMappingAppBo)
 	mInformerFactory := mappingInformer.NewSharedInformerFactory(mCli, 0)
 	mInformer := mInformerFactory.Applicationconnector().V1alpha1().ApplicationMappings().Informer()
 
@@ -550,23 +550,25 @@ func TestApplicationService_UpdateApplicationMapping(t *testing.T) {
 
 	t.Run("Should return updated ApplicationMapping with two services", func(t *testing.T) {
 		// GIVEN
-		dynamicClient, err := newDynamicClient()
+		fixAppMapping := fixApplicationMappingCR(fixName, fixNamespace)
+
+		dynamicClientApp, err := newDynamicClient()
 		require.NoError(t, err)
-		aCli := createApplicationDynamicClient(dynamicClient)
-		mCli := createMappingDynamicClient(dynamicClient)
-		//mCli := fake.FakeApplicationMappings{Fake: &fake.FakeApplicationconnectorV1alpha1{Fake: &dynamicClient.Fake}}
-		aInformer := createApplicationFakeInformer(dynamicClient)
-		mInformer := createMappingFakeInformer(dynamicClient)
+		aCli := createApplicationDynamicClient(dynamicClientApp)
+		dynamicClientMapping, err := newDynamicClient(fixAppMapping)
+		require.NoError(t, err)
+		mCli := createMappingDynamicClient(dynamicClientMapping)
+
+		aInformer := createApplicationFakeInformer(dynamicClientApp)
+		mInformer := createMappingFakeInformer(dynamicClientMapping)
 
 		svc, err := application.NewApplicationService(application.Config{}, aCli, mCli, mInformer, aInformer)
 		require.NoError(t, err)
+
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, mInformer)
+
 		serviceIDOne := "47f8ec38-7bee-400a-8e3e-fcf238e4d916"
 		serviceIDTwo := "63d1125b-1451-4122-82f1-54e482248b33"
-		services := []*gqlschema.ApplicationMappingService{
-			{
-				ID: "173626e3-4a8b-4d65-8847-a0bf31e674e8",
-			},
-		}
 		newServices := []*gqlschema.ApplicationMappingService{
 			{
 				ID: serviceIDOne,
@@ -575,9 +577,6 @@ func TestApplicationService_UpdateApplicationMapping(t *testing.T) {
 				ID: serviceIDTwo,
 			},
 		}
-
-		_, err = svc.Enable(fixNamespace, fixName, services)
-		assert.NoError(t, err)
 
 		// WHEN
 		am, err := svc.UpdateApplicationMapping(fixNamespace, fixName, newServices)
@@ -748,8 +747,12 @@ func newTestServer(data string, statusCode int) *httptest.Server {
 	}))
 }
 
-func fixApplicationMappingCR(name, ns string) mappingTypes.ApplicationMapping {
-	return mappingTypes.ApplicationMapping{
+func fixApplicationMappingCR(name, ns string) *mappingTypes.ApplicationMapping {
+	return &mappingTypes.ApplicationMapping{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ApplicationMapping",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+		},
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
 			Namespace: ns,
@@ -782,14 +785,14 @@ func createMappingDynamicClient(dynamicClient dynamic.Interface) dynamic.Namespa
 	return dynamicClient.Resource(schema.GroupVersionResource{
 		Version:  mappingTypes.SchemeGroupVersion.Version,
 		Group:    mappingTypes.SchemeGroupVersion.Group,
-		Resource: "ApplicationMapping",
+		Resource: "applicationmappings",
 	})
 }
 
 func createApplicationFakeInformer(dynamic dynamic.Interface) cache.SharedIndexInformer {
 	appInformerFactory := dynamicinformer.NewDynamicSharedInformerFactory(dynamic, informerResyncPeriod)
 	return appInformerFactory.ForResource(schema.GroupVersionResource{
-		Version:  mappingTypes.SchemeGroupVersion.Version,
+		Version:  appTypes.SchemeGroupVersion.Version,
 		Group:    appTypes.SchemeGroupVersion.Group,
 		Resource: "applications",
 	}).Informer()
@@ -800,13 +803,17 @@ func createMappingFakeInformer(dynamic dynamic.Interface) cache.SharedIndexInfor
 	return mappingInformerFactory.ForResource(schema.GroupVersionResource{
 		Version:  mappingTypes.SchemeGroupVersion.Version,
 		Group:    mappingTypes.SchemeGroupVersion.Group,
-		Resource: "ApplicationMapping",
+		Resource: "applicationmappings",
 	}).Informer()
 }
 
 func newDynamicClient(objects ...runtime.Object) (*dynamicFake.FakeDynamicClient, error) {
 	scheme := runtime.NewScheme()
 	err := appTypes.AddToScheme(scheme)
+	if err != nil {
+		return &dynamicFake.FakeDynamicClient{}, err
+	}
+	err = mappingTypes.AddToScheme(scheme)
 	if err != nil {
 		return &dynamicFake.FakeDynamicClient{}, err
 	}
