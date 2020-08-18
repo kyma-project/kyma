@@ -35,19 +35,7 @@ spec:
             - /bin/sh
             - -c
             - |
-              DB_URL_PORT=$(echo $DSN | cut -d '@' -f2 | cut -d '/' -f 1 )
-
-              if echo "$DB_URL_PORT" | grep -q ':'; then
-                DB_URL=$(echo $DB_URL_PORT | cut -d ':' -f 1)
-                DB_PORT=$(echo $DB_URL_PORT | cut -d ':' -f 2)
-              else
-                DB_URL=$DB_URL_PORT
-              fi
-
-              until nc -zv -w 5 $DB_URL $DB_PORT; do
-                echo "$DB_URL not yet ready"
-                sleep 5
-              done
+{{ .Files.Get "files/wait-for-db.sh" | printf "%s" | indent 14 }}
           env:
             - name: DSN
               valueFrom:
