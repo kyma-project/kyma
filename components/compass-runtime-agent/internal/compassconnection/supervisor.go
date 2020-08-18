@@ -28,7 +28,7 @@ const (
 	DefaultCompassConnectionName = "compass-connection"
 )
 
-//go:generate mockery -name=CRManager
+//go:generate mockery --name=CRManager
 type CRManager interface {
 	Create(*v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error)
 	Update(*v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error)
@@ -36,7 +36,7 @@ type CRManager interface {
 	Get(name string, options v1.GetOptions) (*v1alpha1.CompassConnection, error)
 }
 
-//go:generate mockery -name=Supervisor
+//go:generate mockery --name=Supervisor
 type Supervisor interface {
 	InitializeCompassConnection() (*v1alpha1.CompassConnection, error)
 	SynchronizeWithCompass(connection *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error)
