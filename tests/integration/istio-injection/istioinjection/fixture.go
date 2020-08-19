@@ -15,13 +15,14 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 const HTTPDBSERVICE_IMAGE = "eu.gcr.io/kyma-project/example/http-db-service:0.0.6"
 
-func createNamespace() error {
+func (testSuite *TestSuite) createNamespace() error {
 	log.Infof("Creating namespace '%s", testSuite.namespace)
 	var err error
 	err = retry.Do(func() error {
@@ -41,7 +42,7 @@ func createNamespace() error {
 	return err
 }
 
-func deleteNamespace() error {
+func (testSuite *TestSuite) deleteNamespace() error {
 	log.Infof("Deleting namespace '%s", testSuite.namespace)
 	var deleteImmediately int64
 	var err error
@@ -77,7 +78,12 @@ func loadKubeConfigOrDie() *rest.Config {
 	return cfg
 }
 
-func disableInjectionForNamespace(disable bool) {
+func (testSuite *TestSuite) initK8sClient() {
+	kubeConfig := loadKubeConfigOrDie()
+	testSuite.k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
+}
+
+func (testSuite *TestSuite) disableInjectionForNamespace(disable bool) {
 	var err error
 	var ns *corev1.Namespace
 	err = retry.Do(func() error {
@@ -113,9 +119,9 @@ func disableInjectionForNamespace(disable bool) {
 	}
 }
 
-func createDeployment(name string, disableSidecarInjection bool) (*appv1.Deployment, error) {
+func (testSuite *TestSuite) createDeployment(name string, disableSidecarInjection bool) (*appv1.Deployment, error) {
 	log.Infof("Creating deployment '%s", name)
-	labels := labels(name)
+	labels := testSuite.labels(name)
 
 	annotations := make(map[string]string)
 	if disableSidecarInjection {
@@ -172,7 +178,7 @@ func createDeployment(name string, disableSidecarInjection bool) (*appv1.Deploym
 	return dep, err
 }
 
-func getPods(appLabelValue string) (*v1.PodList, error) {
+func (testSuite *TestSuite) getPods(appLabelValue string) (*v1.PodList, error) {
 	var pods *v1.PodList
 	var err error
 
@@ -193,7 +199,7 @@ func getPods(appLabelValue string) (*v1.PodList, error) {
 	return pods, err
 }
 
-func deleteDeployment(name string) {
+func (testSuite *TestSuite) deleteDeployment(name string) {
 	log.Infof("Deleting deployment '%s", name)
 
 	err := retry.Do(func() error {
@@ -218,7 +224,7 @@ func deleteDeployment(name string) {
 	}
 }
 
-func labels(testID string) map[string]string {
+func (testSuite *TestSuite) labels(testID string) map[string]string {
 	labels := make(map[string]string)
 	labels["createdBy"] = "istio-injection-tests"
 	labels["app"] = fmt.Sprintf(testID)

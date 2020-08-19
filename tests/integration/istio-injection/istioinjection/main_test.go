@@ -19,20 +19,17 @@ type TestSuite struct {
 	namespace string
 }
 
-var testSuite *TestSuite
-
 func TestIstioInjection(t *testing.T) {
 	namespace := fmt.Sprintf("%s-%s", namespaceNameRoot, generateRandomString(8))
 	if namespace == "" {
 		log.Fatal("Namespace not set.")
 	}
 
-	kubeConfig := loadKubeConfigOrDie()
-	k8sClient := kubernetes.NewForConfigOrDie(kubeConfig)
-	testSuite = &TestSuite{k8sClient, namespace}
+	testSuite := &TestSuite{namespace: namespace}
+	testSuite.initK8sClient()
 
-	defer deleteNamespace()
-	if err := createNamespace(); err != nil {
+	defer testSuite.deleteNamespace()
+	if err := testSuite.createNamespace(); err != nil {
 		panic(err)
 	}
 
@@ -50,17 +47,17 @@ func TestIstioInjection(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.description, func(t *testing.T) {
-			disableInjectionForNamespace(c.disableInjectionForNamespace)
+			testSuite.disableInjectionForNamespace(c.disableInjectionForNamespace)
 			testID := generateRandomString(8)
 
-			_, err := createDeployment(testID, c.disableInjectionForDeployment)
+			_, err := testSuite.createDeployment(testID, c.disableInjectionForDeployment)
 			if err != nil {
 				log.Errorf("Cannot create deployment '%s': %v", testID, err)
 			}
 
-			defer deleteDeployment(testID)
+			defer testSuite.deleteDeployment(testID)
 
-			pods, err := getPods(testID)
+			pods, err := testSuite.getPods(testID)
 
 			if err != nil {
 				log.Fatal("There is no pods for the deployment", err)

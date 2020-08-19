@@ -1,0 +1,21 @@
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: istio-injection
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}-test
+spec:
+  disableConcurrency: false
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-test
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccount: istio-injection-tests
+      containers:
+      - name: tests
+        image: muralov/istio-injection:v2
+      restartPolicy: Never
