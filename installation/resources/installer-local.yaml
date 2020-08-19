@@ -61,28 +61,6 @@ spec:
     plural: releases
     shortNames: ['release']
 ---
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: all-psp
-rules:
-- apiGroups: ["policy/v1beta1"]
-  resources: ["podsecuritypolicies"]
-  verbs: ["use"]
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: all-psp
-subjects:
-- kind: ServiceAccount
-  name: helm-certs-job-sa
-  namespace: kyma-installer
-roleRef:
-  kind: ClusterRole
-  name: all-psp
-  apiGroup: rbac.authorization.k8s.io
----
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -114,75 +92,7 @@ spec:
       labels:
         name: kyma-installer
     spec:
-      serviceAccountName: kyma-installer
-      initContainers:
-      - name: 2to3
-        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
-        terminationMessagePolicy: "FallbackToLogsOnError"
-        command:
-        - /bin/bash
-        - -c
-        - |
-          set -e
-          HELM_2_BINARY=$(which helm)
-          HELM_3_BINARY=$(which helm3)
-          SECRET_NAME="helm-secret"
-          NAMESPACE="kyma-installer"
-          CHART_BLACKLIST=( "gateway-0.0.1" "application-0.0.1" )
-
-          echo "---> Install requirements"
-          apk add git jq
-
-          echo "---> Get HELM_2 certs"
-          ${HELM_2_BINARY} init -c
-
-          if [[ $(kubectl get -n kube-system deploy tiller-deploy -o name) ]]; then
-            if [[ $(kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o name) ]]; then
-              kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.ca\\.crt']}" | base64 --decode > "$(helm home)/ca.pem"
-              kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.tls\\.crt']}" | base64 --decode > "$(helm home)/cert.pem"
-              kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o jsonpath="{.data['global\\.helm\\.tls\\.key']}" | base64 --decode > "$(helm home)/key.pem"
-            else
-              exit 0
-            fi
-          else
-            echo "------> No Tiller deployment found, exiting gracefully"
-            exit 0
-          fi
-
-          echo "---> Get current releases"
-          ${HELM_2_BINARY} ls --tls --all --output json | jq '.Releases[] | .Name + " " + .Namespace + " " + .Chart' | tr -d '"' > helm2-releases
-
-          if [[ ! $(${HELM_3_BINARY} plugin list | grep '2to3') ]]; then
-            echo "---> Get migration plugin"
-            ${HELM_3_BINARY} plugin install https://github.com/helm/helm-2to3.git
-
-            echo "---> Migrate config files"
-            yes | ${HELM_3_BINARY} 2to3 move config
-          fi
-
-          echo "---> Migrate releases"
-
-          while read line; do
-            release=$(echo $line | cut -d " " -f1)
-            ns=$(echo $line | cut -d " " -f2)
-            chart=$(echo $line | cut -d " " -f3)
-
-            if [[ " ${CHART_BLACKLIST[@]} " =~ " ${chart} " ]]; then
-              echo "------> Release ${release} is blacklisted by ${chart}"
-              continue
-            fi
-
-            if [[ $(${HELM_3_BINARY} get all ${release} -n ${ns} 2> /dev/null) ]]; then
-              echo "------> Release ${release} in ns ${ns} already migrated!"
-            else
-              ${HELM_3_BINARY} 2to3 convert ${release}
-            fi
-          done < helm2-releases
-        resources:
-          limits:
-            memory: 1024Mi
-          requests:
-            memory: 512Mi
+      serviceAccountName: kyma-installer      
       containers:
       - name: kyma-installer-container
         image: eu.gcr.io/kyma-project/develop/kyma-installer:63f27f76

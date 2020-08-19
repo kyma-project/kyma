@@ -14,7 +14,7 @@ data:
     
     COPY /src/package.json $KUBELESS_INSTALL_VOLUME/package.json
     RUN /kubeless-npm-install.sh
-    COPY /src/handler.js $KUBELESS_INSTALL_VOLUME/handler.js
+    COPY /src $KUBELESS_INSTALL_VOLUME
 
     USER 1000
 ---
@@ -34,7 +34,7 @@ data:
     
     COPY /src/package.json $KUBELESS_INSTALL_VOLUME/package.json
     RUN /kubeless-npm-install.sh
-    COPY /src/handler.js $KUBELESS_INSTALL_VOLUME/handler.js
+    COPY /src $KUBELESS_INSTALL_VOLUME
 
     USER 1000
 ---
@@ -54,6 +54,6 @@ data:
     
     COPY /src/requirements.txt /requirements.txt
     RUN pip install -r /requirements.txt
-    COPY /src/handler.py /handler.py
+    COPY /src /
 
     USER 1000

@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -29,6 +30,7 @@ const (
 
 type TestSuite struct {
 	application string
+	ctx         context.Context
 
 	config     testkit.TestConfig
 	helmClient testkit.HelmClient
@@ -57,6 +59,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 
 	return &TestSuite{
 		application:         app,
+		ctx:                 context.Background(),
 		config:              config,
 		helmClient:          helmClient,
 		k8sClient:           k8sResourcesClient,
@@ -67,19 +70,19 @@ func NewTestSuite(t *testing.T) *TestSuite {
 
 func (ts *TestSuite) Setup(t *testing.T) {
 	t.Logf("Creating %s Application", ts.application)
-	_, err := ts.k8sClient.CreateDummyApplication(ts.application, ts.application, false)
+	_, err := ts.k8sClient.CreateDummyApplication(ts.ctx, ts.application, ts.application, false)
 	require.NoError(t, err)
 }
 
 func (ts *TestSuite) Cleanup(t *testing.T) {
 	t.Log("Cleaning up...")
-	err := ts.k8sClient.DeleteApplication(ts.application, &metav1.DeleteOptions{})
+	err := ts.k8sClient.DeleteApplication(ts.ctx, ts.application, metav1.DeleteOptions{})
 	require.NoError(t, err)
 }
 
 func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T) {
 	err := testkit.WaitForFunction(defaultCheckInterval, ts.installationTimeout, func() bool {
-		app, err := ts.k8sClient.GetApplication(ts.application, metav1.GetOptions{})
+		app, err := ts.k8sClient.GetApplication(ts.ctx, ts.application, metav1.GetOptions{})
 		if err != nil {
 			return false
 		}
@@ -106,7 +109,7 @@ func (ts *TestSuite) RunApplicationTests(t *testing.T) {
 }
 
 func (ts *TestSuite) getLogsAndCleanup(t *testing.T) {
-	podsToFetch, err := ts.k8sClient.ListPods(metav1.ListOptions{LabelSelector: ts.labelSelector})
+	podsToFetch, err := ts.k8sClient.ListPods(ts.ctx, metav1.ListOptions{LabelSelector: ts.labelSelector})
 	require.NoError(t, err)
 
 	for _, pod := range podsToFetch.Items {
@@ -124,11 +127,11 @@ func (ts *TestSuite) getPodLogs(t *testing.T, pod v1.Pod) {
 		}
 	}
 
-	req := ts.k8sClient.GetLogs(pod.Name, &v1.PodLogOptions{
+	req := ts.k8sClient.GetLogs(ts.ctx, pod.Name, &v1.PodLogOptions{
 		Container: testContainer,
 	})
 
-	reader, err := req.Stream()
+	reader, err := req.Stream(ts.ctx)
 	require.NoError(t, err)
 
 	defer reader.Close()
@@ -147,6 +150,6 @@ func (ts *TestSuite) getPodLogs(t *testing.T, pod v1.Pod) {
 }
 
 func (ts *TestSuite) deleteTestPod(t *testing.T, pod v1.Pod) {
-	err := ts.k8sClient.DeletePod(pod.Name, &metav1.DeleteOptions{})
+	err := ts.k8sClient.DeletePod(ts.ctx, pod.Name, metav1.DeleteOptions{})
 	require.NoError(t, err)
 }
