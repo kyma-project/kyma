@@ -105,6 +105,9 @@ EOF
 
 ## Service to Service authorization
 As Kyma is build on top of the Istio Service Mesh, we support the native [Istio RBAC](https://archive.istio.io/v1.4/docs/reference/config/security/istio.rbac.v1alpha1/) mechanism provided by the mesh. The RBAC enabled the creation of `ServiceRoles` and `ServiceRoleBindings` which enable a fine grained method of restricting access to services inside the kubernetes cluster. 
+For more details on Istio RBAC please read [this section](/components/service-mesh/#details-istio-rbac-configuration)
 
 ## Authorization in API Gateway
-opis + link do docu api-gateway
+Kyma uses a custom Api-Gateway component, which is build on top of [ORY Oathkeeper](https://www.ory.sh/oathkeeper/docs/). It is used to streamline the process of exposing user applications within the Kyma environment, and securing them if necessary. 
+
+For more details on the Api-Gateway please read [this section](/components/api-gateway/#overview-overview)
