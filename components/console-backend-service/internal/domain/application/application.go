@@ -143,7 +143,14 @@ func (r *PluggableContainer) Enable() error {
 	}
 	r.gatewayService = gatewayService
 
-	eventActivationService := newEventActivationService(mappingInformer)
+	// EventActivations
+	eventActivationInformer := r.appInformerFactory.ForResource(schema.GroupVersionResource{
+		Version:  mappingTypes.SchemeGroupVersion.Version,
+		Group:    mappingTypes.SchemeGroupVersion.Group,
+		Resource: "eventactivations",
+	}).Informer()
+
+	eventActivationService := newEventActivationService(eventActivationInformer)
 
 	r.Pluggable.EnableAndSyncCache(func(stopCh chan struct{}) {
 		r.mappingInformerFactory.Start(stopCh)
