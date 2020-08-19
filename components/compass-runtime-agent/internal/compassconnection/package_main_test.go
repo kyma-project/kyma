@@ -9,16 +9,16 @@ import (
 
 	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
 
-	"kyma-project.io/compass-runtime-agent/internal/certificates"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 
-	"kyma-project.io/compass-runtime-agent/internal/testutil"
-	compassCRClientset "kyma-project.io/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/testutil"
+	compassCRClientset "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
 
 	"github.com/sirupsen/logrus"
 
 	"github.com/pkg/errors"
 
-	"kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"

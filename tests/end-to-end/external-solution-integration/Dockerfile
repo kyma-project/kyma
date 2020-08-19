@@ -1,9 +1,9 @@
 FROM golang:1.13-alpine as builder
 
-ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration
+ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration
 
-WORKDIR $DOCK_PKG_DIR
-COPY . $DOCK_PKG_DIR
+WORKDIR $SRC_DIR
+COPY . $SRC_DIR
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /e2e ./cmd/runner
 

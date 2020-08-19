@@ -37,24 +37,24 @@ func (c *navigationNodeConverter) ToGQL(in *uiV1alpha1v.NavigationNode) (*gqlsch
 	return &navigationNode, nil
 }
 
-func (c *navigationNodeConverter) ToGQLs(in []uiV1alpha1v.NavigationNode) ([]gqlschema.NavigationNode, error) {
-	var result []gqlschema.NavigationNode
+func (c *navigationNodeConverter) ToGQLs(in []uiV1alpha1v.NavigationNode) ([]*gqlschema.NavigationNode, error) {
+	var result []*gqlschema.NavigationNode
 	for _, u := range in {
 		converted, err := c.ToGQL(&u)
 		if err != nil {
 			return nil, err
 		}
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil
 }
 
-func (c *navigationNodeConverter) requiredPermissionsToGQLs(in []uiV1alpha1v.RequiredPermission) []gqlschema.RequiredPermission {
-	var result []gqlschema.RequiredPermission
+func (c *navigationNodeConverter) requiredPermissionsToGQLs(in []uiV1alpha1v.RequiredPermission) []*gqlschema.RequiredPermission {
+	var result []*gqlschema.RequiredPermission
 	for _, u := range in {
-		converted := gqlschema.RequiredPermission{
+		converted := &gqlschema.RequiredPermission{
 			Verbs:    u.Verbs,
 			Resource: u.Resource,
 			APIGroup: u.APIGroup,
@@ -68,19 +68,22 @@ func (c *navigationNodeConverter) settingsToGQLJSON(in *uiV1alpha1v.NavigationNo
 	if in == nil {
 		return nil, nil
 	}
+	result := gqlschema.Settings{}
+	if in.Settings == nil {
+		return result, nil
+	}
 
 	jsonByte, err := json.Marshal(in.Settings)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while marshalling %s with ViewURL `%s`", pretty.NavigationNode, in.ViewURL)
 	}
 
-	var jsonMap map[string]interface{}
+	jsonMap := make(map[string]interface{})
 	err = json.Unmarshal(jsonByte, &jsonMap)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while unmarshalling %s with ViewURL `%s` to map", pretty.NavigationNode, in.ViewURL)
 	}
 
-	var result gqlschema.Settings
 	err = result.UnmarshalGQL(jsonMap)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while unmarshalling %s with ViewURL `%s` to GQL JSON", pretty.NavigationNode, in.ViewURL)

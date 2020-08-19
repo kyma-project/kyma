@@ -49,15 +49,15 @@ func (s *secretConverter) ToGQL(in *v1.Secret) (*gqlschema.Secret, error) {
 	return out, nil
 }
 
-func (s *secretConverter) ToGQLs(in []*v1.Secret) ([]gqlschema.Secret, error) {
-	var result []gqlschema.Secret
+func (s *secretConverter) ToGQLs(in []*v1.Secret) ([]*gqlschema.Secret, error) {
+	var result []*gqlschema.Secret
 	for _, u := range in {
 		converted, err := s.ToGQL(u)
 		if err != nil {
 			return nil, err
 		}
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

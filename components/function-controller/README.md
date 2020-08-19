@@ -1,184 +1,62 @@
 # Function Controller
 
-The Knative Function Controller is a Kubernetes controller that enables Kyma to manage Function resources. It uses Tekton Pipelines and Knative Serving under the hood.
+The Function Controller is a Kubernetes controller that enables Kyma to manage Function resources. It uses Kubernetes Jobs, Deployments, Services, and HorizontalPodAutoscalers under the hood.
 
 ## Prerequisites
 
 The Function Controller requires the following components to be installed:
 
-- [Tekton Pipelines](https://github.com/tektoncd/pipeline/releases) (v0.7.0)
-- [Knative Serving](https://github.com/knative/serving/releases) (v0.8.1)
-- [Istio](https://github.com/istio/istio/releases) (v1.0.7)
+- [Istio](https://github.com/istio/istio/releases) (v1.4.3)
+- [Docker registry](https://github.com/docker/distribution) (v2.7.1)
 
-## Installation
+## Development
 
-### Set up the environment
+To develop the component, use the formulae declared in the [generic](/common/makefiles/generic-make-go.mk) and [component-specific](./Makefile) Makefiles. To run tests without the Makefile logic, use the `go test ./...` command.
 
-Follow these steps to prepare the environment you will use to deploy the Controller.
+### Environment variables
 
-1. Export the following environment variables:
+#### The Function Controller uses these environment variables:
 
-    | Variable        | Description | Sample value |
-    | --------------- | ----------- |--------------|
-    | **FN_REGISTRY** | The URL of the container registry Function images will be pushed to. Used for authentication. | `https://gcr.io/` for GCR, `https://index.docker.io/v1/` for Docker Hub |
-    | **KO_DOCKER_REPO** | The name of the container repository Function images will be pushed to. | `gcr.io/my-project` for GCR, `my-user` for Docker Hub |
-    | **FN_NAMESPACE** | The Namespace where Functions are deployed. | `sample-namespace` |
+| Variable                                            | Description                                                                                                                                                                                                                                                                                                  | Default value                                                                                                                                            |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **APP_METRICS_ADDRESS**                             | Address on which controller metrics are exposed                                                                                                                                                                                                                                                              | `:8080`                                                                                                                                                  |
+| **APP_LEADER_ELECTION_ENABLED**                     | Field that enables one instance of the Function Controller to manage the traffic among all instances                                                                                                                                                                                                         | `false`                                                                                                                                                  |
+| **APP_LEADER_ELECTION_ID**                          | Name of the ConfigMap that specifies the main instance of the Function Controller that manages the traffic among all instances                                                                                                                                                                               | `serverless-controller-leader-election-helper`                                                                                                           |
+| **APP_KUBERNETES_BASE_NAMESPACE**                   | Name of the Namespace with the serverless configuration (such as runtime, Secret and service account for the Docker registry) propagated to other Namespaces                                                                                                                                                 | `kyma-system`                                                                                                                                            |
+| **APP_KUBERNETES_EXCLUDED_NAMESPACES**              | List of Namespaces to which serverless configuration is not propagated                                                                                                                                                                                                                                       | `istio-system,knative-eventing,knative-serving,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system` |
+| **APP_KUBERNETES_CONFIG_MAP_REQUEUE_DURATION**      | Period of time after which the ConfigMap Controller refreshes the status of a ConfigMap                                                                                                                                                                                                                      | `1m`                                                                                                                                                     |
+| **APP_KUBERNETES_SECRET_REQUEUE_DURATION**          | Period of time after which the Secret Controller refreshes the status of a Secret                                                                                                                                                                                                                            | `1m`                                                                                                                                                     |
+| **APP_KUBERNETES_SERVICE_ACCOUNT_REQUEUE_DURATION** | Period of time after which the ServiceAccount Controller refreshes the status of a ServiceAccount                                                                                                                                                                                                            | `1m`                                                                                                                                                     |
+| **APP_FUNCTION_IMAGE_REGISTRY_DOCKER_CONFIG_SECRET_NAME**             | Name of the secret that contains hashed credentials to the Docker registry                                                                                                                                                                                                                 | `serverless-image-pull-secret`                                                                                                                           |
+| **APP_FUNCTION_IMAGE_PULL_ACCOUNT_NAME**            | Name of the service account that contains credentials to the Docker registry                                                                                                                                                                                                                                 | `serverless`                                                                                                                                             |
+| **APP_FUNCTION_REQUEUE_DURATION**                   | Period of time after which the Function Controller refreshes the status of a Function CR                                                                                                                                                                                                                     | `1m`                                                                                                                                                     |
+| **APP_FUNCTION_BUILD_REQUESTS_CPU**                 | Minimum amount of CPU assigned to the Job to build a Function image. See [this](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu) document for available values.                                                                                         | `350m`                                                                                                                                                   |
+| **APP_FUNCTION_BUILD_REQUESTS_MEMORY**              | Minimum amount of memory assigned to the Job to build a Function image. See [this](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu) document for available values.                                                                                      | `750mi`                                                                                                                                                  |
+| **APP_FUNCTION_BUILD_LIMITS_CPU**                   | Maximum amount of CPU assigned to the Job to build a Function image. See [this](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu) document for available values.                                                                                         | `1`                                                                                                                                                      |
+| **APP_FUNCTION_BUILD_LIMITS_MEMORY**                | Maximum amount of memory assigned to the Job to build a Function image. See [this](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu) document for available values.                                                                                      | `1Gi`                                                                                                                                                    |
+| **APP_FUNCTION_BUILD_RUNTIME_CONFIG_MAP_NAME**      | Name of the ConfigMap that contains the runtime definition                                                                                                                                                                                                                                                   | `dockerfile-nodejs-12`                                                                                                                                   |
+| **APP_FUNCTION_BUILD_EXECUTOR_ARGS**                | List of arguments passed to the Kaniko executor                                                                                                                                                                                                                                                              | `--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true`                                                                       |
+| **APP_FUNCTION_BUILD_EXECUTOR_IMAGE**               | Full name of the Kaniko executor image used for building Function images and pushing them to the Docker registry                                                                                                                                                                                             | `gcr.io/kaniko-project/executor:v0.22.0`                                                                                                                 |
+| **APP_FUNCTION_BUILD_REPOFETCHER_IMAGE**            | Full name of the Repo-Fetcher init container used for cloning repository for the Kaniko executor                                                                                                                                                                                                             | `eu.gcr.io/kyma-project/function-build-init:305bee60`                                                                                                    |
+| **APP_FUNCTION_DOCKER_INTERNAL_SERVER_ADDRESS**     | Internal server address of the Docker registry                                                                                                                                                                                                                                                               | `serverless-docker-registry.kyma-system.svc.cluster.local:5000`                                                                                          |
+| **APP_FUNCTION_DOCKER_REGISTRY_ADDRESS**            | External address of the Docker registry                                                                                                                                                                                                                                                                      | `registry.kyma.local`                                                                                                                                    |
+| **APP_FUNCTION_TARGET_CPU_UTILIZATION_PERCENTAGE**  | Average CPU usage of all the Pods in a given Deployment. It is represented as a percentage of the overall requested CPU. If the CPU consumption is higher or lower than this limit, Horizontal Pod Autoscaler (HPA) scales the Deployment and increases or decreases the number of Pod replicas accordingly. | `50`                                                                                                                                                     |
 
-    See the example:
+#### The Webhook uses these environment variables:
 
-    ```bash
-    export FN_REGISTRY=https://index.docker.io/v1/
-    export KO_DOCKER_REPO=my-docker-user
-    export FN_NAMESPACE=my-functions
-    ```
-
-2. Create the `serverless-system` Namespace you will deploy the controller to.
-
-    ```bash
-    kubectl create namespace serverless-system
-    ```
-
-3. Create the following configuration for the controller. It contains a list of supported runtimes as well as the container repository referenced by the **KO_DOCKER_REPO** environment variable, which you will create a Secret for in the next steps.
-
-    ```bash
-    cat <<EOF | kubectl -n serverless-system apply -f -
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: fn-config
-    data:
-      serviceAccountName: function-controller-build
-      dockerRegistry: ${KO_DOCKER_REPO}
-      runtimes: |
-        - ID: nodejs8
-          dockerFileName: dockerfile-nodejs-8
-        - ID: nodejs6
-          dockerFileName: dockerfile-nodejs-6
-      funcSizes: |
-        - size: S
-        - size: M
-        - size: L
-      funcTypes: |
-        - type: plaintext
-        - type: base64
-      defaults: |
-        size: S
-        runtime: nodejs8
-        timeOut: 180
-        funcContentType: plaintext
-    EOF
-    ```
-
-4. Create the Namespace defined previously by the **FN_NAMESPACE** environment variable. Function will be deployed to it.
-
-    ```bash
-    kubectl create namespace ${FN_NAMESPACE}
-    ```
-
-5. Functions require Dockerfiles to be created for each supported runtime. The following manifest contains Dockerfiles for Node.js runtimes.
-
-    ```bash
-    kubectl apply -n ${FN_NAMESPACE} -f config/dockerfiles.yaml
-    ```
-
-6. Before you create Functions, it is necessary to create the `registry-credentials` Secret, which contains credentials to the Docker registry defined by the **FN_REGISTRY** environment variable. Tekton Pipelines uses this Secret to push the images it builds for the deployed Functions. The corresponding `function-controller-build` ServiceAccount was referenced inside the controller configuration in step 3.
-
-    ```bash
-    reg_username=<container registry username>
-    reg_password=<container registry password>
-
-    cat <<EOF | kubectl -n ${FN_NAMESPACE} apply -f -
-    ---
-    apiVersion: v1
-    kind: Secret
-    type: kubernetes.io/basic-auth
-    metadata:
-      name: registry-credentials
-      annotations:
-        tekton.dev/docker-0: ${FN_REGISTRY}
-    stringData:
-      username: ${reg_username}
-      password: ${reg_password}
-    ---
-    apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      name: function-controller-build
-    secrets:
-    - name: registry-credentials
-    EOF
-    ```
-
-### Deploy the controller
-
-To deploy the Function Controller to the `serverless-system` Namespace, run:
-
-```bash
-make deploy
-```
-
-This runs [ko](https://github.com/google/ko) to build your image and push it to the container repository set in the **KO_DOCKER_REPO** environment variable.
-
-## Usage
-
-### Run tests
-
-Use the following `make` target to test the deployed Function Controller.
-
-```bash
-make test
-```
-
-### Create a sample Hello World Function
-
-Follow the steps below to create a sample Function.
-
-1. Apply the following Function manifest:
-
-    ```bash
-    kubectl -n ${FN_NAMESPACE} apply -f config/samples/serverless_v1alpha1_function.yaml
-    ```
-
-2. Ensure the Function was created:
-
-    ```bash
-    kubectl -n ${FN_NAMESPACE} get functions
-    ```
-
-3. Check the status of the build:
-
-    ```bash
-    kubectl -n ${FN_NAMESPACE} get taskruns.tekton.dev
-    ```
-
-4. Check the status of the Knative Serving service:
-
-    ```bash
-    kubectl -n ${FN_NAMESPACE} get services.serving.knative.dev
-    ```
-
-5. Access the Function:
-
-    <div tabs name="installation">
-
-      <details>
-      <summary>Minikube</summary>
-
-      ```bash
-      FN_DOMAIN="$(kubectl -n ${FN_NAMESPACE} get ksvc demo --output 'jsonpath={.status.url}' | sed -e 's/http\([s]\)*:[/][/]//')"
-      FN_PORT="$(kubectl get svc istio-ingressgateway -n istio-system --output 'jsonpath={.spec.ports[?(@.port==80)].nodePort}')"
-      curl -v -H "Host: ${FN_DOMAIN}" http://$(minikube ip):${FN_PORT}
-      ```
-      </details>
-
-      <details>
-      <summary>Remote cluster</summary>
-
-      ```bash
-      FN_DOMAIN="$(kubectl -n ${FN_NAMESPACE} get ksvc demo --output 'jsonpath={.status.url}' | sed -e 's/http\([s]\)*:[/][/]//')"
-      FN_INGRESS="$(kubectl get svc istio-ingressgateway -n istio-system --output 'jsonpath={.status.loadBalancer.ingress[0].ip}')"
-      curl -kD- -H "Host: ${FN_DOMAIN}" "http://${FN_INGRESS}"   
-      ```
-      </details>
-
-    </div>
+| Variable                                  | Description                                                                               | Default value        |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------- | -------------------- |
+| **SYSTEM_NAMESPACE**                      | Namespace which contains the Service Account and the Secret                               | `kyma-system`        |
+| **WEBHOOK_SERVICE_NAME**                  | Name of the Service Account which is used by the webhook server                           | `serverless-webhook` |
+| **WEBHOOK_SECRET_NAME**                   | Name of the Secret which contains the certificate is used to register the webhook server  | `serverless-webhook` |
+| **WEBHOOK_PORT**                          | Port on which the webhook server are exposed                                              | `8443`               |
+| **WEBHOOK_VALIDATION_MIN_REQUEST_CPU**    | Minimum amount of requested the limits and requests CPU to pass through the validation    | `10m`                |
+| **WEBHOOK_VALIDATION_MIN_REQUEST_MEMORY** | Minimum amount of requested the limits and requests memory to pass through the validation | `16Mi`               |
+| **WEBHOOK_VALIDATION_MIN_REPLICAS_VALUE** | Minimum amount of replicas to pass through the validation                                 | `1`                  |
+| **WEBHOOK_VALIDATION_RESERVED_ENVS**      | List of reserved envs                                                                     | `{}`                 |
+| **WEBHOOK_DEFAULTING_REQUEST_CPU**        | Value of the request CPU which webhook should set if origin equals null                   | `50m`                |
+| **WEBHOOK_DEFAULTING_REQUEST_MEMORY**     | Value of the request memory which webhook should set if origin equals null                | `64Mi`               |
+| **WEBHOOK_DEFAULTING_LIMITS_CPU**         | Value of the limits CPU which webhook should set if origin equals null                    | `100m`               |
+| **WEBHOOK_DEFAULTING_LIMITS_MEMORY**      | Value of the limits memory which webhook should set if origin equals null                 | `128Mi`              |
+| **WEBHOOK_DEFAULTING_MINREPLICAS**        | Value of the minReplicas which webhook should set if origin equals null                   | `1`                  |
+| **WEBHOOK_DEFAULTING_MAXREPLICAS**        | Value of the maxReplicas which webhook should set if origin equals null                   | `1`                  |

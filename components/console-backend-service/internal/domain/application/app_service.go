@@ -238,7 +238,7 @@ func (svc *applicationService) ListInNamespace(namespace string) ([]*v1alpha1.Ap
 		}
 
 		if !exists {
-			glog.Warningf("Found %s %q in namespaces %q but %s with name %q does not exists", pretty.ApplicationMapping, pretty.Application, mapping.Name, mapping.Namespace, mapping.Name)
+			glog.Warningf("Found %s %q in namespaces %q but %s with name %q does not exists", pretty.ApplicationMapping, mapping.Name, mapping.Namespace, pretty.Application, mapping.Name)
 			continue
 		}
 

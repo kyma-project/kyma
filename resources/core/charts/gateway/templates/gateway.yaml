@@ -14,6 +14,13 @@ spec:
     tls:
       mode: SIMPLE
       credentialName: {{ .Values.global.istio.gateway.name }}-certs
+      minProtocolVersion: TLSV1_1
+      cipherSuites:
+      - ECDHE-RSA-CHACHA20-POLY1305
+      - ECDHE-RSA-AES256-GCM-SHA384
+      - ECDHE-RSA-AES256-SHA
+      - ECDHE-RSA-AES128-GCM-SHA256
+      - ECDHE-RSA-AES128-SHA
     hosts:
       - "*.{{ .Values.global.ingress.domainName }}"
   - port:

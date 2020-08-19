@@ -25,7 +25,7 @@ func TestBackendModuleResolver_BackendModulesQuery(t *testing.T) {
 		resources := []*v1alpha1.BackendModule{
 			resource, resource,
 		}
-		expected := []gqlschema.BackendModule{
+		expected := []*gqlschema.BackendModule{
 			{
 				Name: "Test",
 			},
@@ -58,7 +58,7 @@ func TestBackendModuleResolver_BackendModulesQuery(t *testing.T) {
 		resourceGetter.On("List").Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 		resolver := ui.NewBackendModuleResolver(resourceGetter)
-		var expected []gqlschema.BackendModule
+		var expected []*gqlschema.BackendModule
 
 		result, err := resolver.BackendModulesQuery(nil)
 

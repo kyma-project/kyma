@@ -1,8 +1,11 @@
 package testsuite
 
 import (
+	"net/http"
 	"testing"
 	"time"
+
+	fileclient "github.com/kyma-project/kyma/tests/rafter/pkg/fileclient"
 
 	"github.com/kyma-project/kyma/tests/rafter/pkg/mockice"
 	"github.com/kyma-project/kyma/tests/rafter/pkg/namespace"
@@ -22,6 +25,7 @@ type Config struct {
 	ClusterBucketName     string        `envconfig:"default=test-cluster-bucket"`
 	AssetGroupName        string        `envconfig:"default=test-asset-group"`
 	ClusterAssetGroupName string        `envconfig:"default=test-cluster-asset-group"`
+	AssetName             string        `envconfig:"default=test-asset"`
 	CommonAssetPrefix     string        `envconfig:"default=test"`
 	MockiceName           string        `envconfig:"default=rafter-test-svc"`
 	WaitTimeout           time.Duration `envconfig:"default=3m"`
@@ -33,16 +37,18 @@ type TestSuite struct {
 	clusterBucket     *clusterBucket
 	assetGroup        *assetGroup
 	clusterAssetGroup *clusterAssetGroup
+	asset             *asset
 	t                 *testing.T
 	g                 *gomega.GomegaWithT
 	assetDetails      []assetData
 	dynamicCli        dynamic.Interface
 	cfg               Config
+	fileClientCfg     fileclient.Config
 
 	testID string
 }
 
-func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWithT) (*TestSuite, error) {
+func New(restConfig *rest.Config, cfg Config, fileClientCfg fileclient.Config, t *testing.T, g *gomega.GomegaWithT) (*TestSuite, error) {
 	coreCli, err := corev1.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating K8s Core client")
@@ -58,6 +64,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	cag := newClusterAssetGroup(dynamicCli, cfg.ClusterAssetGroupName, cfg.ClusterBucketName, cfg.WaitTimeout, t.Logf)
 	b := newBucket(dynamicCli, cfg.BucketName, cfg.Namespace, cfg.WaitTimeout, t.Logf)
 	cb := newClusterBucket(dynamicCli, cfg.ClusterBucketName, cfg.WaitTimeout, t.Logf)
+	a := newAsset(dynamicCli, cfg.AssetName, cfg.Namespace, cfg.WaitTimeout, t.Logf)
 
 	return &TestSuite{
 		namespace:         ns,
@@ -65,40 +72,20 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		clusterBucket:     cb,
 		assetGroup:        ag,
 		clusterAssetGroup: cag,
+		asset:             a,
 		t:                 t,
 		g:                 g,
 		dynamicCli:        dynamicCli,
 		testID:            "singularity",
 		cfg:               cfg,
+		fileClientCfg:     fileClientCfg,
 	}, nil
 }
 
 func (t *TestSuite) Run() {
-	// clean up leftovers from previous tests
-
-	t.t.Log("Deleting leftover Mockice resources...")
-	err := t.teardownMockice(t.t.Log)
-	failOnError(t.g, err)
-
-	t.t.Log("Deleting old asset groups...")
-	err = t.assetGroup.Delete(t.t.Log)
-	failOnError(t.g, err)
-
-	t.t.Log("Deleting old cluster asset groups...")
-	err = t.clusterAssetGroup.Delete(t.t.Log)
-	failOnError(t.g, err)
-
-	t.t.Log("Deleting old cluster bucket...")
-	err = t.clusterBucket.Delete(t.t.Log)
-	failOnError(t.g, err)
-
-	t.t.Log("Deleting old bucket...")
-	err = t.bucket.Delete(t.t.Log)
-	failOnError(t.g, err)
-
 	// setup environment
 	t.t.Log("Creating namespace...")
-	err = t.namespace.Create(t.t.Log)
+	err := t.namespace.Create(t.t.Log)
 	failOnError(t.g, err)
 
 	t.t.Log("Starting test service...")
@@ -139,12 +126,53 @@ func (t *TestSuite) Run() {
 	t.t.Log("Waiting for cluster asset group to have ready phase...")
 	err = t.clusterAssetGroup.WaitForStatusReady(resourceVersion, t.t.Log)
 	failOnError(t.g, err)
+
+	t.t.Log("Creating asset...")
+	resourceVersion, err = t.asset.Create(t.assetDetails[0], t.bucket.name, t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Waiting for asset to have ready phase...")
+	err = t.asset.WaitForStatusReady(resourceVersion, t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Fetching data of files from asset...")
+	err = t.fetchFiles()
+	failOnError(t.g, err)
+}
+
+func (t *TestSuite) Setup() {
+	t.t.Log("Deleting leftover Mockice resources...")
+	err := t.teardownMockice()
+	failOnError(t.g, err)
+
+	t.t.Log("Deleting old asset...")
+	err = t.asset.Delete(t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Deleting old asset groups...")
+	err = t.assetGroup.Delete(t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Deleting old cluster asset groups...")
+	err = t.clusterAssetGroup.Delete(t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Deleting old cluster bucket...")
+	err = t.clusterBucket.Delete(t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Deleting old bucket...")
+	err = t.bucket.Delete(t.t.Log)
+	failOnError(t.g, err)
 }
 
 func (t *TestSuite) Cleanup() {
 	t.t.Log("Cleaning up...")
 
-	err := t.clusterBucket.Delete(t.t.Log)
+	err := t.asset.Delete(t.t.Log)
+	failOnError(t.g, err)
+
+	err = t.clusterBucket.Delete(t.t.Log)
 	failOnError(t.g, err)
 
 	err = t.bucket.Delete(t.t.Log)
@@ -156,10 +184,10 @@ func (t *TestSuite) Cleanup() {
 	err = t.assetGroup.Delete(t.t.Log)
 	failOnError(t.g, err)
 
-	err = t.teardownMockice(t.t.Log)
+	err = t.teardownMockice()
 	failOnError(t.g, err)
 
-	err = t.namespace.Delete(t.t.Log)
+	err = t.namespace.Delete()
 	failOnError(t.g, err)
 }
 
@@ -183,7 +211,29 @@ func (t *TestSuite) startMockice() ([]assetData, error) {
 	return as, nil
 }
 
-func (t *TestSuite) teardownMockice(callbacks ...func(...interface{})) error {
+func (t *TestSuite) fetchFiles() error {
+	client, err := fileclient.New(t.fileClientCfg)
+	if err != nil {
+		return errors.Wrap(err, "while creating File client")
+	}
+
+	files, err := t.asset.Files()
+	if err != nil {
+		return err
+	}
+
+	headers := http.Header{}
+	headers.Set("Origin", "https://foo.kyma.local")
+
+	for _, file := range files {
+		if _, err := client.Get(file.URL, headers); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (t *TestSuite) teardownMockice() error {
 	err := t.teardownMockiceResource("pods", t.t.Log)
 	if err != nil {
 		return err

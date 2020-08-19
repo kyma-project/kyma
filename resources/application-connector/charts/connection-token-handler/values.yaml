@@ -2,6 +2,6 @@ deployment:
   image:
     pullPolicy: IfNotPresent
 tests:
-  central: central false
+  central: false
   image:
     pullPolicy: IfNotPresent

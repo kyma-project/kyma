@@ -30,7 +30,7 @@ func (c *clusterServiceClassConverter) ToGQL(in *v1beta1.ClusterServiceClass) (*
 	displayName := resource.ToStringPtr(externalMetadata["displayName"])
 	longDescription := resource.ToStringPtr(externalMetadata["longDescription"])
 
-	var labels gqlschema.Labels
+	labels := gqlschema.Labels{}
 	err = labels.UnmarshalGQL(externalMetadata["labels"])
 	if err != nil {
 		return nil, errors.Wrapf(err, "while unmarshalling labels in ClusterServiceClass `%s`", in.Name)
@@ -54,8 +54,8 @@ func (c *clusterServiceClassConverter) ToGQL(in *v1beta1.ClusterServiceClass) (*
 	return &class, nil
 }
 
-func (c *clusterServiceClassConverter) ToGQLs(in []*v1beta1.ClusterServiceClass) ([]gqlschema.ClusterServiceClass, error) {
-	var result []gqlschema.ClusterServiceClass
+func (c *clusterServiceClassConverter) ToGQLs(in []*v1beta1.ClusterServiceClass) ([]*gqlschema.ClusterServiceClass, error) {
+	var result []*gqlschema.ClusterServiceClass
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -63,7 +63,7 @@ func (c *clusterServiceClassConverter) ToGQLs(in []*v1beta1.ClusterServiceClass)
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

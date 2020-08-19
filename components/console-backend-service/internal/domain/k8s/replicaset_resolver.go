@@ -23,7 +23,7 @@ type replicaSetSvc interface {
 //go:generate mockery -name=gqlReplicaSetConverter -output=automock -outpkg=automock -case=underscore
 type gqlReplicaSetConverter interface {
 	ToGQL(in *api.ReplicaSet) (*gqlschema.ReplicaSet, error)
-	ToGQLs(in []*api.ReplicaSet) ([]gqlschema.ReplicaSet, error)
+	ToGQLs(in []*api.ReplicaSet) ([]*gqlschema.ReplicaSet, error)
 	GQLJSONToReplicaSet(in gqlschema.JSON) (api.ReplicaSet, error)
 }
 
@@ -58,7 +58,7 @@ func (r *replicaSetResolver) ReplicaSetQuery(ctx context.Context, name, namespac
 	return converted, nil
 }
 
-func (r *replicaSetResolver) ReplicaSetsQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ReplicaSet, error) {
+func (r *replicaSetResolver) ReplicaSetsQuery(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.ReplicaSet, error) {
 	replicaSets, err := r.replicaSetSvc.List(namespace, pager.PagingParams{
 		First:  first,
 		Offset: offset,

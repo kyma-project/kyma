@@ -70,10 +70,10 @@ func (r *applicationResolver) ApplicationQuery(ctx context.Context, name string)
 	}
 
 	gqlApp := r.appConverter.ToGQL(application)
-	return &gqlApp, nil
+	return gqlApp, nil
 }
 
-func (r *applicationResolver) ApplicationsQuery(ctx context.Context, namespace *string, first *int, offset *int) ([]gqlschema.Application, error) {
+func (r *applicationResolver) ApplicationsQuery(ctx context.Context, namespace *string, first *int, offset *int) ([]*gqlschema.Application, error) {
 	var items []*appTypes.Application
 	var err error
 
@@ -81,18 +81,18 @@ func (r *applicationResolver) ApplicationsQuery(ctx context.Context, namespace *
 		items, err = r.appSvc.List(pager.PagingParams{First: first, Offset: offset})
 		if err != nil {
 			glog.Error(errors.Wrapf(err, "while listing all %s", pretty.Applications))
-			return []gqlschema.Application{}, gqlerror.New(err, pretty.Applications)
+			return nil, gqlerror.New(err, pretty.Applications)
 		}
 	} else { // retrieve only for given namespace
 		// TODO: Add support for paging.
 		items, err = r.appSvc.ListInNamespace(*namespace)
 		if err != nil {
 			glog.Error(errors.Wrapf(err, "while listing %s for namespace %v", pretty.Applications, namespace))
-			return []gqlschema.Application{}, gqlerror.New(err, pretty.Applications, gqlerror.WithNamespace(*namespace))
+			return nil, gqlerror.New(err, pretty.Applications, gqlerror.WithNamespace(*namespace))
 		}
 	}
 
-	res := make([]gqlschema.Application, 0)
+	res := make([]*gqlschema.Application, 0)
 	for _, item := range items {
 		res = append(res, r.appConverter.ToGQL(item))
 	}
@@ -100,8 +100,8 @@ func (r *applicationResolver) ApplicationsQuery(ctx context.Context, namespace *
 	return res, nil
 }
 
-func (r *applicationResolver) ApplicationEventSubscription(ctx context.Context) (<-chan gqlschema.ApplicationEvent, error) {
-	channel := make(chan gqlschema.ApplicationEvent, 1)
+func (r *applicationResolver) ApplicationEventSubscription(ctx context.Context) (<-chan *gqlschema.ApplicationEvent, error) {
+	channel := make(chan *gqlschema.ApplicationEvent, 1)
 	appListener := listener.NewApplication(channel, &r.appConverter, extractor.ApplicationUnstructuredExtractor{})
 
 	r.appSvc.Subscribe(appListener)
@@ -114,51 +114,51 @@ func (r *applicationResolver) ApplicationEventSubscription(ctx context.Context) 
 	return channel, nil
 }
 
-func (r *applicationResolver) CreateApplication(ctx context.Context, name string, description *string, qglLabels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error) {
+func (r *applicationResolver) CreateApplication(ctx context.Context, name string, description *string, qglLabels gqlschema.Labels) (*gqlschema.ApplicationMutationOutput, error) {
 	desc, labels := r.returnWithDefaults(description, qglLabels)
 	_, err := r.appSvc.Create(name, desc, labels)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.Application, name))
-		return gqlschema.ApplicationMutationOutput{}, gqlerror.New(err, pretty.Application, gqlerror.WithName(name))
+		return nil, gqlerror.New(err, pretty.Application, gqlerror.WithName(name))
 	}
-	return gqlschema.ApplicationMutationOutput{
+	return &gqlschema.ApplicationMutationOutput{
 		Name:        name,
 		Labels:      labels,
 		Description: desc,
 	}, nil
 }
 
-func (r *applicationResolver) DeleteApplication(ctx context.Context, name string) (gqlschema.DeleteApplicationOutput, error) {
+func (r *applicationResolver) DeleteApplication(ctx context.Context, name string) (*gqlschema.DeleteApplicationOutput, error) {
 	err := r.appSvc.Delete(name)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while deleting %s `%s`", pretty.Application, name))
-		return gqlschema.DeleteApplicationOutput{}, gqlerror.New(err, pretty.Application, gqlerror.WithName(name))
+		return nil, gqlerror.New(err, pretty.Application, gqlerror.WithName(name))
 	}
-	return gqlschema.DeleteApplicationOutput{Name: name}, nil
+	return &gqlschema.DeleteApplicationOutput{Name: name}, nil
 }
 
-func (r *applicationResolver) UpdateApplication(ctx context.Context, name string, description *string, qglLabels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error) {
+func (r *applicationResolver) UpdateApplication(ctx context.Context, name string, description *string, qglLabels gqlschema.Labels) (*gqlschema.ApplicationMutationOutput, error) {
 	desc, labels := r.returnWithDefaults(description, qglLabels)
 	_, err := r.appSvc.Update(name, desc, labels)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while updating %s `%s`", pretty.Application, name))
-		return gqlschema.ApplicationMutationOutput{}, gqlerror.New(err, pretty.Application, gqlerror.WithName(name))
+		return nil, gqlerror.New(err, pretty.Application, gqlerror.WithName(name))
 	}
-	return gqlschema.ApplicationMutationOutput{
+	return &gqlschema.ApplicationMutationOutput{
 		Name:        name,
 		Labels:      labels,
 		Description: desc,
 	}, nil
 }
 
-func (r *applicationResolver) ConnectorServiceQuery(ctx context.Context, application string) (gqlschema.ConnectorService, error) {
+func (r *applicationResolver) ConnectorServiceQuery(ctx context.Context, application string) (*gqlschema.ConnectorService, error) {
 	url, err := r.appSvc.GetConnectionURL(application)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s for %s '%s'", pretty.ConnectorService, pretty.Application, application))
-		return gqlschema.ConnectorService{}, gqlerror.New(err, pretty.ConnectorService)
+		return nil, gqlerror.New(err, pretty.ConnectorService)
 	}
 
-	dto := gqlschema.ConnectorService{
+	dto := &gqlschema.ConnectorService{
 		URL: url,
 	}
 
@@ -245,18 +245,19 @@ func (r *applicationResolver) ApplicationEnabledInNamespacesField(ctx context.Co
 }
 
 func (r *applicationResolver) ApplicationEnabledMappingServices(ctx context.Context, obj *gqlschema.Application) ([]*gqlschema.EnabledMappingService, error) {
+	collection := []*gqlschema.EnabledMappingService{}
+
 	if obj == nil {
 		glog.Error(fmt.Errorf("while resolving 'EnabledMappingServices' field obj is empty"))
-		return nil, gqlerror.NewInternal()
+		return collection, gqlerror.NewInternal()
 	}
 
 	items, err := r.appSvc.ListApplicationMapping(obj.Name)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s for %s %q", pretty.ApplicationMapping, pretty.Application, obj.Name))
-		return nil, gqlerror.New(err, pretty.ApplicationMapping)
+		return collection, gqlerror.New(err, pretty.ApplicationMapping)
 	}
 
-	var collection []*gqlschema.EnabledMappingService
 	for _, mapping := range items {
 		ems := &gqlschema.EnabledMappingService{}
 
@@ -282,7 +283,7 @@ func (r *applicationResolver) findEnabledApplicationService(appServices []gqlsch
 		return "", false
 	}
 
-	var result []*gqlschema.EnabledApplicationService
+	result := []*gqlschema.EnabledApplicationService{}
 	for _, srv := range mapping.Spec.Services {
 		es := &gqlschema.EnabledApplicationService{}
 		es.ID = srv.ID
@@ -314,12 +315,12 @@ func (r *applicationResolver) ApplicationStatusField(ctx context.Context, app *g
 	}
 }
 
-func (r *applicationResolver) returnWithDefaults(description *string, gqlLabels *gqlschema.Labels) (desc string, labels gqlschema.Labels) {
+func (r *applicationResolver) returnWithDefaults(description *string, gqlLabels gqlschema.Labels) (desc string, labels gqlschema.Labels) {
 	if description != nil {
 		desc = *description
 	}
 	if gqlLabels != nil {
-		labels = *gqlLabels
+		labels = gqlLabels
 	}
 
 	return desc, labels

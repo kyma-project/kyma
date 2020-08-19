@@ -1,89 +1,168 @@
 package kymahelm
 
 import (
-	"k8s.io/helm/pkg/helm"
-	"k8s.io/helm/pkg/proto/hapi/release"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
-	"k8s.io/helm/pkg/tlsutil"
+	"time"
+
+	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/release"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/client-go/rest"
+	"k8s.io/klog"
 )
 
+//go:generate mockery -name HelmClient
 type HelmClient interface {
-	ListReleases(ns string) (*rls.ListReleasesResponse, error)
-	InstallReleaseFromChart(chartDir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error)
-	UpdateReleaseFromChart(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error)
-	DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error)
-	ReleaseStatus(rlsName string) (*rls.GetReleaseStatusResponse, error)
+	ListReleases(namespace string) ([]*release.Release, error)
+	InstallReleaseFromChart(chartDir, releaseName string, namespace string, overrides map[string]interface{}) (*release.Release, error)
+	UpdateReleaseFromChart(chartDir, releaseName string, namespace string, overrides map[string]interface{}) (*release.Release, error)
+	DeleteRelease(releaseName string, namespace string) (*release.UninstallReleaseResponse, error)
+	ReleaseStatus(releaseName string, namespace string) (*release.Release, error)
 }
 
 type helmClient struct {
-	helm                *helm.Client
 	installationTimeout int64
+	settings            *cli.EnvSettings
+	config              *rest.Config
+	helmdriver          string
 }
 
-func NewClient(host, tlsKeyFile, tlsCertFile string, skipVerify bool, installationTimeout int64) (HelmClient, error) {
-	tlsOpts := tlsutil.Options{
-		KeyFile:            tlsKeyFile,
-		CertFile:           tlsCertFile,
-		InsecureSkipVerify: skipVerify,
-	}
-
-	tlsCfg, err := tlsutil.ClientConfig(tlsOpts)
-	if err != nil {
-		return nil, err
-	}
+func NewClient(config *rest.Config, driver string, installationTimeout int64) (HelmClient, error) {
 
 	return &helmClient{
-		helm:                helm.NewClient(helm.Host(host), helm.WithTLS(tlsCfg)),
+		config:              config,
+		helmdriver:          driver,
+		settings:            cli.New(),
 		installationTimeout: installationTimeout,
 	}, nil
 }
 
-func (hc *helmClient) ListReleases(ns string) (*rls.ListReleasesResponse, error) {
-	statuses := []release.Status_Code{
-		release.Status_DELETED,
-		release.Status_DELETING,
-		release.Status_DEPLOYED,
-		release.Status_FAILED,
-		release.Status_PENDING_INSTALL,
-		release.Status_PENDING_ROLLBACK,
-		release.Status_PENDING_UPGRADE,
-		release.Status_UNKNOWN,
+func (hc *helmClient) ListReleases(namespace string) ([]*release.Release, error) {
+
+	actionConfig, err := hc.actionConfigInit(namespace)
+	if err != nil {
+		return nil, err
 	}
 
-	return hc.helm.ListReleases(
-		helm.ReleaseListStatuses(statuses),
-		helm.ReleaseListNamespace(ns),
-	)
+	listAction := action.NewList(actionConfig)
+
+	listAction.Deployed = true
+	listAction.Uninstalled = true
+	listAction.Superseded = true
+	listAction.Uninstalling = true
+	listAction.Deployed = true
+	listAction.Failed = true
+	listAction.Pending = true
+
+	results, err := listAction.Run()
+	if err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }
 
-func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error) {
-	return hc.helm.InstallRelease(
-		chartDir,
-		ns,
-		helm.ReleaseName(string(releaseName)),
-		helm.ValueOverrides([]byte(overrides)), //Without it default "values.yaml" file is ignored!
-		helm.InstallWait(true),
-		helm.InstallTimeout(hc.installationTimeout),
-	)
+func (hc *helmClient) InstallReleaseFromChart(chartDir, releaseName string, namespace string, overrides map[string]interface{}) (*release.Release, error) {
+
+	actionConfig, err := hc.actionConfigInit(namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	installAction := action.NewInstall(actionConfig)
+
+	installAction.ReleaseName = releaseName
+	installAction.Namespace = namespace
+	installAction.Timeout = time.Duration(hc.installationTimeout) * time.Second
+	installAction.Wait = true
+
+	chartRequested, err := loader.Load(chartDir)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := installAction.Run(chartRequested, overrides)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }
 
-func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error) {
-	return hc.helm.UpdateRelease(
-		releaseName,
-		chartDir,
-		helm.UpgradeTimeout(hc.installationTimeout),
-		helm.UpdateValueOverrides([]byte(overrides)),
-	)
+func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName string, namespace string, overrides map[string]interface{}) (*release.Release, error) {
+
+	actionConfig, err := hc.actionConfigInit(namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	upgradeAction := action.NewUpgrade(actionConfig)
+
+	upgradeAction.Namespace = namespace
+	upgradeAction.Timeout = time.Duration(hc.installationTimeout)
+
+	chartRequested, err := loader.Load(chartDir)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := upgradeAction.Run(releaseName, chartRequested, overrides)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, err
 }
 
-func (hc *helmClient) DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error) {
-	return hc.helm.DeleteRelease(
-		releaseName,
-		helm.DeletePurge(true),
-		helm.DeleteTimeout(hc.installationTimeout),
-	)
+func (hc *helmClient) DeleteRelease(releaseName string, namespace string) (*release.UninstallReleaseResponse, error) {
+
+	actionConfig, err := hc.actionConfigInit(namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	uninstallAction := action.NewUninstall(actionConfig)
+	uninstallAction.Timeout = time.Duration(hc.installationTimeout)
+
+	response, err := uninstallAction.Run(releaseName)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }
 
-func (hc *helmClient) ReleaseStatus(rlsName string) (*rls.GetReleaseStatusResponse, error) {
-	return hc.helm.ReleaseStatus(rlsName)
+func (hc *helmClient) ReleaseStatus(releaseName string, namespace string) (*release.Release, error) {
+
+	actionConfig, err := hc.actionConfigInit(namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	statusAction := action.NewStatus(actionConfig)
+	release, err := statusAction.Run(releaseName)
+	if err != nil {
+		return nil, err
+	}
+
+	return release, nil
+}
+
+func (hc *helmClient) actionConfigInit(namespace string) (*action.Configuration, error) {
+
+	config := hc.config
+
+	kubeConfig := genericclioptions.NewConfigFlags(false)
+	kubeConfig.APIServer = &config.Host
+	kubeConfig.BearerToken = &config.BearerToken
+	kubeConfig.CAFile = &config.CAFile
+
+	actionConfig := new(action.Configuration)
+	err := actionConfig.Init(kubeConfig, namespace, hc.helmdriver, klog.Infof)
+	if err != nil {
+		return actionConfig, err
+	}
+
+	return actionConfig, nil
 }

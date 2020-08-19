@@ -12,10 +12,7 @@ metadata:
 {{- end }}
   name: {{ template "grafana.fullname" . }}
   labels:
-    app: {{ template "grafana.name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    heritage: {{ $.Release.Service }}
-    release: {{ $.Release.Name }}
+    {{- include "grafana.labels" . | nindent 4 }}
 {{- if .Values.virtualservice.labels }}
 {{ toYaml .Values.virtualservice.labels | indent 4 }}
 {{- end }}
@@ -23,7 +20,7 @@ spec:
   hosts:
   - grafana.{{ .Values.global.ingress.domainName }}
   gateways:
-  - {{ .Values.global.istio.gateway.name }}
+  - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
   http:
   - match:
     - uri:
@@ -31,6 +28,10 @@ spec:
     route:
     - destination:
         port:
-          number: 80
-        host: {{ printf "%s-%s" $releaseName "grafana" | trunc 63 }}
+          number: {{ .Values.service.port }}
+{{- if .Values.kyma.authProxy.enabled }}
+        host: {{ template "grafana.fullname" . }}-secured
+{{- else }}
+        host: {{ template "grafana.fullname" . }}
+{{- end -}}
 {{- end }}

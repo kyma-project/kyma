@@ -31,40 +31,41 @@ func (c *serviceConverter) ToGQL(in *v1.Service) (*gqlschema.Service, error) {
 		Ports:             toGQLSchemaServicePorts(in.Spec.Ports),
 		Status:            toGQLSchemaServiceStatus(in.Status),
 		JSON:              gqlJSON,
+		UID:               string(in.ObjectMeta.UID),
 	}, nil
 }
 
-func toGQLSchemaServiceStatus(s v1.ServiceStatus) gqlschema.ServiceStatus {
+func toGQLSchemaServiceStatus(s v1.ServiceStatus) *gqlschema.ServiceStatus {
 	if s.LoadBalancer.Ingress == nil {
-		return gqlschema.ServiceStatus{
-			LoadBalancer: gqlschema.LoadBalancerStatus{
+		return &gqlschema.ServiceStatus{
+			LoadBalancer: &gqlschema.LoadBalancerStatus{
 				Ingress: nil,
 			},
 		}
 	}
-	ingressSlice := make([]gqlschema.LoadBalancerIngress, len(s.LoadBalancer.Ingress))
+	ingressSlice := make([]*gqlschema.LoadBalancerIngress, len(s.LoadBalancer.Ingress))
 	for i, ingress := range s.LoadBalancer.Ingress {
-		ingressSlice[i] = gqlschema.LoadBalancerIngress{
+		ingressSlice[i] = &gqlschema.LoadBalancerIngress{
 			IP:       ingress.IP,
 			HostName: ingress.Hostname,
 		}
 	}
-	return gqlschema.ServiceStatus{
-		LoadBalancer: gqlschema.LoadBalancerStatus{
+	return &gqlschema.ServiceStatus{
+		LoadBalancer: &gqlschema.LoadBalancerStatus{
 			Ingress: ingressSlice,
 		},
 	}
 }
 
-func (c *serviceConverter) ToGQLs(in []*v1.Service) ([]gqlschema.Service, error) {
-	var result []gqlschema.Service
+func (c *serviceConverter) ToGQLs(in []*v1.Service) ([]*gqlschema.Service, error) {
+	var result []*gqlschema.Service
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
 			return nil, err
 		}
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil
@@ -121,12 +122,12 @@ func toGQLSchemaServicePort(in *v1.ServicePort) *gqlschema.ServicePort {
 	}
 }
 
-func toGQLSchemaServicePorts(in []v1.ServicePort) []gqlschema.ServicePort {
-	var result []gqlschema.ServicePort
+func toGQLSchemaServicePorts(in []v1.ServicePort) []*gqlschema.ServicePort {
+	var result []*gqlschema.ServicePort
 	for _, item := range in {
 		converted := toGQLSchemaServicePort(&item)
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result
@@ -135,9 +136,9 @@ func toGQLSchemaServicePorts(in []v1.ServicePort) []gqlschema.ServicePort {
 func toGQLSchemaServiceProtocol(protocol *v1.Protocol) gqlschema.ServiceProtocol {
 	switch *protocol {
 	case v1.ProtocolTCP:
-		return gqlschema.ServiceProtocolTcp
+		return gqlschema.ServiceProtocolTCP
 	case v1.ProtocolUDP:
-		return gqlschema.ServiceProtocolUdp
+		return gqlschema.ServiceProtocolUDP
 	default:
 		return gqlschema.ServiceProtocolUnknown
 	}

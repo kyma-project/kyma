@@ -2,7 +2,6 @@ replicaCount: 1
 image:
   pullPolicy: IfNotPresent
 service:
-  type: NodePort
   externalPort: 80
   internalPort: 8080
 

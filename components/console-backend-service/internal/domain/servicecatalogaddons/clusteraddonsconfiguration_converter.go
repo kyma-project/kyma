@@ -12,16 +12,21 @@ func (c *clusterAddonsConfigurationConverter) ToGQL(item *v1alpha1.ClusterAddons
 		return nil
 	}
 
-	var urls []string
-	var repositories []gqlschema.AddonsConfigurationRepository
+	urls := []string{}
+	repositories := []*gqlschema.AddonsConfigurationRepository{}
 	for _, repo := range item.Spec.Repositories {
 		urls = append(urls, repo.URL)
 		repositories = append(repositories, parseRepository(repo))
 	}
 
+	labels := item.Labels
+	if labels == nil {
+		labels = gqlschema.Labels{}
+	}
+
 	addonsCfg := gqlschema.AddonsConfiguration{
 		Name:         item.Name,
-		Labels:       item.Labels,
+		Labels:       labels,
 		Urls:         urls,
 		Status:       parseStatus(item.Status.CommonAddonsConfigurationStatus),
 		Repositories: repositories,
@@ -30,12 +35,12 @@ func (c *clusterAddonsConfigurationConverter) ToGQL(item *v1alpha1.ClusterAddons
 	return &addonsCfg
 }
 
-func (c *clusterAddonsConfigurationConverter) ToGQLs(in []*v1alpha1.ClusterAddonsConfiguration) []gqlschema.AddonsConfiguration {
-	var result []gqlschema.AddonsConfiguration
+func (c *clusterAddonsConfigurationConverter) ToGQLs(in []*v1alpha1.ClusterAddonsConfiguration) []*gqlschema.AddonsConfiguration {
+	var result []*gqlschema.AddonsConfiguration
 	for _, u := range in {
 		converted := c.ToGQL(u)
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result

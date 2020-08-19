@@ -1,3 +1,4 @@
+{{- if and .Values.loki.enabled .Values.global.logging_integration_tests.enabled }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -17,6 +18,13 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: {{ .Chart.Name }}-tests
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            - "oauth2.{{ .Values.global.ingress.domainName }}"
+            - "dex.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
       restartPolicy: Never
       containers:
       - name: tests
@@ -27,6 +35,19 @@ spec:
         args:
         - "-c"
         - "./test-logging"
+        env:
+        - name: DOMAIN
+          value: {{ .Values.global.ingress.domainName }}
+        - name: TEST_USER_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.logging_integration_tests.env.testUser }}
+              key: email
+        - name: TEST_USER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.logging_integration_tests.env.testUser }}
+              key: password
       volumes:
       - name: dex-config
         configMap:
@@ -35,3 +56,4 @@ spec:
                 - key: config.yaml
                   path: config.yaml
 {{- end}}
+{{- end }}

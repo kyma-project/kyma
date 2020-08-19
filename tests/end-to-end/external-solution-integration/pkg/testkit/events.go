@@ -2,27 +2,51 @@ package testkit
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/common/resilient"
+	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/pkg/errors"
+
+	"github.com/kyma-project/kyma/common/resilient"
+
+	cehttp "github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/http"
 )
 
 type EventSender struct {
 	httpClient resilient.HttpClient
+	ceClient   cehttp.ResilientCloudEventClient
 	domain     string
 }
 
-func NewEventSender(httpClient resilient.HttpClient, domain string) *EventSender {
+func NewEventSender(httpClient *http.Client, domain, application string) *EventSender {
+	eventsUrl := fmt.Sprintf("https://gateway.%s/%s/events", domain, application)
+
+	t, err := cloudevents.NewHTTPTransport(
+		cloudevents.WithTarget(eventsUrl),
+		cloudevents.WithBinaryEncoding(),
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	t.Client = httpClient
+	ceClient, err := cloudevents.NewClient(t)
+	if err != nil {
+		panic(err)
+	}
+
 	return &EventSender{
-		httpClient: httpClient,
+		httpClient: resilient.WrapHttpClient(httpClient),
 		domain:     domain,
+		ceClient:   cehttp.NewWrappedCloudEventClient(ceClient),
 	}
 }
 
-func (s *EventSender) SendEvent(appName string, event *ExampleEvent) error {
+func (s *EventSender) SendEventToCompatibilityLayer(appName string, event *ExampleEvent) error {
 	body, err := json.Marshal(event)
 	if err != nil {
 		return err
@@ -47,4 +71,8 @@ func (s *EventSender) SendEvent(appName string, event *ExampleEvent) error {
 	}
 
 	return nil
+}
+
+func (s *EventSender) SendCloudEventToMesh(ctx context.Context, event cloudevents.Event) (ct context.Context, evt *cloudevents.Event, err error) {
+	return s.ceClient.Send(ctx, event)
 }

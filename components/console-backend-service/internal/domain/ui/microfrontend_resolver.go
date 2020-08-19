@@ -19,7 +19,7 @@ type microFrontendLister interface {
 //go:generate mockery -name=gqlMicroFrontendConverter -output=automock -outpkg=automock -case=underscore
 type gqlMicroFrontendConverter interface {
 	ToGQL(in *v1alpha1.MicroFrontend) (*gqlschema.MicroFrontend, error)
-	ToGQLs(in []*v1alpha1.MicroFrontend) ([]gqlschema.MicroFrontend, error)
+	ToGQLs(in []*v1alpha1.MicroFrontend) ([]*gqlschema.MicroFrontend, error)
 }
 
 type microFrontendResolver struct {
@@ -34,7 +34,7 @@ func newMicroFrontendResolver(microFrontendLister microFrontendLister) *microFro
 	}
 }
 
-func (r *microFrontendResolver) MicroFrontendsQuery(ctx context.Context, namespace string) ([]gqlschema.MicroFrontend, error) {
+func (r *microFrontendResolver) MicroFrontendsQuery(ctx context.Context, namespace string) ([]*gqlschema.MicroFrontend, error) {
 	items, err := r.microFrontendLister.List(namespace)
 
 	if err != nil {

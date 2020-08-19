@@ -30,7 +30,7 @@ func TestAddonsConfigurationResolver_AddonsConfigurationsQuery(t *testing.T) {
 
 	// then
 	require.NoError(t, err)
-	assert.Equal(t, []gqlschema.AddonsConfiguration{*fixGQLAddonsConfiguration(fixNS)}, res)
+	assert.Equal(t, []*gqlschema.AddonsConfiguration{fixGQLAddonsConfiguration(fixNS)}, res)
 }
 
 func TestAddonsConfigurationResolver_CreateAddonsConfiguration(t *testing.T) {
@@ -39,13 +39,13 @@ func TestAddonsConfigurationResolver_CreateAddonsConfiguration(t *testing.T) {
 	addonsCfgMutation := automock.NewAddonsCfgMutations()
 	defer addonsCfgMutation.AssertExpectations(t)
 
-	addonsCfgMutation.On("Create", fixNS, fixNS, []gqlschema.AddonsConfigurationRepositoryInput{}, &gqlschema.Labels{}).
+	addonsCfgMutation.On("Create", fixNS, fixNS, []*gqlschema.AddonsConfigurationRepositoryInput{}, gqlschema.Labels{}).
 		Return(fixAddonsConfiguration(fixNS), nil).Once()
 
 	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(nil, addonsCfgMutation, nil)
 
 	// when
-	res, err := resolver.CreateAddonsConfiguration(context.Background(), fixNS, fixNS, nil, []string{}, &gqlschema.Labels{})
+	res, err := resolver.CreateAddonsConfiguration(context.Background(), fixNS, fixNS, nil, []string{}, gqlschema.Labels{})
 
 	// then
 	require.NoError(t, err)
@@ -57,13 +57,13 @@ func TestAddonsConfigurationResolver_UpdateAddonsConfiguration(t *testing.T) {
 	const addonName = "test"
 	addonsCfgMutation := automock.NewAddonsCfgMutations()
 	defer addonsCfgMutation.AssertExpectations(t)
-	addonsCfgMutation.On("Update", addonName, addonName, []gqlschema.AddonsConfigurationRepositoryInput{}, &gqlschema.Labels{}).
+	addonsCfgMutation.On("Update", addonName, addonName, []*gqlschema.AddonsConfigurationRepositoryInput{}, gqlschema.Labels{}).
 		Return(fixAddonsConfiguration(addonName), nil).Once()
 
 	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(nil, addonsCfgMutation, nil)
 
 	// when
-	cfgs, err := resolver.UpdateAddonsConfiguration(context.Background(), addonName, addonName, nil, []string{}, &gqlschema.Labels{})
+	cfgs, err := resolver.UpdateAddonsConfiguration(context.Background(), addonName, addonName, nil, []string{}, gqlschema.Labels{})
 
 	// then
 	require.NoError(t, err)
@@ -93,7 +93,7 @@ func TestAddonsConfigurationResolver_AddAddonsConfigurationURLs(t *testing.T) {
 	const addonName = "test"
 	addonsCfgUpdater := automock.NewAddonsCfgUpdater()
 	defer addonsCfgUpdater.AssertExpectations(t)
-	addonsCfgUpdater.On("AddRepos", addonName, addonName, []gqlschema.AddonsConfigurationRepositoryInput{{URL: "app.gg"}}).
+	addonsCfgUpdater.On("AddRepos", addonName, addonName, []*gqlschema.AddonsConfigurationRepositoryInput{{URL: "app.gg"}}).
 		Return(fixAddonsConfiguration(addonName), nil).Once()
 
 	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
@@ -130,13 +130,13 @@ func TestAddonsConfigurationResolver_AddAddonsConfigurationRepository(t *testing
 	addonsCfgUpdater := automock.NewAddonsCfgUpdater()
 	defer addonsCfgUpdater.AssertExpectations(t)
 	url := "app.gg"
-	addonsCfgUpdater.On("AddRepos", addonName, addonName, []gqlschema.AddonsConfigurationRepositoryInput{{URL: url}}).
+	addonsCfgUpdater.On("AddRepos", addonName, addonName, []*gqlschema.AddonsConfigurationRepositoryInput{{URL: url}}).
 		Return(fixAddonsConfiguration(addonName), nil).Once()
 
 	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
 
 	// when
-	cfgs, err := resolver.AddAddonsConfigurationRepositories(context.Background(), addonName, addonName, []gqlschema.AddonsConfigurationRepositoryInput{{URL: url}})
+	cfgs, err := resolver.AddAddonsConfigurationRepositories(context.Background(), addonName, addonName, []*gqlschema.AddonsConfigurationRepositoryInput{{URL: url}})
 
 	// then
 	require.NoError(t, err)
@@ -187,10 +187,14 @@ func fixGQLAddonsConfiguration(name string) *gqlschema.AddonsConfiguration {
 		Urls: []string{
 			url,
 		},
-		Repositories: []gqlschema.AddonsConfigurationRepository{
+		Repositories: []*gqlschema.AddonsConfigurationRepository{
 			{
 				URL: url,
 			},
+		},
+		Labels: gqlschema.Labels{},
+		Status: &gqlschema.AddonsConfigurationStatus{
+			Repositories: []*gqlschema.AddonsConfigurationStatusRepository{},
 		},
 	}
 }

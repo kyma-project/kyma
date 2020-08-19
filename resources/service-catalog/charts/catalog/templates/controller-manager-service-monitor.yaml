@@ -1,4 +1,5 @@
 # Inform Prometheus to scrap the metrics endpoint
+{{- if .Values.controllerManager.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -11,13 +12,18 @@ metadata:
   name: {{ template "fullname" . }}-controller-manager
 spec:
   endpoints:
-  - port: secure
+  - port: https-secure
     scheme: https
     tlsConfig:
       insecureSkipVerify: true
+    metricRelabelings:
+      - sourceLabels: [ __name__ ]
+        regex: ^(servicecatalog_osb_request_count|servicecatalog_broker_service_class_count|servicecatalog_broker_service_plan_count)$
+        action: keep
   namespaceSelector:
     matchNames:
     - "{{ .Release.Namespace }}"
   selector:
     matchLabels:
       app: {{ template "fullname" . }}-controller-manager
+{{- end }}

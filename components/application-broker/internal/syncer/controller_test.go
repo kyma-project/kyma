@@ -53,7 +53,7 @@ func TestControllerRunSuccess(t *testing.T) {
 	defer relistRequesterMock.AssertExpectations(t)
 	relistRequesterMock.ExpectOnRequestRelist().Run(fulfillExpectation).Once()
 
-	syncJob := syncer.New(appInformer, upserterMock, nil, relistRequesterMock, spy.NewLogDummy()).
+	syncJob := syncer.New(appInformer, upserterMock, nil, relistRequesterMock, spy.NewLogDummy(), false).
 		WithCRValidator(validatorMock).
 		WithCRMapper(mapperMock)
 

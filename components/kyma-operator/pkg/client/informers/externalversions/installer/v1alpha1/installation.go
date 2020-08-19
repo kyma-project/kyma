@@ -3,6 +3,7 @@
 package v1alpha1
 
 import (
+	"context"
 	time "time"
 
 	installerv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
@@ -45,13 +46,13 @@ func NewFilteredInstallationInformer(client versioned.Interface, namespace strin
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.InstallerV1alpha1().Installations(namespace).List(options)
+				return client.InstallerV1alpha1().Installations(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.InstallerV1alpha1().Installations(namespace).Watch(options)
+				return client.InstallerV1alpha1().Installations(namespace).Watch(context.TODO(), options)
 			},
 		},
 		&installerv1alpha1.Installation{},

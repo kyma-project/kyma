@@ -1,13 +1,15 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
   namespace: {{ .Values.global.namespace }}
   labels:
     app: {{ .Chart.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: 1
   selector:
@@ -24,14 +26,16 @@ spec:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       labels:
         app: {{ .Chart.Name }}
-        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-        release: "{{ .Release.Name }}"
-        heritage: "{{ .Release.Service }}"
+        release: {{ .Release.Name }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        app.kubernetes.io/name: {{ template "name" . }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       serviceAccountName: {{ .Chart.Name }}
       containers:
       - name: ctrl
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_broker.dir }}application-broker:{{ .Values.global.application_broker.version }}"
+        image: "{{ .Values.global.containerRegistry.path }}/application-broker:{{ .Values.global.application_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
           limits:
@@ -42,7 +46,7 @@ spec:
             cpu: 80m
         env:
           - name: APP_PORT
-            value: "{{ .Values.service.internalPort }}"
+            value: {{ .Values.service.internalPort | quote }}
           - name: APP_CONFIG_FILE_NAME
             value: /etc/config/re-broker/config.yaml
           - name: APP_BROKER_RELIST_DURATION_WINDOW
@@ -57,7 +61,18 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-
+          - name: APP_API_PACKAGES_SUPPORT
+            value: {{ .Values.global.disableLegacyConnectivity | quote }}
+          {{ if .Values.global.disableLegacyConnectivity }}
+          - name: APP_DIRECTOR_PROXY_URL
+            value: {{ .Values.director.proxyURL | quote }}
+          - name: APP_DIRECTOR_SERVICE_OPERATION_POLLING_TIMEOUT
+            value: {{ .Values.director.operationPoolingTimeout | quote }}
+          - name: APP_DIRECTOR_SERVICE_OPERATION_POLLING_INTERVAL
+            value: {{ .Values.director.operationPoolingInterval | quote }}
+          - name: APP_GATEWAY_BASE_URL_FORMAT
+            value: {{ .Values.gatewayBaseURLFormat | quote }}
+          {{ end }}
         volumeMounts:
         - mountPath: /etc/config/re-broker
           name: config-volume

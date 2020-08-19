@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	eventsURLLabelKey  = "runtime/event_service_url"
-	consoleURLLabelKey = "runtime/console_url"
+	eventsURLLabelKey  = "runtime_eventServiceUrl"
+	consoleURLLabelKey = "runtime_consoleUrl"
 )
 
 func TestRuntimeLabeledWithURL(t *testing.T) {

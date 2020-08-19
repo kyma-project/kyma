@@ -14,13 +14,13 @@ type gqlBindingUsageConverter interface {
 }
 
 type BindingUsage struct {
-	channel   chan<- gqlschema.ServiceBindingUsageEvent
+	channel   chan<- *gqlschema.ServiceBindingUsageEvent
 	filter    func(bindingUsage *api.ServiceBindingUsage) bool
 	converter gqlBindingUsageConverter
 	extractor extractor.BindingUsageUnstructuredExtractor
 }
 
-func NewBindingUsage(channel chan<- gqlschema.ServiceBindingUsageEvent, filter func(bindingUsage *api.ServiceBindingUsage) bool, converter gqlBindingUsageConverter) *BindingUsage {
+func NewBindingUsage(channel chan<- *gqlschema.ServiceBindingUsageEvent, filter func(bindingUsage *api.ServiceBindingUsage) bool, converter gqlBindingUsageConverter) *BindingUsage {
 	return &BindingUsage{
 		channel:   channel,
 		filter:    filter,
@@ -66,9 +66,9 @@ func (l *BindingUsage) notify(eventType gqlschema.SubscriptionEventType, binding
 		return
 	}
 
-	event := gqlschema.ServiceBindingUsageEvent{
+	event := &gqlschema.ServiceBindingUsageEvent{
 		Type:                eventType,
-		ServiceBindingUsage: *gqlBindingUsage,
+		ServiceBindingUsage: gqlBindingUsage,
 	}
 
 	l.channel <- event

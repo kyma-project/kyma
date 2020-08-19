@@ -4,6 +4,7 @@ package servicecatalogaddons
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
 
 	"time"
@@ -99,8 +100,22 @@ func TestAddonsConfigurationMutationsAndQueries(t *testing.T) {
 		auth.Get:    {suite.fixAddonsConfigurationRequest()},
 		auth.Create: {suite.fixCreateAddonsConfigurationsRequest()},
 		auth.Delete: {suite.fixDeleteAddonsConfigurationRequest()},
+		auth.Watch:  {suite.fixAddonConfigurationSubscription()},
 	}
 	AuthSuite.Run(t, ops)
+}
+
+func generateRandomName() string {
+	var random *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	const charset = "abcdefghijklmnopqrstuvwxyz"
+	const length = 8
+
+	str := make([]byte, length)
+	for i := range str {
+		str[i] = charset[random.Intn(len(charset))]
+	}
+	return string(str)
 }
 
 func newAddonsConfigurationSuite(t *testing.T) *addonsConfigurationTestSuite {
@@ -109,11 +124,12 @@ func newAddonsConfigurationSuite(t *testing.T) *addonsConfigurationTestSuite {
 	addonsCli, _, err := client.NewAddonsConfigurationsClientWithConfig()
 	require.NoError(t, err)
 
+	name := generateRandomName()
 	return &addonsConfigurationTestSuite{
 		gqlCli:                   c,
 		addonsCli:                addonsCli,
 		t:                        t,
-		givenAddonsConfiguration: fixture.AddonsConfiguration("test", []string{"test"}, map[string]string{"label": "true"}),
+		givenAddonsConfiguration: fixture.AddonsConfiguration(name, []string{"test"}, map[string]string{"label": "true"}),
 	}
 }
 
@@ -242,7 +258,7 @@ func (s *addonsConfigurationTestSuite) addonsConfigurationDetailsFields() string
 	`
 }
 
-func (s *addonsConfigurationTestSuite) subscribeAddonsConfiguration() *graphql.Subscription {
+func (s *addonsConfigurationTestSuite) fixAddonConfigurationSubscription() *graphql.Request {
 	query := fmt.Sprintf(`
 			subscription ($namespace: String!) {
 				addonsConfigurationEvent(namespace: $namespace) {
@@ -252,8 +268,11 @@ func (s *addonsConfigurationTestSuite) subscribeAddonsConfiguration() *graphql.S
 		`, s.addonsConfigurationEventDetailsFields())
 	req := graphql.NewRequest(query)
 	req.SetVar("namespace", TestNamespace)
+	return req
+}
 
-	return s.gqlCli.Subscribe(req)
+func (s *addonsConfigurationTestSuite) subscribeAddonsConfiguration() *graphql.Subscription {
+	return s.gqlCli.Subscribe(s.fixAddonConfigurationSubscription())
 }
 
 func (s *addonsConfigurationTestSuite) readAddonsConfigurationEvent(sub *graphql.Subscription) (addonsConfigurationEvent, error) {

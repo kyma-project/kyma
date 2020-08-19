@@ -3,7 +3,7 @@ title: Create a Grafana dashboard
 type: Tutorials
 ---
 
-This tutorial shows how to create and configure a basic Grafana dashboard of a [Gauge](https://grafana.com/docs/features/panels/singlestat/#gauge) type. The dashboard shows how the values of the `cpu_temperature_celsius` metric change in time, representing the current processor temperature ranging from 60 to 90 degrees Celsius. The dashboard shows explicitly when the CPU temperature exceeds the pre-defined threshold of 75 degrees Celsius.
+This tutorial shows how to create and configure a basic Grafana dashboard of a [Gauge](https://grafana.com/docs/grafana/latest/panels/visualizations/gauge-panel/#gauge-panel) type. The dashboard shows how the values of the `cpu_temperature_celsius` metric change in time, representing the current processor temperature ranging from 60 to 90 degrees Celsius. The dashboard shows explicitly when the CPU temperature exceeds the pre-defined threshold of 75 degrees Celsius.
 
 ## Prerequisites
 
@@ -80,3 +80,5 @@ Refresh the browser to see how the dashboard changes according to the current va
 - It turns red if the current metric value ranges from 75 to 90 degrees Celsius:
 
    ![Red dashboard](./assets/red-dashboard.png)
+
+>**NOTE:** You can also define the dashboard's ConfigMap and add it to the `resources` folder under the given component's chart. To make the dashboard visible, simply use the `kubectl apply` command to deploy it. For details on adding monitoring to components, see the [`README.md`](https://github.com/kyma-project/kyma/blob/master/resources/monitoring/charts/grafana/README.md) document.

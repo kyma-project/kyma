@@ -192,11 +192,18 @@ func (ts *appTestSuite) generateFixtures() {
 				{
 					ID:          internal.ApplicationServiceID(ft.id),
 					DisplayName: "displayName",
-					APIEntry: &internal.APIEntry{
-						AccessLabel: "access-label",
-						GatewayURL:  "http://gateway.io",
-						Entry: internal.Entry{
+					Entries: []internal.Entry{
+						{
 							Type: "API",
+							APIEntry: &internal.APIEntry{
+								GatewayURL:  "http://gateway.io",
+								TargetURL:   "http://target.io",
+								Name:        "api-mock",
+								AccessLabel: "access-label",
+							},
+						},
+						{
+							Type: "Events",
 						},
 					},
 					Tags: []string{"tag1", "tag2"},

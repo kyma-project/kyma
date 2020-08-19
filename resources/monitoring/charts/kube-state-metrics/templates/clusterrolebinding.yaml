@@ -3,10 +3,7 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
   labels:
-    app.kubernetes.io/name: {{ template "kube-state-metrics.name" . }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    app.kubernetes.io/managed-by: {{ $.Release.Service }}
-    app.kubernetes.io/instance: {{ $.Release.Name }}
+    {{- include "kube-state-metrics.labels" . | nindent 4 }}
   name: {{ template "kube-state-metrics.fullname" . }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -15,5 +12,5 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: {{ template "kube-state-metrics.fullname" . }}
-  namespace: {{ $.Release.Namespace }}
+  namespace: {{ template "kube-state-metrics.namespace" . }}
 {{- end -}}

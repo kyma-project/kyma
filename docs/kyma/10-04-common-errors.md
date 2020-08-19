@@ -3,17 +3,6 @@ title: Common installation errors
 type: Troubleshooting
 ---
 
-## Istio-related error
-
-In some cases, the logs of the Kyma Installer may show this error, which seemingly indicates problems with Istio:
-
-```
-Step error:  Details: Helm install error: rpc error: code = Unknown desc = validation failed: [unable to recognize "": no matches for kind "DestinationRule" in version "networking.istio.io/v1alpha3", unable to recognize "": no matches for kind "DestinationRule" in version "networking.istio.io/v1alpha3", unable to recognize "": no matches for kind "attributemanifest" in version "config.istio.io/v1alpha2"
-```
-
-As Istio is the first sizeable component handled by the Kyma Installer, sometimes not all of the required CRDs are created before the Installer proceeds to the next component. This situation doesn't cause the installation to fail.
-Instead, the Istio installation step repeats and gets more time for setup. The error message is logged regardless of that.
-
 ## Job failed: DeadlineExceeded error
 
 The `Job failed: DeadlineExceeded` error indicates that a job object didn't finish in a set time leading to a time-out. Frequently this error is followed by a message that indicates the release which failed to install: `Helm install error: rpc error: code = Unknown desc = a release named core already exists`.
@@ -26,13 +15,13 @@ Follow these steps to identify the failing job:
 
 1. Get the installed Helm releases which correspond to components:
   ```
-  helm ls --tls
+  helm list --all-namespaces --all
   ```
   A high number of revisions may suggest that a component was reinstalled several times. If a release has the status different to `Deployed`, the component wasn't installed.
 
 2. Get component details:
   ```
-  helm status {RELEASE_NAME} --tls
+  helm status {RELEASE_NAME} -n {RELEASE_NAMESPACE}
   ```
   Pods with not all containers in `READY` state can cause the error.
 
@@ -48,11 +37,25 @@ If the installation fails and the feedback you get from the console output isn't
 
 To list all of the available Helm releases, run:
 ```
-helm list --tls
+helm list --all-namespaces
 ```
 To inspect a release and its logged errors, run:
 ```
-helm history {RELEASE_NAME} --tls
+helm history {RELEASE_NAME} -n {RELEASE_NAMESPACE}
 ```
 
 >**NOTE:** Names of Helm releases correspond to names of Kyma components.
+
+## Maximum number of retries reached
+
+The Kyma Installer retries the failed installation of releases a set number of times (default is 5). It stops the installation when it reaches the limit and returns this message: `Max number of retries reached during step {STEP_NAME}`. Fetch the logs of the Kyma Installer to check the reason for failure. Run:
+
+```bash 
+kubectl -n kyma-installer logs -l 'name=kyma-installer'
+```
+
+After you fix the error that caused the installation to fail, run this command to restart the installation process: 
+
+```bash
+kubectl -n default label installation/kyma-installation action=install
+```

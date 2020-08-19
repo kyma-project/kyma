@@ -24,17 +24,17 @@ import (
 func TestAddonsConfigurationService_AddRepos_Success(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		name string
-		urls []gqlschema.AddonsConfigurationRepositoryInput
+		urls []*gqlschema.AddonsConfigurationRepositoryInput
 	}{
 		"add URL": {
 			name: "test",
-			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+			urls: []*gqlschema.AddonsConfigurationRepositoryInput{
 				{URL: "www.next"},
 			},
 		},
 		"add many URLs": {
 			name: "test",
-			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+			urls: []*gqlschema.AddonsConfigurationRepositoryInput{
 				{URL: "www.next"},
 				{URL: "www.one"},
 				{URL: "www.two"},
@@ -48,7 +48,7 @@ func TestAddonsConfigurationService_AddRepos_Success(t *testing.T) {
 			fixAddonCfg.Spec.Repositories = []v1alpha1.SpecRepository{
 				{URL: url},
 			}
-			expURLs := append(tc.urls, gqlschema.AddonsConfigurationRepositoryInput{URL: url})
+			expURLs := append(tc.urls, &gqlschema.AddonsConfigurationRepositoryInput{URL: url})
 
 			client, err := newDynamicClient(fixAddonCfg)
 			require.NoError(t, err)
@@ -72,7 +72,7 @@ func TestAddonsConfigurationService_AddRepos_Success(t *testing.T) {
 func TestAddonsConfigurationService_AddRepos_Failure(t *testing.T) {
 	// given
 	fixAddonCfgName := "not-existing-cfg"
-	fixURLs := []gqlschema.AddonsConfigurationRepositoryInput{{URL: "www.www"}}
+	fixURLs := []*gqlschema.AddonsConfigurationRepositoryInput{{URL: "www.www"}}
 
 	client, err := newDynamicClient()
 	require.NoError(t, err)
@@ -179,18 +179,18 @@ func TestAddonsConfigurationService_DeleteRepos_Failure(t *testing.T) {
 func TestAddonsConfigurationService_CreateAddonsConfiguration(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		name   string
-		urls   []gqlschema.AddonsConfigurationRepositoryInput
-		labels *gqlschema.Labels
+		urls   []*gqlschema.AddonsConfigurationRepositoryInput
+		labels gqlschema.Labels
 
 		expectedResult *v1alpha1.AddonsConfiguration
 	}{
 		"successWithLabels": {
 			name: "test",
-			labels: &gqlschema.Labels{
+			labels: gqlschema.Labels{
 				"add": "it",
 				"ion": "al",
 			},
-			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+			urls: []*gqlschema.AddonsConfigurationRepositoryInput{
 				{
 					URL: "ww.fix.k",
 				},
@@ -220,7 +220,7 @@ func TestAddonsConfigurationService_CreateAddonsConfiguration(t *testing.T) {
 		},
 		"successWithNilLabels": {
 			name: "test",
-			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+			urls: []*gqlschema.AddonsConfigurationRepositoryInput{
 				{
 					URL: "ww.fix.k",
 				},
@@ -267,18 +267,18 @@ func TestAddonsConfigurationService_CreateAddonsConfiguration(t *testing.T) {
 func TestAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		name   string
-		urls   []gqlschema.AddonsConfigurationRepositoryInput
-		labels *gqlschema.Labels
+		urls   []*gqlschema.AddonsConfigurationRepositoryInput
+		labels gqlschema.Labels
 
 		expectedResult *v1alpha1.AddonsConfiguration
 	}{
 		"successWithLabels": {
 			name: "test",
-			labels: &gqlschema.Labels{
+			labels: gqlschema.Labels{
 				"add": "it",
 				"ion": "al",
 			},
-			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+			urls: []*gqlschema.AddonsConfigurationRepositoryInput{
 				{
 					URL: "ww.fix.k",
 				},
@@ -309,7 +309,7 @@ func TestAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.T) {
 		},
 		"successWithNilLabels": {
 			name: "test",
-			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+			urls: []*gqlschema.AddonsConfigurationRepositoryInput{
 				{
 					URL: "ww.fix.k",
 				},

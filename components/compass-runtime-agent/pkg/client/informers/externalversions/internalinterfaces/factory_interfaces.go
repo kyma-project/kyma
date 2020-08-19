@@ -5,10 +5,10 @@ package internalinterfaces
 import (
 	time "time"
 
+	versioned "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	cache "k8s.io/client-go/tools/cache"
-	versioned "kyma-project.io/compass-runtime-agent/pkg/client/clientset/versioned"
 )
 
 // NewInformerFunc takes versioned.Interface and time.Duration to return a SharedIndexInformer.

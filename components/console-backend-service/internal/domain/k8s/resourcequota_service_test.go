@@ -61,10 +61,10 @@ func TestResourceQuota_Create(t *testing.T) {
 	} {
 		t.Run(caseName, func(t *testing.T) {
 			resourceQuotaInputGQL := gqlschema.ResourceQuotaInput{
-				Limits: gqlschema.ResourceValuesInput{
+				Limits: &gqlschema.ResourceValuesInput{
 					Memory: &test.resourceLimitsMemory,
 				},
-				Requests: gqlschema.ResourceValuesInput{
+				Requests: &gqlschema.ResourceValuesInput{
 					Memory: &test.resourceRequestsMemory,
 				},
 			}

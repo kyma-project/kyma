@@ -60,7 +60,7 @@ const (
 	stsKind = "StatefulSet"
 )
 
-func (svc *resourceQuotaStatusService) CheckResourceQuotaStatus(namespace string) (gqlschema.ResourceQuotasStatus, error) {
+func (svc *resourceQuotaStatusService) CheckResourceQuotaStatus(namespace string) (*gqlschema.ResourceQuotasStatus, error) {
 	resourcesToCheck := []v1.ResourceName{
 		v1.ResourceRequestsMemory,
 		v1.ResourceLimitsMemory,
@@ -69,20 +69,20 @@ func (svc *resourceQuotaStatusService) CheckResourceQuotaStatus(namespace string
 	}
 	resourceQuotas, err := svc.rqLister.ListResourceQuotas(namespace)
 	if err != nil {
-		return gqlschema.ResourceQuotasStatus{}, errors.Wrapf(err, "while listing %s [namespace: %s]", pretty.ResourceQuotas, namespace)
+		return nil, errors.Wrapf(err, "while listing %s [namespace: %s]", pretty.ResourceQuotas, namespace)
 	}
 	resourcesRequests, err := svc.checkResourcesRequests(namespace, resourcesToCheck, resourceQuotas)
 	if err != nil {
-		return gqlschema.ResourceQuotasStatus{}, errors.Wrapf(err, "while checking resources requests [namespace: %s]", namespace)
+		return nil, errors.Wrapf(err, "while checking resources requests [namespace: %s]", namespace)
 	}
 	if len(resourcesRequests) > 0 {
-		return gqlschema.ResourceQuotasStatus{
+		return &gqlschema.ResourceQuotasStatus{
 			Exceeded:       true,
 			ExceededQuotas: svc.rqConv.ToGQL(resourcesRequests),
 		}, nil
 	}
 
-	return gqlschema.ResourceQuotasStatus{Exceeded: false}, nil
+	return &gqlschema.ResourceQuotasStatus{Exceeded: false}, nil
 }
 
 func (svc *resourceQuotaStatusService) checkResourcesRequests(namespace string, resourcesToCheck []v1.ResourceName, resourceQuotas []*v1.ResourceQuota) (map[string]map[v1.ResourceName][]string, error) {

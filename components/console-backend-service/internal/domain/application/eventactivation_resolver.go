@@ -36,7 +36,7 @@ func newEventActivationResolver(service eventActivationLister, rafterRetriever s
 	}
 }
 
-func (r *eventActivationResolver) EventActivationsQuery(ctx context.Context, namespace string) ([]gqlschema.EventActivation, error) {
+func (r *eventActivationResolver) EventActivationsQuery(ctx context.Context, namespace string) ([]*gqlschema.EventActivation, error) {
 	items, err := r.service.List(namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s in `%s` namespace", pretty.EventActivations, namespace))
@@ -46,7 +46,7 @@ func (r *eventActivationResolver) EventActivationsQuery(ctx context.Context, nam
 	return r.converter.ToGQLs(items), nil
 }
 
-func (r *eventActivationResolver) EventActivationEventsField(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]gqlschema.EventActivationEvent, error) {
+func (r *eventActivationResolver) EventActivationEventsField(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]*gqlschema.EventActivationEvent, error) {
 	if eventActivation == nil {
 		glog.Errorf("EventActivation cannot be empty in order to resolve events field")
 		return nil, gqlerror.NewInternal()
@@ -70,7 +70,7 @@ func (r *eventActivationResolver) EventActivationEventsField(ctx context.Context
 	asyncApiSpec, err := r.rafterRetriever.Specification().AsyncAPI(assetRef.BaseURL, assetRef.Files[0].Name)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while fetching and decoding `AsyncApiSpec` for %s %s", pretty.EventActivation, eventActivation.Name))
-		return []gqlschema.EventActivationEvent{}, gqlerror.New(err, rafterPretty.ClusterAsset)
+		return nil, gqlerror.New(err, rafterPretty.ClusterAsset)
 	}
 
 	if asyncApiSpec.Data.AsyncAPI != "2.0.0" {

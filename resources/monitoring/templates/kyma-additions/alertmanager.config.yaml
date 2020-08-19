@@ -21,7 +21,11 @@ route:
   - receiver: "victorOps"
     continue: true # If set to `false`, it stops after the first matching.
     match_re:
-      severity: critical
+      {{ tpl ( toYaml .Values.global.alertTools.credentials.victorOps.matchExpression | indent 6) . }}
+  {{- with .Values.global.alertTools.credentials.victorOps.routes }}
+    routes:
+    {{- tpl . $ | nindent 4}}
+  {{- end }}
   {{- end }}
   {{- end }}
   {{- if and .Values.global.alertTools.credentials.slack }}
@@ -29,7 +33,11 @@ route:
   - receiver: "slack"
     continue: true # If set to `false`, it stops after the first matching.
     match_re:
-      severity: critical
+      {{ tpl ( toYaml .Values.global.alertTools.credentials.slack.matchExpression | indent 6) . }}
+  {{- with .Values.global.alertTools.credentials.slack.routes }}
+    routes:
+    {{- tpl . $ | nindent 4}}
+  {{- end }}
   {{- end }}
   {{- end }}
 receivers:
@@ -39,10 +47,14 @@ receivers:
 - name: "victorOps"
   victorops_configs:
   - api_key: {{ .Values.global.alertTools.credentials.victorOps.apikey | quote }}
+    {{- if .Values.global.alertTools.credentials.victorOps.sendResolved }}
     send_resolved: true
+    {{- else }}
+    send_resolved: false
+    {{- end }}
     api_url: https://alert.victorops.com/integrations/generic/20131114/alert/
     routing_key: {{ .Values.global.alertTools.credentials.victorOps.routingkey | quote }}
-    state_message: 'Alert: {{`{{ .CommonLabels.alertname }}`}}. Summary:{{`{{ .CommonAnnotations.summary }}`}}. RawData: {{`{{ .CommonLabels }}`}}'
+    state_message: 'Alert: {{`{{ .CommonLabels.alertname }}`}}. Summary:{{`{{ .CommonAnnotations.message }}`}}. RawData: {{`{{ .CommonLabels }}`}}'
     entity_display_name: {{ .Values.global.ingress.domainName }}
 {{- end }}
 {{- end }}
@@ -51,12 +63,16 @@ receivers:
 - name: "slack"
   slack_configs:
   - channel: {{ .Values.global.alertTools.credentials.slack.channel | quote }}
+    {{- if  .Values.global.alertTools.credentials.slack.sendResolved }}
     send_resolved: true
+    {{- else }}
+    send_resolved: false
+    {{- end }}
     api_url: {{ .Values.global.alertTools.credentials.slack.apiurl | quote }}
     icon_emoji: ":ghost:"
     title: '{{`{{ template "__subject" . }}`}} ({{ .Values.global.ingress.domainName }})'
     title_link: 'https://console.{{ .Values.global.ingress.domainName }}'
-    text: '{{`{{ range .Alerts }}`}}<!channel>{{`{{- "\n" -}}`}}{{`{{ .Annotations.description }}`}}{{`{{- "\n" -}}`}}{{`{{ end }}`}}'
+    text: '{{`{{ range .Alerts }}`}}<!channel>{{`{{- "\n" -}}`}}{{`{{ .Annotations.message }}`}}{{`{{- "\n" -}}`}}{{`{{ end }}`}}'
 {{- end }}
 {{- end }}
 {{ end }}

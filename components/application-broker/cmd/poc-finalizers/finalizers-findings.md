@@ -9,13 +9,13 @@ Finalizers allow controllers to implement asynchronous pre-delete hooks. Custom 
 
 The protection controller adds a finalizer to Application, which checks, if any ApplicationMapping exists. It there is no ApplicationMapping with the same name - finalizer is removed and object is deleted.
 
-The protection controller implementation is similar to the [k8s PVC protection controller](https://github.com/kubernetes/kubernetes/blob/f4472b1a92877ed4b1576e7e44496b0de7a8efe2/pkg/controller/volume/pvcprotection/pvc_protection_controller.go) 
+The protection controller implementation is similar to the [k8s PVC protection controller](https://github.com/kubernetes/kubernetes/blob/f4472b1a92877ed4b1576e7e44496b0de7a8efe2/pkg/controller/volume/pvcprotection/pvc_protection_controller.go)
 
 ### Building and running
 
 Build:
 ```bash
-go build cmd/poc-finalizers/main.go cmd/poc-finalizers/controller.go 
+go build cmd/poc-finalizers/main.go cmd/poc-finalizers/controller.go
 ```
 
 Run:
@@ -25,7 +25,7 @@ Run:
 
 ### How the controller works
 
-The protection controller listens on Application events. In case of an update, checks if must be performed any change on the object. If the object is just created - the controller adds the finalizer. If the object is being deleted (`metadata.deletionTimestamp` is set) - the controller checks, if the object can be deleted. If yes, it removes the finalizer. The k8s resource update is safe because an optimistick lock failure will occur. It can be handled by `IsConflict` from `k8s.io/apimachinery/pkg/api/errors` package. You can find more about optimistic lock in [Resource Operation section k8s api doc](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.10/#resource-operations). 
+The protection controller listens on Application events. In case of an update, checks if must be performed any change on the object. If the object is just created - the controller adds the finalizer. If the object is being deleted (`metadata.deletionTimestamp` is set) - the controller checks, if the object can be deleted. If yes, it removes the finalizer. The k8s resource update is safe because an optimistick lock failure will occur. It can be handled by `IsConflict` from `k8s.io/apimachinery/pkg/api/errors` package. You can find more about optimistic lock in [Resource Operation section k8s api doc](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#resource-operations). 
 
 ### Demo
 
@@ -48,7 +48,7 @@ Run:
 
 4. Create ApplicationMapping, which blocks Application deletion
 ```bash
-> kubectl apply -f cmd/poc-finalizers/mapping-prod.yaml 
+> kubectl apply -f cmd/poc-finalizers/mapping-prod.yaml
 ```
 
 5. Try to remove Application

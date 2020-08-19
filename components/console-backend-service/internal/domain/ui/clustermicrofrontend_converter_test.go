@@ -49,7 +49,7 @@ func TestClusterMicroFrontendConverter_ToGQL(t *testing.T) {
 			ViewBaseURL: viewBaseUrl,
 			Placement:   placement,
 			PreloadURL:  preloadUrl,
-			NavigationNodes: []gqlschema.NavigationNode{
+			NavigationNodes: []*gqlschema.NavigationNode{
 				expectedNavigationNode,
 			},
 		}
@@ -102,13 +102,13 @@ func TestClusterMicroFrontendConverter_ToGQLs(t *testing.T) {
 	}
 
 	expectedNavigationNode := fixGqlNavigationNode()
-	expected := gqlschema.ClusterMicroFrontend{
+	expected := &gqlschema.ClusterMicroFrontend{
 		Name:        name,
 		Version:     version,
 		Category:    category,
 		ViewBaseURL: viewBaseUrl,
 		Placement:   placement,
-		NavigationNodes: []gqlschema.NavigationNode{
+		NavigationNodes: []*gqlschema.NavigationNode{
 			expectedNavigationNode,
 		},
 	}
@@ -183,9 +183,9 @@ func fixNavigationNode(t *testing.T) v1alpha1.NavigationNode {
 	}
 }
 
-func fixGqlNavigationNode() gqlschema.NavigationNode {
+func fixGqlNavigationNode() *gqlschema.NavigationNode {
 	externalLinkValue := "link"
-	return gqlschema.NavigationNode{
+	return &gqlschema.NavigationNode{
 		Label:            "test-mf",
 		NavigationPath:   "test-path",
 		ViewURL:          "/test/viewUrl",
@@ -195,8 +195,8 @@ func fixGqlNavigationNode() gqlschema.NavigationNode {
 			"readOnly": true,
 		},
 		ExternalLink: &externalLinkValue,
-		RequiredPermissions: []gqlschema.RequiredPermission{
-			gqlschema.RequiredPermission{
+		RequiredPermissions: []*gqlschema.RequiredPermission{
+			{
 				Verbs:    []string{"foo", "bar"},
 				Resource: "resource",
 				APIGroup: "apigroup",

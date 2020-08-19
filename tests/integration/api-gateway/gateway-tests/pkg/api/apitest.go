@@ -52,7 +52,7 @@ func (h *Tester) TestDeletedAPI(url string) error {
 	}, NotFoundPredicate)
 }
 
-func (h *Tester) withRetries(httpCall func() (*http.Response, error), shouldRetry func(*http.Response) bool) error {
+func (h *Tester) withRetries(httpCall func() (*http.Response, error), isResponseValid func(*http.Response) bool) error {
 
 	if err := retry.Do(func() error {
 
@@ -61,7 +61,7 @@ func (h *Tester) withRetries(httpCall func() (*http.Response, error), shouldRetr
 			return callErr
 		}
 
-		if shouldRetry(response) {
+		if !isResponseValid(response) {
 			body, err := ioutil.ReadAll(response.Body)
 			if err != nil {
 				return errors.Errorf("unexpected response %s. Reason unknown: unable to parse response body: %s.", response.Status, err.Error())
@@ -80,12 +80,11 @@ func (h *Tester) withRetries(httpCall func() (*http.Response, error), shouldRetr
 }
 
 func httpOkPredicate(response *http.Response) bool {
-	return response.StatusCode < 200 || response.StatusCode > 299
+	return response.StatusCode >= 200 && response.StatusCode <= 299
 }
 
 func httpUnauthorizedPredicate(response *http.Response) bool {
-	return response.StatusCode != 401
-
+	return response.StatusCode == 401
 }
 
 func NotFoundPredicate(response *http.Response) bool {

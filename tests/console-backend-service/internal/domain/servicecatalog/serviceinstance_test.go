@@ -43,6 +43,9 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	c, err := graphql.New()
 	require.NoError(t, err)
 
+	k8sClient, _, err := client.NewClientWithConfig()
+	require.NoError(t, err)
+
 	svcatCli, _, err := client.NewServiceCatalogClientWithConfig()
 	require.NoError(t, err)
 
@@ -68,6 +71,9 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 
 	t.Log(("Wait for instance Ready created by %s"), ClusterServiceBrokerKind)
 	err = wait.ForServiceInstanceReady(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Namespace, svcatCli)
+	if err != nil {
+		shared.LogReport(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Namespace, svcatCli, k8sClient)
+	}
 	assert.NoError(t, err)
 
 	t.Log(fmt.Sprintf("Create instance from %s", ServiceBrokerKind))
@@ -78,6 +84,9 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 
 	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", ServiceBrokerKind))
 	err = wait.ForServiceInstanceReady(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Namespace, svcatCli)
+	if err != nil {
+		shared.LogReport(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Namespace, svcatCli, k8sClient)
+	}
 	assert.NoError(t, err)
 
 	t.Log(fmt.Sprintf("Query Single Resource - instance created by %s", ClusterServiceBrokerKind))
@@ -102,10 +111,16 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	// We must again wait for RUNNING status of created instances, because sometimes Kubernetess change status from RUNNING to PROVISIONING at the first queries - Query Single Resource
 	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", ClusterServiceBrokerKind))
 	err = wait.ForServiceInstanceReady(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Namespace, svcatCli)
+	if err != nil {
+		shared.LogReport(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Namespace, svcatCli, k8sClient)
+	}
 	assert.NoError(t, err)
 
 	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", ServiceBrokerKind))
 	err = wait.ForServiceInstanceReady(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Namespace, svcatCli)
+	if err != nil {
+		shared.LogReport(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Namespace, svcatCli, k8sClient)
+	}
 	assert.NoError(t, err)
 
 	t.Log("Query Multiple Resources With Status")
@@ -123,6 +138,9 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 
 	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", ClusterServiceBrokerKind))
 	err = wait.ForServiceInstanceDeletion(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Namespace, svcatCli)
+	if err != nil {
+		shared.LogReport(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Namespace, svcatCli, k8sClient)
+	}
 	assert.NoError(t, err)
 
 	t.Log(fmt.Sprintf("Delete instance created by %s", ServiceBrokerKind))
@@ -133,6 +151,9 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 
 	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", ServiceBrokerKind))
 	err = wait.ForServiceInstanceDeletion(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Namespace, svcatCli)
+	if err != nil {
+		shared.LogReport(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Namespace, svcatCli, k8sClient)
+	}
 	assert.NoError(t, err)
 
 	t.Log("Checking authorization directives...")
@@ -147,6 +168,7 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 			fixCreateServiceInstanceRequest(resourceDetailsQuery, fixture.ServiceInstanceFromServiceClass("", TestNamespace), false),
 		},
 		auth.Delete: {fixDeleteServiceInstanceRequest(resourceDetailsQuery, expectedResourceFromServiceClass)},
+		auth.Watch:  {fixInstanceSubscription(instanceEventDetailsFields(), TestNamespace)},
 	}
 	AuthSuite.Run(t, ops)
 }
@@ -196,7 +218,7 @@ func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedReso
 	return res, err
 }
 
-func subscribeInstance(c *graphql.Client, resourceDetailsQuery string, namespace string) *graphql.Subscription {
+func fixInstanceSubscription(resourceDetailsQuery string, namespace string) *graphql.Request {
 	query := fmt.Sprintf(`
 			subscription ($namespace: String!) {
 				serviceInstanceEvent(namespace: $namespace) {
@@ -206,7 +228,12 @@ func subscribeInstance(c *graphql.Client, resourceDetailsQuery string, namespace
 		`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
 	req.SetVar("namespace", namespace)
+	return req
 
+}
+
+func subscribeInstance(c *graphql.Client, resourceDetailsQuery string, namespace string) *graphql.Subscription {
+	req := fixInstanceSubscription(resourceDetailsQuery, namespace)
 	return c.Subscribe(req)
 }
 

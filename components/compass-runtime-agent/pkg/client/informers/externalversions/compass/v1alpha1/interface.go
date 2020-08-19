@@ -3,7 +3,7 @@
 package v1alpha1
 
 import (
-	internalinterfaces "kyma-project.io/compass-runtime-agent/pkg/client/informers/externalversions/internalinterfaces"
+	internalinterfaces "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.

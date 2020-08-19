@@ -15,12 +15,12 @@ type gqlSecretConverter interface {
 }
 
 type Secret struct {
-	channel   chan<- gqlschema.SecretEvent
+	channel   chan<- *gqlschema.SecretEvent
 	filter    func(secret *v1.Secret) bool
 	converter gqlSecretConverter
 }
 
-func NewSecret(channel chan<- gqlschema.SecretEvent, filter func(secret *v1.Secret) bool, converter gqlSecretConverter) *Secret {
+func NewSecret(channel chan<- *gqlschema.SecretEvent, filter func(secret *v1.Secret) bool, converter gqlSecretConverter) *Secret {
 	return &Secret{
 		channel:   channel,
 		filter:    filter,
@@ -61,9 +61,9 @@ func (l *Secret) notify(eventType gqlschema.SubscriptionEventType, secret *v1.Se
 		return
 	}
 
-	event := gqlschema.SecretEvent{
+	event := &gqlschema.SecretEvent{
 		Type:   eventType,
-		Secret: *gqlSecret,
+		Secret: gqlSecret,
 	}
 
 	l.channel <- event

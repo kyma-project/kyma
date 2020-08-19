@@ -1,24 +1,14 @@
 package application
 
-const (
-	overridesTemplate = `global:
-    domainName: {{ .DomainName }}
-    applicationGatewayImage: {{ .ApplicationGatewayImage }}
-    applicationGatewayTestsImage: {{ .ApplicationGatewayTestsImage }}
-    eventServiceImage: {{ .EventServiceImage }}
-    eventServiceTestsImage: {{ .EventServiceTestsImage }}
-    applicationConnectivityValidatorImage: {{ .ApplicationConnectivityValidatorImage }}
-    tenant: {{ .Tenant }}
-    group: {{ .Group }}`
-)
-
 type OverridesData struct {
-	DomainName                            string
-	ApplicationGatewayImage               string
-	ApplicationGatewayTestsImage          string
-	EventServiceImage                     string
-	EventServiceTestsImage                string
-	ApplicationConnectivityValidatorImage string
-	Tenant                                string
-	Group                                 string
+	DomainName                            string `json:"domainName,omitempty"`
+	ApplicationGatewayImage               string `json:"applicationGatewayImage,omitempty"`
+	ApplicationGatewayTestsImage          string `json:"applicationGatewayTestsImage,omitempty"`
+	EventServiceImage                     string `json:"eventServiceImage,omitempty"`
+	EventServiceTestsImage                string `json:"eventServiceTestsImage,omitempty"`
+	ApplicationConnectivityValidatorImage string `json:"applicationConnectivityValidatorImage,omitempty"`
+	Tenant                                string `json:"tenant,omitempty"`
+	Group                                 string `json:"group,omitempty"`
+	GatewayOncePerNamespace               bool   `json:"deployGatewayOncePerNamespace,omitempty"`
+	StrictMode                            string `json:"strictMode,omitempty"`
 }

@@ -28,7 +28,7 @@ func NewRBACDirective(a authorizer.Authorizer, client discovery.DiscoveryInterfa
 			glog.Errorf("Error while obtaining attributes for authorization: %v", err)
 			return nil, errors.New("access denied due to problems on the server side")
 		}
-		authorized, _, err := a.Authorize(attrs)
+		authorized, _, err := a.Authorize(ctx, attrs)
 
 		if authorized != authorizer.DecisionAllow {
 			if err != nil {

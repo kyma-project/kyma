@@ -1,3 +1,4 @@
+{{- if .Values.loki.enabled }}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -6,7 +7,6 @@ metadata:
     app: {{ template "loki.name" . }}
     chart: {{ template "loki.chart" . }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
 spec:
   hosts:
   - loki.{{ .Values.global.ingress.domainName }}
@@ -31,4 +31,5 @@ spec:
       - access-control-allow-origin
       - authorization
   gateways:
-  - kyma-gateway
+  - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
+{{- end }}

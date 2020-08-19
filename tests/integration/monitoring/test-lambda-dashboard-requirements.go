@@ -56,7 +56,7 @@ func checkLambdaUIDashboard() {
 		log.Fatalf("Unable to check istio_requests_total: %v \n", err)
 	}
 	log.Println("istio_requests_total: Success")
-	err = checkMetricsAndlabels("container_memory_usage_bytes", "pod_name", "container_name")
+	err = checkMetricsAndlabels("container_memory_usage_bytes", "pod", "container")
 	if err != nil {
 		log.Fatalf("Unable to check container_memory_usage_bytes: %v \n", err)
 	}
@@ -66,7 +66,7 @@ func checkLambdaUIDashboard() {
 	}
 	log.Println("kube_pod_container_resource_limits_memory_bytes: Success")
 
-	err = checkMetricsAndlabels("container_cpu_usage_seconds_total", "container_name", "pod_name", "namespace")
+	err = checkMetricsAndlabels("container_cpu_usage_seconds_total", "container", "pod", "namespace")
 	if err != nil {
 		log.Fatalf("Unable to check container_cpu_usage_seconds_total: %v \n", err)
 	}

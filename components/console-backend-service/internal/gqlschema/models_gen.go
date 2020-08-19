@@ -7,80 +7,24 @@ import (
 	"io"
 	"strconv"
 	"time"
+
+	v1alpha12 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
+	v1 "knative.dev/pkg/apis/duck/v1"
 )
 
-type API struct {
-	Name                   string                 `json:"name"`
-	Hostname               string                 `json:"hostname"`
-	Service                ApiService             `json:"service"`
-	AuthenticationPolicies []AuthenticationPolicy `json:"authenticationPolicies"`
-	CreationTimestamp      time.Time              `json:"creationTimestamp"`
-}
-
-type APIInput struct {
-	Hostname                   string `json:"hostname"`
-	ServiceName                string `json:"serviceName"`
-	ServicePort                int    `json:"servicePort"`
-	JwksURI                    string `json:"jwksUri"`
-	Issuer                     string `json:"issuer"`
-	DisableIstioAuthPolicyMTLS *bool  `json:"disableIstioAuthPolicyMTLS"`
-	AuthenticationEnabled      *bool  `json:"authenticationEnabled"`
-}
-
-type APIRule struct {
-	Name    string          `json:"name"`
-	Service APIRuleService  `json:"service"`
-	Gateway string          `json:"gateway"`
-	Rules   []Rule          `json:"rules"`
-	Status  APIRuleStatuses `json:"status"`
-}
-
-type APIRuleConfig struct {
-	Name   string `json:"name"`
-	Config JSON   `json:"config"`
-}
-
-type APIRuleConfigInput struct {
-	Name   string `json:"name"`
-	Config JSON   `json:"config"`
-}
-
-type APIRuleInput struct {
-	Host        string      `json:"host"`
-	ServiceName string      `json:"serviceName"`
-	ServicePort int         `json:"servicePort"`
-	Gateway     string      `json:"gateway"`
-	Rules       []RuleInput `json:"rules"`
-}
-
-type APIRuleService struct {
-	Host string `json:"host"`
-	Name string `json:"name"`
-	Port int    `json:"port"`
-}
-
-type APIRuleStatus struct {
-	Code string  `json:"code"`
-	Desc *string `json:"desc"`
-}
-
-type APIRuleStatuses struct {
-	APIRuleStatus        *APIRuleStatus `json:"apiRuleStatus"`
-	AccessRuleStatus     *APIRuleStatus `json:"accessRuleStatus"`
-	VirtualServiceStatus *APIRuleStatus `json:"virtualServiceStatus"`
-}
-
 type AddonsConfiguration struct {
-	Name         string                          `json:"name"`
-	Urls         []string                        `json:"urls"`
-	Repositories []AddonsConfigurationRepository `json:"repositories"`
-	Labels       Labels                          `json:"labels"`
-	Status       AddonsConfigurationStatus       `json:"status"`
+	Name         string                           `json:"name"`
+	Urls         []string                         `json:"urls"`
+	Repositories []*AddonsConfigurationRepository `json:"repositories"`
+	Labels       Labels                           `json:"labels"`
+	Status       *AddonsConfigurationStatus       `json:"status"`
 }
 
 type AddonsConfigurationEvent struct {
 	Type                SubscriptionEventType `json:"type"`
-	AddonsConfiguration AddonsConfiguration   `json:"addonsConfiguration"`
+	AddonsConfiguration *AddonsConfiguration  `json:"addonsConfiguration"`
 }
 
 type AddonsConfigurationRepository struct {
@@ -94,8 +38,8 @@ type AddonsConfigurationRepositoryInput struct {
 }
 
 type AddonsConfigurationStatus struct {
-	Phase        string                                `json:"phase"`
-	Repositories []AddonsConfigurationStatusRepository `json:"repositories"`
+	Phase        string                                 `json:"phase"`
+	Repositories []*AddonsConfigurationStatusRepository `json:"repositories"`
 }
 
 type AddonsConfigurationStatusAddons struct {
@@ -107,26 +51,16 @@ type AddonsConfigurationStatusAddons struct {
 }
 
 type AddonsConfigurationStatusRepository struct {
-	URL     string                            `json:"url"`
-	Status  string                            `json:"status"`
-	Addons  []AddonsConfigurationStatusAddons `json:"addons"`
-	Reason  string                            `json:"reason"`
-	Message string                            `json:"message"`
+	URL     string                             `json:"url"`
+	Status  string                             `json:"status"`
+	Addons  []*AddonsConfigurationStatusAddons `json:"addons"`
+	Reason  string                             `json:"reason"`
+	Message string                             `json:"message"`
 }
 
-type ApiEvent struct {
-	Type SubscriptionEventType `json:"type"`
-	API  API                   `json:"api"`
-}
-
-type ApiRuleEvent struct {
+type APIRuleEvent struct {
 	Type    SubscriptionEventType `json:"type"`
-	APIRule APIRule               `json:"apiRule"`
-}
-
-type ApiService struct {
-	Name string `json:"name"`
-	Port int    `json:"port"`
+	APIRule *v1alpha1.APIRule     `json:"apiRule"`
 }
 
 type ApplicationEntry struct {
@@ -137,7 +71,7 @@ type ApplicationEntry struct {
 
 type ApplicationEvent struct {
 	Type        SubscriptionEventType `json:"type"`
-	Application Application           `json:"application"`
+	Application *Application          `json:"application"`
 }
 
 type ApplicationMapping struct {
@@ -154,22 +88,22 @@ type ApplicationMutationOutput struct {
 }
 
 type ApplicationService struct {
-	ID                  string             `json:"id"`
-	DisplayName         string             `json:"displayName"`
-	LongDescription     string             `json:"longDescription"`
-	ProviderDisplayName string             `json:"providerDisplayName"`
-	Tags                []string           `json:"tags"`
-	Entries             []ApplicationEntry `json:"entries"`
+	ID                  string              `json:"id"`
+	DisplayName         string              `json:"displayName"`
+	LongDescription     string              `json:"longDescription"`
+	ProviderDisplayName string              `json:"providerDisplayName"`
+	Tags                []string            `json:"tags"`
+	Entries             []*ApplicationEntry `json:"entries"`
 }
 
 type AssetEvent struct {
 	Type  SubscriptionEventType `json:"type"`
-	Asset Asset                 `json:"asset"`
+	Asset *Asset                `json:"asset"`
 }
 
 type AssetGroupEvent struct {
 	Type       SubscriptionEventType `json:"type"`
-	AssetGroup AssetGroup            `json:"assetGroup"`
+	AssetGroup *AssetGroup           `json:"assetGroup"`
 }
 
 type AssetGroupStatus struct {
@@ -184,68 +118,52 @@ type AssetStatus struct {
 	Message string         `json:"message"`
 }
 
-type AuthenticationPolicy struct {
-	Type    AuthenticationPolicyType `json:"type"`
-	Issuer  string                   `json:"issuer"`
-	JwksURI string                   `json:"jwksURI"`
-}
-
 type BackendModule struct {
 	Name string `json:"name"`
 }
 
 type BindableResourcesOutputItem struct {
-	Kind        string              `json:"kind"`
-	DisplayName string              `json:"displayName"`
-	Resources   []UsageKindResource `json:"resources"`
+	Kind        string               `json:"kind"`
+	DisplayName string               `json:"displayName"`
+	Resources   []*UsageKindResource `json:"resources"`
 }
 
 type ClusterAddonsConfigurationEvent struct {
 	Type                SubscriptionEventType `json:"type"`
-	AddonsConfiguration AddonsConfiguration   `json:"addonsConfiguration"`
+	AddonsConfiguration *AddonsConfiguration  `json:"addonsConfiguration"`
 }
 
 type ClusterAssetEvent struct {
 	Type         SubscriptionEventType `json:"type"`
-	ClusterAsset ClusterAsset          `json:"clusterAsset"`
+	ClusterAsset *ClusterAsset         `json:"clusterAsset"`
 }
 
 type ClusterAssetGroupEvent struct {
 	Type              SubscriptionEventType `json:"type"`
-	ClusterAssetGroup ClusterAssetGroup     `json:"clusterAssetGroup"`
+	ClusterAssetGroup *ClusterAssetGroup    `json:"clusterAssetGroup"`
 }
 
 type ClusterMicroFrontend struct {
-	Name            string           `json:"name"`
-	Version         string           `json:"version"`
-	Category        string           `json:"category"`
-	ViewBaseURL     string           `json:"viewBaseUrl"`
-	Placement       string           `json:"placement"`
-	PreloadURL      string           `json:"preloadUrl"`
-	NavigationNodes []NavigationNode `json:"navigationNodes"`
+	Name            string            `json:"name"`
+	Version         string            `json:"version"`
+	Category        string            `json:"category"`
+	ViewBaseURL     string            `json:"viewBaseUrl"`
+	Placement       string            `json:"placement"`
+	PreloadURL      string            `json:"preloadUrl"`
+	NavigationNodes []*NavigationNode `json:"navigationNodes"`
 }
 
 type ClusterServiceBroker struct {
-	Name              string              `json:"name"`
-	Status            ServiceBrokerStatus `json:"status"`
-	CreationTimestamp time.Time           `json:"creationTimestamp"`
-	URL               string              `json:"url"`
-	Labels            Labels              `json:"labels"`
+	Name              string               `json:"name"`
+	Status            *ServiceBrokerStatus `json:"status"`
+	CreationTimestamp time.Time            `json:"creationTimestamp"`
+	URL               string               `json:"url"`
+	Labels            Labels               `json:"labels"`
 }
 
 type ClusterServiceBrokerEvent struct {
 	Type                 SubscriptionEventType `json:"type"`
-	ClusterServiceBroker ClusterServiceBroker  `json:"clusterServiceBroker"`
-}
-
-type ClusterServicePlan struct {
-	Name                           string  `json:"name"`
-	DisplayName                    *string `json:"displayName"`
-	ExternalName                   string  `json:"externalName"`
-	Description                    string  `json:"description"`
-	RelatedClusterServiceClassName string  `json:"relatedClusterServiceClassName"`
-	InstanceCreateParameterSchema  *JSON   `json:"instanceCreateParameterSchema"`
-	BindingCreateParameterSchema   *JSON   `json:"bindingCreateParameterSchema"`
+	ClusterServiceBroker *ClusterServiceBroker `json:"clusterServiceBroker"`
 }
 
 type ConfigMap struct {
@@ -258,7 +176,7 @@ type ConfigMap struct {
 
 type ConfigMapEvent struct {
 	Type      SubscriptionEventType `json:"type"`
-	ConfigMap ConfigMap             `json:"configMap"`
+	ConfigMap *ConfigMap            `json:"configMap"`
 }
 
 type ConnectorService struct {
@@ -284,8 +202,8 @@ type CreateServiceBindingOutput struct {
 
 type CreateServiceBindingUsageInput struct {
 	Name              *string                             `json:"name"`
-	ServiceBindingRef ServiceBindingRefInput              `json:"serviceBindingRef"`
-	UsedBy            LocalObjectReferenceInput           `json:"usedBy"`
+	ServiceBindingRef *ServiceBindingRefInput             `json:"serviceBindingRef"`
+	UsedBy            *LocalObjectReferenceInput          `json:"usedBy"`
 	Parameters        *ServiceBindingUsageParametersInput `json:"parameters"`
 }
 
@@ -304,13 +222,13 @@ type DeleteServiceBindingUsageOutput struct {
 }
 
 type Deployment struct {
-	Name                      string           `json:"name"`
-	Namespace                 string           `json:"namespace"`
-	CreationTimestamp         time.Time        `json:"creationTimestamp"`
-	Status                    DeploymentStatus `json:"status"`
-	Labels                    Labels           `json:"labels"`
-	Containers                []Container      `json:"containers"`
-	BoundServiceInstanceNames []string         `json:"boundServiceInstanceNames"`
+	Name                      string            `json:"name"`
+	Namespace                 string            `json:"namespace"`
+	CreationTimestamp         time.Time         `json:"creationTimestamp"`
+	Status                    *DeploymentStatus `json:"status"`
+	Labels                    Labels            `json:"labels"`
+	Containers                []*Container      `json:"containers"`
+	BoundServiceInstanceNames []string          `json:"boundServiceInstanceNames"`
 }
 
 type DeploymentCondition struct {
@@ -322,12 +240,17 @@ type DeploymentCondition struct {
 	Reason                  string    `json:"reason"`
 }
 
+type DeploymentEvent struct {
+	Type       SubscriptionEventType `json:"type"`
+	Deployment *Deployment           `json:"deployment"`
+}
+
 type DeploymentStatus struct {
-	Replicas          int                   `json:"replicas"`
-	UpdatedReplicas   int                   `json:"updatedReplicas"`
-	ReadyReplicas     int                   `json:"readyReplicas"`
-	AvailableReplicas int                   `json:"availableReplicas"`
-	Conditions        []DeploymentCondition `json:"conditions"`
+	Replicas          int                    `json:"replicas"`
+	UpdatedReplicas   int                    `json:"updatedReplicas"`
+	ReadyReplicas     int                    `json:"readyReplicas"`
+	AvailableReplicas int                    `json:"availableReplicas"`
+	Conditions        []*DeploymentCondition `json:"conditions"`
 }
 
 type EnabledApplicationService struct {
@@ -365,50 +288,109 @@ type File struct {
 type Function struct {
 	Name         string             `json:"name"`
 	Namespace    string             `json:"namespace"`
+	UID          string             `json:"UID"`
 	Labels       Labels             `json:"labels"`
-	Runtime      string             `json:"runtime"`
-	Size         string             `json:"size"`
-	Status       FunctionStatusType `json:"status"`
-	Content      string             `json:"content"`
+	Source       string             `json:"source"`
 	Dependencies string             `json:"dependencies"`
+	Env          []*FunctionEnv     `json:"env"`
+	Replicas     *FunctionReplicas  `json:"replicas"`
+	Resources    *FunctionResources `json:"resources"`
+	Status       *FunctionStatus    `json:"status"`
 }
 
-type FunctionMutationOutput struct {
+type FunctionEnv struct {
+	Name      string                `json:"name"`
+	Value     string                `json:"value"`
+	ValueFrom *FunctionEnvValueFrom `json:"valueFrom"`
+}
+
+type FunctionEnvInput struct {
+	Name      string                     `json:"name"`
+	Value     string                     `json:"value"`
+	ValueFrom *FunctionEnvValueFromInput `json:"valueFrom"`
+}
+
+type FunctionEnvValueFrom struct {
+	Type     FunctionEnvValueFromType `json:"type"`
+	Name     string                   `json:"name"`
+	Key      string                   `json:"key"`
+	Optional *bool                    `json:"optional"`
+}
+
+type FunctionEnvValueFromInput struct {
+	Type     FunctionEnvValueFromType `json:"type"`
+	Name     string                   `json:"name"`
+	Key      string                   `json:"key"`
+	Optional *bool                    `json:"optional"`
+}
+
+type FunctionEvent struct {
+	Type     SubscriptionEventType `json:"type"`
+	Function *Function             `json:"function"`
+}
+
+type FunctionMetadata struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
 }
 
-type FunctionUpdateInput struct {
-	Labels       Labels `json:"labels"`
-	Size         string `json:"size"`
-	Runtime      string `json:"runtime"`
-	Content      string `json:"content"`
-	Dependencies string `json:"dependencies"`
+type FunctionMetadataInput struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
-type IDPPreset struct {
-	Name    string `json:"name"`
-	Issuer  string `json:"issuer"`
-	JwksURI string `json:"jwksUri"`
+type FunctionMutationInput struct {
+	Labels       Labels                  `json:"labels"`
+	Source       string                  `json:"source"`
+	Dependencies string                  `json:"dependencies"`
+	Env          []*FunctionEnvInput     `json:"env"`
+	Replicas     *FunctionReplicasInput  `json:"replicas"`
+	Resources    *FunctionResourcesInput `json:"resources"`
+}
+
+type FunctionReplicas struct {
+	Min *int `json:"min"`
+	Max *int `json:"max"`
+}
+
+type FunctionReplicasInput struct {
+	Min *int `json:"min"`
+	Max *int `json:"max"`
+}
+
+type FunctionResources struct {
+	Limits   *ResourceValues `json:"limits"`
+	Requests *ResourceValues `json:"requests"`
+}
+
+type FunctionResourcesInput struct {
+	Limits   *ResourceValuesInput `json:"limits"`
+	Requests *ResourceValuesInput `json:"requests"`
+}
+
+type FunctionStatus struct {
+	Phase   FunctionPhaseType   `json:"phase"`
+	Reason  *FunctionReasonType `json:"reason"`
+	Message *string             `json:"message"`
 }
 
 type LimitRange struct {
-	Name   string           `json:"name"`
-	Limits []LimitRangeItem `json:"limits"`
+	Name   string            `json:"name"`
+	Limits []*LimitRangeItem `json:"limits"`
 }
 
 type LimitRangeInput struct {
-	Default        ResourceValuesInput `json:"default"`
-	DefaultRequest ResourceValuesInput `json:"defaultRequest"`
-	Max            ResourceValuesInput `json:"max"`
-	Type           string              `json:"type"`
+	Default        *ResourceValuesInput `json:"default"`
+	DefaultRequest *ResourceValuesInput `json:"defaultRequest"`
+	Max            *ResourceValuesInput `json:"max"`
+	Type           string               `json:"type"`
 }
 
 type LimitRangeItem struct {
-	LimitType      LimitType    `json:"limitType"`
-	Max            ResourceType `json:"max"`
-	Default        ResourceType `json:"default"`
-	DefaultRequest ResourceType `json:"defaultRequest"`
+	LimitType      LimitType     `json:"limitType"`
+	Max            *ResourceType `json:"max"`
+	Default        *ResourceType `json:"default"`
+	DefaultRequest *ResourceType `json:"defaultRequest"`
 }
 
 type LoadBalancerIngress struct {
@@ -417,7 +399,7 @@ type LoadBalancerIngress struct {
 }
 
 type LoadBalancerStatus struct {
-	Ingress []LoadBalancerIngress `json:"ingress"`
+	Ingress []*LoadBalancerIngress `json:"ingress"`
 }
 
 type LocalObjectReference struct {
@@ -431,16 +413,16 @@ type LocalObjectReferenceInput struct {
 }
 
 type MicroFrontend struct {
-	Name            string           `json:"name"`
-	Version         string           `json:"version"`
-	Category        string           `json:"category"`
-	ViewBaseURL     string           `json:"viewBaseUrl"`
-	NavigationNodes []NavigationNode `json:"navigationNodes"`
+	Name            string            `json:"name"`
+	Version         string            `json:"version"`
+	Category        string            `json:"category"`
+	ViewBaseURL     string            `json:"viewBaseUrl"`
+	NavigationNodes []*NavigationNode `json:"navigationNodes"`
 }
 
 type NamespaceEvent struct {
 	Type      SubscriptionEventType `json:"type"`
-	Namespace Namespace             `json:"namespace"`
+	Namespace *NamespaceListItem    `json:"namespace"`
 }
 
 type NamespaceMutationOutput struct {
@@ -449,31 +431,36 @@ type NamespaceMutationOutput struct {
 }
 
 type NavigationNode struct {
-	Label               string               `json:"label"`
-	NavigationPath      string               `json:"navigationPath"`
-	ViewURL             string               `json:"viewUrl"`
-	ShowInNavigation    bool                 `json:"showInNavigation"`
-	Order               int                  `json:"order"`
-	Settings            Settings             `json:"settings"`
-	ExternalLink        *string              `json:"externalLink"`
-	RequiredPermissions []RequiredPermission `json:"requiredPermissions"`
+	Label               string                `json:"label"`
+	NavigationPath      string                `json:"navigationPath"`
+	ViewURL             string                `json:"viewUrl"`
+	ShowInNavigation    bool                  `json:"showInNavigation"`
+	Order               int                   `json:"order"`
+	Settings            Settings              `json:"settings"`
+	ExternalLink        *string               `json:"externalLink"`
+	RequiredPermissions []*RequiredPermission `json:"requiredPermissions"`
+}
+
+type OAuth2ClientEvent struct {
+	Type   SubscriptionEventType   `json:"type"`
+	Client *v1alpha11.OAuth2Client `json:"client"`
 }
 
 type Pod struct {
-	Name              string           `json:"name"`
-	NodeName          string           `json:"nodeName"`
-	Namespace         string           `json:"namespace"`
-	RestartCount      int              `json:"restartCount"`
-	CreationTimestamp time.Time        `json:"creationTimestamp"`
-	Labels            Labels           `json:"labels"`
-	Status            PodStatusType    `json:"status"`
-	ContainerStates   []ContainerState `json:"containerStates"`
-	JSON              JSON             `json:"json"`
+	Name              string            `json:"name"`
+	NodeName          string            `json:"nodeName"`
+	Namespace         string            `json:"namespace"`
+	RestartCount      int               `json:"restartCount"`
+	CreationTimestamp time.Time         `json:"creationTimestamp"`
+	Labels            Labels            `json:"labels"`
+	Status            PodStatusType     `json:"status"`
+	ContainerStates   []*ContainerState `json:"containerStates"`
+	JSON              JSON              `json:"json"`
 }
 
 type PodEvent struct {
 	Type SubscriptionEventType `json:"type"`
-	Pod  Pod                   `json:"pod"`
+	Pod  *Pod                  `json:"pod"`
 }
 
 type ReplicaSet struct {
@@ -505,20 +492,20 @@ type ResourceAttributes struct {
 }
 
 type ResourceQuota struct {
-	Name     string         `json:"name"`
-	Pods     *string        `json:"pods"`
-	Limits   ResourceValues `json:"limits"`
-	Requests ResourceValues `json:"requests"`
+	Name     string          `json:"name"`
+	Pods     *string         `json:"pods"`
+	Limits   *ResourceValues `json:"limits"`
+	Requests *ResourceValues `json:"requests"`
 }
 
 type ResourceQuotaInput struct {
-	Limits   ResourceValuesInput `json:"limits"`
-	Requests ResourceValuesInput `json:"requests"`
+	Limits   *ResourceValuesInput `json:"limits"`
+	Requests *ResourceValuesInput `json:"requests"`
 }
 
 type ResourceQuotasStatus struct {
-	Exceeded       bool            `json:"exceeded"`
-	ExceededQuotas []ExceededQuota `json:"exceededQuotas"`
+	Exceeded       bool             `json:"exceeded"`
+	ExceededQuotas []*ExceededQuota `json:"exceededQuotas"`
 }
 
 type ResourceRef struct {
@@ -552,20 +539,6 @@ type ResourceValuesInput struct {
 	CPU    *string `json:"cpu"`
 }
 
-type Rule struct {
-	Path             string          `json:"path"`
-	Methods          []string        `json:"methods"`
-	AccessStrategies []APIRuleConfig `json:"accessStrategies"`
-	Mutators         []APIRuleConfig `json:"mutators"`
-}
-
-type RuleInput struct {
-	Path             string               `json:"path"`
-	Methods          []string             `json:"methods"`
-	AccessStrategies []APIRuleConfigInput `json:"accessStrategies"`
-	Mutators         []APIRuleConfigInput `json:"mutators"`
-}
-
 type Secret struct {
 	Name         string    `json:"name"`
 	Namespace    string    `json:"namespace"`
@@ -579,22 +552,23 @@ type Secret struct {
 
 type SecretEvent struct {
 	Type   SubscriptionEventType `json:"type"`
-	Secret Secret                `json:"secret"`
+	Secret *Secret               `json:"secret"`
 }
 
 type Service struct {
-	Name              string        `json:"name"`
-	ClusterIP         string        `json:"clusterIP"`
-	CreationTimestamp time.Time     `json:"creationTimestamp"`
-	Labels            Labels        `json:"labels"`
-	Ports             []ServicePort `json:"ports"`
-	Status            ServiceStatus `json:"status"`
-	JSON              JSON          `json:"json"`
+	Name              string         `json:"name"`
+	ClusterIP         string         `json:"clusterIP"`
+	CreationTimestamp time.Time      `json:"creationTimestamp"`
+	Labels            Labels         `json:"labels"`
+	Ports             []*ServicePort `json:"ports"`
+	Status            *ServiceStatus `json:"status"`
+	JSON              JSON           `json:"json"`
+	UID               string         `json:"UID"`
 }
 
 type ServiceBindingEvent struct {
 	Type           SubscriptionEventType `json:"type"`
-	ServiceBinding ServiceBinding        `json:"serviceBinding"`
+	ServiceBinding *ServiceBinding       `json:"serviceBinding"`
 }
 
 type ServiceBindingRefInput struct {
@@ -609,7 +583,7 @@ type ServiceBindingStatus struct {
 
 type ServiceBindingUsageEvent struct {
 	Type                SubscriptionEventType `json:"type"`
-	ServiceBindingUsage ServiceBindingUsage   `json:"serviceBindingUsage"`
+	ServiceBindingUsage *ServiceBindingUsage  `json:"serviceBindingUsage"`
 }
 
 type ServiceBindingUsageParameters struct {
@@ -627,8 +601,8 @@ type ServiceBindingUsageStatus struct {
 }
 
 type ServiceBindings struct {
-	Items []ServiceBinding     `json:"items"`
-	Stats ServiceBindingsStats `json:"stats"`
+	Items []*ServiceBinding     `json:"items"`
+	Stats *ServiceBindingsStats `json:"stats"`
 }
 
 type ServiceBindingsStats struct {
@@ -639,17 +613,17 @@ type ServiceBindingsStats struct {
 }
 
 type ServiceBroker struct {
-	Name              string              `json:"name"`
-	Namespace         string              `json:"namespace"`
-	Status            ServiceBrokerStatus `json:"status"`
-	CreationTimestamp time.Time           `json:"creationTimestamp"`
-	URL               string              `json:"url"`
-	Labels            Labels              `json:"labels"`
+	Name              string               `json:"name"`
+	Namespace         string               `json:"namespace"`
+	Status            *ServiceBrokerStatus `json:"status"`
+	CreationTimestamp time.Time            `json:"creationTimestamp"`
+	URL               string               `json:"url"`
+	Labels            Labels               `json:"labels"`
 }
 
 type ServiceBrokerEvent struct {
 	Type          SubscriptionEventType `json:"type"`
-	ServiceBroker ServiceBroker         `json:"serviceBroker"`
+	ServiceBroker *ServiceBroker        `json:"serviceBroker"`
 }
 
 type ServiceBrokerStatus struct {
@@ -660,15 +634,15 @@ type ServiceBrokerStatus struct {
 
 type ServiceEvent struct {
 	Type    SubscriptionEventType `json:"type"`
-	Service Service               `json:"service"`
+	Service *Service              `json:"service"`
 }
 
 type ServiceInstanceCreateInput struct {
-	Name            string                                `json:"name"`
-	ClassRef        ServiceInstanceCreateInputResourceRef `json:"classRef"`
-	PlanRef         ServiceInstanceCreateInputResourceRef `json:"planRef"`
-	Labels          []string                              `json:"labels"`
-	ParameterSchema *JSON                                 `json:"parameterSchema"`
+	Name            string                                 `json:"name"`
+	ClassRef        *ServiceInstanceCreateInputResourceRef `json:"classRef"`
+	PlanRef         *ServiceInstanceCreateInputResourceRef `json:"planRef"`
+	Labels          []string                               `json:"labels"`
+	ParameterSchema JSON                                   `json:"parameterSchema"`
 }
 
 type ServiceInstanceCreateInputResourceRef struct {
@@ -678,7 +652,7 @@ type ServiceInstanceCreateInputResourceRef struct {
 
 type ServiceInstanceEvent struct {
 	Type            SubscriptionEventType `json:"type"`
-	ServiceInstance ServiceInstance       `json:"serviceInstance"`
+	ServiceInstance *ServiceInstance      `json:"serviceInstance"`
 }
 
 type ServiceInstanceResourceRef struct {
@@ -693,17 +667,6 @@ type ServiceInstanceStatus struct {
 	Message string             `json:"message"`
 }
 
-type ServicePlan struct {
-	Name                          string  `json:"name"`
-	Namespace                     string  `json:"namespace"`
-	DisplayName                   *string `json:"displayName"`
-	ExternalName                  string  `json:"externalName"`
-	Description                   string  `json:"description"`
-	RelatedServiceClassName       string  `json:"relatedServiceClassName"`
-	InstanceCreateParameterSchema *JSON   `json:"instanceCreateParameterSchema"`
-	BindingCreateParameterSchema  *JSON   `json:"bindingCreateParameterSchema"`
-}
-
 type ServicePort struct {
 	Name            string          `json:"name"`
 	ServiceProtocol ServiceProtocol `json:"serviceProtocol"`
@@ -713,7 +676,24 @@ type ServicePort struct {
 }
 
 type ServiceStatus struct {
-	LoadBalancer LoadBalancerStatus `json:"loadBalancer"`
+	LoadBalancer *LoadBalancerStatus `json:"loadBalancer"`
+}
+
+type TriggerCreateInput struct {
+	Name             *string         `json:"name"`
+	Broker           string          `json:"broker"`
+	FilterAttributes JSON            `json:"filterAttributes"`
+	Subscriber       *v1.Destination `json:"subscriber"`
+}
+
+type TriggerEvent struct {
+	Type    SubscriptionEventType `json:"type"`
+	Trigger *v1alpha12.Trigger    `json:"trigger"`
+}
+
+type TriggerStatus struct {
+	Reason []string          `json:"reason"`
+	Status TriggerStatusType `json:"status"`
 }
 
 type UsageKind struct {
@@ -729,6 +709,14 @@ type UsageKindResource struct {
 	Namespace string `json:"namespace"`
 }
 
+type VersionInfo struct {
+	KymaVersion *string `json:"kymaVersion"`
+}
+
+type CompassMetadata struct {
+	ApplicationID string `json:"applicationId"`
+}
+
 type EnabledMappingService struct {
 	Namespace   string                       `json:"namespace"`
 	AllServices bool                         `json:"allServices"`
@@ -742,6 +730,12 @@ const (
 	ApplicationStatusNotServing           ApplicationStatus = "NOT_SERVING"
 	ApplicationStatusGatewayNotConfigured ApplicationStatus = "GATEWAY_NOT_CONFIGURED"
 )
+
+var AllApplicationStatus = []ApplicationStatus{
+	ApplicationStatusServing,
+	ApplicationStatusNotServing,
+	ApplicationStatusGatewayNotConfigured,
+}
 
 func (e ApplicationStatus) IsValid() bool {
 	switch e {
@@ -780,6 +774,12 @@ const (
 	AssetGroupPhaseTypeFailed  AssetGroupPhaseType = "FAILED"
 )
 
+var AllAssetGroupPhaseType = []AssetGroupPhaseType{
+	AssetGroupPhaseTypeReady,
+	AssetGroupPhaseTypePending,
+	AssetGroupPhaseTypeFailed,
+}
+
 func (e AssetGroupPhaseType) IsValid() bool {
 	switch e {
 	case AssetGroupPhaseTypeReady, AssetGroupPhaseTypePending, AssetGroupPhaseTypeFailed:
@@ -817,6 +817,12 @@ const (
 	AssetPhaseTypeFailed  AssetPhaseType = "FAILED"
 )
 
+var AllAssetPhaseType = []AssetPhaseType{
+	AssetPhaseTypeReady,
+	AssetPhaseTypePending,
+	AssetPhaseTypeFailed,
+}
+
 func (e AssetPhaseType) IsValid() bool {
 	switch e {
 	case AssetPhaseTypeReady, AssetPhaseTypePending, AssetPhaseTypeFailed:
@@ -846,41 +852,6 @@ func (e AssetPhaseType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type AuthenticationPolicyType string
-
-const (
-	AuthenticationPolicyTypeJwt AuthenticationPolicyType = "JWT"
-)
-
-func (e AuthenticationPolicyType) IsValid() bool {
-	switch e {
-	case AuthenticationPolicyTypeJwt:
-		return true
-	}
-	return false
-}
-
-func (e AuthenticationPolicyType) String() string {
-	return string(e)
-}
-
-func (e *AuthenticationPolicyType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = AuthenticationPolicyType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid AuthenticationPolicyType", str)
-	}
-	return nil
-}
-
-func (e AuthenticationPolicyType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
 type ContainerStateType string
 
 const (
@@ -888,6 +859,12 @@ const (
 	ContainerStateTypeRunning    ContainerStateType = "RUNNING"
 	ContainerStateTypeTerminated ContainerStateType = "TERMINATED"
 )
+
+var AllContainerStateType = []ContainerStateType{
+	ContainerStateTypeWaiting,
+	ContainerStateTypeRunning,
+	ContainerStateTypeTerminated,
+}
 
 func (e ContainerStateType) IsValid() bool {
 	switch e {
@@ -918,43 +895,136 @@ func (e ContainerStateType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type FunctionStatusType string
+type FunctionEnvValueFromType string
 
 const (
-	FunctionStatusTypeUnknown   FunctionStatusType = "Unknown"
-	FunctionStatusTypeRunning   FunctionStatusType = "Running"
-	FunctionStatusTypeBuilding  FunctionStatusType = "Building"
-	FunctionStatusTypeError     FunctionStatusType = "Error"
-	FunctionStatusTypeDeploying FunctionStatusType = "Deploying"
-	FunctionStatusTypeUpdating  FunctionStatusType = "Updating"
+	FunctionEnvValueFromTypeConfigMap FunctionEnvValueFromType = "ConfigMap"
+	FunctionEnvValueFromTypeSecret    FunctionEnvValueFromType = "Secret"
 )
 
-func (e FunctionStatusType) IsValid() bool {
+var AllFunctionEnvValueFromType = []FunctionEnvValueFromType{
+	FunctionEnvValueFromTypeConfigMap,
+	FunctionEnvValueFromTypeSecret,
+}
+
+func (e FunctionEnvValueFromType) IsValid() bool {
 	switch e {
-	case FunctionStatusTypeUnknown, FunctionStatusTypeRunning, FunctionStatusTypeBuilding, FunctionStatusTypeError, FunctionStatusTypeDeploying, FunctionStatusTypeUpdating:
+	case FunctionEnvValueFromTypeConfigMap, FunctionEnvValueFromTypeSecret:
 		return true
 	}
 	return false
 }
 
-func (e FunctionStatusType) String() string {
+func (e FunctionEnvValueFromType) String() string {
 	return string(e)
 }
 
-func (e *FunctionStatusType) UnmarshalGQL(v interface{}) error {
+func (e *FunctionEnvValueFromType) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = FunctionStatusType(str)
+	*e = FunctionEnvValueFromType(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid FunctionStatusType", str)
+		return fmt.Errorf("%s is not a valid FunctionEnvValueFromType", str)
 	}
 	return nil
 }
 
-func (e FunctionStatusType) MarshalGQL(w io.Writer) {
+func (e FunctionEnvValueFromType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type FunctionPhaseType string
+
+const (
+	FunctionPhaseTypeInitializing     FunctionPhaseType = "INITIALIZING"
+	FunctionPhaseTypeBuilding         FunctionPhaseType = "BUILDING"
+	FunctionPhaseTypeDeploying        FunctionPhaseType = "DEPLOYING"
+	FunctionPhaseTypeRunning          FunctionPhaseType = "RUNNING"
+	FunctionPhaseTypeNewRevisionError FunctionPhaseType = "NEW_REVISION_ERROR"
+	FunctionPhaseTypeFailed           FunctionPhaseType = "FAILED"
+)
+
+var AllFunctionPhaseType = []FunctionPhaseType{
+	FunctionPhaseTypeInitializing,
+	FunctionPhaseTypeBuilding,
+	FunctionPhaseTypeDeploying,
+	FunctionPhaseTypeRunning,
+	FunctionPhaseTypeNewRevisionError,
+	FunctionPhaseTypeFailed,
+}
+
+func (e FunctionPhaseType) IsValid() bool {
+	switch e {
+	case FunctionPhaseTypeInitializing, FunctionPhaseTypeBuilding, FunctionPhaseTypeDeploying, FunctionPhaseTypeRunning, FunctionPhaseTypeNewRevisionError, FunctionPhaseTypeFailed:
+		return true
+	}
+	return false
+}
+
+func (e FunctionPhaseType) String() string {
+	return string(e)
+}
+
+func (e *FunctionPhaseType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = FunctionPhaseType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid FunctionPhaseType", str)
+	}
+	return nil
+}
+
+func (e FunctionPhaseType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type FunctionReasonType string
+
+const (
+	FunctionReasonTypeConfig  FunctionReasonType = "CONFIG"
+	FunctionReasonTypeJob     FunctionReasonType = "JOB"
+	FunctionReasonTypeService FunctionReasonType = "SERVICE"
+)
+
+var AllFunctionReasonType = []FunctionReasonType{
+	FunctionReasonTypeConfig,
+	FunctionReasonTypeJob,
+	FunctionReasonTypeService,
+}
+
+func (e FunctionReasonType) IsValid() bool {
+	switch e {
+	case FunctionReasonTypeConfig, FunctionReasonTypeJob, FunctionReasonTypeService:
+		return true
+	}
+	return false
+}
+
+func (e FunctionReasonType) String() string {
+	return string(e)
+}
+
+func (e *FunctionReasonType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = FunctionReasonType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid FunctionReasonType", str)
+	}
+	return nil
+}
+
+func (e FunctionReasonType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -967,6 +1037,14 @@ const (
 	InstanceStatusTypePending        InstanceStatusType = "PENDING"
 	InstanceStatusTypeFailed         InstanceStatusType = "FAILED"
 )
+
+var AllInstanceStatusType = []InstanceStatusType{
+	InstanceStatusTypeRunning,
+	InstanceStatusTypeProvisioning,
+	InstanceStatusTypeDeprovisioning,
+	InstanceStatusTypePending,
+	InstanceStatusTypeFailed,
+}
 
 func (e InstanceStatusType) IsValid() bool {
 	switch e {
@@ -1003,6 +1081,11 @@ const (
 	LimitTypeContainer LimitType = "Container"
 	LimitTypePod       LimitType = "Pod"
 )
+
+var AllLimitType = []LimitType{
+	LimitTypeContainer,
+	LimitTypePod,
+}
 
 func (e LimitType) IsValid() bool {
 	switch e {
@@ -1043,6 +1126,14 @@ const (
 	PodStatusTypeUnknown   PodStatusType = "UNKNOWN"
 )
 
+var AllPodStatusType = []PodStatusType{
+	PodStatusTypePending,
+	PodStatusTypeRunning,
+	PodStatusTypeSucceeded,
+	PodStatusTypeFailed,
+	PodStatusTypeUnknown,
+}
+
 func (e PodStatusType) IsValid() bool {
 	switch e {
 	case PodStatusTypePending, PodStatusTypeRunning, PodStatusTypeSucceeded, PodStatusTypeFailed, PodStatusTypeUnknown:
@@ -1080,6 +1171,13 @@ const (
 	ServiceBindingStatusTypeFailed  ServiceBindingStatusType = "FAILED"
 	ServiceBindingStatusTypeUnknown ServiceBindingStatusType = "UNKNOWN"
 )
+
+var AllServiceBindingStatusType = []ServiceBindingStatusType{
+	ServiceBindingStatusTypeReady,
+	ServiceBindingStatusTypePending,
+	ServiceBindingStatusTypeFailed,
+	ServiceBindingStatusTypeUnknown,
+}
 
 func (e ServiceBindingStatusType) IsValid() bool {
 	switch e {
@@ -1119,6 +1217,13 @@ const (
 	ServiceBindingUsageStatusTypeUnknown ServiceBindingUsageStatusType = "UNKNOWN"
 )
 
+var AllServiceBindingUsageStatusType = []ServiceBindingUsageStatusType{
+	ServiceBindingUsageStatusTypeReady,
+	ServiceBindingUsageStatusTypePending,
+	ServiceBindingUsageStatusTypeFailed,
+	ServiceBindingUsageStatusTypeUnknown,
+}
+
 func (e ServiceBindingUsageStatusType) IsValid() bool {
 	switch e {
 	case ServiceBindingUsageStatusTypeReady, ServiceBindingUsageStatusTypePending, ServiceBindingUsageStatusTypeFailed, ServiceBindingUsageStatusTypeUnknown:
@@ -1151,14 +1256,20 @@ func (e ServiceBindingUsageStatusType) MarshalGQL(w io.Writer) {
 type ServiceProtocol string
 
 const (
-	ServiceProtocolTcp     ServiceProtocol = "TCP"
-	ServiceProtocolUdp     ServiceProtocol = "UDP"
+	ServiceProtocolTCP     ServiceProtocol = "TCP"
+	ServiceProtocolUDP     ServiceProtocol = "UDP"
 	ServiceProtocolUnknown ServiceProtocol = "UNKNOWN"
 )
 
+var AllServiceProtocol = []ServiceProtocol{
+	ServiceProtocolTCP,
+	ServiceProtocolUDP,
+	ServiceProtocolUnknown,
+}
+
 func (e ServiceProtocol) IsValid() bool {
 	switch e {
-	case ServiceProtocolTcp, ServiceProtocolUdp, ServiceProtocolUnknown:
+	case ServiceProtocolTCP, ServiceProtocolUDP, ServiceProtocolUnknown:
 		return true
 	}
 	return false
@@ -1193,6 +1304,12 @@ const (
 	SubscriptionEventTypeDelete SubscriptionEventType = "DELETE"
 )
 
+var AllSubscriptionEventType = []SubscriptionEventType{
+	SubscriptionEventTypeAdd,
+	SubscriptionEventTypeUpdate,
+	SubscriptionEventTypeDelete,
+}
+
 func (e SubscriptionEventType) IsValid() bool {
 	switch e {
 	case SubscriptionEventTypeAdd, SubscriptionEventTypeUpdate, SubscriptionEventTypeDelete:
@@ -1219,5 +1336,48 @@ func (e *SubscriptionEventType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SubscriptionEventType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type TriggerStatusType string
+
+const (
+	TriggerStatusTypeFailed  TriggerStatusType = "FAILED"
+	TriggerStatusTypeUnknown TriggerStatusType = "UNKNOWN"
+	TriggerStatusTypeReady   TriggerStatusType = "READY"
+)
+
+var AllTriggerStatusType = []TriggerStatusType{
+	TriggerStatusTypeFailed,
+	TriggerStatusTypeUnknown,
+	TriggerStatusTypeReady,
+}
+
+func (e TriggerStatusType) IsValid() bool {
+	switch e {
+	case TriggerStatusTypeFailed, TriggerStatusTypeUnknown, TriggerStatusTypeReady:
+		return true
+	}
+	return false
+}
+
+func (e TriggerStatusType) String() string {
+	return string(e)
+}
+
+func (e *TriggerStatusType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TriggerStatusType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TriggerStatusType", str)
+	}
+	return nil
+}
+
+func (e TriggerStatusType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

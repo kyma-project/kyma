@@ -1,9 +1,8 @@
 package controller
 
 import (
-	"strings"
+	"context"
 
-	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/pretty"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -16,7 +15,6 @@ import (
 type labelsSvc interface {
 	EnsureLabelsAreApplied(res *unstructured.Unstructured, labels map[string]string) error
 	EnsureLabelsAreDeleted(res *unstructured.Unstructured, labels map[string]string) error
-	DetectLabelsConflicts(res *unstructured.Unstructured, labels map[string]string) ([]string, error)
 }
 
 // GenericSupervisor ensures that expected labels are present or not on a k8s resource provided by given resourceInterface.
@@ -41,13 +39,9 @@ func NewGenericSupervisor(resourceInterface dynamic.NamespaceableResourceInterfa
 
 // EnsureLabelsCreated ensures that given labels are added to resource
 func (m *GenericSupervisor) EnsureLabelsCreated(namespace, resourceName, usageName string, labels map[string]string) error {
-	res, err := m.resourceInterface.Namespace(namespace).Get(resourceName, metav1.GetOptions{})
+	res, err := m.resourceInterface.Namespace(namespace).Get(context.TODO(), resourceName, metav1.GetOptions{})
 	if err != nil {
 		return errors.Wrap(err, "while getting resource")
-	}
-	if conflictsKeys, err := m.labelSvc.DetectLabelsConflicts(res, labels); err != nil {
-		return errors.Wrapf(err, "found conflicts in %s: %s keys already exists [override forbidden]",
-			pretty.UnstructuredName(res), strings.Join(conflictsKeys, ","))
 	}
 
 	// apply new labels
@@ -68,7 +62,7 @@ func (m *GenericSupervisor) EnsureLabelsCreated(namespace, resourceName, usageNa
 
 // EnsureLabelsDeleted ensures that given labels are deleted on resource
 func (m *GenericSupervisor) EnsureLabelsDeleted(namespace, resourceName, usageName string) error {
-	res, err := m.resourceInterface.Namespace(namespace).Get(resourceName, metav1.GetOptions{})
+	res, err := m.resourceInterface.Namespace(namespace).Get(context.TODO(), resourceName, metav1.GetOptions{})
 	switch {
 	case err == nil:
 	case apiErrors.IsNotFound(err):
@@ -102,7 +96,7 @@ func (m *GenericSupervisor) EnsureLabelsDeleted(namespace, resourceName, usageNa
 
 // GetInjectedLabels returns labels applied on given resource by usage controller
 func (m *GenericSupervisor) GetInjectedLabels(namespace, resourceName, usageName string) (map[string]string, error) {
-	res, err := m.resourceInterface.Namespace(namespace).Get(resourceName, metav1.GetOptions{})
+	res, err := m.resourceInterface.Namespace(namespace).Get(context.TODO(), resourceName, metav1.GetOptions{})
 	switch {
 	case err == nil:
 	case apiErrors.IsNotFound(err):
@@ -125,7 +119,7 @@ func (m *GenericSupervisor) HasSynced() bool {
 }
 
 func (m *GenericSupervisor) executeUpdate(res *unstructured.Unstructured) error {
-	_, err := m.resourceInterface.Namespace(res.GetNamespace()).Update(res, metav1.UpdateOptions{}, "")
+	_, err := m.resourceInterface.Namespace(res.GetNamespace()).Update(context.TODO(), res, metav1.UpdateOptions{}, "")
 	if err != nil {
 		return errors.Wrapf(err, "while updating %s %s in namespace %s", res.GetKind(), res.GetName(), res.GetNamespace())
 	}

@@ -25,9 +25,9 @@ func TestApplicationListener_OnAdd(t *testing.T) {
 
 		converter := automock.NewGQLApplicationConverter()
 
-		channel := make(chan gqlschema.ApplicationEvent, 1)
+		channel := make(chan *gqlschema.ApplicationEvent, 1)
 		defer close(channel)
-		converter.On("ToGQL", application).Return(*gqlApplication, nil).Once()
+		converter.On("ToGQL", application).Return(gqlApplication, nil).Once()
 		defer converter.AssertExpectations(t)
 		defer extractor.AssertExpectations(t)
 		applicationListener := listener.NewApplication(channel, converter, extractor)
@@ -38,7 +38,7 @@ func TestApplicationListener_OnAdd(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeAdd, result.Type)
-		assert.Equal(t, *gqlApplication, result.Application)
+		assert.Equal(t, gqlApplication, result.Application)
 	})
 
 	t.Run("Nil", func(t *testing.T) {
@@ -81,9 +81,9 @@ func TestApplicationListener_OnDelete(t *testing.T) {
 
 		converter := automock.NewGQLApplicationConverter()
 
-		channel := make(chan gqlschema.ApplicationEvent, 1)
+		channel := make(chan *gqlschema.ApplicationEvent, 1)
 		defer close(channel)
-		converter.On("ToGQL", application).Return(*gqlApplication, nil).Once()
+		converter.On("ToGQL", application).Return(gqlApplication, nil).Once()
 		defer converter.AssertExpectations(t)
 		defer extractor.AssertExpectations(t)
 		applicationListener := listener.NewApplication(channel, converter, extractor)
@@ -94,7 +94,7 @@ func TestApplicationListener_OnDelete(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeDelete, result.Type)
-		assert.Equal(t, *gqlApplication, result.Application)
+		assert.Equal(t, gqlApplication, result.Application)
 
 	})
 
@@ -137,9 +137,9 @@ func TestApplicationListener_OnUpdate(t *testing.T) {
 
 		converter := automock.NewGQLApplicationConverter()
 
-		channel := make(chan gqlschema.ApplicationEvent, 1)
+		channel := make(chan *gqlschema.ApplicationEvent, 1)
 		defer close(channel)
-		converter.On("ToGQL", application).Return(*gqlApplication, nil).Once()
+		converter.On("ToGQL", application).Return(gqlApplication, nil).Once()
 		defer converter.AssertExpectations(t)
 		defer extractor.AssertExpectations(t)
 		applicationListener := listener.NewApplication(channel, converter, extractor)
@@ -150,7 +150,7 @@ func TestApplicationListener_OnUpdate(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeUpdate, result.Type)
-		assert.Equal(t, *gqlApplication, result.Application)
+		assert.Equal(t, gqlApplication, result.Application)
 
 	})
 

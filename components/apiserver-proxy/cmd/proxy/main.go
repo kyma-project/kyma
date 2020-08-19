@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	stdflag "flag"
+	"flag"
 	"fmt"
 	"net"
 	"net/http"
@@ -27,7 +27,7 @@ import (
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/authn"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/authz"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/proxy"
-	flag "github.com/spf13/pflag"
+	"github.com/spf13/pflag"
 	"golang.org/x/net/http2"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"k8s.io/client-go/kubernetes"
@@ -97,10 +97,10 @@ func main() {
 		},
 		cors: corsConfig{},
 	}
-	flagset := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	flagset := pflag.NewFlagSet(os.Args[0], pflag.ExitOnError)
 
 	// Add glog flags
-	flagset.AddGoFlagSet(stdflag.CommandLine)
+	flagset.AddGoFlagSet(flag.CommandLine)
 
 	// kube-rbac-proxy flags
 	flagset.StringVar(&cfg.insecureListenAddress, "insecure-listen-address", "", "The address the kube-rbac-proxy HTTP server should listen on.")
@@ -178,19 +178,12 @@ func main() {
 		}
 	}
 
-	sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
-	authorizer, err := authz.NewAuthorizer(sarClient)
-
-	if err != nil {
-		glog.Fatalf("Failed to create authorizer: %v", err)
-	}
-
 	metrics, err := monitoring.NewProxyMetrics()
 	if err != nil {
 		glog.Fatalf("Failed to create metrics: %v", err)
 	}
 
-	authProxy := proxy.New(cfg.auth, authorizer, oidcAuthenticator, metrics)
+	authProxy := proxy.New(cfg.auth, nil, oidcAuthenticator, metrics)
 
 	if err != nil {
 		glog.Fatalf("Failed to create rbac-proxy: %v", err)

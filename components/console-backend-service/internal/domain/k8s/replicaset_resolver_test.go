@@ -106,7 +106,7 @@ func TestReplicaSetResolver_ReplicaSetsQuery(t *testing.T) {
 		resources := []*apps.ReplicaSet{
 			resource, resource,
 		}
-		expected := []gqlschema.ReplicaSet{
+		expected := []*gqlschema.ReplicaSet{
 			{
 				Name: name,
 			},
@@ -135,7 +135,7 @@ func TestReplicaSetResolver_ReplicaSetsQuery(t *testing.T) {
 	t.Run("NotFound", func(t *testing.T) {
 		namespace := "namespace"
 		var resources []*apps.ReplicaSet
-		var expected []gqlschema.ReplicaSet
+		var expected []*gqlschema.ReplicaSet
 
 		resourceGetter := automock.NewReplicaSetSvc()
 		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, nil).Once()

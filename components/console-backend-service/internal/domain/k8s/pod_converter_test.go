@@ -52,7 +52,7 @@ func TestPodConverter_ToGQL(t *testing.T) {
 				"exampleKey2": "exampleValue2",
 			},
 			Status: gqlschema.PodStatusTypePending,
-			ContainerStates: []gqlschema.ContainerState{
+			ContainerStates: []*gqlschema.ContainerState{
 				fixGQLContainerState(gqlschema.ContainerStateTypeWaiting, "exampleReason", "exampleMessage"),
 			},
 			JSON: expectedJSON,
@@ -71,8 +71,9 @@ func TestPodConverter_ToGQL(t *testing.T) {
 		require.NoError(t, err)
 		expected := &gqlschema.Pod{
 			Status:          gqlschema.PodStatusTypeUnknown,
-			ContainerStates: []gqlschema.ContainerState{},
+			ContainerStates: []*gqlschema.ContainerState{},
 			JSON:            emptyPodJSON,
+			Labels:          gqlschema.Labels{},
 		}
 
 		result, err := converter.ToGQL(&v1.Pod{})
@@ -502,8 +503,8 @@ func fixContainerStatus(name string, restartCount int, state *v1.ContainerState)
 	}
 }
 
-func fixGQLContainerState(state gqlschema.ContainerStateType, reason string, message string) gqlschema.ContainerState {
-	return gqlschema.ContainerState{
+func fixGQLContainerState(state gqlschema.ContainerStateType, reason string, message string) *gqlschema.ContainerState {
+	return &gqlschema.ContainerState{
 		State:   state,
 		Reason:  reason,
 		Message: message,

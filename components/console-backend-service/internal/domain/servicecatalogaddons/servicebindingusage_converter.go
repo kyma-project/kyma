@@ -14,6 +14,13 @@ type statusBindingUsageExtractor interface {
 	Status(conditions []sbuTypes.ServiceBindingUsageCondition) gqlschema.ServiceBindingUsageStatus
 }
 
+//go:generate mockery -name=gqlServiceBindingUsageConverter -output=automock -outpkg=automock -case=underscore
+type gqlServiceBindingUsageConverter interface {
+	ToGQL(item *sbuTypes.ServiceBindingUsage) (*gqlschema.ServiceBindingUsage, error)
+	ToGQLs(in []*sbuTypes.ServiceBindingUsage) ([]*gqlschema.ServiceBindingUsage, error)
+	InputToK8s(in *gqlschema.CreateServiceBindingUsageInput) (*api.ServiceBindingUsage, error)
+}
+
 type serviceBindingUsageConverter struct {
 	extractor statusBindingUsageExtractor
 }
@@ -51,16 +58,16 @@ func (c *serviceBindingUsageConverter) ToGQL(in *api.ServiceBindingUsage) (*gqls
 	return &gqlSBU, nil
 }
 
-func (c *serviceBindingUsageConverter) ToGQLs(in []*api.ServiceBindingUsage) ([]gqlschema.ServiceBindingUsage, error) {
-	var out []gqlschema.ServiceBindingUsage
+func (c *serviceBindingUsageConverter) ToGQLs(in []*api.ServiceBindingUsage) ([]*gqlschema.ServiceBindingUsage, error) {
+	out := []*gqlschema.ServiceBindingUsage{}
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
-			return nil, err
+			return out, err
 		}
 
 		if converted != nil {
-			out = append(out, *converted)
+			out = append(out, converted)
 		}
 	}
 	return out, nil

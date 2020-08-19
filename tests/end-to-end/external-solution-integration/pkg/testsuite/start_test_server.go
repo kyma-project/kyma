@@ -1,11 +1,11 @@
 package testsuite
 
 import (
-	"github.com/avast/retry-go"
+	"github.com/pkg/errors"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
-	"github.com/pkg/errors"
-	"time"
 )
 
 type StartTestServer struct {
@@ -31,7 +31,7 @@ func (s *StartTestServer) Run() error {
 		return err
 	}
 
-	err = retry.Do(s.testService.IsReady, retry.Delay(200*time.Millisecond))
+	err = retry.Do(s.testService.IsReady)
 
 	if err != nil {
 		return errors.Wrap(err, "test service not started")

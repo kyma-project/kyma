@@ -1,10 +1,12 @@
 package conditionmanager
 
 import (
+	"context"
+
 	installationv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	installationClientset "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned"
 	listers "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/listers/installer/v1alpha1"
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/consts"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/env"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
@@ -71,7 +73,7 @@ func (cm *impl) InstallError() error {
 		return err
 	}
 
-	cm.setCondition(installation, installationv1alpha1.CondtitionInstalled, v1.ConditionUnknown)
+	cm.setCondition(installation, installationv1alpha1.CondtitionInstalled, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionInstalling, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionInProgress, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionError, v1.ConditionTrue)
@@ -143,7 +145,7 @@ func (cm *impl) UninstallError() error {
 }
 
 func (cm *impl) getInstallation() (*installationv1alpha1.Installation, error) {
-	installation, err := cm.lister.Installations(consts.InstNamespace).Get(consts.InstResource)
+	installation, err := cm.lister.Installations(env.Config.InstNamespace).Get(env.Config.InstResource)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +194,7 @@ func (cm *impl) setCondition(installation *installationv1alpha1.Installation, co
 
 func (cm *impl) update(installation *installationv1alpha1.Installation) error {
 	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		instObj, getErr := cm.lister.Installations(consts.InstNamespace).Get(consts.InstResource)
+		instObj, getErr := cm.lister.Installations(env.Config.InstNamespace).Get(env.Config.InstResource)
 		if getErr != nil {
 			return getErr
 		}
@@ -200,7 +202,7 @@ func (cm *impl) update(installation *installationv1alpha1.Installation) error {
 		installationCopy := instObj.DeepCopy()
 		installationCopy.Status.Conditions = installation.Status.Conditions
 
-		_, updateErr := cm.client.InstallerV1alpha1().Installations(consts.InstNamespace).Update(installationCopy)
+		_, updateErr := cm.client.InstallerV1alpha1().Installations(env.Config.InstNamespace).Update(context.TODO(), installationCopy, metav1.UpdateOptions{})
 
 		return updateErr
 	})

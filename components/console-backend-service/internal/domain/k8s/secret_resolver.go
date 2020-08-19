@@ -36,7 +36,7 @@ func newSecretResolver(svc secretSvc) *secretResolver {
 //go:generate mockery -name=gqlSecretConverter -output=automock -outpkg=automock -case=underscore
 type gqlSecretConverter interface {
 	ToGQL(in *v1.Secret) (*gqlschema.Secret, error)
-	ToGQLs(in []*v1.Secret) ([]gqlschema.Secret, error)
+	ToGQLs(in []*v1.Secret) ([]*gqlschema.Secret, error)
 	GQLJSONToSecret(in gqlschema.JSON) (v1.Secret, error)
 }
 
@@ -58,7 +58,7 @@ func (r *secretResolver) SecretQuery(ctx context.Context, name, ns string) (*gql
 	return r.converter.ToGQL(secret)
 }
 
-func (r *secretResolver) SecretsQuery(ctx context.Context, ns string, first *int, offset *int) ([]gqlschema.Secret, error) {
+func (r *secretResolver) SecretsQuery(ctx context.Context, ns string, first *int, offset *int) ([]*gqlschema.Secret, error) {
 	secrets, err := r.secretSvc.List(ns, pager.PagingParams{
 		First:  first,
 		Offset: offset,
@@ -76,8 +76,8 @@ func (r *secretResolver) SecretsQuery(ctx context.Context, ns string, first *int
 	return r.converter.ToGQLs(secrets)
 }
 
-func (r *secretResolver) SecretEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.SecretEvent, error) {
-	channel := make(chan gqlschema.SecretEvent, 1)
+func (r *secretResolver) SecretEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.SecretEvent, error) {
+	channel := make(chan *gqlschema.SecretEvent, 1)
 	filter := func(secret *v1.Secret) bool {
 		return secret != nil && secret.Namespace == namespace
 	}

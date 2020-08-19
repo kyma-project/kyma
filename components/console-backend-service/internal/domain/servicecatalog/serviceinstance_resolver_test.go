@@ -89,7 +89,7 @@ func TestServiceInstanceResolver_ServiceInstancesQuery(t *testing.T) {
 		resources := []*v1beta1.ServiceInstance{
 			resource, resource,
 		}
-		expected := []gqlschema.ServiceInstance{
+		expected := []*gqlschema.ServiceInstance{
 			{
 				Name: "Test",
 			},
@@ -123,7 +123,7 @@ func TestServiceInstanceResolver_ServiceInstancesQuery(t *testing.T) {
 		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 		resolver := servicecatalog.NewServiceInstanceResolver(resourceGetter, nil, nil, nil, nil)
-		var expected []gqlschema.ServiceInstance
+		var expected []*gqlschema.ServiceInstance
 
 		result, err := resolver.ServiceInstancesQuery(nil, namespace, nil, nil, nil)
 
@@ -172,7 +172,7 @@ func TestServiceInstanceResolver_ServiceInstancesWithStatusQuery(t *testing.T) {
 		resources := []*v1beta1.ServiceInstance{
 			resource, resource,
 		}
-		expected := []gqlschema.ServiceInstance{
+		expected := []*gqlschema.ServiceInstance{
 			{
 				Name: "Test",
 				Status: gqlschema.ServiceInstanceStatus{
@@ -222,12 +222,11 @@ func TestServiceInstanceResolver_ServiceInstancesWithStatusQuery(t *testing.T) {
 		resourceGetter.On("ListForStatus", namespace, pager.PagingParams{}, &statusType).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 		resolver := servicecatalog.NewServiceInstanceResolver(resourceGetter, nil, nil, nil, nil)
-		var expected []gqlschema.ServiceInstance
 
 		result, err := resolver.ServiceInstancesQuery(nil, namespace, nil, nil, &gqlStatusType)
 
 		require.NoError(t, err)
-		assert.Equal(t, expected, result)
+		assert.Nil(t, result)
 	})
 
 	t.Run("Error", func(t *testing.T) {

@@ -24,7 +24,7 @@ rules:
   verbs: ["create", "delete", "get", "list", "patch", "update"]
 - apiGroups: [""]
   resources: ["configmaps"]
-  verbs: ["list", "get", "create", "delete"]
+  verbs: ["list", "get", "create", "delete", "update"]
 - apiGroups: ["apps"]
   resources: ["deployments"]
   verbs: ["create", "get", "delete", "list"]
@@ -32,7 +32,15 @@ rules:
   resources: ["statefulsets"]
   verbs: ["get"]
 
-# Service catalog
+  # Knative eventing
+- apiGroups: ["messaging.knative.dev"]
+  resources: ["channels"]
+  verbs: ["get", "list", "create", "delete"]
+- apiGroups: ["eventing.knative.dev"]
+  resources: ["triggers", "triggers/status", "brokers", "brokers/status"]
+  verbs: ["*"]
+
+  # Service catalog
 - apiGroups: ["servicecatalog.k8s.io"]
   resources: ["servicebrokers", "clusterservicebrokers", "clusterserviceclasses", "serviceclasses", "clusterserviceplans", "serviceplans"]
   verbs: ["get", "list"]
@@ -46,9 +54,12 @@ rules:
 - apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["applications", "applicationmappings","eventactivations"]
   verbs: ["create", "delete", "list", "get"]
+- apiGroups: ["sources.kyma-project.io"]
+  resources: ["httpsources", "httpsources/status"]
+  verbs: ["get","list"]
 - apiGroups: [""]
   resources: ["pods", "pods/log", "pods/status", "secrets", "configmaps"]
-  verbs: ["create", "delete", "get", "list"]
+  verbs: ["create", "delete", "deletecollection", "get", "list"]
 - apiGroups: [""]
   resources: ["services", "services/proxy"]
   verbs: ["create", "delete", "get", "list"]
@@ -69,12 +80,9 @@ rules:
   resources: ["clusterassetgroups", "assetgroups", "clusterbuckets", "clusterassets", "buckets", "assets"]
   verbs: ["create", "delete", "get"]
 
-# Kubeless
-- apiGroups: ["kubeless.io"]
-  resources: ["functions", "httptriggers", "cronjobtriggers"]
-  verbs: ["get", "list", "watch", "update", "create", "delete"]
-- apiGroups: ["gateway.kyma-project.io"]
-  resources: ["apis", "apirules"]
+# Gateway
+- apiGroups: ["gateway.kyma-project.io"]	
+  resources: ["apirules"]
   verbs: ["create", "delete", "get", "list"]
 
 # Ory
@@ -102,6 +110,16 @@ rules:
 - apiGroups: [""]
   resources: ["resourcequotas"]
   verbs: ["get", "list", "watch"]
+
+# Monitoring
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["list"]
+
+# Serverless
+- apiGroups: ["serverless.kyma-project.io"]
+  resources: ["functions"]
+  verbs: ["create", "delete", "get"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1

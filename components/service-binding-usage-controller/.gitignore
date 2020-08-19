@@ -102,3 +102,4 @@ fabric.properties
 *.iml
 binding-usage-controller
 /vendor
+main

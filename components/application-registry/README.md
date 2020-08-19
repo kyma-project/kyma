@@ -28,12 +28,12 @@ To start the Application Registry, run this command:
 
 The Application Registry has the following parameters:
 - **externalAPIPort** is the port that exposes the Metadata API to an external solution. The default port is `8081`.
-- **proxyPort** is the port that acts as a proxy for the calls from services and lambdas to an external solution. The default port is `8080`.
+- **proxyPort** is the port that acts as a proxy for the calls from services and Functions to an external solution. The default port is `8080`.
 - **namespace** is the Namespace where Application Registry is deployed. The default Namespace is `kyma-system`.
 - **requestTimeout** is the time-out for requests sent through the Application Registry. It is provided in seconds. The default time-out is `1`.
 - **requestLogging** is the flag for logging incoming requests. The default value is `false`.
-- **specRequestTimeout** is the time-out for requests fetching specifications provided by the user. It is provided in seconds. The default time-out is `5`.
-- **rafterRequestTimeout** is the time-out for requests fetching specifications from Rafter. It is provided in seconds. The default time-out is `5`.
+- **specRequestTimeout** is the time-out for requests fetching specifications provided by the user. It is provided in seconds. The default time-out is `20`.
+- **rafterRequestTimeout** is the time-out for requests fetching specifications from Rafter. It is provided in seconds. The default time-out is `20`.
 - **detailedErrorResponse** is the flag for showing detailed internal error messages in response bodies. The default value is `false` and all internal server error messages are shortened to `Internal error`, while all other error messages are shown as usual.
 - **uploadServiceURL** is the URL of the Upload Service.
 - **insecureAssetDownload** is the flag for skipping certificate verification for asset download. The default value is `false`.

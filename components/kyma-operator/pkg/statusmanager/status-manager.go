@@ -1,10 +1,13 @@
 package statusmanager
 
 import (
+	"context"
+
 	installationv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	installationClientset "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned"
 	listers "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/listers/installer/v1alpha1"
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/consts"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/env"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 )
 
@@ -93,7 +96,7 @@ func appendErrorLog(entries []installationv1alpha1.ErrorLogEntry, newEntry insta
 
 func (sm *statusManager) updateFunc(updater statusUpdater) error {
 	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		instObj, getErr := sm.lister.Installations(consts.InstNamespace).Get(consts.InstResource)
+		instObj, getErr := sm.lister.Installations(env.Config.InstNamespace).Get(env.Config.InstResource)
 		if getErr != nil {
 			return getErr
 		}
@@ -101,7 +104,7 @@ func (sm *statusManager) updateFunc(updater statusUpdater) error {
 		installationCopy := instObj.DeepCopy()
 		updater(&installationCopy.Status)
 
-		_, updateErr := sm.client.InstallerV1alpha1().Installations(consts.InstNamespace).Update(installationCopy)
+		_, updateErr := sm.client.InstallerV1alpha1().Installations(env.Config.InstNamespace).Update(context.TODO(), installationCopy, v1.UpdateOptions{})
 		return updateErr
 	})
 

@@ -65,7 +65,7 @@ spec:
         runAsUser: 2000
       containers:
       - name: job
-        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
         terminationMessagePolicy: "FallbackToLogsOnError"
         command:
           - /bin/bash

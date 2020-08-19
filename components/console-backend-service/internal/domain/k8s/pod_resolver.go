@@ -28,7 +28,7 @@ type podSvc interface {
 //go:generate mockery -name=gqlPodConverter -output=automock -outpkg=automock -case=underscore
 type gqlPodConverter interface {
 	ToGQL(in *v1.Pod) (*gqlschema.Pod, error)
-	ToGQLs(in []*v1.Pod) ([]gqlschema.Pod, error)
+	ToGQLs(in []*v1.Pod) ([]*gqlschema.Pod, error)
 	GQLJSONToPod(in gqlschema.JSON) (v1.Pod, error)
 }
 
@@ -63,7 +63,7 @@ func (r *podResolver) PodQuery(ctx context.Context, name, namespace string) (*gq
 	return converted, nil
 }
 
-func (r *podResolver) PodsQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.Pod, error) {
+func (r *podResolver) PodsQuery(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.Pod, error) {
 	pods, err := r.podSvc.List(namespace, pager.PagingParams{
 		First:  first,
 		Offset: offset,
@@ -83,8 +83,8 @@ func (r *podResolver) PodsQuery(ctx context.Context, namespace string, first *in
 	return converted, nil
 }
 
-func (r *podResolver) PodEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.PodEvent, error) {
-	channel := make(chan gqlschema.PodEvent, 1)
+func (r *podResolver) PodEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.PodEvent, error) {
+	channel := make(chan *gqlschema.PodEvent, 1)
 	filter := func(pod *v1.Pod) bool {
 		return pod != nil && pod.Namespace == namespace
 	}

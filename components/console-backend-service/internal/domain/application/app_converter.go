@@ -7,9 +7,9 @@ import (
 
 type applicationConverter struct{}
 
-func (c *applicationConverter) ToGQL(in *v1alpha1.Application) gqlschema.Application {
+func (c *applicationConverter) ToGQL(in *v1alpha1.Application) *gqlschema.Application {
 	if in == nil {
-		return gqlschema.Application{}
+		return &gqlschema.Application{}
 	}
 
 	var appServices []gqlschema.ApplicationService
@@ -26,29 +26,38 @@ func (c *applicationConverter) ToGQL(in *v1alpha1.Application) gqlschema.Applica
 
 		appServices = append(appServices, dmSvc)
 	}
-
-	dto := gqlschema.Application{
+	labels := in.Spec.Labels
+	if labels == nil {
+		labels = gqlschema.Labels{}
+	}
+	dto := &gqlschema.Application{
 		Name:        in.Name,
-		Labels:      in.Spec.Labels,
+		Labels:      labels,
 		Description: in.Spec.Description,
 		Services:    appServices,
+	}
+
+	if in.Spec.CompassMetadata != nil {
+		dto.CompassMetadata = &gqlschema.CompassMetadata{
+			ApplicationID: in.Spec.CompassMetadata.ApplicationID,
+		}
 	}
 
 	return dto
 }
 
-func (c *applicationConverter) mapEntriesCRToDTO(entries []v1alpha1.Entry) []gqlschema.ApplicationEntry {
-	dtos := make([]gqlschema.ApplicationEntry, 0, len(entries))
+func (c *applicationConverter) mapEntriesCRToDTO(entries []v1alpha1.Entry) []*gqlschema.ApplicationEntry {
+	dtos := make([]*gqlschema.ApplicationEntry, 0, len(entries))
 	for _, entry := range entries {
 		switch entry.Type {
 		case "API":
-			dtos = append(dtos, gqlschema.ApplicationEntry{
+			dtos = append(dtos, &gqlschema.ApplicationEntry{
 				Type:        entry.Type,
 				AccessLabel: c.ptrString(entry.AccessLabel),
 				GatewayURL:  c.ptrString(entry.GatewayUrl),
 			})
 		case "Events":
-			dtos = append(dtos, gqlschema.ApplicationEntry{
+			dtos = append(dtos, &gqlschema.ApplicationEntry{
 				Type: entry.Type,
 			})
 		}

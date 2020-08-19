@@ -9,7 +9,7 @@ This tutorial shows how to use this feature, using the service example implement
 
 ## Prerequisites
 
-Install [Go](https://golang.org/dl/).
+Install [Go tools](https://golang.org/dl/).
 
 ## Steps
 
@@ -35,14 +35,14 @@ Install [Go](https://golang.org/dl/).
 
 ### Mount the example directory into Minikube
 
-For this step, you need a running local Kyma instance. Read [this](#installation-install-kyma-locally-from-the-release) document to learn how to install Kyma locally.
+For this step, you need a running local Kyma instance. Read the [installation document](#installation-install-kyma-locally-from-the-release) to learn how to install Kyma locally.
 
 1. Open the terminal window. Do not close it until the development finishes.
 2. Mount your local drive into Minikube:
 
    ```shell
    # Use the following pattern:
-   minikube mount {LOCAL_DIR_PATH}:{CLUSTER_DIR_PATH}`
+   minikube mount {LOCAL_DIR_PATH}:{CLUSTER_DIR_PATH}
    # To follow this guide, call:
    minikube mount ~/go/src/github.com/kyma-project/examples/http-db-service:/go/src/github.com/kyma-project/examples/http-db-service
    ```
@@ -121,7 +121,7 @@ For this step, you need a running local Kyma instance. Read [this](#installation
 
 ### Modify the code locally and see the results immediately in Minikube
 
-1. Edit the `main.go` file by adding a new `test` endpoint to the `startService` function:
+1. Edit the `main.go` file by adding a new `test` endpoint to the `startService` Function:
 
    ```go
    router.HandleFunc("/test", func (w http.ResponseWriter, r *http.Request) {

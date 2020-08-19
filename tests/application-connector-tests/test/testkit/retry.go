@@ -1,6 +1,7 @@
 package testkit
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -10,15 +11,13 @@ type RetryConfig struct {
 	Factor     float64
 }
 
-var DefaultRetryConfig RetryConfig = RetryConfig{
-	MaxRetries: 5,
+var DefaultRetryConfig = RetryConfig{
+	MaxRetries: 8,
 	Duration:   2 * time.Second,
 	Factor:     1.5,
 }
 
-func RetryOnError(config RetryConfig, function func() error) error {
-	var err error
-
+func Retry(config RetryConfig, shouldRetry func() (bool, error)) error {
 	duration := config.Duration
 
 	for i := 0; i < config.MaxRetries; i++ {
@@ -27,10 +26,15 @@ func RetryOnError(config RetryConfig, function func() error) error {
 			duration = duration * time.Duration(config.Factor)
 		}
 
-		if err = function(); err == nil {
+		retry, err := shouldRetry()
+		if err != nil {
+			return err
+		}
+
+		if !retry {
 			return nil
 		}
 	}
 
-	return err
+	return fmt.Errorf("retries limit reached")
 }

@@ -332,9 +332,10 @@
   version = "v2.2.7"
 
 [[projects]]
-  digest = "1:760e08df99c3c3b53764ef7c41c03ea9d90e8594d9df42364d9209e99a0352e1"
+  digest = "1:061024a203efbf02654d4aa55d69cd10d1f8985dada4cbafe5d6ce1b6914d22a"
   name = "k8s.io/api"
   packages = [
+    "admissionregistration/v1",
     "admissionregistration/v1beta1",
     "apps/v1",
     "apps/v1beta1",
@@ -354,6 +355,7 @@
     "coordination/v1",
     "coordination/v1beta1",
     "core/v1",
+    "discovery/v1alpha1",
     "events/v1beta1",
     "extensions/v1beta1",
     "networking/v1",
@@ -373,11 +375,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "2cd11237263f515cf13ca56d2b6c6c48a4158396"
-  version = "kubernetes-1.15.6"
+  revision = "6287e2b171401931686bb9a4d1c769343f712343"
+  version = "kubernetes-1.16.10"
 
 [[projects]]
-  digest = "1:4ee0f1ba1441148769e34c0c8f4fd9b157b31eb9928c64ef1ca21a860a9c0d06"
+  digest = "1:b4ff51d8de3c0a1eb179009de5f0628af1d84af80a32e38e514b00ad0e4adfa1"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -417,16 +419,17 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
-  revision = "31ade1b30762be61c32b2e8db2a11aa8b0b8960e"
-  version = "kubernetes-1.15.6"
+  revision = "9402b4926e83cddfcac78460d5dca7ae87c1dc49"
+  version = "kubernetes-1.16.10"
 
 [[projects]]
-  digest = "1:4d90a5be3228eb0a19b7fa6f317bb50ec1f65f4b9db0656c1d0d98dd18d29b30"
+  digest = "1:962783afed5b0029f230e33f1dd482127dc21cdec35772cc3cb231e7c301735c"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "kubernetes",
     "kubernetes/scheme",
+    "kubernetes/typed/admissionregistration/v1",
     "kubernetes/typed/admissionregistration/v1beta1",
     "kubernetes/typed/apps/v1",
     "kubernetes/typed/apps/v1beta1",
@@ -446,6 +449,7 @@
     "kubernetes/typed/coordination/v1",
     "kubernetes/typed/coordination/v1beta1",
     "kubernetes/typed/core/v1",
+    "kubernetes/typed/discovery/v1alpha1",
     "kubernetes/typed/events/v1beta1",
     "kubernetes/typed/extensions/v1beta1",
     "kubernetes/typed/networking/v1",
@@ -481,8 +485,8 @@
     "util/retry",
   ]
   pruneopts = "NUT"
-  revision = "8cba805ad12d699a43f2fe96dbfbcf3042133e89"
-  version = "kubernetes-1.15.6"
+  revision = "0f69009510c3f4630de40c7b7f9034f2a2728023"
+  version = "kubernetes-1.16.10"
 
 [[projects]]
   digest = "1:c0693cb981f43d82a767a3217b7640a4bdb341731d3814b38602f4e5dc4f01b3"

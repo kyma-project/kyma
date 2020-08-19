@@ -18,8 +18,8 @@ func NewResolver(err error) *Resolver {
 	return &Resolver{err: err}
 }
 
-// CreateFunction provides a failing mock function with given fields: ctx, name, namespace, labels, size, runtime
-func (_m *Resolver) CreateFunction(ctx context.Context, name string, namespace string, labels gqlschema.Labels, size string, runtime string) (*gqlschema.Function, error) {
+// CreateFunction provides a failing mock function with given fields: ctx, name, namespace, params
+func (_m *Resolver) CreateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionMutationInput) (*gqlschema.Function, error) {
 	var r0 *gqlschema.Function
 	var r1 error
 	r1 = _m.err
@@ -27,9 +27,27 @@ func (_m *Resolver) CreateFunction(ctx context.Context, name string, namespace s
 	return r0, r1
 }
 
-// DeleteFunction provides a failing mock function with given fields: ctx, name, namespace
-func (_m *Resolver) DeleteFunction(ctx context.Context, name string, namespace string) (*gqlschema.FunctionMutationOutput, error) {
-	var r0 *gqlschema.FunctionMutationOutput
+// DeleteFunction provides a failing mock function with given fields: ctx, namespace, function
+func (_m *Resolver) DeleteFunction(ctx context.Context, namespace string, function gqlschema.FunctionMetadataInput) (*gqlschema.FunctionMetadata, error) {
+	var r0 *gqlschema.FunctionMetadata
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// DeleteManyFunctions provides a failing mock function with given fields: ctx, namespace, functions
+func (_m *Resolver) DeleteManyFunctions(ctx context.Context, namespace string, functions []*gqlschema.FunctionMetadataInput) ([]*gqlschema.FunctionMetadata, error) {
+	var r0 []*gqlschema.FunctionMetadata
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// FunctionEventSubscription provides a failing mock function with given fields: ctx, namespace, functionName
+func (_m *Resolver) FunctionEventSubscription(ctx context.Context, namespace string, functionName *string) (<-chan *gqlschema.FunctionEvent, error) {
+	var r0 <-chan *gqlschema.FunctionEvent
 	var r1 error
 	r1 = _m.err
 
@@ -46,8 +64,8 @@ func (_m *Resolver) FunctionQuery(ctx context.Context, name string, namespace st
 }
 
 // FunctionsQuery provides a failing mock function with given fields: ctx, namespace
-func (_m *Resolver) FunctionsQuery(ctx context.Context, namespace string) ([]gqlschema.Function, error) {
-	var r0 []gqlschema.Function
+func (_m *Resolver) FunctionsQuery(ctx context.Context, namespace string) ([]*gqlschema.Function, error) {
+	var r0 []*gqlschema.Function
 	var r1 error
 	r1 = _m.err
 
@@ -55,7 +73,7 @@ func (_m *Resolver) FunctionsQuery(ctx context.Context, namespace string) ([]gql
 }
 
 // UpdateFunction provides a failing mock function with given fields: ctx, name, namespace, params
-func (_m *Resolver) UpdateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionUpdateInput) (*gqlschema.Function, error) {
+func (_m *Resolver) UpdateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionMutationInput) (*gqlschema.Function, error) {
 	var r0 *gqlschema.Function
 	var r1 error
 	r1 = _m.err

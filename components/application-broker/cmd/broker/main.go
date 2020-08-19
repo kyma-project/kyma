@@ -27,6 +27,7 @@ import (
 	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	appInformer "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
 	"github.com/sirupsen/logrus"
+	istioCli "istio.io/client-go/pkg/clientset/versioned"
 	v1 "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -67,9 +68,12 @@ func main() {
 	eventingClient, err := eventingCli.NewForConfig(k8sConfig)
 	fatalOnError(err)
 	knClient := knative.NewClient(eventingClient, k8sClient)
+	istioClient, err := istioCli.NewForConfig(k8sConfig)
+	fatalOnError(err)
 
 	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
-	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, knClient, &livenessCheckStatus)
+	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, knClient,
+		istioClient, &livenessCheckStatus)
 
 	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
 }
@@ -81,6 +85,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	appClient appCli.Interface,
 	mClient mappingCli.Interface,
 	knClient knative.Client,
+	istioClient istioCli.Interface,
 	livenessCheckStatus *broker.LivenessCheckStatus,
 ) *broker.Server {
 
@@ -97,15 +102,6 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	scInformerFactory := catalogInformers.NewSharedInformerFactory(scClientSet, informerResyncPeriod)
 	scInformersGroup := scInformerFactory.Servicecatalog().V1beta1()
 
-	// instance populator
-	instancePopulator := populator.NewInstances(scClientSet, sFact.Instance(), &populator.Converter{})
-	popCtx, popCancelFunc := context.WithTimeout(context.Background(), time.Minute)
-	defer popCancelFunc()
-	log.Info("Instance storage population...")
-	err = instancePopulator.Do(popCtx)
-	fatalOnError(err)
-	log.Info("Instance storage populated")
-
 	// Applications
 	appInformerFactory := appInformer.NewSharedInformerFactory(appClient, informerResyncPeriod)
 	appInformersGroup := appInformerFactory.Applicationconnector().V1alpha1()
@@ -119,9 +115,9 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	relistRequester := syncer.NewRelistRequester(nsBrokerSyncer, cfg.BrokerRelistDurationWindow, log)
 	siFacade := servicecatalog.NewFacade(scInformersGroup.ServiceInstances().Informer(), scInformersGroup.ServiceClasses().Informer())
 
-	accessChecker := access.New(sFact.Application(), mClient.ApplicationconnectorV1alpha1(), sFact.Instance())
+	accessChecker := access.New(sFact.Application(), mClient.ApplicationconnectorV1alpha1(), sFact.Instance(), cfg.APIPackagesSupport)
 
-	appSyncCtrl := syncer.New(appInformersGroup.Applications(), sFact.Application(), sFact.Application(), relistRequester, log)
+	appSyncCtrl := syncer.New(appInformersGroup.Applications(), sFact.Application(), sFact.Application(), relistRequester, log, cfg.APIPackagesSupport)
 
 	brokerService, err := broker.NewNsBrokerService()
 	fatalOnError(err)
@@ -130,13 +126,18 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 
 	mappingCtrl := mapping.New(mInformersGroup.ApplicationMappings().Informer(),
 		nsInformer, scInformersGroup.ServiceInstances().Informer(), k8sClient.CoreV1().Namespaces(), sFact.Application(),
-		nsBrokerFacade, nsBrokerSyncer, siFacade, log, livenessCheckStatus)
+		nsBrokerFacade, nsBrokerSyncer, siFacade, log, livenessCheckStatus, cfg.APIPackagesSupport)
+
+	// create ApplicationServiceID selector
+	idSelector := broker.NewIDSelector(cfg.APIPackagesSupport)
 
 	// create broker
 	srv := broker.New(sFact.Application(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
-		mClient.ApplicationconnectorV1alpha1(), siFacade,
+		mClient.ApplicationconnectorV1alpha1(),
 		mInformersGroup.ApplicationMappings().Lister(), brokerService,
-		&mClient, knClient, log, livenessCheckStatus)
+		&mClient, knClient, &istioClient, log, livenessCheckStatus,
+		cfg.APIPackagesSupport, cfg.Director.Service, cfg.Director.ProxyURL,
+		scInformersGroup.ServiceBindings().Informer(), cfg.GatewayBaseURLFormat, idSelector)
 
 	// start informers
 	scInformerFactory.Start(stopCh)
@@ -161,6 +162,11 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	go appSyncCtrl.Run(stopCh)
 	go mappingCtrl.Run(stopCh)
 	go relistRequester.Run(stopCh)
+
+	// instance populator
+	instancePopulator := populator.NewInstances(scClientSet, sFact.Instance(), &populator.Converter{}, sFact.InstanceOperation(), srv, idSelector, log)
+	err = instancePopulator.Do()
+	fatalOnError(err)
 
 	return srv
 }

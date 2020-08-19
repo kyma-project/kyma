@@ -4,9 +4,11 @@ metadata:
   name: {{ .Chart.Name }}
   labels:
     app: {{ .Chart.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
 - apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["applications"]
@@ -25,7 +27,7 @@ rules:
   resources: ["services"]
   verbs: ["get","create","delete"]
 - apiGroups: ["servicecatalog.k8s.io"]
-  resources: ["serviceclasses","serviceinstances"]
+  resources: ["serviceclasses","serviceinstances", "servicebindings"]
   verbs: ["get", "list", "watch"]
 - apiGroups: ["servicecatalog.k8s.io"]
   resources: ["servicebrokers"]
@@ -38,3 +40,7 @@ rules:
 - apiGroups: ["messaging.knative.dev"]
   resources: ["channels"]
   verbs: ["list"]
+# Istio policies for authorization and authentication
+- apiGroups: ["authentication.istio.io"]
+  resources: ["policies"]
+  verbs: ["create","update", "get"]

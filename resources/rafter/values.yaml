@@ -2,12 +2,13 @@ global:
   istio:
     gateway:
       name: kyma-gateway
+      namespace: kyma-system
 
 tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/rafter-test"
-    tag: "28fcf2cf"
+    tag: 7dd25b42
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
@@ -17,16 +18,7 @@ tests:
   envs:
     mockiceImage: hudymi/mockice:0.1.3
     waitTimeout: 10m
-
-migration:
-  persistence:
-    size: 10Gi
-  images:
-    alpineHelmKubectl:
-      repository: 'dtzar/helm-kubectl'
-      tag: '2.16.1'
-      pullPolicy: IfNotPresent
-
+    verifySSL: "false"
 
 controller-manager:
   enabled: true
@@ -35,15 +27,16 @@ controller-manager:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-controller-manager
-    tag: 2756b8f6
+    tag: 1a89277a
     pullPolicy: IfNotPresent
 
-  installCRDs: false
+  deployment:
+    fullnameOverride: "rafter-ctrl-mngr"
 
   pod:
     annotations:
       sidecar.istio.io/inject: "false"
-      recreate: "{{ .Release.Time.Seconds }}"
+      recreate: "{{ now }}"
     resources:
       limits:
         cpu: 150m
@@ -198,7 +191,8 @@ controller-manager:
     enabled: true
 
     image:
-      tag: RELEASE.2019-10-12T01-39-57Z
+      tag: RELEASE.2019-10-12T01-39-57Z-a67baaa0
+      repository: eu.gcr.io/kyma-project/incubator/develop/minio/minio
 
     persistence:
       enabled: true
@@ -252,18 +246,21 @@ upload-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-upload-service
-    tag: 2756b8f6
+    tag: 1a89277a
     pullPolicy: IfNotPresent
 
-  pod:
-    annotations:
-      sidecar.istio.io/inject: "false"
-      recreate: "{{ .Release.Time.Seconds }}"
+  deployment:
+    fullnameOverride: "rafter-upload-svc"
     extraProperties:
       strategy:
         type: RollingUpdate
         rollingUpdate:
           maxUnavailable: 0
+
+  pod:
+    annotations:
+      sidecar.istio.io/inject: "false"
+      recreate: "{{ now }}"
 
   service:
     annotations:
@@ -337,11 +334,11 @@ upload-service:
     images:
       alpineKubectl:
         repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-        tag: 'v20190325-ff66a3a'
+        tag: 'v20200617-32c1f3ff'
         pullPolicy: IfNotPresent
       minioClient:
-        repository: 'minio/mc'
-        tag: 'RELEASE.2019-10-09T22-54-57Z'
+        repository: eu.gcr.io/kyma-project/incubator/develop/minio/mc
+        tag: RELEASE.2019-04-03T17-59-57Z-a67baaa0
         pullPolicy: IfNotPresent
     pre:
       minioDeploymentRefName:
@@ -356,17 +353,20 @@ front-matter-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-front-matter-service
-    tag: 2756b8f6
+    tag: 1a89277a
     pullPolicy: IfNotPresent
 
-  pod:
-    annotations:
-      sidecar.istio.io/inject: "false"
+  deployment:
+    fullnameOverride: "rafter-front-matter-svc"
     extraProperties:
       strategy:
         type: RollingUpdate
         rollingUpdate:
           maxUnavailable: 0
+
+  pod:
+    annotations:
+      sidecar.istio.io/inject: "false"
 
   service:
     annotations:
@@ -390,17 +390,20 @@ asyncapi-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-asyncapi-service
-    tag: 2756b8f6
+    tag: 1a89277a
     pullPolicy: IfNotPresent
 
-  pod:
-    annotations:
-      sidecar.istio.io/inject: "false"
+  deployment:
+    fullnameOverride: "rafter-asyncapi-svc"
     extraProperties:
       strategy:
         type: RollingUpdate
         rollingUpdate:
           maxUnavailable: 0
+
+  pod:
+    annotations:
+      sidecar.istio.io/inject: "false"
 
   service:
     annotations:

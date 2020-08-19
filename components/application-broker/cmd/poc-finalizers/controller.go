@@ -8,11 +8,9 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
-	"k8s.io/kubernetes/pkg/controller"
-
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 
 	mV1alpha12 "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	cV1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	informers "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1"
 
@@ -90,7 +88,7 @@ func (c *Controller) Run(workers int, stopCh <-chan struct{}) {
 	c.log.Info("Starting protection controller")
 	defer c.log.Info("Shutting down protection controller")
 
-	if !controller.WaitForCacheSync("Protection", stopCh) {
+	if !cache.WaitForCacheSync(stopCh) {
 		return
 	}
 

@@ -27,7 +27,8 @@ func TestClusterAssetConverter_ToGQL(t *testing.T) {
 				Reason:  "ExampleReason",
 				Message: "ExampleMessage",
 			},
-			Parameters: gqlschema.JSON{"complex": map[string]interface{}{"data": "true"}, "json": "true"},
+			Parameters:  gqlschema.JSON{"complex": map[string]interface{}{"data": "true"}, "json": "true"},
+			DisplayName: "ExampleDisplayName",
 		}
 
 		result, err := converter.ToGQL(item)
@@ -105,7 +106,8 @@ func fixClusterAsset() *v1beta1.ClusterAsset {
 				BucketRef: v1beta1.AssetBucketRef{
 					Name: "ExampleBucketRef",
 				},
-				Parameters: &runtime.RawExtension{Raw: []byte(`{"json":"true","complex":{"data":"true"}}`)},
+				Parameters:  &runtime.RawExtension{Raw: []byte(`{"json":"true","complex":{"data":"true"}}`)},
+				DisplayName: "ExampleDisplayName",
 			},
 		},
 		Status: v1beta1.ClusterAssetStatus{

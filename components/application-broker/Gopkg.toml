@@ -39,6 +39,14 @@ required = [
   non-go = true
 
 [[constraint]]
+  name = "github.com/machinebox/graphql"
+  version = "v0.2.2"
+
+[[override]]
+  name = "github.com/vektah/gqlparser"
+  version = "v1.2.0"
+
+[[constraint]]
   name = "github.com/asaskevich/govalidator"
   version = "8.0.0"
 
@@ -84,19 +92,19 @@ required = [
 
 [[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.0"
+  version = "kubernetes-1.16.10"
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.0"
+  version = "kubernetes-1.16.10"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.0"
+  version = "kubernetes-1.16.10"
 
 [[constraint]]
   name = "k8s.io/code-generator"
-  version = "kubernetes-1.15.0"
+  version = "kubernetes-1.16.10"
 
 [[constraint]]
   name = "github.com/kubernetes-sigs/service-catalog"
@@ -104,23 +112,31 @@ required = [
 
 [[constraint]]
   name = "k8s.io/kubernetes"
-  branch = "release-1.15"
+  branch = "release-1.16"
 
 [[constraint]]
   name = "k8s.io/gengo"
   revision = "e17681d19d3ac4837a019ece36c2a0ec31ffe985"
 
-[[override]]
-  name = "knative.dev/eventing"
-  version = "v0.10.2"
-
-[[override]]
-  name = "knative.dev/pkg"
-  branch = "release-0.10"
-
 [[constraint]]
   name = "k8s.io/kube-openapi"
   revision = "0270cf2f1c1d995d34b36019a6f65d58e6e33ad4"
+
+[[constraint]]
+  name = "github.com/kyma-project/kyma"
+  revision = "8069217e0f42fef97b9e6fddb8b7c86ff5ba1999"
+
+[[constraint]]
+  name = "github.com/kyma-incubator/compass"
+  revision = "960cf3fa606ce139cea977928be029784bd42be5"
+
+[[override]]
+  name = "knative.dev/eventing"
+  version = "v0.12.0"
+
+[[override]]
+  name = "knative.dev/pkg"
+  branch = "release-0.12"
 
 [[override]]
   name = "github.com/docker/distribution"
@@ -128,26 +144,25 @@ required = [
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.0"
+  version = "kubernetes-1.16.10"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.0"
+  version = "kubernetes-1.16.10"
 
 [[override]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.15.0"
+  version = "kubernetes-1.16.10"
 
 [[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.0"
-
-[[constraint]]
-  name = "github.com/kyma-project/kyma"
-  # this is the latest version of Kyma which contains knative 0.10
-  revision = "0b71f328c47a5aca8c00a6f41067df4f186387e6"
+  version = "kubernetes-1.16.10"
 
 [[override]]
   name = "k8s.io/apiextensions-apiserver"
   version = "v0.15.0"
+
+[[override]]
+  name = "gopkg.in/yaml.v2"
+  version = "v2.2.8"
 

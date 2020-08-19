@@ -34,12 +34,12 @@ func (tc *testCase) TearDown() {
 }
 
 func (tc *testCase) AddSBU(t *testing.T, sbu *v1alpha1.ServiceBindingUsage) {
-	_, err := tc.clientSet.ServicecatalogV1alpha1().ServiceBindingUsages(sbu.Namespace).Create(sbu)
+	_, err := tc.clientSet.ServicecatalogV1alpha1().ServiceBindingUsages(sbu.Namespace).Create(context.TODO(), sbu, v1.CreateOptions{})
 	require.NoError(t, err)
 }
 
 func (tc *testCase) RemoveSBU(t *testing.T, sbu *v1alpha1.ServiceBindingUsage) {
-	err := tc.clientSet.ServicecatalogV1alpha1().ServiceBindingUsages(sbu.Namespace).Delete(sbu.Name, &v1.DeleteOptions{})
+	err := tc.clientSet.ServicecatalogV1alpha1().ServiceBindingUsages(sbu.Namespace).Delete(context.TODO(), sbu.Name, v1.DeleteOptions{})
 	require.NoError(t, err)
 	tc.ctrl.(*usagekind.ProtectionController).OnDeleteSBU(&controller.SBUDeletedEvent{
 		Name:       sbu.Name,
@@ -49,23 +49,23 @@ func (tc *testCase) RemoveSBU(t *testing.T, sbu *v1alpha1.ServiceBindingUsage) {
 }
 
 func (tc *testCase) AddUsageKind(t *testing.T, uk *v1alpha1.UsageKind) {
-	_, err := tc.clientSet.ServicecatalogV1alpha1().UsageKinds().Create(uk)
+	_, err := tc.clientSet.ServicecatalogV1alpha1().UsageKinds().Create(context.TODO(), uk, v1.CreateOptions{})
 	require.NoError(t, err)
 }
 
 func (tc *testCase) UpdateUsageKind(t *testing.T, uk *v1alpha1.UsageKind) {
-	_, err := tc.clientSet.ServicecatalogV1alpha1().UsageKinds().Update(uk)
+	_, err := tc.clientSet.ServicecatalogV1alpha1().UsageKinds().Update(context.TODO(), uk, v1.UpdateOptions{})
 	require.NoError(t, err)
 }
 
 func (tc *testCase) GetUsageKind(t *testing.T, name string) *v1alpha1.UsageKind {
-	obj, err := tc.clientSet.ServicecatalogV1alpha1().UsageKinds().Get(name, v1.GetOptions{})
+	obj, err := tc.clientSet.ServicecatalogV1alpha1().UsageKinds().Get(context.TODO(), name, v1.GetOptions{})
 	require.NoError(t, err)
 	return obj
 }
 
 func (tc *testCase) RemoveUsageKind(t *testing.T, name string) {
-	err := tc.clientSet.ServicecatalogV1alpha1().UsageKinds().Delete(name, &v1.DeleteOptions{})
+	err := tc.clientSet.ServicecatalogV1alpha1().UsageKinds().Delete(context.TODO(), name, v1.DeleteOptions{})
 	require.NoError(t, err)
 }
 

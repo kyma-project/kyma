@@ -8,23 +8,22 @@ networkPolicy:
 serviceAccount:
   create: true
   name:
+  annotations: {}
 
 # enable tracing for debug, need install jaeger and specify right jaeger_agent_host
 tracing:
   jaegerAgentHost:
 
 loki:
+  enabled: true
   podManagementPolicy: OrderedReady
   nameOverride: loki
   replicas: 1
-  minReadySeconds: 0
   terminationGracePeriodSeconds: 30
-  deploymentStrategy: RollingUpdate
-  port: 3100
-
   updateStrategy:
     type: RollingUpdate
 
+  ## Pod Labels
   podLabels: {}
 
   securityContext:
@@ -33,43 +32,39 @@ loki:
     runAsNonRoot: true
     runAsUser: 10001
 
+  ## Additional Loki container arguments, e.g. log level (debug, info, warn, error)
   extraArgs: {}
     # log.level: debug
 
   image:
     repository: grafana/loki
-    tag: v0.3.0
-    pullPolicy: Always # Always pull while in BETA
+    tag: 1.5.0
+    pullPolicy: IfNotPresent
 
-  # user: user
-  # password: pass
   service:
     port: 3100
-    scheme: http
-    #user: user
-    #password: pass
+    type: ClusterIP
+    nodePort:
     annotations:
       auth.istio.io/3100: NONE
-    #  prometheus.io/scrape: "true"
-    #  prometheus.io/port: "http-metrics"
     labels: {}
 
   readinessProbe:
     httpGet:
       path: /ready
-      port: http
+      port: http-metrics
     initialDelaySeconds: 45
 
   livenessProbe:
     httpGet:
       path: /ready
-      port: http
+      port: http-metrics
     initialDelaySeconds: 45
 
   resources:
     limits:
-      cpu: 300m
-      memory: 256Mi
+      cpu: 200m
+      memory: 300Mi
     requests:
       cpu: 100m
       memory: 128Mi
@@ -78,62 +73,65 @@ loki:
   podAnnotations:
     sidecar.istio.io/inject: "true"
 
-  ## Deployment annotations
+  ## StatefulSet annotations
   annotations: {}
 
   ## Assign a PriorityClassName to pods if set
   # priorityClassName:
 
-  ## Node labels for pod assignment
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  #
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   nodeSelector: {}
 
   ## Tolerations for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
   tolerations: []
+
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ##
+  # pullSecrets:
+  #   - myRegistryKeySecretName
 
   ## Affinity for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-  ##
   affinity: {}
-    # podAntiAffinity:
-    #   requiredDuringSchedulingIgnoredDuringExecution:
-    #   - labelSelector:
-    #       matchExpressions:
-    #       - key: app
-    #         operator: In
-    #         values:
-    #         - loki
+  # podAntiAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #   - labelSelector:
+  #       matchExpressions:
+  #       - key: app
+  #         operator: In
+  #         values:
+  #         - loki
   #     topologyKey: "kubernetes.io/hostname"
 
-  ## Enable persistence using Persistent Volume Claims
-  ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+  ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
   ## If you set enabled as "True", you need :
   ## - create a pv which above 10Gi and has same namespace with loki
   ## - keep storageClassName same with below setting
   persistence:
     enabled: true
     accessModes:
-      - ReadWriteOnce
+    - ReadWriteOnce
     size: 10Gi
-    storageClassName: ""
-    # annotations: {}
+    annotations: {}
     # subPath: ""
     # existingClaim:
 
   config:
     auth_enabled: false
     ingester:
-      chunk_idle_period: 15m
+      chunk_idle_period: 3m
       chunk_block_size: 262144
+      chunk_retain_period: 1m
+      max_transfer_retries: 0
       lifecycler:
-        address: 127.0.0.1
         ring:
           kvstore:
             store: inmemory
           replication_factor: 1
+
         ## Different ring configs can be used. E.g. Consul
         # ring:
         #   store: consul
@@ -141,21 +139,21 @@ loki:
         #   consul:
         #     host: "consul:8500"
         #     prefix: ""
-        #     httpclienttimeout: "20s"
-        #     consistentreads: true
+        #     http_client_timeout: "20s"
+        #     consistent_reads: true
     limits_config:
       enforce_metric_name: false
       reject_old_samples: true
       reject_old_samples_max_age: 168h
     schema_config:
       configs:
-        - from: 2018-04-15
-          store: boltdb
-          object_store: filesystem
-          schema: v9
-          index:
-            prefix: index_
-            period: 24h
+      - from: 2018-04-15
+        store: boltdb
+        object_store: filesystem
+        schema: v9
+        index:
+          prefix: index_
+          period: 24h
     server:
       http_listen_port: 3100
     storage_config:
@@ -164,162 +162,63 @@ loki:
       filesystem:
         directory: /data/loki/chunks
     chunk_store_config:
-      max_look_back_period: 0
+      max_look_back_period: 0s
     table_manager:
-      retention_deletes_enabled: true 
+      retention_deletes_enabled: true
       retention_period: 24h
 
-promtail:
-  nameOverride: promtail
-  deploymentStrategy: RollingUpdate
+  # The values to set in the PodDisruptionBudget spec
+  # If not set then a PodDisruptionBudget will not be created
+  podDisruptionBudget: {}
+  # minAvailable: 1
+  # maxUnavailable: 1
 
-  entryParser: docker
+  serviceMonitor:
+    enabled: false
+    interval: ""
+    additionalLabels: {}
+    # scrapeTimeout: 10s
 
-  image:
-    repository: grafana/promtail
-    tag: v0.3.0
-    pullPolicy: Always # Always pull while in BETA
+  initContainers: []
+  ## Init containers to be added to the loki pod.
+  # - name: my-init-container
+  #   image: busybox:latest
+  #   command: ['sh', '-c', 'echo hello']
 
-  volumes:
-    - name: varlog
-      hostPath:
-        path: /var/log
-    - name: varlibdockercontainers
-      hostPath:
-        path: /var/lib/docker/containers
+  extraContainers: []
+  ## Additional containers to be added to the loki pod.
+  # - name: reverse-proxy
+  #   image: angelbarrera92/basic-auth-reverse-proxy:dev
+  #   args:
+  #     - "serve"
+  #     - "--upstream=http://localhost:3100"
+  #     - "--auth-config=/etc/reverse-proxy-conf/authn.yaml"
+  #   ports:
+  #     - name: http
+  #       containerPort: 11811
+  #       protocol: TCP
+  #   volumeMounts:
+  #     - name: reverse-proxy-auth-config
+  #       mountPath: /etc/reverse-proxy-conf
 
-  volumeMounts:
-    - name: varlog
-      mountPath: /var/log
-    - name: varlibdockercontainers
-      mountPath: /var/lib/docker/containers
-      readOnly: true
+  extraVolumes: []
+  ## Additional volumes to the loki pod.
+  # - name: reverse-proxy-auth-config
+  #   secret:
+  #     secretName: reverse-proxy-auth-config
 
-  readinessProbe:
-    failureThreshold: 5
-    httpGet:
-      path: /ready
-      port: http-metrics
-    initialDelaySeconds: 10
-    periodSeconds: 10
-    successThreshold: 1
-    timeoutSeconds: 1
+  ## Extra volume mounts that will be added to the loki container
+  extraVolumeMounts: []
 
-  livenessProbe: {}
+  extraPorts: []
+  ## Additional ports to the loki services. Useful to expose extra container ports.
+  # - port: 11811
+  #   protocol: TCP
+  #   name: http
+  #   targetPort: http
 
-  resources:
-    limits:
-      cpu: 300m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-
-  securityContext:
-    readOnlyRootFilesystem: true
-    runAsGroup: 0
-    runAsUser: 0
-
-  # This should match config.server.http_listen_port
-  port: 3101
-
-  ## Pod Labels
-  podLabels: {}
-
-  ## Assign a PriorityClassName to pods if set
-  # priorityClassName:
-
-  ## Pod Annotations
-  podAnnotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "http-metrics"
-  #For pods running sidecars w/o service there's a problem with envoy readiness probe.
-  #Details https://github.com/istio/istio/issues/9504#issuecomment-439432130
-    readiness.status.sidecar.istio.io/applicationPorts: ""
-
-  ## Deployment annotations
-  annotations: {}
-
-  ## Assign a PriorityClassName to pods if set
-  # priorityClassName:
-
-  ## Node labels for pod assignment
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  #
-  nodeSelector: {}
-
-  ## Tolerations for pod assignment
-  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations:
-    - key: node-role.kubernetes.io/master
-      effect: NoSchedule
-
-  ## Affinity for pod assignment
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-  ##
-  affinity: {}
-
-  pipelineStages:
-  - docker: {}
-
-  # Custom scrape_configs to override the default ones in the configmap
-  scrapeConfigs: []
-
-  config:
-    client:
-      # Maximum wait period before sending batch
-      batchwait: 1s
-      # Maximum batch size to accrue before sending, unit is byte
-      batchsize: 102400
-
-      # Maximum time to wait for server to respond to a request
-      timeout: 10s
-
-      backoff_config:
-        # Initial backoff time between retries
-        minbackoff: 100ms
-        # Maximum backoff time between retries
-        maxbackoff: 5s
-        # Maximum number of retires when sending batches, 0 means infinite retries
-        maxretries: 5
-
-      # The labels to add to any time series or alerts when communicating with loki
-      external_labels: {}
-
-    server:
-      http_listen_port: 3101
-    positions:
-      filename: /run/promtail/positions.yaml
-    target_config:
-      # Period to resync directories being watched and files being tailed
-      sync_period: 10s
-
-fluentbit:
-  nameOverride: fluent-bit
-  image:
-    repository: fluent/fluent-bit
-    tag: 1.2.1
-    pullPolicy: Always
-
-# name of log collector to be installed, by default will be grafana promtail installed, other supported collector is "fluent-bit"
-logcollector:
-  name: promtail
-
-logui:
-  replicaCount: 1
-  image:
-    name: log-ui
-    tag: 17f3b3c2
-    dir:
-    pullPolicy: Always
-  service:
-    name: nginx
-    type: ClusterIP
-    externalPort: 80
-    internalPort: 80
-  resources: {}
-  nameOverride: log-ui
+  # Extra env variables to pass to the loki container
+  env: []
 
 global:
   containerRegistry:
@@ -327,9 +226,11 @@ global:
   logging_integration_tests:
     name: logging-integration-tests
     dir: 
-    version: 5a771fdf
-  logging:
-    promtail:
-      config:
-        name: promtail-k8s-1-14.yaml
-    
+    version: 04ed8025
+    enabled: true
+    env:
+      testUser: "admin-user"
+  istio:
+    gateway:
+      name: kyma-gateway
+      namespace: kyma-system

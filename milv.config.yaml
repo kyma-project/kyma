@@ -4,6 +4,9 @@ black-list-internal: ["./kyma/docs/"]
 timeout: 60
 request-repeats: 5
 files:
+  - path: "./kyma/docs/kyma/04-10-upgrade.md"
+    config:
+      white-list-external: ["https://raw.githubusercontent.com/kyma-project/kyma/{NEW_KYMA_VERSION}/installation/resources/tiller.yaml"]
   - path: "./kyma/resources/service-manager-proxy/README.md"
     config:
       white-list-external: ["http://service-manager.dev.cfdev.sh"]
@@ -77,3 +80,19 @@ files:
   - path: "./kyma/docs/security/08-03-add-connector.md"
     config:
       white-list-external: ["https://dex.{CLUSTER_DOMAIN}/callback"]
+  - path: "./kyma/docs/kyma/05-04-component-source-url.md"
+    config:
+      white-list-external: ["https://user:pass@hosting.com/your-user/files/kyma-custom-ory.zip"]
+  - path: "./kyma/docs/runtime-agent/08-07-establish-secure-connection-with-compass.md"
+    config:
+      white-list-external: ["https://compass.{CLUSTER_DOMAIN"]
+  - path: "./kyma/docs/migration-guides/1.10-1.11.md"
+    config:
+      white-list-external: ["https://gateway.domain/APP_NAME/v1/events",
+      "https://gateway.domain/APP_NAME/events"]
+  - path: "./kyma/docs/runtime-agent/08-01-basic-flow-tutorial.md"
+    config:
+      white-list-external: ["https://compass.{CLUSTER_DOMAIN"]
+  - path: "./kyma/docs/migration-guides/1.13-1.14.md"
+    config:
+      white-list-external: ["https://github.com/kyma-project/kyma/blob/release-1.14/docs/kyma/03-03-charts.md#migration-to-helm-v3"]

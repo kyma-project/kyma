@@ -5,7 +5,7 @@ type: Tutorials
 
 This tutorial is intended for the developers who want to quickly learn how to deploy a sample service and test it with Kyma installed locally on Mac.
 
-This tutorial uses a standalone sample service written in the [Go](http://golang.org) language .
+This tutorial uses a standalone sample service written in the [Go language](http://golang.org).
 
 ## Prerequisites
 
@@ -23,7 +23,7 @@ Follow these steps:
 1. Deploy the sample service to any of your Namespaces. Use the `stage` Namespace for this guide:
 
    ```bash
-   kubectl create -n stage -f https://raw.githubusercontent.com/kyma-project/examples/master/http-db-service/deployment/deployment.yaml
+   kubectl apply -n stage -f https://raw.githubusercontent.com/kyma-project/examples/master/http-db-service/deployment/deployment.yaml
    ```
 
 2. Create an unsecured API for your example service:
@@ -63,7 +63,7 @@ Follow these steps:
 Run the following command:
 
    ```bash
-   kubectl apply -n stage -f https://raw.githubusercontent.com/kyma-project/examples/master/gateway/service/api-with-auth.yaml
+   kubectl apply -n stage -f https://raw.githubusercontent.com/kyma-project/examples/master/gateway/service/api-with-jwt.yaml
    ```
 
 After you apply this update, you must include a valid bearer ID token in the Authorization header to access the service.

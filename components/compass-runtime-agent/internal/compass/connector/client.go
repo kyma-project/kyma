@@ -1,14 +1,14 @@
 package connector
 
 import (
-	"kyma-project.io/compass-runtime-agent/internal/graphql"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
 
 	schema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
 	gcli "github.com/machinebox/graphql"
 	"github.com/pkg/errors"
 )
 
-//go:generate mockery -name=Client
+//go:generate mockery --name=Client
 type Client interface {
 	Configuration(headers map[string]string) (schema.Configuration, error)
 	SignCSR(csr string, headers map[string]string) (schema.CertificationResult, error)

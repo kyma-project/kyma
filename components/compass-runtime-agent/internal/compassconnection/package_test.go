@@ -1,43 +1,46 @@
 package compassconnection
 
 import (
+	"context"
 	"errors"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
+
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 
-	"kyma-project.io/compass-runtime-agent/internal/compass/director"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
 
-	"kyma-project.io/compass-runtime-agent/internal/kyma"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
 
-	"kyma-project.io/compass-runtime-agent/internal/apperrors"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 
-	"kyma-project.io/compass-runtime-agent/internal/certificates"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 
 	"github.com/stretchr/testify/assert"
 
+	certsMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates/mocks"
+	directorMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director/mocks"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
+	configMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config/mocks"
+	kymaMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/mocks"
+	kymaModel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	certsMocks "kyma-project.io/compass-runtime-agent/internal/certificates/mocks"
-	directorMocks "kyma-project.io/compass-runtime-agent/internal/compass/director/mocks"
-	"kyma-project.io/compass-runtime-agent/internal/config"
-	configMocks "kyma-project.io/compass-runtime-agent/internal/config/mocks"
-	kymaMocks "kyma-project.io/compass-runtime-agent/internal/kyma/mocks"
-	kymaModel "kyma-project.io/compass-runtime-agent/internal/kyma/model"
 
-	compassMocks "kyma-project.io/compass-runtime-agent/internal/compass/mocks"
+	compassMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/mocks"
 
 	"github.com/stretchr/testify/mock"
 
 	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
 
-	connectorMocks "kyma-project.io/compass-runtime-agent/internal/compass/connector/mocks"
+	connectorMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/connector/mocks"
 
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 
 	"github.com/stretchr/testify/require"
 )
@@ -106,7 +109,6 @@ func TestCompassConnectionController(t *testing.T) {
 
 	// Credentials manager
 	credentialsManagerMock := &certsMocks.Manager{}
-	credentialsManagerMock.On("GetClientCredentials").Return(credentials.ClientCredentials, nil)
 	credentialsManagerMock.On("PreserveCredentials", mock.AnythingOfType("certificates.Credentials")).Run(func(args mock.Arguments) {
 		credentials, ok := args[0].(certificates.Credentials)
 		assert.True(t, ok)
@@ -121,11 +123,23 @@ func TestCompassConnectionController(t *testing.T) {
 	configurationClientMock := &directorMocks.DirectorClient{}
 	configurationClientMock.On("FetchConfiguration").Return(kymaModelApps, nil)
 	configurationClientMock.On("SetURLsLabels", runtimeURLsConfig).Return(runtimeLabels, nil)
+	// Director proxy configurator
+	directorProxyConfiguratorMock := &directorMocks.ProxyConfigurator{}
+	directorProxyConfiguratorMock.On("SetURLAndCerts", mock.AnythingOfType("cache.ConnectionData")).Return(nil)
 	// Clients provider
 	clientsProviderMock := clientsProviderMock(configurationClientMock, tokensConnectorClientMock, certsConnectorClientMock)
 	// Sync service
 	synchronizationServiceMock := &kymaMocks.Service{}
 	synchronizationServiceMock.On("Apply", kymaModelApps).Return(operationResults, nil)
+
+	connectionDataCache := cache.NewConnectionDataCache()
+	connectionDataCache.AddSubscriber(func(data cache.ConnectionData) error {
+		assert.NotEmpty(t, data.Certificate)
+		assert.Equal(t, certSecuredConnectorURL, data.ConnectorURL)
+		assert.Equal(t, directorURL, data.DirectorURL)
+		return nil
+	})
+	connectionDataCache.AddSubscriber(directorProxyConfiguratorMock.SetURLAndCerts)
 
 	var baseDependencies = DependencyConfig{
 		K8sConfig:         cfg,
@@ -137,6 +151,7 @@ func TestCompassConnectionController(t *testing.T) {
 		ConfigProvider:               configProviderMock,
 		CertValidityRenewalThreshold: 0.3,
 		MinimalCompassSyncTime:       minimalConfigSyncTime,
+		ConnectionDataCache:          connectionDataCache,
 
 		RuntimeURLsConfig: runtimeURLsConfig,
 	}
@@ -145,7 +160,7 @@ func TestCompassConnectionController(t *testing.T) {
 	require.NoError(t, err)
 
 	defer func() {
-		err := compassConnectionCRClient.Delete(compassConnectionName, &v1.DeleteOptions{})
+		err := compassConnectionCRClient.Delete(context.Background(), compassConnectionName, v1.DeleteOptions{})
 		if err != nil {
 			t.Logf("error while deleting Compass Connection: %s", err.Error())
 		}
@@ -179,7 +194,7 @@ func TestCompassConnectionController(t *testing.T) {
 
 	t.Run("Compass Connection should be reinitialized if deleted", func(t *testing.T) {
 		// given
-		err := compassConnectionCRClient.Delete(compassConnectionName, &v1.DeleteOptions{})
+		err := compassConnectionCRClient.Delete(context.Background(), compassConnectionName, v1.DeleteOptions{})
 		require.NoError(t, err)
 
 		// then
@@ -203,6 +218,8 @@ func TestCompassConnectionController(t *testing.T) {
 
 	t.Run("should not reinitialized connection if connection is in Synchronized state", func(t *testing.T) {
 		// when
+		credentialsManagerMock.On("GetClientCredentials").Return(credentials.ClientCredentials, nil)
+
 		connection, err := supervisor.InitializeCompassConnection()
 
 		// then
@@ -212,13 +229,13 @@ func TestCompassConnectionController(t *testing.T) {
 
 	t.Run("Should renew certificate if RefreshCredentialsNow set to true", func(t *testing.T) {
 		// given
-		connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+		connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 		require.NoError(t, err)
 
 		connectedConnection.Spec.RefreshCredentialsNow = true
 
 		// when
-		connectedConnection, err = compassConnectionCRClient.Update(connectedConnection)
+		connectedConnection, err = compassConnectionCRClient.Update(context.Background(), connectedConnection, v1.UpdateOptions{})
 		require.NoError(t, err)
 
 		err = waitFor(checkInterval, testTimeout, func() bool {
@@ -272,7 +289,8 @@ func TestCompassConnectionController(t *testing.T) {
 
 	t.Run("Compass Connection should be in SynchronizationFailed state if failed to fetch configuration from Director", func(t *testing.T) {
 		// given
-		clearMockCalls(&configurationClientMock.Mock)
+		configurationClientMock.ExpectedCalls = nil
+		configurationClientMock.Calls = nil
 		configurationClientMock.On("FetchConfiguration").Return(nil, errors.New("error"))
 
 		// when
@@ -291,13 +309,15 @@ func TestCompassConnectionController(t *testing.T) {
 		// given
 		clientsProviderMock.ExpectedCalls = nil
 		clientsProviderMock.Calls = nil
-		clientsProviderMock.On("GetConnectorClient", connectorURL).Return(tokensConnectorClientMock, nil)
-		clientsProviderMock.On("GetConnectorCertSecuredClient", credentials.ClientCredentials, certSecuredConnectorURL).Return(certsConnectorClientMock, nil)
-		clientsProviderMock.On("GetDirectorClient", credentials.ClientCredentials, directorURL, runtimeConfig).Return(nil, errors.New("error"))
+		directorProxyConfiguratorMock.ExpectedCalls = nil
+		directorProxyConfiguratorMock.On("SetURLAndCerts", mock.AnythingOfType("cache.ConnectionData")).Return(nil)
+		clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(tokensConnectorClientMock, nil)
+		clientsProviderMock.On("GetConnectorCertSecuredClient").Return(certsConnectorClientMock, nil)
+		clientsProviderMock.On("GetDirectorClient", runtimeConfig).Return(nil, errors.New("error"))
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&clientsProviderMock.Mock, "GetDirectorClient", credentials.ClientCredentials, directorURL, runtimeConfig)
+			return mockFunctionCalled(&clientsProviderMock.Mock, "GetDirectorClient", runtimeConfig)
 		})
 
 		// then
@@ -311,6 +331,8 @@ func TestCompassConnectionController(t *testing.T) {
 		// given
 		configProviderMock.ExpectedCalls = nil
 		configProviderMock.Calls = nil
+		directorProxyConfiguratorMock.ExpectedCalls = nil
+		directorProxyConfiguratorMock.On("SetURLAndCerts", mock.AnythingOfType("cache.ConnectionData")).Return(nil)
 		configProviderMock.On("GetConnectionConfig").Return(connectionConfig, nil)
 		configProviderMock.On("GetRuntimeConfig").Return(runtimeConfig, errors.New("error"))
 
@@ -362,27 +384,11 @@ func TestCompassConnectionController(t *testing.T) {
 	t.Run("Compass Connection should be in ConnectionMaintenanceFailed state if failed create Cert secured client", func(t *testing.T) {
 		// given
 		clientsProviderMock.ExpectedCalls = nil
-		clientsProviderMock.On("GetConnectorCertSecuredClient", credentials.ClientCredentials, certSecuredConnectorURL).Return(nil, errors.New("error"))
+		clientsProviderMock.On("GetConnectorCertSecuredClient").Return(nil, errors.New("error"))
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&clientsProviderMock.Mock, "GetConnectorCertSecuredClient", credentials.ClientCredentials, certSecuredConnectorURL)
-		})
-
-		// then
-		require.NoError(t, err)
-		require.NoError(t, waitForResourceUpdate(v1alpha1.ConnectionMaintenanceFailed))
-		assertConnectionStatusSet(t)
-	})
-
-	t.Run("Compass Connection should be in ConnectionMaintenanceFailed if failed to get client credentials from secret", func(t *testing.T) {
-		// given
-		credentialsManagerMock.ExpectedCalls = nil
-		credentialsManagerMock.On("GetClientCredentials").Return(certificates.ClientCredentials{}, errors.New("error"))
-
-		// when
-		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&credentialsManagerMock.Mock, "GetClientCredentials")
+			return mockFunctionCalled(&clientsProviderMock.Mock, "GetConnectorCertSecuredClient")
 		})
 
 		// then
@@ -424,7 +430,7 @@ func TestFailedToInitializeConnection(t *testing.T) {
 	require.NoError(t, err)
 
 	defer func() {
-		err := compassConnectionCRClient.Delete(compassConnectionName, &v1.DeleteOptions{})
+		err := compassConnectionCRClient.Delete(context.Background(), compassConnectionName, v1.DeleteOptions{})
 		if err != nil {
 			t.Logf("error while deleting Compass Connection: %s", err.Error())
 		}
@@ -433,7 +439,7 @@ func TestFailedToInitializeConnection(t *testing.T) {
 	defer close(stopChan)
 
 	initConnectionIfNotExist := func() {
-		_, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+		_, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 		if err != nil {
 			if !k8serrors.IsNotFound(err) {
 				t.Fatalf("Failed to initialize Connection: %s", err.Error())
@@ -486,10 +492,10 @@ func TestFailedToInitializeConnection(t *testing.T) {
 			description: "failed to get Connector client",
 			setupFunc: func() {
 				clearMockCalls(&clientsProviderMock.Mock)
-				clientsProviderMock.On("GetConnectorClient", connectorURL).Return(nil, errors.New("error"))
+				clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(nil, errors.New("error"))
 			},
 			waitFunction: func() bool {
-				return mockFunctionCalled(&connectorTokenClientMock.Mock, "GetConnectorClient", connectorURL)
+				return mockFunctionCalled(&connectorTokenClientMock.Mock, "GetConnectorTokensClient", connectorURL)
 			},
 		},
 		{
@@ -573,7 +579,7 @@ func waitForResourceUpdate(expectedState v1alpha1.ConnectionState) error {
 }
 
 func isConnectionInState(expectedState v1alpha1.ConnectionState) bool {
-	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 	if err != nil {
 		return false
 	}
@@ -582,34 +588,34 @@ func isConnectionInState(expectedState v1alpha1.ConnectionState) bool {
 }
 
 func assertConnectionStatusError(t *testing.T) {
-	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 	require.NoError(t, err)
 	t.Logf("Connection status error: %s", connectedConnection.Status.ConnectionStatus.Error)
 	assert.NotEmpty(t, connectedConnection.Status.ConnectionStatus.Error)
 }
 
 func assertSynchronizationStatusError(t *testing.T) {
-	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 	require.NoError(t, err)
 	t.Logf("Synchronization status error: %s", connectedConnection.Status.SynchronizationStatus.Error)
 	assert.NotEmpty(t, connectedConnection.Status.SynchronizationStatus.Error)
 }
 
 func assertManagementInfoSetInCR(t *testing.T) {
-	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, directorURL, connectedConnection.Spec.ManagementInfo.DirectorURL)
 	assert.Equal(t, certSecuredConnectorURL, connectedConnection.Spec.ManagementInfo.ConnectorURL)
 }
 
 func assertCompassConnectionState(t *testing.T, expectedState v1alpha1.ConnectionState) {
-	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, expectedState, connectedConnection.Status.State)
 }
 
 func assertConnectionStatusSet(t *testing.T) {
-	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 	require.NoError(t, err)
 	require.NotNil(t, connectedConnection.Status.ConnectionStatus)
 	assert.NotEmpty(t, connectedConnection.Status.ConnectionStatus)
@@ -617,7 +623,7 @@ func assertConnectionStatusSet(t *testing.T) {
 }
 
 func assertCertificateRenewed(t *testing.T) {
-	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 	require.NoError(t, err)
 	require.NotNil(t, connectedConnection.Status.ConnectionStatus)
 	assert.NotEmpty(t, connectedConnection.Status.ConnectionStatus.CertificateStatus)
@@ -626,9 +632,9 @@ func assertCertificateRenewed(t *testing.T) {
 
 func clientsProviderMock(configClient *directorMocks.DirectorClient, connectorTokensClient, connectorCertsClient *connectorMocks.Client) *compassMocks.ClientsProvider {
 	clientsProviderMock := &compassMocks.ClientsProvider{}
-	clientsProviderMock.On("GetDirectorClient", credentials.ClientCredentials, directorURL, runtimeConfig).Return(configClient, nil)
-	clientsProviderMock.On("GetConnectorCertSecuredClient", credentials.ClientCredentials, certSecuredConnectorURL).Return(connectorCertsClient, nil)
-	clientsProviderMock.On("GetConnectorClient", connectorURL).Return(connectorTokensClient, nil)
+	clientsProviderMock.On("GetDirectorClient", runtimeConfig).Return(configClient, nil)
+	clientsProviderMock.On("GetConnectorCertSecuredClient").Return(connectorCertsClient, nil)
+	clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(connectorTokensClient, nil)
 
 	return clientsProviderMock
 }

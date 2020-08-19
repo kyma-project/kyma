@@ -3,18 +3,24 @@ package k8s
 import (
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
+
 	"github.com/pkg/errors"
-	api "k8s.io/api/apps/v1beta2"
+	api "k8s.io/api/apps/v1"
 	"k8s.io/client-go/tools/cache"
 )
 
 type deploymentService struct {
 	informer cache.SharedIndexInformer
+	notifier resource.Notifier
 }
 
 func newDeploymentService(informer cache.SharedIndexInformer) (*deploymentService, error) {
+	notifier := resource.NewNotifier()
+	informer.AddEventHandler(notifier)
 	svc := &deploymentService{
 		informer: informer,
+		notifier: notifier,
 	}
 
 	err := informer.AddIndexers(cache.Indexers{
@@ -92,4 +98,12 @@ func (svc *deploymentService) toDeployment(item interface{}) (*api.Deployment, e
 	}
 
 	return deployment, nil
+}
+
+func (svc *deploymentService) Subscribe(listener resource.Listener) {
+	svc.notifier.AddListener(listener)
+}
+
+func (svc *deploymentService) Unsubscribe(listener resource.Listener) {
+	svc.notifier.DeleteListener(listener)
 }

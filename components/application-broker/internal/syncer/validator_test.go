@@ -60,8 +60,8 @@ func TestAppCRValidatorValidateFailure(t *testing.T) {
 		"multiple Event entries in one service": {
 			fixModifier: func(app *v1alpha1.Application) {
 				app.Spec.Services[0].Entries = []v1alpha1.Entry{
-					{Type: "Event"},
-					{Type: "Event"},
+					{Type: "Events"},
+					{Type: "Events"},
 				}
 			},
 			expErrMsg: []string{"Service with id \"ac031e8c-9aa4-4cb7-8999-0d358726ffaa\" is invalid. Only one element with type Event is allowed but found 2"},

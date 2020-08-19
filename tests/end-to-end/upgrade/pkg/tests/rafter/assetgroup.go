@@ -6,7 +6,6 @@ import (
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 )
@@ -24,7 +23,7 @@ func newAssetGroup(dynamicCli dynamic.Interface, namespace string, spec v1beta1.
 			Version:  v1beta1.GroupVersion.Version,
 			Group:    v1beta1.GroupVersion.Group,
 			Resource: "assetgroups",
-		}, namespace),
+		}),
 		namespace: namespace,
 		name:      assetGroupName,
 		spec:      spec,
@@ -55,13 +54,8 @@ func (ag *assetGroup) create() error {
 }
 
 func (ag *assetGroup) get() (*v1beta1.AssetGroup, error) {
-	u, err := ag.resCli.Get(ag.name)
-	if err != nil {
-		return nil, err
-	}
-
 	var res v1beta1.AssetGroup
-	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &res)
+	err := ag.resCli.Get(ag.namespace, ag.name, &res)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while converting AssetGroup %s in namespace %s", ag.name, ag.namespace)
 	}

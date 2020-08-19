@@ -1,4 +1,0 @@
-dependencies:
-  # Knative eventing
-  - name: event-publish-service
-  - name: subscription-controller

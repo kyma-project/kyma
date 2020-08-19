@@ -1,11 +1,24 @@
 containerRegistry:
   path: eu.gcr.io/kyma-project
 
+subscriberimage:
+  dir:
+  version: 9913ea21
+
 image:
   dir:
-  version: "8e60b212"
+  version: a28b2c77
   pullPolicy: "IfNotPresent"
 
 dex:
   namespace: kyma-system
   userSecret: admin-user
+
+authorizationPolicy:
+  enabled: false
+  eventService:
+    namespace: kyma-integration
+    applicationName: eventmesh-upgrade
+  consoleBackendService:
+    namespace: kyma-system
+    serviceAccount: console-backend

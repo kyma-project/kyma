@@ -60,10 +60,8 @@ func TestToUnstructured(t *testing.T) {
 				"creationTimestamp": nil,
 			},
 			map[string]interface{}{
-				"function":            "",
-				"functionContentType": "",
-				"runtime":             "",
-				"size":                "",
+				"source":    "",
+				"resources": map[string]interface{}{},
 			},
 			map[string]interface{}{},
 		)

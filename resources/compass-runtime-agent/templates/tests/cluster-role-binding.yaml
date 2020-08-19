@@ -7,12 +7,21 @@ metadata:
     app.kubernetes.io/name: {{ .Chart.Name }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 rules:
+- apiGroups:
+    - '*'
+  resources:
+    - namespaces
+  verbs:
+    - create
+    - get
+    - delete
 - apiGroups:
   - 'applicationconnector.kyma-project.io'
   resources:
   - applications
+  - applicationmappings
   verbs:
   - get
   - list
@@ -25,6 +34,21 @@ rules:
   verbs:
   - get
   - list
+- apiGroups:
+  - 'servicecatalog.k8s.io'
+  resources:
+  - serviceclasses
+  verbs:
+  - get
+- apiGroups:
+  - 'servicecatalog.k8s.io'
+  resources:
+  - serviceinstances
+  - servicebindings
+  verbs:
+  - get
+  - create
+  - delete
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1

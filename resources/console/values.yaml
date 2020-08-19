@@ -1,0 +1,29 @@
+dex:
+  tls:
+    createSecret: false
+
+console:
+  cluster:
+    headerLogoUrl: "assets/logo.svg"
+    headerTitle: ""
+    faviconUrl: "favicon.ico"
+
+global:
+  isLocalEnv: false
+  knative:
+    false
+    # Change value below to your own GitHub user name if you want point to documentation sources from your fork
+    # Example: kymaOrgName: "kyma-incubator"
+  kymaOrgName: "kyma-project"
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  istio:
+    gateway:
+      name: kyma-gateway
+  ui_acceptance_tests:
+    version: deabc685
+  console_backend_service:
+    version: b1038386
+  console_backend_service_test:
+    version: 8bddbb53
+    

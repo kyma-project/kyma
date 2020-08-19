@@ -93,7 +93,7 @@ func TestServiceBrokerResolver_ServiceBrokersQuery(t *testing.T) {
 		resources := []*v1beta1.ServiceBroker{
 			resource, resource,
 		}
-		expected := []gqlschema.ServiceBroker{
+		expected := []*gqlschema.ServiceBroker{
 			{
 				Name: "Test",
 			}, {
@@ -126,7 +126,7 @@ func TestServiceBrokerResolver_ServiceBrokersQuery(t *testing.T) {
 		svc.On("List", ns, pager.PagingParams{}).Return(resources, nil).Once()
 		defer svc.AssertExpectations(t)
 		resolver := servicecatalog.NewServiceBrokerResolver(svc)
-		var expected []gqlschema.ServiceBroker
+		var expected []*gqlschema.ServiceBroker
 
 		result, err := resolver.ServiceBrokersQuery(nil, ns, nil, nil)
 

@@ -30,7 +30,7 @@ func (c *serviceClassConverter) ToGQL(in *v1beta1.ServiceClass) (*gqlschema.Serv
 	displayName := resource.ToStringPtr(externalMetadata["displayName"])
 	longDescription := resource.ToStringPtr(externalMetadata["longDescription"])
 
-	var labels gqlschema.Labels
+	labels := gqlschema.Labels{}
 	err = labels.UnmarshalGQL(externalMetadata["labels"])
 	if err != nil {
 		return nil, errors.Wrapf(err, "while unmarshalling labels in ServiceClass `%s`", in.Name)
@@ -55,8 +55,8 @@ func (c *serviceClassConverter) ToGQL(in *v1beta1.ServiceClass) (*gqlschema.Serv
 	return &class, nil
 }
 
-func (c *serviceClassConverter) ToGQLs(in []*v1beta1.ServiceClass) ([]gqlschema.ServiceClass, error) {
-	var result []gqlschema.ServiceClass
+func (c *serviceClassConverter) ToGQLs(in []*v1beta1.ServiceClass) ([]*gqlschema.ServiceClass, error) {
+	var result []*gqlschema.ServiceClass
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -64,7 +64,7 @@ func (c *serviceClassConverter) ToGQLs(in []*v1beta1.ServiceClass) ([]gqlschema.
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

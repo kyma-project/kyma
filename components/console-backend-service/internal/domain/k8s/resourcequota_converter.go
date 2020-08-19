@@ -8,18 +8,14 @@ import (
 type resourceQuotaConverter struct{}
 
 func (c *resourceQuotaConverter) ToGQL(in *v1.ResourceQuota) *gqlschema.ResourceQuota {
-	if in == nil {
-		return nil
-	}
-
 	out := &gqlschema.ResourceQuota{
 		Name: in.Name,
 		Pods: c.extractValue(in, v1.ResourcePods),
-		Limits: gqlschema.ResourceValues{
+		Limits: &gqlschema.ResourceValues{
 			Memory: c.extractValue(in, v1.ResourceLimitsMemory),
 			CPU:    c.extractValue(in, v1.ResourceLimitsCPU),
 		},
-		Requests: gqlschema.ResourceValues{
+		Requests: &gqlschema.ResourceValues{
 			Memory: c.extractValue(in, v1.ResourceRequestsMemory),
 			CPU:    c.extractValue(in, v1.ResourceRequestsCPU),
 		},
@@ -36,13 +32,13 @@ func (c *resourceQuotaConverter) extractValue(in *v1.ResourceQuota, resourceName
 	return &formattedVal
 }
 
-func (c *resourceQuotaConverter) ToGQLs(in []*v1.ResourceQuota) []gqlschema.ResourceQuota {
-	result := make([]gqlschema.ResourceQuota, 0)
+func (c *resourceQuotaConverter) ToGQLs(in []*v1.ResourceQuota) []*gqlschema.ResourceQuota {
+	result := make([]*gqlschema.ResourceQuota, 0)
 	for _, rq := range in {
 		converted := c.ToGQL(rq)
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result

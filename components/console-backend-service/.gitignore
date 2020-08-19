@@ -6,3 +6,5 @@ vendor/
 .DS_Store
 telepresence.log
 internal/gqlschema/gqlgen
+licenses/
+console-backend-service

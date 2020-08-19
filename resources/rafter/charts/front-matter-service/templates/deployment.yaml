@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "rafterFrontMatterService.fullname" . }}
+  name: {{ include "rafterFrontMatterService.deployment.fullname" . }}
   labels:
     app.kubernetes.io/name: {{ include "rafterFrontMatterService.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -20,8 +20,6 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "rafterFrontMatterService.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/managed-by: {{ .Release.Service }}
-      helm.sh/chart: {{ include "rafterFrontMatterService.chart" . }}
   {{- if .Values.deployment.extraProperties }}
   {{ include "rafterFrontMatterService.tplValue" ( dict "value" .Values.deployment.extraProperties "context" . ) | nindent 2 }}
   {{- end }}

@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -5,8 +6,11 @@ metadata:
   namespace: {{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}-certs-setup-job
-    release: {{ .Chart.Name }}
-    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
   - apiGroups: ["*"]
     resources: ["secrets"]
@@ -19,8 +23,11 @@ metadata:
   namespace: {{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
-    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
   - kind: ServiceAccount
     name: {{ .Chart.Name }}-certs-setup-job
@@ -37,8 +44,11 @@ metadata:
   namespace: {{ .Values.application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}-certs-setup-job
-    release: {{ .Chart.Name }}
-    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
   - apiGroups: ["*"]
     resources: ["secrets"]
@@ -51,8 +61,11 @@ metadata:
   namespace: {{ .Values.application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}-certs-setup-job
-    release: {{ .Chart.Name }}
-    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
   - kind: ServiceAccount
     name: {{ .Chart.Name }}-certs-setup-job
@@ -61,3 +74,4 @@ roleRef:
   kind: Role
   name: {{ .Chart.Name }}-certs-setup-job-connector-cert-role
   apiGroup: rbac.authorization.k8s.io
+{{- end }}

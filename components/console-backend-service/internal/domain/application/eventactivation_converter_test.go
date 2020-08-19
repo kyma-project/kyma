@@ -82,7 +82,7 @@ func TestEventActivationConverter_ToGQLEvents(t *testing.T) {
 		result := converter.ToGQLEvents(fixAsyncApiSpec())
 
 		assert.Len(t, result, 2)
-		assert.Contains(t, result, gqlschema.EventActivationEvent{
+		assert.Contains(t, result, &gqlschema.EventActivationEvent{
 			EventType:   "sell",
 			Version:     "v1",
 			Description: "desc",
@@ -90,7 +90,7 @@ func TestEventActivationConverter_ToGQLEvents(t *testing.T) {
 				"type": "string",
 			},
 		})
-		assert.Contains(t, result, gqlschema.EventActivationEvent{
+		assert.Contains(t, result, &gqlschema.EventActivationEvent{
 			EventType:   "sell",
 			Version:     "v2",
 			Description: "desc",
@@ -137,7 +137,7 @@ func TestEventActivationConverter_ToGQLEvents(t *testing.T) {
 		result := converter.ToGQLEvents(fixAsyncApiSpecWithoutVersion())
 
 		assert.Len(t, result, 1)
-		assert.Contains(t, result, gqlschema.EventActivationEvent{
+		assert.Contains(t, result, &gqlschema.EventActivationEvent{
 			EventType:   "sell",
 			Version:     "",
 			Description: "desc",

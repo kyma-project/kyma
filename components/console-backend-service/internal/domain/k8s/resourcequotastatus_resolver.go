@@ -12,7 +12,7 @@ import (
 
 //go:generate mockery -name=resourceQuotaStatusChecker -output=automock -outpkg=automock -case=underscore
 type resourceQuotaStatusChecker interface {
-	CheckResourceQuotaStatus(namespace string) (gqlschema.ResourceQuotasStatus, error)
+	CheckResourceQuotaStatus(namespace string) (*gqlschema.ResourceQuotasStatus, error)
 }
 
 func newResourceQuotaStatusResolver(checker resourceQuotaStatusChecker) *resourceQuotaStatusResolver {
@@ -25,11 +25,11 @@ type resourceQuotaStatusResolver struct {
 	statusChecker resourceQuotaStatusChecker
 }
 
-func (r *resourceQuotaStatusResolver) ResourceQuotasStatus(ctx context.Context, namespace string) (gqlschema.ResourceQuotasStatus, error) {
+func (r *resourceQuotaStatusResolver) ResourceQuotasStatus(ctx context.Context, namespace string) (*gqlschema.ResourceQuotasStatus, error) {
 	exceeded, err := r.statusChecker.CheckResourceQuotaStatus(namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s [namespace: %s]", pretty.ResourceQuotaStatus, namespace))
-		return gqlschema.ResourceQuotasStatus{}, gqlerror.New(err, pretty.ResourceQuotaStatus, gqlerror.WithNamespace(namespace))
+		return nil, gqlerror.New(err, pretty.ResourceQuotaStatus, gqlerror.WithNamespace(namespace))
 	}
 
 	return exceeded, nil

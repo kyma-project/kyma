@@ -1,11 +1,14 @@
-# Generated from 'pod-total' from https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
-# Do not change in-place! In order to change this file first read following link:
-# https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+{{- /*
+Generated from 'pod-total' from https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
+Do not change in-place! In order to change this file first read following link:
+https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+*/ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  namespace: {{ $.Release.Namespace }}
   name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "pod-total" | trunc 63 | trimSuffix "-" }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
@@ -17,8 +20,10 @@ data:
   pod-total.json: |-
     {
         "__inputs": [
+
         ],
         "__requires": [
+
         ],
         "annotations": {
             "list": [
@@ -33,12 +38,13 @@ data:
                 }
             ]
         },
-        "editable": true,
+        "editable": false,
         "gnetId": null,
         "graphTooltip": 0,
         "hideControls": false,
         "id": null,
         "links": [
+
         ],
         "panels": [
             {
@@ -52,6 +58,7 @@ data:
                 },
                 "id": 2,
                 "panels": [
+
                 ],
                 "repeat": null,
                 "repeatIteration": null,
@@ -90,6 +97,7 @@ data:
                 "id": 3,
                 "interval": null,
                 "links": [
+
                 ],
                 "mappingType": 1,
                 "mappingTypes": [
@@ -118,8 +126,10 @@ data:
                             "unit": "Bps"
                         },
                         "mappings": [
+
                         ],
                         "override": {
+
                         },
                         "thresholds": [
                             {
@@ -214,6 +224,7 @@ data:
                 "id": 4,
                 "interval": null,
                 "links": [
+
                 ],
                 "mappingType": 1,
                 "mappingTypes": [
@@ -242,8 +253,10 @@ data:
                             "unit": "Bps"
                         },
                         "mappings": [
+
                         ],
                         "override": {
+
                         },
                         "thresholds": [
                             {
@@ -320,6 +333,7 @@ data:
                 },
                 "id": 5,
                 "panels": [
+
                 ],
                 "repeat": null,
                 "repeatIteration": null,
@@ -331,6 +345,7 @@ data:
             },
             {
                 "aliasColors": {
+
                 },
                 "bars": false,
                 "dashLength": 10,
@@ -360,6 +375,7 @@ data:
                 "lines": true,
                 "linewidth": 2,
                 "links": [
+
                 ],
                 "minSpan": 12,
                 "nullPointMode": "connected",
@@ -370,6 +386,7 @@ data:
                 "renderer": "flot",
                 "repeat": null,
                 "seriesOverrides": [
+
                 ],
                 "spaceLength": 10,
                 "span": 12,
@@ -380,12 +397,13 @@ data:
                         "expr": "sum(irate(container_network_receive_bytes_total{namespace=~\"$namespace\", pod=~\"$pod\"}[$interval:$resolution])) by (pod)",
                         "format": "time_series",
                         "intervalFactor": 1,
-                        "legendFormat": "{{`{{pod}}`}}",
+                        "legendFormat": "{{`{{`}}pod{{`}}`}}",
                         "refId": "A",
                         "step": 10
                     }
                 ],
                 "thresholds": [
+
                 ],
                 "timeFrom": null,
                 "timeShift": null,
@@ -402,6 +420,7 @@ data:
                     "name": null,
                     "show": true,
                     "values": [
+
                     ]
                 },
                 "yaxes": [
@@ -425,6 +444,7 @@ data:
             },
             {
                 "aliasColors": {
+
                 },
                 "bars": false,
                 "dashLength": 10,
@@ -454,6 +474,7 @@ data:
                 "lines": true,
                 "linewidth": 2,
                 "links": [
+
                 ],
                 "minSpan": 12,
                 "nullPointMode": "connected",
@@ -464,6 +485,7 @@ data:
                 "renderer": "flot",
                 "repeat": null,
                 "seriesOverrides": [
+
                 ],
                 "spaceLength": 10,
                 "span": 12,
@@ -474,12 +496,13 @@ data:
                         "expr": "sum(irate(container_network_transmit_bytes_total{namespace=~\"$namespace\", pod=~\"$pod\"}[$interval:$resolution])) by (pod)",
                         "format": "time_series",
                         "intervalFactor": 1,
-                        "legendFormat": "{{`{{pod}}`}}",
+                        "legendFormat": "{{`{{`}}pod{{`}}`}}",
                         "refId": "A",
                         "step": 10
                     }
                 ],
                 "thresholds": [
+
                 ],
                 "timeFrom": null,
                 "timeShift": null,
@@ -496,6 +519,7 @@ data:
                     "name": null,
                     "show": true,
                     "values": [
+
                     ]
                 },
                 "yaxes": [
@@ -530,6 +554,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -559,6 +584,7 @@ data:
                         "lines": true,
                         "linewidth": 2,
                         "links": [
+
                         ],
                         "minSpan": 12,
                         "nullPointMode": "connected",
@@ -569,6 +595,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -579,12 +606,13 @@ data:
                                 "expr": "sum(irate(container_network_receive_packets_total{namespace=~\"$namespace\", pod=~\"$pod\"}[$interval:$resolution])) by (pod)",
                                 "format": "time_series",
                                 "intervalFactor": 1,
-                                "legendFormat": "{{`{{pod}}`}}",
+                                "legendFormat": "{{`{{`}}pod{{`}}`}}",
                                 "refId": "A",
                                 "step": 10
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -601,6 +629,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -624,6 +653,7 @@ data:
                     },
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -653,6 +683,7 @@ data:
                         "lines": true,
                         "linewidth": 2,
                         "links": [
+
                         ],
                         "minSpan": 12,
                         "nullPointMode": "connected",
@@ -663,6 +694,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -673,12 +705,13 @@ data:
                                 "expr": "sum(irate(container_network_transmit_packets_total{namespace=~\"$namespace\", pod=~\"$pod\"}[$interval:$resolution])) by (pod)",
                                 "format": "time_series",
                                 "intervalFactor": 1,
-                                "legendFormat": "{{`{{pod}}`}}",
+                                "legendFormat": "{{`{{`}}pod{{`}}`}}",
                                 "refId": "A",
                                 "step": 10
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -695,6 +728,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -738,6 +772,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -767,6 +802,7 @@ data:
                         "lines": true,
                         "linewidth": 2,
                         "links": [
+
                         ],
                         "minSpan": 12,
                         "nullPointMode": "connected",
@@ -777,6 +813,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -787,12 +824,13 @@ data:
                                 "expr": "sum(irate(container_network_receive_packets_dropped_total{namespace=~\"$namespace\", pod=~\"$pod\"}[$interval:$resolution])) by (pod)",
                                 "format": "time_series",
                                 "intervalFactor": 1,
-                                "legendFormat": "{{`{{pod}}`}}",
+                                "legendFormat": "{{`{{`}}pod{{`}}`}}",
                                 "refId": "A",
                                 "step": 10
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -809,6 +847,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -832,6 +871,7 @@ data:
                     },
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -861,6 +901,7 @@ data:
                         "lines": true,
                         "linewidth": 2,
                         "links": [
+
                         ],
                         "minSpan": 12,
                         "nullPointMode": "connected",
@@ -871,6 +912,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -881,12 +923,13 @@ data:
                                 "expr": "sum(irate(container_network_transmit_packets_dropped_total{namespace=~\"$namespace\", pod=~\"$pod\"}[$interval:$resolution])) by (pod)",
                                 "format": "time_series",
                                 "intervalFactor": 1,
-                                "legendFormat": "{{`{{pod}}`}}",
+                                "legendFormat": "{{`{{`}}pod{{`}}`}}",
                                 "refId": "A",
                                 "step": 10
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -903,6 +946,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -934,8 +978,9 @@ data:
                 "type": "row"
             }
         ],
-        "refresh": "30s",
+        "refresh": "10s",
         "rows": [
+
         ],
         "schemaVersion": 18,
         "style": "dark",
@@ -946,13 +991,15 @@ data:
             "list": [
                 {
                     "current": {
-                        "text": "Prometheus",
-                        "value": "Prometheus"
+                        "text": "default",
+                        "value": "default"
                     },
                     "hide": 0,
                     "label": null,
                     "name": "datasource",
-                    "options": [],
+                    "options": [
+
+                    ],
                     "query": "prometheus",
                     "refresh": 1,
                     "regex": "",
@@ -975,6 +1022,7 @@ data:
                     "multi": false,
                     "name": "namespace",
                     "options": [
+
                     ],
                     "query": "label_values(container_network_receive_packets_total, namespace)",
                     "refresh": 1,
@@ -983,6 +1031,7 @@ data:
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "query",
@@ -1005,6 +1054,7 @@ data:
                     "multi": false,
                     "name": "pod",
                     "options": [
+
                     ],
                     "query": "label_values(container_network_receive_packets_total{namespace=~\"$namespace\"}, pod)",
                     "refresh": 1,
@@ -1013,6 +1063,7 @@ data:
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "query",
@@ -1057,6 +1108,7 @@ data:
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "interval",
@@ -1091,6 +1143,7 @@ data:
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "interval",

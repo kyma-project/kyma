@@ -1,25 +1,31 @@
 package subscribed
 
 import (
-	eventtypes "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-	"github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1"
-	coretypes "k8s.io/api/core/v1"
-	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"context"
+	"log"
+	"reflect"
+	"time"
+
+	"k8s.io/apimachinery/pkg/labels"
+
+	knv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	"knative.dev/eventing/pkg/client/clientset/versioned"
+	"knative.dev/eventing/pkg/client/informers/externalversions"
+	kneventinglister "knative.dev/eventing/pkg/client/listers/eventing/v1alpha1"
+	"knative.dev/pkg/signals"
+)
+
+const (
+	keySource           = "source"
+	keyEventType        = "type"
+	keyEventTypeVersion = "eventtypeversion"
+
+	informerSyncTimeout = time.Second * 5
 )
 
 //EventsClient interface
 type EventsClient interface {
 	GetSubscribedEvents(appName string) (Events, error)
-}
-
-//SubscriptionsGetter interface
-type SubscriptionsGetter interface {
-	Subscriptions(namespace string) v1alpha1.SubscriptionInterface
-}
-
-//NamespacesClient interface
-type NamespacesClient interface {
-	List(opts meta.ListOptions) (*coretypes.NamespaceList, error)
 }
 
 //Events represents collection of all events with subscriptions
@@ -34,82 +40,111 @@ type Event struct {
 }
 
 type eventsClient struct {
-	subscriptionsClient SubscriptionsGetter
-	namespacesClient    NamespacesClient
+	triggerLister kneventinglister.TriggerLister
+}
+
+// waitForInformersSyncOrDie blocks until all informer caches are synced, or panics after a timeout.
+func waitForInformersSyncOrDie(f externalversions.SharedInformerFactory) {
+	log.Println("waiting for informers caches sync...")
+	ctx, cancel := context.WithTimeout(context.Background(), informerSyncTimeout)
+	defer cancel()
+
+	err := hasSynced(ctx, f.WaitForCacheSync)
+	if err != nil {
+		log.Fatalf("Error waiting for caches sync: %s", err)
+	}
+}
+
+type waitForCacheSyncFunc func(stopCh <-chan struct{}) map[reflect.Type]bool
+
+// hasSynced blocks until the given informer sync waiting function completes. It returns an error if the passed context
+// gets canceled.
+func hasSynced(ctx context.Context, fn waitForCacheSyncFunc) error {
+	// synced gets closed as soon as fn returns
+	synced := make(chan struct{})
+
+	// closing stopWait forces fn to return, which happens whenever ctx
+	// gets canceled
+	stopWait := make(chan struct{})
+	defer close(stopWait)
+
+	// close the synced channel if the `WaitForCacheSync()` finished the execution cleanly
+	go func() {
+		informersCacheSync := fn(stopWait)
+		res := true
+		for _, sync := range informersCacheSync {
+			if !sync {
+				res = false
+			}
+		}
+		if res {
+			close(synced)
+		}
+	}()
+
+	// wait for closure of the goroutine or return an error if it timed out
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-synced:
+	}
+
+	return nil
 }
 
 //NewEventsClient function creates client for retrieving all active events
-func NewEventsClient(subscriptionsClient SubscriptionsGetter, namespacesClient NamespacesClient) EventsClient {
+func NewEventsClient(client versioned.Interface) EventsClient {
+	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
+	lister := informerFactory.Eventing().V1alpha1().Triggers().Lister()
+	ctx := signals.NewContext()
+	informerFactory.Start(ctx.Done())
+	waitForInformersSyncOrDie(informerFactory)
 
 	return &eventsClient{
-		subscriptionsClient: subscriptionsClient,
-		namespacesClient:    namespacesClient,
+		triggerLister: lister,
 	}
 }
 
 func (ec *eventsClient) GetSubscribedEvents(appName string) (Events, error) {
-	var activeEvents []Event
-
-	namespaces, e := ec.getAllNamespaces()
-
-	if e != nil {
-		return Events{}, e
+	activeEvents, err := ec.getEventList(appName)
+	if err != nil {
+		return Events{}, err
 	}
-
-	for _, namespace := range namespaces {
-		events, err := ec.getEventsForNamespace(appName, namespace)
-		if err != nil {
-			return Events{}, err
-		}
-		activeEvents = append(activeEvents, events...)
-	}
-
 	activeEvents = removeDuplicates(activeEvents)
-
 	return Events{EventsInfo: activeEvents}, nil
 }
 
-func (ec *eventsClient) getEventsForNamespace(appName, namespace string) ([]Event, error) {
-	subscriptionList, e := ec.subscriptionsClient.Subscriptions(namespace).List(meta.ListOptions{})
-
-	if e != nil {
-		return nil, e
+func (ec *eventsClient) getEventList(appName string) ([]Event, error) {
+	triggerList, err := ec.triggerLister.List(labels.Everything())
+	if err != nil {
+		return nil, err
 	}
 
-	return getEventsFromSubscriptions(subscriptionList, appName), nil
+	return getEventsFromTriggers(triggerList, appName), nil
 }
 
-func getEventsFromSubscriptions(subscriptionList *eventtypes.SubscriptionList, appName string) []Event {
-	events := make([]Event, 0)
+func getEventsFromTriggers(triggerList []*knv1alpha1.Trigger, appName string) []Event {
+	events := make([]Event, 0, len(triggerList))
 
-	for _, subscription := range subscriptionList.Items {
-		if subscription.SourceID == appName {
-			event := Event{Name: subscription.EventType, Version: subscription.EventTypeVersion}
+	for _, trigger := range triggerList {
+		if trigger == nil {
+			continue
+		}
+		if trigger.Spec.Filter == nil {
+			continue
+		}
+		if trigger.Spec.Filter.Attributes == nil {
+			continue
+		}
+		if source, ok := (*trigger.Spec.Filter.Attributes)[keySource]; ok && source == appName {
+			event := Event{
+				Name:    (*trigger.Spec.Filter.Attributes)[keyEventType],
+				Version: (*trigger.Spec.Filter.Attributes)[keyEventTypeVersion],
+			}
 			events = append(events, event)
 		}
 	}
-
 	return events
-}
-
-func (ec *eventsClient) getAllNamespaces() ([]string, error) {
-	namespaceList, e := ec.namespacesClient.List(meta.ListOptions{})
-
-	if e != nil {
-		return nil, e
-	}
-
-	return extractNamespacesNames(namespaceList), nil
-}
-
-func extractNamespacesNames(namespaceList *coretypes.NamespaceList) []string {
-	var namespaces []string
-
-	for _, namespace := range namespaceList.Items {
-		namespaces = append(namespaces, namespace.Name)
-	}
-
-	return namespaces
 }
 
 func removeDuplicates(events []Event) []Event {

@@ -1,9 +1,10 @@
-# Added manually, can be changed in-place.
+{{- /* Added manually, can be changed in-place. */ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
-{{- if and (semverCompare ">=1.14.0" $kubeTargetVersion) (semverCompare "<1.16.0" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled .Values.coreDns.enabled }}
+{{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled .Values.coreDns.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  namespace: {{ $.Release.Namespace }}
   name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "k8s-coredns" | trunc 63 | trimSuffix "-" }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
@@ -28,7 +29,7 @@ data:
             ]
         },
         "description": "A dashboard for the CoreDNS DNS server.",
-        "editable": true,
+        "editable": false,
         "gnetId": 5926,
         "graphTooltip": 0,
         "id": 9,
@@ -1255,7 +1256,9 @@ data:
         ],
         "schemaVersion": 16,
         "style": "dark",
-        "tags": [],
+        "tags": [
+            "kubernetes-mixin"
+        ],
         "templating": {
             "list": [
                 {
@@ -1316,8 +1319,8 @@ data:
                 "30d"
             ]
         },
-        "timezone": "utc",
-        "title": "CoreDNS",
+        "timezone": "",
+        "title": "Kubernetes / CoreDNS",
         "uid": "vkQ0UHxik",
         "version": 1
     }

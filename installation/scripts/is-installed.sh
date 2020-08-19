@@ -78,8 +78,8 @@ fi
 echo "Checking state of kyma installation...hold on"
 while :
 do
-  STATUS="$(kubectl get installation/kyma-installation -o jsonpath='{.status.state}')"
-  DESC="$(kubectl get installation/kyma-installation -o jsonpath='{.status.description}')"
+  STATUS="$(kubectl -n default get installation/kyma-installation -o jsonpath='{.status.state}')"
+  DESC="$(kubectl -n default get installation/kyma-installation -o jsonpath='{.status.description}')"
   if [ "$STATUS" = "Installed" ]
   then
       echo "kyma is installed..."
@@ -93,7 +93,7 @@ do
     if [ "$TIMEOUT_SET" -ne 0 ] && [ "$ITERATIONS_LEFT" -le 0 ]; then
       echo "Installation errors until timeout:"
       echo "----------"
-      kubectl get installation  kyma-installation -o go-template --template='{{- range .status.errorLog }}
+      kubectl -n default get installation kyma-installation -o go-template --template='{{- range .status.errorLog }}
 {{.component}}:
   {{.log}}
 {{- end}}
@@ -106,7 +106,7 @@ do
     echo "Status: ${STATUS}, description: ${DESC}"
     if [ "$TIMEOUT_SET" -ne 0 ] && [ "$ITERATIONS_LEFT" -le 0 ]; then
       echo "----------"
-      kubectl get installation  kyma-installation -o go-template --template='{{- range .status.errorLog }}
+      kubectl -n default get installation kyma-installation -o go-template --template='{{- range .status.errorLog }}
 {{.component}}:
   {{.log}}
 {{- end}}
@@ -117,7 +117,7 @@ do
     fi
   fi
   if [ "${VERBOSE}" -eq 1 ]; then
-    kubectl get installation/kyma-installation -o yaml
+    kubectl -n default get installation/kyma-installation -o yaml
     echo "----------"
     kubectl get po --all-namespaces
   fi

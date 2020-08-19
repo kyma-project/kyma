@@ -1,0 +1,5 @@
+reviewers:
+  - knative-eventing-kafka-reviewers
+
+approvers:
+  - knative-eventing-kafka-approvers

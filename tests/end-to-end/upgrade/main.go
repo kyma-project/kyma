@@ -3,62 +3,60 @@ package main
 import (
 	"flag"
 	"fmt"
+	"time"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/cms"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/rafter"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/ui"
-	"k8s.io/client-go/dynamic"
-
-	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
-	gateway "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
-	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
-	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
-	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	eaClientSet "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned"
-	subscriptionClientSet "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
-	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/injector"
-	apiController "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-controller"
-	applicationOperator "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/application-operator"
-	assetStore "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/asset-store"
-	eventBus "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/event-bus"
-	serviceCatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	eventingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 
-	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
-
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
-
-	apiGateway "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-gateway"
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
-	k8sClientSet "k8s.io/client-go/kubernetes"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/dynamic"
+	k8sclientset "k8s.io/client-go/kubernetes"
 	restClient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"time"
+	"github.com/pkg/errors"
 
+	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
+	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
+	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
+	dex "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/fetch-dex-token"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/injector"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/ui"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/waiter"
-	"github.com/pkg/errors"
+
+	//"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/logging"
+	apigateway "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-gateway"
+	applicationoperator "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/application-operator"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/rafter"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/serverless"
+	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
 )
 
 // Config holds application configuration
 type Config struct {
-	Logger              logger.Config
-	DexUserSecret       string `envconfig:"default=admin-user"`
-	DexNamespace        string `envconfig:"default=kyma-system"`
-	KubeNamespace       string `envconfig:"default=kube-system"`
-	MaxConcurrencyLevel int    `envconfig:"default=1"`
-	KubeconfigPath      string `envconfig:"optional"`
-	TestingAddonsURL    string
+	Logger                 logger.Config
+	DexUserSecret          string `envconfig:"default=admin-user"`
+	DexNamespace           string `envconfig:"default=kyma-system"`
+	KubeNamespace          string `envconfig:"default=kube-system"`
+	MaxConcurrencyLevel    int    `envconfig:"default=1"`
+	KubeconfigPath         string `envconfig:"optional"`
+	TestingAddonsURL       string
+	WorkingNamespace       string `envconfig:"default=e2e-upgrade-test"`
+	TestsInfoConfigMapName string `envconfig:"default=upgrade-tests-info"`
+	EventSubscriberImage   string
 }
 
 const (
@@ -88,7 +86,7 @@ func main() {
 	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
 	fatalOnError(err, "while creating k8s client cfg")
 
-	k8sCli, err := k8sClientSet.NewForConfig(k8sConfig)
+	k8sCli, err := k8sclientset.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating k8s clientset")
 
 	scCli, err := sc.NewForConfig(k8sConfig)
@@ -103,23 +101,11 @@ func main() {
 	appBrokerCli, err := ab.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Application Broker clientset")
 
-	gatewayCli, err := gateway.NewForConfig(k8sConfig)
-	fatalOnError(err, "while creating Gateway clientset")
-
-	kubelessCli, err := kubeless.NewForConfig(k8sConfig)
-	fatalOnError(err, "while creating Kubeless clientset")
+	messagingCli, err := messagingclientv1alpha1.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating knative Messaging clientset")
 
 	domainName, err := getDomainNameFromCluster(k8sCli)
 	fatalOnError(err, "while reading domain name from cluster")
-
-	subCli, err := subscriptionClientSet.NewForConfig(k8sConfig)
-	fatalOnError(err, "while creating Subscription clientset")
-
-	eaCli, err := eaClientSet.NewForConfig(k8sConfig)
-	fatalOnError(err, "while creating Event Activation clientset")
-
-	kymaAPI, err := kyma.NewForConfig(k8sConfig)
-	fatalOnError(err, "while creating Kyma Api clientset")
 
 	mfCli, err := mfClient.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Microfrontends clientset")
@@ -130,6 +116,12 @@ func main() {
 	dexConfig, err := getDexConfigFromCluster(k8sCli, cfg.DexUserSecret, cfg.DexNamespace, domainName)
 	fatalOnError(err, "while reading dex config from cluster")
 
+	sourcesCli, err := sourcesv1alpha1.NewForConfig(k8sConfig)
+	fatalOnError(err, "while generating sources client")
+
+	eventingCli, err := eventingclientv1alpha1.NewForConfig(k8sConfig)
+	fatalOnError(err, "while generating knative eventing client")
+
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
 
@@ -137,40 +129,33 @@ func main() {
 	// Test name is sanitized and used for creating dedicated namespace for given test,
 	// so it cannot overlap with others.
 
-	grafanaUpgradeTest := monitoring.NewGrafanaUpgradeTest(k8sCli)
-
 	metricUpgradeTest, err := monitoring.NewMetricsUpgradeTest(k8sCli)
 	fatalOnError(err, "while creating Metrics Upgrade Test")
 
 	aInjector, err := injector.NewAddons("end-to-end-upgrade-test", cfg.TestingAddonsURL)
 	fatalOnError(err, "while creating addons configuration injector")
 
-	assetStoreReleaseExists, err := isAssetStoreInstalled(k8sCli, cfg.KubeNamespace)
-	fatalOnError(err, "while checking exists of Asset Store Helm release")
-
-	assetStoreTestName := "AssetStoreUpgradeTest"
-	cmsTestName := "HeadlessCMSUpgradeTest"
-
 	tests := map[string]runner.UpgradeTest{
-		"HelmBrokerUpgradeTest":           serviceCatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
-		"HelmBrokerConflictUpgradeTest":   serviceCatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli),
-		"ApplicationBrokerUpgradeTest":    serviceCatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
-		"LambdaFunctionUpgradeTest":       function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
-		"GrafanaUpgradeTest":              grafanaUpgradeTest,
+		"HelmBrokerUpgradeTest":           servicecatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
+		"HelmBrokerConflictUpgradeTest":   servicecatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
+		"ApplicationBrokerUpgradeTest":    servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
+		"GrafanaUpgradeTest":              monitoring.NewGrafanaUpgradeTest(k8sCli),
+		"TargetsAndRulesUpgradeTest":      monitoring.NewTargetsAndRulesTest(k8sCli),
 		"MetricsUpgradeTest":              metricUpgradeTest,
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
-		"EventBusUpgradeTest":             eventBus.NewEventBusUpgradeTest(k8sCli, eaCli, subCli),
-		"ApiControllerUpgradeTest":        apiController.NewAPIControllerTest(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
-		"ApiGatewayUpgradeTest":           apiGateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
-		"ApplicationOperatorUpgradeTest":  applicationOperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
-		assetStoreTestName:                assetStore.NewAssetStoreUpgradeTest(dynamicCli, assetStoreReleaseExists),
-		cmsTestName:                       cms.NewHeadlessCmsUpgradeTest(dynamicCli, assetStoreReleaseExists),
-		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli, assetStoreReleaseExists, assetStoreTestName, cmsTestName),
+		"ApiGatewayUpgradeTest":           apigateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
+		"ApplicationOperatorUpgradeTest":  applicationoperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
+		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
+		"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, sourcesCli, appBrokerCli, scCli, eventingCli, cfg.EventSubscriberImage),
+		"ServerlessUpgradeTest":           serverless.New(dynamicCli),
+		//"LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
 	}
+	tRegistry, err := runner.NewConfigMapTestRegistry(k8sCli, cfg.WorkingNamespace, cfg.TestsInfoConfigMapName)
+	fatalOnError(err, "while creating Test Registry")
 
 	// Execute requested action
-	testRunner, err := runner.NewTestRunner(log, k8sCli.CoreV1().Namespaces(), tests, cfg.MaxConcurrencyLevel, verbose)
+	testRunner, err := runner.NewTestRunner(log, k8sCli.CoreV1().Namespaces(), tRegistry, tests, cfg.MaxConcurrencyLevel, verbose)
 	fatalOnError(err, "while creating test runner")
 
 	switch action {
@@ -199,7 +184,7 @@ func newRestClientConfig(kubeConfigPath string) (*restClient.Config, error) {
 	return restClient.InClusterConfig()
 }
 
-func getDomainNameFromCluster(k8sCli *k8sClientSet.Clientset) (string, error) {
+func getDomainNameFromCluster(k8sCli *k8sclientset.Clientset) (string, error) {
 	overridesData := overrides.New(k8sCli)
 
 	coreOverridesYaml, err := overridesData.ForRelease("core")
@@ -221,7 +206,7 @@ func getDomainNameFromCluster(k8sCli *k8sClientSet.Clientset) (string, error) {
 	return value, nil
 }
 
-func getDexConfigFromCluster(k8sCli *k8sClientSet.Clientset, userSecret, dexNamespace, domainName string) (dex.Config, error) {
+func getDexConfigFromCluster(k8sCli *k8sclientset.Clientset, userSecret, dexNamespace, domainName string) (dex.Config, error) {
 	dexConfig := dex.Config{}
 	err := waiter.WaitAtMost(func() (done bool, err error) {
 		secret, err := k8sCli.CoreV1().Secrets(dexNamespace).Get(userSecret, metav1.GetOptions{})
@@ -240,20 +225,4 @@ func getDexConfigFromCluster(k8sCli *k8sClientSet.Clientset, userSecret, dexName
 		return dex.Config{}, errors.Wrapf(err, "while waiting for dex config secret %s", userSecret)
 	}
 	return dexConfig, nil
-}
-
-func isAssetStoreInstalled(k8sCli *k8sClientSet.Clientset, kubeNamespace string) (bool, error) {
-	listOptions := metav1.ListOptions{
-		LabelSelector: "NAME=assetstore, OWNER=TILLER",
-	}
-
-	configMaps, err := k8sCli.CoreV1().ConfigMaps(kubeNamespace).List(listOptions)
-	if err != nil {
-		logrus.Infof("while getting configMap: %v", err)
-		return false, err
-	}
-	if configMaps == nil {
-		return false, nil
-	}
-	return len(configMaps.Items) > 0, nil
 }

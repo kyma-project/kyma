@@ -7,5 +7,5 @@ spec:
    resource:
      group: apps
      kind: deployment
-     version: v1beta1
+     version: v1
    labelsPath: spec.template.metadata.labels

@@ -2,50 +2,47 @@ package applicationaccess
 
 import (
 	"fmt"
+	"net/http"
 	"path/filepath"
 	"testing"
 	"time"
 
-	"github.com/pkg/errors"
-
-	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit/services"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
-
-	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit/connector"
-
 	types "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	tokenreq "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
 	tokenreqversioned "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	tokenreqclient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	tokenreq "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
+	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
 	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit"
+	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit/connector"
+	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit/services"
 	"github.com/stretchr/testify/require"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	restclient "k8s.io/client-go/rest"
-	helmapirelease "k8s.io/helm/pkg/proto/hapi/release"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
 )
 
 const (
-	applicationInstallationTimeout = 240 * time.Second
-
-	defaultCheckInterval       = time.Second * 2
-	csrInfoURLRetrievalTimeout = time.Second * 15
+	applicationInstallationTimeout = 300 * time.Second
+	csrInfoURLRetrievalTimeout     = 120 * time.Second
+	defaultCheckInterval           = time.Second * 2
 
 	testGroup  = "app-connector-test-group"
 	testTenant = "app-connector-test-tenant"
+
+	eventSourcesNamespace = "kyma-integration"
 )
 
 type TestSuite struct {
 	applicationInstallationTimeout time.Duration
 	applicationClient              v1alpha1.ApplicationInterface
 	tokenRequestClient             tokenreqclient.TokenRequestInterface
-
-	connectorServiceClient *connector.Client
+	connectorServiceClient         *connector.Client
+	httpSourceClient               sourcesclientv1alpha1.HTTPSourceInterface
 
 	isCentral     bool
 	skipSSLVerify bool
@@ -72,6 +69,9 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	tokenRequestClientset, err := tokenreqversioned.NewForConfig(k8sConfig)
 	require.NoError(t, err)
 
+	httpSourceClientset, err := sourcesclientv1alpha1.NewForConfig(k8sConfig)
+	require.NoError(t, err)
+
 	var defaultGroup, defaultTenant string
 
 	if config.IsCentral {
@@ -84,6 +84,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 		applicationClient:              applicationClientset.ApplicationconnectorV1alpha1().Applications(),
 		tokenRequestClient:             tokenRequestClientset.ApplicationconnectorV1alpha1().TokenRequests(config.Namespace),
 		connectorServiceClient:         connector.NewConnectorClient(config.SkipSSLVerify),
+		httpSourceClient:               httpSourceClientset.HTTPSources(eventSourcesNamespace),
 		isCentral:                      config.IsCentral,
 		skipSSLVerify:                  config.SkipSSLVerify,
 		defaultTenant:                  defaultTenant,
@@ -139,10 +140,29 @@ func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T, applicationNam
 
 		app, err := ts.applicationClient.Get(applicationName, metav1.GetOptions{})
 		if err != nil {
+			t.Logf("Application %s not found: %v", applicationName, err)
+			return false
+		}
+		if app.Status.InstallationStatus.Status != "deployed" {
+			t.Logf("Application installation status %s does not equal %s",
+				app.Status.InstallationStatus.Status,
+				"deployed")
 			return false
 		}
 
-		return app.Status.InstallationStatus.Status == helmapirelease.Status_DEPLOYED.String()
+		httpSource, err := ts.httpSourceClient.Get(applicationName, metav1.GetOptions{})
+		if err != nil {
+			t.Logf("HTTPSource %s not found: %v", applicationName, err)
+			return false
+		}
+		if !httpSource.Status.IsReady() {
+			t.Logf("HTTPSource %s is not ready. Status: \n%+v",
+				httpSource.Name,
+				httpSource.Status)
+			return false
+		}
+
+		return true
 	})
 
 	require.NoError(t, err)
@@ -186,21 +206,42 @@ func (ts *TestSuite) ShouldAccessApplication(t *testing.T, credentials connector
 
 	var apis []services.Service
 	var errorResponse *services.ErrorResponse
-	err := testkit.RetryOnError(testkit.DefaultRetryConfig, func() error {
+	err := testkit.Retry(testkit.DefaultRetryConfig, func() (bool, error) {
 		apis, errorResponse = applicationConnectorClient.GetAllAPIs(t)
-		if errorResponse != nil {
-			return errors.Errorf("Failed to get all APIs. Status: %d, Error: %s", errorResponse.Code, errorResponse.Error)
+		if errorResponse == nil {
+			return false, nil
 		}
-		return nil
+
+		if errorResponse.Code == http.StatusServiceUnavailable || errorResponse.Code == http.StatusNotFound {
+			t.Logf("Application Registry not ready, received %d status", errorResponse.Code)
+			return true, nil
+		}
+
+		return false, fmt.Errorf("failed to get all APIs. Status: %d, Error: %s", errorResponse.Code, errorResponse.Error)
 	})
 	require.NoError(t, err)
-
 	services.RequireNoError(t, errorResponse)
 	require.NotNil(t, apis)
 
+	var publishResponse services.PublishResponse
 	eventId := "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
-	publishResponse, errorResponse := applicationConnectorClient.SendEvent(t, eventId)
+	err = testkit.Retry(testkit.DefaultRetryConfig, func() (bool, error) {
+		publishResponse, errorResponse = applicationConnectorClient.SendEvent(t, eventId)
+		if errorResponse == nil {
+			return false, nil
+		}
+
+		// Event Service returns 500 when Event Mesh is not ready, therefore retry on any error status
+		if errorResponse.Code != http.StatusOK {
+			t.Logf("Event Service not ready, received %d status", errorResponse.Code)
+			return true, nil
+		}
+
+		return false, fmt.Errorf("failed to send Event. Status: %d, Error: %s", errorResponse.Code, errorResponse.Error)
+	})
+	require.NoError(t, err)
 	services.RequireNoError(t, errorResponse)
+
 	require.Equal(t, eventId, publishResponse.EventID)
 }
 

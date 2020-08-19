@@ -18,7 +18,7 @@ MinIO is an open-source asset storage server with Amazon S3-compatible API. You 
 
 In the context of Rafter, the Asset Controller stores all assets in MinIO, in dedicated storage space.
 
-![](./assets/minio.svg)
+![MinIO](./assets/minio.svg)
 
 ## Production storage
 
@@ -28,7 +28,9 @@ For the production purposes, Rafter uses MinIO Gateway which:
 - Allows you to use various cloud providers that support the data replication and CDN configuration.
 - Is compatible with Amazon S3 APIs.
 
-![](./assets/minio-gateway.svg)
+![MinIO Gateway](./assets/minio-gateway.svg)
+
+>**TIP:** Using Gateway mode may generate additional costs for storing buckets, assets, or traffic in general. To avoid them, verify the payment policy with the given cloud provider before you switch to Gateway mode.
 
 See [this tutorial](#tutorials-set-minio-to-gateway-mode) to learn how to set MinIO to Google Cloud Storage Gateway mode.
 

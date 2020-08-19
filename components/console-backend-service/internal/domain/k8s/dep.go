@@ -2,7 +2,7 @@ package k8s
 
 import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	api "k8s.io/api/apps/v1beta2"
+	api "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 )
 

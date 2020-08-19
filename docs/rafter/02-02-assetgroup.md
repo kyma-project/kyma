@@ -7,7 +7,7 @@ This diagram provides more details of the AssetGroup CR flow, the controller tha
 
 >**NOTE:** This flow also applies to the ClusterAssetGroup CR.
 
-![](./assets/rafter-architecture-1.svg)
+![AssetGroup CR flow](./assets/rafter-architecture-1.svg)
 
 1. The user creates an AssetGroup CR in a given Namespace.
 2. The AssetGroup Controller (AGC) reads the AssetGroup CR definition.

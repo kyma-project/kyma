@@ -17,6 +17,7 @@ To customize the Kyma installation, the Kyma Operator exposes a generic mechanis
 ## User-defined overrides
 
 The Kyma Operator finds user-defined overrides by reading the ConfigMaps and Secrets deployed in the `kyma-installer` Namespace and marked with:
+
 - the `installer: overrides` label
 - a `component: {COMPONENT_NAME}` label if the override refers to a specific component
 
@@ -62,11 +63,10 @@ minio:
 ```
 
 To override these values, for example to `512Mi` and `250m`, proceed as follows:
-- Create a ConfigMap in the `kyma-installer` Namespace and label it.
-- Add the `minio.resources.limits.memory: 512Mi` and `minio.resources.limits.cpu: 250m` entries to the ConfigMap and apply it:
 
-```
-cat <<EOF | kubectl apply -f -
+- Create a ConfigMap file with the `minio.resources.limits.memory: 512Mi` and `minio.resources.limits.cpu: 250m` entries to the ConfigMap:
+
+```yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -79,17 +79,16 @@ metadata:
 data:
   controller-manager.minio.resources.limits.memory: 512Mi #increased from 128Mi
   controller-manager.minio.resources.limits.cpu: 250m #increased from 100m
-EOF
 ```
 
-Once the installation starts, the Kyma Operator generates overrides based on the ConfigMap entries. The system uses the values of `512Mi` instead of the default `128Mi` for MinIO memory and `250m` instead of `100m` for MinIO CPU from the chart's `values.yaml` file.
+While installing Kyma, provide the file path using the `-o` flag. Once the installation starts, the Kyma Operator generates overrides based on the ConfigMap entries. The system uses the value of `512Mi` instead of the default `128Mi` for MinIO memory and `250m` instead of `100m` for MinIO CPU from the chart's `values.yaml` file.
 
 For overrides that the system should keep in Secrets, just define a Secret object instead of a ConfigMap with the same key and a base64-encoded value. Be sure to label the Secret.
 
-If you add the overrides in the runtime, trigger the update process using this command:
+If you add the overrides after installation, trigger the update process using this command:
 
-```
-kubectl label installation/kyma-installation action=install
+```bash
+kubectl -n default label installation/kyma-installation action=install
 ```
 
 ### Sub-chart overrides
@@ -106,7 +105,7 @@ This is not a Kyma Operator-specific requirement. The same considerations apply 
 For example, there's the `connector-service` sub-chart nested in the `application-connector` chart installed by default as part of the [Kyma package](#installation-overview).
 In its `deployment.yaml`, there's the following fragment:
 
-```
+```yaml
 spec:
   serviceAccountName: {{ .Chart.Name }}
   containers:
@@ -120,7 +119,7 @@ spec:
 
 This fragment of the `values.yaml` file in the `connector-service` chart defines the default value for `appTokenExpirationMinutes`:
 
-```
+```yaml
 deployment:
   ...
   args:
@@ -130,16 +129,16 @@ deployment:
 
 To override this value and change it from `5` to `10`, do the following:
 
-1. Create a ConfigMap in the `kyma-installer` Namespace and label it.
-2. Name it after the main component chart in the `resources` folder and add the `-overrides` suffix to it. In this example, that would be `application-connector-overrides`.
-3. Add the `connector-service.deployment.args.appTokenExpirationMinutes: 10` entry under the **data** field in the ConfigMap.
+1. Create a ConfigMap file and name it after the main component chart in the `resources` folder and add the `-overrides` suffix to it. In this example, that would be `application-connector-overrides`.
+
+2. Add the `connector-service.deployment.args.appTokenExpirationMinutes: 10` entry under the **data** field in the ConfigMap.
 
 Notice that the user-provided override key now contains two parts:
 
 - The chart "path" inside the top-level `application-connector` chart called `connector-service`
 - The original template value reference from the chart without the `.Values.` prefix, `deployment.args.appTokenExpirationMinutes`
 
-Once the installation starts, the Kyma Operator generates overrides based on the ConfigMap entries. The system uses the value of `10` instead of the default value of `5` from the `values.yaml` chart file.
+While installing Kyma, provide the file path using the `-o` flag. Once the installation starts, the Kyma Operator generates overrides based on the ConfigMap entries. The system uses the value of `10` instead of the default value of `5` from the `values.yaml` chart file.
 
 ## Global overrides
 
@@ -149,14 +148,12 @@ For example, to define the `global.domain` override, just use `global.domain` as
 
 Once the installation starts, the Kyma Operator merges all of the ConfigMap entries and collects all of the global entries under the `global` top-level key to use for the installation.
 
-
 ## Values and types
 
 The Kyma Operator generally recognizes all override values as strings. It internally renders overrides to Helm as a `yaml` stream with only string values.
 
 There is one exception to this rule with respect to handling booleans:
 The system converts `true` or `false` strings that it encounters to a corresponding boolean `true` or `false` value.
-
 
 ## Merging and conflicting entries
 
@@ -166,19 +163,18 @@ If at least one of keys points to a final value, the Kyma Operator performs the 
 
 It is important to avoid overrides having the same keys for final values.
 
-
 ### Non-conflicting merge example
 
 Two overrides with a common key prefix ("a.b"):
 
-```
+```yaml
 "a.b.c": "first"
 "a.b.d": "second"
 ```
 
 The Kyma Operator yields the correct output:
 
-```
+```yaml
 a:
   b:
     c: first
@@ -189,21 +185,21 @@ a:
 
 Two overrides with the same key ("a.b"):
 
-```
+```yaml
 "a.b": "first"
 "a.b": "second"
 ```
 
 The Kyma Operator yields either:
 
-```
+```yaml
 a:
   b: "first"
 ```
 
 Or (due to non-deterministic merge order):
 
-```
+```yaml
 a:
   b: "second"
 ```

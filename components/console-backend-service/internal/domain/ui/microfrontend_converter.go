@@ -35,15 +35,15 @@ func (c *microFrontendConverter) ToGQL(in *uiV1alpha1v.MicroFrontend) (*gqlschem
 	return &mf, nil
 }
 
-func (c *microFrontendConverter) ToGQLs(in []*uiV1alpha1v.MicroFrontend) ([]gqlschema.MicroFrontend, error) {
-	var result []gqlschema.MicroFrontend
+func (c *microFrontendConverter) ToGQLs(in []*uiV1alpha1v.MicroFrontend) ([]*gqlschema.MicroFrontend, error) {
+	var result []*gqlschema.MicroFrontend
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
 			return nil, err
 		}
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

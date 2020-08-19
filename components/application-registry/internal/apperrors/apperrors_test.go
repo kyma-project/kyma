@@ -77,4 +77,18 @@ func TestAppError(t *testing.T) {
 		assert.Equal(t, "Some additional message: error, Some WrongInput apperror, Some pkg err", appendedWrongInputErr.Error())
 		assert.Equal(t, "Some additional message: error, Some UpstreamServerCallFailed apperror, Some pkg err", appendedUpstreamServerCallFailedErr.Error())
 	})
+
+	t.Run("should hide basic credentials from message", func(t *testing.T) {
+		// given
+		simpleError := UpstreamServerCallFailed("error: https://user:password@dummy.com")
+		formattedError := UpstreamServerCallFailed("code: %d, error: %s", 1, "https://user:password@dummy.com")
+		appendedError := UpstreamServerCallFailed("error1: https://user:password@dummy.com").Append("error2: https://user:password@dummy.com")
+		appendedFormatedError := UpstreamServerCallFailed("error1: https://user:password@dummy.com").Append("code: %d, error2: %s", 1, "https://user:password@dummy.com")
+
+		// then
+		assert.Equal(t, "error: https://***:***@dummy.com", simpleError.Error())
+		assert.Equal(t, "code: 1, error: https://***:***@dummy.com", formattedError.Error())
+		assert.Equal(t, "error2: https://***:***@dummy.com, error1: https://***:***@dummy.com", appendedError.Error())
+		assert.Equal(t, "code: 1, error2: https://***:***@dummy.com, error1: https://***:***@dummy.com", appendedFormatedError.Error())
+	})
 }

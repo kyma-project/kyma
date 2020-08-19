@@ -22,7 +22,7 @@ type limitRangeResolver struct {
 	lister    limitRangeLister
 }
 
-func (lr *limitRangeResolver) LimitRangesQuery(ctx context.Context, namespace string) ([]gqlschema.LimitRange, error) {
+func (lr *limitRangeResolver) LimitRangesQuery(ctx context.Context, namespace string) ([]*gqlschema.LimitRange, error) {
 	limitRange, err := lr.lister.List(namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "Cannot list %s from `%s` namespace", pretty.LimitRanges, namespace))

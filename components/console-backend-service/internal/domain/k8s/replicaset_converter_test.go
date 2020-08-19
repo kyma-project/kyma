@@ -46,8 +46,9 @@ func TestReplicaSetConverter_ToGQL(t *testing.T) {
 		emptyReplicaSetJSON, err := converter.replicaSetToGQLJSON(&apps.ReplicaSet{})
 		require.NoError(t, err)
 		expected := &gqlschema.ReplicaSet{
-			Pods: "0/0",
-			JSON: emptyReplicaSetJSON,
+			Pods:   "0/0",
+			JSON:   emptyReplicaSetJSON,
+			Labels: gqlschema.Labels{},
 		}
 
 		result, err := converter.ToGQL(&apps.ReplicaSet{})

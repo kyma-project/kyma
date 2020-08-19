@@ -5,14 +5,15 @@ type: Installation
 
 This Installation guide shows you how to quickly deploy Kyma locally on the MacOS, Linux, and Windows platforms. Kyma is installed locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/).
 
->**TIP:** See [this](#troubleshooting-overview) document for troubleshooting tips.
+>**NOTE:** By default, the local **Kyma Lite** installation on Minikube requires 4 CPU and 8GB of RAM. If you want to add more components to your installation, [install Kyma on a cluster](/root/kyma/#installation-install-kyma-on-a-cluster).
+
+>**TIP:** See the [troubleshooting guide](#troubleshooting-overview) for tips.
 
 ## Prerequisites
 
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Docker](https://www.docker.com/get-started)
-- [Minikube](https://github.com/kubernetes/minikube) 1.3.1
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6
+- [Minikube](https://github.com/kubernetes/minikube) 1.12.2
 
 Virtualization:
 
@@ -57,7 +58,9 @@ Follow these instructions to install Kyma from a release or from sources:
      ```bash
      git clone https://github.com/kyma-project/kyma.git
      ```
+
   3. Provision a Kubernetes cluster on Minikube. Run:
+
      ```bash
      kyma provision minikube
      ```
@@ -68,7 +71,7 @@ Follow these instructions to install Kyma from a release or from sources:
      ```bash
      kyma install --source local
      ```
-     >**NOTE:** By default, the installation uses sources located under your [GOPATH](https://github.com/golang/go/wiki/GOPATH). If you want to use a specific source folder, use it as a parameter when calling `kyma install --source local --src-path {YOUR_KYMA_SOURCE_PATH}`. 
+     >**NOTE:** By default, the installation uses sources located under your [GOPATH](https://github.com/golang/go/wiki/GOPATH). If you want to use a specific source folder, use it as a parameter when calling `kyma install --source local --src-path {YOUR_KYMA_SOURCE_PATH}`.
 
    </details>
 </div>
@@ -77,32 +80,34 @@ Follow these instructions to install Kyma from a release or from sources:
 
 Kyma comes with a local wildcard self-signed `server.crt` certificate. The `kyma install` command downloads and adds this certificate to the trusted certificates in your OS so you can access the Console UI.
 
->**NOTE:** Mozilla Firefox uses its own certificate keychain. If you want to access the Console UI though Firefox, add the Kyma wildcard certificate to the certificate keychain of the browser. To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
+>**NOTE:** Mozilla Firefox uses its own certificate keychain. If you want to access the Console UI though Firefox, add the Kyma wildcard certificate to the certificate keychain of the browser. To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. See the [Java environment](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) as an example.
 
-1. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password printed in the terminal once the installation process is completed.
+1. After the installation is completed, you can access the Console UI. To open the the Console UI in your default browser, run:
 
-2. At this point, Kyma is ready for you to explore. See what you can achieve using the Console UI or check out one of the [available examples](https://github.com/kyma-project/examples).
+   ```bash
+   kyma console
+   ```
 
-Read [this](#installation-reinstall-kyma) document to learn how to reinstall Kyma without deleting the cluster from Minikube.
-To learn how to test Kyma, see [this](#details-testing-kyma) document.
+2. Select **Login with Email**. Use the **admin@kyma.cx** email address and the password printed in the terminal once the installation process is completed.
+
+3. At this point, Kyma is ready for you to explore. See what you can achieve using the Console UI or check out one of the [available examples](https://github.com/kyma-project/examples).
+
+Learn also how to [test Kyma](#details-testing-kyma) or [reinstall](#installation-reinstall-kyma) it without deleting the cluster from Minikube.
 
 ## Stop and restart Kyma without reinstalling
 
 Use the Kyma CLI to restart the Minikube cluster without reinstalling Kyma. Follow these steps to stop and restart your cluster:
 
 1. Stop the Minikube cluster with Kyma installed. Run:
-   ```
+
+   ```bash
    minikube stop
    ```
+
 2. Restart the cluster without reinstalling Kyma. Run:
+
    ```bash
    kyma provision minikube
    ```
 
 The Kyma CLI discovers that a Minikube cluster is initialized and asks if you want to delete it. Answering `no` causes the Kyma CLI to start the Minikube cluster and restarts all of the previously installed components. Even though this procedure takes some time, it is faster than a clean installation as you don't download all of the required Docker images.
-
-To verify that the restart is successful, run this command and check if all Pods have the `RUNNING` status:
-
-```
-kubectl get pods --all-namespaces
-```

@@ -1,9 +1,0 @@
-apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: EventActivation
-metadata:
-  name: perf-test-event-activation
-  labels:
-    app: perf-test-event-bus
-    example: event-subscription-service
-spec:
-  sourceId: perf-app

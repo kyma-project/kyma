@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ .Values.global.natsStreaming.fullname }}
@@ -25,7 +25,7 @@ spec:
     spec:
       initContainers:
       - name: prepare-config
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}event-bus-nats-init:{{ .Values.global.event_bus.version }}"
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.natsInit.dir }}nats-init:{{ .Values.global.natsInit.version }}"
         volumeMounts:
         {{- if .Values.configurationFiles }}
         - name: config-volume-cm

@@ -137,7 +137,7 @@ func TestHelmBrokerAddonsConfiguration(t *testing.T) {
 		assert.NoError(t, err)
 	}()
 	// then
-	repeat.AssertFuncAtMost(t, func() error {
+	repeat.RequireFuncAtMost(t, func() error {
 		_, err := scClient.ServicecatalogV1beta1().ServiceClasses(namespace).Get(addonId, metav1.GetOptions{})
 		return err
 	}, time.Second*20)
@@ -185,7 +185,7 @@ func TestHelmBrokerClusterAddonsConfiguration(t *testing.T) {
 	}()
 
 	// then
-	repeat.AssertFuncAtMost(t, func() error {
+	repeat.RequireFuncAtMost(t, func() error {
 		_, err := scClient.ServicecatalogV1beta1().ClusterServiceClasses().Get(addonId, metav1.GetOptions{})
 		return err
 	}, time.Second*30)
@@ -243,7 +243,7 @@ func TestServiceCatalogResourcesAreCleanUp(t *testing.T) {
 	assert.NoError(t, err)
 
 	t.Log("Assert namespace is removed")
-	repeat.AssertFuncAtMost(t, func() error {
+	repeat.RequireFuncAtMost(t, func() error {
 		_, err := k8sClient.Namespaces().Get(namespace, metav1.GetOptions{})
 		if apimerr.IsNotFound(err) {
 			return nil

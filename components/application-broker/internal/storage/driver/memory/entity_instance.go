@@ -95,6 +95,20 @@ func (s *Instance) FindOne(m func(i *internal.Instance) bool) (*internal.Instanc
 	return nil, nil
 }
 
+// FindOne returns from storage first object which passes the match.
+func (s *Instance) FindAll(m func(i *internal.Instance) bool) ([]*internal.Instance, error) {
+	defer unlock(s.lockW())
+
+	var matches []*internal.Instance
+	for iID, i := range s.storage {
+		if m(i) {
+			matches = append(matches, s.storage[iID])
+		}
+	}
+
+	return matches, nil
+}
+
 // UpdateState modifies state on object in storage.
 func (s *Instance) UpdateState(iID internal.InstanceID, state internal.InstanceState) error {
 	defer unlock(s.lockW())

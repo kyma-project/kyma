@@ -1,11 +1,12 @@
 package statusmanager
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/consts"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/env"
 
 	installationv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned/fake"
@@ -16,6 +17,8 @@ import (
 )
 
 func TestStatusManager(t *testing.T) {
+	env.InitConfig()
+
 	Convey("Status Manager InProgress", t, func() {
 		Convey("should return error if kyma installation is not found", func() {
 			testStatusManager := getTestSetup()
@@ -34,8 +37,8 @@ func TestStatusManager(t *testing.T) {
 
 			testInst := &installationv1alpha1.Installation{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      consts.InstResource,
-					Namespace: consts.InstNamespace,
+					Name:      env.Config.InstResource,
+					Namespace: env.Config.InstNamespace,
 				},
 				Spec: installationv1alpha1.InstallationSpec{
 					URL:         givenURL,
@@ -46,7 +49,7 @@ func TestStatusManager(t *testing.T) {
 
 			err := testStatusManager.InProgress(expectedDescription)
 
-			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
+			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(env.Config.InstNamespace).Get(context.TODO(), env.Config.InstResource, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
 			So(kymaInst.Status.State, ShouldEqual, expectedStatus)
@@ -68,8 +71,8 @@ func TestStatusManager(t *testing.T) {
 
 			testInst := &installationv1alpha1.Installation{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      consts.InstResource,
-					Namespace: consts.InstNamespace,
+					Name:      env.Config.InstResource,
+					Namespace: env.Config.InstNamespace,
 				},
 				Spec: installationv1alpha1.InstallationSpec{
 					URL:         testURL,
@@ -86,7 +89,7 @@ func TestStatusManager(t *testing.T) {
 
 			err := testStatusManager.InProgress(testDescription)
 
-			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
+			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(env.Config.InstNamespace).Get(context.TODO(), env.Config.InstResource, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
 			So(kymaInst.Status.State, ShouldEqual, testState)
@@ -110,8 +113,8 @@ func TestStatusManager(t *testing.T) {
 
 			testInst := &installationv1alpha1.Installation{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      consts.InstResource,
-					Namespace: consts.InstNamespace,
+					Name:      env.Config.InstResource,
+					Namespace: env.Config.InstNamespace,
 				},
 				Spec: installationv1alpha1.InstallationSpec{
 					URL:         givenURL,
@@ -122,7 +125,7 @@ func TestStatusManager(t *testing.T) {
 
 			err := testStatusManager.Error(expectedComponent, expectedDescription, expectedError)
 
-			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
+			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(env.Config.InstNamespace).Get(context.TODO(), env.Config.InstResource, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
 			So(kymaInst.Status.State, ShouldEqual, expectedState)
@@ -151,8 +154,8 @@ func TestStatusManager(t *testing.T) {
 
 			testInst := &installationv1alpha1.Installation{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      consts.InstResource,
-					Namespace: consts.InstNamespace,
+					Name:      env.Config.InstResource,
+					Namespace: env.Config.InstNamespace,
 				},
 				Spec: installationv1alpha1.InstallationSpec{
 					URL:         testURL,
@@ -170,7 +173,7 @@ func TestStatusManager(t *testing.T) {
 
 			err := testStatusManager.Error(testComponent, testDescription, testError)
 
-			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
+			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(env.Config.InstNamespace).Get(context.TODO(), env.Config.InstResource, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
 			So(kymaInst.Status.State, ShouldEqual, testState)
@@ -203,8 +206,8 @@ func TestStatusManager(t *testing.T) {
 
 			testInst := &installationv1alpha1.Installation{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      consts.InstResource,
-					Namespace: consts.InstNamespace,
+					Name:      env.Config.InstResource,
+					Namespace: env.Config.InstNamespace,
 				},
 				Spec: installationv1alpha1.InstallationSpec{
 					URL:         testURL,
@@ -222,7 +225,7 @@ func TestStatusManager(t *testing.T) {
 
 			err := testStatusManager.Error(testComponent, testDescription, testError)
 
-			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
+			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(env.Config.InstNamespace).Get(context.TODO(), env.Config.InstResource, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
 			So(kymaInst.Status.State, ShouldEqual, testState)
@@ -253,8 +256,8 @@ func TestStatusManager(t *testing.T) {
 
 			testInst := &installationv1alpha1.Installation{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      consts.InstResource,
-					Namespace: consts.InstNamespace,
+					Name:      env.Config.InstResource,
+					Namespace: env.Config.InstNamespace,
 				},
 				Spec: installationv1alpha1.InstallationSpec{
 					URL:         testURL,
@@ -272,7 +275,7 @@ func TestStatusManager(t *testing.T) {
 
 			err := testStatusManager.Error(testComponent, testDescription, testError)
 
-			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
+			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(env.Config.InstNamespace).Get(context.TODO(), env.Config.InstResource, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
 			So(kymaInst.Status.State, ShouldEqual, testState)
@@ -308,8 +311,8 @@ func TestStatusManager(t *testing.T) {
 
 			testInst := &installationv1alpha1.Installation{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      consts.InstResource,
-					Namespace: consts.InstNamespace,
+					Name:      env.Config.InstResource,
+					Namespace: env.Config.InstNamespace,
 				},
 				Spec: installationv1alpha1.InstallationSpec{
 					URL:         testURL,
@@ -326,7 +329,7 @@ func TestStatusManager(t *testing.T) {
 
 			err := testStatusManager.InstallDone(testURL, testVersion)
 
-			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
+			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(env.Config.InstNamespace).Get(context.TODO(), env.Config.InstResource, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
 			So(kymaInst.Status.State, ShouldEqual, testState)

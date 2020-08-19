@@ -30,6 +30,7 @@ type Resolver struct {
 	*replicaSetResolver
 	*configMapResolver
 	*selfSubjectRulesResolver
+	*versionInfoResolver
 	informerFactory informers.SharedInformerFactory
 }
 
@@ -52,10 +53,11 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 		return nil, errors.Wrap(err, "while creating namespace service")
 	}
 
-	deploymentService, err := newDeploymentService(informerFactory.Apps().V1beta2().Deployments().Informer())
+	deploymentService, err := newDeploymentService(informerFactory.Apps().V1().Deployments().Informer())
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating deployment service")
 	}
+
 	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer(), clientset.CoreV1())
 
 	resourceService := newResourceService(clientset.Discovery())
@@ -81,6 +83,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 		resourceQuotaStatusResolver: newResourceQuotaStatusResolver(resourceQuotaStatusService),
 		configMapResolver:           newConfigMapResolver(configMapService),
 		selfSubjectRulesResolver:    newSelfSubjectRulesResolver(selfSubjectRulesService),
+		versionInfoResolver:         newVersionInfoResolver(deploymentService),
 		informerFactory:             informerFactory,
 	}, nil
 }

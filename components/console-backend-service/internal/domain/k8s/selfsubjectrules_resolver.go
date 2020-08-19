@@ -24,7 +24,7 @@ type selfSubjectRulesSvc interface {
 
 //go:generate mockery -name=gqlSelfSubjectRulesConverter -output=automock -outpkg=automock -case=underscore
 type gqlSelfSubjectRulesConverter interface {
-	ToGQL(in *v1.SelfSubjectRulesReview) ([]gqlschema.ResourceRule, error)
+	ToGQL(in *v1.SelfSubjectRulesReview) ([]*gqlschema.ResourceRule, error)
 	ToBytes(in *v1.SelfSubjectRulesReview) ([]byte, error)
 }
 
@@ -35,7 +35,7 @@ func newSelfSubjectRulesResolver(selfSubjectRulesSvc selfSubjectRulesSvc) *selfS
 	}
 }
 
-func (r *selfSubjectRulesResolver) SelfSubjectRulesQuery(ctx context.Context, namespace *string) ([]gqlschema.ResourceRule, error) {
+func (r *selfSubjectRulesResolver) SelfSubjectRulesQuery(ctx context.Context, namespace *string) ([]*gqlschema.ResourceRule, error) {
 	if namespace == nil {
 		defaultNamespace := "*"
 		namespace = &defaultNamespace
@@ -53,7 +53,7 @@ func (r *selfSubjectRulesResolver) SelfSubjectRulesQuery(ctx context.Context, na
 	ssrrOut, err := r.selfSubjectRulesSvc.Create(ctx, ssrrBytes)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while reviewing self subject rules"))
-		return []gqlschema.ResourceRule{}, gqlerror.New(err, pretty.SelfSubjectRules)
+		return nil, gqlerror.New(err, pretty.SelfSubjectRules)
 	}
 	return r.gqlSelfSubjectRulesConverter.ToGQL(ssrrOut)
 }

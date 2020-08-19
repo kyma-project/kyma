@@ -27,7 +27,7 @@ type configMapSvc interface {
 //go:generate mockery -name=gqlConfigMapConverter -output=automock -outpkg=automock -case=underscore
 type gqlConfigMapConverter interface {
 	ToGQL(in *v1.ConfigMap) (*gqlschema.ConfigMap, error)
-	ToGQLs(in []*v1.ConfigMap) ([]gqlschema.ConfigMap, error)
+	ToGQLs(in []*v1.ConfigMap) ([]*gqlschema.ConfigMap, error)
 	GQLJSONToConfigMap(in gqlschema.JSON) (v1.ConfigMap, error)
 }
 
@@ -62,7 +62,7 @@ func (r *configMapResolver) ConfigMapQuery(ctx context.Context, name, namespace 
 	return converted, nil
 }
 
-func (r *configMapResolver) ConfigMapsQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ConfigMap, error) {
+func (r *configMapResolver) ConfigMapsQuery(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.ConfigMap, error) {
 	configMaps, err := r.configMapSvc.List(namespace, pager.PagingParams{
 		First:  first,
 		Offset: offset,
@@ -127,8 +127,8 @@ func (r *configMapResolver) DeleteConfigMapMutation(ctx context.Context, name st
 	return deletedConfigMap, nil
 }
 
-func (r *configMapResolver) ConfigMapEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ConfigMapEvent, error) {
-	channel := make(chan gqlschema.ConfigMapEvent, 1)
+func (r *configMapResolver) ConfigMapEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.ConfigMapEvent, error) {
+	channel := make(chan *gqlschema.ConfigMapEvent, 1)
 	filter := func(configMap *v1.ConfigMap) bool {
 		return configMap != nil && configMap.Namespace == namespace
 	}

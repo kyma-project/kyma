@@ -1,0 +1,12 @@
+{{- if .Values.global.ory.hydra.persistence.gcloud.enabled -}}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ template "ory.fullname" . }}-gcloud-sqlproxy
+spec:
+  host: {{ template "ory.fullname" . }}-gcloud-sqlproxy.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+{{- end -}}

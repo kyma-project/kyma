@@ -1,99 +1,3 @@
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: {{ .Chart.Name }}-tests-pod-update
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app: {{ .Chart.Name }}-tests
-    app.kubernetes.io/name: {{ .Chart.Name }}-tests
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}
-rules:
-  - apiGroups:
-      - '*'
-    resources:
-      - pods
-    verbs:
-      - get
-      - list
-      - update
-
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: {{ .Chart.Name }}-tests-pod-update
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app: {{ .Chart.Name }}-tests
-    app.kubernetes.io/name: {{ .Chart.Name }}-tests
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: {{ .Chart.Name }}-tests-pod-update
-subjects:
-  - kind: ServiceAccount
-    name: {{ .Chart.Name }}-tests
-    namespace: {{ .Release.Namespace }}
-
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: {{ .Chart.Name }}-tests
-  namespace: {{ .Values.compassRuntimeAgent.resources.integrationNamespace }}
-  labels:
-    app: {{ .Chart.Name }}-tests
-    app.kubernetes.io/name: {{ .Chart.Name }}-tests
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}
-rules:
-  - apiGroups:
-      - '*'
-    resources:
-      - services
-      - secrets
-    verbs:
-      - create
-      - get
-      - delete
-      - list
-  - apiGroups:
-      - config.istio.io
-    resources:
-      - handlers
-      - rules
-      - instances
-    verbs:
-      - get
-      - list
-
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: {{ .Chart.Name }}-tests
-  namespace: {{ .Values.compassRuntimeAgent.resources.integrationNamespace }}
-  labels:
-    app: {{ .Chart.Name }}-tests
-    app.kubernetes.io/name: {{ .Chart.Name }}-tests
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: {{ .Chart.Name }}-tests
-subjects:
-  - kind: ServiceAccount
-    name: {{ .Chart.Name }}-tests
-    namespace: {{ .Release.Namespace }}
-
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -105,7 +9,7 @@ metadata:
     app.kubernetes.io/name: {{ .Chart.Name }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 rules:
   - apiGroups:
       - '*'
@@ -126,7 +30,7 @@ metadata:
     app.kubernetes.io/name: {{ .Chart.Name }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role

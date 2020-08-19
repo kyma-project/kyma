@@ -1,8 +1,7 @@
+apiVersion: v1
+appVersion: "59c6ec8f"
+description: Kyma component 'dex'
 name: dex
-version: 0.0.2
-description: DEX for Kyma
-keywords:
-  - dex
-  - oidc
-  - kyma
-appVersion: "9409a387"
+version: 1.0.0
+home: https://kyma-project.io
+icon: https://github.com/kyma-project/kyma/blob/master/logo.png?raw=true

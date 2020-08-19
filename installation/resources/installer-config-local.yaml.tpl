@@ -36,7 +36,6 @@ data:
   global.domainName: "kyma.local"
   global.adminPassword: ""
   global.minikubeIP: ""
-  nginx-ingress.controller.service.loadBalancerIP: ""
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -48,10 +47,6 @@ metadata:
     component: istio
     kyma-project.io/installation: ""
 data:
-  gateways.istio-ingressgateway.loadBalancerIP: ""
-  gateways.istio-ingressgateway.type: "NodePort"
-  gateways.istio-ingressgateway.autoscaleEnabled: "false"
-
   pilot.resources.limits.memory: 1024Mi
   pilot.resources.limits.cpu: 500m
   pilot.resources.requests.memory: 512Mi
@@ -71,19 +66,6 @@ data:
 
   mixer.policy.autoscaleEnabled: "false"
   mixer.telemetry.autoscaleEnabled: "false"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: service-catalog-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: service-catalog
-    kyma-project.io/installation: ""
-data:
-  etcd-stateful.etcd.resources.limits.memory: 256Mi
-  etcd-stateful.replicaCount: "1"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -127,6 +109,18 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: core-tests
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: core
+    kyma-project.io/installation: ""
+data:
+  console.test.acceptance.enabled: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: compass-runtime-agent-tests
   namespace: kyma-installer
   labels:
@@ -139,11 +133,93 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: core-tests
+  name: ory-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: core
+    component: ory
     kyma-project.io/installation: ""
 data:
-  kubeless.tests.enabled: "false"
+  global.ory.hydra.persistence.enabled: "false"
+  global.ory.hydra.persistence.postgresql.enabled: "false"
+  hydra.hydra.autoMigrate: "false"
+  hydra.deployment.resources.requests.cpu: "50m"
+  hydra.deployment.resources.limits.cpu: "150m"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tracing-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: tracing
+    kyma-project.io/installation: ""
+data:
+  jaeger.spec.strategy: "allInOne"
+  jaeger.spec.storage.type: "memory"
+  jaeger.spec.storage.options.memory.max-traces: "10000"
+  jaeger.spec.resources.limits.memory: "150Mi"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: monitoring
+    kyma-project.io/installation: ""
+data:
+  alertmanager.alertmanagerSpec.resources.limits.cpu: "50m"
+  alertmanager.alertmanagerSpec.resources.limits.memory: "100Mi"
+  alertmanager.alertmanagerSpec.resources.requests.cpu: "20m"
+  alertmanager.alertmanagerSpec.resources.requests.memory: "50Mi"
+  alertmanager.alertmanagerSpec.retention: "1h"
+  prometheus.prometheusSpec.resources.limits.cpu: "150m"
+  prometheus.prometheusSpec.resources.limits.memory: "800Mi"
+  prometheus.prometheusSpec.resources.requests.cpu: "100m"
+  prometheus.prometheusSpec.resources.requests.memory: "200Mi"
+  prometheus.prometheusSpec.retention: "2h"
+  prometheus.prometheusSpec.retentionSize: "500MB"
+  prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: "1Gi"
+  grafana.persistence.enabled: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: serverless-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: serverless
+    kyma-project.io/installation: ""
+data:
+  containers.manager.envs.buildRequestsCPU.value: "100m"
+  containers.manager.envs.buildRequestsMemory.value: "200Mi"
+  containers.manager.envs.buildLimitsCPU.value: "200m"
+  containers.manager.envs.buildLimitsMemory.value: "400Mi"
+  # TODO: Solve a problem with DNS
+  tests.enabled: "false"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: knative-serving-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: knative-serving
+    kyma-project.io/installation: ""
+data:
+  networking_istio.resources.requests.cpu: "10m"
+  networking_istio.resources.requests.memory: "100Mi"
+  activator.resources.requests.cpu: "100m"
+  activator.resources.requests.memory: "100Mi"
+  autoscaler.resources.requests.cpu: "10m"
+  autoscaler.resources.requests.memory: "100Mi"
+  autoscaler_hpa.resources.requests.cpu: "10m"
+  autoscaler_hpa.resources.requests.memory: "100Mi"
+  controller.resources.requests.cpu: "30m"
+  controller.resources.requests.memory: "100Mi"

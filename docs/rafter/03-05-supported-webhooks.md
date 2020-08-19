@@ -36,4 +36,4 @@ If you create a specific mutation, validation, or metadata service for the avail
   - pass file data in the `"object": "string"` format in the request body, where **object** stands for the file name and **string** is the file content.
   - return the `200` response with extracted metadata.
 
-See the example of an API specification with the `/convert`, `/validate`, and `/extract` endpoints [here](./assets/example-openapi-service.yaml).
+See the [example](./assets/example-openapi-service.yaml) of an API specification with the `/convert`, `/validate`, and `/extract` endpoints.

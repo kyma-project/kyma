@@ -63,12 +63,13 @@ fi
 bash ${SCRIPTS_DIR}/build-kyma-installer.sh --vm-driver "${VM_DRIVER}"
 
 if [ -z "$CR_PATH" ]; then
-
     TMPDIR=`mktemp -d "${CURRENT_DIR}/../../temp-XXXXXXXXXX"`
     CR_PATH="${TMPDIR}/installer-cr-local.yaml"
     bash ${SCRIPTS_DIR}/create-cr.sh --output "${CR_PATH}"
-
 fi
 
 bash ${SCRIPTS_DIR}/installer.sh --cr "${CR_PATH}" --password "${ADMIN_PASSWORD}"
-rm -rf $TMPDIR
+
+if [ -z "$CR_PATH" ]; then
+    rm -rf $TMPDIR
+fi

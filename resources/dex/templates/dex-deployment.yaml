@@ -11,7 +11,9 @@ spec:
   selector:
     matchLabels:
       app: dex
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    {{- toYaml .Values.deploymentStrategy | nindent 4 }}
   template:
     metadata:
       labels:
@@ -23,6 +25,8 @@ spec:
       serviceAccountName: dex-account
       securityContext:
         runAsUser: 2000
+      nodeSelector: 
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
       containers:
       - image: {{ .Values.imageRegistry }}/dex:{{ .Chart.AppVersion }}
         name: dex

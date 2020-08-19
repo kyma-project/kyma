@@ -1,7 +1,7 @@
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "70782d1888118ad2c76b978b49505bb5286e264c"
+  branch = "release-1.13"
 
 [[constraint]]
   name = "github.com/pkg/errors"
@@ -13,24 +13,27 @@
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.16.9"
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.16.9"
 
 [[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.16.9"
 
 [[override]]
   name="sigs.k8s.io/controller-runtime"
   version="v0.2.0-beta.5"
 
+[[override]]
+  name = "github.com/gogo/protobuf"
+  version = "1.3.1"
 
-[[constraint]]
-  name = "k8s.io/helm"
-  version = "2.14.0"
+[[override]]
+  name = "knative.dev/serving"
+  version = "v0.15.2"
 
 [prune]
   go-tests = true

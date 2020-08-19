@@ -1,6 +1,9 @@
 package access
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	emListers "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
@@ -12,6 +15,8 @@ import (
 type ServiceEnabledChecker interface {
 	// IsServiceEnabled returns true if the service is enabled
 	IsServiceEnabled(svc internal.Service) bool
+	// Returns information about checker
+	IdentifyYourself() string
 }
 
 // NewApplicationMappingService creates new instance of NewApplicationMappingService
@@ -79,18 +84,34 @@ func (c *applicationServiceChecker) IsServiceEnabled(svc internal.Service) bool 
 	return exists
 }
 
+func (c *applicationServiceChecker) IdentifyYourself() string {
+	keys := make([]string, 0, len(c.serviceIDs))
+	for k := range c.serviceIDs {
+		keys = append(keys, string(k))
+	}
+	return fmt.Sprintf("Access Checker: Enabled Services with Service IDs: %s", strings.Join(keys, ", "))
+}
+
 type allServicesDisabled struct {
 }
 
 // IsServiceEnabled implements ServiceEnabledChecker, always returns false
-func (c *allServicesDisabled) IsServiceEnabled(svc internal.Service) bool {
+func (c *allServicesDisabled) IsServiceEnabled(_ internal.Service) bool {
 	return false
+}
+
+func (c *allServicesDisabled) IdentifyYourself() string {
+	return "Access Checker: All Service Disabled"
 }
 
 type allServicesEnabled struct {
 }
 
 // IsServiceEnabled implements ServiceEnabledChecker, always returns true
-func (c *allServicesEnabled) IsServiceEnabled(svc internal.Service) bool {
+func (c *allServicesEnabled) IsServiceEnabled(_ internal.Service) bool {
 	return true
+}
+
+func (c *allServicesEnabled) IdentifyYourself() string {
+	return "Access Checker: All Service Enabled"
 }

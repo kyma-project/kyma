@@ -21,6 +21,10 @@ spec:
     - interval: {{ .Values.serviceMonitor.scrapeInterval }}
       port: {{ .Values.service.port.name }}
       path: /metrics
+      metricRelabelings:
+      - sourceLabels: [ __name__ ]
+        regex: ^(container_cpu_usage_seconds_total|container_network_receive_bytes_total|go_gc_duration_seconds|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|go_threads|kube_pod_container_resource_requests_cpu_cores|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rafter_services_http_request_and_mutation_duration_seconds_bucket|rafter_services_http_request_and_validation_duration_seconds_bucket|rafter_services_http_request_and_mutation_duration_seconds_sum|rafter_services_http_request_and_mutation_duration_seconds_count|rafter_services_http_request_and_validation_duration_seconds_sum|rafter_services_http_request_and_validation_duration_seconds_count|rafter_services_handle_mutation_status_code|rafter_services_handle_validation_status_code)$
+        action: keep
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "rafterAsyncAPIService.name" . }}

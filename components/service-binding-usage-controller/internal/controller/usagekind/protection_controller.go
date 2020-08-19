@@ -1,8 +1,11 @@
 package usagekind
 
 import (
+	"context"
 	"fmt"
 	"time"
+
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -236,7 +239,7 @@ func (c *ProtectionController) addFinalizer(uk *v1alpha1.UsageKind) error {
 
 	ukCopy := uk.DeepCopy()
 	ukCopy.ObjectMeta.Finalizers = append(ukCopy.ObjectMeta.Finalizers, finalizerName)
-	_, err := c.ukClient.UsageKinds().Update(ukCopy)
+	_, err := c.ukClient.UsageKinds().Update(context.TODO(), ukCopy, v1.UpdateOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "while adding finalizer to UsageKind %s", uk.Name)
 	}
@@ -288,7 +291,7 @@ func (c *ProtectionController) isBeingUsedBySBU(uk *v1alpha1.UsageKind, keyToSki
 func (c *ProtectionController) removeFinalizer(uk *v1alpha1.UsageKind) error {
 	ukCopy := uk.DeepCopy()
 	ukCopy.ObjectMeta.Finalizers = removeString(ukCopy.ObjectMeta.Finalizers, finalizerName)
-	_, err := c.ukClient.UsageKinds().Update(ukCopy)
+	_, err := c.ukClient.UsageKinds().Update(context.TODO(), ukCopy, v1.UpdateOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "while removing finalizer from UsageKind %s", uk.Name)
 	}

@@ -1,12 +1,17 @@
+{{- if not .Values.global.deployGatewayOncePerNamespace }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Release.Name }}-application-gateway
+  namespace: {{ .Release.Namespace }}
   labels:
     application: {{ .Release.Name }}
     app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   type: ClusterIP
   ports:
@@ -16,16 +21,21 @@ spec:
   selector:
     app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
+{{- end }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Release.Name }}-event-service
+  namespace: {{ .Release.Namespace }}
   labels:
     application: {{ .Release.Name }}
     app: {{ .Release.Name }}-event-service
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   type: ClusterIP
   ports:

@@ -1,32 +1,32 @@
 package rafter
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/util/retry"
-	"kyma-project.io/compass-runtime-agent/internal/apperrors"
-	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 )
 
 const (
 	AssetGroupModeSingle = "single"
-	AssetGroupNameFormat = "%s-%s"
 )
 
-//go:generate mockery -name=ResourceInterface
+//go:generate mockery --name=ResourceInterface
 type ResourceInterface interface {
-	Get(name string, opts metav1.GetOptions, subresources ...string) (*unstructured.Unstructured, error)
-	Delete(name string, opts *metav1.DeleteOptions, subresources ...string) error
-	Create(obj *unstructured.Unstructured, options metav1.CreateOptions, subresources ...string) (*unstructured.Unstructured, error)
-	Update(obj *unstructured.Unstructured, options metav1.UpdateOptions, subresources ...string) (*unstructured.Unstructured, error)
+	Get(ctx context.Context, name string, opts metav1.GetOptions, subresources ...string) (*unstructured.Unstructured, error)
+	Delete(ctx context.Context, name string, opts metav1.DeleteOptions, subresources ...string) error
+	Create(ctx context.Context, obj *unstructured.Unstructured, options metav1.CreateOptions, subresources ...string) (*unstructured.Unstructured, error)
+	Update(ctx context.Context, obj *unstructured.Unstructured, options metav1.UpdateOptions, subresources ...string) (*unstructured.Unstructured, error)
 }
 
-//go:generate mockery -name=ClusterAssetGroupRepository
+//go:generate mockery --name=ClusterAssetGroupRepository
 type ClusterAssetGroupRepository interface {
 	Get(id string) (clusterassetgroup.Entry, apperrors.AppError)
 	Create(assetGroup clusterassetgroup.Entry) apperrors.AppError
@@ -54,7 +54,7 @@ func (r repository) Get(id string) (clusterassetgroup.Entry, apperrors.AppError)
 }
 
 func (r repository) Delete(id string) apperrors.AppError {
-	err := r.resourceInterface.Delete(id, &metav1.DeleteOptions{})
+	err := r.resourceInterface.Delete(context.Background(), id, metav1.DeleteOptions{})
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return apperrors.Internal("Failed to delete ClusterAssetGroup: %s.", err)
 	}
@@ -73,7 +73,7 @@ func (r repository) Create(assetGroupEntry clusterassetgroup.Entry) apperrors.Ap
 }
 
 func (r repository) get(id string) (v1beta1.ClusterAssetGroup, apperrors.AppError) {
-	u, err := r.resourceInterface.Get(id, metav1.GetOptions{})
+	u, err := r.resourceInterface.Get(context.Background(), id, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return v1beta1.ClusterAssetGroup{}, apperrors.NotFound("ClusterAssetGroup with %s id not found.", id)
@@ -97,7 +97,7 @@ func (r repository) create(assetGroup v1beta1.ClusterAssetGroup) apperrors.AppEr
 		return apperrors.Internal("Failed to create ClusterAssetGroup, %s.", err)
 	}
 
-	_, err = r.resourceInterface.Create(u, metav1.CreateOptions{})
+	_, err = r.resourceInterface.Create(context.Background(), u, metav1.CreateOptions{})
 	if err != nil {
 		return apperrors.Internal("Failed to create ClusterAssetGroup, %s.", err)
 	}
@@ -108,7 +108,7 @@ func (r repository) create(assetGroup v1beta1.ClusterAssetGroup) apperrors.AppEr
 func (r repository) update(id string, assetGroup v1beta1.ClusterAssetGroup) apperrors.AppError {
 
 	getRefreshedClusterAssetGroup := func(id string, assetGroup v1beta1.ClusterAssetGroup) (v1beta1.ClusterAssetGroup, error) {
-		newUnstructured, err := r.resourceInterface.Get(id, metav1.GetOptions{})
+		newUnstructured, err := r.resourceInterface.Get(context.Background(), id, metav1.GetOptions{})
 		if err != nil {
 			return v1beta1.ClusterAssetGroup{}, err
 		}
@@ -134,7 +134,7 @@ func (r repository) update(id string, assetGroup v1beta1.ClusterAssetGroup) appe
 			return err
 		}
 
-		_, err = r.resourceInterface.Update(u, metav1.UpdateOptions{})
+		_, err = r.resourceInterface.Update(context.Background(), u, metav1.UpdateOptions{})
 		if err != nil {
 			return err
 		}
@@ -170,18 +170,20 @@ func fromUnstructured(u *unstructured.Unstructured) (v1beta1.ClusterAssetGroup, 
 
 func toK8sType(assetGroupEntry clusterassetgroup.Entry) v1beta1.ClusterAssetGroup {
 	sources := make([]v1beta1.Source, 0, 3)
-	for key, url := range assetGroupEntry.Urls {
-		source := v1beta1.Source{
-			Name: v1beta1.AssetGroupSourceName(fmt.Sprintf(AssetGroupNameFormat, key, assetGroupEntry.Id)),
-			URL:  url,
-			Mode: AssetGroupModeSingle,
-			Type: v1beta1.AssetGroupSourceType(key),
-		}
-		sources = append(sources, source)
-	}
+	annotations := make(map[string]string, len(assetGroupEntry.Assets))
 
-	annotations := map[string]string{
-		clusterassetgroup.SpecHash: assetGroupEntry.SpecHash,
+	for _, asset := range assetGroupEntry.Assets {
+		source := v1beta1.Source{
+			Name:        v1beta1.AssetGroupSourceName(asset.ID),
+			DisplayName: asset.Name,
+			URL:         asset.Url,
+			Mode:        AssetGroupModeSingle,
+			Type:        v1beta1.AssetGroupSourceType(asset.Type),
+		}
+
+		sources = append(sources, source)
+		hashAnnotationName := fmt.Sprintf(clusterassetgroup.SpecHashFormat, asset.ID)
+		annotations[hashAnnotationName] = asset.SpecHash
 	}
 
 	return v1beta1.ClusterAssetGroup{
@@ -197,27 +199,35 @@ func toK8sType(assetGroupEntry clusterassetgroup.Entry) v1beta1.ClusterAssetGrou
 		},
 		Spec: v1beta1.ClusterAssetGroupSpec{
 			CommonAssetGroupSpec: v1beta1.CommonAssetGroupSpec{
-				DisplayName: "Some display name",
-				Description: "Some description",
+				DisplayName: assetGroupEntry.DisplayName,
+				Description: assetGroupEntry.Description,
 				Sources:     sources,
 			},
 		}}
 }
 
 func fromK8sType(k8sAssetGroup v1beta1.ClusterAssetGroup) clusterassetgroup.Entry {
-	urls := make(map[string]string)
+	assets := make([]clusterassetgroup.Asset, 0, len(k8sAssetGroup.Spec.Sources))
 
 	for _, source := range k8sAssetGroup.Spec.Sources {
-		urls[string(source.Type)] = source.URL
+		asset := clusterassetgroup.Asset{
+			ID:   string(source.Name),
+			Name: source.DisplayName,
+			Type: clusterassetgroup.ApiType(source.Type),
+			// Not available in Cluster Asset Group
+			Format:   "",
+			Url:      source.URL,
+			SpecHash: k8sAssetGroup.Annotations[fmt.Sprintf(clusterassetgroup.SpecHashFormat, source.Name)],
+		}
+		assets = append(assets, asset)
 	}
 
 	return clusterassetgroup.Entry{
 		Id:          k8sAssetGroup.Name,
 		Description: k8sAssetGroup.Spec.Description,
 		DisplayName: k8sAssetGroup.Spec.DisplayName,
-		Urls:        urls,
 		Labels:      k8sAssetGroup.Labels,
-		SpecHash:    k8sAssetGroup.Annotations[clusterassetgroup.SpecHash],
+		Assets:      assets,
 		Status:      clusterassetgroup.StatusType(k8sAssetGroup.Status.Phase),
 	}
 }

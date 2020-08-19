@@ -1,10 +1,6 @@
-name: logging
-version: 0.1.0
-description: "Helm Chart for Kyma logging"
 apiVersion: v1
-keywords:
-  - logging
-  - loki
-  - promtail
-  - kyma
-  - grafana
+description: Kyma component 'logging'
+name: logging
+version: 1.0.0
+home: https://kyma-project.io
+icon: https://github.com/kyma-project/kyma/blob/master/logo.png?raw=true

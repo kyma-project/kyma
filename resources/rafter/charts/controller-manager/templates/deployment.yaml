@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "rafter.fullname" . }}
+  name: {{ include "rafter.deployment.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ include "rafter.name" . }}
@@ -21,8 +21,6 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "rafter.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/managed-by: {{ .Release.Service }}
-      helm.sh/chart: {{ include "rafter.chart" . }}
   {{- if .Values.deployment.extraProperties }}
   {{ include "rafter.tplValue" ( dict "value" .Values.deployment.extraProperties "context" . ) | nindent 2 }}
   {{- end }}

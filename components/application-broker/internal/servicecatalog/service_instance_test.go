@@ -18,38 +18,6 @@ import (
 
 const namespace = "working-ns"
 
-func TestServiceInstanceFacadeGetServiceInstance(t *testing.T) {
-	// GIVEN
-	givenServiceInstance := fixServiceInstance()
-	cs := fake.NewSimpleClientset(givenServiceInstance)
-	informer := createServiceInstanceInformer(cs)
-	facade := servicecatalog.NewFacade(informer, nil)
-	waitForInformerStart(t, informer)
-
-	// WHEN
-	obj, err := facade.GetByNamespaceAndExternalID(givenServiceInstance.Namespace, givenServiceInstance.Spec.ExternalID)
-
-	//THEN
-	assert.NoError(t, err)
-	assert.Equal(t, givenServiceInstance, obj)
-}
-
-func TestServiceInstanceFacadeGetServiceInstanceNotFound(t *testing.T) {
-	// GIVEN
-	givenServiceInstance := fixServiceInstance()
-	cs := fake.NewSimpleClientset(givenServiceInstance)
-	informer := createServiceInstanceInformer(cs)
-	facade := servicecatalog.NewFacade(informer, nil)
-	waitForInformerStart(t, informer)
-
-	// WHEN
-	obj, err := facade.GetByNamespaceAndExternalID(givenServiceInstance.Namespace, "not-existing")
-
-	//THEN
-	assert.Error(t, err)
-	assert.Nil(t, obj)
-}
-
 func TestFacadeExistingAppInstance(t *testing.T) {
 	// given
 	cs := fake.NewSimpleClientset(fixAppServiceClass(), fixServiceClass(), fixAppServiceInstnace())

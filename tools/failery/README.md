@@ -48,7 +48,7 @@ dep ensure -add 'github.com/kyma-project/kyma/tools/failery'
     - `{generationTypeParams}` are additional parameters that specify a mock generation type. The **-inpkg** parameter creates a file in the same package, and the **-output {packageName}** parameter generates a mock in the `{packageName}` package.
 
     For more configuration options, see the [mockery](https://github.com/vektra/mockery) documentation.
-  
+
 1. Run the following command in your project root:
 
     ```bash
@@ -67,7 +67,7 @@ dep ensure -add 'github.com/kyma-project/kyma/tools/failery'
         return &Requester{err: err}
     }
 
-    // Get provides a failing mock function with given fields: path
+    // Get provides a failing mock Function with given fields: path
     func (_m *Requester) Get(path string) (string, error) {
         var r0 string
         var r1 error

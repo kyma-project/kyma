@@ -9,9 +9,9 @@ RESOURCES_DIR="${CURRENT_DIR}/../resources"
 
 MINIKUBE_DOMAIN=""
 # Supported Minikube Versions: MINIKUBE_VERSION_MIN (inclusive) up to MINIKUBE_VERSION_MAX (exclusive)
-MINIKUBE_VERSION=1.3.1
-KUBERNETES_VERSION=1.14.6
-KUBECTL_CLI_VERSION=1.14.6
+MINIKUBE_VERSION=1.12.2
+KUBERNETES_VERSION=1.16.3
+KUBECTL_CLI_VERSION=1.16.3
 VM_DRIVER=hyperkit
 DISK_SIZE=30g
 MEMORY=8192
@@ -219,7 +219,7 @@ function start() {
     configureMinikubeAddons
 
     # Adding domains to /etc/hosts files
-    addDevDomainsToEtcHosts "apiserver.${MINIKUBE_DOMAIN} console.${MINIKUBE_DOMAIN} catalog.${MINIKUBE_DOMAIN} instances.${MINIKUBE_DOMAIN} brokers.${MINIKUBE_DOMAIN} dex.${MINIKUBE_DOMAIN} docs.${MINIKUBE_DOMAIN} addons.${MINIKUBE_DOMAIN} lambdas-ui.${MINIKUBE_DOMAIN} console-backend.${MINIKUBE_DOMAIN} storage.${MINIKUBE_DOMAIN} jaeger.${MINIKUBE_DOMAIN} grafana.${MINIKUBE_DOMAIN} log-ui.${MINIKUBE_DOMAIN} loki.${MINIKUBE_DOMAIN} configurations-generator.${MINIKUBE_DOMAIN} gateway.${MINIKUBE_DOMAIN} connector-service.${MINIKUBE_DOMAIN} oauth2.${MINIKUBE_DOMAIN} kiali.${MINIKUBE_DOMAIN} compass-gateway.${MINIKUBE_DOMAIN} compass-gateway-mtls.${MINIKUBE_DOMAIN} compass-gateway-auth-oauth.${MINIKUBE_DOMAIN} compass.${MINIKUBE_DOMAIN} compass-mf.${MINIKUBE_DOMAIN} core-ui.${MINIKUBE_DOMAIN}"
+    addDevDomainsToEtcHosts "apiserver.${MINIKUBE_DOMAIN} console.${MINIKUBE_DOMAIN} catalog.${MINIKUBE_DOMAIN} instances.${MINIKUBE_DOMAIN} brokers.${MINIKUBE_DOMAIN} dex.${MINIKUBE_DOMAIN} docs.${MINIKUBE_DOMAIN} addons.${MINIKUBE_DOMAIN} lambdas-ui.${MINIKUBE_DOMAIN} console-backend.${MINIKUBE_DOMAIN} storage.${MINIKUBE_DOMAIN} jaeger.${MINIKUBE_DOMAIN} grafana.${MINIKUBE_DOMAIN} log-ui.${MINIKUBE_DOMAIN} loki.${MINIKUBE_DOMAIN} configurations-generator.${MINIKUBE_DOMAIN} gateway.${MINIKUBE_DOMAIN} connector-service.${MINIKUBE_DOMAIN} oauth2.${MINIKUBE_DOMAIN} kiali.${MINIKUBE_DOMAIN} core-ui.${MINIKUBE_DOMAIN} registry.${MINIKUBE_DOMAIN}"
 
     increaseFsInotifyMaxUserInstances
 

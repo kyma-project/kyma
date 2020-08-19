@@ -50,15 +50,15 @@ func TestClusterMicroFrontendResolver_ClusterMicroFrontendsQuery(t *testing.T) {
 			item, item,
 		}
 
-		expectedItem := gqlschema.ClusterMicroFrontend{
+		expectedItem := &gqlschema.ClusterMicroFrontend{
 			Name:        name,
 			Version:     version,
 			Category:    category,
 			ViewBaseURL: viewBaseUrl,
 			PreloadURL:  preloadUrl,
 			Placement:   placement,
-			NavigationNodes: []gqlschema.NavigationNode{
-				gqlschema.NavigationNode{
+			NavigationNodes: []*gqlschema.NavigationNode{
+				{
 					Label:            "test-mf",
 					NavigationPath:   "test-path",
 					ViewURL:          "/test/viewUrl",
@@ -67,7 +67,7 @@ func TestClusterMicroFrontendResolver_ClusterMicroFrontendsQuery(t *testing.T) {
 			},
 		}
 
-		expectedItems := []gqlschema.ClusterMicroFrontend{
+		expectedItems := []*gqlschema.ClusterMicroFrontend{
 			expectedItem, expectedItem,
 		}
 
@@ -95,7 +95,7 @@ func TestClusterMicroFrontendResolver_ClusterMicroFrontendsQuery(t *testing.T) {
 		resourceGetter.On("List").Return(items, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 		resolver := ui.NewClusterMicroFrontendResolver(resourceGetter)
-		var expected []gqlschema.ClusterMicroFrontend
+		var expected []*gqlschema.ClusterMicroFrontend
 
 		result, err := resolver.ClusterMicroFrontendsQuery(nil)
 

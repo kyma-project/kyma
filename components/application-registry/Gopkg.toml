@@ -22,23 +22,23 @@ required = [
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.15.9"
 
 [[constraint]]
-  name="k8s.io/apimachinery"
-  version="kubernetes-1.14.1"
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.15.9"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.14.1"
+  version = "kubernetes-1.15.9"
 
 [[constraint]]
   name = "k8s.io/code-generator"
-  version = "kubernetes-1.14.1"
+  version = "kubernetes-1.15.9"
 
 [[override]]
   name = "k8s.io/kubernetes"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.15.9"
 
 [[constraint]]
   name = "github.com/prometheus/client_golang"
@@ -54,5 +54,5 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "ba297749ad3c81d2786c3e9acaaa8751d0a2a2db"
+  revision = "28790517dd090d0b61ea121652ce98ad2a7d038c"
 

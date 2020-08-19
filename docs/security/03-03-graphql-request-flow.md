@@ -13,4 +13,4 @@ This diagram illustrates the request flow for the Console Backend Service which 
 4. Based on the results of SAR, the Kubernetes API Server informs the GraphQL application whether the user can perform the requested [GraphQL action](#details-graph-ql-available-graph-ql-actions).
 5. Based on the information provided by the Kubernetes API Server, the GraphQL application returns an appropriate response to the user.
 
->**NOTE:** Read [this](#details-graph-ql) document to learn more about the custom GraphQL implementation in Kyma.
+>**NOTE:** Read more about the [custom GraphQL implementation in Kyma](#details-graph-ql).

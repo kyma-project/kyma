@@ -21,10 +21,9 @@ data:
           }
         ]
       },
-      "editable": true,
+      "editable": false,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 35,
       "links": [],
       "panels": [
         {
@@ -70,6 +69,7 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
+          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -153,6 +153,7 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
+          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -236,6 +237,7 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
+          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -319,6 +321,7 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
+          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -339,7 +342,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "max(sum by(instance) (rate(apiserver_request_count{code=~\"5..\"}[5m])) / sum by(instance) (rate(apiserver_request_count[5m]))) * 100",
+              "expr": "max(sum by(instance) (rate(apiserver_request_total{code=~\"5..\"}[5m])) / sum by(instance) (rate(apiserver_request_total[5m]))) * 100",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "",
@@ -369,6 +372,7 @@ data:
           "editable": true,
           "error": false,
           "fill": 1,
+          "fillGradient": 0,
           "grid": {
             "threshold1Color": "rgba(216, 200, 27, 0.27)",
             "threshold2Color": "rgba(234, 112, 112, 0.22)"
@@ -379,6 +383,7 @@ data:
             "x": 0,
             "y": 7
           },
+          "hiddenSeries": false,
           "id": 7,
           "isNew": false,
           "legend": {
@@ -400,6 +405,9 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
           "paceLength": 10,
           "percentage": false,
           "pointradius": 5,
@@ -464,6 +472,7 @@ data:
           "editable": true,
           "error": false,
           "fill": 1,
+          "fillGradient": 0,
           "grid": {
             "threshold1Color": "rgba(216, 200, 27, 0.27)",
             "threshold2Color": "rgba(234, 112, 112, 0.22)"
@@ -474,6 +483,7 @@ data:
             "x": 0,
             "y": 14
           },
+          "hiddenSeries": false,
           "id": 6,
           "isNew": false,
           "legend": {
@@ -493,6 +503,9 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
           "paceLength": 10,
           "percentage": false,
           "pointradius": 5,
@@ -504,7 +517,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by(instance) (rate(apiserver_request_count{code=~\"^(?:5..)$\"}[5m]))",
+              "expr": "sum by(instance) (rate(apiserver_request_total{code=~\"^(?:5..)$\"}[5m]))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Error Rate",
@@ -512,7 +525,7 @@ data:
               "step": 60
             },
             {
-              "expr": "sum by(instance) (rate(apiserver_request_count[5m]))",
+              "expr": "sum by(instance) (rate(apiserver_request_total[5m]))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Request Rate",
@@ -563,12 +576,14 @@ data:
           "dashes": false,
           "datasource": "Prometheus",
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 9,
             "w": 12,
             "x": 0,
             "y": 21
           },
+          "hiddenSeries": false,
           "id": 13,
           "legend": {
             "alignAsTable": true,
@@ -587,17 +602,21 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
           "paceLength": 10,
           "percentage": false,
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
           "seriesOverrides": [],
+          "spaceLength": 10,
           "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(apiserver_request_count{job=\"apiserver\"}[5m])) BY (code)",
+              "expr": "sum(rate(apiserver_request_total{job=\"apiserver\"}[5m])) BY (code)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{ `{{code}}` }}",
@@ -652,12 +671,14 @@ data:
           "dashes": false,
           "datasource": "Prometheus",
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 9,
             "w": 12,
             "x": 12,
             "y": 21
           },
+          "hiddenSeries": false,
           "id": 11,
           "legend": {
             "alignAsTable": true,
@@ -676,17 +697,21 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
           "paceLength": 10,
           "percentage": false,
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
           "seriesOverrides": [],
+          "spaceLength": 10,
           "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(apiserver_request_count{job=\"apiserver\"}[5m])) BY (verb)",
+              "expr": "sum(rate(apiserver_request_total{job=\"apiserver\"}[5m])) BY (verb)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{ `{{verb}}` }}",
@@ -741,12 +766,14 @@ data:
           "dashes": false,
           "datasource": "Prometheus",
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 9,
             "w": 24,
             "x": 0,
             "y": 30
           },
+          "hiddenSeries": false,
           "id": 15,
           "legend": {
             "alignAsTable": true,
@@ -765,17 +792,21 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
           "paceLength": 10,
           "percentage": false,
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
           "seriesOverrides": [],
+          "spaceLength": 10,
           "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "expr": "topk(10,sum(rate(apiserver_request_count{job=\"apiserver\"}[5m])) BY (client))",
+              "expr": "topk(10,sum(rate(apiserver_request_total{job=\"apiserver\"}[5m])) BY (client))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -823,19 +854,111 @@ data:
             "align": false,
             "alignLevel": null
           }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 39
+          },
+          "hiddenSeries": false,
+          "id": 17,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "max": false,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sort": "avg",
+            "sortDesc": true,
+            "total": true,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "topk(5,sum(rate(apiserver_registered_watchers[5m])) BY (kind))",
+              "legendFormat": "{{ `{{kind}}` }}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "TOP 5 Registered watchers per Kind",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
         }
       ],
-      "refresh": "5s",
-      "schemaVersion": 18,
+      "refresh": "10s",
+      "schemaVersion": 21,
       "style": "dark",
       "tags": [
+        "kubernetes",
         "kyma"
       ],
       "templating": {
         "list": []
       },
       "time": {
-        "from": "now-30m",
+        "from": "now-1h",
         "to": "now"
       },
       "timepicker": {
@@ -863,8 +986,8 @@ data:
           "30d"
         ]
       },
-      "timezone": "browser",
-      "title": "Kyma / Kubernetes API Server",
+      "timezone": "",
+      "title": "Kyma / Kubernetes / API Server",
       "uid": "yz0lz_TWz",
       "version": 1
     }

@@ -21,7 +21,7 @@ data:
         }
         ]
       },
-      "editable": true,
+      "editable": false,
       "gnetId": null,
       "graphTooltip": 0,
       "links": [],
@@ -404,6 +404,7 @@ data:
       "schemaVersion": 18,
       "style": "dark",
       "tags": [
+        "auth",
         "kyma"
       ],
       "templating": {

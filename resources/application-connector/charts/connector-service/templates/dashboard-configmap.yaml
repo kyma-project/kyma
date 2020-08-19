@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -5,6 +6,11 @@ metadata:
   labels:
     grafana_dashboard: "1"
     app: monitoring-grafana
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 data:
   connector-service-dashboard.json: |-
     {
@@ -22,7 +28,7 @@ data:
           }
         ]
       },
-      "editable": true,
+      "editable": false,
       "gnetId": null,
       "graphTooltip": 0,
       "iteration": 1533822819914,
@@ -688,3 +694,5 @@ data:
       "uid": "ut2aRhFmz",
       "version": 1
     }
+
+{{- end }}

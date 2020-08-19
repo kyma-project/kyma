@@ -1,30 +1,10 @@
-# Copyright 2019 The Kyma Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 APP_NAME = event-sources
 APP_PATH = components/event-sources
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.12
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200423-1d9d6590
 SCRIPTS_DIR = ../../common/makefiles
 
 # COMPONENT_DIR is a local path to component
 include $(SCRIPTS_DIR)/generic-make-go.mk
-
-# generate goal that runs 'all-local' inside a container
-$(eval $(call buildpack-mount,all))
-
-verify:: all
-
 
 #########
 #       #
@@ -32,9 +12,9 @@ verify:: all
 #       #
 #########
 
-.DEFAULT_GOAL := all-local
-
 PKG := github.com/kyma-project/kyma/components/event-sources
+
+ISTIO_CLIENT_GO_PKG := istio.io/client-go/pkg
 
 patched_trace := vendor/go.opencensus.io/trace/trace.go.patched
 
@@ -42,33 +22,36 @@ patched_trace := vendor/go.opencensus.io/trace/trace.go.patched
 cmds := $(foreach dir,$(wildcard cmd/*),$(notdir $(dir)))
 # produce goals to build images for each cmd program ("bin1.image bin2.image ...")
 cmds_images = $(foreach cmd,$(cmds),$(cmd).image)
+cmds_clean = $(foreach cmd,$(cmds),$(cmd).clean)
 # produce goals to push images for each cmd program ("bin1.image.push bin2.image.push ...")
 cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 
+MOUNT_TARGETS = $(cmds)
+$(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
+
 
 .PHONY: clean
+clean: $(cmds_clean) resolve_clean licenses_clean
 
-all-local: clean $(cmds)
+$(cmds_clean): %.clean:
+	rm -f $*
+
+resolve_clean:
+	rm -rf vendor
+
+licenses_clean:
+	rm -rf licenses
+
+build-local: $(cmds) test-local ;
 
 # Example:
 #   make controller-manager
 GOBUILD_FLAGS := -v
-http-adapter: $(patched_trace)
-$(cmds): vendor
-	@echo "+ Building $@"
-	@CGO_ENABLED=0 go build -o $@ \
+$(cmds): %: resolve-local $(patched_trace)
+	@echo "+ Building $*"
+	@CGO_ENABLED=0 go build -o $* \
 		$(GOBUILD_FLAGS) \
-		$(PKG)/cmd/$@
-
-clean:
-	@echo "+ Cleaning"
-	rm -rf bin/
-	rm -f $(cmds)
-	@go clean -x -i $(PKG)/cmd/...
-
-vendor: Gopkg.lock
-	@echo '+ Pulling vendored dependencies'
-	@dep ensure -v --vendor-only
+		$(PKG)/cmd/$*
 
 # https://stackoverflow.com/a/13517811/4716370
 $(patched_trace): hack/set-span-id.patch vendor
@@ -78,26 +61,17 @@ $(patched_trace): hack/set-span-id.patch vendor
 	cp $< $@
 
 
-.PHONY: test
-
-GOTEST_FLAGS := -cover
-test-local: vendor $(patched_trace)
-	@echo "+ Performing unit tests"
-	$(eval testpkgs := $(shell go list -test -f '{{ if .TestGoFiles }}{{ .ForTest }}{{end}}' ./... ))
-	@go test \
-		$(GOTEST_FLAGS) \
-		$(testpkgs)
-
+test-local: $(patched_trace)
 
 .PHONY: $(cmds_images) $(cmds_images_push)
 
 # override image goals from common Makefile because we need to build several images
-build-image: ;
+build-image: $(patched_trace) $(cmds_images) ;
 push-image: $(cmds_images_push) ;
 
 # Example:
 #   make controller-manager.image
-$(cmds_images): %.image: %
+$(cmds_images): %.image: build pull-licenses 
 	$(eval $@_img_name := $(APP_NAME)-$*)
 	@echo "+ Building container image $($@_img_name)"
 	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .
@@ -124,12 +98,17 @@ API_GROUPS := sources/v1alpha1
 # generates e.g. "PKG/apis/sources/v1alpha1 PKG/apis/sources/v1alpha2"
 api-import-paths := $(foreach group,$(API_GROUPS),$(PKG)/apis/$(group))
 
-generators := deepcopy client lister informer injection
+# e.g. "authentication/v1alpha1 networking/v1alpha3"
+ISTIO_API_GROUPS := "authentication/v1alpha1"
+# generates e.g. "ISTIO_CLIENT_GO_PKG/apis/sources/v1alpha1 ISTIO_CLIENT_GO_PKG/apis/sources/v1alpha2"
+istio-api-import-paths := $(foreach group,$(ISTIO_API_GROUPS),$(ISTIO_CLIENT_GO_PKG)/apis/$(group))
+
+generators := deepcopy client lister informer injection istio-injection
 generators_bin := $(foreach x,$(generators),bin/$(x)-gen)
 
 .PHONY: codegen $(generators) $(generators_bin)
 
-codegen: $(generators) injection
+codegen: $(generators)
 
 # http://blog.jgc.org/2007/06/escaping-comma-and-space-in-gnu-make.html
 comma := ,
@@ -179,6 +158,16 @@ injection: bin/injection-gen
 		--output-package $(PKG)/client/generated/injection \
 		--versioned-clientset-package $(PKG)/client/generated/clientset/internalclientset \
 		--external-versions-informers-package $(PKG)/client/generated/informer/externalversions
+
+istio-injection: bin/injection-gen
+	@echo "+ Generating injection for $(ISTIO_API_GROUPS)"
+	@rm -rf client/generated/injection/istio
+	@bin/injection-gen \
+        --go-header-file hack/boilerplate.go.txt \
+        --input-dirs $(subst $(space),$(comma),$(istio-api-import-paths)) \
+        --output-package $(PKG)/client/generated/injection/istio \
+        --versioned-clientset-package $(ISTIO_CLIENT_GO_PKG)/clientset/versioned \
+        --external-versions-informers-package $(ISTIO_CLIENT_GO_PKG)/informers/externalversions
 
 $(generators_bin): vendor
 	@if [ -d ./vendor/k8s.io/code-generator/cmd/$(notdir $@) ]; then \

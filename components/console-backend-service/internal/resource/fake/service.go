@@ -32,3 +32,21 @@ func NewFakeServiceFactory(addToScheme func(*runtime.Scheme) error, objects ...r
 	informerFactory := dynamicinformer.NewDynamicSharedInformerFactory(client, 10)
 	return resource.NewServiceFactory(client, informerFactory), nil
 }
+
+func NewFakeGenericServiceFactory(addToScheme func(*runtime.Scheme) error, objects ...runtime.Object) (*resource.GenericServiceFactory, error) {
+	scheme := runtime.NewScheme()
+	err := addToScheme(scheme)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]runtime.Object, len(objects))
+	for i, obj := range objects {
+		result[i], err = resource.ToUnstructured(obj)
+		if err != nil {
+			return nil, err
+		}
+	}
+	client := dynamicFake.NewSimpleDynamicClient(scheme, result...)
+	informerFactory := dynamicinformer.NewDynamicSharedInformerFactory(client, time.Second)
+	return resource.NewGenericServiceFactory(client, informerFactory), nil
+}

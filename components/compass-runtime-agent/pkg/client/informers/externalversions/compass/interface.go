@@ -3,8 +3,8 @@
 package compass
 
 import (
-	v1alpha1 "kyma-project.io/compass-runtime-agent/pkg/client/informers/externalversions/compass/v1alpha1"
-	internalinterfaces "kyma-project.io/compass-runtime-agent/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/informers/externalversions/compass/v1alpha1"
+	internalinterfaces "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to each of this group's versions.

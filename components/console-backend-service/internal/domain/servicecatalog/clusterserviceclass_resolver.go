@@ -27,7 +27,7 @@ type clusterServiceClassListGetter interface {
 //go:generate mockery -name=gqlClusterServiceClassConverter -output=automock -outpkg=automock -case=underscore
 type gqlClusterServiceClassConverter interface {
 	ToGQL(in *v1beta1.ClusterServiceClass) (*gqlschema.ClusterServiceClass, error)
-	ToGQLs(in []*v1beta1.ClusterServiceClass) ([]gqlschema.ClusterServiceClass, error)
+	ToGQLs(in []*v1beta1.ClusterServiceClass) ([]*gqlschema.ClusterServiceClass, error)
 }
 
 //go:generate mockery -name=clusterServicePlanLister  -output=automock -outpkg=automock -case=underscore
@@ -81,7 +81,7 @@ func (r *clusterServiceClassResolver) ClusterServiceClassQuery(ctx context.Conte
 	return result, nil
 }
 
-func (r *clusterServiceClassResolver) ClusterServiceClassesQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.ClusterServiceClass, error) {
+func (r *clusterServiceClassResolver) ClusterServiceClassesQuery(ctx context.Context, first *int, offset *int) ([]*gqlschema.ClusterServiceClass, error) {
 	items, err := r.classLister.List(pager.PagingParams{
 		First:  first,
 		Offset: offset,
@@ -101,7 +101,7 @@ func (r *clusterServiceClassResolver) ClusterServiceClassesQuery(ctx context.Con
 	return serviceClasses, nil
 }
 
-func (r *clusterServiceClassResolver) ClusterServiceClassPlansField(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ClusterServicePlan, error) {
+func (r *clusterServiceClassResolver) ClusterServiceClassPlansField(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]*gqlschema.ClusterServicePlan, error) {
 	if obj == nil {
 		glog.Error(errors.New("%s cannot be empty in order to resolve %s for class"), pretty.ClusterServiceClass, pretty.ClusterServicePlans)
 		return nil, gqlerror.NewInternal()
@@ -122,7 +122,7 @@ func (r *clusterServiceClassResolver) ClusterServiceClassPlansField(ctx context.
 	return convertedPlans, nil
 }
 
-func (r *clusterServiceClassResolver) ClusterServiceClassInstancesField(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) ([]gqlschema.ServiceInstance, error) {
+func (r *clusterServiceClassResolver) ClusterServiceClassInstancesField(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) ([]*gqlschema.ServiceInstance, error) {
 	if obj == nil {
 		glog.Error(fmt.Errorf("%s cannot be empty in order to resolve activated field", pretty.ClusterServiceClass))
 		return nil, gqlerror.NewInternal()

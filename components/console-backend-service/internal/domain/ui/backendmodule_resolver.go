@@ -19,7 +19,7 @@ type backendModuleLister interface {
 //go:generate mockery -name=gqlBackendModuleConverter -output=automock -outpkg=automock -case=underscore
 type gqlBackendModuleConverter interface {
 	ToGQL(in *v1alpha1.BackendModule) (*gqlschema.BackendModule, error)
-	ToGQLs(in []*v1alpha1.BackendModule) ([]gqlschema.BackendModule, error)
+	ToGQLs(in []*v1alpha1.BackendModule) ([]*gqlschema.BackendModule, error)
 }
 
 type backendModuleResolver struct {
@@ -34,7 +34,7 @@ func newBackendModuleResolver(backendModuleLister backendModuleLister) *backendM
 	}
 }
 
-func (r *backendModuleResolver) BackendModulesQuery(ctx context.Context) ([]gqlschema.BackendModule, error) {
+func (r *backendModuleResolver) BackendModulesQuery(ctx context.Context) ([]*gqlschema.BackendModule, error) {
 	var items []*v1alpha1.BackendModule
 	var err error
 

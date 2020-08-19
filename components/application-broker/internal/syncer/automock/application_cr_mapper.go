@@ -13,7 +13,7 @@ type ApplicationCRMapper struct {
 }
 
 // ToModel provides a mock function with given fields: dto
-func (_m *ApplicationCRMapper) ToModel(dto *v1alpha1.Application) *internal.Application {
+func (_m *ApplicationCRMapper) ToModel(dto *v1alpha1.Application) (*internal.Application, error) {
 	ret := _m.Called(dto)
 
 	var r0 *internal.Application
@@ -25,5 +25,12 @@ func (_m *ApplicationCRMapper) ToModel(dto *v1alpha1.Application) *internal.Appl
 		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*v1alpha1.Application) error); ok {
+		r1 = rf(dto)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }

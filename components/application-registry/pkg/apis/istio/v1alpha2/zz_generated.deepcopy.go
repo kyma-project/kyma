@@ -80,7 +80,7 @@ func (in *Handler) DeepCopyObject() runtime.Object {
 func (in *HandlerList) DeepCopyInto(out *HandlerList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]Handler, len(*in))
@@ -165,7 +165,7 @@ func (in *Instance) DeepCopyObject() runtime.Object {
 func (in *InstanceList) DeepCopyInto(out *InstanceList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]Instance, len(*in))
@@ -266,7 +266,7 @@ func (in *RuleAction) DeepCopy() *RuleAction {
 func (in *RuleList) DeepCopyInto(out *RuleList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]Rule, len(*in))

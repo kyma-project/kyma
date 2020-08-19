@@ -2,5 +2,5 @@ global:
   compass:
     mtls:
       secret:
-        name: application-connector-certs
+        name: kyma-gateway-certs
       host: compass-gateway-mtls

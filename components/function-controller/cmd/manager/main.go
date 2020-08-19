@@ -1,101 +1,123 @@
-/*
-Copyright 2019 The Kyma Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package main
 
 import (
-	"flag"
 	"os"
 
-	// allow client authentication against GKE clusters
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-
+	"github.com/vrischmann/envconfig"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 
-	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
-	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
-
-	"github.com/kyma-project/kyma/components/function-controller/pkg/apis"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/controller"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/webhook"
+	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
+	internalresource "github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	// +kubebuilder:scaffold:imports
 )
 
 var (
-	metricsAddr string
-	devLog      bool
+	scheme   = runtime.NewScheme()
+	setupLog = ctrl.Log.WithName("setup")
 )
 
 func init() {
-	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
-	flag.BoolVar(&devLog, "devlog", false, "Enable logger's development mode")
+	_ = clientgoscheme.AddToScheme(scheme)
+
+	_ = serverlessv1alpha1.AddToScheme(scheme)
+	// +kubebuilder:scaffold:scheme
+}
+
+type config struct {
+	MetricsAddress        string `envconfig:"default=:8080"`
+	LeaderElectionEnabled bool   `envconfig:"default=false"`
+	LeaderElectionID      string `envconfig:"default=serverless-controller-leader-election-helper"`
+	Kubernetes            k8s.Config
+	Function              serverless.FunctionConfig
 }
 
 func main() {
-	flag.Parse()
+	ctrl.SetLogger(zap.New())
 
-	logf.SetLogger(logf.ZapLogger(devLog))
-	log := logf.Log.WithName("entrypoint")
-
-	log.Info("Generating Kubernetes client config")
-	cfg, err := config.GetConfig()
+	config, err := loadConfig("APP")
 	if err != nil {
-		log.Error(err, "Unable to generate Kubernetes client config")
+		setupLog.Error(err, "unable to load config")
 		os.Exit(1)
 	}
 
-	log.Info("Initializing controller manager")
-	mgr, err := manager.New(cfg, manager.Options{})
+	setupLog.Info("Generating Kubernetes client config")
+	restConfig := ctrl.GetConfigOrDie()
+
+	setupLog.Info("Initializing controller manager")
+	mgr, err := manager.New(restConfig, manager.Options{
+		Scheme:             scheme,
+		MetricsBindAddress: config.MetricsAddress,
+		LeaderElection:     config.LeaderElectionEnabled,
+		LeaderElectionID:   config.LeaderElectionID,
+	})
 	if err != nil {
-		log.Error(err, "Unable to initialize controller manager")
+		setupLog.Error(err, "Unable to initialize controller manager")
 		os.Exit(1)
 	}
 
-	log.Info("Registering custom resources")
-	schemeSetupFns := []func(*runtime.Scheme) error{
-		apis.AddToScheme,
-		servingv1alpha1.AddToScheme,
-		tektonv1alpha1.AddToScheme,
-	}
+	resourceClient := internalresource.New(mgr.GetClient(), scheme)
+	configMapSvc := k8s.NewConfigMapService(resourceClient, config.Kubernetes)
+	secretSvc := k8s.NewSecretService(resourceClient, config.Kubernetes)
+	serviceAccountSvc := k8s.NewServiceAccountService(resourceClient, config.Kubernetes)
 
-	for _, fn := range schemeSetupFns {
-		if err := fn(mgr.GetScheme()); err != nil {
-			log.Error(err, "Unable to register custom resources")
-			os.Exit(1)
-		}
-	}
-
-	log.Info("Adding controllers to the manager")
-	if err := controller.AddToManager(mgr); err != nil {
-		log.Error(err, "Unable to add controllers to the manager")
+	if err := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, mgr.GetEventRecorderFor("function-controller")).
+		SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create Function controller")
 		os.Exit(1)
 	}
 
-	log.Info("Adding webhooks to the manager")
-	if err := webhook.AddToManager(mgr); err != nil {
-		log.Error(err, "Unable to add webhooks to the manager")
+	if err := k8s.NewConfigMap(mgr.GetClient(), ctrl.Log, config.Kubernetes, configMapSvc).
+		SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create ConfigMap controller")
 		os.Exit(1)
 	}
 
-	log.Info("Running manager")
-	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-		log.Error(err, "Unable to run the manager")
+	if err := k8s.NewNamespace(mgr.GetClient(), ctrl.Log, config.Kubernetes, configMapSvc, secretSvc, serviceAccountSvc).
+		SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create Namespace controller")
 		os.Exit(1)
 	}
+
+	if err := k8s.NewSecret(mgr.GetClient(), ctrl.Log, config.Kubernetes, secretSvc).
+		SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create Secret controller")
+		os.Exit(1)
+	}
+
+	if err := k8s.NewServiceAccount(mgr.GetClient(), ctrl.Log, config.Kubernetes, serviceAccountSvc).
+		SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create ServiceAccount controller")
+		os.Exit(1)
+	}
+
+	// +kubebuilder:scaffold:builder
+
+	setupLog.Info("Running manager")
+	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+		setupLog.Error(err, "Unable to run the manager")
+		os.Exit(1)
+	}
+}
+
+func loadConfig(prefix string) (config, error) {
+	cfg := config{}
+	err := envconfig.InitWithPrefix(&cfg, prefix)
+	if err != nil {
+		return cfg, err
+	}
+
+	cfg.Function.Build.LimitsCPUValue = resource.MustParse(cfg.Function.Build.LimitsCPU)
+	cfg.Function.Build.LimitsMemoryValue = resource.MustParse(cfg.Function.Build.LimitsMemory)
+	cfg.Function.Build.RequestsCPUValue = resource.MustParse(cfg.Function.Build.RequestsCPU)
+	cfg.Function.Build.RequestsMemoryValue = resource.MustParse(cfg.Function.Build.RequestsMemory)
+
+	return cfg, nil
 }

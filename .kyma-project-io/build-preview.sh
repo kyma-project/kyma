@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Script for build preview of this repo like in https://kyma-project.io/docs/ on every PR.
-# For more information, please contact with: @michal-hudy @m00g3n @aerfio @magicmatatjahu
+# For more information, please contact with: @m00g3n @aerfio @pPrecel @magicmatatjahu
 
 set -eo pipefail
 
@@ -16,6 +16,8 @@ readonly WEBSITE_DIR="website"
 readonly WEBSITE_REPO="https://github.com/kyma-project/website"
 
 readonly BUILD_DIR="${KYMA_PROJECT_IO_DIR}/${WEBSITE_DIR}"
+readonly PUBLIC_DIR="${KYMA_PROJECT_IO_DIR}/${WEBSITE_DIR}/public"
+readonly DOCS_DIR="$( cd "${KYMA_PROJECT_IO_DIR}/../docs" && pwd )"
 
 # Colors
 readonly RED='\033[0;31m'
@@ -42,8 +44,15 @@ copy-website-repo() {
 }
 
 build-preview() {
-  export PREVIEW_SOURCE_DIR="${KYMA_PROJECT_IO_DIR}/.." 
+  export APP_PREVIEW_SOURCE_DIR="${KYMA_PROJECT_IO_DIR}/.."
+  export APP_DOCS_BRANCHES="preview"
+  export APP_PREPARE_FOR_REPO="kyma"
   make -C "${BUILD_DIR}" netlify-docs-preview
+}
+
+copy-build-result() {
+  mkdir -p "${DOCS_DIR}/.kyma-project-io/"
+  cp -rp "${PUBLIC_DIR}/" "${DOCS_DIR}/.kyma-project-io/"
 }
 
 main() {
@@ -58,5 +67,9 @@ main() {
   step "Building preview"
   build-preview
   pass "Builded"
+
+  step "Copying public folder"
+  copy-build-result
+  pass "Copied"
 }
 main

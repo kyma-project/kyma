@@ -1,19 +1,3 @@
-/*
-Copyright 2019 The Kyma Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package testing
 
 import (
@@ -25,17 +9,17 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
-
 	fakeeventingclient "knative.dev/eventing/pkg/client/injection/client/fake"
+	fakelegacyclient "knative.dev/eventing/pkg/legacyclient/injection/client/fake"
 	fakekubeclient "knative.dev/pkg/client/injection/kube/client/fake"
 	"knative.dev/pkg/controller"
 	fakedynamicclient "knative.dev/pkg/injection/clients/dynamicclient/fake"
 	"knative.dev/pkg/logging"
 	logtesting "knative.dev/pkg/logging/testing"
 	rt "knative.dev/pkg/reconciler/testing"
-	fakeservingclient "knative.dev/serving/pkg/client/injection/client/fake"
 
-	fakeclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
+	fakesourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
+	fakeistioclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/client/fake"
 )
 
 const (
@@ -58,14 +42,17 @@ func MakeFactory(ctor Ctor) rt.Factory {
 		ctx := context.Background()
 		ctx = logging.WithLogger(ctx, logtesting.TestLogger(t))
 
-		ctx, sourcesClient := fakeclient.With(ctx, ls.GetSourcesObjects()...)
-		ctx, servingClient := fakeservingclient.With(ctx, ls.GetServingObjects()...)
+		ctx, sourcesClient := fakesourcesclient.With(ctx, ls.GetSourcesObjects()...)
 		ctx, eventingClient := fakeeventingclient.With(ctx, ls.GetEventingObjects()...)
+		ctx, legacyClient := fakelegacyclient.With(ctx, ls.GetLegacyObjects()...)
+		ctx, istioClient := fakeistioclient.With(ctx, ls.GetIstioObjects()...)
 		// the sink URI resolver lists/watches objects using the dynamic client
 		ctx, _ = fakedynamicclient.With(ctx, scheme,
 			ToUnstructured(t, scheme, ls.GetEventingObjects())...)
 		// also inject fake k8s client which is accessed by reconciler.Base
-		ctx, _ = fakekubeclient.With(ctx)
+		k8sobjects := ls.GetCoreObjects()
+		k8sobjects = append(k8sobjects, ls.GetAppsObjects()...)
+		ctx, kubeClient := fakekubeclient.With(ctx, k8sobjects...)
 
 		eventRecorder := record.NewFakeRecorder(maxEventBufferSize)
 		ctx = controller.WithEventRecorder(ctx, eventRecorder)
@@ -73,7 +60,7 @@ func MakeFactory(ctor Ctor) rt.Factory {
 		// set up Controller from fakes
 		c := ctor(t, ctx, &ls)
 
-		actionRecorderList := rt.ActionRecorderList{sourcesClient, servingClient, eventingClient}
+		actionRecorderList := rt.ActionRecorderList{sourcesClient, eventingClient, istioClient, legacyClient, kubeClient}
 		eventList := rt.EventList{Recorder: eventRecorder}
 		statsReporter := &rt.FakeStatsReporter{}
 

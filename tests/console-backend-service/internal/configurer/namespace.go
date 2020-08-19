@@ -9,22 +9,25 @@ import (
 )
 
 type NamespaceConfigurer struct {
-	Name string
-
-	coreCli *corev1.CoreV1Client
+	NamePrefix    string
+	generatedName *string
+	coreCli       *corev1.CoreV1Client
 }
 
 func NewNamespace(name string, coreCli *corev1.CoreV1Client) *NamespaceConfigurer {
-	return &NamespaceConfigurer{Name: name, coreCli: coreCli}
+	return &NamespaceConfigurer{NamePrefix: name, coreCli: coreCli}
 }
 
-func (c *NamespaceConfigurer) Create() error {
-	_, err := c.coreCli.Namespaces().Create(&v1.Namespace{
+func (c *NamespaceConfigurer) Create(additionalLabels map[string]string) error {
+	labels := map[string]string{tester.TestLabelKey: tester.TestLabelValue}
+	for key, value := range additionalLabels {
+		labels[key] = value
+	}
+
+	namespace, err := c.coreCli.Namespaces().Create(&v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: c.Name,
-			Labels: map[string]string{
-				tester.TestLabelKey: tester.TestLabelValue,
-			},
+			GenerateName: c.NamePrefix,
+			Labels:       labels,
 		},
 	})
 
@@ -32,14 +35,23 @@ func (c *NamespaceConfigurer) Create() error {
 		return err
 	}
 
+	c.generatedName = &namespace.Name
 	return nil
 }
 
 func (c *NamespaceConfigurer) Delete() error {
-	err := c.coreCli.Namespaces().Delete(c.Name, nil)
+	if c.generatedName == nil {
+		return nil
+	}
+
+	err := c.coreCli.Namespaces().Delete(*c.generatedName, nil)
 	if err != nil && !apiErrors.IsNotFound(err) {
 		return err
 	}
 
 	return nil
+}
+
+func (c *NamespaceConfigurer) Name() string {
+	return *c.generatedName
 }

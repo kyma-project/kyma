@@ -1,3 +1,0 @@
-dependencies:
-- name: postgresql
-  condition: global.database.embedded.enabled

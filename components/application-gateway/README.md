@@ -29,7 +29,7 @@ To start the Application Gateway, run this command:
 ```
 
 The Application Gateway has the following parameters:
-- **proxyPort** is the port that acts as a proxy for the calls from services and lambdas to an external solution. The default port is `8080`.
+- **proxyPort** is the port that acts as a proxy for the calls from services and Functions to an external solution. The default port is `8080`.
 - **externalAPIPort** is the port that exposes the API allowing to check component status. The default port is `8081`.
 - **application** is the Application name used to write and read information about services. The default Application is `default-ec`.
 - **namespace** is the Namespace in which the Application Gateway is deployed. The default Namespace is `kyma-system`.
@@ -84,10 +84,9 @@ In the current solution, the Console Backend Service iterates through services t
 The Console Backend Service has the following obligatory requirements:
 - The Kubernetes service uses the `application` key, with the value as the name of the Application.
 - The Kubernetes service contains one port with the `http-api-port` name. The system uses this port for the status check.
-- Find the Kubernetes service in the `kyma-integration` Namespace. You can change its location in the `console-backend-service` chart configuration.
+- Find the Kubernetes service in the `kyma-integration` Namespace. You can change its location in the `console-backend` chart configuration.
 - The `/v1/health` endpoint returns a status of `HTTP 200`. Any other status code indicates the service is not healthy.
 
 ### Contribution
 
 To learn how you can contribute to this project, see the [Contributing](/CONTRIBUTING.md) document.
-

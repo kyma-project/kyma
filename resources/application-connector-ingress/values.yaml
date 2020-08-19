@@ -1,4 +1,0 @@
-global:
-  isLocalEnv: false
-  nginx:
-    namespace: kyma-system

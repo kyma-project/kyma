@@ -108,7 +108,7 @@ func TestPodResolver_PodsQuery(t *testing.T) {
 		resources := []*v1.Pod{
 			resource, resource,
 		}
-		expected := []gqlschema.Pod{
+		expected := []*gqlschema.Pod{
 			{
 				Name: name,
 			},
@@ -137,7 +137,7 @@ func TestPodResolver_PodsQuery(t *testing.T) {
 	t.Run("NotFound", func(t *testing.T) {
 		namespace := "namespace"
 		var resources []*v1.Pod
-		var expected []gqlschema.Pod
+		var expected []*gqlschema.Pod
 
 		resourceGetter := automock.NewPodSvc()
 		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, nil).Once()

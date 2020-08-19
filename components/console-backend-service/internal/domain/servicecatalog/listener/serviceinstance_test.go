@@ -18,7 +18,7 @@ func TestInstanceListener_OnAdd(t *testing.T) {
 		instance := new(v1beta1.ServiceInstance)
 		converter := automock.NewGQLInstanceConverter()
 
-		channel := make(chan gqlschema.ServiceInstanceEvent, 1)
+		channel := make(chan *gqlschema.ServiceInstanceEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", instance).Return(gqlInstance, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -30,7 +30,7 @@ func TestInstanceListener_OnAdd(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeAdd, result.Type)
-		assert.Equal(t, *gqlInstance, result.ServiceInstance)
+		assert.Equal(t, gqlInstance, result.ServiceInstance)
 	})
 
 	t.Run("Filtered out", func(t *testing.T) {
@@ -91,7 +91,7 @@ func TestInstanceListener_OnDelete(t *testing.T) {
 		instance := new(v1beta1.ServiceInstance)
 		converter := automock.NewGQLInstanceConverter()
 
-		channel := make(chan gqlschema.ServiceInstanceEvent, 1)
+		channel := make(chan *gqlschema.ServiceInstanceEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", instance).Return(gqlInstance, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -103,7 +103,7 @@ func TestInstanceListener_OnDelete(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeDelete, result.Type)
-		assert.Equal(t, *gqlInstance, result.ServiceInstance)
+		assert.Equal(t, gqlInstance, result.ServiceInstance)
 
 	})
 
@@ -165,7 +165,7 @@ func TestInstanceListener_OnUpdate(t *testing.T) {
 		instance := new(v1beta1.ServiceInstance)
 		converter := automock.NewGQLInstanceConverter()
 
-		channel := make(chan gqlschema.ServiceInstanceEvent, 1)
+		channel := make(chan *gqlschema.ServiceInstanceEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", instance).Return(gqlInstance, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -177,7 +177,7 @@ func TestInstanceListener_OnUpdate(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeUpdate, result.Type)
-		assert.Equal(t, *gqlInstance, result.ServiceInstance)
+		assert.Equal(t, gqlInstance, result.ServiceInstance)
 
 	})
 

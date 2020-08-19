@@ -1,0 +1,34 @@
+{{- if and (.Values.enabled) (.Values.serviceMonitor.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "fluent-bit.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "fluent-bit.metaLabels" . | trim | nindent 4 }}
+    {{- range $key, $value := .Values.serviceMonitor.selector }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  annotations:
+    {{- if .Values.globalAnnotations }}
+    {{- toYaml .Values.globalAnnotations | trim | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "fluent-bit.matchLabels" . | trim | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  endpoints:
+    - port: metrics
+      honorLabels: true
+      path: /api/v1/metrics/prometheus
+      {{- if .Values.serviceMonitor.interval }}
+      interval: {{ .Values.serviceMonitor.interval }}
+      {{- end }}
+      metricRelabelings:
+      - sourceLabels: [ __name__ ]
+        regex: ^(fluentbit_input_bytes_total|fluentbit_output_proc_bytes_total|fluentbit_output_errors_total|fluentbit_output_retries_total|fluentbit_output_retries_failed_total|process_start_time_seconds)$
+        action: keep
+{{- end }}

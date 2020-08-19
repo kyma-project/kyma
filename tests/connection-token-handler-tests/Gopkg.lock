@@ -63,7 +63,7 @@
   version = "v1.1.6"
 
 [[projects]]
-  digest = "1:2bc2317e008395c6c5d496028e3e052aef3924363249089afd254c71826e092d"
+  digest = "1:5fa4f80f1ff00a6d611e4272cc695a2278b4a436661451daf46e823ee2585e8e"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1",
@@ -72,7 +72,7 @@
     "components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "70782d1888118ad2c76b978b49505bb5286e264c"
+  revision = "28790517dd090d0b61ea121652ce98ad2a7d038c"
 
 [[projects]]
   digest = "1:2f42fa12d6911c7b7659738758631bec870b7e9b4c6be5444f963cdcfccc191f"
@@ -218,9 +218,10 @@
   version = "v2.2.2"
 
 [[projects]]
-  digest = "1:759855d98a898d7d6a091b89b9c85c03d6efd673c44e15561d716543f4e88f31"
+  digest = "1:061024a203efbf02654d4aa55d69cd10d1f8985dada4cbafe5d6ce1b6914d22a"
   name = "k8s.io/api"
   packages = [
+    "admissionregistration/v1",
     "admissionregistration/v1beta1",
     "apps/v1",
     "apps/v1beta1",
@@ -240,6 +241,7 @@
     "coordination/v1",
     "coordination/v1beta1",
     "core/v1",
+    "discovery/v1alpha1",
     "events/v1beta1",
     "extensions/v1beta1",
     "networking/v1",
@@ -259,11 +261,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "fdd30b57c827abbc506646ecfd579f6ccb3b80ab"
-  version = "kubernetes-1.15.2"
+  revision = "6287e2b171401931686bb9a4d1c769343f712343"
+  version = "kubernetes-1.16.10"
 
 [[projects]]
-  digest = "1:4dcb9b4422093b7dc775faed07473f254a45591d2f553654248027d561e1be5e"
+  digest = "1:44d81466b155e6fd868fdd5e259a4a27f92e9c9aa64aac22538dddf5c99ef522"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -302,11 +304,11 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
-  revision = "1799e75a07195de9460b8ef7300883499f12127b"
-  version = "kubernetes-1.15.2"
+  revision = "9402b4926e83cddfcac78460d5dca7ae87c1dc49"
+  version = "kubernetes-1.16.10"
 
 [[projects]]
-  digest = "1:bde410425f79036706f386a6abb23e8b19ceac70c7880424e80eb747517fa3e6"
+  digest = "1:a6d0223420405fcfd273c4dbad4a5f733f1af12cb5f4cdc4f5575e237ecc4d88"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -327,8 +329,8 @@
     "util/keyutil",
   ]
   pruneopts = "NUT"
-  revision = "2fe0317bcee0e1ff48861f77cc1e2791cceba458"
-  version = "kubernetes-1.15.2"
+  revision = "0f69009510c3f4630de40c7b7f9034f2a2728023"
+  version = "kubernetes-1.16.10"
 
 [[projects]]
   digest = "1:c05ad592787fc6cdacf8c5309d826561aa4a7d9e4e7ea28660dfb2c77ff68ab0"

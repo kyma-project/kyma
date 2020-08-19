@@ -1,8 +1,0 @@
-name: jaeger
-version: 0.1.0
-description: Helm chart for Jaeger all-in-one deployment
-keywords:
-  - Istio
-  - tracing
-sources:
-  - https://github.com/jaegertracing/jaeger

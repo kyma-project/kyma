@@ -14,13 +14,13 @@ import (
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/mockice"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/resource"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 const (
@@ -45,17 +45,17 @@ func TestClusterAssetGroupsQueries(t *testing.T) {
 	rafterCli, _, err := client.NewDynamicClientWithConfig()
 	require.NoError(t, err)
 
-	t.Log("Setup test service")
-	host, err := mockice.Start(rafterCli, MockiceNamespace, MockiceSvcName)
-	require.NoError(t, err)
-	defer mockice.Stop(rafterCli, MockiceNamespace, MockiceSvcName)
+	// t.Log("Setup test service")
+	// host, err := mockice.Start(rafterCli, MockiceNamespace, MockiceSvcName)
+	// require.NoError(t, err)
+	// defer mockice.Stop(rafterCli, MockiceNamespace, MockiceSvcName)
 
 	subscription := subscribeClusterAssetGroup(c, clusterAssetGroupEventDetailsFields())
 	defer subscription.Close()
 
 	clusterAssetGroupClient := resource.NewClusterAssetGroup(rafterCli, t.Logf)
 
-	createClusterAssetGroup(t, clusterAssetGroupClient, clusterAssetGroupName1, "1", host)
+	createClusterAssetGroup(t, clusterAssetGroupClient, clusterAssetGroupName1, "1")
 	fixedClusterAssetGroup := fixture.ClusterAssetGroup(clusterAssetGroupName1)
 
 	t.Log(fmt.Sprintf("Check subscription event of ClusterAssetGroup %s created", clusterAssetGroupName1))
@@ -64,8 +64,8 @@ func TestClusterAssetGroupsQueries(t *testing.T) {
 	assert.NoError(t, err)
 	checkClusterAssetGroupEvent(t, expectedEvent, event)
 
-	createClusterAssetGroup(t, clusterAssetGroupClient, clusterAssetGroupName3, "3", host)
-	createClusterAssetGroup(t, clusterAssetGroupClient, clusterAssetGroupName2, "2", host)
+	createClusterAssetGroup(t, clusterAssetGroupClient, clusterAssetGroupName3, "3")
+	createClusterAssetGroup(t, clusterAssetGroupClient, clusterAssetGroupName2, "2")
 
 	waitForClusterAssetGroup(t, clusterAssetGroupClient, clusterAssetGroupName1)
 	waitForClusterAssetGroup(t, clusterAssetGroupClient, clusterAssetGroupName3)
@@ -81,14 +81,15 @@ func TestClusterAssetGroupsQueries(t *testing.T) {
 
 	t.Log("Checking authorization directives...")
 	ops := &auth.OperationsInput{
-		auth.List: {fixClusterAssetGroupsQuery(clusterAssetGroupDetailsFields())},
+		auth.List:  {fixClusterAssetGroupsQuery(clusterAssetGroupDetailsFields())},
+		auth.Watch: {fixClusterAssetGroupSubscription(clusterAssetGroupEventDetailsFields())},
 	}
 	AuthSuite.Run(t, ops)
 }
 
-func createClusterAssetGroup(t *testing.T, client *resource.ClusterAssetGroup, name, order, host string) {
+func createClusterAssetGroup(t *testing.T, client *resource.ClusterAssetGroup, name, order string) {
 	t.Log(fmt.Sprintf("Create ClusterAssetGroup %s", name))
-	err := client.Create(fixClusterAssetGroupMeta(name, order), fixCommonClusterAssetGroupSpec(host))
+	err := client.Create(fixClusterAssetGroupMeta(name, order), fixCommonClusterAssetGroupSpec())
 	require.NoError(t, err)
 }
 
@@ -186,7 +187,7 @@ func checkClusterAsset(t *testing.T, expected, actual shared.ClusterAsset) {
 	assert.Equal(t, 1, len(actual.Files))
 }
 
-func subscribeClusterAssetGroup(c *graphql.Client, resourceDetailsQuery string) *graphql.Subscription {
+func fixClusterAssetGroupSubscription(resourceDetailsQuery string) *graphql.Request {
 	query := fmt.Sprintf(`
 		subscription {
 			clusterAssetGroupEvent {
@@ -194,8 +195,11 @@ func subscribeClusterAssetGroup(c *graphql.Client, resourceDetailsQuery string) 
 			}
 		}
 	`, resourceDetailsQuery)
-	req := graphql.NewRequest(query)
+	return graphql.NewRequest(query)
+}
 
+func subscribeClusterAssetGroup(c *graphql.Client, resourceDetailsQuery string) *graphql.Subscription {
+	req := fixClusterAssetGroupSubscription(resourceDetailsQuery)
 	return c.Subscribe(req)
 }
 
@@ -260,7 +264,7 @@ func fixClusterAssetGroupMeta(name, order string) metav1.ObjectMeta {
 	}
 }
 
-func fixCommonClusterAssetGroupSpec(host string) v1beta1.CommonAssetGroupSpec {
+func fixCommonClusterAssetGroupSpec() v1beta1.CommonAssetGroupSpec {
 	return v1beta1.CommonAssetGroupSpec{
 		DisplayName: fixture.AssetGroupDisplayName,
 		Description: fixture.AssetGroupDescription,
@@ -270,7 +274,7 @@ func fixCommonClusterAssetGroupSpec(host string) v1beta1.CommonAssetGroupSpec {
 				Name:       SourceName,
 				Parameters: &runtime.RawExtension{Raw: []byte(`{"json":"true","complex":{"data":"true"}}`)},
 				Mode:       v1beta1.AssetGroupSingle,
-				URL:        mockice.ResourceURL(host),
+				URL:        "https://raw.githubusercontent.com/kyma-project/kyma/master/README.md",
 			},
 		},
 	}

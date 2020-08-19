@@ -78,7 +78,7 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 |  **bindable**   |   No  | The field that specifies whether you can bind an instance of the plan or not. The default value is `false`. |
 |     **free**    |   No  | The attribute which specifies whether an instance of the plan is free or not. The default value is `false`.    |
 
-* `bind.yaml` file - contains information about binding in a specific plan. If you define in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file. For more information about this file, see [this](#details-bind-addons) document.
+* `bind.yaml` file - contains information about binding in a specific plan. If you define in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file. For more information, read about [binding addons](#details-bind-addons).
 
 * `values.yaml` file - provides the default configuration values in a given plan for the chart definition located in the `chart` directory. For more information, see the [values files](https://github.com/kubernetes/helm/blob/release-2.6/docs/chart_template_guide/values_files.md) specification.
 
@@ -88,7 +88,7 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 
 * `bind-instance-schema.json` file - contains a schema that defines parameters for a bind operation. Each input parameter is expressed as a property within a JSON object.
 
->**NOTE:** For more information about schemas, see [this](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#schemas-object) specification.
+>**NOTE:** For more information about schemas, see the [specification](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#schemas-object).
 
 ## docs directory
 
@@ -113,16 +113,4 @@ The `meta.yaml` file contains the specification of the ClusterAssetGroup or Asse
 
 >**NOTE:** Currently you can provide only one entry in the `docs` array.
 
-See [this](https://github.com/kyma-project/addons/tree/master/addons/testing-0.0.1/docs) example of the `docs` directory with documentation for the testing addon. For more information on how to provide addons documentation, read [this](#details-provide-service-classes-documentation) document.
-
-## Troubleshooting
-
-Use the dry run mode to check the generated manifests of the chart without installing it.
-The `--debug` option prints the generated manifests.
-As a prerequisite, you must install [Helm](https://github.com/kubernetes/helm) on your machine to run this command:
-
-```bash
- helm install --dry-run {path-to-chart} --debug
-```
-
-For more details, read the Helm [official documentation](https://helm.sh/docs/chart_template_guide/debugging/).
+See the [example](https://github.com/kyma-project/addons/tree/master/addons/testing-0.0.1/docs) of the `docs` directory with documentation for the testing addon. Read also how to [provide addons documentation](#details-provide-service-classes-documentation).

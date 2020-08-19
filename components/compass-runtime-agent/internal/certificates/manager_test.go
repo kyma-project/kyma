@@ -9,8 +9,8 @@ import (
 
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/secrets/mocks"
 	"github.com/stretchr/testify/require"
-	"kyma-project.io/compass-runtime-agent/internal/secrets/mocks"
 )
 
 const (

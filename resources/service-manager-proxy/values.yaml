@@ -1,55 +1,43 @@
-# Default values for service-broker-proxy.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
-replicaCount: 1
-
-image:
-  repository: quay.io/service-manager/sb-proxy-k8s
-  tag: v0.4.0
-  pullPolicy: IfNotPresent
-  pullsecret:
-
-service:
-  type: ClusterIP
-  port: 80
-
-file:
-  name: application
-  location: /etc/config
-  format: yml
-
-sm:
-  user: admin
-  password: admin
-
-##
-# Security context
-securityContext: {}
-
 config:
   app:
-    legacy_url:
-    url:
-  server:
-    port: 8081
-    request_timeout: 6000ms
-    shutdown_timeout: 6000ms
-  log:
-    level: info
-    format: text
-  sm:
-    url: http://service-manager.dev.cfdev.sh
-    osb_api_path: /v1/osb
-    request_timeout: 6000ms
-    skip_ssl_validation: false
-  producer:
-    resync_period: 1h
+    legacy_url: null
+    url: null
+  authn:
+    client_id: null
+    password: admin
+    token_issuer_url: null
+    user: admin
   k8s:
     client:
-      timeout: 30000ms
-  authn:
-    user: admin
-    password: admin
-    token_issuer_url:
-    client_id:
+      timeout: 30s
+  log:
+    format: text
+    level: info
+  producer:
+    resync_period: 12h
+  server:
+    port: 8081
+    request_timeout: 2m
+    shutdown_timeout: 6s
+  sm:
+    osb_api_path: /v1/osb
+    request_timeout: 2m
+    skip_ssl_validation: false
+    url: http://service-manager.dev.cfdev.sh
+file:
+  format: yml
+  location: /etc/config
+  name: application
+image:
+  pullPolicy: IfNotPresent
+  pullsecret: null
+  repository: eu.gcr.io/kyma-project/external/quay.io/service-manager/sb-proxy-k8s
+  tag: v0.8.4
+replicaCount: 1
+securityContext: {}
+service:
+  port: 80
+  type: ClusterIP
+sm:
+  password: admin
+  user: admin

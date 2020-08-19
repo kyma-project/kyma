@@ -7,10 +7,10 @@ import (
 
 type BrokerExtractor struct{}
 
-func (e *BrokerExtractor) Status(conditions []v1beta1.ServiceBrokerCondition) gqlschema.ServiceBrokerStatus {
+func (e *BrokerExtractor) Status(conditions []v1beta1.ServiceBrokerCondition) *gqlschema.ServiceBrokerStatus {
 	readyStatus, exists := e.findReadyCondition(conditions)
 	if exists {
-		return gqlschema.ServiceBrokerStatus{
+		return &gqlschema.ServiceBrokerStatus{
 			Ready:   readyStatus.Status == v1beta1.ConditionTrue,
 			Reason:  readyStatus.Reason,
 			Message: readyStatus.Message,
@@ -24,7 +24,7 @@ func (e *BrokerExtractor) Status(conditions []v1beta1.ServiceBrokerCondition) gq
 		message = condition.Message
 	}
 
-	return gqlschema.ServiceBrokerStatus{
+	return &gqlschema.ServiceBrokerStatus{
 		Ready:   false,
 		Reason:  reason,
 		Message: message,

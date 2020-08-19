@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "fullname" . }}
@@ -8,6 +8,10 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}
+      release: {{ .Release.Name }}
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
@@ -19,27 +23,13 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}{{ .Values.image.dir }}/service-catalog-ui:{{ .Chart.AppVersion }}"
+          image: "{{ .Values.global.containerRegistry.path }}/service-catalog-ui:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command:
-          - nginx
-          - -c
-          - /nginx-config/nginx.conf
-          - -g
-          - daemon off;
           ports:
-            - containerPort: {{ .Values.catalog.service.internalPort }}
-            - containerPort: {{ .Values.instances.service.internalPort }}
-            - containerPort: {{ .Values.brokers.service.internalPort }}
+            - containerPort: {{ .Values.service.internalPort }}
           volumeMounts:
           - name: config
-            mountPath: /var/catalog-public/config
-          - name: config
-            mountPath: /var/instances-public/config
-          - name: config
-            mountPath: /var/brokers-public/config
-          - name: nginx
-            mountPath: /nginx-config
+            mountPath: /var/public/config
       volumes:
       - name: config
         configMap:
@@ -47,9 +37,3 @@ spec:
           items:
           - key: config.js
             path: config.js
-      - name: nginx
-        configMap:
-          name: {{ .Chart.Name }}
-          items:
-          - key: nginx.conf
-            path: nginx.conf

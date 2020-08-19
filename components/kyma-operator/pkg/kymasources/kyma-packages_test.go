@@ -7,33 +7,33 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestHasInjectedSources(t *testing.T) {
-	Convey("HasInjectedSources", t, func() {
+func TestHasBundledSources(t *testing.T) {
+	Convey("HasBundledSources", t, func() {
 		Convey("returns true when sources are injected", func() {
 			fsWrapperMock := &fsWrapperMockedForExistingSources{}
 			kymaPackages := NewKymaPackages(fsWrapperMock, nil, "/kyma")
 
-			sourcesAreInjected := kymaPackages.HasInjectedSources()
+			sourcesAreBundled := kymaPackages.HasBundledSources()
 
-			So(sourcesAreInjected, ShouldEqual, true)
+			So(sourcesAreBundled, ShouldEqual, true)
 		})
 
 		Convey("returns false when sources are not injected", func() {
 			fsWrapperMock := &fsWrapperMockedForNotExistingSources{}
 			kymaPackages := NewKymaPackages(fsWrapperMock, nil, "/kyma")
 
-			sourcesAreInjected := kymaPackages.HasInjectedSources()
+			sourcesAreBundled := kymaPackages.HasBundledSources()
 
-			So(sourcesAreInjected, ShouldEqual, false)
+			So(sourcesAreBundled, ShouldEqual, false)
 		})
 	})
 
-	Convey("GetInjectedPackage", t, func() {
+	Convey("GetBundledPackage", t, func() {
 		Convey("returns KymaPackage instance for injected package", func() {
 			fsWrapperMock := &fsWrapperMockedForExistingSources{}
 			kymaPackages := NewKymaPackages(fsWrapperMock, nil, "/kyma")
 
-			injectedPackage, err := kymaPackages.GetInjectedPackage()
+			injectedPackage, err := kymaPackages.GetBundledPackage()
 
 			So(err, ShouldBeNil)
 			So(injectedPackage, ShouldNotBeNil)
@@ -43,7 +43,7 @@ func TestHasInjectedSources(t *testing.T) {
 			fsWrapperMock := &fsWrapperMockedForNotExistingSources{}
 			kymaPackages := NewKymaPackages(fsWrapperMock, nil, "/kyma")
 
-			injectedPackage, err := kymaPackages.GetInjectedPackage()
+			injectedPackage, err := kymaPackages.GetBundledPackage()
 
 			So(err, ShouldNotBeNil)
 			So(injectedPackage, ShouldBeNil)
@@ -75,8 +75,8 @@ func TestHasInjectedSources(t *testing.T) {
 	Convey("FetchPackage", t, func() {
 		Convey("fetches the package from server and extracts it", func() {
 			cmdExecutorMock := newKymaCommandExecutor().
-				pushCommand("curl", "-Lks", "http://domain.local/package.tar.gz", "-o", "/kyma/v1.0.0.tar.gz").
-				pushCommand("tar", "xz", "-C", "/kyma/v1.0.0", "--strip-components=1", "-f", "/kyma/v1.0.0.tar.gz")
+				pushCommand("curl", "-Lks", "http://domain.local/package.tar.gz", "-o", "/kyma/legacy-deprecated/v1.0.0.tar.gz").
+				pushCommand("tar", "xz", "-C", "/kyma/legacy-deprecated/v1.0.0", "--strip-components=1", "-f", "/kyma/legacy-deprecated/v1.0.0.tar.gz")
 			fsWrapperMock := &fsWrapperForCreatingDir{}
 			kymaPackages := NewKymaPackages(fsWrapperMock, cmdExecutorMock, "/kyma")
 

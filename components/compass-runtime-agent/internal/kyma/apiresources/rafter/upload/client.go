@@ -9,15 +9,17 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/httpconsts"
 	log "github.com/sirupsen/logrus"
-	"kyma-project.io/compass-runtime-agent/internal/apperrors"
-	"kyma-project.io/compass-runtime-agent/internal/httpconsts"
 )
 
 const (
 	PublicFileField      = "public"
 	EndpointFormat       = "%s/v1/upload"
 	uploadRequestTimeout = time.Duration(5 * time.Second)
+
+	directoryField = "directory"
 )
 
 type Response struct {
@@ -37,9 +39,9 @@ type UploadedFile struct {
 	Size       int64
 }
 
-//go:generate mockery -name=Client
+//go:generate mockery --name=Client
 type Client interface {
-	Upload(fileName string, contents []byte) (UploadedFile, apperrors.AppError)
+	Upload(fileName, directory string, contents []byte) (UploadedFile, apperrors.AppError)
 }
 
 type uploadClient struct {
@@ -56,8 +58,8 @@ func NewClient(uploadServiceUrl string) Client {
 	}
 }
 
-func (uc uploadClient) Upload(fileName string, contents []byte) (UploadedFile, apperrors.AppError) {
-	req, err := uc.prepareRequest(fileName, contents)
+func (uc uploadClient) Upload(fileName, directory string, contents []byte) (UploadedFile, apperrors.AppError) {
+	req, err := uc.prepareRequest(fileName, directory, contents)
 	if err != nil {
 		return UploadedFile{}, err
 	}
@@ -75,11 +77,11 @@ func (uc uploadClient) Upload(fileName string, contents []byte) (UploadedFile, a
 	return uc.extract(fileName, uploadRes)
 }
 
-func (uc uploadClient) prepareRequest(fileName string, contents []byte) (*http.Request, apperrors.AppError) {
+func (uc uploadClient) prepareRequest(fileName, directory string, contents []byte) (*http.Request, apperrors.AppError) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	{
-		err := uc.prepareMultipartForm(body, writer, fileName, contents)
+		err := uc.prepareMultipartForm(body, writer, fileName, directory, contents)
 		if err != nil {
 			return nil, err
 		}
@@ -97,13 +99,18 @@ func (uc uploadClient) prepareRequest(fileName string, contents []byte) (*http.R
 	return req, nil
 }
 
-func (uc uploadClient) prepareMultipartForm(body *bytes.Buffer, writer *multipart.Writer, fileName string, contents []byte) apperrors.AppError {
+func (uc uploadClient) prepareMultipartForm(body *bytes.Buffer, writer *multipart.Writer, fileName, directory string, contents []byte) apperrors.AppError {
 	defer func() {
 		err := writer.Close()
 		if err != nil {
 			log.Error("Failed to close multipart writer.")
 		}
 	}()
+
+	err := writer.WriteField(directoryField, directory)
+	if err != nil {
+		return apperrors.Internal("Failed to write directory field, %s.", err.Error())
+	}
 
 	publicFilePart, err := writer.CreateFormFile(PublicFileField, fileName)
 	if err != nil {

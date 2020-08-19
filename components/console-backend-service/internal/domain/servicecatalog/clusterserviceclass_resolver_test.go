@@ -85,7 +85,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassesQuery(t *testing.T) {
 		resources := []*v1beta1.ClusterServiceClass{
 			resource, resource,
 		}
-		expected := []gqlschema.ClusterServiceClass{
+		expected := []*gqlschema.ClusterServiceClass{
 			{
 				Name: "Test",
 			}, {
@@ -117,7 +117,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassesQuery(t *testing.T) {
 		resourceGetter.On("List", pager.PagingParams{}).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 		resolver := servicecatalog.NewClusterServiceClassResolver(resourceGetter, nil, nil, nil)
-		var expected []gqlschema.ClusterServiceClass
+		var expected []*gqlschema.ClusterServiceClass
 
 		result, err := resolver.ClusterServiceClassesQuery(nil, nil, nil)
 
@@ -200,7 +200,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassInstancesField(t *testin
 			t.Run(fmt.Sprintf("Test Case %d", testNo), func(t *testing.T) {
 				name := "name"
 				externalName := "externalName"
-				var expected []gqlschema.ServiceInstance
+				var expected []*gqlschema.ServiceInstance
 				resourceGetter := automock.NewInstanceListerByClusterServiceClass()
 				resourceGetter.On("ListForClusterServiceClass", name, externalName, testCase.Namespace).Return(nil, nil).Once()
 				defer resourceGetter.AssertExpectations(t)
@@ -353,19 +353,19 @@ func TestClusterServiceClassResolver_ClusterServiceClassActivatedField(t *testin
 
 func TestClusterServiceClassResolver_ClusterServiceClassPlansField(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		expectedSingleObj := gqlschema.ClusterServicePlan{
+		expectedSingleObj := &gqlschema.ClusterServicePlan{
 			Name: "Test",
 		}
-		expected := []gqlschema.ClusterServicePlan{
+		expected := []*gqlschema.ClusterServicePlan{
 			expectedSingleObj,
 			expectedSingleObj,
 		}
 
 		name := "name"
-		resource := v1beta1.ClusterServicePlan{}
+		resource := &v1beta1.ClusterServicePlan{}
 		resources := []*v1beta1.ClusterServicePlan{
-			&resource,
-			&resource,
+			resource,
+			resource,
 		}
 		resourceGetter := automock.NewClusterServicePlanLister()
 		resourceGetter.On("ListForClusterServiceClass", name).Return(resources, nil).Once()

@@ -1,7 +1,6 @@
 package testkit
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -137,13 +136,4 @@ func parseErrorResponse(response *http.Response) error {
 	}
 
 	return errorResponse
-}
-
-func compact(src []byte) []byte {
-	buffer := new(bytes.Buffer)
-	err := json.Compact(buffer, src)
-	if err != nil {
-		return src
-	}
-	return buffer.Bytes()
 }

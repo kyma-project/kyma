@@ -4,6 +4,11 @@ metadata:
   name: applicationsmicrofrontend
   labels:
     app:  applicationsmicrofrontend
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   displayName: Applications
   version: v1
@@ -11,25 +16,24 @@ spec:
   placement: cluster
   viewBaseUrl: 'https://console.{{ js .Values.global.ingress.domainName }}/consoleapp.html#'
   navigationNodes:
-    - label: Applications
+    - label: Applications/Systems
       navigationPath: apps
       viewUrl: '/home/settings/apps'
       order: 1
       settings:
-        readOnly: {{ not .Values.connector_service.enabled }}
+        readOnly: {{ .Values.global.disableLegacyConnectivity }}
       requiredPermissions:
         - apiGroup: applicationconnector.kyma-project.io
           resource: applications
           verbs:
-            - create
+            - get
             - list
-            - update
-            - delete
-    - label: Application Details
+    - label: Application/System Details
       navigationPath: apps/details
       viewUrl: '/home/settings/apps'
-    - label: Application Details
+    - label: Application/System Details
       navigationPath: apps/details/:name
       viewUrl: '/home/settings/apps/:name'
       settings:
-        readOnly: {{ not .Values.connector_service.enabled }}
+        readOnly: {{ .Values.global.disableLegacyConnectivity }}
+        

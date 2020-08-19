@@ -5,7 +5,7 @@ type: Tutorials
 
 This tutorial is intended for the developers who want to quickly learn how to deploy a sample service and test it with the Kyma cluster.
 
-This tutorial uses a standalone sample service written in the [Go](http://golang.org) language.
+This tutorial uses a standalone sample service written in the [Go language](http://golang.org).
 
 ## Prerequisites
 
@@ -84,7 +84,7 @@ Follow these steps:
 Run the following command:
 
    ```bash
-   curl -k https://raw.githubusercontent.com/kyma-project/examples/master/gateway/service/api-with-auth.yaml |  sed "s/.kyma.local/.$yourClusterDomain/" | kubectl apply -n stage -f -
+   curl -k https://raw.githubusercontent.com/kyma-project/examples/master/gateway/service/api-with-jwt.yaml |  sed "s/.kyma.local/.$yourClusterDomain/" | kubectl apply -n stage -f -
    ```
 
 After you apply this update, you must include a valid bearer ID token in the Authorization header to access the service.

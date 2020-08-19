@@ -38,4 +38,4 @@ This is the logic the Controller executes after you delete a given CR:
 
 1. If a given CR is in the **Ready** state, the Controller removes it from the storage.
 2. After addons are removed from the storage, the Controller increments the **reprocessRequest** field of all failed CRs that had conflicts with the deleted CR in order to reprocess them.
-3. The Controller deletes a [finalizer](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/#finalizers) from the given CR.
+3. The Controller deletes a [finalizer](https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-deletion) from the given CR.

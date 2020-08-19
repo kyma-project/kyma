@@ -15,9 +15,8 @@ image:
   tag: 3778b2ec
   pullPolicy: IfNotPresent
 
-installCRDs: true
-
 deployment:
+  fullnameOverride:
   labels: {}
   annotations: {}
   replicas: 1

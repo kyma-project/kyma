@@ -17,10 +17,12 @@ spec:
   selector:
     app: {{ template "fullname" . }}-webhook
   ports:
-  - name: secure
+  - name: https-secure
     protocol: TCP
     port: {{ .Values.webhook.service.port }}
     targetPort: 8443
     {{- if eq .Values.webhook.service.type "NodePort" }}
     nodePort: {{ .Values.webhook.service.nodePort.securePort }}
+    {{ else }}
+    nodePort: null
     {{- end }}

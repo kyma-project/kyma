@@ -6,7 +6,6 @@ import (
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 )
@@ -22,7 +21,7 @@ func newClusterBucket(dynamicCli dynamic.Interface) *clusterBucket {
 			Version:  v1beta1.GroupVersion.Version,
 			Group:    v1beta1.GroupVersion.Group,
 			Resource: "clusterbuckets",
-		}, ""),
+		}),
 		name: clusterBucketName,
 	}
 }
@@ -53,13 +52,8 @@ func (b *clusterBucket) create() error {
 }
 
 func (b *clusterBucket) get() (*v1beta1.ClusterBucket, error) {
-	u, err := b.resCli.Get(b.name)
-	if err != nil {
-		return nil, err
-	}
-
 	var res v1beta1.ClusterBucket
-	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &res)
+	err := b.resCli.Get("", b.name, &res)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while converting ClusterBucket %s", b.name)
 	}

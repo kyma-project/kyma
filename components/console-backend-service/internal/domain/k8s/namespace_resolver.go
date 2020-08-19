@@ -3,6 +3,8 @@ package k8s
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
+
 	"github.com/golang/glog"
 	appPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
@@ -33,6 +35,7 @@ type namespaceResolver struct {
 	namespaceConverter namespaceConverter
 	systemNamespaces   []string
 	podService         podSvc
+	gqlPodConverter    podConverter
 }
 
 func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string, podService podSvc) *namespaceResolver {
@@ -42,10 +45,11 @@ func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.Applica
 		namespaceConverter: *newNamespaceConverter(systemNamespaces),
 		systemNamespaces:   systemNamespaces,
 		podService:         podService,
+		gqlPodConverter:    podConverter{},
 	}
 }
 
-func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]gqlschema.Namespace, error) {
+func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]*gqlschema.NamespaceListItem, error) {
 	namespaces, err := r.namespaceSvc.List()
 
 	if err != nil {
@@ -70,6 +74,65 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNames
 }
 
 func (r *namespaceResolver) ApplicationsField(ctx context.Context, obj *gqlschema.Namespace) ([]string, error) {
+
+	appNames := []string{}
+	if obj == nil {
+		return appNames, errors.New("Cannot get application field for namespace")
+	}
+
+	items, err := r.appRetriever.Application().ListInNamespace(obj.Name)
+	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return appNames, nil
+		}
+
+		return nil, errors.Wrapf(err, "while listing %s for namespace %s", appPretty.Application, obj.Name)
+	}
+
+	for _, app := range items {
+		appNames = append(appNames, app.Name)
+	}
+
+	return appNames, nil
+}
+
+func (r *Resolver) PodsCountField(ctx context.Context, obj *gqlschema.NamespaceListItem) (int, error) {
+	pods, err := r.podSvc.List(obj.Name, pager.PagingParams{
+		First:  nil,
+		Offset: nil,
+	})
+
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while counting %s from namespace %s", pretty.Pods, obj.Name))
+		return 0, gqlerror.New(err, pretty.Pods, gqlerror.WithNamespace(obj.Name))
+	}
+
+	return len(pods), nil
+}
+
+func (r *Resolver) HealthyPodsCountField(ctx context.Context, obj *gqlschema.NamespaceListItem) (int, error) {
+	pods, err := r.podSvc.List(obj.Name, pager.PagingParams{
+		First:  nil,
+		Offset: nil,
+	})
+
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while listing %s from namespace %s", pretty.Pods, obj.Name))
+		return 0, gqlerror.New(err, pretty.Pods, gqlerror.WithNamespace(obj.Name))
+	}
+
+	count := 0
+	for _, pod := range pods {
+		status := r.gqlPodConverter.podStatusPhaseToGQLStatusType(pod.Status.Phase)
+		if status == "RUNNING" || status == "SUCCEEDED" {
+			count++
+		}
+	}
+
+	return count, nil
+}
+
+func (r *Resolver) ApplicationsCountField(ctx context.Context, obj *gqlschema.NamespaceListItem) (*int, error) {
 	if obj == nil {
 		return nil, errors.New("Cannot get application field for namespace")
 	}
@@ -77,18 +140,14 @@ func (r *namespaceResolver) ApplicationsField(ctx context.Context, obj *gqlschem
 	items, err := r.appRetriever.Application().ListInNamespace(obj.Name)
 	if err != nil {
 		if module.IsDisabledModuleError(err) {
-			return nil, err
+			return nil, nil
 		}
 
 		return nil, errors.Wrapf(err, "while listing %s for namespace %s", appPretty.Application, obj.Name)
 	}
 
-	var appNames []string
-	for _, app := range items {
-		appNames = append(appNames, app.Name)
-	}
-
-	return appNames, nil
+	count := len(items)
+	return &count, nil
 }
 
 func (r *namespaceResolver) NamespaceQuery(ctx context.Context, name string) (*gqlschema.Namespace, error) {
@@ -103,27 +162,27 @@ func (r *namespaceResolver) NamespaceQuery(ctx context.Context, name string) (*g
 	return converted, nil
 }
 
-func (r *namespaceResolver) CreateNamespace(ctx context.Context, name string, labels *gqlschema.Labels) (gqlschema.NamespaceMutationOutput, error) {
+func (r *namespaceResolver) CreateNamespace(ctx context.Context, name string, labels gqlschema.Labels) (*gqlschema.NamespaceMutationOutput, error) {
 	gqlLabels := r.populateLabels(labels)
 	ns, err := r.namespaceSvc.Create(name, gqlLabels)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.Namespace, name))
-		return gqlschema.NamespaceMutationOutput{}, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
+		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
 	}
-	return gqlschema.NamespaceMutationOutput{
+	return &gqlschema.NamespaceMutationOutput{
 		Name:   name,
 		Labels: ns.Labels,
 	}, nil
 }
 
-func (r *namespaceResolver) UpdateNamespace(ctx context.Context, name string, labels gqlschema.Labels) (gqlschema.NamespaceMutationOutput, error) {
-	gqlLabels := r.populateLabels(&labels)
+func (r *namespaceResolver) UpdateNamespace(ctx context.Context, name string, labels gqlschema.Labels) (*gqlschema.NamespaceMutationOutput, error) {
+	gqlLabels := r.populateLabels(labels)
 	ns, err := r.namespaceSvc.Update(name, gqlLabels)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while editing %s `%s`", pretty.Namespace, name))
-		return gqlschema.NamespaceMutationOutput{}, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
+		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
 	}
-	return gqlschema.NamespaceMutationOutput{
+	return &gqlschema.NamespaceMutationOutput{
 		Name:   name,
 		Labels: ns.Labels,
 	}, nil
@@ -148,8 +207,8 @@ func (r *namespaceResolver) DeleteNamespace(ctx context.Context, name string) (*
 	return deletedNamespace, nil
 }
 
-func (r *namespaceResolver) NamespaceEventSubscription(ctx context.Context, withSystemNamespaces *bool) (<-chan gqlschema.NamespaceEvent, error) {
-	namespaceChannel := make(chan gqlschema.NamespaceEvent, 1)
+func (r *namespaceResolver) NamespaceEventSubscription(ctx context.Context, withSystemNamespaces *bool) (<-chan *gqlschema.NamespaceEvent, error) {
+	namespaceChannel := make(chan *gqlschema.NamespaceEvent, 1)
 	filter := func(namespace *v1.Namespace) bool {
 		newBool := true
 		return namespace != nil && r.checkNamespace(namespace, withSystemNamespaces, &newBool)
@@ -157,7 +216,7 @@ func (r *namespaceResolver) NamespaceEventSubscription(ctx context.Context, with
 	namespaceListener := listener.NewNamespace(namespaceChannel, filter, &r.namespaceConverter, r.systemNamespaces)
 
 	allowAll := func(_ *v1.Pod) bool { return true }
-	podChannel := make(chan gqlschema.PodEvent, 1)
+	podChannel := make(chan *gqlschema.PodEvent, 1)
 	podsListener := listener.NewPod(podChannel, allowAll, &podConverter{})
 
 	r.namespaceSvc.Subscribe(namespaceListener)
@@ -186,10 +245,10 @@ func (r *namespaceResolver) NamespaceEventSubscription(ctx context.Context, with
 	return namespaceChannel, nil
 }
 
-func (r *namespaceResolver) populateLabels(givenLabels *gqlschema.Labels) map[string]string {
+func (r *namespaceResolver) populateLabels(givenLabels gqlschema.Labels) map[string]string {
 	labels := map[string]string{}
 	if givenLabels != nil {
-		for k, v := range *givenLabels {
+		for k, v := range givenLabels {
 			labels[k] = v
 		}
 	}

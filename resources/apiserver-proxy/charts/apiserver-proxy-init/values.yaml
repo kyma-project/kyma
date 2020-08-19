@@ -1,0 +1,7 @@
+configmapName: oidc-ca
+nameOverride: apiserver-proxy
+
+port:
+  secure: 9443
+  insecure: 8444
+  metrics: 2112

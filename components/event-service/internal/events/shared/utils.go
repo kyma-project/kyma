@@ -20,6 +20,13 @@ func ErrorResponseRequestBodyTooLarge(moreInfo string) (response *api.PublishEve
 	return &api.PublishEventResponses{Ok: nil, Error: &apiError}
 }
 
+// ErrorResponseFromEventMesh returns an error of type PublishEventResponses with InternalServerError status code
+func ErrorResponseFromEventMesh(moreInfo string) (response *api.PublishEventResponses) {
+	var details []api.ErrorDetail
+	apiError := api.Error{Status: http.StatusInternalServerError, Type: ErrorTypeInternalServer, Message: ErrorTypeInternalServer, MoreInfo: moreInfo, Details: details}
+	return &api.PublishEventResponses{Ok: nil, Error: &apiError}
+}
+
 // ErrorResponseMissingFieldEventType returns an error of type PublishEventResponses for missing EventType field
 func ErrorResponseMissingFieldEventType() (response *api.PublishEventResponses) {
 	return CreateMissingFieldError(FieldEventType)
@@ -41,7 +48,7 @@ func ErrorResponseMissingFieldEventTime() (response *api.PublishEventResponses) 
 }
 
 // ErrorResponseWrongEventTime returns an error of type PublishEventResponses for wrong EventTime field
-func ErrorResponseWrongEventTime(err error) (response *api.PublishEventResponses) {
+func ErrorResponseWrongEventTime() (response *api.PublishEventResponses) {
 	return CreateInvalidFieldError(FieldEventTime)
 }
 

@@ -12,16 +12,16 @@ type namespaceConverter struct {
 	mock.Mock
 }
 
-// ToGQL provides a mock function with given fields: in
-func (_m *namespaceConverter) ToGQL(in *v1.Namespace) *gqlschema.Namespace {
+// ToListItemGQL provides a mock function with given fields: in
+func (_m *namespaceConverter) ToListItemGQL(in *v1.Namespace) *gqlschema.NamespaceListItem {
 	ret := _m.Called(in)
 
-	var r0 *gqlschema.Namespace
-	if rf, ok := ret.Get(0).(func(*v1.Namespace) *gqlschema.Namespace); ok {
+	var r0 *gqlschema.NamespaceListItem
+	if rf, ok := ret.Get(0).(func(*v1.Namespace) *gqlschema.NamespaceListItem); ok {
 		r0 = rf(in)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*gqlschema.Namespace)
+			r0 = ret.Get(0).(*gqlschema.NamespaceListItem)
 		}
 	}
 

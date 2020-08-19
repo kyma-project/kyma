@@ -1,0 +1,3 @@
+domain: kyma.cx
+repo: github.com/kyma-project/kyma/components/permission-controller
+version: "2"

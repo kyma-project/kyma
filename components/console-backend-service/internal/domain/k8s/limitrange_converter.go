@@ -13,7 +13,7 @@ func (lr *limitRangeConverter) ToGQL(in *v1.LimitRange) *gqlschema.LimitRange {
 	}
 	out := &gqlschema.LimitRange{
 		Name:   in.Name,
-		Limits: make([]gqlschema.LimitRangeItem, 0, len(in.Spec.Limits)),
+		Limits: make([]*gqlschema.LimitRangeItem, 0, len(in.Spec.Limits)),
 	}
 
 	for _, limitRange := range in.Spec.Limits {
@@ -23,21 +23,21 @@ func (lr *limitRangeConverter) ToGQL(in *v1.LimitRange) *gqlschema.LimitRange {
 	return out
 }
 
-func (lr *limitRangeConverter) ToGQLs(in []*v1.LimitRange) []gqlschema.LimitRange {
+func (lr *limitRangeConverter) ToGQLs(in []*v1.LimitRange) []*gqlschema.LimitRange {
 	if in == nil {
 		return nil
 	}
-	result := make([]gqlschema.LimitRange, 0)
+	result := make([]*gqlschema.LimitRange, 0)
 	for _, limitRange := range in {
 		if lr := lr.ToGQL(limitRange); lr != nil {
-			result = append(result, *lr)
+			result = append(result, lr)
 		}
 	}
 	return result
 }
 
-func (lr *limitRangeConverter) limitsToGQL(item v1.LimitRangeItem) gqlschema.LimitRangeItem {
-	return gqlschema.LimitRangeItem{
+func (lr *limitRangeConverter) limitsToGQL(item v1.LimitRangeItem) *gqlschema.LimitRangeItem {
+	return &gqlschema.LimitRangeItem{
 		LimitType:      gqlschema.LimitType(item.Type),
 		DefaultRequest: lr.extractResourceValues(item.DefaultRequest),
 		Default:        lr.extractResourceValues(item.Default),
@@ -45,8 +45,11 @@ func (lr *limitRangeConverter) limitsToGQL(item v1.LimitRangeItem) gqlschema.Lim
 	}
 }
 
-func (lr *limitRangeConverter) extractResourceValues(item v1.ResourceList) gqlschema.ResourceType {
-	rt := gqlschema.ResourceType{}
+func (lr *limitRangeConverter) extractResourceValues(item v1.ResourceList) *gqlschema.ResourceType {
+	if item == nil {
+		return nil
+	}
+	rt := &gqlschema.ResourceType{}
 	if item, ok := item[v1.ResourceCPU]; ok {
 		rt.CPU = lr.stringPtr(item.String())
 	}

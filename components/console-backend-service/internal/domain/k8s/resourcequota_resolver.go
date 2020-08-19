@@ -19,7 +19,7 @@ type resourceQuotaLister interface {
 
 //go:generate mockery -name=gqlResourceQuotaConverter -output=automock -outpkg=automock -case=underscore
 type gqlResourceQuotaConverter interface {
-	ToGQLs(in []*v1.ResourceQuota) []gqlschema.ResourceQuota
+	ToGQLs(in []*v1.ResourceQuota) []*gqlschema.ResourceQuota
 	ToGQL(in *v1.ResourceQuota) *gqlschema.ResourceQuota
 }
 
@@ -35,7 +35,7 @@ type resourceQuotaResolver struct {
 	converter gqlResourceQuotaConverter
 }
 
-func (r *resourceQuotaResolver) ResourceQuotasQuery(ctx context.Context, namespace string) ([]gqlschema.ResourceQuota, error) {
+func (r *resourceQuotaResolver) ResourceQuotasQuery(ctx context.Context, namespace string) ([]*gqlschema.ResourceQuota, error) {
 	items, err := r.rqLister.ListResourceQuotas(namespace)
 	if err != nil {
 		glog.Error(

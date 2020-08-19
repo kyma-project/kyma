@@ -3,12 +3,12 @@
 package fake
 
 import (
+	compassv1alpha1 "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-	compassv1alpha1 "kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 )
 
 var scheme = runtime.NewScheme()

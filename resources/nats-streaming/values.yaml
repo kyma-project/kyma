@@ -1,4 +1,4 @@
-# Default values for event-bus-nats-streaming.
+# Default values for nats-streaming.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 1 # more than 1 replica is not currently supported
@@ -15,9 +15,9 @@ natsStreaming:
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
-  event_bus:
+  natsInit:
     dir: ""
-    version: b2aa1331
+    version: ac5a2495
   namespace: natss
   natsStreaming:
     fullname: nats-streaming

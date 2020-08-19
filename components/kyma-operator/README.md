@@ -2,118 +2,65 @@
 
 ## Overview
 
-Kyma Operator is a tool for installing all Kyma components. The project is based on the Kubernetes operator pattern. It tracks changes of the Installation custom resource and installs, uninstalls, and updates Kyma accordingly.
+Kyma Operator is a tool for installing all Kyma components. The project is based on the Kubernetes operator pattern. It tracks changes of the Installation custom resource and installs, uninstalls, and updates Kyma accordingly. 
+
+>**NOTE:** The Kyma Operator is designed to work as a [singleton](https://en.wikipedia.org/wiki/Singleton_pattern), meaning that you should deploly only one replica of the controller, and only one Installation CR.
+
+The controller extends the api-server with the following custom resources:
+- `installation.installer.kyma-project.io/v1alpha1`
 
 ## Prerequisites
 
-- Minikube 0.26.1
-- kubectl 1.9.0
-- Docker
-- jq
+- recent version of Go with the support for modules, for example 1.12.6
+- make
+- kubectl
+- access to Kubernetes environment: Minikube or a remote Kubernetes cluster
 
-## Development
+## Details
 
-Before each commit, use the [`Makefile`](./Makefile) script to test your changes:
-  ```bash
-  make verify
-  ```
+### Use commandline flags
 
-## Build a Docker image
+| Name | Required | Description | Default value |
+|------|:----------:|-------------|-----------------|
+| **kubeconfig** | NO | Path to a `kubeconfig` file. | Taken from the **KUBECONFIG** environment parameter.|
+| **kymaDir** | NO | Directory holding helm releases within the image or Pod. | `/kyma` |
+| **backoffIntervals** | NO | Number of seconds to wait before subsequent retries. | `10,20,40,60,80` |
+| **overrideLogFile** | NO | Log file to print installation overrides to. | `/dev/stdout` |
+| **overrideLogFormat** | NO | Installation override log format. The accepted values are text or JSON. | `text` |
+| **helmMaxHistory**  | NO | Maximum number of releases returned by the Helm release history query. | `10` |
+| **helmDriver** | NO | Helm backed storage drivers. Read more about [options and details](https://helm.sh/docs/helm/helm/#helm). | `secrets` |
+| **helmDebugMode** | NO | Enables/Disables Helm client output in the Kyma Operator logs. | `false` |
 
-Run the [`build.sh`](./scripts/build.sh) script to build a Docker image of the Kyma Operator:
-  ```
-  ./scripts/build.sh
-  ```
+### Supported environment variables
 
-## Run on Minikube using local sources
+| Name | Default | Description |
+| ---- | ------- | ----------- |
+| **INST_NAMESPACE** | `default` | Namespace in which the Installation CR is located. |
+| **INST_RESOURCE** | `kyma-installation` | Name of the Installation custom resource. |
+| **INST_FINALIZER** | `finalizer.installer.kyma-project.io` | Name of the finalizer. |
+| **OVERRIDES_NAMESPACE** | `kyma-installer` | Namespace in which the Installer overrides are located. |
 
-Export the path to Kyma sources as an environment variable. This environment variable is used to trigger shell scripts located in Kyma.
-  ```
-  export KYMA_PATH={PATH_TO_KYMA_SOURCES}
-  ```
+## Installer custom resource
 
-Use this script to run Minikube, set up the Kyma Operator, and install Kyma from local sources. If Minikube was started before, it will be restarted.
-  ```
-  ./scripts/run.sh --local --cr {PATH_TO_CR}
-  ```
+The `installations.installer.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format the Kyma Operator Controller listens for. To get the up-to-date CRD and show
+the output in the `yaml` format, run this command:
 
-See the [Custom resource file](#custom-resource-file) section in this document to learn how to generate a custom resource file.
+```bash
+kubectl get crd installations.installer.kyma-project.io -o yaml
+```
 
-To track progress of the installation, run:
-  ```
-  ../../installation/scripts/is-installed.sh
-  ```
-
-## Rerun Kyma without restarting Minikube
-
-This scenario is useful when you want to reuse cached Docker images.
-
-Run this script to clear running Minikube:
-  ```
-  ../../installation/scripts/clean-up.sh
-  ```
-
-Execute the `run.sh` script with the `--skip-minikube-start` flag to rerun Kyma installation without stopping your Minikube:
-  ```
-  ./scripts/run.sh --skip-minikube-start
-  ```
-
-## Upgrade Kyma
-
-The upgrade procedure relies heavily on Helm. When you trigger the upgrade, Helm performs `helm upgrade` on Helm releases that exist in the cluster and are defined in the Kyma version you're upgrading to. If a Helm release is defined in the Kyma version you're upgrading to but is not present in the cluster when you trigger the upgrade, Helm performs `helm install` and installs such a release.
-
-When you trigger Kyma upgrade, the Kyma Operator lists the Helm releases installed in your current Kyma version. This list is compared against the list of Helm releases of the Kyma version you're upgrading to. The releases are matched by their names. The releases that match between versions are upgraded through `helm upgrade`. Releases that don't match are treated as new and installed through `helm install`.
-
->**NOTE:** If you changed the name of a Helm release for a component, remove it before upgrading Kyma to prevent a situation where two Helm releases of the same component exist in the cluster.
-
-The Operator doesn't support rollbacks.
-
-The Operator doesn't migrate Custom Resources to a new version when update is triggered. Custom Resource backward compatibility, or lack thereof, is determined at the component or Helm release level.
-
-## Update the Kyma cluster
-
-Connect to the cluster that hosts your Kyma installation. Prepare the URL to the updated Kyma `tar.gz` package. Run the following command to edit the installation CR:
-  ```
-  kubectl edit installation/{CR_NAME}
-  ```
-
-Change the `url` property in **spec** to `{URL_TO KYMA_TAR_GZ}`. Trigger the update by overriding the **action** label in CR:
-  ```
-  kubectl label installation/{CR_NAME} action=install --overwrite
-  ```
-
-## Uninstall Kyma
-
-Run this command to uninstall Kyma:
-  ```
-  kubectl label installation/kyma-installation action=uninstall
-  ```
-
->**NOTE:** Uninstallation is an experimental feature that invokes the `helm delete --purge` command for each release specified in the CR. It is Helm's policy to prevent some types of resources, such as CRDs or Namespaces, from being deleted. Delete them manually before you attempt to install Kyma again on a cluster from which it was uninstalled.  
-
-## Custom resource file
+### Sample custom resource
 
 The [Installation custom resource file](https://kyma-project.io/docs/root/kyma/#custom-resource-installation) provides the basic information for Kyma installation.
 
-The required properties include:
+## Additional information
 
-- `url` which is the URL address to a Kyma charts package. Only `tar.gz` is supported and it is required for non-local installations only.
-- `version` which is the version of Kyma.
-- `components` which is the list of Kyma components.
+### Upgrade Kyma
 
-## Generate the custom resource file
+The upgrade procedure relies heavily on Helm. When you trigger the upgrade, Helm performs `helm upgrade` on Helm releases that exist in the cluster and are defined in the Kyma version you're upgrading to. If a Helm release is defined in the Kyma version you're upgrading to but is not present in the cluster when you trigger the upgrade, Helm performs `helm install` and installs such a release.
 
-Generate a custom resource file using the [`create-cr.sh`](../../installation/scripts/create-cr.sh) script. It accepts the following arguments:
+When you trigger the Kyma upgrade, the Kyma Operator lists the Helm releases installed in your current Kyma version. This list is compared against the list of Helm releases of the Kyma version you're upgrading to, to match the releases by their names. The releases that match between versions are upgraded through `helm upgrade`. Releases that don't match are treated as new and installed through `helm install`.
 
-- `--output` is a mandatory parameter which indicates the location of the custom resource output file.
-- `--url` is the URL to the Kyma package.
-- `--version` is the version of Kyma.
+>**NOTE:** If you changed the name of a Helm release for a component, remove it before upgrading Kyma to prevent a situation where two Helm releases of the same component exist in the cluster.
 
-For example:
-  ```
-  ../../installation/scripts/create-cr.sh --output installer-cr.yaml --url {URL_TO_KYMA_TAR_GZ} --version 0.8.0
-  ```
-
-## Static overrides for cluster installations
-
-You can define cluster-specific overrides for each root chart. In the cluster deployment scenario, the Kyma Operator reads the `cluster.yaml` file in each root chart and appends its content to the overrides applied during the Helm installation.
+The Operator doesn't migrate custom resources to a new version when the upgrade is triggered. The custom resource backward compatibility, or lack thereof, is determined at the component or Helm release level.

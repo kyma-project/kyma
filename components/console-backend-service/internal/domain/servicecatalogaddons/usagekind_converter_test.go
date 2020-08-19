@@ -14,15 +14,16 @@ func TestUsageKindConverter_ToGQL(t *testing.T) {
 	// GIVEN
 	conv := servicecatalogaddons.NewUsageKindConverter()
 	name := "harry"
+	resourceRef := fixDeploymentResourceReference()
 
 	// WHEN
-	result := conv.ToGQL(fixUsageKind(name))
+	result := conv.ToGQL(fixUsageKind(name, resourceRef))
 
 	// THEN
-	assert.Equal(t, result, fixUsageKindGQL(name))
+	assert.Equal(t, result, fixUsageKindGQL(name, resourceRef))
 }
 
-func fixUsageKind(name string) *v1alpha1.UsageKind {
+func fixUsageKind(name string, resourceRef *v1alpha1.ResourceReference) *v1alpha1.UsageKind {
 	return &v1alpha1.UsageKind{
 		TypeMeta: v1.TypeMeta{
 			APIVersion: "servicecatalog.kyma-project.io/v1alpha1",
@@ -33,22 +34,26 @@ func fixUsageKind(name string) *v1alpha1.UsageKind {
 		},
 		Spec: v1alpha1.UsageKindSpec{
 			DisplayName: fixUsageKindDisplayName(),
-			Resource: &v1alpha1.ResourceReference{
-				Group:   fixResource().Group,
-				Kind:    fixResource().Kind,
-				Version: fixResource().Version,
-			},
-			LabelsPath: fixUsageKindLabelsPath(),
+			Resource:    resourceRef,
+			LabelsPath:  fixUsageKindLabelsPath(),
 		},
 	}
 }
 
-func fixUsageKindGQL(name string) *gqlschema.UsageKind {
+func fixDeploymentResourceReference() *v1alpha1.ResourceReference {
+	return &v1alpha1.ResourceReference{
+		Group:   "apps",
+		Kind:    "deployment",
+		Version: "v1",
+	}
+}
+
+func fixUsageKindGQL(name string, resourceRef *v1alpha1.ResourceReference) *gqlschema.UsageKind {
 	return &gqlschema.UsageKind{
 		Name:        name,
-		Group:       fixResource().Group,
-		Kind:        fixResource().Kind,
-		Version:     fixResource().Version,
+		Group:       resourceRef.Group,
+		Kind:        resourceRef.Kind,
+		Version:     resourceRef.Version,
 		DisplayName: fixUsageKindDisplayName(),
 	}
 }
@@ -59,14 +64,6 @@ func fixUsageKindDisplayName() string {
 
 func fixUsageKindLabelsPath() string {
 	return "meta.data"
-}
-
-func fixResource() *v1alpha1.ResourceReference {
-	return &v1alpha1.ResourceReference{
-		Group:   "kubeless.io",
-		Kind:    "function",
-		Version: "v1beta1",
-	}
 }
 
 func fixUsageKindResourceNamespace() string {

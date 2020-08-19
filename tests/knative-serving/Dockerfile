@@ -1,4 +1,4 @@
-FROM golang:1.10-alpine as builder
+FROM golang:1.14-alpine3.12 as builder
 
 ENV SRC_DIR /go/src/github.com/kyma-project/kyma/tests/knative-serving/
 WORKDIR ${SRC_DIR}
@@ -9,10 +9,10 @@ COPY ./Gopkg.lock ${SRC_DIR}/
 COPY ./Gopkg.toml ${SRC_DIR}/
 COPY ./licenses/ ./licenses
 
-RUN apk add bash dep git && ${SRC_DIR}/before-commit.sh
+RUN apk add bash dep git build-base && ${SRC_DIR}/before-commit.sh
 RUN go test -c ./ -o /knative_serving.test
 
-FROM alpine:3.8
+FROM alpine:3.12
 
 LABEL source = git@github.com:kyma-project/kyma.git
 

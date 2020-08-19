@@ -2,7 +2,6 @@ package graphql
 
 import (
 	"context"
-	"crypto/tls"
 	"net/http"
 	"time"
 
@@ -15,9 +14,9 @@ const (
 	timeout = 30 * time.Second
 )
 
-type ClientConstructor func(certificate *tls.Certificate, graphqlEndpoint string, enableLogging bool, insecureConfigFetch bool) (Client, error)
+type ClientConstructor func(httpClient *http.Client, graphqlEndpoint string, enableLogging bool) (Client, error)
 
-//go:generate mockery -name=Client
+//go:generate mockery --name=Client
 type Client interface {
 	Do(req *graphql.Request, res interface{}) error
 }
@@ -28,21 +27,7 @@ type client struct {
 	logging   bool
 }
 
-func New(certificate *tls.Certificate, graphqlEndpoint string, enableLogging, insecureConfigFetch bool) (Client, error) {
-	var certificates []tls.Certificate
-	if certificate != nil {
-		certificates = []tls.Certificate{*certificate}
-	}
-
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: insecureConfigFetch,
-				Certificates:       certificates,
-			},
-		},
-	}
-
+func New(httpClient *http.Client, graphqlEndpoint string, enableLogging bool) (Client, error) {
 	gqlClient := graphql.NewClient(graphqlEndpoint, graphql.WithHTTPClient(httpClient))
 
 	client := &client{

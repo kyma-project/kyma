@@ -11,13 +11,13 @@ Learn about the lifecycle of the Asset custom resource (CR) and how its creation
 
 When you create an Asset CR, the Asset Controller (AC) receives a CR creation Event, reads the CR definition, verifies if the bucket exists, downloads the asset, unpacks it, and stores it in MinIO Gateway.
 
-![](./assets/create-asset.svg)
+![Create an asset](./assets/create-asset.svg)
 
 ## Remove an Asset CR
 
 When you remove the Asset CR, the AC receives a CR deletion Event and deletes the CR from MinIO Gateway.
 
-![](./assets/delete-asset.svg)
+![Delete an asset](./assets/delete-asset.svg)
 
 ## Change the bucket reference
 
@@ -25,10 +25,10 @@ When you modify an Asset CR by updating the bucket reference in the Asset CR to 
 
 Unfortunately, this causes duplication of data as the assets from the previous bucket storage are not cleaned up by default. Thus, to avoid multiplication of assets, first remove one Bucket CR and then modify the existing Asset CR with a new bucket reference.
 
-![](./assets/modify-bucket-ref-asset.svg)
+![Change the bucket reference](./assets/modify-bucket-ref-asset.svg)
 
 ## Change the Asset CR specification
 
 When you modify the Asset CR specification, the lifecycle starts again. The previous asset content is removed and no longer available.
 
-![](./assets/modify-asset.svg)
+![Change the Asset CR specification](./assets/modify-asset.svg)

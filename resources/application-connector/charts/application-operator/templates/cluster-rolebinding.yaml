@@ -5,11 +5,68 @@ metadata:
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications"]
     verbs: ["get", "list", "create", "update", "delete", "watch"]
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["serviceinstances"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["*"]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "create", "update", "delete", "watch", "patch"]
+  - apiGroups: ["*"]
+    resources: ["secrets"]
+    verbs: ["get", "list", "create", "update", "delete", "watch", "patch"]
+  - apiGroups: ["extensions", "apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "create", "update", "delete", "watch", "patch"]
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["*"]
+    resources: ["services"]
+    verbs: ["get", "list", "create", "update", "delete", "watch", "patch"]
+  - apiGroups: ["security.istio.io"]
+    resources: ["authorizationpolicies"]
+    verbs: ["get", "list", "create", "update", "delete", "watch"]
+  - apiGroups: ["networking.istio.io"]
+    resources: ["virtualservices"]
+    verbs: ["get", "list", "create", "update", "delete", "watch", "patch"]
+  - apiGroups: ["*"]
+    resources: ["roles", "rolebindings", "serviceaccounts"]
+    verbs: ["get", "list", "create", "update", "delete", "watch", "patch"]
+  - apiGroups: ["*"]
+    resources: ["clusterroles", "clusterrolebindings"]
+    verbs: ["get", "list", "create", "update", "delete", "watch", "patch"]
+  - apiGroups: ["sources.kyma-project.io"]
+    resources: ["httpsources"]
+    verbs: ["get", "list", "create", "update", "delete", "watch", "patch"]
+  - apiGroups: ["*"]
+    resources: ["namespaces"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["eventing.knative.dev"]
+    resources: ["triggers"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["eventing.knative.dev"]
+    resources: ["triggers"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["*"]
+    resources: ["triggers", "subscriptions"]
+    verbs: ["delete", "create"]
+  - apiGroups: ["*"]
+    resources: ["pods"]
+    verbs: ["get", "list", "create", "update", "delete", "watch"]
+  - apiGroups: ["*"]
+    resources: ["pods/log"]
+    verbs: ["get", "list"]
+  - apiGroups: ["*"]
+    resources: ["pods/portforward"]
+    verbs: ["create", "delete"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -17,7 +74,10 @@ metadata:
   name: {{ .Chart.Name }}
   labels:
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
   - kind: User
     name: system:serviceaccount:{{ .Values.global.namespace }}:{{ .Chart.Name }}

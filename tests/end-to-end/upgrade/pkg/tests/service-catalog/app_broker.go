@@ -14,16 +14,21 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
+	k8sCoreTypes "k8s.io/api/core/v1"
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	"bufio"
 )
 
 const (
-	appEnvTester        = "app-env-tester"
-	applicationName     = "application-for-testing"
-	apiServiceID        = "api-service-id"
-	eventsServiceID     = "events-service-id"
-	apiBindingName      = "app-binding"
-	apiBindingUsageName = "app-binding"
-	gatewayURL          = "https://gateway.local"
+	appEnvTester         = "app-env-tester"
+	applicationName      = "application-for-testing"
+	apiServiceID         = "api-service-id"
+	eventsServiceID      = "events-service-id"
+	apiBindingName       = "app-binding"
+	apiBindingUsageName  = "app-binding"
+	gatewayURL           = "https://gateway.local"
+	integrationNamespace = "kyma-integration"
 )
 
 // AppBrokerUpgradeTest tests the Helm Broker business logic after Kyma upgrade phase
@@ -33,6 +38,7 @@ type AppBrokerUpgradeTest struct {
 	BUInterface             bu.Interface
 	AppBrokerInterface      appBroker.Interface
 	AppConnectorInterface   appConnector.Interface
+	MessagingInterface      messagingclientv1alpha1.MessagingV1alpha1Interface
 }
 
 // NewAppBrokerUpgradeTest returns new instance of the AppBrokerUpgradeTest
@@ -40,13 +46,15 @@ func NewAppBrokerUpgradeTest(scCli clientset.Interface,
 	k8sCli kubernetes.Interface,
 	buCli bu.Interface,
 	abCli appBroker.Interface,
-	acCli appConnector.Interface) *AppBrokerUpgradeTest {
+	acCli appConnector.Interface,
+	msgCli messagingclientv1alpha1.MessagingV1alpha1Interface) *AppBrokerUpgradeTest {
 	return &AppBrokerUpgradeTest{
 		ServiceCatalogInterface: scCli,
 		K8sInterface:            k8sCli,
 		BUInterface:             buCli,
 		AppBrokerInterface:      abCli,
 		AppConnectorInterface:   acCli,
+		MessagingInterface:      msgCli,
 	}
 }
 
@@ -58,6 +66,7 @@ type appBrokerFlow struct {
 	buInterface           bu.Interface
 	appBrokerInterface    appBroker.Interface
 	appConnectorInterface appConnector.Interface
+	messagingInterface    messagingclientv1alpha1.MessagingV1alpha1Interface
 }
 
 // CreateResources creates resources needed for e2e upgrade test
@@ -65,7 +74,7 @@ func (ut *AppBrokerUpgradeTest) CreateResources(stop <-chan struct{}, log logrus
 	return ut.newFlow(stop, log, namespace).CreateResources()
 }
 
-// TestResources tests resources after backup phase
+// TestResources tests resources after upgrade
 func (ut *AppBrokerUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	return ut.newFlow(stop, log, namespace).TestResources()
 }
@@ -85,12 +94,15 @@ func (ut *AppBrokerUpgradeTest) newFlow(stop <-chan struct{}, log logrus.FieldLo
 		appBrokerInterface:    ut.AppBrokerInterface,
 		appConnectorInterface: ut.AppConnectorInterface,
 		scInterface:           ut.ServiceCatalogInterface,
+		messagingInterface:    ut.MessagingInterface,
+		k8sInterface:          ut.K8sInterface,
 	}
 }
 
 func (f *appBrokerFlow) CreateResources() error {
 	// iterate over steps
 	for _, fn := range []func() error{
+		f.createChannel,
 		f.createApplication,
 		f.createApplicationMapping,
 		f.deployEnvTester,
@@ -125,6 +137,7 @@ func (f *appBrokerFlow) TestResources() error {
 		f.waitForInstancesDeleted,
 		f.deleteApplicationMapping,
 		f.deleteApplication,
+		f.deleteChannel,
 		f.waitForClassesRemoved,
 	} {
 		err := fn()
@@ -141,10 +154,33 @@ func (f *appBrokerFlow) logReport() {
 	f.logK8SReport()
 	f.logServiceCatalogAndBindingUsageReport()
 	f.logApplicationReport()
+	f.reportLogs()
 }
 
 func (f *appBrokerFlow) deleteApplication() error {
 	return f.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().Delete(applicationName, &metav1.DeleteOptions{})
+}
+
+func (f *appBrokerFlow) createChannel() error {
+	channel := &messagingv1alpha1.Channel{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Channel",
+			APIVersion: "messaging.knative.dev/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: applicationName,
+			Labels: map[string]string{
+				"application-name": applicationName,
+			},
+		},
+	}
+
+	_, err := f.messagingInterface.Channels(integrationNamespace).Create(channel)
+	return err
+}
+
+func (f *appBrokerFlow) deleteChannel() error {
+	return f.messagingInterface.Channels(integrationNamespace).Delete(applicationName, &metav1.DeleteOptions{})
 }
 
 func (f *appBrokerFlow) createApplication() error {
@@ -419,3 +455,53 @@ func (f *appBrokerFlow) logApplicationReport() {
 	applications, err := f.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().List(metav1.ListOptions{})
 	f.report("Applications", applications, err)
 }
+
+func (f *appBrokerFlow) logFromPod(namespace, labelSelector, container string) {
+	pods, err := f.k8sInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{
+		LabelSelector: labelSelector,
+	})
+	if err != nil {
+		f.log.Errorf("unable to fetch %s logs: %s", labelSelector, err.Error())
+		return
+	}
+	if len(pods.Items) == 0 {
+		f.log.Errorf("could not find %s pod", labelSelector)
+		return
+	}
+
+	var tailLines int64 = 512
+	for _, p := range pods.Items {
+		func() {
+			req := f.k8sInterface.CoreV1().Pods(namespace).
+				GetLogs(p.Name, &k8sCoreTypes.PodLogOptions{
+				Container: container,
+				TailLines: &tailLines,
+			})
+			readCloser, err := req.Stream()
+			if err != nil {
+				return
+			}
+			defer readCloser.Close()
+
+			rd := bufio.NewReader(readCloser)
+			for {
+				line, _, err := rd.ReadLine()
+				if err != nil {
+					f.log.Warnf("error while reading logs: %s", err.Error())
+					return
+				}
+				f.log.Infof(string(line))
+			}
+			return
+		}()
+
+	}
+}
+
+func (f *appBrokerFlow) reportLogs() {
+	f.log.Infof("Application Broker logs:")
+	f.logFromPod(integrationNamespace, "app=application-broker", "ctrl")
+	f.log.Infof("Service Binding Usage Controller logs:")
+	f.logFromPod("kyma-system", "app=service-catalog-addons-service-binding-usage-controller", "service-binding-usage-controller")
+}
+

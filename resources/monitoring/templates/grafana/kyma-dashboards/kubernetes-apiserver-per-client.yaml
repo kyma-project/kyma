@@ -21,7 +21,7 @@ data:
         }
         ]
       },
-      "editable": true,
+      "editable": false,
       "gnetId": null,
       "graphTooltip": 0,
       "id": 36,
@@ -80,7 +80,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "sum(rate(apiserver_request_count{job=\"apiserver\", client=\"$client\"}[5m])) BY (client)",
+          "expr": "sum(rate(apiserver_request_total{job=\"apiserver\", client=\"$client\"}[5m])) BY (client)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{"{{"}} client }}",
@@ -167,7 +167,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "sum(rate(apiserver_request_count{job=\"apiserver\", client=\"$client\"}[5m])) BY (code)",
+          "expr": "sum(rate(apiserver_request_total{job=\"apiserver\", client=\"$client\"}[5m])) BY (code)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{"{{"}} code }}",
@@ -254,7 +254,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "sum(rate(apiserver_request_count{job=\"apiserver\", client=\"$client\"}[5m])) BY (verb)",
+          "expr": "sum(rate(apiserver_request_total{job=\"apiserver\", client=\"$client\"}[5m])) BY (verb)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{"{{"}} verb }}",
@@ -339,7 +339,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "rate(apiserver_request_count{code=~\"^(?:5..)$\", client=\"$client\"}[5m]) ",
+          "expr": "rate(apiserver_request_total{code=~\"^(?:5..)$\", client=\"$client\"}[5m]) ",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -390,6 +390,7 @@ data:
       "schemaVersion": 18,
       "style": "dark",
       "tags": [
+        "kubernetes",
         "kyma"
       ],
       "templating": {
@@ -422,9 +423,10 @@ data:
         ]
       },
       "time": {
-        "from": "now-6h",
+        "from": "now-1h",
         "to": "now"
       },
+      "refresh": "10s",
       "timepicker": {
         "refresh_intervals": [
           "5s",
@@ -451,7 +453,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Kyma / Kubernetes API Server Clients",
+      "title": "Kyma / Kubernetes / API Server Clients",
       "uid": "tKyXpwoWk",
       "version": 1
     }

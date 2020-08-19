@@ -19,8 +19,8 @@ func NewResolver(err error) *Resolver {
 }
 
 // ClusterServiceBrokerEventSubscription provides a failing mock function with given fields: ctx
-func (_m *Resolver) ClusterServiceBrokerEventSubscription(ctx context.Context) (<-chan gqlschema.ClusterServiceBrokerEvent, error) {
-	var r0 <-chan gqlschema.ClusterServiceBrokerEvent
+func (_m *Resolver) ClusterServiceBrokerEventSubscription(ctx context.Context) (<-chan *gqlschema.ClusterServiceBrokerEvent, error) {
+	var r0 <-chan *gqlschema.ClusterServiceBrokerEvent
 	var r1 error
 	r1 = _m.err
 
@@ -37,8 +37,8 @@ func (_m *Resolver) ClusterServiceBrokerQuery(ctx context.Context, name string) 
 }
 
 // ClusterServiceBrokersQuery provides a failing mock function with given fields: ctx, first, offset
-func (_m *Resolver) ClusterServiceBrokersQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.ClusterServiceBroker, error) {
-	var r0 []gqlschema.ClusterServiceBroker
+func (_m *Resolver) ClusterServiceBrokersQuery(ctx context.Context, first *int, offset *int) ([]*gqlschema.ClusterServiceBroker, error) {
+	var r0 []*gqlschema.ClusterServiceBroker
 	var r1 error
 	r1 = _m.err
 
@@ -64,8 +64,8 @@ func (_m *Resolver) ClusterServiceClassClusterAssetGroupField(ctx context.Contex
 }
 
 // ClusterServiceClassInstancesField provides a failing mock function with given fields: ctx, obj, namespace
-func (_m *Resolver) ClusterServiceClassInstancesField(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) ([]gqlschema.ServiceInstance, error) {
-	var r0 []gqlschema.ServiceInstance
+func (_m *Resolver) ClusterServiceClassInstancesField(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) ([]*gqlschema.ServiceInstance, error) {
+	var r0 []*gqlschema.ServiceInstance
 	var r1 error
 	r1 = _m.err
 
@@ -73,8 +73,8 @@ func (_m *Resolver) ClusterServiceClassInstancesField(ctx context.Context, obj *
 }
 
 // ClusterServiceClassPlansField provides a failing mock function with given fields: ctx, obj
-func (_m *Resolver) ClusterServiceClassPlansField(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ClusterServicePlan, error) {
-	var r0 []gqlschema.ClusterServicePlan
+func (_m *Resolver) ClusterServiceClassPlansField(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]*gqlschema.ClusterServicePlan, error) {
+	var r0 []*gqlschema.ClusterServicePlan
 	var r1 error
 	r1 = _m.err
 
@@ -91,8 +91,17 @@ func (_m *Resolver) ClusterServiceClassQuery(ctx context.Context, name string) (
 }
 
 // ClusterServiceClassesQuery provides a failing mock function with given fields: ctx, first, offset
-func (_m *Resolver) ClusterServiceClassesQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.ClusterServiceClass, error) {
-	var r0 []gqlschema.ClusterServiceClass
+func (_m *Resolver) ClusterServiceClassesQuery(ctx context.Context, first *int, offset *int) ([]*gqlschema.ClusterServiceClass, error) {
+	var r0 []*gqlschema.ClusterServiceClass
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// ClusterServicePlanClusterAssetGroupField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ClusterServicePlanClusterAssetGroupField(ctx context.Context, obj *gqlschema.ClusterServicePlan) (*gqlschema.ClusterAssetGroup, error) {
+	var r0 *gqlschema.ClusterAssetGroup
 	var r1 error
 	r1 = _m.err
 
@@ -100,7 +109,7 @@ func (_m *Resolver) ClusterServiceClassesQuery(ctx context.Context, first *int, 
 }
 
 // CreateServiceBindingMutation provides a failing mock function with given fields: ctx, serviceBindingName, serviceInstanceName, env, parameters
-func (_m *Resolver) CreateServiceBindingMutation(ctx context.Context, serviceBindingName *string, serviceInstanceName string, env string, parameters *gqlschema.JSON) (*gqlschema.CreateServiceBindingOutput, error) {
+func (_m *Resolver) CreateServiceBindingMutation(ctx context.Context, serviceBindingName *string, serviceInstanceName string, env string, parameters gqlschema.JSON) (*gqlschema.CreateServiceBindingOutput, error) {
 	var r0 *gqlschema.CreateServiceBindingOutput
 	var r1 error
 	r1 = _m.err
@@ -136,8 +145,8 @@ func (_m *Resolver) DeleteServiceInstanceMutation(ctx context.Context, name stri
 }
 
 // ServiceBindingEventSubscription provides a failing mock function with given fields: ctx, namespace
-func (_m *Resolver) ServiceBindingEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBindingEvent, error) {
-	var r0 <-chan gqlschema.ServiceBindingEvent
+func (_m *Resolver) ServiceBindingEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.ServiceBindingEvent, error) {
+	var r0 <-chan *gqlschema.ServiceBindingEvent
 	var r1 error
 	r1 = _m.err
 
@@ -163,8 +172,8 @@ func (_m *Resolver) ServiceBindingsToInstanceQuery(ctx context.Context, instance
 }
 
 // ServiceBrokerEventSubscription provides a failing mock function with given fields: ctx, namespace
-func (_m *Resolver) ServiceBrokerEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBrokerEvent, error) {
-	var r0 <-chan gqlschema.ServiceBrokerEvent
+func (_m *Resolver) ServiceBrokerEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.ServiceBrokerEvent, error) {
+	var r0 <-chan *gqlschema.ServiceBrokerEvent
 	var r1 error
 	r1 = _m.err
 
@@ -181,8 +190,8 @@ func (_m *Resolver) ServiceBrokerQuery(ctx context.Context, name string, namespa
 }
 
 // ServiceBrokersQuery provides a failing mock function with given fields: ctx, namespace, first, offset
-func (_m *Resolver) ServiceBrokersQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ServiceBroker, error) {
-	var r0 []gqlschema.ServiceBroker
+func (_m *Resolver) ServiceBrokersQuery(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.ServiceBroker, error) {
+	var r0 []*gqlschema.ServiceBroker
 	var r1 error
 	r1 = _m.err
 
@@ -217,8 +226,8 @@ func (_m *Resolver) ServiceClassClusterAssetGroupField(ctx context.Context, obj 
 }
 
 // ServiceClassInstancesField provides a failing mock function with given fields: ctx, obj
-func (_m *Resolver) ServiceClassInstancesField(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServiceInstance, error) {
-	var r0 []gqlschema.ServiceInstance
+func (_m *Resolver) ServiceClassInstancesField(ctx context.Context, obj *gqlschema.ServiceClass) ([]*gqlschema.ServiceInstance, error) {
+	var r0 []*gqlschema.ServiceInstance
 	var r1 error
 	r1 = _m.err
 
@@ -226,8 +235,8 @@ func (_m *Resolver) ServiceClassInstancesField(ctx context.Context, obj *gqlsche
 }
 
 // ServiceClassPlansField provides a failing mock function with given fields: ctx, obj
-func (_m *Resolver) ServiceClassPlansField(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServicePlan, error) {
-	var r0 []gqlschema.ServicePlan
+func (_m *Resolver) ServiceClassPlansField(ctx context.Context, obj *gqlschema.ServiceClass) ([]*gqlschema.ServicePlan, error) {
+	var r0 []*gqlschema.ServicePlan
 	var r1 error
 	r1 = _m.err
 
@@ -244,8 +253,8 @@ func (_m *Resolver) ServiceClassQuery(ctx context.Context, name string, namespac
 }
 
 // ServiceClassesQuery provides a failing mock function with given fields: ctx, namespace, first, offset
-func (_m *Resolver) ServiceClassesQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ServiceClass, error) {
-	var r0 []gqlschema.ServiceClass
+func (_m *Resolver) ServiceClassesQuery(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.ServiceClass, error) {
+	var r0 []*gqlschema.ServiceClass
 	var r1 error
 	r1 = _m.err
 
@@ -280,8 +289,8 @@ func (_m *Resolver) ServiceInstanceClusterServicePlanField(ctx context.Context, 
 }
 
 // ServiceInstanceEventSubscription provides a failing mock function with given fields: ctx, namespace
-func (_m *Resolver) ServiceInstanceEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceInstanceEvent, error) {
-	var r0 <-chan gqlschema.ServiceInstanceEvent
+func (_m *Resolver) ServiceInstanceEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.ServiceInstanceEvent, error) {
+	var r0 <-chan *gqlschema.ServiceInstanceEvent
 	var r1 error
 	r1 = _m.err
 
@@ -316,8 +325,26 @@ func (_m *Resolver) ServiceInstanceServicePlanField(ctx context.Context, obj *gq
 }
 
 // ServiceInstancesQuery provides a failing mock function with given fields: ctx, namespace, first, offset, status
-func (_m *Resolver) ServiceInstancesQuery(ctx context.Context, namespace string, first *int, offset *int, status *gqlschema.InstanceStatusType) ([]gqlschema.ServiceInstance, error) {
-	var r0 []gqlschema.ServiceInstance
+func (_m *Resolver) ServiceInstancesQuery(ctx context.Context, namespace string, first *int, offset *int, status *gqlschema.InstanceStatusType) ([]*gqlschema.ServiceInstance, error) {
+	var r0 []*gqlschema.ServiceInstance
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// ServicePlanAssetGroupField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ServicePlanAssetGroupField(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.AssetGroup, error) {
+	var r0 *gqlschema.AssetGroup
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// ServicePlanClusterAssetGroupField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ServicePlanClusterAssetGroupField(ctx context.Context, obj *gqlschema.ServicePlan) (*gqlschema.ClusterAssetGroup, error) {
+	var r0 *gqlschema.ClusterAssetGroup
 	var r1 error
 	r1 = _m.err
 

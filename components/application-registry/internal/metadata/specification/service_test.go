@@ -17,7 +17,7 @@ import (
 const (
 	serviceId                    = "1234"
 	gatewayUrl                   = "http://1234.io"
-	defaultSpecRequestTimeout    = 5
+	defaultSpecRequestTimeout    = 20
 	defaultSpecRequestSkipVerify = true
 )
 

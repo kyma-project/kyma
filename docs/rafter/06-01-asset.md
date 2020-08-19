@@ -47,18 +47,23 @@ spec:
       filter: \.js$
   bucketRef:
     name: my-bucket
+  displayName: "Operations svc"
 status:
-  phase: Failed
-  reason: ValidationFailed
-  message: "The file is not valid against the provided json schema"
+  phase: Ready
+  reason: Uploaded
+  message: Asset content has been uploaded
   lastHeartbeatTime: "2018-01-03T07:38:24Z"
   observedGeneration: 1
   assetRef:
-    assets:
-    - README.md
-    - directory/subdirectory/file.md
-    baseUrl: https://{STORAGE_ADDRESS}/test-sample-1b19rnbuc6ir8/asset-sample
-
+    baseUrl: https://{STORAGE_ADDRESS}/my-bucket-1b19rnbuc6ir8/my-package-assets
+    files:
+    - metadata:
+        title: Overview
+      name: README.md
+    - metadata:
+        title: Benefits of distributed storage
+        type: Details
+      name: directory/subdirectory/file.md
 ```
 
 ## Custom resource parameters
@@ -74,35 +79,39 @@ This table lists all possible parameters of a given resource together with their
 | **spec.source.parameters** | No | Specifies a set of parameters for the Asset. For example, use it to define what to render, disable, or modify in the UI. Define it in a valid YAML or JSON format. |
 | **spec.source.url** | Yes | Specifies the location of the file. |
 | **spec.source.filter** | No | Specifies the regex pattern used to select files to store from the package. |
-| **spec.source.validationwebhookservice** | No | Provides specification of the validation webhook services. |
-| **spec.source.validationwebhookservice.name** | Yes | Provides the name of the validation webhook service. |
-| **spec.source.validationwebhookservice.namespace** | Yes | Provides the Namespace in which the service is available. |
-| **spec.source.validationwebhookservice.endpoint** | No | Specifies the endpoint to which the service sends calls. |
-| **spec.source.validationwebhookservice.parameters** | No | Provides detailed parameters specific for a given validation service and its functionality. |
-| **spec.source.validationwebhookservice.filter** | No | Specifies the regex pattern used to select files sent to the service. |
-| **spec.source.mutationwebhookservice** | No | Provides specification of the mutation webhook services. |
-| **spec.source.mutationwebhookservice.name** | Yes | Provides the name of the mutation webhook service. |
-| **spec.source.mutationwebhookservice.namespace** | Yes | Provides the Namespace in which the service is available. |
-| **spec.source.mutationwebhookservice.endpoint** | No | Specifies the endpoint to which the service sends calls. |
-| **spec.source.mutationwebhookservice.parameters** | No | Provides detailed parameters specific for a given mutation service and its functionality. |
-| **spec.source.mutationwebhookservice.filter** | No | Specifies the regex pattern used to select files sent to the service. |
-| **spec.source.metadatawebhookservice** | No | Provides specification of the metadata webhook services. |
-| **spec.source.metadatawebhookservice.name** | Yes | Provides the name of the metadata webhook service. |
-| **spec.source.metadatawebhookservice.namespace** | Yes | Provides the Namespace in which the service is available. |
-| **spec.source.metadatawebhookservice.endpoint** | No | Specifies the endpoint to which the service sends calls. |
-| **spec.source.metadatawebhookservice.filter** | No | Specifies the regex pattern used to select files sent to the service. |
-| **spec.bucketref.name** | Yes | Provides the name of the bucket for storing the asset. |
+| **spec.source.validationWebhookService** | No | Provides specification of the validation webhook services. |
+| **spec.source.validationWebhookService.name** | Yes | Provides the name of the validation webhook service. |
+| **spec.source.validationWebhookService.namespace** | Yes | Provides the Namespace in which the service is available. |
+| **spec.source.validationWebhookService.endpoint** | No | Specifies the endpoint to which the service sends calls. |
+| **spec.source.validationWebhookService.parameters** | No | Provides detailed parameters specific for a given validation service and its functionality. |
+| **spec.source.validationWebhookService.filter** | No | Specifies the regex pattern used to select files sent to the service. |
+| **spec.source.mutationWebhookService** | No | Provides specification of the mutation webhook services. |
+| **spec.source.mutationWebhookService.name** | Yes | Provides the name of the mutation webhook service. |
+| **spec.source.mutationWebhookService.namespace** | Yes | Provides the Namespace in which the service is available. |
+| **spec.source.mutationWebhookService.endpoint** | No | Specifies the endpoint to which the service sends calls. |
+| **spec.source.mutationWebhookService.parameters** | No | Provides detailed parameters specific for a given mutation service and its functionality. |
+| **spec.source.mutationWebhookService.filter** | No | Specifies the regex pattern used to select files sent to the service. |
+| **spec.source.metadataWebhookService** | No | Provides specification of the metadata webhook services. |
+| **spec.source.metadataWebhookService.name** | Yes | Provides the name of the metadata webhook service. |
+| **spec.source.metadataWebhookService.namespace** | Yes | Provides the Namespace in which the service is available. |
+| **spec.source.metadataWebhookService.endpoint** | No | Specifies the endpoint to which the service sends calls. |
+| **spec.source.metadataWebhookService.filter** | No | Specifies the regex pattern used to select files sent to the service. |
+| **spec.bucketRef.name** | Yes | Provides the name of the bucket for storing the asset. |
+| **spec.displayName** | No | Specifies a human-readable name of the asset. |
 | **status.phase** | Not applicable | The Asset Controller adds it to the Asset CR. It describes the status of processing the Asset CR by the Asset Controller. It can be `Ready`, `Failed`, or `Pending`. |
 | **status.reason** | Not applicable | Provides the reason why the Asset CR processing failed or is pending. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. |
 | **status.message** | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure. |
-| **status.lastheartbeattime** | Not applicable | Provides the last time when the Asset Controller processed the Asset CR. |
-| **status.observedGeneration** | Not applicable | Specifies the most recent generation that the Asset Controller observes. |
+| **status.lastHeartbeatTime** | Not applicable | Specifies when was the last time the Asset Controller processed the Asset CR. |
+| **status.observedGeneration** | Not applicable | Specifies the most recent Asset CR generation that the Asset Controller observed. |
 | **status.assetRef** | Not applicable  | Provides details on the location of the assets stored in the bucket.   |
-| **status.assetRef.assets** | Not applicable | Provides the relative path to the given asset in the storage bucket. |
+| **status.assetRef.files** | Not applicable | Provides asset metadata and the relative path to the given asset in the storage bucket with metadata. |
+| **status.assetRef.files.metadata** | Not applicable | Lists metadata extracted from the asset. |
+| **status.assetRef.files.name** | Not applicable | Specifies the relative path to the given asset in the storage bucket. |
 | **status.assetRef.baseUrl** | Not applicable | Specifies the absolute path to the location of the assets in the storage bucket. |
 
-
 > **NOTE:** The Asset Controller automatically adds all parameters marked as **Not applicable** to the Asset CR.
+
+> **TIP:** Asset CRs have an additional `configmap` mode that allows you to refer to asset sources stored in ConfigMaps. If you use this mode, set the **url** parameter to `{namespace}/{configMap-name}`, like `url: default/sample-configmap`. This mode is not enabled in Kyma. To check how it works, see [Rafter tutorials](https://katacoda.com/rafter/) for examples.
 
 ### Status reasons
 

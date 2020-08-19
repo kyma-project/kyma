@@ -49,3 +49,8 @@ func UnstructuredName(obj *unstructured.Unstructured) string {
 func KeyItem(namespace string, name string) string {
 	return fmt.Sprintf(`"%s/%s"`, namespace, name)
 }
+
+// Key returns string item key, made from namespace and name
+func Key(namespace string, name string) string {
+	return fmt.Sprintf("%s/%s", namespace, name)
+}

@@ -3,6 +3,9 @@ package k8s
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
+
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	scPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/pretty"
@@ -12,14 +15,16 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
 	"github.com/pkg/errors"
-	"k8s.io/api/apps/v1beta2"
-	api "k8s.io/api/apps/v1beta2"
+	v1 "k8s.io/api/apps/v1"
 )
 
 //go:generate mockery -name=deploymentLister -output=automock -outpkg=automock -case=underscore
 type deploymentLister interface {
-	List(namespace string) ([]*api.Deployment, error)
-	ListWithoutFunctions(namespace string) ([]*api.Deployment, error)
+	List(namespace string) ([]*v1.Deployment, error)
+	ListWithoutFunctions(namespace string) ([]*v1.Deployment, error)
+	Find(name, namespace string) (*v1.Deployment, error)
+	Subscribe(listener resource.Listener)
+	Unsubscribe(listener resource.Listener)
 }
 
 type deploymentResolver struct {
@@ -37,8 +42,8 @@ func newDeploymentResolver(deploymentLister deploymentLister, scRetriever shared
 	}
 }
 
-func (r *deploymentResolver) DeploymentsQuery(ctx context.Context, namespace string, excludeFunctions *bool) ([]gqlschema.Deployment, error) {
-	var deployments []*v1beta2.Deployment
+func (r *deploymentResolver) DeploymentsQuery(ctx context.Context, namespace string, excludeFunctions *bool) ([]*gqlschema.Deployment, error) {
+	var deployments []*v1.Deployment
 	var err error
 	if excludeFunctions == nil || !*excludeFunctions {
 		deployments, err = r.deploymentLister.List(namespace)
@@ -54,6 +59,24 @@ func (r *deploymentResolver) DeploymentsQuery(ctx context.Context, namespace str
 	return r.deploymentConverter.ToGQLs(deployments), nil
 }
 
+func (r *Resolver) DeploymentEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.DeploymentEvent, error) {
+	channel := make(chan *gqlschema.DeploymentEvent, 1)
+	filter := func(deployment *v1.Deployment) bool {
+		return deployment != nil && deployment.Namespace == namespace
+	}
+
+	deploymentListener := listener.NewDeployment(channel, filter, r.deploymentConverter)
+
+	r.deploymentResolver.deploymentLister.Subscribe(deploymentListener)
+	go func() {
+		defer close(channel)
+		defer r.deploymentResolver.deploymentLister.Unsubscribe(deploymentListener)
+		<-ctx.Done()
+	}()
+
+	return channel, nil
+}
+
 func (r *deploymentResolver) DeploymentBoundServiceInstanceNamesField(ctx context.Context, deployment *gqlschema.Deployment) ([]string, error) {
 	if deployment == nil {
 		glog.Error(errors.New("%s cannot be empty in order to resolve ServiceInstanceNames for %s"), pretty.Deployment, pretty.Deployment)
@@ -65,7 +88,7 @@ func (r *deploymentResolver) DeploymentBoundServiceInstanceNamesField(ctx contex
 		kind = "function"
 	}
 
-	usages, err := r.scaRetriever.ServiceBindingUsage().ListForDeployment(deployment.Namespace, kind, deployment.Name)
+	usages, err := r.scaRetriever.ServiceBindingUsage().ListByUsageKind(deployment.Namespace, kind, deployment.Name)
 	if err != nil {
 		if module.IsDisabledModuleError(err) {
 			return nil, err

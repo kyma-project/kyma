@@ -58,7 +58,7 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
 2. Trigger the update process. Run:
 
   ```
-  kubectl label installation/kyma-installation action=install
+  kubectl -n default label installation/kyma-installation action=install
   ```
 
   To watch the progress of the update, run:
@@ -75,7 +75,7 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
 3. Restart the Console Backend Service to propagate the new certificate. Run:
 
   ```
-  kubectl delete pod -n kyma-system -l app=console-backend-service
+  kubectl delete pod -n kyma-system -l app=console-backend
   ```
 
 4. Add the newly generated certificate to the trusted certificates of your OS. For MacOS, run:

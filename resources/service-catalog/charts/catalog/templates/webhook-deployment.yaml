@@ -10,7 +10,7 @@ metadata:
 spec:
   replicas: 1
   strategy:
-{{ toYaml .Values.webhook.updateStrategy | indent 4 }}
+    type: {{ toYaml .Values.webhook.strategy | nindent 4 }}
   minReadySeconds: {{ .Values.webhook.minReadySeconds }}
   selector:
     matchLabels:
@@ -29,6 +29,8 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: "{{ .Values.webhook.serviceAccount }}"
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
       containers:
       - name: svr
         image: {{ .Values.image }}
@@ -40,7 +42,7 @@ spec:
         - --secure-port
         - "8443"
         - --healthz-server-bind-port
-        - "8080"
+        - "8081"
         - -v
         - "{{ .Values.webhook.verbosity }}"
         - --feature-gates
@@ -58,9 +60,19 @@ spec:
           mountPath: /var/run/service-catalog-webhook
           readOnly: true
         {{- if .Values.webhook.healthcheck.enabled }}
+        readinessProbe:
+          httpGet:
+            port: 8081
+            path: /healthz/ready
+            scheme: HTTP
+          failureThreshold: 1
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
         livenessProbe:
           httpGet:
-            port: 8080
+            port: 8081
             path: /healthz
             scheme: HTTP
           failureThreshold: 3
@@ -71,7 +83,7 @@ spec:
         {{- end }}
       {{ if .Values.webhook.nodeSelector }}
       nodeSelector:
-          {{ .Values.webhook.nodeSelector }}
+{{ toYaml .Values.webhook.nodeSelector | indent 8 }}
       {{ end }}
       volumes:
       - name: service-catalog-webhook-cert

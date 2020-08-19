@@ -11,4 +11,4 @@ When you click **Create Namespace**, you can define:
 
 To manage existing resource quotas in a Namespace, select that Namespace in the **Namespaces** view of the Console and go to the **Resources** tab. This view allows you to edit or delete the existing limits.
 
->**TIP:** If you want to manage ResourceQuotas and LimitRanges directly from the terminal, follow [this](https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/quota-memory-cpu-namespace/) comprehensive Kubernetes guide.
+>**TIP:** If you want to manage ResourceQuotas and LimitRanges directly from the terminal, follow the [Kubernetes guide](https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/quota-memory-cpu-namespace/).

@@ -4,9 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gorilla/mux"
+
+	proxy2 "github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
+
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig/mocks"
 
 	csrfMock "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/mocks"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httperrors"
@@ -19,6 +26,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+)
+
+const (
+	secretName = "my-secret"
+	apiName    = "my-api"
 )
 
 func TestProxy(t *testing.T) {
@@ -55,7 +67,7 @@ func TestProxy(t *testing.T) {
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -100,7 +112,7 @@ func TestProxy(t *testing.T) {
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -145,7 +157,7 @@ func TestProxy(t *testing.T) {
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -203,7 +215,7 @@ func TestProxy(t *testing.T) {
 			RequestParameters: requestParameters,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -261,7 +273,7 @@ func TestProxy(t *testing.T) {
 			RequestParameters: requestParameters,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -313,7 +325,7 @@ func TestProxy(t *testing.T) {
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -359,7 +371,7 @@ func TestProxy(t *testing.T) {
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -429,7 +441,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -481,7 +493,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -533,7 +545,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -560,7 +572,7 @@ func TestProxy(t *testing.T) {
 		serviceDefServiceMock.On("GetAPI", "uuid-1").
 			Return(&metadatamodel.API{}, apperrors.Internal("Failed to read services"))
 
-		handler := New(serviceDefServiceMock, nil, nil, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, nil, nil, createProxyConfig(proxyTimeout), nil)
 
 		// when
 		handler.ServeHTTP(rr, req)
@@ -610,7 +622,7 @@ func TestProxy(t *testing.T) {
 		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
 		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, "").Return(csrfTokenStrategyMock).Twice()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout), nil)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -681,6 +693,216 @@ func TestInvalidStateHandler(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
 	})
+}
+
+func TestProxy_ServeHTTPNamespaced(t *testing.T) {
+
+	proxyTimeout := 10
+	emptyRequestParams := &authorization.RequestParameters{
+		Headers:         nil,
+		QueryParameters: nil,
+	}
+
+	bodyMap := map[string]interface{}{
+		"key1": "string value",
+	}
+
+	for _, testCase := range []struct {
+		description    string
+		serverFunc     func(r *http.Request)
+		createRequest  func() *http.Request
+		assertResponse func(rr *httptest.ResponseRecorder)
+	}{
+		{
+			description: "should proxy without escaping the URL path characters when target URL does not contain path",
+			serverFunc: func(req *http.Request) {
+				assert.Equal(t, "/somepath/Xyz('123')", req.URL.String())
+			},
+			createRequest: func() *http.Request {
+				req, err := http.NewRequest(http.MethodGet, "/secret/"+secretName+"/api/"+apiName+"/somepath/Xyz('123')", nil)
+				require.NoError(t, err)
+				req = mux.SetURLVars(req, map[string]string{"secret": secretName, "apiName": apiName})
+				return req
+			},
+			assertResponse: func(rr *httptest.ResponseRecorder) {
+				assert.Equal(t, http.StatusOK, rr.Code)
+			},
+		},
+		{
+			description: "should proxy without escaping the URL path characters when target URL does not contain path",
+			serverFunc: func(req *http.Request) {
+				var receivedBody map[string]interface{}
+				err := json.NewDecoder(req.Body).Decode(&receivedBody)
+				require.NoError(t, err)
+
+				assert.Equal(t, bodyMap, receivedBody)
+				assert.Equal(t, "/somepath/abcd", req.URL.String())
+			},
+			createRequest: func() *http.Request {
+				body, err := json.Marshal(bodyMap)
+				require.NoError(t, err)
+
+				req, err := http.NewRequest(http.MethodPost, "/somepath/abcd", bytes.NewReader(body))
+				require.NoError(t, err)
+				req = mux.SetURLVars(req, map[string]string{"secret": secretName, "apiName": apiName})
+				return req
+			},
+			assertResponse: func(rr *httptest.ResponseRecorder) {
+				assert.Equal(t, http.StatusOK, rr.Code)
+				assert.Equal(t, "test", rr.Body.String())
+			},
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			// given
+			ts := NewTestServer(testCase.serverFunc)
+			defer ts.Close()
+
+			req := testCase.createRequest()
+
+			authStrategyMock := &authMock.Strategy{}
+			authStrategyMock.
+				On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
+				Return(nil).
+				Once()
+
+			credentials := &authorization.Credentials{OAuth: &authorization.OAuth{RequestParameters: emptyRequestParams}}
+			authStrategyFactoryMock := &authMock.StrategyFactory{}
+			authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
+
+			csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
+
+			targetConfig := proxy2.ProxyDestinationConfig{
+				TargetURL: ts.URL,
+				Configuration: proxy2.Configuration{
+					Credentials: &proxy2.OauthConfig{},
+				},
+			}
+			targetConfigProvider := &mocks.TargetConfigProvider{}
+			targetConfigProvider.On("GetDestinationConfig", secretName, apiName).Return(targetConfig, nil)
+
+			handler := New(nil, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), targetConfigProvider)
+			rr := httptest.NewRecorder()
+
+			// when
+			handler.ServeHTTPNamespaced(rr, req)
+
+			// then
+			testCase.assertResponse(rr)
+
+			authStrategyFactoryMock.AssertExpectations(t)
+			authStrategyMock.AssertExpectations(t)
+			csrfFactoryMock.AssertExpectations(t)
+			csrfStrategyMock.AssertExpectations(t)
+			targetConfigProvider.AssertExpectations(t)
+		})
+	}
+
+	t.Run("should proxy and use internal cache", func(t *testing.T) {
+		// given
+		ts := NewTestServer(func(req *http.Request) {
+			assert.Equal(t, req.Method, http.MethodGet)
+			assert.Equal(t, req.RequestURI, "/orders/123")
+		})
+		defer ts.Close()
+
+		targetConfig := proxy2.ProxyDestinationConfig{
+			TargetURL: ts.URL,
+			Configuration: proxy2.Configuration{
+				Credentials: &proxy2.OauthConfig{},
+			},
+		}
+		targetConfigProvider := &mocks.TargetConfigProvider{}
+		targetConfigProvider.On("GetDestinationConfig", secretName, apiName).Return(targetConfig, nil)
+
+		req, err := http.NewRequest(http.MethodGet, "/secret/"+secretName+"/api/"+apiName+"/orders/123", nil)
+		require.NoError(t, err)
+		req = mux.SetURLVars(req, map[string]string{"secret": secretName, "apiName": apiName})
+
+		authStrategyMock := &authMock.Strategy{}
+		authStrategyMock.
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
+			Return(nil).
+			Twice()
+
+		credentials := &authorization.Credentials{OAuth: &authorization.OAuth{RequestParameters: emptyRequestParams}}
+		authStrategyFactoryMock := &authMock.StrategyFactory{}
+		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
+
+		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledTwice)
+
+		handler := New(nil, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), targetConfigProvider)
+		rr := httptest.NewRecorder()
+
+		// when
+		handler.ServeHTTPNamespaced(rr, req)
+
+		// then
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, "test", rr.Body.String())
+
+		// given
+		nextReq, err := http.NewRequest(http.MethodGet, "/secret/"+secretName+"/api/"+apiName+"/orders/123", nil)
+		require.NoError(t, err)
+		nextReq = mux.SetURLVars(nextReq, map[string]string{"secret": secretName, "apiName": apiName})
+
+		rr = httptest.NewRecorder()
+
+		//when
+		handler.ServeHTTPNamespaced(rr, nextReq)
+
+		//then
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, "test", rr.Body.String())
+		authStrategyFactoryMock.AssertExpectations(t)
+		authStrategyMock.AssertExpectations(t)
+		csrfFactoryMock.AssertExpectations(t)
+		csrfStrategyMock.AssertExpectations(t)
+	})
+
+}
+
+func TestProxy_ServeHTTPNamespaced_ParamsError(t *testing.T) {
+	for _, testCase := range []struct {
+		description string
+		vars        map[string]string
+		errMsg      string
+	}{
+		{
+			description: "when api name not provided",
+			vars:        map[string]string{"secret": secretName},
+			errMsg:      "API name not specified",
+		},
+		{
+			description: "when api name not provided",
+			vars:        map[string]string{},
+			errMsg:      "secret name not specified",
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			// given
+			ts := NewTestServer(func(req *http.Request) {
+				assert.Equal(t, "/somepath/Xyz('123')", req.URL.String())
+			})
+			defer ts.Close()
+
+			req, err := http.NewRequest(http.MethodGet, "/secret/"+secretName+"/api/"+apiName+"/somepath/Xyz('123')", nil)
+			require.NoError(t, err)
+			req = mux.SetURLVars(req, testCase.vars)
+
+			handler := New(nil, nil, nil, Config{}, nil)
+			rr := httptest.NewRecorder()
+
+			// when
+			handler.ServeHTTPNamespaced(rr, req)
+
+			// then
+			assert.Equal(t, http.StatusBadRequest, rr.Code)
+
+			errResp := readErrorResponse(t, rr.Body)
+			assert.Contains(t, errResp.Error, testCase.errMsg)
+		})
+	}
 }
 
 func NewTestServer(check func(req *http.Request)) *httptest.Server {
@@ -762,4 +984,15 @@ func calledTwice(mockCall *mock.Call) {
 
 func calledOnce(mockCall *mock.Call) {
 	mockCall.Once()
+}
+
+func readErrorResponse(t *testing.T, body io.Reader) httperrors.ErrorResponse {
+	responseBody, err := ioutil.ReadAll(body)
+	require.NoError(t, err)
+
+	var errorResponse httperrors.ErrorResponse
+	err = json.Unmarshal(responseBody, &errorResponse)
+	require.NoError(t, err)
+
+	return errorResponse
 }

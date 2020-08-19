@@ -1,3 +1,4 @@
+{{- if .Values.loki.enabled }}
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -6,7 +7,6 @@ metadata:
     app: {{ template "loki.name" . }}
     chart: {{ template "loki.chart" . }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
 spec:
   origins:
   - jwt:
@@ -29,3 +29,4 @@ spec:
       allowTls: true
       mode: PERMISSIVE
   peerIsOptional: true
+{{- end }}

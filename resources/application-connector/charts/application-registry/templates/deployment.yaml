@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,7 +7,10 @@ metadata:
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: 1
   strategy:
@@ -24,10 +28,14 @@ spec:
       labels:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        app.kubernetes.io/name: {{ template "name" . }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
       - name: {{ .Chart.Name }}
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_registry.dir }}application-registry:{{ .Values.global.application_registry.version }}
+        image: {{ .Values.global.containerRegistry.path }}/application-registry:{{ .Values.global.application_registry.version }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
           - "/applicationregistry"
@@ -53,3 +61,5 @@ spec:
           hostnames:
             - "minio.{{ .Values.global.ingress.domainName }}"
       {{ end }}
+
+{{- end }}

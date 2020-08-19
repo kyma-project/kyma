@@ -6,7 +6,7 @@ rules:
 - apiGroups: [""]
   resources: ["services", "serviceaccounts", "secrets", "configmaps", "pods", "persistentvolumeclaims"]
   verbs: ["*"]
-- apiGroups: ["extensions"]
+- apiGroups: ["extensions", "apps"]
   resources: ["deployments", "replicasets"]
   verbs: ["*"]
 - apiGroups: ["batch"]

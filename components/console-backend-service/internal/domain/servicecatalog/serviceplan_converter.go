@@ -54,8 +54,8 @@ func (p *servicePlanConverter) ToGQL(item *v1beta1.ServicePlan) (*gqlschema.Serv
 	return &plan, nil
 }
 
-func (c *servicePlanConverter) ToGQLs(in []*v1beta1.ServicePlan) ([]gqlschema.ServicePlan, error) {
-	var result []gqlschema.ServicePlan
+func (c *servicePlanConverter) ToGQLs(in []*v1beta1.ServicePlan) ([]*gqlschema.ServicePlan, error) {
+	var result []*gqlschema.ServicePlan
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -63,7 +63,7 @@ func (c *servicePlanConverter) ToGQLs(in []*v1beta1.ServicePlan) ([]gqlschema.Se
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

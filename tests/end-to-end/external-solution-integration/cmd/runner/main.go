@@ -1,25 +1,34 @@
 package main
 
 import (
-	"github.com/avast/retry-go"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"os"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
-	coreClient "k8s.io/client-go/kubernetes"
+	k8s "k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/compass"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/connectivity_adapter"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_evaluate"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/event_mesh_prepare"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario/send_and_check_event"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
 var scenarios = map[string]scenario.Scenario{
-	"e2e":        &scenario.E2E{},
-	"event-only": &scenario.SendEventAndCheckCounter{},
+	"event-only":               &send_and_check_event.Scenario{},
+	"compass-e2e":              &compass.Scenario{},
+	"e2e-event-mesh":           &event_mesh.Scenario{},
+	"connectivity-adapter-e2e": &connectivity_adapter.Scenario{},
+	"e2e-prepare":              &event_mesh_prepare.Scenario{},
+	"e2e-evaluate":             &event_mesh_evaluate.Scenario{},
 }
 
 var (
@@ -28,6 +37,10 @@ var (
 )
 
 func main() {
+	if len(os.Args) < 2 {
+		log.Fatalf("Scenario not specified. Specify it as the first argument")
+	}
+
 	scenarioName := os.Args[1]
 	os.Args = os.Args[1:]
 	s, exists := scenarios[scenarioName]
@@ -36,9 +49,10 @@ func main() {
 		for name := range scenarios {
 			log.Infof(" - %s", name)
 		}
+		os.Exit(1)
 	}
 
-	runner = step.NewRunner()
+	runner = step.NewRunner(s.RunnerOpts()...)
 	setupLogging()
 	setupFlags(s)
 	waitForAPIServer()
@@ -58,7 +72,7 @@ func main() {
 }
 
 func waitForAPIServer() {
-	coreClientset := coreClient.NewForConfigOrDie(kubeConfig)
+	coreClientset := k8s.NewForConfigOrDie(kubeConfig)
 	err := retry.Do(func() error {
 		_, err := coreClientset.CoreV1().Nodes().List(metav1.ListOptions{})
 		return err
@@ -75,7 +89,7 @@ func setupLogging() {
 
 func setupFlags(s scenario.Scenario) {
 	var err error
-	kubeconfigFlags := genericclioptions.NewConfigFlags()
+	kubeconfigFlags := genericclioptions.NewConfigFlags(false)
 	kubeconfigFlags.AddFlags(pflag.CommandLine)
 	runner.AddFlags(pflag.CommandLine)
 	s.AddFlags(pflag.CommandLine)

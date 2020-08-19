@@ -35,7 +35,7 @@ func newResourceResolver(resourceSvc resourceSvc) *resourceResolver {
 	}
 }
 
-func (r *resourceResolver) CreateResourceMutation(ctx context.Context, namespace string, resource gqlschema.JSON) (*gqlschema.JSON, error) {
+func (r *resourceResolver) CreateResourceMutation(ctx context.Context, namespace string, resource gqlschema.JSON) (gqlschema.JSON, error) {
 	converted, err := r.gqlResourceConverter.GQLJSONToResource(resource)
 	if err != nil {
 		return nil, gqlerror.New(err, pretty.Resource)
@@ -53,5 +53,5 @@ func (r *resourceResolver) CreateResourceMutation(ctx context.Context, namespace
 		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(converted.Name), gqlerror.WithNamespace(namespace))
 	}
 
-	return &body, nil
+	return body, nil
 }

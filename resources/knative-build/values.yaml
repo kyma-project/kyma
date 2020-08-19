@@ -1,9 +1,0 @@
-
-global:
-  isLocalEnv: false
-  knative: false
-  containerRegistry:
-    path: eu.gcr.io/kyma-project
-  test_knative_build_acceptance:
-    dir: 
-    version: b2aa1331

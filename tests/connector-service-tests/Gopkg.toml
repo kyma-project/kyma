@@ -1,7 +1,4 @@
 [prune]
   go-tests = true
   unused-packages = true
-
-[[override]]
-  name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.2"
+  

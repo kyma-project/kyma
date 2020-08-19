@@ -18,7 +18,7 @@ func TestSecretListener_OnAdd(t *testing.T) {
 		secret := new(v1.Secret)
 		converter := automock.NewGQLSecretConverter()
 
-		channel := make(chan gqlschema.SecretEvent, 1)
+		channel := make(chan *gqlschema.SecretEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", secret).Return(gqlSecret, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -30,7 +30,7 @@ func TestSecretListener_OnAdd(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeAdd, result.Type)
-		assert.Equal(t, *gqlSecret, result.Secret)
+		assert.Equal(t, gqlSecret, result.Secret)
 	})
 
 	t.Run("Filtered out", func(t *testing.T) {
@@ -91,7 +91,7 @@ func TestSecretListener_OnDelete(t *testing.T) {
 		secret := new(v1.Secret)
 		converter := automock.NewGQLSecretConverter()
 
-		channel := make(chan gqlschema.SecretEvent, 1)
+		channel := make(chan *gqlschema.SecretEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", secret).Return(gqlSecret, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -103,7 +103,7 @@ func TestSecretListener_OnDelete(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeDelete, result.Type)
-		assert.Equal(t, *gqlSecret, result.Secret)
+		assert.Equal(t, gqlSecret, result.Secret)
 
 	})
 
@@ -165,7 +165,7 @@ func TestSecretListener_OnUpdate(t *testing.T) {
 		secret := new(v1.Secret)
 		converter := automock.NewGQLSecretConverter()
 
-		channel := make(chan gqlschema.SecretEvent, 1)
+		channel := make(chan *gqlschema.SecretEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", secret).Return(gqlSecret, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -177,7 +177,7 @@ func TestSecretListener_OnUpdate(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeUpdate, result.Type)
-		assert.Equal(t, *gqlSecret, result.Secret)
+		assert.Equal(t, gqlSecret, result.Secret)
 
 	})
 

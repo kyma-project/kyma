@@ -1,13 +1,12 @@
----
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: kyma-installer
   name: xip-kyma-installer-role
 rules:
-- apiGroups: [""]
-  resources: ["configmaps"]
-  verbs: ["get", "create", "patch"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "create", "patch"]
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -16,8 +15,17 @@ metadata:
   name: xip-istio-system-role
 rules:
 - apiGroups: [""]
-  resources: ["services"]
+  resources: ["configmaps"]
+  verbs: ["get", "create", "patch"]
+- apiGroups: [""]
+  resources: ["secrets"]
   verbs: ["get"]
+- apiGroups: ["cert.gardener.cloud"]
+  resources: ["certificates"]
+  verbs: ["get", "create", "patch"]
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "patch"]
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -28,3 +36,14 @@ rules:
 - apiGroups: [""]
   resources: ["secrets"]
   verbs: ["get", "patch"]
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: kube-system
+  name: xip-kube-system-role
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  resourceNames: ["shoot-info"]
+  verbs: ["get"]

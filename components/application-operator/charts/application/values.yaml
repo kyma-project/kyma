@@ -27,12 +27,17 @@ applicationConnectivityValidator:
 istio:
   gateway:
     name: kyma-gateway
+    nameMtls: kyma-gateway-application-connector
     namespace: kyma-system
 
 acceptanceTest:
   image:
     pullPolicy: IfNotPresent
 
+# console-backend is a ServiceAccount which is installed as a part of *core* chart
+authorizationPolicy:
+  serviceAccount:
+    consoleBackendService: console-backend
 eventService:
   deployment:
     labels:
@@ -42,8 +47,6 @@ eventService:
       pullPolicy: IfNotPresent
     args:
       externalAPIPort: &eventServiceExternalAPIPort 8081
-      eventsTargetURLV1: http://event-publish-service.kyma-system.svc.cluster.local:8080/v1/events
-      eventsTargetURLV2: http://event-publish-service.kyma-system.svc.cluster.local:8080/v2/events
       maxRequestSize: 65536
       requestTimeout: 10
       requestLogging: false

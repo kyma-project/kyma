@@ -1,11 +1,14 @@
-# Generated from 'workload-total' from https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
-# Do not change in-place! In order to change this file first read following link:
-# https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+{{- /*
+Generated from 'workload-total' from https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
+Do not change in-place! In order to change this file first read following link:
+https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+*/ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  namespace: {{ $.Release.Namespace }}
   name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "workload-total" | trunc 63 | trimSuffix "-" }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
@@ -17,8 +20,10 @@ data:
   workload-total.json: |-
     {
         "__inputs": [
+
         ],
         "__requires": [
+
         ],
         "annotations": {
             "list": [
@@ -33,12 +38,13 @@ data:
                 }
             ]
         },
-        "editable": true,
+        "editable": false,
         "gnetId": null,
         "graphTooltip": 0,
         "hideControls": false,
         "id": null,
         "links": [
+
         ],
         "panels": [
             {
@@ -52,6 +58,7 @@ data:
                 },
                 "id": 2,
                 "panels": [
+
                 ],
                 "repeat": null,
                 "repeatIteration": null,
@@ -63,16 +70,13 @@ data:
             },
             {
                 "aliasColors": {
+
                 },
-                "breakpoint": "50%",
-                "cacheTimeout": null,
-                "combine": {
-                    "label": "Others",
-                    "threshold": 0
-                },
+                "bars": true,
+                "dashLength": 10,
+                "dashes": false,
                 "datasource": "$datasource",
-                "fontSize": "80%",
-                "format": "Bps",
+                "fill": 2,
                 "gridPos": {
                     "h": 9,
                     "w": 12,
@@ -80,43 +84,100 @@ data:
                     "y": 1
                 },
                 "id": 3,
-                "interval": null,
                 "legend": {
-                    "percentage": true,
-                    "percentageDecimals": null,
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": true,
+                    "hideEmpty": true,
+                    "hideZero": true,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
                     "show": true,
+                    "sort": "current",
+                    "sortDesc": true,
+                    "total": false,
                     "values": true
                 },
-                "legendType": "Right side",
-                "maxDataPoints": 3,
-                "nullPointMode": "connected",
-                "pieType": "donut",
+                "lines": false,
+                "linewidth": 1,
+                "links": [
+
+                ],
+                "minSpan": 24,
+                "nullPointMode": "null",
+                "paceLength": 10,
+                "percentage": false,
+                "pointradius": 5,
+                "points": false,
+                "renderer": "flot",
+                "repeat": null,
+                "seriesOverrides": [
+
+                ],
+                "spaceLength": 10,
+                "span": 24,
+                "stack": false,
+                "steppedLine": false,
                 "targets": [
                     {
                         "expr": "sort_desc(sum(irate(container_network_receive_bytes_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) mixin_pod_workload{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                         "format": "time_series",
-                        "instant": null,
                         "intervalFactor": 1,
-                        "legendFormat": "{{`{{pod}}`}}",
-                        "refId": "A"
+                        "legendFormat": "{{`{{`}} pod {{`}}`}}",
+                        "refId": "A",
+                        "step": 10
                     }
                 ],
+                "thresholds": [
+
+                ],
+                "timeFrom": null,
+                "timeShift": null,
                 "title": "Current Rate of Bytes Received",
-                "type": "grafana-piechart-panel",
-                "valueName": "current"
+                "tooltip": {
+                    "shared": true,
+                    "sort": 2,
+                    "value_type": "individual"
+                },
+                "type": "graph",
+                "xaxis": {
+                    "buckets": null,
+                    "mode": "series",
+                    "name": null,
+                    "show": false,
+                    "values": [
+                        "current"
+                    ]
+                },
+                "yaxes": [
+                    {
+                        "format": "Bps",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": 0,
+                        "show": true
+                    },
+                    {
+                        "format": "Bps",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": 0,
+                        "show": true
+                    }
+                ]
             },
             {
                 "aliasColors": {
+
                 },
-                "breakpoint": "50%",
-                "cacheTimeout": null,
-                "combine": {
-                    "label": "Others",
-                    "threshold": 0
-                },
+                "bars": true,
+                "dashLength": 10,
+                "dashes": false,
                 "datasource": "$datasource",
-                "fontSize": "80%",
-                "format": "Bps",
+                "fill": 2,
                 "gridPos": {
                     "h": 9,
                     "w": 12,
@@ -124,30 +185,90 @@ data:
                     "y": 1
                 },
                 "id": 4,
-                "interval": null,
                 "legend": {
-                    "percentage": true,
-                    "percentageDecimals": null,
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": true,
+                    "hideEmpty": true,
+                    "hideZero": true,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
                     "show": true,
+                    "sort": "current",
+                    "sortDesc": true,
+                    "total": false,
                     "values": true
                 },
-                "legendType": "Right side",
-                "maxDataPoints": 3,
-                "nullPointMode": "connected",
-                "pieType": "donut",
+                "lines": false,
+                "linewidth": 1,
+                "links": [
+
+                ],
+                "minSpan": 24,
+                "nullPointMode": "null",
+                "paceLength": 10,
+                "percentage": false,
+                "pointradius": 5,
+                "points": false,
+                "renderer": "flot",
+                "repeat": null,
+                "seriesOverrides": [
+
+                ],
+                "spaceLength": 10,
+                "span": 24,
+                "stack": false,
+                "steppedLine": false,
                 "targets": [
                     {
                         "expr": "sort_desc(sum(irate(container_network_transmit_bytes_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) mixin_pod_workload{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                         "format": "time_series",
-                        "instant": null,
                         "intervalFactor": 1,
-                        "legendFormat": "{{`{{pod}}`}}",
-                        "refId": "A"
+                        "legendFormat": "{{`{{`}} pod {{`}}`}}",
+                        "refId": "A",
+                        "step": 10
                     }
                 ],
+                "thresholds": [
+
+                ],
+                "timeFrom": null,
+                "timeShift": null,
                 "title": "Current Rate of Bytes Transmitted",
-                "type": "grafana-piechart-panel",
-                "valueName": "current"
+                "tooltip": {
+                    "shared": true,
+                    "sort": 2,
+                    "value_type": "individual"
+                },
+                "type": "graph",
+                "xaxis": {
+                    "buckets": null,
+                    "mode": "series",
+                    "name": null,
+                    "show": false,
+                    "values": [
+                        "current"
+                    ]
+                },
+                "yaxes": [
+                    {
+                        "format": "Bps",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": 0,
+                        "show": true
+                    },
+                    {
+                        "format": "Bps",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": 0,
+                        "show": true
+                    }
+                ]
             },
             {
                 "collapse": true,
@@ -162,16 +283,13 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
-                        "breakpoint": "50%",
-                        "cacheTimeout": null,
-                        "combine": {
-                            "label": "Others",
-                            "threshold": 0
-                        },
+                        "bars": true,
+                        "dashLength": 10,
+                        "dashes": false,
                         "datasource": "$datasource",
-                        "fontSize": "80%",
-                        "format": "Bps",
+                        "fill": 2,
                         "gridPos": {
                             "h": 9,
                             "w": 12,
@@ -179,43 +297,100 @@ data:
                             "y": 11
                         },
                         "id": 6,
-                        "interval": null,
                         "legend": {
-                            "percentage": true,
-                            "percentageDecimals": null,
+                            "alignAsTable": true,
+                            "avg": false,
+                            "current": true,
+                            "hideEmpty": true,
+                            "hideZero": true,
+                            "max": false,
+                            "min": false,
+                            "rightSide": true,
                             "show": true,
+                            "sort": "current",
+                            "sortDesc": true,
+                            "total": false,
                             "values": true
                         },
-                        "legendType": "Right side",
-                        "maxDataPoints": 3,
-                        "nullPointMode": "connected",
-                        "pieType": "donut",
+                        "lines": false,
+                        "linewidth": 1,
+                        "links": [
+
+                        ],
+                        "minSpan": 24,
+                        "nullPointMode": "null",
+                        "paceLength": 10,
+                        "percentage": false,
+                        "pointradius": 5,
+                        "points": false,
+                        "renderer": "flot",
+                        "repeat": null,
+                        "seriesOverrides": [
+
+                        ],
+                        "spaceLength": 10,
+                        "span": 24,
+                        "stack": false,
+                        "steppedLine": false,
                         "targets": [
                             {
                                 "expr": "sort_desc(avg(irate(container_network_receive_bytes_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) mixin_pod_workload{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                                 "format": "time_series",
-                                "instant": null,
                                 "intervalFactor": 1,
-                                "legendFormat": "{{`{{pod}}`}}",
-                                "refId": "A"
+                                "legendFormat": "{{`{{`}} pod {{`}}`}}",
+                                "refId": "A",
+                                "step": 10
                             }
                         ],
+                        "thresholds": [
+
+                        ],
+                        "timeFrom": null,
+                        "timeShift": null,
                         "title": "Average Rate of Bytes Received",
-                        "type": "grafana-piechart-panel",
-                        "valueName": "current"
+                        "tooltip": {
+                            "shared": true,
+                            "sort": 2,
+                            "value_type": "individual"
+                        },
+                        "type": "graph",
+                        "xaxis": {
+                            "buckets": null,
+                            "mode": "series",
+                            "name": null,
+                            "show": false,
+                            "values": [
+                                "current"
+                            ]
+                        },
+                        "yaxes": [
+                            {
+                                "format": "Bps",
+                                "label": null,
+                                "logBase": 1,
+                                "max": null,
+                                "min": 0,
+                                "show": true
+                            },
+                            {
+                                "format": "Bps",
+                                "label": null,
+                                "logBase": 1,
+                                "max": null,
+                                "min": 0,
+                                "show": true
+                            }
+                        ]
                     },
                     {
                         "aliasColors": {
+
                         },
-                        "breakpoint": "50%",
-                        "cacheTimeout": null,
-                        "combine": {
-                            "label": "Others",
-                            "threshold": 0
-                        },
+                        "bars": true,
+                        "dashLength": 10,
+                        "dashes": false,
                         "datasource": "$datasource",
-                        "fontSize": "80%",
-                        "format": "Bps",
+                        "fill": 2,
                         "gridPos": {
                             "h": 9,
                             "w": 12,
@@ -223,30 +398,90 @@ data:
                             "y": 11
                         },
                         "id": 7,
-                        "interval": null,
                         "legend": {
-                            "percentage": true,
-                            "percentageDecimals": null,
+                            "alignAsTable": true,
+                            "avg": false,
+                            "current": true,
+                            "hideEmpty": true,
+                            "hideZero": true,
+                            "max": false,
+                            "min": false,
+                            "rightSide": true,
                             "show": true,
+                            "sort": "current",
+                            "sortDesc": true,
+                            "total": false,
                             "values": true
                         },
-                        "legendType": "Right side",
-                        "maxDataPoints": 3,
-                        "nullPointMode": "connected",
-                        "pieType": "donut",
+                        "lines": false,
+                        "linewidth": 1,
+                        "links": [
+
+                        ],
+                        "minSpan": 24,
+                        "nullPointMode": "null",
+                        "paceLength": 10,
+                        "percentage": false,
+                        "pointradius": 5,
+                        "points": false,
+                        "renderer": "flot",
+                        "repeat": null,
+                        "seriesOverrides": [
+
+                        ],
+                        "spaceLength": 10,
+                        "span": 24,
+                        "stack": false,
+                        "steppedLine": false,
                         "targets": [
                             {
                                 "expr": "sort_desc(avg(irate(container_network_transmit_bytes_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) mixin_pod_workload{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                                 "format": "time_series",
-                                "instant": null,
                                 "intervalFactor": 1,
-                                "legendFormat": "{{`{{pod}}`}}",
-                                "refId": "A"
+                                "legendFormat": "{{`{{`}} pod {{`}}`}}",
+                                "refId": "A",
+                                "step": 10
                             }
                         ],
+                        "thresholds": [
+
+                        ],
+                        "timeFrom": null,
+                        "timeShift": null,
                         "title": "Average Rate of Bytes Transmitted",
-                        "type": "grafana-piechart-panel",
-                        "valueName": "current"
+                        "tooltip": {
+                            "shared": true,
+                            "sort": 2,
+                            "value_type": "individual"
+                        },
+                        "type": "graph",
+                        "xaxis": {
+                            "buckets": null,
+                            "mode": "series",
+                            "name": null,
+                            "show": false,
+                            "values": [
+                                "current"
+                            ]
+                        },
+                        "yaxes": [
+                            {
+                                "format": "Bps",
+                                "label": null,
+                                "logBase": 1,
+                                "max": null,
+                                "min": 0,
+                                "show": true
+                            },
+                            {
+                                "format": "Bps",
+                                "label": null,
+                                "logBase": 1,
+                                "max": null,
+                                "min": 0,
+                                "show": true
+                            }
+                        ]
                     }
                 ],
                 "repeat": null,
@@ -268,6 +503,7 @@ data:
                 },
                 "id": 8,
                 "panels": [
+
                 ],
                 "repeat": null,
                 "repeatIteration": null,
@@ -279,6 +515,7 @@ data:
             },
             {
                 "aliasColors": {
+
                 },
                 "bars": false,
                 "dashLength": 10,
@@ -308,6 +545,7 @@ data:
                 "lines": true,
                 "linewidth": 2,
                 "links": [
+
                 ],
                 "minSpan": 12,
                 "nullPointMode": "connected",
@@ -318,6 +556,7 @@ data:
                 "renderer": "flot",
                 "repeat": null,
                 "seriesOverrides": [
+
                 ],
                 "spaceLength": 10,
                 "span": 12,
@@ -328,12 +567,13 @@ data:
                         "expr": "sort_desc(sum(irate(container_network_receive_bytes_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) mixin_pod_workload{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                         "format": "time_series",
                         "intervalFactor": 1,
-                        "legendFormat": "{{`{{pod}}`}}",
+                        "legendFormat": "{{`{{`}}pod{{`}}`}}",
                         "refId": "A",
                         "step": 10
                     }
                 ],
                 "thresholds": [
+
                 ],
                 "timeFrom": null,
                 "timeShift": null,
@@ -350,6 +590,7 @@ data:
                     "name": null,
                     "show": true,
                     "values": [
+
                     ]
                 },
                 "yaxes": [
@@ -373,6 +614,7 @@ data:
             },
             {
                 "aliasColors": {
+
                 },
                 "bars": false,
                 "dashLength": 10,
@@ -402,6 +644,7 @@ data:
                 "lines": true,
                 "linewidth": 2,
                 "links": [
+
                 ],
                 "minSpan": 12,
                 "nullPointMode": "connected",
@@ -412,6 +655,7 @@ data:
                 "renderer": "flot",
                 "repeat": null,
                 "seriesOverrides": [
+
                 ],
                 "spaceLength": 10,
                 "span": 12,
@@ -422,12 +666,13 @@ data:
                         "expr": "sort_desc(sum(irate(container_network_transmit_bytes_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) mixin_pod_workload{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                         "format": "time_series",
                         "intervalFactor": 1,
-                        "legendFormat": "{{`{{pod}}`}}",
+                        "legendFormat": "{{`{{`}}pod{{`}}`}}",
                         "refId": "A",
                         "step": 10
                     }
                 ],
                 "thresholds": [
+
                 ],
                 "timeFrom": null,
                 "timeShift": null,
@@ -444,6 +689,7 @@ data:
                     "name": null,
                     "show": true,
                     "values": [
+
                     ]
                 },
                 "yaxes": [
@@ -478,6 +724,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -507,6 +754,7 @@ data:
                         "lines": true,
                         "linewidth": 2,
                         "links": [
+
                         ],
                         "minSpan": 12,
                         "nullPointMode": "connected",
@@ -517,6 +765,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -527,12 +776,13 @@ data:
                                 "expr": "sort_desc(sum(irate(container_network_receive_packets_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) mixin_pod_workload{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                                 "format": "time_series",
                                 "intervalFactor": 1,
-                                "legendFormat": "{{`{{pod}}`}}",
+                                "legendFormat": "{{`{{`}}pod{{`}}`}}",
                                 "refId": "A",
                                 "step": 10
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -549,6 +799,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -572,6 +823,7 @@ data:
                     },
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -601,6 +853,7 @@ data:
                         "lines": true,
                         "linewidth": 2,
                         "links": [
+
                         ],
                         "minSpan": 12,
                         "nullPointMode": "connected",
@@ -611,6 +864,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -621,12 +875,13 @@ data:
                                 "expr": "sort_desc(sum(irate(container_network_transmit_packets_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) mixin_pod_workload{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                                 "format": "time_series",
                                 "intervalFactor": 1,
-                                "legendFormat": "{{`{{pod}}`}}",
+                                "legendFormat": "{{`{{`}}pod{{`}}`}}",
                                 "refId": "A",
                                 "step": 10
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -643,6 +898,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -686,6 +942,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -715,6 +972,7 @@ data:
                         "lines": true,
                         "linewidth": 2,
                         "links": [
+
                         ],
                         "minSpan": 12,
                         "nullPointMode": "connected",
@@ -725,6 +983,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -735,12 +994,13 @@ data:
                                 "expr": "sort_desc(sum(irate(container_network_receive_packets_dropped_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) mixin_pod_workload{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                                 "format": "time_series",
                                 "intervalFactor": 1,
-                                "legendFormat": "{{`{{pod}}`}}",
+                                "legendFormat": "{{`{{`}}pod{{`}}`}}",
                                 "refId": "A",
                                 "step": 10
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -757,6 +1017,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -780,6 +1041,7 @@ data:
                     },
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -809,6 +1071,7 @@ data:
                         "lines": true,
                         "linewidth": 2,
                         "links": [
+
                         ],
                         "minSpan": 12,
                         "nullPointMode": "connected",
@@ -819,6 +1082,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -829,12 +1093,13 @@ data:
                                 "expr": "sort_desc(sum(irate(container_network_transmit_packets_dropped_total{namespace=~\"$namespace\"}[$interval:$resolution])\n* on (namespace,pod)\ngroup_left(workload,workload_type) mixin_pod_workload{namespace=~\"$namespace\", workload=~\"$workload\", workload_type=\"$type\"}) by (pod))\n",
                                 "format": "time_series",
                                 "intervalFactor": 1,
-                                "legendFormat": "{{`{{pod}}`}}",
+                                "legendFormat": "{{`{{`}}pod{{`}}`}}",
                                 "refId": "A",
                                 "step": 10
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -851,6 +1116,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -882,8 +1148,9 @@ data:
                 "type": "row"
             }
         ],
-        "refresh": "30s",
+        "refresh": "10s",
         "rows": [
+
         ],
         "schemaVersion": 18,
         "style": "dark",
@@ -894,13 +1161,15 @@ data:
             "list": [
                 {
                     "current": {
-                        "text": "Prometheus",
-                        "value": "Prometheus"
+                        "text": "default",
+                        "value": "default"
                     },
                     "hide": 0,
                     "label": null,
                     "name": "datasource",
-                    "options": [],
+                    "options": [
+
+                    ],
                     "query": "prometheus",
                     "refresh": 1,
                     "regex": "",
@@ -923,6 +1192,7 @@ data:
                     "multi": false,
                     "name": "namespace",
                     "options": [
+
                     ],
                     "query": "label_values(container_network_receive_packets_total, namespace)",
                     "refresh": 1,
@@ -931,6 +1201,7 @@ data:
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "query",
@@ -953,6 +1224,7 @@ data:
                     "multi": false,
                     "name": "workload",
                     "options": [
+
                     ],
                     "query": "label_values(mixin_pod_workload{namespace=~\"$namespace\"}, workload)",
                     "refresh": 1,
@@ -961,6 +1233,7 @@ data:
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "query",
@@ -983,6 +1256,7 @@ data:
                     "multi": false,
                     "name": "type",
                     "options": [
+
                     ],
                     "query": "label_values(mixin_pod_workload{namespace=~\"$namespace\", workload=~\"$workload\"}, workload_type)",
                     "refresh": 1,
@@ -991,6 +1265,7 @@ data:
                     "sort": 0,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "query",
@@ -1035,6 +1310,7 @@ data:
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "interval",
@@ -1069,6 +1345,7 @@ data:
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "interval",

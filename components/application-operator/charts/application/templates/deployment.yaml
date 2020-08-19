@@ -1,11 +1,16 @@
+{{- if not .Values.global.deployGatewayOncePerNamespace }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-application-gateway
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: 1
   strategy:
@@ -57,11 +62,13 @@ spec:
             name: proxy-port
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port
+{{- end }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-event-service
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Release.Name }}-event-service
     release: {{ .Release.Name }}
@@ -94,8 +101,7 @@ spec:
         args:
         - "/eventservice"
         - "--externalAPIPort={{ .Values.eventService.deployment.args.externalAPIPort }}"
-        - "--eventsTargetURLV1={{ .Values.eventService.deployment.args.eventsTargetURLV1 }}"
-        - "--eventsTargetURLV2={{ .Values.eventService.deployment.args.eventsTargetURLV2 }}"
+        - "--eventMeshURL=http://{{ .Release.Name }}.{{ .Release.Namespace }}"
         - "--maxRequestSize={{ .Values.eventService.deployment.args.maxRequestSize }}"
         - "--requestTimeout={{ .Values.eventService.deployment.args.requestTimeout }}"
         - "--requestLogging={{ .Values.eventService.deployment.args.requestLogging }}"

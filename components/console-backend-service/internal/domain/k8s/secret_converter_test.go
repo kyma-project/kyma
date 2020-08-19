@@ -117,7 +117,7 @@ func TestSecretConverter_ToGQLs(t *testing.T) {
 		converter := secretConverter{}
 		result, err := converter.ToGQLs([]*v1.Secret{})
 		require.NoError(t, err)
-		expected := []gqlschema.Secret(nil)
+		expected := []*gqlschema.Secret(nil)
 		assert.Equal(t, result, expected)
 	})
 

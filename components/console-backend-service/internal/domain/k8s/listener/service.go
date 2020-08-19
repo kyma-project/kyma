@@ -17,12 +17,12 @@ type gqlServiceConverter interface {
 }
 
 type Service struct {
-	channel   chan<- gqlschema.ServiceEvent
+	channel   chan<- *gqlschema.ServiceEvent
 	filter    func(pod *v1.Service) bool
 	converter gqlServiceConverter
 }
 
-func NewService(channel chan<- gqlschema.ServiceEvent, filter func(service *v1.Service) bool, converter gqlServiceConverter) *Service {
+func NewService(channel chan<- *gqlschema.ServiceEvent, filter func(service *v1.Service) bool, converter gqlServiceConverter) *Service {
 	return &Service{channel, filter, converter}
 }
 
@@ -60,9 +60,9 @@ func (l *Service) notify(eventType gqlschema.SubscriptionEventType, service *v1.
 		return
 	}
 
-	event := gqlschema.ServiceEvent{
+	event := &gqlschema.ServiceEvent{
 		Type:    eventType,
-		Service: *gqlService,
+		Service: gqlService,
 	}
 
 	l.channel <- event

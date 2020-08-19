@@ -27,7 +27,7 @@ func TestServiceBrokerConverter_ToGQL(t *testing.T) {
 			CreationTimestamp: zeroTimeStamp,
 			Labels:            labels,
 			URL:               "ExampleURL",
-			Status: gqlschema.ServiceBrokerStatus{
+			Status: &gqlschema.ServiceBrokerStatus{
 				Ready:   true,
 				Reason:  "ExampleReason",
 				Message: "ExampleMessage",

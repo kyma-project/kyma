@@ -73,7 +73,7 @@ func TestControllerRunSuccess(t *testing.T) {
 	brokerFacade.On("Create", fixNSName).Return(nil).
 		Run(fulfillExpectation)
 
-	svc := mapping.New(emInformer, nsInformer, instInformer, nsClientMock, appGetterMock, brokerFacade, nil, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus)
+	svc := mapping.New(emInformer, nsInformer, instInformer, nsClientMock, appGetterMock, brokerFacade, nil, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus, false)
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 	awaitInformerStartAtMost(t, time.Second, nsInformer)
 
@@ -104,7 +104,7 @@ func TestControllerRunSuccessLabelRemove(t *testing.T) {
 	nsClientMock.On("Patch", fixNSName, types.StrategicMergePatchType, []byte(deletedLabelNS)).
 		Return(fixExpectedNS, nil).
 		Once()
-	svc := mapping.New(emInformer, nil, instInformer, nsClientMock, nil, nil, nil, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus)
+	svc := mapping.New(emInformer, nil, instInformer, nsClientMock, nil, nil, nil, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus, false)
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 	// when
 	err := svc.DeleteAccessLabelFromNamespace(fixNS, fixAPPName)
@@ -143,7 +143,7 @@ func TestControllerRunFailure(t *testing.T) {
 		Run(fulfillExpectation).
 		Once()
 
-	svc := mapping.New(emInformer, nil, instInformer, nsClientMock, appGetter, nil, nil, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus)
+	svc := mapping.New(emInformer, nil, instInformer, nsClientMock, appGetter, nil, nil, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus, false)
 
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 
@@ -251,7 +251,7 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 			nsBrokerSyncer := tc.prepareNsBrokerSyncer()
 			defer nsBrokerSyncer.AssertExpectations(t)
 
-			svc := mapping.New(emInformer, nsInformer, instInformer, nsClientMock, appGetterMock, nsBrokerFacade, nsBrokerSyncer, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus)
+			svc := mapping.New(emInformer, nsInformer, instInformer, nsClientMock, appGetterMock, nsBrokerFacade, nsBrokerSyncer, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus, false)
 
 			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixAPPName))
 			if tc.errorMsg == "" {
@@ -399,7 +399,7 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			nsBrokerSyncer := tc.prepareNsBrokerSyncer()
 			defer nsBrokerSyncer.AssertExpectations(t)
 
-			svc := mapping.New(emInformer, nsInformer, instInformer, nsClientMock, nil, nsBrokerFacade, nsBrokerSyncer, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus).
+			svc := mapping.New(emInformer, nsInformer, instInformer, nsClientMock, nil, nsBrokerFacade, nsBrokerSyncer, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus, false).
 				WithMappingLister(mappingSvc)
 			// WHEN
 			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixAPPName))

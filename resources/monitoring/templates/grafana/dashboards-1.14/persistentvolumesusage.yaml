@@ -1,11 +1,14 @@
-# Generated from 'persistentvolumesusage' from https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
-# Do not change in-place! In order to change this file first read following link:
-# https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+{{- /*
+Generated from 'persistentvolumesusage' from https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
+Do not change in-place! In order to change this file first read following link:
+https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+*/ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  namespace: {{ $.Release.Namespace }}
   name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "persistentvolumesusage" | trunc 63 | trimSuffix "-" }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
@@ -17,11 +20,14 @@ data:
   persistentvolumesusage.json: |-
     {
         "__inputs": [
+
         ],
         "__requires": [
+
         ],
         "annotations": {
             "list": [
+
             ]
         },
         "editable": false,
@@ -30,8 +36,9 @@ data:
         "hideControls": false,
         "id": null,
         "links": [
+
         ],
-        "refresh": "",
+        "refresh": "10s",
         "rows": [
             {
                 "collapse": false,
@@ -39,6 +46,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -46,6 +54,7 @@ data:
                         "datasource": "$datasource",
                         "fill": 1,
                         "gridPos": {
+
                         },
                         "id": 2,
                         "legend": {
@@ -62,6 +71,7 @@ data:
                         "lines": true,
                         "linewidth": 1,
                         "links": [
+
                         ],
                         "nullPointMode": "null",
                         "percentage": false,
@@ -70,6 +80,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 9,
@@ -77,14 +88,14 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "(\n  sum without(instance, node) (kubelet_volume_stats_capacity_bytes{cluster=\"$cluster\", job=\"kubelet\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"})\n  -\n  sum without(instance, node) (kubelet_volume_stats_available_bytes{cluster=\"$cluster\", job=\"kubelet\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"})\n)\n",
+                                "expr": "(\n  sum without(instance, node) (kubelet_volume_stats_capacity_bytes{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"})\n  -\n  sum without(instance, node) (kubelet_volume_stats_available_bytes{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"})\n)\n",
                                 "format": "time_series",
                                 "intervalFactor": 1,
                                 "legendFormat": "Used Space",
                                 "refId": "A"
                             },
                             {
-                                "expr": "sum without(instance, node) (kubelet_volume_stats_available_bytes{cluster=\"$cluster\", job=\"kubelet\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"})\n",
+                                "expr": "sum without(instance, node) (kubelet_volume_stats_available_bytes{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"})\n",
                                 "format": "time_series",
                                 "intervalFactor": 1,
                                 "legendFormat": "Free Space",
@@ -92,6 +103,7 @@ data:
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -108,6 +120,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -148,10 +161,12 @@ data:
                             "thresholdMarkers": true
                         },
                         "gridPos": {
+
                         },
                         "id": 3,
                         "interval": null,
                         "links": [
+
                         ],
                         "mappingType": 1,
                         "mappingTypes": [
@@ -188,7 +203,7 @@ data:
                         "tableColumn": "",
                         "targets": [
                             {
-                                "expr": "(\n  kubelet_volume_stats_capacity_bytes{cluster=\"$cluster\", job=\"kubelet\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"}\n  -\n  kubelet_volume_stats_available_bytes{cluster=\"$cluster\", job=\"kubelet\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"}\n)\n/\nkubelet_volume_stats_capacity_bytes{cluster=\"$cluster\", job=\"kubelet\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"}\n* 100\n",
+                                "expr": "(\n  kubelet_volume_stats_capacity_bytes{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"}\n  -\n  kubelet_volume_stats_available_bytes{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"}\n)\n/\nkubelet_volume_stats_capacity_bytes{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"}\n* 100\n",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "",
@@ -226,6 +241,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -233,6 +249,7 @@ data:
                         "datasource": "$datasource",
                         "fill": 1,
                         "gridPos": {
+
                         },
                         "id": 4,
                         "legend": {
@@ -249,6 +266,7 @@ data:
                         "lines": true,
                         "linewidth": 1,
                         "links": [
+
                         ],
                         "nullPointMode": "null",
                         "percentage": false,
@@ -257,6 +275,7 @@ data:
                         "renderer": "flot",
                         "repeat": null,
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 9,
@@ -264,14 +283,14 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "sum without(instance, node) (kubelet_volume_stats_inodes_used{cluster=\"$cluster\", job=\"kubelet\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"})\n",
+                                "expr": "sum without(instance, node) (kubelet_volume_stats_inodes_used{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"})\n",
                                 "format": "time_series",
                                 "intervalFactor": 1,
                                 "legendFormat": "Used inodes",
                                 "refId": "A"
                             },
                             {
-                                "expr": "(\n  sum without(instance, node) (kubelet_volume_stats_inodes{cluster=\"$cluster\", job=\"kubelet\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"})\n  -\n  sum without(instance, node) (kubelet_volume_stats_inodes_used{cluster=\"$cluster\", job=\"kubelet\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"})\n)\n",
+                                "expr": "(\n  sum without(instance, node) (kubelet_volume_stats_inodes{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"})\n  -\n  sum without(instance, node) (kubelet_volume_stats_inodes_used{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"})\n)\n",
                                 "format": "time_series",
                                 "intervalFactor": 1,
                                 "legendFormat": " Free inodes",
@@ -279,6 +298,7 @@ data:
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -295,6 +315,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -335,10 +356,12 @@ data:
                             "thresholdMarkers": true
                         },
                         "gridPos": {
+
                         },
                         "id": 5,
                         "interval": null,
                         "links": [
+
                         ],
                         "mappingType": 1,
                         "mappingTypes": [
@@ -375,7 +398,7 @@ data:
                         "tableColumn": "",
                         "targets": [
                             {
-                                "expr": "kubelet_volume_stats_inodes_used{cluster=\"$cluster\", job=\"kubelet\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"}\n/\nkubelet_volume_stats_inodes{cluster=\"$cluster\", job=\"kubelet\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"}\n* 100\n",
+                                "expr": "kubelet_volume_stats_inodes_used{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"}\n/\nkubelet_volume_stats_inodes{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"$volume\"}\n* 100\n",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "",
@@ -417,13 +440,14 @@ data:
             "list": [
                 {
                     "current": {
-                        "text": "Prometheus",
-                        "value": "Prometheus"
+                        "text": "default",
+                        "value": "default"
                     },
                     "hide": 0,
                     "label": null,
                     "name": "datasource",
                     "options": [
+
                     ],
                     "query": "prometheus",
                     "refresh": 1,
@@ -433,6 +457,7 @@ data:
                 {
                     "allValue": null,
                     "current": {
+
                     },
                     "datasource": "$datasource",
                     "hide": 2,
@@ -441,6 +466,7 @@ data:
                     "multi": false,
                     "name": "cluster",
                     "options": [
+
                     ],
                     "query": "label_values(kubelet_volume_stats_capacity_bytes, cluster)",
                     "refresh": 2,
@@ -448,6 +474,7 @@ data:
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "query",
@@ -456,6 +483,7 @@ data:
                 {
                     "allValue": null,
                     "current": {
+
                     },
                     "datasource": "$datasource",
                     "hide": 0,
@@ -464,13 +492,15 @@ data:
                     "multi": false,
                     "name": "namespace",
                     "options": [
+
                     ],
-                    "query": "label_values(kubelet_volume_stats_capacity_bytes{cluster=\"$cluster\", job=\"kubelet\"}, namespace)",
+                    "query": "label_values(kubelet_volume_stats_capacity_bytes{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\"}, namespace)",
                     "refresh": 2,
                     "regex": "",
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "query",
@@ -479,6 +509,7 @@ data:
                 {
                     "allValue": null,
                     "current": {
+
                     },
                     "datasource": "$datasource",
                     "hide": 0,
@@ -487,13 +518,15 @@ data:
                     "multi": false,
                     "name": "volume",
                     "options": [
+
                     ],
-                    "query": "label_values(kubelet_volume_stats_capacity_bytes{cluster=\"$cluster\", job=\"kubelet\", namespace=\"$namespace\"}, persistentvolumeclaim)",
+                    "query": "label_values(kubelet_volume_stats_capacity_bytes{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\"}, persistentvolumeclaim)",
                     "refresh": 2,
                     "regex": "",
                     "sort": 1,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "query",

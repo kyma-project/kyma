@@ -15,6 +15,7 @@ const (
 )
 
 func TestCompassRuntimeAgentNotManagedApplications(t *testing.T) {
+
 	t.Run("should not delete an Application if it has no CompassMetadata in Spec", func(t *testing.T) {
 		// when
 		compassManagedApplicationTemplate := createSimpleApplicationTemplate(compassManagedApplicationName)

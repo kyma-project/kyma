@@ -7,7 +7,6 @@ apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
   name: {{ template "fullname" . }}-webhook
-  namespace: "{{ .Release.Namespace }}"
 webhooks:
 - name: mutating.clusterservicebrokers.servicecatalog.k8s.io
   clientConfig:
@@ -118,7 +117,6 @@ apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: {{ template "fullname" . }}-validating-webhook
-  namespace: "{{ .Release.Namespace }}"
 webhooks:
 - name: validating.status.servicebindings.servicecatalog.k8s.io
   clientConfig:
@@ -181,10 +179,10 @@ webhooks:
       path: "/validating-clusterservicebrokers"
   failurePolicy: Fail
   rules:
-    - operations: [ "CREATE", "UPDATE" ]
-      apiGroups: ["servicecatalog.k8s.io"]
-      apiVersions: ["v1beta1"]
-      resources: ["clusterservicebrokers"]
+  - operations: [ "CREATE", "UPDATE" ]
+    apiGroups: ["servicecatalog.k8s.io"]
+    apiVersions: ["v1beta1"]
+    resources: ["clusterservicebrokers"]
 - name: validating.servicebindings.servicecatalog.k8s.io
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
@@ -207,10 +205,10 @@ webhooks:
       path: "/validating-servicebrokers"
   failurePolicy: Fail
   rules:
-    - operations: [ "CREATE", "UPDATE" ]
-      apiGroups: ["servicecatalog.k8s.io"]
-      apiVersions: ["v1beta1"]
-      resources: ["servicebrokers"]
+  - operations: [ "CREATE", "UPDATE" ]
+    apiGroups: ["servicecatalog.k8s.io"]
+    apiVersions: ["v1beta1"]
+    resources: ["servicebrokers"]
 - name: validating.serviceclasses.servicecatalog.k8s.io
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
@@ -220,10 +218,10 @@ webhooks:
       path: "/validating-serviceclasses"
   failurePolicy: Fail
   rules:
-    - operations: [ "CREATE", "UPDATE" ]
-      apiGroups: ["servicecatalog.k8s.io"]
-      apiVersions: ["v1beta1"]
-      resources: ["serviceclasses"]
+  - operations: [ "CREATE", "UPDATE" ]
+    apiGroups: ["servicecatalog.k8s.io"]
+    apiVersions: ["v1beta1"]
+    resources: ["serviceclasses"]
 - name: validating.clusterserviceclasses.servicecatalog.k8s.io
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
@@ -233,10 +231,10 @@ webhooks:
       path: "/validating-clusterserviceclasses"
   failurePolicy: Fail
   rules:
-    - operations: [ "CREATE", "UPDATE" ]
-      apiGroups: ["servicecatalog.k8s.io"]
-      apiVersions: ["v1beta1"]
-      resources: ["clusterserviceclasses"]
+  - operations: [ "CREATE", "UPDATE" ]
+    apiGroups: ["servicecatalog.k8s.io"]
+    apiVersions: ["v1beta1"]
+    resources: ["clusterserviceclasses"]
 - name: validating.serviceplans.servicecatalog.k8s.io
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
@@ -246,10 +244,10 @@ webhooks:
       path: "/validating-serviceplans"
   failurePolicy: Fail
   rules:
-    - operations: [ "CREATE", "UPDATE" ]
-      apiGroups: ["servicecatalog.k8s.io"]
-      apiVersions: ["v1beta1"]
-      resources: ["serviceplans"]
+  - operations: [ "CREATE", "UPDATE" ]
+    apiGroups: ["servicecatalog.k8s.io"]
+    apiVersions: ["v1beta1"]
+    resources: ["serviceplans"]
 - name: validating.clusterserviceplans.servicecatalog.k8s.io
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
@@ -259,10 +257,10 @@ webhooks:
       path: "/validating-clusterserviceplans"
   failurePolicy: Fail
   rules:
-    - operations: [ "CREATE", "UPDATE" ]
-      apiGroups: ["servicecatalog.k8s.io"]
-      apiVersions: ["v1beta1"]
-      resources: ["clusterserviceplans"]
+  - operations: [ "CREATE", "UPDATE" ]
+    apiGroups: ["servicecatalog.k8s.io"]
+    apiVersions: ["v1beta1"]
+    resources: ["clusterserviceplans"]
 ---
 apiVersion: v1
 kind: Secret

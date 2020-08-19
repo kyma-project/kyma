@@ -14,18 +14,22 @@ spec:
   template:
     spec:
       serviceAccountName: {{ .Chart.Name }}-tests
-      {{ if .Values.global.isLocalEnv }}
+      {{- if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
             - "oauth2.{{ .Values.global.ingress.domainName }}"
             - "dex.{{ .Values.global.ingress.domainName }}"
-      {{ end }}
+      {{- end }}
       containers:
         - name: tests
           image: {{ .Values.tests.image.registry }}/api-gateway-integration-tests:{{ .Values.tests.image.version }}
-          command: ["/bin/bash"]
-          args: ["-c", "sleep 20; ./app.test; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 4; exit $exit_code;"]
+          imagePullPolicy: Always
+          command: 
+          - /bin/bash
+          - -c
+          - |
+{{tpl (.Files.Get "files/api-gateway-tests.sh" | printf "%s" | indent 12) .}}
           env:
           - name: TEST_HYDRA_ADDRESS
             value: "http://ory-hydra-public.kyma-system.svc.cluster.local:4444"
@@ -45,8 +49,22 @@ spec:
             value: {{ .Values.tests.env.delay | quote }}
           - name: INGRESSGATEWAY_ADDRESS
             value: istio-ingressgateway.istio-system.svc.cluster.local
-          - name: DOMAIN
+          - name: TEST_DOMAIN
             value: {{ .Values.global.ingress.domainName }}
+          - name: TEST_CLIENT_TIMEOUT
+            value: {{ .Values.tests.env.jwtTimeout | quote }}
+          - name: TEST_RETRY_MAX_ATTEMPTS
+            value: {{ .Values.tests.env.jwtMaxAttempts | quote }}
+          - name: TEST_RETRY_DELAY
+            value: {{ .Values.tests.env.jwtDelay | quote }}
+          - name: TEST_GATEWAY_NAME
+            value: {{ .Values.tests.env.gatewayName }}
+          - name: TEST_GATEWAY_NAMESPACE
+            value: {{ .Values.tests.env.gatewayNamespace }}
+          {{- if .Values.global.isLocalEnv }}
+          - name: TEST_MINIKUBE_ENV
+            value: "true"
+          {{- end }}
       restartPolicy: Never
 {{- end }}
 {{- end }}

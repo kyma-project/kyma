@@ -1,4 +1,0 @@
-apiVersion: v1
-description: This chart tests the Kyma backup
-name: backup-test
-version: 1.0.0

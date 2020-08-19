@@ -46,16 +46,16 @@ func (c *serviceBindingConverter) ToGQL(in *api.ServiceBinding) (*gqlschema.Serv
 	}, nil
 }
 
-func (c *serviceBindingConverter) ToGQLs(in []*api.ServiceBinding) (gqlschema.ServiceBindings, error) {
-	var result gqlschema.ServiceBindings
+func (c *serviceBindingConverter) ToGQLs(in []*api.ServiceBinding) (*gqlschema.ServiceBindings, error) {
+	result := &gqlschema.ServiceBindings{Stats: &gqlschema.ServiceBindingsStats{}}
 	for _, item := range in {
 		converted, err := c.ToGQL(item)
 		if err != nil {
-			return gqlschema.ServiceBindings{}, errors.Wrapf(err, "while converting service binding [name: %s][namespace: %s]", item.Name, item.Namespace)
+			return nil, errors.Wrapf(err, "while converting service binding [name: %s][namespace: %s]", item.Name, item.Namespace)
 		}
 		if converted != nil {
-			c.addStat(converted.Status.Type, &result.Stats)
-			result.Items = append(result.Items, *converted)
+			c.addStat(converted.Status.Type, result.Stats)
+			result.Items = append(result.Items, converted)
 		}
 	}
 	return result, nil

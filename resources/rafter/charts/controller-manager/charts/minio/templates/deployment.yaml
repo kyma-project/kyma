@@ -106,7 +106,7 @@ spec:
 {{ toYaml .Values.extraArgs | indent 12 }}
           {{- end  }}
           volumeMounts:
-            {{- if and .Values.persistence.enabled (not .Values.gcsgateway.enabled) (not .Values.azuregateway.enabled) (not .Values.s3gateway.enabled) (not .Values.b2gateway.enabled) }}
+            {{- if and (.Values.persistence.enabled) (not .Values.gcsgateway.enabled) (not .Values.azuregateway.enabled) (not .Values.s3gateway.enabled) (not .Values.b2gateway.enabled) }}
             - name: export
               mountPath: {{ .Values.mountPath }}
               {{- if .Values.persistence.subPath }}
@@ -125,7 +125,7 @@ spec:
               mountPath: {{ .Values.configPath }}certs
             {{ end }}
           ports:
-            - name: service
+            - name: http-service
               containerPort: 9000
           env:
             - name: MINIO_ACCESS_KEY
@@ -149,7 +149,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /minio/health/live
-              port: service
+              port: http-service
               {{- if .Values.tls.enabled }}
               scheme: HTTPS
               {{ else }}
@@ -166,7 +166,7 @@ spec:
               scheme: HTTPS
               {{- end }}
               path: /minio/health/ready
-              port: service
+              port: http-service
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -187,7 +187,7 @@ spec:
 {{ toYaml . | indent 8 }}
 {{- end }}
       volumes:
-        {{- if and ((not .Values.gcsgateway.enabled) (not .Values.azuregateway.enabled) (not .Values.s3gateway.enabled) (not .Values.b2gateway.enabled)) }}
+        {{- if and (not .Values.gcsgateway.enabled) (not .Values.azuregateway.enabled) (not .Values.s3gateway.enabled) (not .Values.b2gateway.enabled) }}
         - name: export
         {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:

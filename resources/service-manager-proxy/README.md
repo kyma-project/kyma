@@ -16,8 +16,7 @@ This helm chart bootstraps the Service Broker Proxy for Kubernetes.
 
 ## Prerequisites
 
-* `tiller` is installed and configured in the Kubernetes cluster.
-* `helm` is installed and configured.
+* `helm` is installed and configured. (version > 3)
 * `service-catalog` is installed and configured in the Kubernetes cluster.
 * The cluster is registered in the Service Manager as a platform.
 
@@ -39,29 +38,17 @@ helm repo add peripli 'https://peripli.github.io'
 ### Instal Service Manager agent
 
 ```bash
-# using helm v2.x.x
-helm install peripli/service-broker-proxy-k8s \
-  --name service-broker-proxy \
-  --namespace service-broker-proxy \
-  --set image.tag=<VERSION> \
-  --set config.sm.url=<SM_URL> \
-  --set sm.user=<USER> \
-  --set sm.password=<PASSWORD>
-```
-
-```bash
-# using helm v3.x.x
 kubectl create namespace service-broker-proxy
 helm install service-broker-proxy peripli/service-broker-proxy-k8s \
   --namespace service-broker-proxy \
-  --set image.tag=<VERSION> \
+  --version <VERSION> \
   --set config.sm.url=<SM_URL> \
   --set sm.user=<USER> \
   --set sm.password=<PASSWORD>
 ```
 
 **Note:** Make sure you substitute &lt;SM_URL&gt; with the Service Manager url, &lt;USER&gt; and &lt;PASSWORD&gt; with the credentials returned from cluster registration in Service Manager (see above).
-Substitute \<VERSION> with the required version as listed on [Releases](https://github.com/Peripli/service-broker-proxy-k8s/releases). It is recommended to use the latest release.
+Substitute \<VERSION> with the specific version you require. If this is not set, the latest version is used.
 
 To use your own images you can set `image.repository`, `image.tag` and `image.pullPolicy` to the helm install command. In case your image is pulled from a private repository, you can use
 `image.pullsecret` to name a secret containing the credentials.
@@ -73,7 +60,7 @@ The following table lists some of the configurable parameters of the service bro
 Parameter | Description | Default
 --------- | ----------- | -------
 `image.repository` | image repository |`quay.io/service-manager/sb-proxy-k8s`
-`image.tag` | tag of image | `master`
+`image.tag` | tag of image | `<chart_version>`
 `image.pullsecret` | name of the secret containing pull secrets |
 `config.sm.url` | service manager url | `http://service-manager.dev.cfdev.sh`
 `sm.user` | username for service manager | `admin`

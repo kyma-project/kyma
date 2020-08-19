@@ -41,13 +41,13 @@ This table lists all possible parameters of a given resource together with their
 | **metadata.name** | Yes | Specifies the name of the CR which is also the prefix of the bucket name in the bucket storage. |
 | **spec.region** | No | Specifies the location of the [region](https://github.com/kyma-project/rafter/blob/master/config/crd/bases/rafter.kyma-project.io_clusterbuckets.yaml) under which the ClusterBucket Controller creates the bucket. If the field is empty, the ClusterBucket Controller creates the bucket under the default location. |
 | **spec.policy** | No | Specifies the type of bucket access. Use `none`, `readonly`, `writeonly`, or `readwrite`. |
-| **status.lastheartbeattime** | Not applicable | Provides the last time when the ClusterBucket Controller processed the ClusterBucket CR. |
+| **status.lastHeartbeatTime** | Not applicable | Specifies when was the last time when the ClusterBucket Controller processed the ClusterBucket CR. |
 | **status.message** | Not applicable | Describes a human-readable message on the CR processing success or failure. |
 | **status.phase** | Not applicable | The ClusterBucket Controller automatically adds it to the ClusterBucket CR. It describes the status of processing the ClusterBucket CR by the ClusterBucket Controller. It can be `Ready` or `Failed`. |
 | **status.reason** | Not applicable | Provides information on the ClusterBucket CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. |
 | **status.url** | Not applicable | Provides the address of the bucket storage under which the asset is available. |
 | **status.remoteName** | Not applicable | Provides the name of the bucket in storage. |
-| **status.observedGeneration** | Not applicable | Specifies the most recent generation that the ClusterBucket Controller observes. |
+| **status.observedGeneration** | Not applicable | Specifies the most recent ClusterBucket CR generation that the ClusterBucket Controller observed. |
 
 > **NOTE:** The ClusterBucket Controller automatically adds all parameters marked as **Not applicable** to the ClusterBucket CR.
 

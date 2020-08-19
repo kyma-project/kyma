@@ -17,9 +17,8 @@ spec:
     metadata:
       labels:
         control-plane: controller-manager
-        app.kubernetes.io/name: {{ include "api-gateway.name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
-      {{- with .Values.annotations }}
+{{ include "api-gateway.labels" . | indent 8 }}
+      {{- with .Values.config.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -31,14 +30,14 @@ spec:
           command:
             - /manager
           args:
-            - --metrics-addr=127.0.0.1:8080
+            - --metrics-addr=0.0.0.0:{{ .Values.config.ports.metrics }}
             - --oathkeeper-svc-address={{ .Values.config.oathkeeper.service }}
             - --oathkeeper-svc-port={{ .Values.config.oathkeeper.port }}
             - --jwks-uri={{ .Values.config.jwksURI }}
             - --service-blacklist={{ include "api-gateway.serviceBlackList" . | trimAll "," }}
-            {{- with .Values.global.ingress.domainName }}
-            - --domain-whitelist={{ . | join ", " }}
-            {{- end }}
+            - --generated-objects-labels={{ .Values.config.generatedObjects.labels }}
+            - --domain-whitelist={{ include "api-gateway.domainWhiteList" . }}
+            - --default-domain-name={{ include "api-gateway.defaultDomain" . }}
             {{- with .Values.config.cors.allowOrigin }}
             - --cors-allow-origin={{ . | join ", " }}
             {{- end }}
@@ -52,9 +51,12 @@ spec:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
+          ports:
+          - containerPort: {{ .Values.config.ports.metrics }}
+            name: metrics
       serviceAccountName: {{ include "api-gateway.name" . }}-account
       nodeSelector:
-      {{- with .Values.deployment.nodeSelector }}
+      {{- with .Values.config.nodeSelector }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
     {{- with .Values.affinity }}

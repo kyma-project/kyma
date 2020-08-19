@@ -114,15 +114,15 @@ func (_m *mockGqlServiceInstanceConverter) ToGQL(in *v1beta1.ServiceInstance) (*
 }
 
 // ToGQLs provides a mock function with given fields: in
-func (_m *mockGqlServiceInstanceConverter) ToGQLs(in []*v1beta1.ServiceInstance) ([]gqlschema.ServiceInstance, error) {
+func (_m *mockGqlServiceInstanceConverter) ToGQLs(in []*v1beta1.ServiceInstance) ([]*gqlschema.ServiceInstance, error) {
 	ret := _m.Called(in)
 
-	var r0 []gqlschema.ServiceInstance
-	if rf, ok := ret.Get(0).(func([]*v1beta1.ServiceInstance) []gqlschema.ServiceInstance); ok {
+	var r0 []*gqlschema.ServiceInstance
+	if rf, ok := ret.Get(0).(func([]*v1beta1.ServiceInstance) []*gqlschema.ServiceInstance); ok {
 		r0 = rf(in)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]gqlschema.ServiceInstance)
+			r0 = ret.Get(0).([]*gqlschema.ServiceInstance)
 		}
 	}
 

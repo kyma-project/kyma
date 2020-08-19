@@ -1,13 +1,3 @@
 dependencies:
-  - name: apiserver-proxy
-    condition: apiserver-proxy.enabled
-  - name: console
-    condition: console.enabled
-  - name: cluster-users
-    condition: cluster-users.enabled
-  - name: kubeless
-    condition: kubeless.enabled
-  - name: console-backend-service
-    condition: console-backend-service.enabled
   - name: docs
     condition: docs.enabled

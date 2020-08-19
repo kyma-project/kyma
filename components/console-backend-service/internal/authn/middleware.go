@@ -22,16 +22,23 @@ type contextKey struct {
 func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			defer func() {
+				if err := r.Body.Close(); err != nil {
+					glog.Errorf("Closing body failed due to an error: %s", err)
+				}
+			}()
 			wsProtocolHeader := r.Header.Get("sec-websocket-protocol")
 			if wsProtocolHeader != "" {
 				wsProtocolParts := strings.Split(wsProtocolHeader, ",")
-				if len(wsProtocolParts) != 2 {
+				if len(wsProtocolParts) > 2 {
 					http.Error(w, "sec-websocket-protocol malformed", http.StatusBadRequest)
 					return
 				}
-				wsProtocol, wsToken := strings.TrimSpace(wsProtocolParts[0]), strings.TrimSpace(wsProtocolParts[1])
-				r.Header.Set("Authorization", "Bearer "+wsToken)
-				r.Header.Set("sec-websocket-protocol", wsProtocol)
+				if len(wsProtocolParts) == 2 {
+					wsProtocol, wsToken := strings.TrimSpace(wsProtocolParts[0]), strings.TrimSpace(wsProtocolParts[1])
+					r.Header.Set("Authorization", "Bearer "+wsToken)
+					r.Header.Set("sec-websocket-protocol", wsProtocol)
+				}
 			}
 
 			u, ok, err := a.AuthenticateRequest(r)

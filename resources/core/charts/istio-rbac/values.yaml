@@ -10,3 +10,4 @@ global:
           - connector-service-internal-api.kyma-integration.svc.cluster.local
           - application-broker.kyma-integration.svc.cluster.local
           - compass-connector-internal.compass-system.svc.cluster.local
+          - compass-runtime-agent.compass-system.svc.cluster.local

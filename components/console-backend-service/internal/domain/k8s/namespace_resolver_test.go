@@ -25,22 +25,25 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 		name, inactiveName, systemName := "name", "inactive", "system"
 
 		k8sNamespace := fixNamespaceWithStatus(name, "Active")
-		gqlNamespace := gqlschema.Namespace{
+		gqlNamespace := gqlschema.NamespaceListItem{
 			Name:              name,
 			Status:            "Active",
 			IsSystemNamespace: false,
+			Labels:            gqlschema.Labels{},
 		}
 		k8sInactiveNamespace := fixNamespaceWithStatus(inactiveName, "Terminating")
-		gqlInactiveNamespace := gqlschema.Namespace{
+		gqlInactiveNamespace := gqlschema.NamespaceListItem{
 			Name:              inactiveName,
 			Status:            "Terminating",
 			IsSystemNamespace: false,
+			Labels:            gqlschema.Labels{},
 		}
 		k8sSystemNamespace := fixNamespaceWithStatus(systemName, "Active")
-		gqlSystemNamespace := gqlschema.Namespace{
+		gqlSystemNamespace := gqlschema.NamespaceListItem{
 			Name:              systemName,
 			Status:            "Active",
 			IsSystemNamespace: true,
+			Labels:            gqlschema.Labels{},
 		}
 
 		resources := []*v1.Namespace{k8sNamespace, k8sInactiveNamespace, k8sSystemNamespace}
@@ -55,8 +58,8 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 
 		// check with default values
 		result, err := resolver.NamespacesQuery(nil, nil, nil)
-		expected := []gqlschema.Namespace{
-			gqlNamespace,
+		expected := []*gqlschema.NamespaceListItem{
+			&gqlNamespace,
 		}
 
 		require.NoError(t, err)
@@ -66,8 +69,8 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 
 		// check with system namespaces
 		result, err = resolver.NamespacesQuery(nil, &trueBool, nil)
-		expected = []gqlschema.Namespace{
-			gqlNamespace, gqlSystemNamespace,
+		expected = []*gqlschema.NamespaceListItem{
+			&gqlNamespace, &gqlSystemNamespace,
 		}
 
 		require.NoError(t, err)
@@ -75,8 +78,8 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 
 		// check with inactive namespaces
 		result, err = resolver.NamespacesQuery(nil, nil, &trueBool)
-		expected = []gqlschema.Namespace{
-			gqlNamespace, gqlInactiveNamespace,
+		expected = []*gqlschema.NamespaceListItem{
+			&gqlNamespace, &gqlInactiveNamespace,
 		}
 
 		require.NoError(t, err)
@@ -85,7 +88,7 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 
 	t.Run("Empty", func(t *testing.T) {
 		resources := []*v1.Namespace{}
-		expected := []gqlschema.Namespace(nil)
+		expected := []*gqlschema.NamespaceListItem(nil)
 		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
 		svc.On("List").Return(resources, nil).Once()
@@ -184,7 +187,7 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 		}
 
 		resource := fixNamespace(name, labels)
-		expected := gqlschema.NamespaceMutationOutput{
+		expected := &gqlschema.NamespaceMutationOutput{
 			Name:   name,
 			Labels: labels,
 		}
@@ -197,7 +200,7 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 		podSvc := automock.NewPodSvc()
 		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
 
-		result, err := resolver.CreateNamespace(nil, name, &labels)
+		result, err := resolver.CreateNamespace(nil, name, labels)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -214,11 +217,11 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 		podSvc := automock.NewPodSvc()
 		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
 
-		result, err := resolver.CreateNamespace(nil, name, &labels)
+		result, err := resolver.CreateNamespace(nil, name, labels)
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
-		assert.NotNil(t, result)
+		assert.Nil(t, result)
 	})
 }
 
@@ -230,7 +233,7 @@ func TestNamespaceResolver_UpdateNamespace(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		resource := fixNamespace(name, labels)
-		expected := gqlschema.NamespaceMutationOutput{
+		expected := &gqlschema.NamespaceMutationOutput{
 			Name:   name,
 			Labels: labels,
 		}
@@ -262,7 +265,7 @@ func TestNamespaceResolver_UpdateNamespace(t *testing.T) {
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
-		assert.NotNil(t, result)
+		assert.Nil(t, result)
 	})
 }
 

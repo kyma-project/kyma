@@ -1,35 +1,31 @@
 package testsuite
 
 import (
-	"github.com/avast/retry-go"
-	serviceCatalogApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	scv1beta1 "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 )
 
 // CreateServiceBinding is a step which creates new ServiceBinding
 type CreateServiceBinding struct {
-	serviceBindings serviceCatalogClient.ServiceBindingInterface
-	state           CreateServiceBindingState
+	serviceBindings servicecatalogclientset.ServiceBindingInterface
 	name            string
-}
-
-// CreateServiceBindingState represents CreateServiceBinding dependencies
-type CreateServiceBindingState interface {
-	GetServiceInstanceName() string
+	serviceName     string
 }
 
 var _ step.Step = &CreateServiceBinding{}
 
 // NewCreateServiceBinding returns new CreateServiceBinding
-func NewCreateServiceBinding(name string, serviceBindings serviceCatalogClient.ServiceBindingInterface, state CreateServiceBindingState) *CreateServiceBinding {
+func NewCreateServiceBinding(name, serviceName string, serviceBindings servicecatalogclientset.ServiceBindingInterface) *CreateServiceBinding {
 	return &CreateServiceBinding{
 		serviceBindings: serviceBindings,
-		state:           state,
 		name:            name,
+		serviceName:     serviceName,
 	}
 }
 
@@ -40,11 +36,11 @@ func (s *CreateServiceBinding) Name() string {
 
 // Run executes the step
 func (s *CreateServiceBinding) Run() error {
-	serviceBinding := &serviceCatalogApi.ServiceBinding{
+	serviceBinding := &scv1beta1.ServiceBinding{
 		ObjectMeta: metav1.ObjectMeta{Name: s.name},
-		Spec: serviceCatalogApi.ServiceBindingSpec{
-			InstanceRef: serviceCatalogApi.LocalObjectReference{
-				Name: s.state.GetServiceInstanceName(),
+		Spec: scv1beta1.ServiceBindingSpec{
+			InstanceRef: scv1beta1.LocalObjectReference{
+				Name: s.serviceName,
 			},
 		},
 	}
@@ -75,8 +71,8 @@ func (s *CreateServiceBinding) isServiceBindingReady() error {
 	}
 
 	for _, condition := range sb.Status.Conditions {
-		if condition.Type == serviceCatalogApi.ServiceBindingConditionReady {
-			if condition.Status != serviceCatalogApi.ConditionTrue {
+		if condition.Type == scv1beta1.ServiceBindingConditionReady {
+			if condition.Status != scv1beta1.ConditionTrue {
 				return errors.New("ServiceBinding is not ready")
 			}
 			break

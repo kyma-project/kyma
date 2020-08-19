@@ -42,16 +42,9 @@ deployment:
 service:
   externalapi:
     port: *externalAPIPort
-    nodePort: 32010
   internalapi:
     serviceType: ClusterIP
     port: *internalAPIPort
-
-ingress:
-  externalapi:
-    port: *externalAPIPort
-  authSecret: kyma-integration/nginx-auth-ca
-  tlsSecret: application-connector-ingress-tls-cert
 
 istio:
   rbac:
@@ -60,7 +53,7 @@ istio:
       subjects:
       - user: cluster.local/ns/kyma-integration/sa/connection-token-handler
       - user: cluster.local/ns/kyma-integration/sa/{{ .Chart.Name }}-tests
-      - user: cluster.local/ns/kyma-system/sa/core-console-backend-service
+      - user: cluster.local/ns/kyma-system/sa/console-backend
   mtlsDestinationRule:
     required: false
 

@@ -2,10 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-connectivity-validator
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Release.Name }}-connectivity-validator
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: 1
   strategy:
@@ -22,8 +26,10 @@ spec:
         sidecar.istio.io/inject: "true"
       labels:
         app: {{ .Release.Name }}-connectivity-validator
+        kyma-project.io/dashboard: event-mesh
         release: {{ .Release.Name }}
     spec:
+      serviceAccountName: {{ .Release.Name }}-connectivity-validator
       containers:
         - name: {{ .Release.Name }}-connectivity-validator
           image: {{ .Values.global.applicationConnectivityValidatorImage }}
@@ -65,11 +71,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Release.Name }}-validator
+  namespace: {{ .Release.Namespace }}
   labels:
     application: {{ .Release.Name }}
     app: {{ .Release.Name }}-connectivity-validator
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   type: ClusterIP
   ports:

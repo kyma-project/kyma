@@ -3,47 +3,59 @@ package testkit
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/go-multierror"
-	gatewayApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
-	gatewayClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2"
-	"github.com/pkg/errors"
 	"io/ioutil"
-	model "k8s.io/api/apps/v1"
-	core "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
-	appsClient "k8s.io/client-go/kubernetes/typed/apps/v1"
-	coreClient "k8s.io/client-go/kubernetes/typed/core/v1"
 	"net/http"
+	"strconv"
+
+	"k8s.io/apimachinery/pkg/runtime"
+
+	"k8s.io/client-go/dynamic"
+
+	"github.com/hashicorp/go-multierror"
+	rulev1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
+	"github.com/pkg/errors"
+	appsv1 "k8s.io/api/apps/v1"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/util/intstr"
+	appsclient "k8s.io/client-go/kubernetes/typed/apps/v1"
+	coreclient "k8s.io/client-go/kubernetes/typed/core/v1"
+
+	apiRulev1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 )
 
 const (
-	testServiceName         = "counter-service"
+	testServiceNamePrefix   = "ctr-svc"
 	testServicePort         = 8090
-	testServiceImage        = "maladie/counterservice:latest"
 	labelKey                = "component"
-	healthEndpointFormat    = "https://counter-service.%s/health"
-	endpointFormat          = "https://counter-service.%s"
-	inClusterEndpointFormat = "http://counter-service.%s.svc.cluster.local:8090"
+	healthEndpointFormat    = "http://%s.%s:%d/health"
+	endpointFormat          = "http://%s.%s:%d"
+	inClusterEndpointFormat = "http://%s.%s.svc.cluster.local:%v"
+	gateway                 = "kyma-gateway.kyma-system.svc.cluster.local"
 )
 
 type TestService struct {
-	apis        gatewayClient.ApiInterface
-	deployments appsClient.DeploymentInterface
-	services    coreClient.ServiceInterface
-	HttpClient  *http.Client
-	domain      string
-	namespace   string
+	apiRules         dynamic.ResourceInterface
+	deployments      appsclient.DeploymentInterface
+	services         coreclient.ServiceInterface
+	HttpClient       *http.Client
+	domain           string
+	namespace        string
+	testServiceImage string
+	testServiceName  string
 }
 
-func NewTestService(httpClient *http.Client, deployments appsClient.DeploymentInterface, services coreClient.ServiceInterface, apis gatewayClient.ApiInterface, domain, namespace string) *TestService {
+func NewTestService(httpClient *http.Client, deployments appsclient.DeploymentInterface, services coreclient.ServiceInterface, apiRules dynamic.ResourceInterface, domain, namespace, testServiceImage string) *TestService {
 	return &TestService{
-		HttpClient:  httpClient,
-		domain:      domain,
-		apis:        apis,
-		deployments: deployments,
-		services:    services,
-		namespace:   namespace,
+		HttpClient:       httpClient,
+		domain:           domain,
+		apiRules:         apiRules,
+		deployments:      deployments,
+		services:         services,
+		namespace:        namespace,
+		testServiceName:  fmt.Sprintf("%v-%v", testServiceNamePrefix, namespace),
+		testServiceImage: testServiceImage,
 	}
 }
 
@@ -62,7 +74,7 @@ func (ts *TestService) CreateTestService() error {
 func (ts *TestService) checkValue() (int, error) {
 
 	url := ts.GetTestServiceURL()
-	resp, err := ts.HttpClient.Get(url + "/counter")
+	resp, err := ts.HttpClient.Get(url)
 
 	if err != nil {
 		return 0, err
@@ -107,6 +119,23 @@ func (ts *TestService) IsReady() error {
 
 	return nil
 }
+
+func (ts *TestService) Reset() error {
+	url := ts.GetTestServiceURL()
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := ts.HttpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("expected 200, got %v", resp.StatusCode)
+	}
+	return nil
+}
+
 func (ts *TestService) WaitForCounterPodToUpdateValue(val int) error {
 	count, err := ts.checkValue()
 	if err != nil {
@@ -114,61 +143,67 @@ func (ts *TestService) WaitForCounterPodToUpdateValue(val int) error {
 	}
 
 	if count != val {
-		return errors.Errorf("counter different then expected value: %v", count)
+		return errors.Errorf("counter different then expected value: Got: %v but expected %v", count, val)
 	}
 	return nil
 }
 
 func (ts *TestService) DeleteTestService() error {
-	errDeployment := ts.deployments.Delete(testServiceName, &v1.DeleteOptions{})
-	errService := ts.services.Delete(testServiceName, &v1.DeleteOptions{})
-	errApi := ts.apis.Delete(testServiceName, &v1.DeleteOptions{})
+	errDeployment := ts.deployments.Delete(ts.testServiceName, &metav1.DeleteOptions{})
+	errService := ts.services.Delete(ts.testServiceName, &metav1.DeleteOptions{})
+	errApi := ts.apiRules.Delete(ts.testServiceName, &metav1.DeleteOptions{})
 	err := multierror.Append(errDeployment, errService, errApi)
 	return err.ErrorOrNil()
 }
 
 func (ts *TestService) GetTestServiceURL() string {
-	return fmt.Sprintf(endpointFormat, ts.domain)
+	return fmt.Sprintf(endpointFormat, ts.testServiceName, ts.namespace, testServicePort)
 }
 
 func (ts *TestService) GetInClusterTestServiceURL() string {
-	return fmt.Sprintf(inClusterEndpointFormat, ts.namespace)
+	return fmt.Sprintf(inClusterEndpointFormat, ts.testServiceName, ts.namespace, testServicePort)
 }
 
 func (ts *TestService) getHealthEndpointURL() string {
-	return fmt.Sprintf(healthEndpointFormat, ts.domain)
+	return fmt.Sprintf(healthEndpointFormat, ts.testServiceName, ts.namespace, testServicePort)
 }
 
 func (ts *TestService) createDeployment() error {
 	rs := int32(1)
-	deployment := &model.Deployment{
-		ObjectMeta: v1.ObjectMeta{
-			Name: testServiceName,
+	deployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: ts.testServiceName,
 			Labels: map[string]string{
-				labelKey: testServiceName,
+				labelKey: ts.testServiceName,
 			},
 		},
-		Spec: model.DeploymentSpec{
+		Spec: appsv1.DeploymentSpec{
 			Replicas: &rs,
-			Selector: &v1.LabelSelector{
+			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					labelKey: testServiceName,
+					labelKey: ts.testServiceName,
 				},
 			},
-			Template: core.PodTemplateSpec{
-				ObjectMeta: v1.ObjectMeta{
+			Template: v1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						labelKey: testServiceName,
+						labelKey: ts.testServiceName,
 					},
 				},
-				Spec: core.PodSpec{
-					Containers: []core.Container{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
 						{
-							Name:  testServiceName,
-							Image: testServiceImage,
-							Ports: []core.ContainerPort{
+							Name:    ts.testServiceName,
+							Image:   ts.testServiceImage,
+							Command: []string{"/event-subscriber"},
+							Args: []string{
+								"--port",
+								strconv.Itoa(testServicePort),
+							},
+							Ports: []v1.ContainerPort{
 								{ContainerPort: testServicePort},
 							},
+							ImagePullPolicy: v1.PullAlways,
 						},
 					},
 				},
@@ -180,21 +215,23 @@ func (ts *TestService) createDeployment() error {
 }
 
 func (ts *TestService) createService() error {
-	service := &core.Service{
+	service := &v1.Service{
 
-		ObjectMeta: v1.ObjectMeta{
-			Name: testServiceName,
+		ObjectMeta: metav1.ObjectMeta{
+			Name: ts.testServiceName,
 		},
-		Spec: core.ServiceSpec{
+		Spec: v1.ServiceSpec{
 			Type: "ClusterIP",
-			Ports: []core.ServicePort{
+			Ports: []v1.ServicePort{
 				{
+					Name:       "http-counter",
 					Port:       testServicePort,
+					Protocol:   "TCP",
 					TargetPort: intstr.FromInt(testServicePort),
 				},
 			},
 			Selector: map[string]string{
-				labelKey: testServiceName,
+				labelKey: ts.testServiceName,
 			},
 		},
 	}
@@ -203,19 +240,48 @@ func (ts *TestService) createService() error {
 }
 
 func (ts *TestService) createAPI() error {
-	api := &gatewayApi.Api{
-		ObjectMeta: v1.ObjectMeta{
-			Name: testServiceName,
+	port := uint32(testServicePort)
+	host := fmt.Sprintf("%s.%s", ts.testServiceName, ts.domain)
+	gateway := gateway
+	apiRule := &apiRulev1alpha1.APIRule{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "APIRule",
+			APIVersion: apiRulev1alpha1.GroupVersion.String(),
 		},
-		Spec: gatewayApi.ApiSpec{
-			Service: gatewayApi.Service{
-				Name: testServiceName,
-				Port: testServicePort,
+		ObjectMeta: metav1.ObjectMeta{
+			Name: ts.testServiceName,
+		},
+		Spec: apiRulev1alpha1.APIRuleSpec{
+			Service: &apiRulev1alpha1.Service{
+				Name: &ts.testServiceName,
+				Port: &port,
+				Host: &host,
 			},
-			Hostname:       fmt.Sprintf("%s.%s", testServiceName, ts.domain),
-			Authentication: []gatewayApi.AuthenticationRule{},
+			Gateway: &gateway,
+			Rules: []apiRulev1alpha1.Rule{
+				{
+					Path: "/.*",
+					Methods: []string{
+						"GET",
+						"DELETE",
+					},
+					AccessStrategies: []*rulev1alpha1.Authenticator{
+						{
+							Handler: &rulev1alpha1.Handler{
+								Name: "noop",
+							},
+						},
+					},
+				},
+			},
 		},
 	}
-	_, err := ts.apis.Create(api)
+
+	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&apiRule)
+	if err != nil {
+		return err
+	}
+
+	_, err = ts.apiRules.Create(&unstructured.Unstructured{Object: unstructuredObj}, metav1.CreateOptions{})
 	return err
 }

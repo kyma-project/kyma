@@ -4,68 +4,59 @@ connector_service:
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
+connectivity_certs_controller:
+  enabled: false
+
 global:
+  disableLegacyConnectivity: false
   isLocalEnv: false
   namespace: kyma-integration
-  istio:
-    namespace: istio-system
+  strictMode: disabled
+  ingress:
+    domainName: "TBD"
+  helm:
     tls:
-      secretName: istio-ingress-certs
+      crt: "TBD"
+      key: "TBD"
+  istio:
     gateway:
       name: kyma-gateway
+      nameMtls: kyma-gateway-application-connector
       namespace: kyma-system
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    dir:
-    version: 48a441da
+    version: "8392259f"
   application_operator_tests:
-    dir:
-    version: 83cc9c71
+    version: "8c81ea09"
   connector_service:
-    dir:
-    version: 4e3576cd
+    version: "4e3576cd"
   connector_service_tests:
-    dir:
-    version: 27eff119
+    version: "27eff119"
   connection_token_handler:
-    dir:
-    version: fbf1000b
+    version: "fbf1000b"
   connection_token_handler_tests:
-    dir:
-    version: fbf1000b
-  connectivity_certs_controller:
-    dir:
-    version: fbf1000b
+    version: "fbf1000b"
   event_service:
-    dir:
-    version: b2aa1331
+    version: "d4372526"
   event_service_integration_tests:
-    dir:
-    version: fe0ba6e1
-  application_connectivity_validator:
-    dir:
-    version: 83cc9c71
+    version: "2c51c024"
   application_gateway:
-    dir:
-    version: 97ee9c85
+    version: "b06fbd6f"
   application_gateway_tests:
-    dir:
-    version: c608dbf3
+    version: "1272752c"
   application_registry:
-    dir:
-    version: 97ee9c85
+    version: "4bd4dbfb"
   application_registry_tests:
-    dir:
-    version: c608dbf3
+    version: "c608dbf3"
   application_broker:
-    dir:
-    version: 87fe96df
+    version: "1acc510b"
   application_connectivity_certs_setup_job:
-    dir:
-    version: fbf1000b
-connectivity_certs_controller:
-  enabled: false
+    version: "fbf1000b"
+  application_connectivity_validator:
+    version: "39d1ab87"
+  connectivity_certs_controller:
+    version: "fbf1000b"
 
 application_connectivity_certs_setup_job:
   secrets:
@@ -73,19 +64,17 @@ application_connectivity_certs_setup_job:
       name: connector-service-app-ca
       namespace: kyma-integration
     caCertificateSecret:
-      name: application-connector-certs
+      name: kyma-gateway-certs-cacert
       namespace: istio-system
   certificate:
     validityTime: 92d
 
 tests:
   application_connector_tests:
-    #    enabled: *connectorServiceEnabled
     enabled: true
     connector_service:
       central: false
     skipSslVerify: true
     image:
-      dir:
-      version: fbf1000b
+      version: "c9ff90c3"
       pullPolicy: IfNotPresent

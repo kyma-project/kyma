@@ -7,7 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	appsApi "k8s.io/api/apps/v1beta2"
+	appsApi "k8s.io/api/apps/v1"
 	coreApi "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -16,19 +16,19 @@ func TestDeploymentConverter_ToGQL(t *testing.T) {
 	t.Run("All properties are given", func(t *testing.T) {
 		var zeroTimeStamp time.Time
 
-		deployment := fixDeployment()
+		deployment := fixDeployment("image")
 
 		expected := &gqlschema.Deployment{
 			Name:              "name",
 			CreationTimestamp: zeroTimeStamp,
 			Namespace:         "namespace",
 			Labels:            gqlschema.Labels{"test": "ok", "ok": "test"},
-			Status: gqlschema.DeploymentStatus{
+			Status: &gqlschema.DeploymentStatus{
 				Replicas:          1,
 				AvailableReplicas: 1,
 				ReadyReplicas:     1,
 				UpdatedReplicas:   1,
-				Conditions: []gqlschema.DeploymentCondition{
+				Conditions: []*gqlschema.DeploymentCondition{
 					{
 						Status:  "True",
 						Type:    "Available",
@@ -37,7 +37,7 @@ func TestDeploymentConverter_ToGQL(t *testing.T) {
 					},
 				},
 			},
-			Containers: []gqlschema.Container{
+			Containers: []*gqlschema.Container{
 				{
 					Name:  "test",
 					Image: "image",
@@ -68,8 +68,8 @@ func TestDeploymentConverter_ToGQL(t *testing.T) {
 func TestDeploymentConverter_ToGQLs(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		deployments := []*appsApi.Deployment{
-			fixDeployment(),
-			fixDeployment(),
+			fixDeployment("image"),
+			fixDeployment("image"),
 		}
 
 		converter := deploymentConverter{}
@@ -91,7 +91,7 @@ func TestDeploymentConverter_ToGQLs(t *testing.T) {
 	t.Run("With nil", func(t *testing.T) {
 		deployments := []*appsApi.Deployment{
 			nil,
-			fixDeployment(),
+			fixDeployment("image"),
 			nil,
 		}
 
@@ -103,7 +103,7 @@ func TestDeploymentConverter_ToGQLs(t *testing.T) {
 	})
 }
 
-func fixDeployment() *appsApi.Deployment {
+func fixDeployment(image string) *appsApi.Deployment {
 	var mockTimeStamp v1.Time
 
 	return &appsApi.Deployment{
@@ -138,7 +138,7 @@ func fixDeployment() *appsApi.Deployment {
 					Containers: []coreApi.Container{
 						{
 							Name:  "test",
-							Image: "image",
+							Image: image,
 						},
 					},
 				},

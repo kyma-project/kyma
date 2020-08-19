@@ -17,8 +17,9 @@ type TestConfig struct {
 	}
 
 	DirectorURL                    string        `envconfig:"default=https://compass-director.compass-system.svc.cluster.local:3000"`
-	Namespace                      string        `envconfig:"default=compass-system"`
+	CompassNamespace               string        `envconfig:"default=compass-system"`
 	IntegrationNamespace           string        `envconfig:"default=kyma-integration"`
+	TestTargetNamespace            string        `envconfig:"default=compass-runtime-agent-test"`
 	TestPodAppLabel                string        `envconfig:"default=compass-runtime-agent-tests"`
 	MockServicePort                int32         `envconfig:"default=8080"`
 	MockServiceName                string        `envconfig:"default=compass-runtime-agent-tests-mock"`

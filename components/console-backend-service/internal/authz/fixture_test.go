@@ -25,8 +25,8 @@ const (
 )
 
 var (
-	apiGroup     = "extensions"
-	apiVersion   = "v1beta1"
+	apiGroup     = "apps"
+	apiVersion   = "v1"
 	groupVersion = fmt.Sprintf("%s/%s", apiGroup, apiVersion)
 	resource     = "deployments"
 	resourceArg  = "MyResource"
@@ -50,21 +50,21 @@ var (
 		},
 	}
 	fakeResources = []*v1.APIResourceList{
-		&v1.APIResourceList{
+		{
 			TypeMeta:     v1.TypeMeta{},
 			GroupVersion: groupVersion,
 			APIResources: []v1.APIResource{
-				v1.APIResource{
+				{
 					Name: resource,
 					Kind: kind,
 				},
 			},
 		},
-		&v1.APIResourceList{
+		{
 			TypeMeta:     v1.TypeMeta{},
 			GroupVersion: apiVersion,
 			APIResources: []v1.APIResource{
-				v1.APIResource{
+				{
 					Name: resource,
 					Kind: kind,
 				},
@@ -165,17 +165,17 @@ func withRedundantResourceArgAttributes(isChildResolver ChildResolverSetting) gq
 }
 
 func noArgsContext() context.Context {
-	resolver := graphql.ResolverContext{Args: map[string]interface{}{}}
-	return graphql.WithResolverContext(context.Background(), &resolver)
+	resolver := graphql.FieldContext{Args: map[string]interface{}{}}
+	return graphql.WithFieldContext(context.Background(), &resolver)
 }
 
 func withArgsContext(resource gqlschema.JSON) context.Context {
-	resolver := graphql.ResolverContext{Args: map[string]interface{}{
+	resolver := graphql.FieldContext{Args: map[string]interface{}{
 		namespaceArg: namespace,
 		nameArg:      name,
 		resourceArg:  resource,
 	}}
-	return graphql.WithResolverContext(context.Background(), &resolver)
+	return graphql.WithFieldContext(context.Background(), &resolver)
 }
 
 func verifyCommonAttributes(t *testing.T, authAttributes authorizer.Attributes) {

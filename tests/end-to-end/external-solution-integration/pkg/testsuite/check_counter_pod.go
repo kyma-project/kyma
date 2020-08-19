@@ -1,25 +1,29 @@
 package testsuite
 
 import (
-	"time"
+	retrygo "github.com/avast/retry-go"
+	"github.com/pkg/errors"
 
-	"github.com/avast/retry-go"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
-	"github.com/pkg/errors"
 )
 
 // CheckCounterPod is a step which checks if counter has been updated in test pod
 type CheckCounterPod struct {
-	testService *testkit.TestService
+	testService   *testkit.TestService
+	expectedValue int
+	retryOpts     []retrygo.Option
 }
 
 var _ step.Step = &CheckCounterPod{}
 
 // NewCheckCounterPod returns new CheckCounterPod
-func NewCheckCounterPod(testService *testkit.TestService) *CheckCounterPod {
+func NewCheckCounterPod(testService *testkit.TestService, expectedValue int, opts ...retrygo.Option) *CheckCounterPod {
 	return &CheckCounterPod{
-		testService: testService,
+		testService:   testService,
+		expectedValue: expectedValue,
+		retryOpts:     opts,
 	}
 }
 
@@ -31,8 +35,8 @@ func (s *CheckCounterPod) Name() string {
 // Run executes the step
 func (s *CheckCounterPod) Run() error {
 	err := retry.Do(func() error {
-		return s.testService.WaitForCounterPodToUpdateValue(1)
-	}, retry.Attempts(20), retry.Delay(time.Second*10), retry.DelayType(retry.FixedDelay))
+		return s.testService.WaitForCounterPodToUpdateValue(s.expectedValue)
+	}, s.retryOpts...)
 	if err != nil {
 		return errors.Wrapf(err, "the counter pod is not updated")
 	}

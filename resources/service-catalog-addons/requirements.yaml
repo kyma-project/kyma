@@ -1,9 +1,5 @@
 dependencies:
 - name: service-binding-usage-controller
   condition: service-binding-usage-controller.enabled
-- name: broker-ui
-  condition: broker-ui.enabled
-- name: catalog-ui
+- name: service-catalog-ui
   condition: catalog-ui.enabled
-- name: instances-ui
-  condition: instances-ui.enabled

@@ -7,11 +7,26 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   scaleTargetRef:
-    apiVersion: extensions/v1beta1
+    apiVersion: apps/v1
     kind: Deployment
     name: {{ include "oathkeeper.fullname" . }}-oathkeeper
   minReplicas: {{ .Values.hpa.oathkeeper.minReplicas }}
   maxReplicas: {{ .Values.hpa.oathkeeper.maxReplicas }}
   metrics:
 {{ toYaml .Values.hpa.oathkeeper.metrics | trim | indent 2 }}
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "hydra.fullname" . }}-hydra
+  namespace: {{ .Release.Namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "hydra.fullname" . }}-hydra
+  minReplicas: {{ .Values.hpa.hydra.minReplicas }}
+  maxReplicas: {{ .Values.hpa.hydra.maxReplicas }}
+  metrics:
+{{ toYaml .Values.hpa.hydra.metrics | trim | indent 2 }}
 {{ end }}

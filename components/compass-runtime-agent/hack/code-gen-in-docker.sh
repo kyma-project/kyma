@@ -5,7 +5,7 @@ GEN_DIR=$(dirname $0)
 REPO_DIR="$CURRENT_DIR/$GEN_DIR/.."
 echo $REPO_DIR
 
-PROJECT_MODULE="kyma-project.io/compass-runtime-agent"
+PROJECT_MODULE="github.com/kyma-project/kyma/components/compass-runtime-agent"
 IMAGE_NAME="kubernetes-codegen:latest"
 
 CUSTOM_RESOURCE_GROUP_DIR="compass"

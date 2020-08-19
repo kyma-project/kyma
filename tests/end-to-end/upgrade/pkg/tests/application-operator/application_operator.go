@@ -115,7 +115,7 @@ func (ut *UpgradeTest) isApplicationReady() (bool, error) {
 		return false, err
 	}
 
-	return application.Status.InstallationStatus.Status == "DEPLOYED", nil
+	return application.Status.InstallationStatus.Status == "deployed", nil
 }
 
 func (ut *UpgradeTest) getImagesConfigFromOperatorOpts() (appImagesConfig, error) {
@@ -170,7 +170,7 @@ func getImageVersion(containerName string, containers []core.Container) (string,
 	return "", fmt.Errorf(fmt.Sprintf("container name %s not found", containerName))
 }
 
-// TestResources tests resources after backup phase
+// TestResources tests resources after upgrade
 func (ut *UpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Info("ApplicationOperator UpgradeTest testing resources...")
 

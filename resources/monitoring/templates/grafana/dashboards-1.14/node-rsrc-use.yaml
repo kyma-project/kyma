@@ -1,11 +1,14 @@
-# Generated from 'node-rsrc-use' from https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
-# Do not change in-place! In order to change this file first read following link:
-# https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+{{- /*
+Generated from 'node-rsrc-use' from https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
+Do not change in-place! In order to change this file first read following link:
+https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+*/ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled .Values.nodeExporter.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  namespace: {{ $.Release.Namespace }}
   name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "node-rsrc-use" | trunc 63 | trimSuffix "-" }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
@@ -18,13 +21,15 @@ data:
     {
         "annotations": {
             "list": [
+
             ]
         },
-        "editable": true,
+        "editable": false,
         "gnetId": null,
         "graphTooltip": 0,
         "hideControls": false,
         "links": [
+
         ],
         "refresh": "10s",
         "rows": [
@@ -34,6 +39,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -53,6 +59,7 @@ data:
                         "lines": true,
                         "linewidth": 1,
                         "links": [
+
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -60,6 +67,7 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 6,
@@ -76,6 +84,7 @@ data:
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -92,6 +101,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -115,6 +125,7 @@ data:
                     },
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -134,6 +145,7 @@ data:
                         "lines": true,
                         "linewidth": 1,
                         "links": [
+
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -141,6 +153,7 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 6,
@@ -157,6 +170,7 @@ data:
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -173,6 +187,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -208,6 +223,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -227,6 +243,7 @@ data:
                         "lines": true,
                         "linewidth": 1,
                         "links": [
+
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -234,6 +251,7 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 6,
@@ -250,6 +268,7 @@ data:
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -266,6 +285,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -289,6 +309,7 @@ data:
                     },
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -308,6 +329,7 @@ data:
                         "lines": true,
                         "linewidth": 1,
                         "links": [
+
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -315,6 +337,7 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 6,
@@ -331,6 +354,7 @@ data:
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -347,6 +371,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -382,6 +407,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -401,6 +427,7 @@ data:
                         "lines": true,
                         "linewidth": 1,
                         "links": [
+
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -441,6 +468,7 @@ data:
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -457,6 +485,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -480,6 +509,7 @@ data:
                     },
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -499,6 +529,7 @@ data:
                         "lines": true,
                         "linewidth": 1,
                         "links": [
+
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -539,6 +570,7 @@ data:
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -555,6 +587,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -590,6 +623,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -609,6 +643,7 @@ data:
                         "lines": true,
                         "linewidth": 1,
                         "links": [
+
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -616,6 +651,7 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 6,
@@ -626,12 +662,13 @@ data:
                                 "expr": "instance_device:node_disk_io_time_seconds:rate1m{job=\"node-exporter\", instance=\"$instance\"}",
                                 "format": "time_series",
                                 "intervalFactor": 2,
-                                "legendFormat": "{{`{{device}}`}}",
+                                "legendFormat": "{{`{{`}}device{{`}}`}}",
                                 "legendLink": null,
                                 "step": 10
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -648,6 +685,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -671,6 +709,7 @@ data:
                     },
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -690,6 +729,7 @@ data:
                         "lines": true,
                         "linewidth": 1,
                         "links": [
+
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -697,6 +737,7 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 6,
@@ -707,12 +748,13 @@ data:
                                 "expr": "instance_device:node_disk_io_time_weighted_seconds:rate1m{job=\"node-exporter\", instance=\"$instance\"}",
                                 "format": "time_series",
                                 "intervalFactor": 2,
-                                "legendFormat": "{{`{{device}}`}}",
+                                "legendFormat": "{{`{{`}}device{{`}}`}}",
                                 "legendLink": null,
                                 "step": 10
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -729,6 +771,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -764,6 +807,7 @@ data:
                 "panels": [
                     {
                         "aliasColors": {
+
                         },
                         "bars": false,
                         "dashLength": 10,
@@ -783,6 +827,7 @@ data:
                         "lines": true,
                         "linewidth": 1,
                         "links": [
+
                         ],
                         "nullPointMode": "null as zero",
                         "percentage": false,
@@ -790,6 +835,7 @@ data:
                         "points": false,
                         "renderer": "flot",
                         "seriesOverrides": [
+
                         ],
                         "spaceLength": 10,
                         "span": 12,
@@ -800,12 +846,13 @@ data:
                                 "expr": "1 -\n(\n  max without (mountpoint, fstype) (node_filesystem_avail_bytes{job=\"node-exporter\", fstype!=\"\", instance=\"$instance\"})\n/\n  max without (mountpoint, fstype) (node_filesystem_size_bytes{job=\"node-exporter\", fstype!=\"\", instance=\"$instance\"})\n)\n",
                                 "format": "time_series",
                                 "intervalFactor": 2,
-                                "legendFormat": "{{`{{device}}`}}",
+                                "legendFormat": "{{`{{`}}device{{`}}`}}",
                                 "legendLink": null,
                                 "step": 10
                             }
                         ],
                         "thresholds": [
+
                         ],
                         "timeFrom": null,
                         "timeShift": null,
@@ -822,6 +869,7 @@ data:
                             "name": null,
                             "show": true,
                             "values": [
+
                             ]
                         },
                         "yaxes": [
@@ -855,18 +903,20 @@ data:
         "schemaVersion": 14,
         "style": "dark",
         "tags": [
+            "kubernetes-mixin"
         ],
         "templating": {
             "list": [
                 {
                     "current": {
-                        "text": "Prometheus",
-                        "value": "Prometheus"
+                        "text": "default",
+                        "value": "default"
                     },
                     "hide": 0,
                     "label": null,
                     "name": "datasource",
                     "options": [
+
                     ],
                     "query": "prometheus",
                     "refresh": 1,
@@ -886,6 +936,7 @@ data:
                     "multi": false,
                     "name": "instance",
                     "options": [
+
                     ],
                     "query": "label_values(up{job=\"node-exporter\"}, instance)",
                     "refresh": 1,
@@ -893,6 +944,7 @@ data:
                     "sort": 2,
                     "tagValuesQuery": "",
                     "tags": [
+
                     ],
                     "tagsQuery": "",
                     "type": "query",
@@ -930,7 +982,7 @@ data:
             ]
         },
         "timezone": "",
-        "title": "USE Method / Node",
+        "title": "Kubernetes / USE Method / Node",
         "uid": "fac67cfbe174d3ef53eb473d73d9212f",
         "version": 0
     }

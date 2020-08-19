@@ -28,7 +28,7 @@ func newAssetGroupResolver(assetGroupService assetGroupSvc, assetGroupConverter 
 	}
 }
 
-func (r *assetGroupResolver) AssetGroupAssetsField(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]gqlschema.Asset, error) {
+func (r *assetGroupResolver) AssetGroupAssetsField(ctx context.Context, obj *gqlschema.AssetGroup, types []string) ([]*gqlschema.Asset, error) {
 	if obj == nil {
 		glog.Error(errors.Errorf("%s cannot be empty in order to resolve `assets` field", pretty.AssetGroup))
 		return nil, gqlerror.NewInternal()
@@ -49,8 +49,8 @@ func (r *assetGroupResolver) AssetGroupAssetsField(ctx context.Context, obj *gql
 	return assets, nil
 }
 
-func (r *assetGroupResolver) AssetGroupEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.AssetGroupEvent, error) {
-	channel := make(chan gqlschema.AssetGroupEvent, 1)
+func (r *assetGroupResolver) AssetGroupEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.AssetGroupEvent, error) {
+	channel := make(chan *gqlschema.AssetGroupEvent, 1)
 	filter := func(entity *v1beta1.AssetGroup) bool {
 		return entity != nil && entity.Namespace == namespace
 	}

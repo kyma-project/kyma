@@ -1,0 +1,21 @@
+{{- if .Values.networkPolicy.enabled }}
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: "{{ include "gcloud-sqlproxy.fullname" . }}"
+  labels:
+    {{- include "gcloud-sqlproxy.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "gcloud-sqlproxy.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  ingress:
+    # Allow inbound connections
+    - ports:
+      {{- range .Values.cloudsql.instances }}
+      - port: {{ .port }}
+      {{- end }}
+      from:
+{{ toYaml .Values.networkPolicy.ingress.from | indent 10 }}
+{{- end }}

@@ -6,8 +6,6 @@ import (
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/automock"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -25,7 +23,6 @@ func TestGenericSupervisor_EnsureLabelsCreated(t *testing.T) {
 	labels := fixLabels()
 
 	labelOp.On("EnsureLabelsAreApplied", usageKind, labels).Return(nil)
-	labelOp.On("DetectLabelsConflicts", usageKind, labels).Return([]string{}, nil)
 	tracerOp.On("SetAnnotationAboutBindingUsage", usageKind, "test", labels).Return(nil)
 
 	scheme := runtime.NewScheme()
@@ -96,32 +93,6 @@ func TestGenericSupervisor_GetInjectedLabels(t *testing.T) {
 	// THEN
 	require.NoError(t, err)
 	require.Equal(t, labels, result)
-}
-
-func TestGenericSupervisor_DetectLabelsConflict_Err(t *testing.T) {
-	// GIVEN
-	labelOp := &automock.LabelsSvc{}
-	defer labelOp.AssertExpectations(t)
-
-	labels := fixLabels()
-	usageKind := fixUnstructuredUK()
-	usageKind.SetLabels(labels)
-
-	labelOp.On("DetectLabelsConflicts", usageKind, labels).Return([]string{"label"}, errors.New("fix"))
-
-	scheme := runtime.NewScheme()
-	client := fakeDynamic.NewSimpleDynamicClient(scheme, usageKind)
-
-	resourceInterface := client.Resource(v1alpha1.SchemeGroupVersion.WithResource("usagekinds"))
-
-	logErrSink := newLogSinkForErrors()
-	ctrl := controller.NewGenericSupervisor(resourceInterface, labelOp, logErrSink.Logger)
-
-	// WHEN
-	err := ctrl.EnsureLabelsCreated("test", "test", "test", labels)
-
-	// THEN
-	assert.Error(t, err)
 }
 
 func fixUnstructuredUK() *unstructured.Unstructured {

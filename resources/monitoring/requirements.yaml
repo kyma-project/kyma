@@ -1,0 +1,3 @@
+dependencies:
+    - name: prometheus-pushgateway
+      condition: pushgateway.enabled

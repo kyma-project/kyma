@@ -7,8 +7,8 @@ After you create an Application, connect it to an external solution to consume t
 
 This guide shows you how to get the client certificate.
 
->**NOTE:** The client certificate is valid for 92 days. See [this](#tutorials-renew-the-client-certificate) tutorial to learn how to renew the client certificate. 
-You can also revoke the client certificate, which prevents it from being renewed. See [this](#tutorials-revoke-the-client-certificate) tutorial to learn how to do this.
+>**NOTE:** The client certificate is valid for 92 days. See the [tutorial](#tutorials-renew-the-client-certificate) to learn how to renew the client certificate.
+You can also revoke the client certificate, which prevents it from being renewed. See the [tutorial](#tutorials-revoke-the-client-certificate) to learn how to do this.
 
 ## Prerequisites
 
@@ -34,11 +34,11 @@ To get the configuration URL which allows you to fetch the required configuratio
    ```bash
    kubectl get tokenrequest.applicationconnector.kyma-project.io {APP_NAME} -o yaml
    ```
-   
+
    >**NOTE:** If the response doesn't contain the **status** section, wait for a few moments and fetch the CR again.
 
    A successful call returns the following response:
-  
+
    ```yaml
    apiVersion: applicationconnector.kyma-project.io/v1alpha1
    kind: TokenRequest
@@ -73,7 +73,7 @@ A successful call returns the following response:
         "certificatesUrl":  "https://connector-service.{CLUSTER_DOMAIN}/v1/applications/certificates",
     },
     "certificate":{
-        "subject": "OU=Test,O=TestOrg,L=Waldorf,ST=Waldorf,C=DE,CN={APP_NAME}",
+        "subject": "OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE,CN={APP_NAME}",
         "extensions": "",
         "key-algorithm": "rsa2048",
     }
@@ -88,7 +88,7 @@ Generate a CSR using the certificate subject data obtained in the previous step:
 
 ```bash
 openssl genrsa -out generated.key 2048
-openssl req -new -sha256 -out generated.csr -key generated.key -subj "/OU=Test/O=TestOrg/L=Waldorf/ST=Waldorf/C=DE/CN={APP_NAME}"
+openssl req -new -sha256 -out generated.csr -key generated.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN={APP_NAME}"
 openssl base64 -in generated.csr
 ```
 
@@ -108,7 +108,7 @@ The response contains a valid client certificate signed by the Kyma Certificate 
 }
 ```
 
-After you receive the certificates, decode the certificate chain and use it in your Application. 
+After you receive the certificates, decode the certificate chain and use it in your Application.
 
 ## Call the metadata endpoint
 
@@ -139,7 +139,7 @@ A successful call returns the following response:
     "revokeCertUrl": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"
   },
   "certificate": {
-    "subject": "OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={APP_NAME}",
+    "subject": "OU=OrgUnit,O=Organization,L=Blacksburg,ST=Virginia,C=US,CN={APP_NAME}",
     "extensions": "string",
     "key-algorithm": "rsa2048"
   }

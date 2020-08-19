@@ -2,54 +2,32 @@
 title: Architecture
 ---
 
-The following diagram illustrates a generic serverless implementation.
+Serverless relies heavily on Kubernetes resources. It uses [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/), [Services](https://kubernetes.io/docs/concepts/services-networking/service/) and [HorizontalPodAutoscalers](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) to deploy and manage Functions, and [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) to create Docker images. See how these and other resources process a Function within a Kyma cluster:
 
-![General serverless architecture](./assets/serverless_general.svg)
+![Serverless architecture](./assets/serverless-architecture.svg)
 
-The application flow takes place on the client side. Third parties handle the infrastructural logic. Custom logic can process updates and encapsulate databases. Authentication is an example of custom logic. Third parties can also handle business logic. A hosted database contains read-only data that the client reads. None of this functionality runs on a single, central server. Instead, the client relies on FaaS as its resource.
+> **CAUTION:** Serverless imposes some requirements on the setup of Namespaces. If you create a new Namespace, do not disable sidecar injection in it as Serverless requires Istio for other resources to communicate with Functions correctly. Also, if you apply custom [LimitRanges](/root/kyma/#details-resource-quotas) for a new Namespace, they must be higher than or equal to the [limits for building Jobs' resources](#configuration-serverless-chart).
 
-The following diagram shows an example of tasks that lambdas can perform in Kyma after a user invokes them.
+1. Create a Function either through the UI or by applying a Function custom resource (CR). This CR contains the Function definition (business logic that you want to execute) and information on the environment on which it should run.
 
-![Lambdas in Kyma](./assets/lambda_example.svg)
+   > **NOTE:** Function Controller sets the Node.js 12 runtime by default.
 
-First, the user invokes the exposed lambda endpoint. Then, the lambda function can carry out a number of tasks, such as:
+2. Before the Function can be saved or modified, it is first updated and then verified by the [defaulting and validation webhooks](#details-supported-webhooks) respectively.
 
-* Retrieving cart information from Enterprise Commerce
-* Retrieving stock details
-* Updating a database
+3. Function Controller (FC) detects the new, validated Function CR.
 
-## Open source components
+4. FC creates a ConfigMap with the Function definition.
 
-Kyma is comprised of several open source technologies to provide extensive functionality.
+5. Based on the ConfigMap, FC creates a Kubernetes Job that triggers the creation of a Function image.
 
-### Kubeless
+6. The Job creates a Pod which builds the production Docker image based on the Function's definition. The Job then pushes this image to a Docker registry.
 
-Kubeless is the serverless framework integrated into Kyma that allows you to deploy lambda functions. These functions run in Pods inside the Kubeless controller on a node, which can be a virtual or hardware machine.
+    > **NOTE:** Serverless offers a built-in internal Docker registry that is suitable for local development. For production purposes, switch to an [external Docker registry](#tutorials-set-an-external-docker-registry).
 
-Kubeless also has a command line interface. Use Node.js to create lambda functions.
+7. FC monitors the Job status. When the image creation finishes successfully, FC creates a Deployment that uses the newly built image.
 
-### Istio
+8. FC creates a Service that points to the Deployment.
 
-Istio is a third-party component that makes it possible to expose and consume services in Kyma. See the [Istio documentation](https://istio.io) to learn more. Istio helps create a network of deployed services, called a service mesh.
+9. FC creates a HorizontalPodAutoscaler that automatically scales the number of Pods in the Deployment based on the observed CPU utilization.
 
-In Kyma, functions run in Pods. Istio provides a proxy for specified pods that talk to a pilot. The pilot confirms whether access to the pod is permissible as per the request. In the diagram, Pod B requests access to Pod A. Pod A has an Istio proxy that contains a set of instructions on which services can access Pod A. The Istio proxy also notifies Pod A as to whether Pod B is a part of the service mesh. The Istio Proxy gets all of its information from the Pilot.
-
-![Istio architecture](./assets/istio.svg)
-
-### NATS
-
-The Event Bus in Kyma monitors business events and trigger functions based on those events. At the heart of the Event Bus is NATS, an open source, stand-alone messaging system. To learn more about NATS, visit the [NATS website](https://nats.io).
-
-The following diagram demonstrates the Event Bus architecture.
-
-![Event Bus architecture](./assets/nats.svg)
-
-The Event Bus exposes an HTTP endpoint that the system can consume. An external event, such as a subscription, triggers the Event Bus. A lambda function works with a push notification, and the subscription handling of the Event Bus processes the notification.
-
-### Knative
-
-Knative is a platform which manages serverless workloads inside Kubernetes environments. Due to its high versatility, Knative can manage the whole lifecycle of a lambda function, from building the source code to serving it.
-
-Kyma bridges the gap between developers and Knative using its own [Function Controller](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md) which uses the Function custom resource to facilitate the deployment of lambda functions.
-
-For details, see the [Knative project](https://knative.dev/docs/) documentation.
+10. FC waits for the Deployment to become ready.

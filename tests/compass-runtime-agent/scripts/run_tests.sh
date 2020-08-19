@@ -25,8 +25,15 @@ echo "Removing old cluster test suite"
 echo "------------------------"
 
 set +e
-kubectl -n $NAMESPACE delete cts $APP_NAME
+kubectl delete cts $APP_NAME
 set -e
+
+echo ""
+echo "------------------------"
+echo "Building binary"
+echo "------------------------"
+
+CGO_ENABLED=0 GOOS=linux go test -c -o ${CURRENT_DIR}/../test.test ${CURRENT_DIR}/../test/runtimeagent/test
 
 echo ""
 echo "------------------------"
@@ -35,8 +42,11 @@ echo "------------------------"
 
 IMAGE=$DOCKER_PUSH_REPOSITORY/$APP_NAME:$DOCKER_TAG
 
-make build-image
-make push-image
+docker build ${CURRENT_DIR}/.. -t ${IMAGE} -f ${CURRENT_DIR}/../Dockerfile.local
+docker push ${IMAGE}
+
+#make build-image
+#make push-image
 
 echo ""
 echo "------------------------"
@@ -57,7 +67,7 @@ echo "------------------------"
 echo "Creating test suite"
 echo "------------------------"
 
-cat <<EOF | kubectl -n $NAMESPACE apply -f -
+cat <<EOF | kubectl apply -f -
 apiVersion: testing.kyma-project.io/v1alpha1
 kind: ClusterTestSuite
 metadata:
@@ -75,10 +85,10 @@ EOF
 
 echo ""
 echo "------------------------"
-echo "Waiting 15 seconds for pod to start..."
+echo "Waiting 20 seconds for pod to start..."
 echo "------------------------"
 echo ""
 
-sleep 15
+sleep 20
 
 kubectl -n $NAMESPACE logs -l testing.kyma-project.io/def-name=$APP_NAME -c $APP_NAME -f

@@ -10,7 +10,7 @@ import (
 
 //go:generate mockery -name=appConverter -output=automock -outpkg=automock -case=underscore
 type appConverter interface {
-	ToGQL(in *api.Application) gqlschema.Application
+	ToGQL(in *api.Application) *gqlschema.Application
 }
 
 //go:generate mockery -name=extractor -output=automock -outpkg=automock -case=underscore
@@ -19,12 +19,12 @@ type extractor interface {
 }
 
 type Application struct {
-	channel   chan<- gqlschema.ApplicationEvent
+	channel   chan<- *gqlschema.ApplicationEvent
 	converter appConverter
 	extractor extractor
 }
 
-func NewApplication(channel chan<- gqlschema.ApplicationEvent, converter appConverter, extractor extractor) *Application {
+func NewApplication(channel chan<- *gqlschema.ApplicationEvent, converter appConverter, extractor extractor) *Application {
 	return &Application{
 		channel:   channel,
 		converter: converter,
@@ -61,7 +61,7 @@ func (l *Application) onEvent(eventType gqlschema.SubscriptionEventType, object 
 func (l *Application) notify(eventType gqlschema.SubscriptionEventType, application *api.Application) {
 	gqlApplication := l.converter.ToGQL(application)
 
-	event := gqlschema.ApplicationEvent{
+	event := &gqlschema.ApplicationEvent{
 		Type:        eventType,
 		Application: gqlApplication,
 	}

@@ -1,36 +1,30 @@
 package compass
 
 import (
-	"crypto/rsa"
-	"crypto/tls"
-	"crypto/x509"
 	"errors"
+	"net/http"
 	"testing"
 
-	"kyma-project.io/compass-runtime-agent/internal/config"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 
 	"github.com/stretchr/testify/require"
 
-	"kyma-project.io/compass-runtime-agent/internal/certificates"
-
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql/mocks"
 	"github.com/stretchr/testify/assert"
-	"kyma-project.io/compass-runtime-agent/internal/graphql/mocks"
 
-	"kyma-project.io/compass-runtime-agent/internal/graphql"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
 )
 
 func newMockGQLConstructor(
 	t *testing.T,
 	returnedError error,
-	expectedCert *tls.Certificate,
 	expectedEndpoint string,
-	expectedLogging bool,
-	expectedInsecureConfigFetch bool) graphql.ClientConstructor {
-	return func(certificate *tls.Certificate, graphqlEndpoint string, enableLogging bool, insecureConfigFetch bool) (graphql.Client, error) {
-		assert.Equal(t, expectedCert, certificate)
+	expectedLogging bool) graphql.ClientConstructor {
+	return func(httpClient *http.Client, graphqlEndpoint string, enableLogging bool) (graphql.Client, error) {
 		assert.Equal(t, expectedEndpoint, graphqlEndpoint)
 		assert.Equal(t, expectedLogging, enableLogging)
-		assert.Equal(t, expectedInsecureConfigFetch, insecureConfigFetch)
 
 		return &mocks.Client{}, returnedError
 	}
@@ -43,25 +37,19 @@ func TestClientsProvider_GetCompassConfigClient(t *testing.T) {
 		Tenant:    "tenant",
 	}
 
-	credentials := certificates.ClientCredentials{
-		ClientKey:         &rsa.PrivateKey{},
-		CertificateChain:  []*x509.Certificate{},
-		ClientCertificate: &x509.Certificate{},
-	}
-
-	tlsCert := credentials.AsTLSCertificate()
 	url := "http://api.io"
 	enableLogging := true
-	insecureFetch := true
+	skipCompassTLSVerify := true
 
 	t.Run("should create new Compass Config Client", func(t *testing.T) {
 		// given
-		constructor := newMockGQLConstructor(t, nil, tlsCert, url, enableLogging, insecureFetch)
+		constructor := newMockGQLConstructor(t, nil, url, enableLogging)
 
-		provider := NewClientsProvider(constructor, false, insecureFetch, enableLogging)
+		provider := NewClientsProvider(constructor, skipCompassTLSVerify, enableLogging)
+		_ = provider.UpdateConnectionData(cache.ConnectionData{DirectorURL: url})
 
 		// when
-		configClient, err := provider.GetDirectorClient(credentials, url, runtimeConfig)
+		configClient, err := provider.GetDirectorClient(runtimeConfig)
 
 		// then
 		require.NoError(t, err)
@@ -70,12 +58,13 @@ func TestClientsProvider_GetCompassConfigClient(t *testing.T) {
 
 	t.Run("should return error when failed to create GraphQL client", func(t *testing.T) {
 		// given
-		constructor := newMockGQLConstructor(t, errors.New("error"), tlsCert, url, enableLogging, insecureFetch)
+		constructor := newMockGQLConstructor(t, errors.New("error"), url, enableLogging)
 
-		provider := NewClientsProvider(constructor, false, insecureFetch, enableLogging)
+		provider := NewClientsProvider(constructor, skipCompassTLSVerify, enableLogging)
+		_ = provider.UpdateConnectionData(cache.ConnectionData{DirectorURL: url})
 
 		// when
-		_, err := provider.GetDirectorClient(credentials, url, runtimeConfig)
+		_, err := provider.GetDirectorClient(runtimeConfig)
 
 		// then
 		require.Error(t, err)
@@ -91,12 +80,12 @@ func TestClientsProvider_GetConnectorTokenSecuredClient(t *testing.T) {
 
 	t.Run("should create new Connector token-secured Client", func(t *testing.T) {
 		// given
-		constructor := newMockGQLConstructor(t, nil, nil, url, enableLogging, insecureFetch)
+		constructor := newMockGQLConstructor(t, nil, url, enableLogging)
 
-		provider := NewClientsProvider(constructor, insecureFetch, false, enableLogging)
+		provider := NewClientsProvider(constructor, insecureFetch, enableLogging)
 
 		// when
-		configClient, err := provider.GetConnectorClient(url)
+		configClient, err := provider.GetConnectorTokensClient(url)
 
 		// then
 		require.NoError(t, err)
@@ -105,12 +94,12 @@ func TestClientsProvider_GetConnectorTokenSecuredClient(t *testing.T) {
 
 	t.Run("should return error when failed to create GraphQL client", func(t *testing.T) {
 		// given
-		constructor := newMockGQLConstructor(t, errors.New("error"), nil, url, enableLogging, insecureFetch)
+		constructor := newMockGQLConstructor(t, errors.New("error"), url, enableLogging)
 
-		provider := NewClientsProvider(constructor, insecureFetch, false, enableLogging)
+		provider := NewClientsProvider(constructor, insecureFetch, enableLogging)
 
 		// when
-		_, err := provider.GetConnectorClient(url)
+		_, err := provider.GetConnectorTokensClient(url)
 
 		// then
 		require.Error(t, err)
@@ -119,25 +108,19 @@ func TestClientsProvider_GetConnectorTokenSecuredClient(t *testing.T) {
 
 func TestClientsProvider_GetConnectorCertSecuredClient(t *testing.T) {
 
-	credentials := certificates.ClientCredentials{
-		ClientKey:         &rsa.PrivateKey{},
-		CertificateChain:  []*x509.Certificate{},
-		ClientCertificate: &x509.Certificate{},
-	}
-
-	tlsCert := credentials.AsTLSCertificate()
 	url := "http://api.io"
 	enableLogging := true
 	insecureFetch := true
 
 	t.Run("should create new Connector cert-secured Client", func(t *testing.T) {
 		// given
-		constructor := newMockGQLConstructor(t, nil, tlsCert, url, enableLogging, insecureFetch)
+		constructor := newMockGQLConstructor(t, nil, url, enableLogging)
 
-		provider := NewClientsProvider(constructor, insecureFetch, false, enableLogging)
+		provider := NewClientsProvider(constructor, insecureFetch, enableLogging)
+		_ = provider.UpdateConnectionData(cache.ConnectionData{ConnectorURL: url})
 
 		// when
-		configClient, err := provider.GetConnectorCertSecuredClient(credentials, url)
+		configClient, err := provider.GetConnectorCertSecuredClient()
 
 		// then
 		require.NoError(t, err)
@@ -146,12 +129,13 @@ func TestClientsProvider_GetConnectorCertSecuredClient(t *testing.T) {
 
 	t.Run("should return error when failed to create GraphQL client", func(t *testing.T) {
 		// given
-		constructor := newMockGQLConstructor(t, errors.New("error"), tlsCert, url, enableLogging, insecureFetch)
+		constructor := newMockGQLConstructor(t, errors.New("error"), url, enableLogging)
 
-		provider := NewClientsProvider(constructor, insecureFetch, false, enableLogging)
+		provider := NewClientsProvider(constructor, insecureFetch, enableLogging)
+		_ = provider.UpdateConnectionData(cache.ConnectionData{ConnectorURL: url})
 
 		// when
-		_, err := provider.GetConnectorCertSecuredClient(credentials, url)
+		_, err := provider.GetConnectorCertSecuredClient()
 
 		// then
 		require.Error(t, err)

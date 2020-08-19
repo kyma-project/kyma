@@ -12,15 +12,19 @@ required = [
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.16.10"
+
+[[constraint]]
+  name = "github.com/kyma-project/kyma"
+  revision = "28790517dd090d0b61ea121652ce98ad2a7d038c"
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.16.10"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.16.10"
 
 [[override]]
   name = "k8s.io/gengo"
@@ -28,5 +32,5 @@ required = [
 
 [[override]]
   name = "k8s.io/kubernetes"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.16.10"
 

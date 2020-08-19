@@ -1,0 +1,15 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: compassconnections.compass.kyma-project.io
+spec:
+  group: compass.kyma-project.io
+  version: v1alpha1
+  names:
+    kind: CompassConnection
+    listKind: CompassConnectionList
+    plural: compassconnections
+    singular: compassconnection
+  scope: Cluster

@@ -1,12 +1,14 @@
 package application
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"strings"
-	"sync"
 	"testing"
 	"time"
+
+	"helm.sh/helm/v3/pkg/release"
 
 	"k8s.io/apimachinery/pkg/labels"
 
@@ -16,8 +18,6 @@ import (
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
-	hapirelease1 "k8s.io/helm/pkg/proto/hapi/release"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
 )
 
 const (
@@ -30,6 +30,7 @@ const (
 
 type TestSuite struct {
 	application string
+	ctx         context.Context
 
 	config     testkit.TestConfig
 	helmClient testkit.HelmClient
@@ -48,7 +49,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	helmClient, err := testkit.NewHelmClient(config.TillerHost, config.TillerTLSKeyFile, config.TillerTLSCertificateFile, config.TillerTLSSkipVerify)
+	helmClient, err := testkit.NewHelmClient(config.HelmDriver)
 	require.NoError(t, err)
 
 	testPodsLabels := labels.Set{
@@ -57,8 +58,8 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	}
 
 	return &TestSuite{
-		application: app,
-
+		application:         app,
+		ctx:                 context.Background(),
 		config:              config,
 		helmClient:          helmClient,
 		k8sClient:           k8sResourcesClient,
@@ -69,75 +70,46 @@ func NewTestSuite(t *testing.T) *TestSuite {
 
 func (ts *TestSuite) Setup(t *testing.T) {
 	t.Logf("Creating %s Application", ts.application)
-	_, err := ts.k8sClient.CreateDummyApplication(ts.application, ts.application, false)
+	_, err := ts.k8sClient.CreateDummyApplication(ts.ctx, ts.application, ts.application, false)
 	require.NoError(t, err)
 }
 
 func (ts *TestSuite) Cleanup(t *testing.T) {
 	t.Log("Cleaning up...")
-	err := ts.k8sClient.DeleteApplication(ts.application, &metav1.DeleteOptions{})
+	err := ts.k8sClient.DeleteApplication(ts.ctx, ts.application, metav1.DeleteOptions{})
 	require.NoError(t, err)
 }
 
 func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T) {
 	err := testkit.WaitForFunction(defaultCheckInterval, ts.installationTimeout, func() bool {
-		app, err := ts.k8sClient.GetApplication(ts.application, metav1.GetOptions{})
+		app, err := ts.k8sClient.GetApplication(ts.ctx, ts.application, metav1.GetOptions{})
 		if err != nil {
 			return false
 		}
-
-		return app.Status.InstallationStatus.Status == hapirelease1.Status_DEPLOYED.String()
+		return app.Status.InstallationStatus.Status == release.StatusDeployed.String()
 	})
 
 	require.NoError(t, err)
 }
 
 func (ts *TestSuite) RunApplicationTests(t *testing.T) {
-	wg := sync.WaitGroup{}
-	wg.Add(2)
 
 	t.Log("Running application tests")
-	responseChan, errorChan := ts.helmClient.TestRelease(ts.application)
+	_, err := ts.helmClient.TestRelease(ts.application, ts.config.Namespace)
 
-	go ts.receiveTestResponse(t, &wg, responseChan)
-	go ts.receiveErrorResponse(t, &wg, errorChan)
-
-	wg.Wait()
-}
-
-func (ts *TestSuite) receiveTestResponse(t *testing.T, wg *sync.WaitGroup, responseChan <-chan *rls.TestReleaseResponse) {
-	defer wg.Done()
-
-	testFailed := false
-
-	for msg := range responseChan {
-		t.Log(msg.String())
-		if msg.Status == hapirelease1.TestRun_FAILURE {
-			testFailed = true
-		}
-	}
-	t.Logf("%s tests finished. Message channel closed", ts.application)
+	t.Logf("%s tests finished.", ts.application)
 
 	ts.getLogsAndCleanup(t)
 
-	if testFailed {
+	if err != nil {
+		t.Errorf("Error while executing tests for %s release: %s", ts.application, err.Error())
 		t.Logf("%s tests failed", ts.application)
 		t.Fatal("Application tests failed")
 	}
 }
 
-func (ts *TestSuite) receiveErrorResponse(t *testing.T, wg *sync.WaitGroup, errorChan <-chan error) {
-	defer wg.Done()
-
-	for err := range errorChan {
-		t.Errorf("Error while executing tests for %s release: %s", ts.application, err.Error())
-	}
-
-	t.Log("Error channel closed")
-}
-
 func (ts *TestSuite) getLogsAndCleanup(t *testing.T) {
-	podsToFetch, err := ts.k8sClient.ListPods(metav1.ListOptions{LabelSelector: ts.labelSelector})
+	podsToFetch, err := ts.k8sClient.ListPods(ts.ctx, metav1.ListOptions{LabelSelector: ts.labelSelector})
 	require.NoError(t, err)
 
 	for _, pod := range podsToFetch.Items {
@@ -155,11 +127,11 @@ func (ts *TestSuite) getPodLogs(t *testing.T, pod v1.Pod) {
 		}
 	}
 
-	req := ts.k8sClient.GetLogs(pod.Name, &v1.PodLogOptions{
+	req := ts.k8sClient.GetLogs(ts.ctx, pod.Name, &v1.PodLogOptions{
 		Container: testContainer,
 	})
 
-	reader, err := req.Stream()
+	reader, err := req.Stream(ts.ctx)
 	require.NoError(t, err)
 
 	defer reader.Close()
@@ -178,6 +150,6 @@ func (ts *TestSuite) getPodLogs(t *testing.T, pod v1.Pod) {
 }
 
 func (ts *TestSuite) deleteTestPod(t *testing.T, pod v1.Pod) {
-	err := ts.k8sClient.DeletePod(pod.Name, &metav1.DeleteOptions{})
+	err := ts.k8sClient.DeletePod(ts.ctx, pod.Name, metav1.DeleteOptions{})
 	require.NoError(t, err)
 }

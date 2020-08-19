@@ -7,14 +7,14 @@ metadata:
 spec:
   displayName: API Rules
   version: v1
-  category: Experimental
+  category: Configuration
   placement: namespace
   viewBaseUrl: "https://core-ui.{{ js .Values.global.ingress.domainName }}"
   navigationNodes:
-    - label: API Rules [preview]
+    - label: API Rules
       navigationPath: apirules
       viewUrl: "/apirules"
-      order: 1
+      order: -3
       viewGroup: "_core_ui_"
       keepSelectedForChildren: true
       navigationContext: "apirules"

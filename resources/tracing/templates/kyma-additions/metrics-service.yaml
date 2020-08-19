@@ -1,0 +1,68 @@
+{{- if eq .Values.jaeger.spec.strategy "allInOne" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "jaeger-operator.fullname" . }}-jaeger-metrics
+  labels:
+    app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-metrics
+spec:
+  ports:
+  - name: metrics
+    port: 14269
+    protocol: TCP
+    targetPort: 14269
+  selector:
+    app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger
+  type: ClusterIP
+{{- end }}
+
+{{- if eq .Values.jaeger.spec.strategy "production" }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "jaeger-operator.fullname" . }}-jaeger-agent-metrics
+  labels:
+    app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-agent-metrics
+spec:
+  ports:
+  - name: metrics
+    port: 14271
+    protocol: TCP
+    targetPort: 14271
+  selector:
+    app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-query
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "jaeger-operator.fullname" . }}-jaeger-query-metrics
+  labels:
+    app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-query-metrics
+spec:
+  ports:
+  - name: metrics
+    port: 16687
+    protocol: TCP
+    targetPort: 16687
+  selector:
+    app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-query
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "jaeger-operator.fullname" . }}-jaeger-collector-metrics
+  labels:
+    app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-collector-metrics
+spec:
+  ports:
+  - name: metrics
+    port: 14269
+    protocol: TCP
+    targetPort: 14269
+  selector:
+    app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-collector
+  type: ClusterIP
+{{- end }}

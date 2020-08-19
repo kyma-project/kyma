@@ -3,7 +3,7 @@
 
 `generic_make_go.mk` is a generic Makefile used to build, format, and test Golang components.
 
-## Prerequisites 
+## Prerequisites
 * [Docker](https://www.docker.com/get-started)
 * [GNU Makefile](https://www.gnu.org/software/make/manual/make.html) v3.80 or higher
 
@@ -20,7 +20,7 @@ To add the generic Makefile to your Makefile, add these variables and the statem
 APP_NAME = {APPLICATION NAME}
 APP_PATH = {APPLICATION PATH IN REPOSITORY}
 BUILDPACK = {BUILDPACK IMAGE}
-SCRIPTS_DIR = {GENERIC MAKEFILE PATH} 
+SCRIPTS_DIR = {GENERIC MAKEFILE PATH}
 include $(SCRIPTS_DIR)/generic-make-go.mk
 ```
 Find the list of available buildpack images [here](https://github.com/kyma-project/test-infra/blob/master/templates/config.yaml).
@@ -57,18 +57,18 @@ The Docker container is used in the CI environment.
 | build-image                       | Builds a Docker image used in the CI environment.                 |
 | push-image                        | Pushes the image to the image registry used in the CI environment.           |
 
-### Example workflow 
+### Example workflow
 The generic Makefile is used by the CI.
 When a job is triggered, the CI runs the `make release` command.
 The `release` rule depends on the `resolve`, `dep-status`, `verify`, `build-image`, and `push-image` rules.
-Although these rules do not appear in the Makefile, they are generated. 
- 
+Although these rules do not appear in the Makefile, they are generated.
+
 The generic Makefile contains such a line of code:
 ```makefile
 MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate pull-licenses gqlgen
 $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 ```
-For all the rules defined in **MOUNT_TARGETS**, the `buildpack-mount` function is called. It dynamically defines a new rule:
+For all the rules defined in **MOUNT_TARGETS**, the `buildpack-mount` Function is called. It dynamically defines a new rule:
 ```makefile
 resolve:
     @echo make resolve
@@ -76,7 +76,7 @@ resolve:
         -v $(COMPONENT_DIR):$(WORKSPACE_COMPONENT_DIR):delegated \
         $(DOCKER_CREATE_OPTS) make resolve-local
 ```
-As you can see, the `resolve-local` rule is executed inside the container. 
+As you can see, the `resolve-local` rule is executed inside the container.
 If the `resolve` rule passes, the next rules are executed.
 If any rule fails, the Makefile aborts the execution and fails as well.
 
@@ -85,8 +85,8 @@ There are two available **BUILDPACK_FUNCTIONS** which generate the rule dynamica
 - `buildpack-cp-ro` - creates the rule and copies component's files to a Docker container
 
 These are two variables which contain rules names that are created dynamically:
-- **MOUNT_TARGET** - contains rules which are dynamically created by the `buildpack-mount` function
-- **COPY_TARGET** - contains rules which are dynamically created by the `buildpack-cp-ro` function
+- **MOUNT_TARGET** - contains rules which are dynamically created by the `buildpack-mount` Function
+- **COPY_TARGET** - contains rules which are dynamically created by the `buildpack-cp-ro` Function
 
 ## Adjust the generic Makefile
 
@@ -102,12 +102,12 @@ verify:: {YOUR_RULE}
 ```
 
 ### Add a new local rule that needs a buildpack
-To add a new local rule that needs a buildpack, define a rule in the local Makefile and call the function that creates the rule:
+To add a new local rule that needs a buildpack, define a rule in the local Makefile and call the Function that creates the rule:
 ```makefile
 {RULE}-local: {COMMANDS}
 
 # Function which creates the new rule dynamically
-$(eval $(call {BUILDPACK_FUNCTION},{RULE})) 
+$(eval $(call {BUILDPACK_FUNCTION},{RULE}))
 ```
 
 ### Add a new rule in the generic Makefile

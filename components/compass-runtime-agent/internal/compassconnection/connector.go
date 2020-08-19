@@ -4,14 +4,14 @@ import (
 	"crypto/x509/pkix"
 	"strings"
 
-	"kyma-project.io/compass-runtime-agent/internal/compass"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 
 	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
-	"kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 
 	"github.com/pkg/errors"
 
-	"kyma-project.io/compass-runtime-agent/internal/certificates"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 )
 
 type EstablishedConnection struct {
@@ -23,10 +23,10 @@ const (
 	ConnectorTokenHeader = "Connector-Token"
 )
 
-//go:generate mockery -name=Connector
+//go:generate mockery --name=Connector
 type Connector interface {
 	EstablishConnection(connectorURL, token string) (EstablishedConnection, error)
-	MaintainConnection(credentials certificates.ClientCredentials, connectorURL string, renewCert bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error)
+	MaintainConnection(renewCert bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error)
 }
 
 func NewCompassConnector(
@@ -49,7 +49,7 @@ func (cc *compassConnector) EstablishConnection(connectorURL, token string) (Est
 		return EstablishedConnection{}, errors.New("Failed to establish connection. Connector URL is empty")
 	}
 
-	tokenSecuredConnectorClient, err := cc.clientsProvider.GetConnectorClient(connectorURL)
+	tokenSecuredConnectorClient, err := cc.clientsProvider.GetConnectorTokensClient(connectorURL)
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to prepare Connector Token-secured client")
 	}
@@ -81,8 +81,8 @@ func (cc *compassConnector) EstablishConnection(connectorURL, token string) (Est
 	}, nil
 }
 
-func (cc *compassConnector) MaintainConnection(credentials certificates.ClientCredentials, connectorURL string, renewCert bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error) {
-	certSecuredClient, err := cc.clientsProvider.GetConnectorCertSecuredClient(credentials, connectorURL)
+func (cc *compassConnector) MaintainConnection(renewCert bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error) {
+	certSecuredClient, err := cc.clientsProvider.GetConnectorCertSecuredClient()
 	if err != nil {
 		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to prepare Certificate-secured Connector client while checking connection")
 	}

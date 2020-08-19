@@ -3,6 +3,7 @@ package auth
 import (
 	"log"
 	"testing"
+	"time"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 
@@ -12,8 +13,10 @@ import (
 )
 
 const (
-	rbacError string = "graphql: access denied"
-	authError string = "graphql: server returned a non-200 status code: 401"
+	accessDenied = "access denied"
+	rbacError    = "graphql: " + accessDenied
+	authError    = "graphql: server returned a non-200 status code: 401"
+	wsError      = "websocket: bad handshake"
 )
 
 type TestSuite struct {
@@ -29,6 +32,7 @@ const (
 	Update
 	Delete
 	CreateSelfSubjectRulesReview
+	Watch
 )
 
 type OperationsInput map[OperationType][]*graphql.Request
@@ -103,6 +107,8 @@ func (a *TestSuite) Run(t *testing.T, ops *OperationsInput) {
 				a.testDelete(t, req)
 			case CreateSelfSubjectRulesReview:
 				a.testCreateSelfSubjectRulesReview(t, req)
+			case Watch:
+				a.testWatch(t, req)
 			default:
 				t.Log("unknown operation type")
 				t.Fail()
@@ -176,6 +182,19 @@ func (a *TestSuite) testDelete(t *testing.T, request *graphql.Request) {
 	})
 }
 
+func (a *TestSuite) testWatch(t *testing.T, request *graphql.Request) {
+	tc := testCases{
+		noUser:        {graphql.NoUser, false},
+		noRightsUser:  {graphql.NoRightsUser, false},
+		readOnlyUser:  {graphql.ReadOnlyUser, true},
+		readWriteUser: {graphql.AdminUser, true},
+	}
+
+	t.Run("Watch", func(t *testing.T) {
+		a.runTestsSubscribe(t, &tc, request)
+	})
+}
+
 func (a *TestSuite) testCreateSelfSubjectRulesReview(t *testing.T, request *graphql.Request) {
 	tc := testCases{
 		noUser:        {graphql.NoUser, true},
@@ -206,6 +225,29 @@ func (a *TestSuite) runTests(t *testing.T, testCases *testCases, request *graphq
 				assert.NotEqual(t, rbacError, err)
 			} else {
 				assert.EqualError(t, err, rbacError)
+			}
+		})
+	}
+}
+
+func (a *TestSuite) runTestsSubscribe(t *testing.T, testCases *testCases, request *graphql.Request) {
+	for testName, testCase := range *testCases {
+		t.Run(testName.String(), func(t *testing.T) {
+			a.changeUser(t, testCase.user)
+
+			var res interface{}
+			err := a.client.Subscribe(request).Next(res, 500*time.Millisecond)
+
+			if testCase.user == graphql.NoUser {
+				assert.EqualError(t, err, wsError)
+				return
+			}
+
+			if testCase.hasPermission {
+				assert.NotEqual(t, rbacError, err)
+			} else {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), accessDenied)
 			}
 		})
 	}

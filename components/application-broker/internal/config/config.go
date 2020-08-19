@@ -5,13 +5,15 @@ import (
 	"os"
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-broker/internal/director"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/ghodss/yaml"
 	"github.com/imdario/mergo"
 	"github.com/kyma-project/kyma/components/application-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/application-broker/platform/logger"
-	"github.com/mcuadros/go-defaults"
+	defaults "github.com/mcuadros/go-defaults"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
 )
@@ -26,6 +28,7 @@ import (
 // Combining many tags: tags have to be separated by WHITESPACE: `json:"port" default:"8080" valid:"required"`
 type Config struct {
 	Logger                     logger.Config
+	APIPackagesSupport         bool
 	Port                       int              `default:"8080"`
 	Storage                    []storage.Config `valid:"required"`
 	BrokerRelistDurationWindow time.Duration    `valid:"required"`
@@ -34,6 +37,11 @@ type Config struct {
 	UniqueSelectorLabelValue string `valid:"required"`
 	Namespace                string `valid:"required"`
 	ServiceName              string `valid:"required"`
+	Director                 struct {
+		Service  director.ServiceConfig
+		ProxyURL string
+	}
+	GatewayBaseURLFormat string `default:"http://%s-gateway"`
 }
 
 // Load method has following strategy:

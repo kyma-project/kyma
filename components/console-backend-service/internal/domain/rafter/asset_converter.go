@@ -12,7 +12,7 @@ import (
 //go:generate failery -name=gqlAssetConverter -case=underscore -output disabled -outpkg disabled
 type gqlAssetConverter interface {
 	ToGQL(in *v1beta1.Asset) (*gqlschema.Asset, error)
-	ToGQLs(in []*v1beta1.Asset) ([]gqlschema.Asset, error)
+	ToGQLs(in []*v1beta1.Asset) ([]*gqlschema.Asset, error)
 }
 
 type assetConverter struct {
@@ -37,18 +37,19 @@ func (c *assetConverter) ToGQL(item *v1beta1.Asset) (*gqlschema.Asset, error) {
 	}
 
 	asset := gqlschema.Asset{
-		Name:       item.Name,
-		Namespace:  item.Namespace,
-		Type:       item.Labels[TypeLabel],
-		Status:     status,
-		Parameters: parameters,
+		Name:        item.Name,
+		Namespace:   item.Namespace,
+		Type:        item.Labels[TypeLabel],
+		Status:      status,
+		Parameters:  parameters,
+		DisplayName: item.Spec.DisplayName,
 	}
 
 	return &asset, nil
 }
 
-func (c *assetConverter) ToGQLs(in []*v1beta1.Asset) ([]gqlschema.Asset, error) {
-	var result []gqlschema.Asset
+func (c *assetConverter) ToGQLs(in []*v1beta1.Asset) ([]*gqlschema.Asset, error) {
+	var result []*gqlschema.Asset
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {
@@ -56,7 +57,7 @@ func (c *assetConverter) ToGQLs(in []*v1beta1.Asset) ([]gqlschema.Asset, error) 
 		}
 
 		if converted != nil {
-			result = append(result, *converted)
+			result = append(result, converted)
 		}
 	}
 	return result, nil

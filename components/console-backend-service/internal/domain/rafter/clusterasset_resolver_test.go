@@ -47,7 +47,7 @@ func TestClusterAssetResolver_ClusterAssetFilesField(t *testing.T) {
 				Metadata: rawMap,
 			},
 		}
-		expected := []gqlschema.File{
+		expected := []*gqlschema.File{
 			{
 				URL: "https://example.com/markdown.md",
 				Metadata: gqlschema.JSON{

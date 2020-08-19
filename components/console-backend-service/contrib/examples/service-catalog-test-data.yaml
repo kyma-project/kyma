@@ -136,13 +136,16 @@ spec:
 
 ---
 
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: adidas-app
   namespace: mordor
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: printer
   template:
     metadata:
       labels:
@@ -156,7 +159,7 @@ spec:
 
 ---
 
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nike-app
@@ -176,7 +179,7 @@ spec:
 
 ---
 
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: reebok-app

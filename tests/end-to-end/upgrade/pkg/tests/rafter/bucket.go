@@ -6,7 +6,6 @@ import (
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 )
@@ -23,7 +22,7 @@ func newBucket(dynamicCli dynamic.Interface, namespace string) *bucket {
 			Version:  v1beta1.GroupVersion.Version,
 			Group:    v1beta1.GroupVersion.Group,
 			Resource: "buckets",
-		}, namespace),
+		}),
 		name:      bucketName,
 		namespace: namespace,
 	}
@@ -56,13 +55,8 @@ func (b *bucket) create() error {
 }
 
 func (b *bucket) get() (*v1beta1.Bucket, error) {
-	u, err := b.resCli.Get(b.name)
-	if err != nil {
-		return nil, err
-	}
-
 	var res v1beta1.Bucket
-	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &res)
+	err := b.resCli.Get(b.namespace, b.name, &res)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while converting Bucket %s in namespace %s", b.name, b.namespace)
 	}

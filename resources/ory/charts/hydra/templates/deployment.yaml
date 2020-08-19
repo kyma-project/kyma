@@ -11,6 +11,8 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "hydra.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
+  strategy:
+    {{- toYaml .Values.deployment.strategy | nindent 4 }}
   template:
     metadata:
       labels:
@@ -27,16 +29,33 @@ spec:
     {{- end }}
     {{- if .Values.hydra.autoMigrate }}
       initContainers:
-        - name: {{ .Chart.Name }}-automigrate
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["hydra"]
-          args: ["migrate", "sql", "-e", "--yes"]
+        - name: wait-for-db
+          image: "{{ .Values.busybox.repository }}:{{ .Values.busybox.tag }}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+{{ .Files.Get "files/wait-for-db.sh" | printf "%s" | indent 14 }}
           env:
             - name: DSN
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "hydra.fullname" . }}
+                  name: {{ include "hydra.secretName" . }}
+                  key: dsn
+        - name: {{ .Chart.Name }}-automigrate
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["hydra"]
+          args: ["migrate", "sql", "-e", "--yes", "--config", "/etc/config/config.yaml"]
+          volumeMounts:
+            - name: {{ include "hydra.name" . }}-config-volume
+              mountPath: /etc/config
+              readOnly: true
+          env:
+            - name: DSN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "hydra.secretName" . }}
                   key: dsn
     {{- end}}
       volumes:
@@ -76,16 +95,16 @@ spec:
             httpGet:
               path: /health/alive
               port: http-admin
-            initialDelaySeconds: 30
+            initialDelaySeconds: 45
             periodSeconds: 10
-            failureThreshold: 5
+            failureThreshold: 10
           readinessProbe:
             httpGet:
               path: /health/ready
               port: http-admin
-            initialDelaySeconds: 30
+            initialDelaySeconds: 45
             periodSeconds: 10
-            failureThreshold: 5
+            failureThreshold: 10
           env:
             {{- $issuer := include "hydra.config.urls.issuer" . -}}
             {{- if $issuer }}
@@ -95,17 +114,17 @@ spec:
             - name: DSN
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "hydra.fullname" . }}
+                  name: {{ template "hydra.secretName" . }}
                   key: dsn
             - name: SECRETS_SYSTEM
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "hydra.fullname" . }}
+                  name: {{ template "hydra.secretName" . }}
                   key: secretsSystem
             - name: SECRETS_COOKIE
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "hydra.fullname" . }}
+                  name: {{ template "hydra.secretName" . }}
                   key: secretsCookie
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}

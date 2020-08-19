@@ -6,6 +6,11 @@ metadata:
   labels:
     control-plane: {{ .Chart.Name }}
     controller-tools.k8s.io: "1.0"
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   selector:
     matchLabels:
@@ -19,41 +24,49 @@ spec:
       labels:
         control-plane: {{ .Chart.Name }}
         controller-tools.k8s.io: "1.0"
+        release: {{ .Release.Name }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        app.kubernetes.io/name: {{ template "name" . }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       serviceAccountName: {{ .Chart.Name }}
+      initContainers:
+        - name: helm-release-migrator
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+          command:
+            - /bin/bash
+            - -c
+            - |
+{{ .Files.Get "files/helm-release-migration.sh" | indent 14 }}
       containers:
       - name: {{ .Chart.Name }}
+        ports:
+          - containerPort: 8090
+            name: http-health
         args:
         - "/manager"
         - "--appName={{ .Values.controller.args.appName }}"
         - "--domainName={{ .Values.global.ingress.domainName }}"
         - "--namespace={{ .Values.global.namespace }}"
-        - "--tillerUrl={{ .Values.controller.args.tillerUrl }}"
-        - "--helmTLSKeyFile={{ .Values.controller.args.helmTLSKeyFile }}"
-        - "--helmTLSCertificateFile={{ .Values.controller.args.helmTLSCertificateFile }}"
-        - "--tillerTLSSkipVerify={{ .Values.controller.args.tillerTLSInsecure }}"
-        - "--applicationGatewayImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway.dir }}application-gateway:{{ .Values.global.application_gateway.version }}"
-        - "--applicationGatewayTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway_tests.dir }}application-gateway-tests:{{ .Values.global.application_gateway_tests.version }}"
-        - "--eventServiceImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_service.dir }}event-service:{{ .Values.global.event_service.version }}"
-        - "--eventServiceTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_service_integration_tests.dir }}event-service-integration-tests:{{ .Values.global.event_service_integration_tests.version }}"
-        - "--applicationConnectivityValidatorImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_connectivity_validator.dir }}application-connectivity-validator:{{ .Values.global.application_connectivity_validator.version }}"
+        - "--helmDriver={{ .Values.controller.args.helmDriver }}"
+        - "--applicationGatewayImage={{ .Values.global.containerRegistry.path }}/application-gateway:{{ .Values.global.application_gateway.version }}"
+        - "--applicationGatewayTestsImage={{ .Values.global.containerRegistry.path }}/application-gateway-tests:c608dbf3" # Use hardcoded value of tests image as this is the last version that operate without API packages. The approach with API packages was changed and tests are no longer deployed with the Gateway. TODO: should be removed after full transition to API packages
+        - "--eventServiceImage={{ .Values.global.containerRegistry.path }}/event-service:{{ .Values.global.event_service.version }}"
+        - "--eventServiceTestsImage={{ .Values.global.containerRegistry.path }}/event-service-integration-tests:{{ .Values.global.event_service_integration_tests.version }}"
+        - "--applicationConnectivityValidatorImage={{ .Values.global.containerRegistry.path }}/application-connectivity-validator:{{ .Values.global.application_connectivity_validator.version }}"
         - "--syncPeriod={{ .Values.controller.args.syncPeriod }}"
         - "--installationTimeout={{ .Values.controller.args.installationTimeout }}"
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_operator.dir }}application-operator:{{ .Values.global.application_operator.version }}
-        imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+        - "--gatewayOncePerNamespace={{ .Values.global.disableLegacyConnectivity }}"
+        - "--strictMode={{ .Values.global.strictMode }}"
+        - "--healthPort={{ .Values.controller.args.healthPort }}"
+        image: {{ .Values.global.containerRegistry.path }}/application-operator:{{ .Values.global.application_operator.version }}
+        imagePullPolicy: {{ .Values.controller.image.pullPolicy | quote }}
         resources:
           limits:
             cpu: 100m
-            memory: 100Mi
+            memory: 256Mi
           requests:
             cpu: 100m
-            memory: 20Mi
-        volumeMounts:
-          - mountPath: /etc/certs
-            name: helm-certs
-            readOnly: true
-      volumes:
-        - name: helm-certs
-          secret:
-            secretName: helm-secret
+            memory: 128Mi
       terminationGracePeriodSeconds: 10

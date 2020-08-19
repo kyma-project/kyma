@@ -22,6 +22,7 @@ func TestCheckFn(t *testing.T) {
 		{[]string{"foo.bar.local", "https://*.test.com"}, "https://sample.test.com", true},
 		{[]string{"foo.bar.local", "https://*.test.com"}, "http://sample.test.com", false},
 		{[]string{"foo.bar.local", "*.test.com"}, "sample.test.com", true},
+		{[]string{"*"}, "https://sample.test.com", true},
 	}
 
 	for testCaseNo, testCase := range testCases {

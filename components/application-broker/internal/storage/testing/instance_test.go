@@ -85,6 +85,55 @@ func TestInstanceFindOne(t *testing.T) {
 	})
 }
 
+func TestInstanceFindAll(t *testing.T) {
+	tRunDrivers(t, "Success/Found/MatchID", func(t *testing.T, sf storage.Factory) {
+		// GIVEN:
+		ts := newInstanceTestSuite(t, sf)
+		ts.PopulateStorage()
+		fixA1 := ts.MustGetFixture("A1")
+		fixA2 := ts.MustGetFixture("A2")
+		fixB1 := ts.MustGetFixture("B3")
+
+		// WHEN:
+		got, err := ts.s.FindAll(func(i *internal.Instance) bool {
+			switch i.ID {
+			case fixA1.ID, fixA2.ID, fixB1.ID:
+				return true
+			default:
+				return false
+			}
+		})
+
+		// THEN:
+		assert.NoError(t, err)
+		ts.AssertContainsAll(got, fixA1, fixA2, fixB1)
+	})
+
+	tRunDrivers(t, "Success/NotFound/MatchIDButNotNamespace", func(t *testing.T, sf storage.Factory) {
+		// GIVEN:
+		ts := newInstanceTestSuite(t, sf)
+		ts.PopulateStorage()
+
+		fixA1 := ts.MustGetFixture("A1")
+		fixB1 := ts.MustGetFixture("B3")
+
+		// WHEN:
+		got, err := ts.s.FindAll(func(i *internal.Instance) bool {
+			if !(i.ID == fixA1.ID || i.ID == fixB1.ID) {
+				return false
+			}
+			if i.Namespace != "not-existing-namespace" {
+				return false
+			}
+			return true
+		})
+
+		// THEN:
+		assert.NoError(t, err)
+		assert.Nil(t, got)
+	})
+}
+
 func TestInstanceInsert(t *testing.T) {
 	tRunDrivers(t, "Success/New", func(t *testing.T, sf storage.Factory) {
 		// GIVEN:
@@ -243,4 +292,14 @@ func (ts *instanceTestSuite) AssertInstanceDoesNotExist(i *internal.Instance) bo
 	ts.t.Helper()
 	_, err := ts.s.Get(i.ID)
 	return assert.True(ts.t, storage.IsNotFoundError(err), "NotFound error expected")
+}
+
+func (ts *instanceTestSuite) AssertContainsAll(got []*internal.Instance, exp ...*internal.Instance) {
+	ts.t.Helper()
+
+	assert.Len(ts.t, got, len(exp))
+
+	for _, fix := range exp {
+		assert.Contains(ts.t, got, fix)
+	}
 }

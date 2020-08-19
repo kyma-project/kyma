@@ -5,7 +5,7 @@ image:
   # ORY Hydra image
   repository: oryd/hydra
   # ORY Hydra version
-  tag: v1.0.0
+  tag: v1.4.6
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -92,8 +92,11 @@ hydra:
   autoMigrate: false
   dangerousForceHttp: false
   dangerousAllowInsecureRedirectUrls: false
+  # existingSecret: secret
 
 deployment:
+  strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+
   resources: {}
   #  We usually recommend not to specify default resources and to leave this as a conscious
   #  choice for the user. This also increases chances charts run on environments with little
@@ -126,3 +129,7 @@ affinity: {}
 # Configures controller setup
 maester:
   enabled: true
+
+busybox:
+  repository: busybox
+  tag: 1.32

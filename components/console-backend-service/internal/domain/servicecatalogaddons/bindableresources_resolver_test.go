@@ -28,12 +28,12 @@ func TestBindableResourcesResolver_ListBindableResources(t *testing.T) {
 	assert.Equal(t, fixBindableResourcesOutputItems(), result)
 }
 
-func fixBindableResourcesOutputItems() []gqlschema.BindableResourcesOutputItem {
-	return []gqlschema.BindableResourcesOutputItem{
+func fixBindableResourcesOutputItems() []*gqlschema.BindableResourcesOutputItem {
+	return []*gqlschema.BindableResourcesOutputItem{
 		{
 			Kind:        "deployment",
 			DisplayName: "Deployments",
-			Resources:   []gqlschema.UsageKindResource{},
+			Resources:   []*gqlschema.UsageKindResource{},
 		},
 	}
 }

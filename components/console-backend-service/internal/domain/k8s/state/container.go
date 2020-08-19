@@ -9,8 +9,8 @@ import (
 
 type ContainerExtractor struct{}
 
-func (ext *ContainerExtractor) States(in []v1.ContainerStatus) []gqlschema.ContainerState {
-	containerStates := make([]gqlschema.ContainerState, 0, len(in))
+func (ext *ContainerExtractor) States(in []v1.ContainerStatus) []*gqlschema.ContainerState {
+	containerStates := make([]*gqlschema.ContainerState, 0, len(in))
 
 	for _, containerStatus := range in {
 		if containerStatus.State.Waiting != nil {
@@ -27,31 +27,31 @@ func (ext *ContainerExtractor) States(in []v1.ContainerStatus) []gqlschema.Conta
 	return containerStates
 }
 
-func (ext *ContainerExtractor) getWaitingContainerState(in *v1.ContainerStateWaiting) gqlschema.ContainerState {
+func (ext *ContainerExtractor) getWaitingContainerState(in *v1.ContainerStateWaiting) *gqlschema.ContainerState {
 	if in == nil {
-		return gqlschema.ContainerState{
+		return &gqlschema.ContainerState{
 			State: gqlschema.ContainerStateTypeWaiting,
 		}
 	}
 
-	return gqlschema.ContainerState{
+	return &gqlschema.ContainerState{
 		State:   gqlschema.ContainerStateTypeWaiting,
 		Reason:  in.Reason,
 		Message: in.Message,
 	}
 }
 
-func (ext *ContainerExtractor) getRunningContainerState() gqlschema.ContainerState {
-	return gqlschema.ContainerState{
+func (ext *ContainerExtractor) getRunningContainerState() *gqlschema.ContainerState {
+	return &gqlschema.ContainerState{
 		State:   gqlschema.ContainerStateTypeRunning,
 		Reason:  "",
 		Message: "",
 	}
 }
 
-func (ext *ContainerExtractor) getTerminatedContainerState(in *v1.ContainerStateTerminated) gqlschema.ContainerState {
+func (ext *ContainerExtractor) getTerminatedContainerState(in *v1.ContainerStateTerminated) *gqlschema.ContainerState {
 	if in == nil {
-		return gqlschema.ContainerState{
+		return &gqlschema.ContainerState{
 			State: gqlschema.ContainerStateTypeTerminated,
 		}
 	}
@@ -65,13 +65,13 @@ func (ext *ContainerExtractor) getTerminatedContainerState(in *v1.ContainerState
 		reason = fmt.Sprintf("Exit code: %d", in.ExitCode)
 	}
 
-	return gqlschema.ContainerState{
+	return &gqlschema.ContainerState{
 		State:   gqlschema.ContainerStateTypeTerminated,
 		Reason:  reason,
 		Message: in.Message,
 	}
 }
 
-func (ext *ContainerExtractor) getDefaultContainerState() gqlschema.ContainerState {
+func (ext *ContainerExtractor) getDefaultContainerState() *gqlschema.ContainerState {
 	return ext.getWaitingContainerState(nil)
 }

@@ -1,3 +1,4 @@
 name: docs
-description:  Documentation and UI for it
+description: Documentation and UI for it
 version: 0.0.1
+apiVersion: v1

@@ -1,9 +1,17 @@
 replicaCount: 1
 
-rbacJob:
+jobs:
   image:
     repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20190325-ff66a3a"
+    tag: "v20200617-32c1f3ff"
+
+config:
+  # SyncPeriod determines the minimum frequency at which watched resources are
+  # reconciled. A lower period will correct entropy more quickly, but reduce
+  # responsiveness to change if there are many watched resources.
+  syncPeriod: 10h
+  # Name of existingSecret for hydra, if used
+  # hydraSecret: secret
 
 globalAccess: false
 #The Controller have CREATE and READ access to all Secrets in the namespaces listed below.
@@ -11,7 +19,7 @@ enabledNamespaces: []
 
 image:
   repository: oryd/hydra-maester
-  tag: v0.0.7
+  tag: v0.0.15
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -19,6 +27,8 @@ port:
   metrics: 8080
 
 deployment:
+  strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+
   resources: {}
     #  We usually recommend not to specify default resources and to leave this as a conscious
     #  choice for the user. This also increases chances charts run on environments with little
