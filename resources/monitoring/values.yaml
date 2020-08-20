@@ -516,18 +516,22 @@ grafana:
   ## Configure additional grafana datasources
   ## ref: https://grafana.com/docs/grafana/latest/features/datasources/
   additionalDataSources:
-    - name: Loki
-      type: loki
-      access: proxy
-      url: http://logging-loki.kyma-system:3100
-      editable: true
-      jsonData:
-        maxLines: 1000
-    - name: Jaeger
-      type: jaeger
-      access: proxy
-      url: http://tracing-jaeger-query.kyma-system:16686
-      editable: true
+    LokiEnabled: true
+    LokiConfig:
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://logging-loki.kyma-system:3100
+        editable: true
+        jsonData:
+          maxLines: 1000
+    JaegerEnabled: true
+    JaegerConfig: 
+      - name: Jaeger
+        type: jaeger
+        access: proxy
+        url: http://tracing-jaeger-query.kyma-system:16686
+        editable: true
   # - name: prometheus-sample
   #   access: proxy
   #   basicAuth: true

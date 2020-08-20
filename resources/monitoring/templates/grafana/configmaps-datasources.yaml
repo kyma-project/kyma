@@ -32,7 +32,10 @@ data:
 {{- end }}
 {{- end }}
 {{- end }}
-{{- if .Values.grafana.additionalDataSources }}
-{{ toYaml .Values.grafana.additionalDataSources | indent 4}}
+{{- if .Values.grafana.additionalDataSources.LokiEnabled }}
+{{ toYaml .Values.grafana.additionalDataSources.LokiConfig | indent 4}}
+{{- end }}
+{{- if .Values.grafana.additionalDataSources.JaegerEnabled }}
+{{ toYaml .Values.grafana.additionalDataSources.JaegerConfig | indent 4}}
 {{- end }}
 {{- end }}
