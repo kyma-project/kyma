@@ -70,22 +70,3 @@ getLoadBalancerIPFromLabel() {
     echo "${LOAD_BALANCER_IP}"
 }
 
-generateCertificatesForDomain() {
-
-    if [ "$#" -ne 3 ]; then
-        echo "usage: generateCertificatesForDomain <domain> <key_output_file> <cert_output_file>"
-        exit 1
-    fi
-
-    DOMAIN="$1"
-    KEY_PATH="$2"
-    CERT_PATH="$3"
-
-    openssl req -x509 -nodes -days 30 -newkey rsa:4069 \
-                 -subj "/CN=${DOMAIN}" \
-                 -reqexts SAN -extensions SAN \
-                 -config <(cat /etc/ssl/openssl.cnf \
-        <(printf "\\n[SAN]\\nsubjectAltName=DNS:*.%s" "${DOMAIN}")) \
-                 -keyout "${KEY_PATH}" \
-                 -out "${CERT_PATH}"
-}

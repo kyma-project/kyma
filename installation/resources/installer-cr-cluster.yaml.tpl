@@ -22,6 +22,8 @@ spec:
       namespace: "istio-system"
     - name: "xip-patch"
       namespace: "kyma-installer"
+    - name: "kyma-certs"
+      namespace: "kyma-system"
 
 #    - name: "istio-kyma-patch"
 #      namespace: "istio-system"

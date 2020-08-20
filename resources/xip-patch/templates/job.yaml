@@ -14,7 +14,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: {{ .Release.Name }}
-        image: {{ .Values.containerRegistry.path }}/{{ .Values.xip_patch.dir }}xip-patch:{{ .Values.xip_patch.version }}
+        image: tsmsap/xip-patch-cmpoc:001
         env:
         - name: EXTERNAL_PUBLIC_IP
           value: {{ .Values.global.loadBalancerIP }}

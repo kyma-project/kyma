@@ -59,24 +59,18 @@ generateCerts() {
 
 createOverridesConfigMap() {
     COMMON_PARAMS=$(echo --from-literal global.ingress.domainName="$INGRESS_DOMAIN" \
-                         --from-literal global.ingress.tlsCrt="$INGRESS_TLS_CERT" \
-                         --from-literal global.ingress.tlsKey="$INGRESS_TLS_KEY" \
-                         --from-literal global.environment.gardener="$GARDENER_ENVIRONMENT") \
+                         --from-literal global.environment.gardener="$GARDENER_ENVIRONMENT")
 
-    if [[ "$GARDENER_ENVIRONMENT" == true ]]; then
-        kubectl create configmap net-global-overrides ${COMMON_PARAMS} \
-        --from-literal global.domainName="$INGRESS_DOMAIN" \
-        --from-literal global.tlsCrt="$INGRESS_TLS_CERT" \
-        --from-literal global.tlsKey="$INGRESS_TLS_KEY" \
-        -n kyma-installer -o yaml --dry-run | kubectl apply -f -
-    else
-        kubectl create configmap net-global-overrides ${COMMON_PARAMS} \
-        -n kyma-installer -o yaml --dry-run | kubectl apply -f -
-    fi
+
+    kubectl create configmap net-global-overrides ${COMMON_PARAMS} \
+      --from-literal global.domainName="$INGRESS_DOMAIN" \
+      -n kyma-installer -o yaml --dry-run | kubectl apply -f -
+
     kubectl label configmap net-global-overrides --overwrite installer=overrides -n kyma-installer
     kubectl label configmap net-global-overrides --overwrite kyma-project.io/installation="" -n kyma-installer
 }
 
+#Not used anymore
 patchTlsCrtSecret() {
     TLS_CERT_YAML=$(cat << EOF
 ---
@@ -117,7 +111,7 @@ EOF
 
     SECONDS=0
     END_TIME=$((SECONDS+600)) #600 seconds = 10 minutes
-    
+
     while [ ${SECONDS} -lt ${END_TIME} ];do
         STATUS="$(kubectl get -n istio-system certificate.cert.gardener.cloud kyma-tls-cert -o jsonpath='{.status.state}')"
         if [ "${STATUS}" = "Ready" ]; then
@@ -140,20 +134,8 @@ EOF
     kubectl -n istio-system annotate service istio-ingressgateway dns.gardener.cloud/class='garden' dns.gardener.cloud/dnsnames='*.'"${DOMAIN}"'' --overwrite
 }
 
-echo "Checking if running on Gardener"
-
 GARDENER_ENVIRONMENT=false
 
-if [ -n "$(kubectl -n kube-system get configmap shoot-info --ignore-not-found)" ]; then
-  requestGardenerCerts
-  INGRESS_DOMAIN=${DOMAIN}
-  INGRESS_TLS_CERT=${TLS_CERT}
-  INGRESS_TLS_KEY=${TLS_KEY}
-  GARDENER_ENVIRONMENT=true
-fi
-
-INGRESS_TLS_CERT="${INGRESS_TLS_CERT:-$GLOBAL_TLS_CERT}"
-INGRESS_TLS_KEY="${INGRESS_TLS_KEY:-$GLOBAL_TLS_KEY}"
 INGRESS_DOMAIN="${INGRESS_DOMAIN:-$GLOBAL_DOMAIN}"
 
 if [ -n "${INGRESS_TLS_CERT}" ] && [ -z "${INGRESS_DOMAIN}" ]; then
@@ -165,12 +147,4 @@ if [ -z "${INGRESS_DOMAIN}" ] ; then
     INGRESS_DOMAIN=$(generateXipDomain)
 fi
 
-if [ -z "${INGRESS_TLS_CERT}" ] ; then
-    generateCerts
-    INGRESS_TLS_CERT=${TLS_CERT}
-    INGRESS_TLS_KEY=${TLS_KEY}
-fi
-
 createOverridesConfigMap
-
-patchTlsCrtSecret

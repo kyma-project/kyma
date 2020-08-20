@@ -1,0 +1,9 @@
+# Self-signed cluster-wide issuer
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: kyma-selfsigned-issuer
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  selfSigned: {}
+
