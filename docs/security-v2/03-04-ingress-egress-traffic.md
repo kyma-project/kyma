@@ -37,6 +37,10 @@ data:
 
 However, if this is not supplied, then a demo setup is assumed using the DNS-as-a-Service provider [xip.io](http://xip.io/), and a self-signed certificate.
 
+### Certificate propagation paths
+
+![Certificate propagation](./assets/certificate-propagation.svg)
+
 ## Egress
 Currently no Egress limitations are implemented, meaning that all applications deployed in the Kyma cluster can access outside resources without limitations.
 However, a future improvement is to enable [Istio Egress Gateway](https://istio.io/latest/docs/tasks/traffic-management/egress/egress-gateway/), which can limit the number of external services accessible to the applications running within the cluster.
