@@ -77,10 +77,10 @@ spec:
           mountPath: /secure/forward-tls.key
           subPath: tls.key
 {{- end }}
-{{- if and (.Values.backend.http.tls_verify) (.Values.backend.http.tls_ca) }}
-        - name: http-ca-secret
-          mountPath: /secure/http-tls-ca.crt
-          subPath: http-tls-ca.crt
+{{- if and (.Values.backend.forward.tls.verify) (.Values.backend.forward.tls.ca) }}
+        - name: forward-ca-secret
+          mountPath: /secure/forward-tls-ca.crt
+          subPath: forward-tls-ca.crt
 {{- end }}
 {{- if and (.Values.backend.http.tls_cert) (.Values.backend.http.tls_key) }}
         - name: http-tls-secret
