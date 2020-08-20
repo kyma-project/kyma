@@ -472,9 +472,9 @@ type LimitRange {
 
 type LimitRangeItem {
     limitType: LimitType!
-    max: ResourceType!
-    default: ResourceType!
-    defaultRequest: ResourceType!
+    max: ResourceType
+    default: ResourceType
+    defaultRequest: ResourceType
 }
 
 input LimitRangeInput {

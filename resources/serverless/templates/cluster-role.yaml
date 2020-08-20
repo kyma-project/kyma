@@ -151,3 +151,17 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - serverless.kyma-project.io
+  resources:
+  - gitrepositories
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - serverless.kyma-project.io
+  resources:
+  - gitrepositories/status
+  verbs:
+  - get

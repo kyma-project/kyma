@@ -388,6 +388,42 @@ function testRafter() {
 	done
 }
 
+function testServerless() {
+  local -r userEmail="${1}"
+	local -r testNamespace="${2}"
+	local -r hasEditPermission="${3}"
+	local -r hasViewPermission="${4}"
+
+	local editPermissionText=""
+	if [[ "${hasEditPermission}" == "no" ]]; then
+		editPermissionText=" NOT"
+	fi
+
+	local viewAccessText=""
+	if [[ "${hasViewPermission}" == "no" ]]; then
+		viewAccessText=" NOT"
+	fi
+	readonly editPermissionText viewAccessText
+
+	local -r resources=( "functions.serverless.kyma-project.io" "gitrepositories.serverless.kyma-project.io" )
+
+	# View
+	for resource in "${resources[@]}"; do
+		for operation in "${VIEW_OPERATIONS[@]}"; do
+			echo "--> ${userEmail} should${viewAccessText} be able to ${operation} ${resource} CR in ${testNamespace}"
+			testPermissions "${operation}" "${resource}" "${testNamespace}" "${hasViewPermission}"
+		done
+	done
+
+	# Edit
+	for resource in "${resources[@]}"; do
+		for operation in "${EDIT_OPERATIONS[@]}"; do
+			echo "--> ${userEmail} should${editPermissionText} be able to ${operation} ${resource} CR in ${testNamespace}"
+			testPermissions "${operation}" "${resource}" "${testNamespace}" "${hasEditPermission}"
+		done
+	done
+}
+
 function runTests() {
 	EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
@@ -446,6 +482,8 @@ function runTests() {
 	testKymaEventing "${ADMIN_EMAIL}" "${NAMESPACE}" "yes" "yes"
 	testKymaEventing "${ADMIN_EMAIL}" "${SYSTEM_NAMESPACE}" "yes" "yes"
 
+	testServerless "${ADMIN_EMAIL}" "${NAMESPACE}" "yes" "yes"
+
 	echo "--> ${ADMIN_EMAIL} should be able to delete any namespace in the cluster"
 	testPermissionsClusterScoped "delete" "namespace" "yes"
 
@@ -494,6 +532,9 @@ function runTests() {
 	testKymaEventing "${VIEW_EMAIL}" "${NAMESPACE}" "no" "yes"
 	testKymaEventing "${VIEW_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "yes"
 
+	testServerless "${VIEW_EMAIL}" "${NAMESPACE}" "no" "yes"
+	testServerless "${VIEW_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "yes"
+
 	echo "--> ${VIEW_EMAIL} should NOT be able to create serviceinstances in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "serviceinstances" "${CUSTOM_NAMESPACE}" "no"
 
@@ -535,6 +576,9 @@ function runTests() {
 
 	testKymaEventing "${NAMESPACE_ADMIN_EMAIL}" "${NAMESPACE}" "yes" "yes"
 	testKymaEventing "${NAMESPACE_ADMIN_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "no"
+
+	testServerless "${NAMESPACE_ADMIN_EMAIL}" "${NAMESPACE}" "yes" "yes"
+	testServerless "${NAMESPACE_ADMIN_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "no"
 
 	# namespace admin should not be able to create clusterrolebindings - if they can't create it in one namespace,
 	# that means they can't create it in any namespace (resource is non namespaced and RBAC is permissive)
@@ -694,6 +738,8 @@ function runTests() {
 	testRafter "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "no"
 	testKnativeServing "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "no"
 
+	testServerless "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "yes" "yes"
+
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get addonsconfigurations.addons.kyma-project.io in the namespace they created"
 	testPermissions "get" "addonsconfigurations/status.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
@@ -781,6 +827,9 @@ function runTests() {
 
 	testKymaEventing "${DEVELOPER_EMAIL}" "${CUSTOM_NAMESPACE}" "yes" "yes"
 	testKymaEventing "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "no"
+
+	testServerless "${DEVELOPER_EMAIL}" "${CUSTOM_NAMESPACE}" "yes" "yes"
+	testServerless "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "no"
 
 	# developer who was granted kyma-developer role should not be able to operate in system namespaces
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to list Deployments in system namespace"
