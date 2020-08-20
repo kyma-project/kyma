@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: cloud-event-gateway-proxy
+  name: cloud-event-gateway-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-event-gateway-proxy
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: cloud-event-gateway-proxy
+    spec:
+      containers:
+      - env:
+        - name: CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: cloud-event-gateway-proxy
+              key: client-id
+        - name: CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: cloud-event-gateway-proxy
+              key: client-secret
+        - name: TOKEN_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: cloud-event-gateway-proxy
+              key: token-endpoint
+        - name: EMS_CE_URL
+          valueFrom:
+            secretKeyRef:
+              name: cloud-event-gateway-proxy
+              key: ems-ce-url
+        image: github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/cmd
+        imagePullPolicy: IfNotPresent
+        name: cloud-event-gateway-proxy
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 2
+          successThreshold: 1
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /readyz
+            port: 8080
+            scheme: HTTP
+#            - containerPort: 9090
+#              name: metrics
+#              protocol: TCP
