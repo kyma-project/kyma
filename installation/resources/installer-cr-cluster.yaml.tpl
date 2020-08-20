@@ -14,6 +14,8 @@ spec:
   components:
     - name: "cluster-essentials"
       namespace: "kyma-system"
+    - name: "cert-manager"
+      namespace: "cert-manager"
     - name: "testing"
       namespace: "kyma-system"
     - name: "istio"
@@ -27,13 +29,13 @@ spec:
     - name: "knative-eventing"
       namespace: "knative-eventing"
     # - name: "knative-eventing-kafka"
-    #   namespace: knative-eventing    
+    #   namespace: knative-eventing
     - name: "dex"
       namespace: "kyma-system"
     - name: "ory"
       namespace: "kyma-system"
     - name: "api-gateway"
-      namespace: "kyma-system"   
+      namespace: "kyma-system"
     - name: "rafter"
       namespace: "kyma-system"
     - name: "service-catalog"
