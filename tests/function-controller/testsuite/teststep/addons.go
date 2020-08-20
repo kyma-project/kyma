@@ -45,7 +45,7 @@ func (a Addons) Cleanup() error {
 		a.log.Warn(errors.Wrapf(err, "while logging resource"))
 	}
 
-	return errors.Wrap(a.addonConfig.Delete(), "while deleting addong configuration")
+	return errors.Wrap(a.addonConfig.Delete(), "while deleting addon configuration")
 }
 
 var _ step.Step = Addons{}
