@@ -10,7 +10,7 @@ Exposing applications is done using the [API Gateway](components/api-gateway/#ov
 The current setup of the main gateway can be found [here](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/gateway/templates/gateway.yaml). Configuration description:
 - The gateway listens on port `80` and `443`
 - Port `80` is automatically redirected to `443`
-- The TLS connection requires at least `TLSV1_1`, meaning `TLSV1_0` is rejected
+- The TLS connection requires at least `TLSV1_2`, meaning `TLSV1_0` and `TLSV1_1` is rejected
 - Accepted cipher suites: `ECDHE-RSA-CHACHA20-POLY1305`, `ECDHE-RSA-AES256-GCM-SHA384`, `ECDHE-RSA-AES256-SHA`, `ECDHE-RSA-AES128-GCM-SHA256`, `ECDHE-RSA-AES128-SHA`
 
 ## TLS Managmenet
