@@ -64,6 +64,8 @@ clusterRoles:
       - "sources.kyma-project.io"
       - "messaging.knative.dev"
       - "eventing.knative.dev"
+    svcat:
+      - "settings.svcat.k8s.io"
   verbs:
     edit:
       - "create"
