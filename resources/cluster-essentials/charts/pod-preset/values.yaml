@@ -9,6 +9,7 @@ webhook:
     runAsUser: 2000
   pdb:
     enabled: false
+  timeout: 10
 
 controller:
   enabled: false
