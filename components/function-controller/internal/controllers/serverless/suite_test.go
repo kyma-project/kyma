@@ -28,7 +28,7 @@ var resourceClient resource.Client
 var testEnv *envtest.Environment
 
 const (
-	testNamespace = "tutaj"
+	testNamespace = "test-namespace-name"
 )
 
 func TestAPIs(t *testing.T) {

@@ -9,7 +9,7 @@ import (
 func ValidateDependencies(runtime Runtime, dependencies string) error {
 	switch runtime {
 	case Nodejs10, Nodejs12:
-		return validateNodeJSDependecies(dependencies)
+		return validateNodeJSDependencies(dependencies)
 	case Python37:
 		return nil
 	}
@@ -17,7 +17,7 @@ func ValidateDependencies(runtime Runtime, dependencies string) error {
 	return fmt.Errorf("cannot find runtime: %s", runtime)
 }
 
-func validateNodeJSDependecies(dependencies string) error {
+func validateNodeJSDependencies(dependencies string) error {
 	if deps := strings.TrimSpace(dependencies); deps != "" && (deps[0] != '{' || deps[len(deps)-1] != '}') {
 		return errors.New("deps should start with '{' and end with '}'")
 	}
