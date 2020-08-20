@@ -11,8 +11,7 @@ Breaking down a monolithic application into atomic services offers various benef
 
 Kyma Security provides a comprehensive package of configured security tools which aim to mitigate those issues, and enable a streamlined experience:
 - Predefined kubernetes RBAC roles
-- Istio service-mesh with global mTLS setup, Ingress/Egress configuration
-- Dex as a local or federated identity provider
+- Istio service-mesh with global mTLS setup, Ingress configuration
+- Dex as a local identity provider with federation capabilities
 - Ory/Oathkeeper & Hydra providing a Oauth2 server and API Gateway functionality
-
 
