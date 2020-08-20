@@ -241,11 +241,16 @@ backend:
     http_passwd: ""
     tls: "off"
     tls_verify: on
+    tls_ca: ""
+    tls_cert: ""
+    tls_key: ""
     tls_debug: 1
     ## Specify the data format to be used in the HTTP request body
     ## Can be either 'msgpack' or 'json'
     format: msgpack
-    # json_date_format: double or iso8601
+    compress: ""
+    json_date_key: ""
+    json_date_format: ""
     headers: []
 
 # Enable this if you're using https://github.com/coreos/prometheus-operator

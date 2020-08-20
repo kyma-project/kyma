@@ -222,6 +222,15 @@ data:
         Host  {{ .Values.backend.http.host }}
         Port  {{ .Values.backend.http.port }}
         URI  {{ .Values.backend.http.uri }}
+{{- if .Values.backend.http.compress }}
+        compress {{ .Values.backend.http.compress }}
+{{- end }}
+{{- if .Values.backend.http.json_date_key }}
+        json_date_key {{ .Values.backend.http.json_date_key }}
+{{- end }}
+{{- if .Values.backend.http.json_date_format }}
+        json_date_format {{ .Values.backend.http.json_date_format }}
+{{- end }}
 {{- if .Values.backend.http.format }}
         Format {{ .Values.backend.http.format }}
 {{- end }}
@@ -232,8 +241,15 @@ data:
 {{- if (.Values.backend.http.tls)  }}
         tls   {{ .Values.backend.http.tls }}
         tls.verify {{ .Values.backend.http.tls_verify }}
+{{- if (.Values.backend.http.tls_ca)  }}
+        tls.ca_file /secure/http-tls-ca.crt
+{{- end }}
 {{- if (.Values.backend.http.tls_debug)  }}
         tls.debug {{ .Values.backend.http.tls_debug }}
+{{- end }}
+{{- if and (.Values.backend.http.tls_cert) (.Values.backend.http.tls_key) }}
+        tls.crt_file /secure/http-tls.crt
+        tls.key_file /secure/http-tls.key
 {{- end }}
 {{- end }}
 {{- end }}
