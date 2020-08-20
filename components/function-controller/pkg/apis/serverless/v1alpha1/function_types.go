@@ -7,7 +7,7 @@ import (
 
 type SourceType string
 
-//+kubebuilder:validation:Enum=nodejs12;nodejs10;python37
+// +kubebuilder:validation:Enum=nodejs12;nodejs10;python37
 
 type Runtime string
 
@@ -48,7 +48,7 @@ type FunctionSpec struct {
 	Labels map[string]string `json:"labels,omitempty"`
 
 	// +optional
-	SourceType SourceType `json:"sourceType"`
+	SourceType SourceType `json:"sourceType,omitempty"`
 
 	Repository `json:",inline,omitempty"`
 }
@@ -108,7 +108,7 @@ type FunctionStatus struct {
 	Repository `json:",inline,omitempty"`
 	Commit     string  `json:"commit,omitempty"`
 	Source     string  `json:"source,omitempty"`
-	Runtime    Runtime `json:"runtime"`
+	Runtime    Runtime `json:"runtime,omitempty"`
 }
 
 type Repository struct {
