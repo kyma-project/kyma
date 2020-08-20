@@ -199,8 +199,6 @@ spec:
             source:
               description: Source defines the source code of a function
               type: string
-            type:
-              type: string
             sourceType:
               type: string
           required:
@@ -243,8 +241,6 @@ spec:
               type: string
             source:
               type: string
-          required:
-          - runtime
           type: object
       type: object
   version: v1alpha1
