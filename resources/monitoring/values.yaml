@@ -518,7 +518,6 @@ grafana:
 
 
   dataSources:
-    enabled: true
     loki:
       enabled: true
       config:
