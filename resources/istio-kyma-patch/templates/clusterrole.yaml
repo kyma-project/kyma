@@ -4,7 +4,7 @@ metadata:
   name: istio-kyma-patch
 rules:
 - apiGroups: [""]
-  resources: ["namespaces"]
+  resources: ["namespaces", "secrets"]
   verbs: ["get", "list", "watch", "patch"]
 - apiGroups: ["apiextensions.k8s.io"]
   resources: ["customresourcedefinitions"]
