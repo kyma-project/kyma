@@ -499,6 +499,12 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to describe Nodes in the cluster"
 	testDescribeClusterScoped "nodes" "yes"
 
+	echo "--> ${ADMIN_EMAIL} should be able to create podpreset.settings.svcat.k8s.io"
+	testPermissions "create" "podpreset.settings.svcat.k8s.io" "${NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to list podpreset.settings.svcat.k8s.io"
+	testPermissions "list" "podpreset.settings.svcat.k8s.io" "${NAMESPACE}" "yes"
+
 	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
@@ -540,6 +546,12 @@ function runTests() {
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to create servicebindings in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "servicebindings" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${VIEW_EMAIL} should NOT be able to create podpreset.settings.svcat.k8s.io"
+	testPermissions "create" "podpreset.settings.svcat.k8s.io" "${NAMESPACE}" "no"
+
+	echo "--> ${VIEW_EMAIL} should NOT be able to list podpreset.settings.svcat.k8s.io"
+	testPermissions "list" "podpreset.settings.svcat.k8s.io" "${NAMESPACE}" "no"
 
 	EMAIL=${NAMESPACE_ADMIN_EMAIL} PASSWORD=${NAMESPACE_ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
@@ -719,7 +731,7 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get serverless-webhook-envs configmap in ${CUSTOM_NAMESPACE}"
 	testPermissions "get" "configmap/serverless-webhook-envs" "${NAMESPACE}" "yes"
 
-  # namespace-admin role doesn't allow to create addonsconfigurations
+  	# namespace-admin role doesn't allow to create addonsconfigurations
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create addonsconfigurations in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "addonsconfigurations" "${CUSTOM_NAMESPACE}" "no"
 
@@ -760,6 +772,12 @@ function runTests() {
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to describe Nodes in the cluster"
 	testDescribeClusterScoped "nodes" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create podpreset.settings.svcat.k8s.io"
+	testPermissions "create" "podpreset.settings.svcat.k8s.io" "${NAMESPACE}" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to list podpreset.settings.svcat.k8s.io"
+	testPermissions "list" "podpreset.settings.svcat.k8s.io" "${NAMESPACE}" "no"
 
 	# developer who was granted kyma-developer role should be able to operate in the scope of its namespace
 	EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
@@ -870,6 +888,18 @@ function runTests() {
 
 	echo "--> ${DEVELOPER_EMAIL} should be able to get serverless-webhook-envs configmap in ${SYSTEM_NAMESPACE}"
 	testPermissions "get" "configmap/serverless-webhook-envs" "${NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create podpreset.settings.svcat.k8s.io in ${SYSTEM_NAMESPACE}"
+	testPermissions "create" "podpreset.settings.svcat.k8s.io" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to list podpreset.settings.svcat.k8s.io in ${SYSTEM_NAMESPACE}"
+	testPermissions "list" "podpreset.settings.svcat.k8s.io" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create podpreset.settings.svcat.k8s.io in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "podpreset.settings.svcat.k8s.io" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to list podpreset.settings.svcat.k8s.io in ${CUSTOM_NAMESPACE}"
+	testPermissions "list" "podpreset.settings.svcat.k8s.io" "${CUSTOM_NAMESPACE}" "no"
 }
 
 function cleanup() {
