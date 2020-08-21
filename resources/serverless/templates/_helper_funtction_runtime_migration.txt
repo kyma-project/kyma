@@ -30,7 +30,7 @@ patchSingleFunction() {
     runtime="nodejs12"
   fi
   kubectl patch functions -n "${functionNamespace}" "${functionName}" \
-    --patch "{\"spec\": {\"runtime\": ${runtime}}}" \
+    --patch "{\"spec\": {\"runtime\": \"${runtime}\"}}" \
     --type=merge
 }
 main() {
