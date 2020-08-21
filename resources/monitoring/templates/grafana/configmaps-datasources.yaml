@@ -32,6 +32,12 @@ data:
 {{- end }}
 {{- end }}
 {{- end }}
+{{- if .Values.grafana.dataSources.loki.enabled }}
+{{ toYaml .Values.grafana.dataSources.loki.config | indent 4}}
+{{- end }}
+{{- if .Values.grafana.dataSources.jaeger.enabled }}
+{{ toYaml .Values.grafana.dataSources.jaeger.config | indent 4}}
+{{- end }}
 {{- if .Values.grafana.additionalDataSources }}
 {{ toYaml .Values.grafana.additionalDataSources | indent 4}}
 {{- end }}
