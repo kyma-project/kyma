@@ -37,7 +37,11 @@ data:
 
 However, if this is not supplied, then a demo setup is assumed using the DNS-as-a-Service provider [xip.io](http://xip.io/), and a self-signed certificate.
 
+### Gardener
+Kyma can also be installed on top of [Gardener](https://gardener.cloud/) managed instances, in which the existing certificate management service is used. The difference can be observed in the following section.
+
 ### Certificate propagation paths
+As the certificate data is propagated though Kyma it is delivered into several components, which generate a set of Secrets/ConfigMaps. The propagation path varies slightly for each of the supported modes:
 
 ![Certificate propagation](./assets/certificate-propagation.svg)
 
