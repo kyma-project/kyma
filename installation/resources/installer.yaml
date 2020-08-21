@@ -184,7 +184,7 @@ spec:
             memory: 512Mi
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/kyma-installer:1.15.0-rc1
+        image: eu.gcr.io/kyma-project/kyma-installer:1.15.0-rc2
         imagePullPolicy: IfNotPresent
         args:
           - -overrideLogFile=/app/overrides.txt
