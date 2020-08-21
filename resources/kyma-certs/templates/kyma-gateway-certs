@@ -1,7 +1,7 @@
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
-  name: ingress-tls-cert
+  name: kyma-gateway-certs
 spec:
   duration: 720h # 30d
   renewBefore: 360h # 15d
@@ -11,7 +11,7 @@ spec:
   commonName: {{ .Values.global.domainName }}
   dnsNames:
   - "*.{{ .Values.global.domainName }}"
-  secretName: ingress-tls-cert
+  secretName: kyma-gateway-certs
   issuerRef:
     name: kyma-selfsigned-issuer
     kind: ClusterIssuer

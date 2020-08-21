@@ -23,7 +23,7 @@ spec:
     - name: "xip-patch"
       namespace: "kyma-installer"
     - name: "kyma-certs"
-      namespace: "kyma-system"
+      namespace: "istio-system"
     - name: "istio-kyma-patch"
       namespace: "istio-system"
     - name: "knative-serving"
