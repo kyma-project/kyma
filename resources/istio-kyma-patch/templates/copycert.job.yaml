@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: istio-kyma-patch
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: copycert
+      labels:
+        app: copycert
+    spec:
+      serviceAccountName: istio-kyma-patch
+      restartPolicy: Never
+      containers:
+      - name: copycert
+        image: {{ .Values.istio_kyma_patch.image }}:{{ .Values.istio_kyma_patch.tag }}
+        command:
+          - /bin/bash
+          - -c
+          - |
+{{.Files.Get "files/copycert.sh" | printf "%s" | indent 16}}
+        terminationMessagePolicy: "FallbackToLogsOnError"
+
