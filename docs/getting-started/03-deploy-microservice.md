@@ -11,60 +11,9 @@ You will create:
 
 ## Steps
 
-### Get the kubeconfig file and configure the CLI
-
-Follow these steps to get the `kubeconfig` file and configure the CLI to connect to the cluster:
-
-1. Access the Console UI of your Kyma cluster.
-2. Click the user icon in the top right corner.
-3. Select **Get Kubeconfig** from the drop-down menu to download the configuration file to a selected location on your machine.
-4. Open a terminal window.
-5. Export the **KUBECONFIG** environment variable to point to the downloaded `kubeconfig`. Run this command:
-
-   ```bash
-   export KUBECONFIG={KUBECONFIG_FILE_PATH}
-   ```
-
-   >**NOTE:** Drag and drop the `kubeconfig` file in the terminal to easily add the path of the file to the `export KUBECONFIG` command you run.
-
-6. Run `kubectl cluster-info` to check if the CLI is connected to the correct cluster.
-
-### Create a Namespace
-
-Create the `test` Namespace where you will deploy your Service.
-
-<div tabs name="steps" group="create-service">
-  <details>
-  <summary label="cli">
-  CLI
-  </summary>
-
-Run this command:
-
-```
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: test
-EOF
-```
-
-</details>
-<details>
-<summary label="console-ui">
-Console UI
-</summary>
-
-1. In the main view of the Console UI, select the **Add new namespace** button.
-2. Enter `test` in the **Name** field and confirm by selecting the **Create** button.
-
-</details>
-</div>
-
 ### Create a Deployment
 
-Create a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) that provides the application definition and enables you to run it on the cluster. The Deployment uses the `eu.gcr.io/kyma-project/develop/http-db-service:47d43e19` image. This Docker image exposes the `8017` port on which the related Service is listening.
+1. Create a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) that provides the application definition and enables you to run it on the cluster. The Deployment uses the `eu.gcr.io/kyma-project/pr/orders-service:PR-162` image. This Docker image exposes the `8080` port on which the related Service is listening.
 
 <div tabs name="steps" group="create-service">
   <details>
@@ -72,52 +21,51 @@ Create a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/
   CLI
   </summary>
 
-```
+```bash
 cat <<EOF | kubectl apply -f -
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: http-db-service
-  namespace: test
+  name: orders-service
+  namespace: orders-service
   labels:
-    example: http-db-service
-    app: http-db-service
+    app: orders-service
+    example: orders-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: http-db-service
-      example: http-db-service
+      app: orders-service
+      example: orders-service
   template:
     metadata:
       labels:
-        app: http-db-service
-        example: http-db-service
+        app: orders-service
+        example: orders-service
     spec:
       containers:
-      # replace the repository URL with your own repository (e.g. {DockerID}/http-db-service:0.0.x for Docker Hub).
-      - image: eu.gcr.io/kyma-project/develop/http-db-service:47d43e19
-        imagePullPolicy: IfNotPresent
-        name: http-db-service
-        ports:
-        - name: http
-          containerPort: 8017
-        resources:
-          limits:
-            memory: 100Mi
-          requests:
-            memory: 32Mi
-        env:
-        - name: dbtype
-          # available dbtypes are: [memory, mssql]
-          value: "memory"
+        - name: orders-service
+          image: "eu.gcr.io/kyma-project/pr/orders-service:PR-162"
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 20m
+              memory: 32Mi
+            requests:
+              cpu: 10m
+              memory: 16Mi
+          env:
+            - name: APP_PORT
+              value: "8080"
+            - name: APP_REDIS_PREFIX
+              value: "REDIS_"
 EOF
 ```
 
-A successfully created Deployment prints this result:
+2. Check if the Deployment was created. The correct Deployment status should set **readyReplicas** to `1`:
 
 ```bash
-deployment.apps/http-db-service created
+kubectl get deployment orders-service -n orders-service -o=jsonpath="{.status.readyReplicas}"
 ```
 
 </details>
@@ -126,58 +74,57 @@ deployment.apps/http-db-service created
 Console UI
 </summary>
 
-1. Create a YAML file with the Deployment definition:
+1. Create the `deployment.yaml` file with the Deployment definition:
 
-```
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: http-db-service
-  namespace: test
+  name: orders-service
+  namespace: orders-service
   labels:
-    example: http-db-service
-    app: http-db-service
+    app: orders-service
+    example: orders-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: http-db-service
-      example: http-db-service
+      app: orders-service
+      example: orders-service
   template:
     metadata:
       labels:
-        app: http-db-service
-        example: http-db-service
+        app: orders-service
+        example: orders-service
     spec:
       containers:
-      # replace the repository URL with your own repository (e.g. {DockerID}/http-db-service:0.0.x for Docker Hub).
-      - image: eu.gcr.io/kyma-project/develop/http-db-service:47d43e19
-        imagePullPolicy: IfNotPresent
-        name: http-db-service
-        ports:
-        - name: http
-          containerPort: 8017
-        resources:
-          limits:
-            memory: 100Mi
-          requests:
-            memory: 32Mi
-        env:
-        - name: dbtype
-          # available dbtypes are: [memory, mssql]
-          value: "memory"
+        - name: orders-service
+          image: "eu.gcr.io/kyma-project/pr/orders-service:PR-162"
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 20m
+              memory: 32Mi
+            requests:
+              cpu: 10m
+              memory: 16Mi
+          env:
+            - name: APP_PORT
+              value: "8080"
+            - name: APP_REDIS_PREFIX
+              value: "REDIS_"
 ```
 
-2. Go to the `test` Namespace view in the Console UI and select the **Deploy new resource** button.
-3. Browse your Deployment file and select **Deploy** to confirm changes.
-4. Go to the **Deployments** view to make sure `http-db-service` is running.
+2. Once in the `orders-service` Namespace overview, select the **Deploy new resource** button.
+3. Browse the `deployment.yaml` file and select **Deploy** to confirm changes.
+4. Go to the **Deployments** view under the **Operation** section in the UI to make sure the status of `orders-service` is `RUNNING`.
 
 </details>
 </div>
 
 ### Create the Service
 
-Deploy the Kubernetes `http-db-service` [Service](https://kubernetes.io/docs/concepts/services-networking/service/) in the `test` Namespace to allow other Kubernetes resources to communicate with your application.
+Deploy the Kubernetes [Service](https://kubernetes.io/docs/concepts/services-networking/service/) in the `orders-service` Namespace to allow other Kubernetes resources to communicate with your application.
 
 <div tabs name="steps" group="create-service">
   <details>
@@ -187,23 +134,26 @@ Deploy the Kubernetes `http-db-service` [Service](https://kubernetes.io/docs/con
 
 Run this command:
 
-```
+```bash
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Service
 metadata:
-  name: http-db-service
-  namespace: test
+  name: orders-service
+  namespace: orders-service
   labels:
-    example: http-db-service
-    app: http-db-service
+    app: orders-service
+    example: orders-service
 spec:
+  type: ClusterIP
   ports:
-  - name: http
-    port: 8017
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8080
   selector:
-    app: http-db-service
-    example: http-db-service
+    app: orders-service
+    example: orders-service
 EOF
 ```
 
@@ -221,27 +171,30 @@ service/http-db-service created
 
 1. Create a YAML file with the Service definition:
 
-  ```
+  ```yaml
   apiVersion: v1
   kind: Service
   metadata:
-    name: http-db-service
-    namespace: test
+    name: orders-service
+    namespace: orders-service
     labels:
-      example: http-db-service
-      app: http-db-service
+      app: orders-service
+      example: orders-service
   spec:
+    type: ClusterIP
     ports:
-    - name: http
-      port: 8017
+      - name: http
+        port: 80
+        protocol: TCP
+        targetPort: 8080
     selector:
-      app: http-db-service
-      example: http-db-service
+      app: orders-service
+      example: orders-service
   ```
 
-2. Go to the `test` Namespace view in the Console UI and select the **Deploy new resource** button.
-3. Browse your Service file and select **Deploy** to confirm changes.
-4. Go to the **Services** view to make sure `http-db-service` is running.
+2. Once in the `orders-service` Namespace overview, select the **Deploy new resource** button.
+3. Browse the `service.yaml` file and select **Deploy** to confirm changes.
+4. Go to the **Services** view under the **Operation** section in the UI to make sure the status of `orders-service` is `RUNNING`.
 
   </details>
   </div>
