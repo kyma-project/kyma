@@ -164,10 +164,10 @@ _PART FROM ANOTHER TUTORIAL_
 
 Follow the steps to create a Function that you will trigger with your event.
 
-1. Go to the Namespace in which you deployed the **Business Events** API.
-2. Go **Functions**.
+1. Go to the Namespace in which you deployed the Commerce mock API.
+2. Go to **Functions** under the **Development** section in the left navigation.
 3. Click **Create Function**
-4. Go to **Configuration** tab to select the Event Trigger. For example, use **bo.interaction.created**. This will be the event that triggers your Function.
+4. Go to **Configuration** tab to select the Event Trigger. For example, use **order.deliverysent.v1**. This will be the event that triggers your Function.
 5. In the **Source** tab, add the code for your Function. For example:
 
     ```bash
@@ -184,7 +184,7 @@ Follow the steps to create a Function that you will trigger with your event.
 Follow the steps to send an event to Kyma and trigger a Function.
 
 1. In the mock application, go to **Remote APIs**.
-2. Go to **SAP Marketing Cloud - Business Events**.
-3. Select the Event, in this case **bo.interaction.created**. You can also add the event payload.
-4. Send the event. (_explain_)
+2. Go to **SAP Commerce Cloud - Events**.
+3. Select **order.deliverysent.v1** under **Event Topics**.
+4. Select **Send Event**.
 5. Check the logs in the **Logs** section under **Functions** to see if the event arrived.

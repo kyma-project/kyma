@@ -3,12 +3,12 @@ title: Connect an external application
 type: Getting Started
 ---
 
-Let's start with integrating an external application to Kyma. In this set of guides, we will use a mock application called [SAP Marketing Cloud - Mock](https://github.com/SAP-samples/xf-addons/tree/master/addons/marketing-mock-0.1.0) that is to simulate a monolithic application. You will learn how you can connect it to Kyma, and expose its API and events. We will subscribe to one of its events (**bo.interaction.created**) in other tutorials and use it to trigger the logic of a sample service and function.  
+Let's start with integrating an external application to Kyma. In this set of guides, we will use a mock application called [Commerce mock](https://github.com/SAP-samples/xf-addons/tree/master/addons/commerce-mock-0.1.0) that is to simulate a monolithic application. You will learn how you can connect it to Kyma, and expose its API and events. We will subscribe to one of its events (**order.deliverysent.v1**) in other tutorials and use it to trigger the logic of a sample service and function.  
 
-## Deploy the XF Addons and provision the Marketing mock
+## Deploy the XF Addons and provision the Commerce mock
 
-Marketing mock is a part of the XF Addons that are cluster-wide addons giving access to 3 instances of mocks that simulate external applications sending events to Kyma.
-Follow these steps to deploy XF Addons and add the Marketing mock to your Namespace:
+Commerce mock is a part of the XF Addons that are cluster-wide addons giving access to 3 instances of mocks that simulate external applications sending events to Kyma.
+Follow these steps to deploy XF Addons and add the Commerce mock to your Namespace:
 
 1. In the Kyma Console, go to **Cluster Addons**.
 2. Click **Add New Configuration**.

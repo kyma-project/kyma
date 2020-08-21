@@ -3,19 +3,11 @@ title: Deploy a microservice
 type: Getting Started
 ---
 
-Learn how to quickly deploy a standalone [`http-db-service`](https://github.com/kyma-project/examples/blob/master/http-db-service/README.md) microservice on a Kyma cluster.
+Learn how to quickly deploy a standalone [`orders-service`](https://github.com/kyma-project/examples/blob/master/http-db-service/README.md) microservice on a Kyma cluster.
 
 You will create:
-- `test` Namespace for your application
-- Deployment in which you specify the application configuration
+- Deployment in which you specify the application's configuration
 - Kubernetes Service through which your application will communicate with other resources on the Kyma cluster
-
-## Prerequisites
-
-To use the Kyma cluster and install the example, download these tools:
-
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16
-- [curl](https://github.com/curl/curl)
 
 ## Steps
 
