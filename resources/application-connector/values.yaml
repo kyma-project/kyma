@@ -4,9 +4,6 @@ connector_service:
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
-connectivity_certs_controller:
-  enabled: false
-
 global:
   disableLegacyConnectivity: false
   isLocalEnv: false
@@ -55,8 +52,6 @@ global:
     version: "fbf1000b"
   application_connectivity_validator:
     version: "39d1ab87"
-  connectivity_certs_controller:
-    version: "fbf1000b"
 
 application_connectivity_certs_setup_job:
   secrets:
