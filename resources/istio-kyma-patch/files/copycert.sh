@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-TLS_CRT_VAL=$(kubectl get secret -n istio-system kyma-gateway-certs -o jsonpath='{.data.cert}')
+TLS_CRT_VAL=$(kubectl get secret -n istio-system kyma-gateway-certs -o jsonpath='{.data.tls\.crt}')
 echo "TLS_CRT_VAL: ${TLS_CRT_VAL}"
 
 TLS_CRT_PATCH=$(cat << EOF
