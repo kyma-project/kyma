@@ -1,13 +1,11 @@
 ---
-title: Add a Redis service
+title: Add the Redis service
 type: Getting Started
 ---
 
 This tutorial shows how you can provision a sample [Redis](https://redis.io/) service using an Addon configuration linking to an example in the GitHub repository.
 
 ## Steps
-
-### Add an Addon with the Redis service
 
 Follows these steps:
 

@@ -1,5 +1,5 @@
 ---
-title: Expose a microservice
+title: Expose the microservice
 type: Getting Started
 ---
 
@@ -7,7 +7,7 @@ Now that you deployed a standalone `orders-service` microservice, you can make i
 
 ## Prerequisites
 
-Go through the [Deploy a microservice](/#tutorials-deploy-microservice) tutorial to apply the `orders-service` microservice in the `orders-service` Namespace on your cluster.
+Go through the [Deploy the microservice](/#tutorials-deploy-microservice) tutorial to apply the `orders-service` microservice in the `orders-service` Namespace on your cluster.
 
 ## Steps
 
@@ -181,4 +181,4 @@ You can see the service returns the order details previously sent to it.
   []
   ```
 
-  As you can see, the microservice uses in-memory storage which means every time when you delete the Pod of a microservice or change the Deployment definition, the orders details will be lost. In further guides, you will see how you can order data deletion by attaching an external Redis storage to the microservice.
+  As you can see, the `orders-service` microservice uses in-memory storage which means every time you delete the Pod of a microservice or change the Deployment definition, the orders details will be lost. In further guides, you will see how you can prevent order data deletion by attaching an external Redis storage to the microservice.
