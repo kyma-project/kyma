@@ -7,7 +7,7 @@ Almost all operations in these guide are performed using Namespace-scoped resour
 
 Follow these steps:
 
-<div tabs name="setup-namespace" group="setup-namespace">
+<div tabs name="setup-namespace" group="set-up-namespace">
   <details>
   <summary label="cli">
   CLI

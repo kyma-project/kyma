@@ -6,16 +6,16 @@ type: Getting Started
 Learn how to quickly deploy a standalone [`orders-service`](https://github.com/kyma-project/examples/blob/master/http-db-service/README.md) microservice on a Kyma cluster.
 
 You will create:
-- Deployment in which you specify the application's configuration
-- Kubernetes Service through which your application will communicate with other resources on the Kyma cluster
+- Deployment in which you specify the configuration of the microservice
+- Kubernetes Service through which your microservice will communicate with other resources on the Kyma cluster
 
 ## Steps
 
 ### Create a Deployment
 
-1. Create a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) that provides the application definition and enables you to run it on the cluster. The Deployment uses the `eu.gcr.io/kyma-project/pr/orders-service:PR-162` image. This Docker image exposes the `8080` port on which the related Service is listening.
+1. Create a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) that provides the microservice definition and enables you to run it on the cluster. The Deployment uses the `eu.gcr.io/kyma-project/pr/orders-service:PR-162` image. This Docker image exposes the `8080` port on which the related Service is listening.
 
-<div tabs name="steps" group="create-service">
+<div tabs name="steps" group="deploy-microservice">
   <details>
   <summary label="cli">
   CLI
@@ -124,9 +124,9 @@ spec:
 
 ### Create the Service
 
-Deploy the Kubernetes [Service](https://kubernetes.io/docs/concepts/services-networking/service/) in the `orders-service` Namespace to allow other Kubernetes resources to communicate with your application.
+Deploy the Kubernetes [Service](https://kubernetes.io/docs/concepts/services-networking/service/) in the `orders-service` Namespace to allow other Kubernetes resources to communicate with your microservice.
 
-<div tabs name="steps" group="create-service">
+<div tabs name="steps" group="deploy-microservice">
   <details>
   <summary label="cli">
   CLI
@@ -155,12 +155,6 @@ spec:
     app: orders-service
     example: orders-service
 EOF
-```
-
-A successfully deployed Service prints this result:
-
-```bash
-service/http-db-service created
 ```
 
   </details>

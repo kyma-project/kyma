@@ -7,58 +7,53 @@ This tutorial shows how you can provision a sample [Redis](https://redis.io/) se
 
 ## Steps
 
+### Add an Addon with the Redis service
+
 Follows these steps:
 
-<div tabs name="steps" group="add-addon">
+<div tabs name="steps" group="create-redis-service">
   <details>
   <summary label="cli">
   CLI
   </summary>
 
-1. Export these variables:
-
-   ```bash
-   export NAME={FUNCTION_NAME}
-   export NAMESPACE={FUNCTION_NAMESPACE}
-   ```
-
-2. Provision an Addon CR with the Redis service:
+1. Provision an Addon CR with the Redis service:
 
    ```yaml
    cat <<EOF | kubectl apply -f  -
    apiVersion: addons.kyma-project.io/v1alpha1
    kind: AddonsConfiguration
    metadata:
-     name: $NAME
-     namespace: $NAMESPACE
+     name: redis-addon
+     namespace: orders-service
    spec:
-     reprocessRequest: 0
      repositories:
-     - url: https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml
+     - url: https://github.com/kyma-project/addons/releases/download/0.12.0/index-testing.yaml
    EOF
    ```
 
-3. Check if the Addon CR was created successfully. The CR phase should state `Ready`:
+2. Check if the Addon CR was created successfully. The CR phase should state `Ready`:
 
-   ```bash
-   kubectl get addons $NAME -n $NAMESPACE -o=jsonpath="{.status.phase}"
-   ```
+  ```bash
+  kubectl get addonsconfigurations redis-addon -n orders-service -o=jsonpath="{.status.phase}"
+  ```
 
-    </details>
-    <details>
-    <summary label="console-ui">
-    Console UI
-    </summary>
+  </details>
+  <details>
+  <summary label="console-ui">
+  Console UI
+  </summary>
 
-1. Select a Namespace from the drop-down list in the top navigation panel where you want to provision the Redis service.
+1. Navigate to the `orders-service` Namespace overview by selecting it from the drop-down list in the top navigation panel.
 
-2. Go to the **Addons** view in the left navigation panel and select **Add New Configuration**.
+2. Navigate to the **Configuration** section in the left navigation panel, go to the **Addons** view, and select **Add New Configuration**.
 
 3. Enter `https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml` in the **Urls** field. The Addon name is automatically generated.
 
 4. Select **Add** to confirm changes.
 
-   You will see that the Addon has the `Ready` status.
+5. Wait for the Addon to have the `READY` status.
+
 
     </details>
 </div>

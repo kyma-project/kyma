@@ -7,7 +7,7 @@ To create a binding between a Function and a provisioned Service, you must first
 
 To create the binding, you will use ServiceBinding and ServiceBindingUsage custom resources (CRs) managed by the [Service Catalog](https://svc-cat.io/docs/walkthrough/).
 
->**NOTE:** See the document on [provisioning and binding](/components/service-catalog/#details-provisioning-and-binding) to learn more about binding Service Instances to applications in Kyma.
+>**NOTE:** See the document on [provisioning and binding](/components/service-catalog/#details-provisioning-and-binding) to learn more about binding Service Instances to microservices in Kyma.
 
 ## Prerequisites
 
