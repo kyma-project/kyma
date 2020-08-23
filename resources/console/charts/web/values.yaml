@@ -40,10 +40,10 @@ test:
     ui:
       # tests uses chromium that require more memory
       limits:
-        cpu: 450m
+        cpu: 900m
         memory: 1.5Gi
       requests:
-        cpu: 380m
+        cpu: 750m
         memory: 900Mi
       service_catalog:
         enabled: true
