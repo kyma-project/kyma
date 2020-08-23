@@ -60,7 +60,7 @@ Follows these steps:
 
 <!-- Explain the image pull policy choice-->
 
-5. Select **Create** to confirm changes.
+5. Select **Create** to confirm the changes.
 
 You will be redirected to **Catalog Management** > **Instances** > **redis-service** view. Wait until the status of the instance changes from `PROVISIONING` to `RUNNING`.
 

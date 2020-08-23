@@ -37,7 +37,7 @@ Follow these steps:
 
 3. Enter `orders-service` in the **Name** field.
 
-4. Select **Create** to confirm changes.
+4. Select **Create** to confirm the changes.
 
    You will be redirected to the `orders-service` Namespace view.
 

@@ -65,7 +65,7 @@ Console UI
 
 1. Select the `orders-service` Namespace from the drop-down list in the top navigation panel.
 
-2. Navigate to the **Configuration** section in the left navigation panel, go to the **API Rules** view, and select **Add API Rule**.
+2. Navigate to the **Configuration** section in the left navigation panel, go to the **API Rules** view, and select **Create API Rule**.
 
 3. In the **General settings** section:
 
@@ -79,7 +79,7 @@ Console UI
 
 4. In the **Access strategies** section, leave only the `GET` and `POST` methods marked and the `noop` handler selected. This way you will be able to send the orders to a service and retrieve orders from it without any token.
 
-5. Select **Create** to confirm changes.
+5. Select **Create** to confirm the changes.
 
     The message appears on the screen confirming the changes were saved.
 

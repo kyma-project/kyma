@@ -120,7 +120,7 @@ To follow this tutorial you must first [provision the Redis service](/#tutorials
 
    > **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
-7. Select **Bind Application** to confirm changes and wait for status `READY` of the created Service Binding Usage.
+7. Select **Bind Application** to confirm the changes and wait for status `READY` of the created Service Binding Usage.
 
   </details>
 </div>

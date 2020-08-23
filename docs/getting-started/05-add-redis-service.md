@@ -48,7 +48,7 @@ Follows these steps:
 
 3. Once the new box opens up, enter `https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml` in the **Urls** field. The Addon name is automatically generated.
 
-4. Select **Add** to confirm changes.
+4. Select **Add** to confirm the changes.
 
 5. Wait for the Addon to have the `READY` status.
 

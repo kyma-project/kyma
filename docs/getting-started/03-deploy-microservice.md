@@ -116,7 +116,7 @@ spec:
 ```
 
 2. Once in the `orders-service` Namespace overview, select the **Deploy new resource** button.
-3. Browse the `deployment.yaml` file and select **Deploy** to confirm changes.
+3. Browse the `deployment.yaml` file and select **Deploy** to confirm the changes.
 4. Go to the **Deployments** view under the **Operation** section in the UI to make sure the status of `orders-service` is `RUNNING`.
 
 </details>
@@ -187,7 +187,7 @@ EOF
   ```
 
 2. Once in the `orders-service` Namespace overview, select the **Deploy new resource** button.
-3. Browse the `service.yaml` file and select **Deploy** to confirm changes.
+3. Browse the `service.yaml` file and select **Deploy** to confirm the changes.
 4. Go to the **Services** view under the **Operation** section in the UI to make sure the status of `orders-service` is `RUNNING`.
 
   </details>

@@ -81,7 +81,7 @@ EOF
  > **TIP:** You can also use the search box in the upper right corner of the Console UI to find the mock.
 
 8. Click **Add once** to deploy the application in the `orders-service` Namespace. Leave the `default` plan. The mock name will be automatically generated.
-9. Select **Create** to confirm changes.
+9. Select **Create** to confirm the changes.
 
 You will be redirected to the **Catalog Management** > **Instances** > **{GENERATED_MOCK_NAME}** view. Wait for the mock to have the `RUNNING` status.
 
@@ -159,7 +159,7 @@ EOF
 
 1. Return to the general view in the Console UI by selecting **Back to Namespaces**.
 2. Go to **Applications/Systems** under the **Integration** section and select **Create Application**.
-3. Set the Application's name as `commerce-mock` and select **Create** to confirm changes.
+3. Set the Application's name as `commerce-mock` and select **Create** to confirm the changes.
 
 Wait for the Application to have the `SERVING` status.
 
@@ -242,7 +242,7 @@ EOF
 
 3. Select **Add once** to add the service to the Namespace.
 
-4. When the box pops up, leave the default values and confirm changes by selecting **Create**.
+4. When the box pops up, leave the default values and confirm the changes by selecting **Create**.
 
 This way you provisioned the events (created ServiceClasses) in the Namespace.
 
