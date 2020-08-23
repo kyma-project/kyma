@@ -92,7 +92,7 @@ Console UI
 
 ### Call and test the microservice
 
-> **CAUTION:** If you have a Minikube cluster, you must first add the IP address of exposed Service to the `hosts` file on your machine:
+> **CAUTION:** If you have a Minikube cluster, you must first add the IP address of the exposed k8s Service to the `hosts` file on your machine:
 >
 >  ```bash
 >  echo "$(minikube ip) orders-service.kyma.local" | sudo tee -a /etc/hosts
@@ -155,7 +155,7 @@ x-envoy-upstream-service-time: 6
 [{"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
 ```
 
-You can see the service returns the order details previously sent to it.
+ You can see the microservice returns the previously sent order details.
 
 5. Remove the [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) created by the `orders-service` Deployment. Run this command and wait for the system to delete the Pod and start a new one:
 
@@ -181,4 +181,4 @@ You can see the service returns the order details previously sent to it.
   []
   ```
 
-  As you can see, the `orders-service` microservice uses in-memory storage which means every time you delete the Pod of a microservice or change the Deployment definition, the orders details will be lost. In further guides, you will see how you can prevent order data deletion by attaching an external Redis storage to the microservice.
+  As you can see, the `orders-service` microservice uses in-memory storage which means every time you delete the Pod of the microservice or change the Deployment definition, the orders details will be lost. In further guides, you will see how you can prevent order data deletion by attaching an external Redis storage to the microservice.

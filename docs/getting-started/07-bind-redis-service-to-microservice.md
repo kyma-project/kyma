@@ -79,7 +79,7 @@ To follow this tutorial you must first [provision the Redis service](/#tutorials
    kubectl get servicebindingusage orders-service -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
    ```
 
-5. If you want to see the Secret details from the ServiceBinding, run this command:
+5. If you want to see the Secret details and retrieve them from the ServiceBinding, run this command:
 
 <!-- Not sure if this step is needed-->
 
@@ -128,6 +128,10 @@ To follow this tutorial you must first [provision the Redis service](/#tutorials
 ### Call and test the microservice
 
 > **CAUTION:** If you have a Minikube cluster, you must first add the IP address of the exposed Service to the `hosts` file on your machine:
+>
+>  ```bash
+>  echo "$(minikube ip) orders-service.kyma.local" | sudo tee -a /etc/hosts
+>  ```
 
 <!-- Explain why -->
 

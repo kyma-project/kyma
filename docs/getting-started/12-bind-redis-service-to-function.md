@@ -3,95 +3,83 @@ title: Bind a Redis ServiceInstance to a Function
 type: Getting Started
 ---
 
-This tutorial shows how you can bind a sample instance of the Redis service to a Function. After completing all steps, you will get the Function with encoded Secrets to the service. You can use them for authentication when you connect to the service to implement custom business logic of your Function.
-
-## Prerequisites
-
-Follow these tutorials first to:
-1. [Create a Function](/#tutorials-create-a-function)
-2. [Provision the Redis Addon](/#tutorials-register-an-addon)
-3. [Create a ServiceInstance](/#tutorials-create-a-service-instance)
+This tutorial shows how you can bind a sample instance of the Redis service to a Function. After completing all steps, you will get the Function with encoded Secrets to the service. You can use them to connect to the service and use it as external storage for the Function.
 
 ## Steps
 
+### Bind the Redis ServiceInstance to the Function
+
 Follows these steps:
 
-<div tabs name="steps" group="bind-function">
+<div tabs name="steps" group="bind-redis-to-function">
   <details>
   <summary label="cli">
   CLI
   </summary>
 
-1. Export these variables:
+1. Create a ServiceBinding CR that points to the existing Redis instance in the **spec.instanceRef** field:
 
-   ```bash
-   export NAME={FUNCTION_NAME}
-   export NAMESPACE={FUNCTION_NAMESPACE}
-   ```
+```yaml
+cat <<EOF | kubectl apply -f -
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceBinding
+metadata:
+  name: orders-function
+  namespace: orders-service
+spec:
+  instanceRef:
+    name: redis-service
+EOF
+```
 
-2. Create a ServiceBinding CR that points to the newly created Service Instance in the **spec.instanceRef** field:
+2. Check if the ServiceBinding CR was created. The last condition in the CR status should state `Ready True`:
 
-   ```yaml
-   cat <<EOF | kubectl apply -f -
-   apiVersion: servicecatalog.k8s.io/v1beta1
-   kind: ServiceBinding
-   metadata:
-     name: $NAME
-     namespace: $NAMESPACE
-   spec:
-     instanceRef:
-       name: $NAME
-   EOF
-   ```
+```bash
+kubectl get servicebinding orders-function -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
+```
 
-   > **NOTE:** If you use an existing Service Instance, change **spec.instanceRef.name** to the name of your Service Instance.
+3. Create a ServiceBindingUsage CR:
 
-3. Check if the ServiceBinding CR was created successfully. The last condition in the CR status should state `Ready True`:
+```yaml
+cat <<EOF | kubectl apply -f -
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
+kind: ServiceBindingUsage
+metadata:
+  name: orders-function
+  namespace: orders-service
+spec:
+  serviceBindingRef:
+    name: orders-function
+  usedBy:
+    kind: serverless-function
+    name: orders-function
+  parameters:
+    envPrefix:
+      name: "REDIS_"
+EOF
+```
 
-   ```bash
-   kubectl get servicebinding $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
-   ```
+   - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the ServiceBinding you have just created and **spec.usedBy** points to the Function. More specifically, **spec.usedBy** refers to the name of the Function and the cluster-specific [UsageKind CR](/components/service-catalog/#custom-resource-usage-kind) (`kind: serverless-function`) that defines how Secrets should be injected to your Function when creating a ServiceBinding.
 
-4. Create a ServiceBindingUsage CR:
-
-   ```yaml
-   cat <<EOF | kubectl apply -f -
-   apiVersion: servicecatalog.kyma-project.io/v1alpha1
-   kind: ServiceBindingUsage
-   metadata:
-     name: $NAME
-     namespace: $NAMESPACE
-   spec:
-     serviceBindingRef:
-       name: $NAME
-     usedBy:
-       kind: serverless-function
-       name: $NAME
-     parameters:
-       envPrefix:
-         name: "REDIS_"
-   EOF
-   ```
-
-   - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the Service Binding you have just created and **spec.usedBy** points to the Function. More specifically, **spec.usedBy** refers to the name of the Function and the cluster-specific [UsageKind CR](https://kyma-project.io/docs/components/service-catalog/#custom-resource-usage-kind) (`kind: serverless-function`) that defines how Secrets should be injected to your Function when creating a Service Binding.
-
-   - The **spec.parameters.envPrefix.name** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a Service Binding. In our example, **envPrefix** is `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
+   - The **spec.parameters.envPrefix.name** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a ServiceBinding. In our example, **envPrefix** is `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
 
      > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
-5. Check if the ServiceBindingUsage CR was created successfully. The last condition in the CR status should state `Ready True`:
+4. Check if the ServiceBindingUsage CR was created. The last condition in the CR status should state `Ready True`:
 
-   ```bash
-   kubectl get servicebindingusage $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
-   ```
+```bash
+kubectl get servicebindingusage orders-function -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
+```
 
-6. Retrieve and decode Secret details from the Service Binding:
+5. If you want to see the Secret details and retrieve them from the ServiceBinding, run this command:
 
-    ```bash
-    kubectl get secret $NAME -n $NAMESPACE -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
-    ```
+<!-- Not sure if this step is needed-->
 
-    You should get a result similar to the following details:
+```bash
+kubectl get secret orders-function -n orders-service -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
+```
+
+    You should get a similar result:
 
     ```bash
     HOST: hb-redis-micro-0e965585-9699-443f-b987-38bc6af0e416-redis.serverless.svc.cluster.local
@@ -99,48 +87,126 @@ Follows these steps:
     REDIS_PASSWORD: 1tvDcINZvp
     ```
 
-    > **NOTE:** If you added the **REDIS\_** prefix for environmental variables in step 6, all variables will start with it. For example, the **PORT** variable will take the form of **REDIS_PORT**.
-
     </details>
     <details>
     <summary label="console-ui">
     Console UI
     </summary>
 
-1. Go to the **Functions** view in the left navigation panel and select the Function you want to bind to the Service Instance.
+1. Go to the **Functions** view under the **Development** section in the left navigation panel and select the `orders-function` Function.
 
 2. Switch to the **Configuration** tab and select **Create Service Binding** in the **Service Bindings** section.
 
-3. Select the Redis service from the **Service Instance** drop-down list, add `REDIS_` as **Prefix for injected variables**, and make sure **Create new Secret** is selected.
+3. Select `redis-service` in the **Service Instance** drop-down list, add `REDIS_` as **Prefix for injected variables**, and make sure **Create new Secret** is selected.
+
+   > **NOTE:** The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a ServiceBinding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
+
+   > **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure t
 
 4. Select **Create** to confirm changes.
 
-The message appears on the screen confirming that the Service Binding was successfully created, and you will see it in the **Service Bindings** section in your Function, along with environment variable names.
+The message appears on the screen confirming that the ServiceBinding was successfully created, and you will see it in the **Service Bindings** section in your Function, along with environment variable names.
 
-> **NOTE:** The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a Service Binding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
-
-> **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
+If you switch to the **Code** tab and scroll down to the **Environment Variables** section, you should see `REDIS_PORT`, `REDIS_HOST` and `REDIS_REDIS_PASSWORD` items with the `Service Binding` type. It indicates that the environment variable was injected to the Function by the ServiceBinding.
 
     </details>
-
 </div>
 
-## Test the Function
+## Call and test the Function
 
-To test if the Secret has been properly connected to the Function:
+> **CAUTION:** If you have a Minikube cluster, you must first add the IP address of the exposed Service to the `hosts` file on your machine:
+>
+>  ```bash
+>  echo "$(minikube ip) orders-service.kyma.local" | sudo tee -a /etc/hosts
+>  ```
 
-1. Change the Function's code to:​
+1. Retrieve the domain of the exposed Function and save it to the environment variable:
 
-   ```js
-   module.exports = {
-     main: function (event, context) {
-       return "Redis port: " + process.env.REDIS_PORT;
-     },
-   };
+   ```bash
+   export FUNCTION_DOMAIN=$(kubectl get virtualservices -l apirule.gateway.kyma-project.io/v1alpha1=orders-function.orders-service -n orders-service -o=jsonpath='{.items[*].spec.hosts[0]}')
    ```
 
-2. Expose the Function through an [API Rule](#tutorials-expose-a-function-with-an-api-rule), and access the Function's external address. You should get this result:
+2. Run this command in the terminal to call the Function:
 
-   ```text
-   Redis port: 6379
+   ```bash
+   curl -ik "https://$FUNCTION_DOMAIN"
    ```
+
+   The system should return a similar response:
+
+   ```bash
+   HTTP/2 200
+   access-control-allow-origin: *
+   content-length: 187
+   content-type: application/json; charset=utf-8
+   date: Mon, 13 Jul 2020 13:05:33 GMT
+   etag: W/"bb-Iuoc/aX9UjdqADJAZPNrwPdoraI"
+   server: istio-envoy
+   x-envoy-upstream-service-time: 25
+   x-powered-by: Express
+
+   [{"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"123456789","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
+   ```
+
+   > **NOTE:** The listed orders are those created in the previous guides.
+
+3. Send a `POST` request to the Function with a sample order details:
+
+   ```bash
+   curl -ikX POST "https://$FUNCTION_DOMAIN" \
+     -H "Content-Type: application/json" \
+     -H 'Cache-Control: no-cache' -d \
+     '{
+       "orderCode": "762727234",
+       "consignmentCode": "76272725",
+       "consignmentStatus": "PICKUP_COMPLETE"
+     }'
+   ```
+
+4. If we call again the `https://$FUNCTION_DOMAIN` URL, then the system should return a response similar to the following:
+
+   ```bash
+   HTTP/2 200
+   access-control-allow-origin: *
+   content-length: 280
+   content-type: application/json; charset=utf-8
+   date: Mon, 13 Jul 2020 13:05:51 GMT
+   etag: W/"118-lAc/HJqUaWFKlQ/uyvrhuPb++80"
+   server: istio-envoy
+   x-envoy-upstream-service-time: 9
+   x-powered-by: Express
+
+   [{"orderCode":"762727234","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"123456789","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
+   ```
+
+   You can see the Function returns the previously sent order details.
+
+5. Remove the [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) created by the `orders-function` Function. Run this command and wait for the system to delete the Pod and start a new one:
+
+   ```bash
+   kubectl delete pod -n orders-service -l "serverless.kyma-project.io/function-name=orders-function"
+   ```
+
+6. Call the Function again to check the storage:
+
+   ```bash
+   curl -ik "https://$FUNCTION_DOMAIN"
+   ```
+
+   The system should return a similar response:
+
+   ```bash
+   HTTP/2 200
+   access-control-allow-origin: *
+   content-length: 280
+   content-type: application/json; charset=utf-8
+   date: Mon, 13 Jul 2020 13:05:33 GMT
+   etag: W/"118-lAc/HJqUaWFKlQ/uyvrhuPb++80"
+   server: istio-envoy
+   x-envoy-upstream-service-time: 975
+   x-powered-by: Express
+
+   [{"orderCode":"762727234","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"123456789","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
+   ```
+
+   As we can see, `orders-function` of Function uses Redis storage now. It means that every time you delete the Pod of the Function or change its Deployment definition, the orders details will not get lost.

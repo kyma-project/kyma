@@ -18,6 +18,8 @@ This tutorial is based on an existing Function. To create one, follow the [Creat
 
 ## Steps
 
+### Expose the Function
+
 Follows these steps:
 
 <div tabs name="steps" group="expose-function">
@@ -92,3 +94,102 @@ kubectl get apirules orders-function -n orders-service -o=jsonpath='{.status.API
 
     </details>
 </div>
+
+### Call and test the microservice
+
+> **CAUTION:** If you have a Minikube cluster, you must first add the IP address of the exposed k8s to the `hosts` file on your machine:
+>
+> ```bash
+> echo "$(minikube ip) orders-function.kyma.local" | sudo tee -a /etc/hosts
+> ```
+
+1. Retrieve the domain of the exposed Function and save it to the environment variable:
+
+   ```bash
+   export FUNCTION_DOMAIN=$(kubectl get virtualservices -l apirule.gateway.kyma-project.io/v1alpha1=orders-function.orders-service -n orders-service -o=jsonpath='{.items[*].spec.hosts[0]}')
+   ```
+
+2. Similarly to the guide on [exposing the microservice](#getting-started-expose-the-microservice), call the Function:
+
+   ```bash
+   curl -ik "https://$FUNCTION_DOMAIN"
+   ```
+
+   The system should return a similar response:
+
+   ```bash
+   content-length: 2
+   content-type: application/json;charset=UTF-8
+   date: Mon, 13 Jul 2020 13:05:33 GMT
+   server: istio-envoy
+   vary: Origin
+   x-envoy-upstream-service-time: 37
+
+   []
+   ```
+
+3. Send a `POST` request to the Function with a sample order details:
+
+   ```bash
+   curl -ikX POST "https://$FUNCTION_DOMAIN" \
+     -H "Content-Type: application/json" \
+     -H 'Cache-Control: no-cache' -d \
+     '{
+       "orderCode": "762727210",
+       "consignmentCode": "76272725",
+       "consignmentStatus": "PICKUP_COMPLETE"
+     }'
+   ```
+
+4. Call the Function again to check the storage:
+
+   ```bash
+   curl -ik "https://$FUNCTION_DOMAIN"
+   ```
+
+   The system should return a similar response:
+
+   ```bash
+   HTTP/2 200
+   access-control-allow-origin: *
+   content-length: 187
+   content-type: application/json; charset=utf-8
+   date: Mon, 13 Jul 2020 13:05:51 GMT
+   etag: W/"bb-Iuoc/aX9UjdqADJAZPNrwPdoraI"
+   server: istio-envoy
+   x-envoy-upstream-service-time: 838
+   x-powered-by: Express
+
+   [{"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
+   ```
+
+   You can see the Function returns the previously sent order details.
+
+5. Remove the [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) created by the `orders-function` Function. Run this command and wait for the system to delete the Pod and start a new one:
+
+   ```bash
+   kubectl delete pod -n orders-service -l "serverless.kyma-project.io/function-name=orders-function"
+   ```
+
+6. Call the Function again to check the storage:
+
+   ```bash
+   curl -ik "https://$FUNCTION_DOMAIN"
+   ```
+
+   The system should return a similar response:
+
+   ```bash
+   HTTP/2 200
+   access-control-allow-origin: *
+   content-length: 187
+   content-type: application/json; charset=utf-8
+   date: Mon, 13 Jul 2020 13:05:33 GMT
+   etag: W/"bb-Iuoc/aX9UjdqADJAZPNrwPdoraI"
+   server: istio-envoy
+   x-envoy-upstream-service-time: 838
+   x-powered-by: Express
+
+   []
+   ```
+  As you can see, `orders-function` uses in-memory storage which means every time you delete the Pod of the Function or change its Deployment definition, the orders details will be lost. Just like we did with the microservice, let's binf the external Redis storage to prevent the order data loss.
