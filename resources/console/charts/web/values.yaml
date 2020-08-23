@@ -36,14 +36,14 @@ replicaCount: 1
 resources: {}
 test:
   acceptance:
-    enabled: true
+    enabled: false
     ui:
       # tests uses chromium that require more memory
       limits:
-        cpu: 900m
+        cpu: 400m
         memory: 1.5Gi
       requests:
-        cpu: 750m
+        cpu: 350m
         memory: 900Mi
       service_catalog:
         enabled: true
