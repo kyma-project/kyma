@@ -48,17 +48,19 @@ Follows these steps:
     Console UI
     </summary>
 
-1. Go to the **Catalog** view under the **Service Management** section in the left navigation panel. Switch to the **Add-Ons** tab and select **[Experimental] Redis**.
+1. Go to the **Catalog** view under the **Service Management** section in the left navigation panel.
+
+2. Switch to the **Add-Ons** tab and select **[Experimental] Redis**.
 
  > **TIP:** You can also use the search box in the upper right corner of the Console UI to find the service.
 
-2. Select **Add** to provision the Redis ServiceClass and create its instance in the `orders-service` Namespace.
+3. Select **Add** to provision the Redis ServiceClass and create its instance in the `orders-service` Namespace.
 
-3. Change the **Name** to `redis-service` to match the name of the service, leave `micro` in the **Plan** drop-down list, and set **Image pull policy** to `Always`.
+4. Change the **Name** to `redis-service` to match the name of the service, leave `micro` in the **Plan** drop-down list, and set **Image pull policy** to `Always`.
 
 <!-- Explain the image pull policy choice-->
 
-4. Select **Create** to confirm changes.
+5. Select **Create** to confirm changes.
 
 You will be redirected to **Catalog Management** > **Instances** > **redis-service** view. Wait until the status of the instance changes from `PROVISIONING` to `RUNNING`.
 

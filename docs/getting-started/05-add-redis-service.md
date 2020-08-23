@@ -15,7 +15,7 @@ Follows these steps:
   CLI
   </summary>
 
-1. Provision an Addon CR with the Redis service:
+1. Provision an AddonsConfiguration CR with the Redis service:
 
    ```yaml
    cat <<EOF | kubectl apply -f  -
@@ -30,7 +30,7 @@ Follows these steps:
    EOF
    ```
 
-2. Check if the Addon CR was created successfully. The CR phase should state `Ready`:
+2. Check if the AddonsConfiguration CR was created successfully. The CR phase should state `Ready`:
 
   ```bash
   kubectl get addonsconfigurations redis-addon -n orders-service -o=jsonpath="{.status.phase}"
@@ -46,7 +46,7 @@ Follows these steps:
 
 2. Navigate to the **Configuration** section in the left navigation panel, go to the **Addons** view, and select **Add New Configuration**.
 
-3. Enter `https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml` in the **Urls** field. The Addon name is automatically generated.
+3. Once the new box opens up, enter `https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml` in the **Urls** field. The Addon name is automatically generated.
 
 4. Select **Add** to confirm changes.
 

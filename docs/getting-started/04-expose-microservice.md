@@ -11,7 +11,7 @@ Go through the [Deploy the microservice](/#tutorials-deploy-microservice) tutori
 
 ## Steps
 
-## Expose the Service
+### Expose the Service
 
 Create an APIRule custom resource (CR) which exposes the Kubernetes Service of the microservice under na unsecured endpoint (**handler** set to `noop`) and accepts the `GET` and `POST` methods.
 
@@ -25,7 +25,7 @@ Create an APIRule custom resource (CR) which exposes the Kubernetes Service of t
 
 1. Open the terminal window and apply the APIRule CR:
 
-```
+```bash
 cat <<EOF | kubectl apply -f -
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
@@ -90,7 +90,7 @@ Console UI
 </details>
 </div>
 
-## Call and test the microservice
+### Call and test the microservice
 
 > **CAUTION:** If you have a Minikube cluster, you must first add the IP address of exposed Service to the `hosts` file on your machine:
 >
