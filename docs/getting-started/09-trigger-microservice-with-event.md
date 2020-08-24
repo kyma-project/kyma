@@ -5,7 +5,9 @@ type: Getting Started
 
 This tutorial shows how to trigger the deployed `orders-service` microservice with the `order.deliverysent.v1` event from the Commerce mock connected to Kyma.
 
-## Create the event trigger
+## Steps
+
+### Create the event trigger
 
 <div tabs name="steps" group="trigger-microservice">
   <details>
@@ -68,7 +70,7 @@ Console UI
 </div>
 
 
-## Test the trigger
+### Test the trigger
 
 To send events from Commerce mock to the `orders-service` microservice, follow these steps:  
 
@@ -86,7 +88,7 @@ To send events from Commerce mock to the `orders-service` microservice, follow t
    curl -ik "https://$SERVICE_DOMAIN/orders"
    ```
 
-   > **NOTE**: To get the microservice domain, run:
+   > **NOTE**: To get the domain of the microservice, run:
    >
    > ```bash
    > export SERVICE_DOMAIN=$(kubectl get virtualservices -l apirule.gateway.kyma-project.io/v1alpha1=orders-service.orders-service -n orders-service -o=jsonpath='{.items[*].spec.hosts[0]}')

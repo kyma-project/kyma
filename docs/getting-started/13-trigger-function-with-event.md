@@ -74,42 +74,43 @@ The message appears on the UI confirming that the event trigger was created, and
     </details>
 </div>
 
-_TO_DO_BELOW_
-## Test the Trigger
+### Test the Trigger
 
-To send events from mock to Orders Service application, follow these steps:  
+To send events from Commerce mock to `orders-function`, follow these steps:
 
-1. Access the SAP Commerce Cloud Mock mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or go to **API Rules** view (under **Configuration** section) in `orders-service` Namespace and select the mock, you will the direct link to the mock application under **Host** column.
+1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or go to **API Rules** view (under **Configuration** section) in the `orders-service` Namespace and select the mock. You can also follow the direct link under the **Host** column.
 
-2. Switch to **Remote APIs** tab, find **SAP Commerce Cloud - Events** and click it.
+2. Switch to the **Remote APIs** tab, find **SAP Commerce Cloud - Events** and select it.
 
-3. In opened view search in dropdown list `order.deliverysent.v1` event. In pasted event change `orderCode` to `987654321` and select **Send Event**.
+3. Select the `order.deliverysent.v1` event type in **Event Topics** drop-down list. In the details of the printed event, change **orderCode** to `987654321` and select **Send Event**.
 
    The message appears on the UI confirming that the event was successfully sent.
 
-4. For the last time call the Function to check the storage:
+4. Call the Function for the last time to verify is the event details were saved:
 
    ```bash
    curl -ik "https://$FUNCTION_DOMAIN"
    ```
 
-   > **NOTE**: To get the Function domain, run:
+   > **NOTE**: To get the domain of the Function, run:
    >
    > ```bash
    > export FUNCTION_DOMAIN=$(kubectl get virtualservices -l apirule.gateway.kyma-project.io/v1alpha1=orders-function.orders-service -n orders-service -o=jsonpath='{.items[*].spec.hosts[0]}')
    > ```
 
-   You should see a response similar to the following:
+   You should see a similar response:
 
    ```bash
-   content-length: 2
-   content-type: application/json;charset=UTF-8
+   HTTP/2 200
+   access-control-allow-origin: *
+   content-length: 652
+   content-type: application/json; charset=utf-8
    date: Mon, 13 Jul 2020 13:05:33 GMT
+   etag: W/"28c-MLZh1MyovyUrCPwMzfRWfVQwhlU"
    server: istio-envoy
-   vary: Origin
-   x-envoy-upstream-service-time: 37
+   x-envoy-upstream-service-time: 991
+   x-powered-by: Express
 
-   [{"orderCode":"762727234","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"123456789","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"987654321","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
+   [{"orderCode":"987654321","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"},
+   {"orderCode":"762727234","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"123456789","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
    ```
-
-   The event from mock application was saved in Redis instance :)

@@ -112,7 +112,7 @@ If you switch to the **Code** tab and scroll down to the **Environment Variables
     </details>
 </div>
 
-## Call and test the Function
+### Call and test the Function
 
 > **CAUTION:** If you have a Minikube cluster, you must first add the IP address of the exposed Service to the `hosts` file on your machine:
 >
