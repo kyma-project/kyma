@@ -40,4 +40,4 @@ COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certifica
 # Run app
 
 # -logtostderr=true is required, as glog is stupid and tries to log to /tmp, which crashes the pod
-CMD ["/app/main", "-logtostderr=true"]
+# CMD ["/app/main", "-logtostderr=true"]
