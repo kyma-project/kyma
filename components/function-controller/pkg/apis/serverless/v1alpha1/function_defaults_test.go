@@ -55,7 +55,7 @@ func TestSetDefaults(t *testing.T) {
 		"Should not change runtime type": {
 			givenFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: Python37,
+					Runtime: Python38,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
@@ -72,7 +72,7 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: Python37,
+					Runtime: Python38,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
