@@ -12,7 +12,7 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   hosts:
-  - core-ui.{{ .Values.global.ingress.domainName }}
+  - core-ui.{{ .Values.global.domainName }}
   gateways:
   - {{ .Values.global.istio.gateway.name }}
   http:

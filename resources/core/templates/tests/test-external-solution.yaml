@@ -25,9 +25,9 @@ spec:
       hostAliases:
         - ip: {{ $.Values.global.minikubeIP }}
           hostnames:
-            - "connector-service.{{ $.Values.global.ingress.domainName }}"
-            - "ctr-svc-{{ $val.testsuite }}.{{ $.Values.global.ingress.domainName }}"
-            - "gateway.{{ $.Values.global.ingress.domainName }}"
+            - "connector-service.{{ $.Values.global.domainName }}"
+            - "ctr-svc-{{ $val.testsuite }}.{{ $.Values.global.domainName }}"
+            - "gateway.{{ $.Values.global.domainName }}"
       {{- end }}
       containers:
         - name: test
@@ -44,7 +44,7 @@ spec:
               echo 'TESTING start'
               sleep 10
               /e2e {{ $val.testsuite }} \
-              --domain {{ $.Values.global.ingress.domainName }} \
+              --domain {{ $.Values.global.domainName }} \
               --testID {{ $val.testsuite }} \
               --skipSSLVerify \
               --testServiceImage "{{ $.Values.global.containerRegistry.path }}/{{ $.Values.global.e2e_external_solution_test_service.dir }}event-subscriber-tools:{{ $.Values.global.e2e_external_solution_test_service.version }}"

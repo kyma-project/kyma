@@ -8,7 +8,7 @@ spec:
   gateways:
     - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
   hosts:
-    - oauth2.{{ .Values.global.ingress.domainName }}
+    - oauth2.{{ .Values.global.domainName }}
   http:
     {{- if .Values.hydra.service.admin.enabled }}
     - match:

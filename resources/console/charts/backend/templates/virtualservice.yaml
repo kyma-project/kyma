@@ -20,7 +20,7 @@ metadata:
 {{- end }}
 spec:
   hosts:
-  - '{{ .Values.virtualservice.host }}.{{ .Values.global.ingress.domainName }}'
+  - '{{ .Values.virtualservice.host }}.{{ .Values.global.domainName }}'
   gateways:
   - {{ .Values.global.istio.gateway.name }}
   http:

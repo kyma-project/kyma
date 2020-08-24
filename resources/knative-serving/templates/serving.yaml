@@ -858,7 +858,7 @@ data:
     # List of repositories for which tag to digest resolving should be skipped
     registriesSkippingTagResolving: "ko.local,dev.local"
   queueSidecarImage: gcr.io/knative-releases/knative.dev/serving/cmd/queue@sha256:f32c20456c6349a4fe99c83060009c7e9f6ba0c644ef854a04514e1f8aca982e
-  registriesSkippingTagResolving: "registry.{{ .Values.global.ingress.domainName }}"
+  registriesSkippingTagResolving: "registry.{{ .Values.global.domainName }}"
 kind: ConfigMap
 metadata:
   labels:
@@ -869,8 +869,8 @@ metadata:
 ---
 apiVersion: v1
 data:
-  {{ if (ne "" .Values.global.ingress.domainName) }}
-  {{ .Values.global.ingress.domainName }}: ""
+  {{ if (ne "" .Values.global.domainName) }}
+  {{ .Values.global.domainName }}: ""
   {{ end }}
    # Routes having domain suffix of 'svc.cluster.local' will not be exposed
     # through Ingress. You can define your own label selector to assign that

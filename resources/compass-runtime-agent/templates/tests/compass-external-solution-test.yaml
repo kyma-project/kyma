@@ -23,10 +23,10 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-          - "ctr-svc-compass-e2e-test.{{ .Values.global.ingress.domainName }}"
-          - "gateway.{{ .Values.global.ingress.domainName }}"
-          - "compass-gateway.{{ .Values.global.ingress.domainName }}"
-          - "dex.{{ .Values.global.ingress.domainName }}"
+          - "ctr-svc-compass-e2e-test.{{ .Values.global.domainName }}"
+          - "gateway.{{ .Values.global.domainName }}"
+          - "compass-gateway.{{ .Values.global.domainName }}"
+          - "dex.{{ .Values.global.domainName }}"
       {{ end }}
       containers:
         - name: tests
@@ -40,7 +40,7 @@ spec:
               echo 'TESTING start'
               sleep 10
               /e2e compass-e2e \
-              --domain {{ .Values.global.ingress.domainName }} \
+              --domain {{ .Values.global.domainName }} \
               --skipSSLVerify
               exit_code=$?
               echo "code is $exit_code"
@@ -54,9 +54,9 @@ spec:
                     optional: true
           env:
             - name: DIRECTOR_URL
-              value: "https://compass-gateway.{{ .Values.global.ingress.domainName }}/director"
+              value: "https://compass-gateway.{{ .Values.global.domainName }}/director"
             - name: DOMAIN
-              value: {{ .Values.global.ingress.domainName | quote }}
+              value: {{ .Values.global.domainName | quote }}
             - name: DEX_SECRET_NAMESPACE
               value: {{ .Values.compassRuntimeAgent.resources.dexSecretNamespace }}
             - name: DEX_SECRET_NAME

@@ -53,8 +53,8 @@ This is an example of a client configuration string:
     - id: console2
       name: Console2
       redirectURIs:
-      - 'http://console-dev.{{ .Values.global.ingress.domainName }}:4200'
-      - 'https://console.{{ .Values.global.ingress.domainName }}'
+      - 'http://console-dev.{{ .Values.global.domainName }}:4200'
+      - 'https://console.{{ .Values.global.domainName }}'
       secret: a1b2c3d4xyz
 ```
 ### Custom volumes

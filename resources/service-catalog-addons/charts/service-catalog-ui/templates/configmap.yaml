@@ -9,7 +9,7 @@ data:
   config.js: |
     window.clusterConfig = {
       catalogUrl: '/home/environments/{CURRENT_ENV}/catalog',
-      graphqlApiUrl: 'https://console-backend.{{ .Values.global.ingress.domainName }}/graphql',
-      subscriptionsApiUrl: 'wss://console-backend.{{ .Values.global.ingress.domainName }}/graphql',
+      graphqlApiUrl: 'https://console-backend.{{ .Values.global.domainName }}/graphql',
+      subscriptionsApiUrl: 'wss://console-backend.{{ .Values.global.domainName }}/graphql',
     };
 

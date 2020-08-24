@@ -8,7 +8,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 spec:
   hosts:
-  - "dex.{{ .Values.global.ingress.domainName }}"
+  - "dex.{{ .Values.global.domainName }}"
   gateways:
   - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
   http:

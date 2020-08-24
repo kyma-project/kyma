@@ -13,7 +13,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   hosts:
-    - connector-service.{{ .Values.global.ingress.domainName }}
+    - connector-service.{{ .Values.global.domainName }}
   gateways:
     - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
   http:
