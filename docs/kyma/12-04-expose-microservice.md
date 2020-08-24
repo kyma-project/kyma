@@ -77,7 +77,7 @@ Console UI
 
     - Select `orders-service (port: 80)` from the drop-down list in the **Service** column to indicate the Service name for which you want to create the API Rule.
 
-4. In the **Access strategies** section, leave only the `GET` and `POST` methods marked and the `noop` handler selected. This way you will be able to send the orders to a service and retrieve orders from it without any token.
+4. In the **Access strategies** section, leave only the `GET` and `POST` methods marked and the `noop` handler selected. This way you will be able to send the orders to the service and retrieve orders from it without any token.
 
 5. Select **Create** to confirm the changes.
 
@@ -181,4 +181,4 @@ x-envoy-upstream-service-time: 6
   []
   ```
 
-  As you can see, the `orders-service` microservice uses in-memory storage which means every time you delete the Pod of the microservice or change the Deployment definition, the orders details will be lost. In further guides, you will see how you can prevent order data deletion by attaching an external Redis storage to the microservice.
+  As you can see, the `orders-service` microservice uses in-memory storage which means every time you delete the Pod of the microservice or change the Deployment definition, the order details will be lost. In further guides, you will see how you can prevent order data deletion by attaching an external Redis storage to the microservice.

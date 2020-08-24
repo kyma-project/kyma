@@ -34,10 +34,10 @@ name: xf-mocks
 namespace: orders-service
 spec:
 repositories:
-- url: github.com/sap/xf-addons//addons/index.yaml
+- url: github.com/sap/xf-addons/addons/index.yaml
 EOF
 ```
-   > **NOTE:** The `index.yaml` file is an addons manifest with APIs of SAP Marketing Cloud, SAP Cloud for Customer, and SAP Commerce Cloud applications.
+   > **NOTE:** The `index.yaml` file is a manifest for APIs of SAP Marketing Cloud, SAP Cloud for Customer, and SAP Commerce Cloud applications.
 
 2. Check if the AddonsConfiguration CR was created. The CR phase should state `Ready`:
 
@@ -73,9 +73,9 @@ EOF
 
 1. Go to the `orders-service` Namespace in the Console UI and navigate to **Addons** under the **Configuration** section in the left navigation panel.
 2. Select **Add New Configuration**.
-3. Once the new box opens up, enter `github.com/sap/xf-addons//addons/index.yaml` in the **Urls** field. The addon name is automatically generated.
+3. Once the new box opens up, enter `github.com/sap/xf-addons/addons/index.yaml` in the **Urls** field. The addon name is automatically generated.
 
-   > **NOTE:** The `index.yaml` file is an addons manifest with APIs of SAP Marketing Cloud, SAP Cloud for Customer, and SAP Commerce Cloud applications.
+   > **NOTE:** The `index.yaml` file is a manifest for APIs of SAP Marketing Cloud, SAP Cloud for Customer, and SAP Commerce Cloud applications.
 
 4. **Add** the configuration.
 5. Wait for the addon to have the `READY` status.
@@ -252,11 +252,11 @@ EOF
 
 3. Select **Add once** to add the service to the Namespace.
 
-4. When the box pops up, leave the default values and confirm the changes by selecting **Create**.
+4. When the box pops up, leave the default values, and confirm the changes by selecting **Create**.
 
 This way you provisioned the events (created ServiceClasses) in the Namespace.
 
-You will be redirected to the **Catalog Manegement** > **Instances** > **{GENERATED_MOCK_NAME}** view. Wait for the Events API to have the `RUNNING` status.
+You will be redirected to the **Catalog Management** > **Instances** > **{GENERATED_MOCK_NAME}** view. Wait for the Events API to have the `RUNNING` status.
 
 </details>
 </div>

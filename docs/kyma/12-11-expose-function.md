@@ -188,4 +188,4 @@ kubectl get apirules orders-function -n orders-service -o=jsonpath='{.status.API
 
    []
    ```
-  As you can see, `orders-function` uses in-memory storage which means every time you delete the Pod of the Function or change its Deployment definition, the orders details will be lost. Just like we did with the microservice, let's binf the external Redis storage to prevent the order data loss.
+  As you can see, `orders-function` uses in-memory storage which means every time you delete the Pod of the Function or change its Deployment definition, the order details will be lost. Just like we did with the microservice, let's bind the external Redis storage to prevent the order data loss.

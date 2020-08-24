@@ -7,7 +7,7 @@ This tutorial shows how to trigger the deployed `orders-service` microservice wi
 
 ## Related Kyma components
 
-This guide demonstrates how [Event Mesh](/components/event-mesh/) works in Kyma. It allows you receives business events from external solutions and is able to trigger business flows using Functions or microservices.
+This guide demonstrates how [Event Mesh](/components/event-mesh/) works in Kyma. It allows you to receive business events from external solutions and is able to trigger business flows using Functions or microservices.
 
 ## Steps
 
@@ -68,7 +68,7 @@ Console UI
 
 4. Find the `order.deliverysent` event with the `v1` version from the `commerce-mock` application. Mark it on the list and select **Add**.
 
-   The message appears on the UI confirming that the event trigger was created, and you will see it in the **Event Triggers** section of service's details view.
+   The message appears on the UI confirming that the event trigger was created, and you will see it in the **Event Triggers** section of the service's details view.
 
   </details>
 </div>
@@ -80,7 +80,7 @@ To send events from Commerce mock to the `orders-service` microservice, follow t
 
 1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or go to **API Rules** view (under **Configuration** section) in the `orders-service` Namespace and select the mock application. You can also follow the direct link under the **Host** column.
 
-2. Switch to the **Remote APIs** tab, find **SAP Commerce Cloud - Events** and select it.
+2. Switch to the **Remote APIs** tab, find **SAP Commerce Cloud - Events**, and select it.
 
 3. Select the `order.deliverysent.v1` event type in **Event Topics** drop-down list. In the details of the printed event, change **orderCode** to `123456789` and select **Send Event**.
 

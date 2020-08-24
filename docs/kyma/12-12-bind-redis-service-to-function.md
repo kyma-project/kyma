@@ -209,4 +209,4 @@ If you switch to the **Code** tab and scroll down to the **Environment Variables
    [{"orderCode":"762727234","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"123456789","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
    ```
 
-   As we can see, `orders-function` of Function uses Redis storage now. It means that every time you delete the Pod of the Function or change its Deployment definition, the orders details will not get lost.
+   As we can see, `orders-function` uses Redis storage now. It means that every time you delete the Pod of the Function or change its Deployment definition, the order details will not get lost.
