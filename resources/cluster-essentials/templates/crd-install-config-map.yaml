@@ -22,10 +22,20 @@ metadata:
     "helm.sh/hook-weight": "1"
     "helm.sh/hook-delete-policy": "before-hook-creation"
 data:
+
+  #{{ range $pathIdx, $path := $filePaths }}
+  #  {{ if has $path (list .Values.global.skipCrds) }}
+  #  {{ else }}
+  #  {{ $pathIdx }}: {{ printf "%s " $path}}
+  #  {{ end }}
+  #{{ end }}
+
+{{ (printf "padu: %s" "abc") }}
+
 {{ range $pathIdx, $path := $filePaths }}
   {{- with $currentScope }}
   {{ if eq $idx (mod $pathIdx $configMapLen) }}
-  {{ base $path }}: |-  
+  {{ base $path }}: |-
 {{ .Files.Get (printf "files/%s" $path) | printf "%s" | indent 4 }}
   {{ end }}
   {{- end }}

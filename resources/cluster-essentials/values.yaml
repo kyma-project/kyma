@@ -9,6 +9,7 @@ jobs:
 global:
   isLocalEnv: false
   disableLegacyConnectivity: false
+  skipCrds: "cert-manager.io.crd.1.yaml"
 
 containerRegistry:
   path: eu.gcr.io/kyma-project
