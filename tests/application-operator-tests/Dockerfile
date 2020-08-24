@@ -8,7 +8,6 @@ COPY . $SRC_DIR
 COPY go.mod .
 COPY go.sum .
 RUN go mod download
-RUN go mod vendor
 
 RUN CGO_ENABLED=0 go test -o applicationcontroller.test -c ./test/applicationcontroller/tests
 RUN CGO_ENABLED=0 go test -o serviceinstancecontroller.test -c ./test/serviceinstancecontroller/tests
