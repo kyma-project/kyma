@@ -52,9 +52,6 @@
 # The `connection-token-handler` subchart
 /resources/application-connector/charts/connection-token-handler/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
-# The `connectivity-certs-controller` subchart
-/resources/application-connector/charts/connectivity-certs-controller/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
-
 # The `application-registry` subchart
 /resources/application-connector/charts/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
@@ -210,9 +207,6 @@ components/etcd-tls-setup-job/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksp
 
 # Connection Token Handler Component
 /components/connection-token-handler/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
-
-# Connectivity Certs Controller Component
-/components/connectivity-certs-controller/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
 # Application Registry Component
 /components/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa

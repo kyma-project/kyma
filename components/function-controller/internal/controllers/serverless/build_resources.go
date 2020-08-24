@@ -14,20 +14,21 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 const (
 	destinationArg        = "--destination"
 	functionContainerName = "lambda"
+	baseDir               = "/workspace/src/"
 	workspaceMountPath    = "/workspace"
 )
 
-func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
+func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function, rtm runtime.Runtime) corev1.ConfigMap {
 	data := map[string]string{
-		configMapHandler:  configMapHandler,
-		configMapFunction: instance.Spec.Source,
-		configMapDeps:     r.sanitizeDependencies(instance.Spec.Deps),
+		FunctionSourceKey: instance.Spec.Source,
+		FunctionDepsKey:   rtm.SanitizeDependencies(instance.Spec.Deps),
 	}
 
 	return corev1.ConfigMap{
@@ -40,7 +41,7 @@ func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Functio
 	}
 }
 
-func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, configMapName string) batchv1.Job {
+func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, configMapName string) batchv1.Job {
 	one := int32(1)
 	zero := int32(0)
 
@@ -80,7 +81,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 							Name: "runtime",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: r.config.Build.RuntimeConfigMapName},
+									LocalObjectReference: corev1.LocalObjectReference{Name: rtmConfig.DockerfileConfigMapName},
 								},
 							},
 						},
@@ -117,9 +118,9 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 							VolumeMounts: []corev1.VolumeMount{
 								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
 								// If COPY is not used, then the cache will not work
-								{Name: "sources", ReadOnly: true, MountPath: fmt.Sprintf("%s/src/package.json", workspaceMountPath), SubPath: "package.json"},
-								{Name: "sources", ReadOnly: true, MountPath: fmt.Sprintf("%s/src/handler.js", workspaceMountPath), SubPath: "handler.js"},
-								{Name: "runtime", ReadOnly: true, MountPath: fmt.Sprintf("%s/Dockerfile", workspaceMountPath), SubPath: "Dockerfile"},
+								{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.DependencyFile), SubPath: FunctionDepsKey},
+								{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.FunctionFile), SubPath: FunctionSourceKey},
+								{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
 								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
@@ -217,7 +218,7 @@ func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function, gitOptions g
 	return vars
 }
 
-func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, gitOptions git.Options) batchv1.Job {
+func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, gitOptions git.Options, rtmConfig runtime.Config) batchv1.Job {
 	imageName := r.buildInternalImageAddress(instance)
 	args := r.config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
@@ -263,7 +264,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 							Name: "runtime",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: r.config.Build.RuntimeConfigMapName},
+									LocalObjectReference: corev1.LocalObjectReference{Name: rtmConfig.DockerfileConfigMapName},
 								},
 							},
 						},
@@ -275,7 +276,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 					InitContainers: []corev1.Container{
 						{
 							Name:            "repo-fetcher",
-							Image:           "eu.gcr.io/kyma-project/function-build-init:PR-9134", // TODO: Expose this as an ENV and override it in the chart
+							Image:           r.config.Build.RepoFetcherImage,
 							Env:             buildRepoFetcherEnvVars(instance, gitOptions),
 							ImagePullPolicy: corev1.PullAlways,
 							VolumeMounts: []corev1.VolumeMount{
@@ -322,10 +323,13 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 	}
 }
 
-func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function) appsv1.Deployment {
+func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config) appsv1.Deployment {
 	imageName := r.buildImageAddress(instance)
 	deploymentLabels := r.functionLabels(instance)
 	podLabels := r.podLabels(instance)
+
+	envs := append(instance.Spec.Env, rtmConfig.RuntimeEnvs...)
+	envs = append(envs, envVarsForDeployment...)
 
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -348,7 +352,7 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 						{
 							Name:            functionContainerName,
 							Image:           imageName,
-							Env:             append(instance.Spec.Env, envVarsForDeployment...),
+							Env:             envs,
 							Resources:       instance.Spec.Resources,
 							ImagePullPolicy: corev1.PullIfNotPresent,
 						},
@@ -440,15 +444,6 @@ func (r *FunctionReconciler) buildImageAddress(instance *serverlessv1alpha1.Func
 		imageTag = r.calculateImageTag(instance)
 	}
 	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.RegistryAddress, instance.Namespace, instance.Name, imageTag)
-}
-
-func (r *FunctionReconciler) sanitizeDependencies(dependencies string) string {
-	result := "{}"
-	if strings.Trim(dependencies, " ") != "" {
-		result = dependencies
-	}
-
-	return result
 }
 
 func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Function) map[string]string {

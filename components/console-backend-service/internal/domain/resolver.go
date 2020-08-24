@@ -23,13 +23,14 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/ui"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 
+	"github.com/pkg/errors"
+	"k8s.io/client-go/rest"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
-	"github.com/pkg/errors"
-	"k8s.io/client-go/rest"
 )
 
 //go:generate go run github.com/99designs/gqlgen

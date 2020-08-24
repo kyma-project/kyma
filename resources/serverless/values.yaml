@@ -10,7 +10,7 @@ injectCerts:
     tag: 'v20200617-32c1f3ff'
     pullPolicy: IfNotPresent
 
-knativeMigration:
+runtimeMigration:
   image:
     repository: 'eu.gcr.io/kyma-project/test-infra/alpine-kubectl'
     tag: 'v20200617-32c1f3ff'
@@ -68,7 +68,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "e2e41336"
+    tag: "PR-9126"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
@@ -137,6 +137,8 @@ containers:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v0.22.0
+      functionBuildRepoFetcherImage:
+        value: eu.gcr.io/kyma-project/function-build-init:305bee60
 
 services:
   manager:

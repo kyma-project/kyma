@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"time"
 
-	v1alpha12 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
+	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	v1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -295,6 +295,8 @@ type Function struct {
 	Env          []*FunctionEnv     `json:"env"`
 	Replicas     *FunctionReplicas  `json:"replicas"`
 	Resources    *FunctionResources `json:"resources"`
+	Runtime      *string            `json:"runtime"`
+	SourceType   *string            `json:"sourceType"`
 	Status       *FunctionStatus    `json:"status"`
 }
 
@@ -346,6 +348,8 @@ type FunctionMutationInput struct {
 	Env          []*FunctionEnvInput     `json:"env"`
 	Replicas     *FunctionReplicasInput  `json:"replicas"`
 	Resources    *FunctionResourcesInput `json:"resources"`
+	Runtime      *string                 `json:"runtime"`
+	SourceType   *string                 `json:"sourceType"`
 }
 
 type FunctionReplicas struct {

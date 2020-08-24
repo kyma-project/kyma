@@ -472,9 +472,9 @@ type LimitRange {
 
 type LimitRangeItem {
     limitType: LimitType!
-    max: ResourceType!
-    default: ResourceType!
-    defaultRequest: ResourceType!
+    max: ResourceType
+    default: ResourceType
+    defaultRequest: ResourceType
 }
 
 input LimitRangeInput {
@@ -908,6 +908,8 @@ type Function {
     env: [FunctionEnv!]!
     replicas: FunctionReplicas!
     resources: FunctionResources!
+    runtime: String
+    sourceType: String
 
     # status
     status: FunctionStatus!
@@ -982,7 +984,7 @@ enum FunctionPhaseType {
 enum FunctionReasonType {
     CONFIG # ConfigMap
     JOB # K8S Job
-    SERVICE # KNative Service
+    SERVICE #  Deployment + Service + hpa
 }
 
 input FunctionMutationInput {
@@ -992,6 +994,8 @@ input FunctionMutationInput {
     env: [FunctionEnvInput!]!
     replicas: FunctionReplicasInput!
     resources: FunctionResourcesInput!
+    runtime: String
+    sourceType: String
 }
 
 type FunctionMetadata {
