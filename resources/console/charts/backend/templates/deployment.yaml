@@ -38,7 +38,7 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
           limits:
-            memory: 300Mi
+            memory: 301Mi # let's trigger some jobs
           requests:
             memory: 64Mi
         env:
