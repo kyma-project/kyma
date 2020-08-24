@@ -44,9 +44,9 @@ kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/
 
 2. Go to the **Functions** view under the **Development** section in the left navigation panel and select **Create Function**.
 
-3. In the pop-up box, provide the `orders-function` name and select **Create** to confirm the changes.
+3. In the pop-up box, provide the `orders-function` name, add `app=orders-function` and `example=orders-function` labels, and select **Create** to confirm the changes.
 
-<!-- Add these labels: `app=orders-function, example=orders-function`-->
+>**TIP:** Separate multiple Function labels in the Console UI with commas.
 
      The pop-up box closes and the message appears on the screen after a while, confirming that the Function was created.
 
