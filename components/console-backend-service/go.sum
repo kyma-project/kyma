@@ -104,8 +104,6 @@ github.com/davecgh/go-spew v0.0.0-20151105211317-5215b55f46b2/go.mod h1:J7Y8YcW2
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/dbadura/kyma/components/function-controller v0.0.0-20200821112709-f1016fdfbed3 h1:Xeuvanaej5S+/QszZ/cAuG7EJt4SyuAN0ywFJ2GAbbE=
-github.com/dbadura/kyma/components/function-controller v0.0.0-20200821112709-f1016fdfbed3/go.mod h1:6Fxxddum/XzkLRCXNdv05HNFK39f9fBEGQmzJ9ctfnU=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/dgryski/trifles v0.0.0-20190318185328-a8d75aae118c h1:TUuUh0Xgj97tLMNtWtNvI9mIV6isjEb9lBMNv+77IGM=
 github.com/dgryski/trifles v0.0.0-20190318185328-a8d75aae118c/go.mod h1:if7Fbed8SFyPtHLHbg49SI7NAdJiC5WIA09pe59rfAA=
@@ -353,6 +351,8 @@ github.com/kyma-project/helm-broker v0.0.0-20190906085923-d07feb2d365a h1:G+lhfd
 github.com/kyma-project/helm-broker v0.0.0-20190906085923-d07feb2d365a/go.mod h1:VFnkD5ddzF9s8qcY12DRzYOznJJlpMbSRWGRgM4P1XA=
 github.com/kyma-project/kyma v0.5.1-0.20200609051543-f5997d4a36d6 h1:P3R3c4pewIa+IjzNldO9WRFA58s0r3WVqRxLK6feYc8=
 github.com/kyma-project/kyma v0.5.1-0.20200609051543-f5997d4a36d6/go.mod h1:cfj5AQwIOmmoXLZUhW3bIiaB66Z6vgjCYu7TRK3+1lc=
+github.com/kyma-project/kyma/components/function-controller v0.0.0-20200824091842-73a94348bb7d h1:vSEdWo6bjmIt+n9oiOoolfJfNQO6PH6IKsyVUX8iZrw=
+github.com/kyma-project/kyma/components/function-controller v0.0.0-20200824091842-73a94348bb7d/go.mod h1:6Fxxddum/XzkLRCXNdv05HNFK39f9fBEGQmzJ9ctfnU=
 github.com/kyma-project/rafter v0.0.0-20200402080904-a0157e52e150 h1:UYawXgUZBPBe+wcSDsjpyy+mDM9Q7CugfLXix3bwbWE=
 github.com/kyma-project/rafter v0.0.0-20200402080904-a0157e52e150/go.mod h1:zlQEXkFdCYTii7GGjd0jLOudgPtxgZLJy2VDXW7j54I=
 github.com/logrusorgru/aurora v0.0.0-20200102142835-e9ef32dff381/go.mod h1:7rIyQOR62GCctdiQpZ/zOJlFyk6y+94wXzv6RNZgaR4=
