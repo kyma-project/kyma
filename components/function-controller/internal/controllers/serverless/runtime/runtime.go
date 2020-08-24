@@ -44,9 +44,9 @@ func GetRuntimeConfig(r serverlessv1alpha1.Runtime) Config {
 			Runtime:                 serverlessv1alpha1.Python38,
 			DependencyFile:          "requirements.txt",
 			FunctionFile:            "handler.py",
-			DockerfileConfigMapName: "dockerfile-python-37",
-			RuntimeEnvs: []corev1.EnvVar{{Name: "PYTHONPATH", Value: "$(KUBELESS_INSTALL_VOLUME)/lib.python3.7/site-packages:$(KUBELESS_INSTALL_VOLUME)"}, // https://github.com/kubeless/runtimes/blob/master/stable/python/python.jsonnet#L45
-				{Name: "FUNC_RUNTIME", Value: "python37"}},
+			DockerfileConfigMapName: "dockerfile-python-38",
+			RuntimeEnvs: []corev1.EnvVar{{Name: "PYTHONPATH", Value: "$(KUBELESS_INSTALL_VOLUME)/lib.python3.8/site-packages:$(KUBELESS_INSTALL_VOLUME)"}, // https://github.com/kubeless/runtimes/blob/master/stable/python/python.jsonnet#L45
+				{Name: "FUNC_RUNTIME", Value: "python38"}},
 		}
 	default:
 		return Config{
