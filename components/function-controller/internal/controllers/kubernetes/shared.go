@@ -10,6 +10,7 @@ import (
 
 const (
 	ConfigLabel              = "serverless.kyma-project.io/config"
+	RuntimeLabel             = "serverless.kyma-project.io/runtime"
 	CredentialsLabelValue    = "credentials"
 	ServiceAccountLabelValue = "service-account"
 	RuntimeLabelValue        = "runtime"

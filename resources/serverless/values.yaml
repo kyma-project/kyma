@@ -10,6 +10,12 @@ injectCerts:
     tag: 'v20200617-32c1f3ff'
     pullPolicy: IfNotPresent
 
+runtimeMigration:
+  image:
+    repository: 'eu.gcr.io/kyma-project/test-infra/alpine-kubectl'
+    tag: 'v20200617-32c1f3ff'
+    pullPolicy: IfNotPresent
+
 tests:
   enabled: true
   long:
@@ -62,7 +68,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "5320126d"
+    tag: "PR-9126"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:

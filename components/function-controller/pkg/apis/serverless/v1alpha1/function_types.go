@@ -7,12 +7,18 @@ import (
 
 type SourceType string
 
-// +kubebuilder:validation:Enum=nodejs-12
+// +kubebuilder:validation:Enum=nodejs12;nodejs10;python37
+
 type Runtime string
 
 const (
-	SourceTypeGit   SourceType = "git"
-	RuntimeNodeJS12 Runtime    = "nodejs-12"
+	SourceTypeGit SourceType = "git"
+)
+
+const (
+	Nodejs12 Runtime = "nodejs12"
+	Nodejs10 Runtime = "nodejs10"
+	Python37 Runtime = "python37"
 )
 
 // FunctionSpec defines the desired state of Function
@@ -22,6 +28,9 @@ type FunctionSpec struct {
 
 	// Deps defines the dependencies for a function
 	Deps string `json:"deps,omitempty"`
+
+	// +optional
+	Runtime Runtime `json:"runtime,omitempty"`
 
 	// Env defines an array of key value pairs need to be used as env variable for a function
 	Env []corev1.EnvVar `json:"env,omitempty"`
@@ -39,7 +48,7 @@ type FunctionSpec struct {
 	Labels map[string]string `json:"labels,omitempty"`
 
 	// +optional
-	SourceType SourceType `json:"type"`
+	SourceType SourceType `json:"sourceType,omitempty"`
 
 	Repository `json:",inline,omitempty"`
 }
@@ -97,14 +106,14 @@ type Condition struct {
 type FunctionStatus struct {
 	Conditions []Condition `json:"conditions,omitempty"`
 	Repository `json:",inline,omitempty"`
-	Commit     string `json:"commit,omitempty"`
-	Source     string `json:"source,omitempty"`
+	Commit     string  `json:"commit,omitempty"`
+	Source     string  `json:"source,omitempty"`
+	Runtime    Runtime `json:"runtime,omitempty"`
 }
 
 type Repository struct {
-	BaseDir   string  `json:"baseDir,omitempty"`
-	Runtime   Runtime `json:"runtime,omitempty"`
-	Reference string  `json:"reference,omitempty"`
+	BaseDir   string `json:"baseDir,omitempty"`
+	Reference string `json:"reference,omitempty"`
 }
 
 // Function is the Schema for the functions API
@@ -113,6 +122,7 @@ type Repository struct {
 // +kubebuilder:printcolumn:name="Configured",type="string",JSONPath=".status.conditions[?(@.type=='ConfigurationReady')].status"
 // +kubebuilder:printcolumn:name="Built",type="string",JSONPath=".status.conditions[?(@.type=='BuildReady')].status"
 // +kubebuilder:printcolumn:name="Running",type="string",JSONPath=".status.conditions[?(@.type=='Running')].status"
+// +kubebuilder:printcolumn:name="Runtime",type="string",JSONPath=".status.runtime"
 // +kubebuilder:printcolumn:name="Version",type="integer",JSONPath=".metadata.generation"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 
