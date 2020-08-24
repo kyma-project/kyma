@@ -19,7 +19,7 @@ Follows these steps:
   CLI
   </summary>
 
-1. Create a Trigger CR for the `orders-function` Function to subscribe the Function to the `order.deliverysent.v1` event Commerce mock:
+1. Create a Trigger CR for the `orders-function` Function to subscribe the Function to the `order.deliverysent.v1` event from Commerce mock:
 
 ```yaml
 cat <<EOF | kubectl apply -f  -
@@ -78,7 +78,7 @@ The message appears on the UI confirming that the event trigger was created, and
 
 To send events from Commerce mock to `orders-function`, follow these steps:
 
-1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or go to **API Rules** view (under **Configuration** section) in the `orders-service` Namespace and select the mock. You can also follow the direct link under the **Host** column.
+1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or go to **API Rules** view (under **Configuration** section) in the `orders-service` Namespace and select the mock application. You can also follow the direct link under the **Host** column.
 
 2. Switch to the **Remote APIs** tab, find **SAP Commerce Cloud - Events** and select it.
 

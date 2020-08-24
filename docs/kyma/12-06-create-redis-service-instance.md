@@ -5,10 +5,6 @@ type: Getting Started
 
 To create a binding between the microservice and a provisioned Redis service, you must first create an instance of this service to bind the microservice to it.
 
-## Prerequisites
-
-To follow this tutorial you must first [provision the Redis service](/#tutorials-register-an-addon) with its `micro` plan.
-
 ## Steps
 
 Follows these steps:

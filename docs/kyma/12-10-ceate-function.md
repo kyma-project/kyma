@@ -5,6 +5,10 @@ type: Getting Started
 
 This tutorial shows how you can create a simple Function.
 
+## Related Kyma components
+
+This guide demonstrates how [Serverless](/components/event-mesh/) works in Kyma. It allows you to build, run, and manage serverless applications called Functions. You can bind them to other services, subscribe them to business events from external solutions, and trigger the Function's logic upon receiving a given event type.
+
 ## Steps
 
 Follows these steps:

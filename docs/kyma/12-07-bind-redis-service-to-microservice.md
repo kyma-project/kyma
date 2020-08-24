@@ -9,10 +9,6 @@ To create the binding, you will use ServiceBinding and ServiceBindingUsage custo
 
 >**NOTE:** See the document on [provisioning and binding](/components/service-catalog/#details-provisioning-and-binding) to learn more about binding Service Instances to microservices in Kyma.
 
-## Prerequisites
-
-To follow this tutorial you must first [provision the Redis service](/#tutorials-register-an-addon) with its `micro` plan.
-
 ## Steps
 
 ### Bind the Redis ServiceInstance to the microservice

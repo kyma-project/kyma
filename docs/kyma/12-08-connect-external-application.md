@@ -3,13 +3,17 @@ title: Connect an external application
 type: Getting Started
 ---
 
-Let's now integrate an external application to Kyma. In this set of guides, we will use a mock application called [Commerce mock](https://github.com/SAP-samples/xf-addons/tree/master/addons/commerce-mock-0.1.0) that is to simulate a monolithic application. You will learn how you can connect it to Kyma, and expose its API and events. We will subscribe to one of its events (**order.deliverysent.v1**) in other guides and see how you can use it to trigger the logic of our sample microservice.  
+Let's now integrate an external application to Kyma. In this set of guides, we will use a sample application called [Commerce mock](https://github.com/SAP-samples/xf-addons/tree/master/addons/commerce-mock-0.1.0) that simulates a monolithic application. You will learn how you can connect it to Kyma, and expose its API and events. We will subscribe to one of its events (**order.deliverysent.v1**) in other guides and see how you can use it to trigger the logic of our sample microservice.  
+
+## Related Kyma components
+
+This guide demonstrates how [Application Connector](/components/application-connector/) works in Kyma. It allows you to securely connect external solutions to your Kyma cluster.
 
 ## Steps
 
 ### Deploy the XF addons and provision Commerce mock
 
-Commerce mock is a part of the XF addons that are cluster-wide addons giving access to three instances of mocks that simulate external applications sending events to Kyma.
+Commerce mock is a part of the XF addons that are cluster-wide addons giving access to three instances of mock applications that simulate external applications sending events to Kyma.
 
 Follow these steps to deploy XF addons and add Commerce mock in the `orders-service` Namespace:
 
@@ -19,7 +23,7 @@ Follow these steps to deploy XF addons and add Commerce mock in the `orders-serv
   CLI
   </summary>
 
-1. Provision an AddonsConfiguration CR with the mocks:
+1. Provision an AddonsConfiguration CR with the mock applications:
 
 ```bash
 cat <<EOF | kubectl apply -f  -
@@ -41,7 +45,7 @@ EOF
   kubectl get addonsconfigurations xf-mocks -n orders-service -o=jsonpath="{.status.phase}"
   ```
 
-3. Create the ServiceInstance CR with the mock:
+3. Create the ServiceInstance CR with Commerce mock:
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -78,23 +82,21 @@ EOF
 6. Go to the **Catalog** view under the **Service Management** section in the left navigation panel.
 7. Switch to the **Add-Ons** tab and select **[Preview] SAP Commerce Cloud - Mock** as the application to provision.
 
- > **TIP:** You can also use the search box in the upper right corner of the Console UI to find the mock.
+ > **TIP:** You can also use the search box in the upper right corner of the Console UI to find the Commerce mock.
 
-8. Click **Add once** to deploy the application in the `orders-service` Namespace. Leave the `default` plan. The mock name will be automatically generated.
+8. Click **Add once** to deploy the application in the `orders-service` Namespace. Leave the `default` plan. The name will be automatically generated.
 9. Select **Create** to confirm the changes.
 
-You will be redirected to the **Catalog Management** > **Instances** > **{GENERATED_MOCK_NAME}** view. Wait for the mock to have the `RUNNING` status.
+You will be redirected to the **Catalog Management** > **Instances** > **{GENERATED_MOCK_NAME}** view. Wait for Commerce mock to have the `RUNNING` status.
 
-When Commerce mock is provisioned, an API Rule for it is automatically created. When you go to the **API Rules** view in the `orders-service` Namespace and select the mock, you will see the direct link to Commerce mock under **Host**.
+When Commerce mock is provisioned, an API Rule for it is automatically created. When you go to the **API Rules** view in the `orders-service` Namespace and select Commerce mock, you will see the direct link to it under **Host**.
 
 </details>
 </div>
 
-### Connect Commerce mock to Kyma
+### Create the Application and retrieve a token
 
-After provisioning the mock, connect it to Kyma to expose its APIs and events on the cluster:
-
-#### Create the Application and retrieve a token
+After provisioning Commerce mock, connect it to Kyma to expose its APIs and events on the cluster.
 
 First create the Application CR and then retrieve the token required to connect Commerce mock to the created Application. Follow these steps:
 
@@ -173,7 +175,7 @@ Wait for the Application to have the `SERVING` status.
 
 To connect events from Commerce mock to the microservice, follow these steps:  
 
-1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}` or use the link under **API Rules** in the **Configuration** section in the `order-service` Namespace. You can also access Commerce mock through the direct link to the mock application under the **Host** column.
+1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}` or use the link under **API Rules** in the **Configuration** section in the `order-service` Namespace. You can also access Commerce mock through the direct link to it under the **Host** column.
 2. Click **Connect**.
 3. Paste the token, confirm by selecting **Connect**, and wait until the application gets connected.
 4. Select **Register All** on the **Local APIs** tab or just register **SAP Commerce Cloud - Events** to be able to send events.
@@ -182,7 +184,7 @@ Once registered, you will see all Commerce mock APIs and events available under 
 
     >**NOTE:** Local APIs are the ones available within the mock application. Remote APIs represent the ones registered in Kyma.
 
-#### Expose events in the Namespace
+### Expose events in the Namespace
 
 To expose events in a Namespace, first create an ApplicationMapping CR in the cluster to bind an application to the Namespace. Then, provision the Events API in the Namespace by ServiceInstance CR. Follow the instructions:
 
@@ -242,7 +244,7 @@ EOF
   Console UI
   </summary>
 
-1. Back in the application view in the Console UI (**Integration** > **Applications/Systems** > **commerce-mock**), select **Create Binding** to bind the application to the Namespace in which you will later provision the APIs provided by the Commerce mock. Select `orders-service` Namespace and click **Create**.
+1. Back in the application view in the Console UI (**Integration** > **Applications/Systems** > **commerce-mock**), select **Create Binding** to bind the application to the Namespace in which you will later provision the APIs provided by Commerce mock. Select `orders-service` Namespace and click **Create**.
 
 2. Open the `orders-service` Namespace view and navigate to **Service Management** > **Catalog**. Once on the **Services** tab, find **SAP Commerce Cloud - Events** and select it.
 

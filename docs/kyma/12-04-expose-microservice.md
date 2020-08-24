@@ -5,9 +5,9 @@ type: Getting Started
 
 Now that you deployed a standalone `orders-service` microservice, you can make it available outside the cluster to other resources by exposing its Kubernetes Service.
 
-## Prerequisites
+## Related Kyma components
 
-Go through the [Deploy the microservice](/#tutorials-deploy-microservice) tutorial to apply the `orders-service` microservice in the `orders-service` Namespace on your cluster.
+This guide demonstrates how [API Gateway](/components/api-gateway) works in Kyma. It makes your service accessible outside the Kyma cluster through the APIRule CR.
 
 ## Steps
 

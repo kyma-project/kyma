@@ -5,6 +5,10 @@ type: Getting Started
 
 This tutorial shows how you can provision a sample [Redis](https://redis.io/) service using an addon configuration linking to an example in the GitHub repository.
 
+## Related Kyma components
+
+This guide demonstrates how [Service Catalog](/components/service-catalog/) works in Kyma. It enables an easy access to services managed by [Service Brokers](/components/service-catalog/#overview-service-brokers) registered in Kyma. You can consume these services by creating their instances and binding them to your microservices and Functions.
+
 ## Steps
 
 Follows these steps:

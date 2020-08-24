@@ -12,10 +12,6 @@ When you complete this tutorial, you get a Function that:
 
 >**NOTE:** Learn also how to [secure the Function](/components/api-gateway#tutorials-expose-and-secure-a-service-deploy-expose-and-secure-the-sample-resources).
 
-## Prerequisites
-
-This tutorial is based on an existing Function. To create one, follow the [Create a Function](/components/serverless#tutorials-create-a-function) tutorial.
-
 ## Steps
 
 ### Expose the Function

@@ -5,6 +5,10 @@ type: Getting Started
 
 Almost all operations in these guide are performed using Namespace-scoped resources, so let's start by creating a Namespace called `orders-service`.
 
+## Related Kyma components
+
+This and all other guides demonstrate steps you can perform both from kubectl and UI. Read about the [Console](/components/console) through which you can visually and [securely](/components/security/) administer Kyma functionalities and manage the basic Kubernetes resources.
+
 ## Steps
 
 Follow these steps:
@@ -15,13 +19,13 @@ Follow these steps:
   CLI
   </summary>
 
-1. Create the Namespace:
+1. Create the `orders-service` Namespace:
 
    ```bash
    kubectl create ns orders-service
    ```
 
-2. Check if the Namespace was set up successfully. The Namespace status phase should state `Active`:
+2. Check if the Namespace was set up. The Namespace status phase should state `Active`:
 
    ```bash
    kubectl get ns orders-service -o=jsonpath="{.status.phase}"
@@ -33,7 +37,7 @@ Follow these steps:
   Console UI
   </summary>
 
-1. [Log into](https://kyma-project.io/docs/1.12/root/kyma#installation-install-kyma-on-a-cluster-access-the-cluster) the Kyma Console UI.
+1. [Log into](#installation-install-kyma-on-a-cluster-access-the-cluster) the Kyma Console UI.
 
 2. After logging, select **Add new namespace** in the **Namespaces** view.
 
