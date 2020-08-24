@@ -21,45 +21,10 @@ You will create:
   CLI
   </summary>
 
+Run this command:
+
 ```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: orders-service
-  namespace: orders-service
-  labels:
-    app: orders-service
-    example: orders-service
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: orders-service
-      example: orders-service
-  template:
-    metadata:
-      labels:
-        app: orders-service
-        example: orders-service
-    spec:
-      containers:
-        - name: orders-service
-          image: "eu.gcr.io/kyma-project/pr/orders-service:PR-162"
-          imagePullPolicy: IfNotPresent
-          resources:
-            limits:
-              cpu: 20m
-              memory: 32Mi
-            requests:
-              cpu: 10m
-              memory: 16Mi
-          env:
-            - name: APP_PORT
-              value: "8080"
-            - name: APP_REDIS_PREFIX
-              value: "REDIS_"
-EOF
+kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-service-deployment.yaml
 ```
 
 2. Check if the Deployment was created. The correct Deployment status should set **readyReplicas** to `1`:
@@ -74,49 +39,9 @@ kubectl get deployment orders-service -n orders-service -o=jsonpath="{.status.re
 Console UI
 </summary>
 
-1. Create the `deployment.yaml` file with the Deployment definition:
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: orders-service
-  namespace: orders-service
-  labels:
-    app: orders-service
-    example: orders-service
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: orders-service
-      example: orders-service
-  template:
-    metadata:
-      labels:
-        app: orders-service
-        example: orders-service
-    spec:
-      containers:
-        - name: orders-service
-          image: "eu.gcr.io/kyma-project/pr/orders-service:PR-162"
-          imagePullPolicy: IfNotPresent
-          resources:
-            limits:
-              cpu: 20m
-              memory: 32Mi
-            requests:
-              cpu: 10m
-              memory: 16Mi
-          env:
-            - name: APP_PORT
-              value: "8080"
-            - name: APP_REDIS_PREFIX
-              value: "REDIS_"
-```
-
+1. Create `orders-service-deployment.yaml` on your machine containing [this Deployment definition](https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-service-deployment.yaml).
 2. Once in the `orders-service` Namespace overview, select the **Deploy new resource** button.
-3. Browse the `deployment.yaml` file and select **Deploy** to confirm the changes.
+3. Browse the `orders-service-deployment.yaml` file and select **Deploy** to confirm the changes.
 4. Go to the **Deployments** view under the **Operation** section in the UI to make sure the status of `orders-service` is `RUNNING`.
 
 </details>
@@ -135,26 +60,7 @@ Deploy the Kubernetes [Service](https://kubernetes.io/docs/concepts/services-net
 Run this command:
 
 ```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Service
-metadata:
-  name: orders-service
-  namespace: orders-service
-  labels:
-    app: orders-service
-    example: orders-service
-spec:
-  type: ClusterIP
-  ports:
-    - name: http
-      port: 80
-      protocol: TCP
-      targetPort: 8080
-  selector:
-    app: orders-service
-    example: orders-service
-EOF
+kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-service-service.yaml
 ```
 
   </details>
@@ -163,31 +69,9 @@ EOF
   Console UI
   </summary>
 
-1. Create a YAML file with the Service definition:
-
-  ```yaml
-  apiVersion: v1
-  kind: Service
-  metadata:
-    name: orders-service
-    namespace: orders-service
-    labels:
-      app: orders-service
-      example: orders-service
-  spec:
-    type: ClusterIP
-    ports:
-      - name: http
-        port: 80
-        protocol: TCP
-        targetPort: 8080
-    selector:
-      app: orders-service
-      example: orders-service
-  ```
-
+1. Create `orders-service-service.yaml` on your machine containing [this Service definition](https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-service-service.yaml).
 2. Once in the `orders-service` Namespace overview, select the **Deploy new resource** button.
-3. Browse the `service.yaml` file and select **Deploy** to confirm the changes.
+3. Browse the `orders-service-service.yaml` file and select **Deploy** to confirm the changes.
 4. Go to the **Services** view under the **Operation** section in the UI to make sure the status of `orders-service` is `RUNNING`.
 
   </details>

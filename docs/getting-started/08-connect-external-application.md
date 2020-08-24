@@ -165,10 +165,18 @@ Wait for the Application to have the `SERVING` status.
 
 4. Open the newly created Application and select **Connect Application**.
 5. Copy the token by clicking **Copy to Clipboard** and select **OK** to close the pop-up box.
-6. Access the SAP Marketing Cloud Mock mock at `https://marketing-{NAMESPACE}.{CLUSTER_DOMAIN}.` or use the link under **API Rules** in the `order-service` Namespace.
-7. Click **Connect**.
-8. Paste the token, confirm by selecting **Connect**, and wait until the application gets connected.
-9. Select **Register All** on the **Local APIs** tab or just register **SAP Commerce Cloud - Events** to be able to send events.
+
+</details>
+</div>
+
+### Connect events
+
+To connect events from Commerce mock to the microservice, follow these steps:  
+
+1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}` or use the link under **API Rules** in the **Configuration** section in the `order-service` Namespace. You can also access Commerce mock through the direct link to the mock application under the **Host** column.
+2. Click **Connect**.
+3. Paste the token, confirm by selecting **Connect**, and wait until the application gets connected.
+4. Select **Register All** on the **Local APIs** tab or just register **SAP Commerce Cloud - Events** to be able to send events.
 
 Once registered, you will see all Commerce mock APIs and events available under the **Remote APIs** tab.
 

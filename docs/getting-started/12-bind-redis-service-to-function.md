@@ -103,7 +103,7 @@ kubectl get secret orders-function -n orders-service -o go-template='{{range $k,
 
    > **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure t
 
-4. Select **Create** to confirm changes.
+4. Select **Create** to confirm the changes.
 
 The message appears on the screen confirming that the ServiceBinding was successfully created, and you will see it in the **Service Bindings** section in your Function, along with environment variable names.
 
