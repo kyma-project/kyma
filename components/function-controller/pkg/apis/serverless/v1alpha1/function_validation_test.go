@@ -273,9 +273,9 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 					MinReplicas: &one,
 					MaxReplicas: &one,
 					SourceType:  SourceTypeGit,
+					Runtime:     Nodejs12,
 					Repository: Repository{
 						BaseDir:   "/",
-						Runtime:   RuntimeNodeJS12,
 						Reference: "test-me",
 					},
 				},
@@ -299,10 +299,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 					},
 					MinReplicas: &one,
 					MaxReplicas: &one,
+					Runtime:     Nodejs12,
 					SourceType:  SourceTypeGit,
-					Repository: Repository{
-						Runtime: RuntimeNodeJS12,
-					},
 				},
 			},
 			specifiedExpectedError: gomega.And(

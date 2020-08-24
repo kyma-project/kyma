@@ -70,7 +70,7 @@ func (spec *FunctionSpec) validateSource() *apis.FieldError {
 	return nil
 }
 
-func (spec *FunctionSpec) validateDeps(_ context.Context) (apisError *apis.FieldError) {
+func (spec *FunctionSpec) validateDeps() (apisError *apis.FieldError) {
 	err := ValidateDependencies(spec.Runtime, spec.Deps)
 	if err != nil {
 		apisError = apisError.Also(apis.ErrInvalidValue(err.Error(), "spec.deps"))
