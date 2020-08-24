@@ -3,6 +3,8 @@ title: Accessing Kyma
 type: Details
 ---
 
+--> zmiana diagramu na flow chart
+
 Kyma can be accessed in two different ways:
 - Console User Interface: Simple webUI, which allows the user to view, create and manage their resources. 
 - Kubernetes native CLI (kubectl): Kyma uses a custom proxy to handle all api-server connections, therefore one can distinguish two types of config files:
@@ -11,6 +13,7 @@ Kyma can be accessed in two different ways:
 
 ![Kyma access diagram](assets/access-kyma.svg)
 
+--> po zmianie diagramu, opis usunąć podział A1-4, krótki słowny opis
 ## Console UI
 The path for an user using the UI is presented in the diagram as path A, in which:
 - A1: The user starts by accessing the UI though a browser, which is exposed using the *Ingress Gateway* component. This component redirects all traffic to TLS, performs TLS termination and connects the user with he desired service.

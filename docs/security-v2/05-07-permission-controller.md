@@ -57,3 +57,26 @@ data:
   config.enableStaticUser: "{BOOLEAN-VALUE-FOR-NAMESPACE-ADMIN-STATIC-USER}"
 EOF
 ```
+
+3. To change the group mappings run:
+
+```bash
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: permission-controller-overrides
+  namespace: kyma-installer
+  labels:
+    component: permission-controller
+    installer: overrides
+    kyma-project.io/installation: ""
+data:
+  # namespace admins group name
+  global.kymaRuntime.namespaceAdminGroup: "runtimeNamespaceAdmin"
+  # namespace developers group name
+  global.kymaRuntime.developerGroup: "runtimeDeveloper"
+  # cluster wide kyma admins group name
+  global.kymaRuntime.adminGroup: "runtimeAdmin" 
+EOF
+```
