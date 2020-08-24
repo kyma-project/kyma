@@ -4,11 +4,13 @@ type: Details
 ---
 
 ## User authorization
-Kyma uses a group-based approach to managing authorizations. Each user connecting to Kyma (using the Console UI or the kubectl cli) is assigned a JWT token containing user data like email, groups and claims. This data is then used to assign Roles and ClusterRoles to a user, or a group to which the user belongs. 
+Kyma uses roles and user groups to manage access in the cluster. Each user accessing the system (whether by the Console or CLI) must introduce themselves with a JWT token collecting their user information (username, email, groups or claims) which is used to determine whether the user has access to perform certain operations.
 
-To give users that belong to a group access to resources in Kyma, you must create:
-- Role and RoleBinding - for resources in a given Namespace.
-- ClusterRole and ClusterRoleBinding - for resources available in the entire cluster.
+You can assign any of the predefined roles to a user or to a group of users in the context of:  
+  - The entire cluster by creating a [ClusterRoleBinding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding)
+  - A specific Namespace by creating a [RoleBinding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding)
+
+>**TIP:** To ensure proper Namespace separation, use [RoleBindings](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding) to give users access to the cluster. This way a group or a user can have different permissions in different Namespaces.
 
 The RoleBinding or ClusterRoleBinding must have a group specified as their subject.
 See the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) to learn how to manage Roles and RoleBindings.
@@ -29,16 +31,10 @@ Read more about [roles in Kyma](#details-roles-in-kyma).
 >**NOTE:** The **Global permissions** view in the **Settings** section of the Kyma Console UI allows you to manage cluster-level bindings between user groups and roles. To manage bindings between user groups and roles in a Namespace, select the Namespace and go to the **Configuration** section of the **Permissions** view.
 
 ### Cluster wide
-Kyma uses roles and groups to manage access in the cluster. Every cluster comes with predefined roles which give the assigned users different level of permissions suitable for different purposes.
+Every cluster comes with predefined roles which give the assigned users different level of permissions suitable for different purposes.
 These roles are defined as ClusterRoles and use the Kubernetes mechanism of aggregation which allows you to combine multiple ClusterRoles into a single ClusterRole. Use the aggregation mechanism to efficiently manage access to Kubernetes and Kyma-specific resources.
 
 >**NOTE:** Read the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles) to learn more about the aggregation mechanism used to define Kyma roles.
-
-You can assign any of the predefined roles to a user or to a group of users in the context of:  
-  - The entire cluster by creating a [ClusterRoleBinding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding)
-  - A specific Namespace by creating a [RoleBinding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding)
-
->**TIP:** To ensure proper Namespace separation, use [RoleBindings](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding) to give users access to the cluster. This way a group or a user can have different permissions in different Namespaces.
 
 The predefined roles are:
 
@@ -63,46 +59,6 @@ When the Controller is deployed in a cluster, it checks all existing Namespaces 
 
 By default, the controller binds users of the **runtimeNamespaceAdmin** group to the **kyma-namespace-admin** role in the Namespaces they create. Additionally, the controller creates a RoleBinding for the static `namespace.admin@kyma.cx` user to the **kyma-admin** role in every Namespace that is not blacklisted.
 
-You can adjust the default settings of the Permission Controller by applying these overrides to the cluster either before installation, or at runtime:
-
->**TIP:** Read the [configuration document](#configuration-permission-controller-chart) to learn more about the adjustable parameters of the Permission Controller.
-
-1. To change the default group, run:
-
-```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: namespace-admin-groups-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    kyma-project.io/installation: ""
-data:
-  global.kymaRuntime.namespaceAdminGroup: "{CUSTOM-GROUP}"
-EOF
-```
-
-2. To change the blacklisted Namespaces and decide whether the `namespace.admin@kyma.cx` static user should be assigned the **kyma-admin** role, run:
-
-```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: permission-controller-overrides
-  namespace: kyma-installer
-  labels:
-    component: permission-controller
-    installer: overrides
-    kyma-project.io/installation: ""
-data:
-  config.namespaceBlacklist: "kyma-system, istio-system, default, knative-eventing, knative-serving, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss, compass-system, {USER-DEFINED-NAMESPACE-1}, {USER-DEFINED-NAMESPACE-2}"
-  config.enableStaticUser: "{BOOLEAN-VALUE-FOR-NAMESPACE-ADMIN-STATIC-USER}"
-EOF
-```
-
 ## Service to Service authorization
 As Kyma is build on top of the Istio Service Mesh, we support the native [Istio RBAC](https://archive.istio.io/v1.4/docs/reference/config/security/istio.rbac.v1alpha1/) mechanism provided by the mesh. The RBAC enabled the creation of `ServiceRoles` and `ServiceRoleBindings` which enable a fine grained method of restricting access to services inside the kubernetes cluster. 
 For more details on Istio RBAC please read [this section](/components/service-mesh/#details-istio-rbac-configuration)
@@ -110,4 +66,4 @@ For more details on Istio RBAC please read [this section](/components/service-me
 ## Authorization in API Gateway
 Kyma uses a custom Api-Gateway component, which is build on top of [ORY Oathkeeper](https://www.ory.sh/oathkeeper/docs/). It is used to streamline the process of exposing user applications within the Kyma environment, and securing them if necessary. 
 
-For more details on the Api-Gateway please read [this section](/components/api-gateway/#overview-overview)
+For more details on the Api-Gateway please read [this section](components/api-gateway#details-details)
