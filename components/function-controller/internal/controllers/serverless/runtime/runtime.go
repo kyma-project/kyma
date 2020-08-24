@@ -39,9 +39,9 @@ func GetRuntimeConfig(r serverlessv1alpha1.Runtime) Config {
 				{Name: "FUNC_RUNTIME", Value: "nodejs10"},
 			},
 		}
-	case serverlessv1alpha1.Python37:
+	case serverlessv1alpha1.Python38:
 		return Config{
-			Runtime:                 serverlessv1alpha1.Python37,
+			Runtime:                 serverlessv1alpha1.Python38,
 			DependencyFile:          "requirements.txt",
 			FunctionFile:            "handler.py",
 			DockerfileConfigMapName: "dockerfile-python-37",
@@ -65,7 +65,7 @@ func GetRuntime(r serverlessv1alpha1.Runtime) Runtime {
 	switch r {
 	case serverlessv1alpha1.Nodejs12, serverlessv1alpha1.Nodejs10:
 		return nodejs{}
-	case serverlessv1alpha1.Python37:
+	case serverlessv1alpha1.Python38:
 		return python{}
 	default:
 		return nodejs{}
