@@ -38,12 +38,54 @@ data:
 However, if this is not supplied, then a demo setup is assumed using the DNS-as-a-Service provider [xip.io](http://xip.io/), and a self-signed certificate.
 
 ### Gardener
-Kyma can also be installed on top of [Gardener](https://gardener.cloud/) managed instances, in which the existing certificate management service is used. The difference can be observed in the following section.
+Kyma can also be installed on top of [Gardener](https://gardener.cloud/) managed instances, in which the existing certificate management service is used. In this case the user is not required to provide any certificates or domain, as they will be created for them by Gardener. The certificate is provided in the form a CustomResource managed by Gardener, and is a Wildcard certificate for the whole domain.
 
 ### Certificate propagation paths
 As the certificate data is propagated though Kyma it is delivered into several components, which generate a set of Secrets/ConfigMaps. The propagation path varies slightly for each of the supported modes:
 
 ![Certificate propagation](./assets/certificate-propagation.svg)
+
+<div tabs name="certificate-propagation" group="tls-management">
+  <details>
+  <summary label="own-certificate">
+  Bring your own Certificate
+  </summary>
+  | Kind | Name | Namespace |
+  | :--- | :--- | :--- | 
+  | Secret | ingress-tls-cert | kyma-system |
+  | ConfigMap | net-global-overrides | kyma-installer | 
+  | Secret | kyma-gateway-certs | istio-system |
+  | Secret | kyma-gateway-certs-cacert | istio-system |
+  | Secret | apiserver-proxy-tls-cert | kyma-system | 
+  | ConfigMap | apiserver-proxy | kyma-system |  
+  </details>
+  <details>
+  <summary label="demo-xip">
+  Demo xip.io setup
+  </summary>
+  | Kind | Name | Namespace |
+  | :--- | :--- | :--- | 
+  | Secret | ingress-tls-cert | kyma-system |
+  | ConfigMap | net-global-overrides | kyma-installer | 
+  | Secret | kyma-gateway-certs | istio-system |
+  | Secret | kyma-gateway-certs-cacert | istio-system |
+  | Secret | apiserver-proxy-tls-cert | kyma-system | 
+  | ConfigMap | apiserver-proxy | kyma-system |
+  </details>
+  <details>
+  <summary label="gardener">
+  Gardener managed
+  </summary>
+  | Kind | Name | Namespace |
+  | :--- | :--- | :--- | 
+  | Secret | ingress-tls-cert | kyma-system |
+  | ConfigMap | net-global-overrides | kyma-installer | 
+  | Secret | kyma-gateway-certs-cacert | istio-system |
+  | Certificate | kyma-tls-cert | istio-system
+  | Certificate | apiserver-proxy-tls-cert | kyma-system | 
+  | ConfigMap | apiserver-proxy | kyma-system |
+   </details>
+</div>
 
 ## Egress
 Currently no Egress limitations are implemented, meaning that all applications deployed in the Kyma cluster can access outside resources without limitations.
