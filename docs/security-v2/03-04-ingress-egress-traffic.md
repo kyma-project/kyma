@@ -40,6 +40,11 @@ However, if this is not supplied, then a demo setup is assumed using the DNS-as-
 ### Gardener
 Kyma can also be installed on top of [Gardener](https://gardener.cloud/) managed instances, in which the existing certificate management service is used. In this case the user is not required to provide any certificates or domain, as they will be created for them by Gardener. The certificate is provided in the form a CustomResource managed by Gardener, and is a Wildcard certificate for the whole domain.
 
+### Apiserver-proxy
+The apiserver-proxy component is a Reverse Authorization proxy which acts as an intermediary with the Kubernetes API. By default it is exposed as a LoadBalancer Service, meaning it requires a dedicated certificate and DNS entry.
+
+To learn about the component, please visit the [component page](https://github.com/kyma-project/kyma/tree/master/components/apiserver-proxy), and to learn about its configuration, please visit the [configuration section](/components/security-v2/#configuration-api-server-proxy-chart)
+
 ### Certificate propagation paths
 As the certificate data is propagated though Kyma it is delivered into several components, which generate a set of Secrets/ConfigMaps. The propagation path varies slightly for each of the supported modes:
 
