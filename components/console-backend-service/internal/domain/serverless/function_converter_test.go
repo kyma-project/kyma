@@ -20,8 +20,8 @@ func TestFunctionConverter_ToGQL(t *testing.T) {
 		expectedUID := "expectedUID"
 		expectedSource := "expectedSource"
 		expectedDependencies := "expectedDependencies"
-		expectedRuntime := v1alpha1.Python37
-		expectedRuntimeString := "python37"
+		expectedRuntime := v1alpha1.Python38
+		expectedRuntimeString := "python38"
 		expectedLabels := map[string]string{"foo": "bar"}
 
 		function := fixFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedLabels, expectedRuntime)
@@ -109,8 +109,8 @@ func TestFunctionConverter_ToFunction(t *testing.T) {
 		expectedNamespace := "expectedNamespace"
 		expectedSource := "expectedSource"
 		expectedDependencies := "expectedDependencies"
-		expectedRuntime := v1alpha1.Python37
-		expectedRuntimeString := "python37"
+		expectedRuntime := v1alpha1.Python38
+		expectedRuntimeString := "python38"
 		expectedLabels := map[string]string{"foo": "bar"}
 
 		function := fixFunction(expectedName, expectedNamespace, "", expectedSource, expectedDependencies, expectedLabels, expectedRuntime)

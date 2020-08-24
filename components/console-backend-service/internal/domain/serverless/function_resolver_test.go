@@ -26,8 +26,8 @@ import (
 func TestFunctionResolver_FunctionQuery(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		labels := map[string]string{"foo": "bar"}
-		function := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Python37)
-		gqlFunction := fixGQLFunction("1", "a", "1", "content", "dependencies", "python37", labels)
+		function := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Python38)
+		gqlFunction := fixGQLFunction("1", "a", "1", "content", "dependencies", "python38", labels)
 
 		svc := automock.NewFunctionService()
 		svc.On("Find", "a", "1").Return(function, nil).Once()
@@ -82,10 +82,10 @@ func TestFunctionResolver_FunctionQuery(t *testing.T) {
 func TestFunctionResolver_FunctionsQuery(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		labels := map[string]string{"foo": "bar"}
-		function1 := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Python37)
-		function2 := fixFunction("2", "a", "1", "content", "dependencies", labels, v1alpha1.Python37)
-		gqlFunction1 := fixGQLFunction("1", "a", "1", "content", "dependencies", "python37", labels)
-		gqlFunction2 := fixGQLFunction("2", "a", "1", "content", "dependencies", "python37", labels)
+		function1 := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Python38)
+		function2 := fixFunction("2", "a", "1", "content", "dependencies", labels, v1alpha1.Python38)
+		gqlFunction1 := fixGQLFunction("1", "a", "1", "content", "dependencies", "python38", labels)
+		gqlFunction2 := fixGQLFunction("2", "a", "1", "content", "dependencies", "python38", labels)
 		functions := []*v1alpha1.Function{function1, function2}
 		expected := []*gqlschema.Function{gqlFunction1, gqlFunction2}
 
@@ -211,8 +211,8 @@ func TestFunctionResolver_UpdateFunction(t *testing.T) {
 	t.Run("Error", func(t *testing.T) {
 		expected := errors.New("Error")
 		labels := map[string]string{"foo": "bar"}
-		function := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Python37)
-		mutationInput := fixGQLMutationInput("content", "dependencies", "python37", labels)
+		function := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Python38)
+		mutationInput := fixGQLMutationInput("content", "dependencies", "python38", labels)
 
 		svc := automock.NewFunctionService()
 		svc.On("Update", function).Return(function, expected).Once()

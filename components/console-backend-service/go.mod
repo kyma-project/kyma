@@ -55,6 +55,7 @@ require (
 )
 
 replace (
+	github.com/kyma-project/kyma/components/function-controller => github.com/aerfio/kyma/components/function-controller v0.0.0-20200824110652-0d8d37899c02
 	golang.org/x/text => golang.org/x/text v0.3.3
 	k8s.io/client-go => k8s.io/client-go v0.17.4
 )
