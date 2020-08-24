@@ -1,5 +1,5 @@
 ---
-# Destination rule to disable (m)TLS when talking to helm tiller, as it doesn't have a sidecar.
+# Destination rule to disable (m)TLS when talking to apiserver, as it doesn't have a sidecar.
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:

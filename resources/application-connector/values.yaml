@@ -4,9 +4,6 @@ connector_service:
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
-connectivity_certs_controller:
-  enabled: false
-
 global:
   disableLegacyConnectivity: false
   isLocalEnv: false
@@ -54,8 +51,6 @@ global:
   application_connectivity_certs_setup_job:
     version: "PR-9214"
   application_connectivity_validator:
-    version: "PR-9214"
-  connectivity_certs_controller:
     version: "PR-9214"
 
 application_connectivity_certs_setup_job:
