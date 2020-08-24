@@ -5,13 +5,14 @@ import (
 
 	"knative.dev/pkg/apis"
 
-	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/cache"
+	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	v1 "knative.dev/pkg/apis/duck/v1"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 )
 
 var triggersKind = "Trigger"

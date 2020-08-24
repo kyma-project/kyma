@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/pretty"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 
 //go:generate mockery -name=gqlFunctionConverter -output=automock -outpkg=automock -case=underscore
@@ -30,6 +32,13 @@ func newFunctionConverter() *functionConverter {
 	return &functionConverter{
 		extractor: newFunctionUnstructuredExtractor(),
 	}
+}
+
+func stringPtr(str string) *string {
+	if str == "" {
+		return nil
+	}
+	return &str
 }
 
 func (c *functionConverter) ToGQL(function *v1alpha1.Function) (*gqlschema.Function, error) {
@@ -56,6 +65,8 @@ func (c *functionConverter) ToGQL(function *v1alpha1.Function) (*gqlschema.Funct
 		Env:          envVariables,
 		Replicas:     replicas,
 		Resources:    resources,
+		Runtime:      stringPtr(string(function.Spec.Runtime)),
+		SourceType:   stringPtr(string(function.Spec.SourceType)),
 		Status:       status,
 	}, nil
 }
@@ -88,6 +99,11 @@ func (c *functionConverter) ToFunction(name, namespace string, in gqlschema.Func
 	envVariables := c.fromGQLEnv(in.Env)
 	minReplicas, maxReplicas := c.fromGQLReplicas(in.Replicas)
 
+	var runtime v1alpha1.Runtime
+	if in.Runtime != nil {
+		runtime = v1alpha1.Runtime(*in.Runtime)
+	}
+
 	return &v1alpha1.Function{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "serverless.kyma-project.io/v1alpha1",
@@ -105,6 +121,7 @@ func (c *functionConverter) ToFunction(name, namespace string, in gqlschema.Func
 			Resources:   resources,
 			MinReplicas: minReplicas,
 			MaxReplicas: maxReplicas,
+			Runtime:     runtime,
 		},
 	}, nil
 }

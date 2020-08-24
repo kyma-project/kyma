@@ -15,7 +15,6 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	v1alpha12 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
 	v1alpha13 "github.com/ory/oathkeeper-maester/api/v1alpha1"
@@ -24,6 +23,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	"knative.dev/pkg/apis"
 	v11 "knative.dev/pkg/apis/duck/v1"
 )
@@ -459,7 +459,9 @@ type ComplexityRoot struct {
 		Namespace    func(childComplexity int) int
 		Replicas     func(childComplexity int) int
 		Resources    func(childComplexity int) int
+		Runtime      func(childComplexity int) int
 		Source       func(childComplexity int) int
+		SourceType   func(childComplexity int) int
 		Status       func(childComplexity int) int
 		UID          func(childComplexity int) int
 	}
@@ -2832,12 +2834,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Function.Resources(childComplexity), true
 
+	case "Function.runtime":
+		if e.complexity.Function.Runtime == nil {
+			break
+		}
+
+		return e.complexity.Function.Runtime(childComplexity), true
+
 	case "Function.source":
 		if e.complexity.Function.Source == nil {
 			break
 		}
 
 		return e.complexity.Function.Source(childComplexity), true
+
+	case "Function.sourceType":
+		if e.complexity.Function.SourceType == nil {
+			break
+		}
+
+		return e.complexity.Function.SourceType(childComplexity), true
 
 	case "Function.status":
 		if e.complexity.Function.Status == nil {
@@ -6364,14 +6380,14 @@ extend type Subscription {
     apiRuleEvent(namespace: String!, serviceName: String): ApiRuleEvent! @HasAccess(attributes: {resource: "apirules", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha", namespaceArg: "namespace"})
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "internal/gqlschema/eventing.graphql", Input: `type Trigger @goModel(model: "github.com/knative/eventing/pkg/apis/eventing/v1alpha1.Trigger"){
+	&ast.Source{Name: "internal/gqlschema/eventing.graphql", Input: `type Trigger @goModel(model: "knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger"){
     name: String!
     namespace: String!
     spec: TriggerSpec!
     status: TriggerStatus!
 }
 
-type TriggerSpec @goModel(model: "github.com/knative/eventing/pkg/apis/eventing/v1alpha1.TriggerSpec"){
+type TriggerSpec @goModel(model: "knative.dev/eventing/pkg/apis/eventing/v1alpha1.TriggerSpec"){
     broker: String!
     filter: JSON
     subscriber: Subscriber!
@@ -7412,6 +7428,8 @@ type Function {
     env: [FunctionEnv!]!
     replicas: FunctionReplicas!
     resources: FunctionResources!
+    runtime: String
+    sourceType: String
 
     # status
     status: FunctionStatus!
@@ -7486,7 +7504,7 @@ enum FunctionPhaseType {
 enum FunctionReasonType {
     CONFIG # ConfigMap
     JOB # K8S Job
-    SERVICE # KNative Service
+    SERVICE #  Deployment + Service + hpa
 }
 
 input FunctionMutationInput {
@@ -7496,6 +7514,8 @@ input FunctionMutationInput {
     env: [FunctionEnvInput!]!
     replicas: FunctionReplicasInput!
     resources: FunctionResourcesInput!
+    runtime: String
+    sourceType: String
 }
 
 type FunctionMetadata {
@@ -18081,6 +18101,68 @@ func (ec *executionContext) _Function_resources(ctx context.Context, field graph
 	return ec.marshalNFunctionResources2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionResources(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Function_runtime(ctx context.Context, field graphql.CollectedField, obj *Function) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Function",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Runtime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Function_sourceType(ctx context.Context, field graphql.CollectedField, obj *Function) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Function",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SourceType, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Function_status(ctx context.Context, field graphql.CollectedField, obj *Function) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -22531,7 +22613,7 @@ func (ec *executionContext) _Mutation_createTrigger(ctx context.Context, field g
 		if data, ok := tmp.(*v1alpha12.Trigger); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/knative/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22542,7 +22624,7 @@ func (ec *executionContext) _Mutation_createTrigger(ctx context.Context, field g
 	}
 	res := resTmp.(*v1alpha12.Trigger)
 	fc.Result = res
-	return ec.marshalOTrigger2ᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, field.Selections, res)
+	return ec.marshalOTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createManyTriggers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -22593,7 +22675,7 @@ func (ec *executionContext) _Mutation_createManyTriggers(ctx context.Context, fi
 		if data, ok := tmp.([]*v1alpha12.Trigger); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/knative/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22604,7 +22686,7 @@ func (ec *executionContext) _Mutation_createManyTriggers(ctx context.Context, fi
 	}
 	res := resTmp.([]*v1alpha12.Trigger)
 	fc.Result = res
-	return ec.marshalOTrigger2ᚕᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
+	return ec.marshalOTrigger2ᚕᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_deleteTrigger(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -22655,7 +22737,7 @@ func (ec *executionContext) _Mutation_deleteTrigger(ctx context.Context, field g
 		if data, ok := tmp.(*v1alpha12.Trigger); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/knative/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22666,7 +22748,7 @@ func (ec *executionContext) _Mutation_deleteTrigger(ctx context.Context, field g
 	}
 	res := resTmp.(*v1alpha12.Trigger)
 	fc.Result = res
-	return ec.marshalOTrigger2ᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, field.Selections, res)
+	return ec.marshalOTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_deleteManyTriggers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -22717,7 +22799,7 @@ func (ec *executionContext) _Mutation_deleteManyTriggers(ctx context.Context, fi
 		if data, ok := tmp.([]*v1alpha12.Trigger); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/knative/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22728,7 +22810,7 @@ func (ec *executionContext) _Mutation_deleteManyTriggers(ctx context.Context, fi
 	}
 	res := resTmp.([]*v1alpha12.Trigger)
 	fc.Result = res
-	return ec.marshalOTrigger2ᚕᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
+	return ec.marshalOTrigger2ᚕᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createOAuth2Client(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -27610,7 +27692,7 @@ func (ec *executionContext) _Query_triggers(ctx context.Context, field graphql.C
 		if data, ok := tmp.([]*v1alpha12.Trigger); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/knative/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -27621,7 +27703,7 @@ func (ec *executionContext) _Query_triggers(ctx context.Context, field graphql.C
 	}
 	res := resTmp.([]*v1alpha12.Trigger)
 	fc.Result = res
-	return ec.marshalOTrigger2ᚕᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
+	return ec.marshalOTrigger2ᚕᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_oAuth2Clients(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -34557,7 +34639,7 @@ func (ec *executionContext) _Trigger_spec(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(v1alpha12.TriggerSpec)
 	fc.Result = res
-	return ec.marshalNTriggerSpec2githubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerSpec(ctx, field.Selections, res)
+	return ec.marshalNTriggerSpec2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerSpec(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Trigger_status(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.Trigger) (ret graphql.Marshaler) {
@@ -34659,7 +34741,7 @@ func (ec *executionContext) _TriggerEvent_trigger(ctx context.Context, field gra
 	}
 	res := resTmp.(*v1alpha12.Trigger)
 	fc.Result = res
-	return ec.marshalNTrigger2ᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, field.Selections, res)
+	return ec.marshalNTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TriggerSpec_broker(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.TriggerSpec) (ret graphql.Marshaler) {
@@ -36550,6 +36632,18 @@ func (ec *executionContext) unmarshalInputFunctionMutationInput(ctx context.Cont
 		case "resources":
 			var err error
 			it.Resources, err = ec.unmarshalNFunctionResourcesInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionResourcesInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "runtime":
+			var err error
+			it.Runtime, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "sourceType":
+			var err error
+			it.SourceType, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -39486,6 +39580,10 @@ func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "runtime":
+			out.Values[i] = ec._Function_runtime(ctx, field, obj)
+		case "sourceType":
+			out.Values[i] = ec._Function_sourceType(ctx, field, obj)
 		case "status":
 			out.Values[i] = ec._Function_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -47220,11 +47318,11 @@ func (ec *executionContext) marshalNTimestamp2timeᚐTime(ctx context.Context, s
 	return res
 }
 
-func (ec *executionContext) marshalNTrigger2githubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v v1alpha12.Trigger) graphql.Marshaler {
+func (ec *executionContext) marshalNTrigger2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v v1alpha12.Trigger) graphql.Marshaler {
 	return ec._Trigger(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTrigger2ᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v *v1alpha12.Trigger) graphql.Marshaler {
+func (ec *executionContext) marshalNTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v *v1alpha12.Trigger) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -47280,7 +47378,7 @@ func (ec *executionContext) marshalNTriggerEvent2ᚖgithubᚗcomᚋkymaᚑprojec
 	return ec._TriggerEvent(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTriggerSpec2githubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha12.TriggerSpec) graphql.Marshaler {
+func (ec *executionContext) marshalNTriggerSpec2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha12.TriggerSpec) graphql.Marshaler {
 	return ec._TriggerSpec(ctx, sel, &v)
 }
 
@@ -48829,11 +48927,11 @@ func (ec *executionContext) unmarshalOSubscriberRefInput2ᚖknativeᚗdevᚋpkg�
 	return &res, err
 }
 
-func (ec *executionContext) marshalOTrigger2githubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v v1alpha12.Trigger) graphql.Marshaler {
+func (ec *executionContext) marshalOTrigger2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v v1alpha12.Trigger) graphql.Marshaler {
 	return ec._Trigger(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOTrigger2ᚕᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha12.Trigger) graphql.Marshaler {
+func (ec *executionContext) marshalOTrigger2ᚕᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha12.Trigger) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -48860,7 +48958,7 @@ func (ec *executionContext) marshalOTrigger2ᚕᚖgithubᚗcomᚋknativeᚋevent
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNTrigger2ᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, sel, v[i])
+			ret[i] = ec.marshalNTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -48873,7 +48971,7 @@ func (ec *executionContext) marshalOTrigger2ᚕᚖgithubᚗcomᚋknativeᚋevent
 	return ret
 }
 
-func (ec *executionContext) marshalOTrigger2ᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v *v1alpha12.Trigger) graphql.Marshaler {
+func (ec *executionContext) marshalOTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v *v1alpha12.Trigger) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

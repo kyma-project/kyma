@@ -4,14 +4,16 @@ import (
 	"context"
 	"testing"
 
-	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
+	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 
-	resourceFake "github.com/kyma-project/kyma/components/console-backend-service/internal/resource/fake"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	resourceFake "github.com/kyma-project/kyma/components/console-backend-service/internal/resource/fake"
 
 	"github.com/stretchr/testify/require"
 )
