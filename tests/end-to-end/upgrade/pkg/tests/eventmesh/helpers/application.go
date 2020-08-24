@@ -3,21 +3,17 @@ package helpers
 import (
 	"fmt"
 
-	appbrokerclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
-
 	"github.com/avast/retry-go"
-
 	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	messagingv1alpha1clientset "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 
 	appbrokerv1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	appbrokerclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	appconnectorclientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	messagingv1alpha1clientset "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
-	servingclientset "knative.dev/serving/pkg/client/clientset/versioned"
+	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
 )
 
 const (
@@ -74,7 +70,7 @@ func WithEventService(id string) ApplicationOption {
 	}
 }
 
-func WaitForApplication(appConnector appconnectorclientset.Interface, messaging messagingv1alpha1clientset.MessagingV1alpha1Interface, serving servingclientset.Interface, name string, retryOptions ...retry.Option) error {
+func WaitForApplication(appConnector appconnectorclientset.Interface, messaging messagingv1alpha1clientset.MessagingV1alpha1Interface, sources sourcesv1alpha1.SourcesV1alpha1Interface, name string, retryOptions ...retry.Option) error {
 	application, err := appConnector.ApplicationconnectorV1alpha1().Applications().Get(name, metav1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("cannot get application: %v", err)
@@ -83,7 +79,7 @@ func WaitForApplication(appConnector appconnectorclientset.Interface, messaging 
 		if err := WaitForChannel(messaging, name, integrationNamespace, retryOptions...); err != nil {
 			return fmt.Errorf("waiting for application failed: %v, application: %+v", err, application)
 		}
-		if err := WaitForHttpSource(serving, name, integrationNamespace, retryOptions...); err != nil {
+		if err := WaitForHttpSource(sources, name, integrationNamespace, retryOptions...); err != nil {
 			return fmt.Errorf("waiting for application failed: %v, application: %+v", err, application)
 		}
 	}
@@ -118,15 +114,15 @@ func WaitForChannel(messaging messagingv1alpha1clientset.MessagingV1alpha1Interf
 		}, retryOptions...)
 }
 
-func WaitForHttpSource(serving servingclientset.Interface, name, namespace string, retryOptions ...retry.Option) error {
+func WaitForHttpSource(sources sourcesv1alpha1.SourcesV1alpha1Interface, name, namespace string, retryOptions ...retry.Option) error {
 	return retry.Do(
 		func() error {
-			ksvc, err := serving.ServingV1alpha1().Services(namespace).Get(name, metav1.GetOptions{})
+			src, err := sources.HTTPSources(namespace).Get(name, metav1.GetOptions{})
 			if err != nil {
 				return fmt.Errorf("cannot get HttpSource: %v", err)
 			}
-			if !ksvc.Status.IsReady() {
-				return fmt.Errorf("knative-service %v for HTTPSource not ready, ksvc: %+v", ksvc.Name, ksvc)
+			if !src.Status.IsReady() {
+				return fmt.Errorf("httpsource %v for HTTPSource not ready, src: %+v", src.Name, src)
 			}
 			return nil
 		}, retryOptions...)

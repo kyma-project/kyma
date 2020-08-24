@@ -74,9 +74,9 @@ var _ = ginkgo.Describe("Function", func() {
 			Spec: serverlessv1alpha1.FunctionSpec{
 				SourceType: serverlessv1alpha1.SourceTypeGit,
 				Source:     fmt.Sprintf("%s-%d", name, suffix),
+				Runtime:    serverlessv1alpha1.Nodejs12,
 				Repository: serverlessv1alpha1.Repository{
 					BaseDir:   "/",
-					Runtime:   serverlessv1alpha1.RuntimeNodeJS12,
 					Reference: "master",
 				},
 				Env: []corev1.EnvVar{
@@ -158,7 +158,7 @@ var _ = ginkgo.Describe("Function", func() {
 
 			data := data
 			ginkgo.BeforeEach(func() {
-				function := newTestFunction("tutaj-devops", "ah-tak-przeciez", 1, 2)
+				function := newTestFunction(testNamespace, "ah-tak-przeciez", 1, 2)
 
 				request = ctrl.Request{
 					NamespacedName: types.NamespacedName{
@@ -176,14 +176,14 @@ var _ = ginkgo.Describe("Function", func() {
 						SecretName: function.Name,
 					}
 
-					secret := newTestSecret(function.Name, "tutaj-devops", data.stringData)
+					secret := newTestSecret(function.Name, testNamespace, data.stringData)
 					// apply secret for a given scenario
 					gomega.Expect(resourceClient.Create(context.TODO(), secret)).To(gomega.Succeed())
 				}
 
 				operator = newMockedGitOperator(function.Name, data.stringData, data.authType)
 
-				repo := newTestRepository(function.GetName(), "tutaj-devops", auth)
+				repo := newTestRepository(function.GetName(), testNamespace, auth)
 
 				// apply git repository for a given scenario
 				gomega.Expect(resourceClient.Create(context.TODO(), repo)).To(gomega.Succeed())

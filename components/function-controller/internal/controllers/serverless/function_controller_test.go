@@ -23,8 +23,9 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 			Namespace: namespace,
 		},
 		Spec: serverlessv1alpha1.FunctionSpec{
-			Source: "module.exports = {main: function(event, context) {return 'Hello World.'}}",
-			Deps:   "   ",
+			Source:  "module.exports = {main: function(event, context) {return 'Hello World.'}}",
+			Deps:    "   ",
+			Runtime: serverlessv1alpha1.Nodejs12,
 			Env: []corev1.EnvVar{
 				{
 					Name:  "TEST_1",

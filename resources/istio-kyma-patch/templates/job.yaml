@@ -17,7 +17,12 @@ spec:
       restartPolicy: Never
       containers:
       - name: istio-kyma-patch
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.istio_kyma_patch.dir }}istio-kyma-patch:{{ .Values.global.istio_kyma_patch.version }}
+        image: {{ .Values.istio_kyma_patch.image }}:{{ .Values.istio_kyma_patch.tag }}
+        command:
+          - /bin/bash
+          - -c
+          - |
+{{.Files.Get "files/check.sh" | printf "%s" | indent 16}}
         volumeMounts:
         - name: config-volume
           mountPath: /etc/config
@@ -25,7 +30,7 @@ spec:
         - name: CONFIG_DIR
           value: /etc/config
         - name: REQUIRED_ISTIO_VERSION
-          value: {{ .Values.global.required_istio_version }}
+          value: {{ .Values.required_istio_version }}
         terminationMessagePolicy: "FallbackToLogsOnError"
       volumes:
       - name: config-volume
