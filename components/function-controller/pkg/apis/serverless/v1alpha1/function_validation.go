@@ -25,9 +25,9 @@ type ValidationConfig struct {
 
 func (fn *Function) performBasicValidation(ctx context.Context) *apis.FieldError {
 	return fn.validateObjectMeta(ctx).Also(
-		fn.Spec.validateSource(ctx),
+		fn.Spec.validateSource(),
 		fn.Spec.validateEnv(ctx),
-		fn.Spec.validateLabels(ctx),
+		fn.Spec.validateLabels(),
 		fn.Spec.validateReplicas(ctx),
 		fn.Spec.validateResources(ctx),
 	)
@@ -38,18 +38,19 @@ func (fn *Function) Validate(ctx context.Context) (errors *apis.FieldError) {
 
 	if spec.SourceType == SourceTypeGit {
 		return fn.performBasicValidation(ctx).Also(
-			spec.validateRepository(ctx),
+			spec.validateRepository(),
 		)
 	}
 
 	return fn.performBasicValidation(ctx).Also(
-		spec.validateDeps(ctx),
+		spec.validateDeps(),
 	)
 }
 
-func (fn *Function) validateObjectMeta(_ context.Context) (apisError *apis.FieldError) {
+func (fn *Function) validateObjectMeta(_ context.Context) *apis.FieldError {
 	nameFn := validation.ValidateNameFunc(validation.NameIsDNS1035Label)
 	fieldPath := field.NewPath("metadata")
+	apisError := &apis.FieldError{}
 	if errs := validation.ValidateObjectMeta(&fn.ObjectMeta, true, nameFn, fieldPath); errs != nil {
 		for _, err := range errs {
 			if err.Type == field.ErrorTypeRequired {
@@ -62,11 +63,11 @@ func (fn *Function) validateObjectMeta(_ context.Context) (apisError *apis.Field
 	return apisError
 }
 
-func (spec *FunctionSpec) validateSource(_ context.Context) (apisError *apis.FieldError) {
+func (spec *FunctionSpec) validateSource() *apis.FieldError {
 	if strings.TrimSpace(spec.Source) == "" {
-		apisError = apisError.Also(apis.ErrMissingField("spec.source"))
+		return apis.ErrMissingField("spec.source")
 	}
-	return apisError
+	return nil
 }
 
 func (spec *FunctionSpec) validateDeps(_ context.Context) (apisError *apis.FieldError) {
@@ -78,9 +79,10 @@ func (spec *FunctionSpec) validateDeps(_ context.Context) (apisError *apis.Field
 	return apisError
 }
 
-func (spec *FunctionSpec) validateEnv(ctx context.Context) (apisError *apis.FieldError) {
+func (spec *FunctionSpec) validateEnv(ctx context.Context) *apis.FieldError {
 	envs := spec.Env
 	reservedEnvs := ctx.Value(ValidationConfigKey).(ValidationConfig).ReservedEnvs
+	apisError := &apis.FieldError{}
 	for _, env := range envs {
 		errs := utilvalidation.IsEnvVarName(env.Name)
 		for _, reservedEnv := range reservedEnvs {
@@ -95,12 +97,13 @@ func (spec *FunctionSpec) validateEnv(ctx context.Context) (apisError *apis.Fiel
 	return apisError
 }
 
-func (spec *FunctionSpec) validateResources(ctx context.Context) (apisError *apis.FieldError) {
+func (spec *FunctionSpec) validateResources(ctx context.Context) *apis.FieldError {
 	minMemory := resource.MustParse(ctx.Value(ValidationConfigKey).(ValidationConfig).MinRequestMemory)
 	minCpu := resource.MustParse(ctx.Value(ValidationConfigKey).(ValidationConfig).MinRequestCpu)
 	requests := spec.Resources.Requests
 	limits := spec.Resources.Limits
 
+	apisError := &apis.FieldError{}
 	if requests.Cpu().Cmp(minCpu) == -1 {
 		apisError = apisError.Also(apis.ErrInvalidValue(
 			fmt.Sprintf("requests cpu(%s) should be higher than minimal value (%s)",
@@ -136,10 +139,12 @@ func (spec *FunctionSpec) validateResources(ctx context.Context) (apisError *api
 	return apisError
 }
 
-func (spec *FunctionSpec) validateReplicas(ctx context.Context) (apisError *apis.FieldError) {
+func (spec *FunctionSpec) validateReplicas(ctx context.Context) *apis.FieldError {
 	minValue := ctx.Value(ValidationConfigKey).(ValidationConfig).MinReplicasValue
 	maxReplicas := spec.MaxReplicas
 	minReplicas := spec.MinReplicas
+
+	apisError := &apis.FieldError{}
 	if maxReplicas != nil && minReplicas != nil && *minReplicas > *maxReplicas {
 		apisError = apisError.Also(apis.ErrInvalidValue(
 			fmt.Sprintf("maxReplicas(%d) is less than minReplicas(%d)", *maxReplicas, *minReplicas), "spec.maxReplicas"))
@@ -156,7 +161,8 @@ func (spec *FunctionSpec) validateReplicas(ctx context.Context) (apisError *apis
 	return apisError
 }
 
-func (spec *FunctionSpec) validateLabels(_ context.Context) (apisError *apis.FieldError) {
+func (spec *FunctionSpec) validateLabels() *apis.FieldError {
+	apisError := &apis.FieldError{}
 	labels := spec.Labels
 	fieldPath := field.NewPath("spec.labels")
 
@@ -167,7 +173,8 @@ func (spec *FunctionSpec) validateLabels(_ context.Context) (apisError *apis.Fie
 	return apisError
 }
 
-func (in *Repository) validateRepository(_ context.Context) (apisError *apis.FieldError) {
+func (in *Repository) validateRepository() *apis.FieldError {
+	apisError := &apis.FieldError{}
 	for _, fieldName := range []struct{ name, value string }{
 		{name: "spec.baseDir", value: in.BaseDir},
 		{name: "spec.reference", value: in.Reference},
@@ -178,6 +185,5 @@ func (in *Repository) validateRepository(_ context.Context) (apisError *apis.Fie
 		err := apis.ErrMissingField(fieldName.name)
 		apisError = apisError.Also(err)
 	}
-
-	return
+	return apisError
 }
