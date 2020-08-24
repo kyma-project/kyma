@@ -5,6 +5,8 @@ type: Getting Started
 
 Almost all operations in these guide are performed using Namespace-scoped resources, so let's start by creating a Namespace called `orders-service`.
 
+## Steps
+
 Follow these steps:
 
 <div tabs name="setup-namespace" group="set-up-namespace">

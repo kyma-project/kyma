@@ -64,7 +64,7 @@ kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/
 }
 ```
 
-5. Select **Save** to confirm the changes.
+6. Select **Save** to confirm the changes.
 
   You will see the message confirming the changes were saved. Once deployed, the new Function should have the `RUNNING` status.
 

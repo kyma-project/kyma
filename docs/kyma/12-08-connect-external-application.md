@@ -7,11 +7,11 @@ Let's now integrate an external application to Kyma. In this set of guides, we w
 
 ## Steps
 
-### Deploy the XF Addons and provision Commerce mock
+### Deploy the XF addons and provision Commerce mock
 
-Commerce mock is a part of the XF Addons that are cluster-wide addons giving access to three instances of mocks that simulate external applications sending events to Kyma.
+Commerce mock is a part of the XF addons that are cluster-wide addons giving access to three instances of mocks that simulate external applications sending events to Kyma.
 
-Follow these steps to deploy XF Addons and add Commerce mock in the `orders-service` Namespace:
+Follow these steps to deploy XF addons and add Commerce mock in the `orders-service` Namespace:
 
 <div tabs name="provision-mock" group="connect-external-application">
   <details>
@@ -33,7 +33,7 @@ repositories:
 - url: github.com/sap/xf-addons//addons/index.yaml
 EOF
 ```
-   > **NOTE:** The `index.yaml` file is an Addons manifest with APIs of SAP Marketing Cloud, SAP Cloud for Customer, and SAP Commerce Cloud applications.
+   > **NOTE:** The `index.yaml` file is an addons manifest with APIs of SAP Marketing Cloud, SAP Cloud for Customer, and SAP Commerce Cloud applications.
 
 2. Check if the AddonsConfiguration CR was created. The CR phase should state `Ready`:
 
@@ -69,12 +69,12 @@ EOF
 
 1. Go to the `orders-service` Namespace in the Console UI and navigate to **Addons** under the **Configuration** section in the left navigation panel.
 2. Select **Add New Configuration**.
-3. Once the new box opens up, enter `github.com/sap/xf-addons//addons/index.yaml` in the **Urls** field. The Addon name is automatically generated.
+3. Once the new box opens up, enter `github.com/sap/xf-addons//addons/index.yaml` in the **Urls** field. The addon name is automatically generated.
 
-   > **NOTE:** The `index.yaml` file is an Addons manifest with APIs of SAP Marketing Cloud, SAP Cloud for Customer, and SAP Commerce Cloud applications.
+   > **NOTE:** The `index.yaml` file is an addons manifest with APIs of SAP Marketing Cloud, SAP Cloud for Customer, and SAP Commerce Cloud applications.
 
 4. **Add** the configuration.
-5. Wait for the Addon to have the `READY` status.
+5. Wait for the addon to have the `READY` status.
 6. Go to the **Catalog** view under the **Service Management** section in the left navigation panel.
 7. Switch to the **Add-Ons** tab and select **[Preview] SAP Commerce Cloud - Mock** as the application to provision.
 

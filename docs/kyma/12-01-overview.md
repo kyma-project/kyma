@@ -41,7 +41,7 @@ e. Export the **KUBECONFIG** environment variable to point to the downloaded `ku
 
 f. Run `kubectl cluster-info` to check if you are connected to the correct cluster.
 
-<!-- Move the above step to the existing docs (https://kyma-project.io/docs/components/security/#details-iam-kubeconfig-service-get-the-kubeconfig-file-and-configure-the-cli) as they are outdated after recent UI changes. Only link to it here.  -->
+<!-- Once the updates Security component in docs is merged, move the above Kubeconfig steps there (existing doc: https://kyma-project.io/docs/components/security/#details-iam-kubeconfig-service-get-the-kubeconfig-file-and-configure-the-cli) and only link to these steps here. -->
 
 ## Main actors
 
@@ -49,7 +49,7 @@ Let's introduce the main actors that will lead us through the guides. These are 
 
 - [Orders service](https://github.com/kazydek/examples/tree/master/orders-service) is a sample application (microservice) written in Go. It can expose HTTP endpoints used to create and read basic order JSON entities. The service can run with either an in-memory database that is enabled by default or an external, Redis database. On the basis of it, we will show how you can use Kyma to deploy your own microservice, expose it on HTTP endpoints to make it available for external services, and bind it to an external database service (Redis).
 
-- [Function](https://github.com/kyma-project/examples/blob/order-service/orders-service/deployment/function.yaml) that is an equivalent of the Orders Service with the ability to retrieve order records and save data in it. Like the microservice, the Function can run with either an in-memory database or a Redis instance.
+- [Function](https://github.com/kyma-project/examples/blob/order-service/orders-service/deployment/function.yaml) that is an equivalent of the Orders service with the ability to retrieve order records and save data in it. Like the microservice, the Function can run with either an in-memory database or a Redis instance.
 
 - [Redis addon](https://github.com/kyma-project/addons/tree/master/addons/redis-0.0.3) is basically a bundle of two Redis services available in two plans: `micro` and `enterprise`. We will connect it to Kyma thanks to Helm Broker and expose it in the Kyma cluster as an addon under Service Catalog. The Redis service represents an open source, in-memory data structure store, used as a database, cache and message broker. For the purpose of these guides, we will use the `micro` plan with the in-memory storage to demonstrate how it can replace the default memory of our microservice.
 

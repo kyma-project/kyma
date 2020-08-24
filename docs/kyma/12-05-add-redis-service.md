@@ -3,7 +3,7 @@ title: Add the Redis service
 type: Getting Started
 ---
 
-This tutorial shows how you can provision a sample [Redis](https://redis.io/) service using an Addon configuration linking to an example in the GitHub repository.
+This tutorial shows how you can provision a sample [Redis](https://redis.io/) service using an addon configuration linking to an example in the GitHub repository.
 
 ## Steps
 
@@ -46,11 +46,11 @@ Follows these steps:
 
 2. Navigate to the **Configuration** section in the left navigation panel, go to the **Addons** view, and select **Add New Configuration**.
 
-3. Once the new box opens up, enter `https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml` in the **Urls** field. The Addon name is automatically generated.
+3. Once the new box opens up, enter `https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml` in the **Urls** field. The addon name is automatically generated.
 
 4. Select **Add** to confirm the changes.
 
-5. Wait for the Addon to have the `READY` status.
+5. Wait for the addon to have the `READY` status.
 
 
     </details>
