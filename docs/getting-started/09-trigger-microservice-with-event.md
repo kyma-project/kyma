@@ -56,7 +56,7 @@ Console UI
 
 1. Navigate to the `orders-service` Namespace view in the Console UI from the drop-down list in the top navigation panel.
 
-2. Go to the **Services** view (under **Operation** section) in the left navigation panel and navigate to `orders-service`.
+2. Go to the **Services** view under the **Operation** section in the left navigation panel and navigate to `orders-service`.
 
 3. Once in the service's details view, select **Add Event Trigger** in the **Event Triggers** section.
 

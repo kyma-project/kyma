@@ -3,21 +3,13 @@ title: Trigger a Function with an event
 type: Getting Started
 ---
 
-This tutorial shows how to trigger a Function with an event from an Application connected to Kyma.
+This tutorial shows how to trigger a Function with an event from Commerce mock connected to Kyma.
 
 > **NOTE:** To learn more about events flow in Kyma, read the [eventing](/components/event-mesh) documentation.
 
-## Prerequisites
-
-This tutorial is based on an existing Function. To create one, follow the [Create a Function](#tutorials-create-a-function) tutorial.
-
-You must also have:
-
-- An Application bound to a specific Namespace. Read the tutorials to learn how to [create](/components/application-connector#tutorials-create-a-new-application) an Application and [bind](/components/application-connector#tutorials-bind-an-application-to-a-namespace) it to a Namespace.
-- An event service (an API of [AsyncAPI](https://www.asyncapi.com/) type) registered in the desired Application. Read the [tutorial](/components/application-connector#tutorials-register-a-service) to learn how to do it.
-- A Service Instance created for the registered service to expose events in a specific Namespace. Read the [tutorial](/components/application-connector#tutorials-bind-a-service-to-a-namespace) for details.
-
 ## Steps
+
+### Create the Trigger
 
 Follows these steps:
 
@@ -27,48 +19,41 @@ Follows these steps:
   CLI
   </summary>
 
-1. Export these variables:
+1. Create a Trigger CR for the `orders-function` Function to subscribe the Function to the `order.deliverysent.v1` event Commerce mock:
 
-    ```bash
-    export NAME={FUNCTION_NAME}
-    export NAMESPACE={FUNCTION_NAMESPACE}
-    export APP_NAME={APPLICATION_NAME}
-    export EVENT_VERSION={EVENT_TYPE_VERSION}
-    export EVENT_TYPE={EVENT_TYPE_NAME}
-    ```
+```yaml
+cat <<EOF | kubectl apply -f  -
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Trigger
+metadata:
+  name: orders-function
+  namespace: orders-service
+spec:
+  broker: default
+  filter:
+    attributes:
+      eventtypeversion: v1
+      source: commerce-mock
+      type: order.deliverysent
+  subscriber:
+    ref:
+      apiVersion: v1
+      kind: Service
+      name: orders-function
+      namespace: orders-service
+EOF
+```
 
-    > **NOTE:** Function takes the name from the Function CR name. The Trigger CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
+where:
+- **spec.filter.attributes.eventtypeversion** points to the specific event version. In our case, it is `v1`.
+- **spec.filter.attributes.source** is taken from the name of the Application CR and specifies the source of events. In our example, it is `commerce-mock`.
+- **spec.filter.attributes.type** points to the given event type to which you want to subscribe the Function. In our case, it is `order.deliverysent`.
 
-These variables refer to the following:
+2. Check if the Trigger CR was created and is ready. The status of the CR should state `True`:
 
-- **APP_NAME** is taken from the name of the Application CR and specifies the source of events.
-- **EVENT_VERSION** points to the specific event version, such as `v1`.
-- **EVENT_TYPE** points to the given event type to which you want to subscribe your Function, such as `user.created`.
-
-2. Create a Trigger CR for your Function to subscribe your Function to a specific event type.
-
-    ```yaml
-    cat <<EOF | kubectl apply -f  -
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Trigger
-    metadata:
-      name: $NAME
-      namespace: $NAMESPACE
-    spec:
-      broker: default
-      filter:
-        attributes:
-          eventtypeversion: $EVENT_VERSION
-          source: $APP_NAME
-          type: $EVENT_TYPE
-      subscriber:
-        ref:
-          apiVersion: v1
-          kind: Service
-          name: $NAME
-          namespace: $NAMESPACE
-    EOF
-    ```
+   ```bash
+   kubectl get trigger orders-function -n orders-service -o=jsonpath="{.status.conditions[2].status}"
+   ```
 
     </details>
     <details>
@@ -76,115 +61,55 @@ These variables refer to the following:
     Console UI
     </summary>
 
-1. From the drop-down list in the top navigation panel, select the Namespace in which your Application exposes events.
+1. Navigate to the `orders-service` Namespace view in the Console UI from the drop-down list in the top navigation panel.
 
-2. Go to the **Functions** view in the left navigation panel and navigate to your Function.
+2. Go to the **Functions** view under the **Development** section in the left navigation panel and navigate to `orders-function`.
 
-3. Once in the Function details view, Switch to the **Configuration** tab, and select **Add Event Trigger** in the **Event Triggers** section.
+3. Once in the Function's details view, switch to the **Configuration** tab and select **Add Event Trigger** in the **Event Triggers** section.
 
-4. Select the event type and version that you want to use as a trigger for your Function and select **Add** to confirm changes.
+4. Once the pop-up box opens, find the `order.deliverysent` event with the `v1` version from the `commerce-mock` application. Mark it on the list and select **Add**.
 
-The message appears on the UI confirming that the Event Trigger was successfully created, and you will see it in the **Event Triggers** section in your Function.
+The message appears on the UI confirming that the event trigger was created, and you will see it in the **Event Triggers** section in the Function's details view.
 
     </details>
 </div>
 
-## Test the trigger
+_TO_DO_BELOW_
+## Test the Trigger
 
-> **CAUTION:** Before you follow steps in this section and send a sample event, bear in mind that it will be propagated to all services subscribed to this event type.
+To send events from mock to Orders Service application, follow these steps:  
 
-To test if the Trigger CR is properly connected to the Function:
+1. Access the SAP Commerce Cloud Mock mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or go to **API Rules** view (under **Configuration** section) in `orders-service` Namespace and select the mock, you will the direct link to the mock application under **Host** column.
 
-1. Change the Function's code to:​
+2. Switch to **Remote APIs** tab, find **SAP Commerce Cloud - Events** and click it.
 
-    ```js
-    module.exports = {
-      main: function (event, context) {
-        console.log("User created: ", event.data);
-      }
-    }
-    ```
+3. In opened view search in dropdown list `order.deliverysent.v1` event. In pasted event change `orderCode` to `987654321` and select **Send Event**.
 
-2.  Send an event manually to trigger the function. The first example shows the implementation introduced with the Kyma 1.11 release where a [CloudEvent](https://github.com/cloudevents/spec/blob/v1.0/spec.md) is sent directly to the Event Mesh. In the second example, an event also reaches the Event Mesh, but it is first modified by the compatibility layer to the format compliant with the CloudEvents specification. This solution ensures compatibility if your events follow a format other than CloudEvents, or you use the Event Bus available before 1.11.
+   The message appears on the UI confirming that the event was successfully sent.
 
-    > **TIP:** For details on CloudEvents, exposed endpoints, and the compatibility layer, read about [event processing and delivery](/components/event-mesh/#details-event-processing-and-delivery).
+4. For the last time call the Function to check the storage:
 
-    <div tabs name="examples" group="test=trigger">
-      <details>
-      <summary label="CloudEvents">
-      Send CloudEvents directly to Event Mesh
-      </summary>
+   ```bash
+   curl -ik "https://$FUNCTION_DOMAIN"
+   ```
 
-    ```bash
-    curl -v -H "Content-Type: application/cloudevents+json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/events -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d \
-      '{
-        "specversion": "1.0",
-        "source": "{APP_NAME}",
-        "type": "{EVENT_TYPE}",
-        "eventtypeversion": "{EVENT_VERSION}",
-        "id": "A234-1234-1234",
-        "data": "123456789",
-        "datacontenttype": "application/json"
-      }'
-    ```
-      </details>
-      <details>
-      <summary label="Compatibility layer">
-      Send events to Event Mesh through compatibility layer
-      </summary>
+   > **NOTE**: To get the Function domain, run:
+   >
+   > ```bash
+   > export FUNCTION_DOMAIN=$(kubectl get virtualservices -l apirule.gateway.kyma-project.io/v1alpha1=orders-function.orders-service -n orders-service -o=jsonpath='{.items[*].spec.hosts[0]}')
+   > ```
 
-    ```bash
-    curl -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d \
-      '{
-          "event-type": "{EVENT_TYPE}",
-          "event-type-version": "{EVENT_VERSION}",
-          "event-time": "2020-04-02T21:37:00Z",
-          "data": "123456789"
-         }'
-    ```
+   You should see a response similar to the following:
 
-      </details>
-  </div>
+   ```bash
+   content-length: 2
+   content-type: application/json;charset=UTF-8
+   date: Mon, 13 Jul 2020 13:05:33 GMT
+   server: istio-envoy
+   vary: Origin
+   x-envoy-upstream-service-time: 37
 
-    - **CLUSTER_DOMAIN** is the domain of your cluster, such as `kyma.local`.
+   [{"orderCode":"762727234","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"123456789","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"987654321","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
+   ```
 
-    - **CERT_FILE_NAME** and **KEY_FILE_NAME** are client certificates for a given Application. You can get them by completing steps in the [tutorial](/components/application-connector/#tutorials-get-the-client-certificate).
-
-3. After sending an event, you should get this result from logs of your Function's latest Pod:
-
-    ```text
-    User created: 123456789
-    ```
-
-
----
-_PART FROM ANOTHER TUTORIAL_
-
-##  Create Function
-
-Follow the steps to create a Function that you will trigger with your event.
-
-1. Go to the Namespace in which you deployed the Commerce mock API.
-2. Go to **Functions** under the **Development** section in the left navigation.
-3. Click **Create Function**
-4. Go to **Configuration** tab to select the Event Trigger. For example, use **order.deliverysent.v1**. This will be the event that triggers your Function.
-5. In the **Source** tab, add the code for your Function. For example:
-
-    ```bash
-    module.exports = {
-    main: function (event, context) {
-        console.log(event.data);
-        return "Hello World!";
-    }
-    }
-    ```
-
-## Send events
-
-Follow the steps to send an event to Kyma and trigger a Function.
-
-1. In the mock application, go to **Remote APIs**.
-2. Go to **SAP Commerce Cloud - Events**.
-3. Select **order.deliverysent.v1** under **Event Topics**.
-4. Select **Send Event**.
-5. Check the logs in the **Logs** section under **Functions** to see if the event arrived.
+   The event from mock application was saved in Redis instance :)

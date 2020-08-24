@@ -163,7 +163,7 @@ If you switch to the **Code** tab and scroll down to the **Environment Variables
      }'
    ```
 
-4. If we call again the `https://$FUNCTION_DOMAIN` URL, then the system should return a response similar to the following:
+4. When you call the `https://$FUNCTION_DOMAIN` URL again, the system should return a similar response:
 
    ```bash
    HTTP/2 200
