@@ -910,6 +910,8 @@ type Function {
     resources: FunctionResources!
     runtime: String
     sourceType: String
+    baseDir: String
+    reference: String
 
     # status
     status: FunctionStatus!
@@ -996,6 +998,8 @@ input FunctionMutationInput {
     resources: FunctionResourcesInput!
     runtime: String
     sourceType: String
+    baseDir: String
+    reference: String
 }
 
 type FunctionMetadata {

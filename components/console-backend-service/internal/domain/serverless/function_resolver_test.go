@@ -407,6 +407,16 @@ func fixGQLFunction(name, namespace, uid, source, dependencies, runtime string, 
 	}
 }
 
+func fixGQLGitFunction(function *gqlschema.Function, gitRepositoryRef, baseDir, reference string) *gqlschema.Function {
+	var nilStr string
+	function.SourceType = stringPtr(string(v1alpha1.SourceTypeGit))
+	function.Source = gitRepositoryRef
+	function.Dependencies = nilStr
+	function.BaseDir = stringPtr(baseDir)
+	function.Reference = stringPtr(reference)
+	return function
+}
+
 func fixFunction(name, namespace, uid, source, dependencies string, labels map[string]string, runtime v1alpha1.Runtime) *v1alpha1.Function {
 	return &v1alpha1.Function{
 		TypeMeta: metav1.TypeMeta{
@@ -432,4 +442,16 @@ func fixFunction(name, namespace, uid, source, dependencies string, labels map[s
 		},
 		Status: v1alpha1.FunctionStatus{},
 	}
+}
+
+func fixGitFunction(function *v1alpha1.Function, gitRepositoryRef, baseDir, reference string) *v1alpha1.Function {
+	var nilStr string
+	function.Spec.SourceType = v1alpha1.SourceTypeGit
+	function.Spec.Source = gitRepositoryRef
+	function.Spec.Deps = nilStr
+	function.Spec.Repository = v1alpha1.Repository{
+		BaseDir:   baseDir,
+		Reference: reference,
+	}
+	return function
 }
