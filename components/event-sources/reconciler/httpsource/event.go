@@ -17,6 +17,8 @@ const (
 	failedCreateReason reason = "FailedCreate"
 	// failedUpdateReason is used when an object update fails.
 	failedUpdateReason reason = "FailedUpdate"
+	// deleteReason is used when an object is successfully deleted.
+	deleteReason reason = "Delete"
 )
 
 // event records a normal event for an API object.

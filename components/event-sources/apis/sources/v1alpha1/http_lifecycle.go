@@ -7,7 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"knative.dev/pkg/apis"
 
-	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
 )
 
 const (
@@ -85,7 +85,7 @@ func (s *HTTPSourceStatus) MarkServiceCreated(service *corev1.Service) {
 }
 
 // MarkPolicyCreated sets the PolicyCreated condition to True once a Policy is created.
-func (s *HTTPSourceStatus) MarkPolicyCreated(policy *authenticationv1alpha1.Policy) {
+func (s *HTTPSourceStatus) MarkPolicyCreated(policy *securityv1beta1.PeerAuthentication) {
 	if policy == nil {
 		httpCondSet.Manage(s).MarkUnknown(HTTPConditionPolicyCreated,
 			HTTPSourceReasonPolicyNotCreated, "The Istio policy is not created")

@@ -18,6 +18,8 @@ package object
 
 import (
 	"istio.io/api/security/v1beta1"
+	securityv1beta1apis "istio.io/api/security/v1beta1"
+	istiov1beta1apis "istio.io/api/type/v1beta1"
 	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -35,6 +37,31 @@ func NewPeerAuthentication(ns, name string, opts ...ObjectOption) *securityv1bet
 		opt(s)
 	}
 	return s
+}
+
+// WithPermissiveModeDeprecated sets the mTLS mode of the PeerAuthentication to Permissive for the given port
+func WithPermissiveMode(port uint32) ObjectOption {
+	return func(o metav1.Object) {
+		p := o.(*securityv1beta1.PeerAuthentication)
+		p.Spec.Mtls = &securityv1beta1apis.PeerAuthentication_MutualTLS{
+			Mode: securityv1beta1apis.PeerAuthentication_MutualTLS_PERMISSIVE,
+		}
+		p.Spec.PortLevelMtls = map[uint32]*securityv1beta1apis.PeerAuthentication_MutualTLS{
+			port: {
+				Mode: securityv1beta1apis.PeerAuthentication_MutualTLS_PERMISSIVE,
+			},
+		}
+	}
+}
+
+// WithSelectorSpec selects a workload based on labels
+func WithSelectorSpec(labels map[string]string) ObjectOption {
+	return func(o metav1.Object) {
+		p := o.(*securityv1beta1.PeerAuthentication)
+		p.Spec.Selector = &istiov1beta1apis.WorkloadSelector{
+			MatchLabels: labels,
+		}
+	}
 }
 
 func NewAuthorizationPolicy(ns, name string, opts ...ObjectOption) *securityv1beta1.AuthorizationPolicy {
@@ -67,22 +94,22 @@ func ApplyExistingAuthorizationPolicy(src, dst *securityv1beta1.AuthorizationPol
 func WithTargetAuthorizationPolicy(target string) ObjectOption {
 	return func(o metav1.Object) {
 		p := o.(*securityv1beta1.AuthorizationPolicy)
-		p.Spec.Selector.MatchLabels = map[string]string{"app": "knsvc", "version": "v1"}    // TODO find the real label for a ksvc
+		p.Spec.Selector.MatchLabels = map[string]string{"app": "knsvc", "version": "v1"} // TODO find the real label for a ksvc
 		p.Spec.Action = v1beta1.AuthorizationPolicy_ALLOW
-		p.Spec.Rules = []*v1beta1.Rule {
+		p.Spec.Rules = []*v1beta1.Rule{
 			{
 				From: []*v1beta1.Rule_From{
 					{
-						Source: &v1beta1.Source {
+						Source: &v1beta1.Source{
 							Principals: []string{"*"},
 						},
 					},
 				},
-			To: []*v1beta1.Rule_To {
+				To: []*v1beta1.Rule_To{
 					{
-						Operation: &v1beta1.Operation {
+						Operation: &v1beta1.Operation{
 							Methods: []string{"GET"},
-							Ports: []string{targetPort2},
+							Ports:   []string{targetPort2},
 						},
 					},
 				},
@@ -95,7 +122,7 @@ func WithTargetAuthorizationPolicy(target string) ObjectOption {
 func WithPermissiveModePeerAuthentication() ObjectOption {
 	return func(o metav1.Object) {
 		pa := o.(*securityv1beta1.PeerAuthentication)
-		pa.Spec.Selector.MatchLabels = map[string]string{"app": "knsvc", "version": "v1"}    // TODO find the real label for a ksvc
+		pa.Spec.Selector.MatchLabels = map[string]string{"app": "knsvc", "version": "v1"} // TODO find the real label for a ksvc
 		pa.Spec.Mtls.Mode = v1beta1.PeerAuthentication_MutualTLS_PERMISSIVE
 	}
 }

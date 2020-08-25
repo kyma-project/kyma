@@ -16,8 +16,8 @@ const (
 
 func TestNewPolicy(t *testing.T) {
 	policy := NewPolicy(tNs, tName,
-		WithTarget(tTarget),
-		WithPermissiveMode())
+		WithTargetDeprecated(tTarget),
+		WithPermissiveModeDeprecated())
 
 	expectPolicy := &authenticationv1alpha1.Policy{
 		ObjectMeta: metav1.ObjectMeta{

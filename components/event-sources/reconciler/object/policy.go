@@ -3,6 +3,7 @@ package object
 import (
 	authenticationv1alpha1api "istio.io/api/authentication/v1alpha1"
 	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -26,16 +27,16 @@ func NewPolicy(ns, name string, opts ...ObjectOption) *authenticationv1alpha1.Po
 
 // ApplyExistingPolicyAttributes copies some important attributes from a given
 // source Policy to a destination Policy.
-func ApplyExistingPolicyAttributes(src, dst *authenticationv1alpha1.Policy) {
+func ApplyExistingPolicyAttributes(src, dst *securityv1beta1.PeerAuthentication) {
 	// resourceVersion must be returned to the API server
 	// unmodified for optimistic concurrency, as per Kubernetes API
 	// conventions
 	dst.ResourceVersion = src.ResourceVersion
 }
 
-// WithTarget sets the target name of the Policy for a Deployment which
+// WithTargetDeprecated sets the target name of the Policy for a Deployment which
 // has metrics end-point
-func WithTarget(target string) ObjectOption {
+func WithTargetDeprecated(target string) ObjectOption {
 	return func(o metav1.Object) {
 		p := o.(*authenticationv1alpha1.Policy)
 		p.Spec.Targets = []*authenticationv1alpha1api.TargetSelector{
@@ -53,8 +54,8 @@ func WithTarget(target string) ObjectOption {
 	}
 }
 
-// WithPermissiveMode sets the mTLS mode of the policy to Permissive
-func WithPermissiveMode() ObjectOption {
+// WithPermissiveModeDeprecated sets the mTLS mode of the policy to Permissive
+func WithPermissiveModeDeprecated() ObjectOption {
 	return func(o metav1.Object) {
 		p := o.(*authenticationv1alpha1.Policy)
 		p.Spec.Peers = []*authenticationv1alpha1api.PeerAuthenticationMethod{
