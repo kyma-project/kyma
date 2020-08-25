@@ -90,9 +90,9 @@ docker-create-opts:
 	@echo $(DOCKER_CREATE_OPTS)
 .PHONY: post-pr-tag-image
 post-pr-tag-image:
-	ifneq ($(strip $(DOCKER_POST_PR_TAG)),)
+ifdef DOCKER_POST_PR_TAG
 	docker tag $(IMG_NAME) $(IMG_NAME):$(DOCKER_POST_PR_TAG)
-	endif
+endif
 
 # Targets mounting sources to buildpack
 MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate pull-licenses gqlgen
