@@ -168,6 +168,16 @@ spec:
         secret:
           secretName: "{{ template "fluent-bit.fullname" . }}-forward-tls-secret"
 {{- end }}
+{{- if and (.Values.backend.http.tls_verify) (.Values.backend.http.tls_ca) }}
+      - name: http-ca-secret
+        secret:
+          secretName: "{{ template "fluent-bit.fullname" . }}-http-ca-secret"
+{{- end }}
+{{- if (.Values.backend.http.tls) }}
+      - name: http-tls-secret
+        secret:
+          secretName: "{{ template "fluent-bit.fullname" . }}-http-tls-secret"
+{{- end }}
 {{- if .Values.prometheusPushGateway.tls.caCertificate }}
       - name: pg-ca-secret
         secret:
