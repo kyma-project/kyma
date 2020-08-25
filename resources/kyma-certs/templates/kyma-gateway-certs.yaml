@@ -1,18 +1,27 @@
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Issuer
+metadata:
+  name: kyma-ca-issuer
+  namespace: istio-system
+spec:
+  ca:
+    secretName: kyma-ca-key-pair
+---
+apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
-  name: kyma-gateway-certs
+  name: kyma-gateway-crt
+  namespace: istio-system
 spec:
-  duration: 720h # 30d
-  renewBefore: 360h # 15d
+  duration: 720h
+  renewBefore: 10m
   keySize: 4096
   organization: # For debugging purposes
-  - Kyma
-  commonName: {{ .Values.global.domainName }}
+  - kyma2
+  commonName: "*{{.Values.global.ingress.domainName}}"
   dnsNames:
-  - "*.{{ .Values.global.domainName }}"
+  - "*.{{.Values.global.ingress.domainName}}"
   secretName: kyma-gateway-certs
   issuerRef:
-    name: kyma-selfsigned-issuer
-    kind: ClusterIssuer
-    group: cert-manager.io
+    name: kyma-ca-issuer
+    kind: Issuer
