@@ -1,5 +1,5 @@
 ---
-title: Bind a Redis ServiceInstance to a Function
+title: Bind a Redis ServiceInstance to the Function
 type: Getting Started
 ---
 

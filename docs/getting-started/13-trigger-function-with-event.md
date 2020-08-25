@@ -1,5 +1,5 @@
 ---
-title: Trigger a Function with an event
+title: Trigger the Function with an event
 type: Getting Started
 ---
 

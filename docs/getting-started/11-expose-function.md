@@ -1,5 +1,5 @@
 ---
-title: Expose a Function
+title: Expose the Function
 type: Getting Started
 ---
 
