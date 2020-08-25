@@ -11,6 +11,7 @@ Start with the overarching [Kyma](./kyma) documentation where you can find the g
 -   [Backup](./backup/)
 -   [Console](./console/)
 -   [Event Mesh](./event-mesh/)
+-   [Getting Started](./getting-started/)
 -   [Helm Broker](./helm-broker/)
 -   [Logging](./logging/)
 -   [Monitoring](./monitoring/)

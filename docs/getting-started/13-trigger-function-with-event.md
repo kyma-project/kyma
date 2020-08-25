@@ -17,7 +17,7 @@ Follows these steps:
   CLI
   </summary>
 
-1. Create a Trigger CR for the `orders-function` Function to subscribe the Function to the `order.deliverysent` event type from Commerce mock:
+1. Create a Trigger CR for `orders-function` to subscribe the Function to the `order.deliverysent` event type from Commerce mock:
 
 ```yaml
 cat <<EOF | kubectl apply -f  -
