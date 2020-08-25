@@ -18,7 +18,7 @@ require (
 	github.com/kyma-project/kyma v0.5.1-0.20200824115234-c78d8c28ae20
 	github.com/kyma-project/kyma/common v0.0.0-20200824115234-c78d8c28ae20
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20200824115234-c78d8c28ae20
-	github.com/kyma-project/kyma/components/function-controller v0.0.0-20200824091842-73a94348bb7d
+	github.com/kyma-project/kyma/components/function-controller v0.0.0-20200825075519-bae7e2e7dd47
 	github.com/kyma-project/kyma/components/service-binding-usage-controller v0.0.0-20200824115234-c78d8c28ae20
 	github.com/kyma-project/rafter v0.0.0-20200402080904-a0157e52e150
 	github.com/moby/moby v17.12.0-ce-rc1.0.20200618181300-9dc6525e6118+incompatible

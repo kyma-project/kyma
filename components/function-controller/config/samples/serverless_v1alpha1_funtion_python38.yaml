@@ -1,9 +1,9 @@
 apiVersion: serverless.kyma-project.io/v1alpha1
 kind: Function
 metadata:
-  name: python37-sample-fn
+  name: python38-sample-fn
 spec:
-  runtime: python37
+  runtime: python38
   source: |
     def main(event, context):
       return "Hello world from Python"

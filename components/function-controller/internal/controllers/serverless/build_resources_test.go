@@ -59,7 +59,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 	type args struct {
 		instance *serverlessv1alpha1.Function
 	}
-	rtmCfg := runtime.GetRuntimeConfig(serverlessv1alpha1.Python37)
+	rtmCfg := runtime.GetRuntimeConfig(serverlessv1alpha1.Python38)
 
 	tests := []struct {
 		name string

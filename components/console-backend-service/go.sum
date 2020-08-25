@@ -488,6 +488,8 @@ github.com/kyma-project/kyma/components/application-operator v0.0.0-202008241152
 github.com/kyma-project/kyma/components/application-operator v0.0.0-20200824115234-c78d8c28ae20/go.mod h1:LUlTpeBF6hz7DyOtROez1IjluZOrFFgJH9vx8/me5p8=
 github.com/kyma-project/kyma/components/function-controller v0.0.0-20200824091842-73a94348bb7d h1:vSEdWo6bjmIt+n9oiOoolfJfNQO6PH6IKsyVUX8iZrw=
 github.com/kyma-project/kyma/components/function-controller v0.0.0-20200824091842-73a94348bb7d/go.mod h1:6Fxxddum/XzkLRCXNdv05HNFK39f9fBEGQmzJ9ctfnU=
+github.com/kyma-project/kyma/components/function-controller v0.0.0-20200825075519-bae7e2e7dd47 h1:q0kbtwORi816Sl54H778XXaKPKLV+OAm8KgLwF5dz0c=
+github.com/kyma-project/kyma/components/function-controller v0.0.0-20200825075519-bae7e2e7dd47/go.mod h1:6Fxxddum/XzkLRCXNdv05HNFK39f9fBEGQmzJ9ctfnU=
 github.com/kyma-project/kyma/components/service-binding-usage-controller v0.0.0-20200824115234-c78d8c28ae20 h1:tCFdxT7w71KsKE/3yYbYmE4yiFkNLT13PlxQpLK65p8=
 github.com/kyma-project/kyma/components/service-binding-usage-controller v0.0.0-20200824115234-c78d8c28ae20/go.mod h1:L25qSl+YCazWAZiPJq00zzDoXjoWK6XcsBI08+p8abI=
 github.com/kyma-project/rafter v0.0.0-20200402080904-a0157e52e150 h1:UYawXgUZBPBe+wcSDsjpyy+mDM9Q7CugfLXix3bwbWE=
