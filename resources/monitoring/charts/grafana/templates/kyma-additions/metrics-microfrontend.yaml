@@ -13,11 +13,11 @@ spec:
   version: v1
   category: Diagnostics
   placement: cluster
-  viewBaseUrl: https://grafana.{{ js .Values.global.domainName }}
+  viewBaseUrl: https://grafana.{{ js .Values.global.ingress.domainName }}
   navigationNodes:
     - label: Metrics
       navigationPath: ''
       viewUrl: ''
-      externalLink: https://grafana.{{ js .Values.global.domainName }}
+      externalLink: https://grafana.{{ js .Values.global.ingress.domainName }}
       order: 1
 {{- end }}

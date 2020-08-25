@@ -11,7 +11,7 @@ spec:
   service:
     name: {{ template "registry-fullname" . }}
     port: {{.Values.global.dockerServicePort }}
-    host: registry.{{ .Values.global.domainName }} # docker-registry.{DOMAIN}
+    host: registry.{{ .Values.global.ingress.domainName }} # docker-registry.{DOMAIN}
   rules:
     - path: /.*
       methods: ["GET"]

@@ -197,7 +197,7 @@ func getDomainNameFromCluster(k8sCli *k8sclientset.Clientset) (string, error) {
 		return "", err
 	}
 
-	value, found := overrides.FindOverrideStringValue(coreOverridesMap, "global.domainName")
+	value, found := overrides.FindOverrideStringValue(coreOverridesMap, "global.ingress.domainName")
 	logrus.Infof("using domainName: %v", value)
 
 	if !found || value == "" {

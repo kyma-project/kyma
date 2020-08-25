@@ -6,7 +6,7 @@ metadata:
 {{ include "jaeger-operator.labels" . | indent 4 }}
 spec:
   hosts:
-  - jaeger.{{ .Values.global.domainName }}
+  - jaeger.{{ .Values.global.ingress.domainName }}
   gateways:
   - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
   http:

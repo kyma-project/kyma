@@ -20,8 +20,8 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-            - "console-backend.{{ .Values.global.domainName }}"
-            - "dex.{{ .Values.global.domainName }}"
+            - "console-backend.{{ .Values.global.ingress.domainName }}"
+            - "dex.{{ .Values.global.ingress.domainName }}"
       {{ end }}
       serviceAccountName: console-{{ .Chart.Name }}-tests
       containers:
@@ -31,9 +31,9 @@ spec:
             - name: MOCKICE_IMAGE
               value: hudymi/mockice:0.1.1
             - name: DOMAIN
-              value: "{{ .Values.global.domainName }}"
+              value: "{{ .Values.global.ingress.domainName }}"
             - name: GRAPHQL_ENDPOINT
-              value: "https://console-backend.{{ .Values.global.domainName }}/graphql"
+              value: "https://console-backend.{{ .Values.global.ingress.domainName }}/graphql"
             - name: ADMIN_EMAIL
               valueFrom:
                 secretKeyRef:

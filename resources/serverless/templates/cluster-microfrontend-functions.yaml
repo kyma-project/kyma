@@ -10,7 +10,7 @@ spec:
   version: v1
   category: Development
   placement: namespace
-  viewBaseUrl: 'https://core-ui.{{ js .Values.global.domainName }}'
+  viewBaseUrl: 'https://core-ui.{{ js .Values.global.ingress.domainName }}'
   navigationNodes:
     - label: Functions
       navigationPath: functions

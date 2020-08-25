@@ -9,7 +9,7 @@ spec:
   gateways:
   - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
   hosts:
-  - kiali.{{ .Values.global.domainName }}
+  - kiali.{{ .Values.global.ingress.domainName }}
   http:
   - route:
     - destination:

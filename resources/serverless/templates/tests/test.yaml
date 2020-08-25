@@ -32,7 +32,7 @@ spec:
             - name: APP_TEST_WAIT_TIMEOUT
               value: "{{ .Values.tests.envs.waitTimeout }}"
             - name: APP_TEST_INGRESS_HOST
-              value: "{{ .Values.global.domainName }}"
+              value: "{{ .Values.global.ingress.domainName }}"
             - name: APP_TEST_VERBOSE
               value: "{{ .Values.tests.envs.verbose }}"
             - name: APP_TEST_USAGE_KIND_NAME

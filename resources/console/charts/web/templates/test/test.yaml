@@ -23,18 +23,18 @@ spec:
           hostAliases:
            - ip: {{ .Values.global.minikubeIP }}
              hostnames:
-              - "apiserver.{{ .Values.global.domainName }}"
-              - "console.{{ .Values.global.domainName }}"
-              - "catalog.{{ .Values.global.domainName }}"
-              - "instances.{{ .Values.global.domainName }}"
-              - "brokers.{{ .Values.global.domainName }}"
-              - "dex.{{ .Values.global.domainName }}"
-              - "docs.{{ .Values.global.domainName }}"
-              - "lambdas-ui.{{ .Values.global.domainName }}"
-              - "console-backend.{{ .Values.global.domainName }}"
-              - "storage.{{ .Values.global.domainName }}"
-              - "ui-test-exposed-api.{{ .Values.global.domainName }}"
-              - "core-ui.{{ .Values.global.domainName }}"
+              - "apiserver.{{ .Values.global.ingress.domainName }}"
+              - "console.{{ .Values.global.ingress.domainName }}"
+              - "catalog.{{ .Values.global.ingress.domainName }}"
+              - "instances.{{ .Values.global.ingress.domainName }}"
+              - "brokers.{{ .Values.global.ingress.domainName }}"
+              - "dex.{{ .Values.global.ingress.domainName }}"
+              - "docs.{{ .Values.global.ingress.domainName }}"
+              - "lambdas-ui.{{ .Values.global.ingress.domainName }}"
+              - "console-backend.{{ .Values.global.ingress.domainName }}"
+              - "storage.{{ .Values.global.ingress.domainName }}"
+              - "ui-test-exposed-api.{{ .Values.global.ingress.domainName }}"
+              - "core-ui.{{ .Values.global.ingress.domainName }}"
           {{ end }}
           serviceAccountName: {{ template "fullname" . }}-tests
           containers:
@@ -50,7 +50,7 @@ spec:
                    cpu: {{ .Values.test.acceptance.ui.limits.cpu }}
               env:
                 - name: DOMAIN
-                  value: {{ .Values.global.domainName }}
+                  value: {{ .Values.global.ingress.domainName }}
                 - name: LOGIN
                   valueFrom:
                     secretKeyRef:

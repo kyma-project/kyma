@@ -9,5 +9,5 @@ metadata:
 data:
   config.js: |
     window.clusterConfig = {
-      graphqlApiUrl: 'https://console-backend.{{ .Values.global.domainName }}/graphql'
+      graphqlApiUrl: 'https://console-backend.{{ .Values.global.ingress.domainName }}/graphql'
     };

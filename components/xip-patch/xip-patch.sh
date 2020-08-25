@@ -58,7 +58,7 @@ generateCerts() {
 }
 
 createOverridesConfigMap() {
-    COMMON_PARAMS=$(echo --from-literal global.domainName="$INGRESS_DOMAIN" \
+    COMMON_PARAMS=$(echo --from-literal global.ingress.domainName="$INGRESS_DOMAIN" \
                          --from-literal global.environment.gardener="$GARDENER_ENVIRONMENT")
 
 
