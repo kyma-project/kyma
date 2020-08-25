@@ -44,3 +44,11 @@ global:
   xip_patch:
     dir:
     version: d022112f
+
+init:
+  targetSecret:
+    name: kyma-gateway-certs
+    namespace: istio-system
+  image:
+    name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
+    tag: "v20200617-32c1f3ff"

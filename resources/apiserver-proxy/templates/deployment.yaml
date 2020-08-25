@@ -32,6 +32,20 @@ spec:
           hostnames:
             - "dex.{{ .Values.global.ingress.domainName }}"
       {{ end }}
+      initContainers:
+      - image: {{ .Values.init.image.name }}:{{ .Values.init.image.tag}}
+        name: cert-injector
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - name: cert-injector-sa-token
+            mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+          - name: shared-data
+            mountPath: /injected-certs/
+        command:
+          - /bin/sh
+          - -c
+          - |
+            kubectl get secret -n {{ .Values.init.targetSecret.namespace }} {{ .Values.init.targetSecret.name }} -o yaml > /injected-certs/secret.yaml
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy.dir }}apiserver-proxy:{{ .Values.global.apiserver_proxy.version }}
         name: auth-proxy
@@ -77,6 +91,8 @@ spec:
         - name: dex-tls-cert
           mountPath: /etc/dex-tls-cert/
       {{ end }}
+      - name: shared-data
+        mountPath: /etc/injected-tls-certs/
       volumes:
       {{ if not .Values.global.environment.gardener }}
       - name: dex-tls-cert
@@ -86,3 +102,8 @@ spec:
       - name: tls-cert
         secret:
           secretName: {{ template "name" . }}-tls-cert
+      - name: cert-injector-sa-token
+        secret:
+          secretName: {{ template "name" . }}-cert-injector-sa-token
+      - name: shared-data
+        emptyDir: {}
