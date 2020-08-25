@@ -11,8 +11,8 @@ Follows these steps:
 
 <div tabs name="steps" group="create-function">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Export these variables:
@@ -56,8 +56,8 @@ Follows these steps:
 
     </details>
     <details>
-    <summary label="console-ui">
-    Console UI
+    <summary label="ui">
+    UI
     </summary>
 
 1. Create a Namespace or select one from the drop-down list in the top navigation panel.

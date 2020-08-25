@@ -13,8 +13,8 @@ Follows these steps:
 
 <div tabs name="steps" group="bind-redis-to-function">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Create a ServiceBinding CR that points to the existing Redis instance in the **spec.instanceRef** field:
@@ -88,8 +88,8 @@ kubectl get secret orders-function -n orders-service -o go-template='{{range $k,
 
   </details>
   <details>
-  <summary label="console-ui">
-  Console UI
+  <summary label="ui">
+  UI
   </summary>
 
 1. Go to **Development** > **Functions** in the left navigation panel and select the `orders-function` Function.

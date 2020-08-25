@@ -15,8 +15,8 @@ Follows these steps:
 
 <div tabs name="steps" group="create-redis-service">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Provision an AddonsConfiguration CR with the Redis service:
@@ -42,8 +42,8 @@ Follows these steps:
 
   </details>
   <details>
-  <summary label="console-ui">
-  Console UI
+  <summary label="ui">
+  UI
   </summary>
 
 1. Navigate to the `orders-service` Namespace overview by selecting it from the drop-down list in the top navigation panel.

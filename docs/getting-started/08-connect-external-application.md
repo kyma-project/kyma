@@ -21,8 +21,8 @@ Follow these steps to deploy XF addons and add Commerce mock to the `orders-serv
 
 <div tabs name="provision-mock" group="connect-external-application">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Provision an AddonsConfiguration CR with the mock application set:
@@ -69,8 +69,8 @@ EOF
    ```
    </details>
    <details>
-   <summary label="console-ui">
-   Console UI
+   <summary label="ui">
+   UI
    </summary>
 
 1. Switch to the `orders-service` Namespace, and navigate to **Configuration** > **Addons** in the left navigation panel.
@@ -106,8 +106,8 @@ Follow these steps:
 
 <div tabs name="create-application" group="connect-external-application">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Apply the Application CR definition to the cluster:
@@ -159,8 +159,8 @@ EOF
 
   </details>
   <details>
-  <summary label="console-ui">
-  Console UI
+  <summary label="ui">
+  UI
   </summary>
 
 1. Return to the general view in the Console UI by selecting **Back to Namespaces**.
@@ -196,8 +196,8 @@ Follow these steps:
 
 <div tabs name="expose-events-in-namespace" group="connect-external-application">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Create an ApplicationMapping CR and apply it to the cluster:
@@ -246,8 +246,8 @@ EOF
 
   </details>
   <details>
-  <summary label="console-ui">
-  Console UI
+  <summary label="ui">
+  UI
   </summary>
 
 1. Go to **Integration** > **Applications/Systems** > **commerce-mock**, select **Create Binding** to bind the application to the Namespace in which you will later provision the APIs provided by Commerce mock. Select the `orders-service` Namespace and click **Create**.

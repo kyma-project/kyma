@@ -21,8 +21,8 @@ Create an APIRule CR which exposes the Kubernetes Service of the microservice un
 
 <div tabs name="steps" group="expose-microservice">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Open the terminal window and apply the APIRule CR:
@@ -59,8 +59,8 @@ EOF
 
 </details>
 <details>
-<summary label="console-ui">
-Console UI
+<summary label="ui">
+UI
 </summary>
 
 >**TIP:** You can expose a Service or Function with an API Rule from different views in the Console UI. This tutorial shows how to do that from the generic **API Rules** view.

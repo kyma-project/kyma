@@ -15,8 +15,8 @@ Follows these steps:
 
 <div tabs name="steps" group="create-function">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Apply the Function CR that specifies the Function's logic:
@@ -40,8 +40,8 @@ kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/
 
     </details>
     <details>
-    <summary label="console-ui">
-    Console UI
+    <summary label="ui">
+    UI
     </summary>
 
 1. Select the `orders-service` Namespace from the drop-down list in the top navigation panel.

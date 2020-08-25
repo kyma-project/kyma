@@ -11,8 +11,8 @@ Follows these steps:
 
 <div tabs name="steps" group="create-redis-instance">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Create a ServiceInstance CR. You will provision the [Redis](https://redis.io/) service with its `micro` plan:
@@ -40,8 +40,8 @@ Follows these steps:
 
     </details>
     <details>
-    <summary label="console-ui">
-    Console UI
+    <summary label="ui">
+    UI
     </summary>
 
 1. Go to **Service Management** > **Catalog** in the left navigation panel.

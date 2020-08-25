@@ -20,8 +20,8 @@ Follows these steps:
 
 <div tabs name="steps" group="expose-function">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Create an APIRule CR for the Function. It is exposed on port `80` that is the default port of the [Service](/components/serverless#architecture-architecture).
@@ -62,8 +62,8 @@ kubectl get apirules orders-function -n orders-service -o=jsonpath='{.status.API
 
     </details>
     <details>
-    <summary label="console-ui">
-    Console UI
+    <summary label="ui">
+    UI
     </summary>
 
 1. Select the `orders-service` Namespace from the drop-down list in the top navigation panel.

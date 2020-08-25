@@ -19,8 +19,8 @@ Follows these steps:
 
 <div tabs name="steps" group="bind-function">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Export these variables:
@@ -153,8 +153,8 @@ Follows these steps:
 
     </details>
     <details>
-    <summary label="console-ui">
-    Console UI
+    <summary label="ui">
+    UI
     </summary>
 
 To create a binding, you must first create a sample ServiceInstance to which you can bind the Function. Follow the sections and steps to complete this tutorial.

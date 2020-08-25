@@ -19,8 +19,8 @@ Follows these steps:
 
 <div tabs name="bind-redis-to-microservice" group="bind-redis-to-microservice">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Create a ServiceBinding CR that points in its **spec.instanceRef** field to the Redis ServiceInstance created in the previous guide:
@@ -93,8 +93,8 @@ Follows these steps:
 
   </details>
   <details>
-  <summary label="console-ui">
-  Console UI
+  <summary label="ui">
+  UI
   </summary>
 
 1. Go to **Catalog Management** > **Instances** in the left navigation panel in the `orders-service` Namespace.

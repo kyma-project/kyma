@@ -22,8 +22,8 @@ Follows these steps:
 
 <div tabs name="steps" group="expose-function">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Export these variables:
@@ -75,13 +75,13 @@ Follows these steps:
     ```bash
     curl https://$NAME.$DOMAIN
     ```
-   
-   >**NOTE:** If you are using Minikube, make sure that you've added the endpoint to the Minikube IP entry in the `/etc/hosts` file. 
+
+   >**NOTE:** If you are using Minikube, make sure that you've added the endpoint to the Minikube IP entry in the `/etc/hosts` file.
 
     </details>
     <details>
-    <summary label="console-ui">
-    Console UI
+    <summary label="ui">
+    UI
     </summary>
 
 1. Select a Namespace from the drop-down list in the top navigation panel. Make sure the Namespace includes the Function that you want to expose through an API Rule.

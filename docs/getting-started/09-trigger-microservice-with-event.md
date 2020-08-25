@@ -17,8 +17,8 @@ Follows these steps:
 
 <div tabs name="steps" group="trigger-microservice">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Create the Trigger CR for the `orders-service` microservice to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
@@ -58,8 +58,8 @@ EOF
 
    </details>
 <details>
-<summary label="console-ui">
-Console UI
+<summary label="ui">
+UI
 </summary>
 
 1. Navigate to the `orders-service` Namespace view in the Console UI from the drop-down list in the top navigation panel.

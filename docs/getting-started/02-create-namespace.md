@@ -15,8 +15,8 @@ Follow these steps:
 
 <div tabs name="setup-namespace" group="set-up-namespace">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Create the `orders-service` Namespace:
@@ -33,8 +33,8 @@ Follow these steps:
 
   </details>
   <details>
-  <summary label="console-ui">
-  Console UI
+  <summary label="ui">
+  UI
   </summary>
 
 1. [Log into](#installation-install-kyma-on-a-cluster-access-the-cluster) the Kyma Console UI.

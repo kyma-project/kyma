@@ -23,8 +23,8 @@ Follows these steps:
 
 <div tabs name="steps" group="trigger-function">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Export these variables:
@@ -72,8 +72,8 @@ These variables refer to the following:
 
     </details>
     <details>
-    <summary label="console-ui">
-    Console UI
+    <summary label="ui">
+    UI
     </summary>
 
 1. From the drop-down list in the top navigation panel, select the Namespace in which your Application exposes events.
@@ -125,7 +125,7 @@ To test if the Trigger CR is properly connected to the Function:
         "id": "A234-1234-1234",
         "data": "123456789",
         "datacontenttype": "application/json"
-      }' 
+      }'
     ```
       </details>
       <details>
@@ -141,7 +141,7 @@ To test if the Trigger CR is properly connected to the Function:
           "event-time": "2020-04-02T21:37:00Z",
           "data": "123456789"
          }'
-    ``` 
+    ```
 
       </details>
   </div>

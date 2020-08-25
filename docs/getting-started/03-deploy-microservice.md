@@ -20,8 +20,8 @@ Create a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/
 
 <div tabs name="steps" group="deploy-microservice">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Apply the microservice definition to the `orders-service` Namespace on your cluster:
@@ -38,8 +38,8 @@ kubectl get deployment orders-service -n orders-service -o=jsonpath="{.status.re
 
 </details>
 <details>
-<summary label="console-ui">
-Console UI
+<summary label="ui">
+UI
 </summary>
 
 1. Create `orders-service-deployment.yaml` on your machine containing [this Deployment definition](https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-service-deployment.yaml).
@@ -56,8 +56,8 @@ Deploy the Kubernetes [Service](https://kubernetes.io/docs/concepts/services-net
 
 <div tabs name="steps" group="deploy-microservice">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 Apply the Kubernetes Service to the `orders-service` Namespace on your cluster:
@@ -68,8 +68,8 @@ kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/
 
   </details>
   <details>
-  <summary label="console-ui">
-  Console UI
+  <summary label="ui">
+  UI
   </summary>
 
 1. Create `orders-service-service.yaml` on your machine containing [this Service definition](https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-service-service.yaml).

@@ -13,8 +13,8 @@ Follows these steps:
 
 <div tabs name="steps" group="trigger-function">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Create a Trigger CR for `orders-function` to subscribe the Function to the `order.deliverysent` event type from Commerce mock:
@@ -55,8 +55,8 @@ where:
 
     </details>
     <details>
-    <summary label="console-ui">
-    Console UI
+    <summary label="ui">
+    UI
     </summary>
 
 1. Navigate to the `orders-service` Namespace view in the Console UI from the drop-down list in the top navigation panel.
