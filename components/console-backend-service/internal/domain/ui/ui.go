@@ -8,8 +8,7 @@ import (
 	"k8s.io/client-go/dynamic"
 
 	"github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/pkg/client/clientset/versioned"
-	"github.com/kyma-project/kyma/components/console-backend-service/pkg/client/informers/externalversions"
+	v1 "github.com/kyma-project/kyma/components/console-backend-service/pkg/apis/ui/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamicinformer"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
@@ -27,40 +26,37 @@ type Resolver struct {
 	*microFrontendResolver
 	*clusterMicroFrontendResolver
 
-	informerFactory              externalversions.SharedInformerFactory
-	microFrontendInformerFactory dynamicinformer.DynamicSharedInformerFactory
+	informerFactory              dynamicinformer.DynamicSharedInformerFactory
 }
 
 func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Container, error) {
-	clientset, err := versioned.NewForConfig(restConfig)
+	clientset, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
 		return nil, err
 	}
-	microFrontendClientset, err := dynamic.NewForConfig(restConfig)
-	if err != nil {
-		return nil, err
-	}
+	informerFactory := dynamicinformer.NewDynamicSharedInformerFactory(clientset, informerResyncPeriod)
 
-	informerFactory := externalversions.NewSharedInformerFactory(clientset, informerResyncPeriod)
-	backendModuleInformer := informerFactory.Ui().V1alpha1().BackendModules().Informer()
-	backendModuleService := newBackendModuleService(backendModuleInformer)
-
-	microFrontendInformerFactory := dynamicinformer.NewDynamicSharedInformerFactory(microFrontendClientset, informerResyncPeriod)
-
-	microFrontendInformer := microFrontendInformerFactory.ForResource(schema.GroupVersionResource{
+	microFrontendInformer := informerFactory.ForResource(schema.GroupVersionResource{
 		Version:  v1alpha1.SchemeGroupVersion.Version,
 		Group:    v1alpha1.SchemeGroupVersion.Group,
 		Resource: "microfrontends",
 	}).Informer()
 
-	clusterMicroFrontendInformer := microFrontendInformerFactory.ForResource(schema.GroupVersionResource{
+	clusterMicroFrontendInformer := informerFactory.ForResource(schema.GroupVersionResource{
 		Version:  v1alpha1.SchemeGroupVersion.Version,
 		Group:    v1alpha1.SchemeGroupVersion.Group,
 		Resource: "clustermicrofrontends",
 	}).Informer()
 
+	backendModuleInformer := informerFactory.ForResource(schema.GroupVersionResource{
+		Version:  v1.SchemeGroupVersion.Version,
+		Group:    v1.SchemeGroupVersion.Group,
+		Resource: "backendmodules",
+	}).Informer()
+
 	microFrontendService := newMicroFrontendService(microFrontendInformer)
 	clusterMicroFrontendService := newClusterMicroFrontendService(clusterMicroFrontendInformer)
+	backendModuleService := newBackendModuleService(backendModuleInformer)
 
 	return &Container{
 		Resolver: &Resolver{
@@ -68,7 +64,6 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Containe
 			informerFactory:              informerFactory,
 			microFrontendResolver:        newMicroFrontendResolver(microFrontendService),
 			clusterMicroFrontendResolver: newClusterMicroFrontendResolver(clusterMicroFrontendService),
-			microFrontendInformerFactory: microFrontendInformerFactory,
 		},
 		BackendModuleInformer:        backendModuleInformer,
 		MicroFrontendInformer:        microFrontendInformer,
@@ -79,6 +74,4 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Containe
 func (r *Resolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.informerFactory.Start(stopCh)
 	r.informerFactory.WaitForCacheSync(stopCh)
-	r.microFrontendInformerFactory.Start(stopCh)
-	r.microFrontendInformerFactory.WaitForCacheSync(stopCh)
 }

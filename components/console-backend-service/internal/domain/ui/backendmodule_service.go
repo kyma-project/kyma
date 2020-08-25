@@ -1,14 +1,15 @@
 package ui
 
 import (
-	"fmt"
-
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/ui/extractor"
+	res "github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/apis/ui/v1alpha1"
 	"k8s.io/client-go/tools/cache"
 )
 
 type backendModuleService struct {
 	informer cache.SharedIndexInformer
+	extractor extractor.BMUnstructuredExtractor
 }
 
 func newBackendModuleService(informer cache.SharedIndexInformer) *backendModuleService {
@@ -22,11 +23,15 @@ func (svc *backendModuleService) List() ([]*v1alpha1.BackendModule, error) {
 
 	var backendModules []*v1alpha1.BackendModule
 	for _, item := range items {
-		backendModule, ok := item.(*v1alpha1.BackendModule)
-		if !ok {
-			return nil, fmt.Errorf("Incorrect item type: %T, should be: *BackendModule", item)
+		backendModule, err := res.ToUnstructured(item)
+		if err != nil {
+			return nil, err
 		}
-		backendModules = append(backendModules, backendModule)
+		formattedBM, err := svc.extractor.FromUnstructured(backendModule)
+		if err != nil {
+			return nil, err
+		}
+		backendModules = append(backendModules, formattedBM)
 	}
 
 	return backendModules, nil
