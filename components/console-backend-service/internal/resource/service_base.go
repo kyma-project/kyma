@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"context"
 	"fmt"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -87,9 +88,9 @@ func (s *enabledServiceBase) Create(obj interface{}, result interface{}) error {
 
 	var created *unstructured.Unstructured
 	if u.GetNamespace() == "" {
-		created, err = s.Client.Create(u, v1.CreateOptions{})
+		created, err = s.Client.Create(context.TODO(), u, v1.CreateOptions{})
 	} else {
-		created, err = s.Client.Namespace(u.GetNamespace()).Create(u, v1.CreateOptions{})
+		created, err = s.Client.Namespace(u.GetNamespace()).Create(context.TODO(), u, v1.CreateOptions{})
 	}
 	if err != nil {
 		return err
@@ -106,9 +107,9 @@ func (s *enabledServiceBase) Apply(obj interface{}, result interface{}) error {
 
 	var updated *unstructured.Unstructured
 	if u.GetNamespace() == "" {
-		updated, err = s.Client.Update(u, v1.UpdateOptions{})
+		updated, err = s.Client.Update(context.TODO(), u, v1.UpdateOptions{})
 	} else {
-		updated, err = s.Client.Namespace(u.GetNamespace()).Update(u, v1.UpdateOptions{})
+		updated, err = s.Client.Namespace(u.GetNamespace()).Update(context.TODO(), u, v1.UpdateOptions{})
 	}
 	if err != nil {
 		return err
@@ -130,7 +131,7 @@ func (s *enabledServiceBase) deleteListener(listener *Listener) {
 }
 
 func (s *enabledServiceBase) DeleteInNamespace(name, namespace string) error {
-	return s.Client.Namespace(namespace).Delete(name, &v1.DeleteOptions{})
+	return s.Client.Namespace(namespace).Delete(context.TODO(), name, v1.DeleteOptions{})
 }
 
 func (s *enabledServiceBase) GVR() schema.GroupVersionResource {
