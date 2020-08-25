@@ -3,10 +3,13 @@
 {{ $configMapLen := int (add1 (div $fileLen .Values.jobs.crdsInConfigMap)) }}
 
 {{ $currentScope := . }}
+{{ $skipCrds := .Values.global.skipCrds }}
 
 {{ $filePaths := list }}
 {{ range $path, $_ := $files }}
+#{{ if has $path $skipCrds }}
 {{ $filePaths = append $filePaths (base $path) }}
+#{{ end }}
 {{ end }}
 
 {{ range $idx, $_ := until $configMapLen }}
@@ -22,16 +25,6 @@ metadata:
     "helm.sh/hook-weight": "1"
     "helm.sh/hook-delete-policy": "before-hook-creation"
 data:
-
-  #{{ range $pathIdx, $path := $filePaths }}
-  #  {{ if has $path (list .Values.global.skipCrds) }}
-  #  {{ else }}
-  #  {{ $pathIdx }}: {{ printf "%s " $path}}
-  #  {{ end }}
-  #{{ end }}
-
-{{ (printf "padu: %s" "abc") }}
-
 {{ range $pathIdx, $path := $filePaths }}
   {{- with $currentScope }}
   {{ if eq $idx (mod $pathIdx $configMapLen) }}
