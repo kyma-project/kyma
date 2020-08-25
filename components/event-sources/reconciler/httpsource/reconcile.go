@@ -182,12 +182,12 @@ func (r *Reconciler) reconcileService(src *sourcesv1alpha1.HTTPSource, deploymen
 // reconcilePolicy reconciles the state of the Policy.
 func (r *Reconciler) reconcilePolicy(src *sourcesv1alpha1.HTTPSource, deployment *appsv1.Deployment) (*securityv1beta1.PeerAuthentication, error) {
 	if deployment == nil {
-		r.Logger.Info("Skipping creation of Istio Policy as there is no deployment yet")
+		r.Logger.Info("Skipping creation of Istio PeerAuthentication as there is no deployment yet")
 		return nil, nil
 	}
 
 	if deployment.Status.AvailableReplicas == 0 {
-		r.Logger.Info("Skipping creation of Istio Policy as there is no revision yet")
+		r.Logger.Info("Skipping creation of Istio PeerAuthentication as there is no revision yet")
 		return nil, nil
 	}
 	desiredPolicy := r.makePolicy(src, deployment)
@@ -204,7 +204,7 @@ func (r *Reconciler) reconcilePolicy(src *sourcesv1alpha1.HTTPSource, deployment
 
 	_, err = r.syncPolicy(src, currentPolicy, desiredPolicy)
 	if err != nil {
-		return nil, pkgerrors.Wrap(err, "failed to synchronize Istio Policy")
+		return nil, pkgerrors.Wrap(err, "failed to synchronize Istio PeerAuthentication")
 	}
 
 	return desiredPolicy, nil
@@ -311,13 +311,13 @@ func (r *Reconciler) getOrCreatePolicy(src *sourcesv1alpha1.HTTPSource,
 	case apierrors.IsNotFound(err):
 		policy, err = r.securityClient.PeerAuthentications(src.Namespace).Create(desiredPolicy)
 		if err != nil {
-			r.eventWarn(src, failedCreateReason, "Creation failed for Istio Policy %q", desiredPolicy.Name)
-			return nil, pkgerrors.Wrap(err, "failed to create Istio Policy")
+			r.eventWarn(src, failedCreateReason, "Creation failed for Istio PeerAuthentication %q", desiredPolicy.Name)
+			return nil, pkgerrors.Wrap(err, "failed to create Istio PeerAuthentication")
 		}
-		r.event(src, createReason, "Created Istio Policy %q", policy.Name)
+		r.event(src, createReason, "Created Istio PeerAuthentication %q", policy.Name)
 
 	case err != nil:
-		return nil, pkgerrors.Wrap(err, "failed to get Istio Policy from cache")
+		return nil, pkgerrors.Wrap(err, "failed to get Istio PeerAuthentication from cache")
 	}
 
 	return policy, nil
@@ -327,18 +327,19 @@ func (r *Reconciler) getOrCreatePolicy(src *sourcesv1alpha1.HTTPSource,
 // creates it if it is missing.
 func (r *Reconciler) deleteDeprecatedPolicy(src *sourcesv1alpha1.HTTPSource,
 	desiredPolicy *securityv1beta1.PeerAuthentication) error {
-	policy, err := r.policyLister.Policies(src.Namespace).Get(desiredPolicy.Name)
+	desiredPolicyName := desiredPolicy.Namespace
+	policy, err := r.policyLister.Policies(src.Namespace).Get(desiredPolicyName)
 	switch {
 	case apierrors.IsNotFound(err):
-		r.event(src, deleteReason, "No occurrence of deprecated Istio Policy found for: %q", policy.Name)
-
+		r.event(src, deleteReason, "No occurrence of deprecated Istio PeerAuthentication found for: %q", desiredPolicyName)
+		return nil
 	case err != nil:
-		return pkgerrors.Wrap(err, "failed to get Istio Policy from cache")
+		return pkgerrors.Wrap(err, "failed to get Istio PeerAuthentication from cache")
 	}
 	if err := r.authClient.Policies(src.Namespace).Delete(policy.Name, &metav1.DeleteOptions{}); err != nil {
 		return err
 	}
-	r.event(src, deleteReason, "Deleted deprecated Istio Policy: %q", policy.Name)
+	r.event(src, deleteReason, "Deleted deprecated Istio PeerAuthentication: %q", policy.Name)
 
 	return nil
 }
@@ -483,10 +484,10 @@ func (r *Reconciler) syncPolicy(src *sourcesv1alpha1.HTTPSource, currentPolicy, 
 
 	policy, err := r.securityClient.PeerAuthentications(currentPolicy.Namespace).Update(desiredPolicy)
 	if err != nil {
-		r.eventWarn(src, failedUpdateReason, "Update failed for Istio Policy %q", desiredPolicy.Name)
+		r.eventWarn(src, failedUpdateReason, "Update failed for Istio PeerAuthentication %q", desiredPolicy.Name)
 		return nil, err
 	}
-	r.event(src, updateReason, "Updated Istio Policy %q", policy.Name)
+	r.event(src, updateReason, "Updated Istio PeerAuthentication %q", policy.Name)
 
 	return policy, nil
 }
