@@ -3,13 +3,17 @@ title: Bind the Redis ServiceInstance to the microservice
 type: Getting Started
 ---
 
-In this guide, we will bind the created ServiceInstance of the Redis service to the `orders-service` microservice. Them, we will send a sample order to the microservice. This way we will test if the binding to the external Redis storage works and the order data is not removed upon the microservice Pod restart.
+In this guide, we will bind the created ServiceInstance of the Redis service to the `orders-service` microservice. Then, you will test the binding by sending a sample order to the microservice. This way, you can check if the binding to the external Redis storage works and the order data is no longer removed upon the microservice Pod restart.
+
+## Reference
 
 To create the binding, you will use ServiceBinding and ServiceBindingUsage custom resources (CRs) managed by the [Service Catalog](https://svc-cat.io/docs/walkthrough/).
 
 >**NOTE:** See the document on [provisioning and binding](/components/service-catalog/#details-provisioning-and-binding) to learn more about binding Service Instances to microservices in Kyma.
 
 ## Steps
+
+Follows these steps:
 
 ### Bind the Redis ServiceInstance to the microservice
 
@@ -19,9 +23,7 @@ To create the binding, you will use ServiceBinding and ServiceBindingUsage custo
   CLI
   </summary>
 
-> **NOTE:** The ServiceInstance, ServiceBinding, and ServiceBindingUsage can have different names than the Function, but it is recommended that all related resources share a common name.
-
-1. Create a ServiceBinding CR that points in the **spec.instanceRef** field to the Redis ServiceInstance created in the previous guide:
+1. Create a ServiceBinding CR that points in its **spec.instanceRef** field to the Redis ServiceInstance created in the previous guide:
 
    ```yaml
    cat <<EOF | kubectl apply -f -
@@ -69,15 +71,13 @@ To create the binding, you will use ServiceBinding and ServiceBindingUsage custo
 
      > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a microservice must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
-4. Check if the ServiceBindingUsage CR was created successfully. The last condition in the CR status should state `Ready True`:
+4. Check if the ServiceBindingUsage CR was created. The last condition in the CR status should state `Ready True`:
 
    ```bash
    kubectl get servicebindingusage orders-service -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
    ```
 
-5. If you want to see the Secret details and retrieve them from the ServiceBinding, run this command:
-
-<!-- Not sure if this step is needed-->
+ If you want to see the Secret details and retrieve them from the ServiceBinding, run this command:
 
     ```bash
     kubectl get secret orders-service -n orders-service -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
@@ -97,7 +97,7 @@ To create the binding, you will use ServiceBinding and ServiceBindingUsage custo
   Console UI
   </summary>
 
-1. Go to the **Catalog Management** > **Instances** view in the left navigation panel in the `orders-service` Namespace.
+1. Go to **Catalog Management** > **Instances** in the left navigation panel in the `orders-service` Namespace.
 
 2. Switch to the **Add-Ons** tab.
 
@@ -107,7 +107,7 @@ To create the binding, you will use ServiceBinding and ServiceBindingUsage custo
 
 5. Select **Bind Application**.
 
-6. In the box that opens up:
+6. In the pop-up box that opens up:
 
     - Choose `order-service` from the **Select Application** drop-down
     - Choose **Set prefix for injected variables** and enter `REDIS_` in the box under the **Prefix namespace value** field.
@@ -156,7 +156,7 @@ To create the binding, you will use ServiceBinding and ServiceBindingUsage custo
    []
    ```
 
-3. Now, send a `POST` request to the microservice with a sample order details:
+3. Send a `POST` request to the microservice with a sample order details:
 
    ```bash
    curl -ikX POST "https://$SERVICE_DOMAIN/orders" \
@@ -182,7 +182,7 @@ To create the binding, you will use ServiceBinding and ServiceBindingUsage custo
    [{"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
    ```
 
-5. Similarly to the previous tutorial where we exposed the `orders-service` microservice, remove the Pod created by the `orders-service` Deployment. Run this command and wait for the system to delete the Pod and start a new one:
+5. Similarly to the previous guide where you exposed the `orders-service` microservice, remove the Pod created by the `orders-service` Deployment. Run this command and wait for the system to delete the Pod and start a new one:
 
    ```bash
    kubectl delete pod -n orders-service -l app=orders-service

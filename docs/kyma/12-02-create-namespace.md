@@ -3,9 +3,9 @@ title: Set up a Namespace
 type: Getting Started
 ---
 
-Almost all operations in these guides are performed using Namespace-scoped resources, so let's start by creating a Namespace called `orders-service`.
+Almost all operations in these guides are performed using [Namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)-scoped resources, so let's start by creating a dedicated Namespace called `orders-service` in which you will you will deploy all further resources.
 
-## Related Kyma components
+## Reference
 
 This and all other guides demonstrate steps you can perform both through terminal and UI. Read about the [Console](/components/console) through which you can visually and [securely](/components/security/) administer Kyma functionalities and manage the basic Kubernetes resources.
 

@@ -3,13 +3,15 @@ title: Trigger a microservice with an event
 type: Getting Started
 ---
 
-This tutorial shows how to trigger the deployed `orders-service` microservice with the `order.deliverysent.v1` event from Commerce mock connected to Kyma.
+This tutorial shows how to trigger the deployed `orders-service` microservice with the `order.deliverysent.v1` event from Commerce mock previously connected to Kyma.
 
-## Related Kyma components
+## Reference
 
-This guide demonstrates how [Event Mesh](/components/event-mesh/) works in Kyma. It allows you to receive business events from external solutions and is able to trigger business flows using Functions or microservices.
+This guide demonstrates how [Event Mesh](/components/event-mesh/) works in Kyma. It allows you to receive business events from external solutions and trigger business flows with Functions or microservices.
 
 ## Steps
+
+Follows these steps:
 
 ### Create the event trigger
 
@@ -19,7 +21,7 @@ This guide demonstrates how [Event Mesh](/components/event-mesh/) works in Kyma.
   CLI
   </summary>
 
-1. Create the Trigger CR for the `orders-service` microservice to subscribe it to the `order.deliverysent.v1` event from Commerce mock:
+1. Create the Trigger CR for the `orders-service` microservice to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
 
 ```bash
 cat <<EOF | kubectl apply -f  -
@@ -44,11 +46,11 @@ spec:
 EOF
 ```
 
-- **spec.filter.attributes.eventtypeversion** points to the specific event version, on our case it is `v1`.
-- **spec.filter.attributes.source** is taken from the name of the Application CR and specifies the source of events. In our example, it is `commerce-mock`.
-- **spec.filter.attributes.type** points to the given event type to which you want to subscribe the microservice. In our case, it is `order.deliverysent`.
+- **spec.filter.attributes.eventtypeversion** points to the specific event version. In this example, it is `v1`.
+- **spec.filter.attributes.source** is taken from the name of the Application CR and specifies the source of events. In this example, it is `commerce-mock`.
+- **spec.filter.attributes.type** points to the given event type to which you want to subscribe the microservice. In this example, it is `order.deliverysent`.
 
-2. Check if the Trigger CR was created and is ready. The status of the CR should state `True`:
+2. Check if the Trigger CR was created and is ready. Its status should be `True`:
 
    ```bash
    kubectl get trigger orders-service -n orders-service -o=jsonpath="{.status.conditions[2].status}"
@@ -62,11 +64,11 @@ Console UI
 
 1. Navigate to the `orders-service` Namespace view in the Console UI from the drop-down list in the top navigation panel.
 
-2. Go to the **Services** view under the **Operation** section in the left navigation panel and navigate to `orders-service`.
+2. Go to **Operation** > **Services** in the left navigation panel and navigate to `orders-service`.
 
 3. Once in the service's details view, select **Add Event Trigger** in the **Event Triggers** section.
 
-4. Find the `order.deliverysent` event with the `v1` version from the `commerce-mock` application. Mark it on the list and select **Add**.
+4. Find the `order.deliverysent` event type with the `v1` version from the `commerce-mock` application. Mark it on the list and select **Add**.
 
    The message appears on the UI confirming that the event trigger was created, and you will see it in the **Event Triggers** section of the service's details view.
 
@@ -78,7 +80,7 @@ Console UI
 
 To send events from Commerce mock to the `orders-service` microservice, follow these steps:  
 
-1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or go to **API Rules** view (under **Configuration** section) in the `orders-service` Namespace and select the mock application. You can also follow the direct link under the **Host** column.
+1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or use the link under **Host** in the **Configuration** > **API Rules** view in the `order-service` Namespace.
 
 2. Switch to the **Remote APIs** tab, find **SAP Commerce Cloud - Events**, and select it.
 
@@ -86,7 +88,7 @@ To send events from Commerce mock to the `orders-service` microservice, follow t
 
    The message appears on the UI confirming that the event was sent.
 
-4. Call the microservice for the last time to verify is the event details were saved:
+4. Call the microservice to verify is the event details were saved:
 
    ```bash
    curl -ik "https://$SERVICE_DOMAIN/orders"
@@ -98,7 +100,7 @@ To send events from Commerce mock to the `orders-service` microservice, follow t
    > export SERVICE_DOMAIN=$(kubectl get virtualservices -l apirule.gateway.kyma-project.io/v1alpha1=orders-service.orders-service -n orders-service -o=jsonpath='{.items[*].spec.hosts[0]}')
    > ```
 
-   You should see a response similar to the following:
+   You should see a similar response:
 
    ```bash
    content-length: 2

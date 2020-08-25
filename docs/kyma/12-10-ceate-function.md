@@ -3,9 +3,9 @@ title: Create a Function
 type: Getting Started
 ---
 
-This tutorial shows how you can create a simple Function.
+Let's now repeat the same steps but for a Function that we did for the `order-service` microservice. This guide shows how you can create a simple `orders-function` Function with the same logic as the one in the microservice. In further guides, you will expose the Function, bind it to the Redis storage, and subscribe it to the `order.deliverysent.v1` event type from Commerce mock.
 
-## Related Kyma components
+## Reference
 
 This guide demonstrates how [Serverless](/components/event-mesh/) works in Kyma. It allows you to build, run, and manage serverless applications called Functions. You can bind them to other services, subscribe business events from external solutions to them, and trigger the Function's logic upon receiving a given event type.
 
@@ -31,7 +31,7 @@ kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/
     kubectl get functions orders-function -n orders-service
     ```
 
-    You should get a result similar to the following example:
+    You should get a similar result:
 
     ```bash
     NAME                CONFIGURED   BUILT   RUNNING   VERSION   AGE
@@ -44,9 +44,9 @@ kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/
     Console UI
     </summary>
 
-1. Navigate to the `orders-service` Namespace view in the Console UI from the drop-down list in the top navigation panel.
+1. Select the `orders-service` Namespace from the drop-down list in the top navigation panel.
 
-2. Go to the **Functions** view under the **Development** section in the left navigation panel and select **Create Function**.
+2. Go to **Development** > **Functions** in the left navigation panel and select **Create Function**.
 
 3. In the pop-up box, provide the `orders-function` name, add `app=orders-function` and `example=orders-function` labels, and select **Create** to confirm the changes.
 

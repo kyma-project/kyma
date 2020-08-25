@@ -3,17 +3,19 @@ title: Expose the microservice
 type: Getting Started
 ---
 
-Now that you deployed a standalone `orders-service` microservice, you can make it available outside the cluster to other resources by exposing its Kubernetes Service.
+Now that you deployed a standalone `orders-service` microservice, allow other resources to communicate with it. Make it available outside the cluster to other resources by exposing its Kubernetes Service through an APIRule custom resources (CR).
 
-## Related Kyma components
+## Reference
 
-This guide demonstrates how [API Gateway](/components/api-gateway) works in Kyma. It makes your service accessible outside the Kyma cluster through the APIRule CR.
+This guide demonstrates how [API Gateway](/components/api-gateway) works in Kyma. It exposes your Service under secured or unsecured endpoints for other Services outside the Kyma cluster.
 
 ## Steps
 
+Follows these steps:
+
 ### Expose the Service
 
-Create an APIRule custom resource (CR) which exposes the Kubernetes Service of the microservice under na unsecured endpoint (**handler** set to `noop`) and accepts the `GET` and `POST` methods.
+Create an APIRule CR which exposes the Kubernetes Service of the microservice under na unsecured endpoint (**handler** set to `noop`) and accepts the `GET` and `POST` methods.
 
 >**TIP:** **noop** stands for "no operation" and means access without any token. If you want to secure your Service, read the [tutorial](/components/api-gateway/#tutorials-expose-and-secure-a-service) to learn how to do that.
 
@@ -65,7 +67,7 @@ Console UI
 
 1. Select the `orders-service` Namespace from the drop-down list in the top navigation panel.
 
-2. Navigate to the **Configuration** section in the left navigation panel, go to the **API Rules** view, and select **Create API Rule**.
+2. Go to **Configuration** > **API Rules** in the left navigation panel, and select **Create API Rule**.
 
 3. In the **General settings** section:
 
@@ -110,7 +112,7 @@ export SERVICE_DOMAIN=$(kubectl get virtualservices -l apirule.gateway.kyma-proj
    curl -ik "https://$SERVICE_DOMAIN/orders"
 ```
 
-The system returns a response similar to the following:
+The system returns a similar response:
 
 ```bash
 content-length: 2
@@ -168,7 +170,7 @@ x-envoy-upstream-service-time: 6
    ```bash
    curl -ik "https://$SERVICE_DOMAIN/orders"
    ```
-   You should receive a similar response:
+   The system returns a similar response:
 
   ```bash
   content-length: 2
@@ -181,4 +183,4 @@ x-envoy-upstream-service-time: 6
   []
   ```
 
-  As you can see, the `orders-service` microservice uses in-memory storage which means every time you delete the Pod of the microservice or change the Deployment definition, the order details will be lost. In further guides, you will see how you can prevent order data deletion by attaching an external Redis storage to the microservice.
+  As you can see, the `orders-service` microservice uses in-memory storage which means every time you delete the Pod of the microservice or change the Deployment definition, the order details get lost. In further guides, you will see how you can prevent order data deletion by binding external Redis storage to the microservice.

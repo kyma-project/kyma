@@ -3,9 +3,7 @@ title: Trigger a Function with an event
 type: Getting Started
 ---
 
-This tutorial shows how to trigger a Function with an event from Commerce mock connected to Kyma.
-
-> **NOTE:** To learn more about events flow in Kyma, read the [eventing](/components/event-mesh) documentation.
+As the final step, you will trigger the Function with the `order.deliverysent` event type from Commerce mock, send a sample event from the mock application, and test if the event reached the Function.
 
 ## Steps
 
@@ -19,7 +17,7 @@ Follows these steps:
   CLI
   </summary>
 
-1. Create a Trigger CR for the `orders-function` Function to subscribe the Function to the `order.deliverysent.v1` event from Commerce mock:
+1. Create a Trigger CR for the `orders-function` Function to subscribe the Function to the `order.deliverysent` event type from Commerce mock:
 
 ```yaml
 cat <<EOF | kubectl apply -f  -
@@ -45,11 +43,11 @@ EOF
 ```
 
 where:
-- **spec.filter.attributes.eventtypeversion** points to the specific event version. In our case, it is `v1`.
-- **spec.filter.attributes.source** is taken from the name of the Application CR and specifies the source of events. In our example, it is `commerce-mock`.
-- **spec.filter.attributes.type** points to the given event type to which you want to subscribe the Function. In our case, it is `order.deliverysent`.
+- **spec.filter.attributes.eventtypeversion** points to the specific event version. In this example, it is `v1`.
+- **spec.filter.attributes.source** is taken from the name of the Application CR and specifies the source of events. In this example, it is `commerce-mock`.
+- **spec.filter.attributes.type** points to the given event type to which you want to subscribe the Function. In this example, it is `order.deliverysent`.
 
-2. Check if the Trigger CR was created and is ready. The status of the CR should state `True`:
+2. Check if the Trigger CR was created and is ready. Its status should be `True`:
 
    ```bash
    kubectl get trigger orders-function -n orders-service -o=jsonpath="{.status.conditions[2].status}"
@@ -63,7 +61,7 @@ where:
 
 1. Navigate to the `orders-service` Namespace view in the Console UI from the drop-down list in the top navigation panel.
 
-2. Go to the **Functions** view under the **Development** section in the left navigation panel and navigate to `orders-function`.
+2. Go to **Development** > **Functions** in the left navigation panel and navigate to `orders-function`.
 
 3. Once in the Function's details view, switch to the **Configuration** tab and select **Add Event Trigger** in the **Event Triggers** section.
 
@@ -78,7 +76,7 @@ The message appears on the UI confirming that the event trigger was created, and
 
 To send events from Commerce mock to `orders-function`, follow these steps:
 
-1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or go to **API Rules** view (under **Configuration** section) in the `orders-service` Namespace and select the mock application. You can also follow the direct link under the **Host** column.
+1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or use the link under **Host** in the **Configuration** > **API Rules** view in the `order-service` Namespace.
 
 2. Switch to the **Remote APIs** tab, find **SAP Commerce Cloud - Events** and select it.
 
@@ -86,7 +84,7 @@ To send events from Commerce mock to `orders-function`, follow these steps:
 
    The message appears on the UI confirming that the event was successfully sent.
 
-4. Call the Function for the last time to verify is the event details were saved:
+4. Call the Function to verify if the event details were saved:
 
    ```bash
    curl -ik "https://$FUNCTION_DOMAIN"
@@ -98,7 +96,7 @@ To send events from Commerce mock to `orders-function`, follow these steps:
    > export FUNCTION_DOMAIN=$(kubectl get virtualservices -l apirule.gateway.kyma-project.io/v1alpha1=orders-function.orders-service -n orders-service -o=jsonpath='{.items[*].spec.hosts[0]}')
    > ```
 
-   You should see a similar response:
+   You should see a similar response proving that the `987654321` event was delivered as expected:
 
    ```bash
    HTTP/2 200

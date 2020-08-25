@@ -3,17 +3,19 @@ title: Deploy the microservice
 type: Getting Started
 ---
 
-Learn how to quickly deploy a standalone [`orders-service`](https://github.com/kyma-project/examples/blob/master/http-db-service/README.md) microservice on a Kyma cluster.
+You will now start by deploying a standalone [`orders-service`](https://github.com/kyma-project/examples/blob/master/http-db-service/README.md) microservice on a Kyma cluster. This microservice will act as a link between the external application and the Redis service and we will build the whole end-to-end flow around it.
 
-You will create:
-- Deployment in which you specify the configuration of the microservice
+In this guide you will create:
+- Deployment in which you specify the configuration of your microservice
 - Kubernetes Service through which your microservice will communicate with other resources on the Kyma cluster
 
 ## Steps
 
+Follows these steps:
+
 ### Create a Deployment
 
-1. Create a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) that provides the microservice definition and enables you to run it on the cluster. The Deployment uses the `eu.gcr.io/kyma-project/pr/orders-service:PR-162` image. This Docker image exposes the `8080` port on which the related Service is listening.
+Create a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) that provides the microservice definition and enables you to run it on the cluster. The Deployment uses the `eu.gcr.io/kyma-project/pr/orders-service:PR-162` image. This Docker image exposes the `8080` port on which the related Service is listening.
 
 <div tabs name="steps" group="deploy-microservice">
   <details>
@@ -21,7 +23,7 @@ You will create:
   CLI
   </summary>
 
-Run this command:
+1. Apply the microservice definition to the `orders-service` Namespace on your cluster:
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-service-deployment.yaml
@@ -57,7 +59,7 @@ Deploy the Kubernetes [Service](https://kubernetes.io/docs/concepts/services-net
   CLI
   </summary>
 
-Run this command:
+Apply the Kubernetes Service to the `orders-service` Namespace on your cluster:
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-service-service.yaml

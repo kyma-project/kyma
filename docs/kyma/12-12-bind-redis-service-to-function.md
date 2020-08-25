@@ -3,7 +3,7 @@ title: Bind a Redis ServiceInstance to a Function
 type: Getting Started
 ---
 
-This tutorial shows how you can bind a sample instance of the Redis service to a Function. After completing all steps, you will get the Function with encoded Secrets to the service. You can use them to connect to the service and use it as external storage for the Function.
+This guide shows how you can bind a sample instance of the Redis service to the Function. After completing all steps, you will get the Function with encoded Secrets to the service. You will use Redis as an external database for the Function that replaces its in-memory storage.
 
 ## Steps
 
@@ -32,7 +32,7 @@ spec:
 EOF
 ```
 
-2. Check if the ServiceBinding CR was created. The last condition in the CR status should state `Ready True`:
+2. Check if the ServiceBinding CR was created. The last condition in the CR status should be `Ready True`:
 
 ```bash
 kubectl get servicebinding orders-function -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
@@ -65,15 +65,14 @@ EOF
 
      > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
-4. Check if the ServiceBindingUsage CR was created. The last condition in the CR status should state `Ready True`:
+4. Check if the ServiceBindingUsage CR was created. The last condition in the CR status should be `Ready True`:
 
 ```bash
 kubectl get servicebindingusage orders-function -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
 ```
 
-5. If you want to see the Secret details and retrieve them from the ServiceBinding, run this command:
+If you want to see the Secret details and retrieve them from the ServiceBinding, run this command:
 
-<!-- Not sure if this step is needed-->
 
 ```bash
 kubectl get secret orders-function -n orders-service -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
@@ -87,13 +86,13 @@ kubectl get secret orders-function -n orders-service -o go-template='{{range $k,
     REDIS_PASSWORD: 1tvDcINZvp
     ```
 
-    </details>
-    <details>
-    <summary label="console-ui">
-    Console UI
-    </summary>
+  </details>
+  <details>
+  <summary label="console-ui">
+  Console UI
+  </summary>
 
-1. Go to the **Functions** view under the **Development** section in the left navigation panel and select the `orders-function` Function.
+1. Go to **Development** > **Functions** in the left navigation panel and select the `orders-function` Function.
 
 2. Switch to the **Configuration** tab and select **Create Service Binding** in the **Service Bindings** section.
 
@@ -209,4 +208,4 @@ If you switch to the **Code** tab and scroll down to the **Environment Variables
    [{"orderCode":"762727234","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"123456789","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
    ```
 
-   As we can see, `orders-function` uses Redis storage now. It means that every time you delete the Pod of the Function or change its Deployment definition, the order details will not get lost.
+   As you can see, `orders-function` uses Redis storage now. It means that every time you delete the Pod of the Function or change its Deployment definition, the order details will not get lost.

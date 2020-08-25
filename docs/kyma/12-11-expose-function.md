@@ -3,9 +3,9 @@ title: Expose a Function
 type: Getting Started
 ---
 
-This tutorial shows how you can expose a Function to access it outside the cluster, through an HTTP proxy. To expose it, use an APIRule custom resource (CR) managed by the in-house API Gateway Controller. This controller reacts to an instance of the APIRule CR and, based on its details, it creates an Istio Virtual Service and Oathkeeper Access Rules that specify your permissions for the exposed Function.
+In this guides, you will expose the Function outside the cluster, through an HTTP proxy. To expose it, use an APIRule custom resource (CR) managed by the in-house API Gateway Controller. This controller reacts to an instance of the APIRule CR and, based on its details, it creates an Istio Virtual Service and Oathkeeper Access Rules that specify your permissions for the exposed Function.
 
-When you complete this tutorial, you get a Function that:
+After completing this guide, you will get a Function that:
 
 - Is available under an unsecured endpoint (**handler** set to `noop` in the APIRule CR).
 - Accepts `GET` and `POST` methods.
@@ -14,9 +14,9 @@ When you complete this tutorial, you get a Function that:
 
 ## Steps
 
-### Expose the Function
-
 Follows these steps:
+
+### Expose the Function
 
 <div tabs name="steps" group="expose-function">
   <details>
@@ -48,7 +48,7 @@ spec:
 EOF  
 ```
 
-2. Check if the API Rule was created and has the `OK` status:
+2. Check if the APIRule was created and has the `OK` status:
 
 ```bash
 kubectl get apirules orders-function -n orders-service -o=jsonpath='{.status.APIRuleStatus.code}'
@@ -66,9 +66,9 @@ kubectl get apirules orders-function -n orders-service -o=jsonpath='{.status.API
     Console UI
     </summary>
 
-1. Navigate to the `orders-service` Namespace view in the Console UI from the drop-down list in the top navigation panel.
+1. Select the `orders-service` Namespace from the drop-down list in the top navigation panel.
 
-2. Go to the **API Rules** view under the **Configuration** section in the left navigation panel and select **Create API Rule**.
+2. Go to **Configuration** > **API Rules** in the left navigation panel and select **Create API Rule**.
 
 3. In the **General settings** section:
 
@@ -188,4 +188,4 @@ kubectl get apirules orders-function -n orders-service -o=jsonpath='{.status.API
 
    []
    ```
-  As you can see, `orders-function` uses in-memory storage which means every time you delete the Pod of the Function or change its Deployment definition, the order details will be lost. Just like we did with the microservice, let's bind the external Redis storage to prevent the order data loss.
+  As you can see, `orders-function` uses in-memory storage which means every time you delete the Pod of the Function or change its Deployment definition, the order details will be lost. Just like we did with the microservice in previous guides, let's bind the external Redis storage to the Function to prevent the order data loss.
