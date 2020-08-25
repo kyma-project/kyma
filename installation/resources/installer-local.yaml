@@ -96,7 +96,7 @@ spec:
       containers:
       - name: kyma-installer-container
         image: colunira/kyma-installer:certs-0.0.1
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         args:
           - -overrideLogFile=/app/overrides.txt
 ---
