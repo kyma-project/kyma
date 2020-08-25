@@ -90,7 +90,7 @@ docker-create-opts:
 	@echo $(DOCKER_CREATE_OPTS)
 .PHONY: post-pr-tag-image
 post-pr-tag-image:
-	ifdef DOCKER_POST_PR_TAG
+	ifneq ($(strip $(DOCKER_POST_PR_TAG)),)
 	docker tag $(IMG_NAME) $(IMG_NAME):$(DOCKER_POST_PR_TAG)
 	endif
 
