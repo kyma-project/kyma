@@ -7,10 +7,19 @@
 
 {{ $filePaths := list }}
 {{ range $path, $_ := $files }}
-#{{ if has $path $skipCrds }}
+{{ if eq (has (base $path) $skipCrds) false }}
 {{ $filePaths = append $filePaths (base $path) }}
-#{{ end }}
 {{ end }}
+{{ end }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: default
+  name: padu
+  annotations:
+data:
+  files: {{ $filePaths }}
 
 {{ range $idx, $_ := until $configMapLen }}
 apiVersion: v1
