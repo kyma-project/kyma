@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-environment-overrides-creator
+  annotations:
+    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
+    "helm.sh/hook": "pre-install"
+    "helm.sh/hook-weight": "0"
+spec:
+  activeDeadlineSeconds: 180
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ .Release.Name }}-crd-install
+      restartPolicy: OnFailure
+      containers:
+        - name: {{ .Release.Name }}-install-crds
+          image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - |
+              kubectl create configmap environment-override --from-literal global.environment.gardener={{ template "environment.isGardener" . }} -n kyma-installer
+              kubectl label configmap environment-override --overwrite installer=overrides -n kyma-installer
+              kubectl label configmap environment-override --overwrite kyma-project.io/installation="" -n kyma-installer
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 256Mi
+              cpu: 200m

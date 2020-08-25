@@ -1,4 +1,12 @@
-{{ $files := .Files.Glob "files/**.yaml" }}
+{{ $globPattern := "" }}
+
+{{- if .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" }}
+  {{ $globPattern = "files/crds/*.yaml" }}
+{{ else }}
+  {{ $globPattern = "files/**.yaml" }}
+{{ end }}
+
+{{ $files := .Files.Glob (printf "%s" $globPattern) }}
 {{ $fileLen := len $files }}
 {{ $configMapLen := int (add1 (div $fileLen .Values.jobs.crdsInConfigMap)) }}
 

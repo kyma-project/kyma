@@ -14,3 +14,15 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- $name := default .Chart.Name .Values.nameOverride -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+
+{{/*
+True if Gardener
+*/}}
+{{- define "environment.isGardener" -}}
+{{- if .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" }}
+  {{- true -}}
+{{- else }}
+  {{- false -}}
+{{- end }}
+{{- end -}}
