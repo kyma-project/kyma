@@ -14,7 +14,7 @@ import (
 func TestFunctionService_Find(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		labels := map[string]string{"foo": "bar"}
-		function1 := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Python37)
+		function1 := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Python38)
 		function2 := fixFunction("2", "a", "2", "content", "dependencies", labels, v1alpha1.Nodejs10)
 		function3 := fixFunction("3", "b", "3", "content", "dependencies", labels, v1alpha1.Nodejs12)
 
@@ -91,7 +91,7 @@ func TestFunctionService_Update(t *testing.T) {
 		newLabels := map[string]string{"bar": "foo"}
 		function1 := fixFunction("1", "a", "1", "content", "dependencies", oldLabels, v1alpha1.Nodejs12)
 		function1.Spec.Labels = oldLabels
-		function2 := fixFunction("1", "a", "1", "content", "dependencies", newLabels, v1alpha1.Python37)
+		function2 := fixFunction("1", "a", "1", "content", "dependencies", newLabels, v1alpha1.Python38)
 		function2.Spec.Labels = newLabels
 
 		service := fixFakeFunctionService(t, function1)
@@ -103,7 +103,7 @@ func TestFunctionService_Update(t *testing.T) {
 
 	t.Run("NotFound", func(t *testing.T) {
 		labels := map[string]string{"foo": "bar"}
-		function1 := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Python37)
+		function1 := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Python38)
 
 		service := fixFakeFunctionService(t)
 
@@ -115,7 +115,7 @@ func TestFunctionService_Update(t *testing.T) {
 
 func TestFunctionService_Delete(t *testing.T) {
 	labels := map[string]string{"foo": "bar"}
-	function1 := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Python37)
+	function1 := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Python38)
 	function2 := fixFunction("2", "a", "2", "content", "dependencies", labels, v1alpha1.Nodejs12)
 	function3 := fixFunction("3", "b", "3", "content", "dependencies", labels, v1alpha1.Nodejs10)
 
@@ -157,7 +157,7 @@ func TestFunctionService_DeleteMany(t *testing.T) {
 	labels := map[string]string{"foo": "bar"}
 	function1 := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Nodejs10)
 	function2 := fixFunction("2", "a", "2", "content", "dependencies", labels, v1alpha1.Nodejs12)
-	function3 := fixFunction("3", "b", "3", "content", "dependencies", labels, v1alpha1.Python37)
+	function3 := fixFunction("3", "b", "3", "content", "dependencies", labels, v1alpha1.Python38)
 
 	for testName, testData := range map[string]struct {
 		functions []gqlschema.FunctionMetadataInput
