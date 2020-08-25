@@ -3,15 +3,13 @@ title: Connect an external application
 type: Getting Started
 ---
 
-Let's now integrate an external application to Kyma. In this set of guides, we will use a sample application called [Commerce mock](https://github.com/SAP-samples/xf-addons/tree/master/addons/commerce-mock-0.1.0) that simulates a monolithic application. You will learn how you can connect it to Kyma, and expose its API and events. In further guides, you will subscribe to one of Commerce mock events (**order.deliverysent.v1**) and see how you can use it to trigger the logic of the `orders-service` microservice.  
+Let's now integrate an external application to Kyma. In this set of guides, we will use a sample application called [Commerce mock](https://github.com/SAP-samples/xf-addons/tree/master/addons/commerce-mock-0.1.0) that simulates a monolithic application. You will learn how you can connect it to Kyma, and expose its API and events. In further guides, you will subscribe to one of Commerce mock events (`order.deliverysent.v1`) and see how you can use it to trigger the logic of the `orders-service` microservice.  
 
 ## Reference
 
 This guide demonstrates how [Application Connector](/components/application-connector/) works in Kyma. It allows you to securely connect external solutions to your Kyma cluster.
 
 ## Steps
-
-Follows these steps:
 
 ### Deploy the XF addons and provision Commerce mock
 
@@ -27,18 +25,18 @@ Follow these steps to deploy XF addons and add Commerce mock to the `orders-serv
 
 1. Provision an AddonsConfiguration CR with the mock application set:
 
-```bash
-cat <<EOF | kubectl apply -f  -
-apiVersion: addons.kyma-project.io/v1alpha1
-kind: AddonsConfiguration
-metadata:
-name: xf-mocks
-namespace: orders-service
-spec:
-repositories:
-- url: github.com/sap/xf-addons/addons/index.yaml
-EOF
-```
+  ```yaml
+  cat <<EOF | kubectl apply -f  -
+  apiVersion: addons.kyma-project.io/v1alpha1
+  kind: AddonsConfiguration
+  metadata:
+  name: xf-mocks
+  namespace: orders-service
+  spec:
+  repositories:
+  - url: github.com/sap/xf-addons/addons/index.yaml
+  EOF
+  ```
    > **NOTE:** The `index.yaml` file is a manifest for APIs of SAP Marketing Cloud, SAP Cloud for Customer, and SAP Commerce Cloud applications.
 
 2. Check if the AddonsConfiguration CR was created. Its phase should state `Ready`:
@@ -49,18 +47,18 @@ EOF
 
 3. Create the ServiceInstance CR with Commerce mock:
 
-```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceInstance
-metadata:
-  name: commerce-mock
-  namespace: orders-service
-spec:
-  serviceClassExternalName: commerce-mock
-  servicePlanExternalName: default
-EOF
-```
+  ```yaml
+  cat <<EOF | kubectl apply -f -
+  apiVersion: servicecatalog.k8s.io/v1beta1
+  kind: ServiceInstance
+  metadata:
+    name: commerce-mock
+    namespace: orders-service
+  spec:
+    serviceClassExternalName: commerce-mock
+    servicePlanExternalName: default
+  EOF
+  ```
 
 4. Check if the ServiceInstance CR was created. The last condition in the CR status should state `Ready True`:
 
@@ -112,19 +110,19 @@ Follow these steps:
 
 1. Apply the Application CR definition to the cluster:
 
-```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: Application
-metadata:
-  name: commerce-mock
-spec:
-  description: "Application for Commerce mock"
-  labels:
-    app: orders-service
-    example: orders-service
-EOF
-```
+  ```yaml
+  cat <<EOF | kubectl apply -f -
+  apiVersion: applicationconnector.kyma-project.io/v1alpha1
+  kind: Application
+  metadata:
+    name: commerce-mock
+  spec:
+    description: "Application for Commerce mock"
+    labels:
+      app: orders-service
+      example: orders-service
+  EOF
+  ```
 
 2. Check if the Application CR was created. Its phase should state `deployed`:
 
@@ -133,14 +131,14 @@ EOF
    ```
 3. Get a token required to connect Commerce mock to the Application CR. To do that, create the TokenRequest CR. The CR name must match the name of the application for which you want to get the configuration details. Run this command:
 
-```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: TokenRequest
-metadata:
-  name: commerce-mock
-EOF
-```
+  ```yaml
+  cat <<EOF | kubectl apply -f -
+  apiVersion: applicationconnector.kyma-project.io/v1alpha1
+  kind: TokenRequest
+  metadata:
+    name: commerce-mock
+  EOF
+  ```
 
 4. Fetch the TokenRequest CR you created to get the token from the status section:
 
@@ -186,7 +184,7 @@ To connect events from Commerce mock to the microservice, follow these steps:
 
 Once registered, you will see all Commerce mock APIs and events available under the **Remote APIs** tab.
 
-    >**TIP:** Local APIs are the ones available within the mock application. Remote APIs represent the ones registered in Kyma.
+> **TIP:** Local APIs are the ones available within the mock application. Remote APIs represent the ones registered in Kyma.
 
 ### Expose events in the Namespace
 
@@ -202,15 +200,15 @@ Follow these steps:
 
 1. Create an ApplicationMapping CR and apply it to the cluster:
 
-```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: ApplicationMapping
-metadata:
-  name: commerce-mock
-  namespace: orders-service
-EOF
-```
+  ```yaml
+  cat <<EOF | kubectl apply -f -
+  apiVersion: applicationconnector.kyma-project.io/v1alpha1
+  kind: ApplicationMapping
+  metadata:
+    name: commerce-mock
+    namespace: orders-service
+  EOF
+  ```
 
 2. List available ServiceClass CRs in the `orders-service` Namespace and find under the `EXTERNAL-NAME` column the one with the `sap-commerce-cloud-events-*` prefix.
 
@@ -219,24 +217,24 @@ EOF
    ```
    Copy the full `EXTERNAL NAME` to an environment variable. See the example:
 
-```bash
-export EVENTS_EXTERNAL_NAME="sap-commerce-cloud-events-58d21"
-```
+   ```bash
+   export EVENTS_EXTERNAL_NAME="sap-commerce-cloud-events-58d21"
+   ```
 
 3. Provision the Events API in the `orders-service` Namespace by creating a ServiceInstance CR:
 
-```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceInstance
-metadata:
-  name: commerce-mock-events
-  namespace: orders-service
-spec:
-  serviceClassExternalName: $EVENTS_EXTERNAL_NAME
-  servicePlanExternalName: default
-EOF
-```
+  ```yaml
+  cat <<EOF | kubectl apply -f -
+  apiVersion: servicecatalog.k8s.io/v1beta1
+  kind: ServiceInstance
+  metadata:
+    name: commerce-mock-events
+    namespace: orders-service
+  spec:
+    serviceClassExternalName: $EVENTS_EXTERNAL_NAME
+    servicePlanExternalName: default
+  EOF
+  ```
 
 4. Check if the ServiceInstance CR was created. The last condition in the CR status should state `Ready True`:
 

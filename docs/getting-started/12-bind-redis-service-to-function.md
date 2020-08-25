@@ -19,45 +19,45 @@ Follows these steps:
 
 1. Create a ServiceBinding CR that points to the existing Redis instance in the **spec.instanceRef** field:
 
-```yaml
-cat <<EOF | kubectl apply -f -
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceBinding
-metadata:
-  name: orders-function
-  namespace: orders-service
-spec:
-  instanceRef:
-    name: redis-service
-EOF
-```
+  ```yaml
+  cat <<EOF | kubectl apply -f -
+  apiVersion: servicecatalog.k8s.io/v1beta1
+  kind: ServiceBinding
+  metadata:
+    name: orders-function
+    namespace: orders-service
+  spec:
+    instanceRef:
+      name: redis-service
+  EOF
+  ```
 
 2. Check if the ServiceBinding CR was created. The last condition in the CR status should be `Ready True`:
 
-```bash
-kubectl get servicebinding orders-function -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
-```
+  ```bash
+  kubectl get servicebinding orders-function -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
+  ```
 
 3. Create a ServiceBindingUsage CR:
 
-```yaml
-cat <<EOF | kubectl apply -f -
-apiVersion: servicecatalog.kyma-project.io/v1alpha1
-kind: ServiceBindingUsage
-metadata:
-  name: orders-function
-  namespace: orders-service
-spec:
-  serviceBindingRef:
+  ```yaml
+  cat <<EOF | kubectl apply -f -
+  apiVersion: servicecatalog.kyma-project.io/v1alpha1
+  kind: ServiceBindingUsage
+  metadata:
     name: orders-function
-  usedBy:
-    kind: serverless-function
-    name: orders-function
-  parameters:
-    envPrefix:
-      name: "REDIS_"
-EOF
-```
+    namespace: orders-service
+  spec:
+    serviceBindingRef:
+      name: orders-function
+      usedBy:
+        kind: serverless-function
+        name: orders-function
+      parameters:
+        envPrefix:
+          name: "REDIS_"
+  EOF
+  ```
 
    - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the ServiceBinding you have just created and **spec.usedBy** points to the Function. More specifically, **spec.usedBy** refers to the name of the Function and the cluster-specific [UsageKind CR](/components/service-catalog/#custom-resource-usage-kind) (`kind: serverless-function`) that defines how Secrets should be injected to your Function when creating a ServiceBinding.
 
@@ -67,24 +67,23 @@ EOF
 
 4. Check if the ServiceBindingUsage CR was created. The last condition in the CR status should be `Ready True`:
 
-```bash
-kubectl get servicebindingusage orders-function -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
-```
+  ```bash
+  kubectl get servicebindingusage orders-function -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
+  ```
 
 If you want to see the Secret details and retrieve them from the ServiceBinding, run this command:
 
+  ```bash
+  kubectl get secret orders-function -n orders-service -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
+  ```
 
-```bash
-kubectl get secret orders-function -n orders-service -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
-```
+  You should get a similar result:
 
-    You should get a similar result:
-
-    ```bash
-    HOST: hb-redis-micro-0e965585-9699-443f-b987-38bc6af0e416-redis.serverless.svc.cluster.local
-    PORT: 6379
-    REDIS_PASSWORD: 1tvDcINZvp
-    ```
+  ```bash
+  HOST: hb-redis-micro-0e965585-9699-443f-b987-38bc6af0e416-redis.serverless.svc.cluster.local
+  PORT: 6379
+  REDIS_PASSWORD: 1tvDcINZvp
+  ```
 
   </details>
   <details>
@@ -112,6 +111,8 @@ If you switch to the **Code** tab and scroll down to the **Environment Variables
 </div>
 
 ### Call and test the Function
+
+Follow these steps:
 
 > **CAUTION:** If you have a Minikube cluster, you must first add the IP address of the exposed Service to the `hosts` file on your machine:
 >

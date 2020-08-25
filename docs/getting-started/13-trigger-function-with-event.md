@@ -19,28 +19,28 @@ Follows these steps:
 
 1. Create a Trigger CR for `orders-function` to subscribe the Function to the `order.deliverysent` event type from Commerce mock:
 
-```yaml
-cat <<EOF | kubectl apply -f  -
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Trigger
-metadata:
-  name: orders-function
-  namespace: orders-service
-spec:
-  broker: default
-  filter:
-    attributes:
-      eventtypeversion: v1
-      source: commerce-mock
-      type: order.deliverysent
-  subscriber:
-    ref:
-      apiVersion: v1
-      kind: Service
-      name: orders-function
-      namespace: orders-service
-EOF
-```
+  ```yaml
+  cat <<EOF | kubectl apply -f  -
+  apiVersion: eventing.knative.dev/v1alpha1
+  kind: Trigger
+  metadata:
+    name: orders-function
+    namespace: orders-service
+  spec:
+    broker: default
+    filter:
+      attributes:
+        eventtypeversion: v1
+        source: commerce-mock
+        type: order.deliverysent
+      subscriber:
+        ref:
+          apiVersion: v1
+          kind: Service
+          name: orders-function
+          namespace: orders-service
+  EOF
+  ```
 
 where:
 - **spec.filter.attributes.eventtypeversion** points to the specific event version. In this example, it is `v1`.
@@ -49,9 +49,9 @@ where:
 
 2. Check if the Trigger CR was created and is ready. Its status should be `True`:
 
-   ```bash
-   kubectl get trigger orders-function -n orders-service -o=jsonpath="{.status.conditions[2].status}"
-   ```
+  ```bash
+  kubectl get trigger orders-function -n orders-service -o=jsonpath="{.status.conditions[2].status}"
+  ```
 
     </details>
     <details>

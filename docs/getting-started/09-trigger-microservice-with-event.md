@@ -11,9 +11,9 @@ This guide demonstrates how [Event Mesh](/components/event-mesh/) works in Kyma.
 
 ## Steps
 
-Follows these steps:
-
 ### Create the event trigger
+
+Follow these steps:
 
 <div tabs name="steps" group="trigger-microservice">
   <details>

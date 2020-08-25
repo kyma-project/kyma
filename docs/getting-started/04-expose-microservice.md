@@ -11,13 +11,13 @@ This guide demonstrates how [API Gateway](/components/api-gateway) works in Kyma
 
 ## Steps
 
-Follows these steps:
-
 ### Expose the Service
 
 Create an APIRule CR which exposes the Kubernetes Service of the microservice under na unsecured endpoint (**handler** set to `noop`) and accepts the `GET` and `POST` methods.
 
 >**TIP:** **noop** stands for "no operation" and means access without any token. If you want to secure your Service, read the [tutorial](/components/api-gateway/#tutorials-expose-and-secure-a-service) to learn how to do that.
+
+Follow these steps:
 
 <div tabs name="steps" group="expose-microservice">
   <details>
@@ -27,30 +27,30 @@ Create an APIRule CR which exposes the Kubernetes Service of the microservice un
 
 1. Open the terminal window and apply the APIRule CR:
 
-```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: gateway.kyma-project.io/v1alpha1
-kind: APIRule
-metadata:
-  name: orders-service
-  namespace: orders-service
-  labels:
-    app: orders-service
-    example: orders-service
-spec:
-  service:
-    host: orders-service
+  ```yaml
+  cat <<EOF | kubectl apply -f -
+  apiVersion: gateway.kyma-project.io/v1alpha1
+  kind: APIRule
+  metadata:
     name: orders-service
-    port: 80
-  gateway: kyma-gateway.kyma-system.svc.cluster.local
-  rules:
-    - path: /.*
-      methods: ["GET","POST"]
-      accessStrategies:
-        - handler: noop
-      mutators: []
-EOF
-```
+    namespace: orders-service
+    labels:
+      app: orders-service
+      example: orders-service
+  spec:
+    service:
+      host: orders-service
+      name: orders-service
+      port: 80
+    gateway: kyma-gateway.kyma-system.svc.cluster.local
+    rules:
+      - path: /.*
+        methods: ["GET","POST"]
+        accessStrategies:
+          - handler: noop
+        mutators: []
+  EOF
+  ```
 2. Check if the API Rule was created successfully and has the `OK` status:
 
    ```bash
@@ -87,12 +87,14 @@ UI
 
 6. In the API Rule's details view that opens up automatically, check if the API Rule status is `OK`. See if you can access the Service by selecting the HTTPS link under **Host** and adding the `/orders` endpoint at the end of the link.
 
-**NOTE:** For the whole list of endpoints available in the service, see its [OpenAPI specification](./assets/orders-service-openapi.yaml).
+> **NOTE:** For the whole list of endpoints available in the service, see its [OpenAPI specification](./assets/orders-service-openapi.yaml).
 
 </details>
 </div>
 
 ### Call and test the microservice
+
+Follow these steps:
 
 > **CAUTION:** If you have a Minikube cluster, you must first add the IP address of the exposed k8s Service to the `hosts` file on your machine:
 >
@@ -102,62 +104,62 @@ UI
 
 1. Retrieve the domain of the exposed microservice and save it to the environment variable:
 
-```bash
-export SERVICE_DOMAIN=$(kubectl get virtualservices -l apirule.gateway.kyma-project.io/v1alpha1=orders-service.orders-service -n orders-service -o=jsonpath='{.items[*].spec.hosts[0]}')
-```
+  ```bash
+  export SERVICE_DOMAIN=$(kubectl get virtualservices -l apirule.gateway.kyma-project.io/v1alpha1=orders-service.orders-service -n orders-service -o=jsonpath='{.items[*].spec.hosts[0]}')
+  ```
 
 2. Run this command in the terminal to call the service:
 
-```bash
-   curl -ik "https://$SERVICE_DOMAIN/orders"
-```
+  ```bash
+  curl -ik "https://$SERVICE_DOMAIN/orders"
+  ```
 
-The system returns a similar response:
+  The system returns a similar response:
 
-```bash
-content-length: 2
-content-type: application/json;charset=UTF-8
-date: Mon, 13 Jul 2020 13:05:33 GMT
-server: istio-envoy
-vary: Origin
-x-envoy-upstream-service-time: 37
+  ```bash
+  content-length: 2
+  content-type: application/json;charset=UTF-8
+  date: Mon, 13 Jul 2020 13:05:33 GMT
+  server: istio-envoy
+  vary: Origin
+  x-envoy-upstream-service-time: 37
 
-[]
-```
+  []
+  ```
 
 3. Send a `POST` request to the microservice with sample order details:
 
-```bash
-curl -ikX POST "https://$SERVICE_DOMAIN/orders" \
-  -H 'Cache-Control: no-cache' -d \
-  '{
-    "orderCode": "762727210",
-    "consignmentCode": "76272725",
-    "consignmentStatus": "PICKUP_COMPLETE"
-  }'
-```
+  ```bash
+  curl -ikX POST "https://$SERVICE_DOMAIN/orders" \
+    -H 'Cache-Control: no-cache' -d \
+    '{
+      "orderCode": "762727210",
+      "consignmentCode": "76272725",
+      "consignmentStatus": "PICKUP_COMPLETE"
+    }'
+  ```
 
 4. Call the microservice again to check the storage:
 
-```bash
-curl -ik "https://$SERVICE_DOMAIN/orders"
-```
+  ```bash
+  curl -ik "https://$SERVICE_DOMAIN/orders"
+  ```
 
-You should receive a similar response:
+  You should receive a similar response:
 
-```bash
-HTTP/2 200
-content-length: 73
-content-type: application/json;charset=UTF-8
-date: Mon, 13 Jul 2020 13:05:51 GMT
-server: istio-envoy
-vary: Origin
-x-envoy-upstream-service-time: 6
+  ```bash
+  HTTP/2 200
+  content-length: 73
+  content-type: application/json;charset=UTF-8
+  date: Mon, 13 Jul 2020 13:05:51 GMT
+  server: istio-envoy
+  vary: Origin
+  x-envoy-upstream-service-time: 6
 
-[{"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
-```
+  [{"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
+  ```
 
- You can see the microservice returns the previously sent order details.
+  You can see the microservice returns the previously sent order details.
 
 5. Remove the [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) created by the `orders-service` Deployment. Run this command and wait for the system to delete the Pod and start a new one:
 

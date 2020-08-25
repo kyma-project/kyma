@@ -10,13 +10,13 @@ After completing this guide, you will get a Function that:
 - Is available under an unsecured endpoint (**handler** set to `noop` in the APIRule CR).
 - Accepts `GET` and `POST` methods.
 
->**NOTE:** Learn also how to [secure the Function](/components/api-gateway#tutorials-expose-and-secure-a-service-deploy-expose-and-secure-the-sample-resources).
+> **NOTE:** Learn also how to [secure the Function](/components/api-gateway#tutorials-expose-and-secure-a-service-deploy-expose-and-secure-the-sample-resources).
 
 ## Steps
 
-Follows these steps:
-
 ### Expose the Function
+
+Follow these steps:
 
 <div tabs name="steps" group="expose-function">
   <details>
@@ -26,33 +26,33 @@ Follows these steps:
 
 1. Create an APIRule CR for the Function. It is exposed on port `80` that is the default port of the [Service](/components/serverless#architecture-architecture).
 
-```yaml
-cat <<EOF | kubectl apply -f -
-apiVersion: gateway.kyma-project.io/v1alpha1
-kind: APIRule
-metadata:
-  name: orders-function
-  namespace: orders-service
-spec:
-  gateway: kyma-gateway.kyma-system.svc.cluster.local
-  rules:
-  - path: /.*
-    accessStrategies:
-    - config: {}
-      handler: noop
-    methods: ["GET","POST"]
-  service:
-    host: orders-function
-    name: orders-function
-    port: 80
-EOF  
-```
+  ```yaml
+  cat <<EOF | kubectl apply -f -
+    apiVersion: gateway.kyma-project.io/v1alpha1
+    kind: APIRule
+    metadata:
+      name: orders-function
+      namespace: orders-service
+    spec:
+      gateway: kyma-gateway.kyma-system.svc.cluster.local
+      rules:
+        - path: /.*
+          accessStrategies:
+            - config: {}
+          handler: noop
+          methods: ["GET","POST"]
+      service:
+        host: orders-function
+        name: orders-function
+        port: 80
+  EOF  
+  ```
 
 2. Check if the APIRule was created and has the `OK` status:
 
-```bash
-kubectl get apirules orders-function -n orders-service -o=jsonpath='{.status.APIRuleStatus.code}'
-```
+  ```bash
+  kubectl get apirules orders-function -n orders-service -o=jsonpath='{.status.APIRuleStatus.code}'
+  ```
 
 3. Access the Function's external address:
 
@@ -92,6 +92,8 @@ kubectl get apirules orders-function -n orders-service -o=jsonpath='{.status.API
 </div>
 
 ### Call and test the microservice
+
+Follow these steps:
 
 > **CAUTION:** If you have a Minikube cluster, you must first add the IP address of the exposed k8s to the `hosts` file on your machine:
 >

@@ -13,9 +13,9 @@ To create the binding, you will use ServiceBinding and ServiceBindingUsage custo
 
 ## Steps
 
-Follows these steps:
-
 ### Bind the Redis ServiceInstance to the microservice
+
+Follow these steps:
 
 <div tabs name="bind-redis-to-microservice" group="bind-redis-to-microservice">
   <details>
@@ -123,13 +123,13 @@ Follows these steps:
 
 ### Call and test the microservice
 
+Follow these steps:
+
 > **CAUTION:** If you have a Minikube cluster, you must first add the IP address of the exposed Service to the `hosts` file on your machine:
 >
 >  ```bash
 >  echo "$(minikube ip) orders-service.kyma.local" | sudo tee -a /etc/hosts
 >  ```
-
-<!-- Explain why -->
 
 1. Retrieve the domain of the exposed microservice and save it to the environment variable:
 

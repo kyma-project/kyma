@@ -12,11 +12,11 @@ In this guide you will create:
 
 ## Steps
 
-Follows these steps:
-
 ### Create a Deployment
 
 Create a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) that provides the microservice definition and enables you to run it on the cluster. The Deployment uses the `eu.gcr.io/kyma-project/pr/orders-service:PR-162` image. This Docker image exposes the `8080` port on which the related Service is listening.
+
+Follow these steps:
 
 <div tabs name="steps" group="deploy-microservice">
   <details>
@@ -53,6 +53,8 @@ UI
 ### Create the Service
 
 Deploy the Kubernetes [Service](https://kubernetes.io/docs/concepts/services-networking/service/) in the `orders-service` Namespace to allow other Kubernetes resources to communicate with your microservice.
+
+Follow these steps:
 
 <div tabs name="steps" group="deploy-microservice">
   <details>

@@ -1,5 +1,5 @@
 ---
-title: Set up a Namespace
+title: Create a Namespace
 type: Getting Started
 ---
 
@@ -37,7 +37,7 @@ Follow these steps:
   UI
   </summary>
 
-1. [Log into](#installation-install-kyma-on-a-cluster-access-the-cluster) the Kyma Console UI.
+1. [Log into](/root/kyma#installation-install-kyma-on-a-cluster-access-the-cluster) the Kyma Console UI.
 
 2. After logging, select **Add new namespace** in the **Namespaces** view.
 
