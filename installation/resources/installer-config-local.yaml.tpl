@@ -116,7 +116,8 @@ metadata:
     component: core
     kyma-project.io/installation: ""
 data:
-  console.test.acceptance.enabled: "false"
+  tests.enabled: "false"
+  global.console.web.test.acceptance.enabled: "false"
 ---
 apiVersion: v1
 kind: ConfigMap
