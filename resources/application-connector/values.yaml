@@ -33,7 +33,7 @@ global:
   connection_token_handler:
     version: "PR-9214"
   connection_token_handler_tests:
-    version: "PR-9214"
+    version: "PR-9300"
   event_service:
     version: "d4372526"
   event_service_integration_tests:
@@ -41,9 +41,9 @@ global:
   application_gateway:
     version: "PR-9214"
   application_gateway_tests:
-    version: "PR-9214"
+    version: "PR-9300"
   application_registry:
-    version: "PR-9214"
+    version: "PR-9300"
   application_registry_tests:
     version: "c608dbf3"
   application_broker:
