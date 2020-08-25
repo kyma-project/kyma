@@ -66,7 +66,7 @@ func TestApplyExistingPolicyAttributes(t *testing.T) {
 
 	desiredPolicy := NewPolicy(tNs, tName)
 
-	ApplyExistingPolicyAttributes(existingPolicy, desiredPolicy)
+	ApplyExistingPeerAuthenticationAttributes(existingPolicy, desiredPolicy)
 	expectedPolicy := &authenticationv1alpha1.Policy{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:       tNs,

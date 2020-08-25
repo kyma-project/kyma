@@ -413,11 +413,11 @@ func WithoutService(src *sourcesv1alpha1.HTTPSource) {
 }
 
 func WithPolicy(src *sourcesv1alpha1.HTTPSource) {
-	src.Status.MarkPolicyCreated(newPolicyWithSpec())
+	src.Status.MarkPeerAuthenticationCreated(newPolicyWithSpec())
 }
 
 func WithoutPolicy(src *sourcesv1alpha1.HTTPSource) {
-	src.Status.MarkPolicyCreated(nil)
+	src.Status.MarkPeerAuthenticationCreated(nil)
 }
 
 func Deployed(src *sourcesv1alpha1.HTTPSource) {

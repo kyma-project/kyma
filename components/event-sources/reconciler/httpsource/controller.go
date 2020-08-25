@@ -56,18 +56,21 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 
 	rb := reconciler.NewBase(ctx, controllerAgentName, cmw)
 	r := &Reconciler{
-		Base:             rb,
-		adapterEnvCfg:    adapterEnvCfg,
-		httpsourceLister: httpSourceInformer.Lister(),
-		deploymentLister: deploymentInformer.Lister(),
-		chLister:         chInformer.Lister(),
-		policyLister:     policyInformer.Lister(),
+		Base:                     rb,
+		adapterEnvCfg:            adapterEnvCfg,
+		httpsourceLister:         httpSourceInformer.Lister(),
+		deploymentLister:         deploymentInformer.Lister(),
+		chLister:                 chInformer.Lister(),
 		peerAuthenticationLister: peerAuthenticationInformer.Lister(),
-		serviceLister:    serviceInformer.Lister(),
-		sourcesClient:    sourcesclient.Get(ctx).SourcesV1alpha1(),
-		messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
-		authClient:       istioclient.Get(ctx).AuthenticationV1alpha1(),
-		securityClient: istioclient.Get(ctx).SecurityV1beta1(),
+		serviceLister:            serviceInformer.Lister(),
+		sourcesClient:            sourcesclient.Get(ctx).SourcesV1alpha1(),
+		messagingClient:          rb.EventingClientSet.MessagingV1alpha1(),
+		securityClient:           istioclient.Get(ctx).SecurityV1beta1(),
+
+		// TODO: remove me when Kyma 1.16 is out
+		policyLister: policyInformer.Lister(),
+		authClient:               istioclient.Get(ctx).AuthenticationV1alpha1(),
+		// END
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 

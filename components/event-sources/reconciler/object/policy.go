@@ -25,9 +25,9 @@ func NewPolicy(ns, name string, opts ...ObjectOption) *authenticationv1alpha1.Po
 	return s
 }
 
-// ApplyExistingPolicyAttributes copies some important attributes from a given
+// ApplyExistingPeerAuthenticationAttributes copies some important attributes from a given
 // source Policy to a destination Policy.
-func ApplyExistingPolicyAttributes(src, dst *securityv1beta1.PeerAuthentication) {
+func ApplyExistingPeerAuthenticationAttributes(src, dst *securityv1beta1.PeerAuthentication) {
 	// resourceVersion must be returned to the API server
 	// unmodified for optimistic concurrency, as per Kubernetes API
 	// conventions
