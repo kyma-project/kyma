@@ -9,6 +9,7 @@ This set of Getting Started guides is an end-to-end scanario that aims to demons
 - **Application runtime** feature supported by [Serverless](https://kyma-project.io/docs/components/serverless/) where you can build microservices and functions to interact with external services and applications to perform a given business logic.
 
 Having these features in mind, we will:
+
 1. Create a microservice that can expose HTTP endpoints and receive a specific type of events from external applications. It has a built-in in-memory storage for storing event details, but it can also work with the external Redis storage.
 2. Provision the Redis service through the Service Catalog and use it as an alternative database for the microservice.
 3. Connect a mock application as an addon to Kyma. We will use it to send events to the microservice with order delivery details.
@@ -21,6 +22,7 @@ All guides, whenever possible, demonstrate the steps from both kubectl and Conso
 ## Prerequisites
 
 1. Install:
+
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (1.16 or greater)
 - [curl](https://github.com/curl/curl)
 - [Kyma](https://kyma-project.io/docs/#installation-install-kyma-on-a-cluster]) on a cluster of your choice.

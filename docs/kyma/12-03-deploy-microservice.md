@@ -6,6 +6,7 @@ type: Getting Started
 You will now start by deploying a standalone [`orders-service`](https://github.com/kyma-project/examples/blob/master/http-db-service/README.md) microservice on a Kyma cluster. This microservice will act as a link between the external application and the Redis service and we will build the whole end-to-end flow around it.
 
 In this guide you will create:
+
 - Deployment in which you specify the configuration of your microservice
 - Kubernetes Service through which your microservice will communicate with other resources on the Kyma cluster
 
