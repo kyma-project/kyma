@@ -19,7 +19,7 @@ Follows these steps:
   kubectl
   </summary>
 
-1. Apply the Function CR that specifies the Function's logic:
+1. Apply the [Function CR](/components/serverless/#custom-resource-function) that specifies the Function's logic:
 
   ```bash
   kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-function.yaml

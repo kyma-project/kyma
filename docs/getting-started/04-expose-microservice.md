@@ -25,7 +25,7 @@ Follow these steps:
   kubectl
   </summary>
 
-1. Open the terminal window and apply the APIRule CR:
+1. Open the terminal window and apply the [APIRule CR](/components/api-gateway/#custom-resource-api-rule):
 
   ```yaml
   cat <<EOF | kubectl apply -f -

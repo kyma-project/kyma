@@ -19,7 +19,7 @@ Follows these steps:
   kubectl
   </summary>
 
-1. Provision an AddonsConfiguration CR with the Redis service:
+1. Provision an [AddonsConfiguration CR](/components/helm-broker/#custom-resource-addons-configuration) with the Redis service:
 
    ```yaml
    cat <<EOF | kubectl apply -f  -

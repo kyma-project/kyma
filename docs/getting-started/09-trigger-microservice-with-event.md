@@ -21,7 +21,7 @@ Follow these steps:
   kubectl
   </summary>
 
-1. Create the Trigger CR for the `orders-service` microservice to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
+1. Create the [Trigger CR](https://knative.dev/docs/eventing/triggers/) for the `orders-service` microservice to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
 
 ```bash
 cat <<EOF | kubectl apply -f  -

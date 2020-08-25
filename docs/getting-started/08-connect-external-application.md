@@ -23,7 +23,7 @@ Follow these steps to deploy XF addons and add Commerce mock to the `orders-serv
   kubectl
   </summary>
 
-1. Provision an AddonsConfiguration CR with the mock application set:
+1. Provision an [AddonsConfiguration CR](/components/helm-broker/#custom-resource-addons-configuration) with the mock application set:
 
   ```yaml
   cat <<EOF | kubectl apply -f  -
@@ -108,7 +108,7 @@ Follow these steps:
   kubectl
   </summary>
 
-1. Apply the Application CR definition to the cluster:
+1. Apply the [Application CR](/components/application-connector/#custom-resource-application) definition to the cluster:
 
   ```yaml
   cat <<EOF | kubectl apply -f -
@@ -129,7 +129,7 @@ Follow these steps:
    ```bash
    kubectl get application commerce-mock -o=jsonpath="{.status.installationStatus.status}"
    ```
-3. Get a token required to connect Commerce mock to the Application CR. To do that, create the TokenRequest CR. The CR name must match the name of the application for which you want to get the configuration details. Run this command:
+3. Get a token required to connect Commerce mock to the Application CR. To do that, create the [TokenRequest CR](/components/application-connector/#custom-resource-token-request). The CR name must match the name of the application for which you want to get the configuration details. Run this command:
 
   ```yaml
   cat <<EOF | kubectl apply -f -
@@ -198,7 +198,7 @@ Follow these steps:
   kubectl
   </summary>
 
-1. Create an ApplicationMapping CR and apply it to the cluster:
+1. Create an [ApplicationMapping CR](/components/application-connector/#custom-resource-application-mapping) and apply it to the cluster:
 
   ```yaml
   cat <<EOF | kubectl apply -f -
@@ -210,7 +210,7 @@ Follow these steps:
   EOF
   ```
 
-2. List available ServiceClass CRs in the `orders-service` Namespace and find under the `EXTERNAL-NAME` column the one with the `sap-commerce-cloud-events-*` prefix.
+2. List available [ServiceClass CRs](https://svc-cat.io/docs/walkthrough/#step-2---viewing-clusterserviceclasses-and-clusterserviceplans) in the `orders-service` Namespace and find under the `EXTERNAL-NAME` column the one with the `sap-commerce-cloud-events-*` prefix.
 
    ```bash
    kubectl get serviceclasses -n orders-service

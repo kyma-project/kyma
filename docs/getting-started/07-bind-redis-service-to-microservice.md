@@ -23,7 +23,7 @@ Follow these steps:
   kubectl
   </summary>
 
-1. Create a ServiceBinding CR that points in its **spec.instanceRef** field to the Redis ServiceInstance created in the previous guide:
+1. Create a [ServiceBinding CR](https://svc-cat.io/docs/walkthrough/#step-5---requesting-a-servicebinding-to-use-the-serviceinstance) that points in its **spec.instanceRef** field to the Redis ServiceInstance created in the previous guide:
 
    ```yaml
    cat <<EOF | kubectl apply -f -
@@ -44,7 +44,7 @@ Follow these steps:
    kubectl get servicebinding orders-service -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
    ```
 
-3. Create a ServiceBindingUsage CR:
+3. Create a [ServiceBindingUsage CR](/components/service-catalog/#custom-resource-service-binding-usage):
 
    ```yaml
    cat <<EOF | kubectl apply -f -

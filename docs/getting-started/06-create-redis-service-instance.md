@@ -15,7 +15,7 @@ Follows these steps:
   kubectl
   </summary>
 
-1. Create a ServiceInstance CR. You will provision the [Redis](https://redis.io/) service with its `micro` plan:
+1. Create a [ServiceInstance CR](https://svc-cat.io/docs/walkthrough/#step-4---creating-a-new-serviceinstance). You will provision the [Redis](https://redis.io/) service with its `micro` plan:
 
    ```yaml
    cat <<EOF | kubectl apply -f -

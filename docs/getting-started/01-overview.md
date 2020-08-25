@@ -3,7 +3,7 @@ title: Overview
 type: Getting Started
 ---
 
-This set of Getting Started guides is an end-to-end scenario that will walk you through all Kyma functionalities and demonstrate its:
+This set of Getting Started guides is an end-to-end scenario that will walk you through all major Kyma functionalities and demonstrate its:
 - **Integration and connectivity** feature brought in by [Application Connector](https://kyma-project.io/docs/components/application-connector/). With Kyma you can connect external applications and expose their API and events in Kyma.
 - **Extensibility** feature provided by [Service Catalog](https://kyma-project.io/docs/components/service-catalog/). You can use its built-in portfolio of external services in your applications.
 - **Application runtime** feature supported by [Serverless](https://kyma-project.io/docs/components/serverless/) where you can build microservices and functions to interact with external services and applications to perform a given business logic.
