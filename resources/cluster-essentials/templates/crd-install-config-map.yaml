@@ -12,15 +12,6 @@
 {{ end }}
 {{ end }}
 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  namespace: default
-  name: padu
-  annotations:
-data:
-  files: {{ $filePaths }}
-
 {{ range $idx, $_ := until $configMapLen }}
 apiVersion: v1
 kind: ConfigMap

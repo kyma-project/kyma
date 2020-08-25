@@ -11,7 +11,7 @@ global:
   disableLegacyConnectivity: false
   # Provide list of CRD file names (without path!) that will be excluded from installation.
   # The files are in the ./files directory of this chart.
-  # Using this mechanism you can exclude a CRD in specific environment where it's functionality isn't used.
+  # Using this mechanism you can exclude a CRD from an environment where it's not used.
   skipCrds:
 
 containerRegistry:
