@@ -93,7 +93,9 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	chInformer.Informer().AddEventHandler(eventHandler)
 
 	// istio
+	// TODO: remove me when Kyma 1.16 is out
 	policyInformer.Informer().AddEventHandler(eventHandler)
+	// END
 	peerAuthenticationInformer.Informer().AddEventHandler(eventHandler)
 
 	// watch for changes to metrics/logging configs
