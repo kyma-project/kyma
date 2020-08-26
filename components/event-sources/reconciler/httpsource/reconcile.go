@@ -472,7 +472,7 @@ func (r *Reconciler) syncService(src *sourcesv1alpha1.HTTPSource,
 // state in the running cluster.
 func (r *Reconciler) syncPeerAuthentication(src *sourcesv1alpha1.HTTPSource, currentPeerAuthentication, desiredPeerAuthentication *securityv1beta1.PeerAuthentication) (*securityv1beta1.PeerAuthentication, error) {
 
-	if reflect.DeepEqual(currentPeerAuthentication, desiredPeerAuthentication) {
+	if object.Semantic.DeepEqual(currentPeerAuthentication, desiredPeerAuthentication) {
 		return currentPeerAuthentication, nil
 	}
 

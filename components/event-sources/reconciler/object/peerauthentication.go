@@ -16,8 +16,6 @@ limitations under the License.
 
 package object
 
-// TODO: add same tests as in policy_test.go
-
 import (
 	securityv1beta1apis "istio.io/api/security/v1beta1"
 	istiov1beta1apis "istio.io/api/type/v1beta1"
@@ -42,9 +40,6 @@ func NewPeerAuthentication(ns, name string, opts ...ObjectOption) *securityv1bet
 func WithPermissiveMode(port uint32) ObjectOption {
 	return func(o metav1.Object) {
 		p := o.(*securityv1beta1.PeerAuthentication)
-		p.Spec.Mtls = &securityv1beta1apis.PeerAuthentication_MutualTLS{
-			Mode: securityv1beta1apis.PeerAuthentication_MutualTLS_PERMISSIVE,
-		}
 		p.Spec.PortLevelMtls = map[uint32]*securityv1beta1apis.PeerAuthentication_MutualTLS{
 			port: {
 				Mode: securityv1beta1apis.PeerAuthentication_MutualTLS_PERMISSIVE,

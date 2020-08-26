@@ -558,9 +558,6 @@ func newPeerAuthentication() *securityv1beta1.PeerAuthentication {
 // newPeerAuthentication returns a test PeerAuthentication object with Spec
 func newPeerAuthenticationWithSpec() *securityv1beta1.PeerAuthentication {
 	peerAuthentication := newPeerAuthentication()
-	peerAuthentication.Spec.Mtls = &securityv1beta1apis.PeerAuthentication_MutualTLS{
-		Mode: securityv1beta1apis.PeerAuthentication_MutualTLS_PERMISSIVE,
-	}
 	peerAuthentication.Spec.PortLevelMtls = map[uint32]*securityv1beta1apis.PeerAuthentication_MutualTLS{
 		tTargetPort: {
 			Mode: securityv1beta1apis.PeerAuthentication_MutualTLS_PERMISSIVE,

@@ -9,8 +9,9 @@ import (
 	"testing"
 
 	"github.com/pkg/errors"
-	authenticationv1alpha1api "istio.io/api/authentication/v1alpha1"
-	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+	securityv1beta1apis "istio.io/api/security/v1beta1"
+	"istio.io/api/type/v1beta1"
+	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,15 +20,15 @@ import (
 )
 
 const (
-	fixtureChannelPath    = "../../test/fixtures/channel.json"
-	fixturePolicyPath     = "../../test/fixtures/policy.json"
-	fixtureDeploymentPath = "../../test/fixtures/deployment.json"
-	fixtureServicePath    = "../../test/fixtures/service.json"
+	fixtureChannelPath            = "../../test/fixtures/channel.json"
+	fixturePeerAuthenticationPath = "../../test/fixtures/peerAuthentication.json"
+	fixtureDeploymentPath         = "../../test/fixtures/deployment.json"
+	fixtureServicePath            = "../../test/fixtures/service.json"
 )
 
 var fixtureChannel *messagingv1alpha1.Channel
 var fixtureDeployment *appsv1.Deployment
-var fixturePolicy *authenticationv1alpha1.Policy
+var fixturePeerAuthentication *securityv1beta1.PeerAuthentication
 var fixtureService *corev1.Service
 
 func TestMain(m *testing.M) {
@@ -38,9 +39,9 @@ func TestMain(m *testing.M) {
 		panic(errors.Wrap(err, "loading Channel from fixtures"))
 	}
 
-	fixturePolicy = &authenticationv1alpha1.Policy{}
-	if err = loadFixture(fixturePolicyPath, fixturePolicy); err != nil {
-		panic(errors.Wrap(err, "loading Policy from fixtures"))
+	fixturePeerAuthentication = &securityv1beta1.PeerAuthentication{}
+	if err = loadFixture(fixturePeerAuthenticationPath, fixturePeerAuthentication); err != nil {
+		panic(errors.Wrap(err, "loading PeerAuthentication from fixtures"))
 	}
 
 	fixtureDeployment = &appsv1.Deployment{}
@@ -498,75 +499,6 @@ func TestContainerEqual(t *testing.T) {
 	}
 }
 
-func TestProbeEqual(t *testing.T) {
-	cs := fixtureDeployment.Spec.Template.Spec.Containers
-
-	if cs == nil || cs[0].ReadinessProbe == nil {
-		t.Fatalf("Test requires fixture object %s to have a configured ReadinessProbe", fixtureDeploymentPath)
-	}
-	if cs[0].ReadinessProbe.SuccessThreshold == 0 {
-		t.Fatalf("Test requires fixture object %s ReadinessProbe to have a defined SuccessThreshold", fixtureDeploymentPath)
-	}
-
-	p := cs[0].ReadinessProbe
-
-	testCases := map[string]struct {
-		prep   func() *corev1.Probe
-		expect bool
-	}{
-		"not equal when one element is nil": {
-			func() *corev1.Probe {
-				return nil
-			},
-			false,
-		},
-		"not equal when handlers differ": {
-			func() *corev1.Probe {
-				pCopy := p.DeepCopy()
-				pCopy.Handler.Reset()
-				return pCopy
-			},
-			false,
-		},
-	}
-
-	for _, fieldName := range []string{
-		"InitialDelaySeconds",
-		"TimeoutSeconds",
-		"PeriodSeconds",
-		"SuccessThreshold",
-		"FailureThreshold",
-	} {
-		testCases[fmt.Sprintf("not equal when %s field differs", fieldName)] = struct {
-			prep   func() *corev1.Probe
-			expect bool
-		}{
-			func(fieldName string) func() *corev1.Probe {
-				return func() *corev1.Probe {
-					pCopy := p.DeepCopy()
-
-					ptrProbe := reflect.ValueOf(pCopy)
-					probe := ptrProbe.Elem()
-					f := probe.FieldByName(fieldName)
-					f.SetInt(f.Int() + 1)
-
-					return pCopy
-				}
-			}(fieldName),
-			false,
-		}
-	}
-
-	for name, tc := range testCases {
-		t.Run(name, func(t *testing.T) {
-			testP := tc.prep()
-			if probeEqual(testP, p) != tc.expect {
-				t.Errorf("Expected output to be %t", tc.expect)
-			}
-		})
-	}
-}
-
 func TestEnvEqual(t *testing.T) {
 
 	testCases := map[string]struct {
@@ -722,61 +654,46 @@ func TestHandlerEqual(t *testing.T) {
 	}
 }
 
-func TestPolicyEqual(t *testing.T) {
-	policy := fixturePolicy
+func TestPeerAuthenticationEqual(t *testing.T) {
+	peerAuthentication := fixturePeerAuthentication
 	testCases := map[string]struct {
-		prep   func() *authenticationv1alpha1.Policy
+		prep   func() *securityv1beta1.PeerAuthentication
 		expect bool
 	}{
-		"not equal when targets differ": {
-			prep: func() *authenticationv1alpha1.Policy {
-				p := policy.DeepCopy()
-				p.Spec = authenticationv1alpha1api.Policy{
-					Targets: []*authenticationv1alpha1api.TargetSelector{
-						{Name: "foo"},
-						{Name: "bar"},
+		"not equal when selector differs": {
+			prep: func() *securityv1beta1.PeerAuthentication {
+				p := peerAuthentication.DeepCopy()
+				p.Spec.Selector = &v1beta1.WorkloadSelector{
+					MatchLabels: map[string]string{"foo": "bar"},
+				}
+				return p
+			},
+			expect: false,
+		},
+		"not equal when portlevel mtls port differs": {
+			prep: func() *securityv1beta1.PeerAuthentication {
+				p := peerAuthentication.DeepCopy()
+				differentPort := uint32(1234)
+				p.Spec.PortLevelMtls = map[uint32]*securityv1beta1apis.PeerAuthentication_MutualTLS{
+					differentPort: {
+						Mode: securityv1beta1apis.PeerAuthentication_MutualTLS_PERMISSIVE,
 					},
 				}
 				return p
 			},
 			expect: false,
 		},
-		"not equal when peers differ": {
-			prep: func() *authenticationv1alpha1.Policy {
-				p := policy.DeepCopy()
-				p.Spec.Peers = []*authenticationv1alpha1api.PeerAuthenticationMethod{
-					{
-						Params: &authenticationv1alpha1api.PeerAuthenticationMethod_Mtls{
-							Mtls: &authenticationv1alpha1api.MutualTls{
-								Mode: authenticationv1alpha1api.MutualTls_STRICT,
-							},
-						},
-					},
-				}
+		"not equal when portlevel mtls authentication differs": {
+			prep: func() *securityv1beta1.PeerAuthentication {
+				p := peerAuthentication.DeepCopy()
+				p.Spec.PortLevelMtls[tTargetPort].Mode = securityv1beta1apis.PeerAuthentication_MutualTLS_STRICT
 				return p
 			},
 			expect: false,
-		},
-		"equal when labels, targets and peers are equal but other fields are different": {
-			func() *authenticationv1alpha1.Policy {
-				p := policy.DeepCopy()
-				p.Annotations = map[string]string{
-					"foo": fmt.Sprintf("%s%s", p.Annotations["foo"], "bar"),
-				}
-				p.Spec.Origins = []*authenticationv1alpha1api.OriginAuthenticationMethod{
-					{
-						XXX_NoUnkeyedLiteral: struct{}{},
-						XXX_unrecognized:     nil,
-						XXX_sizecache:        0,
-					},
-				}
-				return p
-			},
-			true,
 		},
 		"not equal when labels differ": {
-			prep: func() *authenticationv1alpha1.Policy {
-				p := policy.DeepCopy()
+			prep: func() *securityv1beta1.PeerAuthentication {
+				p := peerAuthentication.DeepCopy()
 				p.Labels = map[string]string{
 					"foo": fmt.Sprintf("%s%s", p.Labels["foo"], "bar"),
 				}
@@ -788,8 +705,8 @@ func TestPolicyEqual(t *testing.T) {
 
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
-			testPol := tc.prep()
-			if policyEqual(testPol, policy) != tc.expect {
+			testPeerAuthentication := tc.prep()
+			if peerAuthenticationEqual(testPeerAuthentication, peerAuthentication) != tc.expect {
 				t.Errorf("Expected output to be %t", tc.expect)
 			}
 		})
