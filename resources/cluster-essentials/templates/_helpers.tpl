@@ -17,12 +17,12 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 
 
 {{/*
-True if Gardener
+False if Gardener or local env
 */}}
-{{- define "environment.isGardener" -}}
-{{- if .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" }}
-  {{- true -}}
-{{- else }}
+{{- define "components.installCertManager" -}}
+{{- if ( or (.Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1") (.Values.global.isLocalEnv)) }}
   {{- false -}}
+{{- else }}
+  {{- true -}}
 {{- end }}
 {{- end -}}

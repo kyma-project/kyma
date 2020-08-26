@@ -14,6 +14,8 @@ spec:
   components:
     - name: "cluster-essentials"
       namespace: "kyma-system"
+    - name: "certman"
+      namespace: "cert-manager"
     - name: "testing"
       namespace: "kyma-system"
     - name: "istio"
