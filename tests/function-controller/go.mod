@@ -6,17 +6,14 @@ require (
 	github.com/Azure/go-autorest/autorest v0.9.3 // indirect
 	github.com/Azure/go-autorest/autorest/adal v0.8.1 // indirect
 	github.com/avast/retry-go v2.6.0+incompatible
-	github.com/golang/protobuf v1.4.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-multierror v1.1.0
-	github.com/hashicorp/golang-lru v0.5.4 // indirect
-	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/kubernetes-incubator/service-catalog v0.2.2
 	github.com/kubernetes-sigs/service-catalog v0.2.2 // indirect
 	github.com/kyma-project/helm-broker v1.0.0
 	github.com/kyma-project/kyma/components/function-controller v0.0.0-20200825094731-2ab8b8780e41
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect
-	github.com/onsi/gomega v1.9.0
+	github.com/onsi/gomega v1.10.1
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
@@ -24,17 +21,14 @@ require (
 	github.com/vrischmann/envconfig v1.2.0
 	go.uber.org/multierr v1.5.0 // indirect
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a // indirect
-	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect
 	golang.org/x/sys v0.0.0-20200810151505-1b9f1253b3ed // indirect
 	honnef.co/go/tools v0.0.1-2020.1.5 // indirect
-	k8s.io/api v0.17.4
-	k8s.io/apiextensions-apiserver v0.17.4 // indirect
-	k8s.io/apimachinery v0.17.4
-	k8s.io/client-go v0.17.4
-	k8s.io/utils v0.0.0-20200414100711-2df71ebbae66 // indirect
+	k8s.io/api v0.17.8
+	k8s.io/apimachinery v0.17.8
+	k8s.io/client-go v0.17.8
 	knative.dev/eventing v0.12.0
 	knative.dev/pkg v0.0.0-20200306230727-a56a6ea3fa56
-	sigs.k8s.io/controller-runtime v0.5.2
+	sigs.k8s.io/controller-runtime v0.5.9
 )
 
 replace (
