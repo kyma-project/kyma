@@ -1,29 +1,19 @@
 apiVersion: cert-manager.io/v1alpha2
-kind: ClusterIssuer
-metadata:
-  name: kyma-ca-issuer
-  namespace: {{ .Release.Namespace }}
-spec:
-  ca:
-    secretName: kyma-ca-key-pair
----
-apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
-  name: kyma-gateway-certs
-  namespace: {{ .Release.Namespace }}
+  name: apiserver-proxy-tls-crt2
+  namespace: kyma-sysem
 spec:
   duration: 720h
   renewBefore: 10m
   keySize: 4096
   organization: # For debugging purposes
-  - kyma2
+  - kyma3
   commonName: {{ .Values.global.domainName }}
   dnsNames:
   - "*.{{ .Values.global.domainName }}"
-  secretName: kyma-gateway-certs
+  secretName: apiserver-proxy-tls-crt2
   issuerRef:
     name: kyma-ca-issuer
     kind: ClusterIssuer
     group: cert-manager.io
-
