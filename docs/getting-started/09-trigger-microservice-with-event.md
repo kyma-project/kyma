@@ -1,5 +1,5 @@
 ---
-title: Trigger a microservice with an event
+title: Trigger the microservice with an event
 type: Getting Started
 ---
 
@@ -62,15 +62,15 @@ EOF
 UI
 </summary>
 
-1. Navigate to the `orders-service` Namespace view in the Console UI from the drop-down list in the top navigation panel.
+1. Select the `orders-service` Namespace from the drop-down list in the top navigation panel.
 
-2. Go to **Operation** > **Services** in the left navigation panel and navigate to `orders-service`.
+2. Go to **Operation** > **Services** in the left navigation panel and select `orders-service`.
 
 3. Once in the service's details view, select **Add Event Trigger** in the **Event Triggers** section.
 
 4. Find the `order.deliverysent` event type with the `v1` version from the `commerce-mock` application. Mark it on the list and select **Add**.
 
-   The message appears on the UI confirming that the event trigger was created, and you will see it in the **Event Triggers** section of the service's details view.
+   The message will appear on the UI confirming that the event trigger was created, and you will see it in the **Event Triggers** section of the service's details view.
 
   </details>
 </div>
@@ -84,11 +84,13 @@ To send events from Commerce mock to the `orders-service` microservice, follow t
 
 2. Switch to the **Remote APIs** tab, find **SAP Commerce Cloud - Events**, and select it.
 
-3. Select the `order.deliverysent.v1` event type in **Event Topics** drop-down list. In the details of the printed event, change **orderCode** to `123456789` and select **Send Event**.
+3. Select the `order.deliverysent.v1` event type in **Event Topics** drop-down list.
 
-   The message appears on the UI confirming that the event was sent.
+4. In the details of the printed event, change **orderCode** to `123456789` and select **Send Event**.
 
-4. Call the microservice to verify is the event details were saved:
+   The message will appear in the UI confirming that the event was sent.
+
+5. Call the microservice to verify is the event details were saved:
 
    ```bash
    curl -ik "https://$SERVICE_DOMAIN/orders"
@@ -100,7 +102,7 @@ To send events from Commerce mock to the `orders-service` microservice, follow t
    > export SERVICE_DOMAIN=$(kubectl get virtualservices -l apirule.gateway.kyma-project.io/v1alpha1=orders-service.orders-service -n orders-service -o=jsonpath='{.items[*].spec.hosts[0]}')
    > ```
 
-   You should see a similar response:
+   You should see a similar response proving that the microservice received the `123456789` order details:
 
    ```bash
    content-length: 2
@@ -112,17 +114,3 @@ To send events from Commerce mock to the `orders-service` microservice, follow t
 
    [{"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"123456789","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
    ```
-
-5. Remove the [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) created by the `orders-service` Deployment. Run this command and wait for the system to delete the Pod and start a new one:
-
-      ```bash
-      kubectl delete pod -n orders-service -l app=orders-service
-      ```
-
-6. Call the microservice again to check the storage:
-
-      ```bash
-      curl -ik "https://$SERVICE_DOMAIN/orders"
-      ```
-
-You will see that the order data was not removed this time. This proves that the details were saved in the Redis database instead of the default in-memory storage.

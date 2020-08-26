@@ -24,7 +24,7 @@ Follow these steps:
   kubectl
   </summary>
 
-1. Create an APIRule CR for the Function. It is exposed on port `80` that is the default port of the [Service](/components/serverless#architecture-architecture).
+1. Create an APIRule CR for the Function. It is exposed on port `80` that is the default port of the [Service](/components/serverless/#architecture-architecture).
 
   ```yaml
   cat <<EOF | kubectl apply -f -

@@ -3,13 +3,13 @@ title: Bind the Redis ServiceInstance to the microservice
 type: Getting Started
 ---
 
-In this guide, we will bind the created ServiceInstance of the Redis service to the `orders-service` microservice. Then, you will test the binding by sending a sample order to the microservice. This way, you can check if the binding to the external Redis storage works and the order data is no longer removed upon the microservice Pod restart.
+In this guide, we will bind the created ServiceInstance of the Redis service to the `orders-service` microservice. Then, you will test the binding by sending a sample order to the microservice. This way you can check if the binding to the external Redis storage works and the order data is no longer removed upon the microservice Pod restart.
 
 ## Reference
 
 To create the binding, you will use ServiceBinding and ServiceBindingUsage custom resources (CRs) managed by the [Service Catalog](https://svc-cat.io/docs/walkthrough/).
 
->**NOTE:** See the document on [provisioning and binding](/components/service-catalog/#details-provisioning-and-binding) to learn more about binding Service Instances to microservices in Kyma.
+>**NOTE:** See the document on [provisioning and binding](/components/service-catalog/#details-provisioning-and-binding) to learn more about binding ServiceInstances to microservices in Kyma.
 
 ## Steps
 
@@ -44,7 +44,7 @@ Follow these steps:
    kubectl get servicebinding orders-service -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
    ```
 
-3. Create a [ServiceBindingUsage CR](/components/service-catalog/#custom-resource-service-binding-usage):
+3. Create a [ServiceBindingUsage CR](/components/service-catalog/#custom-resource-service-binding-usage) that injects the Secret associated with the ServiceBinding to the microservice Deployment.
 
    ```yaml
    cat <<EOF | kubectl apply -f -
@@ -109,14 +109,14 @@ Follow these steps:
 
 6. In the pop-up box that opens up:
 
-    - Choose `order-service` from the **Select Application** drop-down
-    - Choose **Set prefix for injected variables** and enter `REDIS_` in the box under the **Prefix namespace value** field.
+    - Select `order-service` from the **Select Application** drop-down
+    - Select **Set prefix for injected variables** and enter `REDIS_` in the box under the **Prefix namespace value** field.
 
    > **NOTE:** The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a ServiceBinding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
 
    > **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
-7. Select **Bind Application** to confirm the changes and wait for status `READY` of the created Service Binding Usage.
+7. Select **Bind Application** to confirm the changes and wait until the status of the created Service Binding Usage changes into `READY`.
 
   </details>
 </div>
@@ -207,4 +207,4 @@ Follow these steps:
    [{"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
    ```
 
-   In the [Expose the microservice](#getting-started-expose-the-microservice) guide, we saw how the in-memory storage works - every time when you deleted a microservice's Pod or changed the Deployment definition, the order details were lost. Thanks to the binding to the Redis instance, order details are now stored outside the microservice and the data is preserved.
+   In the [Expose the microservice](#getting-started-expose-the-microservice) guide, we saw how the in-memory storage works - every time you deleted the Pod of the microservice or changed the Deployment definition, the order details were lost. Thanks to the binding to the Redis instance, order details are now stored outside the microservice and the data is preserved.

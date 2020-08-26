@@ -91,7 +91,7 @@ If you want to see the Secret details and retrieve them from the ServiceBinding,
   UI
   </summary>
 
-1. Go to **Development** > **Functions** in the left navigation panel and select the `orders-function` Function.
+1. Go to **Development** > **Functions** in the left navigation panel and select `orders-function`.
 
 2. Switch to the **Configuration** tab and select **Create Service Binding** in the **Service Bindings** section.
 
@@ -103,7 +103,7 @@ If you want to see the Secret details and retrieve them from the ServiceBinding,
 
 4. Select **Create** to confirm the changes.
 
-The message appears on the screen confirming that the ServiceBinding was successfully created, and you will see it in the **Service Bindings** section in your Function, along with environment variable names.
+The message will appear on the screen confirming that the ServiceBinding was created, and you will see it in the **Service Bindings** section in your Function along with environment variable names.
 
 If you switch to the **Code** tab and scroll down to the **Environment Variables** section, you should see `REDIS_PORT`, `REDIS_HOST` and `REDIS_REDIS_PASSWORD` items with the `Service Binding` type. It indicates that the environment variable was injected to the Function by the ServiceBinding.
 

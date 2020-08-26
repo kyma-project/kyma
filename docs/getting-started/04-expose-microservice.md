@@ -3,11 +3,11 @@ title: Expose the microservice
 type: Getting Started
 ---
 
-Now that you deployed a standalone `orders-service` microservice, allow other resources to communicate with it. Make it available outside the cluster to other resources by exposing its Kubernetes Service through an APIRule custom resources (CR).
+Now that you deployed a standalone `orders-service` microservice, allow other resources to communicate with it. Make it available for other resources outside the cluster by exposing its Kubernetes Service through an APIRule custom resources (CR).
 
 ## Reference
 
-This guide demonstrates how [API Gateway](/components/api-gateway) works in Kyma. It exposes your Service under secured or unsecured endpoints for other Services outside the Kyma cluster.
+This guide demonstrates how [API Gateway](/components/api-gateway) works in Kyma. It exposes your Service under secured or unsecured endpoints for external Services to communicate with it.
 
 ## Steps
 
@@ -25,7 +25,7 @@ Follow these steps:
   kubectl
   </summary>
 
-1. Open the terminal window and apply the [APIRule CR](/components/api-gateway/#custom-resource-api-rule):
+1. Open the terminal window and apply the [APIRule CR](/components/api-gateway#custom-resource-api-rule):
 
   ```yaml
   cat <<EOF | kubectl apply -f -
@@ -51,7 +51,7 @@ Follow these steps:
         mutators: []
   EOF
   ```
-2. Check if the API Rule was created successfully and has the `OK` status:
+2. Check if the API Rule was created and has the `OK` status:
 
    ```bash
    kubectl get apirules orders-service -n orders-service -o=jsonpath='{.status.APIRuleStatus.code}'
@@ -63,7 +63,7 @@ Follow these steps:
 UI
 </summary>
 
->**TIP:** You can expose a Service or Function with an API Rule from different views in the Console UI. This tutorial shows how to do that from the generic **API Rules** view.
+>**TIP:** You can expose a Service or a Function with an API Rule from different views in the Console UI. This tutorial shows how to do that from the generic **API Rules** view.
 
 1. Select the `orders-service` Namespace from the drop-down list in the top navigation panel.
 
@@ -79,13 +79,13 @@ UI
 
     - Select `orders-service (port: 80)` from the drop-down list in the **Service** column to indicate the Service name for which you want to create the API Rule.
 
-4. In the **Access strategies** section, leave only the `GET` and `POST` methods marked and the `noop` handler selected. This way you will be able to send the orders to the service and retrieve orders from it without any token.
+4. In the **Access strategies** section, leave only the `GET` and `POST` methods marked and the `noop` handler selected. This way you will be able to send the orders to the Service and retrieve orders from it without any token.
 
 5. Select **Create** to confirm the changes.
 
-    The message appears on the screen confirming the changes were saved.
+    The message will appear on the screen confirming the changes were saved.
 
-6. In the API Rule's details view that opens up automatically, check if the API Rule status is `OK`. See if you can access the Service by selecting the HTTPS link under **Host** and adding the `/orders` endpoint at the end of the link.
+6. In the API Rule's details view that opens up automatically, check if the API Rule status is `OK`. See if you can access the Service by selecting the HTTPS link under **Host** and adding the `/orders` endpoint at the end of it.
 
 > **NOTE:** For the whole list of endpoints available in the service, see its [OpenAPI specification](./assets/orders-service-openapi.yaml).
 

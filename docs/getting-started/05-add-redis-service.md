@@ -3,11 +3,11 @@ title: Add the Redis service
 type: Getting Started
 ---
 
-Provision the external [Redis](https://redis.io/) service to replace your microservice in-memory storage. To do so, you will use a sample addon configuration linking to an example in the GitHub repository.
+Provision the external [Redis](https://redis.io/) service that will replace your microservice in-memory storage. To do so, you will use a sample addon configuration linking to an example in the GitHub repository.
 
 ## Reference
 
-This guide demonstrates how [Service Catalog](/components/service-catalog/) works in Kyma. It enables easy access to services (ServiceClasses) managed by [Service Brokers](/components/service-catalog/#overview-service-brokers) registered in Kyma. You can consume these services by creating their instances and binding them to your microservices and Functions.
+This guide demonstrates how [Service Catalog](/components/service-catalog/) works in Kyma. It enables easy access to services ([ServiceClass CRs](https://svc-cat.io/docs/resources/#service-classes)) managed by [Service Brokers](/components/service-catalog/#overview-service-brokers) registered in Kyma. You can consume these services by creating their instances and binding them to your microservices and Functions.
 
 ## Steps
 
@@ -30,7 +30,7 @@ Follows these steps:
      namespace: orders-service
    spec:
      repositories:
-     - url: https://github.com/kyma-project/addons/releases/download/0.12.0/index-testing.yaml
+       - url: https://github.com/kyma-project/addons/releases/download/0.12.0/index-testing.yaml
    EOF
    ```
 

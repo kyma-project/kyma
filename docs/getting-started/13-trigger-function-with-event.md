@@ -59,7 +59,7 @@ where:
     UI
     </summary>
 
-1. Navigate to the `orders-service` Namespace view in the Console UI from the drop-down list in the top navigation panel.
+1. Select the `orders-service` Namespace from the drop-down list in the top navigation panel.
 
 2. Go to **Development** > **Functions** in the left navigation panel and navigate to `orders-function`.
 
@@ -67,7 +67,7 @@ where:
 
 4. Once the pop-up box opens, find the `order.deliverysent` event with the `v1` version from the `commerce-mock` application. Mark it on the list and select **Add**.
 
-The message appears on the UI confirming that the event trigger was created, and you will see it in the **Event Triggers** section in the Function's details view.
+The message will appear in the UI confirming that the event trigger was created, and you will see it in the **Event Triggers** section in the Function's details view.
 
     </details>
 </div>
@@ -82,7 +82,7 @@ To send events from Commerce mock to `orders-function`, follow these steps:
 
 3. Select the `order.deliverysent.v1` event type in **Event Topics** drop-down list. In the details of the printed event, change **orderCode** to `987654321` and select **Send Event**.
 
-   The message appears on the UI confirming that the event was successfully sent.
+   The message appears on the UI confirming that the event was sent.
 
 4. Call the Function to verify if the event details were saved:
 

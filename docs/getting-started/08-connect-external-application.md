@@ -30,13 +30,14 @@ Follow these steps to deploy XF addons and add Commerce mock to the `orders-serv
   apiVersion: addons.kyma-project.io/v1alpha1
   kind: AddonsConfiguration
   metadata:
-  name: xf-mocks
-  namespace: orders-service
+    name: xf-mocks
+    namespace: orders-service
   spec:
-  repositories:
-  - url: github.com/sap/xf-addons/addons/index.yaml
+    repositories:
+      - url: github.com/sap/xf-addons/addons/index.yaml
   EOF
   ```
+
    > **NOTE:** The `index.yaml` file is a manifest for APIs of SAP Marketing Cloud, SAP Cloud for Customer, and SAP Commerce Cloud applications.
 
 2. Check if the AddonsConfiguration CR was created. Its phase should state `Ready`:
@@ -71,7 +72,7 @@ Follow these steps to deploy XF addons and add Commerce mock to the `orders-serv
    UI
    </summary>
 
-1. Switch to the `orders-service` Namespace, and navigate to **Configuration** > **Addons** in the left navigation panel.
+1. Switch to the `orders-service` Namespace, and go to **Configuration** > **Addons** in the left navigation panel.
 2. Select **Add New Configuration**.
 3. Once the new box opens up, enter `github.com/sap/xf-addons/addons/index.yaml` in the **Urls** field. The addon name is automatically generated.
 
@@ -163,9 +164,9 @@ Follow these steps:
 
 1. Return to the general view in the Console UI by selecting **Back to Namespaces**.
 2. Go to **Integration** > **Applications/Systems** and select **Create Application**.
-3. Set the application's name as `commerce-mock` and select **Create** to confirm the changes.
+3. Set the application's name to `commerce-mock` and select **Create** to confirm the changes.
 
-Wait for the application to have the `SERVING` status.
+  Wait for the application to have the `SERVING` status.
 
 4. Open the newly created application and select **Connect Application**.
 5. Copy the token by clicking **Copy to Clipboard** and select **OK** to close the pop-up box.
@@ -188,7 +189,7 @@ Once registered, you will see all Commerce mock APIs and events available under 
 
 ### Expose events in the Namespace
 
-To expose events in the `orders-service` Namespace, first create an ApplicationMapping CR to bind an application to the Namespace. Then, provision the Events API in the Namespace using the ServiceInstance CR.
+To expose events in the `orders-service` Namespace, first create an ApplicationMapping CR to bind the application to the Namespace. Then, provision the Events API in the Namespace using the ServiceInstance CR.
 
 Follow these steps:
 
@@ -210,7 +211,7 @@ Follow these steps:
   EOF
   ```
 
-2. List available [ServiceClass CRs](https://svc-cat.io/docs/walkthrough/#step-2---viewing-clusterserviceclasses-and-clusterserviceplans) in the `orders-service` Namespace and find under the `EXTERNAL-NAME` column the one with the `sap-commerce-cloud-events-*` prefix.
+2. List available ServiceClass CR in the `orders-service` Namespace. Under the `EXTERNAL-NAME` column, find one with the `sap-commerce-cloud-events-*` prefix. 
 
    ```bash
    kubectl get serviceclasses -n orders-service

@@ -46,7 +46,7 @@ Follows these steps:
    spec:
      reprocessRequest: 0
      repositories:
-     - url: https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml
+       - url: https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml
    EOF
    ```
 

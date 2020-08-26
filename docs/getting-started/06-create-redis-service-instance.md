@@ -61,4 +61,4 @@ You will be redirected to the **Catalog Management** > **Instances** > **redis-s
     </details>
 </div>
 
-You now have a provisioned Redis instance. As the next step, you will finally fit the two puzzle pieces together and bind the new Redis ServiceInstance to the previously deployed `orders-service` microservice.
+This way you provisioned a Redis instance. As the next step, you will finally fit the two puzzle pieces together and bind the new Redis ServiceInstance to the previously deployed `orders-service` microservice.

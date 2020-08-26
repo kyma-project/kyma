@@ -3,7 +3,7 @@ title: Create a Function
 type: Getting Started
 ---
 
-Let's now repeat the same steps but for a Function that we did for the `order-service` microservice. This guide shows how you can create a simple `orders-function` Function with the same logic as the one in the microservice. In further guides, you will expose the Function, bind it to the Redis storage, and subscribe it to the `order.deliverysent.v1` event type from Commerce mock.
+Let's now repeat the microservice flow for a Function. This guide shows how you can create a simple Function (`orders-function`) with the same logic as the one in the microservice. In further guides, you will expose the Function, bind it to the Redis storage, and subscribe it to the `order.deliverysent.v1` event type from Commerce mock.
 
 ## Reference
 
@@ -48,11 +48,11 @@ Follows these steps:
 
 2. Go to **Development** > **Functions** in the left navigation panel and select **Create Function**.
 
-3. In the pop-up box, provide the `orders-function` name, add `app=orders-function` and `example=orders-function` labels, and select **Create** to confirm the changes.
+3. In the pop-up box, provide the `orders-function` name. Add the `app=orders-function` and `example=orders-function` labels, and select **Create** to confirm the changes.
 
   >**TIP:** Separate multiple Function labels in the Console UI with commas.
 
-  The pop-up box closes and the message appears on the screen after a while, confirming that the Function was created.
+  The pop-up box will close and the message will appear on the screen after a while, confirming that the Function was created.
 
 4. In the **Source** tab of the Function details view that opens up automatically, enter the Function's code from the [`orders-function.js`](https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-function.js) file.
 
