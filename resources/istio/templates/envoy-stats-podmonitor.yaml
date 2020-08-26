@@ -1,0 +1,36 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  annotations:
+    meta.helm.sh/release-name: monitoring
+    meta.helm.sh/release-namespace: kyma-system
+  labels:
+    app: monitoring-prometheus
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    prometheus: monitoring
+  name: envoy-stats
+  namespace: kyma-system
+spec:
+  namespaceSelector:
+    any: true
+  podMetricsEndpoints:
+    - relabelings:
+      - sourceLabels: [__meta_kubernetes_pod_container_port_name]
+        action: keep
+        regex: '.*-envoy-prom'
+      - sourceLabels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:15090
+        targetLabel: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - sourceLabels: [__meta_kubernetes_namespace]
+        action: replace
+        targetLabel: namespace
+      - sourceLabels: [__meta_kubernetes_pod_name]
+        action: replace
+        targetLabel: pod_name
+      path: /stats/prometheus
+  selector: {}
