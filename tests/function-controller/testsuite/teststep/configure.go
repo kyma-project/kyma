@@ -92,8 +92,9 @@ func (f ConfigreFunction) Run() error {
 
 	f.log.Infof("Waiting for service binding to have ready phase...")
 	err = f.svcBinding.WaitForStatusRunning()
+	err = errors.New("something")
 	if err != nil {
-		return errors.Wrap(err, "while waitiing for service binding")
+		return errors.Wrap(err, "while waiting for service binding")
 	}
 
 	f.log.Infof("Creating service binding usage...")
@@ -151,7 +152,7 @@ func (f ConfigreFunction) prettyPrint(obj interface{}) {
 	}
 }
 
-func (f ConfigreFunction) LogResources() error {
+func (f ConfigreFunction) logResources() error {
 	tr, err := f.trigger.Get()
 	if err != nil {
 		return err
@@ -185,8 +186,8 @@ func (f ConfigreFunction) LogResources() error {
 }
 
 func (f ConfigreFunction) Cleanup() error {
-	if err := f.LogResources(); err != nil {
-		return errors.Wrapf(err, "while logging resources before cleanup")
+	if err := f.logResources(); err != nil {
+		f.log.Warnf("%s", errors.Wrapf(err, "while logging resources before cleanup"))
 	}
 
 	err := f.trigger.Delete()

@@ -34,7 +34,7 @@ func (s SerialSteps) Run() error {
 	for i, serialStep := range s.steps {
 		s.log.Infof("Step %d: %s", i, serialStep.Name())
 		if err := serialStep.Run(); err != nil {
-			return errors.Wrapf(err, "while excuting step: %s", serialStep.Name())
+			return errors.Wrapf(err, "while executing step: %s", serialStep.Name())
 		}
 	}
 	return nil

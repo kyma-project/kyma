@@ -39,7 +39,7 @@ func (f newFunction) Run() error {
 
 func (f newFunction) Cleanup() error {
 	if err := f.fn.LogResource(); err != nil {
-		return errors.Wrapf(err, "while logging function")
+		f.log.Warn(errors.Wrapf(err, "while logging function"))
 	}
 
 	return errors.Wrapf(f.fn.Delete(), "while deleting function: %s", f.name)

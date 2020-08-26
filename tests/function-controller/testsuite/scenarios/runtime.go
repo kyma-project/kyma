@@ -53,7 +53,7 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 		Namespace:   cfg.Namespace,
 		WaitTimeout: cfg.WaitTimeout,
 		Verbose:     cfg.Verbose,
-		Log:         python38Logger,
+		Log:         logrus.NewEntry(logf),
 	}
 
 	nodejs12Cfg, err := runtimes.NewFunctionConfig("nodejs12", cfg.UsageKindName, cfg.DomainName, genericContainer.WithLogger(nodejs12Logger), clientset)
@@ -71,7 +71,7 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 		return nil, errors.Wrapf(err, "while creating nodejs10 config")
 	}
 
-	addon := addons.New("test-addon", genericContainer.WithLogger(logrus.NewEntry(logf)))
+	addon := addons.New("test-addon", genericContainer)
 
 	addonURL, err := url.Parse(testsuite.AddonsConfigUrl)
 	if err != nil {
@@ -87,8 +87,8 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 	}
 
 	return []step.Step{
-		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer.WithLogger(logrus.NewEntry(logf))),
-		teststep.NewAddonConfiguration("Create addon configuration", addon, addonURL),
+		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
+		teststep.NewAddonConfiguration("Create addon configuration", addon, addonURL, genericContainer),
 		step.Parallel(
 			teststep.NewSerialSteps(python38Logger, "Python37 test",
 				teststep.CreateFunction(python38Logger, python38Cfg.Fn, "Create Python37 Function", runtimes.BasicPythonFunction("Hello From python")),

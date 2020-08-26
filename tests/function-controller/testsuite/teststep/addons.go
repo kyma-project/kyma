@@ -4,8 +4,10 @@ import (
 	"net/url"
 
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/addons"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
 )
 
@@ -13,13 +15,15 @@ type Addons struct {
 	name        string
 	addonConfig *addons.AddonConfiguration
 	url         *url.URL
+	log         *logrus.Entry
 }
 
-func NewAddonConfiguration(name string, addonConfig *addons.AddonConfiguration, url *url.URL) step.Step {
+func NewAddonConfiguration(name string, addonConfig *addons.AddonConfiguration, url *url.URL, container shared.Container) step.Step {
 	return &Addons{
 		name:        name,
 		addonConfig: addonConfig,
 		url:         url,
+		log:         container.Log,
 	}
 }
 
@@ -38,7 +42,7 @@ func (a Addons) Run() error {
 
 func (a Addons) Cleanup() error {
 	if err := a.addonConfig.LogResource(); err != nil {
-		return errors.Wrapf(err, "while logging resource")
+		a.log.Warn(errors.Wrapf(err, "while logging resource"))
 	}
 
 	return errors.Wrap(a.addonConfig.Delete(), "while deleting addong configuration")
