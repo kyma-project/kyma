@@ -109,18 +109,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: core-tests
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: core
-    kyma-project.io/installation: ""
-data:
-  console.web.test.acceptance.enabled: "false"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: compass-runtime-agent-tests
   namespace: kyma-installer
   labels:
