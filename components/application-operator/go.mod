@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/application-operator
 
-go 1.13
+go 1.14
 
 require (
 	cloud.google.com/go v0.44.3 // indirect

@@ -3,10 +3,14 @@ package ui
 import (
 	"time"
 
-	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
-	mfInformer "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/informers/externalversions"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"k8s.io/client-go/dynamic"
+
+	"github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/client/informers/externalversions"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamicinformer"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 )
@@ -24,7 +28,7 @@ type Resolver struct {
 	*clusterMicroFrontendResolver
 
 	informerFactory              externalversions.SharedInformerFactory
-	microFrontendInformerFactory mfInformer.SharedInformerFactory
+	microFrontendInformerFactory dynamicinformer.DynamicSharedInformerFactory
 }
 
 func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Container, error) {
@@ -32,7 +36,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Containe
 	if err != nil {
 		return nil, err
 	}
-	microFrontendClientset, err := mfClient.NewForConfig(restConfig)
+	microFrontendClientset, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -41,9 +45,20 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Containe
 	backendModuleInformer := informerFactory.Ui().V1alpha1().BackendModules().Informer()
 	backendModuleService := newBackendModuleService(backendModuleInformer)
 
-	microFrontendInformerFactory := mfInformer.NewSharedInformerFactory(microFrontendClientset, informerResyncPeriod)
-	microFrontendInformer := microFrontendInformerFactory.Ui().V1alpha1().MicroFrontends().Informer()
-	clusterMicroFrontendInformer := microFrontendInformerFactory.Ui().V1alpha1().ClusterMicroFrontends().Informer()
+	microFrontendInformerFactory := dynamicinformer.NewDynamicSharedInformerFactory(microFrontendClientset, informerResyncPeriod)
+
+	microFrontendInformer := microFrontendInformerFactory.ForResource(schema.GroupVersionResource{
+		Version:  v1alpha1.SchemeGroupVersion.Version,
+		Group:    v1alpha1.SchemeGroupVersion.Group,
+		Resource: "microfrontends",
+	}).Informer()
+
+	clusterMicroFrontendInformer := microFrontendInformerFactory.ForResource(schema.GroupVersionResource{
+		Version:  v1alpha1.SchemeGroupVersion.Version,
+		Group:    v1alpha1.SchemeGroupVersion.Group,
+		Resource: "clustermicrofrontends",
+	}).Informer()
+
 	microFrontendService := newMicroFrontendService(microFrontendInformer)
 	clusterMicroFrontendService := newClusterMicroFrontendService(clusterMicroFrontendInformer)
 
