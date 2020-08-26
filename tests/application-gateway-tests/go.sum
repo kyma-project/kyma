@@ -115,8 +115,6 @@ github.com/evanphx/json-patch v4.5.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLi
 github.com/exponent-io/jsonpath v0.0.0-20151013193312-d6023ce2651d/go.mod h1:ZZMPRZwes7CROmyNKgQzC3XPs6L/G2EJLHddWejkmf4=
 github.com/fatih/camelcase v1.0.0/go.mod h1:yN2Sb0lFhZJUdVvtELVWefmrXpuZESvPmqwoZc+/fpc=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
-github.com/franpog859/kyma/components/application-gateway v0.0.0-20200812095246-cd67ce3de73c h1:uaA0EnQCASrQHlOOZN0Xqg4DT08fxv8IxD3081TeUdk=
-github.com/franpog859/kyma/components/application-gateway v0.0.0-20200812095246-cd67ce3de73c/go.mod h1:kTQyCK36j0XWvpizZnTIDWPamLzluVbX8xzoZAlP4Y0=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/garyburd/redigo v0.0.0-20150301180006-535138d7bcd7/go.mod h1:NR3MbYisc3/PwhQ00EMzDiPmrwpPxAn5GI05/YaO1SY=
 github.com/ghodss/yaml v0.0.0-20150909031657-73d445a93680/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
@@ -273,6 +271,8 @@ github.com/kubernetes-incubator/service-catalog v0.2.2 h1:EKDy3ppb7X8laxwXL516Pk
 github.com/kubernetes-incubator/service-catalog v0.2.2/go.mod h1:D0CRODiXUJs6VCZDB15TmCkesbuizkac9fYEiTA78BA=
 github.com/kubernetes-sigs/service-catalog v0.2.2 h1:V/NrjGRWD37hkyvIwiS1Ekz/n7k1Ro9kPj6efRXkqEw=
 github.com/kubernetes-sigs/service-catalog v0.2.2/go.mod h1:fmRsWJ38Od93DQ7cOXR9mMSSwmjyDS1EAomWxBlumuo=
+github.com/kyma-project/kyma/components/application-gateway v0.0.0-20200825094731-2ab8b8780e41 h1:0LNqyEXK8ptErWBjioiGqeMixV7LFOYadSJ140tjyFw=
+github.com/kyma-project/kyma/components/application-gateway v0.0.0-20200825094731-2ab8b8780e41/go.mod h1:kTQyCK36j0XWvpizZnTIDWPamLzluVbX8xzoZAlP4Y0=
 github.com/kyma-project/kyma/components/application-operator v0.0.0-20200810104940-0669e658a4a6/go.mod h1:q7ktyGNNIJWy72jTW5nKGrPJch1aqFb4xlhpgPR3ZX0=
 github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de/go.mod h1:zAbeS9B/r2mtpb6U+EI2rYA5OAXxsYw6wTamcNW+zcE=
 github.com/lithammer/dedent v1.1.0/go.mod h1:jrXYCQtgg0nJiN+StA2KgR7w6CiQNv9Fd/Z9BP0jIOc=
