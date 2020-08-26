@@ -25,4 +25,4 @@ appVersion: 1.16.0
 dependencies:
   - name: cert-manager
     version: 0.0.1
-    condition: global.environment.gardener # not
+    condition: cert-manager.enabled
