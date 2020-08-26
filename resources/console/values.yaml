@@ -25,5 +25,5 @@ global:
   console_backend_service:
     version: bdd0df2d
   console_backend_service_test:
-    version: 8bddbb53
+    version: PR-9313
     
