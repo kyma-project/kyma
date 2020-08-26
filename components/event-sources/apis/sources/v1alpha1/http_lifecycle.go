@@ -99,9 +99,10 @@ func (s *HTTPSourceStatus) MarkPeerAuthenticationCreated(peerAuthentication *sec
 
 // TODO: delete me when Kyma 1.16 is out
 // ClearPolicyStatus clears the PolicyCreated condition
-func (s *HTTPSourceStatus) ClearPolicyStatus() error{
+func (s *HTTPSourceStatus) ClearPolicyStatus() error {
 	return httpCondSet.Manage(s).ClearCondition(HTTPConditionPolicyCreated)
 }
+
 // END
 
 // MarkNoSink sets the SinkProvided condition to False with the given reason

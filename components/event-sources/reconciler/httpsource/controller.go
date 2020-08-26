@@ -69,7 +69,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 
 		// TODO: remove me when Kyma 1.16 is out
 		policyLister: policyInformer.Lister(),
-		authClient:               istioclient.Get(ctx).AuthenticationV1alpha1(),
+		authClient:   istioclient.Get(ctx).AuthenticationV1alpha1(),
 		// END
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
