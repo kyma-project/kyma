@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  annotations:
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+  labels:
+    app: monitoring-prometheus
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: monitoring
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    prometheus: monitoring
+  name: istio-policy
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector: {}
+  namespaceSelector:
+    matchNames:
+      - istio-system
+  endpoints:
+    - path: /metrics
+      scheme: http
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+          separator: ;
+          regex: istio-policy;http-policy-monitoring
+          replacement: $1
+          action: keep
