@@ -113,11 +113,10 @@ metadata:
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: console
+    component: core
     kyma-project.io/installation: ""
 data:
-  web.test.acceptance.enabled: "false"
-  console.web.test.acceptance.enabled: "false"
+  console.test.acceptance.enabled: "false"
 ---
 apiVersion: v1
 kind: ConfigMap
