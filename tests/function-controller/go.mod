@@ -15,7 +15,8 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/vrischmann/envconfig v1.2.0
-	golang.org/x/crypto v0.0.0-20200414173820-0848c9571904 // indirect
+	go.uber.org/multierr v1.5.0 // indirect
+	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a // indirect
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
 	golang.org/x/sys v0.0.0-20200413165638-669c56c373c4 // indirect
@@ -32,8 +33,14 @@ require (
 	sigs.k8s.io/controller-runtime v0.5.2
 )
 
-replace golang.org/x/text => golang.org/x/text v0.3.3
+replace (
+	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 
-// mismatch among fun-controller, knative enevting and knative serving...
-// try to delete it after update of eventing/serving
-replace knative.dev/pkg => knative.dev/pkg v0.0.0-20200113182502-b8dc5fbc6d2f
+	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
+
+	golang.org/x/text => golang.org/x/text v0.3.3
+
+	// mismatch among fun-controller, knative enevting and knative serving...
+	// try to delete it after update of eventing/serving
+	knative.dev/pkg => knative.dev/pkg v0.0.0-20200113182502-b8dc5fbc6d2f
+)
