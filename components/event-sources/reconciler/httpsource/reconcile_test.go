@@ -5,8 +5,13 @@ import (
 	"strconv"
 	"testing"
 
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	clientgotesting "k8s.io/client-go/testing"
+
 	pkgerrors "github.com/pkg/errors"
+	authenticationv1alpha1api "istio.io/api/authentication/v1alpha1"
 	istiov1beta1apis "istio.io/api/type/v1beta1"
+	authv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -50,6 +55,9 @@ const (
 	tPeerAuthentication = "test"
 	tRevisionSvc        = "test"
 	tTargetPort         = metricsPort
+	// TODO: delete me then Kyma 1.16 is out
+	tTargetPortName = "http-usermetric"
+	// END
 
 	tMetricsDomain = "testing"
 )
@@ -253,6 +261,42 @@ func TestReconcile(t *testing.T) {
 				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Istio PeerAuthentication %q", tPeerAuthentication),
 			},
 		},
+		// TODO: delete me then Kyma 1.16 is out
+		{
+			Name: "Istio Policy migrated to PeerAuthentication",
+			Key:  tNs + "/" + tName,
+			Objects: []runtime.Object{
+				newSource(Deployed, WithSink, WithPeerAuthentication, WithService),
+				newDeploymentAvailable(),
+				newChannelReady(),
+				newService(),
+				newPolicyWithSpec(),
+			},
+			WantCreates: []runtime.Object{
+				newPeerAuthenticationWithSpec(),
+			},
+			WantDeletes: []clientgotesting.DeleteActionImpl{
+				{
+					Name: tName,
+					ActionImpl: clientgotesting.ActionImpl{
+						Namespace: tNs,
+						Verb:      "delete",
+						Resource: schema.GroupVersionResource{
+							Group:    "security.istio.io",
+							Version:  "v1beta1",
+							Resource: "PeerAuthentication",
+						},
+					},
+				},
+			},
+			WantUpdates:       nil,
+			WantStatusUpdates: nil,
+			WantEvents: []string{
+				rt.Eventf(corev1.EventTypeNormal, string(deleteReason), "Deleted deprecated Istio Policy %q", tPeerAuthentication),
+				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Istio PeerAuthentication %q", tPeerAuthentication),
+			},
+		},
+		// END
 		{
 			Name: "Adapter deployment in progress",
 			Key:  tNs + "/" + tName,
@@ -448,6 +492,51 @@ func newChannel() *messagingv1alpha1.Channel {
 		},
 	}
 }
+
+// TODO: delete me then Kyma 1.16 is out
+// newPolicy returns a test Policy object with pre-filled metadata
+func newPolicy() *authv1alpha1.Policy {
+	lbls := make(map[string]string, len(tChLabels))
+	for k, v := range tChLabels {
+		lbls[k] = v
+	}
+
+	return &authv1alpha1.Policy{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:       tNs,
+			Name:            tPeerAuthentication,
+			Labels:          lbls,
+			OwnerReferences: []metav1.OwnerReference{tOwnerRef},
+		},
+	}
+}
+
+// newPolicy returns a test Policy object with Spec
+func newPolicyWithSpec() *authv1alpha1.Policy {
+	policy := newPolicy()
+	policy.Spec = authenticationv1alpha1api.Policy{
+		Targets: []*authenticationv1alpha1api.TargetSelector{{
+			Name: tRevisionSvc,
+			Ports: []*authenticationv1alpha1api.PortSelector{
+				{
+					Port: &authenticationv1alpha1api.PortSelector_Name{
+						Name: tTargetPortName,
+					},
+				},
+			},
+		}},
+		Peers: []*authenticationv1alpha1api.PeerAuthenticationMethod{{
+			Params: &authenticationv1alpha1api.PeerAuthenticationMethod_Mtls{
+				Mtls: &authenticationv1alpha1api.MutualTls{
+					Mode: authenticationv1alpha1api.MutualTls_PERMISSIVE,
+				}}},
+		},
+	}
+
+	return policy
+}
+
+// END
 
 // newPeerAuthentication returns a test PeerAuthentication object with pre-filled metadata
 func newPeerAuthentication() *securityv1beta1.PeerAuthentication {

@@ -333,7 +333,7 @@ func (r *Reconciler) getOrCreatePeerAuthentication(src *sourcesv1alpha1.HTTPSour
 // See also: https://istio.io/latest/news/releases/1.6.x/announcing-1.6/upgrade-notes/.
 func (r *Reconciler) deleteDeprecatedPolicy(src *sourcesv1alpha1.HTTPSource,
 	desiredPeerAuthentication *securityv1beta1.PeerAuthentication) error {
-	desiredPolicyName := desiredPeerAuthentication.Namespace
+	desiredPolicyName := desiredPeerAuthentication.Name
 	policy, err := r.policyLister.Policies(src.Namespace).Get(desiredPolicyName)
 	switch {
 	case apierrors.IsNotFound(err):
@@ -344,7 +344,7 @@ func (r *Reconciler) deleteDeprecatedPolicy(src *sourcesv1alpha1.HTTPSource,
 	if err := r.authClient.Policies(src.Namespace).Delete(policy.Name, &metav1.DeleteOptions{}); err != nil {
 		return err
 	}
-	r.event(src, deleteReason, "Deleted deprecated Istio Policy: %q", policy.Name)
+	r.event(src, deleteReason, "Deleted deprecated Istio Policy %q", policy.Name)
 
 	return nil
 }
