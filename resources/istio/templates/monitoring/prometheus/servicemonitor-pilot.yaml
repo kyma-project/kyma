@@ -2,11 +2,14 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   annotations:
+    meta.helm.sh/release-name: {{ $.Release.Name | quote }}
     meta.helm.sh/release-namespace: {{ .Release.Namespace }}
   labels:
-    app: monitoring-prometheus
+    app: {{ $.Release.Name }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: monitoring
+    app.kubernetes.io/name: istio-pilot
+    helm.sh/chart: {{ $.Release.Name }}-1.0
     prometheus: monitoring
   name: istio-pilot
   namespace: {{ .Release.Namespace }}
