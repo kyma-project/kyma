@@ -24,8 +24,7 @@ const HTTPDBSERVICE_IMAGE = "eu.gcr.io/kyma-project/example/http-db-service:0.0.
 
 func (testSuite *TestSuite) createNamespace() error {
 	log.Infof("Creating namespace '%s", testSuite.namespace)
-	var err error
-	err = retry.Do(func() error {
+	err := retry.Do(func() error {
 		_, err := testSuite.k8sClient.CoreV1().Namespaces().Create(&v1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: testSuite.namespace,
@@ -45,8 +44,7 @@ func (testSuite *TestSuite) createNamespace() error {
 func (testSuite *TestSuite) deleteNamespace() error {
 	log.Infof("Deleting namespace '%s", testSuite.namespace)
 	var deleteImmediately int64
-	var err error
-	err = retry.Do(func() error {
+	err := retry.Do(func() error {
 		err := testSuite.k8sClient.CoreV1().Namespaces().Delete(testSuite.namespace, &metav1.DeleteOptions{
 			GracePeriodSeconds: &deleteImmediately,
 		})
@@ -84,11 +82,11 @@ func (testSuite *TestSuite) initK8sClient() {
 }
 
 func (testSuite *TestSuite) disableInjectionForNamespace(disable bool) {
-	var err error
-	var ns *corev1.Namespace
-	err = retry.Do(func() error {
-		ns, err = testSuite.k8sClient.CoreV1().Namespaces().Get(testSuite.namespace, metav1.GetOptions{})
-		return err
+	var namespace *corev1.Namespace
+	err := retry.Do(func() error {
+		ns, er := testSuite.k8sClient.CoreV1().Namespaces().Get(testSuite.namespace, metav1.GetOptions{})
+		namespace = ns
+		return er
 	},
 		retry.Attempts(5),
 		retry.Delay(3*time.Second))
@@ -99,15 +97,15 @@ func (testSuite *TestSuite) disableInjectionForNamespace(disable bool) {
 	}
 
 	if disable {
-		ns.ObjectMeta.Labels = map[string]string{
+		namespace.ObjectMeta.Labels = map[string]string{
 			"istio-injection": "disabled",
 		}
 	} else {
-		ns.ObjectMeta.Labels = map[string]string{}
+		namespace.ObjectMeta.Labels = map[string]string{}
 	}
 
 	err = retry.Do(func() error {
-		_, err = testSuite.k8sClient.CoreV1().Namespaces().Update(ns)
+		_, err = testSuite.k8sClient.CoreV1().Namespaces().Update(namespace)
 		return err
 	},
 		retry.Attempts(5),
@@ -128,7 +126,7 @@ func (testSuite *TestSuite) createDeployment(name string, disableSidecarInjectio
 		annotations["sidecar.istio.io/inject"] = "false"
 	}
 
-	deployment := &appv1.Deployment{
+	deploymentManifest := &appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: testSuite.namespace,
@@ -162,20 +160,20 @@ func (testSuite *TestSuite) createDeployment(name string, disableSidecarInjectio
 		},
 	}
 
-	var dep *appv1.Deployment
+	var deployment *appv1.Deployment
 	err := retry.Do(func() error {
-		deployment, err := testSuite.k8sClient.AppsV1().Deployments(testSuite.namespace).Create(deployment)
-		dep = deployment
+		dep, err := testSuite.k8sClient.AppsV1().Deployments(testSuite.namespace).Create(deploymentManifest)
+		deployment = dep
 		return err
 	},
 		retry.Attempts(5),
 		retry.Delay(3*time.Second))
 
 	if err != nil {
-		log.Errorf("Cannot create deployment '%s': %v", deployment, err)
+		log.Errorf("Cannot create deployment '%s': %v", deploymentManifest, err)
 	}
 
-	return dep, err
+	return deployment, err
 }
 
 func (testSuite *TestSuite) getPods(appLabelValue string) (*v1.PodList, error) {
@@ -189,7 +187,7 @@ func (testSuite *TestSuite) getPods(appLabelValue string) (*v1.PodList, error) {
 			return errors.Errorf("Cannot list the pods with label '%s': %v", appLabelValue, err)
 		}
 		if len(pods.Items) == 0 {
-			return errors.Errorf("There is not pod created yet")
+			return errors.Errorf("The pod is not created yet")
 		}
 		return nil
 	},

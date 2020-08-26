@@ -52,7 +52,7 @@ func TestIstioInjection(t *testing.T) {
 
 			_, err := testSuite.createDeployment(testID, c.disableInjectionForDeployment)
 			if err != nil {
-				log.Errorf("Cannot create deployment '%s': %v", testID, err)
+				log.Panic("Cannot create deployment", err)
 			}
 
 			defer testSuite.deleteDeployment(testID)
@@ -60,7 +60,7 @@ func TestIstioInjection(t *testing.T) {
 			pods, err := testSuite.getPods(testID)
 
 			if err != nil {
-				log.Fatal("There is no pods for the deployment", err)
+				log.Panic("There is no pod for the deployment", err)
 			}
 
 			pod := pods.Items[0]

@@ -1,4 +1,4 @@
-module github.com/muralov/kyma/tests/integration/istio-injection
+module github.com/kyma-project/kyma/tests/integration/istio-injection
 
 go 1.13
 
