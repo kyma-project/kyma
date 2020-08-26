@@ -1,6 +1,6 @@
 {{ $globPattern := "" }}
 
-{{- if .Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1" }}
+{{- if ( or (.Capabilities.APIVersions.Has "cert.gardener.cloud/v1alpha1") (.Values.global.isLocalEnv)) }}
   {{ $globPattern = "files/crds/*.yaml" }}
 {{ else }}
   {{ $globPattern = "files/**.yaml" }}
