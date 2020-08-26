@@ -8,7 +8,6 @@ import (
 
 	"go.opencensus.io/stats/view"
 
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/ems"
 	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/gateway"
 	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/handler"
 	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/metrics"
@@ -56,14 +55,9 @@ func main() {
 
 	logger.Info("Starting the Cloud Event Gateway Proxy")
 
-	token, err := ems.FetchOAuthToken(env)
-	if err != nil {
-		logger.Fatal("failed to fetch token", zap.Error(err))
-	}
-
 	oAuth2Config := oauth.Config(env)
 
-	httpClient := oAuth2Config.Client(ctx, token)
+	httpClient := oAuth2Config.Client(ctx)
 	connectionArgs := sender.ConnectionArgs{
 		MaxIdleConns:        defaultMaxIdleConnections,
 		MaxIdleConnsPerHost: defaultMaxIdleConnectionsPerHost,
