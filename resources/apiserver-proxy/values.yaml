@@ -47,7 +47,7 @@ global:
 
 init:
   targetSecret:
-    name: kyma-gateway-certs
+    name: kyma-ca-key-pair
     namespace: istio-system
   image:
     name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl

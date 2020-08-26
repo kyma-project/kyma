@@ -37,15 +37,15 @@ spec:
         name: cert-injector
         imagePullPolicy: IfNotPresent
         volumeMounts:
-          - name: cert-injector-sa-token
-            mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-          - name: shared-data
-            mountPath: /injected-certs/
+        - name: cert-injector-sa-token
+          mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        - name: shared-data
+          mountPath: /injected-certs/
         command:
           - /bin/sh
           - -c
           - |
-            kubectl get secret -n {{ .Values.init.targetSecret.namespace }} {{ .Values.init.targetSecret.name }} -o yaml > /injected-certs/secret.yaml
+            kubectl get secret -n {{ .Values.init.targetSecret.namespace }} {{ .Values.init.targetSecret.name }} -o jsonpath='{.data.tls\.crt}' > /injected-certs/secret.yaml
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy.dir }}apiserver-proxy:{{ .Values.global.apiserver_proxy.version }}
         name: auth-proxy
@@ -85,14 +85,12 @@ spec:
           hostPort: {{ .Values.port.secure }}
           {{ end }}
         volumeMounts:
-        - name: tls-cert
-          mountPath: /etc/tls-cert/
-      {{ if not .Values.global.environment.gardener }}
+        {{ if not .Values.global.environment.gardener }}
         - name: dex-tls-cert
           mountPath: /etc/dex-tls-cert/
-      {{ end }}
-      - name: shared-data
-        mountPath: /etc/injected-tls-certs/
+        {{ end }}
+        - name: shared-data
+          mountPath: /etc/tls-cert/
       volumes:
       {{ if not .Values.global.environment.gardener }}
       - name: dex-tls-cert
