@@ -19,7 +19,7 @@ rules:
   verbs: ["get", "create", "patch"]
 - apiGroups: [""]
   resources: ["secrets"]
-  verbs: ["get"]
+  verbs: ["get", "create", "patch"]
 - apiGroups: ["cert.gardener.cloud"]
   resources: ["certificates"]
   verbs: ["get", "create", "patch"]
