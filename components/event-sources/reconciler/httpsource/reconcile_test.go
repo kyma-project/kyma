@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	pkgerrors "github.com/pkg/errors"
+	istiov1beta1apis "istio.io/api/type/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -218,10 +219,10 @@ func TestReconcile(t *testing.T) {
 			},
 		},
 
-		/* Policy synchronization */
+		/* PeerAuthentication synchronization */
 
 		{
-			Name: "Policy missing when deployment not available",
+			Name: "PeerAuthentication missing when deployment not available",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSource(NotDeployed, WithSink, WithoutPeerAuthentication, WithService),
@@ -235,7 +236,7 @@ func TestReconcile(t *testing.T) {
 			WantEvents:        nil,
 		},
 		{
-			Name: "Policy created",
+			Name: "PeerAuthentication created",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
 				newSource(Deployed, WithSink, WithPeerAuthentication, WithService),
@@ -249,7 +250,7 @@ func TestReconcile(t *testing.T) {
 			WantUpdates:       nil,
 			WantStatusUpdates: nil,
 			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Istio Policy %q", tPeerAuthentication),
+				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Istio PeerAuthentication %q", tPeerAuthentication),
 			},
 		},
 		{
@@ -316,7 +317,7 @@ func TestReconcile(t *testing.T) {
 				Object: newSource(Deployed, WithSink, WithPeerAuthentication, WithService),
 			}},
 			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Istio Policy %q", tPeerAuthentication),
+				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Istio PeerAuthentication %q", tPeerAuthentication),
 			},
 		},
 		{
@@ -353,15 +354,17 @@ func TestReconcile(t *testing.T) {
 				Image: tImg,
 				Port:  tPort,
 			},
-			httpsourceLister: ls.GetHTTPSourceLister(),
-			deploymentLister: ls.GetDeploymentLister(),
-			chLister:         ls.GetChannelLister(),
-			policyLister:     ls.GetPolicyLister(),
-			serviceLister:    ls.GetServiceLister(),
-			sourcesClient:    fakesourcesclient.Get(ctx).SourcesV1alpha1(),
-			messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
-			authClient:       fakeistioclient.Get(ctx).AuthenticationV1alpha1(),
-			sinkResolver:     resolver.NewURIResolver(ctx, func(types.NamespacedName) {}),
+			httpsourceLister:         ls.GetHTTPSourceLister(),
+			deploymentLister:         ls.GetDeploymentLister(),
+			chLister:                 ls.GetChannelLister(),
+			policyLister:             ls.GetPolicyLister(),
+			peerAuthenticationLister: ls.GetPeerAuthenticationLister(),
+			serviceLister:            ls.GetServiceLister(),
+			sourcesClient:            fakesourcesclient.Get(ctx).SourcesV1alpha1(),
+			messagingClient:          rb.EventingClientSet.MessagingV1alpha1(),
+			authClient:               fakeistioclient.Get(ctx).AuthenticationV1alpha1(),
+			sinkResolver:             resolver.NewURIResolver(ctx, func(types.NamespacedName) {}),
+			securityClient:           fakeistioclient.Get(ctx).SecurityV1beta1(),
 		}
 
 		cmw.Watch(metrics.ConfigMapName(), r.updateAdapterMetricsConfig)
@@ -446,7 +449,7 @@ func newChannel() *messagingv1alpha1.Channel {
 	}
 }
 
-// newPeerAuthentication returns a test Policy object with pre-filled metadata
+// newPeerAuthentication returns a test PeerAuthentication object with pre-filled metadata
 func newPeerAuthentication() *securityv1beta1.PeerAuthentication {
 	lbls := make(map[string]string, len(tChLabels))
 	for k, v := range tChLabels {
@@ -474,7 +477,11 @@ func newPeerAuthenticationWithSpec() *securityv1beta1.PeerAuthentication {
 			Mode: securityv1beta1apis.PeerAuthentication_MutualTLS_PERMISSIVE,
 		},
 	}
-
+	peerAuthentication.Spec.Selector = &istiov1beta1apis.WorkloadSelector{
+		MatchLabels: map[string]string{
+			applicationLabelKey: tName,
+		},
+	}
 	return peerAuthentication
 }
 
