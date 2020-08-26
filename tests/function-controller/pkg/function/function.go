@@ -1,10 +1,12 @@
-package testsuite
+package function
 
 import (
 	"context"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/util/json"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
@@ -20,17 +22,17 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
-type function struct {
+type Function struct {
 	resCli      *resource.Resource
 	name        string
 	namespace   string
 	waitTimeout time.Duration
-	log         shared.Logger
+	log         *logrus.Entry
 	verbose     bool
 }
 
-func newFunction(name string, c shared.Container) *function {
-	return &function{
+func NewFunction(name string, c shared.Container) *Function {
+	return &Function{
 		resCli:      resource.New(c.DynamicCli, serverlessv1alpha1.GroupVersion.WithResource("functions"), c.Namespace, c.Log, c.Verbose),
 		name:        name,
 		namespace:   c.Namespace,
@@ -40,7 +42,7 @@ func newFunction(name string, c shared.Container) *function {
 	}
 }
 
-func (f *function) Create(data *functionData) error {
+func (f *Function) Create(data *FunctionData) error {
 	function := &serverlessv1alpha1.Function{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Function",
@@ -51,8 +53,9 @@ func (f *function) Create(data *functionData) error {
 			Namespace: f.namespace,
 		},
 		Spec: serverlessv1alpha1.FunctionSpec{
-			Source: data.Body,
-			Deps:   data.Deps,
+			Source:  data.Body,
+			Deps:    data.Deps,
+			Runtime: data.Runtime,
 		},
 	}
 
@@ -63,8 +66,8 @@ func (f *function) Create(data *functionData) error {
 	return err
 }
 
-func (f *function) WaitForStatusRunning() error {
-	fn, err := f.get()
+func (f *Function) WaitForStatusRunning() error {
+	fn, err := f.Get()
 	if err != nil {
 		return err
 	}
@@ -83,7 +86,7 @@ func (f *function) WaitForStatusRunning() error {
 	return nil
 }
 
-func (f *function) Delete() error {
+func (f *Function) Delete() error {
 	err := f.resCli.Delete(f.name, f.waitTimeout)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting Function %s in namespace %s", f.name, f.namespace)
@@ -92,9 +95,9 @@ func (f *function) Delete() error {
 	return nil
 }
 
-func (f *function) Update(data *functionData) error {
+func (f *Function) Update(data *FunctionData) error {
 	// correct update must first perform get
-	fn, err := f.get()
+	fn, err := f.Get()
 	if err != nil {
 		return err
 	}
@@ -105,12 +108,13 @@ func (f *function) Update(data *functionData) error {
 	fnCopy.Spec.MaxReplicas = &data.MaxReplicas
 	fnCopy.Spec.Deps = data.Deps
 	fnCopy.Spec.Source = data.Body
+	fnCopy.Spec.Runtime = data.Runtime
 
 	_, err = f.resCli.Update(fnCopy)
 	return err
 }
 
-func (f *function) get() (*serverlessv1alpha1.Function, error) {
+func (f *Function) Get() (*serverlessv1alpha1.Function, error) {
 	u, err := f.resCli.Get(f.name)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while getting Function %s in namespace %s", f.name, f.namespace)
@@ -124,13 +128,28 @@ func (f *function) get() (*serverlessv1alpha1.Function, error) {
 	return &function, nil
 }
 
-func (f *function) isFunctionReady() func(event watch.Event) (bool, error) {
+func (f Function) LogResource() error {
+	fn, err := f.Get()
+	if err != nil {
+		return err
+	}
+
+	out, err := json.Marshal(fn)
+	if err != nil {
+		return err
+	}
+
+	f.log.Infof("%s", string(out))
+	return nil
+}
+
+func (f *Function) isFunctionReady() func(event watch.Event) (bool, error) {
 	return func(event watch.Event) (bool, error) {
 		if event.Type != watch.Modified {
 			return false, nil
 		}
 
-		function, err := f.get()
+		function, err := f.Get()
 
 		if err != nil {
 			return false, err
@@ -139,7 +158,7 @@ func (f *function) isFunctionReady() func(event watch.Event) (bool, error) {
 	}
 }
 
-func (f function) isConditionReady(fn serverlessv1alpha1.Function) bool {
+func (f Function) isConditionReady(fn serverlessv1alpha1.Function) bool {
 	conditions := fn.Status.Conditions
 	if len(conditions) == 0 {
 		shared.LogReadiness(false, f.verbose, f.name, f.log, fn)
