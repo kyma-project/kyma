@@ -47,7 +47,7 @@ build-local: $(cmds) test-local ;
 # Example:
 #   make controller-manager
 GOBUILD_FLAGS := -v
-$(cmds): %: resolve-local $(patched_trace)
+$(cmds): %: resolve-local istio-injection $(patched_trace)
 	@echo "+ Building $*"
 	@CGO_ENABLED=0 go build -o $* \
 		$(GOBUILD_FLAGS) \
@@ -61,7 +61,7 @@ $(patched_trace): hack/set-span-id.patch vendor
 	cp $< $@
 
 
-test-local: $(patched_trace)
+test-local: istio-injection $(patched_trace)
 
 .PHONY: $(cmds_images) $(cmds_images_push)
 
