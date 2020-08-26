@@ -45,7 +45,7 @@ spec:
           - /bin/sh
           - -c
           - |
-            kubectl get secret -n {{ .Values.init.targetSecret.namespace }} {{ .Values.init.targetSecret.name }} -o jsonpath='{.data.tls\.crt}' > /injected-certs/secret.yaml
+            kubectl get secret -n {{ .Values.init.targetSecret.namespace }} {{ .Values.init.targetSecret.name }} -o jsonpath='{.data.tls\.crt}' > /injected-certs/tls.crt
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy.dir }}apiserver-proxy:{{ .Values.global.apiserver_proxy.version }}
         name: auth-proxy
@@ -97,9 +97,6 @@ spec:
         secret:
           secretName: ingress-tls-cert
       {{ end }}
-      - name: tls-cert
-        secret:
-          secretName: {{ template "name" . }}-tls-cert
       - name: cert-injector-sa-token
         secret:
           secretName: {{ template "name" . }}-cert-injector-sa-token
