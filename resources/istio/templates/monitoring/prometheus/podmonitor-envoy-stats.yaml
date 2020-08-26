@@ -2,13 +2,15 @@ apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
   annotations:
-    meta.helm.sh/release-name: monitoring
+    meta.helm.sh/release-name: {{ $.Release.Name | quote }}
     meta.helm.sh/release-namespace: kyma-system
   labels:
-    app: monitoring-prometheus
+    app: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: envoy-stats
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    prometheus: monitoring
+    release: monitoring
   name: envoy-stats
   namespace: kyma-system
 spec:
