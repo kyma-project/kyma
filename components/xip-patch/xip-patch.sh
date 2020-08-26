@@ -75,21 +75,21 @@ generateRootCACerts() {
       --namespace=istio-system
 
     # export Root CA public key so internal and external clients can understand certs issued by cert-manager and signed by the Root CA
-    export INGRESS_TLS_CERT=$(base64 < /tmp/ca.crt | tr -d '\n')
+    # export INGRESS_TLS_CERT=$(base64 < /tmp/ca.crt | tr -d '\n')
 
-    TEMP=$(mktemp /tmp/cert-file.XXXXXXXX)
-    sed 's/{{.Values.global.ingress.domainName}}/'$INGRESS_DOMAIN'/' /etc/cert-config/config.yaml.tpl > ${TEMP}
+    #TEMP=$(mktemp /tmp/cert-file.XXXXXXXX)
+    #sed 's/{{.Values.global.ingress.domainName}}/'$INGRESS_DOMAIN'/' /etc/cert-config/config.yaml.tpl > ${TEMP}
 
-    set +e
+    #set +e
 
-    msg=$(kubectl create -f ${TEMP} 2>&1)
-    status=$?
-    rm ${TEMP}
-    set -e
-    if [[ $status -ne 0 ]]; then
-        echo "${msg}"
-        exit ${status}
-    fi
+    #msg=$(kubectl create -f ${TEMP} 2>&1)
+    #status=$?
+    #rm ${TEMP}
+    #set -e
+    #if [[ $status -ne 0 ]]; then
+    #    echo "${msg}"
+    #    exit ${status}
+    #fi
 }
 
 createOverridesConfigMap() {
