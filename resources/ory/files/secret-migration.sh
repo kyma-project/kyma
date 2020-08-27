@@ -48,7 +48,7 @@ if [[ -z "${PASSWORD}" ]]; then
   PASSWORD=$(get_from_file_or_die "${PASSWORD_KEY}")
 fi
   {{- end }}
-DSN=${DB_TYPE}://${DB_USER}:${PASSWORD}@${DB_URL}/${DB_NAME}?sslmode=disable
+DSN=${DB_TYPE}://${DB_USER}:${PASSWORD}@${DB_URL}/${DB_NAME}?sslmode=disable&max_conn_lifetime=10s
 {{- else }}
 DSN=memory
 {{- end }}
