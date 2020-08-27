@@ -11,16 +11,16 @@ export IS_GARDENER=false
 export DOMAIN="${GLOBAL_DOMAIN}"
 
 if [[ -n "$(kubectl -n ${SHOOT_INFO_NAMESPACE} get cm ${SHOOT_INFO_NAME} --ignore-not-found)" ]]; then
-	echo "---> Gardener env detected"
-	IS_GARDENER=true
-	DOMAIN="$(kubectl -n ${SHOOT_INFO_NAMESPACE} get cm ${SHOOT_INFO_NAME} -o jsonpath='{.data.domain}')"
-	if [[ -z "$DOMAIN" ]]; then
-		echo "---> Could not get domain, exitting"
-		exit 1
-	fi
+    echo "---> Gardener env detected"
+    IS_GARDENER=true
+    DOMAIN="$(kubectl -n ${SHOOT_INFO_NAMESPACE} get cm ${SHOOT_INFO_NAME} -o jsonpath='{.data.domain}')"
+    if [[ -z "$DOMAIN" ]]; then
+        echo "---> Could not get domain, exitting"
+        exit 1
+    fi
 else
-	echo "---> Gardener not detected, exitting"
-	exit 0
+    echo "---> Gardener not detected, exitting"
+    exit 0
 fi
 
 PATCH_YAML=$(cat << EOF
