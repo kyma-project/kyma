@@ -1,8 +1,8 @@
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
-  name: apiserver-proxy-tls-crt2
-  namespace: kyma-sysem
+  name: {{ template "name" . }}-tls-crt2
+  namespace: kyma-system
 spec:
   duration: 720h
   renewBefore: 10m
@@ -11,8 +11,8 @@ spec:
   - kyma3
   commonName: {{ .Values.global.domainName }}
   dnsNames:
-  - "*.{{ .Values.global.domainName }}"
-  secretName: apiserver-proxy-tls-crt2
+  - "apiserver-proxy.{{ .Values.global.domainName }}"
+  secretName: {{ template "name" . }}-tls-crt2
   issuerRef:
     name: kyma-ca-issuer
     kind: ClusterIssuer

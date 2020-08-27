@@ -46,7 +46,6 @@ spec:
           - -c
           - |
             kubectl get secret -n {{ .Values.init.targetSecret.namespace }} {{ .Values.init.targetSecret.name }} -o jsonpath='{.data.tls\.crt}' > /injected-certs/tls.crt
-            kubectl get secret -n {{ .Values.init.targetSecret.namespace }} {{ .Values.init.targetSecret.name }} -o jsonpath='{.data.tls\.key}' > /injected-certs/tls.key
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy.dir }}apiserver-proxy:{{ .Values.global.apiserver_proxy.version }}
         name: auth-proxy
@@ -86,20 +85,16 @@ spec:
           hostPort: {{ .Values.port.secure }}
           {{ end }}
         volumeMounts:
-        {{ if not .Values.global.environment.gardener }}
-        - name: dex-tls-cert
-          mountPath: /etc/dex-tls-cert/
-        {{ end }}
-        - name: shared-data
+        - name: tls-cert
           mountPath: /etc/tls-cert/
+        - name: shared-data
+          mountPath: /etc/dex-tls-cert/
       volumes:
-      {{ if not .Values.global.environment.gardener }}
-      - name: dex-tls-cert
+      - name: tls-cert
         secret:
-          secretName: ingress-tls-cert
-      {{ end }}
+          secretName: {{ template "name" . }}-tls-cert2
+      - name: shared-data
+        emptyDir: {}
       - name: cert-injector-sa-token
         secret:
           secretName: {{ template "name" . }}-cert-injector-sa-token
-      - name: shared-data
-        emptyDir: {}
