@@ -5,6 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
+	"github.com/kyma-project/kyma/tests/function-controller/testsuite/scenarios"
+
 	"github.com/onsi/gomega"
 	"github.com/vrischmann/envconfig"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -18,23 +23,25 @@ type config struct {
 	Test           testsuite.Config
 }
 
-func TestFunctionController(t *testing.T) {
+func TestRuntimes(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
-
 	g := gomega.NewGomegaWithT(t)
 
 	cfg, err := loadConfig("APP")
 	failOnError(g, err)
 
 	restConfig := controllerruntime.GetConfigOrDie()
-	failOnError(g, err)
 
-	testSuite, err := testsuite.New(restConfig, cfg.Test, t, g)
-	failOnError(g, err)
+	logf := logrus.New()
+	logf.SetFormatter(&logrus.TextFormatter{})
+	logf.SetReportCaller(false)
 
-	defer testSuite.Cleanup()
-	defer testSuite.LogResources()
-	testSuite.Run()
+	steps, err := scenarios.FunctionTestStep(restConfig, cfg.Test, logf)
+	failOnError(g, err)
+	runner := step.NewRunner(step.WithCleanupDefault(cfg.Test.Cleanup), step.WithLogger(logf))
+
+	err = runner.Execute(steps)
+	failOnError(g, err)
 }
 
 func loadConfig(prefix string) (config, error) {
