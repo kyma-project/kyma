@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/instance: {{ $.Release.Name }}
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: istio-pilot
-    helm.sh/chart: {{ $.Release.Name }}-1.0
+    helm.sh/chart: {{ .Chart.appVersion }}
     prometheus: monitoring
   name: istio-pilot
   namespace: {{ .Release.Namespace }}

@@ -9,10 +9,10 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: envoy-stats
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    helm.sh/chart: {{ .Chart.appVersion }}
     release: monitoring
   name: envoy-stats
-  namespace: kyma-system
+  namespace: {{ .Release.Namespace }}
 spec:
   namespaceSelector:
     any: true
