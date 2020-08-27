@@ -405,7 +405,6 @@ func (r *Reconciler) makePeerAuthentication(src *sourcesv1alpha1.HTTPSource, dep
 	return object.NewPeerAuthentication(src.Namespace, deployment.Name,
 		object.WithControllerRef(src.ToOwner()),
 		object.WithLabel(applicationNameLabelKey, src.Name),
-		// TODO: check that only this pod is used, otherwise introduce a more unique label
 		object.WithSelectorSpec(map[string]string{applicationLabelKey: src.Name}),
 		object.WithPermissiveMode(metricsPort),
 	)
