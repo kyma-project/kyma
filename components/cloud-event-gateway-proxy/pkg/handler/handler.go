@@ -6,19 +6,18 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/ems"
+	"go.uber.org/zap"
 
 	"github.com/cloudevents/sdk-go/v2/binding"
+	cev2client "github.com/cloudevents/sdk-go/v2/client"
+	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	cehttp "github.com/cloudevents/sdk-go/v2/protocol/http"
 
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/events"
+	cloudevents "github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/cloudevents"
+	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/ems"
 	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/health"
 	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/receiver"
 	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/sender"
-
-	cev2client "github.com/cloudevents/sdk-go/v2/client"
-	cev2event "github.com/cloudevents/sdk-go/v2/event"
-	"go.uber.org/zap"
 )
 
 const (
@@ -41,51 +40,21 @@ type Handler struct {
 	// Defaults sets default values to incoming events
 	Defaulter cev2client.EventDefaulter
 
-	// Metrics server
-	// MetricsServer *metrics.Server
-	//// Reporter reports stats of status code and dispatch time
-	//Reporter StatsReporter
 	Logger *zap.Logger
+}
+
+func NewHandler(receiver *receiver.HttpMessageReceiver, sender *sender.HttpMessageSender, logger *zap.Logger) *Handler {
+	return &Handler{Receiver: receiver, Sender: sender, Logger: logger}
 }
 
 func (h *Handler) Start(ctx context.Context) error {
 	return h.Receiver.StartListen(ctx, health.WithLivenessCheck(health.WithReadinessCheck(h)))
 }
 
-//// Blocking
-//func (h *Handler) StartMetricsServer(ctx context.Context) error {
-//	var err error
-//	if h.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", recv.metricsPort)); err != nil {
-//		return err
-//	}
-//
-//	recv.server = &nethttp.Server{
-//		Addr:    recv.listener.Addr().String(),
-//		Handler: recv.handler,
-//	}
-//
-//	errChan := make(chan error, 1)
-//	go func() {
-//		errChan <- recv.server.Serve(recv.listener)
-//	}()
-//
-//	// wait for the server to return or ctx.Done().
-//	select {
-//	case <-ctx.Done():
-//		ctx, cancel := context.WithTimeout(context.Background(), getShutdownTimeout(ctx))
-//		defer cancel()
-//		err := recv.server.Shutdown(ctx)
-//		<-errChan // Wait for server goroutine to exit
-//		return err
-//	case err := <-errChan:
-//		return err
-//	}
-//}
-
 func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	// validate request method
 	if request.Method != http.MethodPost {
-		h.Logger.Warn("unexpected request method", zap.String("method", request.Method))
+		h.Logger.Warn("Unexpected request method", zap.String("method", request.Method))
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
@@ -103,74 +72,68 @@ func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 
 	event, err := binding.ToEvent(ctx, message)
 	if err != nil {
-		h.Logger.Warn("failed to extract event from request", zap.Error(err))
-		writer.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	err = event.Validate()
-	if err != nil {
-		h.Logger.Warn("request is valid as per CE spec", zap.Error(err))
+		h.Logger.Warn("Failed to extract event from request", zap.Error(err))
 		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	statusCode, dispatchTime, respBody := h.receive(ctx, request.Header, event)
-	if dispatchTime > noDuration {
-		//	_ = h.Reporter.ReportEventDispatchTime(reporterArgs, statusCode, dispatchTime)
+	if err := event.Validate(); err != nil {
+		h.Logger.Warn("Request is invalid as per CE spec", zap.Error(err))
+		writer.WriteHeader(http.StatusBadRequest)
+		return
 	}
-	//_ = h.Reporter.ReportEventCount(reporterArgs, statusCode)
+
+	statusCode, dispatchTime, respBody := h.receive(ctx, event)
+	h.Logger.Info("Event dispatched", zap.Duration("duration", dispatchTime))
 
 	writer.WriteHeader(statusCode)
 
-	_, err = writer.Write(respBody)
-	if err != nil {
-		h.Logger.Error("failed to write response", zap.Error(err))
+	if _, err := writer.Write(respBody); err != nil {
+		h.Logger.Error("Failed to write response", zap.Error(err))
 	}
 }
 
-func (h *Handler) receive(ctx context.Context, headers http.Header, event *cev2event.Event) (int, time.Duration, []byte) {
-
+func (h *Handler) receive(ctx context.Context, event *cev2event.Event) (int, time.Duration, []byte) {
 	if h.Defaulter != nil {
 		newEvent := h.Defaulter(ctx, *event)
 		event = &newEvent
 	}
 
-	h.Logger.Info("Event received", zap.Any("", *event))
-	return h.send(ctx, headers, event)
+	h.Logger.Info("Event received", zap.Any("id", event.ID()))
+
+	return h.send(ctx, event)
 }
 
-func (h *Handler) send(ctx context.Context, headers http.Header, event *cev2event.Event) (int, time.Duration, []byte) {
-
+func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.Duration, []byte) {
 	request, err := h.Sender.NewCloudEventRequestWithTarget(ctx, h.Sender.Target)
 	if err != nil {
-		h.Logger.Error("failed in NewCloudEventRequestWithTarget", zap.Error(err))
+		h.Logger.Error("Failed to prepare a cloudevent request with target", zap.Error(err))
 		return http.StatusInternalServerError, noDuration, []byte{}
 	}
 
-	// Should we do this???
 	message := binding.ToMessage(event)
 	defer func() { _ = message.Finish(nil) }()
 
-	err = events.WriteHttpRequestWithAdditionalHeaders(ctx, message, request, additionalHeaders)
+	err = cloudevents.WriteRequestWithHeaders(ctx, message, request, additionalHeaders)
 	if err != nil {
-		h.Logger.Error("failed to add additional headers to the req", zap.Error(err))
+		h.Logger.Error("Failed to add additional headers to the request", zap.Error(err))
 		return http.StatusInternalServerError, noDuration, []byte{}
 	}
+
 	resp, dispatchTime, err := h.sendAndRecordDispatchTime(request)
 	if err != nil {
-		h.Logger.Error("failed in sendAndRecordDispatchTime", zap.Error(err))
+		h.Logger.Error("Failed to send event and record dispatch time", zap.Error(err))
 		return http.StatusInternalServerError, dispatchTime, []byte{}
 	}
-	if resp != nil {
-		defer func() { _ = resp.Body.Close() }()
+	defer func() { _ = resp.Body.Close() }()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		h.Logger.Error("Failed to read response body", zap.Error(err))
+		return http.StatusInternalServerError, dispatchTime, []byte{}
 	}
 
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		h.Logger.Error("failed to read response body", zap.Error(err))
-		return http.StatusInternalServerError, dispatchTime, []byte{}
-	}
-	return resp.StatusCode, dispatchTime, respBody
+	return resp.StatusCode, dispatchTime, body
 }
 
 func (h *Handler) sendAndRecordDispatchTime(request *http.Request) (*http.Response, time.Duration, error) {

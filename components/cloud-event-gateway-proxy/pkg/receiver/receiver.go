@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
-	nethttp "net/http"
+	"net/http"
 	"time"
 
 	"go.opencensus.io/plugin/ochttp"
@@ -15,11 +15,10 @@ const (
 )
 
 type HttpMessageReceiver struct {
-	port        int
-	metricsPort int
-	handler     nethttp.Handler
-	server      *nethttp.Server
-	listener    net.Listener
+	port     int
+	handler  http.Handler
+	server   *http.Server
+	listener net.Listener
 }
 
 func NewHttpMessageReceiver(port int) *HttpMessageReceiver {
@@ -29,7 +28,7 @@ func NewHttpMessageReceiver(port int) *HttpMessageReceiver {
 }
 
 // Blocking
-func (recv *HttpMessageReceiver) StartListen(ctx context.Context, handler nethttp.Handler) error {
+func (recv *HttpMessageReceiver) StartListen(ctx context.Context, handler http.Handler) error {
 	var err error
 	if recv.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", recv.port)); err != nil {
 		return err
@@ -37,7 +36,7 @@ func (recv *HttpMessageReceiver) StartListen(ctx context.Context, handler nethtt
 
 	recv.handler = CreateHandler(handler)
 
-	recv.server = &nethttp.Server{
+	recv.server = &http.Server{
 		Addr:    recv.listener.Addr().String(),
 		Handler: recv.handler,
 	}
@@ -70,9 +69,6 @@ func getShutdownTimeout(ctx context.Context) time.Duration {
 	return v.(time.Duration)
 }
 
-func CreateHandler(handler nethttp.Handler) nethttp.Handler {
-	return &ochttp.Handler{
-		//Propagation: tracecontextb3.TraceContextEgress,
-		Handler: handler,
-	}
+func CreateHandler(handler http.Handler) http.Handler {
+	return &ochttp.Handler{Handler: handler}
 }

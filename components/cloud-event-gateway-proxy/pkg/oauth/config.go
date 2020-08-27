@@ -1,8 +1,9 @@
 package oauth
 
 import (
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/gateway"
 	"golang.org/x/oauth2/clientcredentials"
+
+	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/gateway"
 )
 
 func Config(env gateway.EnvConfig) clientcredentials.Config {
