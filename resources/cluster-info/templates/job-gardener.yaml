@@ -1,0 +1,40 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "cluster-info.fullname" . }}-gardener
+  annotations: 
+    helm.sh/hook: post-install,post-upgrade
+    # helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook-weight: "10"
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      name: {{ include "cluster-info.fullname" . }}-gardener
+      labels:
+        app: {{ include "cluster-info.fullname" . }}-gardener
+    spec:
+      serviceAccountName: {{ include "cluster-info.fullname" . }}-gardener
+      restartPolicy: Never
+      containers:
+      - name: {{ include "cluster-info.fullname" . }}-gardener
+        image: {{ .Values.jobs.image }}:{{ .Values.jobs.tag }}
+        command:
+          - /bin/bash
+          - -c
+          - |
+{{ .Files.Get "files/check-gardener.sh" | printf "%s" | indent 12 }}
+        env:
+        - name: GLOBAL_DOMAIN
+          value: {{ .Values.global.domainName }}
+        - name: CLUSTER_INFO_NS
+          value: "{{ .Release.Namespace }}"
+        - name: CLUSTER_INFO_CM
+          value: "{{ .Values.configMapName }}"
+        - name: SHOOT_INFO_NAME
+          value: "{{ .Values.gardener.shootInfo.name }}"
+        - name: SHOOT_INFO_NAMESPACE
+          value: "{{ .Values.gardener.shootInfo.namespace }}"
+        terminationMessagePolicy: "FallbackToLogsOnError"

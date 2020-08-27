@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configMapName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    installer: overrides
+    kyma-project.io/installation: ""
+data:
+  {{- if .Values.global.isLocalEnv }}
+  global.environment.type: "local"
+  {{- else if .Values.global.isOwnDomain }}
+  global.environment.type: "own-domain"
+  {{- else if .Values.global.isGardenerEnv }}
+  global.environment.type: "gardener"
+  {{- else if .Values.global.isXipEnv }}
+  global.environment.type: "xip"
+  {{- end }}
+  {{- if .Values.global.domainName }}
+  global.ingress.domainName: "{{ .Values.global.domainName }}"
+  {{- end }}
+  {{- if .Values.global.loadBalancerIP }}
+  global.loadBalancerIP: "{{ .Values.global.loadBalancerIP }}"
+  {{- end }}
+  {{- if .Values.global.minikubeIP }}
+  global.minikubeIP: "{{ .Values.global.minikubeIP }}"
+  {{- end }}

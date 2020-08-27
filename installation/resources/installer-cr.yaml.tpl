@@ -18,6 +18,8 @@ spec:
       namespace: "kyma-system"
     - name: "istio"
       namespace: "istio-system"
+    - name: "cluster-info"
+      namespace: "kyma-installer"
     - name: "xip-patch"
       namespace: "kyma-installer"
     - name: "istio-kyma-patch"

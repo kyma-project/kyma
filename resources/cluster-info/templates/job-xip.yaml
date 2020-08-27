@@ -1,0 +1,48 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "cluster-info.fullname" . }}-xip
+  annotations: 
+    helm.sh/hook: post-install,post-upgrade
+    # helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook-weight: "30"
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      name: {{ include "cluster-info.fullname" . }}-xip
+      labels:
+        app: {{ include "cluster-info.fullname" . }}-xip
+    spec:
+      serviceAccountName: {{ include "cluster-info.fullname" . }}-xip
+      restartPolicy: Never
+      containers:
+      - name: {{ include "cluster-info.fullname" . }}-xip
+        image: {{ .Values.jobs.image }}:{{ .Values.jobs.tag }}
+        command:
+          - /bin/bash
+          - -c
+          - |
+{{ .Files.Get "files/check-xip.sh" | printf "%s" | indent 12 }}
+        env:
+        - name: ENV_TYPE
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Values.configMapName }}
+              key: global.environment.type
+              optional: true
+        - name: GLOBAL_DOMAIN
+          value: {{ .Values.global.domainName }}
+        - name: GLOBAL_IP
+          value: {{ .Values.global.loadBalancerIP }}
+        - name: CLUSTER_INFO_NS
+          value: "{{ .Release.Namespace }}"
+        - name: CLUSTER_INFO_CM
+          value: "{{ .Values.configMapName }}"
+        - name: ISTIO_GATEWAY_NAME
+          value: "{{ .Values.istio.gateway.name }}"
+        - name: ISTIO_GATEWAY_NAMESPACE
+          value: "{{ .Values.istio.gateway.namespace }}"
+        terminationMessagePolicy: "FallbackToLogsOnError"

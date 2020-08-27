@@ -1,0 +1,17 @@
+# Default values for cluster-info.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+global:
+  foo: bar
+configMapName: net-global-overrides-2
+jobs:
+  image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
+  tag: "v20200617-32c1f3ff"
+gardener:
+  shootInfo:
+    name: shoot-info
+    namespace: kube-system
+istio:
+  gateway:
+    name: istio-ingressgateway
+    namespace: istio-system
