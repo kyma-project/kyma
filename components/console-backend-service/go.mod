@@ -11,13 +11,12 @@ require (
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
-	github.com/googleapis/gnostic v0.4.0
+	github.com/googleapis/gnostic v0.4.1
 	github.com/gorilla/mux v1.7.3
 	github.com/gorilla/websocket v1.4.1
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/jcmturner/gofork v1.0.0 // indirect
-	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/klauspost/compress v1.9.8 // indirect
 	github.com/kubernetes-sigs/service-catalog v0.2.2-0.20190920221325-ccab52343967
 	github.com/kyma-incubator/api-gateway v0.0.0-20191125140217-295e8fcaa03f
@@ -47,7 +46,7 @@ require (
 	gopkg.in/jcmturner/gokrb5.v7 v7.4.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.4.1 // indirect
 	k8s.io/api v0.17.4
-	k8s.io/apimachinery v0.17.4
+	k8s.io/apimachinery v0.19.0
 	k8s.io/apiserver v0.17.4
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
 	knative.dev/eventing v0.13.1
