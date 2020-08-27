@@ -39,13 +39,13 @@ Follow these steps:
         - path: /.*
           accessStrategies:
             - config: {}
-          handler: noop
+              handler: noop
           methods: ["GET","POST"]
       service:
         host: orders-function
         name: orders-function
         port: 80
-  EOF  
+  EOF
   ```
 
 2. Check if the APIRule was created and has the `OK` status:

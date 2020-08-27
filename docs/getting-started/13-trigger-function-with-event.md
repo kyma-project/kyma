@@ -33,12 +33,12 @@ Follows these steps:
         eventtypeversion: v1
         source: commerce-mock
         type: order.deliverysent
-      subscriber:
-        ref:
-          apiVersion: v1
-          kind: Service
-          name: orders-function
-          namespace: orders-service
+    subscriber:
+      ref:
+        apiVersion: v1
+        kind: Service
+        name: orders-function
+        namespace: orders-service
   EOF
   ```
 

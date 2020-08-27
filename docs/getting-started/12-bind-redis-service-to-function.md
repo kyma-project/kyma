@@ -50,12 +50,12 @@ Follows these steps:
   spec:
     serviceBindingRef:
       name: orders-function
-      usedBy:
-        kind: serverless-function
-        name: orders-function
-      parameters:
-        envPrefix:
-          name: "REDIS_"
+    usedBy:
+      kind: serverless-function
+      name: orders-function
+    parameters:
+      envPrefix:
+        name: "REDIS_"
   EOF
   ```
 

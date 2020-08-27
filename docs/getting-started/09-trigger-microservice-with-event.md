@@ -23,7 +23,7 @@ Follow these steps:
 
 1. Create the [Trigger CR](https://knative.dev/docs/eventing/triggers/) for the `orders-service` microservice to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
 
-```bash
+```yaml
 cat <<EOF | kubectl apply -f  -
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Trigger

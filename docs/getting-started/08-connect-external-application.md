@@ -74,7 +74,7 @@ Follow these steps to deploy XF addons and add Commerce mock to the `orders-serv
 
 1. Switch to the `orders-service` Namespace, and go to **Configuration** > **Addons** in the left navigation panel.
 2. Select **Add New Configuration**.
-3. Once the new box opens up, enter `github.com/sap/xf-addons/addons/index.yaml` in the **Urls** field. The addon name is automatically generated.
+3. Once the new box opens up, enter `github.com/sap/xf-addons/addons/index.yaml` in the **Urls** field. Change the addon name to `xf-mocks`.
 
    > **NOTE:** The `index.yaml` file is a manifest for APIs of SAP Marketing Cloud, SAP Cloud for Customer, and SAP Commerce Cloud applications.
 
@@ -154,7 +154,9 @@ Follow these steps:
    https://connector-service.{CLUSTER_DOMAIN}/v1/applications/signingRequests/info?token=h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
    ```
 
-   Save this token to the clipboard, as you will need it in the next steps.
+   Save this output with the token to the clipboard, as you will need it in the next steps.
+
+   > **CAUTION:** The token included in the output is valid for 5 minutes.
 
   </details>
   <details>
@@ -169,7 +171,9 @@ Follow these steps:
   Wait for the application to have the `SERVING` status.
 
 4. Open the newly created application and select **Connect Application**.
-5. Copy the token by clicking **Copy to Clipboard** and select **OK** to close the pop-up box.
+5. Copy the whole URL string with the token by clicking **Copy to Clipboard** and select **OK** to close the pop-up box.
+
+  > **CAUTION:** The token included in the URL is valid for 5 minutes.
 
 </details>
 </div>
@@ -178,10 +182,11 @@ Follow these steps:
 
 To connect events from Commerce mock to the microservice, follow these steps:  
 
-1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}`, or use the link under **Host** in the **Configuration** > **API Rules** view in the `order-service` Namespace.
-2. Click **Connect**.
-3. Paste the token, confirm by selecting **Connect**, and wait until the application gets connected.
-4. Select **Register All** on the **Local APIs** tab or just register **SAP Commerce Cloud - Events** to be able to send events.
+1. Once in the `order-service` Namespace, go to **Configuration** > **API Rules** > **commerce-mock** in the left navigation panel.
+2. Open the link under the **Host** column to access Commerce mock.
+3. Click **Connect**.
+4. Paste the previously copied URL string with the token. Confirm by selecting **Connect** and wait until the application gets connected.
+5. Select **Register All** on the **Local APIs** tab or just register **SAP Commerce Cloud - Events** to be able to send events.
 
 Once registered, you will see all Commerce mock APIs and events available under the **Remote APIs** tab.
 
@@ -211,7 +216,7 @@ Follow these steps:
   EOF
   ```
 
-2. List available ServiceClass CR in the `orders-service` Namespace. Under the `EXTERNAL-NAME` column, find one with the `sap-commerce-cloud-events-*` prefix. 
+2. List available ServiceClass CR in the `orders-service` Namespace. Under the `EXTERNAL-NAME` column, find one with the `sap-commerce-cloud-events-*` prefix.
 
    ```bash
    kubectl get serviceclasses -n orders-service
@@ -249,19 +254,23 @@ Follow these steps:
   UI
   </summary>
 
-1. Go to **Integration** > **Applications/Systems** > **commerce-mock**, select **Create Binding** to bind the application to the Namespace in which you will later provision the APIs provided by Commerce mock. Select the `orders-service` Namespace and click **Create**.
+1. Back in the Console UI, go to **Integration** > **Applications/Systems** > **commerce-mock**.
 
-2. Open the `orders-service` Namespace view and navigate to **Service Management** > **Catalog**. Once on the **Services** tab, find **SAP Commerce Cloud - Events** and select it.
+2. Select **Create Binding** to bind the application to the Namespace in which you will later provision the APIs provided by Commerce mock.
+
+3. Select the `orders-service` Namespace and click **Create**.
+
+4. Go to the `orders-service` Namespace view and navigate to **Service Management** > **Catalog**. Once on the **Services** tab, find **SAP Commerce Cloud - Events** and select it.
 
    > **TIP:** You can also use the search in the upper right corner.
 
-3. Select **Add once** to add the service to the Namespace.
+5. Select **Add once** to add the service to the Namespace.
 
-4. When the box pops up, leave the default values, and confirm the changes by selecting **Create**.
+6. When the box pops up, change **Name** to `commerce-mock-events`, and confirm the changes by selecting **Create**.
 
 This way you provisioned the events in the Namespace.
 
-You will be redirected to the **Catalog Management** > **Instances** > **commerce-mock** view. Wait for the Events API to have the `RUNNING` status.
+You will be redirected to the **Catalog Management** > **Instances** > **commerce-mock-events** view. Wait for the Events API to have the `RUNNING` status.
 
 </details>
 </div>

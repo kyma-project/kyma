@@ -50,7 +50,7 @@ Follows these steps:
 
 2. Go to **Configuration** > **Addons** in the left navigation panel, and select **Add New Configuration**.
 
-3. Once the new box opens up, enter `https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml` in the **Urls** field. The addon name is automatically generated.
+3. Once the new box opens up, change **Name** to `redis-addon`, and enter `https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml` in the **Urls** field.
 
 4. Select **Add** to confirm the changes.
 
