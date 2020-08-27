@@ -24,7 +24,16 @@ appVersion: 1.16.0
 dependencies:
   - name: cert-manager
     version: v0.16.1
-    condition: certificates.manager.enabled
+    condition: modules.manager.enabled
+  - name: xip
+    version: 0.0.1
+    condition: global.environment.xip
+  - name: gardener
+    version: 0.0.1
+    condition: global.environment.gardener
+  - name: ownDomain
+    version: 0.0.1
+    condition: global.environment.ownDomain
 
 # cluster-info release/job który sprawdza 
 # certificates release jako zbiór subchartów z jobami dedykowanymi do obsługi domeny/certyfikatów

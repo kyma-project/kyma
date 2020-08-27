@@ -42,3 +42,22 @@ if [[ $status -ne 0 ]] && [[ ! "$msg" == *"not patched"* ]]; then
     echo "$msg"
     exit $status
 fi
+
+PATCH_YAML=$(cat << EOF
+---
+data:
+  modules.manager.enabled: "true"
+  modules.gardener.enabled: "true"
+EOF
+)
+
+echo "---> Patching cm kyma-installer/certificates-overrides"
+set +e
+msg=$(kubectl patch cm certificates-overrides --patch "${PATCH_YAML}" -n kyma-installer 2>&1)
+status=$?
+set -e
+
+if [[ $status -ne 0 ]] && [[ ! "$msg" == *"not patched"* ]]; then
+    echo "$msg"
+    exit $status
+fi

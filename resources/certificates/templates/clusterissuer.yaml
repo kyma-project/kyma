@@ -1,9 +1,0 @@
----
-apiVersion: cert-manager.io/v1alpha2
-kind: ClusterIssuer
-metadata:
-  name: own-domain
-  namespace: {{ .Release.Namespace }}
-spec:
-  ca:
-    secretName: {{ .Values.tls.secretName }}
