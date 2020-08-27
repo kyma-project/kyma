@@ -92,7 +92,6 @@ func (f ConfigreFunction) Run() error {
 
 	f.log.Infof("Waiting for service binding to have ready phase...")
 	err = f.svcBinding.WaitForStatusRunning()
-	err = errors.New("something")
 	if err != nil {
 		return errors.Wrap(err, "while waiting for service binding")
 	}
