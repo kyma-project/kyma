@@ -28,7 +28,11 @@ spec:
 {{ .Files.Get "files/check-gardener.sh" | printf "%s" | indent 12 }}
         env:
         - name: GLOBAL_DOMAIN
-          value: {{ .Values.global.domainName }}
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Values.configMapName }}
+              key: global.ingress.domainName
+              optional: true
         - name: CLUSTER_INFO_NS
           value: "{{ .Release.Namespace }}"
         - name: CLUSTER_INFO_CM

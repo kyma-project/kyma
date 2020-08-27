@@ -1,6 +1,9 @@
 # Default values for cluster-info.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+global:
+  isLocalEnv: false
+
 configMapName: net-global-overrides-2
 jobs:
   image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
