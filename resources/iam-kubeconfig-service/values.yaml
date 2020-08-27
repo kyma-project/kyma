@@ -19,3 +19,11 @@ global:
   iam_kubeconfig_service:
     dir:
     version: 1af8f7a8
+
+init:
+  targetSecret:
+    name: kyma-ca-key-pair
+    namespace: istio-system
+  image:
+    name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
+    tag: "v20200617-32c1f3ff"

@@ -26,6 +26,20 @@ spec:
         hostnames:
           - "dex.{{ .Values.global.ingress.domainName }}"
       {{ end }}
+      initContainers:
+        - image: {{ .Values.init.image.name }}:{{ .Values.init.image.tag}}
+          name: cert-injector
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: cert-injector-sa-token
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+            - name: shared-data
+              mountPath: /injected-certs/
+          command:
+            - /bin/sh
+            - -c
+            - |
+              kubectl get secret -n {{ .Values.init.targetSecret.namespace }} {{ .Values.init.targetSecret.name }} -o jsonpath='{.data.tls\.crt}' > /injected-certs/tls.crt
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.iam_kubeconfig_service.dir }}iam-kubeconfig-service:{{ .Values.global.iam_kubeconfig_service.version }}
         name: {{ template "name" . }}
@@ -55,17 +69,14 @@ spec:
         volumeMounts:
         - name: apiserver-proxy-tls-cert
           mountPath: "/etc/apiserver-proxy-tls-cert"
-          readOnly: true
-      {{ if not .Values.global.environment.gardener }}
-        - name: dex-tls-cert
+        - name: shared-data
           mountPath: /etc/dex-tls-cert/
-      {{ end }}
       volumes:
-      {{ if not .Values.global.environment.gardener }}
-      - name: dex-tls-cert
-        secret:
-          secretName: ingress-tls-cert
-      {{ end }}
       - name: apiserver-proxy-tls-cert
         secret:
-          secretName: apiserver-proxy-tls-cert
+          secretName: apiserver-proxy-tls-crt2
+      - name: shared-data
+        emptyDir: {}
+      - name: cert-injector-sa-token
+        secret:
+          secretName: apiserver-proxy-cert-injector-sa-token
