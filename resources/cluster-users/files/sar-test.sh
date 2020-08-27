@@ -505,6 +505,33 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to list podpreset.settings.svcat.k8s.io"
 	testPermissions "list" "podpreset.settings.svcat.k8s.io" "${NAMESPACE}" "yes"
 
+	echo "--> ${ADMIN_EMAIL} should be able to get microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "get" "microfrontend" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to create microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "microfrontend" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to delete microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "delete" "microfrontend" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to get clustermicrofrontend"
+	testPermissionsClusterScoped "get" "clustermicrofrontend"  "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to create clustermicrofrontend"
+	testPermissionsClusterScoped "create" "clustermicrofrontend" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to delete clustermicrofrontend"
+	testPermissionsClusterScoped "delete" "clustermicrofrontend" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to get backendmodule"
+	testPermissionsClusterScoped "get" "backendmodule" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to create backendmodule"
+	testPermissionsClusterScoped "create" "backendmodule" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to delete backendmodule"
+	testPermissionsClusterScoped "delete" "backendmodule" "yes"
+
 	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
@@ -552,6 +579,27 @@ function runTests() {
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to list podpreset.settings.svcat.k8s.io"
 	testPermissions "list" "podpreset.settings.svcat.k8s.io" "${NAMESPACE}" "no"
+
+	echo "--> ${VIEW_EMAIL} should be able to get microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "get" "microfrontend" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${VIEW_EMAIL} should NOT be able to create microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "microfrontend" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${VIEW_EMAIL} should be able to get clustermicrofrontend"
+	testPermissionsClusterScoped "get" "clustermicrofrontend"  "yes"
+
+	echo "--> ${VIEW_EMAIL} should NOT be able to create clustermicrofrontend"
+	testPermissionsClusterScoped "create" "clustermicrofrontend" "no"
+
+	echo "--> ${VIEW_EMAIL} should be able to get backendmodule"
+	testPermissionsClusterScoped "get" "backendmodule" "yes"
+
+	echo "--> ${VIEW_EMAIL} should be able to create backendmodule"
+	testPermissionsClusterScoped "create" "backendmodule" "yes"
+
+	echo "--> ${VIEW_EMAIL} should be able to delete backendmodule"
+	testPermissionsClusterScoped "delete" "backendmodule" "yes"
 
 	EMAIL=${NAMESPACE_ADMIN_EMAIL} PASSWORD=${NAMESPACE_ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
@@ -779,6 +827,27 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to list podpreset.settings.svcat.k8s.io"
 	testPermissions "list" "podpreset.settings.svcat.k8s.io" "${NAMESPACE}" "no"
 
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "get" "microfrontend" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "microfrontend" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get clustermicrofrontend"
+	testPermissionsClusterScoped "get" "clustermicrofrontend"  "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create clustermicrofrontend"
+	testPermissionsClusterScoped "create" "clustermicrofrontend" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get backendmodule"
+	testPermissionsClusterScoped "get" "backendmodule" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create backendmodule"
+	testPermissionsClusterScoped "create" "backendmodule" "yes"
+
+	echo "--> ${ADNAMESPACE_ADMIN_EMAILMIN_EMAIL} should be able to delete backendmodule"
+	testPermissionsClusterScoped "delete" "backendmodule" "yes"
+
 	# developer who was granted kyma-developer role should be able to operate in the scope of its namespace
 	EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
@@ -900,6 +969,27 @@ function runTests() {
 
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to list podpreset.settings.svcat.k8s.io in ${CUSTOM_NAMESPACE}"
 	testPermissions "list" "podpreset.settings.svcat.k8s.io" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to get microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "get" "microfrontend" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "microfrontend" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to get clustermicrofrontend"
+	testPermissionsClusterScoped "get" "clustermicrofrontend"  "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create clustermicrofrontend"
+	testPermissionsClusterScoped "create" "clustermicrofrontend" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to get backendmodule"
+	testPermissionsClusterScoped "get" "backendmodule" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to create backendmodule"
+	testPermissionsClusterScoped "create" "backendmodule" "yes"
+
+	echo "--> ${ADNAMESPACE_ADMIN_EMAILMIN_EMAIL} should be able to delete backendmodule"
+	testPermissionsClusterScoped "delete" "backendmodule" "yes"
 }
 
 function cleanup() {
