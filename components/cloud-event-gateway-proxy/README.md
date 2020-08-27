@@ -2,11 +2,10 @@
 
 ## Overview
 
+The Cloud Event Gateway proxy receives Cloud Event publishing requests from the cluster workloads (microservice or serverless functions) and redirects it to the Enterprise Messaging Service Cloud Event Gateway.
 
-## Prerequisites
 
-
-## Usage
+## Development
 
 Build
 
