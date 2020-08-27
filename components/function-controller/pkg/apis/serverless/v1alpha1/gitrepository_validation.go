@@ -3,6 +3,7 @@ package v1alpha1
 import (
 	"context"
 	"fmt"
+
 	"knative.dev/pkg/apis"
 )
 

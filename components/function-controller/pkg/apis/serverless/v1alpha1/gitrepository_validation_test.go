@@ -2,8 +2,9 @@ package v1alpha1
 
 import (
 	"context"
-	"github.com/onsi/gomega"
 	"testing"
+
+	"github.com/onsi/gomega"
 )
 
 func TestGitRepositoryValidation(t *testing.T) {
