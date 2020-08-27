@@ -17,7 +17,6 @@ func WaitAtMost(fn func() (bool, error), duration time.Duration) error {
 			return fmt.Errorf("waiting for resource failed in given timeout %f second(s)", duration.Seconds())
 		case <-tick:
 			if err != nil {
-
 				log.Println(err)
 			} else if ok {
 				return nil
