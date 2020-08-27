@@ -47,6 +47,7 @@ rules:
     - namespaces
   verbs:
     - "list"
+    - "watch"
 - apiGroups:
     - ""
   resources:
