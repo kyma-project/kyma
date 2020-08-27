@@ -92,7 +92,7 @@ spec:
       volumes:
       - name: tls-cert
         secret:
-          secretName: {{ template "name" . }}-tls-cert2
+          secretName: {{ template "name" . }}-tls-crt2
       - name: shared-data
         emptyDir: {}
       - name: cert-injector-sa-token
