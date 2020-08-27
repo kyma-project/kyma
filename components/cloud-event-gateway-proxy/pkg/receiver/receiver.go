@@ -49,7 +49,7 @@ func (recv *HttpMessageReceiver) StartListen(ctx context.Context, handler http.H
 	// wait for the server to return or ctx.Done().
 	select {
 	case <-ctx.Done():
-		ctx, cancel := context.WithTimeout(context.Background(), getShutdownTimeout(ctx))
+		ctx, cancel := context.WithTimeout(context.Background(), DefaultShutdownTimeout)
 		defer cancel()
 		err := recv.server.Shutdown(ctx)
 		<-errChan // Wait for server goroutine to exit
@@ -57,16 +57,6 @@ func (recv *HttpMessageReceiver) StartListen(ctx context.Context, handler http.H
 	case err := <-errChan:
 		return err
 	}
-}
-
-type shutdownTimeoutKey struct{}
-
-func getShutdownTimeout(ctx context.Context) time.Duration {
-	v := ctx.Value(shutdownTimeoutKey{})
-	if v == nil {
-		return DefaultShutdownTimeout
-	}
-	return v.(time.Duration)
 }
 
 func CreateHandler(handler http.Handler) http.Handler {
