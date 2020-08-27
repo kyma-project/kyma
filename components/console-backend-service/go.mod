@@ -55,6 +55,7 @@ require (
 )
 
 replace (
+	github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.34.1
 	golang.org/x/text => golang.org/x/text v0.3.3
 	k8s.io/client-go => k8s.io/client-go v0.17.4
 )
