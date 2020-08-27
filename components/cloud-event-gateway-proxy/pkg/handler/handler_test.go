@@ -18,11 +18,6 @@ import (
 	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/sender"
 )
 
-const (
-	emsTokenEndpoint  = "/token"
-	emsEventsEndpoint = "/events"
-)
-
 func TestHandler(t *testing.T) {
 	t.Parallel()
 
@@ -79,8 +74,8 @@ func TestHandler(t *testing.T) {
 			name: "Binary CloudEvent is missing CE-ID header",
 			provideMessage: func() (string, http.Header) {
 				headers := getBinaryMessageHeaders()
-				headers.Del("CE-ID")
-				return "data", headers
+				headers.Del(ceIDHeader)
+				return newBinaryCloudEventPayload(), headers
 			},
 			wantStatusCode: http.StatusBadRequest,
 		},
@@ -88,8 +83,8 @@ func TestHandler(t *testing.T) {
 			name: "Binary CloudEvent is missing CE-Type header",
 			provideMessage: func() (string, http.Header) {
 				headers := getBinaryMessageHeaders()
-				headers.Del("CE-Type")
-				return "data", headers
+				headers.Del(ceTypeHeader)
+				return newBinaryCloudEventPayload(), headers
 			},
 			wantStatusCode: http.StatusBadRequest,
 		},
@@ -97,8 +92,8 @@ func TestHandler(t *testing.T) {
 			name: "Binary CloudEvent is missing CE-Source header",
 			provideMessage: func() (string, http.Header) {
 				headers := getBinaryMessageHeaders()
-				headers.Del("CE-Source")
-				return "data", headers
+				headers.Del(ceSourceHeader)
+				return newBinaryCloudEventPayload(), headers
 			},
 			wantStatusCode: http.StatusBadRequest,
 		},
@@ -106,15 +101,15 @@ func TestHandler(t *testing.T) {
 			name: "Binary CloudEvent is missing CE-SpecVersion header",
 			provideMessage: func() (string, http.Header) {
 				headers := getBinaryMessageHeaders()
-				headers.Del("CE-SpecVersion")
-				return "data", headers
+				headers.Del(ceSpecVersionHeader)
+				return newBinaryCloudEventPayload(), headers
 			},
 			wantStatusCode: http.StatusBadRequest,
 		},
 		{
 			name: "Binary CloudEvent is valid with required headers",
 			provideMessage: func() (string, http.Header) {
-				return "data", getBinaryMessageHeaders()
+				return newBinaryCloudEventPayload(), getBinaryMessageHeaders()
 			},
 			wantStatusCode: http.StatusNoContent,
 		},
@@ -244,22 +239,36 @@ func getStructuredMessageHeaders() http.Header {
 	return http.Header{"Content-Type": []string{"application/cloudevents+json"}}
 }
 
+func newBinaryCloudEventPayload() string {
+	return "payload"
+}
+
 func getBinaryMessageHeaders() http.Header {
 	headers := make(http.Header)
-	headers.Add("CE-ID", "testID")
-	headers.Add("CE-Type", "testType")
-	headers.Add("CE-Source", "testSource")
-	headers.Add("CE-SpecVersion", "1.0")
+	headers.Add(ceIDHeader, "testID")
+	headers.Add(ceTypeHeader, "testType")
+	headers.Add(ceSourceHeader, "testSource")
+	headers.Add(ceSpecVersionHeader, "1.0")
 	return headers
 }
 
 const (
+	// ems endpoints
+	emsTokenEndpoint  = "/token"
+	emsEventsEndpoint = "/events"
+
 	// handler endpoints
 	handlerHealthEndpoint  = "http://localhost:8080/healthz"
 	handlerPublishEndpoint = "http://localhost:8080/publish"
 
+	// binary cloudevent headers
+	ceIDHeader          = "CE-ID"
+	ceTypeHeader        = "CE-Type"
+	ceSourceHeader      = "CE-Source"
+	ceSpecVersionHeader = "CE-SpecVersion"
+
 	// structured cloudevent attributes
-	ceID              = `"id":"testId"`
+	ceID              = `"id":"testID"`
 	ceType            = `"type":"testType"`
 	ceSource          = `"source":"testSource"`
 	ceSpecVersion     = `"specversion":"1.0"`
