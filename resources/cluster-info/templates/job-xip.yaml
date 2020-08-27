@@ -34,9 +34,17 @@ spec:
               key: global.environment.type
               optional: true
         - name: GLOBAL_DOMAIN
-          value: {{ .Values.global.domainName }}
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Values.configMapName }}
+              key: global.ingress.domainName
+              optional: true
         - name: GLOBAL_IP
-          value: {{ .Values.global.loadBalancerIP }}
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Values.configMapName }}
+              key: global.loadBalancerIP
+              optional: true
         - name: CLUSTER_INFO_NS
           value: "{{ .Release.Namespace }}"
         - name: CLUSTER_INFO_CM
