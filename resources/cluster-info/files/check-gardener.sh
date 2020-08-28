@@ -46,8 +46,9 @@ fi
 PATCH_YAML=$(cat << EOF
 ---
 data:
-  modules.manager.enabled: "true"
+  modules.manager.enabled: "false"
   modules.gardener.enabled: "true"
+  modules.own-domain.enabled: "false"
 EOF
 )
 

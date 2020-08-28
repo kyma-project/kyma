@@ -26,14 +26,14 @@ dependencies:
     version: v0.16.1
     condition: modules.manager.enabled
   - name: xip
-    version: 0.0.1
-    condition: global.environment.xip
+    version: 0.1.0
+    condition: modules.xip.enabled
   - name: gardener
-    version: 0.0.1
-    condition: global.environment.gardener
-  - name: ownDomain
-    version: 0.0.1
-    condition: global.environment.ownDomain
+    version: 0.1.0
+    condition: modules.gardener.enabled
+  - name: own-domain
+    version: 0.1.0
+    condition: modules.own-domain.enabled
 
 # cluster-info release/job który sprawdza 
 # certificates release jako zbiór subchartów z jobami dedykowanymi do obsługi domeny/certyfikatów

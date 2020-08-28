@@ -8,7 +8,7 @@ modules:
     enabled: false
   gardener:
     enabled: false
-  ownDomain:
+  own-domain:
     enabled: false
 
 tls:

@@ -46,6 +46,7 @@ PATCH_YAML=$(cat << EOF
 data:
   modules.manager.enabled: "true"
   modules.xip.enabled: "true"
+  modules.own-domain.enabled: "false"
 EOF
 )
 
