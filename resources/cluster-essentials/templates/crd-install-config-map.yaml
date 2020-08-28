@@ -7,7 +7,7 @@
 
 {{ $filePaths := list }}
 {{ range $path, $_ := $files }}
-{{ if eq (has (base $path) $skipCrds) false }}
+{{ if (not (contains (base $path) $skipCrds)) }}
 {{ $filePaths = append $filePaths (base $path) }}
 {{ end }}
 {{ end }}
