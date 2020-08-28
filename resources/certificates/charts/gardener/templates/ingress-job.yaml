@@ -25,7 +25,7 @@ spec:
           - /bin/bash
           - -c
           - |
-{{ .Files.Get "files/annotate-service.sh" | printf "%s" | indent 12 }}
+{{ .Files.Get "files/ingress-annotate.sh" | printf "%s" | indent 12 }}
         env:
         - name: GLOBAL_DOMAIN
           value: "{{ .Values.global.ingress.domainName }}"
@@ -33,4 +33,6 @@ spec:
           value: "{{ .Values.istio.gateway.name }}"
         - name: ISTIO_GATEWAY_NAMESPACE
           value: "{{ .Values.istio.gateway.namespace }}"
+        - name: ISTIO_GATEWAY_SECRET
+          value: "{{ .Values.certs.ingress.secretName }}"
         terminationMessagePolicy: "FallbackToLogsOnError"

@@ -9,7 +9,15 @@ certs:
   ingress:
     name: kyma-tls-cert-2
     secretName: kyma-gateway-certs
+    namespace: istio-system
+  apiserver:
+    name: apiserver-proxy-tls-cert-2
+    secretName: apiserver-proxy-tls-cert
+    namespace: kyma-system
 istio:
   gateway:
     name: istio-ingressgateway
     namespace: istio-system
+  apiserver:
+    name: apiserver-proxy
+    namespace: kyma-system
