@@ -59,7 +59,7 @@ type Reconciler struct {
 	// URI resolver for sink destinations
 	sinkResolver *resolver.URIResolver
 
-	// TODO: remove me when Kyma 1.16 is out
+	// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
 	policyLister authenticationlistersv1alpha1.PolicyLister
 	authClient   authenticationclientv1alpha1.AuthenticationV1alpha1Interface
 	// END
@@ -195,7 +195,7 @@ func (r *Reconciler) reconcilePeerAuthentication(src *sourcesv1alpha1.HTTPSource
 	}
 	desiredPeerAuthentication := r.makePeerAuthentication(src, deployment)
 
-	// TODO: remove me when Kyma 1.16 is out
+	// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
 	// migrate from API group authentication.istio.io to security.istio.io
 	if err := r.deleteDeprecatedPolicy(src, desiredPeerAuthentication); err != nil {
 		return nil, err
@@ -523,7 +523,7 @@ func (r *Reconciler) computeStatus(src *sourcesv1alpha1.HTTPSource, ch *messagin
 	}
 	status.MarkSink(sinkURI)
 	status.MarkPeerAuthenticationCreated(peerAuthentication)
-	// TODO: remove me when Kyma 1.16 is out
+	// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
 	if err := status.ClearPolicyStatus(); err != nil {
 		r.Logger.Info("Error while clearing PolicyCreated condition: %v. Operations are not affected", err)
 	}

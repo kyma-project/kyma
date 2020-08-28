@@ -22,7 +22,7 @@ const (
 	// HTTPConditionPeerAuthenticationCreated has status True when the PeerAuthentication for
 	// Deployment has been successfully created.
 	HTTPConditionPeerAuthenticationCreated apis.ConditionType = "PeerAuthenticationCreated"
-	// TODO: delete me when Kyma 1.16 is out
+	// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
 	HTTPConditionPolicyCreated apis.ConditionType = "PolicyCreated"
 	// END
 
@@ -97,7 +97,7 @@ func (s *HTTPSourceStatus) MarkPeerAuthenticationCreated(peerAuthentication *sec
 	httpCondSet.Manage(s).MarkTrue(HTTPConditionPeerAuthenticationCreated)
 }
 
-// TODO: delete me when Kyma 1.16 is out
+// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
 // ClearPolicyStatus clears the PolicyCreated condition
 func (s *HTTPSourceStatus) ClearPolicyStatus() error {
 	return httpCondSet.Manage(s).ClearCondition(HTTPConditionPolicyCreated)

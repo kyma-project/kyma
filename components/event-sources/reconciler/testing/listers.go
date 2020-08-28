@@ -100,7 +100,7 @@ func (l *Listers) GetChannelLister() messaginglistersv1alpha1.ChannelLister {
 	return messaginglistersv1alpha1.NewChannelLister(l.IndexerFor(&messagingv1alpha1.Channel{}))
 }
 
-// TODO: remve me then Kyma 1.16 is out
+// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
 func (l *Listers) GetPolicyLister() authenticationlistersv1alpha1.PolicyLister {
 	return authenticationlistersv1alpha1.NewPolicyLister(l.IndexerFor(&authv1alpha1.Policy{}))
 }

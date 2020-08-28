@@ -99,7 +99,7 @@ API_GROUPS := sources/v1alpha1
 api-import-paths := $(foreach group,$(API_GROUPS),$(PKG)/apis/$(group))
 
 # e.g. "authentication/v1alpha1 networking/v1alpha3"
-# TODO: REMOVE authentication API group then Kyma 1.16 is out
+# TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
 ISTIO_API_GROUPS := "authentication/v1alpha1" "security/v1beta1"
 # generates e.g. "ISTIO_CLIENT_GO_PKG/apis/sources/v1alpha1 ISTIO_CLIENT_GO_PKG/apis/sources/v1alpha2"
 istio-api-import-paths := $(foreach group,$(ISTIO_API_GROUPS),$(ISTIO_CLIENT_GO_PKG)/apis/$(group))

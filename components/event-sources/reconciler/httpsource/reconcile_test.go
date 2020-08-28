@@ -55,7 +55,7 @@ const (
 	tPeerAuthentication = "test"
 	tRevisionSvc        = "test"
 	tTargetPort         = metricsPort
-	// TODO: delete me then Kyma 1.16 is out
+	// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
 	tTargetPortName = "http-usermetric"
 	// END
 
@@ -261,7 +261,7 @@ func TestReconcile(t *testing.T) {
 				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Istio PeerAuthentication %q", tPeerAuthentication),
 			},
 		},
-		// TODO: delete me then Kyma 1.16 is out
+		// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
 		{
 			Name: "Istio Policy migrated to PeerAuthentication",
 			Key:  tNs + "/" + tName,
@@ -493,7 +493,7 @@ func newChannel() *messagingv1alpha1.Channel {
 	}
 }
 
-// TODO: delete me then Kyma 1.16 is out
+// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
 // newPolicy returns a test Policy object with pre-filled metadata
 func newPolicy() *authv1alpha1.Policy {
 	lbls := make(map[string]string, len(tChLabels))

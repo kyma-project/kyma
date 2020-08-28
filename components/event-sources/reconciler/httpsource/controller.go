@@ -67,7 +67,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		messagingClient:          rb.EventingClientSet.MessagingV1alpha1(),
 		securityClient:           istioclient.Get(ctx).SecurityV1beta1(),
 
-		// TODO: remove me when Kyma 1.16 is out
+		// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
 		policyLister: policyInformer.Lister(),
 		authClient:   istioclient.Get(ctx).AuthenticationV1alpha1(),
 		// END
@@ -93,7 +93,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	chInformer.Informer().AddEventHandler(eventHandler)
 
 	// istio
-	// TODO: remove me when Kyma 1.16 is out
+	// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
 	policyInformer.Informer().AddEventHandler(eventHandler)
 	// END
 	peerAuthenticationInformer.Informer().AddEventHandler(eventHandler)
