@@ -1,3 +1,4 @@
+{{- if .Values.service.apiserver.enabled -}}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -32,3 +33,4 @@ roleRef:
   kind: Role
   name: {{ include "gardener.fullname" . }}-apiserver
   apiGroup: rbac.authorization.k8s.io
+{{- end -}}

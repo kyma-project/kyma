@@ -1,7 +1,34 @@
+---
+# Secure port service
 apiVersion: v1
 kind: Service
 metadata:
+  name: {{ template "name" . }}-ssl
+  namespace: {{ .Release.Namespace }}
+{{- if .Values.global.environment.gardener }}
   annotations:
+    cert.gardener.cloud/secretname: {{ template "name" . }}-tls-cert
+    dns.gardener.cloud/class: garden
+    dns.gardener.cloud/dnsnames: {{ printf "apiserver.%s" .Values.global.domainName }}
+{{- end }}
+spec:
+  {{- if .Values.global.isLocalEnv }}
+  type: NodePort
+  {{- else }}
+  type: LoadBalancer
+  {{- end }}
+  ports:
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: {{ .Values.port.secure }}
+  selector:
+    app: {{ template "name" . }}
+---
+# Insecure port service
+apiVersion: v1
+kind: Service
+metadata:
   name: {{ template "name" . }}
   namespace: {{ .Release.Namespace }}
 spec:

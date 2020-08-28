@@ -26,22 +26,22 @@ spec:
         tlsSecret: ingress-tls-cert
     spec:
       serviceAccountName: {{ template "name" . }}
-      {{ if .Values.global.isLocalEnv }}
+      {{- if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
             - "dex.{{ .Values.global.ingress.domainName }}"
-      {{ end }}
+      {{- end }}
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy.dir }}apiserver-proxy:{{ .Values.global.apiserver_proxy.version }}
         name: auth-proxy
-        {{ if not .Values.global.isLocalEnv }}
+        {{- if not .Values.global.isLocalEnv }}
         resources:
           limits:
             memory: 256Mi
           requests:
             memory: 96Mi
-        {{ end }}
+        {{- end }}
         imagePullPolicy: IfNotPresent
         args:
         - --insecure-listen-address=0.0.0.0:{{ .Values.port.insecure }}
@@ -67,22 +67,22 @@ spec:
           name: metrics
         - containerPort: {{ .Values.port.secure }}
           name: secure
-          {{ if .Values.global.isLocalEnv }}
+          {{- if .Values.global.isLocalEnv }}
           hostPort: {{ .Values.port.secure }}
-          {{ end }}
+          {{- end }}
         volumeMounts:
         - name: tls-cert
           mountPath: /etc/tls-cert/
-      {{ if not .Values.global.environment.gardener }}
+      {{- if not .Values.global.environment.gardener }}
         - name: dex-tls-cert
           mountPath: /etc/dex-tls-cert/
-      {{ end }}
+      {{- end }}
       volumes:
-      {{ if not .Values.global.environment.gardener }}
+      {{- if not .Values.global.environment.gardener }}
       - name: dex-tls-cert
         secret:
           secretName: ingress-tls-cert
-      {{ end }}
+      {{- end }}
       - name: tls-cert
         secret:
           secretName: {{ template "name" . }}-tls-cert

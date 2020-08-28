@@ -7,11 +7,11 @@ jobs:
   tag: "v20200617-32c1f3ff"
 certs:
   ingress:
-    name: kyma-tls-cert-2
+    name: kyma-tls-cert
     secretName: kyma-gateway-certs
     namespace: istio-system
   apiserver:
-    name: apiserver-proxy-tls-cert-2
+    name: apiserver-proxy-tls-cert
     secretName: apiserver-proxy-tls-cert
     namespace: kyma-system
 service:
@@ -21,3 +21,4 @@ service:
   apiserver:
     name: apiserver-proxy
     namespace: kyma-system
+    enabled: false
