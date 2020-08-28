@@ -74,7 +74,7 @@ spec:
       volumes:
       - name: apiserver-proxy-tls-cert
         secret:
-          secretName: apiserver-proxy-tls-cert2
+          secretName: apiserver-proxy-tls-cert
       - name: shared-data
         emptyDir: {}
       - name: cert-injector-sa-token
