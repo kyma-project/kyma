@@ -39,7 +39,7 @@ spec:
         {{- end  }}
         env:
           - name: DOMAIN
-            value: "apiserver.{{ .Values.global.ingress.domainName }}"
+            value: "{{ .Values.global.ingress.domainName }}"
         ports:
           - name: http
             containerPort: 8000
