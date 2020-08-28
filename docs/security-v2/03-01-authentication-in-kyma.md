@@ -4,21 +4,33 @@ type: Details
 ---
 
 ## User authentication
-In Kyma the identity federation is managed through [Dex](https://github.com/dexidp/dex), which is an open-source, [OpenID Connect](https://openid.net/connect/) identity provider.
+
+The identity federation in Kyma is managed through [Dex](https://github.com/dexidp/dex), an open-source, [OpenID Connect](https://openid.net/connect/) identity provider. 
+
+The diagram shows the user authentication flow, focusing on the role Dex plays in the process.
 
 ![Dex diagram](./assets/dex.svg)
 
-1. The user accesses some application (f.e the Kyma Console). If the Console application doesn't find a JWT token in the browser session storage, it redirects the user's browser to the Open ID Connect (OIDC) provider, Dex.
-2. Dex lists all defined Identity Provider connectors to the user. The user selects the Identity Provider to authenticate with. After successful authentication, the browser is redirected back to the dex which issues a JWT token to the user. After obtaining the token, the browser is redirected back to the Console UI. The Console UI stores the token in the Session Storage and uses it for all subsequent requests.
+1. Access the client application, such as the Kyma Console, Grafana UI, or Jaeger UI. 
+2. If the application does not find a [JWT token](#ID-Tokens) in the browser session storage, it will redirect you to Dex to handle the authentication.
+3. Dex lists all the defined identity providers in your browser window.
 
-Dex implements a system of connectors that allow you to delegate authentication to external OpenID Connect and SAML2-compliant Identity Providers and use their user stores. Read the [tutorial](#tutorials-add-an-identity-provider-to-dex) to learn how to enable authentication with an external Identity Provider by using a Dex connector.
+    >**NOTE:** Out of the box, Kyma implements the [static user store](#static-user-store) Dex uses to authenticate users. You can also add a custom external identity providers by following steps in this [tutorial](#tutorials-add-an-identity-provider-to-dex).
 
-Out of the box, Kyma comes with its own static user store used by Dex to authenticate users. This solution is designed for use with local Kyma deployments as it allows to easily create predefined users' credentials by creating Secret objects with a custom `dex-user-config` label.
+4. Select the identity provider and provide the data necessary for authentication.
+5. After successful authentication, Dex issues a JWT token that is stored in the browser session and used for all subsequent requests. This means that if the you want to use a different UI, such as Jaeger or Grafana, Dex will use this token instead of requesting you to log in again.
+
+### Static user store
+
+The static user store is designed for use with local Kyma deployments as it allows to easily create predefined users' credentials by creating Secret objects with a custom `dex-user-config` label.
 Read the [tutorial](#tutorials-manage-static-users-in-dex) to learn how to manage users in the static store used by Dex.
 
->**NOTE:** The static user connector is meant as a demo, and does not offer full functionality when compared to other connectors. As such it does not provide the `groups` claim, which is extensively used in Kyma 
+ >**NOTE:** The static user connector is meant as a demo, and does not offer full functionality when compared to other connectors. As such it does not provide the `groups` claim, which is extensively used in Kyma.
 
-ID Tokens are an OAuth2 extension introduced by OpenID Connect and dex's primary feature. ID Tokens are JSON Web Tokens (JWTs) signed by dex and returned as part of the OAuth2 response that attest to the end user's identity. An example decoded JWT might look like:
+### ID Tokens
+
+ ID Tokens are JSON Web Tokens (JWTs) signed by Dex and returned as part of the OAuth2 response that attest to the end user's identity.
+ An example decoded JWT looks as follows:
 
 ```json
 {
@@ -38,14 +50,12 @@ ID Tokens are an OAuth2 extension introduced by OpenID Connect and dex's primary
 }
 ```
 
->**NOTE:** The expiration settings of the tokens is customizable and can be set by creating overrides for the dex component chart. Current configuration can be found [here](https://github.com/kyma-project/kyma/blob/master/resources/dex/values.yaml#L59)
+>**NOTE:** You can customize the expiration settings of the tokens by creating [overrides](/root/kyma#configuration-helm-overrides-for-kyma-installation) for the Dex component chart. You can find the current configuration in the [YAML file](https://github.com/kyma-project/kyma/blob/master/resources/dex/values.yaml#L59)
 
 ## Service to Service authentication
-As Kyma is build on top of Istio Service Mesh, by default, all user applications are secured by [Istio MutualTLS](https://istio.io/latest/docs/concepts/security/#mutual-tls-authentication). 
 
-For more details on Kyma specific Istio configuration please read this [section](components/service-mesh/#details-istio-setup-in-kyma-kyma-specific-configuration)
+As Kyma is build on top of Istio Service Mesh, service-to-service authentication and encryption is enabled with  [Istio MutualTLS](https://istio.io/latest/docs/concepts/security/#mutual-tls-authentication). For details, read the [Kyma specific Istio configuration](components/service-mesh/#details-istio-setup-in-kyma-kyma-specific-configuration) documentation.
 
-## Authentication in API Gateway
-Kyma uses a custom Api-Gateway component, which is build on top of [ORY Oathkeeper](https://www.ory.sh/oathkeeper/docs/). It is used to streamline the process of exposing user applications within the Kyma environment, and securing them if necessary. 
+## User to service authentication
 
-For more details on authentication options in Api-Gateway please read [this section](components/api-gateway/#architecture-architecture-request-flow)
+Kyma uses a custom [API Gateway](/components/api-gateway/#overview-overview) component that is build on top of [ORY Oathkeeper](https://www.ory.sh/oathkeeper/docs/). The API the process of exposing user applications within the Kyma environment, and securing them if necessary. Read more on [authentication options](components/api-gateway/#architecture-architecture-request-flow) for API Gateway.
