@@ -56,16 +56,16 @@ spec:
         - name: apiserver-proxy-tls-cert
           mountPath: "/etc/apiserver-proxy-tls-cert"
           readOnly: true
-      {{ if not .Values.global.environment.gardener }}
+      {{- if not .Values.global.environment.gardener }}
         - name: dex-tls-cert
           mountPath: /etc/dex-tls-cert/
-      {{ end }}
+      {{- end }}
       volumes:
-      {{ if not .Values.global.environment.gardener }}
+      {{- if not .Values.global.environment.gardener }}
       - name: dex-tls-cert
         secret:
           secretName: ingress-tls-cert
-      {{ end }}
+      {{- end }}
       - name: apiserver-proxy-tls-cert
         secret:
           secretName: apiserver-proxy-tls-cert
