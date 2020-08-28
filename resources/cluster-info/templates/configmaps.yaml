@@ -13,7 +13,7 @@ data:
   global.environment.ownDomain: "true"
   {{- else if .Values.global.isOwnDomain }}
   global.environment.type: "own-domain"
-  global.environment.ownDomain: "true"
+  global.environment.own-domain: "true"
   {{- else if .Values.global.isGardenerEnv }}
   global.environment.type: "gardener"
   global.environment.gardener: "true"

@@ -9,7 +9,7 @@ metadata:
   annotations:
     cert.gardener.cloud/secretname: {{ template "name" . }}-tls-cert
     dns.gardener.cloud/class: garden
-    dns.gardener.cloud/dnsnames: {{ printf "apiserver.%s" .Values.global.domainName }}
+    dns.gardener.cloud/dnsnames: {{ printf "apiserver.%s" .Values.global.ingress.domainName }}
 {{- end }}
 spec:
   {{- if .Values.global.isLocalEnv }}
