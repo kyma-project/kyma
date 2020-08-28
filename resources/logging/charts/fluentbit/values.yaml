@@ -160,6 +160,9 @@ conf:
     forward:
       enabled: false
       Match: "*"
+    http:
+      enabled: false
+      Match: "*"
     stdout:
       enabled: false
       Match: "*"
@@ -230,6 +233,25 @@ backend:
       key: ""
       # TLS debugging levels = 1-5
       debug: 1
+  http:
+    host: "127.0.0.1"
+    port: 80
+    uri: "/"
+    http_user: ""
+    http_passwd: ""
+    tls: "off"
+    tls_verify: on
+    tls_ca: ""
+    tls_cert: ""
+    tls_key: ""
+    tls_debug: 1
+    ## Specify the data format to be used in the HTTP request body
+    ## Can be either 'msgpack' or 'json'
+    format: msgpack
+    compress: ""
+    json_date_key: ""
+    json_date_format: ""
+    headers: []
 
 # Enable this if you're using https://github.com/coreos/prometheus-operator
 serviceMonitor:
