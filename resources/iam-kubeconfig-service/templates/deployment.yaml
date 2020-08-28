@@ -39,7 +39,7 @@ spec:
             - /bin/sh
             - -c
             - |
-              kubectl get secret -n {{ .Values.init.targetSecret.namespace }} {{ .Values.init.targetSecret.name }} -o jsonpath='{.data.tls\.crt}' > /injected-certs/tls.crt
+              kubectl get secret -n {{ .Values.init.targetSecret.namespace }} {{ .Values.init.targetSecret.name }} -o jsonpath='{.data.tls\.crt}' | base64 --decode > /injected-certs/tls.crt
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.iam_kubeconfig_service.dir }}iam-kubeconfig-service:{{ .Values.global.iam_kubeconfig_service.version }}
         name: {{ template "name" . }}
