@@ -596,10 +596,7 @@ function runTests() {
 	testPermissionsClusterScoped "get" "backendmodule" "yes"
 
 	echo "--> ${VIEW_EMAIL} should be able to create backendmodule"
-	testPermissionsClusterScoped "create" "backendmodule" "yes"
-
-	echo "--> ${VIEW_EMAIL} should be able to delete backendmodule"
-	testPermissionsClusterScoped "delete" "backendmodule" "yes"
+	testPermissionsClusterScoped "create" "backendmodule" "no"
 
 	EMAIL=${NAMESPACE_ADMIN_EMAIL} PASSWORD=${NAMESPACE_ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
