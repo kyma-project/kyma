@@ -14,7 +14,7 @@ certs:
     name: apiserver-proxy-tls-cert-2
     secretName: apiserver-proxy-tls-cert
     namespace: kyma-system
-istio:
+service:
   gateway:
     name: istio-ingressgateway
     namespace: istio-system

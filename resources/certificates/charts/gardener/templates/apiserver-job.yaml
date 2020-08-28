@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "gardener.fullname" . }}-ingress
+  name: {{ include "gardener.fullname" . }}-apiserver
   annotations: 
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
@@ -11,14 +11,14 @@ spec:
   backoffLimit: 3
   template:
     metadata:
-      name: {{ include "gardener.fullname" . }}-ingress
+      name: {{ include "gardener.fullname" . }}-apiserver
       labels:
-        app: {{ include "gardener.fullname" . }}-ingress
+        app: {{ include "gardener.fullname" . }}-apiserver
     spec:
-      serviceAccountName: {{ include "gardener.fullname" . }}-ingress
+      serviceAccountName: {{ include "gardener.fullname" . }}-apiserver
       restartPolicy: Never
       containers:
-      - name: {{ include "gardener.fullname" . }}-ingress
+      - name: {{ include "gardener.fullname" . }}-apiserver
         image: {{ .Values.jobs.image }}:{{ .Values.jobs.tag }}
         command:
           - /bin/bash
@@ -29,9 +29,9 @@ spec:
         - name: GLOBAL_DOMAIN
           value: "{{ .Values.global.ingress.domainName }}"
         - name: SERVICE_NAME
-          value: "{{ .Values.service.gateway.name }}"
+          value: "{{ .Values.service.apiserver.name }}"
         - name: SERVICE_NAMESPACE
-          value: "{{ .Values.service.gateway.namespace }}"
+          value: "{{ .Values.service.apiserver.namespace }}"
         - name: SERVICE_SECRET_NAME
-          value: "{{ .Values.certs.ingress.secretName }}"
+          value: "{{ .Values.certs.apiserver.secretName }}"
         terminationMessagePolicy: "FallbackToLogsOnError"
