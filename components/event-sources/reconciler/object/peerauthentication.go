@@ -20,7 +20,7 @@ func NewPeerAuthentication(ns, name string, opts ...ObjectOption) *securityv1bet
 	return s
 }
 
-// WithPermissiveModeDeprecated sets the mTLS mode of the PeerAuthentication to Permissive for the given port
+// WithPermissiveMode sets the mTLS mode of the PeerAuthentication to Permissive for the given port
 func WithPermissiveMode(port uint32) ObjectOption {
 	return func(o metav1.Object) {
 		p := o.(*securityv1beta1.PeerAuthentication)
