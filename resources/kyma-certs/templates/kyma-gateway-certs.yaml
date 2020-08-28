@@ -1,3 +1,4 @@
+{{- if .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" }}
 apiVersion: cert-manager.io/v1alpha2
 kind: ClusterIssuer
 metadata:
@@ -16,8 +17,8 @@ spec:
   duration: 720h
   renewBefore: 10m
   keySize: 4096
-  organization: # For debugging purposes
-  - kyma2
+  organization:
+  - kyma
   commonName: {{ .Values.global.domainName }}
   dnsNames:
   - "*.{{ .Values.global.domainName }}"
@@ -26,4 +27,4 @@ spec:
     name: kyma-ca-issuer
     kind: ClusterIssuer
     group: cert-manager.io
-
+{{- end }}
