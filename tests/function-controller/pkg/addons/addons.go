@@ -5,8 +5,10 @@ import (
 	"time"
 
 	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
+	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/watch"
 	watchtools "k8s.io/client-go/tools/watch"
 
@@ -22,7 +24,7 @@ type AddonConfiguration struct {
 	name        string
 	namespace   string
 	waitTimeout time.Duration
-	log         shared.Logger
+	log         *logrus.Entry
 	verbose     bool
 }
 
@@ -86,6 +88,21 @@ func (a *AddonConfiguration) get() (*v1alpha1.AddonsConfiguration, error) {
 	}
 
 	return &ac, nil
+}
+
+func (a AddonConfiguration) LogResource() error {
+	ad, err := a.get()
+	if err != nil {
+		return err
+	}
+
+	out, err := json.Marshal(ad)
+	if err != nil {
+		return err
+	}
+
+	a.log.Infof("%s", string(out))
+	return nil
 }
 
 func (a *AddonConfiguration) WaitForStatusRunning() error {

@@ -5,11 +5,12 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 
 func TestFunctionConverter_ToGQL(t *testing.T) {
@@ -19,10 +20,12 @@ func TestFunctionConverter_ToGQL(t *testing.T) {
 		expectedUID := "expectedUID"
 		expectedSource := "expectedSource"
 		expectedDependencies := "expectedDependencies"
+		expectedRuntime := v1alpha1.Python38
+		expectedRuntimeString := "python38"
 		expectedLabels := map[string]string{"foo": "bar"}
 
-		function := fixFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedLabels)
-		gqlFunction := fixGQLFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedLabels)
+		function := fixFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedLabels, expectedRuntime)
+		gqlFunction := fixGQLFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedRuntimeString, expectedLabels)
 
 		converter := newFunctionConverter()
 		result, err := converter.ToGQL(function)
@@ -65,13 +68,15 @@ func TestFunctionConverter_ToGQLs(t *testing.T) {
 		expectedSource := "expectedSource"
 		expectedDependencies := "expectedDependencies"
 		expectedLabels := map[string]string{"foo": "bar"}
+		expectedRuntime := v1alpha1.Nodejs10
+		expectedRuntimeString := "nodejs10"
 
-		function1 := fixFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedLabels)
-		function2 := fixFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedLabels)
+		function1 := fixFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedLabels, expectedRuntime)
+		function2 := fixFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedLabels, expectedRuntime)
 		functions := []*v1alpha1.Function{function1, function2}
 
-		gqlFunction1 := fixGQLFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedLabels)
-		gqlFunction2 := fixGQLFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedLabels)
+		gqlFunction1 := fixGQLFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedRuntimeString, expectedLabels)
+		gqlFunction2 := fixGQLFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedRuntimeString, expectedLabels)
 		gqlFunctions := []*gqlschema.Function{gqlFunction1, gqlFunction2}
 
 		converter := newFunctionConverter()
@@ -104,10 +109,12 @@ func TestFunctionConverter_ToFunction(t *testing.T) {
 		expectedNamespace := "expectedNamespace"
 		expectedSource := "expectedSource"
 		expectedDependencies := "expectedDependencies"
+		expectedRuntime := v1alpha1.Python38
+		expectedRuntimeString := "python38"
 		expectedLabels := map[string]string{"foo": "bar"}
 
-		function := fixFunction(expectedName, expectedNamespace, "", expectedSource, expectedDependencies, expectedLabels)
-		gqlMutationInput := fixGQLMutationInput(expectedSource, expectedDependencies, expectedLabels)
+		function := fixFunction(expectedName, expectedNamespace, "", expectedSource, expectedDependencies, expectedLabels, expectedRuntime)
+		gqlMutationInput := fixGQLMutationInput(expectedSource, expectedDependencies, expectedRuntimeString, expectedLabels)
 		gqlMutationInput.Env = []*gqlschema.FunctionEnvInput{
 			{
 				Name:  "foo",

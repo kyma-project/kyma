@@ -208,11 +208,11 @@
   version = "v1.14.1"
 
 [[projects]]
-  digest = "1:c8b0363634b7f813bd07d829fa98af420d99c68d9e88077a7c86fad8e6e31e27"
+  digest = "1:c381e2867d447cca3e74dbfb0c8ed371a4583c694b35838c5c642a2b79480fc6"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "69ecbb4d6d5dab05e49161c6e77ea40a030884e1"
+  revision = "5c72a883971a4325f8c62bf07b6d38c20ea47a6a"
 
 [[projects]]
   branch = "master"
@@ -374,11 +374,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "UT"
-  revision = "6287e2b171401931686bb9a4d1c769343f712343"
-  version = "kubernetes-1.16.10"
+  revision = "c51a99c28e644c3acf396e01512dc93b43c0f219"
+  version = "kubernetes-1.16.14"
 
 [[projects]]
-  digest = "1:14e49e4e84d263b1af3bd7b1aaa19b2d0e0da767422546a70ceb03b55c797289"
+  digest = "1:a6bff67d447abb85066531682056555f9c3235a21225fbfc7c842c4733afd39b"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/apitesting/fuzzer",
@@ -426,8 +426,8 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "UT"
-  revision = "9402b4926e83cddfcac78460d5dca7ae87c1dc49"
-  version = "kubernetes-1.16.10"
+  revision = "79e0efc2a6541b626414086440323ba1de583719"
+  version = "kubernetes-1.16.14"
 
 [[projects]]
   digest = "1:a0257e66344be354a49460704056dc4fa6c6d8a387e3105bfb14006e9144a16c"
@@ -591,8 +591,8 @@
     "util/retry",
   ]
   pruneopts = "UT"
-  revision = "0f69009510c3f4630de40c7b7f9034f2a2728023"
-  version = "kubernetes-1.16.10"
+  revision = "a2f5b5dc82e65ebd4b19f89b2b4fc316b54f8286"
+  version = "kubernetes-1.16.14"
 
 [[projects]]
   digest = "1:93e82f25d75aba18436ad1ac042cb49493f096011f2541075721ed6f9e05c044"
@@ -636,7 +636,7 @@
   revision = "874e3e0c13f520e6906612efc01d8b6f06a0ba56"
 
 [[projects]]
-  digest = "1:5c0025de492f38a6f668eec41f104c931c8e67de7020a869cde5a47831ad145d"
+  digest = "1:48b29a9ca9d439e31caf262462b56d1f9d778688b2cb01ac5445ac64289145b9"
   name = "knative.dev/serving"
   packages = [
     "pkg/apis/autoscaling",
@@ -653,8 +653,8 @@
     "pkg/client/clientset/versioned/typed/serving/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "f87352b72c48286f164838ddc6684c805ea082a9"
-  version = "v0.14.0"
+  revision = "bcda0512798e649627f8dd6e505a9c7b2c0ffc07"
+  version = "v0.14.3"
 
 [[projects]]
   digest = "1:7719608fe0b52a4ece56c2dde37bedd95b938677d1ab0f84b8a7852e4c59f849"

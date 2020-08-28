@@ -8,6 +8,8 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/oauth"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway"
@@ -21,13 +23,14 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/ui"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 
+	"github.com/pkg/errors"
+	"k8s.io/client-go/rest"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
-	"github.com/pkg/errors"
-	"k8s.io/client-go/rest"
 )
 
 //go:generate go run github.com/99designs/gqlgen
@@ -43,6 +46,7 @@ type Resolver struct {
 	ag         *apigateway.Resolver
 	serverless *serverless.PluggableContainer
 	eventing   *eventing.Resolver
+	oauth      *oauth.Resolver
 }
 
 func GetRandomNumber() time.Duration {
@@ -107,6 +111,9 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	eventingResolver := eventing.New(genericServiceFactory)
 	makePluggable(eventingResolver)
 
+	oAuthResolver := oauth.New(genericServiceFactory)
+	makePluggable(oAuthResolver)
+
 	return &Resolver{
 		k8s:        k8sResolver,
 		ui:         uiContainer.Resolver,
@@ -117,6 +124,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 		ag:         agResolver,
 		serverless: serverlessResolver,
 		eventing:   eventingResolver,
+		oauth:      oAuthResolver,
 	}, nil
 }
 
@@ -134,4 +142,5 @@ func (r *Resolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.ag.StopCacheSyncOnClose(stopCh)
 	r.eventing.StopCacheSyncOnClose(stopCh)
 	r.serverless.StopCacheSyncOnClose(stopCh)
+	r.oauth.StopCacheSyncOnClose(stopCh)
 }

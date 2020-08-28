@@ -1,6 +1,8 @@
 package metrics
 
 import (
+	"context"
+
 	"github.com/pkg/errors"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -22,7 +24,7 @@ func newResourcesFetcher(clientset kubernetes.Interface) ResourcesFetcher {
 }
 
 func (r *resourcesFetcher) FetchNodesResources() ([]NodeResources, error) {
-	nodes, err := r.nodeClientSet.List(meta.ListOptions{})
+	nodes, err := r.nodeClientSet.List(context.Background(), meta.ListOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to list nodes")
 	}

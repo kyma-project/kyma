@@ -142,5 +142,14 @@ models:
         resolver: true
       pods:
         resolver: true
+  NamespaceListItem:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.NamespaceListItem"
+    fields:
+      applicationsCount:
+        resolver: true
+      podsCount:
+        resolver: true
+      healthyPodsCount:
+        resolver: true
   APIRuleAccessStrategyInput:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRuleAccessStrategyInput"

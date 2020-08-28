@@ -24,12 +24,11 @@ type RepositoryAuth struct {
 }
 
 // RepositoryAuthType is the enum of available authentication types
-// +kubebuilder:validation:Enum=basic;token;key
+// +kubebuilder:validation:Enum=basic;key
 type RepositoryAuthType string
 
 const (
 	RepositoryAuthBasic  RepositoryAuthType = "basic"
-	RepositoryAuthToken                     = "token"
 	RepositoryAuthSSHKey                    = "key"
 )
 

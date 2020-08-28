@@ -59,8 +59,10 @@ func (spec *FunctionSpec) validateSource(_ context.Context) (apisError *apis.Fie
 }
 
 func (spec *FunctionSpec) validateDeps(_ context.Context) (apisError *apis.FieldError) {
-	if deps := strings.TrimSpace(spec.Deps); deps != "" && (deps[0] != '{' || deps[len(deps)-1] != '}') {
-		apisError = apisError.Also(apis.ErrInvalidValue("deps should start with '{' and end with '}'", "spec.deps"))
+	err := ValidateDependencies(spec.Runtime, spec.Deps)
+	if err != nil {
+		apisError = apisError.Also(apis.ErrInvalidValue(err.Error(), "spec.deps"))
+
 	}
 	return apisError
 }

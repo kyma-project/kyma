@@ -82,8 +82,21 @@ spec:
           mountPath: /secure/forward-tls-ca.crt
           subPath: forward-tls-ca.crt
 {{- end }}
-{{- if .Values.extraVolumeMounts }}
-        {{- toYaml .Values.extraVolumeMounts | trim | nindent 8 }}
+{{- if and (.Values.backend.http.tls_cert) (.Values.backend.http.tls_key) }}
+        - name: http-tls-secret
+          mountPath: /secure/http-tls.crt
+          subPath: tls.crt
+        - name: http-tls-secret
+          mountPath: /secure/http-tls.key
+          subPath: tls.key
+{{- end }}
+{{- if and (.Values.backend.http.tls_verify) (.Values.backend.http.tls_ca) }}
+        - name: http-ca-secret
+          mountPath: /secure/http-tls-ca.crt
+          subPath: http-tls-ca.crt
+{{- end }}
+{{- with .Values.extraVolumeMounts }}
+        {{- tpl . $ | nindent 8}}
 {{- end }}
 {{- if .Values.prometheusPushGateway.enabled }}
       - name: metrics-collector
@@ -155,6 +168,16 @@ spec:
         secret:
           secretName: "{{ template "fluent-bit.fullname" . }}-forward-tls-secret"
 {{- end }}
+{{- if and (.Values.backend.http.tls_verify) (.Values.backend.http.tls_ca) }}
+      - name: http-ca-secret
+        secret:
+          secretName: "{{ template "fluent-bit.fullname" . }}-http-ca-secret"
+{{- end }}
+{{- if (.Values.backend.http.tls) }}
+      - name: http-tls-secret
+        secret:
+          secretName: "{{ template "fluent-bit.fullname" . }}-http-tls-secret"
+{{- end }}
 {{- if .Values.prometheusPushGateway.tls.caCertificate }}
       - name: pg-ca-secret
         secret:
@@ -175,8 +198,8 @@ spec:
           items:
           - key: cron
             path: metrics
-{{- end }}
-{{- if .Values.extraVolumes }}
-      {{- toYaml .Values.extraVolumes | trim | nindent 6 }}
+{{- end }} 
+{{- with .Values.extraVolumes }}
+      {{- tpl . $ | nindent 6}}
 {{- end }}
 {{- end }}

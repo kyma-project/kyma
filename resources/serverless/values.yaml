@@ -10,7 +10,7 @@ injectCerts:
     tag: 'v20200617-32c1f3ff'
     pullPolicy: IfNotPresent
 
-knativeMigration:
+runtimeMigration:
   image:
     repository: 'eu.gcr.io/kyma-project/test-infra/alpine-kubectl'
     tag: 'v20200617-32c1f3ff'
@@ -36,7 +36,7 @@ tests:
 
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "cdf1bd64"
+    tag: "PR-9223"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -68,18 +68,18 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "e2e41336"
+    tag: "bae7e2e7"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "1cc47db6"
+      tag: "2bba165a"
     nodejs10:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
-      tag: "tba"
-    python37:
-      repository: "eu.gcr.io/kyma-project/function-runtime-python37"
-      tag: "tba"
+      tag: "2bba165a"
+    python38:
+      repository: "eu.gcr.io/kyma-project/function-runtime-python38"
+      tag: "2bba165a"
 
 deployment:
   replicas: 1
@@ -137,6 +137,8 @@ containers:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v0.22.0
+      functionBuildRepoFetcherImage:
+        value: eu.gcr.io/kyma-project/function-build-init:305bee60
 
 services:
   manager:

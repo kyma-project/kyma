@@ -50,25 +50,25 @@ spec:
                    memory: {{ .Values.test.acceptance.ui.limits.memory }}
                    cpu: {{ .Values.test.acceptance.ui.limits.cpu }}
               env:
-                - name: DOMAIN
+                - name: CYPRESS_DOMAIN
                   value: {{ .Values.global.ingress.domainName }}
-                - name: LOGIN
+                - name: CYPRESS_LOGIN
                   valueFrom:
                     secretKeyRef:
                       name: admin-user
                       key: email
-                - name: PASSWORD
+                - name: CYPRESS_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: admin-user
                       key: password
-                - name: DISABLE_LEGACY_CONNECTIVITY
+                - name: CYPRESS_DISABLE_LEGACY_CONNECTIVITY
                   value: {{ .Values.global.disableLegacyConnectivity | quote }}
-                - name: CATALOG_ENABLED
+                - name: CYPRESS_CATALOG_ENABLED
                   value: {{ .Values.test.acceptance.ui.service_catalog.enabled | quote }}
-                - name: LOGGING_ENABLED
+                - name: CYPRESS_LOGGING_ENABLED
                   value: {{ .Values.test.acceptance.ui.logging.enabled | quote }}
-                - name: FUNCTIONS_ENABLED
+                - name: CYPRESS_FUNCTIONS_ENABLED
                   value: {{ .Values.test.acceptance.ui.functions.enabled | quote }}
               command:
                 - "/bin/sh"

@@ -6,9 +6,9 @@ package domain
 import (
 	"context"
 
-	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	v1 "knative.dev/pkg/apis/duck/v1"
 )
 

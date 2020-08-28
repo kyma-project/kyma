@@ -1,0 +1,9 @@
+apiVersion: serverless.kyma-project.io/v1alpha1
+kind: Function
+metadata:
+  name: python38-sample-fn
+spec:
+  runtime: python38
+  source: |
+    def main(event, context):
+      return "Hello world from Python"

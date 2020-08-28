@@ -8,8 +8,9 @@ import (
 	"strconv"
 	"time"
 
-	v1alpha11 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
+	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	v1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -294,6 +295,8 @@ type Function struct {
 	Env          []*FunctionEnv     `json:"env"`
 	Replicas     *FunctionReplicas  `json:"replicas"`
 	Resources    *FunctionResources `json:"resources"`
+	Runtime      *string            `json:"runtime"`
+	SourceType   *string            `json:"sourceType"`
 	Status       *FunctionStatus    `json:"status"`
 }
 
@@ -345,6 +348,8 @@ type FunctionMutationInput struct {
 	Env          []*FunctionEnvInput     `json:"env"`
 	Replicas     *FunctionReplicasInput  `json:"replicas"`
 	Resources    *FunctionResourcesInput `json:"resources"`
+	Runtime      *string                 `json:"runtime"`
+	SourceType   *string                 `json:"sourceType"`
 }
 
 type FunctionReplicas struct {
@@ -421,7 +426,7 @@ type MicroFrontend struct {
 
 type NamespaceEvent struct {
 	Type      SubscriptionEventType `json:"type"`
-	Namespace *Namespace            `json:"namespace"`
+	Namespace *NamespaceListItem    `json:"namespace"`
 }
 
 type NamespaceMutationOutput struct {
@@ -438,6 +443,11 @@ type NavigationNode struct {
 	Settings            Settings              `json:"settings"`
 	ExternalLink        *string               `json:"externalLink"`
 	RequiredPermissions []*RequiredPermission `json:"requiredPermissions"`
+}
+
+type OAuth2ClientEvent struct {
+	Type   SubscriptionEventType   `json:"type"`
+	Client *v1alpha11.OAuth2Client `json:"client"`
 }
 
 type Pod struct {
@@ -682,7 +692,7 @@ type TriggerCreateInput struct {
 
 type TriggerEvent struct {
 	Type    SubscriptionEventType `json:"type"`
-	Trigger *v1alpha11.Trigger    `json:"trigger"`
+	Trigger *v1alpha12.Trigger    `json:"trigger"`
 }
 
 type TriggerStatus struct {

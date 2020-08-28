@@ -2,9 +2,7 @@ package controller
 
 import (
 	"context"
-	"strings"
 
-	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/pretty"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -17,7 +15,6 @@ import (
 type labelsSvc interface {
 	EnsureLabelsAreApplied(res *unstructured.Unstructured, labels map[string]string) error
 	EnsureLabelsAreDeleted(res *unstructured.Unstructured, labels map[string]string) error
-	DetectLabelsConflicts(res *unstructured.Unstructured, labels map[string]string) ([]string, error)
 }
 
 // GenericSupervisor ensures that expected labels are present or not on a k8s resource provided by given resourceInterface.
@@ -45,10 +42,6 @@ func (m *GenericSupervisor) EnsureLabelsCreated(namespace, resourceName, usageNa
 	res, err := m.resourceInterface.Namespace(namespace).Get(context.TODO(), resourceName, metav1.GetOptions{})
 	if err != nil {
 		return errors.Wrap(err, "while getting resource")
-	}
-	if conflictsKeys, err := m.labelSvc.DetectLabelsConflicts(res, labels); err != nil {
-		return errors.Wrapf(err, "found conflicts in %s: %s keys already exists [override forbidden]",
-			pretty.UnstructuredName(res), strings.Join(conflictsKeys, ","))
 	}
 
 	// apply new labels

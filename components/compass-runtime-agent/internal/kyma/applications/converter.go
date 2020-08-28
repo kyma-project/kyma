@@ -12,7 +12,7 @@ const (
 	connectedApp = "connected-app"
 )
 
-//go:generate mockery -name=Converter
+//go:generate mockery --name=Converter
 type Converter interface {
 	Do(application model.Application) v1alpha1.Application
 }

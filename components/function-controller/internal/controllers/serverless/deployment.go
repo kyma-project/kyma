@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
+
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -28,15 +30,15 @@ const (
 	MinimumReplicasAvailable = "MinimumReplicasAvailable"
 )
 
-func (r *FunctionReconciler) isOnDeploymentChange(instance *serverlessv1alpha1.Function, deployments []appsv1.Deployment) bool {
-	expectedDeployment := r.buildDeployment(instance)
+func (r *FunctionReconciler) isOnDeploymentChange(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment) bool {
+	expectedDeployment := r.buildDeployment(instance, rtmConfig)
 	resourceOk := len(deployments) == 1 && r.equalDeployments(deployments[0], expectedDeployment)
 
 	return !resourceOk
 }
 
-func (r *FunctionReconciler) onDeploymentChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, deployments []appsv1.Deployment) (ctrl.Result, error) {
-	newDeployment := r.buildDeployment(instance)
+func (r *FunctionReconciler) onDeploymentChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment) (ctrl.Result, error) {
+	newDeployment := r.buildDeployment(instance, rtmConfig)
 
 	switch {
 	case len(deployments) == 0:
@@ -58,7 +60,7 @@ func (r *FunctionReconciler) createDeployment(ctx context.Context, log logr.Logg
 	}
 	log.Info(fmt.Sprintf("Deployment %s created", deployment.GetName()))
 
-	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+	return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionRunning,
 		Status:             corev1.ConditionUnknown,
 		LastTransitionTime: metav1.Now(),
@@ -79,7 +81,7 @@ func (r *FunctionReconciler) updateDeployment(ctx context.Context, log logr.Logg
 	}
 	log.Info(fmt.Sprintf("Deployment %s updated", deploy.GetName()))
 
-	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+	return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionRunning,
 		Status:             corev1.ConditionUnknown,
 		LastTransitionTime: metav1.Now(),
@@ -106,7 +108,7 @@ func (r *FunctionReconciler) updateDeploymentStatus(ctx context.Context, log log
 	// trigger next reconcile loop, in which we should create svc
 	case r.isDeploymentReady(deployments[0]):
 		log.Info(fmt.Sprintf("Deployment %s is ready", deployments[0].GetName()))
-		return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionRunning,
 			Status:             runningStatus,
 			LastTransitionTime: metav1.Now(),
@@ -115,7 +117,7 @@ func (r *FunctionReconciler) updateDeploymentStatus(ctx context.Context, log log
 		})
 	case r.hasDeploymentConditionTrueStatus(deployments[0], appsv1.DeploymentProgressing):
 		log.Info(fmt.Sprintf("Deployment %s is not ready yet", deployments[0].GetName()))
-		return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionRunning,
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
@@ -128,7 +130,7 @@ func (r *FunctionReconciler) updateDeploymentStatus(ctx context.Context, log log
 		if err != nil {
 			return ctrl.Result{}, errors.Wrap(err, "while marshalling deployment status to yaml")
 		}
-		return r.updateStatus(ctx, ctrl.Result{RequeueAfter: r.config.RequeueDuration}, instance, serverlessv1alpha1.Condition{
+		return r.updateStatusWithoutRepository(ctx, ctrl.Result{RequeueAfter: r.config.RequeueDuration}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionRunning,
 			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),

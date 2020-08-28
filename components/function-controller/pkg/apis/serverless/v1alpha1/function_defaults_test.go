@@ -35,8 +35,9 @@ func TestSetDefaults(t *testing.T) {
 					MinReplicas: &two,
 					MaxReplicas: &two},
 			},
-			expectedFunc: Function{
-				Spec: FunctionSpec{Resources: corev1.ResourceRequirements{
+			expectedFunc: Function{Spec: FunctionSpec{
+				Runtime: Nodejs12,
+				Resources: corev1.ResourceRequirements{
 					Limits: corev1.ResourceList{
 						corev1.ResourceCPU:    resource.MustParse("150m"),
 						corev1.ResourceMemory: resource.MustParse("158Mi"),
@@ -46,6 +47,76 @@ func TestSetDefaults(t *testing.T) {
 						corev1.ResourceMemory: resource.MustParse("84Mi"),
 					},
 				},
+				MinReplicas: &two,
+				MaxReplicas: &two,
+			},
+			},
+		},
+		"Should not change runtime type": {
+			givenFunc: Function{
+				Spec: FunctionSpec{
+					Runtime: Python38,
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("150m"),
+							corev1.ResourceMemory: resource.MustParse("158Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("90m"),
+							corev1.ResourceMemory: resource.MustParse("84Mi"),
+						},
+					},
+					MinReplicas: &two,
+					MaxReplicas: &two,
+				},
+			},
+			expectedFunc: Function{
+				Spec: FunctionSpec{
+					Runtime: Python38,
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("150m"),
+							corev1.ResourceMemory: resource.MustParse("158Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("90m"),
+							corev1.ResourceMemory: resource.MustParse("84Mi"),
+						},
+					},
+					MinReplicas: &two,
+					MaxReplicas: &two},
+			},
+		},
+		"Should  change empty runtime type to default nodejs12": {
+			givenFunc: Function{
+				Spec: FunctionSpec{
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("150m"),
+							corev1.ResourceMemory: resource.MustParse("158Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("90m"),
+							corev1.ResourceMemory: resource.MustParse("84Mi"),
+						},
+					},
+					MinReplicas: &two,
+					MaxReplicas: &two,
+				},
+			},
+			expectedFunc: Function{
+				Spec: FunctionSpec{
+					Runtime: Nodejs12,
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("150m"),
+							corev1.ResourceMemory: resource.MustParse("158Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("90m"),
+							corev1.ResourceMemory: resource.MustParse("84Mi"),
+						},
+					},
 					MinReplicas: &two,
 					MaxReplicas: &two},
 			},
@@ -54,6 +125,7 @@ func TestSetDefaults(t *testing.T) {
 			givenFunc: Function{},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
+					Runtime: Nodejs12,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("100m"),
@@ -83,6 +155,7 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
+					Runtime: Nodejs12,
 					Resources: corev1.ResourceRequirements{
 						Requests: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
@@ -112,6 +185,7 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
+					Runtime: Nodejs12,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("15m"),
@@ -132,8 +206,9 @@ func TestSetDefaults(t *testing.T) {
 			// given
 			g := gomega.NewWithT(t)
 			config := &DefaultingConfig{}
-			envconfig.Init(config)
-			ctx := context.WithValue(nil, DefaultingConfigKey, *config)
+			err := envconfig.Init(config)
+			g.Expect(err).To(gomega.BeNil())
+			ctx := context.WithValue(context.Background(), DefaultingConfigKey, *config)
 
 			// when
 			testData.givenFunc.SetDefaults(ctx)

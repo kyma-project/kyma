@@ -1,4 +1,4 @@
-{{- if not .Values.connectivity_certs_controller.enabled }}
+{{- if not .Values.global.disableLegacyConnectivity }}
 apiVersion: batch/v1
 kind: Job
 metadata:

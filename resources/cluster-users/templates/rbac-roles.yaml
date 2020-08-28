@@ -47,6 +47,7 @@ rules:
     - namespaces
   verbs:
     - "list"
+    - "watch"
 - apiGroups:
     - ""
   resources:
@@ -287,6 +288,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-snapshots: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-svcat-admin: "true"
 rules: []
 
 ---

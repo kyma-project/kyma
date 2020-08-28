@@ -1,16 +1,18 @@
-FROM golang:1.13 as builder
+FROM golang:1.14 as builder
 
 ENV GO111MODULE=on
 
 RUN apt-get install -y ca-certificates
 
 ARG DOCK_PKG_DIR=/compass-runtime-agent
-
 WORKDIR $DOCK_PKG_DIR
-COPY . $DOCK_PKG_DIR
-COPY ./licenses/ /app/licenses
 
+COPY go.mod .
+COPY go.sum .
 RUN go mod download
+
+COPY ./licenses/ /app/licenses
+COPY . $DOCK_PKG_DIR
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o compass-runtime-agent ./cmd
 

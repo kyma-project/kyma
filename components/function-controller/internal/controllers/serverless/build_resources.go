@@ -2,7 +2,10 @@ package serverless
 
 import (
 	"fmt"
+	"path"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
@@ -11,21 +14,21 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 const (
 	destinationArg        = "--destination"
 	functionContainerName = "lambda"
-	//TODO refactor strings with workspace path
-	workspace = "/workspace"
+	baseDir               = "/workspace/src/"
+	workspaceMountPath    = "/workspace"
 )
 
-func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function) corev1.ConfigMap {
+func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function, rtm runtime.Runtime) corev1.ConfigMap {
 	data := map[string]string{
-		configMapHandler:  configMapHandler,
-		configMapFunction: instance.Spec.Source,
-		configMapDeps:     r.sanitizeDependencies(instance.Spec.Deps),
+		FunctionSourceKey: instance.Spec.Source,
+		FunctionDepsKey:   rtm.SanitizeDependencies(instance.Spec.Deps),
 	}
 
 	return corev1.ConfigMap{
@@ -38,13 +41,13 @@ func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Functio
 	}
 }
 
-func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, configMapName string) batchv1.Job {
+func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, configMapName string) batchv1.Job {
 	one := int32(1)
 	zero := int32(0)
 
 	imageName := r.buildImageAddressForPush(instance)
 	args := r.config.Build.ExecutorArgs
-	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), "--context=dir:///workspace")
+	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
 
 	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
@@ -78,7 +81,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 							Name: "runtime",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: r.config.Build.RuntimeConfigMapName},
+									LocalObjectReference: corev1.LocalObjectReference{Name: rtmConfig.DockerfileConfigMapName},
 								},
 							},
 						},
@@ -115,9 +118,9 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 							VolumeMounts: []corev1.VolumeMount{
 								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
 								// If COPY is not used, then the cache will not work
-								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/package.json", SubPath: "package.json"},
-								{Name: "sources", ReadOnly: true, MountPath: "/workspace/src/handler.js", SubPath: "handler.js"},
-								{Name: "runtime", ReadOnly: true, MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile"},
+								{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.DependencyFile), SubPath: FunctionDepsKey},
+								{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.FunctionFile), SubPath: FunctionSourceKey},
+								{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
 								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
@@ -134,49 +137,91 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, con
 	}
 }
 
-func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function) []corev1.EnvVar {
-	return []corev1.EnvVar{
+func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function, gitOptions git.Options) []corev1.EnvVar {
+	vars := []corev1.EnvVar{
 		{
 			Name:  "APP_REPOSITORY_URL",
-			Value: instance.Status.Source,
+			Value: gitOptions.URL,
 		},
 		{
 			Name:  "APP_REPOSITORY_COMMIT",
-			Value: instance.Status.Repository.Commit,
+			Value: instance.Status.Repository.Reference,
 		},
 		{
 			Name:  "APP_MOUNT_PATH",
-			Value: workspace,
-		},
-		{
-			Name: "APP_REPOSITORY_USERNAME",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: instance.ObjectMeta.Name,
-					},
-					Key: "username",
-				},
-			},
-		},
-		{
-			Name: "APP_REPOSITORY_PASSWORD",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: instance.ObjectMeta.Name,
-					},
-					Key: "password",
-				},
-			},
+			Value: workspaceMountPath,
 		},
 	}
+
+	if gitOptions.Auth != nil {
+		vars = append(vars, corev1.EnvVar{
+			Name:  "APP_REPOSITORY_AUTH_TYPE",
+			Value: string(gitOptions.Auth.Type),
+		})
+
+		switch gitOptions.Auth.Type {
+		case git.RepositoryAuthBasic:
+			vars = append(vars, []corev1.EnvVar{
+				{
+					Name: "APP_REPOSITORY_USERNAME",
+					ValueFrom: &corev1.EnvVarSource{
+						SecretKeyRef: &corev1.SecretKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: gitOptions.Auth.SecretName,
+							},
+							Key: git.UsernameKey,
+						},
+					},
+				},
+				{
+					Name: "APP_REPOSITORY_PASSWORD",
+					ValueFrom: &corev1.EnvVarSource{
+						SecretKeyRef: &corev1.SecretKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: gitOptions.Auth.SecretName,
+							},
+							Key: git.PasswordKey,
+						},
+					},
+				},
+			}...)
+			break
+		case git.RepositoryAuthSSHKey:
+			vars = append(vars, corev1.EnvVar{
+				Name: "APP_REPOSITORY_KEY",
+				ValueFrom: &corev1.EnvVarSource{
+					SecretKeyRef: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: gitOptions.Auth.SecretName,
+						},
+						Key: git.KeyKey,
+					},
+				},
+			})
+			if _, ok := gitOptions.Auth.Credentials[git.PasswordKey]; ok {
+				vars = append(vars, corev1.EnvVar{
+					Name: "APP_REPOSITORY_PASSWORD",
+					ValueFrom: &corev1.EnvVarSource{
+						SecretKeyRef: &corev1.SecretKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: gitOptions.Auth.SecretName,
+							},
+							Key: git.PasswordKey,
+						},
+					},
+				})
+			}
+			break
+		}
+	}
+
+	return vars
 }
 
-func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) batchv1.Job {
+func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, gitOptions git.Options, rtmConfig runtime.Config) batchv1.Job {
 	imageName := r.buildInternalImageAddress(instance)
 	args := r.config.Build.ExecutorArgs
-	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), "--context=dir:///workspace")
+	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
 
 	one := int32(1)
 	zero := int32(0)
@@ -219,7 +264,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) 
 							Name: "runtime",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: r.config.Build.RuntimeConfigMapName},
+									LocalObjectReference: corev1.LocalObjectReference{Name: rtmConfig.DockerfileConfigMapName},
 								},
 							},
 						},
@@ -231,13 +276,13 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) 
 					InitContainers: []corev1.Container{
 						{
 							Name:            "repo-fetcher",
-							Image:           "eu.gcr.io/kyma-project/function-build-init:PR-8924",
-							Env:             buildRepoFetcherEnvVars(instance),
+							Image:           r.config.Build.RepoFetcherImage,
+							Env:             buildRepoFetcherEnvVars(instance, gitOptions),
 							ImagePullPolicy: corev1.PullAlways,
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "workspace",
-									MountPath: workspace,
+									MountPath: workspaceMountPath,
 								},
 							},
 						},
@@ -258,11 +303,11 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) 
 								},
 							},
 							VolumeMounts: []corev1.VolumeMount{
+								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
 								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
 								// If COPY is not used, then the cache will not work
-								{Name: "workspace", MountPath: workspace},
-								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
-								{Name: "runtime", ReadOnly: true, MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile"},
+								{Name: "workspace", MountPath: path.Join(workspaceMountPath, "src"), SubPath: strings.TrimPrefix(instance.Spec.BaseDir, "/")},
+								{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
@@ -278,10 +323,13 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function) 
 	}
 }
 
-func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function) appsv1.Deployment {
+func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config) appsv1.Deployment {
 	imageName := r.buildImageAddress(instance)
 	deploymentLabels := r.functionLabels(instance)
 	podLabels := r.podLabels(instance)
+
+	envs := append(instance.Spec.Env, rtmConfig.RuntimeEnvs...)
+	envs = append(envs, envVarsForDeployment...)
 
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -304,7 +352,7 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 						{
 							Name:            functionContainerName,
 							Image:           imageName,
-							Env:             append(instance.Spec.Env, envVarsForDeployment...),
+							Env:             envs,
 							Resources:       instance.Spec.Resources,
 							ImagePullPolicy: corev1.PullIfNotPresent,
 						},
@@ -396,15 +444,6 @@ func (r *FunctionReconciler) buildImageAddress(instance *serverlessv1alpha1.Func
 		imageTag = r.calculateImageTag(instance)
 	}
 	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.RegistryAddress, instance.Namespace, instance.Name, imageTag)
-}
-
-func (r *FunctionReconciler) sanitizeDependencies(dependencies string) string {
-	result := "{}"
-	if strings.Trim(dependencies, " ") != "" {
-		result = dependencies
-	}
-
-	return result
 }
 
 func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Function) map[string]string {

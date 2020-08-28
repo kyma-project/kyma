@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 
 type TriggerList []*v1alpha1.Trigger
