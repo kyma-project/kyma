@@ -51,10 +51,7 @@ if [ "$(cat /etc/apiserver-proxy-tls-cert/tls.key)" = "" ]; then
   echo "{{ .Values.global.tlsCrt }}" | base64 -d > ${HOME}/cert.pem
   kubectl create secret tls {{ template "name" . }}-tls-cert  --key ${HOME}/key.pem --cert ${HOME}/cert.pem
 {{- else }}
-  echo "Running on xip.io enabled cluster, creating certificate for the domain"
-  source /app/utils.sh
-  generateCertificatesForDomain "$DOMAIN" ${HOME}/key.pem ${HOME}/cert.pem
-  kubectl create secret tls {{ template "name" . }}-tls-cert  --key ${HOME}/key.pem --cert ${HOME}/cert.pem -o yaml --dry-run | kubectl apply -f -
+  echo "Running on xip.io enabled cluster. Skipping cert creation, because cert-manager will provide a cert."
 {{- end }}
 fi
 echo "Done"

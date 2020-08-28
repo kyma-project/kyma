@@ -2,7 +2,7 @@
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
-  name: {{ template "name" . }}-tls-cert2
+  name: apiserver-proxy-tls-cert
   namespace: kyma-system
 spec:
   duration: 720h
@@ -13,7 +13,7 @@ spec:
   commonName: {{ .Values.global.domainName }}
   dnsNames:
   - "*.{{ .Values.global.domainName }}"
-  secretName: {{ template "name" . }}-tls-cert2
+  secretName: apiserver-proxy-tls-cert
   issuerRef:
     name: kyma-ca-issuer
     kind: ClusterIssuer
