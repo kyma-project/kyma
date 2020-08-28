@@ -32,7 +32,7 @@ Follows these steps:
   EOF
   ```
 
-2. Check if the ServiceBinding CR was created. The last condition in the CR status should be `Ready True`:
+2. Check that the ServiceBinding CR was created. The last condition in the CR status should be `Ready True`:
 
   ```bash
   kubectl get servicebinding orders-function -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
@@ -65,7 +65,7 @@ Follows these steps:
 
      > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
-4. Check if the ServiceBindingUsage CR was created. The last condition in the CR status should be `Ready True`:
+4. Check that the ServiceBindingUsage CR was created. The last condition in the CR status should be `Ready True`:
 
   ```bash
   kubectl get servicebindingusage orders-function -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
@@ -77,7 +77,7 @@ If you want to see the Secret details and retrieve them from the ServiceBinding,
   kubectl get secret orders-function -n orders-service -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
   ```
 
-  You should get a similar result:
+  Expect a response similar to this one:
 
   ```bash
   HOST: hb-redis-micro-0e965585-9699-443f-b987-38bc6af0e416-redis.serverless.svc.cluster.local
@@ -87,8 +87,8 @@ If you want to see the Secret details and retrieve them from the ServiceBinding,
 
   </details>
   <details>
-  <summary label="ui">
-  UI
+  <summary label="console-ui">
+  Console UI
   </summary>
 
 1. Go to **Development** > **Functions** in the left navigation panel and select `orders-function`.
@@ -103,7 +103,7 @@ If you want to see the Secret details and retrieve them from the ServiceBinding,
 
 4. Select **Create** to confirm the changes.
 
-The message will appear on the screen confirming that the ServiceBinding was created, and you will see it in the **Service Bindings** section in your Function along with environment variable names.
+A message will appear on the screen confirming that the ServiceBinding was created, and you will see it in the **Service Bindings** section in your Function along with environment variable names.
 
 If you switch to the **Code** tab and scroll down to the **Environment Variables** section, you should see `REDIS_PORT`, `REDIS_HOST` and `REDIS_REDIS_PASSWORD` items with the `Service Binding` type. It indicates that the environment variable was injected to the Function by the ServiceBinding.
 
@@ -132,7 +132,7 @@ Follow these steps:
    curl -ik "https://$FUNCTION_DOMAIN"
    ```
 
-   The system should return a similar response:
+   The system returns a response similar to this one:
 
    ```bash
    HTTP/2 200
@@ -163,7 +163,7 @@ Follow these steps:
      }'
    ```
 
-4. When you call the `https://$FUNCTION_DOMAIN` URL again, the system should return a similar response:
+4. When you call the `https://$FUNCTION_DOMAIN` URL again, the system returns a response similar to this one:
 
    ```bash
    HTTP/2 200
@@ -193,7 +193,7 @@ Follow these steps:
    curl -ik "https://$FUNCTION_DOMAIN"
    ```
 
-   The system should return a similar response:
+   The system returns a response similar to this one:
 
    ```bash
    HTTP/2 200

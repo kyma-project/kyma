@@ -48,7 +48,7 @@ Follow these steps:
   EOF
   ```
 
-2. Check if the APIRule was created and has the `OK` status:
+2. Check that the APIRule was created and has the `OK` status:
 
   ```bash
   kubectl get apirules orders-function -n orders-service -o=jsonpath='{.status.APIRuleStatus.code}'
@@ -62,8 +62,8 @@ Follow these steps:
 
     </details>
     <details>
-    <summary label="ui">
-    UI
+    <summary label="console-ui">
+    Console UI
     </summary>
 
 1. Select the `orders-service` Namespace from the drop-down list in the top navigation panel.
@@ -84,9 +84,9 @@ Follow these steps:
 
 5. Select **Create** to confirm the changes.
 
-    The message appears on the screen confirming the changes were saved.
+    A message appears on the screen confirming the changes were saved.
 
-6. Once the pop-up box closes, check if you can access the Function by selecting the HTTPS link under the **Host** column of the new `orders-function` API Rule.
+6. Once the pop-up box closes, check that you can access the Function by selecting the HTTPS link under the **Host** column of the new `orders-function` API Rule.
 
     </details>
 </div>
@@ -113,7 +113,7 @@ Follow these steps:
    curl -ik "https://$FUNCTION_DOMAIN"
    ```
 
-   The system should return a similar response:
+   The system returns a response similar to this one:
 
    ```bash
    content-length: 2
@@ -145,7 +145,7 @@ Follow these steps:
    curl -ik "https://$FUNCTION_DOMAIN"
    ```
 
-   The system should return a similar response:
+   The system returns a response similar to this one:
 
    ```bash
    HTTP/2 200
@@ -175,7 +175,7 @@ Follow these steps:
    curl -ik "https://$FUNCTION_DOMAIN"
    ```
 
-   The system should return a similar response:
+   The system returns a response similar to this one:
 
    ```bash
    HTTP/2 200

@@ -4,14 +4,13 @@
 
 The `docs` folder contains end-to-end documentation on Kyma and its components.
 
-Start with the overarching [Kyma](./kyma) documentation where you can find the general information on Kyma and the Getting Started guides. Then, read about the product in more detail:
+Start with the overarching [Kyma](./kyma) documentation where you can find the general information on Kyma and the [Getting Started guides](./getting-started/). Then, read about the product in more detail:
 
 -   [API Gateway](./api-gateway/)
 -   [Application Connector](./application-connector/)
 -   [Backup](./backup/)
 -   [Console](./console/)
 -   [Event Mesh](./event-mesh/)
--   [Getting Started](./getting-started/)
 -   [Helm Broker](./helm-broker/)
 -   [Logging](./logging/)
 -   [Monitoring](./monitoring/)

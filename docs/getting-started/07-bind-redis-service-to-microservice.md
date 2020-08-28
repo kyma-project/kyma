@@ -38,7 +38,7 @@ Follow these steps:
    EOF
    ```
 
-2. Check if the ServiceBinding CR was created. The last condition in the CR status should state `Ready True`:
+2. Check that the ServiceBinding CR was created. The last condition in the CR status should state `Ready True`:
 
    ```bash
    kubectl get servicebinding orders-service -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
@@ -71,7 +71,7 @@ Follow these steps:
 
      > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a microservice must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
-4. Check if the ServiceBindingUsage CR was created. The last condition in the CR status should state `Ready True`:
+4. Check that the ServiceBindingUsage CR was created. The last condition in the CR status should state `Ready True`:
 
    ```bash
    kubectl get servicebindingusage orders-service -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
@@ -83,7 +83,7 @@ Follow these steps:
     kubectl get secret orders-service -n orders-service -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
     ```
 
-    You should get a similar result:
+    Expect a response similar to this one:
 
     ```bash
     HOST: hb-redis-micro-0e965585-9699-443f-b987-38bc6af0e416-redis.orders-service.svc.cluster.local
@@ -93,8 +93,8 @@ Follow these steps:
 
   </details>
   <details>
-  <summary label="ui">
-  UI
+  <summary label="console-ui">
+  Console UI
   </summary>
 
 1. Go to **Catalog Management** > **Instances** in the left navigation panel in the `orders-service` Namespace.
@@ -143,7 +143,7 @@ Follow these steps:
    curl -ik "https://$SERVICE_DOMAIN/orders"
    ```
 
-   You should receive a similar response:
+   Expect a response similar to this one:
 
    ```bash
    content-length: 2
@@ -168,7 +168,7 @@ Follow these steps:
      }'
    ```
 
-4. When you call the `https://$SERVICE_DOMAIN/orders` URL again, the system should return a similar response with order details:
+4. When you call the `https://$SERVICE_DOMAIN/orders` URL again, the system returns a response with similar order details:
 
    ```bash
    HTTP/2 200
@@ -194,7 +194,7 @@ Follow these steps:
    curl -ik "https://$SERVICE_DOMAIN/orders"
    ```
 
-   You should receive a similar response:
+   Expect a response similar to this one:
 
    ```bash
    content-length: 2

@@ -25,13 +25,13 @@ Follows these steps:
   kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-function.yaml
   ```
 
-2. Check if the Function was created and all its conditions are set to `True`:
+2. Check that the Function was created and all its conditions are set to `True`:
 
     ```bash
     kubectl get functions orders-function -n orders-service
     ```
 
-    You should get a similar result:
+    Expect a response similar to this one:
 
     ```bash
     NAME                CONFIGURED   BUILT   RUNNING   VERSION   AGE
@@ -40,8 +40,8 @@ Follows these steps:
 
     </details>
     <details>
-    <summary label="ui">
-    UI
+    <summary label="console-ui">
+    Console UI
     </summary>
 
 1. Select the `orders-service` Namespace from the drop-down list in the top navigation panel.
@@ -52,7 +52,7 @@ Follows these steps:
 
   >**TIP:** Separate multiple Function labels in the Console UI with commas.
 
-  The pop-up box will close and the message will appear on the screen after a while, confirming that the Function was created.
+  The pop-up box will close and a message will appear on the screen after a while, confirming that the Function was created.
 
 4. In the **Source** tab of the Function details view that opens up automatically, enter the Function's code from the [`orders-function.js`](https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-function.js) file.
 
@@ -70,7 +70,7 @@ Follows these steps:
 
 6. Select **Save** to confirm the changes.
 
-  You will see the message confirming the changes were saved. Once deployed, the new Function should have the `RUNNING` status.
+  You will see a message confirming the changes were saved. Once deployed, the new Function should have the `RUNNING` status.
 
     </details>
 </div>

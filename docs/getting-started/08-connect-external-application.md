@@ -40,7 +40,7 @@ Follow these steps to deploy XF addons and add Commerce mock to the `orders-serv
 
    > **NOTE:** The `index.yaml` file is a manifest for APIs of SAP Marketing Cloud, SAP Cloud for Customer, and SAP Commerce Cloud applications.
 
-2. Check if the AddonsConfiguration CR was created. Its phase should state `Ready`:
+2. Check that the AddonsConfiguration CR was created. Its phase should state `Ready`:
 
   ```bash
   kubectl get addonsconfigurations xf-mocks -n orders-service -o=jsonpath="{.status.phase}"
@@ -61,15 +61,15 @@ Follow these steps to deploy XF addons and add Commerce mock to the `orders-serv
   EOF
   ```
 
-4. Check if the ServiceInstance CR was created. The last condition in the CR status should state `Ready True`:
+4. Check that the ServiceInstance CR was created. The last condition in the CR status should state `Ready True`:
 
    ```bash
    kubectl get serviceinstance commerce-mock -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
    ```
    </details>
    <details>
-   <summary label="ui">
-   UI
+   <summary label="console-ui">
+   Console UI
    </summary>
 
 1. Switch to the `orders-service` Namespace, and go to **Configuration** > **Addons** in the left navigation panel.
@@ -125,7 +125,7 @@ Follow these steps:
   EOF
   ```
 
-2. Check if the Application CR was created. Its phase should state `deployed`:
+2. Check that the Application CR was created. Its phase should state `deployed`:
 
    ```bash
    kubectl get application commerce-mock -o=jsonpath="{.status.installationStatus.status}"
@@ -148,7 +148,7 @@ Follow these steps:
    ```
    >**NOTE:** If the response doesn't contain any content, wait for some time and run the command again.
 
-   A successful call should return a similar response:
+   The system returns a response similar to this one:
 
    ```bash
    https://connector-service.{CLUSTER_DOMAIN}/v1/applications/signingRequests/info?token=h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
@@ -160,8 +160,8 @@ Follow these steps:
 
   </details>
   <details>
-  <summary label="ui">
-  UI
+  <summary label="console-ui">
+  Console UI
   </summary>
 
 1. Return to the general view in the Console UI by selecting **Back to Namespaces**.
@@ -242,7 +242,7 @@ Follow these steps:
   EOF
   ```
 
-4. Check if the ServiceInstance CR was created. The last condition in the CR status should state `Ready True`:
+4. Check that the ServiceInstance CR was created. The last condition in the CR status should state `Ready True`:
 
    ```bash
    kubectl get serviceinstance commerce-mock-events -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
@@ -250,8 +250,8 @@ Follow these steps:
 
   </details>
   <details>
-  <summary label="ui">
-  UI
+  <summary label="console-ui">
+  Console UI
   </summary>
 
 1. Back in the Console UI, go to **Integration** > **Applications/Systems** > **commerce-mock**.

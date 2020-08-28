@@ -3,7 +3,7 @@ title: Expose the microservice
 type: Getting Started
 ---
 
-Now that you deployed a standalone `orders-service` microservice, allow other resources to communicate with it. Make it available for other resources outside the cluster by exposing its Kubernetes Service through an APIRule custom resources (CR).
+Now that you deployed a standalone `orders-service` microservice, allow other resources to communicate with it. Make it available for other resources outside the cluster by exposing its Kubernetes Service through an APIRule custom resource (CR).
 
 ## Reference
 
@@ -13,9 +13,9 @@ This guide demonstrates how [API Gateway](/components/api-gateway) works in Kyma
 
 ### Expose the Service
 
-Create an APIRule CR which exposes the Kubernetes Service of the microservice under na unsecured endpoint (**handler** set to `noop`) and accepts the `GET` and `POST` methods.
+Create an APIRule CR which exposes the Kubernetes Service of the microservice under an unsecured endpoint (**handler** set to `noop`) and accepts the `GET` and `POST` methods.
 
->**TIP:** **noop** stands for "no operation" and means access without any token. If you want to secure your Service, read the [tutorial](/components/api-gateway/#tutorials-expose-and-secure-a-service) to learn how to do that.
+>**TIP:** **noop** stands for "no operation" and means access without any token. If you want a more secure option, see the [tutorial on how to secure your Service](/components/api-gateway/#tutorials-expose-and-secure-a-service).
 
 Follow these steps:
 
@@ -51,7 +51,7 @@ Follow these steps:
         mutators: []
   EOF
   ```
-2. Check if the API Rule was created and has the `OK` status:
+2. Check that the API Rule was created and has the `OK` status:
 
    ```bash
    kubectl get apirules orders-service -n orders-service -o=jsonpath='{.status.APIRuleStatus.code}'
@@ -59,8 +59,8 @@ Follow these steps:
 
 </details>
 <details>
-<summary label="ui">
-UI
+<summary label="console-ui">
+Console UI
 </summary>
 
 >**TIP:** You can expose a Service or a Function with an API Rule from different views in the Console UI. This tutorial shows how to do that from the generic **API Rules** view.
@@ -77,17 +77,17 @@ UI
 
     - Enter `orders-service` as **Hostname** to indicate the host on which you want to expose your Service.
 
-    - Select `orders-service (port: 80)` from the drop-down list in the **Service** column to indicate the Service name for which you want to create the API Rule.
+    - From the drop-down list in the **Service** column, select `orders-service (port: 80)` to indicate the Service name for which you want to create the API Rule.
 
-4. In the **Access strategies** section, leave only the `GET` and `POST` methods marked and the `noop` handler selected. This way you will be able to send the orders to the Service and retrieve orders from it without any token.
+4. In the **Access strategies** section, leave only the `GET` and `POST` methods checked and the `noop` handler selected. This way you will be able to send the orders to the Service and retrieve orders from it without any token.
 
 5. Select **Create** to confirm the changes.
 
-    The message will appear on the screen confirming the changes were saved.
+    A message will appear on the screen confirming the changes were saved.
 
-6. In the API Rule's details view that opens up automatically, check if the API Rule status is `OK`. See if you can access the Service by selecting the HTTPS link under **Host** and adding the `/orders` endpoint at the end of it.
+6. In the API Rule's details view that opens up automatically, check that the API Rule status is `OK`. See if you can access the Service by selecting the HTTPS link under **Host** and adding the `/orders` endpoint at the end of it.
 
-> **NOTE:** For the whole list of endpoints available in the service, see its [OpenAPI specification](./assets/orders-service-openapi.yaml).
+> **NOTE:** For the whole list of endpoints available in the Service, see its [OpenAPI specification](./assets/orders-service-openapi.yaml).
 
 </details>
 </div>
@@ -108,13 +108,13 @@ Follow these steps:
   export SERVICE_DOMAIN=$(kubectl get virtualservices -l apirule.gateway.kyma-project.io/v1alpha1=orders-service.orders-service -n orders-service -o=jsonpath='{.items[*].spec.hosts[0]}')
   ```
 
-2. Run this command in the terminal to call the service:
+2. Run this command in the terminal to call the Service:
 
   ```bash
   curl -ik "https://$SERVICE_DOMAIN/orders"
   ```
 
-  The system returns a similar response:
+  The system returns a response similar to this one:
 
   ```bash
   content-length: 2
@@ -145,7 +145,7 @@ Follow these steps:
   curl -ik "https://$SERVICE_DOMAIN/orders"
   ```
 
-  You should receive a similar response:
+  Expect a response similar to this one:
 
   ```bash
   HTTP/2 200
@@ -159,9 +159,9 @@ Follow these steps:
   [{"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
   ```
 
-  You can see the microservice returns the previously sent order details.
+  You can see that the microservice returns the previously sent order details.
 
-5. Remove the [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) created by the `orders-service` Deployment. Run this command and wait for the system to delete the Pod and start a new one:
+5. Remove the [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) created by the `orders-service` Deployment. Run this command, and wait for the system to delete the Pod and start a new one:
 
    ```bash
    kubectl delete pod -n orders-service -l app=orders-service
@@ -172,7 +172,7 @@ Follow these steps:
    ```bash
    curl -ik "https://$SERVICE_DOMAIN/orders"
    ```
-   The system returns a similar response:
+   The system returns a response similar to this one:
 
   ```bash
   content-length: 2
@@ -185,4 +185,4 @@ Follow these steps:
   []
   ```
 
-  As you can see, the `orders-service` microservice uses in-memory storage which means every time you delete the Pod of the microservice or change the Deployment definition, the order details get lost. In further guides, you will see how you can prevent order data deletion by binding external Redis storage to the microservice.
+  As you can see, the `orders-service` microservice uses in-memory storage, which means every time you delete the Pod of the microservice or change the Deployment definition, you lose the order details. In further guides, you will see how you can prevent order data deletion by binding external Redis storage to the microservice.

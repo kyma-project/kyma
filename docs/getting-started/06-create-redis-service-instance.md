@@ -32,7 +32,7 @@ Follows these steps:
    EOF
    ```
 
-2. Check if the ServiceInstance CR was created. The last condition in the CR status should state `Ready True`:
+2. Check that the ServiceInstance CR was created. The last condition in the CR status should state `Ready True`:
 
    ```bash
    kubectl get serviceinstance redis-service -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
@@ -40,8 +40,8 @@ Follows these steps:
 
     </details>
     <details>
-    <summary label="ui">
-    UI
+    <summary label="console-ui">
+    Console UI
     </summary>
 
 1. Go to **Service Management** > **Catalog** in the left navigation panel.

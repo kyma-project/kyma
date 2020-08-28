@@ -34,7 +34,7 @@ Follows these steps:
    EOF
    ```
 
-2. Check if the AddonsConfiguration CR was created. Its phase should state `Ready`:
+2. Check that the AddonsConfiguration CR was created. Its phase should state `Ready`:
 
   ```bash
   kubectl get addonsconfigurations redis-addon -n orders-service -o=jsonpath="{.status.phase}"
@@ -42,8 +42,8 @@ Follows these steps:
 
   </details>
   <details>
-  <summary label="ui">
-  UI
+  <summary label="console-ui">
+  Console UI
   </summary>
 
 1. Navigate to the `orders-service` Namespace overview by selecting it from the drop-down list in the top navigation panel.

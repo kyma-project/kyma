@@ -47,7 +47,7 @@ where:
 - **spec.filter.attributes.source** is taken from the name of the Application CR and specifies the source of events. In this example, it is `commerce-mock`.
 - **spec.filter.attributes.type** points to the given event type to which you want to subscribe the Function. In this example, it is `order.deliverysent`.
 
-2. Check if the Trigger CR was created and is ready. Its status should be `True`:
+2. Check that the Trigger CR was created and is ready. Its status should be `True`:
 
   ```bash
   kubectl get trigger orders-function -n orders-service -o=jsonpath="{.status.conditions[2].status}"
@@ -55,8 +55,8 @@ where:
 
     </details>
     <details>
-    <summary label="ui">
-    UI
+    <summary label="console-ui">
+    Console UI
     </summary>
 
 1. Select the `orders-service` Namespace from the drop-down list in the top navigation panel.
@@ -67,7 +67,7 @@ where:
 
 4. Once the pop-up box opens, find the `order.deliverysent` event with the `v1` version from the `commerce-mock` application. Mark it on the list and select **Add**.
 
-The message will appear in the UI confirming that the event trigger was created, and you will see it in the **Event Triggers** section in the Function's details view.
+A message will appear in the UI confirming that the event trigger was created, and you will see it in the **Event Triggers** section in the Function's details view.
 
     </details>
 </div>
@@ -82,7 +82,7 @@ To send events from Commerce mock to `orders-function`, follow these steps:
 
 3. Select the `order.deliverysent.v1` event type in **Event Topics** drop-down list. In the details of the printed event, change **orderCode** to `987654321` and select **Send Event**.
 
-   The message appears on the UI confirming that the event was sent.
+   A message appears on the UI confirming that the event was sent.
 
 4. Call the Function to verify if the event details were saved:
 
@@ -96,7 +96,7 @@ To send events from Commerce mock to `orders-function`, follow these steps:
    > export FUNCTION_DOMAIN=$(kubectl get virtualservices -l apirule.gateway.kyma-project.io/v1alpha1=orders-function.orders-service -n orders-service -o=jsonpath='{.items[*].spec.hosts[0]}')
    > ```
 
-   You should see a similar response proving that the `987654321` event was delivered as expected:
+   The system returns a response proving that the `987654321` event was delivered as expected:
 
    ```bash
    HTTP/2 200
