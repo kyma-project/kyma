@@ -1,0 +1,9 @@
+---
+apiVersion: cert.gardener.cloud/v1alpha1
+kind: Certificate
+metadata:
+  name: {{ .Values.certs.ingress.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  commonName: "*.{{ .Values.global.ingress.domainName }}"
+  secretName: "{{ .Values.certs.ingress.secretName }}"
