@@ -61,4 +61,4 @@ To manage the connected cluster using the kubectly Command Line Interface (CLI),
     ```
 
 5. Use your terminal to run a command, for example to get a list of resources.
-6. Your requests goes first to the `api-server proxy` service, since the Kubernetes API server is not exposed directly. The service validates the incoming JWT token and forwards requests to the Kubernetes API server.
+6. Your requests goes first to the API Server Proxy service, since the Kubernetes API server is not exposed directly. The service validates the incoming JWT token and forwards requests to the Kubernetes API server.

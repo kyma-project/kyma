@@ -7,7 +7,7 @@ The IAM Kubeconfig Service is a proprietary tool that generates a `kubeconfig` f
 
 The service is a publicly exposed service. You can access it directly under the `https://configurations-generator.{YOUR_CLUSTER_DOMAIN}` address. The service requires a valid ID token issued by Dex to return a code `200` result.
 
-## Get the kubeconfig file and configure the CLI
+## Steps
 
 Follow these steps to get the `kubeconfig` file and configure the CLI to connect to the cluster:
 
