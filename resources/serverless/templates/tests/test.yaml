@@ -37,6 +37,10 @@ spec:
               value: "{{ .Values.tests.envs.verbose }}"
             - name: APP_TEST_USAGE_KIND_NAME
               value: "{{ .Values.usageKind.name }}"
+            - name: APP_TEST_GIT_SERVER_IMAGE
+              value: "{{ .Values.tests.envs.gitServer.image }}:{{ .Values.tests.envs.gitServer.tag }}"
+            - name: APP_TEST_GIT_SERVER_REPO_NAME
+              value: "{{ .Values.tests.envs.gitServer.repoName }}"
           resources:
 {{ include "tplValue" ( dict "value" .Values.tests.resources "context" $ ) | indent 12 }}
 {{- end }}
