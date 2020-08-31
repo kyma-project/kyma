@@ -830,20 +830,20 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create microfrontend in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "microfrontend" "${CUSTOM_NAMESPACE}" "no"
 
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get clustermicrofrontend"
-	testPermissionsClusterScoped "get" "clustermicrofrontend"  "yes"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get clustermicrofrontend in default"
+	testPermissions "get" "clustermicrofrontend" "default" "yes"
 
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create clustermicrofrontend"
-	testPermissionsClusterScoped "create" "clustermicrofrontend" "no"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create clustermicrofrontend in default"
+	testPermissions "create" "clustermicrofrontend" "default" "no"
 
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get backendmodule"
-	testPermissionsClusterScoped "get" "backendmodule" "yes"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get backendmodule in default"
+	testPermissions "get" "backendmodule" "default" "yes"
 
-	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create backendmodule"
-	testPermissionsClusterScoped "create" "backendmodule" "yes"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create backendmodule in default"
+	testPermissions "create" "backendmodule" "default" "yes"
 
-	echo "--> ${ADNAMESPACE_ADMIN_EMAILMIN_EMAIL} should be able to delete backendmodule"
-	testPermissionsClusterScoped "delete" "backendmodule" "yes"
+	echo "--> ${ADNAMESPACE_ADMIN_EMAILMIN_EMAIL} should be able to delete backendmodule in default"
+	testPermissions "delete" "backendmodule" "default" "yes"
 
 	# developer who was granted kyma-developer role should be able to operate in the scope of its namespace
 	EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
@@ -973,20 +973,20 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create microfrontend in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "microfrontend" "${CUSTOM_NAMESPACE}" "no"
 
-	echo "--> ${DEVELOPER_EMAIL} should be able to get clustermicrofrontend"
-	testPermissionsClusterScoped "get" "clustermicrofrontend"  "yes"
+	echo "--> ${DEVELOPER_EMAIL} should be able to get clustermicrofrontend in default"
+	testPermissions "get" "clustermicrofrontend" "default" "yes"
 
-	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create clustermicrofrontend"
-	testPermissionsClusterScoped "create" "clustermicrofrontend" "no"
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create clustermicrofrontend in default"
+	testPermissions "create" "clustermicrofrontend" "default" "no"
 
-	echo "--> ${DEVELOPER_EMAIL} should be able to get backendmodule"
-	testPermissionsClusterScoped "get" "backendmodule" "yes"
+	echo "--> ${DEVELOPER_EMAIL} should be able to get backendmodule in default"
+	testPermissions "get" "backendmodule" "default" "yes"
 
-	echo "--> ${DEVELOPER_EMAIL} should be able to create backendmodule"
-	testPermissionsClusterScoped "create" "backendmodule" "yes"
+	echo "--> ${DEVELOPER_EMAIL} should be able to create backendmodule in default"
+	testPermissions "create" "backendmodule" "default" "yes"
 
-	echo "--> ${ADNAMESPACE_ADMIN_EMAILMIN_EMAIL} should be able to delete backendmodule"
-	testPermissionsClusterScoped "delete" "backendmodule" "yes"
+	echo "--> ${DEVELOPER_EMAIL} should be able to delete backendmodule in default"
+	testPermissions "delete" "backendmodule" "default" "yes"
 }
 
 function cleanup() {
