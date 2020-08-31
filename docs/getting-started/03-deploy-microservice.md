@@ -43,7 +43,7 @@ Console UI
 </summary>
 
 1. On your machine, create `orders-service-deployment.yaml` containing [this Deployment definition](https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-service-deployment.yaml).
-2. Back in the Console UI, go to the `orders-service` Namespace overview, select the **Deploy new resource** button.
+2. Back in the Console UI, go to the `orders-service` Namespace overview and select the **Deploy new resource** button.
 3. Browse the `orders-service-deployment.yaml` file and select **Deploy** to confirm the changes.
 4. Go to **Operation** > **Deployments** to make sure the status of `orders-service` is `RUNNING`.
 
@@ -75,7 +75,7 @@ kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/
   </summary>
 
 1. On your machine, create `orders-service-service.yaml` containing [this Service definition](https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-service-service.yaml).
-2. Back in the Console UI, go to the `orders-service` Namespace overview, select the **Deploy new resource** button.
+2. Back in the Console UI, go to the `orders-service` Namespace overview and select the **Deploy new resource** button.
 3. Browse the `orders-service-service.yaml` file and select **Deploy** to confirm the changes.
 4. Go to **Operation** > **Services** to make sure the status of `orders-service` is `RUNNING`.
 

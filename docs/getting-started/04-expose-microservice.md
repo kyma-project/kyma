@@ -67,7 +67,7 @@ Console UI
 
 1. Select the `orders-service` Namespace from the drop-down list in the top navigation panel.
 
-2. Go to **Configuration** > **API Rules** in the left navigation panel, and select **Create API Rule**.
+2. Go to **Configuration** > **API Rules** in the left navigation panel and select **Create API Rule**.
 
 3. In the **General settings** section:
 
@@ -85,7 +85,7 @@ Console UI
 
     A message will appear on the screen confirming the changes were saved.
 
-6. In the API Rule's details view that opens up automatically, check that the API Rule status is `OK`. See if you can access the Service by selecting the HTTPS link under **Host** and adding the `/orders` endpoint at the end of it.
+6. In the automatically opened API Rule's details view, check that the API Rule status is `OK`. Then, access the Service by selecting the HTTPS link under **Host** and adding the `/orders` endpoint at the end of it.
 
 > **NOTE:** For the whole list of endpoints available in the Service, see its [OpenAPI specification](./assets/orders-service-openapi.yaml).
 

@@ -7,7 +7,7 @@ Provision the external [Redis](https://redis.io/) service that will replace your
 
 ## Reference
 
-This guide demonstrates how [Service Catalog](/components/service-catalog/) works in Kyma. It enables easy access to services ([ServiceClass CRs](https://svc-cat.io/docs/resources/#service-classes)) managed by [Service Brokers](/components/service-catalog/#overview-service-brokers) registered in Kyma. You can consume these services by creating their instances and binding them to your microservices and Functions.
+This guide demonstrates how [Service Catalog](/components/service-catalog/) works in Kyma. It enables easy access to services ([ServiceClass custom resources](https://svc-cat.io/docs/resources/#service-classes)) managed by [Service Brokers](/components/service-catalog/#overview-service-brokers) registered in Kyma. You can consume these services by creating their instances and binding them to your microservices and Functions.
 
 ## Steps
 
@@ -19,7 +19,7 @@ Follows these steps:
   kubectl
   </summary>
 
-1. Provision an [AddonsConfiguration CR](/components/helm-broker/#custom-resource-addons-configuration) with the Redis service:
+1. Provision an [AddonsConfiguration custom resource (CR)](/components/helm-broker/#custom-resource-addons-configuration) with the Redis service:
 
    ```yaml
    cat <<EOF | kubectl apply -f  -
@@ -34,7 +34,7 @@ Follows these steps:
    EOF
    ```
 
-2. Check that the AddonsConfiguration CR was created. Its phase should state `Ready`:
+2. Check that the AddonsConfiguration CR was created. This is indicated by the `Ready` status phase:
 
   ```bash
   kubectl get addonsconfigurations redis-addon -n orders-service -o=jsonpath="{.status.phase}"
@@ -48,7 +48,7 @@ Follows these steps:
 
 1. Navigate to the `orders-service` Namespace overview by selecting it from the drop-down list in the top navigation panel.
 
-2. Go to **Configuration** > **Addons** in the left navigation panel, and select **Add New Configuration**.
+2. Go to **Configuration** > **Addons** in the left navigation panel and select **Add New Configuration**.
 
 3. Once the new box opens up, change **Name** to `redis-addon`, and enter `https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml` in the **Urls** field.
 

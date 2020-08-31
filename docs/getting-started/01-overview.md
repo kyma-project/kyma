@@ -6,7 +6,7 @@ type: Getting Started
 This set of Getting Started guides is an end-to-end scenario that will walk you through all major Kyma functionalities and show its:
 - **Integration and connectivity** feature brought in by [Application Connector](https://kyma-project.io/docs/components/application-connector/). With Kyma, you can connect external applications and expose their APIs and events to the cluster.
 - **Extensibility** feature provided by [Service Catalog](https://kyma-project.io/docs/components/service-catalog/). You can use its built-in portfolio of external services in your microservices and Functions.
-- **Application runtime** feature supported by [Serverless](https://kyma-project.io/docs/components/serverless/). This feature lets your build microservices and Functions that can interact with external services and applications to perform a given business logic.
+- **Application runtime** feature supported by [Serverless](https://kyma-project.io/docs/components/serverless/). This feature lets your build microservices and Functions to interact with external services and applications, and to perform a given business logic.
 
 With these features in mind, we will:
 
@@ -70,11 +70,11 @@ These guides cover the following steps:
 5. [Create the Redis service instance](#getting-started-create-a-service-instance-for-the-redis-service) (ServiceInstance CR) in the Namespace so you can bind it with the microservice and Function.
 6. [Bind the microservice to the Redis service](#getting-started-bind-the-redis-service-instance-to-the-microservice) by creating ServiceBinding and ServiceBindingUsage CRs. Send a sample order to its endpoint. Since it now uses the Redis storage, the order details will not be gone after you restart the microservice.
 7. [Connect Commerce mock](#getting-started-connect-an-external-application) as the external application.
-8. [Trigger the microservice](#getting-started-trigger-the-microservice-with-an-event) to react to the `order.deliverysent.v1` event from Commerce mock. Send the event, and then see if the microservice reacts to it and saves its details in the Redis database.
+8. [Trigger the microservice](#getting-started-trigger-the-microservice-with-an-event) to react to the `order.deliverysent.v1` event from Commerce mock. Send the event. Then, see if the microservice reacts to it and saves its details in the Redis database.
 9. [Create a Function](#getting-started-create-a-function) in the Namespace and repeat the microservice flow:
 - [Expose the Function](#getting-started-expose-the-function) through the APIRule CR on HTTP endpoints. This way it will be available for other services outside the cluster.
 - [Bind the Function to the Redis service](#getting-started-bind-a-redis-service-instance-to-the-function) by creating ServiceBinding and ServiceBindingUsage CRs.
-- [Trigger the Function](#getting-started-trigger-the-function-with-an-event) to react to the `order.deliverysent.v1` event from Commerce mock. Send the event, then and see if the Function reacts to it and saves its details in the Redis database.
+- [Trigger the Function](#getting-started-trigger-the-function-with-an-event) to react to the `order.deliverysent.v1` event from Commerce mock. Send the event. Then, see if the Function reacts to it and saves its details in the Redis database.
 
 As a result, you get two scenarios of the same flow — a microservice and a Function that are triggered by new order events from Commerce mock and send the order data to the Redis database:
 
