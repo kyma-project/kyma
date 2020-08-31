@@ -31,6 +31,10 @@ required = [
   name = "github.com/golang/protobuf"
   version = "v1.3.0"
 
+[[override]]
+  name = "github.com/etcd-io/etcd"
+  version = "v3.3.25"
+  
 [prune]
   go-tests = true
   unused-packages = true
