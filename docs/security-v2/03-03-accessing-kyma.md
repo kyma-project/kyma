@@ -15,7 +15,7 @@ As a user, you can access Kyma using the following:
 
 The diagram shows the Kyma access flow using the Console UI.
 
-![Kyma access Console](assets/kyma-access-flow.svg)
+![Kyma access Console](assets/kyma-access-console.svg)
 
 >**NOTE:** The Console is permission-aware so it only shows elements to which you have access as a logged in user. The access is RBAC-based.
 
@@ -27,36 +27,38 @@ The diagram shows the Kyma access flow using the Console UI.
 
 ## kubectl
 
-The diagram shows the Kyma access flow using kubectl.
+To manage the connected cluster using the kubectly Command Line Interface (CLI), you first need to generate and download the `kubeconfig` file which allows you to access the cluster within your permission boundaries.
 
-![Kyma access kubectl](assets/kubectl.svg)
+![Kyma access kubectl](assets/kyma-access-kubectl.svg)
 
-
-1. You use the Console UI to request the IAM kubeconfig generator to generate the kubeconfig file. 
+1. Use the Console UI to [request the IAM Kubeconfig Service to generate the `kubeconfig` file](#tutorials-generate-kubeconfig). 
 2. Under the hood, the Ingress Gateway terminates the TLS and allows the Kyma Console to proceed with the request.
-3. The request goes out from the Kyma Console to the IAM kubeconfig generator.
-4 IAM kubeconfig generator validates the in-session JWT token and generates a YAML file in the following form:
+3. The request goes out from the Kyma Console to the IAM Kubeconfig Service.
+4. IAM Kubeconfig Service validates your in-session ID token and rewrites it into the generated `kubeconfig` file.
+  
+  >**NOTE:** The time to live (TTL) of the ID token is 8 hours, which effectively means that the TTL of the generated `kubeconfig` file is 8 hours as well. 
+  The content of the file looks as follows:
 
-```yaml
-apiVersion: v1
-clusters:
-- cluster:
-    certificate-authority-data: SERVER_CERTIFICATE_REDACTED
-    server: https://apiserver.kyma.local:9443
-  name: kyma.local
-contexts:
-- context:
-    cluster: kyma.local
-    user: OIDCUser
-  name: kyma.local
-current-context: kyma.local
-kind: Config
-preferences: {}
-users:
-- name: OIDCUser
-  user:
-    token: TOKEN_REDACTED
-```
+    ```yaml
+    apiVersion: v1
+    clusters:
+    - cluster:
+        certificate-authority-data: SERVER_CERTIFICATE_REDACTED
+        server: https://apiserver.kyma.local:9443
+      name: kyma.local
+    contexts:
+    - context:
+        cluster: kyma.local
+        user: OIDCUser
+      name: kyma.local
+    current-context: kyma.local
+    kind: Config
+    preferences: {}
+    users:
+    - name: OIDCUser
+      user:
+        token: TOKEN_REDACTED
+    ```
 
-The JWT token is stored in the config to allow you to use kubectl to communicate with the Kubernetes API server.
-5. The generated config does not point directly to the Kubernetes API server, which is not exposed. Instead,if you want to communicate with the server to manage your resources, it goes through the apiserver-proxy service, which validates incoming JWT tokens and forwards requests to the Kubernetes API server.
+5. Use your terminal to run a command, for example to get a list of resources.
+6. Your requests goes first to the `api-server proxy` service, since the Kubernetes API server is not exposed directly. The service validates the incoming JWT token and forwards requests to the Kubernetes API server.

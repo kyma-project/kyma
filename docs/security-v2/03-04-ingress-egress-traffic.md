@@ -5,20 +5,20 @@ type: Details
 
 ## Ingress
 
-Kyma uses the [Istio Ingress Gateway](https://istio.io/latest/docs/reference/config/networking/gateway/) to handle all incoming traffic, manage TLS termination, and handle mTLS communication between the cluster and external services. By default, `kyma-gateway` is configured as the main point of entry to exposes all applications using the supplied domain and certificate.
+Kyma uses the [Istio Ingress Gateway](https://istio.io/latest/docs/reference/config/networking/gateway/) to handle all incoming traffic, manage TLS termination, and handle mTLS communication between the cluster and external services. By default, the [`kyma-gateway`](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/gateway/templates/gateway.yaml) configuration defines the points of entry to expose all applications using the supplied domain and certificates.
 Applications are exposed using the [API Gateway](components/api-gateway/#overview-overview) controller. 
-You can find the current setup of the main gateway [in this file](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/gateway/templates/gateway.yaml). 
 
-The file defines the following parameters:
+The configuration specifies the following parameters and their values:
 
-* The gateway listens on port `80` and `443`.
-* Port `80` is automatically redirected to `443`
-* The TLS connection requires at least `TLSV1_2`, with `TLSV1_0` and `TLSV1_1` rejected
-* Accepted cipher suites are `ECDHE-RSA-CHACHA20-POLY1305`, `ECDHE-RSA-AES256-GCM-SHA384`, `ECDHE-RSA-AES256-SHA`, `ECDHE-RSA-AES128-GCM-SHA256`, `ECDHE-RSA-AES128-SHA`.
+| Parameter | Description | Value| 
+|-----| ---| -----| 
+| **spec.servers.port** | The ports gateway listens on. | `443`, `80`. <br> **NOTE:** Port `80` is automatically redirected to `443`.|
+| **spec.servers.tls.minProtocolVersion** | The minimum protocol version required by TLS connection. | `TLSV1_2` protocol version. `TLSV1_0` and `TLSV1_1` are rejected. |
+| **spec.servers.tls.cipherSuites** | Accepted cypher suites. | `ECDHE-RSA-CHACHA20-POLY1305`, `ECDHE-RSA-AES256-GCM-SHA384`, `ECDHE-RSA-AES256-SHA`, `ECDHE-RSA-AES128-GCM-SHA256`, `ECDHE-RSA-AES128-SHA`|
 
 ## TLS management
 
-Kyma works on the basis of a bring your own domain/certificates model, so you must provide the certificate and key during installation. This can be achieved using the installation overrides, for example by creating the following ConfigMap before the installation. This value is then propagated in the cluster for all component that require it.
+Kyma employs the bring your own domain/certificates model, so you must provide the certificate and key during installation. You can do ir using the installation overrides. The override can be a ConfigMap, similar to the following: 
 
 ```yaml
 ---
@@ -34,6 +34,7 @@ data:
   global.tlsCrt: "CERT"
   global.tlsKey: "CERT_KEY"
 ```
+During installation, the values are propagated in the cluster for all components that require it.
 
 >**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
 >* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
@@ -41,30 +42,37 @@ data:
 
 ### Demo setup with xip.io
 
-If no certificates or domain is given during the installation process, then the kyma-installer default to a demo setup using the DNS-as-a-Service(DNSaaS) provider [xip.io](http://xip.io/). In this case the domain is generated on demand using the clusters LoadBalancer IP and generating a domain in the form `*.LoadBalancerIP.xip.io` and a self-signed certificate for the generated domain.
+If you don't supply any certificates or domain during installation, the kyma-installer will default to a demo setup using the [xip.io](http://xip.io/) DNS-as-a-Service (DNSaaS) provider. In this case the domain is generated on demand using the clusters LoadBalancer IP in the form of `*.LoadBalancerIP.xip.io` along with a self-signed certificate for the domain.
 
->**NOTE:** Due to limited availability of the DNSaaS provider and a self-singed certificate which can be rejected by some browsers and applications, this setup is regarded as a working, visual demo and should not be used for other scenarios.
+>**NOTE:** Due to limited availability of the DNSaaS provider and a self-singed certificate which can be rejected by some browsers and applications, this setup is regarded as a working, visual demo. Do not use it for other scenarios.
 
 ### Gardener
 
-Kyma can also be installed on top of [Gardener](https://gardener.cloud/) managed instances, in which the existing certificate management service is used. In this case the user is not required to provide any certificates or domain, as they will be created for them by Gardener. The certificate is provided in the form a CustomResource managed by Gardener, and is a wildcard certificate for the whole domain.
+You can install Kyma on top of [Gardener](https://gardener.cloud/) managed instances which use the already present certificate management service. Because Gardener creates the certificates or domain, you don't have to provide them. The certificate is a Custom Resource managed by Gardener, and is a wildcard certificate for the whole domain.
 
 ### Apiserver proxy
 
-The apiserver-proxy component is a reverse proxy which acts as an intermediary with the Kubernetes API. By default it is exposed as a LoadBalancer Service, meaning it requires a dedicated certificate and DNS entry.
+The [API Server Proxy](https://github.com/kyma-project/kyma/tree/master/components/apiserver-proxy) component is a reverse proxy which acts as an intermediary for the Kubernetes API. By default it is exposed as a LoadBalancer Service, meaning it requires a dedicated certificate and DNS entry.
 
-To learn about the component, please visit the [component page](https://github.com/kyma-project/kyma/tree/master/components/apiserver-proxy), and to learn about its configuration, please visit the [configuration section](/components/security-v2/#configuration-api-server-proxy-chart)
+To learn more about about API Server Proxy configuration, see the [configuration section](/components/security/#configuration-api-server-proxy-chart)
 
 ### Certificate propagation paths
 
-As the certificate data is propagated though Kyma it is delivered into several components, which generate a set of Secrets/ConfigMaps. The propagation path varies slightly for each of the supported modes:
+The certificate data is propagated though Kyma and delivered to several components.
 
 ![Certificate propagation](./assets/certificate-propagation.svg)
+
+
+1. Kyma Installer reads the override files you have configured.
+2. Kyma installer passes the values to the specific Kyma components.
+3. Each of these components generates Secrets, ConfigMaps, and Certificates in a certain order. 
+
+The table shows the order in which the configuration elements are created. The order differs depending on the mode:
 
 <div tabs name="certificate-propagation" group="tls-management">
   <details>
   <summary label="own-certificate">
-  Bring your own Certificate
+  Bring Your Own Certificate
   </summary>
   | **Kind** | **Name** | **Namespace** |
   | :--- | :--- | :--- | 
@@ -90,7 +98,7 @@ As the certificate data is propagated though Kyma it is delivered into several c
   </details>
   <details>
   <summary label="gardener">
-  Gardener managed
+  Gardener-managed 
   </summary>
   | **Kind** | **Name** | **Namespace** |
   | :--- | :--- | :--- | 
@@ -107,4 +115,3 @@ As the certificate data is propagated though Kyma it is delivered into several c
 Currently no Egress limitations are implemented, meaning that all applications deployed in the Kyma cluster can access outside resources without limitations.
 
 >**NOTE:** in the case of connection problems with external services it may be required to create an [Service Entry](https://istio.io/latest/docs/reference/config/networking/service-entry/) object to register the service. 
-
