@@ -77,9 +77,9 @@ var _ = ginkgo.Describe("Function", func() {
 				Namespace: namespace,
 			},
 			Spec: serverlessv1alpha1.FunctionSpec{
-				SourceType: serverlessv1alpha1.SourceTypeGit,
-				Source:     fmt.Sprintf("%s-%d", name, suffix),
-				Runtime:    serverlessv1alpha1.Nodejs12,
+				Type:    serverlessv1alpha1.SourceTypeGit,
+				Source:  fmt.Sprintf("%s-%d", name, suffix),
+				Runtime: serverlessv1alpha1.Nodejs12,
 				Repository: serverlessv1alpha1.Repository{
 					BaseDir:   "/",
 					Reference: "master",
