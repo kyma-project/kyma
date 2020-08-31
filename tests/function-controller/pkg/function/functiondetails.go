@@ -8,4 +8,6 @@ type FunctionData struct {
 	MinReplicas int32
 	MaxReplicas int32
 	Runtime     serverlessv1alpha1.Runtime
+	SourceType  serverlessv1alpha1.SourceType
+	Repository  serverlessv1alpha1.Repository
 }

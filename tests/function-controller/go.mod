@@ -6,6 +6,8 @@ require (
 	github.com/Azure/go-autorest/autorest v0.9.3 // indirect
 	github.com/Azure/go-autorest/autorest/adal v0.8.1 // indirect
 	github.com/avast/retry-go v2.6.0+incompatible
+	github.com/go-git/go-billy/v5 v5.0.0
+	github.com/go-git/go-git/v5 v5.1.0
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-multierror v1.1.0
 	github.com/kubernetes-incubator/service-catalog v0.2.2

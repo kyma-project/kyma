@@ -36,7 +36,7 @@ tests:
 
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-9223"
+    tag: "PR-9295"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -51,6 +51,10 @@ tests:
     waitTimeout: 15m
     verifySSL: "false"
     verbose: "true"
+    gitServer:
+      image: "eu.gcr.io/kyma-project/gitserver"
+      tag: "c0aa144a"
+      repoName: "function"
 
 global:
   commonLabels:

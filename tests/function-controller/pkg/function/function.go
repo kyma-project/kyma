@@ -53,9 +53,14 @@ func (f *Function) Create(data *FunctionData) error {
 			Namespace: f.namespace,
 		},
 		Spec: serverlessv1alpha1.FunctionSpec{
-			Source:  data.Body,
-			Deps:    data.Deps,
-			Runtime: data.Runtime,
+			Source:     data.Body,
+			Deps:       data.Deps,
+			Runtime:    data.Runtime,
+			SourceType: data.SourceType,
+			Repository: serverlessv1alpha1.Repository{
+				BaseDir:   data.Repository.BaseDir,
+				Reference: data.Repository.Reference,
+			},
 		},
 	}
 
@@ -109,6 +114,9 @@ func (f *Function) Update(data *FunctionData) error {
 	fnCopy.Spec.Deps = data.Deps
 	fnCopy.Spec.Source = data.Body
 	fnCopy.Spec.Runtime = data.Runtime
+	fnCopy.Spec.SourceType = data.SourceType
+	fnCopy.Spec.Repository.Reference = data.Repository.Reference
+	fnCopy.Spec.Repository.BaseDir = data.Repository.Reference
 
 	_, err = f.resCli.Update(fnCopy)
 	return err
