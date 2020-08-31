@@ -76,6 +76,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-crd-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-self: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-ui-view: "true"
 rules: []
 
 ---

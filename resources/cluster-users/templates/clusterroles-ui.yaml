@@ -32,7 +32,7 @@ rules:
     - "*"
 
 ---
-# Backendmodules
+# Backendmodules admin
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -46,3 +46,19 @@ rules:
     - "backendmodules"
   verbs:
     - "*"
+
+---
+# ui view
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-ui-view
+  labels:
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-ui-view: "true"
+rules:
+- apiGroups:
+{{ toYaml .Values.clusterRoles.apiGroups.ui | indent 4 }}
+  resources:
+    - "*"
+  verbs:
+{{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}

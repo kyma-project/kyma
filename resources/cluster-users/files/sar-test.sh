@@ -982,11 +982,8 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should be able to get backendmodule in default"
 	testPermissions "get" "backendmodule" "default" "yes"
 
-	echo "--> ${DEVELOPER_EMAIL} should be able to create backendmodule in default"
-	testPermissions "create" "backendmodule" "default" "yes"
-
-	echo "--> ${DEVELOPER_EMAIL} should be able to delete backendmodule in default"
-	testPermissions "delete" "backendmodule" "default" "yes"
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create backendmodule in default"
+	testPermissions "create" "backendmodule" "default" "no"
 }
 
 function cleanup() {
