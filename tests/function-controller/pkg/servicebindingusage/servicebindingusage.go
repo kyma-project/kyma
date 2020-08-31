@@ -9,10 +9,10 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	watchtools "k8s.io/client-go/tools/watch"
 
-	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebindingusage/types/v1alpha1"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
 	"github.com/pkg/errors"
