@@ -20,17 +20,17 @@ require (
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/pflag v1.0.5
-	github.com/vrischmann/envconfig v1.2.0
+	github.com/vrischmann/envconfig v1.3.0
 	go.uber.org/multierr v1.5.0 // indirect
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a // indirect
 	golang.org/x/sys v0.0.0-20200810151505-1b9f1253b3ed // indirect
 	honnef.co/go/tools v0.0.1-2020.1.5 // indirect
-	k8s.io/api v0.17.8
-	k8s.io/apimachinery v0.17.8
-	k8s.io/client-go v0.17.8
+	k8s.io/api v0.17.11
+	k8s.io/apimachinery v0.17.11
+	k8s.io/client-go v0.17.11
 	knative.dev/eventing v0.12.0
 	knative.dev/pkg v0.0.0-20200306230727-a56a6ea3fa56
-	sigs.k8s.io/controller-runtime v0.5.9
+	sigs.k8s.io/controller-runtime v0.5.10
 )
 
 replace (
