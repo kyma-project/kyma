@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: envoy-stats
-    helm.sh/chart: {{ .Chart.appVersion }}
+    helm.sh/chart: {{ .Chart.AppVersion }}
     release: monitoring
   name: envoy-stats
   namespace: {{ .Release.Namespace }}

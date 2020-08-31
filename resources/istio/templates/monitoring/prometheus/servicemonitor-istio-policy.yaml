@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/instance: {{ $.Release.Name }}
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: istio-policy
-    helm.sh/chart: {{ .Chart.appVersion }}
+    helm.sh/chart: {{ .Chart.AppVersion }}
     prometheus: monitoring
   name: istio-policy
   namespace: {{ .Release.Namespace }}
