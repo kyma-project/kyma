@@ -17,10 +17,11 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
-	v1alpha13 "github.com/ory/oathkeeper-maester/api/v1alpha1"
+	v1alpha14 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1alpha13 "k8s.io/api/rbac/v1alpha1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
@@ -718,6 +719,7 @@ type ComplexityRoot struct {
 		ReplicaSets                 func(childComplexity int, namespace string, first *int, offset *int) int
 		ResourceQuotas              func(childComplexity int, namespace string) int
 		ResourceQuotasStatus        func(childComplexity int, namespace string) int
+		Roles                       func(childComplexity int, namespace string) int
 		Secret                      func(childComplexity int, name string, namespace string) int
 		Secrets                     func(childComplexity int, namespace string, first *int, offset *int) int
 		SelfSubjectRules            func(childComplexity int, namespace *string) int
@@ -784,6 +786,11 @@ type ComplexityRoot struct {
 	ResourceValues struct {
 		CPU    func(childComplexity int) int
 		Memory func(childComplexity int) int
+	}
+
+	Role struct {
+		Name      func(childComplexity int) int
+		Namespace func(childComplexity int) int
 	}
 
 	Rule struct {
@@ -1226,6 +1233,7 @@ type QueryResolver interface {
 	Triggers(ctx context.Context, namespace string, subscriber *v11.Destination) ([]*v1alpha12.Trigger, error)
 	OAuth2Clients(ctx context.Context, namespace string) ([]*v1alpha11.OAuth2Client, error)
 	OAuth2Client(ctx context.Context, name string, namespace string) (*v1alpha11.OAuth2Client, error)
+	Roles(ctx context.Context, namespace string) ([]*v1alpha13.Role, error)
 }
 type ServiceBindingResolver interface {
 	Secret(ctx context.Context, obj *ServiceBinding) (*Secret, error)
@@ -4556,6 +4564,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ResourceQuotasStatus(childComplexity, args["namespace"].(string)), true
 
+	case "Query.roles":
+		if e.complexity.Query.Roles == nil {
+			break
+		}
+
+		args, err := ec.field_Query_roles_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Roles(childComplexity, args["namespace"].(string)), true
+
 	case "Query.secret":
 		if e.complexity.Query.Secret == nil {
 			break
@@ -4929,6 +4949,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ResourceValues.Memory(childComplexity), true
+
+	case "Role.name":
+		if e.complexity.Role.Name == nil {
+			break
+		}
+
+		return e.complexity.Role.Name(childComplexity), true
+
+	case "Role.namespace":
+		if e.complexity.Role.Namespace == nil {
+			break
+		}
+
+		return e.complexity.Role.Namespace(childComplexity), true
 
 	case "Rule.accessStrategies":
 		if e.complexity.Rule.AccessStrategies == nil {
@@ -6518,6 +6552,15 @@ extend type Subscription {
 }
 
 `, BuiltIn: false},
+	&ast.Source{Name: "internal/gqlschema/roles.graphql", Input: `type Role @goModel(model: "k8s.io/api/rbac/v1alpha1.Role") {
+    namespace: String!
+    name: String!
+}
+
+
+extend type Query {
+    roles(namespace: String!): [Role!]! @HasAccess(attributes: {resource: "roles", verb: "list", apiGroup: "", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+}`, BuiltIn: false},
 	&ast.Source{Name: "internal/gqlschema/schema.graphql", Input: `# Scalars
 
 scalar JSON
@@ -10052,6 +10095,20 @@ func (ec *executionContext) field_Query_resourceQuotas_args(ctx context.Context,
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_roles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_secret_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -10910,7 +10967,7 @@ func (ec *executionContext) _APIRule_generation(ctx context.Context, field graph
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _APIRuleAccessStrategy_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Authenticator) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRuleAccessStrategy_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Authenticator) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10944,7 +11001,7 @@ func (ec *executionContext) _APIRuleAccessStrategy_name(ctx context.Context, fie
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _APIRuleAccessStrategy_config(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Authenticator) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRuleAccessStrategy_config(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Authenticator) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -27833,6 +27890,71 @@ func (ec *executionContext) _Query_oAuth2Client(ctx context.Context, field graph
 	return ec.marshalOOAuth2Client2ᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2Client(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_roles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_roles_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().Roles(rctx, args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "roles", "verb": "list"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*v1alpha13.Role); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*k8s.io/api/rbac/v1alpha1.Role`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*v1alpha13.Role)
+	fc.Result = res
+	return ec.marshalNRole2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1alpha1ᚐRoleᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -28728,6 +28850,74 @@ func (ec *executionContext) _ResourceValues_cpu(ctx context.Context, field graph
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Role_namespace(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Role) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Role",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Role_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Role) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Role",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Rule_path(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Rule) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -28825,7 +29015,7 @@ func (ec *executionContext) _Rule_accessStrategies(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*v1alpha13.Authenticator)
+	res := resTmp.([]*v1alpha14.Authenticator)
 	fc.Result = res
 	return ec.marshalNAPIRuleAccessStrategy2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx, field.Selections, res)
 }
@@ -37263,7 +37453,7 @@ func (ec *executionContext) _APIRule(ctx context.Context, sel ast.SelectionSet, 
 
 var aPIRuleAccessStrategyImplementors = []string{"APIRuleAccessStrategy"}
 
-func (ec *executionContext) _APIRuleAccessStrategy(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.Authenticator) graphql.Marshaler {
+func (ec *executionContext) _APIRuleAccessStrategy(ctx context.Context, sel ast.SelectionSet, obj *v1alpha14.Authenticator) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, aPIRuleAccessStrategyImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -41380,6 +41570,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_oAuth2Client(ctx, field)
 				return res
 			})
+		case "roles":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_roles(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -41661,6 +41865,38 @@ func (ec *executionContext) _ResourceValues(ctx context.Context, sel ast.Selecti
 			out.Values[i] = ec._ResourceValues_memory(ctx, field, obj)
 		case "cpu":
 			out.Values[i] = ec._ResourceValues_cpu(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var roleImplementors = []string{"Role"}
+
+func (ec *executionContext) _Role(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.Role) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, roleImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Role")
+		case "namespace":
+			out.Values[i] = ec._Role_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._Role_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -43630,11 +43866,11 @@ func (ec *executionContext) marshalNAPIRule2ᚖgithubᚗcomᚋkymaᚑincubator�
 	return ec._APIRule(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAPIRuleAccessStrategy2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v v1alpha13.Authenticator) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRuleAccessStrategy2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v v1alpha14.Authenticator) graphql.Marshaler {
 	return ec._APIRuleAccessStrategy(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAPIRuleAccessStrategy2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha13.Authenticator) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRuleAccessStrategy2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha14.Authenticator) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -43671,7 +43907,7 @@ func (ec *executionContext) marshalNAPIRuleAccessStrategy2ᚕᚖgithubᚗcomᚋo
 	return ret
 }
 
-func (ec *executionContext) marshalNAPIRuleAccessStrategy2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v *v1alpha13.Authenticator) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRuleAccessStrategy2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v *v1alpha14.Authenticator) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -43681,11 +43917,11 @@ func (ec *executionContext) marshalNAPIRuleAccessStrategy2ᚖgithubᚗcomᚋory�
 	return ec._APIRuleAccessStrategy(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, v interface{}) (v1alpha13.Authenticator, error) {
+func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, v interface{}) (v1alpha14.Authenticator, error) {
 	return UnmarshalAPIRuleAccessStrategyInput(v)
 }
 
-func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v v1alpha13.Authenticator) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v v1alpha14.Authenticator) graphql.Marshaler {
 	res := MarshalAPIRuleAccessStrategyInput(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -43695,7 +43931,7 @@ func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2githubᚗcomᚋor
 	return res
 }
 
-func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx context.Context, v interface{}) ([]*v1alpha13.Authenticator, error) {
+func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx context.Context, v interface{}) ([]*v1alpha14.Authenticator, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -43705,7 +43941,7 @@ func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗ
 		}
 	}
 	var err error
-	res := make([]*v1alpha13.Authenticator, len(vSlice))
+	res := make([]*v1alpha14.Authenticator, len(vSlice))
 	for i := range vSlice {
 		res[i], err = ec.unmarshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx, vSlice[i])
 		if err != nil {
@@ -43715,7 +43951,7 @@ func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗ
 	return res, nil
 }
 
-func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha13.Authenticator) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha14.Authenticator) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx, sel, v[i])
@@ -43724,7 +43960,7 @@ func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗco
 	return ret
 }
 
-func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, v interface{}) (*v1alpha13.Authenticator, error) {
+func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, v interface{}) (*v1alpha14.Authenticator, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -43732,7 +43968,7 @@ func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcom
 	return &res, err
 }
 
-func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v *v1alpha13.Authenticator) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v *v1alpha14.Authenticator) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -46481,6 +46717,57 @@ func (ec *executionContext) marshalNResponseType2ᚕgithubᚗcomᚋoryᚋhydra�
 	}
 
 	return ret
+}
+
+func (ec *executionContext) marshalNRole2k8sᚗioᚋapiᚋrbacᚋv1alpha1ᚐRole(ctx context.Context, sel ast.SelectionSet, v v1alpha13.Role) graphql.Marshaler {
+	return ec._Role(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRole2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1alpha1ᚐRoleᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha13.Role) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNRole2ᚖk8sᚗioᚋapiᚋrbacᚋv1alpha1ᚐRole(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNRole2ᚖk8sᚗioᚋapiᚋrbacᚋv1alpha1ᚐRole(ctx context.Context, sel ast.SelectionSet, v *v1alpha13.Role) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Role(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNRule2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐRule(ctx context.Context, sel ast.SelectionSet, v v1alpha1.Rule) graphql.Marshaler {

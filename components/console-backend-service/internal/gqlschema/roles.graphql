@@ -1,0 +1,9 @@
+type Role @goModel(model: "k8s.io/api/rbac/v1alpha1.Role") {
+    namespace: String!
+    name: String!
+}
+
+
+extend type Query {
+    roles(namespace: String!): [Role!]! @HasAccess(attributes: {resource: "roles", verb: "list", apiGroup: "", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+}
