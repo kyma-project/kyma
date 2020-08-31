@@ -26,7 +26,7 @@ input RepositoryAuthInput @goModel(model: "github.com/kyma-project/kyma/componen
 
 enum RepositoryAuthType @goModel(model: "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.RepositoryAuthType") {
     BASIC
-    SSHKEY
+    KEY
 }
 
 extend type Query {
