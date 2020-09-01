@@ -32,4 +32,6 @@ type Config struct {
 	MaxPollingTime     time.Duration    `envconfig:"default=5m"`
 	InsecureSkipVerify bool             `envconfig:"default=true"`
 	Cleanup            step.CleanupMode `envconfig:"default=yes"`
+	GitServerImage     string           `envconfig:"default=eu.gcr.io/kyma-project/gitserver:PR-2696"`
+	GitServerRepoName  string           `envconfig:"default=function"`
 }

@@ -199,7 +199,7 @@ spec:
             source:
               description: Source defines the source code of a function
               type: string
-            sourceType:
+            type:
               type: string
           required:
           - source
