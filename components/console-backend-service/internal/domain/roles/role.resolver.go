@@ -21,7 +21,7 @@ func (r *Resolver) RolesQuery(ctx context.Context, namespace string) ([]*v1.Role
 	return items, err
 }
 
-func (r *Resolver) RoleQuery(ctx context.Context, name string, namespace string) (*v1.Role, error) {
+func (r *Resolver) RoleQuery(ctx context.Context, namespace string, name string) (*v1.Role, error) {
 	var result *v1.Role
 	err := r.RoleService().GetInNamespace(name, namespace, &result)
 	return result, err

@@ -34,7 +34,7 @@ func TestRolesService_Query(t *testing.T) {
 		role2 := createMockRole("role 2", namespace)
 		service := setupServiceWithObjects(t, runtime.Object(role1), runtime.Object(role2))
 
-		result, err := service.RoleQuery(context.Background(), name, namespace)
+		result, err := service.RoleQuery(context.Background(), namespace, name)
 
 		require.NoError(t, err)
 
@@ -45,7 +45,7 @@ func TestRolesService_Query(t *testing.T) {
 		role := createMockRole("role 1", namespace)
 		service := setupServiceWithObjects(t, role)
 
-		_, err := service.RoleQuery(context.Background(), "role 2", namespace)
+		_, err := service.RoleQuery(context.Background(), namespace, "role 2")
 
 		require.Error(t, err)
 	})

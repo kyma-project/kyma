@@ -11,7 +11,7 @@ import (
 )
 
 func (r *mutationResolver) CreateRoleBinding(ctx context.Context, name string, namespace string, params gqlschema.RoleBindingInput) (*v1.RoleBinding, error) {
-	return r.roles.CreateRoleBinding(ctx, name, namespace, params)
+	return r.roles.CreateRoleBinding(ctx, namespace, name, params)
 }
 
 func (r *mutationResolver) DeleteRoleBinding(ctx context.Context, namespace string, name string) (*v1.RoleBinding, error) {
@@ -31,7 +31,7 @@ func (r *queryResolver) Roles(ctx context.Context, namespace string) ([]*v1.Role
 }
 
 func (r *queryResolver) Role(ctx context.Context, namespace string, name string) (*v1.Role, error) {
-	return r.roles.RoleQuery(ctx, name, namespace)
+	return r.roles.RoleQuery(ctx, namespace, name)
 }
 
 func (r *queryResolver) ClusterRoles(ctx context.Context) ([]*v1.ClusterRole, error) {

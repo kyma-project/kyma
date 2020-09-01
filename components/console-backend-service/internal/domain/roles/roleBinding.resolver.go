@@ -24,7 +24,7 @@ func (r *Resolver) RoleBindingsQuery(ctx context.Context, namespace string) ([]*
 	return items, err
 }
 
-func (r *Resolver) CreateRoleBinding(ctx context.Context, name string, namespace string, params gqlschema.RoleBindingInput) (*v1.RoleBinding, error) {
+func (r *Resolver) CreateRoleBinding(ctx context.Context, namespace string, name string, params gqlschema.RoleBindingInput) (*v1.RoleBinding, error) {
 	convertedSubjects := make([]v1.Subject, len(params.Subjects))
 
 	for i, sub := range params.Subjects {
