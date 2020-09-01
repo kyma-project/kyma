@@ -6,11 +6,20 @@ package domain
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	v1 "k8s.io/api/rbac/v1"
 )
 
+func (r *mutationResolver) CreateRoleBinding(ctx context.Context, name string, namespace string, params gqlschema.RoleBindingInput) (*v1.RoleBinding, error) {
+	return r.roles.CreateRoleBinding(ctx, name, namespace, params)
+}
+
 func (r *mutationResolver) DeleteRoleBinding(ctx context.Context, namespace string, name string) (*v1.RoleBinding, error) {
 	return r.roles.DeleteRoleBinding(ctx, namespace, name)
+}
+
+func (r *mutationResolver) CreateClusterRoleBinding(ctx context.Context, name string, params gqlschema.ClusterRoleBindingInput) (*v1.ClusterRoleBinding, error) {
+	return r.roles.CreateClusterRoleBinding(ctx, name, params)
 }
 
 func (r *mutationResolver) DeleteClusterRoleBinding(ctx context.Context, name string) (*v1.ClusterRoleBinding, error) {

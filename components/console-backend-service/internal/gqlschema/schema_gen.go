@@ -558,6 +558,7 @@ type ComplexityRoot struct {
 		CreateAddonsConfiguration                  func(childComplexity int, name string, namespace string, repositories []*AddonsConfigurationRepositoryInput, urls []string, labels Labels) int
 		CreateApplication                          func(childComplexity int, name string, description *string, labels Labels) int
 		CreateClusterAddonsConfiguration           func(childComplexity int, name string, repositories []*AddonsConfigurationRepositoryInput, urls []string, labels Labels) int
+		CreateClusterRoleBinding                   func(childComplexity int, name string, params ClusterRoleBindingInput) int
 		CreateFunction                             func(childComplexity int, name string, namespace string, params FunctionMutationInput) int
 		CreateLimitRange                           func(childComplexity int, namespace string, name string, limitRange LimitRangeInput) int
 		CreateManyTriggers                         func(childComplexity int, namespace string, triggers []*TriggerCreateInput, ownerRef []*v1.OwnerReference) int
@@ -565,6 +566,7 @@ type ComplexityRoot struct {
 		CreateOAuth2Client                         func(childComplexity int, name string, namespace string, params v1alpha11.OAuth2ClientSpec) int
 		CreateResource                             func(childComplexity int, namespace string, resource JSON) int
 		CreateResourceQuota                        func(childComplexity int, namespace string, name string, resourceQuota ResourceQuotaInput) int
+		CreateRoleBinding                          func(childComplexity int, name string, namespace string, params RoleBindingInput) int
 		CreateServiceBinding                       func(childComplexity int, serviceBindingName *string, serviceInstanceName string, namespace string, parameters JSON) int
 		CreateServiceBindingUsage                  func(childComplexity int, namespace string, createServiceBindingUsageInput *CreateServiceBindingUsageInput) int
 		CreateServiceInstance                      func(childComplexity int, namespace string, params ServiceInstanceCreateInput) int
@@ -1196,7 +1198,9 @@ type MutationResolver interface {
 	CreateOAuth2Client(ctx context.Context, name string, namespace string, params v1alpha11.OAuth2ClientSpec) (*v1alpha11.OAuth2Client, error)
 	UpdateOAuth2Client(ctx context.Context, name string, namespace string, generation int, params v1alpha11.OAuth2ClientSpec) (*v1alpha11.OAuth2Client, error)
 	DeleteOAuth2Client(ctx context.Context, name string, namespace string) (*v1alpha11.OAuth2Client, error)
+	CreateRoleBinding(ctx context.Context, name string, namespace string, params RoleBindingInput) (*v12.RoleBinding, error)
 	DeleteRoleBinding(ctx context.Context, namespace string, name string) (*v12.RoleBinding, error)
+	CreateClusterRoleBinding(ctx context.Context, name string, params ClusterRoleBindingInput) (*v12.ClusterRoleBinding, error)
 	DeleteClusterRoleBinding(ctx context.Context, name string) (*v12.ClusterRoleBinding, error)
 }
 type NamespaceResolver interface {
@@ -3267,6 +3271,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateClusterAddonsConfiguration(childComplexity, args["name"].(string), args["repositories"].([]*AddonsConfigurationRepositoryInput), args["urls"].([]string), args["labels"].(Labels)), true
 
+	case "Mutation.createClusterRoleBinding":
+		if e.complexity.Mutation.CreateClusterRoleBinding == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createClusterRoleBinding_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateClusterRoleBinding(childComplexity, args["name"].(string), args["params"].(ClusterRoleBindingInput)), true
+
 	case "Mutation.createFunction":
 		if e.complexity.Mutation.CreateFunction == nil {
 			break
@@ -3350,6 +3366,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateResourceQuota(childComplexity, args["namespace"].(string), args["name"].(string), args["resourceQuota"].(ResourceQuotaInput)), true
+
+	case "Mutation.createRoleBinding":
+		if e.complexity.Mutation.CreateRoleBinding == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createRoleBinding_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateRoleBinding(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(RoleBindingInput)), true
 
 	case "Mutation.createServiceBinding":
 		if e.complexity.Mutation.CreateServiceBinding == nil {
@@ -6730,15 +6758,15 @@ extend type Subscription {
     rules: [PolicyRule!]
 }
 
+type ClusterRole @goModel(model: "k8s.io/api/rbac/v1.ClusterRole") {
+    name: String!
+    rules: [PolicyRule!]
+}
+
 type PolicyRule @goModel(model: "k8s.io/api/rbac/v1.PolicyRule") {
     apiGroups: [String!]!
     resources: [String!]!
     verbs: [String!]!
-}
-
-type ClusterRole @goModel(model: "k8s.io/api/rbac/v1.ClusterRole") {
-    name: String!
-    rules: [PolicyRule!]
 }
 
 type RoleBinding @goModel(model: "k8s.io/api/rbac/v1.RoleBinding") {
@@ -6750,6 +6778,32 @@ type ClusterRoleBinding @goModel(model: "k8s.io/api/rbac/v1.ClusterRoleBinding")
     name: String!
 }
 
+enum SubjectKind {
+    User
+    Group
+}
+
+enum RoleKind {
+    Role
+    ClusterRole
+}
+
+input RoleBindingSubject {
+    name: String!
+    kind: SubjectKind!
+}
+
+input RoleBindingInput {
+    roleName: String!
+    roleKind: RoleKind!
+    subjects: [RoleBindingSubject]!
+}
+
+input ClusterRoleBindingInput {
+    roleName: String!
+    subjects: [RoleBindingSubject]!
+}
+
 extend type Query {
     roles(namespace: String!): [Role!]! @HasAccess(attributes: {resource: "roles", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     role(namespace: String!, name: String!): Role! @HasAccess(attributes: {resource: "roles", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
@@ -6757,15 +6811,17 @@ extend type Query {
     clusterRoles: [ClusterRole!]! @HasAccess(attributes: {resource: "clusterroles", verb: "list", apiGroup: "", apiVersion: "v1"})
     clusterRole(name: String!): ClusterRole! @HasAccess(attributes: {resource: "clusterroles", verb: "get", apiGroup: "", apiVersion: "v1"})
 
-    roleBindings(namespace: String!): [RoleBinding!]! @HasAccess(attributes: {resource: "rolesbindings", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    roleBindings(namespace: String!): [RoleBinding!]! @HasAccess(attributes: {resource: "rolebindings", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     clusterRoleBindings: [ClusterRoleBinding!]! @HasAccess(attributes: {resource: "clusterrolebindings", verb: "list", apiGroup: "", apiVersion: "v1"})
 }
 
 extend type Mutation {
-    deleteRoleBinding(namespace: String!, name: String!): RoleBinding!@HasAccess(attributes: {resource: "rolesbindings", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    createRoleBinding(name: String!, namespace: String!, params: RoleBindingInput!): RoleBinding!@HasAccess(attributes: {resource: "rolebindings", verb: "create", apiGroup: "", apiVersion: "v1"})
+    deleteRoleBinding(namespace: String!, name: String!): RoleBinding!@HasAccess(attributes: {resource: "rolebindings", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
-    deleteClusterRoleBinding(name: String!): ClusterRoleBinding!@HasAccess(attributes: {resource: "rolesbindings", verb: "delete", apiGroup: "", apiVersion: "v1"})
+    createClusterRoleBinding(name: String!, params: ClusterRoleBindingInput!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterrolebindings", verb: "create", apiGroup: "", apiVersion: "v1"})
+    deleteClusterRoleBinding(name: String!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterrolebindings", verb: "delete", apiGroup: "", apiVersion: "v1"})
 }`, BuiltIn: false},
 	&ast.Source{Name: "internal/gqlschema/schema.graphql", Input: `# Scalars
 
@@ -8317,6 +8373,28 @@ func (ec *executionContext) field_Mutation_createClusterAddonsConfiguration_args
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createClusterRoleBinding_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 ClusterRoleBindingInput
+	if tmp, ok := rawArgs["params"]; ok {
+		arg1, err = ec.unmarshalNClusterRoleBindingInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterRoleBindingInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["params"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createFunction_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -8508,6 +8586,36 @@ func (ec *executionContext) field_Mutation_createResource_args(ctx context.Conte
 		}
 	}
 	args["resource"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createRoleBinding_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	var arg2 RoleBindingInput
+	if tmp, ok := rawArgs["params"]; ok {
+		arg2, err = ec.unmarshalNRoleBindingInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["params"] = arg2
 	return args, nil
 }
 
@@ -23447,7 +23555,7 @@ func (ec *executionContext) _Mutation_deleteOAuth2Client(ctx context.Context, fi
 	return ec.marshalOOAuth2Client2ᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2Client(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_deleteRoleBinding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_createRoleBinding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -23463,7 +23571,7 @@ func (ec *executionContext) _Mutation_deleteRoleBinding(ctx context.Context, fie
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_deleteRoleBinding_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_createRoleBinding_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -23472,10 +23580,10 @@ func (ec *executionContext) _Mutation_deleteRoleBinding(ctx context.Context, fie
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().DeleteRoleBinding(rctx, args["namespace"].(string), args["name"].(string))
+			return ec.resolvers.Mutation().CreateRoleBinding(rctx, args["name"].(string), args["namespace"].(string), args["params"].(RoleBindingInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "rolesbindings", "verb": "delete"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "rolebindings", "verb": "create"})
 			if err != nil {
 				return nil, err
 			}
@@ -23512,6 +23620,136 @@ func (ec *executionContext) _Mutation_deleteRoleBinding(ctx context.Context, fie
 	return ec.marshalNRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBinding(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_deleteRoleBinding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteRoleBinding_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().DeleteRoleBinding(rctx, args["namespace"].(string), args["name"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "rolebindings", "verb": "delete"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v12.RoleBinding); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/rbac/v1.RoleBinding`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v12.RoleBinding)
+	fc.Result = res
+	return ec.marshalNRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBinding(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createClusterRoleBinding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createClusterRoleBinding_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CreateClusterRoleBinding(rctx, args["name"].(string), args["params"].(ClusterRoleBindingInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterrolebindings", "verb": "create"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v12.ClusterRoleBinding); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/rbac/v1.ClusterRoleBinding`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v12.ClusterRoleBinding)
+	fc.Result = res
+	return ec.marshalNClusterRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBinding(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_deleteClusterRoleBinding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -23540,7 +23778,7 @@ func (ec *executionContext) _Mutation_deleteClusterRoleBinding(ctx context.Conte
 			return ec.resolvers.Mutation().DeleteClusterRoleBinding(rctx, args["name"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "rolesbindings", "verb": "delete"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterrolebindings", "verb": "delete"})
 			if err != nil {
 				return nil, err
 			}
@@ -28794,7 +29032,7 @@ func (ec *executionContext) _Query_roleBindings(ctx context.Context, field graph
 			return ec.resolvers.Query().RoleBindings(rctx, args["namespace"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "rolesbindings", "verb": "list"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "rolebindings", "verb": "list"})
 			if err != nil {
 				return nil, err
 			}
@@ -37672,6 +37910,30 @@ func (ec *executionContext) unmarshalInputAddonsConfigurationRepositoryInput(ctx
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputClusterRoleBindingInput(ctx context.Context, obj interface{}) (ClusterRoleBindingInput, error) {
+	var it ClusterRoleBindingInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "roleName":
+			var err error
+			it.RoleName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "subjects":
+			var err error
+			it.Subjects, err = ec.unmarshalNRoleBindingSubject2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateServiceBindingUsageInput(ctx context.Context, obj interface{}) (CreateServiceBindingUsageInput, error) {
 	var it CreateServiceBindingUsageInput
 	var asMap = obj.(map[string]interface{})
@@ -38197,6 +38459,60 @@ func (ec *executionContext) unmarshalInputResourceValuesInput(ctx context.Contex
 		case "cpu":
 			var err error
 			it.CPU, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputRoleBindingInput(ctx context.Context, obj interface{}) (RoleBindingInput, error) {
+	var it RoleBindingInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "roleName":
+			var err error
+			it.RoleName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "roleKind":
+			var err error
+			it.RoleKind, err = ec.unmarshalNRoleKind2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleKind(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "subjects":
+			var err error
+			it.Subjects, err = ec.unmarshalNRoleBindingSubject2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputRoleBindingSubject(ctx context.Context, obj interface{}) (RoleBindingSubject, error) {
+	var it RoleBindingSubject
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "kind":
+			var err error
+			it.Kind, err = ec.unmarshalNSubjectKind2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubjectKind(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -41456,8 +41772,18 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_updateOAuth2Client(ctx, field)
 		case "deleteOAuth2Client":
 			out.Values[i] = ec._Mutation_deleteOAuth2Client(ctx, field)
+		case "createRoleBinding":
+			out.Values[i] = ec._Mutation_createRoleBinding(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "deleteRoleBinding":
 			out.Values[i] = ec._Mutation_deleteRoleBinding(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createClusterRoleBinding":
+			out.Values[i] = ec._Mutation_createClusterRoleBinding(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -46130,6 +46456,10 @@ func (ec *executionContext) marshalNClusterRoleBinding2ᚖk8sᚗioᚋapiᚋrbac�
 	return ec._ClusterRoleBinding(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNClusterRoleBindingInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterRoleBindingInput(ctx context.Context, v interface{}) (ClusterRoleBindingInput, error) {
+	return ec.unmarshalInputClusterRoleBindingInput(ctx, v)
+}
+
 func (ec *executionContext) marshalNClusterServiceBroker2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterServiceBroker(ctx context.Context, sel ast.SelectionSet, v ClusterServiceBroker) graphql.Marshaler {
 	return ec._ClusterServiceBroker(ctx, sel, &v)
 }
@@ -48167,6 +48497,39 @@ func (ec *executionContext) marshalNRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐ
 	return ec._RoleBinding(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNRoleBindingInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingInput(ctx context.Context, v interface{}) (RoleBindingInput, error) {
+	return ec.unmarshalInputRoleBindingInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNRoleBindingSubject2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx context.Context, v interface{}) ([]*RoleBindingSubject, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*RoleBindingSubject, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalORoleBindingSubject2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNRoleKind2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleKind(ctx context.Context, v interface{}) (RoleKind, error) {
+	var res RoleKind
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNRoleKind2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleKind(ctx context.Context, sel ast.SelectionSet, v RoleKind) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) marshalNRule2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐRule(ctx context.Context, sel ast.SelectionSet, v v1alpha1.Rule) graphql.Marshaler {
 	return ec._Rule(ctx, sel, &v)
 }
@@ -48961,6 +49324,15 @@ func (ec *executionContext) marshalNString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return ec.marshalNString2string(ctx, sel, *v)
+}
+
+func (ec *executionContext) unmarshalNSubjectKind2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubjectKind(ctx context.Context, v interface{}) (SubjectKind, error) {
+	var res SubjectKind
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNSubjectKind2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubjectKind(ctx context.Context, sel ast.SelectionSet, v SubjectKind) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNSubscriber2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, sel ast.SelectionSet, v v11.Destination) graphql.Marshaler {
@@ -50377,6 +50749,18 @@ func (ec *executionContext) marshalOResourceType2ᚖgithubᚗcomᚋkymaᚑprojec
 		return graphql.Null
 	}
 	return ec._ResourceType(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalORoleBindingSubject2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx context.Context, v interface{}) (RoleBindingSubject, error) {
+	return ec.unmarshalInputRoleBindingSubject(ctx, v)
+}
+
+func (ec *executionContext) unmarshalORoleBindingSubject2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx context.Context, v interface{}) (*RoleBindingSubject, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalORoleBindingSubject2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) marshalOSecret2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSecret(ctx context.Context, sel ast.SelectionSet, v Secret) graphql.Marshaler {
