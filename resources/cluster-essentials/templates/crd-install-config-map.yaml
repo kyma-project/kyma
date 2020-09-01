@@ -3,10 +3,13 @@
 {{ $configMapLen := int (add1 (div $fileLen .Values.jobs.crdsInConfigMap)) }}
 
 {{ $currentScope := . }}
+{{ $skipCrds := .Values.global.skipCrds }}
 
 {{ $filePaths := list }}
 {{ range $path, $_ := $files }}
+{{ if (not (contains (base $path) $skipCrds)) }}
 {{ $filePaths = append $filePaths (base $path) }}
+{{ end }}
 {{ end }}
 
 {{ range $idx, $_ := until $configMapLen }}
@@ -25,7 +28,7 @@ data:
 {{ range $pathIdx, $path := $filePaths }}
   {{- with $currentScope }}
   {{ if eq $idx (mod $pathIdx $configMapLen) }}
-  {{ base $path }}: |-  
+  {{ base $path }}: |-
 {{ .Files.Get (printf "files/%s" $path) | printf "%s" | indent 4 }}
   {{ end }}
   {{- end }}
