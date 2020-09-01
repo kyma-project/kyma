@@ -23,16 +23,27 @@ type ValidationConfig struct {
 	ReservedEnvs     []string `envconfig:"default={}"`
 }
 
+func (fn *Function) performBasicValidation(ctx context.Context) *apis.FieldError {
+	return fn.validateObjectMeta(ctx).Also(
+		fn.Spec.validateSource(),
+		fn.Spec.validateEnv(ctx),
+		fn.Spec.validateLabels(),
+		fn.Spec.validateReplicas(ctx),
+		fn.Spec.validateResources(ctx),
+	)
+}
+
 func (fn *Function) Validate(ctx context.Context) (errors *apis.FieldError) {
 	spec := fn.Spec
-	return errors.Also(
-		fn.validateObjectMeta(ctx),
-		spec.validateSource(ctx),
-		spec.validateDeps(ctx),
-		spec.validateEnv(ctx),
-		spec.validateLabels(ctx),
-		spec.validateReplicas(ctx),
-		spec.validateResources(ctx),
+
+	if spec.SourceType == SourceTypeGit {
+		return fn.performBasicValidation(ctx).Also(
+			spec.validateRepository(),
+		)
+	}
+
+	return fn.performBasicValidation(ctx).Also(
+		spec.validateDeps(),
 	)
 }
 
@@ -51,20 +62,18 @@ func (fn *Function) validateObjectMeta(_ context.Context) (apisError *apis.Field
 	return apisError
 }
 
-func (spec *FunctionSpec) validateSource(_ context.Context) (apisError *apis.FieldError) {
+func (spec *FunctionSpec) validateSource() *apis.FieldError {
 	if strings.TrimSpace(spec.Source) == "" {
-		apisError = apisError.Also(apis.ErrMissingField("spec.source"))
+		return apis.ErrMissingField("spec.source")
 	}
-	return apisError
+	return nil
 }
 
-func (spec *FunctionSpec) validateDeps(_ context.Context) (apisError *apis.FieldError) {
-	err := ValidateDependencies(spec.Runtime, spec.Deps)
-	if err != nil {
-		apisError = apisError.Also(apis.ErrInvalidValue(err.Error(), "spec.deps"))
-
+func (spec *FunctionSpec) validateDeps() *apis.FieldError {
+	if err := ValidateDependencies(spec.Runtime, spec.Deps); err != nil {
+		return apis.ErrInvalidValue(err.Error(), "spec.deps")
 	}
-	return apisError
+	return nil
 }
 
 func (spec *FunctionSpec) validateEnv(ctx context.Context) (apisError *apis.FieldError) {
@@ -91,29 +100,35 @@ func (spec *FunctionSpec) validateResources(ctx context.Context) (apisError *api
 	limits := spec.Resources.Limits
 
 	if requests.Cpu().Cmp(minCpu) == -1 {
-		apisError = apisError.Also(apis.ErrInvalidValue(fmt.Sprintf("requests cpu(%s) should be higher than minimal value (%s)",
-			requests.Cpu().String(), minCpu.String()), "spec.resources.requests.cpu"))
+		apisError = apisError.Also(apis.ErrInvalidValue(
+			fmt.Sprintf("requests cpu(%s) should be higher than minimal value (%s)",
+				requests.Cpu().String(), minCpu.String()), "spec.resources.requests.cpu"))
 	}
 	if requests.Memory().Cmp(minMemory) == -1 {
-		apisError = apisError.Also(apis.ErrInvalidValue(fmt.Sprintf("requests memory(%s) should be higher than minimal value (%s)",
-			requests.Memory().String(), minMemory.String()), "spec.resources.requests.memory"))
+		apisError = apisError.Also(apis.ErrInvalidValue(
+			fmt.Sprintf("requests memory(%s) should be higher than minimal value (%s)",
+				requests.Memory().String(), minMemory.String()), "spec.resources.requests.memory"))
 	}
 	if limits.Cpu().Cmp(minCpu) == -1 {
-		apisError = apisError.Also(apis.ErrInvalidValue(fmt.Sprintf("limits cpu(%s) should be higher than minimal value (%s)",
-			limits.Cpu().String(), minCpu.String()), "spec.resources.limits.cpu"))
+		apisError = apisError.Also(apis.ErrInvalidValue(
+			fmt.Sprintf("limits cpu(%s) should be higher than minimal value (%s)",
+				limits.Cpu().String(), minCpu.String()), "spec.resources.limits.cpu"))
 	}
 	if limits.Memory().Cmp(minMemory) == -1 {
-		apisError = apisError.Also(apis.ErrInvalidValue(fmt.Sprintf("limits memory(%s) should be higher than minimal value (%s)",
-			limits.Memory().String(), minMemory.String()), "spec.resources.limits.memory"))
+		apisError = apisError.Also(apis.ErrInvalidValue(
+			fmt.Sprintf("limits memory(%s) should be higher than minimal value (%s)",
+				limits.Memory().String(), minMemory.String()), "spec.resources.limits.memory"))
 	}
 
 	if requests.Cpu().Cmp(*limits.Cpu()) == 1 {
-		apisError = apisError.Also(apis.ErrInvalidValue(fmt.Sprintf("limits cpu(%s) should be higher than requests cpu(%s)",
-			limits.Cpu().String(), requests.Cpu().String()), "spec.resources.limits.cpu"))
+		apisError = apisError.Also(apis.ErrInvalidValue(
+			fmt.Sprintf("limits cpu(%s) should be higher than requests cpu(%s)",
+				limits.Cpu().String(), requests.Cpu().String()), "spec.resources.limits.cpu"))
 	}
 	if requests.Memory().Cmp(*limits.Memory()) == 1 {
-		apisError = apisError.Also(apis.ErrInvalidValue(fmt.Sprintf("limits memory(%s) should be higher than requests memory(%s)",
-			limits.Memory().String(), requests.Memory().String()), "spec.resources.limits.memory"))
+		apisError = apisError.Also(apis.ErrInvalidValue(
+			fmt.Sprintf("limits memory(%s) should be higher than requests memory(%s)",
+				limits.Memory().String(), requests.Memory().String()), "spec.resources.limits.memory"))
 	}
 
 	return apisError
@@ -123,6 +138,7 @@ func (spec *FunctionSpec) validateReplicas(ctx context.Context) (apisError *apis
 	minValue := ctx.Value(ValidationConfigKey).(ValidationConfig).MinReplicasValue
 	maxReplicas := spec.MaxReplicas
 	minReplicas := spec.MinReplicas
+
 	if maxReplicas != nil && minReplicas != nil && *minReplicas > *maxReplicas {
 		apisError = apisError.Also(apis.ErrInvalidValue(
 			fmt.Sprintf("maxReplicas(%d) is less than minReplicas(%d)", *maxReplicas, *minReplicas), "spec.maxReplicas"))
@@ -139,7 +155,7 @@ func (spec *FunctionSpec) validateReplicas(ctx context.Context) (apisError *apis
 	return apisError
 }
 
-func (spec *FunctionSpec) validateLabels(_ context.Context) (apisError *apis.FieldError) {
+func (spec *FunctionSpec) validateLabels() (apisError *apis.FieldError) {
 	labels := spec.Labels
 	fieldPath := field.NewPath("spec.labels")
 
@@ -148,4 +164,27 @@ func (spec *FunctionSpec) validateLabels(_ context.Context) (apisError *apis.Fie
 		apisError = apisError.Also(apis.ErrInvalidValue(err.Error(), "spec.labels"))
 	}
 	return apisError
+}
+
+type property struct {
+	name  string
+	value string
+}
+
+func validateIfMissingFields(properties ...property) (apisError *apis.FieldError) {
+	for _, item := range properties {
+		if strings.TrimSpace(item.value) != "" {
+			continue
+		}
+		err := apis.ErrMissingField(item.name)
+		apisError = apisError.Also(err)
+	}
+	return apisError
+}
+
+func (in *Repository) validateRepository() (apisError *apis.FieldError) {
+	return validateIfMissingFields([]property{
+		{name: "spec.baseDir", value: in.BaseDir},
+		{name: "spec.reference", value: in.Reference},
+	}...)
 }
