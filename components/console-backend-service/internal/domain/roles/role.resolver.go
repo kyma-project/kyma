@@ -2,6 +2,7 @@ package roles
 
 import (
 	"context"
+	"sort"
 
 	v1 "k8s.io/api/rbac/v1"
 )
@@ -18,6 +19,9 @@ func (r *Resolver) RolesQuery(ctx context.Context, namespace string) ([]*v1.Role
 	items := RolesList{}
 	var err error
 	err = r.RoleService().ListInNamespace(namespace, &items)
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].Name < items[j].Name
+	})
 	return items, err
 }
 

@@ -2,6 +2,7 @@ package roles
 
 import (
 	"context"
+	"sort"
 
 	v1 "k8s.io/api/rbac/v1"
 )
@@ -18,6 +19,9 @@ func (r *Resolver) ClusterRolesQuery(ctx context.Context) ([]*v1.ClusterRole, er
 	items := ClusterRolesList{}
 	var err error
 	err = r.ClusterRoleService().List(&items)
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].Name < items[j].Name
+	})
 	return items, err
 }
 

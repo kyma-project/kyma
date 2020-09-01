@@ -2,6 +2,7 @@ package roles
 
 import (
 	"context"
+	"sort"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,6 +22,9 @@ func (r *Resolver) RoleBindingsQuery(ctx context.Context, namespace string) ([]*
 	items := RoleBindingList{}
 	var err error
 	err = r.RoleBindingService().ListInNamespace(namespace, &items)
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].Name < items[j].Name
+	})
 	return items, err
 }
 
