@@ -8,12 +8,12 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
+	// AuthorizationPolicies returns a AuthorizationPolicyInformer.
+	AuthorizationPolicies() AuthorizationPolicyInformer
 	// Handlers returns a HandlerInformer.
 	Handlers() HandlerInformer
 	// Instances returns a InstanceInformer.
 	Instances() InstanceInformer
-	// Rules returns a RuleInformer.
-	Rules() RuleInformer
 }
 
 type version struct {
@@ -27,6 +27,11 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
+// AuthorizationPolicies returns a AuthorizationPolicyInformer.
+func (v *version) AuthorizationPolicies() AuthorizationPolicyInformer {
+	return &authorizationPolicyInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
 // Handlers returns a HandlerInformer.
 func (v *version) Handlers() HandlerInformer {
 	return &handlerInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
@@ -35,9 +40,4 @@ func (v *version) Handlers() HandlerInformer {
 // Instances returns a InstanceInformer.
 func (v *version) Instances() InstanceInformer {
 	return &instanceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
-}
-
-// Rules returns a RuleInformer.
-func (v *version) Rules() RuleInformer {
-	return &ruleInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

@@ -2,6 +2,14 @@
 
 package v1alpha2
 
+// AuthorizationPolicyListerExpansion allows custom methods to be added to
+// AuthorizationPolicyLister.
+type AuthorizationPolicyListerExpansion interface{}
+
+// AuthorizationPolicyNamespaceListerExpansion allows custom methods to be added to
+// AuthorizationPolicyNamespaceLister.
+type AuthorizationPolicyNamespaceListerExpansion interface{}
+
 // HandlerListerExpansion allows custom methods to be added to
 // HandlerLister.
 type HandlerListerExpansion interface{}
@@ -17,11 +25,3 @@ type InstanceListerExpansion interface{}
 // InstanceNamespaceListerExpansion allows custom methods to be added to
 // InstanceNamespaceLister.
 type InstanceNamespaceListerExpansion interface{}
-
-// RuleListerExpansion allows custom methods to be added to
-// RuleLister.
-type RuleListerExpansion interface{}
-
-// RuleNamespaceListerExpansion allows custom methods to be added to
-// RuleNamespaceLister.
-type RuleNamespaceListerExpansion interface{}

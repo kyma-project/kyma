@@ -10,14 +10,18 @@ import (
 
 type IstioV1alpha2Interface interface {
 	RESTClient() rest.Interface
+	AuthorizationPoliciesGetter
 	HandlersGetter
 	InstancesGetter
-	RulesGetter
 }
 
 // IstioV1alpha2Client is used to interact with features provided by the istio group.
 type IstioV1alpha2Client struct {
 	restClient rest.Interface
+}
+
+func (c *IstioV1alpha2Client) AuthorizationPolicies(namespace string) AuthorizationPolicyInterface {
+	return newAuthorizationPolicies(c, namespace)
 }
 
 func (c *IstioV1alpha2Client) Handlers(namespace string) HandlerInterface {
@@ -26,10 +30,6 @@ func (c *IstioV1alpha2Client) Handlers(namespace string) HandlerInterface {
 
 func (c *IstioV1alpha2Client) Instances(namespace string) InstanceInterface {
 	return newInstances(c, namespace)
-}
-
-func (c *IstioV1alpha2Client) Rules(namespace string) RuleInterface {
-	return newRules(c, namespace)
 }
 
 // NewForConfig creates a new IstioV1alpha2Client for the given config.

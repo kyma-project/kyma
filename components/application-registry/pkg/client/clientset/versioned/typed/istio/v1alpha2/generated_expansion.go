@@ -2,8 +2,8 @@
 
 package v1alpha2
 
+type AuthorizationPolicyExpansion interface{}
+
 type HandlerExpansion interface{}
 
 type InstanceExpansion interface{}
-
-type RuleExpansion interface{}

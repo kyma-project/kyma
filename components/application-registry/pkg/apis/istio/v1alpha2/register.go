@@ -34,6 +34,8 @@ func Resource(resource string) schema.GroupResource {
 
 // Adds the list of known types to Scheme.
 func addKnownTypes(scheme *runtime.Scheme) error {
+	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("authorizationPolicy"), &AuthorizationPolicy{})
+	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("authorizationPolicyList"), &AuthorizationPolicyList{})
 	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("rule"), &Rule{})
 	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("ruleList"), &RuleList{})
 	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("handler"), &Handler{})

@@ -12,16 +12,16 @@ type FakeIstioV1alpha2 struct {
 	*testing.Fake
 }
 
+func (c *FakeIstioV1alpha2) AuthorizationPolicies(namespace string) v1alpha2.AuthorizationPolicyInterface {
+	return &FakeAuthorizationPolicies{c, namespace}
+}
+
 func (c *FakeIstioV1alpha2) Handlers(namespace string) v1alpha2.HandlerInterface {
 	return &FakeHandlers{c, namespace}
 }
 
 func (c *FakeIstioV1alpha2) Instances(namespace string) v1alpha2.InstanceInterface {
 	return &FakeInstances{c, namespace}
-}
-
-func (c *FakeIstioV1alpha2) Rules(namespace string) v1alpha2.RuleInterface {
-	return &FakeRules{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

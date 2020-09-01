@@ -37,12 +37,12 @@ func (f *genericInformer) Lister() cache.GenericLister {
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
 	// Group=istio, Version=v1alpha2
+	case v1alpha2.SchemeGroupVersion.WithResource("authorizationpolicies"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Istio().V1alpha2().AuthorizationPolicies().Informer()}, nil
 	case v1alpha2.SchemeGroupVersion.WithResource("handlers"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Istio().V1alpha2().Handlers().Informer()}, nil
 	case v1alpha2.SchemeGroupVersion.WithResource("instances"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Istio().V1alpha2().Instances().Informer()}, nil
-	case v1alpha2.SchemeGroupVersion.WithResource("rules"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Istio().V1alpha2().Rules().Informer()}, nil
 
 	}
 
