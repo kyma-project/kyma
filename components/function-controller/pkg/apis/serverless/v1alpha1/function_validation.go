@@ -36,7 +36,7 @@ func (fn *Function) performBasicValidation(ctx context.Context) *apis.FieldError
 func (fn *Function) Validate(ctx context.Context) (errors *apis.FieldError) {
 	spec := fn.Spec
 
-	if spec.SourceType == SourceTypeGit {
+	if spec.Type == SourceTypeGit {
 		return fn.performBasicValidation(ctx).Also(
 			spec.validateRepository(),
 		)

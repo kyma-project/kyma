@@ -48,7 +48,7 @@ type FunctionSpec struct {
 	Labels map[string]string `json:"labels,omitempty"`
 
 	// +optional
-	SourceType SourceType `json:"sourceType,omitempty"`
+	Type SourceType `json:"type,omitempty"`
 
 	Repository `json:",inline,omitempty"`
 }
