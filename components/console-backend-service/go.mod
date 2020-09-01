@@ -56,6 +56,7 @@ require (
 
 replace (
 	github.com/coreos/etcd => github.com/coreos/etcd v3.3.24+incompatible
+	github.com/kyma-project/kyma/components/function-controller => github.com/aerfio/kyma/components/function-controller v0.0.0-20200901075357-776968cb6772
 	golang.org/x/text => golang.org/x/text v0.3.3
 	k8s.io/client-go => k8s.io/client-go v0.17.4
 )
