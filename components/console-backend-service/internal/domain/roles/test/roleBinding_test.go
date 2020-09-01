@@ -2,15 +2,15 @@ package test
 
 import (
 	"context"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/rbac/v1"
 	k8sMeta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"testing"
 )
-
 
 func TestRoleBindingsService_Query(t *testing.T) {
 	const namespace = "default"

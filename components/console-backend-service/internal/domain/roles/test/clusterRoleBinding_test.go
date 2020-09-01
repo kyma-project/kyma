@@ -2,15 +2,15 @@ package test
 
 import (
 	"context"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/rbac/v1"
 	k8sMeta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"testing"
 )
-
 
 func TestClusterRoleBindingsService_Query(t *testing.T) {
 	t.Run("Should return bindings", func(t *testing.T) {
@@ -64,7 +64,7 @@ func TestClusterRoleBindingsService_Delete(t *testing.T) {
 	})
 
 	t.Run("Should return error on not found", func(t *testing.T) {
-		binding := createMockClusterRoleBinding("other binding",  "clusterRole")
+		binding := createMockClusterRoleBinding("other binding", "clusterRole")
 		service := setupServiceWithObjects(t, runtime.Object(binding))
 
 		_, err := service.DeleteClusterRoleBinding(context.Background(), name)
@@ -80,7 +80,7 @@ func createMockClusterRoleBinding(name, clusterRoleName string) *v1.ClusterRoleB
 			APIVersion: v1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: k8sMeta.ObjectMeta{
-			Name:      name,
+			Name: name,
 		},
 		Subjects: nil,
 		RoleRef: v1.RoleRef{

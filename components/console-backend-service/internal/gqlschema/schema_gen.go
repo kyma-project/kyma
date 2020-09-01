@@ -300,7 +300,8 @@ type ComplexityRoot struct {
 	}
 
 	ClusterRoleBinding struct {
-		Name func(childComplexity int) int
+		Name    func(childComplexity int) int
+		RoleRef func(childComplexity int) int
 	}
 
 	ClusterServiceBroker struct {
@@ -821,6 +822,12 @@ type ComplexityRoot struct {
 	RoleBinding struct {
 		Name      func(childComplexity int) int
 		Namespace func(childComplexity int) int
+		RoleRef   func(childComplexity int) int
+	}
+
+	RoleRef struct {
+		Kind func(childComplexity int) int
+		Name func(childComplexity int) int
 	}
 
 	Rule struct {
@@ -2219,6 +2226,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ClusterRoleBinding.Name(childComplexity), true
+
+	case "ClusterRoleBinding.roleRef":
+		if e.complexity.ClusterRoleBinding.RoleRef == nil {
+			break
+		}
+
+		return e.complexity.ClusterRoleBinding.RoleRef(childComplexity), true
 
 	case "ClusterServiceBroker.creationTimestamp":
 		if e.complexity.ClusterServiceBroker.CreationTimestamp == nil {
@@ -5164,6 +5178,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RoleBinding.Namespace(childComplexity), true
 
+	case "RoleBinding.roleRef":
+		if e.complexity.RoleBinding.RoleRef == nil {
+			break
+		}
+
+		return e.complexity.RoleBinding.RoleRef(childComplexity), true
+
+	case "RoleRef.kind":
+		if e.complexity.RoleRef.Kind == nil {
+			break
+		}
+
+		return e.complexity.RoleRef.Kind(childComplexity), true
+
+	case "RoleRef.name":
+		if e.complexity.RoleRef.Name == nil {
+			break
+		}
+
+		return e.complexity.RoleRef.Name(childComplexity), true
+
 	case "Rule.accessStrategies":
 		if e.complexity.Rule.AccessStrategies == nil {
 			break
@@ -6752,7 +6787,11 @@ extend type Subscription {
 }
 
 `, BuiltIn: false},
-	&ast.Source{Name: "internal/gqlschema/roles.graphql", Input: `type Role @goModel(model: "k8s.io/api/rbac/v1.Role") {
+	&ast.Source{Name: "internal/gqlschema/roles.graphql", Input: `enum SubjectKind { User Group }
+
+enum RoleKind {  Role ClusterRole }
+
+type Role @goModel(model: "k8s.io/api/rbac/v1.Role") {
     name: String!
     namespace: String!
     rules: [PolicyRule!]
@@ -6769,23 +6808,20 @@ type PolicyRule @goModel(model: "k8s.io/api/rbac/v1.PolicyRule") {
     verbs: [String!]!
 }
 
+type RoleRef @goModel(model: "k8s.io/api/rbac/v1.RoleRef") {
+    name: String!
+    kind: String!
+}
+
 type RoleBinding @goModel(model: "k8s.io/api/rbac/v1.RoleBinding") {
     name: String!
     namespace: String!
+    roleRef: RoleRef!
 }
 
 type ClusterRoleBinding @goModel(model: "k8s.io/api/rbac/v1.ClusterRoleBinding") {
     name: String!
-}
-
-enum SubjectKind {
-    User
-    Group
-}
-
-enum RoleKind {
-    Role
-    ClusterRole
+    roleRef: RoleRef!
 }
 
 input RoleBindingSubject {
@@ -6808,20 +6844,20 @@ extend type Query {
     roles(namespace: String!): [Role!]! @HasAccess(attributes: {resource: "roles", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     role(namespace: String!, name: String!): Role! @HasAccess(attributes: {resource: "roles", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
-    clusterRoles: [ClusterRole!]! @HasAccess(attributes: {resource: "clusterroles", verb: "list", apiGroup: "", apiVersion: "v1"})
-    clusterRole(name: String!): ClusterRole! @HasAccess(attributes: {resource: "clusterroles", verb: "get", apiGroup: "", apiVersion: "v1"})
+    clusterRoles: [ClusterRole!]! @HasAccess(attributes: {resource: "clusterRoles", verb: "list", apiGroup: "", apiVersion: "v1"})
+    clusterRole(name: String!): ClusterRole! @HasAccess(attributes: {resource: "clusterRoles", verb: "get", apiGroup: "", apiVersion: "v1"})
 
-    roleBindings(namespace: String!): [RoleBinding!]! @HasAccess(attributes: {resource: "rolebindings", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    roleBindings(namespace: String!): [RoleBinding!]! @HasAccess(attributes: {resource: "roleBindings", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
-    clusterRoleBindings: [ClusterRoleBinding!]! @HasAccess(attributes: {resource: "clusterrolebindings", verb: "list", apiGroup: "", apiVersion: "v1"})
+    clusterRoleBindings: [ClusterRoleBinding!]! @HasAccess(attributes: {resource: "clusterRoleBindings", verb: "list", apiGroup: "", apiVersion: "v1"})
 }
 
 extend type Mutation {
-    createRoleBinding(name: String!, namespace: String!, params: RoleBindingInput!): RoleBinding!@HasAccess(attributes: {resource: "rolebindings", verb: "create", apiGroup: "", apiVersion: "v1"})
-    deleteRoleBinding(namespace: String!, name: String!): RoleBinding!@HasAccess(attributes: {resource: "rolebindings", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    createRoleBinding(name: String!, namespace: String!, params: RoleBindingInput!): RoleBinding!@HasAccess(attributes: {resource: "roleBindings", verb: "create", apiGroup: "", apiVersion: "v1"})
+    deleteRoleBinding(namespace: String!, name: String!): RoleBinding!@HasAccess(attributes: {resource: "roleBindings", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
-    createClusterRoleBinding(name: String!, params: ClusterRoleBindingInput!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterrolebindings", verb: "create", apiGroup: "", apiVersion: "v1"})
-    deleteClusterRoleBinding(name: String!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterrolebindings", verb: "delete", apiGroup: "", apiVersion: "v1"})
+    createClusterRoleBinding(name: String!, params: ClusterRoleBindingInput!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterRoleBindings", verb: "create", apiGroup: "", apiVersion: "v1"})
+    deleteClusterRoleBinding(name: String!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterRoleBindings", verb: "delete", apiGroup: "", apiVersion: "v1"})
 }
 `, BuiltIn: false},
 	&ast.Source{Name: "internal/gqlschema/schema.graphql", Input: `# Scalars
@@ -15351,6 +15387,40 @@ func (ec *executionContext) _ClusterRoleBinding_name(ctx context.Context, field 
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _ClusterRoleBinding_roleRef(ctx context.Context, field graphql.CollectedField, obj *v12.ClusterRoleBinding) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ClusterRoleBinding",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RoleRef, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v12.RoleRef)
+	fc.Result = res
+	return ec.marshalNRoleRef2k8sᚗioᚋapiᚋrbacᚋv1ᚐRoleRef(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _ClusterServiceBroker_name(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBroker) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -23584,7 +23654,7 @@ func (ec *executionContext) _Mutation_createRoleBinding(ctx context.Context, fie
 			return ec.resolvers.Mutation().CreateRoleBinding(rctx, args["name"].(string), args["namespace"].(string), args["params"].(RoleBindingInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "rolebindings", "verb": "create"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "roleBindings", "verb": "create"})
 			if err != nil {
 				return nil, err
 			}
@@ -23649,7 +23719,7 @@ func (ec *executionContext) _Mutation_deleteRoleBinding(ctx context.Context, fie
 			return ec.resolvers.Mutation().DeleteRoleBinding(rctx, args["namespace"].(string), args["name"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "rolebindings", "verb": "delete"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roleBindings", "verb": "delete"})
 			if err != nil {
 				return nil, err
 			}
@@ -23714,7 +23784,7 @@ func (ec *executionContext) _Mutation_createClusterRoleBinding(ctx context.Conte
 			return ec.resolvers.Mutation().CreateClusterRoleBinding(rctx, args["name"].(string), args["params"].(ClusterRoleBindingInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterrolebindings", "verb": "create"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterRoleBindings", "verb": "create"})
 			if err != nil {
 				return nil, err
 			}
@@ -23779,7 +23849,7 @@ func (ec *executionContext) _Mutation_deleteClusterRoleBinding(ctx context.Conte
 			return ec.resolvers.Mutation().DeleteClusterRoleBinding(rctx, args["name"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterrolebindings", "verb": "delete"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterRoleBindings", "verb": "delete"})
 			if err != nil {
 				return nil, err
 			}
@@ -28903,7 +28973,7 @@ func (ec *executionContext) _Query_clusterRoles(ctx context.Context, field graph
 			return ec.resolvers.Query().ClusterRoles(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterroles", "verb": "list"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterRoles", "verb": "list"})
 			if err != nil {
 				return nil, err
 			}
@@ -28968,7 +29038,7 @@ func (ec *executionContext) _Query_clusterRole(ctx context.Context, field graphq
 			return ec.resolvers.Query().ClusterRole(rctx, args["name"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterroles", "verb": "get"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterRoles", "verb": "get"})
 			if err != nil {
 				return nil, err
 			}
@@ -29033,7 +29103,7 @@ func (ec *executionContext) _Query_roleBindings(ctx context.Context, field graph
 			return ec.resolvers.Query().RoleBindings(rctx, args["namespace"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "rolebindings", "verb": "list"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roleBindings", "verb": "list"})
 			if err != nil {
 				return nil, err
 			}
@@ -29091,7 +29161,7 @@ func (ec *executionContext) _Query_clusterRoleBindings(ctx context.Context, fiel
 			return ec.resolvers.Query().ClusterRoleBindings(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterrolebindings", "verb": "list"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterRoleBindings", "verb": "list"})
 			if err != nil {
 				return nil, err
 			}
@@ -30174,6 +30244,108 @@ func (ec *executionContext) _RoleBinding_namespace(ctx context.Context, field gr
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Namespace, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RoleBinding_roleRef(ctx context.Context, field graphql.CollectedField, obj *v12.RoleBinding) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "RoleBinding",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RoleRef, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v12.RoleRef)
+	fc.Result = res
+	return ec.marshalNRoleRef2k8sᚗioᚋapiᚋrbacᚋv1ᚐRoleRef(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RoleRef_name(ctx context.Context, field graphql.CollectedField, obj *v12.RoleRef) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "RoleRef",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RoleRef_kind(ctx context.Context, field graphql.CollectedField, obj *v12.RoleRef) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "RoleRef",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Kind, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -40134,6 +40306,11 @@ func (ec *executionContext) _ClusterRoleBinding(ctx context.Context, sel ast.Sel
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "roleRef":
+			out.Values[i] = ec._ClusterRoleBinding_roleRef(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -43461,6 +43638,43 @@ func (ec *executionContext) _RoleBinding(ctx context.Context, sel ast.SelectionS
 			}
 		case "namespace":
 			out.Values[i] = ec._RoleBinding_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "roleRef":
+			out.Values[i] = ec._RoleBinding_roleRef(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var roleRefImplementors = []string{"RoleRef"}
+
+func (ec *executionContext) _RoleRef(ctx context.Context, sel ast.SelectionSet, obj *v12.RoleRef) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, roleRefImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RoleRef")
+		case "name":
+			out.Values[i] = ec._RoleRef_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "kind":
+			out.Values[i] = ec._RoleRef_kind(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -48541,6 +48755,10 @@ func (ec *executionContext) unmarshalNRoleKind2githubᚗcomᚋkymaᚑprojectᚋk
 
 func (ec *executionContext) marshalNRoleKind2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleKind(ctx context.Context, sel ast.SelectionSet, v RoleKind) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) marshalNRoleRef2k8sᚗioᚋapiᚋrbacᚋv1ᚐRoleRef(ctx context.Context, sel ast.SelectionSet, v v12.RoleRef) graphql.Marshaler {
+	return ec._RoleRef(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNRule2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐRule(ctx context.Context, sel ast.SelectionSet, v v1alpha1.Rule) graphql.Marshaler {

@@ -19,13 +19,20 @@ type PolicyRule @goModel(model: "k8s.io/api/rbac/v1.PolicyRule") {
     verbs: [String!]!
 }
 
+type RoleRef @goModel(model: "k8s.io/api/rbac/v1.RoleRef") {
+    name: String!
+    kind: String!
+}
+
 type RoleBinding @goModel(model: "k8s.io/api/rbac/v1.RoleBinding") {
     name: String!
     namespace: String!
+    roleRef: RoleRef!
 }
 
 type ClusterRoleBinding @goModel(model: "k8s.io/api/rbac/v1.ClusterRoleBinding") {
     name: String!
+    roleRef: RoleRef!
 }
 
 input RoleBindingSubject {
