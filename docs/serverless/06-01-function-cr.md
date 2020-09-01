@@ -52,6 +52,7 @@ spec:
         return 'Hello ' + name;
       }
     }
+  runtime: nodejs12
   status:
     conditions:
       - lastTransitionTime: "2020-04-14T08:17:11Z"
@@ -88,6 +89,7 @@ This table lists all the possible properties of a given resource together with t
 | **spec.resources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Function's Pod to use.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | **spec.resources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the Function's Pod to operate.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | **spec.resources.requests.memory**       |       No       | Specifies the amount of memory requested by the Function's Pod to operate.                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **spec.runtime**                         |       No       | Specifies the runtime of the function. Available values are `nodejs12`, `nodejs10`, `python38`. It is set to `nodejs12` unless specified otherwise.                                                                                                                                                                                                                                                                                                                                                                               |
 | **spec.source**                          |      Yes       | Provides the Function's source code.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the Function's condition status changed from one to another.                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | **status.conditions.message**            | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.                                                                                                                                                                                                                                                                                                                                                                                                                                            |
@@ -99,25 +101,25 @@ This table lists all the possible properties of a given resource together with t
 
 Processing of a Function CR can succeed, continue, or fail for one of these reasons:
 
-| Reason                           | Type                 | Description                                                                                                        |
-| -------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `ConfigMapCreated`               | `ConfigurationReady` | A new ConfigMap was created based on the Function CR definition.                                                   |
-| `ConfigMapUpdated`               | `ConfigurationReady` | The existing ConfigMap was updated after changes in the Function CR name, its source code or dependencies.         |
-| `JobFailed`                      | `BuildReady`         | The image with the Function's configuration could not be created due to an error.                                  |
-| `JobCreated`                     | `BuildReady`         | The Kubernetes Job resource that builds the Function image was created.                                            |
+| Reason                           | Type                 | Description                                                                                                                                                   |
+| -------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ConfigMapCreated`               | `ConfigurationReady` | A new ConfigMap was created based on the Function CR definition.                                                                                              |
+| `ConfigMapUpdated`               | `ConfigurationReady` | The existing ConfigMap was updated after changes in the Function CR name, its source code or dependencies.                                                    |
+| `JobFailed`                      | `BuildReady`         | The image with the Function's configuration could not be created due to an error.                                                                             |
+| `JobCreated`                     | `BuildReady`         | The Kubernetes Job resource that builds the Function image was created.                                                                                       |
 | `JobUpdated`                     | `BuildReady`         | The existing Job was updated after changing the Function's metadata or spec fields that do not affect the way of building the Function image, such as labels. |
-| `JobRunning`                     | `BuildReady`         | The Job is in progress.                                                                                            |
-| `JobsDeleted`                    | `BuildReady`         | Previous Jobs responsible for building Function images were deleted.                                               |
-| `JobFinished`                    | `BuildReady`         | The Job was finished and the Function's image was uploaded to the Docker Registry.                                 |
-| `DeploymentCreated`              | `Running`            | A new Deployment referencing the Function's image was created.                                                     |
-| `DeploymentUpdated`              | `Running`            | The existing Deployment was updated after changing the Function's image, scaling parameters, variables, or labels. |
-| `DeploymentFailed`               | `Running`            | The Function's Pod crashed or could not start due to an error.                                                     |
-| `DeploymentWaiting`              | `Running`            | The Function was deployed and is waiting for the Deployment to be ready.                                           |
-| `DeploymentReady`                | `Running`            | The Function was deployed and is ready.                                                                            |
-| `ServiceCreated`                 | `Running`            | A new Service referencing the Function's Deployment was created.                                                   |
-| `ServiceUpdated`                 | `Running`            | The existing Service was updated after applying required changes.                                                  |
-| `HorizontalPodAutoscalerCreated` | `Running`            | A new HorizontalPodScaler referencing the Function's Deployment was created.                                       |
-| `HorizontalPodAutoscalerUpdated` | `Running`            | The existing HorizontalPodScaler was updated after applying required changes.                                      |
+| `JobRunning`                     | `BuildReady`         | The Job is in progress.                                                                                                                                       |
+| `JobsDeleted`                    | `BuildReady`         | Previous Jobs responsible for building Function images were deleted.                                                                                          |
+| `JobFinished`                    | `BuildReady`         | The Job was finished and the Function's image was uploaded to the Docker Registry.                                                                            |
+| `DeploymentCreated`              | `Running`            | A new Deployment referencing the Function's image was created.                                                                                                |
+| `DeploymentUpdated`              | `Running`            | The existing Deployment was updated after changing the Function's image, scaling parameters, variables, or labels.                                            |
+| `DeploymentFailed`               | `Running`            | The Function's Pod crashed or could not start due to an error.                                                                                                |
+| `DeploymentWaiting`              | `Running`            | The Function was deployed and is waiting for the Deployment to be ready.                                                                                      |
+| `DeploymentReady`                | `Running`            | The Function was deployed and is ready.                                                                                                                       |
+| `ServiceCreated`                 | `Running`            | A new Service referencing the Function's Deployment was created.                                                                                              |
+| `ServiceUpdated`                 | `Running`            | The existing Service was updated after applying required changes.                                                                                             |
+| `HorizontalPodAutoscalerCreated` | `Running`            | A new HorizontalPodScaler referencing the Function's Deployment was created.                                                                                  |
+| `HorizontalPodAutoscalerUpdated` | `Running`            | The existing HorizontalPodScaler was updated after applying required changes.                                                                                 |
 
 ## Related resources and components
 
