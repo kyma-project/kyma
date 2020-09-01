@@ -6796,12 +6796,12 @@ input RoleBindingSubject {
 input RoleBindingInput {
     roleName: String!
     roleKind: RoleKind!
-    subjects: [RoleBindingSubject]!
+    subjects: [RoleBindingSubject!]!
 }
 
 input ClusterRoleBindingInput {
     roleName: String!
-    subjects: [RoleBindingSubject]!
+    subjects: [RoleBindingSubject!]!
 }
 
 extend type Query {
@@ -6822,7 +6822,8 @@ extend type Mutation {
 
     createClusterRoleBinding(name: String!, params: ClusterRoleBindingInput!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterrolebindings", verb: "create", apiGroup: "", apiVersion: "v1"})
     deleteClusterRoleBinding(name: String!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterrolebindings", verb: "delete", apiGroup: "", apiVersion: "v1"})
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 	&ast.Source{Name: "internal/gqlschema/schema.graphql", Input: `# Scalars
 
 scalar JSON
@@ -37924,7 +37925,7 @@ func (ec *executionContext) unmarshalInputClusterRoleBindingInput(ctx context.Co
 			}
 		case "subjects":
 			var err error
-			it.Subjects, err = ec.unmarshalNRoleBindingSubject2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx, v)
+			it.Subjects, err = ec.unmarshalNRoleBindingSubject2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubjectᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -38488,7 +38489,7 @@ func (ec *executionContext) unmarshalInputRoleBindingInput(ctx context.Context, 
 			}
 		case "subjects":
 			var err error
-			it.Subjects, err = ec.unmarshalNRoleBindingSubject2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx, v)
+			it.Subjects, err = ec.unmarshalNRoleBindingSubject2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubjectᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -48501,7 +48502,11 @@ func (ec *executionContext) unmarshalNRoleBindingInput2githubᚗcomᚋkymaᚑpro
 	return ec.unmarshalInputRoleBindingInput(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNRoleBindingSubject2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx context.Context, v interface{}) ([]*RoleBindingSubject, error) {
+func (ec *executionContext) unmarshalNRoleBindingSubject2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx context.Context, v interface{}) (RoleBindingSubject, error) {
+	return ec.unmarshalInputRoleBindingSubject(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNRoleBindingSubject2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubjectᚄ(ctx context.Context, v interface{}) ([]*RoleBindingSubject, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -48513,12 +48518,20 @@ func (ec *executionContext) unmarshalNRoleBindingSubject2ᚕᚖgithubᚗcomᚋky
 	var err error
 	res := make([]*RoleBindingSubject, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalORoleBindingSubject2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNRoleBindingSubject2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 	return res, nil
+}
+
+func (ec *executionContext) unmarshalNRoleBindingSubject2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx context.Context, v interface{}) (*RoleBindingSubject, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNRoleBindingSubject2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) unmarshalNRoleKind2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleKind(ctx context.Context, v interface{}) (RoleKind, error) {
@@ -50749,18 +50762,6 @@ func (ec *executionContext) marshalOResourceType2ᚖgithubᚗcomᚋkymaᚑprojec
 		return graphql.Null
 	}
 	return ec._ResourceType(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalORoleBindingSubject2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx context.Context, v interface{}) (RoleBindingSubject, error) {
-	return ec.unmarshalInputRoleBindingSubject(ctx, v)
-}
-
-func (ec *executionContext) unmarshalORoleBindingSubject2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx context.Context, v interface{}) (*RoleBindingSubject, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalORoleBindingSubject2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx, v)
-	return &res, err
 }
 
 func (ec *executionContext) marshalOSecret2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSecret(ctx context.Context, sel ast.SelectionSet, v Secret) graphql.Marshaler {

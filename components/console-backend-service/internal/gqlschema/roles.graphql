@@ -1,3 +1,7 @@
+enum SubjectKind { User Group }
+
+enum RoleKind {  Role ClusterRole }
+
 type Role @goModel(model: "k8s.io/api/rbac/v1.Role") {
     name: String!
     namespace: String!
@@ -24,16 +28,6 @@ type ClusterRoleBinding @goModel(model: "k8s.io/api/rbac/v1.ClusterRoleBinding")
     name: String!
 }
 
-enum SubjectKind {
-    User
-    Group
-}
-
-enum RoleKind {
-    Role
-    ClusterRole
-}
-
 input RoleBindingSubject {
     name: String!
     kind: SubjectKind!
@@ -42,30 +36,30 @@ input RoleBindingSubject {
 input RoleBindingInput {
     roleName: String!
     roleKind: RoleKind!
-    subjects: [RoleBindingSubject]!
+    subjects: [RoleBindingSubject!]!
 }
 
 input ClusterRoleBindingInput {
     roleName: String!
-    subjects: [RoleBindingSubject]!
+    subjects: [RoleBindingSubject!]!
 }
 
 extend type Query {
     roles(namespace: String!): [Role!]! @HasAccess(attributes: {resource: "roles", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     role(namespace: String!, name: String!): Role! @HasAccess(attributes: {resource: "roles", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
-    clusterRoles: [ClusterRole!]! @HasAccess(attributes: {resource: "clusterroles", verb: "list", apiGroup: "", apiVersion: "v1"})
-    clusterRole(name: String!): ClusterRole! @HasAccess(attributes: {resource: "clusterroles", verb: "get", apiGroup: "", apiVersion: "v1"})
+    clusterRoles: [ClusterRole!]! @HasAccess(attributes: {resource: "clusterRoles", verb: "list", apiGroup: "", apiVersion: "v1"})
+    clusterRole(name: String!): ClusterRole! @HasAccess(attributes: {resource: "clusterRoles", verb: "get", apiGroup: "", apiVersion: "v1"})
 
-    roleBindings(namespace: String!): [RoleBinding!]! @HasAccess(attributes: {resource: "rolebindings", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    roleBindings(namespace: String!): [RoleBinding!]! @HasAccess(attributes: {resource: "roleBindings", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
-    clusterRoleBindings: [ClusterRoleBinding!]! @HasAccess(attributes: {resource: "clusterrolebindings", verb: "list", apiGroup: "", apiVersion: "v1"})
+    clusterRoleBindings: [ClusterRoleBinding!]! @HasAccess(attributes: {resource: "clusterRoleBindings", verb: "list", apiGroup: "", apiVersion: "v1"})
 }
 
 extend type Mutation {
-    createRoleBinding(name: String!, namespace: String!, params: RoleBindingInput!): RoleBinding!@HasAccess(attributes: {resource: "rolebindings", verb: "create", apiGroup: "", apiVersion: "v1"})
-    deleteRoleBinding(namespace: String!, name: String!): RoleBinding!@HasAccess(attributes: {resource: "rolebindings", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    createRoleBinding(name: String!, namespace: String!, params: RoleBindingInput!): RoleBinding!@HasAccess(attributes: {resource: "roleBindings", verb: "create", apiGroup: "", apiVersion: "v1"})
+    deleteRoleBinding(namespace: String!, name: String!): RoleBinding!@HasAccess(attributes: {resource: "roleBindings", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
-    createClusterRoleBinding(name: String!, params: ClusterRoleBindingInput!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterrolebindings", verb: "create", apiGroup: "", apiVersion: "v1"})
-    deleteClusterRoleBinding(name: String!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterrolebindings", verb: "delete", apiGroup: "", apiVersion: "v1"})
+    createClusterRoleBinding(name: String!, params: ClusterRoleBindingInput!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterRoleBindings", verb: "create", apiGroup: "", apiVersion: "v1"})
+    deleteClusterRoleBinding(name: String!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterRoleBindings", verb: "delete", apiGroup: "", apiVersion: "v1"})
 }

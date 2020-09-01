@@ -53,7 +53,7 @@ func TestOAuthService_Query(t *testing.T) {
 	})
 }
 
-func TestTriggersService_Create(t *testing.T) {
+func TestOAuthService_Create(t *testing.T) {
 	const namespace = "default"
 
 	t.Run("Should create", func(t *testing.T) {
@@ -79,7 +79,7 @@ func TestTriggersService_Create(t *testing.T) {
 	})
 }
 
-func TestTriggersService_Update(t *testing.T) {
+func TestOAuthService_Update(t *testing.T) {
 	const namespace = "default"
 
 	t.Run("Should update", func(t *testing.T) {
@@ -119,7 +119,7 @@ func TestTriggersService_Update(t *testing.T) {
 	})
 }
 
-func TestTriggersService_Delete(t *testing.T) {
+func TestOAuthService_Delete(t *testing.T) {
 	const namespace = "default"
 
 	t.Run("Should delete", func(t *testing.T) {
