@@ -46,7 +46,7 @@ If you don't supply any certificates or domain during installation, the kyma-ins
 
 You can install Kyma on top of [Gardener](https://gardener.cloud/) managed instances which use the already present certificate management service. Because Gardener creates the certificates or domain, you don't have to provide them. The certificate is a Custom Resource managed by Gardener, and is a wildcard certificate for the whole domain.
 
-### Apiserver proxy
+### API Server Proxy
 
 The [API Server Proxy](https://github.com/kyma-project/kyma/tree/master/components/apiserver-proxy) component is a reverse proxy which acts as an intermediary for the Kubernetes API. By default, it is exposed as a LoadBalancer Service, meaning it requires a dedicated certificate and DNS entry.
 
@@ -62,47 +62,51 @@ The certificate data is propagated though Kyma and delivered to several componen
 2. Kyma installer passes the values to the specific Kyma components.
 3. Each of these components generates Secrets, ConfigMaps, and Certificates in a certain order. 
 
-The table shows the order in which the configuration elements are created. The order differs depending on the mode:
+The table shows the order in which the configuration elements are created. 
+
+>**NOTE:** The table does not include all possible dependencies between the components and elements that use the certificates. It serves as a reference to know where to find information about the certificates and configurations.
+
+The order differs depending on the mode:
 
 <div tabs name="certificate-propagation" group="tls-management">
   <details>
   <summary label="own-certificate">
   Bring Your Own Certificate
   </summary>
-  |**Component**| **Kind** | **Name** | **Namespace** |
-  | :--- | :--- | :--- | :--- | 
-  | xip-patch | Secret | ingress-tls-cert | `kyma-system` |
-  | xip-patch | ConfigMap | net-global-overrides | `kyma-installer `| 
-  | core/gateway | Secret | kyma-gateway-certs | `istio-system` |
-  | core/gateway | Secret | kyma-gateway-certs-cacert | `istio-system `|
-  | apiserver-proxy | Secret | apiserver-proxy-tls-cert | `kyma-system` | 
-  | apiserver-proxy | ConfigMap | apiserver-proxy | `kyma-system `|  
+  | **Kind** | **Name** | **Namespace** |
+  | :--- | :--- | :--- | 
+  | Secret | ingress-tls-cert | `kyma-system` |
+  | ConfigMap | net-global-overrides | `kyma-installer `| 
+  | Secret | kyma-gateway-certs | `istio-system` |
+  | Secret | kyma-gateway-certs-cacert | `istio-system `|
+  | Secret | apiserver-proxy-tls-cert | `kyma-system` | 
+  | ConfigMap | apiserver-proxy | `kyma-system `|  
   </details>
   <details>
   <summary label="demo-xip">
   Demo xip.io setup
   </summary>
-  |**Component**| **Kind** | **Name** | **Namespace** |
-  | :--- | :--- | :--- | :--- | 
-  | xip-patch | Secret | ingress-tls-cert | `kyma-system` |
-  | xip-patch | ConfigMap | net-global-overrides | `kyma-installer `| 
-  | core/gateway | Secret | kyma-gateway-certs | `istio-system` |
-  | core/gateway | Secret | kyma-gateway-certs-cacert | `istio-system `|
-  | apiserver-proxy | Secret | apiserver-proxy-tls-cert | `kyma-system` | 
-  | apiserver-proxy | ConfigMap | apiserver-proxy | `kyma-system `|  
+  | **Kind** | **Name** | **Namespace** |
+  | :--- | :--- | :--- | 
+  | Secret | ingress-tls-cert | `kyma-system` |
+  | ConfigMap | net-global-overrides | `kyma-installer `| 
+  | Secret | kyma-gateway-certs | `istio-system` |
+  | Secret | kyma-gateway-certs-cacert | `istio-system `|
+  | Secret | apiserver-proxy-tls-cert | `kyma-system` | 
+  | ConfigMap | apiserver-proxy | `kyma-system `|  
   </details>
   <details>
   <summary label="gardener">
   Gardener-managed 
   </summary>
-  |**Component**| **Kind** | **Name** | **Namespace** |
-  | :--- | :--- | :--- | :--- | 
-  | xip-patch | Secret | ingress-tls-cert | `kyma-system `|
-  | xip-patch | ConfigMap | net-global-overrides | `kyma-installer `| 
-  | core/gateway | Secret | kyma-gateway-certs-cacert | `istio-system` |
-  | xip-patch | Certificate | kyma-tls-cert | `istio-system`|
-  | apiserver-proxy | Certificate | apiserver-proxy-tls-cert | `kyma-system` | 
-  | apiserver-proxy |ConfigMap | apiserver-proxy | `kyma-system` |
+  | **Kind** | **Name** | **Namespace** |
+  | :--- | :--- | :--- | 
+  | Secret | ingress-tls-cert | `kyma-system `|
+  | ConfigMap | net-global-overrides | `kyma-installer `| 
+  | Secret | kyma-gateway-certs-cacert | `istio-system` |
+  | Certificate | kyma-tls-cert | `istio-system`|
+  | Certificate | apiserver-proxy-tls-cert | `kyma-system` | 
+  |ConfigMap | apiserver-proxy | `kyma-system` |
    </details>
 </div>
 
