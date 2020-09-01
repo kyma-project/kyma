@@ -9,19 +9,3 @@ type AuthorizationPolicyListerExpansion interface{}
 // AuthorizationPolicyNamespaceListerExpansion allows custom methods to be added to
 // AuthorizationPolicyNamespaceLister.
 type AuthorizationPolicyNamespaceListerExpansion interface{}
-
-// HandlerListerExpansion allows custom methods to be added to
-// HandlerLister.
-type HandlerListerExpansion interface{}
-
-// HandlerNamespaceListerExpansion allows custom methods to be added to
-// HandlerNamespaceLister.
-type HandlerNamespaceListerExpansion interface{}
-
-// InstanceListerExpansion allows custom methods to be added to
-// InstanceLister.
-type InstanceListerExpansion interface{}
-
-// InstanceNamespaceListerExpansion allows custom methods to be added to
-// InstanceNamespaceLister.
-type InstanceNamespaceListerExpansion interface{}

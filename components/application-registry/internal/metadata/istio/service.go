@@ -1,4 +1,4 @@
-// Package istio contains components for managing Istio resources (Deniers, DenyRules, CheckNothings, ...)
+// Package istio contains components for managing Istio AuthorizationPolicies
 package istio
 
 import (
@@ -6,15 +6,15 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-// Service is responsible for creating Istio resources associated with deniers.
+// Service is responsible for creating Istio AuthorizationPolicy.
 type Service interface {
-	// Create creates Istio resources associated with deniers.
+	// Create creates Istio AuthorizationPolicy.
 	Create(application string, appUID types.UID, serviceId, resourceName string) apperrors.AppError
 
-	// Upsert updates or creates Istio resources associated with deniers.
+	// Upsert updates or creates Istio AuthorizationPolicy.
 	Upsert(application string, appUID types.UID, serviceId, resourceName string) apperrors.AppError
 
-	// Delete removes Istio resources associated with deniers.
+	// Delete removes Istio AuthorizationPolicy.
 	Delete(resourceName string) apperrors.AppError
 }
 
@@ -27,62 +27,17 @@ func NewService(repository Repository) Service {
 	return &service{repository: repository}
 }
 
-// Create creates Istio resources associated with deniers.
+// Create creates Istio AuthorizationPolicy.
 func (s *service) Create(application string, appUID types.UID, serviceId, resourceName string) apperrors.AppError {
-	err := s.repository.CreateHandler(application, appUID, serviceId, resourceName)
-	if err != nil {
-		return err
-	}
-
-	err = s.repository.CreateInstance(application, appUID, serviceId, resourceName)
-	if err != nil {
-		return err
-	}
-
-	err = s.repository.CreateRule(application, appUID, serviceId, resourceName)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return s.repository.CreateAuthorizationPolicy(application, appUID, serviceId, resourceName)
 }
 
-// Upsert updates or creates Istio resources associated with deniers.
+// Upsert updates or creates Istio AuthorizationPolicy.
 func (s *service) Upsert(application string, appUID types.UID, serviceId, resourceName string) apperrors.AppError {
-	err := s.repository.UpsertHandler(application, appUID, serviceId, resourceName)
-	if err != nil {
-		return err
-	}
-
-	err = s.repository.UpsertInstance(application, appUID, serviceId, resourceName)
-	if err != nil {
-		return err
-	}
-
-	err = s.repository.UpsertRule(application, appUID, serviceId, resourceName)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return s.repository.UpsertAuthorizationPolicy(application, appUID, serviceId, resourceName)
 }
 
-// Delete removes Istio resources associated with deniers.
+// Delete removes Istio AuthorizationPolicy.
 func (s *service) Delete(resourceName string) apperrors.AppError {
-	err := s.repository.DeleteHandler(resourceName)
-	if err != nil {
-		return err
-	}
-
-	err = s.repository.DeleteInstance(resourceName)
-	if err != nil {
-		return err
-	}
-
-	err = s.repository.DeleteRule(resourceName)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return s.repository.DeleteAuthorizationPolicy(resourceName)
 }

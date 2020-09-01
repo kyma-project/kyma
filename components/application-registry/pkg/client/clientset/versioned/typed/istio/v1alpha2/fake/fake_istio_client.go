@@ -16,14 +16,6 @@ func (c *FakeIstioV1alpha2) AuthorizationPolicies(namespace string) v1alpha2.Aut
 	return &FakeAuthorizationPolicies{c, namespace}
 }
 
-func (c *FakeIstioV1alpha2) Handlers(namespace string) v1alpha2.HandlerInterface {
-	return &FakeHandlers{c, namespace}
-}
-
-func (c *FakeIstioV1alpha2) Instances(namespace string) v1alpha2.InstanceInterface {
-	return &FakeInstances{c, namespace}
-}
-
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeIstioV1alpha2) RESTClient() rest.Interface {

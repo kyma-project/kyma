@@ -10,10 +10,6 @@ import (
 type Interface interface {
 	// AuthorizationPolicies returns a AuthorizationPolicyInformer.
 	AuthorizationPolicies() AuthorizationPolicyInformer
-	// Handlers returns a HandlerInformer.
-	Handlers() HandlerInformer
-	// Instances returns a InstanceInformer.
-	Instances() InstanceInformer
 }
 
 type version struct {
@@ -30,14 +26,4 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 // AuthorizationPolicies returns a AuthorizationPolicyInformer.
 func (v *version) AuthorizationPolicies() AuthorizationPolicyInformer {
 	return &authorizationPolicyInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
-}
-
-// Handlers returns a HandlerInformer.
-func (v *version) Handlers() HandlerInformer {
-	return &handlerInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
-}
-
-// Instances returns a InstanceInformer.
-func (v *version) Instances() InstanceInformer {
-	return &instanceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
