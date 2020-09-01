@@ -36,12 +36,6 @@ func Resource(resource string) schema.GroupResource {
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("authorizationPolicy"), &AuthorizationPolicy{})
 	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("authorizationPolicyList"), &AuthorizationPolicyList{})
-	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("rule"), &Rule{})
-	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("ruleList"), &RuleList{})
-	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("handler"), &Handler{})
-	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("handlerList"), &HandlerList{})
-	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("instance"), &Instance{})
-	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("instanceList"), &InstanceList{})
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil
 }
