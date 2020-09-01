@@ -12,13 +12,13 @@ The configuration specifies the following parameters and their values:
 
 | Parameter | Description | Value| 
 |-----| ---| -----| 
-| **spec.servers.port** | The ports gateway listens on. | `443`, `80`. <br> **NOTE:** Port `80` is automatically redirected to `443`.|
-| **spec.servers.tls.minProtocolVersion** | The minimum protocol version required by TLS connection. | `TLSV1_2` protocol version. `TLSV1_0` and `TLSV1_1` are rejected. |
+| **spec.servers.port** | The ports gateway listens on.  Port `80` is automatically redirected to `443`.| `443`, `80`.|
+| **spec.servers.tls.minProtocolVersion** | The minimum protocol version required by the TLS connection. | `TLSV1_2` protocol version. `TLSV1_0` and `TLSV1_1` are rejected. |
 | **spec.servers.tls.cipherSuites** | Accepted cypher suites. | `ECDHE-RSA-CHACHA20-POLY1305`, `ECDHE-RSA-AES256-GCM-SHA384`, `ECDHE-RSA-AES256-SHA`, `ECDHE-RSA-AES128-GCM-SHA256`, `ECDHE-RSA-AES128-SHA`|
 
 ## TLS management
 
-Kyma employs the bring your own domain/certificates model, so you must provide the certificate and key during installation. You can do ir using the installation overrides. The override can be a ConfigMap, similar to the following: 
+Kyma employs the Bring Your Own Domain/Certificates model that requires you to supply the certificate and key during installation. You can do it using the [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation). See a sample ConfigMap specifying the values to override: 
 
 ```yaml
 ---
@@ -34,11 +34,7 @@ data:
   global.tlsCrt: "CERT"
   global.tlsKey: "CERT_KEY"
 ```
-During installation, the values are propagated in the cluster for all components that require it.
-
->**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
->* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
->* [Top-level charts overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation-top-level-charts-overrides)
+During installation, the values are [propagated in the cluster](#certificate-propagation-paths) to all components that require them. 
 
 ### Demo setup with xip.io
 
@@ -52,16 +48,15 @@ You can install Kyma on top of [Gardener](https://gardener.cloud/) managed insta
 
 ### Apiserver proxy
 
-The [API Server Proxy](https://github.com/kyma-project/kyma/tree/master/components/apiserver-proxy) component is a reverse proxy which acts as an intermediary for the Kubernetes API. By default it is exposed as a LoadBalancer Service, meaning it requires a dedicated certificate and DNS entry.
+The [API Server Proxy](https://github.com/kyma-project/kyma/tree/master/components/apiserver-proxy) component is a reverse proxy which acts as an intermediary for the Kubernetes API. By default, it is exposed as a LoadBalancer Service, meaning it requires a dedicated certificate and DNS entry.
 
-To learn more about about API Server Proxy configuration, see the [configuration section](/components/security/#configuration-api-server-proxy-chart)
+To learn more about about API Server Proxy configuration, see the [configuration section](/components/security/#configuration-api-server-proxy-chart).
 
 ### Certificate propagation paths
 
 The certificate data is propagated though Kyma and delivered to several components.
 
 ![Certificate propagation](./assets/certificate-propagation.svg)
-
 
 1. Kyma Installer reads the override files you have configured.
 2. Kyma installer passes the values to the specific Kyma components.
@@ -74,40 +69,40 @@ The table shows the order in which the configuration elements are created. The o
   <summary label="own-certificate">
   Bring Your Own Certificate
   </summary>
-  | **Kind** | **Name** | **Namespace** |
-  | :--- | :--- | :--- | 
-  | Secret | ingress-tls-cert | `kyma-system` |
-  | ConfigMap | net-global-overrides | `kyma-installer `| 
-  | Secret | kyma-gateway-certs | `istio-system` |
-  | Secret | kyma-gateway-certs-cacert | `istio-system `|
-  | Secret | apiserver-proxy-tls-cert | `kyma-system` | 
-  | ConfigMap | apiserver-proxy | `kyma-system `|  
+  |**Component**| **Kind** | **Name** | **Namespace** |
+  | :--- | :--- | :--- | :--- | 
+  | xip-patch | Secret | ingress-tls-cert | `kyma-system` |
+  | xip-patch | ConfigMap | net-global-overrides | `kyma-installer `| 
+  | core/gateway | Secret | kyma-gateway-certs | `istio-system` |
+  | core/gateway | Secret | kyma-gateway-certs-cacert | `istio-system `|
+  | apiserver-proxy | Secret | apiserver-proxy-tls-cert | `kyma-system` | 
+  | apiserver-proxy | ConfigMap | apiserver-proxy | `kyma-system `|  
   </details>
   <details>
   <summary label="demo-xip">
   Demo xip.io setup
   </summary>
-  | **Kind** | **Name** | **Namespace** |
-  | :--- | :--- | :--- | 
-  | Secret | ingress-tls-cert | `kyma-system` |
-  | ConfigMap | net-global-overrides | `kyma-installer `| 
-  | Secret | kyma-gateway-certs | `istio-system` |
-  | Secret | kyma-gateway-certs-cacert | `istio-system `|
-  | Secret | apiserver-proxy-tls-cert | `kyma-system` | 
-  | ConfigMap | apiserver-proxy | `kyma-system` |
+  |**Component**| **Kind** | **Name** | **Namespace** |
+  | :--- | :--- | :--- | :--- | 
+  | xip-patch | Secret | ingress-tls-cert | `kyma-system` |
+  | xip-patch | ConfigMap | net-global-overrides | `kyma-installer `| 
+  | core/gateway | Secret | kyma-gateway-certs | `istio-system` |
+  | core/gateway | Secret | kyma-gateway-certs-cacert | `istio-system `|
+  | apiserver-proxy | Secret | apiserver-proxy-tls-cert | `kyma-system` | 
+  | apiserver-proxy | ConfigMap | apiserver-proxy | `kyma-system `|  
   </details>
   <details>
   <summary label="gardener">
   Gardener-managed 
   </summary>
-  | **Kind** | **Name** | **Namespace** |
-  | :--- | :--- | :--- | 
-  | Secret | ingress-tls-cert | `kyma-system `|
-  | ConfigMap | net-global-overrides | `kyma-installer `| 
-  | Secret | kyma-gateway-certs-cacert | `istio-system` |
-  | Certificate | kyma-tls-cert | `istio-system`|
-  | Certificate | apiserver-proxy-tls-cert | `kyma-system` | 
-  | ConfigMap | apiserver-proxy | `kyma-system` |
+  |**Component**| **Kind** | **Name** | **Namespace** |
+  | :--- | :--- | :--- | :--- | 
+  | xip-patch | Secret | ingress-tls-cert | `kyma-system `|
+  | xip-patch | ConfigMap | net-global-overrides | `kyma-installer `| 
+  | core/gateway | Secret | kyma-gateway-certs-cacert | `istio-system` |
+  | xip-patch | Certificate | kyma-tls-cert | `istio-system`|
+  | apiserver-proxy | Certificate | apiserver-proxy-tls-cert | `kyma-system` | 
+  | apiserver-proxy |ConfigMap | apiserver-proxy | `kyma-system` |
    </details>
 </div>
 
