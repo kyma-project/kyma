@@ -22,6 +22,8 @@ func (s *GenericService) List(result Appendable) error {
 
 func (s *GenericService) GetInNamespace(name, namespace string, result interface{}) error {
 	key := fmt.Sprintf("%s/%s", namespace, name)
+	fmt.Print("GETBYKEY")
+	fmt.Println(key)
 	return s.GetByKey(key, result)
 }
 
@@ -47,6 +49,10 @@ func (s *GenericService) UpdateInNamespace(name, namespace string, result interf
 }
 
 func (s *GenericService) DeleteInNamespace(namespace, name string, res runtime.Object) error {
+	fmt.Print("NS")
+	fmt.Println(namespace)
+	fmt.Print("NAME")
+	fmt.Println(name)
 	err := s.GetInNamespace(name, namespace, res)
 	if err != nil {
 		return err
@@ -54,5 +60,16 @@ func (s *GenericService) DeleteInNamespace(namespace, name string, res runtime.O
 
 	res = res.DeepCopyObject()
 	err = s.ServiceBase.DeleteInNamespace(name, namespace)
+	return err
+}
+
+func (s *GenericService) Delete(name string, res runtime.Object) error {
+	err := s.Get(name, res)
+	if err != nil {
+		return err
+	}
+
+	res = res.DeepCopyObject()
+	err = s.ServiceBase.Delete(name)
 	return err
 }

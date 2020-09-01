@@ -118,7 +118,11 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	makePluggable(oAuthResolver)
 
 	rolesResolver := roles.New(genericServiceFactory)
-	//makePluggable(rolesResolver)
+	makePluggable(rolesResolver)
+	err = rolesResolver.Enable() // enable manually
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing roles resolver")
+	}
 
 	return &Resolver{
 		k8s:        k8sResolver,
