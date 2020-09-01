@@ -10,16 +10,12 @@ metadata:
 data:
   {{- if .Values.global.isLocalEnv }}
   global.environment.type: "local"
-  global.environment.ownDomain: "true"
   {{- else if .Values.global.isOwnDomain }}
   global.environment.type: "own-domain"
-  global.environment.own-domain: "true"
   {{- else if .Values.global.isGardenerEnv }}
   global.environment.type: "gardener"
-  global.environment.gardener: "true"
   {{- else if .Values.global.isXipEnv }}
   global.environment.type: "xip"
-  global.environment.xip: "true"
   {{- end }}
   {{- if .Values.global.domainName }}
   global.ingress.domainName: "{{ .Values.global.domainName }}"
@@ -48,7 +44,6 @@ metadata:
     kyma-project.io/installation: ""
     component: certificates
 data:
-  modules.manager.enabled: "true"
+  modules.manager.enabled: "false"
   modules.xip.enabled: "false"
   modules.gardener.enabled: "false"
-  modules.ownDomain.enabled: "true"

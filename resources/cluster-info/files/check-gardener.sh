@@ -27,6 +27,7 @@ PATCH_YAML=$(cat << EOF
 ---
 data:
   global.ingress.domainName: "${DOMAIN}"
+  global.apiserver.domainName: "${DOMAIN}"
   global.environment.type: "gardener"
   global.environment.gardener: "true"
 EOF
@@ -48,7 +49,6 @@ PATCH_YAML=$(cat << EOF
 data:
   modules.manager.enabled: "false"
   modules.gardener.enabled: "true"
-  modules.own-domain.enabled: "false"
 EOF
 )
 

@@ -12,6 +12,8 @@ spec:
   version: "__VERSION__"
   url: "__URL__"
   components:
+    - name: "cluster-info"
+      namespace: "kyma-installer"
     - name: "cluster-essentials"
       namespace: "kyma-system"
     - name: "testing"
@@ -20,8 +22,6 @@ spec:
       namespace: "istio-system"
     - name: "istio-kyma-patch"
       namespace: "istio-system"
-    - name: "cluster-info"
-      namespace: "kyma-installer"
     - name: "certificates"
       namespace: "istio-system"
     # - name: "xip-patch"

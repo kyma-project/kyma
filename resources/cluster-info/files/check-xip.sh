@@ -10,17 +10,6 @@ else
     exit 0
 fi
 
-if [ -z "${GLOBAL_IP}" ]; then
-    echo "---> No GLOBAL_IP has been set, defaulting to xip.io"
-    EXTERNAL_PUBLIC_IP=$(kubectl get service -n "${ISTIO_GATEWAY_NAMESPACE}" "${ISTIO_GATEWAY_NAME}" -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
-    if [[ -z "$EXTERNAL_PUBLIC_IP" ]]; then
-        echo "---> Could not get IP, exitting"
-        exit 1
-    fi
-    DOMAIN="${EXTERNAL_PUBLIC_IP}.xip.io"
-    IP="${EXTERNAL_PUBLIC_IP}"
-fi
-
 PATCH_YAML=$(cat << EOF
 ---
 data:
@@ -46,7 +35,6 @@ PATCH_YAML=$(cat << EOF
 data:
   modules.manager.enabled: "true"
   modules.xip.enabled: "true"
-  modules.own-domain.enabled: "false"
 EOF
 )
 
