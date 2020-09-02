@@ -18,13 +18,13 @@ metadata:
   name: $NAME
   namespace: $NAMESPACE
 spec:
-runtime: nodejs12
-source: |
-  module.exports = {
-    main: function(event, context) {
-      return 'Hello World!'
+  runtime: nodejs12
+  source: |
+    module.exports = {
+      main: function(event, context) {
+        return 'Hello World!'
+      }
     }
-  }
 EOF
 ```
 
@@ -42,13 +42,13 @@ metadata:
   name: $NAME
   namespace: $NAMESPACE
 spec:
-runtime: nodejs10
-source: |
-  module.exports = {
-    main: function(event, context) {
-      return 'Hello World!'
+  runtime: nodejs10
+  source: |
+    module.exports = {
+      main: function(event, context) {
+        return 'Hello World!'
+      }
     }
-  }
 EOF
 ```
 
@@ -66,10 +66,10 @@ metadata:
   name: $NAME
   namespace: $NAMESPACE
 spec:
-runtime: python38
-source: |
-  def main(event, context):
-    return 'Hello world!'
+  runtime: python38
+  source: |
+    def main(event, context):
+      return 'Hello world!'
 EOF
 ```
 
