@@ -5,9 +5,9 @@ metadata:
   name: {{ include "cluster-info.fullname" . }}-xip
   annotations: 
     helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    # helm.sh/hook-delete-policy: "before-hook-creation"
-    helm.sh/hook-weight: "30"
+    # helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook-weight: "20"
 spec:
   backoffLimit: 3
   template:
@@ -26,31 +26,23 @@ spec:
           - -c
           - |
 {{ .Files.Get "files/check-xip.sh" | printf "%s" | indent 12 }}
+        volumeMounts:
+        - name: config
+          mountPath: /etc/config/
+          readOnly: true
         env:
-        - name: ENV_TYPE
-          valueFrom:
-            configMapKeyRef:
-              name: {{ .Values.configMapName }}
-              key: global.environment.type
-              optional: true
-        - name: GLOBAL_DOMAIN
-          valueFrom:
-            configMapKeyRef:
-              name: {{ .Values.configMapName }}
-              key: global.ingress.domainName
-              optional: true
-        - name: GLOBAL_IP
-          valueFrom:
-            configMapKeyRef:
-              name: {{ .Values.configMapName }}
-              key: global.loadBalancerIP
-              optional: true
+        - name: "CONFIG_MAP_NAME"
+          value: "{{ .Values.configMapName }}"
+        - name: "CONFIG_MAP_DIR"
+          value: "/etc/config"
         - name: CLUSTER_INFO_NS
           value: "{{ .Release.Namespace }}"
         - name: CLUSTER_INFO_CM
           value: "{{ .Values.configMapName }}"
-        - name: ISTIO_GATEWAY_NAME
-          value: "{{ .Values.istio.gateway.name }}"
-        - name: ISTIO_GATEWAY_NAMESPACE
-          value: "{{ .Values.istio.gateway.namespace }}"
+        - name: MANAGER_ENABLED
+          value: "{{ .Values.global.certificates.manager.enabled }}"
         terminationMessagePolicy: "FallbackToLogsOnError"
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Values.configMapName }}

@@ -1,10 +1,11 @@
 set -ex
 
-CERT_TYPE=$(cat ${CONFIG_MAP_DIR}/global.certificates.type)
-
 echo "--> Is legacy mode?"
 if [[ -s "${CONFIG_MAP_DIR}/global.ingress.tlsCrt" && "${CONFIG_MAP_DIR}/global.ingress.tlsKey" ]]; then
-	echo "----> Legacy Cert overrides detected, legacy mode enabled"
+  echo "----> Legacy Cert overrides detected, legacy mode enabled"
+else
+  echo "----> Not legacy mode, bye"
+  exit 0
 fi
 
 PATCH_YAML=$(cat << EOF
