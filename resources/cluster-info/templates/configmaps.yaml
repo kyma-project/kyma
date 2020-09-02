@@ -46,7 +46,16 @@ metadata:
     kyma-project.io/installation: ""
     component: certificates
 data:
-  modules.manager.enabled: "false"
-  modules.xip.enabled: "false"
-  modules.gardener.enabled: "false"
-  modules.legacy.enabled: "false"
+  modules.manager.enabled: "{{ .Values.global.certificates.manager.enabled }}"
+  {{- if eq .Values.global.certificates.type "xip" }}
+  modules.xip.enabled: "true"
+  {{- end }}
+  {{- if eq .Values.global.certificates.type "gardener" }}
+  modules.gardener.enabled: "true"
+  {{- end }}
+  {{- if eq .Values.global.certificates.type "legacy" }}
+  modules.legacy.enabled: "true"
+  {{- end }}
+  {{- if eq .Values.global.certificates.type "user-provided" }}
+  modules.user-provided.enabled: "true"
+  {{- end }}

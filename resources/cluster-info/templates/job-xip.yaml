@@ -25,6 +25,7 @@ spec:
           - /bin/bash
           - -c
           - |
+            exit 0
 {{ .Files.Get "files/check-xip.sh" | printf "%s" | indent 12 }}
         volumeMounts:
         - name: config
