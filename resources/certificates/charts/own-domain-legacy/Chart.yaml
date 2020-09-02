@@ -1,5 +1,5 @@
 apiVersion: v2
-name: certificates
+name: own-domain-legacy
 description: A Helm chart for Kubernetes
 
 # A chart can be either an 'application' or a 'library' chart.
@@ -21,26 +21,3 @@ version: 0.1.0
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 appVersion: 1.16.0
-dependencies:
-  - name: cert-manager
-    version: v0.16.1
-    condition: modules.manager.enabled
-  - name: xip
-    version: 0.1.0
-    condition: modules.xip.enabled
-  - name: gardener
-    version: 0.1.0
-    condition: modules.gardener.enabled
-  - name: own-domain
-    version: 0.1.0
-    condition: modules.own-domain.enabled
-  - name: own-domain-legacy
-    version: 0.1.0
-    condition: modules.own-domain-legacy.enabled
-
-# cluster-info release/job który sprawdza 
-# certificates release jako zbiór subchartów z jobami dedykowanymi do obsługi domeny/certyfikatów
-
-# cluster-essential: czy jesteśmy na gardenerze
-# na gardnerze/minikube certificates.manager.enabled:false
-# certificates tworzone na if Capabilities

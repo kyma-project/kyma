@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kyma-gateway-certs
+  namespace: istio-system
+data:
+  tls.crt: {{ .Values.global.tlsCrt }}
+  tls.key: {{ .Values.global.tlsKey }}
+type: kubernetes.io/tls
