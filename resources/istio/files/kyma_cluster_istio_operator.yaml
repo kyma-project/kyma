@@ -114,7 +114,7 @@ spec:
 
     # Security feature
     citadel:
-      enabled: false
+      enabled: true
       k8s:
         strategy:
           rollingUpdate:
