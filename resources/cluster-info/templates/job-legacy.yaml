@@ -16,7 +16,7 @@ spec:
       labels:
         app: {{ include "cluster-info.fullname" . }}-legacy
     spec:
-      serviceAccountName: {{ include "cluster-info.fullname" . }}-legacy
+      serviceAccountName: {{ include "cluster-info.fullname" . }}
       restartPolicy: Never
       containers:
       - name: {{ include "cluster-info.fullname" . }}-legacy

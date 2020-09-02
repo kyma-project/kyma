@@ -5,7 +5,7 @@ global:
   isLocalEnv: false
   certificates:
     manager:
-      enabled: false
+      enabled: true
     type: "detect" # legacy/gardener/xip/user-provided/detect
 
 configMapName: net-global-overrides

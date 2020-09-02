@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "cluster-info.fullname" . }}-xip
+  name: {{ include "cluster-info.fullname" . }}-user
   annotations: 
     helm.sh/hook: post-install,post-upgrade
     # helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
@@ -12,21 +12,20 @@ spec:
   backoffLimit: 3
   template:
     metadata:
-      name: {{ include "cluster-info.fullname" . }}-xip
+      name: {{ include "cluster-info.fullname" . }}-user
       labels:
-        app: {{ include "cluster-info.fullname" . }}-xip
+        app: {{ include "cluster-info.fullname" . }}-user
     spec:
-      serviceAccountName: {{ include "cluster-info.fullname" . }}-xip
+      serviceAccountName: {{ include "cluster-info.fullname" . }}
       restartPolicy: Never
       containers:
-      - name: {{ include "cluster-info.fullname" . }}-xip
+      - name: {{ include "cluster-info.fullname" . }}-user
         image: {{ .Values.jobs.image }}:{{ .Values.jobs.tag }}
         command:
           - /bin/bash
           - -c
           - |
-            exit 0
-{{ .Files.Get "files/check-xip.sh" | printf "%s" | indent 12 }}
+{{ .Files.Get "files/check-user.sh" | printf "%s" | indent 12 }}
         volumeMounts:
         - name: config
           mountPath: /etc/config/
