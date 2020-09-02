@@ -691,6 +691,19 @@ func TestPeerAuthenticationEqual(t *testing.T) {
 			},
 			expect: false,
 		},
+		"equal when labels, mtls and selector are equal but other fields are different": {
+			func() *securityv1beta1.PeerAuthentication {
+				p := peerAuthentication.DeepCopy()
+				p.Annotations = map[string]string{
+					"foo": fmt.Sprintf("%s%s", p.Annotations["foo"], "bar"),
+				}
+				p.Spec.XXX_NoUnkeyedLiteral = struct{}{}
+				p.Spec.XXX_unrecognized = nil
+				p.Spec.XXX_sizecache = 0
+				return p
+			},
+			true,
+		},
 		"not equal when labels differ": {
 			prep: func() *securityv1beta1.PeerAuthentication {
 				p := peerAuthentication.DeepCopy()
