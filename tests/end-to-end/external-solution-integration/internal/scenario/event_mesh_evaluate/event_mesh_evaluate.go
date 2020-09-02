@@ -45,9 +45,10 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	return []step.Step{
 		testsuite.NewLoadStoredCertificates(dataStore, state),
 		step.Retry(
-			testsuite.NewResetCounterPod(testService),
+			//testsuite.NewResetCounterPod(testService), no longer needed, as counter will not be checked
 			testsuite.NewSendEventToMesh(s.TestID, helpers.FunctionPayload, state),
-			testsuite.NewCheckCounterPod(testService, 1, retryOpts...),
+			testsuite.NewCheckEventId(testService, s.TestID, retryOpts...),
+			//testsuite.NewCheckCounterPod(testService, 1, retryOpts...),, needs to be replaced with checkTestId
 		).WithRetryOptions(
 			retry.Attempts(3),
 			retry.DelayType(retry.FixedDelay),
