@@ -42,6 +42,7 @@ spec:
         {{- with .Values.volumeMountsExtra }}
         {{- tpl . $ | nindent 8 }}
         {{- end }}
+        {{- if .Values.livenessProbe.enabled }}
         livenessProbe:
           httpGet:
             path: /healthz
@@ -50,6 +51,7 @@ spec:
           timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
           initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
           failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+        {{- end -}}
       {{ if .Values.dex.useStaticConnector }}
       initContainers:
       - name: dex-users-configurator

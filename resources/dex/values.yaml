@@ -94,6 +94,7 @@ global:
 nodeSelector: {}
 
 livenessProbe:
+  enabled: false
   initialDelaySeconds: 60
   periodSeconds: 30
   timeoutSeconds: 5
