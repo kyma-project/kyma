@@ -18,7 +18,7 @@ rules:
 - apiGroups: ["*"]
   resources: ["secrets"]
   verbs: ["create", "get", "update", "delete"]
-- apiGroups: ["config.istio.io"]
+- apiGroups: ["security.istio.io"]
   resources: ["authorizationpolicies"]
   verbs: ["get", "update", "list", "create", "delete"]
 ---

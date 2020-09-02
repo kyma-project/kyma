@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	Group   = "config.istio.io"
-	Version = "v1alpha2"
+	Group   = "security.istio.io"
+	Version = "v1beta1"
 )
 
 var (
@@ -34,8 +34,8 @@ func Resource(resource string) schema.GroupResource {
 
 // Adds the list of known types to Scheme.
 func addKnownTypes(scheme *runtime.Scheme) error {
-	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("authorizationPolicy"), &AuthorizationPolicy{})
-	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("authorizationPolicyList"), &AuthorizationPolicyList{})
+	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("AuthorizationPolicy"), &AuthorizationPolicy{})
+	scheme.AddKnownTypeWithName(SchemeGroupVersion.WithKind("AuthorizationPolicyList"), &AuthorizationPolicyList{})
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil
 }
