@@ -142,7 +142,7 @@ containers:
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v0.22.0
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:305bee60
+        value: eu.gcr.io/kyma-project/function-build-init:PR-9340
 
 services:
   manager:
