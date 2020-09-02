@@ -8,14 +8,16 @@ metadata:
     installer: overrides
     kyma-project.io/installation: ""
 data:
-  {{- if .Values.global.isLocalEnv }}
-  global.environment.type: "local"
-  {{- else if .Values.global.isOwnDomain }}
-  global.environment.type: "own-domain"
-  {{- else if .Values.global.isGardenerEnv }}
-  global.environment.type: "gardener"
-  {{- else if .Values.global.isXipEnv }}
-  global.environment.type: "xip"
+  {{- if or (eq .Values.global.isLocalEnv true) (eq .Values.global.certificates.type "legacy") }}
+  global.certificates.type: "legacy"
+  {{- else if eq .Values.global.certificates.type "gardener" }}
+  global.certificates.type: "gardener"
+  {{- else if eq .Values.global.certificates.type "xip" }}
+  global.certificates.type: "xip"
+  {{- else if eq .Values.global.certificates.type "user-provided" }}
+  global.certificates.type: "user-provided"
+  {{- else }}
+  global.certificates.type: "detect"
   {{- end }}
   {{- if .Values.global.domainName }}
   global.ingress.domainName: "{{ .Values.global.domainName }}"
@@ -26,10 +28,10 @@ data:
   {{- if .Values.global.minikubeIP }}
   global.minikubeIP: "{{ .Values.global.minikubeIP }}"
   {{- end }}
-  {{- if .Values.global.minikubeIP }}
+  {{- if .Values.global.tlsCrt }}
   global.ingress.tlsCrt: "{{ .Values.global.tlsCrt }}"
   {{- end }}
-  {{- if .Values.global.minikubeIP }}
+  {{- if .Values.global.tlsKey }}
   global.ingress.tlsKey: "{{ .Values.global.tlsKey }}"
   {{- end }}
 
@@ -47,3 +49,4 @@ data:
   modules.manager.enabled: "false"
   modules.xip.enabled: "false"
   modules.gardener.enabled: "false"
+  modules.legacy.enabled: "false"

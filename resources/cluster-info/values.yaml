@@ -3,6 +3,10 @@
 # Declare variables to be passed into your templates.
 global:
   isLocalEnv: false
+  certificates:
+    manager:
+      enabled: false
+    type: "detect" # legacy/garden/xip/user-provided/detect
 
 configMapName: net-global-overrides
 jobs:
