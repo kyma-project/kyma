@@ -3,11 +3,15 @@
 {{ $configMapLen := int (add1 (div $fileLen .Values.jobs.crdsInConfigMap)) }}
 
 {{ $currentScope := . }}
-{{ $skipCrds := .Values.global.skipCrds }}
+{{ $skipCrds := regexSplit "," .Values.global.skipCrds -1 }} #split words between "," into a list
+{{ $skipCrdList := list }} #Iterate over the values to trim whitespaces
+{{ range $_, $toSkip := $skipCrds }}
+{{ $skipCrdList = append $skipCrdList (trim $toSkip) }}
+{{ end }}
 
 {{ $filePaths := list }}
 {{ range $path, $_ := $files }}
-{{ if (not (contains (base $path) $skipCrds)) }}
+{{ if (not (has (base $path) $skipCrdList)) }}
 {{ $filePaths = append $filePaths (base $path) }}
 {{ end }}
 {{ end }}
