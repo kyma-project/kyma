@@ -9,7 +9,7 @@ import (
 func TestConfig(t *testing.T) {
 	t.Parallel()
 
-	env := gateway.EnvConfig{ClientID: "someID", ClientSecret: "someSecret", TokenEndpoint: "someEndpoint"}
+	env := &gateway.EnvConfig{ClientID: "someID", ClientSecret: "someSecret", TokenEndpoint: "someEndpoint"}
 	conf := Config(env)
 
 	if env.ClientID != conf.ClientID {

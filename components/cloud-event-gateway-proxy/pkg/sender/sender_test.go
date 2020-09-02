@@ -2,58 +2,58 @@ package sender
 
 import (
 	"context"
-	"go.opencensus.io/plugin/ochttp"
+	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/gateway"
+	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/oauth"
+	testingutils "github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/testing"
+)
+
+const (
+	// mock server endpoints
+	tokenEndpoint  = "/token"
+	eventsEndpoint = "/events"
+
+	// connection settings
+	maxIdleConns        = 100
+	maxIdleConnsPerHost = 200
 )
 
 func TestNewHttpMessageSender(t *testing.T) {
 	t.Parallel()
 
-	httpClient := &http.Client{}
-	connectionArgs := &ConnectionArgs{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost}
-	msgSender, err := NewHttpMessageSender(connectionArgs, target, httpClient)
+	client := oauth.NewClient(context.Background(), &gateway.EnvConfig{})
+	defer client.CloseIdleConnections()
+
+	msgSender, err := NewHttpMessageSender(eventsEndpoint, client)
 
 	if err != nil {
 		t.Errorf("Failed to create a new message sender with error: %v", err)
 	}
-	if msgSender.Target != target {
-		t.Errorf("Message sender target misconfigured want: %s but got: %s", target, msgSender.Target)
+	if msgSender.Target != eventsEndpoint {
+		t.Errorf("Message sender target is misconfigured want: %s but got: %s", eventsEndpoint, msgSender.Target)
 	}
-
-	ocTransport, ok := httpClient.Transport.(*ochttp.Transport)
-	if !ok {
-		t.Errorf("Failed to convert HTTP transport")
-	}
-
-	httpTransport, ok := ocTransport.Base.(*http.Transport)
-	if !ok {
-		t.Errorf("Failed to convert OpenCensus transport")
-	}
-
-	if httpTransport.MaxIdleConns != maxIdleConns {
-		t.Errorf("HTTP Client Transport MaxIdleConns is misconfigured want: %d but got: %d", maxIdleConns, httpTransport.MaxIdleConns)
-	}
-	if httpTransport.MaxIdleConnsPerHost != maxIdleConnsPerHost {
-		t.Errorf("HTTP Client Transport MaxIdleConnsPerHost is misconfigured want: %d but got: %d", maxIdleConnsPerHost, httpTransport.MaxIdleConnsPerHost)
+	if msgSender.Client != client {
+		t.Errorf("Message sender client is misconfigured want: %#v but got: %#v", client, msgSender.Client)
 	}
 }
 
 func TestNewCloudEventRequestWithTarget(t *testing.T) {
 	t.Parallel()
 
-	httpClient := &http.Client{}
-	connectionArgs := &ConnectionArgs{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost}
+	client := oauth.NewClient(context.Background(), &gateway.EnvConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
+	defer client.CloseIdleConnections()
 
-	msgSender, err := NewHttpMessageSender(connectionArgs, target, httpClient)
+	msgSender, err := NewHttpMessageSender(eventsEndpoint, client)
 	if err != nil {
 		t.Errorf("Failed to create a new message sender with error: %v", err)
 	}
 
 	const ctxKey, ctxValue = "testKey", "testValue"
 	ctx := context.WithValue(context.Background(), ctxKey, ctxValue)
-	req, err := msgSender.NewCloudEventRequestWithTarget(ctx, target)
+	req, err := msgSender.NewCloudEventRequestWithTarget(ctx, eventsEndpoint)
 	if err != nil {
 		t.Errorf("Failed to create a CloudEvent HTTP request with error: %v", err)
 	}
@@ -63,8 +63,8 @@ func TestNewCloudEventRequestWithTarget(t *testing.T) {
 	if req.Method != http.MethodPost {
 		t.Errorf("HTTP request has invalid method want: %s but got: %s", http.MethodPost, req.Method)
 	}
-	if req.URL.Path != target {
-		t.Errorf("HTTP request has invalid target want: %s but got: %s", target, req.URL.Path)
+	if req.URL.Path != eventsEndpoint {
+		t.Errorf("HTTP request has invalid target want: %s but got: %s", eventsEndpoint, req.URL.Path)
 	}
 	if len(req.Header) > 0 {
 		t.Error("HTTP request should be created with empty headers")
@@ -84,40 +84,33 @@ func TestNewCloudEventRequestWithTarget(t *testing.T) {
 }
 
 func TestSend(t *testing.T) {
-	mockServer := startMockServer()
+	mockServer := testingutils.NewMockServer()
+	mockServer.Start(t, tokenEndpoint, eventsEndpoint, 60)
 	defer mockServer.Close()
 
-	httpClient := &http.Client{}
-	connectionArgs := &ConnectionArgs{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost}
+	ctx := context.Background()
+	emsCEURL := fmt.Sprintf("%s%s", mockServer.URL(), eventsEndpoint)
+	authURL := fmt.Sprintf("%s%s", mockServer.URL(), tokenEndpoint)
+	env := testingutils.NewEnvConfig(emsCEURL, authURL, maxIdleConns, maxIdleConnsPerHost)
+	client := oauth.NewClient(ctx, env)
+	defer client.CloseIdleConnections()
 
-	msgSender, err := NewHttpMessageSender(connectionArgs, mockServer.URL, httpClient)
+	msgSender, err := NewHttpMessageSender(emsCEURL, client)
 	if err != nil {
 		t.Errorf("Failed to create a new message sender with error: %v", err)
 	}
 
-	ctx := context.Background()
 	request, err := msgSender.NewCloudEventRequestWithTarget(ctx, msgSender.Target)
 	if err != nil {
 		t.Errorf("Failed to create a CloudEvent HTTP request with error: %v", err)
 	}
 
 	resp, err := msgSender.Send(request)
+	defer func() { _ = resp.Body.Close() }()
 	if err != nil {
 		t.Errorf("Failed to send request with error: %v", err)
 	}
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("HTTP response has invalid HTTP status code want: %d but got: %d", http.StatusOK, resp.StatusCode)
+	if resp.StatusCode > http.StatusNoContent {
+		t.Errorf("HTTP response has invalid HTTP status code want: %d but got: %d", http.StatusNoContent, resp.StatusCode)
 	}
 }
-
-func startMockServer() *httptest.Server {
-	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	}))
-}
-
-const (
-	target              = "/target"
-	maxIdleConns        = 100000000
-	maxIdleConnsPerHost = 200000000
-)

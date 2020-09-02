@@ -27,7 +27,7 @@ func NewHttpMessageReceiver(port int) *HttpMessageReceiver {
 	}
 }
 
-// Blocking
+// StartListen starts the HTTP message receiver and blocks until it receives a shutdown signal
 func (recv *HttpMessageReceiver) StartListen(ctx context.Context, handler http.Handler) error {
 	var err error
 	if recv.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", recv.port)); err != nil {
