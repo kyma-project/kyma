@@ -24,8 +24,6 @@ spec:
       namespace: "istio-system"
     - name: "certificates"
       namespace: "istio-system"
-    # - name: "xip-patch"
-    #   namespace: "kyma-installer"
     - name: "knative-serving"
       namespace: "knative-serving"
     - name: "knative-eventing"
