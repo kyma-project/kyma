@@ -103,6 +103,16 @@ func (ts *TestService) checkValue() (int, error) {
 	return response.Counter, nil
 }
 
+func (ts *TestService) CheckTestId(expectedId string) error {
+	actualId := expectedId // has to be replaced by logic to get the actual ID
+
+	if actualId != expectedId {
+		return errors.Errorf("actual testId different then expected value: Got: %v but expected %v", actualId, expectedId)
+	}
+
+	return nil
+}
+
 func (ts *TestService) IsReady() error {
 
 	url := ts.getHealthEndpointURL()
