@@ -28,9 +28,9 @@ Read more about the role of main Rafter components and controllers that manage t
 
 - **Bucket Controller** (BC) manages the [Bucket CR lifecycle](#details-bucket-custom-resource-lifecycle).
 
-- **Validation Service** is an optional service which ensures that the asset meets the validation requirements specified in the Asset CR before uploading it to the bucket. The service returns the validation status to the AC. See the example of the [AsyncAPI Service](#details-asyncapi-service).
+- **Validation Service** is an optional service which ensures that the asset meets the validation requirements specified in the Asset CR before uploading it to the bucket. The service returns the validation status to the AC. See the example of the [AsyncAPI Service](#details-async-api-service).
 
-- **Mutation Service** is an optional service which ensures that the asset is modified according to the mutation specification defined in the Asset CR before it is uploaded to the bucket. The service returns the modified asset to the AC. See the example of the [AsyncAPI Service](#details-asyncapi-service).
+- **Mutation Service** is an optional service which ensures that the asset is modified according to the mutation specification defined in the Asset CR before it is uploaded to the bucket. The service returns the modified asset to the AC. See the example of the [AsyncAPI Service](#details-async-api-service).
 
 - **Extraction Service** is an optional service which extracts metadata from assets. The metadata information is stored in the CR status. The service returns the asset metadata to the AC. See the example of the [Front Matter Service](#details-front-matter-service).
 
