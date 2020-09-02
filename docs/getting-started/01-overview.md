@@ -27,25 +27,7 @@ All guides, whenever possible, demonstrate the steps in both kubectl and Console
 - [curl](https://github.com/curl/curl)
 - [Kyma](/root/kyma/#installation-install-kyma-on-a-cluster) on a cluster of your choice.
 
-2. Download the `kubeconfig` file with the cluster configuration:
-
-  a. Access the Console UI of your Kyma cluster.
-
-  b. Click the user icon in the upper right corner.
-
-  c. Select **Get Kubeconfig** from the drop-down menu to download the configuration file to a selected location on your machine.
-
-  d. Open a terminal window.
-
-  e. Export the **KUBECONFIG** environment variable to point to the downloaded `kubeconfig`. Run this command:
-
-  ```bash
-  export KUBECONFIG={KUBECONFIG_FILE_PATH}
-  ```
-
-  >**NOTE:** Drag and drop the `kubeconfig` file in the terminal to easily add the path of the file to the `export KUBECONFIG` command you run.
-
-  f. Run `kubectl cluster-info` to check that you are connected to the correct cluster.
+2. [Download the `kubeconfig` file](/components/security#tutorials-get-the-kubeconfig-file) with the cluster configuration.
 
 ## Main actors
 

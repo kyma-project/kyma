@@ -3,13 +3,13 @@ title: Bind the Redis ServiceInstance to the microservice
 type: Getting Started
 ---
 
-In this guide, we will bind the created ServiceInstance of the Redis service to the `orders-service` microservice. Then, you will test the binding by sending a sample order to the microservice. This way you can check if the binding to the external Redis storage works and the order data is no longer removed upon the microservice Pod restart.
+In this guide, you will bind the created ServiceInstance of the Redis service to the `orders-service` microservice. Then, you will test the binding by sending a sample order to the microservice. This way you can check that the binding to the external Redis storage works and the order data no longer gets removed upon the microservice Pod restart.
 
 ## Reference
 
 To create the binding, you will use ServiceBinding and ServiceBindingUsage custom resources (CRs) managed by the [Service Catalog](https://svc-cat.io/docs/walkthrough/).
 
->**NOTE:** See the document on [provisioning and binding](/components/service-catalog/#details-provisioning-and-binding) to learn more about binding ServiceInstances to microservices in Kyma.
+>**NOTE:** Read more about [provisioning and binding ServiceInstances to microservices in Kyma](/components/service-catalog/#details-provisioning-and-binding).
 
 ## Steps
 
@@ -23,7 +23,7 @@ Follow these steps:
   kubectl
   </summary>
 
-1. Create a [ServiceBinding CR](https://svc-cat.io/docs/walkthrough/#step-5---requesting-a-servicebinding-to-use-the-serviceinstance) that points in its **spec.instanceRef** field to the Redis ServiceInstance created in the previous guide:
+1. Create a [ServiceBinding CR](https://svc-cat.io/docs/walkthrough/#step-5---requesting-a-servicebinding-to-use-the-serviceinstance) that, in its **spec.instanceRef** field, points to the Redis ServiceInstance created in the previous guide:
 
    ```yaml
    cat <<EOF | kubectl apply -f -
@@ -38,7 +38,7 @@ Follow these steps:
    EOF
    ```
 
-2. Check that the ServiceBinding CR was created. The last condition in the CR status should state `Ready True`:
+2. Check that the ServiceBinding CR was created. This is indicated by the last condition in the CR status being `Ready True`:
 
    ```bash
    kubectl get servicebinding orders-service -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
