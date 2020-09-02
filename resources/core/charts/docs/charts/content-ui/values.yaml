@@ -2,7 +2,7 @@ name: docs
 replicaCount: 1
 image:
   dir:
-  pullPolicy: IfNotPresent
+  pullPolicy: PR-1952
 service:
   internalPort: 80
   externalPort: 80
