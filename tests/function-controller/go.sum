@@ -297,6 +297,8 @@ github.com/kyma-project/helm-broker v1.0.0 h1:g1/9hqMsyn7lcggeVWbrm353t2sDiPLny3
 github.com/kyma-project/helm-broker v1.0.0/go.mod h1:VFnkD5ddzF9s8qcY12DRzYOznJJlpMbSRWGRgM4P1XA=
 github.com/kyma-project/kyma/components/function-controller v0.0.0-20200825094731-2ab8b8780e41 h1:SM6qz85FVFNOvuXPjMU7MTFA9svWxRE3xuNgl5MVOVw=
 github.com/kyma-project/kyma/components/function-controller v0.0.0-20200825094731-2ab8b8780e41/go.mod h1:6Fxxddum/XzkLRCXNdv05HNFK39f9fBEGQmzJ9ctfnU=
+github.com/kyma-project/kyma/components/function-controller v0.0.0-20200902071617-83c683010f30 h1:TOyjAvcm5VhjbbwQ1tcMhQkmsw6wv7Iky4X/sp68pH8=
+github.com/kyma-project/kyma/components/function-controller v0.0.0-20200902071617-83c683010f30/go.mod h1:6Fxxddum/XzkLRCXNdv05HNFK39f9fBEGQmzJ9ctfnU=
 github.com/lyft/protoc-gen-validate v0.0.13/go.mod h1:XbGvPuh87YZc5TdIa2/I4pLk0QoUACkjt2znoq26NVQ=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/mailru/easyjson v0.0.0-20160728113105-d5b7844b561a/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
