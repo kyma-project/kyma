@@ -99,3 +99,6 @@ files:
   - path: "./kyma/docs/security/08-04-add-connector.md"
     config:
       white-list-external: ["https://dex.{CLUSTER_DOMAIN}/callback"]
+  - path: "./kyma/docs/security/08-06-generate-kubeconfig.md"
+    config:
+      white-list-external: ["https://configurations-generator.{YOUR_CLUSTER_DOMAIN"]
