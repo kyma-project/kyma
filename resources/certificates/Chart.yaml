@@ -34,9 +34,9 @@ dependencies:
   - name: own-domain
     version: 0.1.0
     condition: modules.own-domain.enabled
-  - name: own-domain-legacy
+  - name: legacy
     version: 0.1.0
-    condition: modules.own-domain-legacy.enabled
+    condition: modules.legacy.enabled
 
 # cluster-info release/job który sprawdza 
 # certificates release jako zbiór subchartów z jobami dedykowanymi do obsługi domeny/certyfikatów
