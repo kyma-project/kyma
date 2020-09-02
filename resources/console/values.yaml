@@ -25,4 +25,4 @@ global:
   console_backend_service:
     version: 8387ee2b
   console_backend_service_test:
-    version: 8bddbb53
+    version: c29c3c3c
