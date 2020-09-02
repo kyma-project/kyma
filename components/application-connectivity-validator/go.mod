@@ -27,6 +27,5 @@ require (
 
 replace (
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9
-	k8s.io/apimachinery => k8s.io/apimachinery v0.17.2
-	k8s.io/client-go => k8s.io/client-go v0.17.2
+	k8s.io/client-go => k8s.io/client-go v0.18.4
 )
