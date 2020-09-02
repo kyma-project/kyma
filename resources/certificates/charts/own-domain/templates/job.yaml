@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    #    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+spec:
+  template:
+    metadata:
+      name: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}-service-account
+      restartPolicy: Never
+      containers:
+        - name: {{ .Release.Name }}
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+          command:
+            - bash
+            - -c
+            - |
+{{ tpl (.Files.Get "files/certs-check.sh" | printf "%s" | indent 14) . }}
+          env:
+            - name: KYMA_TLS_CERT
+              value: "kyma-tls-cert"
+            - name: APISERVER_PROXY_TLS_CERT
+              value: "apiserver-proxy-tls-cert"
+            - name: KYMA-CA-ISSUER
+              value: "kyma-ca-issuer"
+            - name: KYMA_TLS_SECRET
+              value: "kyma-gateway-certs"
+            - name: APISERVER_PROXY_TLS_SECRET
+              value: "apiserver-proxy-tls-cert"
