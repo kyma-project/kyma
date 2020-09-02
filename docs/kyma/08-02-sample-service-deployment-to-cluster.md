@@ -22,7 +22,7 @@ Follow these steps to get the `kubeconfig` file and configure the CLI to connect
 
 1. Access the Console UI of your Kyma cluster.
 2. Click the user icon in the upper right corner of the screen.
-3. Click the **Download config** button to download the `kubeconfig` file to a selected location on your machine.
+3. Click the **Get Kubeconfig** button to download the `kubeconfig` file to a selected location on your machine.
 4. Open a terminal window.
 5. Export the **KUBECONFIG** environment variable to point to the downloaded `kubeconfig`. Run this command:
 
