@@ -10,14 +10,14 @@ import (
 )
 
 // AuthorizationPolicyInterface allows to perform operations for Istio AuthorizationPolicies in kubernetes
-//go:generate mockery -name AuthorizationPolicyInterface
+//go:generate mockery --name AuthorizationPolicyInterface
 type AuthorizationPolicyInterface interface {
 	Create(policy *v1alpha2.AuthorizationPolicy) (*v1alpha2.AuthorizationPolicy, error)
 	Delete(name string, options *v1.DeleteOptions) error
 }
 
 // Repository allows to perform various operations for Istio resources
-//go:generate mockery -name Repository
+//go:generate mockery --name Repository
 type Repository interface {
 	// CreateAuthorizationPolicy creates AuthorizationPolicy
 	CreateAuthorizationPolicy(application string, appUID types.UID, serviceId, name string) apperrors.AppError

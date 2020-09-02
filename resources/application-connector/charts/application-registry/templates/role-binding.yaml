@@ -19,7 +19,7 @@ rules:
   resources: ["secrets"]
   verbs: ["create", "get", "update", "delete"]
 - apiGroups: ["config.istio.io"]
-  resources: ["rules", "handlers", "instances"]
+  resources: ["authorizationpolicies"]
   verbs: ["get", "update", "list", "create", "delete"]
 ---
 kind: RoleBinding

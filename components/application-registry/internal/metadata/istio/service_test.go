@@ -1,5 +1,5 @@
 package istio
-
+/*
 import (
 	"testing"
 
@@ -231,3 +231,5 @@ func TestService_Delete(t *testing.T) {
 	})
 
 }
+
+ */

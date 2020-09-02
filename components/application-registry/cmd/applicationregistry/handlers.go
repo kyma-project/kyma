@@ -142,9 +142,7 @@ func newIstioService(config *restclient.Config, namespace string) (istio.Service
 	}
 
 	repository := istio.NewRepository(
-		ic.IstioV1alpha2().Rules(namespace),
-		ic.IstioV1alpha2().Instances(namespace),
-		ic.IstioV1alpha2().Handlers(namespace),
+		ic.IstioV1alpha2().AuthorizationPolicies(namespace),
 		istio.RepositoryConfig{Namespace: namespace},
 	)
 
