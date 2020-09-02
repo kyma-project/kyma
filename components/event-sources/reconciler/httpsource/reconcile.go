@@ -308,7 +308,7 @@ func (r *Reconciler) getOrCreateService(src *sourcesv1alpha1.HTTPSource,
 	return service, nil
 }
 
-// getOrCreatePeerAuthentication returns the existing PeerAuthentication for a Revision of a Deployment, or
+// getOrCreatePeerAuthentication returns the existing PeerAuthentication for a Replica of a Deployment, or
 // creates it if it is missing.
 func (r *Reconciler) getOrCreatePeerAuthentication(src *sourcesv1alpha1.HTTPSource,
 	desiredPeerAuthentication *securityv1beta1.PeerAuthentication) (*securityv1beta1.PeerAuthentication, error) {
