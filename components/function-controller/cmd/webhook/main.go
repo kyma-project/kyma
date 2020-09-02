@@ -23,7 +23,8 @@ import (
 )
 
 var types = map[schema.GroupVersionKind]resourcesemantics.GenericCRD{
-	serverlessv1alhpa1.GroupVersion.WithKind("Function"): &serverlessv1alhpa1.Function{},
+	serverlessv1alhpa1.GroupVersion.WithKind("Function"):      &serverlessv1alhpa1.Function{},
+	serverlessv1alhpa1.GroupVersion.WithKind("GitRepository"): &serverlessv1alhpa1.GitRepository{},
 }
 
 type config struct {
