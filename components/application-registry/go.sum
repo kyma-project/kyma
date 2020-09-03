@@ -39,8 +39,6 @@ github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdko
 github.com/Shopify/logrus-bugsnag v0.0.0-20171204204709-577dee27f20d/go.mod h1:HI8ITrYtUY+O+ZhtlqUnD8+KwNPOyugEhfP9fdUIaEQ=
 github.com/Shopify/sarama v1.19.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=
 github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMxUHB2q5Ap20/P/eIdh4G0pI=
-github.com/Szymongib/kyma/components/application-gateway v0.0.0-20200902080656-573e032dd983 h1:uzIVrQoIgRwLlKgBGZ4LEea4RvpP0OXx4VBjCwpmAho=
-github.com/Szymongib/kyma/components/application-gateway v0.0.0-20200902080656-573e032dd983/go.mod h1:CBev1velA2qQHNAHsGJk0SPfMP3BUPEHdquL9y79ea4=
 github.com/VividCortex/gohistogram v1.0.0/go.mod h1:Pf5mBqqDxYaXu3hDrrU+w6nw50o/4+TcAqDqk/vUH7g=
 github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5/go.mod h1:SkGFH1ia65gfNATL8TAiHDNxPzPdmEL5uirI2Uyuz6c=
 github.com/agnivade/levenshtein v1.0.1/go.mod h1:CURSv5d9Uaml+FovSIICkLbAUZ9S4RqaHDIsdSBg7lM=
@@ -383,6 +381,8 @@ github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/kubernetes-sigs/go-open-service-broker-client v0.0.0-20190909175253-906fa5f9c249/go.mod h1:s8wBC55/DEkNa3YMY1WLgpT33Ghpmw7v+waIxh15dYI=
 github.com/kubernetes-sigs/service-catalog v0.3.0/go.mod h1:zRfgMd1T9HuXR24Qj4GOu/TGWABVGw62MGlyHVcpWnU=
+github.com/kyma-project/kyma/components/application-gateway v0.0.0-20200903161647-0fae3728c173 h1:O+TXtyIgMQEYSaOGSNnmLaZReJ5VsN829C0UYSOf358=
+github.com/kyma-project/kyma/components/application-gateway v0.0.0-20200903161647-0fae3728c173/go.mod h1:CBev1velA2qQHNAHsGJk0SPfMP3BUPEHdquL9y79ea4=
 github.com/kyma-project/kyma/components/application-operator v0.0.0-20200902071617-83c683010f30 h1:bqG/FehsUzEmeTOYZuzjVQQZCgWu545IHWRX9M5eq2I=
 github.com/kyma-project/kyma/components/application-operator v0.0.0-20200902071617-83c683010f30/go.mod h1:caerCWyllbJsqBM4gtwWW3QsRFgRuRmqYXOqrpji/Ms=
 github.com/kyma-project/rafter v0.0.0-20191209072228-90c07ef7c8a3 h1:Ni7EpzcGmx3azepyjug1We7m1rn8PnDtPkVMXU84tdQ=
