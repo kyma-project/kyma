@@ -2,6 +2,7 @@ package istio
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/application-registry/pkg/apis/istio/v1alpha2"
