@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/watch"
@@ -22,8 +23,12 @@ type ServiceInstance struct {
 	name        string
 	namespace   string
 	waitTimeout time.Duration
-	log         shared.Logger
+	log         *logrus.Entry
 	verbose     bool
+}
+
+func (s ServiceInstance) GetName() string {
+	return s.name
 }
 
 func New(name string, c shared.Container) *ServiceInstance {
@@ -74,7 +79,7 @@ func (si *ServiceInstance) Delete() error {
 	return nil
 }
 
-func (si *ServiceInstance) get() (*v1beta1.ServiceInstance, error) {
+func (si *ServiceInstance) Get() (*v1beta1.ServiceInstance, error) {
 	u, err := si.resCli.Get(si.name)
 	if err != nil {
 		return &v1beta1.ServiceInstance{}, errors.Wrapf(err, "while getting ServiceInstance %s in namespace %s", si.name, si.namespace)
@@ -89,12 +94,12 @@ func (si *ServiceInstance) get() (*v1beta1.ServiceInstance, error) {
 }
 
 func (si *ServiceInstance) WaitForStatusRunning() error {
-	serviceinstance, err := si.get()
+	serviceinstance, err := si.Get()
 	if err != nil {
 		return err
 	}
 
-	// we need to ensure that status is ready first, because otherwise we would not get any events in watchtools.Until
+	// we need to ensure that status is ready first, because otherwise we would not Get any events in watchtools.Until
 	if si.isReadyPhase(*serviceinstance) {
 		return nil
 	}

@@ -438,10 +438,9 @@
   revision = "ccab5234396729fee8dbf70620eafdfbc3d1a6af"
 
 [[projects]]
-  digest = "1:a4c5b20edb93502f2f90ac8042b6bf18a5d4a3d4da1e324cbdc5c0c210781b38"
+  digest = "1:9cc47dbb96d7c407d485b49b66685635dc5293839a0eebfd8f4fcc8b75fe7a17"
   name = "github.com/kyma-incubator/compass"
   packages = [
-    "components/connectivity-adapter/pkg/gqlcli",
     "components/director/internal/model",
     "components/director/pkg/apperrors",
     "components/director/pkg/graphql",
@@ -481,14 +480,6 @@
   revision = "8069217e0f42fef97b9e6fddb8b7c86ff5ba1999"
 
 [[projects]]
-  digest = "1:8139f3ca1f0523e8db13e12c21b5c1b3ec2f396ae27c64ca1bc126f8136d2e7f"
-  name = "github.com/machinebox/graphql"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "05b17f3157491bbfa5d6fc2006443a272d960d15"
-  version = "v0.2.2"
-
-[[projects]]
   digest = "1:7bbccd3dd7998f2a180264ec1d12e362ed8e02f55ea7b82ac0d0f48ffa2d8888"
   name = "github.com/mailru/easyjson"
   packages = [
@@ -499,6 +490,14 @@
   pruneopts = "NUT"
   revision = "8edcc4e51f39ddbd3505a3386aff3f435a7fd028"
   version = "v0.7.1"
+
+[[projects]]
+  digest = "1:b94761204ef188cce92f69d5f3089762fc4b7f41fea901c9590544ebfd5d5d27"
+  name = "github.com/matryer/is"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "94c589d890bea635baca9098f809a91f8dd2072e"
+  version = "v1.4.0"
 
 [[projects]]
   branch = "master"
@@ -1611,7 +1610,6 @@
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions",
-    "github.com/kyma-incubator/compass/components/connectivity-adapter/pkg/gqlcli",
     "github.com/kyma-incubator/compass/components/director/pkg/graphql",
     "github.com/kyma-project/kyma/components/application-gateway/pkg/authorization",
     "github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig",
@@ -1622,7 +1620,7 @@
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1",
-    "github.com/machinebox/graphql",
+    "github.com/matryer/is",
     "github.com/mcuadros/go-defaults",
     "github.com/meatballhat/negroni-logrus",
     "github.com/oklog/ulid",

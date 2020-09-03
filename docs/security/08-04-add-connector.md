@@ -6,7 +6,7 @@ type: Tutorials
 Add external identity providers to Kyma using [Dex connectors](https://github.com/dexidp/dex#connectors). You can add connectors to Dex by creating component overrides.
 This tutorial shows how to add a [GitHub](https://github.com/dexidp/dex/blob/master/Documentation/connectors/github.md) or [XSUAA](https://help.sap.com/viewer/65de2977205c403bbc107264b8eccf4b/Cloud/en-US/ea0281368f11472b8d2b145a2a28666c.html) connector and use it to authenticate users in Kyma.
 
->**NOTE:** Groups in Github are represented as teams. Read more to learn how to [manage teams in GitHub](https://help.github.com/articles/organizing-members-into-teams/)
+>**NOTE:** Groups in Github are represented as teams. Read more to learn how to [manage teams in GitHub](https://help.github.com/articles/organizing-members-into-teams/).
 
 ## Prerequisites
 
