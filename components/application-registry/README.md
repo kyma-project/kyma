@@ -123,7 +123,7 @@ Prerequisites:
 
  - [Mockery](https://github.com/vektra/mockery) 2.0 or higher
 
-To generate a mocks, run:
+To generate mocks, run:
 
 ```sh
 go generate ./...
