@@ -122,7 +122,7 @@ func (c *functionConverter) ToFunction(name, namespace string, in gqlschema.Func
 			Resources:   resources,
 			MinReplicas: minReplicas,
 			MaxReplicas: maxReplicas,
-			Type:  sourceType,
+			Type:        sourceType,
 			Runtime:     runtime,
 			Repository:  repository,
 		},
