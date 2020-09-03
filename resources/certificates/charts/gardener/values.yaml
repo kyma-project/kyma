@@ -7,18 +7,11 @@ jobs:
   tag: "v20200617-32c1f3ff"
 certs:
   ingress:
-    name: kyma-tls-cert
     secretName: kyma-gateway-certs
-    namespace: istio-system
-  apiserver:
-    name: apiserver-proxy-tls-cert
-    secretName: apiserver-proxy-tls-cert
-    namespace: kyma-system
 service:
   gateway:
     name: istio-ingressgateway
     namespace: istio-system
-  apiserver:
-    name: apiserver-proxy
-    namespace: kyma-system
-    enabled: false
+shootConfigMap:
+  name: shoot-info
+  namespace: kube-system

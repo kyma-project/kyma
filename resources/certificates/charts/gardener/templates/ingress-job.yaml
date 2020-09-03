@@ -5,8 +5,8 @@ metadata:
   name: {{ include "gardener.fullname" . }}-ingress
   annotations: 
     helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    # helm.sh/hook-delete-policy: "before-hook-creation"
+    # helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook-delete-policy: "before-hook-creation"
 spec:
   backoffLimit: 3
   template:
@@ -26,12 +26,14 @@ spec:
           - |
 {{ .Files.Get "files/service-annotate.sh" | printf "%s" | indent 12 }}
         env:
-        - name: GLOBAL_DOMAIN
-          value: "{{ .Values.global.ingress.domainName }}"
         - name: SERVICE_NAME
           value: "{{ .Values.service.gateway.name }}"
         - name: SERVICE_NAMESPACE
           value: "{{ .Values.service.gateway.namespace }}"
         - name: SERVICE_SECRET_NAME
           value: "{{ .Values.certs.ingress.secretName }}"
+        - name: SHOOT_CM_NAME
+          value: "{{ .Values.shootConfigMap.name }}"
+        - name: SHOOT_CM_NAMESPACE
+          value: "{{ .Values.shootConfigMap.namespace }}"
         terminationMessagePolicy: "FallbackToLogsOnError"

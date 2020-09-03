@@ -10,6 +10,8 @@ modules:
     enabled: false
   own-domain:
     enabled: false
+  legacy:
+    enabled: false
 
 tls:
   secretName: kyma-gateway-certs-2
