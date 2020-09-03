@@ -19,9 +19,19 @@ metadata:
 spec:
   runtime: nodejs12
   source: |
+    const _ = require('lodash')
+
     module.exports = {
       main: function(event, context) {
-        return 'Hello World!'
+        return _.kebabCase('Hello World from Node.js 12 Funtion');
+      }
+    }
+  deps: |
+    {
+      "name": "test-function-nodejs12",
+      "version": "1.0.0",
+      "dependencies": {
+        "lodash":"^4.17.20"
       }
     }
 EOF
@@ -42,9 +52,19 @@ metadata:
 spec:
   runtime: nodejs10
   source: |
+    const _ = require('lodash')
+
     module.exports = {
       main: function(event, context) {
-        return 'Hello World!'
+        return _.kebabCase('Hello World from Node.js 10 Funtion');
+      }
+    }
+  deps: |
+    {
+      "name": "test-function-nodejs12",
+      "version": "1.0.0",
+      "dependencies": {
+        "lodash":"^4.17.20"
       }
     }
 EOF
@@ -65,12 +85,18 @@ metadata:
 spec:
   runtime: python38
   source: |
-    import pydash
+    import requests
 
     def main(event, context):
-        return pydash.omit({'name': 'moe', 'age': 40}, 'age')
+        params = {'format': 'wookiee'}
+        r = requests.get('https://swapi.dev/api/people/1', params=params)
+        return r.json()
   deps: |
-    pydash==4.8.0
+    certifi==2020.6.20
+    chardet==3.0.4
+    idna==2.10
+    requests==2.24.0
+    urllib3==1.25.10
 EOF
 ```
 
