@@ -19,11 +19,11 @@ metadata:
 spec:
   runtime: nodejs12
   source: |
-    const _ = require('lodash')
+    const fetch = require("node-fetch");
 
     module.exports = {
-      main: function(event, context) {
-        return _.kebabCase('Hello World from Node.js 12 Funtion');
+      main: function (event, context) {
+        return fetch("https://swapi.dev/api/people/12").then(res => res.json())
       }
     }
   deps: |
@@ -31,7 +31,7 @@ spec:
       "name": "test-function-nodejs12",
       "version": "1.0.0",
       "dependencies": {
-        "lodash":"^4.17.20"
+        "node-fetch": "^2.6.0"
       }
     }
 EOF
@@ -56,7 +56,7 @@ spec:
 
     module.exports = {
       main: function(event, context) {
-        return _.kebabCase('Hello World from Node.js 10 Funtion');
+        return _.kebabCase('Hello World from Node.js 10 Function');
       }
     }
   deps: |
