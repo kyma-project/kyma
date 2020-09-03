@@ -30,6 +30,7 @@ This is an example GraphQL action implemented in Kyma out of the box.
 
   ```
   microFrontends(namespace: String!): [MicroFrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+
   ```
 
 This query secures the access to [MicroFrontend](/components/console/#custom-resource-micro-frontend) custom resources with specific names. To access it, the user must be bound to a role that allows to access:
@@ -52,3 +53,16 @@ To allow access specifically to the example query, create this RBAC role in the 
   ```
 
 > **NOTE:** Read also about [RBAC authorization in a Kubernetes cluster](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
+
+## Request flow
+This diagram illustrates the request flow for the Console Backend Service which uses a custom [GraphQL](http://graphql.org/) implementation:
+
+![GraphQL request flow](./assets/002-graphql-request-flow.svg)
+
+1. The user sends a request with an ID token to the GraphQL application.
+2. The GraphQL application validates the user token and extracts user data required to perform [Subject Access Review](https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access) (SAR).
+3. The [Kubernetes API Server](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/) performs SAR.
+4. Based on the results of SAR, the Kubernetes API Server informs the GraphQL application whether the user can perform the requested [GraphQL action](#details-graph-ql-available-graph-ql-actions).
+5. Based on the information provided by the Kubernetes API Server, the GraphQL application returns an appropriate response to the user.
+
+>**NOTE:** Read more about the [custom GraphQL implementation in Kyma](#details-graph-ql).
