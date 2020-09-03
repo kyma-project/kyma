@@ -1552,7 +1552,7 @@ prometheus:
     ##
     query:
       maxConcurrency: 100
-      timeout: 1m
+      timeout: 30s
 
     ## Namespaces to be selected for PrometheusRules discovery.
     ## If nil, select own namespace. Namespaces to be selected for ServiceMonitor discovery.
