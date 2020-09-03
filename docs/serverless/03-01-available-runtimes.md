@@ -89,7 +89,7 @@ spec:
 
     def main(event, context):
         params = {'format': 'wookiee'}
-        r = requests.get('https://swapi.dev/api/people/1', params=params)
+        r = requests.get('https://swapi.dev/api/people/13', params=params)
         return r.json()
   deps: |
     certifi==2020.6.20
