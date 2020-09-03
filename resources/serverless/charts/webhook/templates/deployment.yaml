@@ -39,11 +39,11 @@ spec:
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           resources:
             requests:
-              cpu: 50m
-              memory: 80Mi
+              cpu: 30m
+              memory: 50Mi
             limits:
-              cpu: 400m
-              memory: 400Mi
+              cpu: 300m
+              memory: 300Mi
           securityContext:
             allowPrivilegeEscalation: {{ .Values.container.allowPrivilegeEscalation }}
           ports:
