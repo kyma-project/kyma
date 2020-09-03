@@ -256,9 +256,21 @@ containers:
       - name: GF_AUTH_GENERIC_OAUTH_AUTH_URL
         value: "https://dex.{{ .Values.global.ingress.domainName }}/auth"
       {{- end }}
+      {{- if not .Values.env.GF_AUTH_GENERIC_OAUTH_TOKEN_URL }}
+      - name: GF_AUTH_GENERIC_OAUTH_TOKEN_URL
+        value: "https://dex.{{ .Values.global.ingress.domainName }}/token"
+      {{- end }}
+      {{- if not .Values.env.GF_AUTH_GENERIC_OAUTH_API_URL }}
+      - name: GF_AUTH_GENERIC_OAUTH_API_URL
+        value: "https://dex.{{ .Values.global.ingress.domainName }}/userinfo"
+      {{- end }}
       {{- if not .Values.env.GF_SERVER_ROOT_URL }}
       - name: GF_SERVER_ROOT_URL
         value: "https://grafana.{{ .Values.global.ingress.domainName }}/"
+      {{- end }}
+      {{- if .Values.kyma.grafana.useKymaGroups }}
+      - name: GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH
+        value: "contains(groups[*], `{{ .Values.global.kymaRuntime.adminGroup }}`) && 'Admin' || contains(groups[*], `{{ .Values.global.kymaRuntime.operatorGroup }}`) && 'Admin' || contains(groups[*], `{{ .Values.global.kymaRuntime.developerGroup }}`) && 'Editor' ||contains(groups[*], `{{ .Values.global.kymaRuntime.operatorGroup }}`) && 'Admin' || contains(groups[*], `{{ .Values.global.kymaRuntime.namespaceAdminGroup }}`) && 'Editor' || 'Editor'"
       {{- end }}
     {{- range $key, $value := .Values.envValueFrom }}
       - name: {{ $key | quote }}
