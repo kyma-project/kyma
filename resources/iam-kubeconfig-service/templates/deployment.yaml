@@ -51,12 +51,13 @@ spec:
         command:
           - sh
           - -c
-          - |
-            source /injected-config/domain.sh
+          -
         {{- if eq .Values.global.certificates.type "gardener" }}
-            /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client
+          - /app/app -kube-config-cluster-name=$(cat /injected-config/domain) -kube-config-url="https://apiserver.$(cat /injected-config/domain)" -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client
+        {{- else if .Values.global.isLocalEnv }}
+          - /app/app -kube-config-cluster-name=$(cat /injected-config/domain) -kube-config-url="https://apiserver.$(cat /injected-config/domain):9443" -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/etc/dex-tls-cert/tls.crt
         {{- else }}
-            /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/etc/dex-tls-cert/tls.crt
+          - /app/app -kube-config-cluster-name=$(cat /injected-config/domain) -kube-config-url="https://apiserver.$(cat /injected-config/domain)" -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/etc/dex-tls-cert/tls.crt
         {{- end  }}
         ports:
           - name: http
