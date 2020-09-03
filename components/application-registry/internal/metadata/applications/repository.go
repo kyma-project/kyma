@@ -21,7 +21,7 @@ const (
 )
 
 // AppManager contains operations for managing Application CRD
-//go:generate mockery -name AppManager
+//go:generate mockery --name AppManager
 type AppManager interface {
 	Update(ctx context.Context, application *v1alpha1.Application, options v1.UpdateOptions) (*v1alpha1.Application, error)
 	Get(ctx context.Context, name string, options v1.GetOptions) (*v1alpha1.Application, error)

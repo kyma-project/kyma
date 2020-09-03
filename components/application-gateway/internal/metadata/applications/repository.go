@@ -18,7 +18,7 @@ const (
 )
 
 // Manager contains operations for managing Application CRD
-//go:generate mockery -name=Manager
+//go:generate mockery --name=Manager
 type Manager interface {
 	Get(ctx context.Context, name string, options v1.GetOptions) (*v1alpha1.Application, error)
 }

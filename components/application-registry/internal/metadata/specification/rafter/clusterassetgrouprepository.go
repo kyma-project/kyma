@@ -19,7 +19,7 @@ const (
 	ClusterAssetGroupNameFormat = "%s-%s"
 )
 
-//go:generate mockery -name ResourceInterface
+//go:generate mockery --name ResourceInterface
 type ResourceInterface interface {
 	Get(ctx context.Context, name string, opts metav1.GetOptions, subresources ...string) (*unstructured.Unstructured, error)
 	Delete(ctx context.Context, name string, opts metav1.DeleteOptions, subresources ...string) error
@@ -27,7 +27,7 @@ type ResourceInterface interface {
 	Update(ctx context.Context, obj *unstructured.Unstructured, options metav1.UpdateOptions, subresources ...string) (*unstructured.Unstructured, error)
 }
 
-//go:generate mockery -name ClusterAssetGroupRepository
+//go:generate mockery --name ClusterAssetGroupRepository
 type ClusterAssetGroupRepository interface {
 	Get(id string) (clusterassetgroup.Entry, apperrors.AppError)
 	Upsert(documentationTopic clusterassetgroup.Entry) apperrors.AppError

@@ -28,12 +28,12 @@ type ProxyHandler interface {
 	ProxyAppConnectorRequests(w http.ResponseWriter, r *http.Request)
 }
 
-//go:generate mockery -name=ApplicationGetter
+//go:generate mockery --name=ApplicationGetter
 type ApplicationGetter interface {
 	Get(ctx context.Context, name string, options metav1.GetOptions) (*v1alpha1.Application, error)
 }
 
-//go:generate mockery -name=Cache
+//go:generate mockery --name=Cache
 type Cache interface {
 	Get(k string) (interface{}, bool)
 	Set(k string, x interface{}, d time.Duration)

@@ -22,7 +22,7 @@ const (
 )
 
 // ServiceDefinitionService is a service that manages ServiceDefinition objects.
-//go:generate mockery -name ServiceDefinitionService
+//go:generate mockery --name ServiceDefinitionService
 type ServiceDefinitionService interface {
 	// Create adds new ServiceDefinition.
 	Create(application string, serviceDefinition *model.ServiceDefinition) (id string, err apperrors.AppError)
@@ -43,7 +43,7 @@ type ServiceDefinitionService interface {
 	GetAPI(application, serviceId string) (*model.API, apperrors.AppError)
 }
 
-//go:generate mockery -name ApplicationGetter
+//go:generate mockery --name ApplicationGetter
 type ApplicationGetter interface {
 	Get(ctx context.Context, name string, options v1.GetOptions) (*alpha1.Application, error)
 }

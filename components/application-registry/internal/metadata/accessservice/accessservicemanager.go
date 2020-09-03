@@ -17,7 +17,7 @@ import (
 const appNameLabelFormat = "%s-application-gateway"
 
 // ServiceInterface has methods to work with Service resources.
-//go:generate mockery -name ServiceInterface
+//go:generate mockery --name ServiceInterface
 type ServiceInterface interface {
 	Create(context.Context, *corev1.Service, metav1.CreateOptions) (*corev1.Service, error)
 	Delete(context.Context, string, metav1.DeleteOptions) error

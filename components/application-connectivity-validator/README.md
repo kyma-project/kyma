@@ -33,3 +33,21 @@ The Application Connectivity Validator forwards only the requests with the `X-Fo
 - **CommonName** is the name of the Application custom resource.
 - (Optional) **Organization** is the tenant.
 - (Optional) **OrganizationalUnit** is the group.
+
+
+## Development
+
+### Generate mocks
+
+Requirements:
+ - [Mockery](https://github.com/vektra/mockery) version 2.0 or higher
+
+To generate a mocks, run:
+```sh
+go generate ./...
+```
+
+In case of adding new interface to mock or mock of existing interface not being generated add the following line directly above interface declaration:
+```
+//go:generate mockery --name {INTERFACE_NAME}
+```

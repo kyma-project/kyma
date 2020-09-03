@@ -21,28 +21,28 @@ const (
 )
 
 // RuleInterface allows to perform operations for Istio Rules in kubernetes
-//go:generate mockery -name RuleInterface
+//go:generate mockery --name RuleInterface
 type RuleInterface interface {
 	Create(context.Context, *v1alpha2.Rule, v1.CreateOptions) (*v1alpha2.Rule, error)
 	Delete(context.Context, string, v1.DeleteOptions) error
 }
 
 // InstanceInterface allows to perform operations for Istio Instances in kubernetes
-//go:generate mockery -name InstanceInterface
+//go:generate mockery --name InstanceInterface
 type InstanceInterface interface {
 	Create(context.Context, *v1alpha2.Instance, v1.CreateOptions) (*v1alpha2.Instance, error)
 	Delete(context.Context, string, v1.DeleteOptions) error
 }
 
 // HandlerInterface allows to perform operations for Istio Handlers in kubernetes
-//go:generate mockery -name HandlerInterface
+//go:generate mockery --name HandlerInterface
 type HandlerInterface interface {
 	Create(context.Context, *v1alpha2.Handler, v1.CreateOptions) (*v1alpha2.Handler, error)
 	Delete(context.Context, string, v1.DeleteOptions) error
 }
 
 // Repository allows to perform various operations for Istio resources
-//go:generate mockery -name Repository
+//go:generate mockery --name Repository
 type Repository interface {
 	// CreateHandler creates Handler
 	CreateHandler(application string, appUID types.UID, serviceId, name string) apperrors.AppError
