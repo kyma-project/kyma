@@ -26,20 +26,38 @@ spec:
         hostnames:
           - "dex.{{ .Values.global.ingress.domainName }}"
       {{- end }}
+      initContainers:
+        - name: init
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TYPE
+              value: "{{ .Values.global.certificates.type }}"
+            - name: CERT_MANAGER
+              value: "{{ .Values.global.certificates.manager.enabled }}"
+            - name: IS_LOCAL
+              value: "{{ .Values.global.isLocalEnv }}"
+          command:
+            - bash
+            - -c
+            - |
+{{ tpl (.Files.Get "files/init.sh" | printf "%s" | indent 14) . }}
+          volumeMounts:
+            - name: config
+              mountPath: /injected-config/
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.iam_kubeconfig_service.dir }}iam-kubeconfig-service:{{ .Values.global.iam_kubeconfig_service.version }}
         name: {{ template "name" . }}
         command:
           - sh
           - -c
+          - |
+            source /injected-config/domain.sh
         {{- if .Values.global.environment.gardener }}
-          - /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client
+            /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client
         {{- else }}
-          - /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/etc/dex-tls-cert/tls.crt
+            /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/etc/dex-tls-cert/tls.crt
         {{- end  }}
-        env:
-          - name: DOMAIN
-            value: "{{ .Values.global.ingress.domainName }}"
         ports:
           - name: http
             containerPort: 8000
@@ -53,6 +71,8 @@ spec:
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         volumeMounts:
+        - name: config
+          mountPath: /injected-config/
         - name: apiserver-proxy-tls-cert
           mountPath: "/etc/apiserver-proxy-tls-cert"
           readOnly: true
@@ -61,6 +81,8 @@ spec:
           mountPath: /etc/dex-tls-cert/
       {{- end }}
       volumes:
+      - name: config
+        emptyDir: {}
       {{- if not .Values.global.environment.gardener }}
       - name: dex-tls-cert
         secret:
