@@ -67,17 +67,17 @@ Follow these steps:
 
    - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the ServiceBinding you have just created and **spec.usedBy** points to the `orders-service` Deployment. More specifically, **spec.usedBy** refers to the name of the Deployment and the cluster-specific [UsageKind CR](/components/service-catalog/#custom-resource-usage-kind) (`kind: deployment`) that defines how Secrets should be injected to `orders-service` microservice when creating a ServiceBinding.
 
-   - The **spec.parameters.envPrefix.name** field is optional. It adds a prefix to all environment variables injected in a Secret to the microservice when creating a ServiceBinding. In our example, **envPrefix** is `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
+   - The **spec.parameters.envPrefix.name** field is optional. On creating a ServiceBinding, it adds a prefix to all environment variables injected in a Secret to the microservice. In our example, **envPrefix** is `REDIS_`, so all environment variables will follow the `REDIS_{env}` naming pattern.
 
      > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a microservice must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
-4. Check that the ServiceBindingUsage CR was created. The last condition in the CR status should state `Ready True`:
+4. Check that the ServiceBindingUsage CR was created. This is indicated by the last condition in the CR status being `Ready True`:
 
    ```bash
    kubectl get servicebindingusage orders-service -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
    ```
 
- If you want to see the Secret details and retrieve them from the ServiceBinding, run this command:
+ To see the Secret details and retrieve them from the ServiceBinding, run this command:
 
     ```bash
     kubectl get secret orders-service -n orders-service -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
@@ -97,11 +97,11 @@ Follow these steps:
   Console UI
   </summary>
 
-1. Go to **Catalog Management** > **Instances** in the left navigation panel in the `orders-service` Namespace.
+1. From the `orders-service` Namespace view, go to **Catalog Management** > **Instances** in the left navigation panel.
 
 2. Switch to the **Add-Ons** tab.
 
-3. Select `redis-service` item on the list to get into the details view of the `redis-service` Redis instance.
+3. Select the `redis-service` item on the list to get into the details view of the `redis-service` Redis instance.
 
 4. Switch to the **Bound Applications** tab.
 
@@ -109,14 +109,14 @@ Follow these steps:
 
 6. In the pop-up box that opens up:
 
-    - Select `order-service` from the **Select Application** drop-down
+    - From the **Select Application** drop-down list, select `order-service`.
     - Select **Set prefix for injected variables** and enter `REDIS_` in the box under the **Prefix namespace value** field.
 
-   > **NOTE:** The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a ServiceBinding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
+   > **NOTE:** The **Prefix for injected variables** field is optional. On creating a ServiceBinding, it adds a prefix to all environment variables injected in a Secret to the microservice. In our example, the prefix is set to `REDIS_`, so all environment variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
 
-   > **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
+   > **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a microservice must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
-7. Select **Bind Application** to confirm the changes and wait until the status of the created Service Binding Usage changes into `READY`.
+7. Select **Bind Application** to confirm the changes and wait until the status of the created Service Binding Usage changes to `READY`.
 
   </details>
 </div>
@@ -131,7 +131,7 @@ Follow these steps:
 >  echo "$(minikube ip) orders-service.kyma.local" | sudo tee -a /etc/hosts
 >  ```
 
-1. Retrieve the domain of the exposed microservice and save it to the environment variable:
+1. Retrieve the domain of the exposed microservice and save it to an environment variable:
 
    ```bash
    export SERVICE_DOMAIN=$(kubectl get virtualservices -l apirule.gateway.kyma-project.io/v1alpha1=orders-service.orders-service -n orders-service -o=jsonpath='{.items[*].spec.hosts[0]}')
@@ -156,7 +156,7 @@ Follow these steps:
    []
    ```
 
-3. Send a `POST` request to the microservice with a sample order details:
+3. Send a `POST` request to the microservice with sample order details:
 
    ```bash
    curl -ikX POST "https://$SERVICE_DOMAIN/orders" \
@@ -168,7 +168,7 @@ Follow these steps:
      }'
    ```
 
-4. When you call the `https://$SERVICE_DOMAIN/orders` URL again, the system returns a response with similar order details:
+4. When you call the `https://$SERVICE_DOMAIN/orders` URL again, the system returns a response with order details similar to these:
 
    ```bash
    HTTP/2 200
@@ -182,7 +182,7 @@ Follow these steps:
    [{"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
    ```
 
-5. Similarly to the previous guide where you exposed the `orders-service` microservice, remove the Pod created by the `orders-service` Deployment. Run this command and wait for the system to delete the Pod and start a new one:
+5. Similarly to the previous guide where you exposed the `orders-service` microservice, remove the Pod created by the `orders-service` Deployment. Run this command, and wait for the system to delete the Pod and start a new one:
 
    ```bash
    kubectl delete pod -n orders-service -l app=orders-service
@@ -207,4 +207,4 @@ Follow these steps:
    [{"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
    ```
 
-   In the [Expose the microservice](#getting-started-expose-the-microservice) guide, we saw how the in-memory storage works - every time you deleted the Pod of the microservice or changed the Deployment definition, the order details were lost. Thanks to the binding to the Redis instance, order details are now stored outside the microservice and the data is preserved.
+In the [Expose the microservice](#getting-started-expose-the-microservice) guide, we saw how the in-memory storage works — every time you deleted the Pod of the microservice or changed the Deployment definition, the order details were lost. Thanks to the binding to the Redis instance, order details are now stored outside the microservice and the data is preserved.

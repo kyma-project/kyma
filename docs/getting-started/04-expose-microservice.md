@@ -7,13 +7,13 @@ Now that you deployed a standalone `orders-service` microservice, allow other re
 
 ## Reference
 
-This guide demonstrates how [API Gateway](/components/api-gateway) works in Kyma. It exposes your Service under secured or unsecured endpoints for external Services to communicate with it.
+This guide demonstrates how [API Gateway](/components/api-gateway) works in Kyma. It exposes your Service on secured or unsecured endpoints for external Services to communicate with it.
 
 ## Steps
 
 ### Expose the Service
 
-Create an APIRule CR which exposes the Kubernetes Service of the microservice under an unsecured endpoint (**handler** set to `noop`) and accepts the `GET` and `POST` methods.
+Create an APIRule CR which exposes the Kubernetes Service of the microservice on an unsecured endpoint (**handler** set to `noop`) and accepts the `GET` and `POST` methods.
 
 >**TIP:** **noop** stands for "no operation" and means access without any token. If you want a more secure option, see the [tutorial on how to secure your Service](/components/api-gateway/#tutorials-expose-and-secure-a-service).
 

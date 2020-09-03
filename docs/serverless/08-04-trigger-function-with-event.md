@@ -41,9 +41,9 @@ Follows these steps:
 
 These variables refer to the following:
 
-- **APP_NAME** is taken from the name of the Application CR and specifies the source of events.
-- **EVENT_VERSION** points to the specific event version, such as `v1`.
-- **EVENT_TYPE** points to the given event type to which you want to subscribe your Function, such as `user.created`.
+- **APP_NAME** is the name of the Application CR which is the source of the events.
+- **EVENT_VERSION** points to the specific event version type, such as `v1`.
+- **EVENT_TYPE** points to the event type to which you want to subscribe your Function, such as `user.created`.
 
 2. Create a Trigger CR for your Function to subscribe your Function to a specific event type.
 
@@ -72,8 +72,8 @@ These variables refer to the following:
 
     </details>
     <details>
-    <summary label="ui">
-    UI
+    <summary label="console-ui">
+    Console UI
     </summary>
 
 1. From the drop-down list in the top navigation panel, select the Namespace in which your Application exposes events.

@@ -21,7 +21,7 @@ Follow these steps:
   kubectl
   </summary>
 
-1. Create the [Trigger CR](https://knative.dev/docs/eventing/triggers/) for the `orders-service` microservice to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
+1. Create a [Trigger CR](https://knative.dev/docs/eventing/triggers/) for the `orders-service` microservice to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
 
 ```yaml
 cat <<EOF | kubectl apply -f  -
@@ -46,11 +46,11 @@ spec:
 EOF
 ```
 
-- **spec.filter.attributes.eventtypeversion** points to the specific event version. In this example, it is `v1`.
-- **spec.filter.attributes.source** is taken from the name of the Application CR and specifies the source of events. In this example, it is `commerce-mock`.
-- **spec.filter.attributes.type** points to the given event type to which you want to subscribe the microservice. In this example, it is `order.deliverysent`.
+- **spec.filter.attributes.eventtypeversion** points to the specific event version type. In this example, it is `v1`.
+- **spec.filter.attributes.source** is the name of the Application CR which is the source of the events. In this example, it is `commerce-mock`.
+- **spec.filter.attributes.type** points to the event type to which you want to subscribe the microservice. In this example, it is `order.deliverysent`.
 
-2. Check that the Trigger CR was created and is ready. Its status should be `True`:
+2. Check that the Trigger CR was created and is ready. This is indicated by its status equal to `True`:
 
    ```bash
    kubectl get trigger orders-service -n orders-service -o=jsonpath="{.status.conditions[2].status}"
@@ -62,7 +62,7 @@ EOF
 Console UI
 </summary>
 
-1. Select the `orders-service` Namespace from the drop-down list in the top navigation panel.
+1. From the drop-down list in the top navigation panel, select the `orders-service` Namespace.
 
 2. Go to **Operation** > **Services** in the left navigation panel and select `orders-service`.
 
@@ -70,7 +70,7 @@ Console UI
 
 4. Find the `order.deliverysent` event type with the `v1` version from the `commerce-mock` application. Mark it on the list and select **Add**.
 
-   A message will appear on the UI confirming that the event trigger was created, and you will see it in the **Event Triggers** section of the service's details view.
+   A message confirming that the event trigger was created will appear in the **Event Triggers** section of the service's details view.
 
   </details>
 </div>
@@ -84,13 +84,13 @@ To send events from Commerce mock to the `orders-service` microservice, follow t
 
 2. Switch to the **Remote APIs** tab, find **SAP Commerce Cloud - Events**, and select it.
 
-3. Select the `order.deliverysent.v1` event type in **Event Topics** drop-down list.
+3. From the **Event Topics** drop-down list, select the `order.deliverysent.v1` event type.
 
 4. In the details of the printed event, change **orderCode** to `123456789` and select **Send Event**.
 
    A message will appear in the UI confirming that the event was sent.
 
-5. Call the microservice to verify is the event details were saved:
+5. Call the microservice to verify that the event details were saved:
 
    ```bash
    curl -ik "https://$SERVICE_DOMAIN/orders"

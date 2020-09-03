@@ -48,7 +48,7 @@ Follows these steps:
 
 2. Switch to the **Add-Ons** tab and select **[Experimental] Redis**.
 
- > **TIP:** You can also use the search box in the upper right corner of the Console UI to find the service.
+ > **TIP:** You can also use the search bar in the upper right corner of the Console UI to find the service.
 
 3. Select **Add** to provision Redis and create its instance in the `orders-service` Namespace.
 

@@ -3,12 +3,12 @@ title: Expose the Function
 type: Getting Started
 ---
 
-In this guides, you will expose the Function outside the cluster, through an HTTP proxy. To expose it, use an APIRule custom resource (CR) managed by the in-house API Gateway Controller. This controller reacts to an instance of the APIRule CR and, based on its details, it creates an Istio Virtual Service and Oathkeeper Access Rules that specify your permissions for the exposed Function.
+In this guides, you will expose your Function outside the cluster, through an HTTP proxy. To expose it, use an APIRule custom resource (CR) managed by the in-house API Gateway Controller. This controller reacts to an instance of the APIRule CR and, based on its details, it creates an Istio Virtual Service and Oathkeeper Access Rules that specify your permissions for the exposed Function.
 
 After completing this guide, you will get a Function that:
 
-- Is available under an unsecured endpoint (**handler** set to `noop` in the APIRule CR).
-- Accepts `GET` and `POST` methods.
+- Is available on an unsecured endpoint (**handler** set to `noop` in the APIRule CR).
+- Accepts the `GET` and `POST` methods.
 
 > **NOTE:** Learn also how to [secure the Function](/components/api-gateway#tutorials-expose-and-secure-a-service-deploy-expose-and-secure-the-sample-resources).
 
@@ -24,7 +24,7 @@ Follow these steps:
   kubectl
   </summary>
 
-1. Create an APIRule CR for the Function. It is exposed on port `80` that is the default port of the [Service](/components/serverless/#architecture-architecture).
+1. Create an APIRule CR for the Function. It is exposed on port `80`, which is the default port of the [Service](/components/serverless/#architecture-architecture).
 
   ```yaml
   cat <<EOF | kubectl apply -f -
@@ -66,7 +66,7 @@ Follow these steps:
     Console UI
     </summary>
 
-1. Select the `orders-service` Namespace from the drop-down list in the top navigation panel.
+1. From the drop-down list in the top navigation panel, select the `orders-service` Namespace.
 
 2. Go to **Configuration** > **API Rules** in the left navigation panel and select **Create API Rule**.
 
@@ -74,17 +74,17 @@ Follow these steps:
 
     - Enter `orders-function` as the API Rule's **Name**.
 
-    >**NOTE:** The APIRule CR can have a different name than the Function, but it is recommended that all related resources share common names.
+    >**NOTE:** The APIRule CR can have a name different from that of the Function, but it is recommended that all related resources share common names.
 
     - Enter `orders-function` as **Hostname** to indicate the host on which you want to expose your Function.
 
     - Select `orders-function` as the **Service** that indicates the Function you want to expose.
 
-4. In the **Access strategies** section, leave the default settings, with `GET` and `POST` methods and the `noop` handler selected.
+4. In the **Access strategies** section, leave the default settings, with the `GET` and `POST` methods and the `noop` handler selected.
 
 5. Select **Create** to confirm the changes.
 
-    A message appears on the screen confirming the changes were saved.
+    A message appears on the screen confirming that the changes were saved.
 
 6. Once the pop-up box closes, check that you can access the Function by selecting the HTTPS link under the **Host** column of the new `orders-function` API Rule.
 
@@ -95,19 +95,19 @@ Follow these steps:
 
 Follow these steps:
 
-> **CAUTION:** If you have a Minikube cluster, you must first add the IP address of the exposed k8s to the `hosts` file on your machine:
+> **CAUTION:** If you have a Minikube cluster, you must first add the IP address of the exposed Service to the `hosts` file on your machine:
 >
 > ```bash
 > echo "$(minikube ip) orders-function.kyma.local" | sudo tee -a /etc/hosts
 > ```
 
-1. Retrieve the domain of the exposed Function and save it to the environment variable:
+1. Retrieve the domain of an exposed Function and save it to an environment variable:
 
    ```bash
    export FUNCTION_DOMAIN=$(kubectl get virtualservices -l apirule.gateway.kyma-project.io/v1alpha1=orders-function.orders-service -n orders-service -o=jsonpath='{.items[*].spec.hosts[0]}')
    ```
 
-2. Similarly to the guide on [exposing the microservice](#getting-started-expose-the-microservice), call the Function:
+2. Call the Function:
 
    ```bash
    curl -ik "https://$FUNCTION_DOMAIN"
@@ -126,7 +126,7 @@ Follow these steps:
    []
    ```
 
-3. Send a `POST` request to the Function with a sample order details:
+3. Send a `POST` request to the Function with sample order details:
 
    ```bash
    curl -ikX POST "https://$FUNCTION_DOMAIN" \
@@ -163,7 +163,7 @@ Follow these steps:
 
    You can see the Function returns the previously sent order details.
 
-5. Remove the [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) created by the `orders-function` Function. Run this command and wait for the system to delete the Pod and start a new one:
+5. Remove the [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) created by the `orders-function` Function. Run this command, and wait for the system to delete the Pod and start a new one:
 
    ```bash
    kubectl delete pod -n orders-service -l "serverless.kyma-project.io/function-name=orders-function"
@@ -190,4 +190,5 @@ Follow these steps:
 
    []
    ```
-  As you can see, `orders-function` uses in-memory storage which means every time you delete the Pod of the Function or change its Deployment definition, the order details will be lost. Just like we did with the microservice in previous guides, let's bind the external Redis storage to the Function to prevent the order data loss.
+
+As you can see, `orders-function` uses in-memory storage, which means every time you delete the Pod of the Function or change its Deployment definition, the order details will be lost. Just like we did with the microservice in the previous guides, let's bind the external Redis storage to the Function to prevent the order data loss.

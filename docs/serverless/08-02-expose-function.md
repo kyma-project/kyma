@@ -3,12 +3,12 @@ title: Expose a Function with an API Rule
 type: Tutorials
 ---
 
-This tutorial shows how you can expose a Function to access it outside the cluster, through an HTTP proxy. To expose it, use an APIRule custom resource (CR) managed by the in-house API Gateway Controller. This controller reacts to an instance of the APIRule CR and, based on its details, it creates an Istio Virtual Service and Oathkeeper Access Rules that specify your permissions for the exposed Function.
+This tutorial shows how you can expose your Function to access it outside the cluster, through an HTTP proxy. To expose it, use an APIRule custom resource (CR) managed by the in-house API Gateway Controller. This controller reacts to an instance of the APIRule CR and, based on its details, it creates an Istio Virtual Service and Oathkeeper Access Rules that specify your permissions for the exposed Function.
 
 When you complete this tutorial, you get a Function that:
 
-- Is available under an unsecured endpoint (**handler** set to `noop` in the APIRule CR).
-- Accepts `GET`, `POST`, `PUT`, and `DELETE` methods.
+- Is available on an unsecured endpoint (**handler** set to `noop` in the APIRule CR).
+- Accepts the `GET`, `POST`, `PUT`, and `DELETE` methods.
 
 >**NOTE:** To learn more about securing your Function, see the [tutorial](/components/api-gateway#tutorials-expose-and-secure-a-service-deploy-expose-and-secure-the-sample-resources).
 
@@ -76,12 +76,12 @@ Follows these steps:
     curl https://$NAME.$DOMAIN
     ```
 
-   >**NOTE:** If you are using Minikube, make sure that you've added the endpoint to the Minikube IP entry in the `/etc/hosts` file.
+   >**NOTE:** If you are using Minikube, make sure that you've added the domain name to the Minikube IP entry in the `/etc/hosts` file.
 
     </details>
     <details>
-    <summary label="ui">
-    UI
+    <summary label="console-ui">
+    Console UI
     </summary>
 
 1. Select a Namespace from the drop-down list in the top navigation panel. Make sure the Namespace includes the Function that you want to expose through an API Rule.
@@ -94,16 +94,16 @@ Follows these steps:
 
     - Enter the API Rule's **Name** matching the Function's name.
 
-    >**NOTE:** The APIRule CR can have a different name than the Function, but it is recommended that all related resources share a common name.
+    >**NOTE:** The APIRule CR can have a name different from that of the Function, but it is recommended that all related resources share a common name.
 
     - Enter **Hostname** to indicate the host on which you want to expose your Function.
 
-5. In the **Access strategies** section, leave the default settings with `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, and `HEAD` methods and the `noop` handler selected.
+5. In the **Access strategies** section, leave the default settings with the `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, and `HEAD` methods and the `noop` handler selected.
 
 6. Select **Create** to confirm changes. The pop-up box with the form will close.
 
 7. Check if you can access the Function by selecting the HTTPS link under the **Host** column for the newly created API Rule.
 
-    >**NOTE:** If you are using Minikube, make sure that you've added the endpoint to the Minikube IP entry in the `/etc/hosts` file.
+    >**NOTE:** If you are using Minikube, make sure that you've added the domain name to the Minikube IP entry in the `/etc/hosts` file.
     </details>
 </div>
