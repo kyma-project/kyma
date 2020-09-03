@@ -100,9 +100,9 @@ func (c *functionConverter) ToFunction(name, namespace string, in gqlschema.Func
 		runtime = v1alpha1.Runtime(*in.Runtime)
 	}
 
-	var sourceType v1alpha1.Type
+	var sourceType v1alpha1.SourceType
 	if in.SourceType != nil {
-		sourceType = v1alpha1.SourceType(*in.Type)
+		sourceType = v1alpha1.SourceType(*in.SourceType)
 	}
 
 	return &v1alpha1.Function{
@@ -122,7 +122,7 @@ func (c *functionConverter) ToFunction(name, namespace string, in gqlschema.Func
 			Resources:   resources,
 			MinReplicas: minReplicas,
 			MaxReplicas: maxReplicas,
-			SourceType:  sourceType,
+			Type:  sourceType,
 			Runtime:     runtime,
 			Repository:  repository,
 		},
