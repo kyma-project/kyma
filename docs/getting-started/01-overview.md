@@ -3,10 +3,9 @@ title: Overview
 type: Getting Started
 ---
 
-This set of Getting Started guides is an end-to-end scenario that will walk you through all major Kyma functionalities and show its:
-- **Integration and connectivity** feature brought in by [Application Connector](https://kyma-project.io/docs/components/application-connector/). With Kyma, you can connect external applications and expose their APIs and events to the cluster.
-- **Extensibility** feature provided by [Service Catalog](https://kyma-project.io/docs/components/service-catalog/). You can use its built-in portfolio of external services in your microservices and Functions.
-- **Application runtime** feature supported by [Serverless](https://kyma-project.io/docs/components/serverless/). This feature lets your build microservices and Functions to interact with external services and applications, and to perform a given business logic.
+This set of Getting Started guides is an end-to-end scenario that will walk you through major Kyma components and show its two main use cases:
+- **Extensibility** - when you connect external applications to Kyma, expose their APIs and events to the cluster, and create extensions for them by building a simple Function, a more complex microservice, or a mixture of those, depending on your use case complexity level. You can simplify these integrations and use [Open Service Broker](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md)-compliant services enabled in Kyma's [Service Catalog](/components/service-catalog/).
+- **Application runtime** - when you want to use Kyma to build standalone microservices and Functions, rather than extensions for the existing systems, and shape their business logic from scratch.
 
 With these features in mind, we will:
 
