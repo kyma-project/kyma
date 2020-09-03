@@ -1,0 +1,39 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "xip.fullname" . }}-ingress
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    # helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      name: {{ include "xip.fullname" . }}-ingress
+      labels:
+        app: {{ include "xip.fullname" . }}-ingress
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ include "xip.fullname" . }}-ingress
+      restartPolicy: Never
+      containers:
+      - name: {{ include "xip.fullname" . }}-ingress
+        image: {{ .Values.jobs.image }}:{{ .Values.jobs.tag }}
+        command:
+          - /bin/bash
+          - -c
+          - |
+{{ .Files.Get "files/xip-cert.sh" | printf "%s" | indent 12 }}
+        env:
+        - name: INGRESSGATEWAY_SERVICE_NAME
+          value: "{{ .Values.certs.ingress.gateway.serviceName}}"
+        - name: INGRESSGATEWAY_SERVICE_NAMESPACE
+          value: "{{ .Values.certs.ingress.gateway.serviceNamespace}}"
+        - name: ROOTCA_SECRET_NAME
+          value: "{{ .Values.certs.ingress.rootCA.secretName }}"
+        - name: ROOTCA_SERVICE_NAMESPACE
+          value: "{{ .Values.certs.ingress.rootCA.secretNamespace }}"
+        terminationMessagePolicy: "FallbackToLogsOnError"
+
