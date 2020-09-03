@@ -1,6 +1,7 @@
 package istio
 
 import (
+	"fmt"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/application-registry/pkg/apis/istio/v1alpha2"
@@ -86,9 +87,25 @@ func (repo *repository) makeAuthorizationPolicyObject(application string, appUID
 		},
 		Spec: &v1alpha2.AuthorizationPolicySpec{
 			//TODO: Make it work!
-			Selector: nil,
-			Action:   v1alpha2.Deny,
-			Rules:    nil,
+			Selector: &v1alpha2.WorkloadSelector{
+				MatchLabels: map[string]string{
+					name: "true",
+				},
+			},
+			Action: v1alpha2.Allow,
+			Rules: []v1alpha2.Rule{
+				{
+					To: []v1alpha2.To{
+						{
+							Operation: v1alpha2.Operation{
+								Hosts: []string{
+									fmt.Sprintf("%s.%s.svc.cluster.local", name, repo.config.Namespace),
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
