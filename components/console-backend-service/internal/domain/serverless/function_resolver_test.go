@@ -446,7 +446,7 @@ func fixFunction(name, namespace, uid, source, dependencies string, labels map[s
 
 func fixGitFunction(function *v1alpha1.Function, gitRepositoryRef, baseDir, reference string) *v1alpha1.Function {
 	var nilStr string
-	function.Spec.SourceType = v1alpha1.SourceTypeGit
+	function.Spec.Type = v1alpha1.SourceTypeGit
 	function.Spec.Source = gitRepositoryRef
 	function.Spec.Deps = nilStr
 	function.Spec.Repository = v1alpha1.Repository{

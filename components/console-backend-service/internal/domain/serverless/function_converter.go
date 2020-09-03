@@ -100,9 +100,9 @@ func (c *functionConverter) ToFunction(name, namespace string, in gqlschema.Func
 		runtime = v1alpha1.Runtime(*in.Runtime)
 	}
 
-	var sourceType v1alpha1.SourceType
+	var sourceType v1alpha1.Type
 	if in.SourceType != nil {
-		sourceType = v1alpha1.SourceType(*in.SourceType)
+		sourceType = v1alpha1.SourceType(*in.Type)
 	}
 
 	return &v1alpha1.Function{
