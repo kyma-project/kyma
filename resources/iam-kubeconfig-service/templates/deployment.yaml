@@ -53,7 +53,7 @@ spec:
           - -c
           - |
             source /injected-config/domain.sh
-        {{- if .Values.global.environment.gardener }}
+        {{- if eq .Values.global.certificates.type "gardener" }}
             /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client
         {{- else }}
             /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/etc/dex-tls-cert/tls.crt
@@ -76,14 +76,14 @@ spec:
         - name: apiserver-proxy-tls-cert
           mountPath: "/etc/apiserver-proxy-tls-cert"
           readOnly: true
-      {{- if not .Values.global.environment.gardener }}
+      {{- if not (eq .Values.global.certificates.type "gardener") }}
         - name: dex-tls-cert
           mountPath: /etc/dex-tls-cert/
       {{- end }}
       volumes:
       - name: config
         emptyDir: {}
-      {{- if not .Values.global.environment.gardener }}
+      {{- if not (eq .Values.global.certificates.type "gardener") }}
       - name: dex-tls-cert
         secret:
           secretName: ingress-tls-cert

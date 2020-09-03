@@ -10,6 +10,8 @@ resources:
     cpu: 50m
     memory: 32Mi
 global:
+  tlsCrt: "cGxhY2Vob2xkZXI="
+  tlsKey: "cGxhY2Vob2xkZXI="
   isLocalEnv: false
   istio:
     gateway:
