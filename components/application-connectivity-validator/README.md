@@ -16,7 +16,6 @@ A single instance of the component is deployed for an Application and uses these
 - **appRegistryPathPrefix** is the path prefix for which requests are forwarded to the Application Registry. The default value is `/v1/metadata`.
 - **appRegistryHost** is the host and the port of the Event Service. The default value is `application-registry-external-api:8081`.
 
-
 ## Details
 
 The certificate subjects are validated using the `X-Forwarded-Client-Cert` header.
@@ -34,20 +33,22 @@ The Application Connectivity Validator forwards only the requests with the `X-Fo
 - (Optional) **Organization** is the tenant.
 - (Optional) **OrganizationalUnit** is the group.
 
-
 ## Development
 
 ### Generate mocks
 
-Requirements:
- - [Mockery](https://github.com/vektra/mockery) version 2.0 or higher
+Prerequisites:
 
-To generate a mocks, run:
+ - [Mockery](https://github.com/vektra/mockery) 2.0 or higher
+
+To generate a mock, run:
+
 ```sh
 go generate ./...
 ```
 
-In case of adding new interface to mock or mock of existing interface not being generated add the following line directly above interface declaration:
+When adding a new interface to be mocked or when a mock of an existing interface is not being generated, add the following line directly above the interface declaration:
+
 ```
 //go:generate mockery --name {INTERFACE_NAME}
 ```
