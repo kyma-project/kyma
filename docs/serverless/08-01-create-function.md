@@ -51,8 +51,8 @@ Follows these steps:
     You should get a result similar to the following example:
 
     ```bash
-    NAME                        CONFIGURED   BUILT   RUNNING   VERSION   AGE
-    test-function               True         True    True      1         18m
+    NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
+    test-function   True         True      True      nodejs12   1         96s
     ```
 
     </details>
