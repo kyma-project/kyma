@@ -2,7 +2,7 @@
 title: Runtimes
 ---
 
-Functions support multiple languages through the use of runtimes. In order to use chosen runtime supply the value in `spec.runtime` field of Function CR.
+Functions support multiple languages through the use of runtimes. In order to use chosen runtime supply the value in `spec.runtime` field of Function CR. If it's not specified, it defaults to `nodejs12`.
 
 <div tabs name="available-runtimes" group="available-runtimes">
   <details>
