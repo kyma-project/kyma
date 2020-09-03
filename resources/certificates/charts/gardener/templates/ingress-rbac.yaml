@@ -43,7 +43,6 @@ rules:
   resources: ["configmaps"]
   verbs: 
     - get
-    - list
   resourceNames: 
     - {{ .Values.shootConfigMap.name }}
 ---
@@ -55,7 +54,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: {{ include "gardener.fullname" . }}-ingress
-  namespace: {{ .Values.shootConfigMap.namespace }}
+  namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role
   name: {{ include "gardener.fullname" . }}-ingress
