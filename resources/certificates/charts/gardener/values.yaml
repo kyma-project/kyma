@@ -15,3 +15,6 @@ service:
 shootConfigMap:
   name: shoot-info
   namespace: kube-system
+clusterInfoConfigMap:
+  name: net-global-overrides
+  namespace: kyma-installer

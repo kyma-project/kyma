@@ -4,6 +4,7 @@ kind: ServiceAccount
 metadata:
   name: {{ include "gardener.fullname" . }}-ingress
   namespace: {{ .Release.Namespace }}
+# {{ .Release.Namespace }}
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -32,6 +33,7 @@ roleRef:
   kind: Role
   name: {{ include "gardener.fullname" . }}-ingress
   apiGroup: rbac.authorization.k8s.io
+# {{ .Values.shootConfigMap.namespace }}
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -51,6 +53,35 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "gardener.fullname" . }}-ingress
   namespace: {{ .Values.shootConfigMap.namespace }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "gardener.fullname" . }}-ingress
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ include "gardener.fullname" . }}-ingress
+  apiGroup: rbac.authorization.k8s.io
+# {{ .Values.clusterInfoConfigMap.namespace }}
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: {{ .Values.clusterInfoConfigMap.namespace }}
+  name: {{ include "gardener.fullname" . }}-ingress
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: 
+    - get
+    - patch
+  resourceNames: 
+    - {{ .Values.clusterInfoConfigMap.name }}
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "gardener.fullname" . }}-ingress
+  namespace: {{ .Values.clusterInfoConfigMap.namespace }}
 subjects:
 - kind: ServiceAccount
   name: {{ include "gardener.fullname" . }}-ingress

@@ -13,9 +13,6 @@ modules:
   legacy:
     enabled: false
 
-tls:
-  secretName: kyma-gateway-certs-2
-
 cert-manager:
   podAnnotations:
     sidecar.istio.io/inject: "false"

@@ -36,4 +36,8 @@ spec:
           value: "{{ .Values.shootConfigMap.name }}"
         - name: SHOOT_CM_NAMESPACE
           value: "{{ .Values.shootConfigMap.namespace }}"
+        - name: CLUSTER_INFO_CM_NAME
+          value: "{{ .Values.clusterInfoConfigMap.name }}"
+        - name: CLUSTER_INFO_CM_NAMESPACE
+          value: "{{ .Values.clusterInfoConfigMap.namespace }}"
         terminationMessagePolicy: "FallbackToLogsOnError"
