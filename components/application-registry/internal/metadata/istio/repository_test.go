@@ -1,6 +1,7 @@
 package istio
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -45,7 +46,7 @@ func TestRepository_Create(t *testing.T) {
 		}
 
 		denierInterface := new(mocks.HandlerInterface)
-		denierInterface.On("Create", expected).Return(nil, nil)
+		denierInterface.On("Create", context.Background(), expected, v1.CreateOptions{}).Return(nil, nil)
 
 		repository := NewRepository(nil, nil, denierInterface, config)
 
@@ -60,7 +61,7 @@ func TestRepository_Create(t *testing.T) {
 	t.Run("should handle error when creating denier", func(t *testing.T) {
 		// given
 		denierInterface := new(mocks.HandlerInterface)
-		denierInterface.On("Create", mock.AnythingOfType("*v1alpha2.Handler")).
+		denierInterface.On("Create", context.Background(), mock.AnythingOfType("*v1alpha2.Handler"), v1.CreateOptions{}).
 			Return(nil, errors.New("some error"))
 
 		repository := NewRepository(nil, nil, denierInterface, config)
@@ -90,7 +91,7 @@ func TestRepository_Create(t *testing.T) {
 		}
 
 		checknothingInterface := new(mocks.InstanceInterface)
-		checknothingInterface.On("Create", expected).Return(nil, nil)
+		checknothingInterface.On("Create", context.Background(), expected, v1.CreateOptions{}).Return(nil, nil)
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
@@ -105,7 +106,7 @@ func TestRepository_Create(t *testing.T) {
 	t.Run("should handle error when creating checknothing", func(t *testing.T) {
 		// given
 		checknothingInterface := new(mocks.InstanceInterface)
-		checknothingInterface.On("Create", mock.AnythingOfType("*v1alpha2.Instance")).
+		checknothingInterface.On("Create", context.Background(), mock.AnythingOfType("*v1alpha2.Instance"), v1.CreateOptions{}).
 			Return(nil, errors.New("some error"))
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
@@ -139,7 +140,7 @@ func TestRepository_Create(t *testing.T) {
 		}
 
 		ruleInterface := new(mocks.RuleInterface)
-		ruleInterface.On("Create", expected).Return(nil, nil)
+		ruleInterface.On("Create", context.Background(), expected, v1.CreateOptions{}).Return(nil, nil)
 
 		repository := NewRepository(ruleInterface, nil, nil, config)
 
@@ -154,7 +155,7 @@ func TestRepository_Create(t *testing.T) {
 	t.Run("should handle error when creating rule", func(t *testing.T) {
 		// given
 		ruleInterface := new(mocks.RuleInterface)
-		ruleInterface.On("Create", mock.AnythingOfType("*v1alpha2.Rule")).
+		ruleInterface.On("Create", context.Background(), mock.AnythingOfType("*v1alpha2.Rule"), v1.CreateOptions{}).
 			Return(nil, errors.New("some error"))
 
 		repository := NewRepository(ruleInterface, nil, nil, config)
@@ -193,7 +194,7 @@ func TestRepository_Upsert(t *testing.T) {
 		}
 
 		denierInterface := new(mocks.HandlerInterface)
-		denierInterface.On("Create", expected).Return(nil, nil)
+		denierInterface.On("Create", context.Background(), expected, v1.CreateOptions{}).Return(nil, nil)
 
 		repository := NewRepository(nil, nil, denierInterface, config)
 
@@ -208,7 +209,7 @@ func TestRepository_Upsert(t *testing.T) {
 	t.Run("should handle already exists error when upserting denier", func(t *testing.T) {
 		// given
 		denierInterface := new(mocks.HandlerInterface)
-		denierInterface.On("Create", mock.AnythingOfType("*v1alpha2.Handler")).
+		denierInterface.On("Create", context.Background(), mock.AnythingOfType("*v1alpha2.Handler"), v1.CreateOptions{}).
 			Return(nil, k8serrors.NewAlreadyExists(schema.GroupResource{}, ""))
 
 		repository := NewRepository(nil, nil, denierInterface, config)
@@ -224,7 +225,7 @@ func TestRepository_Upsert(t *testing.T) {
 	t.Run("should handle error when upserting denier", func(t *testing.T) {
 		// given
 		denierInterface := new(mocks.HandlerInterface)
-		denierInterface.On("Create", mock.AnythingOfType("*v1alpha2.Handler")).
+		denierInterface.On("Create", context.Background(), mock.AnythingOfType("*v1alpha2.Handler"), v1.CreateOptions{}).
 			Return(nil, errors.New("some error"))
 
 		repository := NewRepository(nil, nil, denierInterface, config)
@@ -254,7 +255,7 @@ func TestRepository_Upsert(t *testing.T) {
 		}
 
 		checknothingInterface := new(mocks.InstanceInterface)
-		checknothingInterface.On("Create", expected).Return(nil, nil)
+		checknothingInterface.On("Create", context.Background(), expected, v1.CreateOptions{}).Return(nil, nil)
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
@@ -269,7 +270,7 @@ func TestRepository_Upsert(t *testing.T) {
 	t.Run("should handle already exists error when upserting checknothing", func(t *testing.T) {
 		// given
 		checknothingInterface := new(mocks.InstanceInterface)
-		checknothingInterface.On("Create", mock.AnythingOfType("*v1alpha2.Instance")).
+		checknothingInterface.On("Create", context.Background(), mock.AnythingOfType("*v1alpha2.Instance"), v1.CreateOptions{}).
 			Return(nil, k8serrors.NewAlreadyExists(schema.GroupResource{}, ""))
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
@@ -285,7 +286,7 @@ func TestRepository_Upsert(t *testing.T) {
 	t.Run("should handle error when upserting checknothing", func(t *testing.T) {
 		// given
 		checknothingInterface := new(mocks.InstanceInterface)
-		checknothingInterface.On("Create", mock.AnythingOfType("*v1alpha2.Instance")).
+		checknothingInterface.On("Create", context.Background(), mock.AnythingOfType("*v1alpha2.Instance"), v1.CreateOptions{}).
 			Return(nil, errors.New("some error"))
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
@@ -319,7 +320,7 @@ func TestRepository_Upsert(t *testing.T) {
 		}
 
 		ruleInterface := new(mocks.RuleInterface)
-		ruleInterface.On("Create", expected).Return(nil, nil)
+		ruleInterface.On("Create", context.Background(), expected, v1.CreateOptions{}).Return(nil, nil)
 
 		repository := NewRepository(ruleInterface, nil, nil, config)
 
@@ -334,7 +335,7 @@ func TestRepository_Upsert(t *testing.T) {
 	t.Run("should handle already exists error when upserting rule", func(t *testing.T) {
 		// given
 		ruleInterface := new(mocks.RuleInterface)
-		ruleInterface.On("Create", mock.AnythingOfType("*v1alpha2.Rule")).
+		ruleInterface.On("Create", context.Background(), mock.AnythingOfType("*v1alpha2.Rule"), v1.CreateOptions{}).
 			Return(nil, k8serrors.NewAlreadyExists(schema.GroupResource{}, ""))
 
 		repository := NewRepository(ruleInterface, nil, nil, config)
@@ -350,7 +351,7 @@ func TestRepository_Upsert(t *testing.T) {
 	t.Run("should handle error when upserting rule", func(t *testing.T) {
 		// given
 		ruleInterface := new(mocks.RuleInterface)
-		ruleInterface.On("Create", mock.AnythingOfType("*v1alpha2.Rule")).
+		ruleInterface.On("Create", context.Background(), mock.AnythingOfType("*v1alpha2.Rule"), v1.CreateOptions{}).
 			Return(nil, errors.New("some error"))
 
 		repository := NewRepository(ruleInterface, nil, nil, config)
@@ -369,7 +370,7 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should delete denier", func(t *testing.T) {
 		// given
 		denierInterface := new(mocks.HandlerInterface)
-		denierInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).Return(nil)
+		denierInterface.On("Delete", context.Background(), "app-test-uuid1", v1.DeleteOptions{}).Return(nil)
 
 		repository := NewRepository(nil, nil, denierInterface, config)
 
@@ -384,7 +385,7 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should handle error when deleting denier", func(t *testing.T) {
 		// given
 		denierInterface := new(mocks.HandlerInterface)
-		denierInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).
+		denierInterface.On("Delete", context.Background(), "app-test-uuid1", v1.DeleteOptions{}).
 			Return(errors.New("some error"))
 
 		repository := NewRepository(nil, nil, denierInterface, config)
@@ -400,7 +401,7 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should ignore not found error when deleting denier", func(t *testing.T) {
 		// given
 		denierInterface := new(mocks.HandlerInterface)
-		denierInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).
+		denierInterface.On("Delete", context.Background(), "app-test-uuid1", v1.DeleteOptions{}).
 			Return(k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
 		repository := NewRepository(nil, nil, denierInterface, config)
@@ -415,7 +416,7 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should delete checknothing", func(t *testing.T) {
 		// given
 		checknothingInterface := new(mocks.InstanceInterface)
-		checknothingInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).Return(nil)
+		checknothingInterface.On("Delete", context.Background(), "app-test-uuid1", v1.DeleteOptions{}).Return(nil)
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
@@ -430,7 +431,7 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should handle error when deleting checknothing", func(t *testing.T) {
 		// given
 		checknothingInterface := new(mocks.InstanceInterface)
-		checknothingInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).
+		checknothingInterface.On("Delete", context.Background(), "app-test-uuid1", v1.DeleteOptions{}).
 			Return(errors.New("some error"))
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
@@ -446,7 +447,7 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should ignore not found error when deleting checknothing", func(t *testing.T) {
 		// given
 		checknothingInterface := new(mocks.InstanceInterface)
-		checknothingInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).
+		checknothingInterface.On("Delete", context.Background(), "app-test-uuid1", v1.DeleteOptions{}).
 			Return(k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
@@ -461,7 +462,7 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should delete rule", func(t *testing.T) {
 		// given
 		ruleInterface := new(mocks.RuleInterface)
-		ruleInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).Return(nil)
+		ruleInterface.On("Delete", context.Background(), "app-test-uuid1", v1.DeleteOptions{}).Return(nil)
 
 		repository := NewRepository(ruleInterface, nil, nil, config)
 
@@ -476,7 +477,7 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should handle error when deleting rule", func(t *testing.T) {
 		// given
 		ruleInterface := new(mocks.RuleInterface)
-		ruleInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).
+		ruleInterface.On("Delete", context.Background(), "app-test-uuid1", v1.DeleteOptions{}).
 			Return(errors.New("some error"))
 
 		repository := NewRepository(ruleInterface, nil, nil, config)
@@ -492,7 +493,7 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should ignore not found error when deleting rule", func(t *testing.T) {
 		// given
 		ruleInterface := new(mocks.RuleInterface)
-		ruleInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).
+		ruleInterface.On("Delete", context.Background(), "app-test-uuid1", v1.DeleteOptions{}).
 			Return(k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
 		repository := NewRepository(ruleInterface, nil, nil, config)

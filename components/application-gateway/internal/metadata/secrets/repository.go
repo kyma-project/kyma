@@ -2,6 +2,8 @@
 package secrets
 
 import (
+	"context"
+
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	log "github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
@@ -10,6 +12,7 @@ import (
 )
 
 // Repository contains operations for managing client credentials
+//go:generate mockery --name=Repository
 type Repository interface {
 	Get(name string) (map[string][]byte, apperrors.AppError)
 }
@@ -20,8 +23,9 @@ type repository struct {
 }
 
 // Manager contains operations for managing k8s secrets
+//go:generate mockery --name=Manager
 type Manager interface {
-	Get(name string, options metav1.GetOptions) (*v1.Secret, error)
+	Get(ctx context.Context, name string, options metav1.GetOptions) (*v1.Secret, error)
 }
 
 // NewRepository creates a new secrets repository
@@ -33,7 +37,7 @@ func NewRepository(secretsManager Manager, application string) Repository {
 }
 
 func (r *repository) Get(name string) (map[string][]byte, apperrors.AppError) {
-	secret, err := r.secretsManager.Get(name, metav1.GetOptions{})
+	secret, err := r.secretsManager.Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
 		log.Errorf("failed to read secret '%s': %s", name, err.Error())
 		if k8serrors.IsNotFound(err) {

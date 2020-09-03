@@ -1,6 +1,7 @@
 package istio
 
 import (
+	"context"
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/types"
@@ -20,28 +21,28 @@ const (
 )
 
 // RuleInterface allows to perform operations for Istio Rules in kubernetes
-//go:generate mockery -name RuleInterface
+//go:generate mockery --name RuleInterface
 type RuleInterface interface {
-	Create(*v1alpha2.Rule) (*v1alpha2.Rule, error)
-	Delete(name string, options *v1.DeleteOptions) error
+	Create(context.Context, *v1alpha2.Rule, v1.CreateOptions) (*v1alpha2.Rule, error)
+	Delete(context.Context, string, v1.DeleteOptions) error
 }
 
 // InstanceInterface allows to perform operations for Istio Instances in kubernetes
-//go:generate mockery -name InstanceInterface
+//go:generate mockery --name InstanceInterface
 type InstanceInterface interface {
-	Create(*v1alpha2.Instance) (*v1alpha2.Instance, error)
-	Delete(name string, options *v1.DeleteOptions) error
+	Create(context.Context, *v1alpha2.Instance, v1.CreateOptions) (*v1alpha2.Instance, error)
+	Delete(context.Context, string, v1.DeleteOptions) error
 }
 
 // HandlerInterface allows to perform operations for Istio Handlers in kubernetes
-//go:generate mockery -name HandlerInterface
+//go:generate mockery --name HandlerInterface
 type HandlerInterface interface {
-	Create(*v1alpha2.Handler) (*v1alpha2.Handler, error)
-	Delete(name string, options *v1.DeleteOptions) error
+	Create(context.Context, *v1alpha2.Handler, v1.CreateOptions) (*v1alpha2.Handler, error)
+	Delete(context.Context, string, v1.DeleteOptions) error
 }
 
 // Repository allows to perform various operations for Istio resources
-//go:generate mockery -name Repository
+//go:generate mockery --name Repository
 type Repository interface {
 	// CreateHandler creates Handler
 	CreateHandler(application string, appUID types.UID, serviceId, name string) apperrors.AppError
@@ -88,7 +89,7 @@ func NewRepository(ruleInterface RuleInterface, instanceInterface InstanceInterf
 func (repo *repository) CreateHandler(application string, appUID types.UID, serviceId, name string) apperrors.AppError {
 	handler := repo.makeHandlerObject(application, appUID, serviceId, name)
 
-	_, err := repo.handlerInterface.Create(handler)
+	_, err := repo.handlerInterface.Create(context.Background(), handler, v1.CreateOptions{})
 	if err != nil {
 		return apperrors.Internal("Creating %s handler failed, %s", name, err.Error())
 	}
@@ -100,7 +101,7 @@ func (repo *repository) CreateHandler(application string, appUID types.UID, serv
 func (repo *repository) CreateInstance(application string, appUID types.UID, serviceId, name string) apperrors.AppError {
 	checkNothing := repo.makeInstanceObject(application, appUID, serviceId, name)
 
-	_, err := repo.instanceInterface.Create(checkNothing)
+	_, err := repo.instanceInterface.Create(context.Background(), checkNothing, v1.CreateOptions{})
 	if err != nil {
 		return apperrors.Internal("Creating %s instance failed, %s", name, err.Error())
 	}
@@ -111,7 +112,7 @@ func (repo *repository) CreateInstance(application string, appUID types.UID, ser
 func (repo *repository) CreateRule(application string, appUID types.UID, serviceId, name string) apperrors.AppError {
 	rule := repo.makeRuleObject(application, appUID, serviceId, name)
 
-	_, err := repo.ruleInterface.Create(rule)
+	_, err := repo.ruleInterface.Create(context.Background(), rule, v1.CreateOptions{})
 	if err != nil {
 		return apperrors.Internal("Creating %s rule failed, %s", name, err.Error())
 	}
@@ -122,7 +123,7 @@ func (repo *repository) CreateRule(application string, appUID types.UID, service
 func (repo *repository) UpsertHandler(application string, appUID types.UID, serviceId, name string) apperrors.AppError {
 	handler := repo.makeHandlerObject(application, appUID, serviceId, name)
 
-	_, err := repo.handlerInterface.Create(handler)
+	_, err := repo.handlerInterface.Create(context.Background(), handler, v1.CreateOptions{})
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		return apperrors.Internal("Updating %s handler failed, %s", name, err.Error())
 	}
@@ -133,7 +134,7 @@ func (repo *repository) UpsertHandler(application string, appUID types.UID, serv
 func (repo *repository) UpsertInstance(application string, appUID types.UID, serviceId, name string) apperrors.AppError {
 	checkNothing := repo.makeInstanceObject(application, appUID, serviceId, name)
 
-	_, err := repo.instanceInterface.Create(checkNothing)
+	_, err := repo.instanceInterface.Create(context.Background(), checkNothing, v1.CreateOptions{})
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		return apperrors.Internal("Updating %s instance failed, %s", name, err.Error())
 	}
@@ -144,7 +145,7 @@ func (repo *repository) UpsertInstance(application string, appUID types.UID, ser
 func (repo *repository) UpsertRule(application string, appUID types.UID, serviceId, name string) apperrors.AppError {
 	rule := repo.makeRuleObject(application, appUID, serviceId, name)
 
-	_, err := repo.ruleInterface.Create(rule)
+	_, err := repo.ruleInterface.Create(context.Background(), rule, v1.CreateOptions{})
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		return apperrors.Internal("Updating %s rule failed, %s", name, err.Error())
 	}
@@ -153,7 +154,7 @@ func (repo *repository) UpsertRule(application string, appUID types.UID, service
 
 // DeleteHandler deletes Handler
 func (repo *repository) DeleteHandler(name string) apperrors.AppError {
-	err := repo.handlerInterface.Delete(name, nil)
+	err := repo.handlerInterface.Delete(context.Background(), name, v1.DeleteOptions{})
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return apperrors.Internal("Deleting %s handler failed, %s", name, err.Error())
 	}
@@ -162,7 +163,7 @@ func (repo *repository) DeleteHandler(name string) apperrors.AppError {
 
 // DeleteInstance deletes Instance
 func (repo *repository) DeleteInstance(name string) apperrors.AppError {
-	err := repo.instanceInterface.Delete(name, nil)
+	err := repo.instanceInterface.Delete(context.Background(), name, v1.DeleteOptions{})
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return apperrors.Internal("Deleting %s instance failed, %s", name, err.Error())
 	}
@@ -171,7 +172,7 @@ func (repo *repository) DeleteInstance(name string) apperrors.AppError {
 
 // DeleteRule deletes Rule
 func (repo *repository) DeleteRule(name string) apperrors.AppError {
-	err := repo.ruleInterface.Delete(name, nil)
+	err := repo.ruleInterface.Delete(context.Background(), name, v1.DeleteOptions{})
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return apperrors.Internal("Deleting %s rule failed, %s", name, err.Error())
 	}

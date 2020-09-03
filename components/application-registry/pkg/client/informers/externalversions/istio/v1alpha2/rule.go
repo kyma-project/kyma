@@ -3,6 +3,7 @@
 package v1alpha2
 
 import (
+	"context"
 	time "time"
 
 	istiov1alpha2 "github.com/kyma-project/kyma/components/application-registry/pkg/apis/istio/v1alpha2"
@@ -45,13 +46,13 @@ func NewFilteredRuleInformer(client versioned.Interface, namespace string, resyn
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.IstioV1alpha2().Rules(namespace).List(options)
+				return client.IstioV1alpha2().Rules(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.IstioV1alpha2().Rules(namespace).Watch(options)
+				return client.IstioV1alpha2().Rules(namespace).Watch(context.TODO(), options)
 			},
 		},
 		&istiov1alpha2.Rule{},
