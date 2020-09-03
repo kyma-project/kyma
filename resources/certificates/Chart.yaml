@@ -37,10 +37,3 @@ dependencies:
   - name: legacy
     version: 0.1.0
     condition: modules.legacy.enabled
-
-# cluster-info release/job który sprawdza 
-# certificates release jako zbiór subchartów z jobami dedykowanymi do obsługi domeny/certyfikatów
-
-# cluster-essential: czy jesteśmy na gardenerze
-# na gardnerze/minikube certificates.manager.enabled:false
-# certificates tworzone na if Capabilities

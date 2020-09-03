@@ -5,7 +5,7 @@ kind: Service
 metadata:
   name: {{ template "name" . }}-ssl
   namespace: {{ .Release.Namespace }}
-{{- if .Values.global.environment.gardener }}
+{{- if eq .Values.global.certificates.type "gardener" }}
   annotations:
     cert.gardener.cloud/secretname: {{ template "name" . }}-tls-cert
     dns.gardener.cloud/class: garden
