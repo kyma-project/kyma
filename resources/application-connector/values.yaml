@@ -45,7 +45,7 @@ global:
   application_registry:
     version: "PR-9356"
   application_registry_tests:
-    version: "c608dbf3"
+    version: "PR-9356"
   application_broker:
     version: "1acc510b"
   application_connectivity_certs_setup_job:
