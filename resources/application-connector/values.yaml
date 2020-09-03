@@ -43,7 +43,7 @@ global:
   application_gateway_tests:
     version: "PR-9300"
   application_registry:
-    version: "PR-9300"
+    version: "PR-9356"
   application_registry_tests:
     version: "c608dbf3"
   application_broker:
