@@ -66,7 +66,7 @@ func (c *functionConverter) ToGQL(function *v1alpha1.Function) (*gqlschema.Funct
 		Replicas:     replicas,
 		Resources:    resources,
 		Runtime:      stringPtr(string(function.Spec.Runtime)),
-		SourceType:   stringPtr(string(function.Spec.SourceType)),
+		SourceType:   stringPtr(string(function.Spec.Type)),
 		Status:       status,
 	}, nil
 }

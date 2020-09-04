@@ -25,7 +25,7 @@ func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function
 	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
 	var expectedJob batchv1.Job
-	if instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit {
+	if instance.Spec.Type != serverlessv1alpha1.SourceTypeGit {
 		expectedJob = r.buildJob(instance, rtmCfg, "")
 	} else {
 		expectedJob = r.buildGitJob(instance, gitOptions, rtmCfg)

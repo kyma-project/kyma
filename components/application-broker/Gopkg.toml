@@ -38,9 +38,6 @@ required = [
   go-tests = true
   non-go = true
 
-[[constraint]]
-  name = "github.com/machinebox/graphql"
-  version = "v0.2.2"
 
 [[override]]
   name = "github.com/vektah/gqlparser"

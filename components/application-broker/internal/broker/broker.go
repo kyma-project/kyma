@@ -13,7 +13,7 @@ import (
 	listers "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/platform/idprovider"
 
-	gcli "github.com/machinebox/graphql"
+	gcli "github.com/kyma-project/kyma/components/application-broker/third_party/machinebox/graphql"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 	istioCli "istio.io/client-go/pkg/clientset/versioned"

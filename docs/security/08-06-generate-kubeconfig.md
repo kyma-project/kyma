@@ -1,21 +1,19 @@
 ---
-title: IAM Kubeconfig Service
-type: Details
+title: Get the kubeconfig file
+type: Tutorials
 ---
 
 The IAM Kubeconfig Service is a proprietary tool that generates a `kubeconfig` file which allows the user to access the Kyma cluster through the Command Line Interface (CLI), and to manage the connected cluster within the permission boundaries of the user.
 
-The IAM Kubeconfig Service rewrites the ID token issued for the user by Dex into the generated `kubeconfig` file. The time to live (TTL) of the ID token is 8 hours, which effectively means that the TTL of the generated `kubeconfig` file is 8 hours as well.
-
 The service is a publicly exposed service. You can access it directly under the `https://configurations-generator.{YOUR_CLUSTER_DOMAIN}` address. The service requires a valid ID token issued by Dex to return a code `200` result.
 
-## Get the kubeconfig file and configure the CLI
+## Steps
 
 Follow these steps to get the `kubeconfig` file and configure the CLI to connect to the cluster:
 
 1. Access the Console UI of your Kyma cluster.
-2. Click **Administration**.
-3. Click the **Download config** button to download the `kubeconfig` file to a selected location on your machine.
+2. Click the user icon in the upper right corner of the screen.
+3. Click the **Get Kubeconfig** button to download the `kubeconfig` file to a selected location on your machine.
 4. Open a terminal window.
 5. Export the **KUBECONFIG** environment variable to point to the downloaded `kubeconfig`. Run this command:
 

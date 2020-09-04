@@ -39,9 +39,9 @@ global:
   event_service_integration_tests:
     version: "2c51c024"
   application_gateway:
-    version: "PR-9214"
+    version: "PR-9349"
   application_gateway_tests:
-    version: "PR-9300"
+    version: "PR-9349"
   application_registry:
     version: "PR-9356"
   application_registry_tests:
@@ -51,7 +51,7 @@ global:
   application_connectivity_certs_setup_job:
     version: "PR-9214"
   application_connectivity_validator:
-    version: "PR-9214"
+    version: "PR-9349"
 
 application_connectivity_certs_setup_job:
   secrets:

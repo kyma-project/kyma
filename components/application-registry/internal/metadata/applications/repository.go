@@ -2,6 +2,7 @@
 package applications
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -19,14 +20,15 @@ const (
 	CredentialsCertificateGenType = "CertificateGen"
 )
 
-// Manager contains operations for managing Application CRD
-type Manager interface {
-	Update(application *v1alpha1.Application) (*v1alpha1.Application, error)
-	Get(name string, options v1.GetOptions) (*v1alpha1.Application, error)
+// AppManager contains operations for managing Application CRD
+//go:generate mockery --name AppManager
+type AppManager interface {
+	Update(ctx context.Context, application *v1alpha1.Application, options v1.UpdateOptions) (*v1alpha1.Application, error)
+	Get(ctx context.Context, name string, options v1.GetOptions) (*v1alpha1.Application, error)
 }
 
 type repository struct {
-	appManager Manager
+	appManager AppManager
 }
 
 // ServiceAPI stores information needed to call an API
@@ -89,7 +91,7 @@ type ServiceRepository interface {
 }
 
 // NewServiceRepository creates a new ApplicationServiceRepository
-func NewServiceRepository(appManager Manager) ServiceRepository {
+func NewServiceRepository(appManager AppManager) ServiceRepository {
 	return &repository{appManager: appManager}
 }
 
@@ -180,7 +182,7 @@ func (r *repository) Delete(appName, id string) apperrors.AppError {
 }
 
 func (r *repository) getApplication(appName string) (*v1alpha1.Application, apperrors.AppError) {
-	app, err := r.appManager.Get(appName, v1.GetOptions{})
+	app, err := r.appManager.Get(context.Background(), appName, v1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			message := fmt.Sprintf("Application %s not found", appName)
@@ -209,7 +211,7 @@ func (r *repository) updateApplicationWithRetries(
 			return err
 		}
 
-		_, err = r.appManager.Update(app)
+		_, err = r.appManager.Update(context.Background(), app, v1.UpdateOptions{})
 		return err
 	})
 }

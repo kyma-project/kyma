@@ -37,7 +37,6 @@ clusterRoles:
       - "authentication.kyma-project.io"
       - "gateway.kyma-project.io"
       - "servicecatalog.kyma-project.io"
-      - "ui.kyma-project.io"
       - "kyma.cx"
       - "ui.kyma.cx"
       - "testing.kyma-project.io"
@@ -66,6 +65,8 @@ clusterRoles:
       - "eventing.knative.dev"
     svcat:
       - "settings.svcat.k8s.io"
+    ui:
+      - "ui.kyma-project.io"
   verbs:
     edit:
       - "create"

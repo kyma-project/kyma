@@ -255,6 +255,60 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				gomega.ContainSubstring("spec.resources.limits.memory"),
 			),
 		},
+		"should be OK for git sourceType": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Source: "test-source",
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("100m"),
+							corev1.ResourceMemory: resource.MustParse("128Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("50m"),
+							corev1.ResourceMemory: resource.MustParse("64Mi"),
+						},
+					},
+					MinReplicas: &one,
+					MaxReplicas: &one,
+					Type:        SourceTypeGit,
+					Runtime:     Nodejs12,
+					Repository: Repository{
+						BaseDir:   "/",
+						Reference: "test-me",
+					},
+				},
+			},
+			expectedError: gomega.BeNil(),
+		},
+		"Should return errors OK if reference and baseDir is missing": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Source: "test-source",
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("100m"),
+							corev1.ResourceMemory: resource.MustParse("128Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("50m"),
+							corev1.ResourceMemory: resource.MustParse("64Mi"),
+						},
+					},
+					MinReplicas: &one,
+					MaxReplicas: &one,
+					Runtime:     Nodejs12,
+					Type:        SourceTypeGit,
+				},
+			},
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring("spec.reference"),
+				gomega.ContainSubstring("spec.baseDir"),
+			),
+			expectedError: gomega.HaveOccurred(),
+		},
 	} {
 		t.Run(testName, func(t *testing.T) {
 			// given
