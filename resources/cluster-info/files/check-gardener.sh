@@ -8,7 +8,8 @@ if [[ "$CERT_TYPE" != "detect" ]]; then
 fi
 
 export GARDEN_CERTS=false
-if kubectl api-versions | grep -c cert.gardener.cloud ; then
+API_VERSIONS=$(kubectl api-versions)
+if echo $API_VERSIONS | grep -c cert.gardener.cloud ; then
   echo "--> Gardener Certificate CR present"
 else
   echo "--> No Gardener Certificate CR present, move on"
