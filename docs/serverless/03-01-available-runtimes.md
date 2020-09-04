@@ -2,7 +2,9 @@
 title: Runtimes
 ---
 
-Functions support multiple languages through the use of runtimes. In order to use chosen runtime supply the value in `spec.runtime` field of Function CR. If it's not specified, it defaults to `nodejs12`. Node.js function dependencies should be specified using [package.json](https://docs.npmjs.com/creating-a-package-json-file) format. Python Function dependencies should follow requirements format, used by [pip](https://packaging.python.org/key_projects/#pip).
+Functions support multiple languages through the use of runtimes. In order to use chosen runtime supply the value in `spec.runtime` field of [Function CR](#custom-resource-function). If it's not specified, it defaults to `nodejs12`. Node.js function dependencies should be specified using [package.json](https://docs.npmjs.com/creating-a-package-json-file) format. Python Function dependencies should follow requirements format, used by [pip](https://packaging.python.org/key_projects/#pip).
+
+See example Functions in each available runtime:
 
 <div tabs name="available-runtimes" group="available-runtimes">
   <details>
@@ -61,7 +63,7 @@ spec:
     }
   deps: |
     {
-      "name": "test-function-nodejs12",
+      "name": "test-function-nodejs10",
       "version": "1.0.0",
       "dependencies": {
         "lodash":"^4.17.20"
