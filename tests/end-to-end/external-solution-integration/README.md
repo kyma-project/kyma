@@ -108,7 +108,7 @@ Currently, the test cannot be executed locally, as it requires access to interna
 
 >**Requirements:** 
   ko github.com/google/ko
-  dlv https://github.com/go-delve/delve
+  dlv github.com/go-delve/delve
 
 Even though the test cannot be run locally, there is way to debug it locally while the test is actually running inside the cluster.
 The idea is as follows: 
@@ -116,21 +116,33 @@ The idea is as follows:
 - deploy a pod which starts dlv debugger and runs the test while waiting for client connection on a specified port
 - after port-forward, one can connect to
 
-Start the debugger inside the pod:
+#### Start test with dlv
+
+Start the dlv debugger inside the pod:
 
 ```bash
-make debug-local
+TEST_DEBUG_SCENARIO=e2e-event-mesh make debug-local
 kubectl port-forward -n kyma-system core-test-external-solution 40000
 ```
 
-Connect to the debugger:
+#### Connect to the debugger:
 
 via CLI:
 
-```bash
+```shell
 dlv connect localhost:40000
 ```
+
+For further information on how to use dlv see this [CLI reference](https://github.com/go-delve/delve/tree/master/Documentation/cli)
 
 via Goland:
 
 Create a new Run Configuration with type `Go Remote` and select localhost:40000 as target. Then click the debug button and debug as usual.
+
+#### Get logs
+
+The test logs can be found inside the container:
+
+```bash
+k logs -n kyma-system -l app=core-test-external-solution -c test -f
+```

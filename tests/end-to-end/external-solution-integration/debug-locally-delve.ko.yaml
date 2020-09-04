@@ -14,7 +14,7 @@ spec:
     - command:
       - /bin/sh
       - -c
-      - "dlv exec /ko-app/runner e2e-event-mesh --listen=:40000 --headless=true --api-version=2 --log --accept-multiclient -- /ko-app/runner e2e-event-mesh --domain $KYMADOMAIN --testID e2e-event-mesh --skipSSLVerify --testServiceImage eu.gcr.io/kyma-project/event-subscriber-tools:9913ea21"
+      - "dlv exec --listen=:40000 --headless=true --api-version=2 --log --accept-multiclient -- /ko-app/runner ${TEST_DEBUG_SCENARIO} --domain ${KYMADOMAIN} --testID ${TEST_DEBUG_SCENARIO} --skipSSLVerify --testServiceImage eu.gcr.io/kyma-project/event-subscriber-tools:9913ea21"
       securityContext:
         capabilities:
           add:
@@ -24,6 +24,8 @@ spec:
         value: istio-ingressgateway.istio-system.svc.cluster.local
       - name: KYMADOMAIN
         value: <use-envsubst-here>
+      - name: TEST_DEBUG_SCENARIO
+        value: ${TEST_DEBUG_SCENARIO}
       image: ko://github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/cmd/runner
       imagePullPolicy: Always
       name: test
