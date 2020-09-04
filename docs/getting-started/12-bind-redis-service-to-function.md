@@ -17,7 +17,7 @@ Follow these steps:
   kubectl
   </summary>
 
-1. Create a ServiceBinding custom resource (CR). Its **spec.instanceRef** field points to your Redis instance:
+1. Create a ServiceBinding custom resource (CR) that points to the existing Redis instance in the **spec.instanceRef** field:
 
   ```yaml
   cat <<EOF | kubectl apply -f -
@@ -65,7 +65,7 @@ Follow these steps:
 
      > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
-4. Check that the ServiceBindingUsage CR was created. Tis is indicated by the last condition in the CR status equal to `Ready True`:
+4. Check that the ServiceBindingUsage CR was created. This is indicated by the last condition in the CR status equal to `Ready True`:
 
   ```bash
   kubectl get servicebindingusage orders-function -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
@@ -103,7 +103,7 @@ To see the Secret details and retrieve them from the ServiceBinding, run this co
 
 4. Select **Create** to confirm the changes.
 
-A message confirming that the ServiceBinding was created will appear in the **Service Bindings** section in your Function along with environment variable names.
+A message confirming that the ServiceBinding was created will appear in the **Service Bindings** section in your Function's view along with environment variable names.
 
 When you switch to the **Code** tab and scroll down to the **Environment Variables** section, you can now see `REDIS_PORT`, `REDIS_HOST`, and `REDIS_REDIS_PASSWORD` items with the `Service Binding` type. It indicates that the environment variable was injected to the Function by the ServiceBinding.
 

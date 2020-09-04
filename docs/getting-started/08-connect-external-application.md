@@ -216,7 +216,7 @@ Follow these steps:
   EOF
   ```
 
-2. List the available ServiceClass CRs in the `orders-service` Namespace.
+2. List the available ServiceClass CRs in the `orders-service` Namespace:
 
    ```bash
    kubectl get serviceclasses -n orders-service
