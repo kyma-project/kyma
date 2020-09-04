@@ -42,11 +42,26 @@ spec:
         - --skip-openid-provider-tls-verify={{ not .Values.kyma.authProxy.config.tlsVerify }}
         - --client-id=$(CLIENT_ID)
         - --client-secret=$(CLIENT_SECRET)
-        - --resources=uri={{ .Values.kyma.authProxy.config.resources.uri }}{{ template "grafana.kyma.authProxy.methods" }}{{ template "grafana.kyma.authProxy.groups" }}{{ template "grafana.kyma.authProxy.roles" }}
+        - --resources=uri={{ .Values.kyma.authProxy.config.resources.uri }}{{ template "grafana.kyma.authProxy.methods" . }}{{ template "grafana.kyma.authProxy.groups" . }}{{ template "grafana.kyma.authProxy.roles" . }}
         - --redirection-url=https://grafana.{{ .Values.global.ingress.domainName }}
         {{- if .Values.kyma.authProxy.config.scopes }}
-        {{- range $i, $scope := .Values.kyma.authProxy.config.scopes }}
+        {{- range $i, $scope := (splitList "," .Values.kyma.authProxy.config.scopes) }}
         - --scopes={{ $scope }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.kyma.authProxy.config.addClaims }}
+        {{- range $i, $claim := (splitList "," .Values.kyma.authProxy.config.addClaims) }}
+        - --add-claims={{ $claim }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.kyma.authProxy.config.matchClaims }}
+        {{- range $i, $claim := (splitList "," .Values.kyma.authProxy.config.matchClaims) }}
+        - --match-claims={{ $claim }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.kyma.authProxy.config.headers }}
+        {{- range $i, $header := (splitList "," .Values.kyma.authProxy.config.headers) }}
+        - --headers={{ $header }}
         {{- end }}
         {{- end }}
         - --verbose=false

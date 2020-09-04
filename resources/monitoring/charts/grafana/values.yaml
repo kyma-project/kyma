@@ -574,8 +574,10 @@ kyma:
         useKymaGroups: false
         groups: ""
         roles: ""
-      scopes:
-        - "groups"
+      scopes: "groups"
+      headers: ""
+      matchClaims: ""
+      addClaims: ""
     nodeSelector: {}
     port: 3000
     image:

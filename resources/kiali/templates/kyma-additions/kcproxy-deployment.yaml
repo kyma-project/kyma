@@ -36,11 +36,26 @@ spec:
         - --skip-openid-provider-tls-verify={{ not .Values.kcproxy.config.tlsVerify }}
         - --client-id=$(CLIENT_ID)
         - --client-secret=$(CLIENT_SECRET)
-        - --resources=uri={{ .Values.kcproxy.config.resources.uri }}{{ template "kiali.kcproxy.methods" }}{{ template "kiali.kcproxy.groups" }}{{ template "kiali.kcproxy.roles" }}
+        - --resources=uri={{ .Values.kcproxy.config.resources.uri }}{{ template "kiali.kcproxy.methods" . }}{{ template "kiali.kcproxy.groups" . }}{{ template "kiali.kcproxy.roles" . }}
         - --redirection-url=https://kiali.{{ .Values.global.ingress.domainName }}
         {{- if .Values.kcproxy.config.scopes }}
-        {{- range $i, $scope := .Values.kcproxy.config.scopes }}
+        {{- range $i, $scope := (splitList "," .Values.kcproxy.config.scopes) }}
         - --scopes={{ $scope }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.kcproxy.config.addClaims }}
+        {{- range $i, $claim := (splitList "," .Values.kcproxy.config.addClaims) }}
+        - --add-claims={{ $claim }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.kcproxy.config.matchClaims }}
+        {{- range $i, $claim := (splitList "," .Values.kcproxy.config.matchClaims) }}
+        - --match-claims={{ $claim }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.kcproxy.config.headers }}
+        {{- range $i, $header := (splitList "," .Values.kcproxy.config.headers) }}
+        - --headers={{ $header }}
         {{- end }}
         {{- end }}
         - --verbose=false
