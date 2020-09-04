@@ -53,7 +53,6 @@ Create chart name and version as used by the chart label.
 
 {{- define "kiali.kcproxy.groups" -}}
 {{- if .Values.kcproxy.config.resources.useKymaGroups }}
-{{- printf "icke2 " }}
 {{- printf "|groups=%s,%s,%s,%s" .Values.global.kymaRuntime.adminGroup .Values.global.kymaRuntime.operatorGroup .Values.global.kymaRuntime.developerGroup .Values.global.kymaRuntime.namespaceAdminGroup -}}
 {{- else if .Values.kcproxy.config.resources.groups }}
 {{- printf "|groups=%s" .Values.kcproxy.config.resources.groups }}
