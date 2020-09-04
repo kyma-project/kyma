@@ -1071,29 +1071,31 @@
   version = "v2.2.8"
 
 [[projects]]
-  digest = "1:e69930e125dcf7de588804c3a86203de9e2d7a1d01063e5c775824aa3ccf9ce4"
+  digest = "1:7f32fec73ffe8fb190da8a123e2460b8847dc2fad989322b114765bc239ef008"
   name = "istio.io/api"
   packages = [
     "authentication/v1alpha1",
     "mixer/v1",
     "mixer/v1/config/client",
     "networking/v1alpha3",
+    "networking/v1beta1",
     "policy/v1beta1",
     "rbac/v1alpha1",
     "security/v1beta1",
     "type/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "ed4b507c54e129239375e3521f233aaa397d23b7"
-  version = "1.4.5"
+  revision = "34e474846e0d348c39ee16a268a71a3104cb6f9e"
+  version = "1.6.8"
 
 [[projects]]
-  digest = "1:9ddcbc3aba819e14b70c18dc6307cf3d3cda16c206df30c2a72bb37e2d1ba9ba"
+  digest = "1:b6ea7cf2d2db63ceb6d60136ef60257e71e116430a42845e5e2123a404b119b8"
   name = "istio.io/client-go"
   packages = [
     "pkg/apis/authentication/v1alpha1",
     "pkg/apis/config/v1alpha2",
     "pkg/apis/networking/v1alpha3",
+    "pkg/apis/networking/v1beta1",
     "pkg/apis/rbac/v1alpha1",
     "pkg/apis/security/v1beta1",
     "pkg/clientset/versioned",
@@ -1105,14 +1107,16 @@
     "pkg/clientset/versioned/typed/config/v1alpha2/fake",
     "pkg/clientset/versioned/typed/networking/v1alpha3",
     "pkg/clientset/versioned/typed/networking/v1alpha3/fake",
+    "pkg/clientset/versioned/typed/networking/v1beta1",
+    "pkg/clientset/versioned/typed/networking/v1beta1/fake",
     "pkg/clientset/versioned/typed/rbac/v1alpha1",
     "pkg/clientset/versioned/typed/rbac/v1alpha1/fake",
     "pkg/clientset/versioned/typed/security/v1beta1",
     "pkg/clientset/versioned/typed/security/v1beta1/fake",
   ]
   pruneopts = "NUT"
-  revision = "9053b0f86b0359b7e66293eb6098cc551aec6f69"
-  version = "1.4.5"
+  revision = "f8d9d8ff84e6e3753cdfcbb82c03f495269e29dc"
+  version = "1.5.10"
 
 [[projects]]
   digest = "1:d02adf242827386d31d21ef100c67734e72ef00080889181a2b2d0b34a173e20"
@@ -1637,8 +1641,10 @@
     "gopkg.in/yaml.v2",
     "istio.io/api/authentication/v1alpha1",
     "istio.io/client-go/pkg/apis/authentication/v1alpha1",
+    "istio.io/client-go/pkg/apis/security/v1beta1",
     "istio.io/client-go/pkg/clientset/versioned",
     "istio.io/client-go/pkg/clientset/versioned/fake",
+    "istio.io/client-go/pkg/clientset/versioned/typed/security/v1beta1",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",

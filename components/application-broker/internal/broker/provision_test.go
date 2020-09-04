@@ -133,7 +133,7 @@ func TestProvisionAsync(t *testing.T) {
 
 			knCli, k8sCli, istioCli, eaCli := bt.NewFakeClients(tc.initialObjs...)
 
-			sut := NewProvisioner(mockInstanceStorage, mockStateGetter, mockOperationStorage, mockOperationStorage, mockAccessChecker, mockAppFinder, eaCli.ApplicationconnectorV1alpha1(), knative.NewClient(knCli, k8sCli), istioCli, mockInstanceStorage, mockOperationIDProvider, spy.NewLogDummy(), &IDSelector{false}, apiPkgCredsCreatorMock, validateProvisionRequestV2)
+			sut := NewProvisioner(mockInstanceStorage, mockStateGetter, mockOperationStorage, mockOperationStorage, mockAccessChecker, mockAppFinder, eaCli.ApplicationconnectorV1alpha1(), knative.NewClient(knCli, k8sCli), istioCli.SecurityV1beta1(), mockInstanceStorage, mockOperationIDProvider, spy.NewLogDummy(), &IDSelector{false}, apiPkgCredsCreatorMock, validateProvisionRequestV2)
 
 			asyncFinished := make(chan struct{}, 0)
 			sut.asyncHook = func() {
@@ -202,7 +202,7 @@ func TestProvisionProcess(t *testing.T) {
 	}
 
 	// GIVEN
-	provisioner := NewProvisioner(mockInstanceStorage, nil, mockOperationStorage, mockOperationStorage, mockAccessChecker, mockAppFinder, eaCli.ApplicationconnectorV1alpha1(), knative.NewClient(knCli, k8sCli), istioCli, mockInstanceStorage, mockOperationIDProvider, spy.NewLogDummy(), &IDSelector{false}, apiPkgCredsCreatorMock, validateProvisionRequestV2)
+	provisioner := NewProvisioner(mockInstanceStorage, nil, mockOperationStorage, mockOperationStorage, mockAccessChecker, mockAppFinder, eaCli.ApplicationconnectorV1alpha1(), knative.NewClient(knCli, k8sCli), istioCli.SecurityV1beta1(), mockInstanceStorage, mockOperationIDProvider, spy.NewLogDummy(), &IDSelector{false}, apiPkgCredsCreatorMock, validateProvisionRequestV2)
 
 	asyncFinished := make(chan struct{}, 0)
 	provisioner.asyncHook = func() {
@@ -390,7 +390,7 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 				Once()
 
 			knCli, k8sCli := setupMocks(clientset, mockInstanceStorage, mockOperationStorage)
-			sut := NewProvisioner(mockInstanceStorage, mockStateGetter, mockOperationStorage, mockOperationStorage, mockAccessChecker, mockAppFinder, clientset.ApplicationconnectorV1alpha1(), knative.NewClient(knCli, k8sCli), fakeistioclientset.NewSimpleClientset(), mockInstanceStorage, mockOperationIDProvider, spy.NewLogDummy(), &IDSelector{false}, apiPkgCredsCreatorMock, validateProvisionRequestV2)
+			sut := NewProvisioner(mockInstanceStorage, mockStateGetter, mockOperationStorage, mockOperationStorage, mockAccessChecker, mockAppFinder, clientset.ApplicationconnectorV1alpha1(), knative.NewClient(knCli, k8sCli), fakeistioclientset.NewSimpleClientset().SecurityV1beta1(), mockInstanceStorage, mockOperationIDProvider, spy.NewLogDummy(), &IDSelector{false}, apiPkgCredsCreatorMock, validateProvisionRequestV2)
 
 			asyncFinished := make(chan struct{}, 0)
 			sut.asyncHook = func() {
@@ -596,7 +596,7 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 				bt.NewAppSubscription(string(appNs), string(appName), string(appSvcID)),
 			},
 			expectCreates: []runtime.Object{
-				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
+				bt.NewIstioPeerAuthentication(string(appNs), fmt.Sprintf("%s%s", appNs, peerAuthNameSuffix)),
 			},
 			expectUpdates: []runtime.Object{
 				bt.NewAppSubscription(string(appNs), string(appName), string(appSvcID), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
@@ -616,14 +616,14 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 			},
 			expectCreates: []runtime.Object{
 				bt.NewAppSubscription(string(appNs), string(appName), string(appSvcID), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
-				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
+				bt.NewIstioPeerAuthentication(string(appNs), fmt.Sprintf("%s%s", appNs, peerAuthNameSuffix)),
 			},
 			expectUpdates: []runtime.Object{
 				bt.NewAppNamespace(string(appNs), true),
 			},
 		},
 		{
-			name:                           "provision success no istio policy created before",
+			name:                           "provision success no istio PeerAuthentication created before",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
 			expectedOpState:                internal.OperationStateSucceeded,
 			expectedOpDesc:                 internal.OperationDescriptionProvisioningSucceeded,
@@ -635,14 +635,14 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 			},
 			expectCreates: []runtime.Object{
 				bt.NewAppSubscription(string(appNs), string(appName), string(appSvcID), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
-				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
+				bt.NewIstioPeerAuthentication(string(appNs), fmt.Sprintf("%s%s", appNs, peerAuthNameSuffix)),
 			},
 			expectUpdates: []runtime.Object{
 				bt.NewAppNamespace(string(appNs), true),
 			},
 		},
 		{
-			name:                           "provision success an istio policy created before",
+			name:                           "provision success an istio PeerAuthentication created before",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
 			expectedOpState:                internal.OperationStateSucceeded,
 			expectedOpDesc:                 internal.OperationDescriptionProvisioningSucceeded,
@@ -651,15 +651,15 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 			initialObjs: []runtime.Object{
 				bt.NewAppChannel(string(appName)),
 				bt.NewAppNamespace(string(appNs), false),
-				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
+				bt.NewIstioPeerAuthentication(string(appNs), fmt.Sprintf("%s%s", appNs, peerAuthNameSuffix)),
 			},
 			expectCreates: []runtime.Object{
 				bt.NewAppSubscription(string(appNs), string(appName), string(appSvcID), bt.WithSpec(t, knative.GetDefaultBrokerURI(appNs))),
-				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
+				bt.NewIstioPeerAuthentication(string(appNs), fmt.Sprintf("%s%s", appNs, peerAuthNameSuffix)),
 			},
 			expectUpdates: []runtime.Object{
 				bt.NewAppNamespace(string(appNs), true),
-				bt.NewIstioPolicy(string(appNs), fmt.Sprintf("%s%s", appNs, policyNameSuffix)),
+				bt.NewIstioPeerAuthentication(string(appNs), fmt.Sprintf("%s%s", appNs, peerAuthNameSuffix)),
 			},
 		},
 	} {
@@ -678,7 +678,7 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 
 			knCli, k8sCli, istioCli, eaClient := bt.NewFakeClients(tc.initialObjs...)
 
-			provisioner := NewProvisioner(nil, nil, mockOperationStorage, mockOperationStorage, mockAccessChecker, nil, eaClient.ApplicationconnectorV1alpha1(), knative.NewClient(knCli, k8sCli), istioCli, mockInstanceStorage, nil, spy.NewLogDummy(), nil, nil, validateProvisionRequestV2)
+			provisioner := NewProvisioner(nil, nil, mockOperationStorage, mockOperationStorage, mockAccessChecker, nil, eaClient.ApplicationconnectorV1alpha1(), knative.NewClient(knCli, k8sCli), istioCli.SecurityV1beta1(), mockInstanceStorage, nil, spy.NewLogDummy(), nil, nil, validateProvisionRequestV2)
 
 			// WHEN
 			provisioner.do(fixProvisionRequest().Parameters, iID, opID, appName, appID, appSvcID, appNs, eventProvider, apiProvider, displayName)
