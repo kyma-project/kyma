@@ -54,7 +54,7 @@ Follows these steps:
 
 4. Select **Add** to confirm the changes.
 
-5. Wait for the addon to have the `READY` status.
+5. Wait for the addon to have the status `READY`.
 
     </details>
 </div>

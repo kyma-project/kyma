@@ -70,7 +70,7 @@ Follows these steps:
 
 6. Select **Save** to confirm the changes.
 
-  You will see a message confirming that the changes were saved. Once deployed, the new Function should have the `RUNNING` status.
+  You will see a message confirming that the changes were saved. Once deployed, the new Function gets the status `RUNNING`.
 
     </details>
 </div>

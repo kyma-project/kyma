@@ -48,7 +48,7 @@ Follow these steps:
   EOF
   ```
 
-2. Check that the APIRule was created and has the `OK` status:
+2. Check that the APIRule was created and has the status `OK`:
 
   ```bash
   kubectl get apirules orders-function -n orders-service -o=jsonpath='{.status.APIRuleStatus.code}'

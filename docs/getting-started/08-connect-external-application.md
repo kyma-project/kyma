@@ -79,7 +79,7 @@ Follow these steps to deploy XF addons and add Commerce mock to the `orders-serv
    > **NOTE:** The `index.yaml` file is a manifest for APIs of SAP Marketing Cloud, SAP Cloud for Customer, and SAP Commerce Cloud applications.
 
 4. **Add** the configuration.
-5. Wait for the addon to have the `READY` status.
+5. Wait for the addon to have the status `READY`.
 6. In the left navigation panel, go to **Service Management** > **Catalog**.
 7. Switch to the **Add-Ons** tab and select **[Preview] SAP Commerce Cloud - Mock** as the application to provision.
 
@@ -88,7 +88,7 @@ Follow these steps to deploy XF addons and add Commerce mock to the `orders-serv
 8. Click **Add once** to deploy the application in the `orders-service` Namespace. Leave the `default` plan. Change the name to `commerce-mock`.
 9. Select **Create** to confirm the changes.
 
-You will be redirected to the **Catalog Management** > **Instances** > **commerce-mock** view. Wait for it to have the `RUNNING` status.
+You will be redirected to the **Catalog Management** > **Instances** > **commerce-mock** view. Wait for it to have the status `RUNNING`.
 
 When Commerce mock is provisioned, a corresponding API Rule is automatically created. When you go to the **API Rules** view in the `orders-service` Namespace and select `commerce-mock`, you will see the direct link to it under **Host**.
 
@@ -168,7 +168,7 @@ Follow these steps:
 2. Go to **Integration** > **Applications/Systems** and select **Create Application**.
 3. Set the application's name to `commerce-mock` and select **Create** to confirm the changes.
 
-  Wait for the application to have the `SERVING` status.
+  Wait for the application to have the status `SERVING`.
 
 4. Open the newly created application and select **Connect Application**.
 5. Copy the whole URL string with the token by clicking **Copy to Clipboard** and select **OK** to close the pop-up box.
@@ -270,7 +270,7 @@ Follow these steps:
 
 This way you enabled the events in the Namespace.
 
-You will be redirected to the **Catalog Management** > **Instances** > **commerce-mock-events** view. Wait for the events API to have the `RUNNING` status.
+You will be redirected to the **Catalog Management** > **Instances** > **commerce-mock-events** view. Wait for the events API to have the status `RUNNING`.
 
 </details>
 </div>

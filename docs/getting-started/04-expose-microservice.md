@@ -51,7 +51,7 @@ Follow these steps:
         mutators: []
   EOF
   ```
-2. Check that the API Rule was created and has the `OK` status:
+2. Check that the API Rule was created and has the status `OK`:
 
    ```bash
    kubectl get apirules orders-service -n orders-service -o=jsonpath='{.status.APIRuleStatus.code}'
