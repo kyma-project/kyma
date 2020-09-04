@@ -268,10 +268,6 @@ containers:
       - name: GF_SERVER_ROOT_URL
         value: "https://grafana.{{ .Values.global.ingress.domainName }}/"
       {{- end }}
-      {{- if .Values.kyma.grafana.useKymaGroups }}
-      - name: GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH
-        value: "contains(groups[*], `{{ .Values.global.kymaRuntime.adminGroup }}`) && 'Admin' || contains(groups[*], `{{ .Values.global.kymaRuntime.operatorGroup }}`) && 'Admin' || contains(groups[*], `{{ .Values.global.kymaRuntime.developerGroup }}`) && 'Editor' ||contains(groups[*], `{{ .Values.global.kymaRuntime.operatorGroup }}`) && 'Admin' || contains(groups[*], `{{ .Values.global.kymaRuntime.namespaceAdminGroup }}`) && 'Editor' || 'Editor'"
-      {{- end }}
     {{- range $key, $value := .Values.envValueFrom }}
       - name: {{ $key | quote }}
         valueFrom:
