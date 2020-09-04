@@ -6,7 +6,7 @@ global:
   certificates:
     manager:
       enabled: true
-    type: "detect" # legacy/gardener/xip/user-provided/detect
+    type: "xip" # legacy/gardener/xip/user-provided/detect
 
 configMapName: net-global-overrides
 jobs:
