@@ -25,7 +25,7 @@ global:
   application_operator:
     version: "PR-9214"
   application_operator_tests:
-    version: "PR-9214"
+    version: "PR-9356"
   connector_service:
     version: "PR-9214"
   connector_service_tests:
