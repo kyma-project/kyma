@@ -23,7 +23,6 @@ spec:
         prometheus.io/scrape: "true"
       labels:
         app: {{ template "name" . }}
-        tlsSecret: ingress-tls-cert
     spec:
       serviceAccountName: {{ template "name" . }}
       {{- if .Values.global.isLocalEnv }}
@@ -31,6 +30,27 @@ spec:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
             - "dex.{{ .Values.global.ingress.domainName }}"
+      {{- end }}
+      {{- if or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip") }}
+      initContainers:
+        - name: apiserver-proxy-init
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TYPE
+              value: "{{ .Values.global.certificates.type }}"
+          command:
+            - bash
+            - -c
+            - |
+              if [[ $TYPE == "legacy" ]]; then
+                echo "{{ .Values.global.tlsCrt }}" | base64 --decode > /etc/ca-tls-cert/tls.crt
+              elif [[ $TYPE == "xip" ]]; then
+                kubectl get secret -n istio-system kyma-ca-key-pair -o jsonpath='{.data.tls\.crt}' | base64 --decode > /etc/ca-tls-cert/tls.crt
+              fi
+          volumeMounts:
+            - name: ca-tls-cert
+              mountPath: /etc/ca-tls-cert/
       {{- end }}
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy.dir }}apiserver-proxy:{{ .Values.global.apiserver_proxy.version }}
@@ -54,7 +74,7 @@ spec:
         - --oidc-issuer=https://dex.{{ .Values.global.ingress.domainName }}
         - --oidc-clientID=kyma-client
         {{ if not (eq .Values.global.certificates.type "gardener") }}
-        - --oidc-ca-file=/etc/dex-tls-cert/tls.crt
+        - --oidc-ca-file=/etc/ca-tls-cert/tls.crt
         {{ end }}
         - --cors-allow-origin={{ .Values.corsPolicy.allowOrigin | join "," }}
         - --cors-allow-headers={{ .Values.corsPolicy.allowHeaders | join "," }}
@@ -73,15 +93,14 @@ spec:
         volumeMounts:
         - name: tls-cert
           mountPath: /etc/tls-cert/
-      {{- if not (eq .Values.global.certificates.type "gardener") }}
-        - name: dex-tls-cert
-          mountPath: /etc/dex-tls-cert/
+      {{- if or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip") }}
+        - name: ca-tls-cert
+          mountPath: /etc/ca-tls-cert/
       {{- end }}
       volumes:
-      {{- if not (eq .Values.global.certificates.type "gardener") }}
-      - name: dex-tls-cert
-        secret:
-          secretName: ingress-tls-cert
+      {{- if or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip") }}
+      - name: ca-tls-cert
+        emptyDir: {}
       {{- end }}
       - name: tls-cert
         secret:

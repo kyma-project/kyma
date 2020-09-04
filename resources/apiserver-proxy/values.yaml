@@ -30,6 +30,8 @@ hpa:
 tests:
   enabled: true
 global:
+  tlsCrt: "cGxhY2Vob2xkZXI="
+  tlsKey: "cGxhY2Vob2xkZXI="
   apiserver_proxy:
     dir:
     version: 264d8882

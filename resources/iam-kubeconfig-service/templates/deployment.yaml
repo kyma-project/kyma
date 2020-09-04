@@ -17,7 +17,6 @@ spec:
     metadata:
       labels:
         app: {{ template "name" . }}
-        tlsSecret: ingress-tls-cert
         chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     spec:
       {{- if .Values.global.isLocalEnv }}
@@ -53,9 +52,9 @@ spec:
 {{- if eq .Values.global.certificates.type "gardener" }}
             /app/app -kube-config-cluster-name=$(cat /injected-config/domain) -kube-config-url="https://apiserver.$(cat /injected-config/domain)" -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client
 {{- else if .Values.global.isLocalEnv }}
-            /app/app -kube-config-cluster-name=$(cat /injected-config/domain) -kube-config-url="https://apiserver.$(cat /injected-config/domain):9443" -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/etc/dex-tls-cert/tls.crt
+            /app/app -kube-config-cluster-name=$(cat /injected-config/domain) -kube-config-url="https://apiserver.$(cat /injected-config/domain):9443" -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/injected-config/ca-tls-cert.crt
 {{- else }}
-            /app/app -kube-config-cluster-name=$(cat /injected-config/domain) -kube-config-url="https://apiserver.$(cat /injected-config/domain)" -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/etc/dex-tls-cert/tls.crt
+            /app/app -kube-config-cluster-name=$(cat /injected-config/domain) -kube-config-url="https://apiserver.$(cat /injected-config/domain)" -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/injected-config/ca-tls-cert.crt
 {{- end  }}
         ports:
           - name: http
@@ -75,18 +74,9 @@ spec:
         - name: apiserver-proxy-tls-cert
           mountPath: "/etc/apiserver-proxy-tls-cert"
           readOnly: true
-      {{- if not (eq .Values.global.certificates.type "gardener") }}
-        - name: dex-tls-cert
-          mountPath: /etc/dex-tls-cert/
-      {{- end }}
       volumes:
       - name: config
         emptyDir: {}
-      {{- if not (eq .Values.global.certificates.type "gardener") }}
-      - name: dex-tls-cert
-        secret:
-          secretName: ingress-tls-cert
-      {{- end }}
       - name: apiserver-proxy-tls-cert
         secret:
           secretName: apiserver-proxy-tls-cert

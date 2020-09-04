@@ -32,6 +32,27 @@ spec:
             - "dex.{{ .Values.global.ingress.domainName }}"
             - "minio.{{ .Values.global.ingress.domainName }}"
       {{ end }}
+      {{- if or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip") }}
+      initContainers:
+        - name: init
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TYPE
+              value: "{{ .Values.global.certificates.type }}"
+          command:
+            - bash
+            - -c
+            - |
+              if [[ $TYPE == "legacy" ]]; then
+                echo "{{ .Values.global.tlsCrt }}" | base64 --decode > /etc/ca-tls-cert/tls.crt
+              elif [[ $TYPE == "xip" ]]; then
+                kubectl get secret -n istio-system kyma-ca-key-pair -o jsonpath='{.data.tls\.crt}' | base64 --decode > /etc/ca-tls-cert/tls.crt
+              fi
+          volumeMounts:
+            - name: ca-tls-cert
+              mountPath: /etc/ca-tls-cert/
+      {{- end }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.global.console_backend_service.version }}"
@@ -72,7 +93,7 @@ spec:
             value: "kyma-client"
           {{ if not (eq .Values.global.certificates.type "gardener") }}
           - name: APP_OIDC_CA_FILE
-            value: "/etc/ingress-tls-cert/tls.crt"
+            value: "/etc/ca-tls-cert/tls.crt"
           {{ end }}
           - name: APP_TRACING_COLLECTOR_URL
             value: {{ .Values.tracing.collectorUrl }}
@@ -85,12 +106,11 @@ spec:
         ports:
           - containerPort: {{ .Values.service.internalPort }}
             name: {{ .Values.service.internalPortName }}
-      {{ if not (eq .Values.global.certificates.type "gardener") }}
+      {{ if or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip") }}
         volumeMounts:
-          - name: ingress-tls-cert
-            mountPath: /etc/ingress-tls-cert/
+          - name: ca-tls-cert
+            mountPath: /etc/ca-tls-cert/
       volumes:
-        - name: ingress-tls-cert
-          secret:
-            secretName: ingress-tls-cert
+        - name: ca-tls-cert
+          emptyDir: {}
       {{ end }}
