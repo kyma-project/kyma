@@ -50,7 +50,7 @@ Follows these steps:
    EOF
    ```
 
-3. Check if the Addon CR was created successfully. The CR phase changes into `Ready`:
+3. Check that the Addon CR was created successfully and that the CR phase is `Ready`:
 
    ```bash
    kubectl get addons $NAME -n $NAMESPACE -o=jsonpath="{.status.phase}"
