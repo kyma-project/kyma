@@ -112,13 +112,14 @@ Currently, the test cannot be executed locally, as it requires access to interna
 
 Even though the test cannot be run locally, there is way to debug it locally while the test is actually running inside the cluster.
 The idea is as follows: 
-- build a new container image which the delve debugger and the test binary
-- deploy a pod which starts dlv debugger and runs the test while waiting for client connection on a specified port
-- after port-forward, one can connect to
+- build a new container image which contains the delve debugger and the test binary
+- deploy a pod which starts the delve debugger and runs the test while waiting for client connection on a specified port
+- establish a port-forward between the remote debug server and localhost
+- connect with a delve compatible client to the debug server (via port-forward)
 
 #### Start test with dlv
 
-Start the dlv debugger inside the pod:
+Deploy the new test code and start the dlv debugger:
 
 ```bash
 TEST_DEBUG_SCENARIO=e2e-event-mesh make debug-local
@@ -144,5 +145,5 @@ Create a new Run Configuration with type `Go Remote` and select localhost:40000 
 The test logs can be found inside the container:
 
 ```bash
-k logs -n kyma-system -l app=core-test-external-solution -c test -f
+kubectl logs -n kyma-system -l app=core-test-external-solution -c test -f
 ```
