@@ -222,7 +222,7 @@ initChownData:
   ##
   image:
     repository: eu.gcr.io/kyma-project/external/busybox
-    tag: "1.31.1"
+    tag: "1.32.0"
     pullPolicy: IfNotPresent
 
   ## initChownData resource requests and limits
