@@ -125,7 +125,7 @@ Follow these steps:
 
 Follow these steps:
 
-> **CAUTION:** If you have a Minikube cluster, you must first add the IP address of the exposed Service to the `hosts` file on your machine:
+> **CAUTION:** If you have a Minikube cluster, you must first add its IP address mapped to the exposed Kubernetes Service to the `hosts` file on your machine:
 >
 >  ```bash
 >  echo "$(minikube ip) orders-service.kyma.local" | sudo tee -a /etc/hosts

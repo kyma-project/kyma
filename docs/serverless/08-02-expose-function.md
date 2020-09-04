@@ -76,7 +76,7 @@ Follows these steps:
     curl https://$NAME.$DOMAIN
     ```
 
-   >**NOTE:** If you are using Minikube, make sure that you've added the domain name to the Minikube IP entry in the `/etc/hosts` file.
+   >**CAUTION:** If you have a Minikube cluster, you must first add its IP address mapped to the exposed Kubernetes Service to the `hosts` file on your machine.
 
     </details>
     <details>
@@ -104,6 +104,6 @@ Follows these steps:
 
 7. Check if you can access the Function by selecting the HTTPS link under the **Host** column for the newly created API Rule.
 
-    >**NOTE:** If you are using Minikube, make sure that you've added the domain name to the Minikube IP entry in the `/etc/hosts` file.
+    >**CAUTION:** If you have a Minikube cluster, you must first add its IP address mapped to the exposed Kubernetes Service to the `hosts` file on your machine.
     </details>
 </div>
