@@ -14,8 +14,17 @@ test:
 	@echo "Tests are not to be run at this stage."
 
 clustertest:
+	rm .ko.yaml || true
+	ln -s  .ko.curl.yaml .ko.yaml
 	cat testdefinition.ko.yaml| KYMADOMAIN=$(shell kubectl get configmap net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.domainName}') envsubst | ko apply -n kyma-system -f -
 	kyma test run core-test-external-solution --watch
+
+debug-local:
+	kubectl delete pod -n kyma-system core-test-external-solution;
+	rm .ko.yaml || true
+	ln -s .ko.delve.yaml .ko.yaml
+	cat debug-locally-delve.ko.yaml | KYMADOMAIN=$(shell kubectl get configmap net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.domainName}') envsubst | ko apply --disable-optimizations -f -
+
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
