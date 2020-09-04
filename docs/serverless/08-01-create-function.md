@@ -81,8 +81,7 @@ Follows these steps:
 
 5.  Select **Save** to confirm changes.
 
-        You will see the message confirming the changes were saved. Once deployed, the new Function should have the `RUNNING` status in the list of all Functions under the **Functions** view.
+    You will see the message confirming the changes were saved. Once deployed, the new Function should have the `RUNNING` status in the list of all Functions under the **Functions** view.
 
-        </details>
-
-    </div>
+</details>
+</div>
