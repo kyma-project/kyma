@@ -30,7 +30,7 @@ Follow these steps:
 kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-service-deployment.yaml
 ```
 
-2. Check that the Deployment was created. The correct Deployment status should set **readyReplicas** to `1`:
+2. Check that the Deployment was created. The correct Deployment status sets **readyReplicas** to `1`:
 
 ```bash
 kubectl get deployment orders-service -n orders-service -o=jsonpath="{.status.readyReplicas}"

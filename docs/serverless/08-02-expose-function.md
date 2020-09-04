@@ -64,7 +64,7 @@ Follows these steps:
     EOF
     ```
 
-3. Check if the API Rule was created successfully and has the `OK` status:
+3. Check that the API Rule was created successfully and has the status `OK`:
 
     ```bash
     kubectl get apirules $NAME -n $NAMESPACE -o=jsonpath='{.status.APIRuleStatus.code}'

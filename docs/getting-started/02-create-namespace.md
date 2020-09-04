@@ -25,7 +25,7 @@ Follow these steps:
    kubectl create ns orders-service
    ```
 
-2. Check that the Namespace was set up. The Namespace status phase should be `Active`:
+2. Check that the Namespace was set up. This is indicated by the Namespace status phase `Active`:
 
    ```bash
    kubectl get ns orders-service -o=jsonpath="{.status.phase}"

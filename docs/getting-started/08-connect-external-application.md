@@ -40,7 +40,7 @@ Follow these steps to deploy XF addons and add Commerce mock to the `orders-serv
 
    > **NOTE:** The `index.yaml` file is a manifest for APIs of SAP Marketing Cloud, SAP Cloud for Customer, and SAP Commerce Cloud applications.
 
-2. Check that the AddonsConfiguration CR was created. This is indicated by the `Ready` phase:
+2. Check that the AddonsConfiguration CR was created. This is indicated by the phase `Ready`:
 
   ```bash
   kubectl get addonsconfigurations xf-mocks -n orders-service -o=jsonpath="{.status.phase}"
@@ -125,7 +125,7 @@ Follow these steps:
   EOF
   ```
 
-2. Check that the Application CR was created. This is indicated by the `deployed` status:
+2. Check that the Application CR was created. This is indicated by the status `deployed`:
 
    ```bash
    kubectl get application commerce-mock -o=jsonpath="{.status.installationStatus.status}"

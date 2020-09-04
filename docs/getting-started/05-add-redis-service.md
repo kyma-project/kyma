@@ -34,7 +34,7 @@ Follows these steps:
    EOF
    ```
 
-2. Check that the AddonsConfiguration CR was created. This is indicated by the `Ready` status phase:
+2. Check that the AddonsConfiguration CR was created. This is indicated by the status phase `Ready`:
 
   ```bash
   kubectl get addonsconfigurations redis-addon -n orders-service -o=jsonpath="{.status.phase}"

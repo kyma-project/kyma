@@ -50,7 +50,7 @@ Follows these steps:
    EOF
    ```
 
-3. Check if the Addon CR was created successfully. The CR phase should state `Ready`:
+3. Check if the Addon CR was created successfully. The CR phase changes into `Ready`:
 
    ```bash
    kubectl get addons $NAME -n $NAMESPACE -o=jsonpath="{.status.phase}"
@@ -73,7 +73,7 @@ Follows these steps:
    EOF
    ```
 
-5. Check if the ServiceInstance CR was created successfully. The last condition in the CR status should state `Ready True`:
+5. Check if the ServiceInstance CR was created successfully. The last condition in the CR status changes into `Ready True`:
 
    ```bash
    kubectl get serviceinstance $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
@@ -96,7 +96,7 @@ Follows these steps:
 
    > **NOTE:** If you use an existing ServiceInstance, change **spec.instanceRef.name** to the name of your ServiceInstance.
 
-7. Check if the ServiceBinding CR was created successfully. The last condition in the CR status should state `Ready True`:
+7. Check if the ServiceBinding CR was created successfully. The last condition in the CR status changes into `Ready True`:
 
    ```bash
    kubectl get servicebinding $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
@@ -129,7 +129,7 @@ Follows these steps:
 
      > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
 
-9. Check if the ServiceBindingUsage CR was created successfully. The last condition in the CR status should state `Ready True`:
+9. Check if the ServiceBindingUsage CR was created successfully. The last condition in the CR status changes into `Ready True`:
 
    ```bash
    kubectl get servicebindingusage $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
@@ -173,7 +173,7 @@ Follow these steps:
 
 4. Select **Add** to confirm changes.
 
-   You will see that the Addon has the `Ready` status.
+   You will see that the Addon has the status `Ready`.
 
 ### Create a ServiceInstance
 
