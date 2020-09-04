@@ -6,6 +6,8 @@ Functions support multiple languages through the use of runtimes. In order to us
 
 See sample Functions for each available runtime:
 
+> **CAUTION:** When you create a Function, the exported object in the Function's body must have `main` as the handler name.
+
 <div tabs name="available-runtimes" group="available-runtimes">
   <details>
   <summary label="nodejs12">

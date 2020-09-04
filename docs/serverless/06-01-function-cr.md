@@ -13,8 +13,6 @@ kubectl get crd functions.serverless.kyma-project.io -o yaml
 
 The following Function object creates a Function which responds to HTTP requests with the "Hello John" message.
 
-> **CAUTION:** When you create a Function, the exported object in the Function's body must have `main` as the handler name. It also applies to Functions with Python runtime.
-
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha1
 kind: Function
