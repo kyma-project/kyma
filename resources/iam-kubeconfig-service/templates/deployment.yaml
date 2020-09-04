@@ -33,8 +33,6 @@ spec:
           env:
             - name: TYPE
               value: "{{ .Values.global.certificates.type }}"
-            - name: CERT_MANAGER
-              value: "{{ .Values.global.certificates.manager.enabled }}"
             - name: IS_LOCAL
               value: "{{ .Values.global.isLocalEnv }}"
           command:

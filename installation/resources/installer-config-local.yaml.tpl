@@ -36,7 +36,6 @@ data:
   global.domainName: "kyma.local"
   global.adminPassword: ""
   global.minikubeIP: ""
-  modules.legacy.enabled: "true"
   global.certificates.type: "legacy"
   global.certificates.manager.enabled: "false"
 ---
