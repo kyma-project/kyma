@@ -49,7 +49,7 @@ spec:
           - sh
           - -c
           - |
-{{- if eq .Values.global.certificates.type "gardener" }}
+{{- if or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip") }}
             /app/app -kube-config-cluster-name=$(cat /injected-config/domain) -kube-config-url="https://apiserver.$(cat /injected-config/domain)" -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client
 {{- else if .Values.global.isLocalEnv }}
             /app/app -kube-config-cluster-name=$(cat /injected-config/domain) -kube-config-url="https://apiserver.$(cat /injected-config/domain):9443" -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/injected-config/ca-tls-cert.crt

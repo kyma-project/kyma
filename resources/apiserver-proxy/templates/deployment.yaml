@@ -73,7 +73,7 @@ spec:
         - --v=9
         - --oidc-issuer=https://dex.{{ .Values.global.ingress.domainName }}
         - --oidc-clientID=kyma-client
-        {{ if not (eq .Values.global.certificates.type "gardener") }}
+          {{- if or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip") }}
         - --oidc-ca-file=/etc/ca-tls-cert/tls.crt
         {{ end }}
         - --cors-allow-origin={{ .Values.corsPolicy.allowOrigin | join "," }}

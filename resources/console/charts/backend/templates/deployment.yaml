@@ -91,7 +91,7 @@ spec:
             value: "https://dex.{{ .Values.global.ingress.domainName }}"
           - name: APP_OIDC_CLIENT_ID
             value: "kyma-client"
-          {{ if not (eq .Values.global.certificates.type "gardener") }}
+          {{ if or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip") }}
           - name: APP_OIDC_CA_FILE
             value: "/etc/ca-tls-cert/tls.crt"
           {{ end }}
