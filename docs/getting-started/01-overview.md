@@ -6,7 +6,7 @@ type: Getting Started
 This set of Getting Started guides is an end-to-end scenario that will walk you through major Kyma components and show its two main use cases:
 
 - **Extensibility** - when you first connect external applications to Kyma and expose their APIs and events to the cluster. Then, you can create extensions for them by building a simple Function, a more complex microservice, or a mixture of those, depending on your use case complexity level. You can also simplify these integrations and use [Open Service Broker](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md)-compliant services enabled in Kyma's [Service Catalog](/components/service-catalog/).
-- **Application runtime** - when you want to shape your business logic from scratch and use Kyma to build standalone microservices and Functions rather than extensions for the existing systems.
+- **Application runtime** - when you want to shape your business logic from scratch and use Kyma to build standalone microservices and Functions rather than extensions for existing systems.
 
 With these features in mind, we will:
 
