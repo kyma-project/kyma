@@ -27,7 +27,7 @@ spec:
 
     module.exports = {
       main: function (event, context) {
-        return fetch("https://swapi.dev/api/people/12").then(res => res.json())
+        return fetch("https://swapi.dev/api/people/1").then(res => res.json())
       }
     }
   deps: |
@@ -92,8 +92,7 @@ spec:
     import requests
 
     def main(event, context):
-        params = {'format': 'wookiee'}
-        r = requests.get('https://swapi.dev/api/people/13', params=params)
+        r = requests.get('https://swapi.dev/api/people/13')
         return r.json()
   deps: |
     certifi==2020.6.20
