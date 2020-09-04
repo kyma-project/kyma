@@ -1,0 +1,2 @@
+# optionally build your own image from Dockerfile.delve
+defaultBaseImage: docker.io/nachtmaar/delve:alpine
