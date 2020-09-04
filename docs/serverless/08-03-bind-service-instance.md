@@ -127,7 +127,7 @@ Follows these steps:
 
    - The **spec.parameters.envPrefix.name** field is optional. On creating a ServiceBinding, it adds a prefix to all environment variables injected in a Secret to the Function. In our example, **envPrefix** is `REDIS_`, so all environment variables will follow the `REDIS_{env}` naming pattern.
 
-     > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
+     > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another.
 
 9. Check if the ServiceBindingUsage CR was created successfully. The last condition in the CR status changes into `Ready True`:
 
@@ -203,7 +203,7 @@ The message appears on the screen confirming that the ServiceBinding was success
 
 > **NOTE:** The **Prefix for injected variables** field is optional. On creating a ServiceBinding, it adds a prefix to all environment variables injected in a Secret to the Function. In our example, the prefix is set to `REDIS_`, so all environment variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
 
-> **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
+> **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another.
 
     </details>
 
