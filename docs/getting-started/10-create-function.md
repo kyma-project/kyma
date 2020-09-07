@@ -54,7 +54,7 @@ Follows these steps:
 
   The pop-up box will close and a message on the screen will confirm that the Function was created.
 
-4. In the **Source** tab of the automatically opened Function details view, enter the Function's code from the [`orders-function.js`](https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-function.js) file.
+4. In the **Source** tab of the automatically opened Function details view, enter the Function's code from the [`handler.js`](https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/function/handler.js) file.
 
 5. In the **Dependencies** tab, enter:
 
