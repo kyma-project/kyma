@@ -31,9 +31,9 @@ dependencies:
   - name: gardener
     version: 0.1.0
     condition: modules.gardener.enabled
-  - name: own-domain
+  - name: user-provided
     version: 0.1.0
-    condition: modules.own-domain.enabled
+    condition: modules.user-provided.enabled
   - name: legacy
     version: 0.1.0
     condition: modules.legacy.enabled

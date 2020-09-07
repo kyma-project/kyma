@@ -16,6 +16,7 @@ PATCH_YAML=$(cat << EOF
 ---
 data:
   global.ingress.domainName: ${GLOBAL_DOMAIN}
+  global.domainName: ${GLOBAL_DOMAIN}
 EOF
 )
 
