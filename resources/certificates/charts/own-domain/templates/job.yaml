@@ -23,6 +23,8 @@ spec:
           env:
             - name: KYMA_TLS_CERT
               value: "kyma-tls-cert"
+            - name: GLOBAL_DOMAIN
+              value: {{ .Values.global.domainName }}
             - name: APISERVER_PROXY_TLS_CERT
               value: "apiserver-proxy-tls-cert"
             - name: KYMA_CA_ISSUER

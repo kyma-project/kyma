@@ -2,6 +2,16 @@
 
 set -o errexit
 
+for var in KYMA_TLS_CERT GLOBAL_DOMAIN APISERVER_PROXY_TLS_CERT KYMA_CA_ISSUER KYMA_TLS_SECRET APISERVER_PROXY_TLS_SECRET; do
+    if [ -z "${!var}" ] ; then
+        echo "ERROR: $var is not set"
+        discoverUnsetVar=true
+    fi
+done
+if [ "${discoverUnsetVar}" = true ] ; then
+    exit 1
+fi
+
 echo "Checking if cert-manager CRDs are installed"
 
 kubectl get crd certificates.cert-manager.io
