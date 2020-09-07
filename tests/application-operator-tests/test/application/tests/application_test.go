@@ -9,6 +9,11 @@ import (
 func TestApplicationRelease(t *testing.T) {
 
 	testSuite := application.NewTestSuite(t)
+
+	if !testSuite.TestShouldRun() {
+		t.Skip("Application operator in old mode. Skipping test")
+	}
+
 	defer testSuite.Cleanup(t)
 	testSuite.Setup(t)
 
