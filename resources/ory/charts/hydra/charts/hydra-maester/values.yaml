@@ -18,7 +18,7 @@ globalAccess: false
 enabledNamespaces: []
 
 image:
-  repository: oryd/hydra-maester
+  repository: eu.gcr.io/kyma-project/external/oryd/hydra-maester
   tag: v0.0.15
   # Image pull policy
   pullPolicy: IfNotPresent
