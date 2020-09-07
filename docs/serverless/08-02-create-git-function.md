@@ -3,7 +3,7 @@ title: Create a Function from Git Repository
 type: Tutorials
 ---
 
-This tutorial shows how you can create a simple "Hello World!" Function from Git repository.
+This tutorial shows how you can create a sample Function from Git repository based on [orders service example](https://github.com/kyma-project/examples/tree/master/orders-service).
 
 ## Steps
 
@@ -30,8 +30,9 @@ Follows these steps:
     kind: GitRepository
     metadata:
       name: $NAME
+      namespace: $NAMESPACE
     spec:
-      url: "https://github.com/pPrecel/public-gitops"
+      url: "https://github.com/kyma-project/examples.git"
     EOF
     ```
    
@@ -45,16 +46,17 @@ Follows these steps:
     kind: Function
     metadata:
       name: $NAME
+      namespace: $NAMESPACE
     spec:
       type: git
       runtime: nodejs12
       source: $NAME
       reference: master
-      baseDir: js-handler
+      baseDir: orders-service/function
     EOF
     ```
 
-    >**NOTE** To see full spec, go to the xxx page 
+    >**NOTE** To see the function files, go to [this](https://github.com/kyma-project/examples/tree/master/orders-service/function) page. 
 
 4. Check if your Function was created successfully and all conditions are set to `True`:
 
@@ -79,13 +81,13 @@ Follows these steps:
 
 2. Go to the **Functions** view in the left navigation panel and select **Repositories** tab.
 
-3. Click **Connect Repository**,  fill in required fields and click **Connect**.
+3. Click **Connect Repository**, fill the `Url` field with `https://github.com/kyma-project/examples.git` value and click **Connect**.
 
-    >**NOTE** Auth possibility TODO
+    >**NOTE** If you want connect the private repository, change the `Authorization` field from `Public` to `Key` or `Basic` and fill the required fields <TODO insert link to documentation>
 
 4. Go to the **Functions** tab and click **Create Function**.
 
-5. In the pop-up box, change `Source type` to `From Repository`, fill in required fields and select **Create** to confirm changes.
+5. In the pop-up box, change `Source type` to `From Repository`, select created Repository's name, fill the `Reference` field with `master` and `Base directory` field with `orders-service/function` values and select **Create** to confirm changes.
 
     The pop-up box closes and the message appears on the screen after a while, confirming that the Function was created successfully.
     The new Function should have the `RUNNING` status in the list of all Functions under the **Functions** view.
