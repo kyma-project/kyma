@@ -87,12 +87,8 @@ Follows these steps:
 
 3. In the pop-up box, change `Source type` to `From Repository`, fill in required fields and select **Create** to confirm changes.
 
-     The pop-up box closes and the message appears on the screen after a while, confirming that the Function was created successfully.
-
-
-5. Select **Save** to confirm changes.
-
-    You will see the message confirming the changes were saved. Once deployed, the new Function should have the `RUNNING` status in the list of all Functions under the **Functions** view.
+    The pop-up box closes and the message appears on the screen after a while, confirming that the Function was created successfully.
+    The new Function should have the `RUNNING` status in the list of all Functions under the **Functions** view.
 
     </details>
 </div>
