@@ -49,6 +49,17 @@ func (oh *oauthHandler) OAuthTargetHandler(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusOK)
 }
 
+func (oh *oauthHandler) OAuthSpecHandler(w http.ResponseWriter, r *http.Request) {
+	err := oh.checkOauth(r)
+	if err != nil {
+		oh.logger.Error(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func (oh *oauthHandler) checkOauth(r *http.Request) error {
 	headerAuthorization := r.Header.Get(AuthorizationHeader)
 	oAuthToken := strings.TrimPrefix(headerAuthorization, "Bearer ")

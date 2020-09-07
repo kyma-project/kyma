@@ -16,6 +16,11 @@ import (
 func TestProxyService(t *testing.T) {
 
 	testSuit := gateway.NewTestSuite(t)
+
+	if testSuit == nil {
+		return
+	}
+
 	defer testSuit.Cleanup(t)
 	testSuit.Setup(t)
 

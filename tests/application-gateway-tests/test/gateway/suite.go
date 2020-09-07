@@ -52,6 +52,10 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	config, err := ReadConfig()
 	require.NoError(t, err)
 
+	if config.GatewayLegacyMode == true {
+		return nil
+	}
+
 	k8sConfig, err := restclient.InClusterConfig()
 	require.NoError(t, err)
 
