@@ -65,7 +65,7 @@ Follows these steps:
 
 2.  Go to the **Functions** view in the left navigation panel and select **Create Function**.
 
-3.  In the pop-up box, provide the Function's name, select Runtime **Node.js 12** and select **Create** to confirm changes.
+3.  In the pop-up box, provide the Function's name, leave the default runtime `Node.js 12`, and select **Create** to confirm changes.
 
     The pop-up box closes and the message appears on the screen after a while, confirming that the Function was created successfully.
 

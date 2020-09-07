@@ -5,7 +5,7 @@ type: Details
 
 A newly created or modified Function CR is first updated by the defaulting webhook and then verified by the validation webhook before the Function Controller starts to process it:
 
-1. **Defaulting webhook** sets the default values for CPU and memory requests and limits, and adds the maximum and the minimum number of replicas, if not specified already in the Function CR. It also sets default runtime `nodejs12`, unless specified otherwise.
+1. **Defaulting webhook** sets the default values for CPU and memory requests and limits, and adds the maximum and the minimum number of replicas, if not specified already in the Function CR. It also sets the default runtime `nodejs12` unless specified otherwise.
 
    | Parameter         | Default value |
    | ----------------- | ------------- |

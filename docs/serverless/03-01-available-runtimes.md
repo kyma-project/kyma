@@ -1,10 +1,11 @@
 ---
 title: Runtimes
+type: Details
 ---
 
-Functions support multiple languages through the use of runtimes. In order to use chosen runtime supply the value in `spec.runtime` field of [Function CR](#custom-resource-function). If it's not specified, it defaults to `nodejs12`. Node.js function dependencies should be specified using [package.json](https://docs.npmjs.com/creating-a-package-json-file) format. Python Function dependencies should follow requirements format, used by [pip](https://packaging.python.org/key_projects/#pip).
+Functions support multiple languages through the use of runtimes. To use a chosen runtime, add its name and version as a value in the **spec.runtime** field of the [Function custom resource (CR)](#custom-resource-function). If this value is not specified, it defaults to `nodejs12`. Dependencies for a Node.js Function should be specified using the [`package.json`](https://docs.npmjs.com/creating-a-package-json-file) file format. Dependencies for a Python Function should follow the format used by [pip](https://packaging.python.org/key_projects/#pip).
 
-See sample Functions for each available runtime:
+See sample Functions for all available runtime:
 
 > **CAUTION:** When you create a Function, the exported object in the Function's body must have `main` as the handler name.
 
