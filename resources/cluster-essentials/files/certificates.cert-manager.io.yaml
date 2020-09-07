@@ -15,8 +15,8 @@ spec:
     webhook:
       clientConfig:
         service:
-          name: cert-manager-webhook
-          namespace: cert-manager
+          name: certificates-cert-manager-webhook
+          namespace: istio-system
           path: /convert
       conversionReviewVersions:
       - v1
