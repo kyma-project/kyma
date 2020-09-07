@@ -69,7 +69,7 @@ module.exports = { main: function (event, context) {
 		throw new Error("Payload not as expected")	
     }
 	return new Promise((resolve, reject) => {	
-		const url = gateway;	
+		const url = gateway + "/ce";	
 		console.log("Counter URL: ", url);	
 		sendReq(url, resolve, reject);	
 	}).then(resolved, rejected);	
