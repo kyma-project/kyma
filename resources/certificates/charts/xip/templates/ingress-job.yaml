@@ -35,5 +35,9 @@ spec:
           value: "{{ .Values.certs.ingress.rootCA.secretName }}"
         - name: ROOTCA_SERVICE_NAMESPACE
           value: "{{ .Values.certs.ingress.rootCA.secretNamespace }}"
+        - name: CLUSTER_INFO_CM_NAME
+          value: "{{ .Values.clusterInfoConfigMap.name }}"
+        - name: CLUSTER_INFO_CM_NAMESPACE
+          value: "{{ .Values.clusterInfoConfigMap.namespace }}"
         terminationMessagePolicy: "FallbackToLogsOnError"
 

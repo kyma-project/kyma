@@ -5,6 +5,7 @@ metadata:
   name: {{ include "xip.fullname" . }}-ingress
   namespace: {{ .Release.Namespace }}
 ---
+#TODO: Fix these permissions
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -36,4 +37,32 @@ subjects:
 roleRef:
   kind: ClusterRole
   name: {{ include "xip.fullname" . }}-ingress
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "xip.fullname" . }}-cm
+  namespace: {{ .Values.clusterInfoConfigMap.namespace }}
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs:
+    - get
+    - patch
+  resourceNames:
+    - {{ .Values.clusterInfoConfigMap.name }}
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "xip.fullname" . }}-cm
+  namespace: {{ .Values.clusterInfoConfigMap.namespace }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "xip.fullname" . }}-ingress
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ include "xip.fullname" . }}-cm
   apiGroup: rbac.authorization.k8s.io

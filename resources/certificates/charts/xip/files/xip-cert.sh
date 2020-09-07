@@ -9,6 +9,8 @@ set -o errexit
 # INGRESSGATEWAY_SERVICE_NAMESPACE  #
 # ROOTCA_SECRET_NAME                #
 # ROOTCA_SECRET_NAMESPACE           #
+# CLUSTER_INFO_CM_NAME              #
+# CLUSTER_INFO_CM_NAMESPACE         #
 # # # # # # # # # # # # # # # # # # #
 
 
@@ -142,5 +144,27 @@ spec:
     kind: ClusterIssuer
     group: cert-manager.io
 EOF
+
+
+echo "Update global.ingress.domainName override in: ${CLUSTER_INFO_CM_NAMESPACE}/${CLUSTER_INFO_CM_NAME}"
+
+PATCH_YAML=$(cat << EOF
+---
+data:
+  global.ingress.domainName: ${XIP_DOMAIN}
+EOF
+)
+
+echo "---> Patching cm ${CLUSTER_INFO_CM_NAMESPACE}/${CLUSTER_INFO_CM_NAME}"
+set +e
+msg=$(kubectl patch cm ${CLUSTER_INFO_CM_NAME} --patch "${PATCH_YAML}" -n ${CLUSTER_INFO_CM_NAMESPACE} 2>&1)
+status=$?
+set -e
+
+if [[ $status -ne 0 ]] && [[ ! "$msg" == *"not patched"* ]]; then
+    echo "error patching ConfigMap ${CLUSTER_INFO_CM_NAME}"
+    echo "$msg"
+    exit $status
+fi
 
 echo "Success."

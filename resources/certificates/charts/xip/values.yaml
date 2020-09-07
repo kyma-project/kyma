@@ -13,5 +13,6 @@ certs:
     rootCA:
       secretName: kyma-ca-key-pair
       secretNamespace: istio-system
-replicaCount: 1
-
+clusterInfoConfigMap:
+  name: net-global-overrides
+  namespace: kyma-installer
