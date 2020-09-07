@@ -34,12 +34,12 @@ func (r *Resolver) CreateRoleBinding(ctx context.Context, namespace string, name
 	for i, sub := range params.Subjects {
 		convertedSubjects[i] = v1.Subject{
 			Kind:     string(sub.Kind),
-			APIGroup: clusterRoleGroupVersionResource.Group,
+			APIGroup: roleGroupVersionResource.Group,
 			Name:     sub.Name,
 		}
 	}
 
-	roleBinding := &v1.ClusterRoleBinding{
+	roleBinding := &v1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
@@ -60,4 +60,23 @@ func (r *Resolver) DeleteRoleBinding(ctx context.Context, namespace string, name
 	result := &v1.RoleBinding{}
 	err := r.RoleBindingService().DeleteInNamespace(namespace, name, result)
 	return result, err
+}
+
+func (r *Resolver) RoleBindingSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.RoleBindingEvent, error) {
+	channel := make(chan *gqlschema.RoleBindingEvent, 1)
+	filter := func(apiRule v1.RoleBinding) bool {
+		return apiRule.Namespace == namespace
+	}
+	unsubscribe, err := r.RoleBindingService().Subscribe(NewRoleBindingEventHandler(channel, filter))
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		defer close(channel)
+		defer unsubscribe()
+		<-ctx.Done()
+	}()
+
+	return channel, nil
 }

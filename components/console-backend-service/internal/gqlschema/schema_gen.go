@@ -304,6 +304,11 @@ type ComplexityRoot struct {
 		RoleRef func(childComplexity int) int
 	}
 
+	ClusterRoleBindingEvent struct {
+		ClusterRoleBinding func(childComplexity int) int
+		Type               func(childComplexity int) int
+	}
+
 	ClusterServiceBroker struct {
 		CreationTimestamp func(childComplexity int) int
 		Labels            func(childComplexity int) int
@@ -825,6 +830,11 @@ type ComplexityRoot struct {
 		RoleRef   func(childComplexity int) int
 	}
 
+	RoleBindingEvent struct {
+		RoleBinding func(childComplexity int) int
+		Type        func(childComplexity int) int
+	}
+
 	RoleRef struct {
 		Kind func(childComplexity int) int
 		Name func(childComplexity int) int
@@ -1046,6 +1056,7 @@ type ComplexityRoot struct {
 		ClusterAddonsConfigurationEvent func(childComplexity int) int
 		ClusterAssetEvent               func(childComplexity int) int
 		ClusterAssetGroupEvent          func(childComplexity int) int
+		ClusterRoleBindingEvent         func(childComplexity int) int
 		ClusterServiceBrokerEvent       func(childComplexity int) int
 		ConfigMapEvent                  func(childComplexity int, namespace string) int
 		DeploymentEvent                 func(childComplexity int, namespace string) int
@@ -1053,6 +1064,7 @@ type ComplexityRoot struct {
 		NamespaceEvent                  func(childComplexity int, withSystemNamespaces *bool) int
 		OAuth2ClientEvent               func(childComplexity int, namespace string) int
 		PodEvent                        func(childComplexity int, namespace string) int
+		RoleBindingEvent                func(childComplexity int, namespace string) int
 		SecretEvent                     func(childComplexity int, namespace string) int
 		ServiceBindingEvent             func(childComplexity int, namespace string) int
 		ServiceBindingUsageEvent        func(childComplexity int, namespace string, resourceKind *string, resourceName *string) int
@@ -1330,6 +1342,8 @@ type SubscriptionResolver interface {
 	APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan *APIRuleEvent, error)
 	TriggerEvent(ctx context.Context, namespace string, subscriber *v11.Destination) (<-chan *TriggerEvent, error)
 	OAuth2ClientEvent(ctx context.Context, namespace string) (<-chan *OAuth2ClientEvent, error)
+	RoleBindingEvent(ctx context.Context, namespace string) (<-chan *RoleBindingEvent, error)
+	ClusterRoleBindingEvent(ctx context.Context) (<-chan *ClusterRoleBindingEvent, error)
 }
 type TriggerResolver interface {
 	Status(ctx context.Context, obj *v1alpha12.Trigger) (*TriggerStatus, error)
@@ -2233,6 +2247,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ClusterRoleBinding.RoleRef(childComplexity), true
+
+	case "ClusterRoleBindingEvent.clusterRoleBinding":
+		if e.complexity.ClusterRoleBindingEvent.ClusterRoleBinding == nil {
+			break
+		}
+
+		return e.complexity.ClusterRoleBindingEvent.ClusterRoleBinding(childComplexity), true
+
+	case "ClusterRoleBindingEvent.type":
+		if e.complexity.ClusterRoleBindingEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.ClusterRoleBindingEvent.Type(childComplexity), true
 
 	case "ClusterServiceBroker.creationTimestamp":
 		if e.complexity.ClusterServiceBroker.CreationTimestamp == nil {
@@ -5185,6 +5213,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RoleBinding.RoleRef(childComplexity), true
 
+	case "RoleBindingEvent.roleBinding":
+		if e.complexity.RoleBindingEvent.RoleBinding == nil {
+			break
+		}
+
+		return e.complexity.RoleBindingEvent.RoleBinding(childComplexity), true
+
+	case "RoleBindingEvent.type":
+		if e.complexity.RoleBindingEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.RoleBindingEvent.Type(childComplexity), true
+
 	case "RoleRef.kind":
 		if e.complexity.RoleRef.Kind == nil {
 			break
@@ -6157,6 +6199,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Subscription.ClusterAssetGroupEvent(childComplexity), true
 
+	case "Subscription.clusterRoleBindingEvent":
+		if e.complexity.Subscription.ClusterRoleBindingEvent == nil {
+			break
+		}
+
+		return e.complexity.Subscription.ClusterRoleBindingEvent(childComplexity), true
+
 	case "Subscription.clusterServiceBrokerEvent":
 		if e.complexity.Subscription.ClusterServiceBrokerEvent == nil {
 			break
@@ -6235,6 +6284,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.PodEvent(childComplexity, args["namespace"].(string)), true
+
+	case "Subscription.roleBindingEvent":
+		if e.complexity.Subscription.RoleBindingEvent == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_roleBindingEvent_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.RoleBindingEvent(childComplexity, args["namespace"].(string)), true
 
 	case "Subscription.secretEvent":
 		if e.complexity.Subscription.SecretEvent == nil {
@@ -6840,6 +6901,16 @@ input ClusterRoleBindingInput {
     subjects: [RoleBindingSubject!]!
 }
 
+type ClusterRoleBindingEvent {
+    type: SubscriptionEventType!
+    clusterRoleBinding: ClusterRoleBinding!
+}
+
+type RoleBindingEvent {
+    type: SubscriptionEventType!
+    roleBinding: RoleBinding!
+}
+
 extend type Query {
     roles(namespace: String!): [Role!]! @HasAccess(attributes: {resource: "roles", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     role(namespace: String!, name: String!): Role! @HasAccess(attributes: {resource: "roles", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
@@ -6853,13 +6924,17 @@ extend type Query {
 }
 
 extend type Mutation {
-    createRoleBinding(name: String!, namespace: String!, params: RoleBindingInput!): RoleBinding!@HasAccess(attributes: {resource: "roleBindings", verb: "create", apiGroup: "", apiVersion: "v1"})
+    createRoleBinding(name: String!, namespace: String!, params: RoleBindingInput!): RoleBinding!@HasAccess(attributes: {resource: "roleBindings", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     deleteRoleBinding(namespace: String!, name: String!): RoleBinding!@HasAccess(attributes: {resource: "roleBindings", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     createClusterRoleBinding(name: String!, params: ClusterRoleBindingInput!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterRoleBindings", verb: "create", apiGroup: "", apiVersion: "v1"})
     deleteClusterRoleBinding(name: String!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterRoleBindings", verb: "delete", apiGroup: "", apiVersion: "v1"})
 }
-`, BuiltIn: false},
+
+extend type Subscription {
+    roleBindingEvent(namespace: String!): RoleBindingEvent! @HasAccess(attributes: {resource: "roleBindings", verb: "watch", apiGroup: "", apiVersion: "v1alpha", namespaceArg: "namespace"})
+    clusterRoleBindingEvent: ClusterRoleBindingEvent! @HasAccess(attributes: {resource: "clusterRoleBindings", verb: "watch", apiGroup: "", apiVersion: "v1alpha"})
+}`, BuiltIn: false},
 	&ast.Source{Name: "internal/gqlschema/schema.graphql", Input: `# Scalars
 
 scalar JSON
@@ -11097,6 +11172,20 @@ func (ec *executionContext) field_Subscription_oAuth2ClientEvent_args(ctx contex
 }
 
 func (ec *executionContext) field_Subscription_podEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Subscription_roleBindingEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -15419,6 +15508,74 @@ func (ec *executionContext) _ClusterRoleBinding_roleRef(ctx context.Context, fie
 	res := resTmp.(v12.RoleRef)
 	fc.Result = res
 	return ec.marshalNRoleRef2k8sᚗioᚋapiᚋrbacᚋv1ᚐRoleRef(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ClusterRoleBindingEvent_type(ctx context.Context, field graphql.CollectedField, obj *ClusterRoleBindingEvent) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ClusterRoleBindingEvent",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	fc.Result = res
+	return ec.marshalNSubscriptionEventType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriptionEventType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ClusterRoleBindingEvent_clusterRoleBinding(ctx context.Context, field graphql.CollectedField, obj *ClusterRoleBindingEvent) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ClusterRoleBindingEvent",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ClusterRoleBinding, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v12.ClusterRoleBinding)
+	fc.Result = res
+	return ec.marshalNClusterRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBinding(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ClusterServiceBroker_name(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBroker) (ret graphql.Marshaler) {
@@ -23654,7 +23811,7 @@ func (ec *executionContext) _Mutation_createRoleBinding(ctx context.Context, fie
 			return ec.resolvers.Mutation().CreateRoleBinding(rctx, args["name"].(string), args["namespace"].(string), args["params"].(RoleBindingInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "roleBindings", "verb": "create"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roleBindings", "verb": "create"})
 			if err != nil {
 				return nil, err
 			}
@@ -30294,6 +30451,74 @@ func (ec *executionContext) _RoleBinding_roleRef(ctx context.Context, field grap
 	return ec.marshalNRoleRef2k8sᚗioᚋapiᚋrbacᚋv1ᚐRoleRef(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _RoleBindingEvent_type(ctx context.Context, field graphql.CollectedField, obj *RoleBindingEvent) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "RoleBindingEvent",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	fc.Result = res
+	return ec.marshalNSubscriptionEventType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriptionEventType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RoleBindingEvent_roleBinding(ctx context.Context, field graphql.CollectedField, obj *RoleBindingEvent) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "RoleBindingEvent",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RoleBinding, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v12.RoleBinding)
+	fc.Result = res
+	return ec.marshalNRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBinding(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _RoleRef_name(ctx context.Context, field graphql.CollectedField, obj *v12.RoleRef) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -36174,6 +36399,149 @@ func (ec *executionContext) _Subscription_oAuth2ClientEvent(ctx context.Context,
 	}
 }
 
+func (ec *executionContext) _Subscription_roleBindingEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Subscription_roleBindingEvent_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Subscription().RoleBindingEvent(rctx, args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1alpha", "namespaceArg": "namespace", "resource": "roleBindings", "verb": "watch"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(<-chan *RoleBindingEvent); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.RoleBindingEvent`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *RoleBindingEvent)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNRoleBindingEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingEvent(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) _Subscription_clusterRoleBindingEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Subscription().ClusterRoleBindingEvent(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1alpha", "resource": "clusterRoleBindings", "verb": "watch"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(<-chan *ClusterRoleBindingEvent); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ClusterRoleBindingEvent`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *ClusterRoleBindingEvent)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNClusterRoleBindingEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterRoleBindingEvent(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
 func (ec *executionContext) _Trigger_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.Trigger) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -40322,6 +40690,38 @@ func (ec *executionContext) _ClusterRoleBinding(ctx context.Context, sel ast.Sel
 	return out
 }
 
+var clusterRoleBindingEventImplementors = []string{"ClusterRoleBindingEvent"}
+
+func (ec *executionContext) _ClusterRoleBindingEvent(ctx context.Context, sel ast.SelectionSet, obj *ClusterRoleBindingEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, clusterRoleBindingEventImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ClusterRoleBindingEvent")
+		case "type":
+			out.Values[i] = ec._ClusterRoleBindingEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "clusterRoleBinding":
+			out.Values[i] = ec._ClusterRoleBindingEvent_clusterRoleBinding(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var clusterServiceBrokerImplementors = []string{"ClusterServiceBroker"}
 
 func (ec *executionContext) _ClusterServiceBroker(ctx context.Context, sel ast.SelectionSet, obj *ClusterServiceBroker) graphql.Marshaler {
@@ -43657,6 +44057,38 @@ func (ec *executionContext) _RoleBinding(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+var roleBindingEventImplementors = []string{"RoleBindingEvent"}
+
+func (ec *executionContext) _RoleBindingEvent(ctx context.Context, sel ast.SelectionSet, obj *RoleBindingEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, roleBindingEventImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RoleBindingEvent")
+		case "type":
+			out.Values[i] = ec._RoleBindingEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "roleBinding":
+			out.Values[i] = ec._RoleBindingEvent_roleBinding(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var roleRefImplementors = []string{"RoleRef"}
 
 func (ec *executionContext) _RoleRef(ctx context.Context, sel ast.SelectionSet, obj *v12.RoleRef) graphql.Marshaler {
@@ -45027,6 +45459,10 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_triggerEvent(ctx, fields[0])
 	case "oAuth2ClientEvent":
 		return ec._Subscription_oAuth2ClientEvent(ctx, fields[0])
+	case "roleBindingEvent":
+		return ec._Subscription_roleBindingEvent(ctx, fields[0])
+	case "clusterRoleBindingEvent":
+		return ec._Subscription_clusterRoleBindingEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -46669,6 +47105,20 @@ func (ec *executionContext) marshalNClusterRoleBinding2ᚖk8sᚗioᚋapiᚋrbac�
 		return graphql.Null
 	}
 	return ec._ClusterRoleBinding(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNClusterRoleBindingEvent2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterRoleBindingEvent(ctx context.Context, sel ast.SelectionSet, v ClusterRoleBindingEvent) graphql.Marshaler {
+	return ec._ClusterRoleBindingEvent(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNClusterRoleBindingEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterRoleBindingEvent(ctx context.Context, sel ast.SelectionSet, v *ClusterRoleBindingEvent) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ClusterRoleBindingEvent(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNClusterRoleBindingInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterRoleBindingInput(ctx context.Context, v interface{}) (ClusterRoleBindingInput, error) {
@@ -48710,6 +49160,20 @@ func (ec *executionContext) marshalNRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐ
 		return graphql.Null
 	}
 	return ec._RoleBinding(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNRoleBindingEvent2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingEvent(ctx context.Context, sel ast.SelectionSet, v RoleBindingEvent) graphql.Marshaler {
+	return ec._RoleBindingEvent(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRoleBindingEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingEvent(ctx context.Context, sel ast.SelectionSet, v *RoleBindingEvent) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._RoleBindingEvent(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNRoleBindingInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingInput(ctx context.Context, v interface{}) (RoleBindingInput, error) {

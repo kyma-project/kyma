@@ -60,3 +60,21 @@ func (r *Resolver) DeleteClusterRoleBinding(ctx context.Context, name string) (*
 	err := r.ClusterRoleBindingService().Delete(name, result)
 	return result, err
 }
+
+func (r *Resolver) ClusterRoleBindingSubscription(ctx context.Context) (<-chan *gqlschema.ClusterRoleBindingEvent, error) {
+	channel := make(chan *gqlschema.ClusterRoleBindingEvent, 1)
+	filter := func(apiRule v1.ClusterRoleBinding) bool { return true }
+
+	unsubscribe, err := r.ClusterRoleBindingService().Subscribe(NewClusterRoleBindingEventHandler(channel, filter))
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		defer close(channel)
+		defer unsubscribe()
+		<-ctx.Done()
+	}()
+
+	return channel, nil
+}

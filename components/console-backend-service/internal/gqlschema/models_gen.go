@@ -10,8 +10,9 @@ import (
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
+	v1 "k8s.io/api/rbac/v1"
 	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	v1 "knative.dev/pkg/apis/duck/v1"
+	v11 "knative.dev/pkg/apis/duck/v1"
 )
 
 type AddonsConfiguration struct {
@@ -151,6 +152,11 @@ type ClusterMicroFrontend struct {
 	Placement       string            `json:"placement"`
 	PreloadURL      string            `json:"preloadUrl"`
 	NavigationNodes []*NavigationNode `json:"navigationNodes"`
+}
+
+type ClusterRoleBindingEvent struct {
+	Type               SubscriptionEventType  `json:"type"`
+	ClusterRoleBinding *v1.ClusterRoleBinding `json:"clusterRoleBinding"`
 }
 
 type ClusterRoleBindingInput struct {
@@ -548,6 +554,11 @@ type ResourceValuesInput struct {
 	CPU    *string `json:"cpu"`
 }
 
+type RoleBindingEvent struct {
+	Type        SubscriptionEventType `json:"type"`
+	RoleBinding *v1.RoleBinding       `json:"roleBinding"`
+}
+
 type RoleBindingInput struct {
 	RoleName string                `json:"roleName"`
 	RoleKind RoleKind              `json:"roleKind"`
@@ -700,10 +711,10 @@ type ServiceStatus struct {
 }
 
 type TriggerCreateInput struct {
-	Name             *string         `json:"name"`
-	Broker           string          `json:"broker"`
-	FilterAttributes JSON            `json:"filterAttributes"`
-	Subscriber       *v1.Destination `json:"subscriber"`
+	Name             *string          `json:"name"`
+	Broker           string           `json:"broker"`
+	FilterAttributes JSON             `json:"filterAttributes"`
+	Subscriber       *v11.Destination `json:"subscriber"`
 }
 
 type TriggerEvent struct {
