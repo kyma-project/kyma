@@ -56,7 +56,7 @@ Follows these steps:
 
     >**NOTE** To see full spec, go to the xxx page 
 
-3. Check if your Function was created successfully and all conditions are set to `True`:
+4. Check if your Function was created successfully and all conditions are set to `True`:
 
     ```bash
     kubectl get functions $NAME -n $NAMESPACE
@@ -85,7 +85,7 @@ Follows these steps:
 
 4. Go to the **Functions** tab and click **Create Function**.
 
-3. In the pop-up box, change `Source type` to `From Repository`, fill in required fields and select **Create** to confirm changes.
+5. In the pop-up box, change `Source type` to `From Repository`, fill in required fields and select **Create** to confirm changes.
 
     The pop-up box closes and the message appears on the screen after a while, confirming that the Function was created successfully.
     The new Function should have the `RUNNING` status in the list of all Functions under the **Functions** view.
