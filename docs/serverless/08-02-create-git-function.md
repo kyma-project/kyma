@@ -35,7 +35,7 @@ Follows these steps:
     EOF
     ```
    
->**NOTE** Auth possibility TODO
+    >**NOTE** Auth possibility TODO
 
 3. Create a Function CR that specifies the Function's logic:
 
