@@ -3,7 +3,7 @@ title: Deploy a microservice
 type: Getting Started
 ---
 
-You will now deploy a standalone [`orders-service`](https://github.com/kyma-project/examples/blob/master/http-db-service/README.md) microservice in the `orders-service` Namespace. This microservice will act as a link between the external application and the Redis service and we will build the whole end-to-end flow around it.
+You will now deploy a standalone [`orders-service`](https://github.com/kyma-project/examples/blob/master/orders-service/README.md) microservice in the `orders-service` Namespace. This microservice will act as a link between the external application and the Redis service and we will build the whole end-to-end flow around it.
 
 In this guide you will create:
 
