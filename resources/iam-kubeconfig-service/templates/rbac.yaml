@@ -1,30 +1,44 @@
+{{ if eq .Values.global.certificates.type "xip" }}
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ template "name" . }}
   namespace: {{ .Release.Namespace }}
 ---
+kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ template "name" . }}
+rules:
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs:
+      - get
+      - list
+    resourceNames:
+      - apiserver-proxy-ssl
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ template "name" . }}
   namespace: {{ .Release.Namespace }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
 subjects:
-- kind: ServiceAccount
+  - kind: ServiceAccount
+    name: {{ template "name" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
   name: {{ template "name" . }}
-  namespace: {{ .Release.Namespace }}
-
-{{- if eq .Values.global.certificates.type "xip" }}
+  apiGroup: rbac.authorization.k8s.io
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: istio-system
-  name: {{ template "name" . }}-init
+  name: {{ template "name" . }}
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -37,14 +51,14 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ template "name" . }}-init
-  namespace: istio-system
+  name: istio-system
+  namespace: {{ .Release.Namespace }}
 subjects:
   - kind: ServiceAccount
     name: {{ template "name" . }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role
-  name: {{ template "name" . }}-init
+  name: {{ template "name" . }}
   apiGroup: rbac.authorization.k8s.io
 {{- end }}

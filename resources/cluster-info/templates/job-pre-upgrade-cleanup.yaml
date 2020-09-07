@@ -1,0 +1,144 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "cluster-info.fullname" . }}-cleanup
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook-weight: "1"
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      name: {{ include "cluster-info.fullname" . }}-cleanup
+      labels:
+        app: {{ include "cluster-info.fullname" . }}-cleanup
+    spec:
+      serviceAccountName: {{ include "cluster-info.fullname" . }}-cleanup
+      restartPolicy: Never
+      containers:
+        - name: {{ include "cluster-info.fullname" . }}-cleanup
+          image: {{ .Values.jobs.image }}:{{ .Values.jobs.tag }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+              echo Deleting CM net-global-overrides
+              kubectl delete cm -n kyma-installer net-global-overrides --ignore-not-found
+              echo Deleting secret kyma-gateway-certs
+              kubectl delete secret -n istio-system kyma-gateway-certs --ignore-not-found
+              echo Deleting secret apiserver-proxy-tls-cert
+              kubectl delete secret -n kyma-system apiserver-proxy-tls-cert --ignore-not-found
+          terminationMessagePolicy: "FallbackToLogsOnError"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "cluster-info.fullname" . }}-cleanup
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "1"
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "cluster-info.fullname" . }}-cleanup
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "1"
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs:
+      - delete
+    resourceNames:
+      - net-global-overrides
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "cluster-info.fullname" . }}-cleanup
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "1"
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "cluster-info.fullname" . }}-cleanup
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ include "cluster-info.fullname" . }}-cleanup
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: istio-system
+  name: {{ include "cluster-info.fullname" . }}-cleanup
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "1"
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs:
+      - delete
+    resourceNames:
+      - kyma-gateway-certs
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "cluster-info.fullname" . }}-cleanup
+  namespace: istio-system
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "1"
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "cluster-info.fullname" . }}-cleanup
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ include "cluster-info.fullname" . }}-cleanup
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: kyma-system
+  name: {{ include "cluster-info.fullname" . }}-cleanup
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "1"
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs:
+      - delete
+    resourceNames:
+      - apiserver-proxy-tls-cert
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "cluster-info.fullname" . }}-cleanup
+  namespace: kyma-system
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "1"
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "cluster-info.fullname" . }}-cleanup
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ include "cluster-info.fullname" . }}-cleanup
+  apiGroup: rbac.authorization.k8s.io
+
