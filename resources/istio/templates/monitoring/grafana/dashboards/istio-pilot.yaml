@@ -431,7 +431,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "container_fs_usage_bytes{job=\"kubelet\", container=\"discovery\", pod=~\"istio-pilot-.*\"}",
+          "expr": "container_fs_usage_bytes{job=\"kubelet\", container=\"discovery\", pod=~\"istiod-.*|istio-pilot-.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Discovery",
@@ -439,7 +439,7 @@ data:
           "step": 2
         },
         {
-          "expr": "container_fs_usage_bytes{job=\"kubelet\", container=\"istio-proxy\", pod=~\"istio-pilot-.*\"}",
+          "expr": "container_fs_usage_bytes{job=\"kubelet\", container=\"istio-proxy\", pod=~\"istiod-.*|istio-pilot-.*\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Sidecar",
