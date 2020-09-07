@@ -19,11 +19,15 @@ spec:
         app: {{ template "name" . }}
         chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     spec:
+
       {{- if .Values.global.isLocalEnv }}
       hostAliases:
       - ip: {{ .Values.global.minikubeIP }}
         hostnames:
           - "dex.{{ .Values.global.ingress.domainName }}"
+      {{- end }}
+      {{- if eq .Values.global.certificates.type "xip" }}
+      serviceAccountName: {{ template "name" . }}
       {{- end }}
       initContainers:
         - name: init
