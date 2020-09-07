@@ -23,7 +23,7 @@ version: 0.1.0
 appVersion: 1.16.0
 dependencies:
   - name: cert-manager
-    version: v0.16.1
+    version: v1.0.1
     condition: modules.manager.enabled
   - name: xip
     version: 0.1.0
