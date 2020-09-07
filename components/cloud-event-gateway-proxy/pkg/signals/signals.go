@@ -21,12 +21,12 @@ func SetupSignalHandler() (stopCh <-chan struct{}) {
 	close(onlyOneSignalHandler) // panics when called twice
 
 	stop := make(chan struct{})
-	c := make(chan os.Signal, 2)
-	signal.Notify(c, shutdownSignals...)
+	osSignal := make(chan os.Signal, 2)
+	signal.Notify(osSignal, shutdownSignals...)
 	go func() {
-		<-c
+		<-osSignal
 		close(stop)
-		<-c
+		<-osSignal
 		os.Exit(1) // second signal. Exit directly.
 	}()
 
@@ -66,6 +66,6 @@ func (scc *signalContext) Err() error {
 }
 
 // Value implements context.Context
-func (scc *signalContext) Value(key interface{}) interface{} {
+func (scc *signalContext) Value(interface{}) interface{} {
 	return nil
 }
