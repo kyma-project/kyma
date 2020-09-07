@@ -11,8 +11,8 @@ Follows these steps:
 
 <div tabs name="steps" group="create-function">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Export these variables:
@@ -60,7 +60,7 @@ Follows these steps:
     Console UI
     </summary>
 
-1. Create a Namespace or select one from the drop-down list in the top navigation panel.
+1. From the drop-down list in the top navigation panel, create a Namespace or select one.
 
 2. Go to the **Functions** view in the left navigation panel and select **Create Function**.
 
@@ -80,7 +80,7 @@ Follows these steps:
 
 5. Select **Save** to confirm changes.
 
-    You will see the message confirming the changes were saved. Once deployed, the new Function should have the `RUNNING` status in the list of all Functions under the **Functions** view.
+    You will see the message confirming that the changes were saved. Once deployed, the new Function gets the status `RUNNING` in the list of all Functions under the **Functions** view.
 
     </details>
 </div>

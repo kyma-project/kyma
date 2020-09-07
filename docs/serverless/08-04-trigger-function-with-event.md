@@ -23,8 +23,8 @@ Follows these steps:
 
 <div tabs name="steps" group="trigger-function">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Export these variables:
@@ -41,9 +41,9 @@ Follows these steps:
 
 These variables refer to the following:
 
-- **APP_NAME** is taken from the name of the Application CR and specifies the source of events.
-- **EVENT_VERSION** points to the specific event version, such as `v1`.
-- **EVENT_TYPE** points to the given event type to which you want to subscribe your Function, such as `user.created`.
+- **APP_NAME** is the name of the Application CR which is the source of the events.
+- **EVENT_VERSION** points to the specific event version type, such as `v1`.
+- **EVENT_TYPE** points to the event type to which you want to subscribe your Function, such as `user.created`.
 
 2. Create a Trigger CR for your Function to subscribe your Function to a specific event type.
 
@@ -125,7 +125,7 @@ To test if the Trigger CR is properly connected to the Function:
         "id": "A234-1234-1234",
         "data": "123456789",
         "datacontenttype": "application/json"
-      }' 
+      }'
     ```
       </details>
       <details>
@@ -141,7 +141,7 @@ To test if the Trigger CR is properly connected to the Function:
           "event-time": "2020-04-02T21:37:00Z",
           "data": "123456789"
          }'
-    ``` 
+    ```
 
       </details>
   </div>
