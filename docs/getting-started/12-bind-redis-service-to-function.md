@@ -114,7 +114,7 @@ When you switch to the **Code** tab and scroll down to the **Environment Variabl
 
 Follow these steps:
 
-> **CAUTION:** If you have a Minikube cluster, you must first add its IP address mapped to the exposed Kubernetes Service to the `hosts` file on your machine:
+> **CAUTION:** If you have a Minikube cluster, you must first add its IP address, mapped to the hostname of the exposed Kubernetes Service, to the `hosts` file on your machine:
 >
 >  ```bash
 >  echo "$(minikube ip) orders-service.kyma.local" | sudo tee -a /etc/hosts
