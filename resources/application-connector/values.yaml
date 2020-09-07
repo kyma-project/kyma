@@ -41,7 +41,7 @@ global:
   application_gateway:
     version: "PR-9349"
   application_gateway_tests:
-    version: "PR-9349"
+    version: "PR-9366"
   application_registry:
     version: "PR-9356"
   application_registry_tests:
