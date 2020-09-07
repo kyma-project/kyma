@@ -103,11 +103,29 @@ func (ts *TestService) checkValue() (int, error) {
 	return response.Counter, nil
 }
 
-func (ts *TestService) CheckTestId(expectedId string) error {
-	actualId := expectedId // has to be replaced by logic to get the actual ID
+func (ts *TestService) CheckTestId(eventId string) error {
 
-	if actualId != expectedId {
-		return errors.Errorf("actual testId different then expected value: Got: %v but expected %v", actualId, expectedId)
+	// Combine strings for the correct url endpoint
+	url := ts.GetTestServiceURL()
+	// endpoint = url/ce/<uuid>
+	endpoint := url + "/ce/" + eventId
+	// return cloud event with matching uuid. Returns 200 on success, 204 if no event was found
+	resp, err := ts.HttpClient.Get(endpoint)
+
+	// check if there was an error when getting
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// checks if the status is ok
+	if resp.StatusCode != http.StatusOK {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		return errors.Errorf("error response: %s", body)
 	}
 
 	return nil

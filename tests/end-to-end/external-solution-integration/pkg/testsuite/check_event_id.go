@@ -12,17 +12,17 @@ import (
 // CheckEventId is a step which checks if the correct EventId has been received
 type CheckEventId struct {
 	testService *testkit.TestService
-	expectedId  string
+	eventId     string
 	retryOpts   []retrygo.Option
 }
 
 var _ step.Step = &CheckEventId{}
 
 // NewCheckEventId returns new CheckEventId
-func NewCheckEventId(testService *testkit.TestService, expectedId string, opts ...retrygo.Option) *CheckEventId {
+func NewCheckEventId(testService *testkit.TestService, eventId string, opts ...retrygo.Option) *CheckEventId {
 	return &CheckEventId{
 		testService: testService,
-		expectedId:  expectedId,
+		eventId:     eventId,
 		retryOpts:   opts,
 	}
 }
@@ -35,7 +35,7 @@ func (s *CheckEventId) Name() string {
 // Run executes the step
 func (s *CheckEventId) Run() error {
 	err := retry.Do(func() error {
-		return s.testService.CheckTestId(s.expectedId) //s.testService.WaitForCounterPodToUpdateValue(s.expectedValue)
+		return s.testService.CheckTestId(s.eventId)
 	}, s.retryOpts...)
 	if err != nil {
 		return errors.Wrapf(err, "the counter pod is not updated")

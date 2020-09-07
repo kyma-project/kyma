@@ -43,6 +43,7 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	)
 
 	functionEndpoint := helpers.InClusterEndpoint(s.testID, s.testID, helpers.FunctionPort)
+	const eventId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
 
 	return []step.Step{
 		step.Parallel(
@@ -68,9 +69,9 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 			knativeEventingClientSet.MessagingV1alpha1().Subscriptions(helpers.KymaIntegrationNamespace)),
 		testsuite.NewCreateKnativeTrigger(s.testID, helpers.DefaultBrokerName, functionEndpoint, knativeEventingClientSet.EventingV1alpha1().Triggers(s.testID)),
 		testsuite.NewSleep(s.eventSendDelay),
-		testsuite.NewSendEventToMesh(s.testID, helpers.FunctionPayload, state),
+		testsuite.NewSendEventToMesh(s.testID, helpers.FunctionPayload, state, eventId),
 		testsuite.NewCheckCounterPod(testService, 1),
-		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.FunctionPayload, state),
+		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.FunctionPayload, state, eventId),
 		testsuite.NewCheckCounterPod(testService, 2),
 	}, nil
 }

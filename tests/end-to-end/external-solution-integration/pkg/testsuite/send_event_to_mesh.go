@@ -18,6 +18,7 @@ type SendEventToMesh struct {
 	state   SendEventState
 	appName string
 	payload string
+	eventId string
 }
 
 // SendEventState represents SendEvent dependencies
@@ -28,8 +29,8 @@ type SendEventState interface {
 var _ step.Step = &SendEventToMesh{}
 
 // NewSendEvent returns new SendEvent
-func NewSendEventToMesh(appName, payload string, state SendEventState) *SendEventToMesh {
-	return &SendEventToMesh{state: state, appName: appName, payload: payload}
+func NewSendEventToMesh(appName, payload string, state SendEventState, eventId string) *SendEventToMesh {
+	return &SendEventToMesh{state: state, appName: appName, payload: payload, eventId: eventId}
 }
 
 // Name returns name name of the step
@@ -52,7 +53,7 @@ func (s *SendEventToMesh) Run() error {
 
 func (s *SendEventToMesh) prepareEvent() (cloudevents.Event, error) {
 	event := cloudevents.NewEvent(cloudevents.VersionV1)
-	event.SetID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+	event.SetID(s.eventId)
 	event.SetType(example_schema.EventType)
 	event.SetSource("some source")
 	// TODO(k15r): infer mime type automatically

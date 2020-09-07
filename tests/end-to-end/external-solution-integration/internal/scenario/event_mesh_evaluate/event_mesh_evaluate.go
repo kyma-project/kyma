@@ -1,6 +1,7 @@
 package event_mesh_evaluate
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/avast/retry-go"
@@ -41,22 +42,20 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 
 	state := s.NewState()
 	dataStore := testkit.NewDataStore(coreClientset, s.TestID)
+	const basicId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
 
 	return []step.Step{
 		testsuite.NewLoadStoredCertificates(dataStore, state),
 		step.Retry(
-			//testsuite.NewResetCounterPod(testService), no longer needed, as counter will not be checked
-			testsuite.NewSendEventToMesh(s.TestID, helpers.FunctionPayload, state),
-			testsuite.NewCheckEventId(testService, s.TestID, retryOpts...),
-			//testsuite.NewCheckCounterPod(testService, 1, retryOpts...),, needs to be replaced with checkTestId
+			testsuite.NewSendEventToMesh(s.TestID, helpers.FunctionPayload, state, fmt.Sprint(basicId, 0)),
+			testsuite.NewCheckEventId(testService, fmt.Sprint(basicId, 0), retryOpts...),
 		).WithRetryOptions(
 			retry.Attempts(3),
 			retry.DelayType(retry.FixedDelay),
 			retry.Delay(500*time.Millisecond)),
 		step.Retry(
-			testsuite.NewResetCounterPod(testService),
-			testsuite.NewSendEventToCompatibilityLayer(s.TestID, helpers.FunctionPayload, state),
-			testsuite.NewCheckCounterPod(testService, 1, retryOpts...),
+			testsuite.NewSendEventToCompatibilityLayer(s.TestID, helpers.FunctionPayload, state, fmt.Sprint(basicId, 0)),
+			testsuite.NewCheckEventId(testService, fmt.Sprint(basicId, 0), retryOpts...),
 		).WithRetryOptions(
 			retry.Attempts(3),
 			retry.DelayType(retry.FixedDelay),

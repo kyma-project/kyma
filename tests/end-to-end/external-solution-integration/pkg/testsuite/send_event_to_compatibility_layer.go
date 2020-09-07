@@ -13,13 +13,14 @@ type SendEventToCompatibilityLayer struct {
 	state   SendEventState
 	appName string
 	payload string
+	eventId string
 }
 
 var _ step.Step = &SendEventToCompatibilityLayer{}
 
 // NewSendEventToCompatibilityLayer returns new SendEventToCompatibilityLayer
-func NewSendEventToCompatibilityLayer(appName, payload string, state SendEventState) *SendEventToCompatibilityLayer {
-	return &SendEventToCompatibilityLayer{state: state, appName: appName, payload: payload}
+func NewSendEventToCompatibilityLayer(appName, payload string, state SendEventState, eventId string) *SendEventToCompatibilityLayer {
+	return &SendEventToCompatibilityLayer{state: state, appName: appName, payload: payload, eventId: eventId}
 }
 
 // Name returns name name of the step
@@ -37,7 +38,7 @@ func (s *SendEventToCompatibilityLayer) prepareEvent() *testkit.ExampleEvent {
 	return &testkit.ExampleEvent{
 		EventType:        example_schema.EventType,
 		EventTypeVersion: example_schema.EventVersion,
-		EventID:          "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+		EventID:          s.eventId,
 		EventTime:        time.Now(),
 		Data:             s.payload,
 	}
