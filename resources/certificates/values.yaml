@@ -14,6 +14,7 @@ modules:
     enabled: false
 
 cert-manager:
+  installCRDs: true
   podAnnotations:
     sidecar.istio.io/inject: "false"
   webhook:
