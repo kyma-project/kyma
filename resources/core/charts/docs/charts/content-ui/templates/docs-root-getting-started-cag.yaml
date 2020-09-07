@@ -15,3 +15,7 @@ spec:
       mode: package
       url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterAssetGroupsVersion }}.zip
       filter: /docs/getting-started/
+    - type: openapi
+      name: orders-service-openapi
+      mode: single
+      url: https://raw.githubusercontent.com/{{ .Values.global.kymaOrgName }}/kyma/{{ .Values.global.docs.clusterAssetGroupsVersion }}/docs/getting-started/assets/orders-service-openapi.yaml
