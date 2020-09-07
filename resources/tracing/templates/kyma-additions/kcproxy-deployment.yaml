@@ -37,7 +37,7 @@ spec:
         - --skip-openid-provider-tls-verify={{ not .Values.kcproxy.config.tlsVerify }}
         - --client-id=$(CLIENT_ID)
         - --client-secret=$(CLIENT_SECRET)
-        - --resources=uri={{ .Values.kcproxy.config.resources.uri }}{{ template "kiali.kcproxy.methods" . }}{{ template "kiali.kcproxy.groups" . }}{{ template "kiali.kcproxy.roles" . }}
+        - --resources=uri={{ .Values.kcproxy.config.resources.uri }}{{ template "jaeger-operator.kcproxy.methods" . }}{{ template "jaeger-operator.kcproxy.groups" . }}{{ template "jaeger-operator.kcproxy.roles" . }}
         - --redirection-url=https://jaeger.{{ .Values.global.ingress.domainName }}
         {{- if .Values.kcproxy.config.scopes }}
         {{- range $i, $scope := (splitList "," .Values.kcproxy.config.scopes) }}
