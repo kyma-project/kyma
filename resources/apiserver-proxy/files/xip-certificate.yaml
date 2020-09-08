@@ -7,8 +7,9 @@ metadata:
 spec:
   duration: 720h
   renewBefore: 10m
-  organization:
-  - kyma
+  subject:
+    organizations:
+    - kyma
   commonName: $XIP_DOMAIN
   dnsNames:
   - "apiserver.$XIP_DOMAIN"

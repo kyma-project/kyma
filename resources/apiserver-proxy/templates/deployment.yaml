@@ -123,3 +123,4 @@ spec:
       - name: tls-cert
         secret:
           secretName: {{ template "name" . }}-tls-cert
+          optional: true
