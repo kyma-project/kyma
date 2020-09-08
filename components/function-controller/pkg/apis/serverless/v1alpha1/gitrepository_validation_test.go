@@ -63,6 +63,20 @@ func TestGitRepositoryValidation(t *testing.T) {
 			),
 			expectedError: gomega.HaveOccurred(),
 		},
+		"should be invalid - missing Type": {
+			givenFunc: GitRepository{
+				Spec: GitRepositorySpec{
+					URL: "some_url",
+					Auth: &RepositoryAuth{
+						SecretName: "some_name",
+					},
+				},
+			},
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring("spec.auth.type"),
+			),
+			expectedError: gomega.HaveOccurred(),
+		},
 	} {
 		t.Run(testName, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
