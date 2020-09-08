@@ -2,6 +2,7 @@
 package applications
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
@@ -17,8 +18,9 @@ const (
 )
 
 // Manager contains operations for managing Application CRD
+//go:generate mockery --name=Manager
 type Manager interface {
-	Get(name string, options v1.GetOptions) (*v1alpha1.Application, error)
+	Get(ctx context.Context, name string, options v1.GetOptions) (*v1alpha1.Application, error)
 }
 
 type repository struct {
@@ -90,7 +92,7 @@ func (r *repository) Get(id string) (Service, apperrors.AppError) {
 }
 
 func (r *repository) getApplication() (*v1alpha1.Application, apperrors.AppError) {
-	app, err := r.appManager.Get(r.name, v1.GetOptions{})
+	app, err := r.appManager.Get(context.Background(), r.name, v1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			message := fmt.Sprintf("Application: %s not found.", r.name)

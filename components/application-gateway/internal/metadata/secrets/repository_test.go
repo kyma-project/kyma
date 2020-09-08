@@ -1,6 +1,7 @@
 package secrets
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -21,7 +22,7 @@ func TestRepository_Get(t *testing.T) {
 		repository := NewRepository(secretsManagerMock, "default-ec")
 
 		secret := makeSecret("new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId", "default-ec")
-		secretsManagerMock.On("Get", "new-secret", metav1.GetOptions{}).Return(secret, nil)
+		secretsManagerMock.On("Get", context.Background(), "new-secret", metav1.GetOptions{}).Return(secret, nil)
 
 		// when
 		secrets, err := repository.Get("new-secret")
@@ -39,7 +40,7 @@ func TestRepository_Get(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock, "default-ec")
 
-		secretsManagerMock.On("Get", "secret-name", metav1.GetOptions{}).Return(
+		secretsManagerMock.On("Get", context.Background(), "secret-name", metav1.GetOptions{}).Return(
 			nil,
 			errors.New("some error"))
 
@@ -60,7 +61,7 @@ func TestRepository_Get(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock, "default-ec")
 
-		secretsManagerMock.On("Get", "secret-name", metav1.GetOptions{}).Return(
+		secretsManagerMock.On("Get", context.Background(), "secret-name", metav1.GetOptions{}).Return(
 			nil,
 			k8serrors.NewNotFound(schema.GroupResource{},
 				""))

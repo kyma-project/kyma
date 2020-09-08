@@ -144,7 +144,8 @@ echo "Checking if running on Gardener"
 
 GARDENER_ENVIRONMENT=false
 
-if [ -n "$(kubectl -n kube-system get configmap shoot-info --ignore-not-found)" ]; then
+SHOOT_INFO="$(kubectl -n kube-system get configmap shoot-info --ignore-not-found)"
+if [ -n "$SHOOT_INFO" ]; then
   requestGardenerCerts
   INGRESS_DOMAIN=${DOMAIN}
   INGRESS_TLS_CERT=${TLS_CERT}
