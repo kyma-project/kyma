@@ -1,0 +1,4 @@
+apiVersion: v1
+description: mesh-namespaces-migration Helm chart.
+name: mesh-namespaces-migration
+version: 0.1.0
