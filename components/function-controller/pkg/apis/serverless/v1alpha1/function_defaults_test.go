@@ -87,6 +87,16 @@ func TestSetDefaults(t *testing.T) {
 							corev1.ResourceMemory: resource.MustParse("84Mi"),
 						},
 					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("150m"),
+							corev1.ResourceMemory: resource.MustParse("158Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("90m"),
+							corev1.ResourceMemory: resource.MustParse("84Mi"),
+						},
+					},
 					MinReplicas: &two,
 					MaxReplicas: &two,
 				},
@@ -95,6 +105,16 @@ func TestSetDefaults(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: Python38,
 					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("150m"),
+							corev1.ResourceMemory: resource.MustParse("158Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("90m"),
+							corev1.ResourceMemory: resource.MustParse("84Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
 							corev1.ResourceMemory: resource.MustParse("158Mi"),
@@ -121,6 +141,16 @@ func TestSetDefaults(t *testing.T) {
 							corev1.ResourceMemory: resource.MustParse("84Mi"),
 						},
 					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("150m"),
+							corev1.ResourceMemory: resource.MustParse("158Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("90m"),
+							corev1.ResourceMemory: resource.MustParse("84Mi"),
+						},
+					},
 					MinReplicas: &two,
 					MaxReplicas: &two,
 				},
@@ -129,6 +159,16 @@ func TestSetDefaults(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: Nodejs12,
 					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("150m"),
+							corev1.ResourceMemory: resource.MustParse("158Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("90m"),
+							corev1.ResourceMemory: resource.MustParse("84Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
 							corev1.ResourceMemory: resource.MustParse("158Mi"),
@@ -157,6 +197,16 @@ func TestSetDefaults(t *testing.T) {
 							corev1.ResourceMemory: resource.MustParse("64Mi"),
 						},
 					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("100m"),
+							corev1.ResourceMemory: resource.MustParse("128Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("50m"),
+							corev1.ResourceMemory: resource.MustParse("64Mi"),
+						},
+					},
 					MinReplicas: &one,
 					MaxReplicas: &one,
 				},
@@ -169,6 +219,16 @@ func TestSetDefaults(t *testing.T) {
 						Requests: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
 							corev1.ResourceMemory: resource.MustParse("150Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("111m"),
+							corev1.ResourceMemory: resource.MustParse("144Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("55m"),
+							corev1.ResourceMemory: resource.MustParse("72Mi"),
 						},
 					},
 					MinReplicas: &two,
@@ -187,6 +247,16 @@ func TestSetDefaults(t *testing.T) {
 							corev1.ResourceMemory: resource.MustParse("150Mi"),
 						},
 					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("111m"),
+							corev1.ResourceMemory: resource.MustParse("144Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("55m"),
+							corev1.ResourceMemory: resource.MustParse("72Mi"),
+						},
+					},
 					MinReplicas: &two,
 					MaxReplicas: &two,
 				},
@@ -196,6 +266,12 @@ func TestSetDefaults(t *testing.T) {
 			givenFunc: Function{
 				Spec: FunctionSpec{
 					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("15m"),
+							corev1.ResourceMemory: resource.MustParse("15Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("15m"),
 							corev1.ResourceMemory: resource.MustParse("15Mi"),
@@ -217,6 +293,17 @@ func TestSetDefaults(t *testing.T) {
 							corev1.ResourceMemory: resource.MustParse("15Mi"),
 						},
 					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("15m"),
+							corev1.ResourceMemory: resource.MustParse("15Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("15m"),
+							corev1.ResourceMemory: resource.MustParse("15Mi"),
+						},
+					},
+
 					MinReplicas: &zero,
 					MaxReplicas: &zero,
 				},
