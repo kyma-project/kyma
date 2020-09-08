@@ -177,6 +177,11 @@ func shouldIgnoreTarget(target prom.Labels) bool {
 		"knative-eventing/knative-eventing-event-mesh-dashboard-httpsource",
 	}
 
+	// Ignore the pods running the tests. They have *-testsuite-* in their names
+	if string.Contains(target["pod_name"], "testsuite") {
+		return true
+	}
+
 	for _, j := range jobsToBeIgnored {
 		if target["job"] == j {
 			return true
