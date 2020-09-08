@@ -3,9 +3,10 @@ package tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/gateway"
 	"net/http"
 	"testing"
+
+	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/gateway"
 
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/gateway/testkit/util"
 
