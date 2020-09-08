@@ -20,7 +20,7 @@ import (
 	"knative.dev/pkg/injection/sharedmain"
 
 	appconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	kymaeventingclientset "github.com/kyma-project/kyma/components/application-broker/client/generated/clientset/internalclientset"
+	kymaeventingclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 )
 
 const defaultTimeoutDuration = 5 * time.Minute
@@ -65,7 +65,7 @@ func main() {
 
 // initClientSets initializes all required Kubernetes ClientSets.
 func initClientSets() (*kubernetes.Clientset,
-	*kymaeventingclientset.Clientset,
+	*kymaeventingclientset.ApplicationconnectorV1alpha1Client,
 	*servicecatalogclientset.Clientset,
 	dynamic.Interface) {
 

@@ -17,8 +17,9 @@ import (
 	servicecatalogfakeclientset "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
 
 	appoperatorappconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	eventbusappconnectorv1alpha1 "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector/v1alpha1"
-	kymaeventingfakeclientset "github.com/kyma-project/kyma/components/event-bus/client/generated/clientset/internalclientset/fake"
+
+	appbrokerconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	kymaeventingfakeclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 )
 
 func TestNewserviceInstanceManager(t *testing.T) {
@@ -240,9 +241,13 @@ func TestNewserviceInstanceManager(t *testing.T) {
 		},
 	}
 
-	testEventActivations := []*eventbusappconnectorv1alpha1.EventActivation{
+	testEventActivations := []*appbrokerconnectorv1alpha1.EventActivation{
 		// ns1
 		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "EventActivation",
+				APIVersion: "applicationconnector.kyma-project.io",
+			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "my-ea-ns1-1",
 				Namespace: "ns1",
@@ -265,8 +270,13 @@ func TestNewserviceInstanceManager(t *testing.T) {
 					},
 				},
 			},
+			Spec: appbrokerconnectorv1alpha1.EventActivationSpec{},
 		},
 		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "EventActivation",
+				APIVersion: "applicationconnector.kyma-project.io",
+			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "my-ea-ns1-2",
 				Namespace: "ns1",
@@ -282,6 +292,10 @@ func TestNewserviceInstanceManager(t *testing.T) {
 		},
 		// ns2
 		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "EventActivation",
+				APIVersion: "applicationconnector.kyma-project.io",
+			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "my-ea-ns2",
 				Namespace: "ns2",
@@ -297,6 +311,10 @@ func TestNewserviceInstanceManager(t *testing.T) {
 		},
 		// ns3
 		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "EventActivation",
+				APIVersion: "applicationconnector.kyma-project.io",
+			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "my-ea-ns3",
 				Namespace: "ns3",
@@ -312,6 +330,10 @@ func TestNewserviceInstanceManager(t *testing.T) {
 		},
 		// ns4
 		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "EventActivation",
+				APIVersion: "applicationconnector.kyma-project.io",
+			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "my-ea-ns4-1",
 				Namespace: "ns4",
@@ -326,6 +348,10 @@ func TestNewserviceInstanceManager(t *testing.T) {
 			},
 		},
 		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "EventActivation",
+				APIVersion: "applicationconnector.kyma-project.io",
+			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "my-ea-ns4-2",
 				Namespace: "ns4",
@@ -345,21 +371,24 @@ func TestNewserviceInstanceManager(t *testing.T) {
 		serviceClassesToObjectSlice(testServiceClasses),
 		serviceInstancesToObjectSlice(testServiceInstances)...,
 	)
-	scCli := servicecatalogfakeclientset.NewSimpleClientset(scObjects...)
-
-	kymaCli := kymaeventingfakeclientset.NewSimpleClientset(
-		eventActivationsToObjectSlice(testEventActivations)...,
-	)
 
 	fakeScheme := runtime.NewScheme()
+	if err := appbrokerconnectorv1alpha1.AddToScheme(fakeScheme); err != nil {
+		t.Fatalf("Failed to build fake Scheme: %s", err)
+	}
 	if err := appoperatorappconnectorv1alpha1.AddToScheme(fakeScheme); err != nil {
 		t.Fatalf("Failed to build fake Scheme: %s", err)
 	}
 	dynCli := dynamicfakeclientset.NewSimpleDynamicClient(fakeScheme,
 		applicationsToObjectSlice(testApplications)...,
 	)
+	scCli := servicecatalogfakeclientset.NewSimpleClientset(scObjects...)
 
-	m, err := newServiceInstanceManager(scCli, kymaCli, dynCli, testUserNamespaces)
+	kymaCli := kymaeventingfakeclientset.NewSimpleClientset(
+		eventActivationsToObjectSlice(testEventActivations)...,
+	)
+
+	m, err := newServiceInstanceManager(scCli, kymaCli.ApplicationconnectorV1alpha1(), dynCli, testUserNamespaces)
 	if err != nil {
 		t.Fatalf("Failed to initialize serviceInstanceManager: %s", err)
 	}
@@ -472,7 +501,7 @@ func serviceInstancesToObjectSlice(svcis []*servicecatalogv1beta1.ServiceInstanc
 	return objects
 }
 
-func eventActivationsToObjectSlice(eas []*eventbusappconnectorv1alpha1.EventActivation) []runtime.Object {
+func eventActivationsToObjectSlice(eas []*appbrokerconnectorv1alpha1.EventActivation) []runtime.Object {
 	objects := make([]runtime.Object, len(eas))
 	for i := range eas {
 		objects[i] = eas[i]

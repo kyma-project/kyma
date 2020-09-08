@@ -20,7 +20,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 
 	appconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	kymaeventingclientset "github.com/kyma-project/kyma/components/application-broker/client/generated/clientset/internalclientset"
+	kymaeventingclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 )
 
 const (
@@ -37,7 +37,7 @@ type eventActivationsByServiceInstanceAndNamespace map[string]eventActivationsBy
 // serviceInstanceManager performs operations on ServiceInstances.
 type serviceInstanceManager struct {
 	svcCatalogClient servicecatalogclientset.Interface
-	kymaClient       kymaeventingclientset.Interface
+	kymaClient       kymaeventingclientset.ApplicationconnectorV1alpha1Interface
 	dynClient        dynamic.Interface
 
 	serviceInstances      serviceInstancesList
@@ -46,7 +46,7 @@ type serviceInstanceManager struct {
 
 // newServiceInstanceManager creates and initializes a serviceInstanceManager.
 func newServiceInstanceManager(svcCatalogClient servicecatalogclientset.Interface,
-	kymaClient kymaeventingclientset.Interface, dynClient dynamic.Interface,
+	kymaClient kymaeventingclientset.ApplicationconnectorV1alpha1Interface, dynClient dynamic.Interface,
 	namespaces []string) (*serviceInstanceManager, error) {
 
 	m := &serviceInstanceManager{
@@ -184,7 +184,7 @@ func (m *serviceInstanceManager) populateEventActivationIndex(namespaces []strin
 	for _, ns := range namespaces {
 		eventActivationsBySvcInstance := make(eventActivationsByServiceInstance)
 
-		eas, err := m.kymaClient.ApplicationconnectorV1alpha1().EventActivations(ns).List(metav1.ListOptions{})
+		eas, err := m.kymaClient.EventActivations(ns).List(metav1.ListOptions{})
 		switch {
 		case apierrors.IsNotFound(err):
 			return NewTypeNotFoundError(err.(*apierrors.StatusError).ErrStatus.Details.Kind)
@@ -310,7 +310,7 @@ func (m *serviceInstanceManager) waitForServiceInstanceDeletion(ns, name string)
 // waitForEventActivationDeletion waits for the deletion of an EventActivation.
 func (m *serviceInstanceManager) waitForEventActivationDeletion(ns, name string) error {
 	var expectNoEventActivation wait.ConditionFunc = func() (bool, error) {
-		_, err := m.kymaClient.ApplicationconnectorV1alpha1().EventActivations(ns).Get(name, metav1.GetOptions{})
+		_, err := m.kymaClient.EventActivations(ns).Get(name, metav1.GetOptions{})
 		switch {
 		case apierrors.IsNotFound(err):
 			return true, nil
