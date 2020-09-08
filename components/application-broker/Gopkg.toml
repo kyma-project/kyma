@@ -107,10 +107,6 @@ required = [
   name = "github.com/kubernetes-sigs/service-catalog"
   revision = "ccab5234396729fee8dbf70620eafdfbc3d1a6af"
 
-#[[constraint]]
-#  name = "k8s.io/kubernetes"
-#  branch = "release-1.16"
-
 [[constraint]]
   name = "k8s.io/gengo"
   revision = "e17681d19d3ac4837a019ece36c2a0ec31ffe985"
