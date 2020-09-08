@@ -26,6 +26,7 @@ type ServiceBase interface {
 	Apply(obj interface{}, result interface{}) error
 	GVR() schema.GroupVersionResource
 	DeleteInNamespace(name, namespace string) error
+	Delete(name string) error
 	Subscribe(handler EventHandlerProvider) (Unsubscribe, error)
 }
 
@@ -134,6 +135,10 @@ func (s *enabledServiceBase) DeleteInNamespace(name, namespace string) error {
 	return s.Client.Namespace(namespace).Delete(name, &v1.DeleteOptions{})
 }
 
+func (s *enabledServiceBase) Delete(name string) error {
+	return s.Client.Delete(name, &v1.DeleteOptions{})
+}
+
 func (s *enabledServiceBase) GVR() schema.GroupVersionResource {
 	return s.gvr
 }
@@ -168,6 +173,10 @@ func (s disabledServiceBase) GVR() schema.GroupVersionResource {
 }
 
 func (s disabledServiceBase) DeleteInNamespace(_, _ string) error {
+	return s.err
+}
+
+func (s disabledServiceBase) Delete(_ string) error {
 	return s.err
 }
 

@@ -12,8 +12,8 @@ From the moment you create a Function (Function CR) until the time it is ready, 
 For a Function to be considered ready, the status of all three conditions must be `True`:  
 
 ```bash
-NAME                        CONFIGURED   BUILT   RUNNING   VERSION   AGE
-test-function               True         True    True      1         18m
+NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
+test-function   True         True      True      nodejs12   1         96s
 ```
 
 When you update an existing Function, conditions change asynchronously depending on the change type.  

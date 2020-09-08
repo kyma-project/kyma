@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Run tests
-#RUN make verify
+RUN make verify
 
 # Build app
 RUN make build
