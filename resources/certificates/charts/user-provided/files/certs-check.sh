@@ -19,7 +19,7 @@ kubectl get crd clusterissuers.cert-manager.io
 
 echo "Checking if cert-manager ClusterIssuer exists"
 
-kubectl get clusterissuers.cert-manager.io ${KYMA_CA_ISSUER} -n istio-system
+kubectl get clusterissuers.cert-manager.io ${KYMA_CA_ISSUER}
 
 echo "Checking if cert-manager Certificates exist"
 

@@ -13,6 +13,8 @@ set -o errexit
 # CLUSTER_INFO_CM_NAMESPACE         #
 # # # # # # # # # # # # # # # # # # #
 
+echo "Get required packages"
+apk add gettext
 
 getLoadBalancerIP() {
 
@@ -102,49 +104,22 @@ generateRootCACerts() {
 }
 
 echo "Finding XIP domain..."
-XIP_DOMAIN=$(generateXipDomain "${INGRESSGATEWAY_SERVICE_NAME}" "${INGRESSGATEWAY_SERVICE_NAMESPACE}")
+export XIP_DOMAIN=$(generateXipDomain "${INGRESSGATEWAY_SERVICE_NAME}" "${INGRESSGATEWAY_SERVICE_NAMESPACE}")
 echo "XIP domain: ${XIP_DOMAIN}"
 
 echo "Generating Root CA for XIP domain..."
 generateRootCACerts "${XIP_DOMAIN}" "${ROOTCA_SECRET_NAME}" "${ROOTCA_SECRET_NAMESPACE}"
 
-echo "Generating ClusterIssuer"
+echo "Apply extra manifests"
 
-cat <<EOF | kubectl apply -f -
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: kyma-ca-issuer
-  namespace: ${ROOTCA_SECRET_NAMESPACE}
-spec:
-  ca:
-    secretName: ${ROOTCA_SECRET_NAME}
-EOF
+manifests=(
+  certificate.yaml
+  clusterissuer.yaml
+)
 
-echo "Generating Certificate for Istio Ingress Gateway"
-
-cat <<EOF | kubectl apply -f -
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: kyma-gateway-certs
-  namespace: ${ROOTCA_SECRET_NAMESPACE}
-spec:
-  duration: 720h
-  renewBefore: 10m
-  keySize: 4096
-  organization:
-  - kyma
-  commonName: ${XIP_DOMAIN}
-  dnsNames:
-  - "*.${XIP_DOMAIN}"
-  secretName: kyma-gateway-certs
-  issuerRef:
-    name: kyma-ca-issuer
-    kind: ClusterIssuer
-    group: cert-manager.io
-EOF
-
+for resource in "${manifests[@]}"; do
+    envsubst <"/etc/manifests/$resource" | kubectl apply -f -
+done
 
 echo "Update global.ingress.domainName override in: ${CLUSTER_INFO_CM_NAMESPACE}/${CLUSTER_INFO_CM_NAME}"
 

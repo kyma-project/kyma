@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "xip.fullname" . }}-extra-manifests
+data:
+  certificate.yaml: |-
+{{ tpl (.Files.Get "files/certificate.yaml" | printf "%s" | indent 4) . }}
+  clusterissuer.yaml: |-
+{{ tpl (.Files.Get "files/clusterissuer.yaml" | printf "%s" | indent 4) . }}
