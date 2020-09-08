@@ -132,6 +132,6 @@ kubectl get volumesnapshot -w
   </summary>
 
 Gardener Azure does not currently support CSI drivers, that's why you cannot use volume snapshots. This support is planned for Kubernetes 1.19. For details, see [this issue](https://github.com/gardener/gardener-extension-provider-azure/issues/3).
-  
+
   </details>
 </div>
