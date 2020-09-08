@@ -260,14 +260,6 @@ containers:
       - name: GF_AUTH_GENERIC_OAUTH_TOKEN_URL
         value: "https://dex.{{ .Values.global.ingress.domainName }}/token"
       {{- end }}
-      {{- if not .Values.env.GF_AUTH_GENERIC_OAUTH_API_URL }}
-      - name: GF_AUTH_GENERIC_OAUTH_API_URL
-        value: "https://dex.{{ .Values.global.ingress.domainName }}/userinfo"
-      {{- end }}
-      {{- if not .Values.env.GF_SERVER_ROOT_URL }}
-      - name: GF_SERVER_ROOT_URL
-        value: "https://grafana.{{ .Values.global.ingress.domainName }}/"
-      {{- end }}
     {{- range $key, $value := .Values.envValueFrom }}
       - name: {{ $key | quote }}
         valueFrom:
