@@ -178,7 +178,7 @@ func shouldIgnoreTarget(target prom.Labels) bool {
 	}
 
 	// Ignore the pods running the tests. They have *-testsuite-* in their names
-	if string.Contains(target["pod_name"], "testsuite") {
+	if strings.Contains(target["pod_name"], "testsuite") {
 		return true
 	}
 
