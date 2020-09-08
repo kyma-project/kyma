@@ -109,16 +109,6 @@ containers:
         memory: 32Mi
     extraProperties: {}
     envs:
-      runtimeConfigMapName:
-        value: dockerfile-nodejs-12
-      buildRequestsCPU:
-        value: 700m
-      buildRequestsMemory:
-        value: 700Mi
-      buildLimitsCPU:
-        value: 1100m
-      buildLimitsMemory:
-        value: 1100Mi
       configMapRequeueDuration:
         value: 5m
       secretRequeueDuration:
@@ -140,7 +130,7 @@ containers:
       functionBuildExecutorArgs:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildExecutorImage:
-        value: gcr.io/kaniko-project/executor:v0.22.0
+        value: gcr.io/kaniko-project/executor:v1.0.0
       functionBuildRepoFetcherImage:
         value: eu.gcr.io/kyma-project/function-build-init:1088c1af
 

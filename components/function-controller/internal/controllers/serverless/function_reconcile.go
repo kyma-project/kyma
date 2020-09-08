@@ -102,7 +102,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	var runtimeConfigMap corev1.ConfigMapList
 	labels := map[string]string{
-		kubernetes.ConfigLabel:  "runtime",
+		kubernetes.ConfigLabel:  kubernetes.RuntimeLabelValue,
 		kubernetes.RuntimeLabel: string(instance.Spec.Runtime),
 	}
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), labels, &runtimeConfigMap); err != nil {
