@@ -34,9 +34,10 @@ type SubscriberRef @goModel(model: "knative.dev/pkg/apis/duck/v1.KReference"){
     namespace: String!
 }
 
-input SubscriberInput @goModel(model: "knative.dev/pkg/apis/duck/v1.Destination"){
-    uri: URI
-    ref: SubscriberRefInput
+input SubscriberInput {
+    ref: SubscriberRefInput!
+    port: Port
+    path: String
 }
 
 input SubscriberRefInput @goModel(model: "knative.dev/pkg/apis/duck/v1.KReference"){
@@ -68,7 +69,7 @@ type TriggerEvent {
 }
 
 extend type Query {
-    triggers(namespace: String!, subscriber: SubscriberInput): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "list", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    triggers(namespace: String!, serviceName: String!): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "list", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 extend type Mutation {
@@ -79,5 +80,5 @@ extend type Mutation {
 }
 
 extend type Subscription {
-    triggerEvent(namespace: String!, subscriber: SubscriberInput): TriggerEvent! @HasAccess(attributes: {resource: "triggers", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    triggerEvent(namespace: String!, serviceName: String!): TriggerEvent! @HasAccess(attributes: {resource: "triggers", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }

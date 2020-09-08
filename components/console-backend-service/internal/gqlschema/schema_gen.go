@@ -732,7 +732,7 @@ type ComplexityRoot struct {
 		ServiceInstance             func(childComplexity int, name string, namespace string) int
 		ServiceInstances            func(childComplexity int, namespace string, first *int, offset *int, status *InstanceStatusType) int
 		Services                    func(childComplexity int, namespace string, excludedLabels []string, first *int, offset *int) int
-		Triggers                    func(childComplexity int, namespace string, subscriber *v11.Destination) int
+		Triggers                    func(childComplexity int, namespace string, serviceName string) int
 		UsageKinds                  func(childComplexity int, first *int, offset *int) int
 		VersionInfo                 func(childComplexity int) int
 	}
@@ -1015,7 +1015,7 @@ type ComplexityRoot struct {
 		ServiceBrokerEvent              func(childComplexity int, namespace string) int
 		ServiceEvent                    func(childComplexity int, namespace string) int
 		ServiceInstanceEvent            func(childComplexity int, namespace string) int
-		TriggerEvent                    func(childComplexity int, namespace string, subscriber *v11.Destination) int
+		TriggerEvent                    func(childComplexity int, namespace string, serviceName string) int
 	}
 
 	Trigger struct {
@@ -1223,7 +1223,7 @@ type QueryResolver interface {
 	Functions(ctx context.Context, namespace string) ([]*Function, error)
 	APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error)
 	APIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
-	Triggers(ctx context.Context, namespace string, subscriber *v11.Destination) ([]*v1alpha12.Trigger, error)
+	Triggers(ctx context.Context, namespace string, serviceName string) ([]*v1alpha12.Trigger, error)
 	OAuth2Clients(ctx context.Context, namespace string) ([]*v1alpha11.OAuth2Client, error)
 	OAuth2Client(ctx context.Context, name string, namespace string) (*v1alpha11.OAuth2Client, error)
 }
@@ -1274,7 +1274,7 @@ type SubscriptionResolver interface {
 	NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan *NamespaceEvent, error)
 	FunctionEvent(ctx context.Context, namespace string, functionName *string) (<-chan *FunctionEvent, error)
 	APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan *APIRuleEvent, error)
-	TriggerEvent(ctx context.Context, namespace string, subscriber *v11.Destination) (<-chan *TriggerEvent, error)
+	TriggerEvent(ctx context.Context, namespace string, serviceName string) (<-chan *TriggerEvent, error)
 	OAuth2ClientEvent(ctx context.Context, namespace string) (<-chan *OAuth2ClientEvent, error)
 }
 type TriggerResolver interface {
@@ -4734,7 +4734,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Triggers(childComplexity, args["namespace"].(string), args["subscriber"].(*v11.Destination)), true
+		return e.complexity.Query.Triggers(childComplexity, args["namespace"].(string), args["serviceName"].(string)), true
 
 	case "Query.usageKinds":
 		if e.complexity.Query.UsageKinds == nil {
@@ -6049,7 +6049,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Subscription.TriggerEvent(childComplexity, args["namespace"].(string), args["subscriber"].(*v11.Destination)), true
+		return e.complexity.Subscription.TriggerEvent(childComplexity, args["namespace"].(string), args["serviceName"].(string)), true
 
 	case "Trigger.name":
 		if e.complexity.Trigger.Name == nil {
@@ -6416,9 +6416,10 @@ type SubscriberRef @goModel(model: "knative.dev/pkg/apis/duck/v1.KReference"){
     namespace: String!
 }
 
-input SubscriberInput @goModel(model: "knative.dev/pkg/apis/duck/v1.Destination"){
-    uri: URI
-    ref: SubscriberRefInput
+input SubscriberInput {
+    ref: SubscriberRefInput!
+    port: Port
+    path: String
 }
 
 input SubscriberRefInput @goModel(model: "knative.dev/pkg/apis/duck/v1.KReference"){
@@ -6450,7 +6451,7 @@ type TriggerEvent {
 }
 
 extend type Query {
-    triggers(namespace: String!, subscriber: SubscriberInput): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "list", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    triggers(namespace: String!, serviceName: String!): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "list", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 extend type Mutation {
@@ -6461,7 +6462,7 @@ extend type Mutation {
 }
 
 extend type Subscription {
-    triggerEvent(namespace: String!, subscriber: SubscriberInput): TriggerEvent! @HasAccess(attributes: {resource: "triggers", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    triggerEvent(namespace: String!, serviceName: String!): TriggerEvent! @HasAccess(attributes: {resource: "triggers", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }`, BuiltIn: false},
 	&ast.Source{Name: "internal/gqlschema/oauth.graphql", Input: `scalar GrantType @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.GrantType")
 
@@ -10427,14 +10428,14 @@ func (ec *executionContext) field_Query_triggers_args(ctx context.Context, rawAr
 		}
 	}
 	args["namespace"] = arg0
-	var arg1 *v11.Destination
-	if tmp, ok := rawArgs["subscriber"]; ok {
-		arg1, err = ec.unmarshalOSubscriberInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, tmp)
+	var arg1 string
+	if tmp, ok := rawArgs["serviceName"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["subscriber"] = arg1
+	args["serviceName"] = arg1
 	return args, nil
 }
 
@@ -10727,14 +10728,14 @@ func (ec *executionContext) field_Subscription_triggerEvent_args(ctx context.Con
 		}
 	}
 	args["namespace"] = arg0
-	var arg1 *v11.Destination
-	if tmp, ok := rawArgs["subscriber"]; ok {
-		arg1, err = ec.unmarshalOSubscriberInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, tmp)
+	var arg1 string
+	if tmp, ok := rawArgs["serviceName"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["subscriber"] = arg1
+	args["serviceName"] = arg1
 	return args, nil
 }
 
@@ -27669,7 +27670,7 @@ func (ec *executionContext) _Query_triggers(ctx context.Context, field graphql.C
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().Triggers(rctx, args["namespace"].(string), args["subscriber"].(*v11.Destination))
+			return ec.resolvers.Query().Triggers(rctx, args["namespace"].(string), args["serviceName"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "eventing.knative.dev", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "triggers", "verb": "list"})
@@ -34415,7 +34416,7 @@ func (ec *executionContext) _Subscription_triggerEvent(ctx context.Context, fiel
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Subscription().TriggerEvent(rctx, args["namespace"].(string), args["subscriber"].(*v11.Destination))
+			return ec.resolvers.Subscription().TriggerEvent(rctx, args["namespace"].(string), args["serviceName"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "eventing.knative.dev", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "triggers", "verb": "watch"})
@@ -37115,21 +37116,27 @@ func (ec *executionContext) unmarshalInputServiceInstanceCreateInputResourceRef(
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputSubscriberInput(ctx context.Context, obj interface{}) (v11.Destination, error) {
-	var it v11.Destination
+func (ec *executionContext) unmarshalInputSubscriberInput(ctx context.Context, obj interface{}) (SubscriberInput, error) {
+	var it SubscriberInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
 		switch k {
-		case "uri":
+		case "ref":
 			var err error
-			it.URI, err = ec.unmarshalOURI2ᚖknativeᚗdevᚋpkgᚋapisᚐURL(ctx, v)
+			it.Ref, err = ec.unmarshalNSubscriberRefInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "ref":
+		case "port":
 			var err error
-			it.Ref, err = ec.unmarshalOSubscriberRefInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx, v)
+			it.Port, err = ec.unmarshalOPort2ᚖuint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "path":
+			var err error
+			it.Path, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -37201,7 +37208,7 @@ func (ec *executionContext) unmarshalInputTriggerCreateInput(ctx context.Context
 			}
 		case "subscriber":
 			var err error
-			it.Subscriber, err = ec.unmarshalNSubscriberInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, v)
+			it.Subscriber, err = ec.unmarshalNSubscriberInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriberInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -47283,15 +47290,27 @@ func (ec *executionContext) marshalNSubscriber2knativeᚗdevᚋpkgᚋapisᚋduck
 	return ec._Subscriber(ctx, sel, &v)
 }
 
-func (ec *executionContext) unmarshalNSubscriberInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, v interface{}) (v11.Destination, error) {
+func (ec *executionContext) unmarshalNSubscriberInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriberInput(ctx context.Context, v interface{}) (SubscriberInput, error) {
 	return ec.unmarshalInputSubscriberInput(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNSubscriberInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, v interface{}) (*v11.Destination, error) {
+func (ec *executionContext) unmarshalNSubscriberInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriberInput(ctx context.Context, v interface{}) (*SubscriberInput, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalNSubscriberInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, v)
+	res, err := ec.unmarshalNSubscriberInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriberInput(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalNSubscriberRefInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, v interface{}) (v11.KReference, error) {
+	return ec.unmarshalInputSubscriberRefInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNSubscriberRefInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, v interface{}) (*v11.KReference, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNSubscriberRefInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx, v)
 	return &res, err
 }
 
@@ -48599,6 +48618,29 @@ func (ec *executionContext) marshalOPod2ᚖgithubᚗcomᚋkymaᚑprojectᚋkyma�
 	return ec._Pod(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOPort2uint32(ctx context.Context, v interface{}) (uint32, error) {
+	return UnmarshalPort(v)
+}
+
+func (ec *executionContext) marshalOPort2uint32(ctx context.Context, sel ast.SelectionSet, v uint32) graphql.Marshaler {
+	return MarshalPort(v)
+}
+
+func (ec *executionContext) unmarshalOPort2ᚖuint32(ctx context.Context, v interface{}) (*uint32, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOPort2uint32(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOPort2ᚖuint32(ctx context.Context, sel ast.SelectionSet, v *uint32) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOPort2uint32(ctx, sel, *v)
+}
+
 func (ec *executionContext) marshalOReplicaSet2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐReplicaSet(ctx context.Context, sel ast.SelectionSet, v ReplicaSet) graphql.Marshaler {
 	return ec._ReplicaSet(ctx, sel, &v)
 }
@@ -48892,18 +48934,6 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return ec.marshalOString2string(ctx, sel, *v)
 }
 
-func (ec *executionContext) unmarshalOSubscriberInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, v interface{}) (v11.Destination, error) {
-	return ec.unmarshalInputSubscriberInput(ctx, v)
-}
-
-func (ec *executionContext) unmarshalOSubscriberInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, v interface{}) (*v11.Destination, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOSubscriberInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, v)
-	return &res, err
-}
-
 func (ec *executionContext) marshalOSubscriberRef2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, sel ast.SelectionSet, v v11.KReference) graphql.Marshaler {
 	return ec._SubscriberRef(ctx, sel, &v)
 }
@@ -48913,18 +48943,6 @@ func (ec *executionContext) marshalOSubscriberRef2ᚖknativeᚗdevᚋpkgᚋapis�
 		return graphql.Null
 	}
 	return ec._SubscriberRef(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOSubscriberRefInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, v interface{}) (v11.KReference, error) {
-	return ec.unmarshalInputSubscriberRefInput(ctx, v)
-}
-
-func (ec *executionContext) unmarshalOSubscriberRefInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, v interface{}) (*v11.KReference, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOSubscriberRefInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx, v)
-	return &res, err
 }
 
 func (ec *executionContext) marshalOTrigger2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v v1alpha12.Trigger) graphql.Marshaler {

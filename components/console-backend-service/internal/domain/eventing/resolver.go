@@ -2,8 +2,10 @@ package eventing
 
 import (
 	"context"
-	"errors"
 	"fmt"
+
+	"github.com/pkg/errors"
+	"knative.dev/pkg/apis"
 
 	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 
@@ -21,21 +23,12 @@ func (l *TriggerList) Append() interface{} {
 	return e
 }
 
-func (r *Resolver) TriggersQuery(ctx context.Context, namespace string, subscriber *duckv1.Destination) ([]*v1alpha1.Trigger, error) {
+func (r *Resolver) TriggersQuery(ctx context.Context, namespace string, serviceName string) ([]*v1alpha1.Trigger, error) {
 	items := TriggerList{}
-	var err error
 
-	if subscriber == nil {
-		err = r.Service().ListInNamespace(namespace, &items)
-	} else if subscriber.Ref != nil {
-		key := createTriggersSubscriberRefIndexKey(namespace, subscriber.Ref)
-		err = r.Service().ListByIndex(triggersSubscriberRefIndex, key, &items)
-	} else if subscriber.URI != nil {
-		key := createTriggersSubscriberRefURIKey(namespace, subscriber.URI)
-		err = r.Service().ListByIndex(triggersSubscriberURIIndex, key, &items)
-	} else {
-		return nil, errors.New("subscriber is not null but it is empty")
-	}
+	err := r.Service().ListByIndex(triggerIndexKey, createTriggerRefIndexKey(namespace, serviceName), &items)
+	err = r.Service().ListByIndex(triggerIndexKey, "commerce-mock.default.svc.cluster.local", &items)
+
 	return items, err
 }
 
@@ -71,10 +64,14 @@ func (r *Resolver) FilterField(ctx context.Context, obj *v1alpha1.TriggerSpec) (
 }
 
 func (r *Resolver) CreateTrigger(ctx context.Context, namespace string, in gqlschema.TriggerCreateInput, ownerRef []*v1.OwnerReference) (*v1alpha1.Trigger, error) {
-	trigger := r.buildTrigger(namespace, in, ownerRef)
+	trigger, err := r.buildTrigger(namespace, in, ownerRef)
+
+	if err != nil {
+		return nil, err
+	}
 
 	result := &v1alpha1.Trigger{}
-	err := r.Service().Create(trigger, result)
+	err = r.Service().Create(trigger, result)
 	return result, err
 }
 
@@ -108,12 +105,12 @@ func (r *Resolver) DeleteTriggers(ctx context.Context, namespace string, names [
 	return items, nil
 }
 
-func (r *Resolver) TriggerEventSubscription(ctx context.Context, namespace string, subscriber *duckv1.Destination) (<-chan *gqlschema.TriggerEvent, error) {
+func (r *Resolver) TriggerEventSubscription(ctx context.Context, namespace, serviceName string) (<-chan *gqlschema.TriggerEvent, error) {
 	channel := make(chan *gqlschema.TriggerEvent, 1)
 	filter := func(trigger v1alpha1.Trigger) bool {
 		namespaceMatches := trigger.Namespace == namespace
-		subscriberMatches := subscriber == nil || r.areSubscribersEqual(subscriber, trigger.Spec.Subscriber)
-		return namespaceMatches && subscriberMatches
+		serviceMatches := trigger.Spec.Subscriber.Ref.Name == serviceName
+		return namespaceMatches && serviceMatches
 	}
 
 	unsubscribe, err := r.Service().Subscribe(NewEventHandler(channel, filter))
@@ -144,10 +141,28 @@ func (r *Resolver) solveFilters(json gqlschema.JSON) *v1alpha1.TriggerFilter {
 	}
 }
 
-func (r *Resolver) buildTrigger(namespace string, in gqlschema.TriggerCreateInput, ownerRef []*v1.OwnerReference) *v1alpha1.Trigger {
+func (r *Resolver) buildTrigger(namespace string, in gqlschema.TriggerCreateInput, ownerRef []*v1.OwnerReference) (*v1alpha1.Trigger, error) {
 	in = *r.checkTriggerName(&in)
 
 	meta := v1alpha1.SchemeGroupVersion.WithKind("Trigger")
+
+	port := in.Subscriber.Port
+	if port == nil {
+		defaultPort := uint32(80)
+		port = &defaultPort
+	}
+	path := in.Subscriber.Path
+	if path == nil {
+		defaultPath := "/"
+		path = &defaultPath
+	}
+
+	uriString := fmt.Sprintf("http://%s.%s.svc.cluster.local:%d%s", in.Subscriber.Ref.Name, namespace, *port, *path)
+	uri, err := apis.ParseURL(uriString)
+	if err != nil {
+		return nil, errors.Wrap(err, "while creating trigger subscriber uri")
+	}
+
 	trigger := &v1alpha1.Trigger{
 		TypeMeta: v1.TypeMeta{
 			Kind:       meta.Kind,
@@ -163,7 +178,7 @@ func (r *Resolver) buildTrigger(namespace string, in gqlschema.TriggerCreateInpu
 			Filter: r.solveFilters(in.FilterAttributes),
 			Subscriber: duckv1.Destination{
 				Ref: in.Subscriber.Ref,
-				URI: in.Subscriber.URI,
+				URI: uri,
 			},
 		},
 	}
@@ -172,27 +187,7 @@ func (r *Resolver) buildTrigger(namespace string, in gqlschema.TriggerCreateInpu
 		trigger.OwnerReferences = append(trigger.OwnerReferences, *ref)
 	}
 
-	return trigger
-}
-
-func (r *Resolver) areSubscribersEqual(expected *duckv1.Destination, actual duckv1.Destination) bool {
-	if expected.URI != nil {
-		if actual.URI == nil || expected.URI.String() != actual.URI.String() {
-			return false
-		}
-	}
-
-	if expected.Ref != nil {
-		if actual.Ref == nil {
-			return false
-		}
-		return r.compareRefs(expected.Ref, actual.Ref)
-	}
-	return true
-}
-
-func (r *Resolver) compareRefs(r1 *duckv1.KReference, r2 *duckv1.KReference) bool {
-	return r1.Name == r2.Name && r1.APIVersion == r2.APIVersion && r1.Kind == r2.Kind && r1.Namespace == r2.Namespace
+	return trigger, nil
 }
 
 func (r *Resolver) checkTriggerName(trigger *gqlschema.TriggerCreateInput) *gqlschema.TriggerCreateInput {

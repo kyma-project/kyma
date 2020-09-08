@@ -683,11 +683,17 @@ type ServiceStatus struct {
 	LoadBalancer *LoadBalancerStatus `json:"loadBalancer"`
 }
 
+type SubscriberInput struct {
+	Ref  *v1.KReference `json:"ref"`
+	Port *uint32        `json:"port"`
+	Path *string        `json:"path"`
+}
+
 type TriggerCreateInput struct {
-	Name             *string         `json:"name"`
-	Broker           string          `json:"broker"`
-	FilterAttributes JSON            `json:"filterAttributes"`
-	Subscriber       *v1.Destination `json:"subscriber"`
+	Name             *string          `json:"name"`
+	Broker           string           `json:"broker"`
+	FilterAttributes JSON             `json:"filterAttributes"`
+	Subscriber       *SubscriberInput `json:"subscriber"`
 }
 
 type TriggerEvent struct {
