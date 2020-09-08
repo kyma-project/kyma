@@ -51,8 +51,8 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: istio-system
-  namespace: {{ .Release.Namespace }}
+  name: {{ template "name" . }}
+  namespace: istio-system
 subjects:
   - kind: ServiceAccount
     name: {{ template "name" . }}
