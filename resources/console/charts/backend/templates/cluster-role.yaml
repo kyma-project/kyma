@@ -57,7 +57,7 @@ rules:
     resources: ["clusterassetgroups", "assetgroups", "clusterbuckets", "clusterassets", "buckets", "assets"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["serverless.kyma-project.io"]
-    resources: ["functions", "gitrepositories"]
+    resources: ["functions"]
     verbs: ["get", "list", "create", "delete", "update", "watch"]
   - apiGroups: ["*"]
     resources: ["*"]
