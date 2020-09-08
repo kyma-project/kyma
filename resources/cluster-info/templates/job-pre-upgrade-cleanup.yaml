@@ -43,10 +43,9 @@ metadata:
     helm.sh/hook: pre-install, pre-upgrade
     helm.sh/hook-weight: "1"
 ---
-kind: Role
+kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  namespace: {{ .Release.Namespace }}
   name: {{ include "cluster-info.fullname" . }}-cleanup
   annotations:
     helm.sh/hook: pre-install, pre-upgrade
@@ -58,8 +57,15 @@ rules:
       - delete
     resourceNames:
       - net-global-overrides
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs:
+      - delete
+    resourceNames:
+      - kyma-gateway-certs
+      - apiserver-proxy-tls-cert
 ---
-kind: RoleBinding
+kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "cluster-info.fullname" . }}-cleanup
@@ -72,73 +78,6 @@ subjects:
     name: {{ include "cluster-info.fullname" . }}-cleanup
     namespace: {{ .Release.Namespace }}
 roleRef:
-  kind: Role
+  kind: ClusterRole
   name: {{ include "cluster-info.fullname" . }}-cleanup
   apiGroup: rbac.authorization.k8s.io
----
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  namespace: istio-system
-  name: {{ include "cluster-info.fullname" . }}-cleanup
-  annotations:
-    helm.sh/hook: pre-install, pre-upgrade
-    helm.sh/hook-weight: "1"
-rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs:
-      - delete
-    resourceNames:
-      - kyma-gateway-certs
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: {{ include "cluster-info.fullname" . }}-cleanup
-  namespace: istio-system
-  annotations:
-    helm.sh/hook: pre-install, pre-upgrade
-    helm.sh/hook-weight: "1"
-subjects:
-  - kind: ServiceAccount
-    name: {{ include "cluster-info.fullname" . }}-cleanup
-    namespace: {{ .Release.Namespace }}
-roleRef:
-  kind: Role
-  name: {{ include "cluster-info.fullname" . }}-cleanup
-  apiGroup: rbac.authorization.k8s.io
----
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  namespace: kyma-system
-  name: {{ include "cluster-info.fullname" . }}-cleanup
-  annotations:
-    helm.sh/hook: pre-install, pre-upgrade
-    helm.sh/hook-weight: "1"
-rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs:
-      - delete
-    resourceNames:
-      - apiserver-proxy-tls-cert
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: {{ include "cluster-info.fullname" . }}-cleanup
-  namespace: kyma-system
-  annotations:
-    helm.sh/hook: pre-install, pre-upgrade
-    helm.sh/hook-weight: "1"
-subjects:
-  - kind: ServiceAccount
-    name: {{ include "cluster-info.fullname" . }}-cleanup
-    namespace: {{ .Release.Namespace }}
-roleRef:
-  kind: Role
-  name: {{ include "cluster-info.fullname" . }}-cleanup
-  apiGroup: rbac.authorization.k8s.io
-
