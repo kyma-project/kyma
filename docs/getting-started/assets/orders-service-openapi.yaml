@@ -124,11 +124,11 @@ components:
         consignmentCode:
           type: string
           example: "123456789"
-          description: ID of the consignment code of order
+          description: ID of the order consignment code
         consignmentStatus:
           type: string
           example: "PICKUP_COMPLETE"
-          description: Consignment status of order
+          description: Order consignment status
       required:
         - orderCode
         - consignmentCode
