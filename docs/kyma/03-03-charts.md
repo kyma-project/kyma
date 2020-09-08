@@ -94,7 +94,7 @@ Here are some examples:
          initContainers:
          - name: init-helm-broker
            image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
-           command: ['-c', 'until nc -zv service-catalog-controller-manager.kyma-system.svc.cluster.local 8080; do echo waiting for etcd service; sleep 2; done;']
+           command: ['sh', '-c', 'until nc -zv service-catalog-controller-manager.kyma-system.svc.cluster.local 8080; do echo waiting for etcd service; sleep 2; done;']
 
          containers:
          - name: helm-broker
