@@ -186,7 +186,7 @@ func shouldIgnoreTarget(target prom.Labels) bool {
 	}
 
 	for _, p := range podsToBeIgnored {
-		if target["pod_name"] == p {
+		if strings.Contains(target["pod_name"], p) {
 			return true
 		}
 	}
