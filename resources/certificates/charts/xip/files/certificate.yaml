@@ -7,7 +7,6 @@ metadata:
 spec:
   duration: 720h
   renewBefore: 10m
-  keySize: 4096
   organization:
   - kyma
   commonName: $XIP_DOMAIN
