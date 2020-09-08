@@ -9,3 +9,5 @@ data:
 {{ tpl (.Files.Get "files/certificate.yaml" | printf "%s" | indent 4) . }}
   clusterissuer.yaml: |-
 {{ tpl (.Files.Get "files/clusterissuer.yaml" | printf "%s" | indent 4) . }}
+  secret.yaml: |-
+{{ tpl (.Files.Get "files/secret.yaml" | printf "%s" | indent 4) . }}

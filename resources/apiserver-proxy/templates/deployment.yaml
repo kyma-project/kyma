@@ -40,21 +40,30 @@ spec:
             - name: TYPE
               value: "{{ .Values.global.certificates.type }}"
             - name: APISERVER_SERVICE_NAME
-              value: "apiserver-proxy-ssl"
+              value: "{{ template "name" . }}-ssl"
             - name: APISERVER_SERVICE_NAMESPACE
-              value: "kyma-system"
+              value: "{{ .Release.Namespace }}"
             - name: APISERVER_SECRET_NAME
               value: "apiserver-proxy-tls-cert"
             - name: APISERVER_SECRET_NAMESPACE
-              value: "kyma-system"
+              value: "{{ .Release.Namespace }}"
           command:
             - bash
             - -c
             - |
-{{ .Files.Get "files/xip-cert.sh" | printf "%s" | indent 14 }}
+{{- if eq .Values.global.certificates.type "xip" }}
+{{ .Files.Get "files/xip.sh" | printf "%s" | indent 14 }}
+{{- else if eq .Values.global.certificates.type "legacy" }}
+              echo "{{ .Values.global.tlsCrt }}" | base64 --decode > /etc/ca-tls-cert/tls.crt
+{{- end }}
           volumeMounts:
             - name: ca-tls-cert
               mountPath: /etc/ca-tls-cert/
+        {{- if eq .Values.global.certificates.type "xip" }}
+            - name: manifests
+              mountPath: /etc/manifests
+              readOnly: true
+        {{- end }}
       {{- end }}
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy.dir }}apiserver-proxy:{{ .Values.global.apiserver_proxy.version }}
@@ -102,10 +111,15 @@ spec:
           mountPath: /etc/ca-tls-cert/
       {{- end }}
       volumes:
-      {{- if or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip") }}
+    {{- if or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip") }}
       - name: ca-tls-cert
         emptyDir: {}
+      {{- if eq .Values.global.certificates.type "xip" }}
+      - name: manifests
+        configMap:
+          name: {{ include "fullname" . }}-xip-certificate
       {{- end }}
+     {{- end }}
       - name: tls-cert
         secret:
           secretName: {{ template "name" . }}-tls-cert

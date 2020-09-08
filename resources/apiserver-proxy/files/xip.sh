@@ -8,10 +8,10 @@ set -o errexit
 # TYPE                              #
 # APISERVER_SERVICE_NAME            #
 # APISERVER_SERVICE_NAMESPACE       #
-# APISERVER_SECRET_NAME             #
-# APISERVER_SECRET_NAMESPACE        #
 # # # # # # # # # # # # # # # # # # #
 
+echo "Get required packages"
+apk add gettext
 
 getLoadBalancerIP() {
 
@@ -68,40 +68,21 @@ generateXipDomain() {
     echo "${EXTERNAL_PUBLIC_IP}.xip.io"
 }
 
+kubectl get secret -n istio-system kyma-ca-key-pair -o jsonpath='{.data.tls\.crt}' | base64 --decode > /etc/ca-tls-cert/tls.crt
 
-if [[ $TYPE == "legacy" ]]; then
-    echo "{{ .Values.global.tlsCrt }}" | base64 --decode > /etc/ca-tls-cert/tls.crt
-elif [[ $TYPE == "xip" ]]; then
-    kubectl get secret -n istio-system kyma-ca-key-pair -o jsonpath='{.data.tls\.crt}' | base64 --decode > /etc/ca-tls-cert/tls.crt
+echo "Finding XIP domain for api-server LoadBalancer..."
+export XIP_DOMAIN=$(generateXipDomain "${APISERVER_SERVICE_NAME}" "${APISERVER_SERVICE_NAMESPACE}")
+echo "XIP domain for api-server LoadBalancer: ${XIP_DOMAIN}"
 
-    echo "Finding XIP domain for api-server LoadBalancer..."
-    XIP_DOMAIN=$(generateXipDomain "${APIGATEWAY_SERVICE_NAME}" "${APIGATEWAY_SERVICE_NAMESPACE}")
-    echo "XIP domain for api-server LoadBalancer: ${XIP_DOMAIN}"
+echo "Generating Certificate for ApiServer Ingress Gateway"
 
-    echo "Generating Certificate for ApiServer Ingress Gateway"
+manifests=(
+  certificate.yaml
+)
 
-cat <<EOF | kubectl apply -f -
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: ${APISERVER_SECRET_NAME}-cert
-  namespace: ${APISERVER_SECRET_NAMESPACE}
-spec:
-  duration: 720h
-  renewBefore: 10m
-  keySize: 4096
-  organization:
-  - kyma
-  commonName: ${XIP_DOMAIN}
-  dnsNames:
-  - "*.${XIP_DOMAIN}"
-  secretName: ${APISERVER_SECRET_NAME}
-  issuerRef:
-    name: kyma-ca-issuer
-    kind: ClusterIssuer
-    group: cert-manager.io
-EOF
+for resource in "${manifests[@]}"; do
+    envsubst <"/etc/manifests/$resource" | kubectl apply -f -
+done
 
 echo "Success."
 
-fi

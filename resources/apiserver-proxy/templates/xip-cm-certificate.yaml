@@ -1,0 +1,11 @@
+{{- if eq .Values.global.certificates.type "xip" }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "fullname" . }}-xip-certificate
+data:
+  certificate.yaml: |-
+{{ tpl (.Files.Get "files/xip-certificate.yaml" | printf "%s" | indent 4) . }}
+{{- end }}

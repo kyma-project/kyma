@@ -1,0 +1,20 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: $APISERVER_SECRET_NAME-cert
+  namespace: $APISERVER_SECRET_NAMESPACE
+spec:
+  duration: 720h
+  renewBefore: 10m
+  keySize: 4096
+  organization:
+  - kyma
+  commonName: $XIP_DOMAIN
+  dnsNames:
+  - "apiserver.$XIP_DOMAIN"
+  secretName: $APISERVER_SECRET_NAME
+  issuerRef:
+    name: kyma-ca-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
