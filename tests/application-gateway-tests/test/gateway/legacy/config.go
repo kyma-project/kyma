@@ -16,6 +16,8 @@ const (
 	mockServicePortEnvName   = "MOCK_SERVICE_PORT"
 	testExecutorImageEnvName = "TEST_EXECUTOR_IMAGE"
 	GatewayLegacyModeEnvName = "GatewayLegacyModeEnvName"
+	mockSelectorKeyEnvName   = "SELECTOR_KEY"
+	mockSelectorValueEnvName = "SELECTOR_VALUE"
 )
 
 type LegacyModeTestConfig struct {
@@ -23,6 +25,8 @@ type LegacyModeTestConfig struct {
 	Namespace          string
 	ServiceAccountName string
 	MockServicePort    int32
+	MockSelectorKey    string
+	MockSelectorValue  string
 	TestExecutorImage  string
 	GatewayLegacyMode  bool
 }
@@ -48,6 +52,16 @@ func ReadConfig() (LegacyModeTestConfig, error) {
 		return LegacyModeTestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", mockServicePortEnvName))
 	}
 
+	mockSelectorKey, found := os.LookupEnv(mockSelectorKeyEnvName)
+	if !found {
+		return LegacyModeTestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", mockSelectorKeyEnvName))
+	}
+
+	mockSelectorValue, found := os.LookupEnv(mockSelectorValueEnvName)
+	if !found {
+		return LegacyModeTestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", mockSelectorValueEnvName))
+	}
+
 	mockServicePort, err := strconv.Atoi(mockServicePortStr)
 	if err != nil {
 		return LegacyModeTestConfig{}, errors.New(fmt.Sprintf("failed to parse %s env value to int", mockServicePortEnvName))
@@ -58,12 +72,12 @@ func ReadConfig() (LegacyModeTestConfig, error) {
 		return LegacyModeTestConfig{}, errors.New(fmt.Sprintf("failed to parse %s env value to int", testExecutorImageEnvName))
 	}
 
-	GatewayLegacyModeStr, found := os.LookupEnv(GatewayLegacyModeEnvName)
+	gatewayLegacyModeStr, found := os.LookupEnv(GatewayLegacyModeEnvName)
 	if !found {
 		return LegacyModeTestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", GatewayLegacyModeEnvName))
 	}
 
-	legacyMode, err := strconv.ParseBool(GatewayLegacyModeStr)
+	legacyMode, err := strconv.ParseBool(gatewayLegacyModeStr)
 
 	if err != nil {
 		return LegacyModeTestConfig{}, errors.New(fmt.Sprintf("failed to parse %s env value to bool", GatewayLegacyModeEnvName))
@@ -74,6 +88,8 @@ func ReadConfig() (LegacyModeTestConfig, error) {
 		Namespace:          namespace,
 		ServiceAccountName: serviceAccountName,
 		MockServicePort:    int32(mockServicePort),
+		MockSelectorKey:    mockSelectorKey,
+		MockSelectorValue:  mockSelectorValue,
 		TestExecutorImage:  testExecutorImage,
 		GatewayLegacyMode:  legacyMode,
 	}

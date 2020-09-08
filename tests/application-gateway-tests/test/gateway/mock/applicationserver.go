@@ -95,8 +95,6 @@ func NewAppMockServerForLegacy(port int32) *AppMockServer {
 	}
 }
 
-
-
 func (ams *AppMockServer) Start() {
 	log.Infof("Starting test server on port: %d", ams.port)
 

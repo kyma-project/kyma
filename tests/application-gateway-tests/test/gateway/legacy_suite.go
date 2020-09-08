@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -199,12 +200,12 @@ func (ts *LegacyTestSuite) createMockService(t *testing.T) {
 		},
 	}
 
-	_, err := ts.serviceClient.Create(service)
+	_, err := ts.serviceClient.Create(context.Background(), service, metav1.CreateOptions{})
 	require.NoError(t, err)
 }
 
 func (ts *LegacyTestSuite) deleteMockService(t *testing.T) {
-	err := ts.serviceClient.Delete(ts.mockServiceName, &metav1.DeleteOptions{})
+	err := ts.serviceClient.Delete(context.Background(), ts.mockServiceName, metav1.DeleteOptions{})
 	assert.NoError(t, err)
 }
 
