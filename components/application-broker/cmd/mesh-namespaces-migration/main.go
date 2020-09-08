@@ -19,9 +19,7 @@ import (
 	servicecatalogclientset "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
 	"knative.dev/pkg/injection/sharedmain"
 
-	// TODO: nachtmaar - generate apis using makefile
 	appconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	// TODO: nachtmaar - generate client using makefile
 	kymaeventingclientset "github.com/kyma-project/kyma/components/application-broker/client/generated/clientset/internalclientset"
 )
 
