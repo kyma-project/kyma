@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/gateway"
+	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/oauth"
 	testingutils "github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/testing"
 )
@@ -24,7 +24,7 @@ const (
 func TestNewHttpMessageSender(t *testing.T) {
 	t.Parallel()
 
-	client := oauth.NewClient(context.Background(), &gateway.EnvConfig{})
+	client := oauth.NewClient(context.Background(), &env.Config{})
 	defer client.CloseIdleConnections()
 
 	msgSender, err := NewHttpMessageSender(eventsEndpoint, client)
@@ -43,7 +43,7 @@ func TestNewHttpMessageSender(t *testing.T) {
 func TestNewCloudEventRequestWithTarget(t *testing.T) {
 	t.Parallel()
 
-	client := oauth.NewClient(context.Background(), &gateway.EnvConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
+	client := oauth.NewClient(context.Background(), &env.Config{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
 	defer client.CloseIdleConnections()
 
 	msgSender, err := NewHttpMessageSender(eventsEndpoint, client)
@@ -85,14 +85,14 @@ func TestNewCloudEventRequestWithTarget(t *testing.T) {
 
 func TestSend(t *testing.T) {
 	mockServer := testingutils.NewMockServer()
-	mockServer.Start(t, tokenEndpoint, eventsEndpoint, 60)
+	mockServer.Start(t, tokenEndpoint, eventsEndpoint)
 	defer mockServer.Close()
 
 	ctx := context.Background()
 	emsCEURL := fmt.Sprintf("%s%s", mockServer.URL(), eventsEndpoint)
 	authURL := fmt.Sprintf("%s%s", mockServer.URL(), tokenEndpoint)
-	env := testingutils.NewEnvConfig(emsCEURL, authURL, maxIdleConns, maxIdleConnsPerHost)
-	client := oauth.NewClient(ctx, env)
+	cfg := testingutils.NewEnvConfig(emsCEURL, authURL, testingutils.WithMaxIdleConns(maxIdleConns), testingutils.WithMaxIdleConnsPerHost(maxIdleConnsPerHost))
+	client := oauth.NewClient(ctx, cfg)
 	defer client.CloseIdleConnections()
 
 	msgSender, err := NewHttpMessageSender(emsCEURL, client)

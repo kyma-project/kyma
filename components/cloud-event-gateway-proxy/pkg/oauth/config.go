@@ -3,13 +3,13 @@ package oauth
 import (
 	"golang.org/x/oauth2/clientcredentials"
 
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/gateway"
+	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/env"
 )
 
-func Config(env *gateway.EnvConfig) clientcredentials.Config {
+func Config(cfg *env.Config) clientcredentials.Config {
 	return clientcredentials.Config{
-		ClientID:     env.ClientID,
-		ClientSecret: env.ClientSecret,
-		TokenURL:     env.TokenEndpoint,
+		ClientID:     cfg.ClientID,
+		ClientSecret: cfg.ClientSecret,
+		TokenURL:     cfg.TokenEndpoint,
 	}
 }

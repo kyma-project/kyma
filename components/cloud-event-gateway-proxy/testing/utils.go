@@ -2,7 +2,6 @@ package testing
 
 import (
 	"bytes"
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/gateway"
 	"net/http"
 )
 
@@ -38,16 +37,6 @@ func SendEvent(endpoint, body string, headers http.Header) (*http.Response, erro
 	return client.Do(req)
 }
 
-func NewEnvConfig(emsCEURL, authURL string, maxIdleConns, maxIdleConnsPerHost int) *gateway.EnvConfig {
-	return &gateway.EnvConfig{
-		Port:                8080,
-		EmsCEURL:            emsCEURL,
-		TokenEndpoint:       authURL,
-		MaxIdleConns:        maxIdleConns,
-		MaxIdleConnsPerHost: maxIdleConnsPerHost,
-	}
-}
-
 func GetStructuredMessageHeaders() http.Header {
 	return http.Header{"Content-Type": []string{"application/cloudevents+json"}}
 }
@@ -59,8 +48,4 @@ func GetBinaryMessageHeaders() http.Header {
 	headers.Add(CeSourceHeader, CeSource)
 	headers.Add(CeSpecVersionHeader, CeSpecVersion)
 	return headers
-}
-
-func NewBinaryCloudEventPayload() string {
-	return "payload"
 }

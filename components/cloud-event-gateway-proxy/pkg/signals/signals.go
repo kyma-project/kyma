@@ -33,14 +33,14 @@ func SetupSignalHandler() (stopCh <-chan struct{}) {
 	return stop
 }
 
+type signalContext struct {
+	stopCh <-chan struct{}
+}
+
 // NewContext creates a new context with SetupSignalHandler()
 // as our Done() channel.
 func NewContext() context.Context {
 	return &signalContext{stopCh: SetupSignalHandler()}
-}
-
-type signalContext struct {
-	stopCh <-chan struct{}
 }
 
 // Deadline implements context.Context

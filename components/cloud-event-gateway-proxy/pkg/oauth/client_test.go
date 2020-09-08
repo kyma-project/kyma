@@ -3,7 +3,6 @@ package oauth
 import (
 	"context"
 	"fmt"
-	testingutils "github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/testing"
 	"net/http"
 	"testing"
 	"time"
@@ -11,7 +10,8 @@ import (
 	"go.opencensus.io/plugin/ochttp"
 	"golang.org/x/oauth2"
 
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/gateway"
+	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/env"
+	testingutils "github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/testing"
 )
 
 func TestNewClient(t *testing.T) {
@@ -22,7 +22,7 @@ func TestNewClient(t *testing.T) {
 		maxIdleConnsPerHost = 200
 	)
 
-	client := NewClient(context.Background(), &gateway.EnvConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
+	client := NewClient(context.Background(), &env.Config{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
 	defer client.CloseIdleConnections()
 
 	ocTransport, ok := client.Transport.(*ochttp.Transport)
@@ -83,14 +83,14 @@ func TestGetToken(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			mockServer := testingutils.NewMockServer()
-			mockServer.Start(t, tokenEndpoint, eventsEndpoint, test.givenExpiresInSec)
+			mockServer := testingutils.NewMockServer(testingutils.WithExpiresIn(test.givenExpiresInSec))
+			mockServer.Start(t, tokenEndpoint, eventsEndpoint)
 			defer mockServer.Close()
 
 			emsCEURL := fmt.Sprintf("%s%s", mockServer.URL(), eventsEndpoint)
 			authURL := fmt.Sprintf("%s%s", mockServer.URL(), tokenEndpoint)
-			env := testingutils.NewEnvConfig(emsCEURL, authURL, 1, 1)
-			client := NewClient(context.Background(), env)
+			cfg := testingutils.NewEnvConfig(emsCEURL, authURL)
+			client := NewClient(context.Background(), cfg)
 			defer client.CloseIdleConnections()
 
 			for i := 0; i < test.requestsCount; i++ {

@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/kelseyhightower/envconfig"
 	"github.com/sirupsen/logrus"
 
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/gateway"
+	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/handler"
 	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/oauth"
 	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/receiver"
@@ -14,38 +12,32 @@ import (
 	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/signals"
 )
 
-const (
-	// emsPublishEndpoint the endpoint used to publish CloudEvents to EMS
-	emsPublishEndpoint = "/events"
-)
-
 func main() {
 	logger := logrus.New()
 
-	env := &gateway.EnvConfig{}
-	if err := envconfig.Process("", env); err != nil {
+	cfg := new(env.Config)
+	if err := envconfig.Process("", cfg); err != nil {
 		logger.Fatalf("Start handler failed with error: %s", err)
 	}
 
 	logger.Info("Start the Cloudevent Gateway Proxy")
 
 	// configure message receiver
-	messageReceiver := receiver.NewHttpMessageReceiver(env.Port)
+	messageReceiver := receiver.NewHttpMessageReceiver(cfg.Port)
 
 	// configure auth client
 	ctx := signals.NewContext()
-	client := oauth.NewClient(ctx, env)
+	client := oauth.NewClient(ctx, cfg)
 	defer client.CloseIdleConnections()
 
 	// configure message sender
-	publishURL := fmt.Sprintf("%s%s", env.EmsCEURL, emsPublishEndpoint)
-	messageSender, err := sender.NewHttpMessageSender(publishURL, client)
+	messageSender, err := sender.NewHttpMessageSender(cfg.EmsPublishURL, client)
 	if err != nil {
 		logger.Fatalf("Unable to create message sender with error: %s", err)
 	}
 
 	// start handler which blocks until it receives a shutdown signal
-	if err := handler.NewHandler(messageReceiver, messageSender, logger).Start(ctx); err != nil {
+	if err := handler.NewHandler(messageReceiver, messageSender, cfg.RequestTimeout, logger).Start(ctx); err != nil {
 		logger.Fatalf("Start handler failed with error: %s", err)
 	}
 

@@ -37,14 +37,16 @@ type Handler struct {
 	Receiver *receiver.HttpMessageReceiver
 	// Sender sends requests to the broker
 	Sender *sender.HttpMessageSender
-	// Defaults sets default values to incoming events
+	// Defaulter sets default values to incoming events
 	Defaulter cev2client.EventDefaulter
-
+	// RequestTimeout timeout for outgoing requests
+	RequestTimeout time.Duration
+	// Logger default logger
 	Logger *logrus.Logger
 }
 
-func NewHandler(receiver *receiver.HttpMessageReceiver, sender *sender.HttpMessageSender, logger *logrus.Logger) *Handler {
-	return &Handler{Receiver: receiver, Sender: sender, Logger: logger}
+func NewHandler(receiver *receiver.HttpMessageReceiver, sender *sender.HttpMessageSender, requestTimeout time.Duration, logger *logrus.Logger) *Handler {
+	return &Handler{Receiver: receiver, Sender: sender, RequestTimeout: requestTimeout, Logger: logger}
 }
 
 func (h *Handler) Start(ctx context.Context) error {
@@ -65,7 +67,8 @@ func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	ctx := request.Context()
+	ctx, cancel := context.WithTimeout(request.Context(), h.RequestTimeout)
+	defer cancel()
 
 	message := cehttp.NewMessageFromHttpRequest(request)
 	defer func() { _ = message.Finish(nil) }()

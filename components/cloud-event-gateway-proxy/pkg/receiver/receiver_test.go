@@ -11,7 +11,7 @@ import (
 // a mocked http.Handler
 type testHandler struct{}
 
-func (h *testHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {}
+func (h *testHandler) ServeHTTP(http.ResponseWriter, *http.Request) {}
 
 var _ http.Handler = (*testHandler)(nil)
 

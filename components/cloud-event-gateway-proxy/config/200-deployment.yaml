@@ -33,11 +33,11 @@ spec:
                 secretKeyRef:
                   name: cloud-event-gateway-proxy
                   key: token-endpoint
-            - name: EMS_CE_URL
+            - name: EMS_PUBLISH_URL
               valueFrom:
                 secretKeyRef:
                   name: cloud-event-gateway-proxy
-                  key: ems-ce-url
+                  key: ems-publish-url
           image: github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/cmd
           imagePullPolicy: IfNotPresent
           name: cloud-event-gateway-proxy

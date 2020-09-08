@@ -1,4 +1,4 @@
-package gateway
+package env
 
 import (
 	"net/http"
@@ -14,8 +14,8 @@ func TestConfigureTransport(t *testing.T) {
 	)
 
 	transport := &http.Transport{}
-	env := EnvConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost}
-	env.ConfigureTransport(transport)
+	cfg := Config{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost}
+	cfg.ConfigureTransport(transport)
 
 	if transport.MaxIdleConns != maxIdleConns {
 		t.Errorf("HTTP Transport MaxIdleConns is misconfigured want: %d but got: %d", maxIdleConns, transport.MaxIdleConns)

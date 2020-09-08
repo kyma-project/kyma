@@ -18,10 +18,6 @@ const (
 	// mock server endpoints
 	tokenEndpoint  = "/token"
 	eventsEndpoint = "/events"
-
-	// handler endpoints
-	handlerHealthEndpoint  = "http://localhost:8080/healthz"
-	handlerPublishEndpoint = "http://localhost:8080/publish"
 )
 
 func TestHandler(t *testing.T) {
@@ -36,35 +32,35 @@ func TestHandler(t *testing.T) {
 		{
 			name: "Structured CloudEvent without id",
 			provideMessage: func() (string, http.Header) {
-				return testingutils.CloudEventWithoutID, testingutils.GetStructuredMessageHeaders()
+				return testingutils.StructuredCloudEventPayloadWithoutID, testingutils.GetStructuredMessageHeaders()
 			},
 			wantStatusCode: http.StatusBadRequest,
 		},
 		{
 			name: "Structured CloudEvent without type",
 			provideMessage: func() (string, http.Header) {
-				return testingutils.CloudEventWithoutType, testingutils.GetStructuredMessageHeaders()
+				return testingutils.StructuredCloudEventPayloadWithoutType, testingutils.GetStructuredMessageHeaders()
 			},
 			wantStatusCode: http.StatusBadRequest,
 		},
 		{
 			name: "Structured CloudEvent without specversion",
 			provideMessage: func() (string, http.Header) {
-				return testingutils.CloudEventWithoutSpecVersion, testingutils.GetStructuredMessageHeaders()
+				return testingutils.StructuredCloudEventPayloadWithoutSpecVersion, testingutils.GetStructuredMessageHeaders()
 			},
 			wantStatusCode: http.StatusBadRequest,
 		},
 		{
 			name: "Structured CloudEvent without source",
 			provideMessage: func() (string, http.Header) {
-				return testingutils.CloudEventWithoutSource, testingutils.GetStructuredMessageHeaders()
+				return testingutils.StructuredCloudEventPayloadWithoutSource, testingutils.GetStructuredMessageHeaders()
 			},
 			wantStatusCode: http.StatusBadRequest,
 		},
 		{
 			name: "Structured CloudEvent is valid",
 			provideMessage: func() (string, http.Header) {
-				return testingutils.CloudEvent, testingutils.GetStructuredMessageHeaders()
+				return testingutils.StructuredCloudEventPayload, testingutils.GetStructuredMessageHeaders()
 			},
 			wantStatusCode: http.StatusNoContent,
 		},
@@ -74,7 +70,7 @@ func TestHandler(t *testing.T) {
 			provideMessage: func() (string, http.Header) {
 				headers := testingutils.GetBinaryMessageHeaders()
 				headers.Del(testingutils.CeIDHeader)
-				return testingutils.NewBinaryCloudEventPayload(), headers
+				return testingutils.BinaryCloudEventPayload, headers
 			},
 			wantStatusCode: http.StatusBadRequest,
 		},
@@ -83,7 +79,7 @@ func TestHandler(t *testing.T) {
 			provideMessage: func() (string, http.Header) {
 				headers := testingutils.GetBinaryMessageHeaders()
 				headers.Del(testingutils.CeTypeHeader)
-				return testingutils.NewBinaryCloudEventPayload(), headers
+				return testingutils.BinaryCloudEventPayload, headers
 			},
 			wantStatusCode: http.StatusBadRequest,
 		},
@@ -92,7 +88,7 @@ func TestHandler(t *testing.T) {
 			provideMessage: func() (string, http.Header) {
 				headers := testingutils.GetBinaryMessageHeaders()
 				headers.Del(testingutils.CeSpecVersionHeader)
-				return testingutils.NewBinaryCloudEventPayload(), headers
+				return testingutils.BinaryCloudEventPayload, headers
 			},
 			wantStatusCode: http.StatusBadRequest,
 		},
@@ -101,21 +97,27 @@ func TestHandler(t *testing.T) {
 			provideMessage: func() (string, http.Header) {
 				headers := testingutils.GetBinaryMessageHeaders()
 				headers.Del(testingutils.CeSourceHeader)
-				return testingutils.NewBinaryCloudEventPayload(), headers
+				return testingutils.BinaryCloudEventPayload, headers
 			},
 			wantStatusCode: http.StatusBadRequest,
 		},
 		{
 			name: "Binary CloudEvent is valid with required headers",
 			provideMessage: func() (string, http.Header) {
-				return testingutils.NewBinaryCloudEventPayload(), testingutils.GetBinaryMessageHeaders()
+				return testingutils.BinaryCloudEventPayload, testingutils.GetBinaryMessageHeaders()
 			},
 			wantStatusCode: http.StatusNoContent,
 		},
 	}
 
+	var (
+		port            = 8888
+		healthEndpoint  = fmt.Sprintf("http://localhost:%d/healthz", port)
+		publishEndpoint = fmt.Sprintf("http://localhost:%d/publish", port)
+	)
+
 	mockServer := testingutils.NewMockServer()
-	mockServer.Start(t, tokenEndpoint, eventsEndpoint, 60)
+	mockServer.Start(t, tokenEndpoint, eventsEndpoint)
 	defer mockServer.Close()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -123,8 +125,8 @@ func TestHandler(t *testing.T) {
 
 	emsCEURL := fmt.Sprintf("%s%s", mockServer.URL(), eventsEndpoint)
 	authURL := fmt.Sprintf("%s%s", mockServer.URL(), tokenEndpoint)
-	env := testingutils.NewEnvConfig(emsCEURL, authURL, 1, 1)
-	client := oauth.NewClient(ctx, env)
+	cfg := testingutils.NewEnvConfig(emsCEURL, authURL, testingutils.WithPort(port))
+	client := oauth.NewClient(ctx, cfg)
 	defer client.CloseIdleConnections()
 
 	msgSender, err := sender.NewHttpMessageSender(emsCEURL, client)
@@ -132,19 +134,20 @@ func TestHandler(t *testing.T) {
 		t.Errorf("Failed to create a new message sender with error: %v", err)
 	}
 
-	handler := NewHandler(receiver.NewHttpMessageReceiver(env.Port), msgSender, logrus.New())
+	msgReceiver := receiver.NewHttpMessageReceiver(cfg.Port)
+	handler := NewHandler(msgReceiver, msgSender, cfg.RequestTimeout, logrus.New())
 	go func() {
 		if err := handler.Start(ctx); err != nil {
 			t.Errorf("Failed to start handler with error: %v", err)
 		}
 	}()
 
-	waitForHandlerToStart(t)
+	waitForHandlerToStart(t, healthEndpoint)
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			body, headers := testCase.provideMessage()
-			resp, err := testingutils.SendEvent(handlerPublishEndpoint, body, headers)
+			resp, err := testingutils.SendEvent(publishEndpoint, body, headers)
 			if err != nil {
 				t.Errorf("Failed to send event with error: %v", err)
 			}
@@ -156,7 +159,57 @@ func TestHandler(t *testing.T) {
 	}
 }
 
-func waitForHandlerToStart(t *testing.T) {
+func TestHandlerTimeout(t *testing.T) {
+	t.Parallel()
+
+	var (
+		port               = 9999
+		requestTimeout     = time.Nanosecond  // short request timeout
+		serverResponseTime = time.Millisecond // long server response time
+		healthEndpoint     = fmt.Sprintf("http://localhost:%d/healthz", port)
+		publishEndpoint    = fmt.Sprintf("http://localhost:%d/publish", port)
+	)
+
+	mockServer := testingutils.NewMockServer(testingutils.WithResponseTime(serverResponseTime))
+	mockServer.Start(t, tokenEndpoint, eventsEndpoint)
+	defer mockServer.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	emsCEURL := fmt.Sprintf("%s%s", mockServer.URL(), eventsEndpoint)
+	authURL := fmt.Sprintf("%s%s", mockServer.URL(), tokenEndpoint)
+	cfg := testingutils.NewEnvConfig(emsCEURL, authURL, testingutils.WithPort(port), testingutils.WithRequestTimeout(requestTimeout))
+	client := oauth.NewClient(ctx, cfg)
+	defer client.CloseIdleConnections()
+
+	msgSender, err := sender.NewHttpMessageSender(emsCEURL, client)
+	if err != nil {
+		t.Errorf("Failed to create a new message sender with error: %v", err)
+	}
+
+	msgReceiver := receiver.NewHttpMessageReceiver(cfg.Port)
+	handler := NewHandler(msgReceiver, msgSender, cfg.RequestTimeout, logrus.New())
+	go func() {
+		if err := handler.Start(ctx); err != nil {
+			t.Errorf("Failed to start handler with error: %v", err)
+		}
+	}()
+
+	waitForHandlerToStart(t, healthEndpoint)
+
+	body, headers := testingutils.StructuredCloudEventPayload, testingutils.GetStructuredMessageHeaders()
+	resp, err := testingutils.SendEvent(publishEndpoint, body, headers)
+	if err != nil {
+		t.Errorf("Failed to send event with error: %v", err)
+	}
+	_ = resp.Body.Close()
+	if http.StatusInternalServerError != resp.StatusCode {
+		t.Errorf("Test failed, want status code:%d but got:%d", http.StatusInternalServerError, resp.StatusCode)
+	}
+}
+
+func waitForHandlerToStart(t *testing.T, healthEndpoint string) {
 	timeout := time.After(time.Second * 30)
 	tick := time.Tick(time.Second * 1)
 
@@ -168,7 +221,7 @@ func waitForHandlerToStart(t *testing.T) {
 			}
 		case <-tick:
 			{
-				if resp, err := http.Get(handlerHealthEndpoint); err != nil {
+				if resp, err := http.Get(healthEndpoint); err != nil {
 					continue
 				} else if resp.StatusCode == http.StatusOK {
 					return

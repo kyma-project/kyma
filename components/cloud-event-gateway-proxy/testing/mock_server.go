@@ -10,20 +10,42 @@ import (
 
 type MockServer struct {
 	server               *httptest.Server
-	generatedTokensCount int
+	responseTime         time.Duration // server response time
+	expiresInSec         int           // token expiry in seconds
+	generatedTokensCount int           // generated tokens count
 }
 
-func NewMockServer() *MockServer {
-	return &MockServer{generatedTokensCount: 0}
+func NewMockServer(opts ...MockServerOption) *MockServer {
+	mockServer := &MockServer{expiresInSec: 0, generatedTokensCount: 0, responseTime: 0}
+	for _, opt := range opts {
+		opt(mockServer)
+	}
+	return mockServer
 }
 
-func (s *MockServer) Start(t *testing.T, tokenEndpoint, eventsEndpoint string, expiresIn int) {
-	s.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+type MockServerOption func(m *MockServer)
+
+func WithExpiresIn(expiresIn int) MockServerOption {
+	return func(m *MockServer) {
+		m.expiresInSec = expiresIn
+	}
+}
+
+func WithResponseTime(responseTime time.Duration) MockServerOption {
+	return func(m *MockServer) {
+		m.responseTime = responseTime
+	}
+}
+
+func (m *MockServer) Start(t *testing.T, tokenEndpoint, eventsEndpoint string) {
+	m.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(m.responseTime)
+
 		switch r.URL.String() {
 		case tokenEndpoint:
 			{
-				s.generatedTokensCount++
-				token := fmt.Sprintf("access_token=token-%d&token_type=bearer&expires_in=%d", time.Now().UnixNano(), expiresIn)
+				m.generatedTokensCount++
+				token := fmt.Sprintf("access_token=token-%d&token_type=bearer&expires_in=%d", time.Now().UnixNano(), m.expiresInSec)
 				if _, err := w.Write([]byte(token)); err != nil {
 					t.Errorf("Failed to write HTTP response")
 				}
@@ -40,14 +62,14 @@ func (s *MockServer) Start(t *testing.T, tokenEndpoint, eventsEndpoint string, e
 	}))
 }
 
-func (s *MockServer) URL() string {
-	return s.server.URL
+func (m *MockServer) URL() string {
+	return m.server.URL
 }
 
-func (s *MockServer) GeneratedTokensCount() int {
-	return s.generatedTokensCount
+func (m *MockServer) GeneratedTokensCount() int {
+	return m.generatedTokensCount
 }
 
-func (s *MockServer) Close() {
-	s.server.Close()
+func (m *MockServer) Close() {
+	m.server.Close()
 }

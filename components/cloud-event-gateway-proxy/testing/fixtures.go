@@ -1,7 +1,7 @@
 package testing
 
 const (
-	CloudEventWithoutID = `{
+	StructuredCloudEventPayloadWithoutID = `{
 		   "type":"someType",
 		   "specversion":"1.0",
 		   "source":"someSource",
@@ -9,7 +9,7 @@ const (
 		   "datacontenttype":"application/json"
 		}`
 
-	CloudEventWithoutType = `{
+	StructuredCloudEventPayloadWithoutType = `{
 		   "id":"00000",
 		   "specversion":"1.0",
 		   "source":"someSource",
@@ -17,7 +17,7 @@ const (
 		   "datacontenttype":"application/json"
 		}`
 
-	CloudEventWithoutSpecVersion = `{
+	StructuredCloudEventPayloadWithoutSpecVersion = `{
 		   "id":"00000",
 		   "type":"someType",
 		   "source":"someSource",
@@ -25,7 +25,7 @@ const (
 		   "datacontenttype":"application/json"
 		}`
 
-	CloudEventWithoutSource = `{
+	StructuredCloudEventPayloadWithoutSource = `{
 		   "id":"00000",
 		   "type":"someType",
 		   "specversion":"1.0",
@@ -33,7 +33,7 @@ const (
 		   "datacontenttype":"application/json"
 		}`
 
-	CloudEvent = `{
+	StructuredCloudEventPayload = `{
 		   "id":"00000",
 		   "type":"someType",
 		   "specversion":"1.0",
@@ -41,4 +41,6 @@ const (
 		   "data":"{\"foo\":\"bar\"}",
 		   "datacontenttype":"application/json"
 		}`
+
+	BinaryCloudEventPayload = `"{\"foo\":\"bar\"}"`
 )

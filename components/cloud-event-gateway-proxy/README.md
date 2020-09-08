@@ -36,8 +36,8 @@ $ ko apply -f config/
 | INGRESS_PORT            | The ingress port for the CloudEvents Gateway Proxy.                                           | 8080          |
 | MAX_IDLE_CONNS          | The maximum number of idle (keep-alive) connections across all hosts. Zero means no limit.    | 100           |
 | MAX_IDLE_CONNS_PER_HOST | The maximum idle (keep-alive) connections to keep per-host. Zero means use the default value. | 2             |
+| REQUEST_TIMEOUT         | The timeout for the outgoing requests to the Messaging server.                                | 5s            |
 | CLIENT_ID               | The Client ID used to acquire Access Tokens from the Authentication server.                   |               |
 | CLIENT_SECRET           | The Client Secret used to acquire Access Tokens from the Authentication server.               |               |
 | TOKEN_ENDPOINT          | The Authentication Server Endpoint to provide Access Tokens.                                  |               |
-| EMS_CE_URL              | The Messaging Server Endpoint that accepts publishing CloudEvents to it.                      |               |
-
+| EMS_PUBLISH_URL         | The Messaging Server Endpoint that accepts publishing CloudEvents to it.                      |               |
