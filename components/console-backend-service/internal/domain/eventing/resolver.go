@@ -74,7 +74,7 @@ func (r *Resolver) PortField(ctx context.Context, obj *v1alpha1.TriggerSpec) (ui
 		}
 		port, err := strconv.Atoi(portString)
 		if err != nil {
-			return 0, errors.Wrap(err, "while extracting port")
+			return 0, errors.Wrap(err, "while converting port")
 		}
 		return uint32(port), nil
 	} else {
@@ -117,8 +117,6 @@ func (r *Resolver) CreateTriggers(ctx context.Context, namespace string, trigger
 
 func (r *Resolver) DeleteTrigger(ctx context.Context, namespace string, name string) (*v1alpha1.Trigger, error) {
 	result := &v1alpha1.Trigger{}
-	fmt.Print("del")
-	fmt.Println(name)
 	err := r.Service().DeleteInNamespace(namespace, name, result)
 	return result, err
 }
@@ -138,17 +136,11 @@ func (r *Resolver) DeleteTriggers(ctx context.Context, namespace string, names [
 func (r *Resolver) TriggerEventSubscription(ctx context.Context, namespace, serviceName string) (<-chan *gqlschema.TriggerEvent, error) {
 	channel := make(chan *gqlschema.TriggerEvent, 1)
 	filter := func(trigger v1alpha1.Trigger) bool {
-		fmt.Printf("sub-servicename: %s\n", serviceName)
 		namespaceMatches := trigger.Namespace == namespace
 		if trigger.Spec.Subscriber.Ref != nil {
-			fmt.Print(trigger.Spec.Subscriber.Ref.Name)
-			fmt.Print(" ")
-			fmt.Print(serviceName)
 			return namespaceMatches && trigger.Spec.Subscriber.Ref.Name == serviceName
 		} else {
 			name, err := extractServiceNameFromUri(*trigger.Spec.Subscriber.URI)
-			fmt.Println(name)
-			fmt.Println(err)
 			return err == nil && namespaceMatches && name == serviceName
 		}
 	}

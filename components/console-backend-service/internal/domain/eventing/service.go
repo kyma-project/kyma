@@ -80,7 +80,6 @@ func (h *EventHandler) ShouldNotify() bool {
 }
 
 func (h *EventHandler) Notify(eventType gqlschema.SubscriptionEventType) {
-	fmt.Println("notify")
 	h.channel <- &gqlschema.TriggerEvent{
 		Type:    eventType,
 		Trigger: h.res,
