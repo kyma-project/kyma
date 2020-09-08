@@ -88,10 +88,6 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		"namespace", instance.GetNamespace(),
 		"version", instance.GetGeneration())
 
-	if !instance.DeletionTimestamp.IsZero() {
-		return ctrl.Result{}, nil
-	}
-
 	var configMaps corev1.ConfigMapList
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &configMaps); err != nil {
 		log.Error(err, "Cannot list ConfigMaps")
