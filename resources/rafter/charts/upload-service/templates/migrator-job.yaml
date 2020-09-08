@@ -11,7 +11,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafterUploadService.chart" . }}
   annotations:
-    helm.sh/hook: pre-upgrade
+    helm.sh/hook: pre-upgrade,post-upgrade
     helm.sh/hook-weight: "-1"
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
 data:
