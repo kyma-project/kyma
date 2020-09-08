@@ -107,12 +107,12 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 							Args:  args,
 							Resources: corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
-									corev1.ResourceMemory: r.config.Build.LimitsMemoryValue,
-									corev1.ResourceCPU:    r.config.Build.LimitsCPUValue,
+									corev1.ResourceMemory: *instance.Spec.BuildResources.Limits.Memory(),
+									corev1.ResourceCPU:    *instance.Spec.BuildResources.Limits.Cpu(),
 								},
 								Requests: corev1.ResourceList{
-									corev1.ResourceMemory: r.config.Build.RequestsMemoryValue,
-									corev1.ResourceCPU:    r.config.Build.RequestsCPUValue,
+									corev1.ResourceMemory: *instance.Spec.BuildResources.Requests.Memory(),
+									corev1.ResourceCPU:    *instance.Spec.BuildResources.Requests.Cpu(),
 								},
 							},
 							VolumeMounts: []corev1.VolumeMount{
@@ -294,12 +294,12 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 							Args:  args,
 							Resources: corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
-									corev1.ResourceMemory: r.config.Build.LimitsMemoryValue,
-									corev1.ResourceCPU:    r.config.Build.LimitsCPUValue,
+									corev1.ResourceMemory: *instance.Spec.BuildResources.Limits.Memory(),
+									corev1.ResourceCPU:    *instance.Spec.BuildResources.Limits.Cpu(),
 								},
 								Requests: corev1.ResourceList{
-									corev1.ResourceMemory: r.config.Build.RequestsMemoryValue,
-									corev1.ResourceCPU:    r.config.Build.RequestsCPUValue,
+									corev1.ResourceMemory: *instance.Spec.BuildResources.Requests.Memory(),
+									corev1.ResourceCPU:    *instance.Spec.BuildResources.Requests.Cpu(),
 								},
 							},
 							VolumeMounts: []corev1.VolumeMount{

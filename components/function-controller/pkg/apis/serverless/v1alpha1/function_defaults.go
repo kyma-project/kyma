@@ -12,21 +12,34 @@ var _ resourcesemantics.GenericCRD = (*Function)(nil)
 
 const DefaultingConfigKey = "defaulting-config"
 
+type FunctionDefaultResources struct {
+	RequestCpu    string `envconfig:"default=50m"`
+	RequestMemory string `envconfig:"default=64Mi"`
+	LimitsCpu     string `envconfig:"default=100m"`
+	LimitsMemory  string `envconfig:"default=128Mi"`
+}
+
+type BuildDefaultResources struct {
+	RequestCpu    string `envconfig:"default=50m"`
+	RequestMemory string `envconfig:"default=64Mi"`
+	LimitsCpu     string `envconfig:"default=100m"`
+	LimitsMemory  string `envconfig:"default=128Mi"`
+}
+
 type DefaultingConfig struct {
-	RequestCpu    string  `envconfig:"default=50m"`
-	RequestMemory string  `envconfig:"default=64Mi"`
-	LimitsCpu     string  `envconfig:"default=100m"`
-	LimitsMemory  string  `envconfig:"default=128Mi"`
-	MinReplicas   int32   `envconfig:"default=1"`
-	MaxReplicas   int32   `envconfig:"default=1"`
-	Runtime       Runtime `envconfig:"default=nodejs12"`
+	Function    FunctionDefaultResources
+	Build       BuildDefaultResources
+	MinReplicas int32   `envconfig:"default=1"`
+	MaxReplicas int32   `envconfig:"default=1"`
+	Runtime     Runtime `envconfig:"default=nodejs12"`
 }
 
 func (fn *Function) SetDefaults(ctx context.Context) {
 	config := ctx.Value(DefaultingConfigKey).(DefaultingConfig)
 
 	fn.Spec.defaultReplicas(ctx)
-	fn.Spec.defaultResources(ctx)
+	fn.Spec.defaultFunctionResources(ctx)
+	fn.Spec.defaultBuildResources(ctx)
 	fn.Spec.defaultRuntime(config)
 }
 
@@ -49,48 +62,64 @@ func (spec *FunctionSpec) defaultReplicas(ctx context.Context) {
 	}
 }
 
-func (spec *FunctionSpec) defaultResources(ctx context.Context) {
+func defaultResources(res corev1.ResourceRequirements, requestMemory, requestCpu, limitsMemory, limitsCpu string) corev1.ResourceRequirements {
+	copiedRes := res.DeepCopy()
+
+	if copiedRes.Requests == nil {
+		copiedRes.Requests = corev1.ResourceList{}
+	}
+	if copiedRes.Requests.Memory().IsZero() {
+		newResource := resource.MustParse(requestMemory)
+		if !copiedRes.Limits.Memory().IsZero() && copiedRes.Limits.Memory().Cmp(newResource) == -1 {
+			newResource = *copiedRes.Limits.Memory()
+		}
+
+		copiedRes.Requests[corev1.ResourceMemory] = newResource
+	}
+	if copiedRes.Requests.Cpu().IsZero() {
+		newResource := resource.MustParse(requestCpu)
+		if !copiedRes.Limits.Cpu().IsZero() && copiedRes.Limits.Cpu().Cmp(newResource) == -1 {
+			newResource = *copiedRes.Limits.Cpu()
+		}
+
+		copiedRes.Requests[corev1.ResourceCPU] = newResource
+	}
+
+	if copiedRes.Limits == nil {
+		copiedRes.Limits = corev1.ResourceList{}
+	}
+	if copiedRes.Limits.Memory().IsZero() {
+		newResource := resource.MustParse(limitsMemory)
+		if copiedRes.Requests.Memory().Cmp(newResource) == 1 {
+			newResource = *copiedRes.Requests.Memory()
+		}
+
+		copiedRes.Limits[corev1.ResourceMemory] = newResource
+	}
+	if copiedRes.Limits.Cpu().IsZero() {
+		newResource := resource.MustParse(limitsCpu)
+		if copiedRes.Requests.Cpu().Cmp(newResource) == 1 {
+			newResource = *copiedRes.Requests.Cpu()
+		}
+
+		copiedRes.Limits[corev1.ResourceCPU] = newResource
+	}
+
+	return *copiedRes
+}
+
+func (spec *FunctionSpec) defaultFunctionResources(ctx context.Context) {
 	resources := spec.Resources
-	if resources.Requests == nil {
-		spec.Resources.Requests = corev1.ResourceList{}
-	}
-	if resources.Requests.Memory().IsZero() {
-		val := ctx.Value(DefaultingConfigKey).(DefaultingConfig).RequestMemory
-		newResource := resource.MustParse(val)
-		if !resources.Limits.Memory().IsZero() && resources.Limits.Memory().Cmp(newResource) == -1 {
-			newResource = *resources.Limits.Memory()
-		}
+	defaultingConfig := ctx.Value(DefaultingConfigKey).(DefaultingConfig).Function
 
-		spec.Resources.Requests[corev1.ResourceMemory] = newResource
-	}
-	if resources.Requests.Cpu().IsZero() {
-		newResource := resource.MustParse(ctx.Value(DefaultingConfigKey).(DefaultingConfig).RequestCpu)
-		if !resources.Limits.Cpu().IsZero() && resources.Limits.Cpu().Cmp(newResource) == -1 {
-			newResource = *resources.Limits.Cpu()
-		}
+	spec.Resources = defaultResources(resources, defaultingConfig.RequestMemory, defaultingConfig.RequestCpu, defaultingConfig.LimitsMemory, defaultingConfig.LimitsCpu)
+}
 
-		spec.Resources.Requests[corev1.ResourceCPU] = newResource
-	}
+func (spec *FunctionSpec) defaultBuildResources(ctx context.Context) {
+	resources := spec.BuildResources
+	defaultingConfig := ctx.Value(DefaultingConfigKey).(DefaultingConfig).Build
 
-	if resources.Limits == nil {
-		spec.Resources.Limits = corev1.ResourceList{}
-	}
-	if resources.Limits.Memory().IsZero() {
-		newResource := resource.MustParse(ctx.Value(DefaultingConfigKey).(DefaultingConfig).LimitsMemory)
-		if spec.Resources.Requests.Memory().Cmp(newResource) == 1 {
-			newResource = *spec.Resources.Requests.Memory()
-		}
-
-		spec.Resources.Limits[corev1.ResourceMemory] = newResource
-	}
-	if resources.Limits.Cpu().IsZero() {
-		newResource := resource.MustParse(ctx.Value(DefaultingConfigKey).(DefaultingConfig).LimitsCpu)
-		if spec.Resources.Requests.Cpu().Cmp(newResource) == 1 {
-			newResource = *spec.Resources.Requests.Cpu()
-		}
-
-		spec.Resources.Limits[corev1.ResourceCPU] = newResource
-	}
+	spec.BuildResources = defaultResources(resources, defaultingConfig.RequestMemory, defaultingConfig.RequestCpu, defaultingConfig.LimitsMemory, defaultingConfig.LimitsCpu)
 }
 
 func (spec *FunctionSpec) defaultRuntime(config DefaultingConfig) {

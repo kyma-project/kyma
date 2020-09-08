@@ -38,6 +38,9 @@ type FunctionSpec struct {
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 
+	// +optional
+	BuildResources corev1.ResourceRequirements `json:"buildResources,omitempty"`
+
 	// +kubebuilder:validation:Minimum:=1
 	MinReplicas *int32 `json:"minReplicas,omitempty"`
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	"k8s.io/apimachinery/pkg/api/validation"
@@ -16,11 +17,21 @@ import (
 
 const ValidationConfigKey = "validation-config"
 
+type MinFunctionRequestValues struct {
+	MinRequestCpu    string `envconfig:"default=10m"`
+	MinRequestMemory string `envconfig:"default=16Mi"`
+}
+
+type MinBuildRequestValues struct {
+	MinRequestCpu    string `envconfig:"default=200m"`
+	MinRequestMemory string `envconfig:"default=200Mi"`
+}
+
 type ValidationConfig struct {
-	MinRequestCpu    string   `envconfig:"default=10m"`
-	MinRequestMemory string   `envconfig:"default=16Mi"`
-	MinReplicasValue int32    `envconfig:"default=1"`
-	ReservedEnvs     []string `envconfig:"default={}"`
+	FunctionResources MinFunctionRequestValues
+	BuildResources    MinBuildRequestValues
+	MinReplicasValue  int32    `envconfig:"default=1"`
+	ReservedEnvs      []string `envconfig:"default={}"`
 }
 
 func (fn *Function) performBasicValidation(ctx context.Context) *apis.FieldError {
@@ -29,7 +40,8 @@ func (fn *Function) performBasicValidation(ctx context.Context) *apis.FieldError
 		fn.Spec.validateEnv(ctx),
 		fn.Spec.validateLabels(),
 		fn.Spec.validateReplicas(ctx),
-		fn.Spec.validateResources(ctx),
+		fn.Spec.validateFunctionResources(ctx),
+		fn.Spec.validateBuildResources(ctx),
 	)
 }
 
@@ -93,42 +105,56 @@ func (spec *FunctionSpec) validateEnv(ctx context.Context) (apisError *apis.Fiel
 	return apisError
 }
 
-func (spec *FunctionSpec) validateResources(ctx context.Context) (apisError *apis.FieldError) {
-	minMemory := resource.MustParse(ctx.Value(ValidationConfigKey).(ValidationConfig).MinRequestMemory)
-	minCpu := resource.MustParse(ctx.Value(ValidationConfigKey).(ValidationConfig).MinRequestCpu)
+func (spec *FunctionSpec) validateFunctionResources(ctx context.Context) (apisError *apis.FieldError) {
+	minMemory := resource.MustParse(ctx.Value(ValidationConfigKey).(ValidationConfig).FunctionResources.MinRequestMemory)
+	minCpu := resource.MustParse(ctx.Value(ValidationConfigKey).(ValidationConfig).FunctionResources.MinRequestCpu)
 	requests := spec.Resources.Requests
 	limits := spec.Resources.Limits
 
+	return validateResources(requests, limits, minMemory, minCpu).ViaField("spec.resources")
+}
+
+func (spec *FunctionSpec) validateBuildResources(ctx context.Context) (apisError *apis.FieldError) {
+	minMemory := resource.MustParse(ctx.Value(ValidationConfigKey).(ValidationConfig).BuildResources.MinRequestMemory)
+	minCpu := resource.MustParse(ctx.Value(ValidationConfigKey).(ValidationConfig).BuildResources.MinRequestCpu)
+	requests := spec.BuildResources.Requests
+	limits := spec.BuildResources.Limits
+
+	return validateResources(requests, limits, minMemory, minCpu).ViaField("spec.buildResources")
+}
+
+func validateResources(requests, limits corev1.ResourceList, minMemory, minCpu resource.Quantity) *apis.FieldError {
+	var apisError *apis.FieldError
 	if requests.Cpu().Cmp(minCpu) == -1 {
 		apisError = apisError.Also(apis.ErrInvalidValue(
 			fmt.Sprintf("requests cpu(%s) should be higher than minimal value (%s)",
-				requests.Cpu().String(), minCpu.String()), "spec.resources.requests.cpu"))
+				requests.Cpu().String(), minCpu.String()), "requests.cpu"))
 	}
 	if requests.Memory().Cmp(minMemory) == -1 {
 		apisError = apisError.Also(apis.ErrInvalidValue(
 			fmt.Sprintf("requests memory(%s) should be higher than minimal value (%s)",
-				requests.Memory().String(), minMemory.String()), "spec.resources.requests.memory"))
+				requests.Memory().String(), minMemory.String()), "requests.memory"))
 	}
 	if limits.Cpu().Cmp(minCpu) == -1 {
 		apisError = apisError.Also(apis.ErrInvalidValue(
 			fmt.Sprintf("limits cpu(%s) should be higher than minimal value (%s)",
-				limits.Cpu().String(), minCpu.String()), "spec.resources.limits.cpu"))
+				limits.Cpu().String(), minCpu.String()), "limits.cpu"))
 	}
 	if limits.Memory().Cmp(minMemory) == -1 {
 		apisError = apisError.Also(apis.ErrInvalidValue(
 			fmt.Sprintf("limits memory(%s) should be higher than minimal value (%s)",
-				limits.Memory().String(), minMemory.String()), "spec.resources.limits.memory"))
+				limits.Memory().String(), minMemory.String()), "limits.memory"))
 	}
 
 	if requests.Cpu().Cmp(*limits.Cpu()) == 1 {
 		apisError = apisError.Also(apis.ErrInvalidValue(
 			fmt.Sprintf("limits cpu(%s) should be higher than requests cpu(%s)",
-				limits.Cpu().String(), requests.Cpu().String()), "spec.resources.limits.cpu"))
+				limits.Cpu().String(), requests.Cpu().String()), "limits.cpu"))
 	}
 	if requests.Memory().Cmp(*limits.Memory()) == 1 {
 		apisError = apisError.Also(apis.ErrInvalidValue(
 			fmt.Sprintf("limits memory(%s) should be higher than requests memory(%s)",
-				limits.Memory().String(), requests.Memory().String()), "spec.resources.limits.memory"))
+				limits.Memory().String(), requests.Memory().String()), "limits.memory"))
 	}
 
 	return apisError

@@ -22,7 +22,33 @@ func TestSetDefaults(t *testing.T) {
 	}{
 		"Should do nothing": {
 			givenFunc: Function{
-				Spec: FunctionSpec{Resources: corev1.ResourceRequirements{
+				Spec: FunctionSpec{
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("150m"),
+							corev1.ResourceMemory: resource.MustParse("158Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("90m"),
+							corev1.ResourceMemory: resource.MustParse("84Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("150m"),
+							corev1.ResourceMemory: resource.MustParse("158Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("90m"),
+							corev1.ResourceMemory: resource.MustParse("84Mi"),
+						},
+					},
+					MinReplicas: &two,
+					MaxReplicas: &two},
+			},
+			expectedFunc: Function{Spec: FunctionSpec{
+				Runtime: Nodejs12,
+				Resources: corev1.ResourceRequirements{
 					Limits: corev1.ResourceList{
 						corev1.ResourceCPU:    resource.MustParse("150m"),
 						corev1.ResourceMemory: resource.MustParse("158Mi"),
@@ -32,12 +58,7 @@ func TestSetDefaults(t *testing.T) {
 						corev1.ResourceMemory: resource.MustParse("84Mi"),
 					},
 				},
-					MinReplicas: &two,
-					MaxReplicas: &two},
-			},
-			expectedFunc: Function{Spec: FunctionSpec{
-				Runtime: Nodejs12,
-				Resources: corev1.ResourceRequirements{
+				BuildResources: corev1.ResourceRequirements{
 					Limits: corev1.ResourceList{
 						corev1.ResourceCPU:    resource.MustParse("150m"),
 						corev1.ResourceMemory: resource.MustParse("158Mi"),
