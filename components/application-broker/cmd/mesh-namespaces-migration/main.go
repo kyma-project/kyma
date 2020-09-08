@@ -17,10 +17,9 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
 	servicecatalogclientset "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
-
-	kneventingclientset "knative.dev/eventing/pkg/client/clientset/versioned"
 	"knative.dev/pkg/injection/sharedmain"
 
+	// TODO: nachtmaar - generate apis using makefile
 	appconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	// TODO: nachtmaar - generate client using makefile
 	kymaeventingclientset "github.com/kyma-project/kyma/components/application-broker/client/generated/clientset/internalclientset"
@@ -45,7 +44,7 @@ func init() {
 func main() {
 	flag.Parse()
 
-	k8sClient, kymaClient, knativeClient, servicecatalogClient, dynClient := initClientSets()
+	k8sClient, kymaClient, servicecatalogClient, dynClient := initClientSets()
 
 	userNamespaces, err := listUserNamespaces(k8sClient)
 	if err != nil {
@@ -59,26 +58,16 @@ func main() {
 		handleAndTerminate(err, "initializing serviceInstanceManager")
 	}
 
-	subscriptionMigrator, err := newSubscriptionMigrator(kymaClient, knativeClient, userNamespaces)
-	if err != nil {
-		handleAndTerminate(err, "initializing subscriptionMigrator")
-	}
-
 	// run migration
 
 	if err := serviceInstanceManager.recreateAll(); err != nil {
 		handleAndTerminate(err, "re-creating ServiceInstances")
-	}
-
-	if err := subscriptionMigrator.migrateAll(); err != nil {
-		handleAndTerminate(err, "migrating Kyma Subscriptions")
 	}
 }
 
 // initClientSets initializes all required Kubernetes ClientSets.
 func initClientSets() (*kubernetes.Clientset,
 	*kymaeventingclientset.Clientset,
-	*kneventingclientset.Clientset,
 	*servicecatalogclientset.Clientset,
 	dynamic.Interface) {
 
@@ -86,7 +75,6 @@ func initClientSets() (*kubernetes.Clientset,
 
 	return kubernetes.NewForConfigOrDie(cfg),
 		kymaeventingclientset.NewForConfigOrDie(cfg),
-		kneventingclientset.NewForConfigOrDie(cfg),
 		servicecatalogclientset.NewForConfigOrDie(cfg),
 		dynamic.NewForConfigOrDie(cfg)
 }
