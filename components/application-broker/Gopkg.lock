@@ -453,7 +453,7 @@
   revision = "960cf3fa606ce139cea977928be029784bd42be5"
 
 [[projects]]
-  digest = "1:947013de4845127d3b2f1485becc308c95beb7390094f5dac969b0b22472af38"
+  digest = "1:6410fbc7335414ede070ec64886ad15900ff421e0ad58c3740e5d60a0ba47a42"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-gateway/pkg/apperrors",
@@ -475,8 +475,6 @@
     "components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1",
     "components/application-operator/pkg/client/informers/externalversions/internalinterfaces",
     "components/application-operator/pkg/client/listers/applicationconnector/v1alpha1",
-    "components/event-bus/apis/applicationconnector",
-    "components/event-bus/apis/eventing",
   ]
   pruneopts = "NUT"
   revision = "8069217e0f42fef97b9e6fddb8b7c86ff5ba1999"
@@ -1245,13 +1243,12 @@
   version = "kubernetes-1.16.10"
 
 [[projects]]
-  digest = "1:9b3bb171ef37c98d57855975922f0fdb1ea027f73c3ebb17bc0036c96136194a"
+  digest = "1:c5130b5b60b7c073b8916cf12cad5b8ff5c2f505126ee806e1dfc9bb9f76df51"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "discovery/fake",
     "dynamic",
-    "dynamic/fake",
     "informers",
     "informers/admissionregistration",
     "informers/admissionregistration/v1",
@@ -1650,8 +1647,6 @@
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1",
-    "github.com/kyma-project/kyma/components/event-bus/apis/applicationconnector",
-    "github.com/kyma-project/kyma/components/event-bus/apis/eventing",
     "github.com/matryer/is",
     "github.com/mcuadros/go-defaults",
     "github.com/meatballhat/negroni-logrus",
@@ -1683,14 +1678,12 @@
     "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apimachinery/pkg/util/runtime",
-    "k8s.io/apimachinery/pkg/util/sets",
     "k8s.io/apimachinery/pkg/util/strategicpatch",
     "k8s.io/apimachinery/pkg/util/wait",
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
     "k8s.io/client-go/dynamic",
-    "k8s.io/client-go/dynamic/fake",
     "k8s.io/client-go/informers/core/v1",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/fake",
