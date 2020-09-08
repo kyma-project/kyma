@@ -22,9 +22,16 @@ rules:
     verbs:
       - list
   - apiGroups:
+      - applicationconnector.kyma-project.io
+    resources:
+      - applications
+    verbs:
+      - list
+  - apiGroups:
       - servicecatalog.k8s.io
     resources:
       - serviceinstances
+      - serviceclasses
     verbs:
       - create
       - get
@@ -57,7 +64,7 @@ subjects:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "recreate-service-instances.fullname" . }}-recreate-service-instances
+  name: {{ template "recreate-service-instances.fullname" . }}-hooks
   labels:
 {{ include "recreate-service-instances.labels.standard" . | indent 4 }}
   annotations:
@@ -74,6 +81,7 @@ spec:
       restartPolicy: Never
       serviceAccountName: {{ template "recreate-service-instances.fullname" . }}-hooks
       containers:
-        - name: recreate-service-instances
-          image: "{{ .Values.global.containerRegistry.path }}/application-broker-eventing-migration:{{ .Values.global.application_broker_eventing_migration.version }}"
+        - name: recreate-serv1acc510bice-instances
+          # TODO: use image from CI/CD
+          image: nachtmaar/application-broker-eventing-service-instance-migration:latest
           imagePullPolicy: Always
