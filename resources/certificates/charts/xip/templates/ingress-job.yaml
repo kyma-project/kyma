@@ -33,7 +33,7 @@ spec:
           value: "{{ .Values.certs.ingress.gateway.serviceNamespace}}"
         - name: ROOTCA_SECRET_NAME
           value: "{{ .Values.certs.ingress.rootCA.secretName }}"
-        - name: ROOTCA_SERVICE_NAMESPACE
+        - name: ROOTCA_SECRET_NAMESPACE
           value: "{{ .Values.certs.ingress.rootCA.secretNamespace }}"
         - name: CLUSTER_INFO_CM_NAME
           value: "{{ .Values.clusterInfoConfigMap.name }}"

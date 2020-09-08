@@ -111,7 +111,7 @@ generateRootCACerts "${XIP_DOMAIN}" "${ROOTCA_SECRET_NAME}" "${ROOTCA_SECRET_NAM
 echo "Generating ClusterIssuer"
 
 cat <<EOF | kubectl apply -f -
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: kyma-ca-issuer
@@ -124,7 +124,7 @@ EOF
 echo "Generating Certificate for Istio Ingress Gateway"
 
 cat <<EOF | kubectl apply -f -
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: kyma-gateway-certs
