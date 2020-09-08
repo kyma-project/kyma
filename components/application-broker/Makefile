@@ -1,16 +1,19 @@
-APP_NAME = application-broker
+APP_NAME = application
 APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190930-d28d219
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 PKG := github.com/kyma-project/kyma/components/application-broker
 
+# exclude dirs from cmd to be considered for further processing
+EXCLUDE_DIRS = poc-events poc-finalizers
+
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
-#ENTRYPOINT:=cmd/broker/main.go
 VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
-
 # produce goals for each cmd program ("bin1 bin2 ...")
-cmds := $(foreach dir,$(wildcard cmd/*),$(notdir $(dir)))
+cmds_all := $(foreach dir, $(wildcard cmd/*),$(notdir $(dir)))
+cmds := $(filter-out $(EXCLUDE_DIRS), $(cmds_all))
+
 # produce goals to build images for each cmd program ("bin1.image bin2.image ...")
 cmds_images = $(foreach cmd,$(cmds),$(cmd).image)
 cmds_clean = $(foreach cmd,$(cmds),$(cmd).clean)
@@ -20,14 +23,14 @@ cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 MOUNT_TARGETS = $(cmds)
 $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
-build-local: $(cmds) test-local ;
+#build-local: $(cmds) test-local ;
 
-GOBUILD_FLAGS := -v
-$(cmds): %: resolve-local
-	@echo "+ Building $*"
-	@CGO_ENABLED=0 go build -o $* \
-		$(GOBUILD_FLAGS) \
-		$(PKG)/cmd/$*
+#GOBUILD_FLAGS := -v
+#$(cmds): %: resolve-local
+#	@echo "+ Building $*"
+#	@CGO_ENABLED=0 go build -o $* \
+#		$(GOBUILD_FLAGS) \
+#		$(PKG)/cmd/$*
 
 .PHONY: clean
 clean: $(cmds_clean) resolve_clean licenses_clean
@@ -39,11 +42,12 @@ resolve_clean:
 	rm -rf vendor
 
 licenses_clean:
+	@echo "cmds_filters: " $(cmds)
 	rm -rf licenses
 
 # Example:
 #   make controller-manager.image
-$(cmds_images): %.image: build pull-licenses
+$(cmds_images): %.image: pull-licenses
 	$(eval $@_img_name := $(APP_NAME)-$*)
 	@echo "+ Building container image $($@_img_name)"
 	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .
