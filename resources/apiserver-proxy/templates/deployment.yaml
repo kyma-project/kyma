@@ -39,15 +39,19 @@ spec:
           env:
             - name: TYPE
               value: "{{ .Values.global.certificates.type }}"
+            - name: APISERVER_SERVICE_NAME
+              value: "apiserver-proxy-ssl"
+            - name: APISERVER_SERVICE_NAMESPACE
+              value: "kyma-system"
+            - name: APISERVER_SECRET_NAME
+              value: "apiserver-proxy-tls-cert"
+            - name: APISERVER_SECRET_NAMESPACE
+              value: "kyma-system"
           command:
             - bash
             - -c
             - |
-              if [[ $TYPE == "legacy" ]]; then
-                echo "{{ .Values.global.tlsCrt }}" | base64 --decode > /etc/ca-tls-cert/tls.crt
-              elif [[ $TYPE == "xip" ]]; then
-                kubectl get secret -n istio-system kyma-ca-key-pair -o jsonpath='{.data.tls\.crt}' | base64 --decode > /etc/ca-tls-cert/tls.crt
-              fi
+{{ .Files.Get "files/xip-cert.sh" | printf "%s" | indent 14 }}
           volumeMounts:
             - name: ca-tls-cert
               mountPath: /etc/ca-tls-cert/
