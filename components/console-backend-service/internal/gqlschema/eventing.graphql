@@ -8,6 +8,8 @@ type Trigger @goModel(model: "knative.dev/eventing/pkg/apis/eventing/v1alpha1.Tr
 type TriggerSpec @goModel(model: "knative.dev/eventing/pkg/apis/eventing/v1alpha1.TriggerSpec"){
     broker: String!
     filter: JSON
+    port: Port!
+    path: String!
     subscriber: Subscriber!
 }
 
@@ -23,7 +25,6 @@ enum TriggerStatusType {
 }
 
 type Subscriber @goModel(model: "knative.dev/pkg/apis/duck/v1.Destination"){
-    uri: URI
     ref: SubscriberRef
 }
 

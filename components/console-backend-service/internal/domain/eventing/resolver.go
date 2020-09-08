@@ -3,6 +3,9 @@ package eventing
 import (
 	"context"
 	"fmt"
+	"net"
+	"regexp"
+	"strconv"
 
 	"github.com/pkg/errors"
 	"knative.dev/pkg/apis"
@@ -27,7 +30,6 @@ func (r *Resolver) TriggersQuery(ctx context.Context, namespace string, serviceN
 	items := TriggerList{}
 
 	err := r.Service().ListByIndex(triggerIndexKey, createTriggerRefIndexKey(namespace, serviceName), &items)
-	err = r.Service().ListByIndex(triggerIndexKey, "commerce-mock.default.svc.cluster.local", &items)
 
 	return items, err
 }
@@ -63,6 +65,32 @@ func (r *Resolver) FilterField(ctx context.Context, obj *v1alpha1.TriggerSpec) (
 	return attr, nil
 }
 
+func (r *Resolver) PortField(ctx context.Context, obj *v1alpha1.TriggerSpec) (uint32, error) {
+	const defaultPort = uint32(80)
+	if obj.Subscriber.URI != nil {
+		_, portString, err := net.SplitHostPort(obj.Subscriber.URI.Host)
+		if err != nil {
+			return 0, errors.Wrap(err, "while extracting port")
+		}
+		port, err := strconv.Atoi(portString)
+		if err != nil {
+			return 0, errors.Wrap(err, "while extracting port")
+		}
+		return uint32(port), nil
+	} else {
+		return defaultPort, nil
+	}
+}
+
+func (r *Resolver) PathField(ctx context.Context, obj *v1alpha1.TriggerSpec) (string, error) {
+	const defaultPath = "/"
+	if obj.Subscriber.URI != nil {
+		return obj.Subscriber.URI.Path, nil
+	} else {
+		return defaultPath, nil
+	}
+}
+
 func (r *Resolver) CreateTrigger(ctx context.Context, namespace string, in gqlschema.TriggerCreateInput, ownerRef []*v1.OwnerReference) (*v1alpha1.Trigger, error) {
 	trigger, err := r.buildTrigger(namespace, in, ownerRef)
 
@@ -89,6 +117,8 @@ func (r *Resolver) CreateTriggers(ctx context.Context, namespace string, trigger
 
 func (r *Resolver) DeleteTrigger(ctx context.Context, namespace string, name string) (*v1alpha1.Trigger, error) {
 	result := &v1alpha1.Trigger{}
+	fmt.Print("del")
+	fmt.Println(name)
 	err := r.Service().DeleteInNamespace(namespace, name, result)
 	return result, err
 }
@@ -108,9 +138,19 @@ func (r *Resolver) DeleteTriggers(ctx context.Context, namespace string, names [
 func (r *Resolver) TriggerEventSubscription(ctx context.Context, namespace, serviceName string) (<-chan *gqlschema.TriggerEvent, error) {
 	channel := make(chan *gqlschema.TriggerEvent, 1)
 	filter := func(trigger v1alpha1.Trigger) bool {
+		fmt.Printf("sub-servicename: %s\n", serviceName)
 		namespaceMatches := trigger.Namespace == namespace
-		serviceMatches := trigger.Spec.Subscriber.Ref.Name == serviceName
-		return namespaceMatches && serviceMatches
+		if trigger.Spec.Subscriber.Ref != nil {
+			fmt.Print(trigger.Spec.Subscriber.Ref.Name)
+			fmt.Print(" ")
+			fmt.Print(serviceName)
+			return namespaceMatches && trigger.Spec.Subscriber.Ref.Name == serviceName
+		} else {
+			name, err := extractServiceNameFromUri(*trigger.Spec.Subscriber.URI)
+			fmt.Println(name)
+			fmt.Println(err)
+			return err == nil && namespaceMatches && name == serviceName
+		}
 	}
 
 	unsubscribe, err := r.Service().Subscribe(NewEventHandler(channel, filter))
@@ -162,7 +202,6 @@ func (r *Resolver) buildTrigger(namespace string, in gqlschema.TriggerCreateInpu
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating trigger subscriber uri")
 	}
-
 	trigger := &v1alpha1.Trigger{
 		TypeMeta: v1.TypeMeta{
 			Kind:       meta.Kind,
@@ -177,7 +216,6 @@ func (r *Resolver) buildTrigger(namespace string, in gqlschema.TriggerCreateInpu
 			Broker: in.Broker,
 			Filter: r.solveFilters(in.FilterAttributes),
 			Subscriber: duckv1.Destination{
-				Ref: in.Subscriber.Ref,
 				URI: uri,
 			},
 		},
@@ -196,4 +234,13 @@ func (r *Resolver) checkTriggerName(trigger *gqlschema.TriggerCreateInput) *gqls
 		trigger.Name = &name
 	}
 	return trigger
+}
+
+func extractServiceNameFromUri(url apis.URL) (string, error) {
+	r := regexp.MustCompile("(.*)\\.(?:.+)svc\\.cluster\\.local")
+	result := r.FindStringSubmatch(url.Host)
+	if len(result) < 2 {
+		return "", errors.Errorf("cannot find port in %s", url.Host)
+	}
+	return result[1], nil
 }

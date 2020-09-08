@@ -24,7 +24,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	"knative.dev/pkg/apis"
 	v11 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -983,7 +982,6 @@ type ComplexityRoot struct {
 
 	Subscriber struct {
 		Ref func(childComplexity int) int
-		URI func(childComplexity int) int
 	}
 
 	SubscriberRef struct {
@@ -1033,6 +1031,8 @@ type ComplexityRoot struct {
 	TriggerSpec struct {
 		Broker     func(childComplexity int) int
 		Filter     func(childComplexity int) int
+		Path       func(childComplexity int) int
+		Port       func(childComplexity int) int
 		Subscriber func(childComplexity int) int
 	}
 
@@ -1282,6 +1282,8 @@ type TriggerResolver interface {
 }
 type TriggerSpecResolver interface {
 	Filter(ctx context.Context, obj *v1alpha12.TriggerSpec) (JSON, error)
+	Port(ctx context.Context, obj *v1alpha12.TriggerSpec) (uint32, error)
+	Path(ctx context.Context, obj *v1alpha12.TriggerSpec) (string, error)
 }
 
 type executableSchema struct {
@@ -5777,13 +5779,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Subscriber.Ref(childComplexity), true
 
-	case "Subscriber.uri":
-		if e.complexity.Subscriber.URI == nil {
-			break
-		}
-
-		return e.complexity.Subscriber.URI(childComplexity), true
-
 	case "SubscriberRef.apiVersion":
 		if e.complexity.SubscriberRef.APIVersion == nil {
 			break
@@ -6107,6 +6102,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.TriggerSpec.Filter(childComplexity), true
 
+	case "TriggerSpec.path":
+		if e.complexity.TriggerSpec.Path == nil {
+			break
+		}
+
+		return e.complexity.TriggerSpec.Path(childComplexity), true
+
+	case "TriggerSpec.port":
+		if e.complexity.TriggerSpec.Port == nil {
+			break
+		}
+
+		return e.complexity.TriggerSpec.Port(childComplexity), true
+
 	case "TriggerSpec.subscriber":
 		if e.complexity.TriggerSpec.Subscriber == nil {
 			break
@@ -6390,6 +6399,8 @@ extend type Subscription {
 type TriggerSpec @goModel(model: "knative.dev/eventing/pkg/apis/eventing/v1alpha1.TriggerSpec"){
     broker: String!
     filter: JSON
+    port: Port!
+    path: String!
     subscriber: Subscriber!
 }
 
@@ -6405,7 +6416,6 @@ enum TriggerStatusType {
 }
 
 type Subscriber @goModel(model: "knative.dev/pkg/apis/duck/v1.Destination"){
-    uri: URI
     ref: SubscriberRef
 }
 
@@ -32728,37 +32738,6 @@ func (ec *executionContext) _ServiceStatus_loadBalancer(ctx context.Context, fie
 	return ec.marshalNLoadBalancerStatus2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLoadBalancerStatus(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Subscriber_uri(ctx context.Context, field graphql.CollectedField, obj *v11.Destination) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Subscriber",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.URI, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*apis.URL)
-	fc.Result = res
-	return ec.marshalOURI2ᚖknativeᚗdevᚋpkgᚋapisᚐURL(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Subscriber_ref(ctx context.Context, field graphql.CollectedField, obj *v11.Destination) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -34808,6 +34787,74 @@ func (ec *executionContext) _TriggerSpec_filter(ctx context.Context, field graph
 	res := resTmp.(JSON)
 	fc.Result = res
 	return ec.marshalOJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TriggerSpec_port(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.TriggerSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "TriggerSpec",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.TriggerSpec().Port(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(uint32)
+	fc.Result = res
+	return ec.marshalNPort2uint32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TriggerSpec_path(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.TriggerSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "TriggerSpec",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.TriggerSpec().Path(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TriggerSpec_subscriber(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.TriggerSpec) (ret graphql.Marshaler) {
@@ -42903,8 +42950,6 @@ func (ec *executionContext) _Subscriber(ctx context.Context, sel ast.SelectionSe
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Subscriber")
-		case "uri":
-			out.Values[i] = ec._Subscriber_uri(ctx, field, obj)
 		case "ref":
 			out.Values[i] = ec._Subscriber_ref(ctx, field, obj)
 		default:
@@ -43130,6 +43175,34 @@ func (ec *executionContext) _TriggerSpec(ctx context.Context, sel ast.SelectionS
 					}
 				}()
 				res = ec._TriggerSpec_filter(ctx, field, obj)
+				return res
+			})
+		case "port":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._TriggerSpec_port(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "path":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._TriggerSpec_path(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "subscriber":
@@ -48994,29 +49067,6 @@ func (ec *executionContext) marshalOTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋ
 		return graphql.Null
 	}
 	return ec._Trigger(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOURI2knativeᚗdevᚋpkgᚋapisᚐURL(ctx context.Context, v interface{}) (apis.URL, error) {
-	return UnmarshalURI(v)
-}
-
-func (ec *executionContext) marshalOURI2knativeᚗdevᚋpkgᚋapisᚐURL(ctx context.Context, sel ast.SelectionSet, v apis.URL) graphql.Marshaler {
-	return MarshalURI(v)
-}
-
-func (ec *executionContext) unmarshalOURI2ᚖknativeᚗdevᚋpkgᚋapisᚐURL(ctx context.Context, v interface{}) (*apis.URL, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOURI2knativeᚗdevᚋpkgᚋapisᚐURL(ctx, v)
-	return &res, err
-}
-
-func (ec *executionContext) marshalOURI2ᚖknativeᚗdevᚋpkgᚋapisᚐURL(ctx context.Context, sel ast.SelectionSet, v *apis.URL) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec.marshalOURI2knativeᚗdevᚋpkgᚋapisᚐURL(ctx, sel, *v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

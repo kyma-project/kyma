@@ -24,9 +24,7 @@ var triggersGroupVersionResource = schema.GroupVersionResource{
 var triggerIndexKey = "ref"
 
 func createTriggerRefIndexKey(namespace, serviceName string) string {
-	return fmt.Sprintf("%s/%s",
-		namespace,
-		serviceName)
+	return fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
 }
 
 func createTriggerUriIndexKey(uri apis.URL) string {
@@ -82,6 +80,7 @@ func (h *EventHandler) ShouldNotify() bool {
 }
 
 func (h *EventHandler) Notify(eventType gqlschema.SubscriptionEventType) {
+	fmt.Println("notify")
 	h.channel <- &gqlschema.TriggerEvent{
 		Type:    eventType,
 		Trigger: h.res,

@@ -130,6 +130,7 @@ func (s *enabledServiceBase) deleteListener(listener *Listener) {
 }
 
 func (s *enabledServiceBase) DeleteInNamespace(name, namespace string) error {
+	fmt.Printf("del %s %s\n", name, namespace)
 	return s.Client.Namespace(namespace).Delete(name, &v1.DeleteOptions{})
 }
 

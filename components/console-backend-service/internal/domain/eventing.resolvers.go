@@ -43,6 +43,14 @@ func (r *triggerSpecResolver) Filter(ctx context.Context, obj *v1alpha1.TriggerS
 	return r.eventing.FilterField(ctx, obj)
 }
 
+func (r *triggerSpecResolver) Port(ctx context.Context, obj *v1alpha1.TriggerSpec) (uint32, error) {
+	return r.eventing.PortField(ctx, obj)
+}
+
+func (r *triggerSpecResolver) Path(ctx context.Context, obj *v1alpha1.TriggerSpec) (string, error) {
+	return r.eventing.PathField(ctx, obj)
+}
+
 // Trigger returns gqlschema.TriggerResolver implementation.
 func (r *Resolver) Trigger() gqlschema.TriggerResolver { return &triggerResolver{r} }
 
