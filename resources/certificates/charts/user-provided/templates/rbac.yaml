@@ -6,8 +6,8 @@ metadata:
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  namespace: kyma-installer
-  name: {{ .Release.Name }}-kyma-installer-role
+  namespace: kyma-system
+  name: {{ .Release.Name }}-kyma-system-role
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -15,22 +15,46 @@ rules:
   - apiGroups: ["cert-manager.io"]
     resources: ["certificates"]
     verbs: ["get"]
-  - apiGroups: ["apiextensions.k8s.io"]
-    resources: ["customresourcedefinitions"]
-    verbs: ["get"]
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}-kyma-installer-role-binding
-  namespace: kyma-installer
+  name: {{ .Release.Name }}-kyma-system-role-binding
+  namespace: kyma-system
 subjects:
   - kind: ServiceAccount
     name: {{ .Release.Name }}-service-account
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role
-  name: {{ .Release.Name }}-kyma-installer-role
+  name: {{ .Release.Name }}-kyma-system-role
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: istio-system
+  name: {{ .Release.Name }}-istio-system-role
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+  - apiGroups: ["cert-manager.io"]
+    resources: ["certificates"]
+    verbs: ["get"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Release.Name }}-istio-system-role-binding
+  namespace: istio-system
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Release.Name }}-service-account
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Release.Name }}-istio-system-role
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: ClusterRole
