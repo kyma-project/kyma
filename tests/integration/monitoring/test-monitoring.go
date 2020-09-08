@@ -182,10 +182,9 @@ func shouldIgnoreTarget(target prom.Labels) bool {
 		"-testsuite-",
 		"-test-",
 		"nodejs12-",
-		"nodejs10-"
+		"nodejs10-",
 	}
 
-	
 	for _, p := range podsToBeIgnored {
 		if target["pod_name"] == p {
 			return true
