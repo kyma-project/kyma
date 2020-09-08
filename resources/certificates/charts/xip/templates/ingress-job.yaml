@@ -39,5 +39,12 @@ spec:
           value: "{{ .Values.clusterInfoConfigMap.name }}"
         - name: CLUSTER_INFO_CM_NAMESPACE
           value: "{{ .Values.clusterInfoConfigMap.namespace }}"
+        volumeMounts:
+          - name: manifests
+            mountPath: /etc/manifests
+            readOnly: true
         terminationMessagePolicy: "FallbackToLogsOnError"
-
+      volumes:
+      - name: manifests
+        configMap:
+          name: {{ include "xip.fullname" . }}-extra-manifests
