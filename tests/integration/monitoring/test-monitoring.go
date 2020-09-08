@@ -177,7 +177,7 @@ func shouldIgnoreTarget(target prom.Labels) bool {
 		"knative-eventing/knative-eventing-event-mesh-dashboard-httpsource",
 	}
 
-	var podsToBeIgnored = []strings{
+	var podsToBeIgnored = []string{
 		// Ignore the pods that are created during tests.
 		"-testsuite-",
 		"-test-",
