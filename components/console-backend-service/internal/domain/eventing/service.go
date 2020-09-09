@@ -23,7 +23,7 @@ var triggersGroupVersionResource = schema.GroupVersionResource{
 
 var triggerIndexKey = "ref"
 
-func createTriggerRefIndexKey(namespace, serviceName string) string {
+func createTriggerIndexKey(namespace, serviceName string) string {
 	return fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
 }
 
@@ -46,7 +46,7 @@ func NewService(serviceFactory *resource.GenericServiceFactory) (*resource.Gener
 				return nil, err
 			}
 			if trigger.Spec.Subscriber.Ref != nil {
-				return []string{createTriggerRefIndexKey(trigger.Namespace, trigger.Spec.Subscriber.Ref.Name)}, nil
+				return []string{createTriggerIndexKey(trigger.Namespace, trigger.Spec.Subscriber.Ref.Name)}, nil
 			} else {
 				return []string{createTriggerUriIndexKey(*trigger.Spec.Subscriber.URI)}, nil
 			}

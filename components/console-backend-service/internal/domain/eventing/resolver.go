@@ -29,7 +29,7 @@ func (l *TriggerList) Append() interface{} {
 func (r *Resolver) TriggersQuery(ctx context.Context, namespace string, serviceName string) ([]*v1alpha1.Trigger, error) {
 	items := TriggerList{}
 
-	err := r.Service().ListByIndex(triggerIndexKey, createTriggerRefIndexKey(namespace, serviceName), &items)
+	err := r.Service().ListByIndex(triggerIndexKey, createTriggerIndexKey(namespace, serviceName), &items)
 
 	return items, err
 }
