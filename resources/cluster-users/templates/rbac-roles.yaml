@@ -165,6 +165,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-rafter-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-cert-manager-view: "true"
 rules: []
 
 ---
@@ -220,6 +222,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-dex-edit: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-ory-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-cert-manager-edit: "true"
 rules: []
 
 ---
@@ -294,6 +298,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-svcat-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-ui-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-cert-manager-admin: "true"
 rules: []
 
 ---
