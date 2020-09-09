@@ -23,7 +23,7 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    version: "PR-9394"
+    version: "2ab8b878"
   application_operator_tests:
     version: "PR-9394"
   connector_service:
