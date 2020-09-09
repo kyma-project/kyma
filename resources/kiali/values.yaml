@@ -14,12 +14,29 @@ global:
       namespace: kyma-system
   containerRegistry:
     path: eu.gcr.io/kyma-project
+  kymaRuntime:
+    adminGroup: runtimeAdmin
+    operatorGroup: runtimeOperator
+    developerGroup: runtimeDeveloper
+    namespaceAdminGroup: runtimeNamespaceAdmin
 
 kcproxy:
   replicaCount: 1
   inPort: 3000
-  clientId: kiali
-  clientSecret: hiFWLWqIxw5d3gl
+  config:
+    clientId: "kiali"
+    clientSecret: "hiFWLWqIxw5d3gl"
+    tlsVerify: false
+    resources:
+      uri: "/*"
+      methods: "GET,POST,PUT,DELETE"
+      useKymaGroups: false
+      groups: ""
+      roles: ""
+    scopes: "groups"
+    headers: ""
+    matchClaims: ""
+    addClaims: ""
   nodeSelector: {}
   image:
     repository: eu.gcr.io/kyma-project/external/bitnami/keycloak-gatekeeper
