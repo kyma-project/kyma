@@ -8084,7 +8084,7 @@ type Mutation {
     deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 
     createNamespace(name: String!, labels: Labels): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "create", apiGroup: "", apiVersion: "v1"})
-    updateNamespace(name: String!, labels: Labels!): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
+    updateNamespace(name: String!, labels: Labels): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
     deleteNamespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
 
     createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
@@ -9736,7 +9736,7 @@ func (ec *executionContext) field_Mutation_updateNamespace_args(ctx context.Cont
 	args["name"] = arg0
 	var arg1 Labels
 	if tmp, ok := rawArgs["labels"]; ok {
-		arg1, err = ec.unmarshalNLabels2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLabels(ctx, tmp)
+		arg1, err = ec.unmarshalOLabels2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLabels(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
