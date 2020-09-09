@@ -12,7 +12,7 @@ The project requires Go 1.8 or higher.
 
 Environment parameters used by the tests:
 
-| Name | Required | Default | Description | Possible values |
+| Name | Required | Default | Description | Example value |
 |------|----------|---------|-------------|-----------------|
 | **APPLICATION** | Yes | None | The name of the Application to test | `my-application` |
 | **NAMESPACE** | Yes | None | The Namespace in which the test Application will operate | `kyma-integration` |
