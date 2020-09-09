@@ -321,7 +321,7 @@
   version = "kubernetes-1.15.2"
 
 [[projects]]
-  digest = "1:5b745069b798d644ff4f5428c03c72694411f63fe8432a6d472bef22f889d582"
+  digest = "1:75649cc25f81d8bd2bec4d15742d1e4ab6268e6ee14e2667b096b94e7ed675ba"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -355,7 +355,6 @@
     "pkg/util/sets",
     "pkg/util/validation",
     "pkg/util/validation/field",
-    "pkg/util/wait",
     "pkg/util/yaml",
     "pkg/version",
     "pkg/watch",
@@ -366,7 +365,7 @@
   version = "kubernetes-1.15.2"
 
 [[projects]]
-  digest = "1:5f328d1ce269f4fc12ecad4cee9ba343867ef9f93c9024af1e241f0534027059"
+  digest = "1:423849080259f7edb2c769207421e46b5a327040813d781416a23c2ae7a682f2"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -423,7 +422,6 @@
     "util/connrotation",
     "util/flowcontrol",
     "util/keyutil",
-    "util/retry",
   ]
   pruneopts = "NUT"
   revision = "2fe0317bcee0e1ff48861f77cc1e2791cceba458"
@@ -472,7 +470,6 @@
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/typed/core/v1",
     "k8s.io/client-go/rest",
-    "k8s.io/client-go/util/retry",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
