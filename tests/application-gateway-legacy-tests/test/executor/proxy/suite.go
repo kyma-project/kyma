@@ -31,7 +31,7 @@ const (
 	apiServerAccessTimeout         = 60 * time.Second
 	dnsWaitTime                    = 30 * time.Second
 
-	mockServiceNameFormat     = "%s-gateway-legacy-test-mock-service"
+	mockServiceNameFormat = "%s-gateway-legacy-test-mock-service"
 )
 
 type TestSuite struct {
@@ -200,4 +200,3 @@ func (ts *TestSuite) deleteMockService(t *testing.T) {
 	err := ts.serviceClient.Delete(ts.mockServiceName, &metav1.DeleteOptions{})
 	assert.NoError(t, err)
 }
-
