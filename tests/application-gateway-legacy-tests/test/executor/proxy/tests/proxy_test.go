@@ -6,14 +6,14 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/testkit/util"
+	"github.com/kyma-project/kyma/tests/application-gateway-legacy-tests/test/executor/testkit/util"
 
 	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/proxy"
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/testkit/registry"
+	"github.com/kyma-project/kyma/tests/application-gateway-legacy-tests/test/executor/proxy"
+	"github.com/kyma-project/kyma/tests/application-gateway-legacy-tests/test/executor/testkit/registry"
 )
 
 func TestProxyService(t *testing.T) {

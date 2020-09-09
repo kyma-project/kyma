@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/helmtest"
+	"github.com/kyma-project/kyma/tests/application-gateway-legacy-tests/test/helmtest"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 
@@ -17,7 +17,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools"
+	"github.com/kyma-project/kyma/tests/application-gateway-legacy-tests/test/tools"
 
 	"github.com/stretchr/testify/require"
 	"k8s.io/client-go/kubernetes"

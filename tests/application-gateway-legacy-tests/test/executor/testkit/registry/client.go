@@ -10,9 +10,9 @@ import (
 
 	"github.com/kyma-project/kyma/common/resilient"
 
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools"
+	"github.com/kyma-project/kyma/tests/application-gateway-legacy-tests/test/tools"
 
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/testkit/util"
+	"github.com/kyma-project/kyma/tests/application-gateway-legacy-tests/test/executor/testkit/util"
 
 	"github.com/stretchr/testify/require"
 

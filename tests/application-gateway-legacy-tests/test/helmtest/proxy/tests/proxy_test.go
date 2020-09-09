@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/helmtest/proxy"
+	"github.com/kyma-project/kyma/tests/application-gateway-legacy-tests/test/helmtest/proxy"
 )
 
 func TestApplicationGateway(t *testing.T) {

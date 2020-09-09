@@ -7,15 +7,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/proxy/mock"
+	"github.com/kyma-project/kyma/tests/application-gateway-legacy-tests/test/executor/proxy/mock"
 
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor"
+	"github.com/kyma-project/kyma/tests/application-gateway-legacy-tests/test/executor"
 
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools"
+	"github.com/kyma-project/kyma/tests/application-gateway-legacy-tests/test/tools"
 
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
