@@ -9,7 +9,7 @@ if [[ "$KYMA_GATEWAY_CERTS_ISSUER" != "kyma-ca-issuer" ]]; then
     kubectl delete secret -n istio-system kyma-gateway-certs --ignore-not-found
 fi
 
-APISERVER_PROXY_TLS_CERTS_ISSUE=$(kubectl get secret/apiserver-proxy-tls-cert -n kyma-system -o jsonpath='{.metadata.annotations.cert-manager\.io/issuer-name}' --ignore-not-found)
+APISERVER_PROXY_TLS_CERTS_ISSUER=$(kubectl get secret/apiserver-proxy-tls-cert -n kyma-system -o jsonpath='{.metadata.annotations.cert-manager\.io/issuer-name}' --ignore-not-found)
 
 if [[ "$APISERVER_PROXY_TLS_CERTS_ISSUER" != "kyma-ca-issuer" ]]; then
     echo Deleting secret apiserver-proxy-tls-cert
