@@ -97,8 +97,9 @@ Follows these steps:
 
 1. Create a Namespace or select one from the drop-down list in the top navigation panel.
 
-    (Optional) If you are willing to use a private repository, create a secret with credentials to the repository:
+    (Optional) If you are willing to use a private repository, to authorize with basic authentication create a secret with credentials to the repository:
 
+    1. Save yaml file with secret on your hard drive:
     ```yaml
     apiVersion: v1
     kind: Secret
@@ -109,8 +110,10 @@ Follows these steps:
       username: <USERNAME>
       password: <PASSWORD>
     ```
-
-    >**NOTE** To see other authorization methods, go to the [documentation]().
+   >**NOTE** To see other possible authorization methods, go to the [documentation]().
+   
+   2. Go to the namespace view and click **Deploy new resource**.
+   3. Select secret file and click **Deploy**.
 
 2. Go to the **Functions** view in the left navigation panel and select **Repositories** tab.
 
