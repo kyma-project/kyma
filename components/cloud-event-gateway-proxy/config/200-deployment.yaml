@@ -38,7 +38,7 @@ spec:
                 secretKeyRef:
                   name: cloud-event-gateway-proxy
                   key: ems-publish-url
-          image: github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/cmd
+          image: github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/cmd/cloud-event-gateway-proxy
           imagePullPolicy: IfNotPresent
           name: cloud-event-gateway-proxy
           ports:

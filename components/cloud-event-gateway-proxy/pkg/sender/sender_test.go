@@ -40,7 +40,7 @@ func TestNewHttpMessageSender(t *testing.T) {
 	}
 }
 
-func TestNewCloudEventRequestWithTarget(t *testing.T) {
+func TestNewRequestWithTarget(t *testing.T) {
 	t.Parallel()
 
 	client := oauth.NewClient(context.Background(), &env.Config{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
@@ -53,7 +53,7 @@ func TestNewCloudEventRequestWithTarget(t *testing.T) {
 
 	const ctxKey, ctxValue = "testKey", "testValue"
 	ctx := context.WithValue(context.Background(), ctxKey, ctxValue)
-	req, err := msgSender.NewCloudEventRequestWithTarget(ctx, eventsEndpoint)
+	req, err := msgSender.NewRequestWithTarget(ctx, eventsEndpoint)
 	if err != nil {
 		t.Errorf("Failed to create a CloudEvent HTTP request with error: %v", err)
 	}
@@ -100,7 +100,7 @@ func TestSend(t *testing.T) {
 		t.Errorf("Failed to create a new message sender with error: %v", err)
 	}
 
-	request, err := msgSender.NewCloudEventRequestWithTarget(ctx, msgSender.Target)
+	request, err := msgSender.NewRequestWithTarget(ctx, msgSender.Target)
 	if err != nil {
 		t.Errorf("Failed to create a CloudEvent HTTP request with error: %v", err)
 	}

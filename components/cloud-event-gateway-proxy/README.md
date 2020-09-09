@@ -2,28 +2,28 @@
 
 ## Overview
 
-The Cloud Event Gateway proxy receives Cloud Event publishing requests from the cluster workloads (microservice or serverless functions) and redirects it to the Enterprise Messaging Service Cloud Event Gateway.
+The Cloud Event Gateway Proxy receives Cloud Event publishing requests from the cluster workloads (microservice or Serverless functions) and redirects it to the Enterprise Messaging Service Cloud Event Gateway.
 
 ## Prerequisites
 
-- go modules.
-- [ko](https://github.com/google/ko).
+- Go modules
+- [ko](https://github.com/google/ko)
 
 ## Development
 
-Build
+### Build
 
 ```bash
 $ go mod vendor
 ```
 
-Test
+### Test
 
 ```bash
 $ make test-local
 ```
 
-Deploy inside a cluster
+### Deploy inside a cluster
 
 ```bash
 $ ko apply -f config/
@@ -31,13 +31,13 @@ $ ko apply -f config/
 
 ## Environment Variables
 
-| Environment Variable    | Description                                                                                   | Default Value |
-| ----------------------- | --------------------------------------------------------------------------------------------- | ------------- |
-| INGRESS_PORT            | The ingress port for the CloudEvents Gateway Proxy.                                           | 8080          |
-| MAX_IDLE_CONNS          | The maximum number of idle (keep-alive) connections across all hosts. Zero means no limit.    | 100           |
-| MAX_IDLE_CONNS_PER_HOST | The maximum idle (keep-alive) connections to keep per-host. Zero means use the default value. | 2             |
-| REQUEST_TIMEOUT         | The timeout for the outgoing requests to the Messaging server.                                | 5s            |
-| CLIENT_ID               | The Client ID used to acquire Access Tokens from the Authentication server.                   |               |
-| CLIENT_SECRET           | The Client Secret used to acquire Access Tokens from the Authentication server.               |               |
-| TOKEN_ENDPOINT          | The Authentication Server Endpoint to provide Access Tokens.                                  |               |
-| EMS_PUBLISH_URL         | The Messaging Server Endpoint that accepts publishing CloudEvents to it.                      |               |
+| Environment Variable    | Default Value | Description                                                                                   |
+| ----------------------- | ------------- |---------------------------------------------------------------------------------------------- |
+| INGRESS_PORT            | 8080          | The ingress port for the CloudEvents Gateway Proxy.                                           |
+| MAX_IDLE_CONNS          | 100           | The maximum number of idle (keep-alive) connections across all hosts. Zero means no limit.    |
+| MAX_IDLE_CONNS_PER_HOST | 2             | The maximum idle (keep-alive) connections to keep per-host. Zero means the default value.     |
+| REQUEST_TIMEOUT         | 5s            | The timeout for the outgoing requests to the Messaging server.                                |
+| CLIENT_ID               |               | The Client ID used to acquire Access Tokens from the Authentication server.                   |
+| CLIENT_SECRET           |               | The Client Secret used to acquire Access Tokens from the Authentication server.               |
+| TOKEN_ENDPOINT          |               | The Authentication Server Endpoint to provide Access Tokens.                                  |
+| EMS_PUBLISH_URL         |               | The Messaging Server Endpoint that accepts publishing CloudEvents to it.                      |

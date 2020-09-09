@@ -4,13 +4,15 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"net/textproto"
 	"reflect"
 	"testing"
 
 	cehttp "github.com/cloudevents/sdk-go/v2/protocol/http"
+	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/ems"
 )
 
-func Test_WriteRequestWithHeaders(t *testing.T) {
+func TestWriteRequestWithHeaders(t *testing.T) {
 	t.Parallel()
 
 	req := httptest.NewRequest(http.MethodPost, "/", nil)
@@ -19,7 +21,12 @@ func Test_WriteRequestWithHeaders(t *testing.T) {
 	message := cehttp.NewMessageFromHttpRequest(req)
 	defer func() { _ = message.Finish(nil) }()
 
-	additionalHeaders := http.Header{"key1": []string{"value1", "value2"}, "key2": []string{"value3"}}
+	additionalHeaders := http.Header{
+		"qos":    []string{string(ems.QosAtLeastOnce)},
+		"accept": []string{"application/json"},
+		"key1":   []string{"value1", "value2"},
+		"key2":   []string{"value3"},
+	}
 	additionalHeadersCopy := copyHeaders(additionalHeaders)
 
 	ctx := context.Background()
@@ -33,7 +40,7 @@ func Test_WriteRequestWithHeaders(t *testing.T) {
 	}
 
 	for k, v := range additionalHeaders {
-		vv, ok := req.Header[k]
+		vv, ok := req.Header[textproto.CanonicalMIMEHeaderKey(k)]
 		if !ok || !reflect.DeepEqual(v, vv) {
 			t.Fatal("The HTTP request should contain the given HTTP headers")
 		}

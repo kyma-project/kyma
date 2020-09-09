@@ -14,7 +14,7 @@ func NewHttpMessageSender(target string, client *http.Client) (*HttpMessageSende
 	return &HttpMessageSender{Client: client, Target: target}, nil
 }
 
-func (s *HttpMessageSender) NewCloudEventRequestWithTarget(ctx context.Context, target string) (*http.Request, error) {
+func (s *HttpMessageSender) NewRequestWithTarget(ctx context.Context, target string) (*http.Request, error) {
 	return http.NewRequestWithContext(ctx, http.MethodPost, target, nil)
 }
 

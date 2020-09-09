@@ -5,7 +5,7 @@ ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/cloud-event-gat
 WORKDIR $DOCK_PKG_DIR
 COPY . $DOCK_PKG_DIR
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o cloud-event-gateway-proxy ./cmd
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o cloud-event-gateway-proxy ./cmd/cloud-event-gateway-proxy
 
 FROM scratch
 LABEL source = git@github.com:kyma-project/kyma.git

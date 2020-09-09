@@ -15,7 +15,7 @@ func (h *testHandler) ServeHTTP(http.ResponseWriter, *http.Request) {}
 
 var _ http.Handler = (*testHandler)(nil)
 
-func Test_NewHttpMessageReceiver(t *testing.T) {
+func TestNewHttpMessageReceiver(t *testing.T) {
 	port := 9091
 	r := NewHttpMessageReceiver(port)
 	if r == nil {
@@ -27,7 +27,7 @@ func Test_NewHttpMessageReceiver(t *testing.T) {
 }
 
 // Test that tht receiver shuts down properly then receiving stop signal
-func Test_StartListener(t *testing.T) {
+func TestStartListener(t *testing.T) {
 	timeout := time.Second * 10
 	r := fixtureReceiver()
 

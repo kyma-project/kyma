@@ -13,11 +13,13 @@ import (
 func WriteRequestWithHeaders(ctx context.Context, message binding.Message, req *http.Request, headers http.Header, transformers ...binding.Transformer) error {
 	err := cehttp.WriteRequest(ctx, message, req, transformers...)
 	if err != nil {
-		return errors.Wrap(err, "failed to WriteRequest")
+		return errors.Wrap(err, "failed to write Request")
 	}
 
 	for k, v := range headers {
-		req.Header[k] = v
+		for _, vv := range v {
+			req.Header.Add(k, vv)
+		}
 	}
 
 	return nil

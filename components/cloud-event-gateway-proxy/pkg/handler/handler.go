@@ -90,7 +90,7 @@ func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	statusCode, dispatchTime, respBody := h.send(ctx, event)
 	h.writeResponse(writer, statusCode, respBody)
 
-	h.Logger.Infof("Event dispatch statusCode:%d duration:%s responseBody:%s", statusCode, dispatchTime, respBody)
+	h.Logger.Infof("Event dispatch statusCode:[%d] duration:[%s] responseBody:[%s]", statusCode, dispatchTime, respBody)
 }
 
 func (h *Handler) writeResponse(writer http.ResponseWriter, statusCode int, respBody []byte) {
@@ -114,7 +114,7 @@ func (h *Handler) receive(ctx context.Context, event *cev2event.Event) {
 }
 
 func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.Duration, []byte) {
-	request, err := h.Sender.NewCloudEventRequestWithTarget(ctx, h.Sender.Target)
+	request, err := h.Sender.NewRequestWithTarget(ctx, h.Sender.Target)
 	if err != nil {
 		h.Logger.Errorf("Failed to prepare a cloudevent request with error: %s", err)
 		return http.StatusInternalServerError, noDuration, []byte{}
