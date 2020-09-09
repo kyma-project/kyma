@@ -19,40 +19,50 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes/scheme"
 
-	kymaeventingclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	appconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	istioauthenticationv1alpha1apis "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+	istioclientset "istio.io/client-go/pkg/clientset/versioned"
+
+	kymaeventingclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 )
 
 const (
-	appBrokerServiceClass  = "application-broker"
-	serviceInstanceKind    = "ServiceInstance"
-	eventsServiceEntryType = "Events"
+	appBrokerServiceClass         = "application-broker"
+	serviceInstanceKind           = "ServiceInstance"
+	eventsServiceEntryType        = "Events"
+	policyKnativeBrokerLabelKey   = "eventing.knative.dev/broker"
+	policyKnativeBrokerLabelValue = "default"
 )
 
 type serviceInstancesList []servicecatalogv1beta1.ServiceInstance
 
 type eventActivationsByServiceInstance map[string][]string
 type eventActivationsByServiceInstanceAndNamespace map[string]eventActivationsByServiceInstance
+type istioPolicyByNamespace = map[string]*istioauthenticationv1alpha1apis.Policy
 
 // serviceInstanceManager performs operations on ServiceInstances.
 type serviceInstanceManager struct {
 	svcCatalogClient servicecatalogclientset.Interface
 	kymaClient       kymaeventingclientset.ApplicationconnectorV1alpha1Interface
 	dynClient        dynamic.Interface
+	istioClient      istioclientset.Interface
 
 	serviceInstances      serviceInstancesList
 	eventActivationsIndex eventActivationsByServiceInstanceAndNamespace
+	istioBrokerPolicies   istioPolicyByNamespace
 }
 
 // newServiceInstanceManager creates and initializes a serviceInstanceManager.
 func newServiceInstanceManager(svcCatalogClient servicecatalogclientset.Interface,
 	kymaClient kymaeventingclientset.ApplicationconnectorV1alpha1Interface, dynClient dynamic.Interface,
+	istioClient istioclientset.Interface,
 	namespaces []string) (*serviceInstanceManager, error) {
 
 	m := &serviceInstanceManager{
 		svcCatalogClient: svcCatalogClient,
 		kymaClient:       kymaClient,
 		dynClient:        dynClient,
+		istioClient:      istioClient,
 	}
 
 	if err := m.populateServiceInstances(namespaces); err != nil {
@@ -61,6 +71,10 @@ func newServiceInstanceManager(svcCatalogClient servicecatalogclientset.Interfac
 
 	if err := m.populateEventActivationIndex(namespaces); err != nil {
 		return nil, errors.Wrap(err, "populating EventActivation index")
+	}
+
+	if err := m.populateIstioPolicies(namespaces); err != nil {
+		return nil, errors.Wrap(err, "populating Istio Policy index")
 	}
 
 	return m, nil
@@ -346,4 +360,63 @@ func ApplicationFromUnstructured(app *unstructured.Unstructured) (*appconnectorv
 	}
 
 	return appObj, nil
+}
+
+// populateIstioPolicies retrieves all Istio Policies which belong to a knative broker
+func (m *serviceInstanceManager) populateIstioPolicies(namespaces []string) error {
+	m.istioBrokerPolicies = make(istioPolicyByNamespace)
+	labelSelector := fmt.Sprintf("%s=%s", policyKnativeBrokerLabelKey, policyKnativeBrokerLabelValue)
+
+	for _, ns := range namespaces {
+		policies, err := m.istioClient.AuthenticationV1alpha1().Policies(ns).List(metav1.ListOptions{
+			LabelSelector: labelSelector,
+		})
+		switch {
+		case apierrors.IsNotFound(err):
+			return NewTypeNotFoundError(err.(*apierrors.StatusError).ErrStatus.Details.Kind)
+		case err != nil:
+			return errors.Wrapf(err, "listing Istio Policies in namespace %s", ns)
+		}
+		cntIstioPolicies := len(policies.Items)
+
+		// broker has exactly one policy
+		// however, to be resilient we also accept 0 policies (then migration already deleted it in another retry)
+		if cntIstioPolicies > 1 {
+			return fmt.Errorf("only one Istio Policy expected, got %d instead", cntIstioPolicies)
+		}
+		if cntIstioPolicies == 0 {
+			log.Printf("No Istio Policy found with label selector: %s", labelSelector)
+			return nil
+		}
+
+		// yeah - we found it
+		m.istioBrokerPolicies[ns] = &policies.Items[0]
+	}
+
+	return nil
+}
+
+// deletePopulatedIstioPolicies deleted all Istio Policies which belong to a knative broker
+func (m *serviceInstanceManager) deletePopulatedIstioPolicies() error {
+
+	for ns, istioPolicy := range m.istioBrokerPolicies {
+
+		if m.istioBrokerPolicies == nil {
+			return nil
+		}
+
+		log.Printf("+ Deleting Istio Policy with name: %s in namespace: %s", istioPolicy.Name, ns)
+		if err := m.istioClient.AuthenticationV1alpha1().Policies(ns).Delete(
+			istioPolicy.Name, &metav1.DeleteOptions{},
+		); err != nil {
+			switch {
+			case apierrors.IsNotFound(err):
+				log.Printf("No Istio Policy found with name: %s in namespace: %s", istioPolicy.Name, ns)
+				return nil
+			case err != nil:
+				return errors.Wrapf(err, "error while deleting Istio Policiy %s in namespace %s", istioPolicy.Name, ns)
+			}
+		}
+	}
+	return nil
 }

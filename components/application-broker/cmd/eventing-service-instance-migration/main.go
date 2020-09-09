@@ -18,6 +18,7 @@ import (
 
 	servicecatalogclientset "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
 	"knative.dev/pkg/injection/sharedmain"
+	istioclientset "istio.io/client-go/pkg/clientset/versioned"
 
 	kymaeventingclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	appconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -42,7 +43,7 @@ func init() {
 func main() {
 	flag.Parse()
 
-	k8sClient, kymaClient, servicecatalogClient, dynClient := initClientSets()
+	k8sClient, kymaClient, servicecatalogClient, dynClient, istioClient := initClientSets()
 
 	userNamespaces, err := listUserNamespaces(k8sClient)
 	if err != nil {
@@ -51,7 +52,7 @@ func main() {
 
 	// initialize managers
 
-	serviceInstanceManager, err := newServiceInstanceManager(servicecatalogClient, kymaClient, dynClient, userNamespaces)
+	serviceInstanceManager, err := newServiceInstanceManager(servicecatalogClient, kymaClient, dynClient, istioClient, userNamespaces)
 	if err != nil {
 		handleAndTerminate(err, "initializing serviceInstanceManager")
 	}
@@ -61,20 +62,27 @@ func main() {
 	if err := serviceInstanceManager.recreateAll(); err != nil {
 		handleAndTerminate(err, "re-creating ServiceInstances")
 	}
+	if err := serviceInstanceManager.deletePopulatedIstioPolicies(); err != nil {
+		handleAndTerminate(err, "deleting Istio policies")
+	}
+
 }
 
 // initClientSets initializes all required Kubernetes ClientSets.
 func initClientSets() (*kubernetes.Clientset,
 	*kymaeventingclientset.ApplicationconnectorV1alpha1Client,
 	*servicecatalogclientset.Clientset,
-	dynamic.Interface) {
+	dynamic.Interface,
+	*istioclientset.Clientset,
+) {
 
 	cfg := getRESTConfig()
 
 	return kubernetes.NewForConfigOrDie(cfg),
 		kymaeventingclientset.NewForConfigOrDie(cfg),
 		servicecatalogclientset.NewForConfigOrDie(cfg),
-		dynamic.NewForConfigOrDie(cfg)
+		dynamic.NewForConfigOrDie(cfg),
+		istioclientset.NewForConfigOrDie(cfg)
 }
 
 // getRESTConfig returns a rest.Config to be used for Kubernetes client creation.

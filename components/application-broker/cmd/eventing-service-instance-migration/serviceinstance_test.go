@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	authenticationv1alpha1api "istio.io/api/authentication/v1alpha1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -17,6 +18,9 @@ import (
 	servicecatalogfakeclientset "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
 
 	appoperatorappconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+
+	istiov1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+	istiofakeclientset "istio.io/client-go/pkg/clientset/versioned/fake"
 
 	appbrokerconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	kymaeventingfakeclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
@@ -367,6 +371,62 @@ func TestNewserviceInstanceManager(t *testing.T) {
 		},
 	}
 
+	// This sample policy has been taken from a Kyma cluster
+	// $k get policy -n eventmeshupgradetest eventmeshupgradetest-broker -oyaml
+	//
+	// apiVersion: authentication.istio.io/v1alpha1
+	// kind: Policy
+	// metadata:
+	//   creationTimestamp: "2020-08-18T14:48:36Z"
+	//   generation: 1
+	//   labels:
+	//     eventing.knative.dev/broker: default
+	//   name: eventmeshupgradetest-broker
+	//   namespace: eventmeshupgradetest
+	//   resourceVersion: "39064"
+	//   selfLink: /apis/authentication.istio.io/v1alpha1/namespaces/eventmeshupgradetest/policies/eventmeshupgradetest-broker
+	//   uid: f616754c-ec77-4cae-9bac-b10e87292276
+	// spec:
+	//   peers:
+	//   - mtls:
+	//       mode: PERMISSIVE
+	//   targets:
+	//   - name: default-broker
+	//   - name: default-broker-filter
+	//
+	testPolicies := []*istiov1alpha1.Policy{
+		// policy1
+		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Policy",
+				APIVersion: "authentication.istio.io",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "ns1-broker",
+				Namespace: "ns1",
+				Labels: map[string]string{
+					policyKnativeBrokerLabelKey: policyKnativeBrokerLabelValue,
+				},
+			},
+			Spec: authenticationv1alpha1api.Policy{
+				Targets: []*authenticationv1alpha1api.TargetSelector{
+					{
+						Name: "default-broker",
+					},
+					{
+						Name: "default-broker-filter",
+					},
+				},
+				Peers: []*authenticationv1alpha1api.PeerAuthenticationMethod{{
+					Params: &authenticationv1alpha1api.PeerAuthenticationMethod_Mtls{
+						Mtls: &authenticationv1alpha1api.MutualTls{
+							Mode: authenticationv1alpha1api.MutualTls_PERMISSIVE,
+						}}},
+				},
+			},
+		},
+	}
+
 	scObjects := append(
 		serviceClassesToObjectSlice(testServiceClasses),
 		serviceInstancesToObjectSlice(testServiceInstances)...,
@@ -379,6 +439,9 @@ func TestNewserviceInstanceManager(t *testing.T) {
 	if err := appoperatorappconnectorv1alpha1.AddToScheme(fakeScheme); err != nil {
 		t.Fatalf("Failed to build fake Scheme: %s", err)
 	}
+	if err := istiofakeclientset.AddToScheme(fakeScheme); err != nil {
+		t.Fatalf("Failed to build fake Scheme: %s", err)
+	}
 	dynCli := dynamicfakeclientset.NewSimpleDynamicClient(fakeScheme,
 		applicationsToObjectSlice(testApplications)...,
 	)
@@ -387,8 +450,12 @@ func TestNewserviceInstanceManager(t *testing.T) {
 	kymaCli := kymaeventingfakeclientset.NewSimpleClientset(
 		eventActivationsToObjectSlice(testEventActivations)...,
 	)
+	// TODO: pass objects to fake client
+	// istioClient := istiofakeclientset.NewSimpleClientset(testPolicies)
+	fmt.Print(testPolicies)
 
-	m, err := newServiceInstanceManager(scCli, kymaCli.ApplicationconnectorV1alpha1(), dynCli, testUserNamespaces)
+	istioClient := istiofakeclientset.NewSimpleClientset()
+	m, err := newServiceInstanceManager(scCli, kymaCli.ApplicationconnectorV1alpha1(), dynCli, istioClient, testUserNamespaces)
 	if err != nil {
 		t.Fatalf("Failed to initialize serviceInstanceManager: %s", err)
 	}
