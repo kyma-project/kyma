@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -36,7 +35,7 @@ const (
 
 type serviceInstancesList []servicecatalogv1beta1.ServiceInstance
 
-type eventActivationsByServiceInstance map[string][]string
+type eventActivationsByServiceInstance map[string]string
 type eventActivationsByServiceInstanceAndNamespace map[string]eventActivationsByServiceInstance
 type istioPolicyByNamespace = map[string]*istioauthenticationv1alpha1apis.Policy
 
@@ -207,12 +206,9 @@ func (m *serviceInstanceManager) populateEventActivationIndex(namespaces []strin
 		}
 
 		for _, ea := range eas.Items {
-			for _, ownRef := range ea.OwnerReferences {
-				if isServiceInstanceOwnerReference(ownRef) {
-					eventActivationsBySvcInstance[ownRef.Name] = append(
-						eventActivationsBySvcInstance[ownRef.Name],
-						ea.Name,
-					)
+			for _, eventingServiceInstance := range m.serviceInstances {
+				if eventingServiceInstance.Spec.ServiceClassRef.Name == ea.Name {
+					eventActivationsBySvcInstance[eventingServiceInstance.Name] = ea.Name
 				}
 			}
 		}
@@ -223,26 +219,6 @@ func (m *serviceInstanceManager) populateEventActivationIndex(namespaces []strin
 	}
 
 	return nil
-}
-
-// isServiceInstanceOwnerReference returns whether the given OwnerReference matches a ServiceInstance.
-func isServiceInstanceOwnerReference(ownRef metav1.OwnerReference) bool {
-	grp, err := apiGroup(ownRef.APIVersion)
-	if err != nil {
-		log.Printf("Failed to parse API group: %s", err)
-		return false
-	}
-
-	return ownRef.Kind == serviceInstanceKind && grp == servicecatalogv1beta1.GroupName
-}
-
-// apiGroup returns the API group of a SchemeGroupVersion string.
-func apiGroup(groupVersion string) (string, error) {
-	elements := strings.Split(groupVersion, "/")
-	if len(elements) != 2 {
-		return "", errors.Errorf("expected 2 elements in groupVersion %q", groupVersion)
-	}
-	return elements[0], nil
 }
 
 // recreateAll re-creates all ServiceInstance objects listed in the serviceInstanceManager. This ensures the Kyma
@@ -275,14 +251,12 @@ func (m *serviceInstanceManager) recreateServiceInstance(svci servicecatalogv1be
 		return errors.Wrapf(err, "waiting for deletion of ServiceInstance %q", svciKey)
 	}
 
-	eventActivationsForServiceInstance := m.eventActivationsIndex[svci.Namespace][svci.Name]
-	for _, eaName := range eventActivationsForServiceInstance {
-		eaKey := fmt.Sprintf("%s/%s", svci.Namespace, eaName)
+	eaName := m.eventActivationsIndex[svci.Namespace][svci.Name]
+	eaKey := fmt.Sprintf("%s/%s", svci.Namespace, eaName)
 
-		log.Printf("++ Waiting for deletion of EventActivation %q", eaKey)
-		if err := m.waitForEventActivationDeletion(svci.Namespace, eaName); err != nil {
-			return errors.Wrapf(err, "waiting for deletion of EventActivation %q", eaKey)
-		}
+	log.Printf("++ Waiting for deletion of EventActivation %q", eaKey)
+	if err := m.waitForEventActivationDeletion(svci.Namespace, eaName); err != nil {
+		return errors.Wrapf(err, "waiting for deletion of EventActivation %q", eaKey)
 	}
 
 	// Sanitize the ServiceInstance to avoid the following error from the webhook
