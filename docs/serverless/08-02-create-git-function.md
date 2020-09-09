@@ -22,6 +22,24 @@ Follows these steps:
     export NAMESPACE={FUNCTION_NAMESPACE}
     ```
 
+    (Optional) If you are willing to use a private repository, create a secret with credentials to the repository:
+
+    ```yaml
+    cat <<EOF | kubectl apply -f -
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: git-creds-basic
+      namespace: $NAMESPACE
+    type: Opaque
+    data:
+      username: <USERNAME>
+      password: <PASSWORD>
+    EOF
+    ```
+
+    >**NOTE** To see other authorization methods, go to the [documentation]().
+
 2. Create a GitRepository CR that specifies the Git repository metadata:
 
     ```yaml
@@ -36,7 +54,7 @@ Follows these steps:
     EOF
     ```
    
-    >**NOTE** Auth possibility TODO
+    >**NOTE** If you are using a private repository, add `auth` object with `type` and `secretName` fields to the spec. For details, see [documentation]().
 
 3. Create a Function CR that specifies the Function's logic:
 
@@ -79,11 +97,26 @@ Follows these steps:
 
 1. Create a Namespace or select one from the drop-down list in the top navigation panel.
 
+    (Optional) If you are willing to use a private repository, create a secret with credentials to the repository:
+
+    ```yaml
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: git-creds-basic
+    type: Opaque
+    data:
+      username: <USERNAME>
+      password: <PASSWORD>
+    ```
+
+    >**NOTE** To see other authorization methods, go to the [documentation]().
+
 2. Go to the **Functions** view in the left navigation panel and select **Repositories** tab.
 
 3. Click **Connect Repository**, fill the `Url` field with `https://github.com/kyma-project/examples.git` value and click **Connect**.
 
-    >**NOTE** If you want connect the private repository, change the `Authorization` field from `Public` to `Key` or `Basic` and fill the required fields <TODO insert link to documentation>
+    >**NOTE** If you want connect the private repository, change the `Authorization` field from `Public` to `Key` or `Basic` and fill the required fields. For details, see [documentation]().
 
 4. Go to the **Functions** tab and click **Create Function**.
 
