@@ -149,7 +149,7 @@ func subscribeTriggerEvent(client *graphql.Client, arguments, resourceDetailsQue
 }
 
 func listTriggersArguments(namespace string) string {
-	return fmt.Sprintf(`checkou
+	return fmt.Sprintf(`
 		namespace: "%s",
 		subscriber: {
 			ref: {
