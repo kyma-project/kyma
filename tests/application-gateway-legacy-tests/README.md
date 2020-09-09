@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project contains the acceptance tests for the Kyma Application Gateway.
+This project contains the acceptance tests for the Kyma Application Gateway in the legacy mode.
 
 ## Prerequisites
 
