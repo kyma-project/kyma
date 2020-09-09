@@ -19,7 +19,6 @@ Environment parameters used by the tests:
 | **MOCK_SERVICE_PORT** | Yes | None | Number of the port used by the mock service created by the test | `8080` |
 | **TEST_EXECUTOR_IMAGE** | No | Version matching the Helm test image  | Image name of the test executor created by the Helm test  | `user/my-image:1.0.0` |
 
-
 ## Development
 
 The project consists of two applications: Helm Test and Test Executor.
