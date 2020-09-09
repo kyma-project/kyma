@@ -89,7 +89,7 @@ spec:
       restartPolicy: Never
       serviceAccountName: {{ template "recreate-service-instances.fullname" . }}-hooks
       containers:
-        - name: recreate-serv1acc510bice-instances
+        - name: recreate-service-instances
           # TODO: use image from CI/CD
           image: nachtmaar/application-eventing-service-instance-migration:1
           imagePullPolicy: Always

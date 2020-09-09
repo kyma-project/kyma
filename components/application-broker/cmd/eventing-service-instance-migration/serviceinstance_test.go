@@ -474,7 +474,7 @@ func TestNewserviceInstanceManager(t *testing.T) {
 		t.Fatalf("error while deleting Istio policies: %v", err)
 	}
 
-		// expect
+	// expect
 	//  1 ServiceInstance from ns1 (user namespace, only 1 instance matching expected service class)
 	//  1 ServiceInstance from ns2 (user namespace, only 1 instance matching expected service class)
 	//  0 ServiceInstance from ns3 (non-user namespace)

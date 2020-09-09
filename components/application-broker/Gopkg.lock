@@ -1722,10 +1722,7 @@
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/duck/v1",
-    "knative.dev/pkg/controller",
-    "knative.dev/pkg/injection",
     "knative.dev/pkg/injection/sharedmain",
-    "knative.dev/pkg/logging",
     "knative.dev/pkg/reconciler/testing",
   ]
   solver-name = "gps-cdcl"

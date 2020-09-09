@@ -17,8 +17,8 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
 	servicecatalogclientset "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
-	"knative.dev/pkg/injection/sharedmain"
 	istioclientset "istio.io/client-go/pkg/clientset/versioned"
+	"knative.dev/pkg/injection/sharedmain"
 
 	kymaeventingclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	appconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"

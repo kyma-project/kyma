@@ -116,10 +116,6 @@ required = [
   revision = "0270cf2f1c1d995d34b36019a6f65d58e6e33ad4"
 
 [[constraint]]
-  name = "github.com/kyma-project/kyma"
-  revision = "8069217e0f42fef97b9e6fddb8b7c86ff5ba1999"
-
-[[constraint]]
   name = "github.com/kyma-incubator/compass"
   revision = "960cf3fa606ce139cea977928be029784bd42be5"
 
