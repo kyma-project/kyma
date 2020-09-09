@@ -310,9 +310,6 @@ components/etcd-tls-setup-job/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksp
 
 # Tools
 
-# The alpine-net directory
-/tools/alpine-net/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
-
 # The failery directory
 /tools/failery/ @m00g3n @aerfio @pPrecel @magicmatatjahu
 
