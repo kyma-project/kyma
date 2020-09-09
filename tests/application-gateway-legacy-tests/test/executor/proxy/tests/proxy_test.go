@@ -121,23 +121,6 @@ func TestProxyService(t *testing.T) {
 		t.Log("Successfully accessed application")
 	})
 
-	t.Run("denier test - should receive with 403 when not labeled", func(t *testing.T) {
-		apiID := client.CreateNotSecuredAPI(t, testSuit.GetMockServiceURL())
-		t.Logf("Created service with apiID: %s", apiID)
-		defer func() {
-			t.Logf("Cleaning up service %s", apiID)
-			client.CleanupService(t, apiID)
-		}()
-
-		t.Log("Skip labeling tests pod with denier label")
-
-		t.Log("Calling Access Service")
-		resp := testSuit.CallAccessService(t, apiID, "status/ok")
-		util.RequireStatus(t, http.StatusForbidden, resp)
-
-		t.Log("Denier successfully restricted access")
-	})
-
 	t.Run("retry with new CSRF token for basic auth test", func(t *testing.T) {
 		username := "username"
 		password := "password"
