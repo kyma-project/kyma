@@ -16,7 +16,7 @@ Environment parameters used by the tests:
 |------|----------|---------|-------------|-----------------|
 | **APPLICATION** | Yes | None | The name of the Application to test | `my-application` |
 | **NAMESPACE** | Yes | None | The Namespace in which the test Application will operate | `kyma-integration` |
-| **MOCK_SERVICE_PORT** | Yes | None |  Port number used by the mock service created by the test | `8080` |
+| **MOCK_SERVICE_PORT** | Yes | None | Number of the port used by the mock service created by the test | `8080` |
 | **TEST_EXECUTOR_IMAGE** | No | Version matching the Helm test image  | Image name of the test executor created by the Helm test  | `user/my-image:1.0.0` |
 
 
