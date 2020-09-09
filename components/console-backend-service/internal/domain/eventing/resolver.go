@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"regexp"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -136,8 +137,12 @@ func (r *Resolver) TriggerEventSubscription(ctx context.Context, namespace, serv
 	channel := make(chan *gqlschema.TriggerEvent, 1)
 	filter := func(trigger v1alpha1.Trigger) bool {
 		namespaceMatches := trigger.Namespace == namespace
-		serviceNameMatches := trigger.OwnerReferences[0].Name == serviceName
-		return namespaceMatches && serviceNameMatches
+		if trigger.Spec.Subscriber.Ref != nil {
+			return namespaceMatches && trigger.Spec.Subscriber.Ref.Name == serviceName
+		} else {
+			name, err := extractServiceNameFromUri(*trigger.Spec.Subscriber.URI)
+			return err == nil && namespaceMatches && name == serviceName
+		}
 	}
 
 	unsubscribe, err := r.Service().Subscribe(NewEventHandler(channel, filter))
@@ -221,4 +226,13 @@ func (r *Resolver) checkTriggerName(trigger *gqlschema.TriggerCreateInput) *gqls
 		trigger.Name = &name
 	}
 	return trigger
+}
+
+func extractServiceNameFromUri(url apis.URL) (string, error) {
+	r := regexp.MustCompile("(.*)\\.(?:.+)svc\\.cluster\\.local")
+	result := r.FindStringSubmatch(url.Host)
+	if len(result) < 2 {
+		return "", errors.Errorf("cannot find port in %s", url.Host)
+	}
+	return result[1], nil
 }
