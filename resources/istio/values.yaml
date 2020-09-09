@@ -1,6 +1,10 @@
 ---
 global:
   isLocalEnv: false
+  tracing:
+    enabled: true
+    zipkinAddress: "zipkin.kyma-system:9411"
+    
 kyma:
   namespaces2Label:
     - istio-system
