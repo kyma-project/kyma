@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: istio-workload-dashboard
+  name: istio-workload-grafana-dashboard
   namespace: kyma-system
   labels:
     grafana_dashboard: "1"
