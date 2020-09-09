@@ -22,9 +22,13 @@ import (
 	istiov1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	istiofakeclientset "istio.io/client-go/pkg/clientset/versioned/fake"
 
+	k8sruntime "k8s.io/apimachinery/pkg/runtime"
+
 	appbrokerconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	kymaeventingfakeclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 )
+
+var _ k8sruntime.Object = (*istiov1alpha1.Policy)(nil)
 
 func TestNewserviceInstanceManager(t *testing.T) {
 	testUserNamespaces := []string{
@@ -394,7 +398,7 @@ func TestNewserviceInstanceManager(t *testing.T) {
 	//   - name: default-broker
 	//   - name: default-broker-filter
 	//
-	testPolicies := []*istiov1alpha1.Policy{
+	testPolicies := []istiov1alpha1.Policy{
 		// policy1
 		{
 			TypeMeta: metav1.TypeMeta{
@@ -450,17 +454,27 @@ func TestNewserviceInstanceManager(t *testing.T) {
 	kymaCli := kymaeventingfakeclientset.NewSimpleClientset(
 		eventActivationsToObjectSlice(testEventActivations)...,
 	)
-	// TODO: pass objects to fake client
-	// istioClient := istiofakeclientset.NewSimpleClientset(testPolicies)
-	fmt.Print(testPolicies)
+	istioClient := istiofakeclientset.NewSimpleClientset(policiesToObjectSlice(testPolicies)...)
+	// istioClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	// 	resource := action.GetResource()
+	// 	if action.GetVerb() == "DELETE" && resource.Group == "authentication.istio.io" {
 
-	istioClient := istiofakeclientset.NewSimpleClientset()
+	// 	}
+	// 	// TODO:
+	// 	return false, nil, nil
+	// })
 	m, err := newServiceInstanceManager(scCli, kymaCli.ApplicationconnectorV1alpha1(), dynCli, istioClient, testUserNamespaces)
 	if err != nil {
 		t.Fatalf("Failed to initialize serviceInstanceManager: %s", err)
 	}
+	if err := m.recreateAll(); err != nil {
+		t.Fatalf("error while re-creating ServiceInstances: %v", err)
+	}
+	if err := m.deletePopulatedIstioPolicies(); err != nil {
+		t.Fatalf("error while deleting Istio policies: %v", err)
+	}
 
-	// expect
+		// expect
 	//  1 ServiceInstance from ns1 (user namespace, only 1 instance matching expected service class)
 	//  1 ServiceInstance from ns2 (user namespace, only 1 instance matching expected service class)
 	//  0 ServiceInstance from ns3 (non-user namespace)
@@ -497,6 +511,19 @@ func TestNewserviceInstanceManager(t *testing.T) {
 
 	if diff := cmp.Diff(expectEA, gotEA); diff != "" {
 		t.Errorf("Unexpected EventActivation index: (-:expect, +:got) %s", diff)
+	}
+
+	// ensure Istio Policies got deleted
+	for _, policy := range testPolicies {
+		policyDeleted := false
+		for _, action := range istioClient.Actions() {
+			if action.GetNamespace() == policy.Namespace && action.GetResource().Group == "authentication.istio.io" && action.GetVerb() == "delete" {
+				policyDeleted = true
+			}
+		}
+		if !policyDeleted {
+			t.Errorf("No Istio Policy with name/namespace: %s/%s deleted!", policy.Name, policy.Namespace)
+		}
 	}
 }
 
@@ -556,6 +583,14 @@ func serviceClassesToObjectSlice(serviceClasses []servicecatalogv1beta1.ServiceC
 	objects := make([]runtime.Object, len(serviceClasses))
 	for i := range serviceClasses {
 		objects[i] = &serviceClasses[i]
+	}
+	return objects
+}
+
+func policiesToObjectSlice(policies []istiov1alpha1.Policy) []runtime.Object {
+	objects := make([]runtime.Object, len(policies))
+	for i := range policies {
+		objects[i] = &policies[i]
 	}
 	return objects
 }
