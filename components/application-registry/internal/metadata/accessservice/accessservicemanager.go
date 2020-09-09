@@ -1,6 +1,7 @@
 package accessservice
 
 import (
+	"context"
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/types"
@@ -16,9 +17,10 @@ import (
 const appNameLabelFormat = "%s-application-gateway"
 
 // ServiceInterface has methods to work with Service resources.
+//go:generate mockery --name ServiceInterface
 type ServiceInterface interface {
-	Create(*corev1.Service) (*corev1.Service, error)
-	Delete(name string, options *metav1.DeleteOptions) error
+	Create(context.Context, *corev1.Service, metav1.CreateOptions) (*corev1.Service, error)
+	Delete(context.Context, string, metav1.DeleteOptions) error
 }
 
 type AccessServiceManager interface {
@@ -63,7 +65,7 @@ func (m *accessServiceManager) Upsert(application string, appUID types.UID, serv
 }
 
 func (m *accessServiceManager) Delete(serviceName string) apperrors.AppError {
-	err := m.serviceInterface.Delete(serviceName, &metav1.DeleteOptions{})
+	err := m.serviceInterface.Delete(context.Background(), serviceName, metav1.DeleteOptions{})
 	if err != nil {
 		if !k8serrors.IsNotFound(err) {
 			return apperrors.Internal("Deleting service failed, %s", err.Error())
@@ -97,5 +99,5 @@ func (m *accessServiceManager) create(application string, appUID types.UID, serv
 		},
 	}
 
-	return m.serviceInterface.Create(&service)
+	return m.serviceInterface.Create(context.Background(), &service, metav1.CreateOptions{})
 }

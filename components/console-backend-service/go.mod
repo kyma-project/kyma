@@ -23,7 +23,7 @@ require (
 	github.com/kyma-incubator/api-gateway v0.0.0-20191125140217-295e8fcaa03f
 	github.com/kyma-project/helm-broker v0.0.0-20190906085923-d07feb2d365a
 	github.com/kyma-project/kyma v0.5.1-0.20200609051543-f5997d4a36d6
-	github.com/kyma-project/kyma/components/function-controller v0.0.0-20200825075519-bae7e2e7dd47
+	github.com/kyma-project/kyma/components/function-controller v0.0.0-20200901115958-8e0d3c51dd7a
 	github.com/kyma-project/rafter v0.0.0-20200402080904-a0157e52e150
 	github.com/moby/moby v17.12.0-ce-rc1.0.20200618181300-9dc6525e6118+incompatible
 	github.com/opentracing-contrib/go-observer v0.0.0-20170622124052-a52f23424492 // indirect
@@ -55,6 +55,8 @@ require (
 )
 
 replace (
+	github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.34.1
+	github.com/coreos/etcd => github.com/coreos/etcd v3.3.24+incompatible
 	golang.org/x/text => golang.org/x/text v0.3.3
 	k8s.io/client-go => k8s.io/client-go v0.17.4
 )

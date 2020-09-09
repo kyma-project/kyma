@@ -19,8 +19,8 @@ Follows these steps:
 
 <div tabs name="steps" group="bind-function">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Export these variables:
@@ -46,11 +46,11 @@ Follows these steps:
    spec:
      reprocessRequest: 0
      repositories:
-     - url: https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml
+       - url: https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml
    EOF
    ```
 
-3. Check if the Addon CR was created successfully. The CR phase should state `Ready`:
+3. Check that the Addon CR was created successfully and that the CR phase is `Ready`:
 
    ```bash
    kubectl get addons $NAME -n $NAMESPACE -o=jsonpath="{.status.phase}"
@@ -73,7 +73,7 @@ Follows these steps:
    EOF
    ```
 
-5. Check if the ServiceInstance CR was created successfully. The last condition in the CR status should state `Ready True`:
+5. Check if the ServiceInstance CR was created successfully. The last condition in the CR status changes into `Ready True`:
 
    ```bash
    kubectl get serviceinstance $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
@@ -96,7 +96,7 @@ Follows these steps:
 
    > **NOTE:** If you use an existing ServiceInstance, change **spec.instanceRef.name** to the name of your ServiceInstance.
 
-7. Check if the ServiceBinding CR was created successfully. The last condition in the CR status should state `Ready True`:
+7. Check if the ServiceBinding CR was created successfully. The last condition in the CR status changes into `Ready True`:
 
    ```bash
    kubectl get servicebinding $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
@@ -125,11 +125,11 @@ Follows these steps:
 
    - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the ServiceBinding you have just created and **spec.usedBy** points to the Function. More specifically, **spec.usedBy** refers to the name of the Function and the cluster-specific [UsageKind CR](/components/service-catalog/#custom-resource-usage-kind) (`kind: serverless-function`) that defines how Secrets should be injected to your Function when creating a ServiceBinding.
 
-   - The **spec.parameters.envPrefix.name** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a ServiceBinding. In our example, **envPrefix** is `REDIS_`, so all environmental variables will follow the `REDIS_{env}` naming pattern.
+   - The **spec.parameters.envPrefix.name** field is optional. On creating a ServiceBinding, it adds a prefix to all environment variables injected in a Secret to the Function. In our example, **envPrefix** is `REDIS_`, so all environment variables will follow the `REDIS_{env}` naming pattern.
 
-     > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
+     > **TIP:** It is considered good practice to use **envPrefix**. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another.
 
-9. Check if the ServiceBindingUsage CR was created successfully. The last condition in the CR status should state `Ready True`:
+9. Check if the ServiceBindingUsage CR was created successfully. The last condition in the CR status changes into `Ready True`:
 
    ```bash
    kubectl get servicebindingusage $NAME -n $NAMESPACE -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
@@ -149,7 +149,7 @@ Follows these steps:
     REDIS_PASSWORD: 1tvDcINZvp
     ```
 
-    > **NOTE:** If you added the **REDIS\_** prefix for environmental variables in step 6, all variables will start with it. For example, the **PORT** variable will take the form of **REDIS_PORT**.
+    > **NOTE:** If you added the **REDIS\_** prefix for environment variables in step 6, all variables will start with it. For example, the **PORT** variable will take the form of **REDIS_PORT**.
 
     </details>
     <details>
@@ -173,7 +173,7 @@ Follow these steps:
 
 4. Select **Add** to confirm changes.
 
-   You will see that the Addon has the `Ready` status.
+   You will see that the Addon has the status `Ready`.
 
 ### Create a ServiceInstance
 
@@ -201,9 +201,9 @@ Follow these steps:
 
 The message appears on the screen confirming that the ServiceBinding was successfully created, and you will see it in the **Service Bindings** section in your Function, along with environment variable names.
 
-> **NOTE:** The **Prefix for injected variables** field is optional. It adds a prefix to all environment variables injected in a Secret to the Function when creating a ServiceBinding. In our example, the prefix is set to `REDIS_`, so all environmental variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
+> **NOTE:** The **Prefix for injected variables** field is optional. On creating a ServiceBinding, it adds a prefix to all environment variables injected in a Secret to the Function. In our example, the prefix is set to `REDIS_`, so all environment variables will follow the `REDIS_{ENVIRONMENT_VARIABLE}` naming pattern.
 
-> **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another one.
+> **TIP:** It is considered good practice to use prefixes for environment variables. In some cases, a Function must use several instances of a given ServiceClass. Prefixes allow you to distinguish between instances and make sure that one Secret does not overwrite another.
 
     </details>
 

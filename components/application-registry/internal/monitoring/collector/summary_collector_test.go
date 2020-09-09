@@ -33,16 +33,4 @@ func TestNewSummaryCollector(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, collector)
 	})
-
-	t.Run("should return error if help not specified", func(t *testing.T) {
-		// given
-		opts := prometheus.SummaryOpts{
-			Name: "name",
-		}
-		// when
-		collector, err := NewSummaryCollector(opts, []string{"label"})
-		//then
-		require.Error(t, err)
-		assert.Nil(t, collector)
-	})
 }

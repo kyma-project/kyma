@@ -1,6 +1,7 @@
 package validationproxy
 
 import (
+	"context"
 	"crypto/x509/pkix"
 	"net/http"
 	"net/http/httputil"
@@ -27,12 +28,12 @@ type ProxyHandler interface {
 	ProxyAppConnectorRequests(w http.ResponseWriter, r *http.Request)
 }
 
-//go:generate mockery -name=ApplicationGetter
+//go:generate mockery --name=ApplicationGetter
 type ApplicationGetter interface {
-	Get(name string, options metav1.GetOptions) (*v1alpha1.Application, error)
+	Get(ctx context.Context, name string, options metav1.GetOptions) (*v1alpha1.Application, error)
 }
 
-//go:generate mockery -name=Cache
+//go:generate mockery --name=Cache
 type Cache interface {
 	Get(k string) (interface{}, bool)
 	Set(k string, x interface{}, d time.Duration)
@@ -150,7 +151,7 @@ func (ph *proxyHandler) getClientIDsFromCache(applicationName string) ([]string,
 }
 
 func (ph *proxyHandler) getClientIDsFromResource(applicationName string) ([]string, apperrors.AppError) {
-	application, err := ph.applicationGetter.Get(applicationName, metav1.GetOptions{})
+	application, err := ph.applicationGetter.Get(context.Background(), applicationName, metav1.GetOptions{})
 	if err != nil {
 		return []string{}, apperrors.Internal("failed to get %s application: %s", applicationName, err)
 	}

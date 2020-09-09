@@ -89,7 +89,7 @@ func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Resul
 	service.Status.Conditions = r.updateCondition(service.Status.Conditions, condition)
 
 	equalConditions := r.equalConditions(instance.Status.Conditions, service.Status.Conditions)
-	if equalConditions && instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit {
+	if equalConditions && instance.Spec.Type != serverlessv1alpha1.SourceTypeGit {
 		return result, nil
 	}
 	// checking if status changed in gitops flow

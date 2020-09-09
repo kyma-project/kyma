@@ -92,3 +92,10 @@ global:
     version: 47b606f6
 
 nodeSelector: {}
+
+livenessProbe:
+  enabled: false
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 4

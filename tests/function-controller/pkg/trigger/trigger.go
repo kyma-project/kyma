@@ -12,6 +12,8 @@ import (
 	watchtools "k8s.io/client-go/tools/watch"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
@@ -26,7 +28,7 @@ type Trigger struct {
 	name        string
 	namespace   string
 	waitTimeout time.Duration
-	log         shared.Logger
+	log         *logrus.Entry
 	verbose     bool
 }
 
@@ -150,4 +152,18 @@ func (t Trigger) isStateReady(trigger eventingv1alpha1.Trigger) bool {
 	shared.LogReadiness(ready, t.verbose, t.name, t.log, trigger)
 
 	return ready
+}
+
+func (t *Trigger) Get() (*eventingv1alpha1.Trigger, error) {
+	u, err := t.resCli.Get(t.name)
+	if err != nil {
+		return &eventingv1alpha1.Trigger{}, errors.Wrapf(err, "while getting Trigger %s in namespace %s", t.name, t.namespace)
+	}
+
+	tr, err := convertFromUnstructuredToTrigger(*u)
+	if err != nil {
+		return &eventingv1alpha1.Trigger{}, err
+	}
+
+	return &tr, nil
 }
