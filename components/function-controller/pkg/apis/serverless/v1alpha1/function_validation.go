@@ -108,22 +108,21 @@ func (spec *FunctionSpec) validateEnv(ctx context.Context) (apisError *apis.Fiel
 func (spec *FunctionSpec) validateFunctionResources(ctx context.Context) (apisError *apis.FieldError) {
 	minMemory := resource.MustParse(ctx.Value(ValidationConfigKey).(ValidationConfig).FunctionResources.MinRequestMemory)
 	minCpu := resource.MustParse(ctx.Value(ValidationConfigKey).(ValidationConfig).FunctionResources.MinRequestCpu)
-	requests := spec.Resources.Requests
-	limits := spec.Resources.Limits
 
-	return validateResources(requests, limits, minMemory, minCpu).ViaField("spec.resources")
+	return validateResources(spec.Resources, minMemory, minCpu).ViaField("spec.resources")
 }
 
 func (spec *FunctionSpec) validateBuildResources(ctx context.Context) (apisError *apis.FieldError) {
 	minMemory := resource.MustParse(ctx.Value(ValidationConfigKey).(ValidationConfig).BuildResources.MinRequestMemory)
 	minCpu := resource.MustParse(ctx.Value(ValidationConfigKey).(ValidationConfig).BuildResources.MinRequestCpu)
-	requests := spec.BuildResources.Requests
-	limits := spec.BuildResources.Limits
 
-	return validateResources(requests, limits, minMemory, minCpu).ViaField("spec.buildResources")
+	return validateResources(spec.BuildResources, minMemory, minCpu).ViaField("spec.buildResources")
 }
 
-func validateResources(requests, limits corev1.ResourceList, minMemory, minCpu resource.Quantity) *apis.FieldError {
+func validateResources(resources corev1.ResourceRequirements, minMemory, minCpu resource.Quantity) *apis.FieldError {
+	limits := resources.Limits
+	requests := resources.Requests
+
 	var apisError *apis.FieldError
 	if requests.Cpu().Cmp(minCpu) == -1 {
 		apisError = apisError.Also(apis.ErrInvalidValue(
