@@ -23,9 +23,9 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    version: "PR-9214"
+    version: "PR-9394"
   application_operator_tests:
-    version: "PR-9356"
+    version: "PR-9394"
   connector_service:
     version: "PR-9214"
   connector_service_tests:
@@ -42,6 +42,8 @@ global:
     version: "PR-9349"
   application_gateway_tests:
     version: "PR-9366"
+  application_gateway_legacy_tests:
+    version: "PR-9394"
   application_registry:
     version: "PR-9356"
   application_registry_tests:
