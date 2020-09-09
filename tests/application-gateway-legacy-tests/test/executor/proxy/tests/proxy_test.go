@@ -32,9 +32,6 @@ func TestProxyService(t *testing.T) {
 			client.CleanupService(t, apiID)
 		}()
 
-		t.Log("Labeling tests pod with denier label")
-		testSuit.AddDenierLabel(t, apiID)
-
 		t.Log("Calling Access Service")
 		resp := testSuit.CallAccessService(t, apiID, "status/ok")
 		util.RequireStatus(t, http.StatusOK, resp)
@@ -52,9 +49,6 @@ func TestProxyService(t *testing.T) {
 			t.Logf("Cleaning up service %s", apiID)
 			client.CleanupService(t, apiID)
 		}()
-
-		t.Log("Labeling tests pod with denier label")
-		testSuit.AddDenierLabel(t, apiID)
 
 		t.Log("Calling Access Service")
 		resp := testSuit.CallAccessService(t, apiID, fmt.Sprintf("auth/basic/%s/%s", userName, password))
@@ -75,9 +69,6 @@ func TestProxyService(t *testing.T) {
 			t.Logf("Cleaning up service %s", apiID)
 			client.CleanupService(t, apiID)
 		}()
-
-		t.Log("Labeling tests pod with denier label")
-		testSuit.AddDenierLabel(t, apiID)
 
 		t.Log("Calling Access Service")
 		resp := testSuit.CallAccessService(t, apiID, "/target/auth/oauth")
@@ -101,9 +92,6 @@ func TestProxyService(t *testing.T) {
 			client.CleanupService(t, apiID)
 		}()
 
-		t.Log("Labeling tests pod with denier label")
-		testSuit.AddDenierLabel(t, apiID)
-
 		t.Log("Calling Access Service")
 		resp := testSuit.CallAccessService(t, apiID, fmt.Sprintf("headers/%s/%s", headerName, headerValue))
 		util.RequireStatus(t, http.StatusOK, resp)
@@ -125,9 +113,6 @@ func TestProxyService(t *testing.T) {
 			t.Logf("Cleaning up service %s", apiID)
 			client.CleanupService(t, apiID)
 		}()
-
-		t.Log("Labeling tests pod with denier label")
-		testSuit.AddDenierLabel(t, apiID)
 
 		t.Log("Calling Access Service")
 		resp := testSuit.CallAccessService(t, apiID, fmt.Sprintf("queryparams/%s/%s", paramName, paramValue))
@@ -165,9 +150,6 @@ func TestProxyService(t *testing.T) {
 			client.CleanupService(t, apiID)
 		}()
 
-		t.Log("Labeling tests pod with denier label")
-		testSuit.AddDenierLabel(t, apiID)
-
 		t.Log("Calling Access Service with correct CSRF token")
 		resp := testSuit.CallAccessService(t, apiID, "target")
 		util.RequireStatus(t, http.StatusOK, resp)
@@ -199,9 +181,6 @@ func TestProxyService(t *testing.T) {
 			client.CleanupService(t, apiID)
 		}()
 
-		t.Log("Labeling tests pod with denier label")
-		testSuit.AddDenierLabel(t, apiID)
-
 		t.Log("Calling Access Service")
 		resp := testSuit.CallAccessService(t, apiID, "/target/auth/oauth")
 		util.RequireStatus(t, http.StatusOK, resp)
@@ -228,9 +207,6 @@ func TestProxyService(t *testing.T) {
 			t.Logf("Cleaning up service %s", apiID)
 			client.CleanupService(t, apiID)
 		}()
-
-		t.Log("Labeling tests pod with denier label")
-		testSuit.AddDenierLabel(t, apiID)
 
 		t.Log("Calling Access Service")
 		resp := testSuit.CallAccessService(t, apiID, "/target/auth/oauth")

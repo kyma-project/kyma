@@ -22,7 +22,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
-	"k8s.io/client-go/util/retry"
 )
 
 const (
@@ -32,11 +31,8 @@ const (
 	apiServerAccessTimeout         = 60 * time.Second
 	dnsWaitTime                    = 30 * time.Second
 
-	mockServiceNameFormat     = "%s-gateway-test-mock-service"
-	testExecutorPodNameFormat = "%s-tests-test-executor"
+	mockServiceNameFormat     = "%s-gateway-legacy-test-mock-service"
 )
-
-type updatePodFunc func(pod *v1.Pod)
 
 type TestSuite struct {
 	httpClient      *http.Client
@@ -205,31 +201,3 @@ func (ts *TestSuite) deleteMockService(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func (ts *TestSuite) AddDenierLabel(t *testing.T, apiId string) {
-	podName := fmt.Sprintf(testExecutorPodNameFormat, ts.config.Application)
-	serviceName := fmt.Sprintf("%s-%s", ts.config.Application, apiId)
-
-	updateFunc := func(pod *v1.Pod) {
-		if pod.Labels == nil {
-			pod.Labels = map[string]string{}
-		}
-
-		pod.Labels[serviceName] = "true"
-	}
-
-	err := ts.updatePod(podName, updateFunc)
-	require.NoError(t, err)
-}
-
-func (ts *TestSuite) updatePod(podName string, updateFunc updatePodFunc) error {
-	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-		newPod, err := ts.podClient.Get(podName, metav1.GetOptions{})
-		if err != nil {
-			return err
-		}
-
-		updateFunc(newPod)
-		_, err = ts.podClient.Update(newPod)
-		return err
-	})
-}
