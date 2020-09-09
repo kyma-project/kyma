@@ -532,6 +532,12 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to delete backendmodule"
 	testPermissionsClusterScoped "delete" "backendmodule" "yes"
 
+	echo "--> ${ADMIN_EMAIL} should be able to create ClusterIssuer"
+	testPermissionsClusterScoped "create" "clusterissuer" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to delete Certificate in ${CUSTOM_NAMESPACE}"
+	testPermissions "delete" "certificate" "${CUSTOM_NAMESPACE}" "yes"
+
 	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
@@ -597,6 +603,15 @@ function runTests() {
 
 	echo "--> ${VIEW_EMAIL} should be able to create backendmodule"
 	testPermissionsClusterScoped "create" "backendmodule" "no"
+
+	echo "--> ${VIEW_EMAIL} should NOT be able to create ClusterIssuer"
+	testPermissionsClusterScoped "create" "clusterissuer" "no"
+
+	echo "--> ${VIEW_EMAIL} should NOT be able to create issuer in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "issuer" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${VIEW_EMAIL} should be able to get certificate in ${CUSTOM_NAMESPACE}"
+	testPermissions "get" "certificate" "${CUSTOM_NAMESPACE}" "yes"
 
 	EMAIL=${NAMESPACE_ADMIN_EMAIL} PASSWORD=${NAMESPACE_ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
@@ -842,8 +857,17 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create backendmodule in default"
 	testPermissions "create" "backendmodule" "default" "yes"
 
-	echo "--> ${ADNAMESPACE_ADMIN_EMAILMIN_EMAIL} should be able to delete backendmodule in default"
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete backendmodule in default"
 	testPermissions "delete" "backendmodule" "default" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create ClusterIssuer"
+	testPermissionsClusterScoped "create" "clusterissuer" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create issuer in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "issuer" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get certificate in ${CUSTOM_NAMESPACE}"
+	testPermissions "get" "certificate" "${CUSTOM_NAMESPACE}" "yes"
 
 	# developer who was granted kyma-developer role should be able to operate in the scope of its namespace
 	EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
@@ -984,6 +1008,15 @@ function runTests() {
 
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create backendmodule in default"
 	testPermissions "create" "backendmodule" "default" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create ClusterIssuer"
+	testPermissionsClusterScoped "create" "clusterissuer" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to create issuer in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "issuer" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to get certificate in ${CUSTOM_NAMESPACE}"
+	testPermissions "get" "certificate" "${CUSTOM_NAMESPACE}" "yes"
 }
 
 function cleanup() {

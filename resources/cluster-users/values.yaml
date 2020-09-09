@@ -67,6 +67,13 @@ clusterRoles:
       - "settings.svcat.k8s.io"
     ui:
       - "ui.kyma-project.io"
+    certManager:
+      - "certificaterequests.cert-manager.io"
+      - "certificates.cert-manager.io"
+      - "challenges.acme.cert-manager.io"
+      - "clusterissuers.cert-manager.io"
+      - "issuers.cert-manager.io"
+      - "orders.acme.cert-manager.io"
   verbs:
     edit:
       - "create"
