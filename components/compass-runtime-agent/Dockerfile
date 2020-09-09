@@ -1,4 +1,4 @@
-FROM golang:1.14 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.14.8-alpine as builder
 
 ENV GO111MODULE=on
 
