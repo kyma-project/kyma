@@ -23,3 +23,7 @@ spec:
           env:
             - name: GLOBAL_DOMAIN
               value: {{ .Values.global.domainName }}
+            - name: CM_NAME
+              value: {{ .Values.configMap.name }}
+            - name: CM_NAMESPACE
+              value: {{ .Values.configMap.namespace }}
