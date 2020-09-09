@@ -8,7 +8,7 @@ global:
       enabled: true
     type: "detect" # legacy/gardener/xip/user-provided/detect
 
-configMapName: net-global-overrides-copy
+configMapName: net-global-overrides
 jobs:
   image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
   tag: "v20200617-32c1f3ff"

@@ -6,7 +6,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: post-install, post-upgrade
-{{/*    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"*/}}
+    # helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "1"
 spec:
   backoffLimit: 3
@@ -25,7 +25,7 @@ spec:
             - /bin/bash
             - -c
             - |
-{{ .Files.Get "files/cleanup.sh" | printf "%s" | indent 12 }}
+              echo "TODO: Cleanup"
           terminationMessagePolicy: "FallbackToLogsOnError"
 ---
 apiVersion: v1
