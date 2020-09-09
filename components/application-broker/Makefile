@@ -23,7 +23,7 @@ cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 MOUNT_TARGETS = $(cmds)
 $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
-#build-local: $(cmds) test-local ;
+build-local: $(cmds) test-local ;
 
 #GOBUILD_FLAGS := -v
 #$(cmds): %: resolve-local

@@ -35,10 +35,8 @@ spec:
       serviceAccountName: {{ .Chart.Name }}
       containers:
       - name: ctrl
-        # TODO: revert to PR image
-        image: nachtmaar/application-broker:1
-        # TODO: revert to ...
-        imagePullPolicy: Always
+        image: "{{ .Values.global.containerRegistry.path }}/application-broker-broker:{{ .Values.global.application_broker.version }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
           limits:
             memory: 76Mi

@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ template "recreate-service-instances.fullname" . }}-hooks
+  name: {{ template "application-broker-eventing-migration.fullname" . }}-hooks
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
@@ -10,7 +10,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ template "recreate-service-instances.fullname" . }}-hooks
+  name: {{ template "application-broker-eventing-migration.fullname" . }}-hooks
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
@@ -56,25 +56,25 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ template "recreate-service-instances.fullname" . }}-hooks
+  name: {{ template "application-broker-eventing-migration.fullname" . }}-hooks
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ template "recreate-service-instances.fullname" . }}-hooks
+  name: {{ template "application-broker-eventing-migration.fullname" . }}-hooks
 subjects:
 - kind: ServiceAccount
-  name: {{ template "recreate-service-instances.fullname" . }}-hooks
+  name: {{ template "application-broker-eventing-migration.fullname" . }}-hooks
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "recreate-service-instances.fullname" . }}-hooks
+  name: {{ template "application-broker-eventing-migration.fullname" . }}-hooks
   labels:
-{{ include "recreate-service-instances.labels.standard" . | indent 4 }}
+{{ include "application-broker-eventing-migration.labels.standard" . | indent 4 }}
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
@@ -84,12 +84,11 @@ spec:
       annotations:
         sidecar.istio.io/inject: 'false'
       labels:
-{{ include "recreate-service-instances.labels.standard" . | indent 8 }}
+{{ include "application-broker-eventing-migration.labels.standard" . | indent 8 }}
     spec:
       restartPolicy: Never
-      serviceAccountName: {{ template "recreate-service-instances.fullname" . }}-hooks
+      serviceAccountName: {{ template "application-broker-eventing-migration.fullname" . }}-hooks
       containers:
-        - name: recreate-service-instances
-          # TODO: use image from CI/CD
-          image: nachtmaar/application-eventing-service-instance-migration:1
+        - name: application-broker-eventing-migration
+          image: "{{ .Values.global.containerRegistry.path }}/application-broker-eventing-service-instance-migration:{{ .Values.global.application_broker_eventing_migration.version }}"
           imagePullPolicy: Always
