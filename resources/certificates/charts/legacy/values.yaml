@@ -1,3 +1,6 @@
 global:
   tlsCrt: "cGxhY2Vob2xkZXI="
   tlsKey: "cGxhY2Vob2xkZXI="
+configMap:
+  name: net-global-overrides
+  namespace: kyma-installer

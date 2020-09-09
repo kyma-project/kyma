@@ -8,4 +8,4 @@ EOF
 )
 
 echo $PATCH_YAML
-kubectl patch configmap net-global-overrides --patch "${PATCH_YAML}" -n kyma-installer
+kubectl patch configmap $CM_NAME --patch "${PATCH_YAML}" -n $CM_NAMESPACE
