@@ -16,7 +16,7 @@ tests:
     limits:
       memory: 128Mi
   envs:
-    mockiceImage: hudymi/mockice:0.1.3
+    mockiceImage: eu.gcr.io/kyma-project/external/hudymi/mockice:0.1.3
     waitTimeout: 10m
     verifySSL: "false"
 
