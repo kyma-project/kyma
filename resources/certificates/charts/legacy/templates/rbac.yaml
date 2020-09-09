@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Release.Name }}-service-account
+  name: {{ include "legacy.fullname" . }}
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: kyma-installer
-  name: {{ .Release.Name }}-kyma-installer-role
+  name: {{ include "legacy.fullname" . }}
 rules:
   - apiGroups: [""]
     resources: ["configmaps"]
@@ -16,13 +16,13 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}-kyma-installer-role-binding
+  name: {{ include "legacy.fullname" . }}
   namespace: kyma-installer
 subjects:
   - kind: ServiceAccount
-    name: {{ .Release.Name }}-service-account
+    name: {{ include "legacy.fullname" . }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role
-  name: {{ .Release.Name }}-kyma-installer-role
+  name: {{ include "legacy.fullname" . }}
   apiGroup: rbac.authorization.k8s.io

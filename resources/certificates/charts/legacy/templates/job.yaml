@@ -1,19 +1,19 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ include "legacy.fullname" . }}
   annotations:
     helm.sh/hook: post-install,post-upgrade
     #    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
 spec:
   template:
     metadata:
-      name: {{ .Release.Name }}
+      name: {{ include "legacy.fullname" . }}
     spec:
-      serviceAccountName: {{ .Release.Name }}-service-account
+      serviceAccountName: {{ include "legacy.fullname" . }}
       restartPolicy: Never
       containers:
-        - name: {{ .Release.Name }}
+        - name: {{ include "legacy.fullname" . }}
           image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
           command:
             - bash

@@ -29,7 +29,6 @@ fi
 PATCH_YAML=$(cat << EOF
 ---
 data:
-  modules.manager.enabled: "false"
   modules.legacy.enabled: "true"
 EOF
 )
