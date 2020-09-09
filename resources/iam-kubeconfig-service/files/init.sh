@@ -4,7 +4,7 @@ DOMAIN=""
 
 if [[ $TYPE == "xip" ]]; then
   # When running on xip get the IP address from apiserver-proxy-ssl service
-  IP_ADDRESS=$(kubectl get service -n kyma-system apiserver-proxy-ssl -o jsonpath='{.spec.clusterIP}')
+  IP_ADDRESS=$(kubectl get service -n kyma-system apiserver-proxy-ssl -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
   DOMAIN="${IP_ADDRESS}.xip.io"
 else
   DOMAIN="{{ .Values.global.domainName }}"
