@@ -2,7 +2,6 @@ package eventing
 
 import (
 	"fmt"
-	"net"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
@@ -10,7 +9,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/cache"
 	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	"knative.dev/pkg/apis"
 )
 
 var triggersKind = "Trigger"
@@ -24,12 +22,7 @@ var triggersGroupVersionResource = schema.GroupVersionResource{
 var triggerIndexKey = "ref"
 
 func createTriggerIndexKey(namespace, serviceName string) string {
-	return fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
-}
-
-func createTriggerUriIndexKey(uri apis.URL) string {
-	host, _, _ := net.SplitHostPort(uri.Host)
-	return host
+	return fmt.Sprintf("%s/%s", namespace, serviceName)
 }
 
 type Service struct {
@@ -45,11 +38,7 @@ func NewService(serviceFactory *resource.GenericServiceFactory) (*resource.Gener
 			if err != nil {
 				return nil, err
 			}
-			if trigger.Spec.Subscriber.Ref != nil {
-				return []string{createTriggerIndexKey(trigger.Namespace, trigger.Spec.Subscriber.Ref.Name)}, nil
-			} else {
-				return []string{createTriggerUriIndexKey(*trigger.Spec.Subscriber.URI)}, nil
-			}
+			return []string{createTriggerIndexKey(trigger.Namespace, trigger.OwnerReferences[0].Name)}, nil
 		},
 	})
 	return service, err
