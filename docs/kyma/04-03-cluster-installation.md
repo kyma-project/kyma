@@ -100,13 +100,10 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 6. Create a ConfigMap with overrides for the Kyma Installer:
 
     ```bash
-   kubectl create configmap xip-overrides \
-           --from-literal global.certificates.manager.enabled="true" \
-           --from-literal global.certificates.type="xip" \
-           -n kyma-installer
-   kubectl label configmap xip-overrides --overwrite installer=overrides -n kyma-installer
-   kubectl label configmap xip-overrides --overwrite kyma-project.io/installation="" -n kyma-installer
-   ```
+    kubectl create configmap xip-overrides --from-literal global.certificates.type="xip" -n kyma-installer
+    kubectl label configmap xip-overrides --overwrite installer=overrides -n kyma-installer
+    kubectl label configmap xip-overrides --overwrite kyma-project.io/installation="" -n kyma-installer
+    ```
 
   </details>
   <details>
@@ -150,6 +147,14 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/azure-crb-for-healthz.yaml
     ```
   >**CAUTION:** If you define your own Kubernetes jobs on the AKS cluster, follow the [troubleshooting guide](/components/service-mesh/#troubleshooting-kubernetes-jobs-fail-on-aks) to avoid jobs running endlessly on AKS deployments of Kyma.
+
+6. Create a ConfigMap with overrides for the Kyma Installer:
+
+    ```bash
+    kubectl create configmap xip-overrides --from-literal global.certificates.type="xip" -n kyma-installer
+    kubectl label configmap xip-overrides --overwrite installer=overrides -n kyma-installer
+    kubectl label configmap xip-overrides --overwrite kyma-project.io/installation="" -n kyma-installer
+    ```
 
   </details>
   <details>
