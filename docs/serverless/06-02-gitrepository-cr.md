@@ -19,7 +19,7 @@ kind: GitRepository
 metadata:
   name: sample-with-auth
 spec:
-  url: "git@github.com:kyma-project/kyma.git"
+  url: "git@github.com:sample-organization/sample-repo.git"
   auth:
     type: key
     secretName: kyma-git-creds

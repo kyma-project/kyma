@@ -18,8 +18,6 @@ To create a Function with the Git source, you must:
 2. Create a Secret CR (optional, only if you must authenticate to the repository).
 3. Create a [Function CR](#custom-resource-function) with your Function definition and references to the Git repository.
 
-> **NOTE:** For detailed steps, see the tutorial on [creating a Function from Git repository sources](#tutorials-create-a-function-from-git-repository).
-
 You can have various setups for your Function's Git source with different:
 
 - Directory structures
