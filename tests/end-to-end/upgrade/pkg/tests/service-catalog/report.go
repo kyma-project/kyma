@@ -433,5 +433,5 @@ func (r *Report) Print() {
 		r.log.Errorf("cannot marshal Report: %s", err)
 		return
 	}
-	r.log.Info(string(jsonReport))
+	r.log.Warn(string(jsonReport))
 }
