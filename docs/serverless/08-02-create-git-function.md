@@ -1,5 +1,5 @@
 ---
-title: Create a Function from Git Repository
+title: Create a Function from Git repository sources
 type: Tutorials
 ---
 
