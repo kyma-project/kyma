@@ -36,7 +36,7 @@ func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function
 		buildStatus != corev1.ConditionUnknown &&
 		len(jobs) > 0 &&
 		r.mapsEqual(expectedJob.GetLabels(), jobs[0].GetLabels()) {
-		return false
+		return buildStatus == corev1.ConditionFalse
 	}
 
 	return len(jobs) != 1 ||
