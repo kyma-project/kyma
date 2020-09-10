@@ -3,9 +3,9 @@ title: Git source type
 type: Details
 ---
 
-Serverless in Kyma allows you to choose where you want to keep your Function's source code and dependencies. You can either place them directly in the [Function custom resource (CR)](#custom-resource-function) under **spec.source** and **spec.deps** fields as an inline Function, or store the code and dependencies in a public or private Git repository. Choosing the second option ensures your Function is versioned and gives you more development freedom in the project structure and editor choice.
+Serverless in Kyma allows you to choose where you want to keep your Function's source code and dependencies. You can either place them directly in the [Function custom resource (CR)](#custom-resource-function) under the **spec.source** and **spec.deps** fields as an inline Function, or store the code and dependencies in a public or private Git repository. Choosing the second option ensures your Function is versioned and gives you more development freedom in the choice of a project structure or an IDE.
 
-Depending on a runtime you use to build your Function (Node.js 12, Node.js 10, or Python 3.8), your Git repository should contain at least a directory with these files:
+Depending on a runtime you use to build your Function (Node.js 12, Node.js 10, or Python 3.8), your Git repository must contain at least a directory with these files:
 
 - `handler.js` or `handler.py` with Function's code
 - `package.json` or `requirements.txt` with Function's dependencies
@@ -32,4 +32,4 @@ You can have various setups for your Function's Git source with different:
 
 - Function's rebuild triggers
 
-  You can use the **reference** parameter in the GitRepository CR to define whether the Function Controller should monitor a given branch or commit in the Git repository and rebuild the Function upon their changes.
+  You can use the **reference** parameter in the GitRepository CR to define whether the Function Controller must monitor a given branch or commit in the Git repository and rebuild the Function upon their changes.
