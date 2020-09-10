@@ -1,5 +1,4 @@
 ---
-{{- if .Values.tests.enabled }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 
 apiVersion: "testing.kyma-project.io/v1alpha1"
@@ -12,6 +11,10 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    {{- range $key, $val := .Values.tests.labels }}
+    kyma-project.io/test.{{ $key }}: {{ $val | quote }}
+    {{- end }}
+
 spec:
   disableConcurrency: false
   template:
@@ -57,5 +60,4 @@ spec:
             - name: MAX_TEST_RETRIES
               value: "10"
       restartPolicy: Never
-{{- end }}
 {{- end }}

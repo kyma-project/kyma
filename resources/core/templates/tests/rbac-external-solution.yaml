@@ -1,4 +1,4 @@
-{{- if .Values.test.external_solution.event_mesh.enabled }}
+{{- if .Values.tests.external_solution.event_mesh.enabled }}
 ---
 kind: ServiceAccount
 apiVersion: v1

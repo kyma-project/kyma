@@ -57,6 +57,9 @@ compassRuntimeAgent:
     port: 8090
     proxyStatusPort: 15020
   tests:
+    labels:
+      integration: true
+      after-upgrade: true
     enabled: true
     mockService:
       port: 8080

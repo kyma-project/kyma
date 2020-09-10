@@ -58,6 +58,9 @@ istio:
     required: false
 
 tests:
+  labels:
+    integration: true
+    after-upgrade: true
   enabled: true
   skipSslVerify: true
   central: *central

@@ -66,6 +66,9 @@ application_connectivity_certs_setup_job:
 
 tests:
   application_connector_tests:
+    labels:
+      integration: true
+      after-upgrade: true
     enabled: true
     connector_service:
       central: false

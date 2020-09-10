@@ -18,6 +18,10 @@ runtimeMigration:
 
 tests:
   enabled: true
+  labels:
+    integration: true
+    after-upgrade: true
+
   long:
     initTimeout: 120s
     resources:

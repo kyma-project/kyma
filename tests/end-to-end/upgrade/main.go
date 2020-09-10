@@ -52,7 +52,7 @@ type Config struct {
 	DexNamespace           string `envconfig:"default=kyma-system"`
 	KubeNamespace          string `envconfig:"default=kube-system"`
 	MaxConcurrencyLevel    int    `envconfig:"default=1"`
-	KubeconfigPath         string `envconfig:"optional"`
+	KubeConfigPath         string `envconfig:"optional"`
 	TestingAddonsURL       string
 	WorkingNamespace       string `envconfig:"default=e2e-upgrade-test"`
 	TestsInfoConfigMapName string `envconfig:"default=upgrade-tests-info"`
@@ -69,7 +69,9 @@ func main() {
 
 	var action string
 	var verbose bool
+	var testName string
 	flag.StringVar(&action, "action", "", actionUsage)
+	flag.StringVar(&testName, "testName", "", "limit test to test with name")
 	flag.BoolVar(&verbose, "verbose", false, "Print all test logs")
 	flag.Parse()
 
@@ -83,7 +85,7 @@ func main() {
 	stopCh := signal.SetupChannel()
 
 	// K8s client
-	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
+	k8sConfig, err := newRestClientConfig(cfg.KubeConfigPath)
 	fatalOnError(err, "while creating k8s client cfg")
 
 	k8sCli, err := k8sclientset.NewForConfig(k8sConfig)
@@ -151,6 +153,13 @@ func main() {
 		"ServerlessUpgradeTest":           serverless.New(dynamicCli),
 		//"LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
 	}
+
+	if testName != "" {
+		tests = map[string]runner.UpgradeTest{
+			testName: tests[testName],
+		}
+	}
+
 	tRegistry, err := runner.NewConfigMapTestRegistry(k8sCli, cfg.WorkingNamespace, cfg.TestsInfoConfigMapName)
 	fatalOnError(err, "while creating Test Registry")
 

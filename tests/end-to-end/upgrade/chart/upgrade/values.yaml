@@ -22,3 +22,18 @@ authorizationPolicy:
   consoleBackendService:
     namespace: kyma-system
     serviceAccount: console-backend
+
+tests:
+  HelmBrokerUpgradeTest: true
+  HelmBrokerConflictUpgradeTest: true
+  ApplicationBrokerUpgradeTest: true
+  GrafanaUpgradeTest: true
+  TargetsAndRulesUpgradeTest: true
+  MetricsUpgradeTest: true
+  MicrofrontendUpgradeTest: true
+  ClusterMicrofrontendUpgradeTest: true
+  ApiGatewayUpgradeTest: true
+  ApplicationOperatorUpgradeTest: true
+  RafterUpgradeTest: true
+  EventMeshUpgradeTest: true
+  ServerlessUpgradeTest: true

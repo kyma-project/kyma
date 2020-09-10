@@ -6,6 +6,10 @@ global:
 
 tests:
   enabled: true
+  labels:
+    integration: true
+    after-upgrade: true
+
   image:
     repository: "eu.gcr.io/kyma-project/rafter-test"
     tag: 1088c1af

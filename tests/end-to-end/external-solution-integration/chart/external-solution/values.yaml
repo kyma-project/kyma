@@ -12,3 +12,4 @@ testServiceImage:
 
 tests:
   enabled: false
+

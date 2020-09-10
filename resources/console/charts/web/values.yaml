@@ -36,6 +36,9 @@ replicaCount: 1
 resources: {}
 test:
   acceptance:
+    labels:
+      integration: true
+      after-upgrade: true
     enabled: true
     ui:
       # tests uses chromium that require more memory

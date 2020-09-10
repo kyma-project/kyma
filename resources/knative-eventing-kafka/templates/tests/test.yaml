@@ -1,4 +1,3 @@
-{{- if .Values.test.enabled }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -8,6 +7,9 @@ metadata:
   labels:
 {{ include "knative-kafka.labels" . | indent 4 }}
     kyma-project.io/test: {{ .Release.Name }}
+    {{- range $key, $val := .Values.test.labels }}
+    {{ $key }}: {{ $val | quote }}
+    {{- end }}
 spec:
   disableConcurrency: false
   template:
@@ -20,5 +22,4 @@ spec:
       - name: tests
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.test.dir }}knative-channel-kafka-contract-tests:{{ .Values.test.version }}"
       restartPolicy: Never
-{{- end }}
 {{- end }}
