@@ -2,8 +2,6 @@ package testsuite
 
 import (
 	retrygo "github.com/avast/retry-go"
-	"github.com/pkg/errors"
-
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
@@ -29,16 +27,18 @@ func NewCheckEventId(testService *testkit.TestService, eventId string, opts ...r
 
 // Name returns name name of the step
 func (s *CheckEventId) Name() string {
-	return "Check counter pod"
+	return "Check event id"
 }
 
 // Run executes the step
 func (s *CheckEventId) Run() error {
 	err := retry.Do(func() error {
-		return s.testService.CheckTestId(s.eventId)
+		return s.testService.CheckEventId(s.eventId)
 	}, s.retryOpts...)
 	if err != nil {
-		return errors.Wrapf(err, "the counter pod is not updated")
+		//if all retries fail, the test should ask the subscriber for all events which it received
+		return s.testService.CheckAllReceivedEvents()
+		//return errors.Wrapf(err, "the event id could not be checked")
 	}
 	return nil
 }

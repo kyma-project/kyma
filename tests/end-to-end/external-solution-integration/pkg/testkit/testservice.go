@@ -103,7 +103,44 @@ func (ts *TestService) checkValue() (int, error) {
 	return response.Counter, nil
 }
 
-func (ts *TestService) CheckTestId(eventId string) error {
+func (ts *TestService) CheckAllReceivedEvents() error {
+	// Get url
+	url := ts.GetTestServiceURL()
+	endpoint := url + "/ce"
+	// return list of all received cloudevents
+	resp, err := ts.HttpClient.Get(endpoint)
+
+	// check if there was an error when getting
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// check and return the received cloudevents
+	if resp.StatusCode != http.StatusOK {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		return errors.Errorf("error response: %s", body)
+	}
+
+	var response struct {
+		Cloudevents []string `json:"ce"`
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(&response)
+
+	if err != nil {
+		return err
+	}
+
+	//return response.Cloudevents, nil
+	return errors.Errorf("received cloudevents: %s", response.Cloudevents)
+}
+
+func (ts *TestService) CheckEventId(eventId string) error {
 
 	// Combine strings for the correct url endpoint
 	url := ts.GetTestServiceURL()

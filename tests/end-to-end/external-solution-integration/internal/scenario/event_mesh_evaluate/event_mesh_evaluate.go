@@ -47,8 +47,15 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	return []step.Step{
 		testsuite.NewLoadStoredCertificates(dataStore, state),
 		step.Retry(
-			testsuite.NewSendEventToMesh(s.TestID, helpers.FunctionPayload, state, fmt.Sprint(basicId, 0)),
-			testsuite.NewCheckEventId(testService, fmt.Sprint(basicId, 0), retryOpts...),
+			//SendEvent & CheckId need to be moved to one step to allow a counter
+			testsuite.NewSendEventAndCheckId(
+				s.TestID,
+				helpers.FunctionPayload,
+				state,
+				testService,
+				retryOpts...),
+			//testsuite.NewSendEventToMesh(s.TestID, helpers.FunctionPayload, state, fmt.Sprint(basicId, 0)),
+			//testsuite.NewCheckEventId(testService, fmt.Sprint(basicId, 0), retryOpts...),
 		).WithRetryOptions(
 			retry.Attempts(3),
 			retry.DelayType(retry.FixedDelay),
