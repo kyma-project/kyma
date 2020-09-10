@@ -129,10 +129,7 @@ func TestHandler(t *testing.T) {
 	client := oauth.NewClient(ctx, cfg)
 	defer client.CloseIdleConnections()
 
-	msgSender, err := sender.NewHttpMessageSender(emsCEURL, client)
-	if err != nil {
-		t.Errorf("Failed to create a new message sender with error: %v", err)
-	}
+	msgSender := sender.NewHttpMessageSender(emsCEURL, client)
 
 	msgReceiver := receiver.NewHttpMessageReceiver(cfg.Port)
 	handler := NewHandler(msgReceiver, msgSender, cfg.RequestTimeout, logrus.New())
@@ -183,10 +180,7 @@ func TestHandlerTimeout(t *testing.T) {
 	client := oauth.NewClient(ctx, cfg)
 	defer client.CloseIdleConnections()
 
-	msgSender, err := sender.NewHttpMessageSender(emsCEURL, client)
-	if err != nil {
-		t.Errorf("Failed to create a new message sender with error: %v", err)
-	}
+	msgSender := sender.NewHttpMessageSender(emsCEURL, client)
 
 	msgReceiver := receiver.NewHttpMessageReceiver(cfg.Port)
 	handler := NewHandler(msgReceiver, msgSender, cfg.RequestTimeout, logrus.New())

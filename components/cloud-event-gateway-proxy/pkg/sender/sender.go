@@ -10,8 +10,9 @@ type HttpMessageSender struct {
 	Target string
 }
 
-func NewHttpMessageSender(target string, client *http.Client) (*HttpMessageSender, error) {
-	return &HttpMessageSender{Client: client, Target: target}, nil
+// NewHttpMessageSender returns a new HttpMessageSender instance with the given target and client.
+func NewHttpMessageSender(target string, client *http.Client) *HttpMessageSender {
+	return &HttpMessageSender{Client: client, Target: target}
 }
 
 func (s *HttpMessageSender) NewRequestWithTarget(ctx context.Context, target string) (*http.Request, error) {

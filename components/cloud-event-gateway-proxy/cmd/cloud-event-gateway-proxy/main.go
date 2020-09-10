@@ -31,10 +31,7 @@ func main() {
 	defer client.CloseIdleConnections()
 
 	// configure message sender
-	messageSender, err := sender.NewHttpMessageSender(cfg.EmsPublishURL, client)
-	if err != nil {
-		logger.Fatalf("Unable to create message sender with error: %s", err)
-	}
+	messageSender := sender.NewHttpMessageSender(cfg.EmsPublishURL, client)
 
 	// start handler which blocks until it receives a shutdown signal
 	if err := handler.NewHandler(messageReceiver, messageSender, cfg.RequestTimeout, logger).Start(ctx); err != nil {
