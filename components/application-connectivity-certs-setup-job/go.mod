@@ -27,3 +27,5 @@ require (
 	k8s.io/utils v0.0.0-20200603063816-c1c6865ac451 // indirect
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
+
+replace golang.org/x/text => golang.org/x/text v0.3.3

@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
-  title: Orders service and events API
-  version: 0.0.2
+  title: Orders service API
+  version: 0.1.0
 tags:
   - name: orders
   - name: webhook
@@ -39,7 +39,7 @@ paths:
         '500':
           description: Internal server error.
     delete:
-      description: Delete orders collection.
+      description: Delete an orders collection.
       tags:
         - orders
       requestBody:
@@ -130,8 +130,9 @@ components:
           example: "PICKUP_COMPLETE"
           description: Order consignment status
       required:
-        - orderId
-        - total
+        - orderCode
+        - consignmentCode
+        - consignmentStatus
     OrderList:
       type: array
       items:
