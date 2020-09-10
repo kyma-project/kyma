@@ -38,13 +38,6 @@ rules:
       - delete
       - list
   - apiGroups:
-      - applicationconnector.kyma-project.io
-    resources:
-      - eventactivations
-    verbs:
-      - get
-      - list
-  - apiGroups:
       - authentication.istio.io
     resources:
       - policies
