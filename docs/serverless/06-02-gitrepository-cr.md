@@ -11,7 +11,7 @@ kubectl get crd gitrepositories.serverless.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample custom resource that creates a GitRepository object which points to a Git repository with the Function's source code and dependencies. This resource specifies that the repository requires an SSH key to authenticate to it and points to the Secret that stores these credentials.
+This is a sample custom resource that creates a GitRepository object pointing to a Git repository with the Function's source code and dependencies. This resource specifies that the repository requires an SSH key to authenticate to it and points to the Secret that stores these credentials.
 
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha1
