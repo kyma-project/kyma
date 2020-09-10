@@ -3,7 +3,9 @@ title: Create a Function from Git Repository
 type: Tutorials
 ---
 
-This tutorial shows how you can create a sample Function from Git repository based on [orders service example](https://github.com/kyma-project/examples/tree/master/orders-service).
+Create a sample Function from code and dependencies stored in a Git repository. The tutorial is based on the Function from the [`orders service` example](https://github.com/kyma-project/examples/tree/master/orders-service). It shows how you can fetch Function's source code and dependencies from a public Git repository that does not require any authentication method.
+
+> **NOTE:** Read more about [Git source type](#details-git-source-type) and different ways of securing your repository.
 
 ## Steps
 
@@ -11,8 +13,8 @@ Follows these steps:
 
 <div tabs name="steps" group="create-function">
   <details>
-  <summary label="cli">
-  CLI
+  <summary label="kubectl">
+  kubectl
   </summary>
 
 1. Export these variables:
@@ -22,7 +24,7 @@ Follows these steps:
     export NAMESPACE={FUNCTION_NAMESPACE}
     ```
 
-    (Optional) If you are willing to use a private repository, create a secret with credentials to the repository:
+If you use a secured repository, you must first create a Secret with basic authentication to this repository in the same Namespace as the Function:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -40,7 +42,7 @@ Follows these steps:
 
     >**NOTE** To see other authorization methods, go to the [documentation]().
 
-2. Create a GitRepository CR that specifies the Git repository metadata:
+2. Create a [GitRepository CR](#custom-resource-git-repository) that specifies the Git repository metadata:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -54,7 +56,7 @@ Follows these steps:
     EOF
     ```
    
-    >**NOTE** If you are using a private repository, add `auth` object with `type` and `secretName` fields to the spec. For details, see [documentation]().
+    >**NOTE:** If you use a secured repository, add the **auth** object with the **type** and **secretName** fields to the spec.
 
 3. Create a Function CR that specifies the Function's logic:
 
@@ -74,9 +76,9 @@ Follows these steps:
     EOF
     ```
 
-    >**NOTE** To see the function files, go to [this](https://github.com/kyma-project/examples/tree/master/orders-service/function) page. 
+    >**NOTE:** See this [Function's code and dependencies](https://github.com/kyma-project/examples/tree/master/orders-service/function).
 
-4. Check if your Function was created successfully and all conditions are set to `True`:
+4. Check if your Function was created and all conditions are set to `True`:
 
     ```bash
     kubectl get functions $NAME -n $NAMESPACE
@@ -97,9 +99,9 @@ Follows these steps:
 
 1. Create a Namespace or select one from the drop-down list in the top navigation panel.
 
-    (Optional) If you are willing to use a private repository, to authorize with basic authentication create a secret with credentials to the repository:
+    If you use a secured repository, you must first create a Secret with basic authentication to this repository in the same Namespace as the Function. To do that, follow these substeps:
 
-    1. Save yaml file with secret on your hard drive:
+    a. On your machine, create this YAML file with the Secret definition:
     ```yaml
     apiVersion: v1
     kind: Secret
@@ -112,21 +114,21 @@ Follows these steps:
     ```
    >**NOTE** To see other possible authorization methods, go to the [documentation]().
    
-   2. Go to the namespace view and click **Deploy new resource**.
-   3. Select secret file and click **Deploy**.
+   b. Go to your Namespace view and select **Deploy new resource**.
+   c. Locate the YAML file with the Secret and select **Deploy**.
 
-2. Go to the **Functions** view in the left navigation panel and select **Repositories** tab.
+2. Go to the **Functions** view in the left navigation panel and select the **Repositories** tab.
 
-3. Click **Connect Repository**, fill the `Url` field with `https://github.com/kyma-project/examples.git` value and click **Connect**.
+3. Select **Connect Repository**, fill in the `Url` field with `https://github.com/kyma-project/examples.git`, and confirm by selecting **Connect**.
 
-    >**NOTE** If you want connect the private repository, change the `Authorization` field from `Public` to `Key` or `Basic` and fill the required fields. For details, see [documentation]().
+    >**NOTE:** If you want to connect the secured repository with basic authentication, change the **Authorization** field from `Public` to `Basic` and fill the required fields.
 
-4. Go to the **Functions** tab and click **Create Function**.
+4. Go to the **Functions** tab and select **Create Function**.
 
 5. In the pop-up box, change `Source type` to `From Repository`, select created Repository's name, fill the `Reference` field with `master` and `Base directory` field with `orders-service/function` values and select **Create** to confirm changes.
 
-    The pop-up box closes and the message appears on the screen after a while, confirming that the Function was created successfully.
-    The new Function should have the `RUNNING` status in the list of all Functions under the **Functions** view.
+    The pop-up box closes and the message appears on the screen after a while, confirming that the Function was created.
+    Make sure that new Function has the `RUNNING` status in the list of all Functions under the **Functions** view.
 
     </details>
 </div>
