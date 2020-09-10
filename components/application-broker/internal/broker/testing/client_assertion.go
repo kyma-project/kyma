@@ -17,6 +17,8 @@ import (
 	rt "knative.dev/pkg/reconciler/testing"
 )
 
+const knBrokerMetricPort = uint32(9090)
+
 // NewFakeClients initializes fake Clientsets with an optional list of API objects.
 func NewFakeClients(objs ...runtime.Object) (*eventingfake.Clientset, *k8sfake.Clientset, *istiofake.Clientset, *eaFake.Clientset) {
 	ls := NewListers(objs)
@@ -128,7 +130,6 @@ func peerAuthenticationEqual() cmp.Option {
 		}
 
 		var mtlsP1, mtlsP2 *securityv1beta1apis.PeerAuthentication_MutualTLS
-		knBrokerMetricPort := uint32(9090)
 		if mP1, ok := p1.Spec.PortLevelMtls[knBrokerMetricPort]; ok {
 			mtlsP1 = mP1
 		}
