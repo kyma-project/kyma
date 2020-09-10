@@ -54,5 +54,5 @@ $(cmds_images_push): %.push: %
 	docker image push $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($@_img_name):$(TAG)
 
 # override image goals from common Makefile because we need to build several images
-build-image: $(cmds_images) ;
-push-image: $(cmds_images_push) ;
+build-image: $(cmds_images)
+push-image: $(cmds_images_push)
