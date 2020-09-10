@@ -21,13 +21,10 @@ import (
 	appconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	istioauthenticationv1alpha1apis "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	istioclientset "istio.io/client-go/pkg/clientset/versioned"
-
-	kymaeventingclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 )
 
 const (
 	appBrokerServiceClass         = "application-broker"
-	serviceInstanceKind           = "ServiceInstance"
 	eventsServiceEntryType        = "Events"
 	policyKnativeBrokerLabelKey   = "eventing.knative.dev/broker"
 	policyKnativeBrokerLabelValue = "default"
@@ -42,7 +39,6 @@ type istioPolicyByNamespace = map[string]*istioauthenticationv1alpha1apis.Policy
 // serviceInstanceManager performs operations on ServiceInstances.
 type serviceInstanceManager struct {
 	svcCatalogClient servicecatalogclientset.Interface
-	kymaClient       kymaeventingclientset.ApplicationconnectorV1alpha1Interface
 	dynClient        dynamic.Interface
 	istioClient      istioclientset.Interface
 
@@ -52,24 +48,18 @@ type serviceInstanceManager struct {
 }
 
 // newServiceInstanceManager creates and initializes a serviceInstanceManager.
-func newServiceInstanceManager(svcCatalogClient servicecatalogclientset.Interface,
-	kymaClient kymaeventingclientset.ApplicationconnectorV1alpha1Interface, dynClient dynamic.Interface,
+func newServiceInstanceManager(svcCatalogClient servicecatalogclientset.Interface, dynClient dynamic.Interface,
 	istioClient istioclientset.Interface,
 	namespaces []string) (*serviceInstanceManager, error) {
 
 	m := &serviceInstanceManager{
 		svcCatalogClient: svcCatalogClient,
-		kymaClient:       kymaClient,
 		dynClient:        dynClient,
 		istioClient:      istioClient,
 	}
 
 	if err := m.populateServiceInstances(namespaces); err != nil {
 		return nil, errors.Wrap(err, "populating ServiceInstances cache")
-	}
-
-	if err := m.populateEventActivationIndex(namespaces); err != nil {
-		return nil, errors.Wrap(err, "populating EventActivation index")
 	}
 
 	if err := m.populateIstioPolicies(namespaces); err != nil {
@@ -190,37 +180,6 @@ func (m *serviceInstanceManager) buildServiceClassIndex() (eventsServiceClasses,
 	return eventsSvcClasses, nil
 }
 
-// populateEventActivationIndex populates the local index of EventActivations.
-func (m *serviceInstanceManager) populateEventActivationIndex(namespaces []string) error {
-	m.eventActivationsIndex = make(eventActivationsByServiceInstanceAndNamespace)
-
-	for _, ns := range namespaces {
-		eventActivationsBySvcInstance := make(eventActivationsByServiceInstance)
-
-		eas, err := m.kymaClient.EventActivations(ns).List(metav1.ListOptions{})
-		switch {
-		case apierrors.IsNotFound(err):
-			return NewTypeNotFoundError(err.(*apierrors.StatusError).ErrStatus.Details.Kind)
-		case err != nil:
-			return errors.Wrapf(err, "listing EventActivations in namespace %s", ns)
-		}
-
-		for _, ea := range eas.Items {
-			for _, eventingServiceInstance := range m.serviceInstances {
-				if eventingServiceInstance.Spec.ServiceClassRef.Name == ea.Name {
-					eventActivationsBySvcInstance[eventingServiceInstance.Name] = ea.Name
-				}
-			}
-		}
-
-		if len(eventActivationsBySvcInstance) != 0 {
-			m.eventActivationsIndex[ns] = eventActivationsBySvcInstance
-		}
-	}
-
-	return nil
-}
-
 // recreateAll re-creates all ServiceInstance objects listed in the serviceInstanceManager. This ensures the Kyma
 // Application broker re-triggers the provisioning of Kyma Applications.
 func (m *serviceInstanceManager) recreateAll() error {
@@ -249,14 +208,6 @@ func (m *serviceInstanceManager) recreateServiceInstance(svci servicecatalogv1be
 
 	if err := m.waitForServiceInstanceDeletion(svci.Namespace, svci.Name); err != nil {
 		return errors.Wrapf(err, "waiting for deletion of ServiceInstance %q", svciKey)
-	}
-
-	eaName := m.eventActivationsIndex[svci.Namespace][svci.Name]
-	eaKey := fmt.Sprintf("%s/%s", svci.Namespace, eaName)
-
-	log.Printf("++ Waiting for deletion of EventActivation %q", eaKey)
-	if err := m.waitForEventActivationDeletion(svci.Namespace, eaName); err != nil {
-		return errors.Wrapf(err, "waiting for deletion of EventActivation %q", eaKey)
 	}
 
 	// Sanitize the ServiceInstance to avoid the following error from the webhook
@@ -293,22 +244,6 @@ func (m *serviceInstanceManager) waitForServiceInstanceDeletion(ns, name string)
 	}
 
 	return wait.PollImmediateUntil(time.Second, expectNoServiceInstance, newTimeoutChannel())
-}
-
-// waitForEventActivationDeletion waits for the deletion of an EventActivation.
-func (m *serviceInstanceManager) waitForEventActivationDeletion(ns, name string) error {
-	var expectNoEventActivation wait.ConditionFunc = func() (bool, error) {
-		_, err := m.kymaClient.EventActivations(ns).Get(name, metav1.GetOptions{})
-		switch {
-		case apierrors.IsNotFound(err):
-			return true, nil
-		case err != nil:
-			return false, err
-		}
-		return false, nil
-	}
-
-	return wait.PollImmediateUntil(time.Second, expectNoEventActivation, newTimeoutChannel())
 }
 
 // createServiceInstanceWithRetry creates a ServiceInstance and retries in case of failure.
@@ -359,8 +294,8 @@ func (m *serviceInstanceManager) populateIstioPolicies(namespaces []string) erro
 			return fmt.Errorf("only one Istio Policy expected, got %d instead", cntIstioPolicies)
 		}
 		if cntIstioPolicies == 0 {
-			log.Printf("No Istio Policy found with label selector: %s", labelSelector)
-			return nil
+			log.Printf("No Istio Policy found with label selector: %s in ns: %s", labelSelector, ns)
+			continue
 		}
 
 		// yeah - we found it
