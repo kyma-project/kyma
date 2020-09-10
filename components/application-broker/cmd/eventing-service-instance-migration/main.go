@@ -77,7 +77,6 @@ func initClientSets() (*kubernetes.Clientset,
 	cfg := getRESTConfig()
 
 	return kubernetes.NewForConfigOrDie(cfg),
-		//kymaeventingclientset.NewForConfigOrDie(cfg),
 		servicecatalogclientset.NewForConfigOrDie(cfg),
 		dynamic.NewForConfigOrDie(cfg),
 		istioclientset.NewForConfigOrDie(cfg)

@@ -308,12 +308,11 @@ func (m *serviceInstanceManager) populateIstioPolicies(namespaces []string) erro
 // deletePopulatedIstioPolicies deleted all Istio Policies which belong to a knative broker
 func (m *serviceInstanceManager) deletePopulatedIstioPolicies() error {
 
+	if m.istioBrokerPolicies == nil {
+		log.Printf("No Istio policies to be deleted!")
+		return nil
+	}
 	for ns, istioPolicy := range m.istioBrokerPolicies {
-
-		if m.istioBrokerPolicies == nil {
-			return nil
-		}
-
 		log.Printf("+ Deleting Istio Policy with name: %s in namespace: %s", istioPolicy.Name, ns)
 		if err := m.istioClient.AuthenticationV1alpha1().Policies(ns).Delete(
 			istioPolicy.Name, &metav1.DeleteOptions{},

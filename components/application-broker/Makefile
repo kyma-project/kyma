@@ -25,13 +25,6 @@ $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
 build-local: $(cmds) test-local ;
 
-#GOBUILD_FLAGS := -v
-#$(cmds): %: resolve-local
-#	@echo "+ Building $*"
-#	@CGO_ENABLED=0 go build -o $* \
-#		$(GOBUILD_FLAGS) \
-#		$(PKG)/cmd/$*
-
 .PHONY: clean
 clean: $(cmds_clean) resolve_clean licenses_clean
 
@@ -61,5 +54,5 @@ $(cmds_images_push): %.push: %
 	docker image push $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($@_img_name):$(TAG)
 
 # override image goals from common Makefile because we need to build several images
-build-image: $(cmds_images) ;
-push-image: $(cmds_images_push) ;
+build-image: $(cmds_images)
+push-image: $(cmds_images_push)
