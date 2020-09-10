@@ -44,3 +44,7 @@ rules:
 - apiGroups: ["authentication.istio.io"]
   resources: ["policies"]
   verbs: ["create","update", "get"]
+# Istio peerauthentiactions for Knative brokers
+- apiGroups: ["security.istio.io"]
+  resources: ["peerauthentications"]
+  verbs: ["create","update", "get"]

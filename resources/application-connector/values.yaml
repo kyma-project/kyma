@@ -47,11 +47,13 @@ global:
   application_registry_tests:
     version: "PR-9356"
   application_broker:
-    version: "1acc510b"
+    version: "PR-9389"
   application_connectivity_certs_setup_job:
     version: "PR-9214"
   application_connectivity_validator:
     version: "PR-9349"
+  application_broker_eventing_migration:
+    version: "PR-9389"
 
 application_connectivity_certs_setup_job:
   secrets:
