@@ -29,9 +29,9 @@ spec:
             - |
 {{ include (print $.Template.BasePath "/_helper_tests.txt") . | indent 14 }}
           env:
-            - name: APP_RUN_RUNTIME_SCENARIO
+            - name: APP_TEST_RUN_RUNTIME_SCENARIO
               value: "{{ .Values.tests.envs.runRuntimeScenario }}"
-            - name: APP_RUN_GITOPS_SCENARIO
+            - name: APP_TEST_RUN_GITOPS_SCENARIO
               value: "{{ .Values.tests.envs.runGitopsScenario }}"
             - name: APP_TEST_WAIT_TIMEOUT
               value: "{{ .Values.tests.envs.waitTimeout }}"
