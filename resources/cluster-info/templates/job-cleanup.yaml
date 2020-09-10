@@ -6,7 +6,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: post-install, post-upgrade
-    # helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "1"
 spec:
   backoffLimit: 3
@@ -25,7 +25,7 @@ spec:
             - /bin/bash
             - -c
             - |
-              echo "TODO: Cleanup"
+{{ .Files.Get "files/cleanup.sh" | printf "%s" | nindent 14 }}
           terminationMessagePolicy: "FallbackToLogsOnError"
 ---
 apiVersion: v1
@@ -34,7 +34,7 @@ metadata:
   name: {{ include "cluster-info.fullname" . }}-cleanup
   namespace: {{ .Release.Namespace }}
   annotations:
-    helm.sh/hook: pre-install, pre-upgrade
+    helm.sh/hook: post-install, post-upgrade
     helm.sh/hook-weight: "1"
 ---
 kind: ClusterRole
@@ -42,18 +42,23 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "cluster-info.fullname" . }}-cleanup
   annotations:
-    helm.sh/hook: pre-install, pre-upgrade
+    helm.sh/hook: post-install, post-upgrade
     helm.sh/hook-weight: "1"
 rules:
   - apiGroups: [""]
-    resources: ["configmaps"]
+    resources: ["namespaces"]
     verbs:
-      - delete
+      - get
     resourceNames:
-      - net-global-overrides
+      - istio-system
+      - kyma-system
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "create", "delete"]
   - apiGroups: [""]
     resources: ["secrets"]
     verbs:
+      - get
       - delete
     resourceNames:
       - kyma-gateway-certs
@@ -65,7 +70,7 @@ metadata:
   name: {{ include "cluster-info.fullname" . }}-cleanup
   namespace: {{ .Release.Namespace }}
   annotations:
-    helm.sh/hook: pre-install, pre-upgrade
+    helm.sh/hook: post-install, post-upgrade
     helm.sh/hook-weight: "1"
 subjects:
   - kind: ServiceAccount

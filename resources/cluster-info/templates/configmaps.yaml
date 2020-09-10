@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.configMapName }}
+  name: {{ .Values.configMapName }}-copy
   namespace: {{ .Release.Namespace }}
   labels:
     installer: overrides
