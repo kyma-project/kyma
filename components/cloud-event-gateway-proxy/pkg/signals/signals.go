@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	// onlyOneSignalHandler to make that only one signal handler is registered.
+	// onlyOneSignalHandler to make sure that only one signal handler is registered.
 	onlyOneSignalHandler = make(chan struct{})
 
 	// shutdownSignals array of system signals to cause shutdown.
