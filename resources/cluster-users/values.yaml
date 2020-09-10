@@ -32,6 +32,7 @@ clusterRoles:
       - "authentication.istio.io"
       - "config.istio.io"
       - "networking.istio.io"
+      - "security.istio.io"
     kyma:
       - "applicationconnector.kyma-project.io"
       - "authentication.kyma-project.io"
