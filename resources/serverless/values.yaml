@@ -18,6 +18,7 @@ runtimeMigration:
 
 tests:
   enabled: true
+
   long:
     initTimeout: 120s
     resources:
@@ -36,7 +37,7 @@ tests:
 
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "1088c1af"
+    tag: "PR-9422"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -48,6 +49,8 @@ tests:
       memory: 64Mi
       cpu: 200m
   envs:
+    runRuntimeScenario: "true"
+    runGitopsScenario: "false"
     waitTimeout: 15m
     verifySSL: "false"
     verbose: "true"
