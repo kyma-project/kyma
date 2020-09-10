@@ -90,7 +90,7 @@ func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	statusCode, dispatchTime, respBody := h.send(ctx, event)
 	h.writeResponse(writer, statusCode, respBody)
 
-	h.Logger.Infof("Event dispatch statusCode:[%d] duration:[%s] responseBody:[%s]", statusCode, dispatchTime, respBody)
+	h.Logger.Infof("Event dispatched id:[%s] statusCode:[%d] duration:[%s] responseBody:[%s]", event.ID(), statusCode, dispatchTime, respBody)
 }
 
 func (h *Handler) writeResponse(writer http.ResponseWriter, statusCode int, respBody []byte) {
@@ -110,7 +110,7 @@ func (h *Handler) receive(ctx context.Context, event *cev2event.Event) {
 		event = &newEvent
 	}
 
-	h.Logger.Infof("Event received id: %s", event.ID())
+	h.Logger.Infof("Event received id:[%s]", event.ID())
 }
 
 func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.Duration, []byte) {
