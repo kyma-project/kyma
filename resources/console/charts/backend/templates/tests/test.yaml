@@ -33,7 +33,7 @@ spec:
           image: {{ .Values.global.containerRegistry.path }}/console-backend-service-test:{{ .Values.global.console_backend_service_test.version }}
           env:
             - name: MOCKICE_IMAGE
-              value: hudymi/mockice:0.1.1
+              value: eu.gcr.io/kyma-project/external/hudymi/mockice:0.1.3
             - name: DOMAIN
               value: "{{ .Values.global.ingress.domainName }}"
             - name: GRAPHQL_ENDPOINT

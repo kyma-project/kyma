@@ -10,8 +10,9 @@ import (
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
+	v1 "k8s.io/api/rbac/v1"
 	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	v1 "knative.dev/pkg/apis/duck/v1"
+	v11 "knative.dev/pkg/apis/duck/v1"
 )
 
 type AddonsConfiguration struct {
@@ -151,6 +152,16 @@ type ClusterMicroFrontend struct {
 	Placement       string            `json:"placement"`
 	PreloadURL      string            `json:"preloadUrl"`
 	NavigationNodes []*NavigationNode `json:"navigationNodes"`
+}
+
+type ClusterRoleBindingEvent struct {
+	Type               SubscriptionEventType  `json:"type"`
+	ClusterRoleBinding *v1.ClusterRoleBinding `json:"clusterRoleBinding"`
+}
+
+type ClusterRoleBindingInput struct {
+	RoleName string                `json:"roleName"`
+	Subjects []*RoleBindingSubject `json:"subjects"`
 }
 
 type ClusterServiceBroker struct {
@@ -543,6 +554,22 @@ type ResourceValuesInput struct {
 	CPU    *string `json:"cpu"`
 }
 
+type RoleBindingEvent struct {
+	Type        SubscriptionEventType `json:"type"`
+	RoleBinding *v1.RoleBinding       `json:"roleBinding"`
+}
+
+type RoleBindingInput struct {
+	RoleName string                `json:"roleName"`
+	RoleKind RoleKind              `json:"roleKind"`
+	Subjects []*RoleBindingSubject `json:"subjects"`
+}
+
+type RoleBindingSubject struct {
+	Name string      `json:"name"`
+	Kind SubjectKind `json:"kind"`
+}
+
 type Secret struct {
 	Name         string    `json:"name"`
 	Namespace    string    `json:"namespace"`
@@ -684,10 +711,10 @@ type ServiceStatus struct {
 }
 
 type TriggerCreateInput struct {
-	Name             *string         `json:"name"`
-	Broker           string          `json:"broker"`
-	FilterAttributes JSON            `json:"filterAttributes"`
-	Subscriber       *v1.Destination `json:"subscriber"`
+	Name             *string          `json:"name"`
+	Broker           string           `json:"broker"`
+	FilterAttributes JSON             `json:"filterAttributes"`
+	Subscriber       *v11.Destination `json:"subscriber"`
 }
 
 type TriggerEvent struct {
@@ -1167,6 +1194,47 @@ func (e PodStatusType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type RoleKind string
+
+const (
+	RoleKindRole        RoleKind = "Role"
+	RoleKindClusterRole RoleKind = "ClusterRole"
+)
+
+var AllRoleKind = []RoleKind{
+	RoleKindRole,
+	RoleKindClusterRole,
+}
+
+func (e RoleKind) IsValid() bool {
+	switch e {
+	case RoleKindRole, RoleKindClusterRole:
+		return true
+	}
+	return false
+}
+
+func (e RoleKind) String() string {
+	return string(e)
+}
+
+func (e *RoleKind) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RoleKind(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RoleKind", str)
+	}
+	return nil
+}
+
+func (e RoleKind) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type ServiceBindingStatusType string
 
 const (
@@ -1297,6 +1365,47 @@ func (e *ServiceProtocol) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ServiceProtocol) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type SubjectKind string
+
+const (
+	SubjectKindUser  SubjectKind = "User"
+	SubjectKindGroup SubjectKind = "Group"
+)
+
+var AllSubjectKind = []SubjectKind{
+	SubjectKindUser,
+	SubjectKindGroup,
+}
+
+func (e SubjectKind) IsValid() bool {
+	switch e {
+	case SubjectKindUser, SubjectKindGroup:
+		return true
+	}
+	return false
+}
+
+func (e SubjectKind) String() string {
+	return string(e)
+}
+
+func (e *SubjectKind) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SubjectKind(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SubjectKind", str)
+	}
+	return nil
+}
+
+func (e SubjectKind) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

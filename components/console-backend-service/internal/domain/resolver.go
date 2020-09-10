@@ -8,6 +8,8 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/roles"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/oauth"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing"
@@ -47,6 +49,7 @@ type Resolver struct {
 	serverless *serverless.PluggableContainer
 	eventing   *eventing.Resolver
 	oauth      *oauth.Resolver
+	roles      *roles.Resolver
 }
 
 func GetRandomNumber() time.Duration {
@@ -114,6 +117,13 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	oAuthResolver := oauth.New(genericServiceFactory)
 	makePluggable(oAuthResolver)
 
+	rolesResolver := roles.New(genericServiceFactory)
+	makePluggable(rolesResolver)
+	err = rolesResolver.Enable() // enable manually
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing roles resolver")
+	}
+
 	return &Resolver{
 		k8s:        k8sResolver,
 		ui:         uiContainer.Resolver,
@@ -125,6 +135,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 		serverless: serverlessResolver,
 		eventing:   eventingResolver,
 		oauth:      oAuthResolver,
+		roles:      rolesResolver,
 	}, nil
 }
 
@@ -143,4 +154,5 @@ func (r *Resolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.eventing.StopCacheSyncOnClose(stopCh)
 	r.serverless.StopCacheSyncOnClose(stopCh)
 	r.oauth.StopCacheSyncOnClose(stopCh)
+	r.roles.StopCacheSyncOnClose(stopCh)
 }

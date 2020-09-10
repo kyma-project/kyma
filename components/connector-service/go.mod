@@ -30,4 +30,5 @@ require (
 
 replace (
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v0.8.0
+	golang.org/x/text => golang.org/x/text v0.3.3
 )
