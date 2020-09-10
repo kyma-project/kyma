@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	// DefaultShutdownTimeout the default timeout for the receiver to shutdown.
-	DefaultShutdownTimeout = time.Minute * 1
+	// defaultShutdownTimeout the default timeout for the receiver to shutdown.
+	defaultShutdownTimeout = time.Minute * 1
 )
 
 // HttpMessageReceiver is responsible for receiving messages over HTTP.
@@ -50,7 +50,7 @@ func (recv *HttpMessageReceiver) StartListen(ctx context.Context, handler http.H
 	// wait for the server to return or ctx.Done().
 	select {
 	case <-ctx.Done():
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultShutdownTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), defaultShutdownTimeout)
 		defer cancel()
 		err := recv.server.Shutdown(ctx)
 		<-errChan // Wait for server goroutine to exit
