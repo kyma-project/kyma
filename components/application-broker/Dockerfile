@@ -14,7 +14,7 @@ WORKDIR $SRC_DIR
 
 RUN CGO_ENABLED=0 go build -o /application-broker ./cmd/broker
 
-FROM alpine:latest as certs
+FROM eu.gcr.io/kyma-project/external/alpine:3.12.0 as certs
 RUN apk --no-cache add ca-certificates
 
 FROM scratch
