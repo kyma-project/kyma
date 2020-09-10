@@ -25,7 +25,11 @@ import (
 
 const scenarioKey = "scenario"
 
-func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Logger) ([]step.Step, error) {
+func RuntimeRun(cfg testsuite.Config) bool {
+	return cfg.RunRuntimeScenario
+}
+
+func RuntimeSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Logger) ([]step.Step, error) {
 	currentDate := time.Now()
 	cfg.Namespace = fmt.Sprintf("%s-%dh-%dm-%ds", "test-parallel", currentDate.Hour(), currentDate.Minute(), currentDate.Second())
 

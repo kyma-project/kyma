@@ -34,4 +34,6 @@ type Config struct {
 	Cleanup            step.CleanupMode `envconfig:"default=yes"`
 	GitServerImage     string           `envconfig:"default=eu.gcr.io/kyma-project/gitserver:PR-2696"`
 	GitServerRepoName  string           `envconfig:"default=function"`
+	RunRuntimeScenario            bool             `envconfig:"default=true"`
+	RunGitopsScenario            bool             `envconfig:"default=true"`
 }

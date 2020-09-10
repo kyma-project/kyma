@@ -20,6 +20,10 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+func GitopsRun(cfg testsuite.Config) bool {
+	return cfg.RunGitopsScenario
+}
+
 func GitopsSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Logger) ([]step.Step, error) {
 	currentDate := time.Now()
 	cfg.Namespace = fmt.Sprintf("%s-%dh-%dm-%ds", "test-parallel", currentDate.Hour(), currentDate.Minute(), currentDate.Second())

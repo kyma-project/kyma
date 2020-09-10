@@ -26,34 +26,37 @@ type config struct {
 }
 
 func TestRuntimes(t *testing.T) {
-	runTests(t, scenarios.FunctionTestStep)
+	runTests(t, scenarios.RuntimeSteps, scenarios.RuntimeRun)
 }
 
 func TestGitops(t *testing.T) {
-	runTests(t, scenarios.GitopsSteps)
+	runTests(t, scenarios.GitopsSteps, scenarios.GitopsRun)
 }
 
 type testRunner func(*rest.Config, testsuite.Config, *logrus.Logger) ([]step.Step, error)
+type testRun func(testsuite.Config) bool
 
-func runTests(t *testing.T, testFunc testRunner) {
+func runTests(t *testing.T, testRunner testRunner, testRun testRun) {
 	rand.Seed(time.Now().UnixNano())
 	g := gomega.NewGomegaWithT(t)
 
 	cfg, err := loadConfig("APP")
 	failOnError(g, err)
 
-	restConfig := controllerruntime.GetConfigOrDie()
+	if testRun(cfg.Test) {
+		restConfig := controllerruntime.GetConfigOrDie()
 
-	logf := logrus.New()
-	logf.SetFormatter(&logrus.TextFormatter{})
-	logf.SetReportCaller(false)
+		logf := logrus.New()
+		logf.SetFormatter(&logrus.TextFormatter{})
+		logf.SetReportCaller(false)
 
-	steps, err := testFunc(restConfig, cfg.Test, logf)
-	failOnError(g, err)
-	runner := step.NewRunner(step.WithCleanupDefault(cfg.Test.Cleanup), step.WithLogger(logf))
+		steps, err := testRunner(restConfig, cfg.Test, logf)
+		failOnError(g, err)
+		runner := step.NewRunner(step.WithCleanupDefault(cfg.Test.Cleanup), step.WithLogger(logf))
 
-	err = runner.Execute(steps)
-	failOnError(g, err)
+		err = runner.Execute(steps)
+		failOnError(g, err)
+	}
 }
 
 func loadConfig(prefix string) (config, error) {
