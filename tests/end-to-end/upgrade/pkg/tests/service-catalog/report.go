@@ -397,7 +397,11 @@ func (r *Report) AddLogs(name string, logs []string, grepWords []string, err err
 		if err != nil {
 			// if log is not in `{"level":"", "log":{"message":""}}` schema then report cannot unmarshal them
 			// log will be save only if contains grep words
+			var logWithGrepWord string
 			if log := r.grep(singleLog, grepWords); log != "" {
+				logWithGrepWord = strings.ToLower(log)
+			}
+			if log := r.grep(logWithGrepWord, []string{"error"}); log != "" {
 				r.Logs[name] = append(r.Logs[name], fmt.Sprintf("[unsupportedSchema] %s", log))
 			}
 			continue
