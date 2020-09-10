@@ -75,7 +75,7 @@ spec:
             value: "/etc/ingress-tls-cert/tls.crt"
           {{ end }}
           - name: APP_TRACING_COLLECTOR_URL
-            value: {{ .Values.global.tracing.zipkinAddress }}/api/v1/spans
+            value: http://{{ .Values.global.tracing.zipkinAddress }}/api/v1/spans
           - name: APP_TRACING_DEBUG
             value: "{{ .Values.tracing.debug }}"
           - name: APP_TRACING_SERVICE_SPAN_NAME

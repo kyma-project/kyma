@@ -2,7 +2,7 @@ global:
   isLocalEnv: false
   tracing:
     enabled: true
-    zipkinAddress: http://zipkin.kyma-system:9411
+    zipkinAddress: zipkin.kyma-system:9411
     sampleRate: 0
 
 knative-eventing:

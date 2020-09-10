@@ -1252,7 +1252,7 @@ metadata:
 apiVersion: v1
 data:
   enable: {{ quote .Values.global.tracing.enabled }}
-  zipkin-endpoint: {{ printf "%s/%s" .Values.global.tracing.zipkinAddress "api/v2/spans" }}
+  zipkin-endpoint: {{ print "http://" .Values.global.tracing.zipkinAddress "/api/v2/spans" }}
   sample-rate: {{ quote .Values.global.tracing.sampleRate }}
   _example: |
     ################################
