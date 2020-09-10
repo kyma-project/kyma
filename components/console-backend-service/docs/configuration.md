@@ -2,7 +2,7 @@
 
 This document describes configuration details of the application.
 
-## Environmental Variables
+## Environment Variables
 
 Use the following environment variables to configure the application:
 

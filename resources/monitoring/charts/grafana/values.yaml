@@ -222,7 +222,7 @@ initChownData:
   ##
   image:
     repository: eu.gcr.io/kyma-project/external/busybox
-    tag: "1.31.1"
+    tag: "1.32.0"
     pullPolicy: IfNotPresent
 
   ## initChownData resource requests and limits
@@ -273,13 +273,16 @@ env:
   GF_AUTH_ANONYMOUS_ORG_ROLE: "Editor"
   GF_AUTH_OAUTH_AUTO_LOGIN: "true"
   GF_AUTH_DISABLE_LOGIN_FORM: "true"
+  GF_AUTH_PROXY_ENABLED: "false"
+  GF_AUTH_PROXY_HEADER_NAME: X-AUTH-EMAIL
+  GF_AUTH_PROXY_HEADER_PROPERTY: "email"
   # https://grafana.com/docs/grafana/latest/installation/configuration/#server
   GF_SERVER_ROOT_URL: ""
   # https://grafana.com/docs/grafana/latest/auth/generic-oauth/
   GF_AUTH_GENERIC_OAUTH_CLIENT_ID: "grafana"
   GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: "apie4eeX6hiC9ainieli"
   GF_AUTH_GENERIC_OAUTH_ENABLED: "true"
-  GF_AUTH_GENERIC_OAUTH_SCOPES: "openid email"
+  GF_AUTH_GENERIC_OAUTH_SCOPES: "openid email groups"
   GF_AUTH_GENERIC_OAUTH_TOKEN_URL: "http://dex-service:5556/token"
   GF_AUTH_GENERIC_OAUTH_AUTH_URL: ""
   GF_AUTH_GENERIC_OAUTH_API_URL: ""
@@ -558,12 +561,23 @@ kyma:
   console:
     ## If true, a console backendmodule gets deployed which activates the linking to grafana in the console
     enabled: true
-
   authProxy:
     enabled: false
     replicaCount: 1
-    clientId: "grafana"
-    clientSecret: "apie4eeX6hiC9ainieli"
+    config:
+      clientId: "grafana"
+      clientSecret: "apie4eeX6hiC9ainieli"
+      tlsVerify: false
+      resources:
+        uri: "/*"
+        methods: "GET,POST,PUT,DELETE"
+        useKymaGroups: false
+        groups: ""
+        roles: ""
+      scopes: "groups"
+      headers: ""
+      matchClaims: ""
+      addClaims: ""
     nodeSelector: {}
     port: 3000
     image:
@@ -577,3 +591,10 @@ kyma:
       requests:
         cpu: 10m
         memory: 5Mi
+
+global:
+  kymaRuntime:
+    adminGroup: runtimeAdmin
+    operatorGroup: runtimeOperator
+    developerGroup: runtimeDeveloper
+    namespaceAdminGroup: runtimeNamespaceAdmin

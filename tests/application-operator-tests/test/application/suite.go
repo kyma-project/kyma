@@ -108,6 +108,10 @@ func (ts *TestSuite) RunApplicationTests(t *testing.T) {
 	}
 }
 
+func (ts *TestSuite) TestShouldRun() bool {
+	return ts.config.GatewayOncePerNamespace
+}
+
 func (ts *TestSuite) getLogsAndCleanup(t *testing.T) {
 	podsToFetch, err := ts.k8sClient.ListPods(ts.ctx, metav1.ListOptions{LabelSelector: ts.labelSelector})
 	require.NoError(t, err)
