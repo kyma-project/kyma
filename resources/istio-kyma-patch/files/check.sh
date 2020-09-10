@@ -31,15 +31,9 @@ function log() {
 
 set -e
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-
 if [[ -z ${REQUIRED_ISTIO_VERSION} ]]; then
     log "Please set REQUIRED_ISTIO_VERSION variable!" red
     exit 1
-fi
-
-if [[ -z ${CONFIG_DIR} ]]; then
-    CONFIG_DIR=${DIR}
 fi
 
 function require_istio_version() {
@@ -55,22 +49,7 @@ function require_istio_system() {
     kubectl get namespace istio-system >/dev/null
 }
 
-function check_mtls_enabled_v1() {
-    log "--> Check global mTLS"
-    local mTLS=$(kubectl get meshpolicy default -o jsonpath='{.spec.peers[0].mtls.mode}')
-    local status=$?
-    if [[ "$?" != 0 ]]; then
-      log "----> MeshPolicy istio-system/default not found!" red
-      exit 1
-    fi
-    if [[ "${mTLS}" != "STRICT" ]] && [[ "${mTLS}" != "" ]]; then
-        log "----> mTLS must be \"STRICT\"" red
-        exit 1
-    fi
-    log "----> mTLS is enabled" green
-}
-
-function check_mtls_enabled_v2() {
+function check_mtls_enabled() {
   log "--> Check global mTLS"
   local mTLS=$(kubectl get PeerAuthentication -n istio-system default -o jsonpath='{.spec.mtls.mode}')
   local status=$?
@@ -85,62 +64,6 @@ function check_mtls_enabled_v2() {
   log "----> mTLS is enabled" green
 }
 
-function check_policy_checks(){
-  log "--> Check policy checks"
-  local istioConfigmap="$(kubectl -n istio-system get cm istio -o jsonpath='{@.data.mesh}')"
-  local policyChecksDisabled=$(grep "disablePolicyChecks: true" <<< "$istioConfigmap")
-  if [[ -n ${policyChecksDisabled} ]]; then
-      log "    disablePolicyChecks must be FALSE" red
-      exit 1
-  fi
-  log "    Policy checks are enabled" green
-}
-
-function run_all_patches() {
-  echo "--> Patch resources"
-  for f in $(find ${CONFIG_DIR} -name '*\.patch\.json' -maxdepth 1); do
-    local type=$(basename ${f} | cut -d. -f2)
-    local name=$(basename ${f} | cut -d. -f1)
-    echo "    Patch $type $name from: ${f}"
-    local patch=$(cat ${f})
-    set +e
-    local out
-    out=$(kubectl patch ${type} -n istio-system ${name} --patch "$patch" --type json)
-    local result=$?
-    set -e
-    echo "$out"
-    if [[ ${result} -ne 0 ]] && [[ ! "$out" = *"NotFound"* ]] && [[ ! "$out" = *"not patched"* ]]; then
-        exit ${result}
-    fi
-  done
-}
-
-function remove_not_used() {
-  echo "--> Delete resources"
-  while read line; do
-    if [[ "$line" == "" ]]; then
-        continue
-    fi
-    echo "    Delete $line"
-    local type=$(cut -d' ' -f1 <<< ${line})
-    local name=$(cut -d' ' -f2 <<< ${line})
-    kubectl delete ${type} ${name} -n istio-system --ignore-not-found=true
-  done <${CONFIG_DIR}/delete
-}
-
-function label_namespaces(){
-  echo "--> Add 'istio-injection' label to namespaces"
-  while read line; do
-    local name
-    name=$(cut -d' ' -f1 <<< "${line}")
-    local switch
-    switch=$(cut -d' ' -f2 <<< "${line}")
-    set +e
-    kubectl label namespace "${name}" "istio-injection=${switch}" --overwrite
-    set -e
-  done <"${CONFIG_DIR}"/injection-in-namespaces
-}
-
 function check_sidecar_injector() {
   echo "--> Check sidecar injector"
   local configmap=$(kubectl -n istio-system get configmap istio-sidecar-injector -o jsonpath='{.data.config}')
@@ -153,31 +76,8 @@ function check_sidecar_injector() {
   log "    Automatic injection policy is enabled" green
 }
 
-function restart_sidecar_injector() {
-  INJECTOR_POD_NAME=$(kubectl get pods -n istio-system -l istio=sidecar-injector -o=name)
-  kubectl delete "${INJECTOR_POD_NAME}"
-}
-
-function check_requirements() {
-  while read crd; do
-    log "Require CRD ${crd}"
-    kubectl get customresourcedefinitions "${crd}"
-    if [[ $? -ne 0 ]]; then
-        log "Cannot find required CRD ${crd}" red
-        exit 1
-    fi
-    log "CRD ${crd} present" green
-  done <${CONFIG_DIR}/required-crds
-}
-
 require_istio_system
 require_istio_version
-check_mtls_enabled_v1
-check_requirements
-check_policy_checks
+check_mtls_enabled
 check_sidecar_injector
-# restart_sidecar_injector
-# run_all_patches
-# remove_not_used
-# label_namespaces
 log "Istio is configured to run Kyma!" green
