@@ -8,3 +8,5 @@ require (
 	k8s.io/apimachinery v0.16.11-rc.0
 	k8s.io/client-go v0.16.10
 )
+
+replace golang.org/x/text => golang.org/x/text v0.3.3
