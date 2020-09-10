@@ -25,13 +25,6 @@ $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
 build-local: $(cmds) test-local ;
 
-#GOBUILD_FLAGS := -v
-#$(cmds): %: resolve-local
-#	@echo "+ Building $*"
-#	@CGO_ENABLED=0 go build -o $* \
-#		$(GOBUILD_FLAGS) \
-#		$(PKG)/cmd/$*
-
 .PHONY: clean
 clean: $(cmds_clean) resolve_clean licenses_clean
 
