@@ -20,7 +20,6 @@ import (
 	istioclientset "istio.io/client-go/pkg/clientset/versioned"
 	"knative.dev/pkg/injection/sharedmain"
 
-	kymaeventingclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	appconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 )
 
@@ -43,7 +42,7 @@ func init() {
 func main() {
 	flag.Parse()
 
-	k8sClient, kymaClient, servicecatalogClient, dynClient, istioClient := initClientSets()
+	k8sClient, servicecatalogClient, dynClient, istioClient := initClientSets()
 
 	userNamespaces, err := listUserNamespaces(k8sClient)
 	if err != nil {
@@ -52,7 +51,7 @@ func main() {
 
 	// initialize managers
 
-	serviceInstanceManager, err := newServiceInstanceManager(servicecatalogClient, kymaClient, dynClient, istioClient, userNamespaces)
+	serviceInstanceManager, err := newServiceInstanceManager(servicecatalogClient, dynClient, istioClient, userNamespaces)
 	if err != nil {
 		handleAndTerminate(err, "initializing serviceInstanceManager")
 	}
@@ -70,7 +69,6 @@ func main() {
 
 // initClientSets initializes all required Kubernetes ClientSets.
 func initClientSets() (*kubernetes.Clientset,
-	*kymaeventingclientset.ApplicationconnectorV1alpha1Client,
 	*servicecatalogclientset.Clientset,
 	dynamic.Interface,
 	*istioclientset.Clientset,
@@ -79,7 +77,7 @@ func initClientSets() (*kubernetes.Clientset,
 	cfg := getRESTConfig()
 
 	return kubernetes.NewForConfigOrDie(cfg),
-		kymaeventingclientset.NewForConfigOrDie(cfg),
+		//kymaeventingclientset.NewForConfigOrDie(cfg),
 		servicecatalogclientset.NewForConfigOrDie(cfg),
 		dynamic.NewForConfigOrDie(cfg),
 		istioclientset.NewForConfigOrDie(cfg)

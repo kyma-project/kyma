@@ -25,7 +25,6 @@ import (
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 
 	appbrokerconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	kymaeventingfakeclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 )
 
 var _ k8sruntime.Object = (*istiov1alpha1.Policy)(nil)
@@ -65,24 +64,6 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				},
 			},
 		},
-		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "my-app-2",
-			},
-			Spec: appoperatorappconnectorv1alpha1.ApplicationSpec{
-				Services: []appoperatorappconnectorv1alpha1.Service{
-					// matches 0 "events" ServiceClasses ID
-					{
-						ID: "my-appbroker-class-ns1-3",
-						Entries: []appoperatorappconnectorv1alpha1.Entry{{
-							Type: "Foo",
-						}, {
-							Type: "Bar",
-						}},
-					},
-				},
-			},
-		},
 	}
 
 	testServiceClasses := []servicecatalogv1beta1.ServiceClass{
@@ -106,6 +87,7 @@ func TestNewserviceInstanceManager(t *testing.T) {
 			Spec: servicecatalogv1beta1.ServiceClassSpec{
 				// has Application broker class,
 				// is referenced by 1 "events" Application
+				// but it has no ServiceInstance
 				ServiceBrokerName: appBrokerServiceClass,
 			},
 		},
@@ -137,7 +119,9 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				Namespace: "ns2",
 			},
 			Spec: servicecatalogv1beta1.ServiceClassSpec{
-				// has Application broker class
+				// has Application broker class,
+				// is referenced by 1 "events" Application
+				// and it has 1 ServiceInstance
 				ServiceBrokerName: appBrokerServiceClass,
 			},
 		},
@@ -163,9 +147,9 @@ func TestNewserviceInstanceManager(t *testing.T) {
 			},
 			Spec: servicecatalogv1beta1.ServiceInstanceSpec{
 				// references Application broker class
-				// class is referenced by 1 "events" Application
+				// class is NOT referenced by "events" Application
 				ServiceClassRef: &servicecatalogv1beta1.LocalObjectReference{
-					Name: "my-appbroker-class-ns1-2",
+					Name: "my-appbroker-class-ns1-1",
 				},
 			},
 		},
@@ -215,6 +199,7 @@ func TestNewserviceInstanceManager(t *testing.T) {
 			Spec: servicecatalogv1beta1.ServiceInstanceSpec{
 				// references Application broker class
 				// class is referenced by 1 "events" Application
+				// with ServiceInstance
 				ServiceClassRef: &servicecatalogv1beta1.LocalObjectReference{
 					Name: "my-appbroker-class-ns2",
 				},
@@ -249,155 +234,6 @@ func TestNewserviceInstanceManager(t *testing.T) {
 		},
 	}
 
-	testEventActivations := []*appbrokerconnectorv1alpha1.EventActivation{
-		// ns1
-		{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "EventActivation",
-				APIVersion: "applicationconnector.kyma-project.io",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-ea-ns1-1",
-				Namespace: "ns1",
-				OwnerReferences: []metav1.OwnerReference{
-					// references 2 ServiceInstances
-					{
-						APIVersion: "test/v1",
-						Kind:       "Test",
-						Name:       "dummy",
-					},
-					{
-						APIVersion: "servicecatalog.k8s.io/v0",
-						Kind:       serviceInstanceKind,
-						Name:       "some-svci-ns1-1",
-					},
-					{
-						APIVersion: "servicecatalog.k8s.io/v0",
-						Kind:       serviceInstanceKind,
-						Name:       "some-svci-ns1-2",
-					},
-				},
-			},
-			Spec: appbrokerconnectorv1alpha1.EventActivationSpec{},
-		},
-		{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "EventActivation",
-				APIVersion: "applicationconnector.kyma-project.io",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-ea-ns1-2",
-				Namespace: "ns1",
-				OwnerReferences: []metav1.OwnerReference{
-					// references 1 ServiceInstance
-					{
-						APIVersion: "servicecatalog.k8s.io/v0",
-						Kind:       serviceInstanceKind,
-						Name:       "some-svci-ns1-2",
-					},
-				},
-			},
-		},
-		// ns2
-		{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "EventActivation",
-				APIVersion: "applicationconnector.kyma-project.io",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-ea-ns2",
-				Namespace: "ns2",
-				OwnerReferences: []metav1.OwnerReference{
-					// references 0 ServiceInstance
-					{
-						APIVersion: "test/v1",
-						Kind:       "Test",
-						Name:       "dummy",
-					},
-				},
-			},
-		},
-		// ns3
-		{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "EventActivation",
-				APIVersion: "applicationconnector.kyma-project.io",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-ea-ns3",
-				Namespace: "ns3",
-				OwnerReferences: []metav1.OwnerReference{
-					// references 1 ServiceInstance
-					{
-						APIVersion: "servicecatalog.k8s.io/v0",
-						Kind:       serviceInstanceKind,
-						Name:       "some-svci-ns3",
-					},
-				},
-			},
-		},
-		// ns4
-		{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "EventActivation",
-				APIVersion: "applicationconnector.kyma-project.io",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-ea-ns4-1",
-				Namespace: "ns4",
-				OwnerReferences: []metav1.OwnerReference{
-					// references 0 ServiceInstance
-					{
-						APIVersion: "test/v1",
-						Kind:       "Test",
-						Name:       "dummy",
-					},
-				},
-			},
-		},
-		{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "EventActivation",
-				APIVersion: "applicationconnector.kyma-project.io",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-ea-ns4-2",
-				Namespace: "ns4",
-				OwnerReferences: []metav1.OwnerReference{
-					// references 1 ServiceInstance
-					{
-						APIVersion: "servicecatalog.k8s.io/v0",
-						Kind:       serviceInstanceKind,
-						Name:       "some-svci-ns4",
-					},
-				},
-			},
-		},
-	}
-
-	// This sample policy has been taken from a Kyma cluster
-	// $k get policy -n eventmeshupgradetest eventmeshupgradetest-broker -oyaml
-	//
-	// apiVersion: authentication.istio.io/v1alpha1
-	// kind: Policy
-	// metadata:
-	//   creationTimestamp: "2020-08-18T14:48:36Z"
-	//   generation: 1
-	//   labels:
-	//     eventing.knative.dev/broker: default
-	//   name: eventmeshupgradetest-broker
-	//   namespace: eventmeshupgradetest
-	//   resourceVersion: "39064"
-	//   selfLink: /apis/authentication.istio.io/v1alpha1/namespaces/eventmeshupgradetest/policies/eventmeshupgradetest-broker
-	//   uid: f616754c-ec77-4cae-9bac-b10e87292276
-	// spec:
-	//   peers:
-	//   - mtls:
-	//       mode: PERMISSIVE
-	//   targets:
-	//   - name: default-broker
-	//   - name: default-broker-filter
-	//
 	testPolicies := []istiov1alpha1.Policy{
 		// policy1
 		{
@@ -406,8 +242,8 @@ func TestNewserviceInstanceManager(t *testing.T) {
 				APIVersion: "authentication.istio.io",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "ns1-broker",
-				Namespace: "ns1",
+				Name:      "ns2-broker",
+				Namespace: "ns2",
 				Labels: map[string]string{
 					policyKnativeBrokerLabelKey: policyKnativeBrokerLabelValue,
 				},
@@ -451,19 +287,8 @@ func TestNewserviceInstanceManager(t *testing.T) {
 	)
 	scCli := servicecatalogfakeclientset.NewSimpleClientset(scObjects...)
 
-	kymaCli := kymaeventingfakeclientset.NewSimpleClientset(
-		eventActivationsToObjectSlice(testEventActivations)...,
-	)
 	istioClient := istiofakeclientset.NewSimpleClientset(policiesToObjectSlice(testPolicies)...)
-	// istioClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-	// 	resource := action.GetResource()
-	// 	if action.GetVerb() == "DELETE" && resource.Group == "authentication.istio.io" {
-
-	// 	}
-	// 	// TODO:
-	// 	return false, nil, nil
-	// })
-	m, err := newServiceInstanceManager(scCli, kymaCli.ApplicationconnectorV1alpha1(), dynCli, istioClient, testUserNamespaces)
+	m, err := newServiceInstanceManager(scCli, dynCli, istioClient, testUserNamespaces)
 	if err != nil {
 		t.Fatalf("Failed to initialize serviceInstanceManager: %s", err)
 	}
@@ -475,13 +300,9 @@ func TestNewserviceInstanceManager(t *testing.T) {
 	}
 
 	// expect
-	//  1 ServiceInstance from ns1 (user namespace, only 1 instance matching expected service class)
 	//  1 ServiceInstance from ns2 (user namespace, only 1 instance matching expected service class)
-	//  0 ServiceInstance from ns3 (non-user namespace)
-	//  0 ServiceInstance from ns4 (does not contain a relevant service class)
 
 	expectSvci := sets.NewString(
-		"ns1/my-events-ns1-1",
 		"ns2/my-events-ns2-2",
 	)
 	gotSvci := sets.NewString(
@@ -489,42 +310,20 @@ func TestNewserviceInstanceManager(t *testing.T) {
 	)
 
 	if !gotSvci.Equal(expectSvci) {
-		t.Errorf("Unexpected ServiceInstances: (-:expect, +:got) %s", cmp.Diff(expectSvci, gotSvci))
-	}
-
-	// expect
-	//  2 ServiceInstances from ns1 (multiple owner refs to different ServiceInstances)
-	//  0 ServiceInstance  from ns2 (no matching owner ref)
-	//  0 ServiceInstance  from ns3 (non-user namespace)
-	//  1 ServiceInstance  from ns4 (single owner ref to single ServiceInstance)
-
-	expectEA := eventActivationsByServiceInstanceAndNamespace{
-		"ns1": eventActivationsByServiceInstance{
-			"some-svci-ns1-1": []string{"my-ea-ns1-1"},
-			"some-svci-ns1-2": []string{"my-ea-ns1-1", "my-ea-ns1-2"},
-		},
-		"ns4": eventActivationsByServiceInstance{
-			"some-svci-ns4": []string{"my-ea-ns4-2"},
-		},
-	}
-	gotEA := m.eventActivationsIndex
-
-	if diff := cmp.Diff(expectEA, gotEA); diff != "" {
-		t.Errorf("Unexpected EventActivation index: (-:expect, +:got) %s", diff)
+		t.Errorf("unexpected ServiceInstances: (-:expect, +:got) %s", cmp.Diff(expectSvci, gotSvci))
 	}
 
 	// ensure Istio Policies got deleted
 	for _, policy := range testPolicies {
-		policyDeleted := false
-		for _, action := range istioClient.Actions() {
-			if action.GetNamespace() == policy.Namespace && action.GetResource().Group == "authentication.istio.io" && action.GetVerb() == "delete" {
-				policyDeleted = true
-			}
+		policies, err := istioClient.AuthenticationV1alpha1().Policies(policy.Namespace).List(metav1.ListOptions{})
+		if err != nil {
+			t.Fatalf("failed to list policies: %v", err)
 		}
-		if !policyDeleted {
-			t.Errorf("No Istio Policy with name/namespace: %s/%s deleted!", policy.Name, policy.Namespace)
+		if len(policies.Items) != 0 {
+			t.Errorf("unexpected length of policies list found after migration:  (-:expect, +:got): -:%d +:%d ", 0, len(policies.Items))
 		}
 	}
+
 }
 
 func TestRecreateServiceInstance(t *testing.T) {
@@ -599,14 +398,6 @@ func serviceInstancesToObjectSlice(svcis []*servicecatalogv1beta1.ServiceInstanc
 	objects := make([]runtime.Object, len(svcis))
 	for i := range svcis {
 		objects[i] = svcis[i]
-	}
-	return objects
-}
-
-func eventActivationsToObjectSlice(eas []*appbrokerconnectorv1alpha1.EventActivation) []runtime.Object {
-	objects := make([]runtime.Object, len(eas))
-	for i := range eas {
-		objects[i] = eas[i]
 	}
 	return objects
 }
