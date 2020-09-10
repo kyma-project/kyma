@@ -26,24 +26,24 @@ type config struct {
 }
 
 func TestRuntimes(t *testing.T) {
-	runTests(t, scenarios.RuntimeSteps, scenarios.RuntimeRun)
+	runTests(t, scenarios.RuntimeSteps, scenarios.RunRuntime)
 }
 
 func TestGitops(t *testing.T) {
-	runTests(t, scenarios.GitopsSteps, scenarios.GitopsRun)
+	runTests(t, scenarios.GitopsSteps, scenarios.RunGitops)
 }
 
 type testRunner func(*rest.Config, testsuite.Config, *logrus.Logger) ([]step.Step, error)
-type testRun func(testsuite.Config) bool
+type runTest func(testsuite.Config) bool
 
-func runTests(t *testing.T, testRunner testRunner, testRun testRun) {
+func runTests(t *testing.T, testRunner testRunner, runTest runTest) {
 	rand.Seed(time.Now().UnixNano())
 	g := gomega.NewGomegaWithT(t)
 
 	cfg, err := loadConfig("APP")
 	failOnError(g, err)
 
-	if testRun(cfg.Test) {
+	if runTest(cfg.Test) {
 		restConfig := controllerruntime.GetConfigOrDie()
 
 		logf := logrus.New()

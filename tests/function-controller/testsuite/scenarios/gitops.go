@@ -20,7 +20,7 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-func GitopsRun(cfg testsuite.Config) bool {
+func RunGitops(cfg testsuite.Config) bool {
 	return cfg.RunGitopsScenario
 }
 

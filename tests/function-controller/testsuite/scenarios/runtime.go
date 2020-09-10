@@ -25,7 +25,7 @@ import (
 
 const scenarioKey = "scenario"
 
-func RuntimeRun(cfg testsuite.Config) bool {
+func RunRuntime(cfg testsuite.Config) bool {
 	return cfg.RunRuntimeScenario
 }
 
