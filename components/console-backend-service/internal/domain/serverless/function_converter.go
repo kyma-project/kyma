@@ -52,22 +52,24 @@ func (c *functionConverter) ToGQL(function *v1alpha1.Function) (*gqlschema.Funct
 	}
 	envVariables := c.toGQLEnv(function.Spec.Env)
 	resources := c.toGQLResources(function.Spec.Resources)
+	buildResources := c.toGQLResources(function.Spec.BuildResources)
 	replicas := c.toGQLReplicas(function.Spec.MinReplicas, function.Spec.MaxReplicas)
 	status := c.getStatus(function.Status)
 
 	return &gqlschema.Function{
-		Name:         function.Name,
-		Namespace:    function.Namespace,
-		UID:          string(function.UID),
-		Labels:       labels,
-		Source:       function.Spec.Source,
-		Dependencies: function.Spec.Deps,
-		Env:          envVariables,
-		Replicas:     replicas,
-		Resources:    resources,
-		Runtime:      stringPtr(string(function.Spec.Runtime)),
-		SourceType:   stringPtr(string(function.Spec.Type)),
-		Status:       status,
+		Name:           function.Name,
+		Namespace:      function.Namespace,
+		UID:            string(function.UID),
+		Labels:         labels,
+		Source:         function.Spec.Source,
+		Dependencies:   function.Spec.Deps,
+		Env:            envVariables,
+		Replicas:       replicas,
+		Resources:      resources,
+		BuildResources: buildResources,
+		Runtime:        stringPtr(string(function.Spec.Runtime)),
+		SourceType:     stringPtr(string(function.Spec.Type)),
+		Status:         status,
 	}, nil
 }
 
@@ -96,6 +98,13 @@ func (c *functionConverter) ToFunction(name, namespace string, in gqlschema.Func
 		err := apierror.NewInvalid(pretty.Function, errs)
 		return nil, errors.Wrapf(err, "while converting to graphql resources field for %s [name: %s]. Resources: %v", pretty.Function, name, resources)
 	}
+
+	buildResources, errs := c.fromGQLResources(in.BuildResources)
+	if len(errs) > 0 {
+		err := apierror.NewInvalid(pretty.Function, errs)
+		return nil, errors.Wrapf(err, "while converting to graphql buildResources field for %s [name: %s]. BuildResources: %v", pretty.Function, name, buildResources)
+	}
+
 	envVariables := c.fromGQLEnv(in.Env)
 	minReplicas, maxReplicas := c.fromGQLReplicas(in.Replicas)
 
@@ -115,13 +124,14 @@ func (c *functionConverter) ToFunction(name, namespace string, in gqlschema.Func
 			Labels:    in.Labels,
 		},
 		Spec: v1alpha1.FunctionSpec{
-			Source:      in.Source,
-			Deps:        in.Dependencies,
-			Env:         envVariables,
-			Resources:   resources,
-			MinReplicas: minReplicas,
-			MaxReplicas: maxReplicas,
-			Runtime:     runtime,
+			Source:         in.Source,
+			Deps:           in.Dependencies,
+			Env:            envVariables,
+			Resources:      resources,
+			BuildResources: buildResources,
+			MinReplicas:    minReplicas,
+			MaxReplicas:    maxReplicas,
+			Runtime:        runtime,
 		},
 	}, nil
 }

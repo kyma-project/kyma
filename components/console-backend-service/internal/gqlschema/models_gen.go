@@ -10,7 +10,7 @@ import (
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
-	v1 "k8s.io/api/rbac/v1"
+	"k8s.io/api/rbac/v1"
 	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	v11 "knative.dev/pkg/apis/duck/v1"
 )
@@ -297,18 +297,19 @@ type File struct {
 }
 
 type Function struct {
-	Name         string             `json:"name"`
-	Namespace    string             `json:"namespace"`
-	UID          string             `json:"UID"`
-	Labels       Labels             `json:"labels"`
-	Source       string             `json:"source"`
-	Dependencies string             `json:"dependencies"`
-	Env          []*FunctionEnv     `json:"env"`
-	Replicas     *FunctionReplicas  `json:"replicas"`
-	Resources    *FunctionResources `json:"resources"`
-	Runtime      *string            `json:"runtime"`
-	SourceType   *string            `json:"sourceType"`
-	Status       *FunctionStatus    `json:"status"`
+	Name           string             `json:"name"`
+	Namespace      string             `json:"namespace"`
+	UID            string             `json:"UID"`
+	Labels         Labels             `json:"labels"`
+	Source         string             `json:"source"`
+	Dependencies   string             `json:"dependencies"`
+	Env            []*FunctionEnv     `json:"env"`
+	Replicas       *FunctionReplicas  `json:"replicas"`
+	Resources      *FunctionResources `json:"resources"`
+	BuildResources *FunctionResources `json:"buildResources"`
+	Runtime        *string            `json:"runtime"`
+	SourceType     *string            `json:"sourceType"`
+	Status         *FunctionStatus    `json:"status"`
 }
 
 type FunctionEnv struct {
@@ -353,14 +354,15 @@ type FunctionMetadataInput struct {
 }
 
 type FunctionMutationInput struct {
-	Labels       Labels                  `json:"labels"`
-	Source       string                  `json:"source"`
-	Dependencies string                  `json:"dependencies"`
-	Env          []*FunctionEnvInput     `json:"env"`
-	Replicas     *FunctionReplicasInput  `json:"replicas"`
-	Resources    *FunctionResourcesInput `json:"resources"`
-	Runtime      *string                 `json:"runtime"`
-	SourceType   *string                 `json:"sourceType"`
+	Labels         Labels                  `json:"labels"`
+	Source         string                  `json:"source"`
+	Dependencies   string                  `json:"dependencies"`
+	Env            []*FunctionEnvInput     `json:"env"`
+	Replicas       *FunctionReplicasInput  `json:"replicas"`
+	Resources      *FunctionResourcesInput `json:"resources"`
+	BuildResources *FunctionResourcesInput `json:"buildResources"`
+	Runtime        *string                 `json:"runtime"`
+	SourceType     *string                 `json:"sourceType"`
 }
 
 type FunctionReplicas struct {

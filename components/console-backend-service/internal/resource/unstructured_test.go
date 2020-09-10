@@ -63,6 +63,7 @@ func TestToUnstructured(t *testing.T) {
 			map[string]interface{}{
 				"source":    "",
 				"resources": map[string]interface{}{},
+				"buildResources": map[string]interface{}{},
 			},
 			map[string]interface{}{},
 		)

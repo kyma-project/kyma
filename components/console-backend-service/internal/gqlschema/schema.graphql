@@ -908,6 +908,7 @@ type Function {
     env: [FunctionEnv!]!
     replicas: FunctionReplicas!
     resources: FunctionResources!
+    buildResources: FunctionResources!
     runtime: String
     sourceType: String
 
@@ -994,6 +995,7 @@ input FunctionMutationInput {
     env: [FunctionEnvInput!]!
     replicas: FunctionReplicasInput!
     resources: FunctionResourcesInput!
+    buildResources: FunctionResourcesInput!
     runtime: String
     sourceType: String
 }
