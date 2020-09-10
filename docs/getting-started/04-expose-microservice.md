@@ -87,10 +87,10 @@ Console UI
 
 6. In the automatically opened API Rule's details view, check that the API Rule status is `OK`. Then, access the Service by selecting the HTTPS link under **Host** and adding the `/orders` endpoint at the end of it.
 
-> **NOTE:** For the whole list of endpoints available in the Service, see its [OpenAPI specification](./assets/orders-service-openapi.yaml).
-
 </details>
 </div>
+
+> **NOTE:** For the whole list of endpoints available in the Service, see its [OpenAPI specification](./assets/orders-service-openapi.yaml).
 
 ### Call and test the microservice
 
