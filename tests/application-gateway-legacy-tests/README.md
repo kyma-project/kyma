@@ -12,12 +12,12 @@ The project requires Go 1.8 or higher.
 
 Environment parameters used by the tests:
 
-| Name | Required | Default | Description | Example value |
+| Name | Required | Description | Default | Example value |
 |------|----------|---------|-------------|-----------------|
-| **APPLICATION** | Yes | None | Name of the Application to test | `my-application` |
-| **NAMESPACE** | Yes | None | Namespace in which the test Application will operate | `kyma-integration` |
-| **MOCK_SERVICE_PORT** | Yes | None | Number of the port used by the mock service created by the test | `8080` |
-| **TEST_EXECUTOR_IMAGE** | No | Version matching the Helm test image  | Image name of the test executor created by the Helm test  | `user/my-image:1.0.0` |
+| **APPLICATION** | Yes | Name of the Application to test | None | `my-application` |
+| **NAMESPACE** | Yes | Namespace in which the test Application will operate | None | `kyma-integration` |
+| **MOCK_SERVICE_PORT** | Yes | Number of the port used by the mock service created by the test | None | `8080` |
+| **TEST_EXECUTOR_IMAGE** | No | Image name of the test executor created by the Helm test | Version matching the Helm test image | `user/my-image:1.0.0` |
 
 ## Development
 
