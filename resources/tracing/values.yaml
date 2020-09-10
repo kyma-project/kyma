@@ -107,7 +107,7 @@ global:
     developerGroup: runtimeDeveloper
     namespaceAdminGroup: runtimeNamespaceAdmin
   tracing:
-    enabled: false
+    enabled: true
 
 kcproxy:
   replicaCount: 1
