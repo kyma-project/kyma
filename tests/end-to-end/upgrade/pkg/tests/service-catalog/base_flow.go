@@ -278,8 +278,8 @@ func (f *baseFlow) waitForInstanceFail(name string) error {
 
 func (f *baseFlow) waitForInstanceRemoved(name string) error {
 	f.log.Infof("Waiting for %s instance to be removed", name)
-	return f.wait(3*time.Minute, func() (bool, error) {
-		_, err := f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).Get(name, metav1.GetOptions{})
+	err := wait.PollImmediate(500*time.Millisecond, 3*time.Minute, func() (done bool, err error) {
+		_, err = f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).Get(name, metav1.GetOptions{})
 		if err != nil {
 			if errors.IsNotFound(err) {
 				return true, nil
@@ -288,6 +288,11 @@ func (f *baseFlow) waitForInstanceRemoved(name string) error {
 		}
 		return false, nil
 	})
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (f *baseFlow) waitForDeployment(name string) error {
