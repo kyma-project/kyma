@@ -10,8 +10,11 @@ import (
 )
 
 var (
+	// onlyOneSignalHandler to make that only one signal handler is registered.
 	onlyOneSignalHandler = make(chan struct{})
-	shutdownSignals      = []os.Signal{os.Interrupt, syscall.SIGTERM}
+
+	// shutdownSignals array of system signals to cause shutdown.
+	shutdownSignals = []os.Signal{os.Interrupt, syscall.SIGTERM}
 )
 
 // SetupSignalHandler registered for SIGTERM and SIGINT. A stop channel is returned
@@ -33,6 +36,7 @@ func SetupSignalHandler() (stopCh <-chan struct{}) {
 	return stop
 }
 
+// signalContext represents a signal context.
 type signalContext struct {
 	stopCh <-chan struct{}
 }
@@ -43,17 +47,17 @@ func NewContext() context.Context {
 	return &signalContext{stopCh: SetupSignalHandler()}
 }
 
-// Deadline implements context.Context
+// Deadline implements context.Context.
 func (scc *signalContext) Deadline() (deadline time.Time, ok bool) {
 	return
 }
 
-// Done implements context.Context
+// Done implements context.Context.
 func (scc *signalContext) Done() <-chan struct{} {
 	return scc.stopCh
 }
 
-// Err implements context.Context
+// Err implements context.Context.
 func (scc *signalContext) Err() error {
 	select {
 	case _, ok := <-scc.Done():
@@ -65,7 +69,7 @@ func (scc *signalContext) Err() error {
 	return nil
 }
 
-// Value implements context.Context
+// Value implements context.Context.
 func (scc *signalContext) Value(interface{}) interface{} {
 	return nil
 }

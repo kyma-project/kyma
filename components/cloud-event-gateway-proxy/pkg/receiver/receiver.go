@@ -11,9 +11,11 @@ import (
 )
 
 const (
+	// DefaultShutdownTimeout the default timeout for the receiver to shutdown.
 	DefaultShutdownTimeout = time.Minute * 1
 )
 
+// HttpMessageReceiver is responsible for receiving messages over HTTP.
 type HttpMessageReceiver struct {
 	port     int
 	handler  http.Handler
@@ -21,20 +23,19 @@ type HttpMessageReceiver struct {
 	listener net.Listener
 }
 
+// NewHttpMessageReceiver returns a new NewHttpMessageReceiver instance with the given port.
 func NewHttpMessageReceiver(port int) *HttpMessageReceiver {
-	return &HttpMessageReceiver{
-		port: port,
-	}
+	return &HttpMessageReceiver{port: port}
 }
 
-// StartListen starts the HTTP message receiver and blocks until it receives a shutdown signal
+// StartListen starts the HTTP message receiver and blocks until it receives a shutdown signal.
 func (recv *HttpMessageReceiver) StartListen(ctx context.Context, handler http.Handler) error {
 	var err error
 	if recv.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", recv.port)); err != nil {
 		return err
 	}
 
-	recv.handler = CreateHandler(handler)
+	recv.handler = createHandler(handler)
 
 	recv.server = &http.Server{
 		Addr:    recv.listener.Addr().String(),
@@ -59,6 +60,7 @@ func (recv *HttpMessageReceiver) StartListen(ctx context.Context, handler http.H
 	}
 }
 
-func CreateHandler(handler http.Handler) http.Handler {
+// createHandler returns a new opentracing HTTP handler wrapper for the given HTTP handler.
+func createHandler(handler http.Handler) http.Handler {
 	return &ochttp.Handler{Handler: handler}
 }

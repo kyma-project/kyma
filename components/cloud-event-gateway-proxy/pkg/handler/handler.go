@@ -21,17 +21,21 @@ import (
 )
 
 const (
-	// noDuration signals that the dispatch step hasn't started
+	// noDuration signals that the dispatch step has not started yet.
 	noDuration = -1
 )
 
 var (
+	// additionalHeaders the required headers by EMS for publish requests.
+	// Any alteration or removal of those headers might cause publish requests to fail.
 	additionalHeaders = http.Header{
 		"qos":    []string{string(ems.QosAtLeastOnce)},
 		"Accept": []string{"application/json"},
 	}
 )
 
+// Handler is responsible for receiving HTTP requests and dispatching them to the EMS gateway.
+// It also assures that the messages received are compliant with the Cloud Events spec.
 type Handler struct {
 	// Receiver receives incoming HTTP requests
 	Receiver *receiver.HttpMessageReceiver
@@ -45,14 +49,19 @@ type Handler struct {
 	Logger *logrus.Logger
 }
 
+// NewHandler returns a new Handler instance for the Cloud Events Gateway Proxy.
 func NewHandler(receiver *receiver.HttpMessageReceiver, sender *sender.HttpMessageSender, requestTimeout time.Duration, logger *logrus.Logger) *Handler {
 	return &Handler{Receiver: receiver, Sender: sender, RequestTimeout: requestTimeout, Logger: logger}
 }
 
+// Start starts the Handler with the given context.
 func (h *Handler) Start(ctx context.Context) error {
 	return h.Receiver.StartListen(ctx, health.CheckHealth(h))
 }
 
+// ServeHTTP serves an HTTP request and returns back an HTTP response.
+// It ensures that the incoming request is a valid Cloud Event, then dispatches it
+// to the EMS gateway and writes back the HTTP response.
 func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	// validate request method
 	if request.Method != http.MethodPost {
@@ -93,6 +102,7 @@ func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	h.Logger.Infof("Event dispatched id:[%s] statusCode:[%d] duration:[%s] responseBody:[%s]", event.ID(), statusCode, dispatchTime, respBody)
 }
 
+// writeResponse writes the HTTP response given the status code and response body.
 func (h *Handler) writeResponse(writer http.ResponseWriter, statusCode int, respBody []byte) {
 	writer.WriteHeader(statusCode)
 
@@ -104,6 +114,7 @@ func (h *Handler) writeResponse(writer http.ResponseWriter, statusCode int, resp
 	}
 }
 
+// receive applies the default values (if any) to the given Cloud Event.
 func (h *Handler) receive(ctx context.Context, event *cev2event.Event) {
 	if h.Defaulter != nil {
 		newEvent := h.Defaulter(ctx, *event)
@@ -113,6 +124,7 @@ func (h *Handler) receive(ctx context.Context, event *cev2event.Event) {
 	h.Logger.Infof("Event received id:[%s]", event.ID())
 }
 
+// send dispatches the given Cloud Event to the EMS gateway and returns the response details and dispatch time.
 func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.Duration, []byte) {
 	request, err := h.Sender.NewRequestWithTarget(ctx, h.Sender.Target)
 	if err != nil {
