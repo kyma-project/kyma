@@ -113,11 +113,12 @@ Follows these steps:
           username: <USERNAME>
           password: <PASSWORD>
         ```
+      >**NOTE:** Read also about other [supported authentication methods](#details-git-source-type).
+        
       - Go to your Namespace view and select **Deploy new resource**. 
         
       - Locate the YAML file with the Secret and select **Deploy**.
         
-      >**NOTE:** Read also about other [supported authentication methods](#details-git-source-type).
    
 2. Go to the **Functions** view in the left navigation panel and select the **Repositories** tab.
 
