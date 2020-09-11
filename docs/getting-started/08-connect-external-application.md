@@ -159,13 +159,7 @@ Follow these steps:
    Save this URL with the token to the clipboard, as you will need it in the next steps.
 
    > **CAUTION:** The token included in the output is valid for 5 minutes.
-
-   > **CAUTION:** If you have a Minikube cluster, you must add [**spec.template.spec.hostAliases**](https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/) field in **commerce-mock** deployment:
-   >
-   >  ```yaml
-   >  hostAliases:
-   >  ```
-
+   
   </details>
   <details>
   <summary label="console-ui">
@@ -183,18 +177,18 @@ Follow these steps:
 
   > **CAUTION:** The token included in the URL is valid for 5 minutes.
 
-  > **CAUTION:** If you have a Minikube cluster, you must add [**spec.template.spec.hostAliases**](https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/) field in **commerce-mock** deployment:
-  >
-  >  ```yaml
-  >  hostAliases:
-  >    - ip: $(minikube ip)
-  >      hostnames:
-  >        - connector-service.kyma.local
-  >        - gateway.kyma.local
-  >  ```
-
-</details>
+  </details>
 </div>
+
+> **CAUTION:** If you have a Minikube cluster, you must add [**spec.template.spec.hostAliases**](https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/) field in **commerce-mock** deployment:
+>
+>  ```yaml
+>  hostAliases:
+>    - ip: $(minikube ip)
+>      hostnames:
+>        - connector-service.kyma.local
+>        - gateway.kyma.local
+>  ```
 
 ### Connect events
 
