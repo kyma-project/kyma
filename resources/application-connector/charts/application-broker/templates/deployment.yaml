@@ -35,7 +35,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}
       containers:
       - name: ctrl
-        image: "{{ .Values.global.containerRegistry.path }}/application-broker-broker:{{ .Values.global.application_broker.version }}"
+        image: "{{ .Values.global.containerRegistry.path }}/application-broker:{{ .Values.global.application_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
           limits:
