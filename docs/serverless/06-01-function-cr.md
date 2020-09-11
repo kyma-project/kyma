@@ -11,7 +11,7 @@ kubectl get crd functions.serverless.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-The following Function object creates a Function which responds to HTTP requests with the "Hello John" message. The function's code (**source**) and dependencies (**deps**) are specified in the Function CR.
+The following Function object creates a Function which responds to HTTP requests with the "Hello John" message. The Function's code (**source**) and dependencies (**deps**) are specified in the Function CR.
 
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha1
