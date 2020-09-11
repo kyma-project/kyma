@@ -113,6 +113,7 @@ Follows these steps:
       username: <USERNAME>
       password: <PASSWORD>
     ```
+   
     >**NOTE:** Read also about other [supported authentication methods](#details-git-source-type).
 
    1.2. Go to your Namespace view and select **Deploy new resource**. 
