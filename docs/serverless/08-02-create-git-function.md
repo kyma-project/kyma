@@ -101,24 +101,24 @@ Follows these steps:
 
     If you use a secured repository, you must first create a Secret with basic authentication to this repository in the same Namespace as the Function. To do that, follow these sub-steps:
 
-      a. On your machine, create this YAML file with the Secret definition:
+    a. On your machine, create this YAML file with the Secret definition:
 
-        ```yaml
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: git-creds-basic
-        type: Opaque
-        data:
-          username: <USERNAME>
-          password: <PASSWORD>
-        ```
-      >**NOTE:** Read also about other [supported authentication methods](#details-git-source-type).
+    ```yaml
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: git-creds-basic
+    type: Opaque
+    data:
+      username: <USERNAME>
+      password: <PASSWORD>
+    ```
+    
+    >**NOTE:** Read also about other [supported authentication methods](#details-git-source-type).
 
-      b. Go to your Namespace view and select **Deploy new resource**.
+    b. Go to your Namespace view and select **Deploy new resource**.
 
-      c. Locate the YAML file with the Secret and select **Deploy**.
-
+    c. Locate the YAML file with the Secret and select **Deploy**.
 
 2. Go to the **Functions** view in the left navigation panel and select the **Repositories** tab.
 
