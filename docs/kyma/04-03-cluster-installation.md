@@ -96,17 +96,6 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     ```bash
     kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
     ```
-   
-6. Create a ConfigMap with overrides for the Kyma Installer:
-
-    ```bash
-   kubectl create configmap xip-overrides \
-           --from-literal global.certificates.manager.enabled="true" \
-           --from-literal global.certificates.type="xip" \
-           -n kyma-installer
-   kubectl label configmap xip-overrides --overwrite installer=overrides -n kyma-installer
-   kubectl label configmap xip-overrides --overwrite kyma-project.io/installation="" -n kyma-installer
-   ```
 
   </details>
   <details>
