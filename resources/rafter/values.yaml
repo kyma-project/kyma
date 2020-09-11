@@ -26,6 +26,7 @@ tests:
 
 controller-manager:
   enabled: true
+
   fullnameOverride: "rafter-controller-manager"
 
   image:
@@ -206,6 +207,7 @@ controller-manager:
 
     podAnnotations:
       sidecar.istio.io/inject: "false"
+      persistence: "on"
 
     service:
       annotations:
@@ -337,7 +339,7 @@ upload-service:
     images:
       alpineKubectl:
         repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-        tag: "v20200617-32c1f3ff"
+        tag: 'v20200617-32c1f3ff'
         pullPolicy: IfNotPresent
       minioClient:
         repository: eu.gcr.io/kyma-project/incubator/develop/minio/mc
