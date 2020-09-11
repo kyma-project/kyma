@@ -481,7 +481,7 @@ spec:
             serviceAccountPath: ""
           enabled: false
           tracer:
-            enabled: false
+            enabled: {{ .Values.global.tracing.enabled }}
             sampleProbability: 1
         stdio:
           enabled: false
@@ -639,4 +639,3 @@ spec:
             memory: 900Mi
         tag: 2.14.2
     version: ""
-

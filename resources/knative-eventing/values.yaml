@@ -2,7 +2,9 @@ global:
   isLocalEnv: false
   tracing:
     enabled: true
+    # Using v2 endpoint for zipkin to get the service name in the span.
     zipkinAddress: zipkin.kyma-system:9411
+    # Sample rate is configured in istio-pilot which drives the overall sampling decision hence setting it to zero.
     sampleRate: 0
 
 knative-eventing:
