@@ -180,7 +180,7 @@ Follow these steps:
   </details>
 </div>
 
-> **CAUTION:** If you have a Minikube cluster, you must add [**spec.template.spec.hostAliases**](https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/) field in **commerce-mock** deployment:
+> **CAUTION:** If you have a Minikube cluster, you must add [**spec.template.spec.hostAliases**](https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/) field in **commerce-mock** deployment with following hostnames:
 >
 >  ```yaml
 >  hostAliases:
