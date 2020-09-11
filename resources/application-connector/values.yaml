@@ -25,7 +25,7 @@ global:
   application_operator:
     version: "PR-9406"
   application_operator_tests:
-    version: "PR-9406"
+    version: "PR-9394"
   connector_service:
     version: "PR-9406"
   connector_service_tests:
@@ -42,6 +42,8 @@ global:
     version: "PR-9406"
   application_gateway_tests:
     version: "PR-9406"
+  application_gateway_legacy_tests:
+    version: "PR-9394"
   application_registry:
     version: "PR-9406"
   application_registry_tests:
