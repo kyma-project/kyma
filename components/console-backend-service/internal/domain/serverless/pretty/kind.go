@@ -7,6 +7,11 @@ const (
 	FunctionType
 	Functions
 	FunctionsType
+
+	Repository
+	RepositoryType
+	Repositories
+	RepositoriesType
 )
 
 func (k Kind) String() string {
@@ -19,6 +24,14 @@ func (k Kind) String() string {
 		return "Functions"
 	case FunctionsType:
 		return "[]Function"
+	case Repository:
+		return "GitRepository"
+	case RepositoryType:
+		return "GitRepository"
+	case Repositories:
+		return "GitRepositories"
+	case RepositoriesType:
+		return "[]GitRepository"
 	default:
 		return "Function"
 	}
