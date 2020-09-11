@@ -66,6 +66,7 @@ Follow these steps to deploy XF addons and add Commerce mock to the `orders-serv
    ```bash
    kubectl get serviceinstance commerce-mock -n orders-service -o=jsonpath="{range .status.conditions[*]}{.type}{'\t'}{.status}{'\n'}{end}"
    ```
+
    </details>
    <details>
    <summary label="console-ui">
@@ -130,6 +131,7 @@ Follow these steps:
    ```bash
    kubectl get application commerce-mock -o=jsonpath="{.status.installationStatus.status}"
    ```
+
 3. Get a token required to connect Commerce mock to the Application CR. To do that, create a [TokenRequest CR](/components/application-connector/#custom-resource-token-request). The CR name must match the name of the application for which you want to get the configuration details. Run this command:
 
   ```yaml
@@ -158,6 +160,16 @@ Follow these steps:
 
    > **CAUTION:** The token included in the output is valid for 5 minutes.
 
+   > **CAUTION:** If you have a Minikube cluster, you must add [**spec.template.spec.hostAliases**](https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/) field in **commerce-mock** deployment:
+   >
+   >  ```yaml
+   >  hostAliases:
+   >    - ip: $(minikube ip)
+   >      hostnames:
+   >        - connector-service.kyma.local
+   >        - gateway.kyma.local
+   >  ```
+
   </details>
   <details>
   <summary label="console-ui">
@@ -175,6 +187,16 @@ Follow these steps:
 
   > **CAUTION:** The token included in the URL is valid for 5 minutes.
 
+  > **CAUTION:** If you have a Minikube cluster, you must add [**spec.template.spec.hostAliases**](https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/) field in **commerce-mock** deployment:
+  >
+  >  ```yaml
+  >  hostAliases:
+  >    - ip: $(minikube ip)
+  >      hostnames:
+  >        - connector-service.kyma.local
+  >        - gateway.kyma.local
+  >  ```
+
 </details>
 </div>
 
@@ -185,7 +207,7 @@ To connect events from Commerce mock to the microservice, follow these steps:
 1. Once in the `order-service` Namespace, go to **Configuration** > **API Rules** > **commerce-mock** in the left navigation panel.
 2. Open the link under the **Host** column to access Commerce mock.
 3. Click **Connect**.
-4. Paste the previously copied URL with the token. Confirm by selecting **Connect** and wait until the application gets connected.
+4. Paste the previously copied URL with the token, check **Insecure Connection** and confirm by selecting **Connect** and wait until the application gets connected.
 5. Select **Register All** on the **Local APIs** tab or just register **SAP Commerce Cloud - Events** to be able to send events.
 
 Once registered, you will see all Commerce mock APIs and events available under the **Remote APIs** tab.
