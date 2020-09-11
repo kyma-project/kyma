@@ -24,7 +24,7 @@ Follows these steps:
     export NAMESPACE={FUNCTION_NAMESPACE}
     ```
 
-If you use a secured repository, you must first create a Secret with basic authentication to this repository in the same Namespace as the Function:
+    If you use a secured repository, you must first create a Secret with basic authentication to this repository in the same Namespace as the Function:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -40,7 +40,7 @@ If you use a secured repository, you must first create a Secret with basic authe
     EOF
     ```
 
-    >**NOTE** To see other authorization methods, go to the [documentation]().
+    >**NOTE:** Read also about other [supported authentication methods](#details-git-source-type).
 
 2. Create a [GitRepository CR](#custom-resource-git-repository) that specifies the Git repository metadata:
 
@@ -58,7 +58,7 @@ If you use a secured repository, you must first create a Secret with basic authe
    
     >**NOTE:** If you use a secured repository, add the **auth** object with the **type** and **secretName** fields to the spec.
 
-3. Create a Function CR that specifies the Function's logic:
+3. Create a Function CR that specifies the Function's logic and points to the directory with code and dependencies in the given repository.
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -87,8 +87,8 @@ If you use a secured repository, you must first create a Secret with basic authe
     You should get a result similar to the following example:
 
     ```bash
-    NAME                        CONFIGURED   BUILT   RUNNING   VERSION   AGE
-    test-function               True         True    True      1         18m
+    NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
+    test-function   True         True      True      nodejs12   1         96s
     ```
 
     </details>
@@ -112,20 +112,20 @@ If you use a secured repository, you must first create a Secret with basic authe
       username: <USERNAME>
       password: <PASSWORD>
     ```
-   >**NOTE** To see other possible authorization methods, go to the [documentation]().
+   >**NOTE:** Read also about other [supported authentication methods](#details-git-source-type).
    
    b. Go to your Namespace view and select **Deploy new resource**.
    c. Locate the YAML file with the Secret and select **Deploy**.
 
 2. Go to the **Functions** view in the left navigation panel and select the **Repositories** tab.
 
-3. Select **Connect Repository**, fill in the `Url` field with `https://github.com/kyma-project/examples.git`, and confirm by selecting **Connect**.
+3. Select **Connect Repository**, fill in the **Url** field with `https://github.com/kyma-project/examples.git`, and confirm by selecting **Connect**.
 
-    >**NOTE:** If you want to connect the secured repository with basic authentication, change the **Authorization** field from `Public` to `Basic` and fill the required fields.
+    >**NOTE:** If you want to connect the secured repository with basic authentication, change the **Authorization** field from `Public` to `Basic` and fill in the required fields.
 
 4. Go to the **Functions** tab and select **Create Function**.
 
-5. In the pop-up box, change `Source type` to `From Repository`, select created Repository's name, fill the `Reference` field with `master` and `Base directory` field with `orders-service/function` values and select **Create** to confirm changes.
+5. In the pop-up box, change `Source Type` to `From Repository`, select created Repository's name, fill the `Reference` field with `master` and `Base Directory` field with `orders-service/function` values and select **Create** to confirm changes.
 
     The pop-up box closes and the message appears on the screen after a while, confirming that the Function was created.
     Make sure that new Function has the `RUNNING` status in the list of all Functions under the **Functions** view.
