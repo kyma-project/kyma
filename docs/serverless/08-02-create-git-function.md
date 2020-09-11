@@ -116,9 +116,9 @@ Follows these steps:
    
     >**NOTE:** Read also about other [supported authentication methods](#details-git-source-type).
 
-   1.2. Go to your Namespace view and select **Deploy new resource**. 
+    1.2. Go to your Namespace view and select **Deploy new resource**. 
         
-   1.3. Locate the YAML file with the Secret and select **Deploy**.
+    1.3. Locate the YAML file with the Secret and select **Deploy**.
    
 2. Go to the **Functions** view in the left navigation panel and select the **Repositories** tab.
 
