@@ -5,7 +5,7 @@ type: Configuration
 
 To configure the Function with the Node.js runtime, override the default values of these environment variables:
 
-| Environment variable | Description                                                               | Unit   | Default value |
+| Environment variable | Description                                                               | Type   | Default value |
 | -------------------- | ------------------------------------------------------------------------- | ------ | ------------- |
 | **FUNC_TIMEOUT**     | Specifies the number of seconds in which a runtime must execute the code. | Number | `180`         |
 | **REQ_MB_LIMIT**     | Specifies the payload body size limit in megabytes.                       | Number | `1`           |
