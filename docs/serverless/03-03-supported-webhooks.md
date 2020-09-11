@@ -3,7 +3,7 @@ title: Supported webhooks
 type: Details
 ---
 
-A newly created or modified Function CR is first updated by the defaulting webhook and then verified by the validation webhook before the Function Controller starts to process it:
+A newly created or modified Function CR is first updated by the defaulting webhook and then verified by the validation webhook before the Function Controller starts to process it.
 
 ## Defaulting webhook
 
@@ -43,7 +43,7 @@ It checks the following conditions for these CRs:
 
 2. [GitRepository CR](#custom-resource-git-repository)
 
-   - **spec.url** must:
+   - The **spec.url** parameter must:
 
       - Not be empty
       - Start with the `http(s)`, `git`, or `ssh` prefix

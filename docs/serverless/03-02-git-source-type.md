@@ -10,19 +10,19 @@ Depending on a runtime you use to build your Function (Node.js 12, Node.js 10, o
 - `handler.js` or `handler.py` with Function's code
 - `package.json` or `requirements.txt` with Function's dependencies
 
-The Function custom resource (CR) must contain `type: git` to specify that you use a Git repository for the Function's sources.
+The Function CR must contain `type: git` to specify that you use a Git repository for the Function's sources.
 
 To create a Function with the Git source, you must:
 
 1. Create a [GitRepository CR](#custom-resource-git-repository) with details of your Git repository.
-2. Create a Secret CR (optional, only if you must authenticate to the repository).
+2. Create a [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) (optional, only if you must authenticate to the repository).
 3. Create a [Function CR](#custom-resource-function) with your Function definition and references to the Git repository.
 
 You can have various setups for your Function's Git source with different:
 
 - Directory structures
 
-  You can specify the location of your code dependencies with the `baseDir` parameter in the Function CR. For example, use `"/"` if you keep the source files at the root of your repository.
+  You can specify the location of your code dependencies with the **baseDir** parameter in the Function CR. For example, use `"/"` if you keep the source files at the root of your repository.
 
 - Authentication methods
 
@@ -30,4 +30,4 @@ You can have various setups for your Function's Git source with different:
 
 - Function's rebuild triggers
 
-  You can use the **reference** parameter in the GitRepository CR to define whether the Function Controller must monitor a given branch or commit in the Git repository and rebuild the Function upon their changes.
+  You can use the **reference** parameter in the GitRepository CR to define whether the Function Controller must monitor a given branch or commit in the Git repository to rebuild the Function upon their changes.

@@ -11,7 +11,7 @@ kubectl get crd functions.serverless.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-The following Function object creates a Function which responds to HTTP requests with the "Hello John" message. The functions code (**source**) and dependencies (**deps**) are specified in the Function CR.
+The following Function object creates a Function which responds to HTTP requests with the "Hello John" message. The function's code (**source**) and dependencies (**deps**) are specified in the Function CR.
 
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha1
@@ -85,11 +85,11 @@ spec:
   runtime: "nodejs-12"
 ```
 
-## Custom resource properties
+## Custom resource parameters
 
-This table lists all the possible properties of a given resource together with their descriptions:
+This table lists all the possible parameters of a given resource together with their descriptions:
 
-| Property         |    Required    | Description                                   |
+| Parameter         |    Required    | Description                                   |
 | ---------------------------------------- | :------------: | ---------|
 | **metadata.name**              |      Yes       | Specifies the name of the CR.                 |
 | **metadata.namespace**     |       No       | Defines the Namespace in which the CR is available. It is set to `default` unless you specify otherwise.      |
@@ -105,7 +105,7 @@ This table lists all the possible properties of a given resource together with t
 | **spec.runtime**                         |       No       | Specifies the runtime of the Function. The available values are `nodejs12`, `nodejs10`, and `python38`. It is set to `nodejs12` unless specified otherwise.  |
 | **spec.type**                          |      No       | Defines that you use a Git repository as the source of Function's code and dependencies. It must be set to `git`. |
 | **spec.source**                          |      Yes       | Provides the Function's full source code or the name of the Git directory in which the code and dependencies are stored.     |
-| **spec.baseDir**                          |      No       | Specifies the relative path to the Git directory containing the source code from which the Function will be built​. |
+| **spec.baseDir**                          |      No       | Specifies the relative path to the Git directory that contains the source code from which the Function will be built​. |
 | **spec.reference**                        |      No       | Specifies either the branch name or the commit revision from which the Function Controller automatically fetches the changes in Function's code and dependencies. |
 | **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the Function's condition status changed from one to another.    |
 | **status.conditions.message**            | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.   |
@@ -141,9 +141,9 @@ Processing of a Function CR can succeed, continue, or fail for one of these reas
 
 ## Related resources and components
 
-The Function custom resource relies on these Kubernetes resources:
+These are the resources related to this CR:
 
-| Resource                                                                                              | Description                                                                           |
+| Custom resource                                                                                              | Description                                                                           |
 | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/)                             | Stores the Function's source code and dependencies.                                   |
 | [Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/)              | Builds an image with the Function's code in a runtime.                                |
