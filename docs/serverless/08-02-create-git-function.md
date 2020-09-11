@@ -99,7 +99,7 @@ Follows these steps:
 
 1. Create a Namespace or select one from the drop-down list in the top navigation panel.
 
-  If you use a secured repository, you must first create a Secret with basic authentication to this repository in the same Namespace as the Function. To do that, follow these sub-steps:
+  If you use a secured repository, you must first create a Secret with basic authentication to this repository in the same Namespace as the Function. To do that, follow these sub-steps: 
 
   a. On your machine, create this YAML file with the Secret definition:
 
