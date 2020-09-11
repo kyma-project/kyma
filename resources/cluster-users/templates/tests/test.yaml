@@ -1,3 +1,4 @@
+{{- if .Values.tests.enabled }}	
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -99,4 +100,5 @@ spec:
           - name: IAM_KUBECONFIG_SVC_FQDN
             value: "https://configurations-generator.{{ .Values.global.ingress.domainName }}"
       restartPolicy: Never
+{{- end }}
 {{- end }}

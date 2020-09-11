@@ -1,3 +1,4 @@
+{{- if .Values.tests.enabled }}	
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -46,4 +47,5 @@ spec:
               value: "{{ .Values.tests.envs.gitServer.repoName }}"
           resources:
 {{ include "tplValue" ( dict "value" .Values.tests.resources "context" $ ) | indent 12 }}
+{{- end }}
 {{- end }}

@@ -1,4 +1,4 @@
-{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+{{- if and ( .Values.test.acceptance.service_catalog.enabled ) ( .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" ) }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
