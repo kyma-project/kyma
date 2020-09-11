@@ -127,7 +127,7 @@ Follows these steps:
 
 4. Go to the **Functions** tab and select **Create Function**.
 
-5. In the pop-up box, change `Source Type` to `From Repository`, select created Repository's name, fill the `Reference` field with `master` and `Base Directory` field with `orders-service/function` values and select **Create** to confirm changes.
+5. In the pop-up box, change `Source Type` to `From Repository`, select created Repository's name, fill in the `Reference` field with `master` and `Base Directory` field with `orders-service/function` values, and select **Create** to confirm changes.
 
     The pop-up box closes and the message appears on the screen after a while, confirming that the Function was created.
     Make sure that new Function has the `RUNNING` status in the list of all Functions under the **Functions** view.
