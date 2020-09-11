@@ -38,7 +38,7 @@ spec:
             - /bin/bash
             - -c
             - |
-              sleep 20
+              sleep 10
               bash /etc/cluster-users/sar-test.sh
               exit_code=$?
               curl -XPOST http://127.0.0.1:15020/quitquitquit

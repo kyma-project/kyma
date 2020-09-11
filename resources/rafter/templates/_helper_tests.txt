@@ -1,5 +1,5 @@
 echo 'TESTING has started'
-sleep 40
+sleep 20
 /app/main.test
 exit_code=$?
 echo exit_code is $exit_code
