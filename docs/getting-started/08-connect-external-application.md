@@ -164,10 +164,6 @@ Follow these steps:
    >
    >  ```yaml
    >  hostAliases:
-   >    - ip: $(minikube ip)
-   >      hostnames:
-   >        - connector-service.kyma.local
-   >        - gateway.kyma.local
    >  ```
 
   </details>
