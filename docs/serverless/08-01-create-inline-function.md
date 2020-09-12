@@ -1,5 +1,5 @@
 ---
-title: Create a Function
+title: Create an inline Function
 type: Tutorials
 ---
 
