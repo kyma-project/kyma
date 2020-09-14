@@ -15,10 +15,7 @@ import (
 	k8sCoreTypes "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/cli-runtime/pkg/genericclioptions/printers"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -67,7 +64,7 @@ func (f *baseFlow) envTesterDeployment(name string, labels map[string]string, te
 					Containers: []k8sCoreTypes.Container{
 						{
 							Name:    "app",
-							Image:   "alpine:3.8",
+							Image:   "alpine:3.12",
 							Command: []string{"/bin/sh", "-c", "--"},
 							Args:    []string{fmt.Sprintf("echo \"value=$%s\"; echo \"done\"; while true; do sleep 30; done;", testedEnv)},
 						},
@@ -182,15 +179,15 @@ func (f *baseFlow) wait(timeout time.Duration, conditionFunc wait.ConditionFunc)
 	return wait.PollUntil(time.Second, conditionFunc, stopCh)
 }
 
-func (f *baseFlow) waitForEnvInjected(svc, expectedEnvName, expectedEnvValue string) error {
-	return f.waitForEnvTesterValue(svc, expectedEnvName, expectedEnvValue)
+func (f *baseFlow) waitForEnvInjected(svc, expectedEnvValue string) error {
+	return f.waitForEnvTesterValue(svc, expectedEnvValue)
 }
 
-func (f *baseFlow) waitForEnvNotInjected(svc, expectedEnvName string) error {
-	return f.waitForEnvTesterValue(svc, expectedEnvName, "")
+func (f *baseFlow) waitForEnvNotInjected(svc string) error {
+	return f.waitForEnvTesterValue(svc, "")
 }
 
-func (f *baseFlow) waitForEnvTesterValue(svc, expectedEnvName, expectedEnvValue string) error {
+func (f *baseFlow) waitForEnvTesterValue(svc, expectedEnvValue string) error {
 	return f.wait(time.Minute, func() (bool, error) {
 		var podName string
 
@@ -306,63 +303,36 @@ func (f *baseFlow) waitForDeployment(name string) error {
 	})
 }
 
-func (f *baseFlow) logK8SReport() {
+func (f *baseFlow) logK8SReport(report *Report) {
 	deployments, err := f.k8sInterface.AppsV1().Deployments(f.namespace).List(metav1.ListOptions{})
-	f.report("Deployments", deployments, err)
+	report.AddDeployments(deployments, err)
 
 	pods, err := f.k8sInterface.CoreV1().Pods(f.namespace).List(metav1.ListOptions{})
-	f.report("Pods", pods, err)
+	report.AddPods(pods, err)
 
 	secrets, err := f.k8sInterface.CoreV1().Secrets(f.namespace).List(metav1.ListOptions{})
-	f.report("Secrets", secrets, err)
+	report.AddSecrets(secrets, err)
 }
 
-func (f *baseFlow) logServiceCatalogAndBindingUsageReport() {
+func (f *baseFlow) logServiceCatalogAndBindingUsageReport(report *Report) {
 	clusterServiceBrokers, err := f.scInterface.ServicecatalogV1beta1().ClusterServiceBrokers().List(metav1.ListOptions{})
-	f.report("ClusterServiceBrokers", clusterServiceBrokers, err)
+	report.AddClusterServiceBrokers(clusterServiceBrokers, err)
 
 	serviceBrokers, err := f.scInterface.ServicecatalogV1beta1().ServiceBrokers(f.namespace).List(metav1.ListOptions{})
-	f.report("ServiceBrokers", serviceBrokers, err)
+	report.AddServiceBrokers(serviceBrokers, err)
 
 	clusterServiceClass, err := f.scInterface.ServicecatalogV1beta1().ClusterServiceClasses().List(metav1.ListOptions{})
-	f.report("ClusterServiceClasses", clusterServiceClass, err)
+	report.AddClusterServiceClasses(clusterServiceClass, err)
 
 	serviceClass, err := f.scInterface.ServicecatalogV1beta1().ServiceClasses(f.namespace).List(metav1.ListOptions{})
-	f.report("ServiceClasses", serviceClass, err)
+	report.AddServiceClasses(serviceClass, err)
 
 	serviceInstances, err := f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).List(metav1.ListOptions{})
-	f.report("ServiceInstances", serviceInstances, err)
+	report.AddServiceInstances(serviceInstances, err)
 
 	serviceBindings, err := f.scInterface.ServicecatalogV1beta1().ServiceBindings(f.namespace).List(metav1.ListOptions{})
-	f.report("ServiceBindings", serviceBindings, err)
+	report.AddServiceBindings(serviceBindings, err)
 
 	serviceBindingUsages, err := f.buInterface.ServicecatalogV1alpha1().ServiceBindingUsages(f.namespace).List(metav1.ListOptions{})
-	f.report("ServiceBindingUsages", serviceBindingUsages, err)
-}
-
-func (f *baseFlow) report(kind string, obj runtime.Object, err error) {
-	printer := &printers.JSONPrinter{}
-	logger := &logWriter{log: f.log}
-	obj.(printerObject).SetGroupVersionKind(schema.GroupVersionKind{Kind: kind})
-	if err != nil {
-		f.log.Errorf("Could not fetch resources: %v", err)
-		return
-	}
-	err = printer.PrintObj(obj, logger)
-	if err != nil {
-		f.log.Errorf("Could not print objects: %v", err)
-	}
-}
-
-type logWriter struct {
-	log logrus.FieldLogger
-}
-
-func (w *logWriter) Write(p []byte) (n int, err error) {
-	w.log.Infof(string(p))
-	return len(p), nil
-}
-
-type printerObject interface {
-	SetGroupVersionKind(gvk schema.GroupVersionKind)
+	report.AddServiceBindingUsages(serviceBindingUsages, err)
 }
