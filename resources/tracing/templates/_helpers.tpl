@@ -78,3 +78,9 @@ Create chart name and version as used by the chart label.
 {{- printf "|roles=%s" .Values.kcproxy.config.resources.roles }}
 {{- end }}
 {{- end -}}
+
+{{- define "kyma.checkRequirements" }}
+{{- if not .Values.global.tracing.enabled }}
+{{- fail (print "Tracing is not enabled across all the components. Set global.tracing.enabled to enable tracing while installing Kyma") }}
+{{- end }}
+{{- end -}}
