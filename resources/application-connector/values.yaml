@@ -53,7 +53,7 @@ global:
   application_connectivity_certs_setup_job:
     version: "2407bbc2"
   application_connectivity_validator:
-    version: "2407bbc2"
+    version: "PR-9446"
 
 application_connectivity_certs_setup_job:
   secrets:
