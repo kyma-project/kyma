@@ -26,8 +26,8 @@ global:
         sendResolved: true
         apiurl: ""
         channel: ""
-        matchExpression:
-          severity: critical
+        matchExpression: |-
+          severity: critical|warning
         routes: |-
       victorOps:
         sendResolved: true
