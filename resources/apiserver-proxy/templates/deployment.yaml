@@ -25,7 +25,7 @@ spec:
         app: {{ template "name" . }}
     spec:
       serviceAccountName: {{ template "name" . }}
-      {{- if .Values.global.isLocalEnv }}
+      {{- if hasKey .Values.global "minikubeIP" }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:

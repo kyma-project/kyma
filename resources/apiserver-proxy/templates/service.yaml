@@ -12,7 +12,7 @@ metadata:
     dns.gardener.cloud/dnsnames: {{ printf "apiserver.%s" .Values.global.ingress.domainName }}
 {{- end }}
 spec:
-  {{- if .Values.global.isLocalEnv }}
+  {{- if hasKey .Values.global "minikubeIP" }}
   type: NodePort
   {{- else }}
   type: LoadBalancer
