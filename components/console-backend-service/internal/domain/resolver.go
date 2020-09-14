@@ -41,15 +41,16 @@ type Resolver struct {
 	ui  *ui.Resolver
 	k8s *k8s.Resolver
 
-	sc         *servicecatalog.PluggableContainer
-	sca        *servicecatalogaddons.PluggableContainer
-	app        *application.PluggableContainer
-	rafter     *rafter.PluggableContainer
-	ag         *apigateway.Resolver
-	serverless *serverless.PluggableContainer
-	eventing   *eventing.Resolver
-	oauth      *oauth.Resolver
-	roles      *roles.Resolver
+	sc            *servicecatalog.PluggableContainer
+	sca           *servicecatalogaddons.PluggableContainer
+	app           *application.PluggableContainer
+	rafter        *rafter.PluggableContainer
+	ag            *apigateway.Resolver
+	serverless    *serverless.PluggableContainer
+	newServerless *serverless.NewResolver
+	eventing      *eventing.Resolver
+	oauth         *oauth.Resolver
+	roles         *roles.Resolver
 }
 
 func GetRandomNumber() time.Duration {
@@ -111,6 +112,9 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	}
 	makePluggable(serverlessResolver)
 
+	newServerlessResolver := serverless.NewR(genericServiceFactory)
+	makePluggable(newServerlessResolver)
+
 	eventingResolver := eventing.New(genericServiceFactory)
 	makePluggable(eventingResolver)
 
@@ -125,17 +129,18 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	}
 
 	return &Resolver{
-		k8s:        k8sResolver,
-		ui:         uiContainer.Resolver,
-		sc:         scContainer,
-		sca:        scaContainer,
-		app:        appContainer,
-		rafter:     rafterContainer,
-		ag:         agResolver,
-		serverless: serverlessResolver,
-		eventing:   eventingResolver,
-		oauth:      oAuthResolver,
-		roles:      rolesResolver,
+		k8s:           k8sResolver,
+		ui:            uiContainer.Resolver,
+		sc:            scContainer,
+		sca:           scaContainer,
+		app:           appContainer,
+		rafter:        rafterContainer,
+		ag:            agResolver,
+		serverless:    serverlessResolver,
+		newServerless: newServerlessResolver,
+		eventing:      eventingResolver,
+		oauth:         oAuthResolver,
+		roles:         rolesResolver,
 	}, nil
 }
 
@@ -153,6 +158,7 @@ func (r *Resolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.ag.StopCacheSyncOnClose(stopCh)
 	r.eventing.StopCacheSyncOnClose(stopCh)
 	r.serverless.StopCacheSyncOnClose(stopCh)
+	r.newServerless.StopCacheSyncOnClose(stopCh)
 	r.oauth.StopCacheSyncOnClose(stopCh)
 	r.roles.StopCacheSyncOnClose(stopCh)
 }

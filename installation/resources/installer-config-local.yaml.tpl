@@ -107,6 +107,17 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: tracing-global-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    kyma-project.io/installation: ""
+data:
+  global.tracing.enabled: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: tracing-overrides
   namespace: kyma-installer
   labels:

@@ -353,7 +353,7 @@ spec:
       controlPlaneSecurityEnabled: true
       disablePolicyChecks: false
       policyCheckFailOpen: false
-      enableTracing: true
+      enableTracing: {{ .Values.global.tracing.enabled }}
       tracer:
         lightstep:
           address: ""                # example: lightstep-satellite:443
@@ -361,7 +361,7 @@ spec:
           secure: true               # example: true|false
           cacertPath: ""             # example: /etc/lightstep/cacert.pem
         zipkin:
-          address: "zipkin.kyma-system:9411"
+          address: {{ .Values.global.tracing.zipkinAddress }}
         datadog:
           address: "$(HOST_IP):8126"
         stackdriver:
@@ -471,7 +471,7 @@ spec:
             apiKey: ""
             serviceAccountPath: ""
           tracer:
-            enabled: false
+            enabled: {{ .Values.global.tracing.enabled }}
             sampleProbability: 1
         useAdapterCRDs: false
 
