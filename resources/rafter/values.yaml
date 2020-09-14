@@ -8,7 +8,7 @@ tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/rafter-test"
-    tag: 1088c1af
+    tag: PR-9434
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
@@ -22,6 +22,7 @@ tests:
 
 controller-manager:
   enabled: true
+
   fullnameOverride: "rafter-controller-manager"
 
   image:
@@ -202,6 +203,7 @@ controller-manager:
 
     podAnnotations:
       sidecar.istio.io/inject: "false"
+      persistence: "on"
 
     service:
       annotations:
@@ -333,7 +335,7 @@ upload-service:
     images:
       alpineKubectl:
         repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-        tag: "v20200617-32c1f3ff"
+        tag: 'v20200617-32c1f3ff'
         pullPolicy: IfNotPresent
       minioClient:
         repository: eu.gcr.io/kyma-project/incubator/develop/minio/mc
