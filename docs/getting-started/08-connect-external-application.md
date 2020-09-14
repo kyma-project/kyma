@@ -93,8 +93,18 @@ You will be redirected to the **Catalog Management** > **Instances** > **commerc
 
 When Commerce mock is provisioned, a corresponding API Rule is automatically created. When you go to the **API Rules** view in the `orders-service` Namespace and select `commerce-mock`, you will see the direct link to it under **Host**.
 
-</details>
+  </details>
 </div>
+
+> **CAUTION:** If you have a Minikube cluster, you must add the [**spec.template.spec.hostAliases**](https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/) field in the **commerce-mock** Deployment with the following hostnames:
+>
+>  ```yaml
+>  hostAliases:
+>    - ip: $(minikube ip)
+>      hostnames:
+>        - connector-service.kyma.local
+>        - gateway.kyma.local
+>  ```
 
 ### Create the Application and retrieve a token
 
@@ -180,16 +190,6 @@ Follow these steps:
   </details>
 </div>
 
-> **CAUTION:** If you have a Minikube cluster, you must add [**spec.template.spec.hostAliases**](https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/) field in **commerce-mock** deployment with following hostnames:
->
->  ```yaml
->  hostAliases:
->    - ip: $(minikube ip)
->      hostnames:
->        - connector-service.kyma.local
->        - gateway.kyma.local
->  ```
-
 ### Connect events
 
 To connect events from Commerce mock to the microservice, follow these steps:  
@@ -197,7 +197,7 @@ To connect events from Commerce mock to the microservice, follow these steps:
 1. Once in the `order-service` Namespace, go to **Configuration** > **API Rules** > **commerce-mock** in the left navigation panel.
 2. Open the link under the **Host** column to access Commerce mock.
 3. Click **Connect**.
-4. Paste the previously copied URL with the token, check **Insecure Connection** and confirm by selecting **Connect** and wait until the application gets connected.
+4. Paste the previously copied URL with the token, check **Insecure Connection**, confirm by selecting **Connect**, and wait until the application gets connected.
 5. Select **Register All** on the **Local APIs** tab or just register **SAP Commerce Cloud - Events** to be able to send events.
 
 Once registered, you will see all Commerce mock APIs and events available under the **Remote APIs** tab.
