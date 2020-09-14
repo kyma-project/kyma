@@ -7,17 +7,20 @@ import (
 	"strconv"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/kyma-incubator/compass/components/connectivity-adapter/pkg/gqlcli"
 	schema "github.com/kyma-incubator/compass/components/director/pkg/graphql"
-	gcli "github.com/machinebox/graphql"
+	gcli "github.com/kyma-project/kyma/components/application-broker/third_party/machinebox/graphql"
 	"github.com/pkg/errors"
 )
 
 type GQLClient struct {
-	cli gqlcli.GraphQLClient
+	cli GraphQLClient
 }
 
-func NewQGLClient(cli gqlcli.GraphQLClient) *GQLClient {
+type GraphQLClient interface {
+	Run(ctx context.Context, req *gcli.Request, resp interface{}) error
+}
+
+func NewQGLClient(cli GraphQLClient) *GQLClient {
 	return &GQLClient{cli: cli}
 }
 

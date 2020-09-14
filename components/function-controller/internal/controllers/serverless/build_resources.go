@@ -219,7 +219,7 @@ func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function, gitOptions g
 }
 
 func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, gitOptions git.Options, rtmConfig runtime.Config) batchv1.Job {
-	imageName := r.buildInternalImageAddress(instance)
+	imageName := r.buildImageAddressForPush(instance)
 	args := r.config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
 
@@ -427,7 +427,7 @@ func (r *FunctionReconciler) buildImageAddressForPush(instance *serverlessv1alph
 
 func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
 	var imageTag string
-	if instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit {
+	if instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
 		imageTag = r.calculateGitImageTag(instance)
 	} else {
 		imageTag = r.calculateImageTag(instance)
@@ -438,7 +438,7 @@ func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alp
 
 func (r *FunctionReconciler) buildImageAddress(instance *serverlessv1alpha1.Function) string {
 	var imageTag string
-	if instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit {
+	if instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
 		imageTag = r.calculateGitImageTag(instance)
 	} else {
 		imageTag = r.calculateImageTag(instance)

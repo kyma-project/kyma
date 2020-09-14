@@ -13,7 +13,7 @@ global:
 ## ref: https://hub.docker.com/r/bitnami/postgresql/tags/
 ##
 image:
-  registry: docker.io
+  registry: eu.gcr.io/kyma-project/external
   repository: postgres
   tag: 11.7-alpine
   ## Specify a imagePullPolicy
@@ -48,7 +48,7 @@ image:
 volumePermissions:
   enabled: false
   image:
-    registry: docker.io
+    registry: eu.gcr.io/kyma-project/external
     repository: alpine
     tag: 3.12.0
     ## Specify a imagePullPolicy
@@ -481,7 +481,7 @@ metrics:
       #     description: replication for {{ template "postgresql.fullname" . }} PostgreSQL is lagging by {{ "{{ $value }}" }} hour(s).
       #     summary: PostgreSQL replication is lagging by {{ "{{ $value }}" }} hour(s).
   image:
-    registry: docker.io
+    registry: eu.gcr.io/kyma-project/external
     repository: bitnami/postgres-exporter
     tag: 0.8.0-debian-10-r28
     pullPolicy: IfNotPresent

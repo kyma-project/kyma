@@ -10,7 +10,6 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -149,7 +148,9 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	revision, err := r.syncRevision(instance, gitOptions)
 	if err != nil {
-		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+		return r.updateStatusWithoutRepository(ctx, ctrl.Result{
+			RequeueAfter: r.config.GitFetchRequeueDuration,
+		}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionConfigurationReady,
 			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),
@@ -162,16 +163,16 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	rtm := fnRuntime.GetRuntime(instance.Spec.Runtime)
 
 	switch {
-	case instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit && r.isOnSourceChange(instance, revision):
+	case instance.Spec.Type == serverlessv1alpha1.SourceTypeGit && r.isOnSourceChange(instance, revision):
 		return r.onSourceChange(ctx, instance, &serverlessv1alpha1.Repository{
 			Reference: instance.Spec.Reference,
 			BaseDir:   instance.Spec.Repository.BaseDir,
 		}, revision)
-	case instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit && r.isOnConfigMapChange(instance, rtm, configMaps.Items, deployments.Items):
+	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit && r.isOnConfigMapChange(instance, rtm, configMaps.Items, deployments.Items):
 		return r.onConfigMapChange(ctx, log, instance, rtm, configMaps.Items)
-	case instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, gitOptions):
+	case instance.Spec.Type == serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, gitOptions):
 		return r.onGitJobChange(ctx, log, instance, rtmCfg, jobs.Items, gitOptions)
-	case instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, git.Options{}):
+	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, git.Options{}):
 		return r.onJobChange(ctx, log, instance, rtmCfg, configMaps.Items[0].GetName(), jobs.Items)
 	case r.isOnDeploymentChange(instance, rtmCfg, deployments.Items):
 		return r.onDeploymentChange(ctx, log, instance, rtmCfg, deployments.Items)
@@ -204,14 +205,14 @@ func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serve
 }
 
 func (r *FunctionReconciler) syncRevision(instance *serverlessv1alpha1.Function, options git.Options) (string, error) {
-	if instance.Spec.SourceType == serverlessv1alpha1.SourceTypeGit {
+	if instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
 		return r.gitOperator.LastCommit(options)
 	}
 	return "", nil
 }
 
 func (r *FunctionReconciler) readGITOptions(ctx context.Context, instance *serverlessv1alpha1.Function) (git.Options, error) {
-	if instance.Spec.SourceType != serverlessv1alpha1.SourceTypeGit {
+	if instance.Spec.Type != serverlessv1alpha1.SourceTypeGit {
 		return git.Options{}, nil
 	}
 

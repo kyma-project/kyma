@@ -9,6 +9,7 @@ import (
 func TestApplicationRelease(t *testing.T) {
 
 	testSuite := application.NewTestSuite(t)
+
 	defer testSuite.Cleanup(t)
 	testSuite.Setup(t)
 

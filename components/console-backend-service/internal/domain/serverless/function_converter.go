@@ -34,13 +34,6 @@ func newFunctionConverter() *functionConverter {
 	}
 }
 
-func stringPtr(str string) *string {
-	if str == "" {
-		return nil
-	}
-	return &str
-}
-
 func (c *functionConverter) ToGQL(function *v1alpha1.Function) (*gqlschema.Function, error) {
 	if function == nil {
 		return nil, nil
@@ -66,7 +59,9 @@ func (c *functionConverter) ToGQL(function *v1alpha1.Function) (*gqlschema.Funct
 		Replicas:     replicas,
 		Resources:    resources,
 		Runtime:      stringPtr(string(function.Spec.Runtime)),
-		SourceType:   stringPtr(string(function.Spec.SourceType)),
+		SourceType:   stringPtr(string(function.Spec.Type)),
+		BaseDir:      stringPtr(function.Spec.BaseDir),
+		Reference:    stringPtr(function.Spec.Reference),
 		Status:       status,
 	}, nil
 }
@@ -98,10 +93,16 @@ func (c *functionConverter) ToFunction(name, namespace string, in gqlschema.Func
 	}
 	envVariables := c.fromGQLEnv(in.Env)
 	minReplicas, maxReplicas := c.fromGQLReplicas(in.Replicas)
+	repository := c.fromGQLRepository(in)
 
 	var runtime v1alpha1.Runtime
 	if in.Runtime != nil {
 		runtime = v1alpha1.Runtime(*in.Runtime)
+	}
+
+	var sourceType v1alpha1.SourceType
+	if in.SourceType != nil {
+		sourceType = v1alpha1.SourceType(*in.SourceType)
 	}
 
 	return &v1alpha1.Function{
@@ -121,7 +122,9 @@ func (c *functionConverter) ToFunction(name, namespace string, in gqlschema.Func
 			Resources:   resources,
 			MinReplicas: minReplicas,
 			MaxReplicas: maxReplicas,
+			Type:        sourceType,
 			Runtime:     runtime,
+			Repository:  repository,
 		},
 	}, nil
 }
@@ -189,9 +192,6 @@ func (c *functionConverter) toGQLReplicas(minReplicas, maxReplicas *int32) *gqls
 }
 
 func (c *functionConverter) toGQLResources(resources v1.ResourceRequirements) *gqlschema.FunctionResources {
-	stringPtr := func(str string) *string {
-		return &str
-	}
 	extractResourceValues := func(item v1.ResourceList) *gqlschema.ResourceValues {
 		rv := &gqlschema.ResourceValues{}
 		if item, ok := item[v1.ResourceMemory]; ok {
@@ -335,6 +335,25 @@ func (c *functionConverter) fromGQLResources(resources *gqlschema.FunctionResour
 	return resourcesReq, errs
 }
 
+func (c *functionConverter) fromGQLRepository(in gqlschema.FunctionMutationInput) v1alpha1.Repository {
+	var baseDir, reference string
+	if in.BaseDir != nil {
+		baseDir = *in.BaseDir
+	}
+	if in.Reference != nil {
+		reference = *in.Reference
+	}
+
+	var repository v1alpha1.Repository
+	if baseDir != "" || reference != "" {
+		repository = v1alpha1.Repository{
+			BaseDir:   baseDir,
+			Reference: reference,
+		}
+	}
+	return repository
+}
+
 func (c *functionConverter) getStatus(status v1alpha1.FunctionStatus) *gqlschema.FunctionStatus {
 	conditions := status.Conditions
 
@@ -428,4 +447,11 @@ func (c *functionConverter) containsReason(reason v1alpha1.ConditionReason, subS
 		}
 	}
 	return false
+}
+
+func stringPtr(str string) *string {
+	if str == "" {
+		return nil
+	}
+	return &str
 }

@@ -1,6 +1,7 @@
 package accessservice
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -33,7 +34,7 @@ func TestAccessServiceManager_Create(t *testing.T) {
 		// given
 		expectedService := mockService("ec-default", "uuid-1", "service-uuid1", 8081)
 		serviceInterface := new(mocks.ServiceInterface)
-		serviceInterface.On("Create", expectedService).Return(expectedService, nil)
+		serviceInterface.On("Create", context.Background(), expectedService, metav1.CreateOptions{}).Return(expectedService, nil)
 
 		manager := NewAccessServiceManager(serviceInterface, config)
 
@@ -49,7 +50,7 @@ func TestAccessServiceManager_Create(t *testing.T) {
 		// given
 		expectedService := mockService("ec-default", "uuid-1", "service-uuid1", 8081)
 		serviceInterface := new(mocks.ServiceInterface)
-		serviceInterface.On("Create", expectedService).Return(nil, errors.New("some error"))
+		serviceInterface.On("Create", context.Background(), expectedService, metav1.CreateOptions{}).Return(nil, errors.New("some error"))
 
 		manager := NewAccessServiceManager(serviceInterface, config)
 
@@ -71,7 +72,7 @@ func TestAccessServiceManager_Upsert(t *testing.T) {
 		// given
 		expectedService := mockService("ec-default", "uuid-1", "service-uuid1", 8081)
 		serviceInterface := new(mocks.ServiceInterface)
-		serviceInterface.On("Create", expectedService).Return(expectedService, nil)
+		serviceInterface.On("Create", context.Background(), expectedService, metav1.CreateOptions{}).Return(expectedService, nil)
 
 		manager := NewAccessServiceManager(serviceInterface, config)
 
@@ -87,7 +88,7 @@ func TestAccessServiceManager_Upsert(t *testing.T) {
 		// given
 		expectedService := mockService("ec-default", "uuid-1", "service-uuid1", 8081)
 		serviceInterface := new(mocks.ServiceInterface)
-		serviceInterface.On("Create", expectedService).Return(nil, k8serrors.NewAlreadyExists(schema.GroupResource{}, ""))
+		serviceInterface.On("Create", context.Background(), expectedService, metav1.CreateOptions{}).Return(nil, k8serrors.NewAlreadyExists(schema.GroupResource{}, ""))
 
 		manager := NewAccessServiceManager(serviceInterface, config)
 
@@ -103,7 +104,7 @@ func TestAccessServiceManager_Upsert(t *testing.T) {
 		// given
 		expectedService := mockService("ec-default", "uuid-1", "service-uuid1", 8081)
 		serviceInterface := new(mocks.ServiceInterface)
-		serviceInterface.On("Create", expectedService).Return(nil, errors.New("some error"))
+		serviceInterface.On("Create", context.Background(), expectedService, metav1.CreateOptions{}).Return(nil, errors.New("some error"))
 
 		manager := NewAccessServiceManager(serviceInterface, config)
 
@@ -124,7 +125,7 @@ func TestAccessServiceManager_Delete(t *testing.T) {
 	t.Run("should delete access service", func(t *testing.T) {
 		// given
 		serviceInterface := new(mocks.ServiceInterface)
-		serviceInterface.On("Delete", "test-service", &metav1.DeleteOptions{}).Return(nil)
+		serviceInterface.On("Delete", context.Background(), "test-service", metav1.DeleteOptions{}).Return(nil)
 
 		manager := NewAccessServiceManager(serviceInterface, config)
 
@@ -140,7 +141,7 @@ func TestAccessServiceManager_Delete(t *testing.T) {
 	t.Run("should handle errors", func(t *testing.T) {
 		// given
 		serviceInterface := new(mocks.ServiceInterface)
-		serviceInterface.On("Delete", "test-service", &metav1.DeleteOptions{}).Return(errors.New("some error"))
+		serviceInterface.On("Delete", context.Background(), "test-service", metav1.DeleteOptions{}).Return(errors.New("some error"))
 
 		manager := NewAccessServiceManager(serviceInterface, config)
 
@@ -158,7 +159,7 @@ func TestAccessServiceManager_Delete(t *testing.T) {
 	t.Run("should ignore not found error", func(t *testing.T) {
 		// given
 		serviceInterface := new(mocks.ServiceInterface)
-		serviceInterface.On("Delete", "test-service", &metav1.DeleteOptions{}).Return(k8serrors.NewNotFound(schema.GroupResource{}, "an error"))
+		serviceInterface.On("Delete", context.Background(), "test-service", metav1.DeleteOptions{}).Return(k8serrors.NewNotFound(schema.GroupResource{}, "an error"))
 
 		manager := NewAccessServiceManager(serviceInterface, config)
 

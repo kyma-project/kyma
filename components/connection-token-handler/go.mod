@@ -24,3 +24,5 @@ require (
 	k8s.io/utils v0.0.0-20190809000727-6c36bc71fc4a // indirect
 	sigs.k8s.io/controller-runtime v0.4.0
 )
+
+replace golang.org/x/text => golang.org/x/text v0.3.3
