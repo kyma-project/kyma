@@ -3,6 +3,7 @@ module github.com/kyma-project/kyma/components/application-connectivity-validato
 go 1.14
 
 require (
+	github.com/avast/retry-go v2.6.0+incompatible
 	github.com/googleapis/gnostic v0.4.0 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20200902071617-83c683010f30

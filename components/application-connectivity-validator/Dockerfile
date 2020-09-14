@@ -12,7 +12,7 @@ COPY . $DOCK_PKG_DIR
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o applicationconnectivityvalidator ./cmd/applicationconnectivityvalidator
 
-FROM scratch
+FROM alpine:3.12.0
 LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-connectivity-validator .

@@ -15,6 +15,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/httptools"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -151,10 +152,32 @@ func (ph *proxyHandler) getClientIDsFromCache(applicationName string) ([]string,
 }
 
 func (ph *proxyHandler) getClientIDsFromResource(applicationName string) ([]string, apperrors.AppError) {
-	application, err := ph.applicationGetter.Get(context.Background(), applicationName, metav1.GetOptions{})
+
+	var application *v1alpha1.Application
+
+	maxAttempts := uint(5)
+	err := retry.Do(
+		func() error {
+			app, err := ph.applicationGetter.Get(context.Background(), applicationName, metav1.GetOptions{})
+			if err != nil {
+				return err
+			}
+
+			application = app
+			return nil
+		},
+		retry.Attempts(maxAttempts),
+		retry.Delay(500*time.Millisecond),
+		retry.DelayType(retry.FixedDelay),
+		retry.OnRetry(func(retryNo uint, err error) {
+			log.Printf("Retry fetching component sources: [%d / %d], error: %s", retryNo+1, maxAttempts, err)
+		}),
+	)
+
 	if err != nil {
 		return []string{}, apperrors.Internal("failed to get %s application: %s", applicationName, err)
 	}
+
 	if application.Spec.CompassMetadata == nil {
 		return []string{}, nil
 	}
