@@ -27,13 +27,13 @@ global:
         apiurl: ""
         channel: ""
         matchExpression: |-
-          severity: critical|warning
+          severity: critical
         routes: |-
       victorOps:
         sendResolved: true
         routingkey: ""
         apikey: ""
-        matchExpression:
+        matchExpression: |-
           severity: critical
         routes: |-
 
