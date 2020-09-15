@@ -1,4 +1,4 @@
-{{- range $suffix, $val := .Values.tests.external_solution }}
+{{- range $suffix, $val := .Values.test.external_solution }}
   {{- if and ( $val.enabled ) ( $.Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" ) }}
 ---
 apiVersion: "testing.kyma-project.io/v1alpha1"

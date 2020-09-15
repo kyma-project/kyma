@@ -47,6 +47,7 @@ tests:
         integration: true
         after-upgrade: true
 
+test:
   external_solution:
     event_mesh:
       enabled: true
