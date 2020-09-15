@@ -21,6 +21,7 @@ spec:
             - |
               kubectl delete destinationrules.networking.istio.io -n istio-system istio-telemetry --ignore-not-found
               kubectl delete destinationrules.networking.istio.io -n istio-system istio-policy --ignore-not-found
+              kubectl delete gateways.networking.istio.io -n istio-system ingressgateway
           image: {{ .Values.kyma.labelJob.image }}:{{ .Values.kyma.labelJob.tag }}
           name: cleanup
       restartPolicy: Never
@@ -47,11 +48,16 @@ metadata:
     helm.sh/hook-weight: "0"
 rules:
   - apiGroups: ["networking.istio.io"]
-    resources: ["destinationrules"]
+    resources: ["gateways"]
     verbs: ["delete"]
     resourceNames:
       - "istio-telemetry"
       - "istio-policy"
+  - apiGroups: ["networking.istio.io"]
+    resources: ["destinationrules"]
+    verbs: ["delete"]
+    resourceNames:
+      - "ingressgateway"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
