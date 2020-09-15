@@ -244,7 +244,10 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				appRegistryPathPrefix,
 				appRegistryHost,
 				applicationGetter,
-				idCache)
+				idCache,
+				5,
+				100,
+			)
 
 			t.Run("should proxy event service V1 request when "+testCase.caseDescription, func(t *testing.T) {
 				eventTitle := "my-event-1"
@@ -393,7 +396,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				appRegistryPathPrefix,
 				appRegistryHost,
 				applicationGetter,
-				idCache)
+				idCache,
+				5,
+				100)
 
 			t.Run("should proxy application registry request when "+testCase.caseDescription, func(t *testing.T) {
 				appRegistryHandler.PathPrefix("/{application}/v1/metadata/services").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -436,7 +441,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				appRegistryPathPrefix,
 				appRegistryHost,
 				applicationGetter,
-				idCache)
+				idCache,
+				5,
+				100)
 
 			req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/metadata/services", applicationName), nil)
 			require.NoError(t, err)
@@ -473,7 +480,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			appRegistryPathPrefix,
 			appRegistryHost,
 			applicationGetter,
-			idCache)
+			idCache,
+			5,
+			100)
 
 		req, err := http.NewRequest(http.MethodGet, "/path", nil)
 		require.NoError(t, err)
@@ -511,7 +520,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			appRegistryPathPrefix,
 			appRegistryHost,
 			applicationGetter,
-			idCache)
+			idCache,
+			5,
+			100)
 
 		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/bad/path", applicationName), nil)
 		require.NoError(t, err)
