@@ -63,15 +63,35 @@ container:
       value: "1"
     reservedEnvs:
       value: "FUNC_RUNTIME,FUNC_HANDLER,FUNC_PORT,MOD_NAME,NODE_PATH,PYTHONPATH" # https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js;https://github.com/kubeless/runtimes/tree/master/stable/python
-    requestCpu:
-      value: "50m"
-    requestMemory:
-      value: "64Mi"
-    limitsCpu:
-      value: "100m"
-    limitsMemory:
-      value: "128Mi"
     minReplicas:
       value: "1"
     maxReplicas:
       value: "1"
+    function:
+      requestCpu: "50m"
+      requestMemory: "64Mi"
+      limitsCpu: "100m"
+      limitsMemory: "128Mi"
+    buildJob:
+      defaultPreset: "normal"
+      presets: |-
+        {
+          "slow": {
+            "requestCpu": "350m",
+            "requestMemory": "350Mi",
+            "limitsCpu": "700m",
+            "limitsMemory": "700Mi"
+          },
+          "normal": {
+            "requestCpu": "700m",
+            "requestMemory": "700Mi",
+            "limitsCpu": "1100m",
+            "limitsMemory": "1100Mi"
+          },
+          "fast": {
+            "requestCpu": "1100m",
+            "requestMemory": "1100Mi",
+            "limitsCpu": "1700m",
+            "limitsMemory": "1700Mi"
+          }
+        }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/pkg/errors"
 
@@ -40,15 +41,8 @@ func main() {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
 
-	defaultingCfg := &serverlessv1alhpa1.DefaultingConfig{}
-	if err := envconfig.InitWithPrefix(defaultingCfg, "WEBHOOK_DEFAULTING"); err != nil {
-		panic(errors.Wrap(err, "while reading env defaulting variables"))
-	}
-
-	validationCfg := &serverlessv1alhpa1.ValidationConfig{}
-	if err := envconfig.InitWithPrefix(validationCfg, "WEBHOOK_VALIDATION"); err != nil {
-		panic(errors.Wrap(err, "while reading env defaulting variables"))
-	}
+	defaultingCfg := readDefaultingConfig()
+	validationCfg := readValidationConfig()
 
 	// Scope informers to the webhook's namespace instead of cluster-wide
 	ctx := injection.WithNamespaceScope(signals.NewContext(), cfg.SystemNamespace)
@@ -116,4 +110,27 @@ func NewValidationAdmissionController(cfg *serverlessv1alhpa1.ValidationConfig) 
 			true,
 		)
 	}
+}
+
+func readDefaultingConfig() *serverlessv1alhpa1.DefaultingConfig {
+	defaultingCfg := &serverlessv1alhpa1.DefaultingConfig{}
+	if err := envconfig.InitWithPrefix(defaultingCfg, "WEBHOOK_DEFAULTING"); err != nil {
+		panic(errors.Wrap(err, "while reading env defaulting variables"))
+	}
+
+	var presets map[string]serverlessv1alhpa1.ResourcesPreset
+	if err := json.Unmarshal([]byte(defaultingCfg.BuildJob.PresetsMap), &presets); err != nil {
+		panic(errors.Wrap(err, "while parsing build presets"))
+	}
+	defaultingCfg.BuildJob.Presets = presets
+
+	return defaultingCfg
+}
+
+func readValidationConfig() *serverlessv1alhpa1.ValidationConfig {
+	validationCfg := &serverlessv1alhpa1.ValidationConfig{}
+	if err := envconfig.InitWithPrefix(validationCfg, "WEBHOOK_VALIDATION"); err != nil {
+		panic(errors.Wrap(err, "while reading env defaulting variables"))
+	}
+	return validationCfg
 }

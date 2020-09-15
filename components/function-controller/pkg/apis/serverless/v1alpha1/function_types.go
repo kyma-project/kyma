@@ -21,6 +21,10 @@ const (
 	Python38 Runtime = "python38"
 )
 
+const (
+	BuildResourcesPresetLabel = "serverless.kyma-project.io/build-resources-preset"
+)
+
 // FunctionSpec defines the desired state of Function
 type FunctionSpec struct {
 	// Source defines the source code of a function
@@ -37,6 +41,9 @@ type FunctionSpec struct {
 
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+
+	// +optional
+	BuildResources corev1.ResourceRequirements `json:"buildResources,omitempty"`
 
 	// +kubebuilder:validation:Minimum:=1
 	MinReplicas *int32 `json:"minReplicas,omitempty"`

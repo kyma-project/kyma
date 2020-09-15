@@ -109,16 +109,6 @@ containers:
         memory: 32Mi
     extraProperties: {}
     envs:
-      runtimeConfigMapName:
-        value: dockerfile-nodejs-12
-      buildRequestsCPU:
-        value: 700m
-      buildRequestsMemory:
-        value: 700Mi
-      buildLimitsCPU:
-        value: 1100m
-      buildLimitsMemory:
-        value: 1100Mi
       configMapRequeueDuration:
         value: 5m
       secretRequeueDuration:

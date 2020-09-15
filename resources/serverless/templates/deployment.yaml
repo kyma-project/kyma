@@ -76,11 +76,6 @@ spec:
               value: "{{- include "tplValue" ( dict "value" .Values.dockerRegistry.internalServerAddress "context" . ) }}"
             - name: APP_FUNCTION_DOCKER_REGISTRY_ADDRESS
               value: "{{- include "tplValue" ( dict "value" .Values.dockerRegistry.registryAddress "context" . ) }}"
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_RUNTIME_CONFIG_MAP_NAME" "value" .Values.containers.manager.envs.runtimeConfigMapName "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_REQUESTS_CPU" "value" .Values.containers.manager.envs.buildRequestsCPU "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_REQUESTS_MEMORY" "value" .Values.containers.manager.envs.buildRequestsMemory "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_LIMITS_CPU" "value" .Values.containers.manager.envs.buildLimitsCPU "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_LIMITS_MEMORY" "value" .Values.containers.manager.envs.buildLimitsMemory "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_CONFIG_MAP_REQUEUE_DURATION" "value" .Values.containers.manager.envs.configMapRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_SECRET_REQUEUE_DURATION" "value" .Values.containers.manager.envs.secretRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_SERVICE_ACCOUNT_REQUEUE_DURATION" "value" .Values.containers.manager.envs.serviceAccountRequeueDuration "context" . ) | nindent 12 }}

@@ -9,13 +9,20 @@ data:
   WEBHOOK_SERVICE_NAME: {{ include "tplValue" ( dict "value" .Values.container.envs.webhookServiceName.value "context" . ) | quote }}
   WEBHOOK_SECRET_NAME: {{ include "tplValue" ( dict "value" .Values.container.envs.webhookSecretName.value "context" . ) | quote }}
   WEBHOOK_PORT: {{ include "tplValue" ( dict "value" .Values.container.envs.webhookPort.value "context" . ) | quote }}
+
   WEBHOOK_VALIDATION_MIN_REQUEST_CPU: {{ include "tplValue" ( dict "value" .Values.container.envs.minRequestCpu.value "context" . ) | quote }}
   WEBHOOK_VALIDATION_MIN_REQUEST_MEMORY: {{ include "tplValue" ( dict "value" .Values.container.envs.minRequestMemory.value "context" . ) | quote }}
   WEBHOOK_VALIDATION_MIN_REPLICAS_VALUE: {{ include "tplValue" ( dict "value" .Values.container.envs.minReplicasValue.value "context" . ) | quote }}
   WEBHOOK_VALIDATION_RESERVED_ENVS: {{ include "tplValue" ( dict "value" .Values.container.envs.reservedEnvs.value "context" . ) | quote }}
-  WEBHOOK_DEFAULTING_REQUEST_CPU: {{ include "tplValue" ( dict "value" .Values.container.envs.requestCpu.value "context" . ) | quote }}
-  WEBHOOK_DEFAULTING_REQUEST_MEMORY: {{ include "tplValue" ( dict "value" .Values.container.envs.requestMemory.value "context" . ) | quote }}
-  WEBHOOK_DEFAULTING_LIMITS_CPU: {{ include "tplValue" ( dict "value" .Values.container.envs.limitsCpu.value "context" . ) | quote }}
-  WEBHOOK_DEFAULTING_LIMITS_MEMORY: {{ include "tplValue" ( dict "value" .Values.container.envs.limitsMemory.value "context" . ) | quote }}
+
   WEBHOOK_DEFAULTING_MINREPLICAS: {{ include "tplValue" ( dict "value" .Values.container.envs.minReplicas.value "context" . ) | quote }}
   WEBHOOK_DEFAULTING_MAXREPLICAS: {{ include "tplValue" ( dict "value" .Values.container.envs.maxReplicas.value "context" . ) | quote }}
+
+  WEBHOOK_DEFAULTING_FUNCTION_REQUEST_CPU: {{ .Values.container.envs.function.requestCpu | quote }}
+  WEBHOOK_DEFAULTING_FUNCTION_REQUEST_MEMORY: {{ .Values.container.envs.function.requestMemory | quote }}
+  WEBHOOK_DEFAULTING_FUNCTION_LIMITS_CPU: {{ .Values.container.envs.function.limitsCpu | quote }}
+  WEBHOOK_DEFAULTING_FUNCTION_LIMITS_MEMORY: {{ .Values.container.envs.function.limitsMemory | quote }}
+
+  WEBHOOK_DEFAULTING_BUILD_JOB_DEFAULT_PRESET: {{ .Values.container.envs.buildJob.defaultPreset | quote }}
+  WEBHOOK_DEFAULTING_BUILD_JOB_PRESETS_MAP:
+  {{ include "tplValue" ( dict "value" .Values.container.envs.buildJob.presets "context" . ) | nindent 2 }}
