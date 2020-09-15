@@ -57,6 +57,9 @@ type proxyHandler struct {
 
 	applicationGetter ApplicationGetter
 	cache             Cache
+
+	retryCount             uint
+	retryDelayMilliseconds uint
 }
 
 func NewProxyHandler(
@@ -70,7 +73,9 @@ func NewProxyHandler(
 	appRegistryPathPrefix string,
 	appRegistryHost string,
 	applicationGetter ApplicationGetter,
-	cache Cache) *proxyHandler {
+	cache Cache,
+	retryCount uint,
+	retryDelayMilliseconds uint) *proxyHandler {
 
 	return &proxyHandler{
 		group:                    group,
@@ -89,6 +94,9 @@ func NewProxyHandler(
 
 		applicationGetter: applicationGetter,
 		cache:             cache,
+
+		retryCount:             retryCount,
+		retryDelayMilliseconds: retryDelayMilliseconds,
 	}
 }
 
@@ -155,7 +163,9 @@ func (ph *proxyHandler) getClientIDsFromResource(applicationName string) ([]stri
 
 	var application *v1alpha1.Application
 
-	maxAttempts := uint(5)
+	maxAttempts := ph.retryCount
+	retryDelay := time.Duration(ph.retryDelayMilliseconds) * time.Millisecond
+
 	err := retry.Do(
 		func() error {
 			app, err := ph.applicationGetter.Get(context.Background(), applicationName, metav1.GetOptions{})
@@ -167,10 +177,10 @@ func (ph *proxyHandler) getClientIDsFromResource(applicationName string) ([]stri
 			return nil
 		},
 		retry.Attempts(maxAttempts),
-		retry.Delay(500*time.Millisecond),
+		retry.Delay(retryDelay),
 		retry.DelayType(retry.FixedDelay),
 		retry.OnRetry(func(retryNo uint, err error) {
-			log.Printf("Retry fetching component sources: [%d / %d], error: %s", retryNo+1, maxAttempts, err)
+			log.Printf("Retry fetching Applications: [%d / %d], error: %s", retryNo+1, maxAttempts, err)
 		}),
 	)
 

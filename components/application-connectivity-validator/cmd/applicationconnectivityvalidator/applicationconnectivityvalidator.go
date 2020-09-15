@@ -54,7 +54,10 @@ func main() {
 		options.appRegistryPathPrefix,
 		options.appRegistryHost,
 		applicationGetter,
-		idCache)
+		idCache,
+		options.retryCount,
+		options.retryDelayMilliseconds,
+	)
 
 	proxyServer := http.Server{
 		Handler: validationproxy.NewHandler(proxyHandler),

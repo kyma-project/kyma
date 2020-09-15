@@ -19,6 +19,8 @@ type options struct {
 	appRegistryHost          string
 	cacheExpirationMinutes   int
 	cacheCleanupMinutes      int
+	retryCount               uint
+	retryDelayMilliseconds   uint
 }
 
 func parseArgs() *options {
@@ -35,6 +37,8 @@ func parseArgs() *options {
 	appRegistryHost := flag.String("appRegistryHost", "application-registry-external-api:8081", "Host (and port) of the Application Registry")
 	cacheExpirationMinutes := flag.Int("cacheExpirationMinutes", 1, "Expiration time for client IDs stored in cache expressed in minutes")
 	cacheCleanupMinutes := flag.Int("cacheCleanupMinutes", 2, "Clean up time for client IDs stored in cache expressed in minutes")
+	retryCount := flag.Uint("retryCount", 5, "Number of retries for fetching Application")
+	retryDelayMilliseconds := flag.Uint("retryDelayMilliseconds", 500, "Application fetching retry delay")
 
 	flag.Parse()
 
@@ -52,6 +56,8 @@ func parseArgs() *options {
 		appRegistryHost:          *appRegistryHost,
 		cacheExpirationMinutes:   *cacheExpirationMinutes,
 		cacheCleanupMinutes:      *cacheCleanupMinutes,
+		retryCount:               *retryCount,
+		retryDelayMilliseconds:   *retryDelayMilliseconds,
 	}
 }
 
