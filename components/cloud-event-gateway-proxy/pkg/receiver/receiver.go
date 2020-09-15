@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	// defaultShutdownTimeout the default timeout for the receiver to shutdown.
+	// defaultShutdownTimeout is the default timeout for the receiver to shutdown.
 	defaultShutdownTimeout = time.Minute * 1
 )
 

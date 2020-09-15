@@ -10,7 +10,7 @@ const (
 )
 
 // CheckHealth does the health checks for the readiness and liveness probes, otherwise it will let the next
-// handler to take care of the incoming HTTP requests.
+// handler take care of the incoming HTTP requests.
 func CheckHealth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		if request.RequestURI == livenessURI {

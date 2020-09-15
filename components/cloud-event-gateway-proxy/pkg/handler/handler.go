@@ -26,7 +26,7 @@ const (
 )
 
 var (
-	// additionalHeaders the required headers by EMS for publish requests.
+	// additionalHeaders are the required headers by EMS for publish requests.
 	// Any alteration or removal of those headers might cause publish requests to fail.
 	additionalHeaders = http.Header{
 		"qos":    []string{string(ems.QosAtLeastOnce)},
