@@ -21,7 +21,7 @@ spec:
             - |
               kubectl delete destinationrules.networking.istio.io -n istio-system istio-telemetry --ignore-not-found
               kubectl delete destinationrules.networking.istio.io -n istio-system istio-policy --ignore-not-found
-              kubectl delete gateways.networking.istio.io -n istio-system ingressgateway
+              kubectl delete gateways.networking.istio.io -n istio-system ingressgateway --ignore-not-found
           image: {{ .Values.kyma.labelJob.image }}:{{ .Values.kyma.labelJob.tag }}
           name: cleanup
       restartPolicy: Never
