@@ -2,7 +2,7 @@ jobs:
   crdsInConfigMap: 20
   image:
     repository: demonsthere/kyma-crds
-    tag: "v2"
+    tag: "v3"
   installer:
     namespace: kyma-installer
 
