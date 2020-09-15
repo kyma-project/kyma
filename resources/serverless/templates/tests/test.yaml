@@ -11,7 +11,7 @@ metadata:
     helm.sh/chart: {{ include "chart" . }}
     {{- range $key, $val := .Values.tests.labels }}
     kyma-project.io/test.{{ $key }}: {{ $val | quote }}
-  {{- end }}
+    {{- end }}
 
 spec:
   disableConcurrency: {{ .Values.tests.disableConcurrency }}

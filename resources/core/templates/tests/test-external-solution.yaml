@@ -14,7 +14,7 @@ metadata:
     helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
     {{- range $label, $value := $val.labels }}
     kyma-project.io/test.{{ $label }}: {{ $value | quote }}
-  {{- end }}
+    {{- end }}
 
 spec:
   disableConcurrency: false

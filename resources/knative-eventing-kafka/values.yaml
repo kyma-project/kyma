@@ -65,5 +65,5 @@ test:
   version: d4372526
   enabled: true
   labels:
-    kyma-project.io/test.integration: true
-    kyma-project.io/test.after-upgrade: true
+    integration: true
+    after-upgrade: true
