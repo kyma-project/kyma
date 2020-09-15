@@ -2,7 +2,9 @@ package v1alpha1
 
 import (
 	"context"
+	"encoding/json"
 
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"knative.dev/pkg/webhook/resourcesemantics"
@@ -27,9 +29,9 @@ type FunctionDefaulting struct {
 }
 
 type BuildJobDefaulting struct {
-	DefaultPreset string `envconfig:"default=normal"`
-	Presets       map[string]ResourcesPreset
-	PresetsMap    string
+	DefaultPreset string                     `envconfig:"default=normal"`
+	Presets       map[string]ResourcesPreset `envconfig:"-"`
+	PresetsMap    string                     `envconfig:"default={}"`
 }
 
 type DefaultingConfig struct {
@@ -167,4 +169,12 @@ func mergeResourcesPreset(fn *Function, presetLabel string, presets map[string]R
 	}
 
 	return resources
+}
+
+func ParseResourcePresets(presetsMap string) (map[string]ResourcesPreset, error) {
+	var presets map[string]ResourcesPreset
+	if err := json.Unmarshal([]byte(presetsMap), &presets); err != nil {
+		return presets, errors.Wrap(err, "while parsing resources presets")
+	}
+	return presets, nil
 }

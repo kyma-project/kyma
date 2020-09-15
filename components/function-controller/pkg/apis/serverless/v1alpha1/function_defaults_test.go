@@ -16,24 +16,45 @@ func TestSetDefaults(t *testing.T) {
 	zero := int32(0)
 	one := int32(1)
 	two := int32(2)
+	buildResources := `
+{
+"slow":{"requestCpu": "350m","requestMemory": "350Mi","limitsCpu": "700m","limitsMemory": "700Mi"},
+"normal":{"requestCpu": "700m","requestMemory": "700Mi","limitsCpu": "1100m","limitsMemory": "1100Mi"},
+"fast":{"requestCpu": "1100m","requestMemory": "1100Mi","limitsCpu": "1700m","limitsMemory": "1700Mi"}
+}
+`
+
 	for testName, testData := range map[string]struct {
 		givenFunc    Function
 		expectedFunc Function
 	}{
 		"Should do nothing": {
 			givenFunc: Function{
-				Spec: FunctionSpec{Resources: corev1.ResourceRequirements{
-					Limits: corev1.ResourceList{
-						corev1.ResourceCPU:    resource.MustParse("150m"),
-						corev1.ResourceMemory: resource.MustParse("158Mi"),
+				Spec: FunctionSpec{
+					Runtime: Nodejs12,
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("150m"),
+							corev1.ResourceMemory: resource.MustParse("158Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("90m"),
+							corev1.ResourceMemory: resource.MustParse("84Mi"),
+						},
 					},
-					Requests: corev1.ResourceList{
-						corev1.ResourceCPU:    resource.MustParse("90m"),
-						corev1.ResourceMemory: resource.MustParse("84Mi"),
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("400m"),
+							corev1.ResourceMemory: resource.MustParse("321Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("374m"),
+							corev1.ResourceMemory: resource.MustParse("300Mi"),
+						},
 					},
-				},
 					MinReplicas: &two,
-					MaxReplicas: &two},
+					MaxReplicas: &two,
+				},
 			},
 			expectedFunc: Function{Spec: FunctionSpec{
 				Runtime: Nodejs12,
@@ -45,6 +66,16 @@ func TestSetDefaults(t *testing.T) {
 					Requests: corev1.ResourceList{
 						corev1.ResourceCPU:    resource.MustParse("90m"),
 						corev1.ResourceMemory: resource.MustParse("84Mi"),
+					},
+				},
+				BuildResources: corev1.ResourceRequirements{
+					Limits: corev1.ResourceList{
+						corev1.ResourceCPU:    resource.MustParse("400m"),
+						corev1.ResourceMemory: resource.MustParse("321Mi"),
+					},
+					Requests: corev1.ResourceList{
+						corev1.ResourceCPU:    resource.MustParse("374m"),
+						corev1.ResourceMemory: resource.MustParse("300Mi"),
 					},
 				},
 				MinReplicas: &two,
@@ -66,6 +97,16 @@ func TestSetDefaults(t *testing.T) {
 							corev1.ResourceMemory: resource.MustParse("84Mi"),
 						},
 					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("400m"),
+							corev1.ResourceMemory: resource.MustParse("321Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("374m"),
+							corev1.ResourceMemory: resource.MustParse("300Mi"),
+						},
+					},
 					MinReplicas: &two,
 					MaxReplicas: &two,
 				},
@@ -83,11 +124,22 @@ func TestSetDefaults(t *testing.T) {
 							corev1.ResourceMemory: resource.MustParse("84Mi"),
 						},
 					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("400m"),
+							corev1.ResourceMemory: resource.MustParse("321Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("374m"),
+							corev1.ResourceMemory: resource.MustParse("300Mi"),
+						},
+					},
 					MinReplicas: &two,
-					MaxReplicas: &two},
+					MaxReplicas: &two,
+				},
 			},
 		},
-		"Should  change empty runtime type to default nodejs12": {
+		"Should change empty runtime type to default nodejs12": {
 			givenFunc: Function{
 				Spec: FunctionSpec{
 					Resources: corev1.ResourceRequirements{
@@ -98,6 +150,16 @@ func TestSetDefaults(t *testing.T) {
 						Requests: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("90m"),
 							corev1.ResourceMemory: resource.MustParse("84Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("400m"),
+							corev1.ResourceMemory: resource.MustParse("321Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("374m"),
+							corev1.ResourceMemory: resource.MustParse("300Mi"),
 						},
 					},
 					MinReplicas: &two,
@@ -115,6 +177,16 @@ func TestSetDefaults(t *testing.T) {
 						Requests: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("90m"),
 							corev1.ResourceMemory: resource.MustParse("84Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("400m"),
+							corev1.ResourceMemory: resource.MustParse("321Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("374m"),
+							corev1.ResourceMemory: resource.MustParse("300Mi"),
 						},
 					},
 					MinReplicas: &two,
@@ -136,6 +208,16 @@ func TestSetDefaults(t *testing.T) {
 							corev1.ResourceMemory: resource.MustParse("64Mi"),
 						},
 					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("1100m"),
+							corev1.ResourceMemory: resource.MustParse("1100Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("700m"),
+							corev1.ResourceMemory: resource.MustParse("700Mi"),
+						},
+					},
 					MinReplicas: &one,
 					MaxReplicas: &one,
 				},
@@ -148,6 +230,12 @@ func TestSetDefaults(t *testing.T) {
 						Requests: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
 							corev1.ResourceMemory: resource.MustParse("150Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("1200m"),
+							corev1.ResourceMemory: resource.MustParse("12000Mi"),
 						},
 					},
 					MinReplicas: &two,
@@ -164,6 +252,16 @@ func TestSetDefaults(t *testing.T) {
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
 							corev1.ResourceMemory: resource.MustParse("150Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("1200m"),
+							corev1.ResourceMemory: resource.MustParse("12000Mi"),
+						},
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("1200m"),
+							corev1.ResourceMemory: resource.MustParse("12000Mi"),
 						},
 					},
 					MinReplicas: &two,
@@ -180,6 +278,12 @@ func TestSetDefaults(t *testing.T) {
 							corev1.ResourceMemory: resource.MustParse("15Mi"),
 						},
 					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("300m"),
+							corev1.ResourceMemory: resource.MustParse("300Mi"),
+						},
+					},
 					MaxReplicas: &zero,
 				},
 			},
@@ -196,6 +300,16 @@ func TestSetDefaults(t *testing.T) {
 							corev1.ResourceMemory: resource.MustParse("15Mi"),
 						},
 					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("300m"),
+							corev1.ResourceMemory: resource.MustParse("300Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("300m"),
+							corev1.ResourceMemory: resource.MustParse("300Mi"),
+						},
+					},
 					MinReplicas: &zero,
 					MaxReplicas: &zero,
 				},
@@ -207,6 +321,9 @@ func TestSetDefaults(t *testing.T) {
 			g := gomega.NewWithT(t)
 			config := &DefaultingConfig{}
 			err := envconfig.Init(config)
+			g.Expect(err).To(gomega.BeNil())
+			presets, err := ParseResourcePresets(buildResources)
+			config.BuildJob.Presets = presets
 			g.Expect(err).To(gomega.BeNil())
 			ctx := context.WithValue(context.Background(), DefaultingConfigKey, *config)
 

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/pkg/errors"
 
@@ -118,9 +117,9 @@ func readDefaultingConfig() *serverlessv1alhpa1.DefaultingConfig {
 		panic(errors.Wrap(err, "while reading env defaulting variables"))
 	}
 
-	var presets map[string]serverlessv1alhpa1.ResourcesPreset
-	if err := json.Unmarshal([]byte(defaultingCfg.BuildJob.PresetsMap), &presets); err != nil {
-		panic(errors.Wrap(err, "while parsing build presets"))
+	presets, err := serverlessv1alhpa1.ParseResourcePresets(defaultingCfg.BuildJob.PresetsMap)
+	if err != nil {
+		panic(errors.Wrap(err, "while reading env defaulting variables"))
 	}
 	defaultingCfg.BuildJob.Presets = presets
 
