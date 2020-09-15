@@ -1,8 +1,8 @@
 jobs:
   crdsInConfigMap: 20
   image:
-    repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20200617-32c1f3ff"
+    repository: demonsthere/kyma-crds
+    tag: "v2"
   installer:
     namespace: kyma-installer
 

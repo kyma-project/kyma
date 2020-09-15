@@ -5,7 +5,7 @@ metadata:
   annotations:
     helm.sh/hook: "pre-upgrade, pre-install"
     helm.sh/hook-weight: "0"
-    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
   labels:
     job: {{ .Release.Name }}-crd-install
 roleRef:
@@ -15,4 +15,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: {{ .Release.Name }}-crd-install
-  namespace: kyma-system
+  namespace: {{ .Release.Namespace }}
