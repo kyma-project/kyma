@@ -180,12 +180,10 @@ func shouldIgnoreTarget(target prom.Labels) bool {
 	var podsToBeIgnored = []string{
 		// Ignore the pods that are created during tests.
 		"-testsuite-",
-		"-test-",
+		"test",
 		"nodejs12-",
 		"nodejs10-",
 		"upgrade",
-		"test",
-		"default-broker-ingress",
 	}
 
 	var namespacesToIgnore = "test"
