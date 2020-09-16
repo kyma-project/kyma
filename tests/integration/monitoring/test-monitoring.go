@@ -183,7 +183,12 @@ func shouldIgnoreTarget(target prom.Labels) bool {
 		"-test-",
 		"nodejs12-",
 		"nodejs10-",
+		"upgrade",
+		"test",
+		"default-broker-ingress",
 	}
+
+	var namespacesToIgnore = test
 
 	for _, p := range podsToBeIgnored {
 		if strings.Contains(target["pod_name"], p) {
@@ -196,6 +201,11 @@ func shouldIgnoreTarget(target prom.Labels) bool {
 			return true
 		}
 	}
+
+	if strings.Contains(target["namespace"], namespacesToIgnore) {
+		return true
+	}
+
 	return false
 }
 
