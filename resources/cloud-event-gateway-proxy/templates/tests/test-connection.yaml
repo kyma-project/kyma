@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "cloud-event-gateway-proxy.fullname" . }}-test-connection"
+  labels:
+    {{- include "cloud-event-gateway-proxy.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "cloud-event-gateway-proxy.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
