@@ -188,7 +188,7 @@ func shouldIgnoreTarget(target prom.Labels) bool {
 		"default-broker-ingress",
 	}
 
-	var namespacesToIgnore = test
+	var namespacesToIgnore = "test"
 
 	for _, p := range podsToBeIgnored {
 		if strings.Contains(target["pod_name"], p) {
