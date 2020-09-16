@@ -11,6 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/tracing/propagation/tracecontextb3"
 )
 
+// NewClient returns a new HTTP client which have nested transports for handling oauth2 security, HTTP connection pooling, and tracing.
 func NewClient(ctx context.Context, cfg *env.Config) *http.Client {
 	// configure auth client
 	config := Config(cfg)
