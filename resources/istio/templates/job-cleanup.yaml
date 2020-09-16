@@ -50,14 +50,9 @@ rules:
   - apiGroups: ["networking.istio.io"]
     resources: ["gateways"]
     verbs: ["delete"]
-    resourceNames:
-      - "istio-telemetry"
-      - "istio-policy"
   - apiGroups: ["networking.istio.io"]
     resources: ["destinationrules"]
     verbs: ["delete"]
-    resourceNames:
-      - "ingressgateway"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
