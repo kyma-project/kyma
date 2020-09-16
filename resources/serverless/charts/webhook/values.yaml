@@ -6,7 +6,7 @@ nameOverride:
 fullnameOverride:
 image:
   repository: "eu.gcr.io/kyma-project/function-webhook"
-  tag: "b04bc441"
+  tag: "PR-9456"
   pullPolicy: IfNotPresent
 
 commonLabels:
