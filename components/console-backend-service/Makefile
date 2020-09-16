@@ -61,7 +61,7 @@ fmt:
 	go fmt $$($(DIRS_TO_CHECK))
 
 build:
-	env CGO_ENABLED=0 go build -o $(APP_NAME) ./$(ENTRYPOINT)
+	env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $(APP_NAME) ./$(ENTRYPOINT)
 
 run: export APP_KUBECONFIG_PATH=/Users/${USER}/.kube/config
 run: export APP_VERBOSE=true
