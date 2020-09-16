@@ -149,22 +149,22 @@ func mergeResourcesPreset(fn *Function, presetLabel string, presets map[string]R
 	resourcesDefaultPreset := presets[defaultPreset]
 
 	resources.RequestCpu = resourcesPreset.RequestCpu
-	if resourcesPreset.RequestCpu == "" {
+	if resources.RequestCpu == "" {
 		resources.RequestCpu = resourcesDefaultPreset.RequestCpu
 	}
 
 	resources.RequestMemory = resourcesPreset.RequestMemory
-	if resourcesPreset.RequestMemory == "" {
+	if resources.RequestMemory == "" {
 		resources.RequestMemory = resourcesDefaultPreset.RequestMemory
 	}
 
 	resources.LimitsCpu = resourcesPreset.LimitsCpu
-	if resourcesPreset.LimitsCpu == "" {
+	if resources.LimitsCpu == "" {
 		resources.LimitsCpu = resourcesDefaultPreset.LimitsCpu
 	}
 
 	resources.LimitsMemory = resourcesPreset.LimitsMemory
-	if resourcesPreset.LimitsMemory == "" {
+	if resources.LimitsMemory == "" {
 		resources.LimitsMemory = resourcesDefaultPreset.LimitsMemory
 	}
 

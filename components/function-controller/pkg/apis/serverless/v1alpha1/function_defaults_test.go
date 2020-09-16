@@ -18,9 +18,7 @@ func TestSetDefaults(t *testing.T) {
 	two := int32(2)
 	buildResources := `
 {
-"slow":{"requestCpu": "350m","requestMemory": "350Mi","limitsCpu": "700m","limitsMemory": "700Mi"},
-"normal":{"requestCpu": "700m","requestMemory": "700Mi","limitsCpu": "1100m","limitsMemory": "1100Mi"},
-"fast":{"requestCpu": "1100m","requestMemory": "1100Mi","limitsCpu": "1700m","limitsMemory": "1700Mi"}
+"normal":{"requestCpu": "700m","requestMemory": "700Mi","limitsCpu": "1100m","limitsMemory": "1100Mi"}
 }
 `
 
@@ -280,8 +278,8 @@ func TestSetDefaults(t *testing.T) {
 					},
 					BuildResources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("300m"),
-							corev1.ResourceMemory: resource.MustParse("300Mi"),
+							corev1.ResourceCPU:    resource.MustParse("800m"),
+							corev1.ResourceMemory: resource.MustParse("800Mi"),
 						},
 					},
 					MaxReplicas: &zero,
@@ -302,12 +300,12 @@ func TestSetDefaults(t *testing.T) {
 					},
 					BuildResources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("300m"),
-							corev1.ResourceMemory: resource.MustParse("300Mi"),
+							corev1.ResourceCPU:    resource.MustParse("800m"),
+							corev1.ResourceMemory: resource.MustParse("800Mi"),
 						},
 						Requests: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("300m"),
-							corev1.ResourceMemory: resource.MustParse("300Mi"),
+							corev1.ResourceCPU:    resource.MustParse("700m"),
+							corev1.ResourceMemory: resource.MustParse("700Mi"),
 						},
 					},
 					MinReplicas: &zero,
