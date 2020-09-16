@@ -8,7 +8,7 @@ tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/rafter-test"
-    tag: 1088c1af
+    tag: e9138b36
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
@@ -16,12 +16,13 @@ tests:
     limits:
       memory: 128Mi
   envs:
-    mockiceImage: hudymi/mockice:0.1.3
+    mockiceImage: eu.gcr.io/kyma-project/external/hudymi/mockice:0.1.3
     waitTimeout: 10m
     verifySSL: "false"
 
 controller-manager:
   enabled: true
+
   fullnameOverride: "rafter-controller-manager"
 
   image:
@@ -202,6 +203,7 @@ controller-manager:
 
     podAnnotations:
       sidecar.istio.io/inject: "false"
+      persistence: "on"
 
     service:
       annotations:
@@ -333,7 +335,7 @@ upload-service:
     images:
       alpineKubectl:
         repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-        tag: "v20200617-32c1f3ff"
+        tag: 'v20200617-32c1f3ff'
         pullPolicy: IfNotPresent
       minioClient:
         repository: eu.gcr.io/kyma-project/incubator/develop/minio/mc

@@ -24,6 +24,7 @@ const expectedPrometheusInstances = 1
 const expectedKubeStateMetrics = 1
 const expectedGrafanaInstance = 1
 
+
 // TargetsAndRulesTest checks that all targets and rules are healthy
 type TargetsAndRulesTest struct {
 	k8sCli     kubernetes.Interface
@@ -176,6 +177,9 @@ func (t TargetsAndRulesTest) testTargetsAreHealthy() error {
 			allTargetsAreHealthy := true
 			timeoutMessage = ""
 			for _, target := range activeTargets {
+				if shouldIgnoreTarget(target.Labels) {
+					continue
+				}
 				if target.Health != "up" {
 					allTargetsAreHealthy = false
 					timeoutMessage += "The following target is not healthy:\n"
@@ -191,6 +195,21 @@ func (t TargetsAndRulesTest) testTargetsAreHealthy() error {
 		}
 	}
 
+}
+
+func shouldIgnoreTarget(target prom.Labels) bool {
+	var jobsToBeIgnored = []string{
+		// Note: These targets will be tested here: https://github.com/kyma-project/kyma/issues/6457
+		"knative-eventing/knative-eventing-event-mesh-dashboard-broker",
+		"knative-eventing/knative-eventing-event-mesh-dashboard-httpsource",
+	}
+
+	for _, j := range jobsToBeIgnored {
+		if target["job"] == j {
+			return true
+		}
+	}
+	return false
 }
 
 func (t TargetsAndRulesTest) testRulesAreHealthy() error {

@@ -308,6 +308,8 @@ type Function struct {
 	Resources    *FunctionResources `json:"resources"`
 	Runtime      *string            `json:"runtime"`
 	SourceType   *string            `json:"sourceType"`
+	BaseDir      *string            `json:"baseDir"`
+	Reference    *string            `json:"reference"`
 	Status       *FunctionStatus    `json:"status"`
 }
 
@@ -361,6 +363,8 @@ type FunctionMutationInput struct {
 	Resources    *FunctionResourcesInput `json:"resources"`
 	Runtime      *string                 `json:"runtime"`
 	SourceType   *string                 `json:"sourceType"`
+	BaseDir      *string                 `json:"baseDir"`
+	Reference    *string                 `json:"reference"`
 }
 
 type FunctionReplicas struct {
