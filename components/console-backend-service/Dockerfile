@@ -14,8 +14,7 @@ RUN go mod download
 COPY . .
 
 # Run tests
-# Temporary comment -> check what is wrong with go modules on CI...
-# RUN make verify
+RUN make verify
 
 # Build app
 RUN make build

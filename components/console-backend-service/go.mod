@@ -51,13 +51,12 @@ require (
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
 	knative.dev/eventing v0.13.1
 	knative.dev/pkg v0.0.0-20200306230727-a56a6ea3fa56
-	sigs.k8s.io/structured-merge-diff v1.0.1-0.20191108220359-b1b620dd3f06 // indirect
 )
 
 replace (
 	github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.34.1
 	github.com/coreos/etcd => github.com/coreos/etcd v3.3.24+incompatible
-	github.com/kyma-project/kyma/components/function-controller => github.com/aerfio/kyma/components/function-controller v0.0.0-20200910130841-f4dedf99d785
+	github.com/kyma-project/kyma/components/function-controller => ../function-controller
 	golang.org/x/text => golang.org/x/text v0.3.3
 	k8s.io/client-go => k8s.io/client-go v0.17.4
 )
