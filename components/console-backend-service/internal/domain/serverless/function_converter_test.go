@@ -14,16 +14,16 @@ import (
 )
 
 func TestFunctionConverter_ToGQL(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		expectedName := "expectedName"
-		expectedNamespace := "expectedNamespace"
-		expectedUID := "expectedUID"
-		expectedSource := "expectedSource"
-		expectedDependencies := "expectedDependencies"
-		expectedRuntime := v1alpha1.Python38
-		expectedRuntimeString := "python38"
-		expectedLabels := map[string]string{"foo": "bar"}
+	expectedName := "expectedName"
+	expectedNamespace := "expectedNamespace"
+	expectedUID := "expectedUID"
+	expectedSource := "expectedSource"
+	expectedDependencies := "expectedDependencies"
+	expectedRuntime := v1alpha1.Python38
+	expectedRuntimeString := "python38"
+	expectedLabels := map[string]string{"foo": "bar"}
 
+	t.Run("Success - plain Function", func(t *testing.T) {
 		function := fixFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedLabels, expectedRuntime)
 		gqlFunction := fixGQLFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedRuntimeString, expectedLabels)
 
@@ -32,6 +32,19 @@ func TestFunctionConverter_ToGQL(t *testing.T) {
 
 		require.NoError(t, err)
 		assert.Equal(t, gqlFunction, result)
+	})
+
+	t.Run("Success - git Function", func(t *testing.T) {
+		function := fixFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedLabels, expectedRuntime)
+		gitFunction := fixGitFunction(function, "git-url", "./handler", "master")
+		gqlFunction := fixGQLFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedRuntimeString, expectedLabels)
+		gqlGitFunction := fixGQLGitFunction(gqlFunction, "git-url", "./handler", "master")
+
+		converter := newFunctionConverter()
+		result, err := converter.ToGQL(gitFunction)
+
+		require.NoError(t, err)
+		assert.Equal(t, gqlGitFunction, result)
 	})
 
 	t.Run("Empty", func(t *testing.T) {
@@ -345,6 +358,28 @@ func TestFunctionConverter_Resources(t *testing.T) {
 		result, errs := converter.fromGQLResources(&gqlschema.FunctionResourcesInput{})
 		assert.Len(t, errs, 0)
 		assert.Equal(t, v1.ResourceRequirements{}, result)
+	})
+}
+
+func TestFunctionConverter_Repository(t *testing.T) {
+	converter := newFunctionConverter()
+
+	t.Run("Success - fromGQLRepository", func(t *testing.T) {
+		baseDir := "./handler"
+		input := gqlschema.FunctionMutationInput{
+			BaseDir: stringPtr(baseDir),
+		}
+		expected := v1alpha1.Repository{
+			BaseDir: baseDir,
+		}
+
+		result := converter.fromGQLRepository(input)
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("Empty - fromGQLRepository", func(t *testing.T) {
+		result := converter.fromGQLRepository(gqlschema.FunctionMutationInput{})
+		assert.Equal(t, v1alpha1.Repository{}, result)
 	})
 }
 

@@ -11,6 +11,7 @@ type FunctionConfig struct {
 	ImagePullAccountName                string        `envconfig:"default=serverless"`
 	TargetCPUUtilizationPercentage      int32         `envconfig:"default=50"`
 	RequeueDuration                     time.Duration `envconfig:"default=1m"`
+	GitFetchRequeueDuration             time.Duration `envconfig:"default=30s"`
 	Build                               BuildConfig
 	Docker                              DockerConfig
 }

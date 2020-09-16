@@ -12,5 +12,6 @@ To eliminate potential security risks when using Functions, bear in mind these f
 - Kyma does not define any authorization policies that would restrict Functions' access to other resources within the Namespace. If you deploy a Function in a given Namespace, it can freely access all events and APIs of services within this Namespace.
 
 - All administrators and regular users who have access to a specific Namespace in a cluster can also access:
+
     - Source code of all Functions within this Namespace
     - Internal Docker registry that contains Function images
