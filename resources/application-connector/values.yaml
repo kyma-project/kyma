@@ -42,6 +42,8 @@ global:
     version: "PR-9407"
   application_gateway_tests:
     version: "PR-9407"
+  application_gateway_legacy_tests:
+    version: "4eeef0b7"
   application_registry:
     version: "PR-9407"
   application_registry_tests:
