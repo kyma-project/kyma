@@ -173,7 +173,7 @@ conf:
       Keep_Log: "On"
       Match: "*"
       # When Merge_Log is enabled, the filter tries to assume the log field from the incoming message is a JSON string message and make a structured representation of it at the same level of the log field in the map. Now if Merge_Log_Key is set (a string name), all the new structured fields taken from the original log content are inserted under the new key.
-      Merge_Log_Key: "logs"
+      Merge_Log_Key: ""
     custom_parser:
       enabled: false
       name:

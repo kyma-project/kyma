@@ -27,11 +27,7 @@ func TestNewHttpMessageSender(t *testing.T) {
 	client := oauth.NewClient(context.Background(), &env.Config{})
 	defer client.CloseIdleConnections()
 
-	msgSender, err := NewHttpMessageSender(eventsEndpoint, client)
-
-	if err != nil {
-		t.Errorf("Failed to create a new message sender with error: %v", err)
-	}
+	msgSender := NewHttpMessageSender(eventsEndpoint, client)
 	if msgSender.Target != eventsEndpoint {
 		t.Errorf("Message sender target is misconfigured want: %s but got: %s", eventsEndpoint, msgSender.Target)
 	}
@@ -46,10 +42,7 @@ func TestNewRequestWithTarget(t *testing.T) {
 	client := oauth.NewClient(context.Background(), &env.Config{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
 	defer client.CloseIdleConnections()
 
-	msgSender, err := NewHttpMessageSender(eventsEndpoint, client)
-	if err != nil {
-		t.Errorf("Failed to create a new message sender with error: %v", err)
-	}
+	msgSender := NewHttpMessageSender(eventsEndpoint, client)
 
 	const ctxKey, ctxValue = "testKey", "testValue"
 	ctx := context.WithValue(context.Background(), ctxKey, ctxValue)
@@ -95,10 +88,7 @@ func TestSend(t *testing.T) {
 	client := oauth.NewClient(ctx, cfg)
 	defer client.CloseIdleConnections()
 
-	msgSender, err := NewHttpMessageSender(emsCEURL, client)
-	if err != nil {
-		t.Errorf("Failed to create a new message sender with error: %v", err)
-	}
+	msgSender := NewHttpMessageSender(emsCEURL, client)
 
 	request, err := msgSender.NewRequestWithTarget(ctx, msgSender.Target)
 	if err != nil {
