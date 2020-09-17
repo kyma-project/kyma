@@ -1,8 +1,5 @@
 jobs:
   crdsInConfigMap: 20
-  helmimage:
-    repository: eu.gcr.io/kyma-project/test-infra/bootstrap-helm
-    tag: "v20200831-e46c648b"
   image:
     repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
     tag: "v20200617-32c1f3ff"

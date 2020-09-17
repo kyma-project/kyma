@@ -130,6 +130,9 @@
 # The `istio-kyma-patch` chart
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
+# The `knative-serving` chart
+/resources/knative-serving/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @m00g3n @aerfio @pPrecel @magicmatatjahu
+
 # The `knative-eventing` chart
 /resources/knative-eventing/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
@@ -259,6 +262,9 @@ components/etcd-tls-setup-job/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksp
 
 # Dex integration tests
 /tests/integration/dex/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+
+# Knative Serving Acceptance
+/tests/knative-serving/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @m00g3n @aerfio @pPrecel @magicmatatjahu
 
 # monitoring tests
 /tests/integration/monitoring/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
