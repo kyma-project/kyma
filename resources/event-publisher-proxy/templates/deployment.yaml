@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  {{ include "event-publisher-proxy.fullname" . }}
+  labels:
+  {{- include "event-publisher-proxy.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{ include "event-publisher-proxy.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        {{ include "event-publisher-proxy.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "event-publisher-proxy.serviceAccountName" . }}
+      containers:
+        - env:
+            - name: CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: event-publisher-proxy
+                  key: client-id
+            - name: CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: event-publisher-proxy
+                  key: client-secret
+            - name: TOKEN_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: event-publisher-proxy
+                  key: token-endpoint
+            - name: EMS_PUBLISH_URL
+              valueFrom:
+                secretKeyRef:
+                  name: event-publisher-proxy
+                  key: ems-publish-url
+          # TODO:
+          image: docker.io/nachtmaar/cloud-event-gateway-proxy-cd4ff4b403b0f3c363f401de52d105ef@sha256:d8ece16affff418aafb07c6a8423472536fd773e7069e67f6e9402952a44a919
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          name: event-publisher-proxy
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 2
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /readyz
+              port: 8080
+              scheme: HTTP
