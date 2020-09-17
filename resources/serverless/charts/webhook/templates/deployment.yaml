@@ -37,6 +37,13 @@ spec:
         - name: webhook
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          resources:
+            requests:
+              cpu: 30m
+              memory: 50Mi
+            limits:
+              cpu: 300m
+              memory: 300Mi
           securityContext:
             allowPrivilegeEscalation: {{ .Values.container.allowPrivilegeEscalation }}
           ports:

@@ -472,9 +472,9 @@ type LimitRange {
 
 type LimitRangeItem {
     limitType: LimitType!
-    max: ResourceType!
-    default: ResourceType!
-    defaultRequest: ResourceType!
+    max: ResourceType
+    default: ResourceType
+    defaultRequest: ResourceType
 }
 
 input LimitRangeInput {
@@ -699,9 +699,21 @@ type Namespace {
     applications: [String!]
 }
 
+type NamespaceListItem {
+    name: String!
+    labels: Labels
+    status: String!
+    isSystemNamespace: Boolean!
+    podsCount: Int!
+    healthyPodsCount: Int!
+
+    # Depends on application module
+    applicationsCount: Int
+}
+
 type NamespaceEvent {
     type: SubscriptionEventType!
-    namespace: Namespace!
+    namespace: NamespaceListItem!
 }
 
 type NamespaceMutationOutput {
@@ -896,6 +908,10 @@ type Function {
     env: [FunctionEnv!]!
     replicas: FunctionReplicas!
     resources: FunctionResources!
+    runtime: String
+    sourceType: String
+    baseDir: String
+    reference: String
 
     # status
     status: FunctionStatus!
@@ -970,7 +986,7 @@ enum FunctionPhaseType {
 enum FunctionReasonType {
     CONFIG # ConfigMap
     JOB # K8S Job
-    SERVICE # KNative Service
+    SERVICE #  Deployment + Service + hpa
 }
 
 input FunctionMutationInput {
@@ -980,6 +996,10 @@ input FunctionMutationInput {
     env: [FunctionEnvInput!]!
     replicas: FunctionReplicasInput!
     resources: FunctionResourcesInput!
+    runtime: String
+    sourceType: String
+    baseDir: String
+    reference: String
 }
 
 type FunctionMetadata {
@@ -1037,8 +1057,8 @@ type Query {
     connectorService(application: String!): ConnectorService! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
 
     # Depends on 'application'
-    namespaces(withSystemNamespaces: Boolean, withInactiveStatus: Boolean): [Namespace!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
-    namespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "get", apiGroup: "", apiVersion: "v1"})
+    namespaces(withSystemNamespaces: Boolean, withInactiveStatus: Boolean): [NamespaceListItem!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
+    namespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
 
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]! @HasAccess(attributes: {resource: "deployments", verb: "list", apiGroup: "apps", apiVersion: "v1beta2", namespaceArg: "namespace"})
     versionInfo: VersionInfo!
@@ -1131,7 +1151,7 @@ type Mutation {
     deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 
     createNamespace(name: String!, labels: Labels): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "create", apiGroup: "", apiVersion: "v1"})
-    updateNamespace(name: String!, labels: Labels!): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
+    updateNamespace(name: String!, labels: Labels): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
     deleteNamespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
 
     createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
@@ -1162,11 +1182,10 @@ type Subscription {
     deploymentEvent(namespace: String!): DeploymentEvent! @HasAccess(attributes: {resource: "deployments", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     configMapEvent(namespace: String!): ConfigMapEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    secretEvent(namespace: String!): SecretEvent! @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     clusterAddonsConfigurationEvent: ClusterAddonsConfigurationEvent! @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
     addonsConfigurationEvent(namespace: String!): AddonsConfigurationEvent! @HasAccess(attributes: {resource: "addonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
-
-    # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
 
     namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 

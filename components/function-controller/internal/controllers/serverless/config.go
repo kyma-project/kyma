@@ -11,6 +11,7 @@ type FunctionConfig struct {
 	ImagePullAccountName                string        `envconfig:"default=serverless"`
 	TargetCPUUtilizationPercentage      int32         `envconfig:"default=50"`
 	RequeueDuration                     time.Duration `envconfig:"default=1m"`
+	GitFetchRequeueDuration             time.Duration `envconfig:"default=30s"`
 	Build                               BuildConfig
 	Docker                              DockerConfig
 }
@@ -27,6 +28,7 @@ type BuildConfig struct {
 	RuntimeConfigMapName string            `envconfig:"default=dockerfile-nodejs-12"`
 	ExecutorArgs         []string          `envconfig:"default=--insecure;--skip-tls-verify;--skip-unused-stages;--log-format=text;--cache=true"`
 	ExecutorImage        string            `envconfig:"default=gcr.io/kaniko-project/executor:v0.22.0"`
+	RepoFetcherImage     string            `envconfig:"default=eu.gcr.io/kyma-project/function-build-init:305bee60"`
 }
 
 type DockerConfig struct {

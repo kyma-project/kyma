@@ -253,8 +253,8 @@ data:
   controller-manager.minio.DeploymentUpdate.type: RollingUpdate
   controller-manager.minio.DeploymentUpdate.maxSurge: "0"
   controller-manager.minio.DeploymentUpdate.maxUnavailable: "50%"
-  controller-manager.minio.podAnnotations.persistence: "false"
-  upload-service.minio.podAnnotations.persistence: "false"
+  controller-manager.minio.podAnnotations.persistence: "off"
+  upload-service.minio.podAnnotations.persistence: "off"
 EOF
 ```
 
@@ -279,7 +279,7 @@ metadata:
     kyma-project.io/installation: ""
 type: Opaque
 data:
-  controller-manager.minio.accessKey: "$(echo "${AZ_ACCOUNT_NAME}" | base64)"
+  controller-manager.minio.accessKey: "$(echo -n "${AZ_ACCOUNT_NAME}" | base64)"
   controller-manager.minio.secretKey: "${AZ_ACCOUNT_KEY}"
 ---
 apiVersion: v1
@@ -298,8 +298,8 @@ data:
   controller-manager.minio.DeploymentUpdate.type: RollingUpdate
   controller-manager.minio.DeploymentUpdate.maxSurge: "0"
   controller-manager.minio.DeploymentUpdate.maxUnavailable: "50%"
-  controller-manager.minio.podAnnotations.persistence: "false"
-  upload-service.minio.podAnnotations.persistence: "false"
+  controller-manager.minio.podAnnotations.persistence: "off"
+  upload-service.minio.podAnnotations.persistence: "off"
 EOF
 ```
 
@@ -330,8 +330,8 @@ metadata:
     kyma-project.io/installation: ""
 type: Opaque
 data:
-  controller-manager.minio.accessKey: "$(echo "${AWS_ACCESS_KEY}" | base64)"
-  controller-manager.minio.secretKey: "$(echo "${AWS_SECRET_KEY}" | base64)"
+  controller-manager.minio.accessKey: "$(echo -n "${AWS_ACCESS_KEY}" | base64)"
+  controller-manager.minio.secretKey: "$(echo -n "${AWS_SECRET_KEY}" | base64)"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -350,8 +350,8 @@ data:
   controller-manager.minio.DeploymentUpdate.type: RollingUpdate
   controller-manager.minio.DeploymentUpdate.maxSurge: "0"
   controller-manager.minio.DeploymentUpdate.maxUnavailable: "50%"
-  controller-manager.minio.podAnnotations.persistence: "false"
-  upload-service.minio.podAnnotations.persistence: "false"
+  controller-manager.minio.podAnnotations.persistence: "off"
+  upload-service.minio.podAnnotations.persistence: "off"
 EOF
 ```
 
@@ -382,8 +382,8 @@ metadata:
     kyma-project.io/installation: ""
 type: Opaque
 data:
-  controller-manager.minio.accessKey: "$(echo "${ALIBABA_ACCESS_KEY}" | base64)"
-  controller-manager.minio.secretKey: "$(echo "${ALIBABA_SECRET_KEY}" | base64)"
+  controller-manager.minio.accessKey: "$(echo -n "${ALIBABA_ACCESS_KEY}" | base64)"
+  controller-manager.minio.secretKey: "$(echo -n "${ALIBABA_SECRET_KEY}" | base64)"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -402,8 +402,8 @@ data:
   controller-manager.minio.DeploymentUpdate.type: RollingUpdate
   controller-manager.minio.DeploymentUpdate.maxSurge: "0"
   controller-manager.minio.DeploymentUpdate.maxUnavailable: "50%"
-  controller-manager.minio.podAnnotations.persistence: "false"
-  upload-service.minio.podAnnotations.persistence: "false"
+  controller-manager.minio.podAnnotations.persistence: "off"
+  upload-service.minio.podAnnotations.persistence: "off"
 EOF
 ```
 
@@ -413,8 +413,8 @@ EOF
 > **CAUTION:** If you want to activate MinIO Gateway mode before you install Kyma, you need to manually add the ConfigMap and the Secret to the `installer-config-local.yaml.tpl` template located under the `installation/resources` subfolder before you run the installation script. In this case you start from scratch, so add the ConfigMap without these lines that trigger the default buckets migration from MinIO to MinIO Gateway:
 >
 > ```bash
-> controller-manager.minio.podAnnotations.persistence: "false"
-> upload-service.minio.podAnnotations.persistence: "false"
+> controller-manager.minio.podAnnotations.persistence: "off"
+> upload-service.minio.podAnnotations.persistence: "off"
 > ```
 
 ### Trigger installation

@@ -50,7 +50,6 @@ echo "
 "
 
 bash ${CURRENT_DIR}/is-ready.sh kube-system k8s-app kube-dns
-bash ${CURRENT_DIR}/install-tiller.sh
 
 if [ $CR_PATH ]; then
 

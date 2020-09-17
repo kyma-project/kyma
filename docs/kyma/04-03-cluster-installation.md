@@ -5,7 +5,7 @@ type: Installation
 
 This installation guide explains how you can quickly deploy Kyma on a cluster with a wildcard DNS provided by [`xip.io`](http://xip.io) using a GitHub release of your choice.
 
->**TIP:** An xip.io domain is not recommended for production. If you want to expose the Kyma cluster on your own domain, follow the [installation guide](#installation-use-your-own-domain). To install Kyma using your own image instead of a GitHub release, follow the [instructions](#installation-use-your-own-kyma-installer-image).
+>**TIP:** An xip.io domain is not recommended for production. If you want to expose the Kyma cluster on your own domain, follow the [installation guide](#installation-install-kyma-with-your-own-domain). To install Kyma using your own image instead of a GitHub release, follow the [instructions](#installation-use-your-own-kyma-installer-image).
 
 ## Prerequisites
 
@@ -48,22 +48,6 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
 
   </details>
-  <details>
-  <summary label="IBM Cloud">
-  IBM Cloud
-  </summary>
-
-  - [Kyma CLI](https://github.com/kyma-project/cli)
-  - [IBM Cloud](https://cloud.ibm.com/login) account
-  - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6 or higher
-  - [IBM Cloud CLI](https://cloud.ibm.com/docs/cli?topic=cloud-cli-getting-started)
-
-  >**NOTE:** Running Kyma on IBM Cloud requires three [`b3c.4x16` machines](https://cloud.ibm.com/docs/containers?topic=containers-planning_worker_nodes). Create these machines when you complete the **Prepare the cluster** step.
-
-  >**CAUTION:** This type of installation is experimental. To install Kyma on IBM Cloud successfully, you must lighten it a bit. [Disable](#configuration-custom-component-installation-remove-a-component) optional components, such as Logging or Monitoring, from the default installation before you proceed to the **Install Kyma** step.
-
-  </details>
-
 </div>
 
 ## Choose the release to install
@@ -198,43 +182,6 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 3. After you provision the cluster, its `kubeconfig` file will be downloaded and automatically set as the current context.
 
   </details>
-  <details>
-  <summary label="IBM Cloud">
-  IBM Cloud
-  </summary>
-
-1. Export the cluster name, the `dc` zone type you want to deploy to, and your IBM Cloud account email address as environment variables:
-
-      ```bash
-      export CLUSTER_NAME={YOUR_CLUSTER_NAME}
-      export CLUSTER_ZONE={ZONE_TO_DEPLOY_TO}
-      export IBM_EMAIL={YOUR_IBM_CLOUD_ACCOUNT_EMAIL}
-      ```
-
-      >**TIP:** Run `ibmcloud ks supported-locations` to list available zones.
-
-2. Create a cluster in the defined zone:
-
-      ```bash
-      ibmcloud ks cluster create classic --zone $CLUSTER_ZONE --machine-type b3c.4x16 --workers 3 --name $CLUSTER_NAME --public-service-endpoint
-      ```
-
-3. Configure kubectl to use your new cluster:
-
-      ```bash
-      ibmcloud ks cluster config --cluster $CLUSTER_NAME
-      ```
-
-4. Copy, paste, and run the `export` command that is displayed in your terminal to set the **KUBECONFIG** environment variable.
-
-5. Add the cluster administrator role to your user account:
-
-      ```bash
-      kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$IBM_EMAIL
-      ```
-
-  </details>
-
 </div>
 
 ## Install Kyma

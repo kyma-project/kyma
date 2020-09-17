@@ -6,10 +6,8 @@ import (
 
 	"k8s.io/apimachinery/pkg/labels"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
-
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -18,6 +16,8 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/dynamic"
 	watchtools "k8s.io/client-go/tools/watch"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
 )
 
 type Resource struct {
@@ -25,10 +25,10 @@ type Resource struct {
 	namespace string
 	kind      string
 	verbose   bool
-	log       shared.Logger
+	log       *logrus.Entry
 }
 
-func New(dynamicCli dynamic.Interface, s schema.GroupVersionResource, namespace string, log shared.Logger, verbose bool) *Resource {
+func New(dynamicCli dynamic.Interface, s schema.GroupVersionResource, namespace string, log *logrus.Entry, verbose bool) *Resource {
 	resCli := dynamicCli.Resource(s).Namespace(namespace)
 	return &Resource{ResCli: resCli, namespace: namespace, kind: s.Resource, log: log, verbose: verbose}
 }
@@ -57,7 +57,7 @@ func (r *Resource) Create(res interface{}) (string, error) {
 	}
 
 	if r.verbose {
-		r.log.Logf("[CREATE]: name %s, namespace %s, resource %v", unstructuredObj.GetName(), unstructuredObj.GetNamespace(), unstructuredObj)
+		r.log.Infof("[CREATE]: name %s, namespace %s, resource %v", unstructuredObj.GetName(), unstructuredObj.GetNamespace(), unstructuredObj)
 	}
 
 	return resourceVersion, nil
@@ -84,7 +84,7 @@ func (r *Resource) List(set map[string]string) (*unstructured.UnstructuredList, 
 	}
 
 	if r.verbose {
-		r.log.Logf("LIST %s: namespace:%s kind:%s\n%v", selector, namespace, r.kind, result)
+		r.log.Infof("LIST %s: namespace:%s kind:%s\n%v", selector, namespace, r.kind, result)
 	}
 
 	return result, nil
@@ -106,7 +106,7 @@ func (r *Resource) Get(name string) (*unstructured.Unstructured, error) {
 	}
 
 	if r.verbose {
-		r.log.Logf("GET name:%s: namespace:%s kind:%s\n%v", name, namespace, r.kind, result)
+		r.log.Infof("GET name:%s: namespace:%s kind:%s\n%v", name, namespace, r.kind, result)
 	}
 
 	return result, nil
@@ -135,7 +135,7 @@ func (r *Resource) Delete(name string, timeout time.Duration) error {
 		}
 
 		if r.verbose {
-			r.log.Logf("DELETE %s: namespace:%s name:%s", r.kind, namespace, name)
+			r.log.Infof("DELETE %s: namespace:%s name:%s", r.kind, namespace, name)
 		}
 
 		return r.ResCli.Delete(name, &metav1.DeleteOptions{})
@@ -192,9 +192,9 @@ func (r *Resource) Update(res interface{}) (*unstructured.Unstructured, error) {
 		namespace = r.namespace
 	}
 
-	r.log.Logf("UPDATE %s: namespace:%s kind:%s", result.GetName(), namespace, r.kind)
+	r.log.Infof("UPDATE %s: namespace:%s kind:%s", result.GetName(), namespace, r.kind)
 	if r.verbose {
-		r.log.Logf("%+v", result)
+		r.log.Infof("%+v", result)
 	}
 
 	return result, nil

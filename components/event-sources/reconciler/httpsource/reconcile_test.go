@@ -1,19 +1,3 @@
-/*
-Copyright 2019 The Kyma Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package httpsource
 
 import (
@@ -22,19 +6,22 @@ import (
 	"testing"
 
 	pkgerrors "github.com/pkg/errors"
+	authenticationv1alpha1api "istio.io/api/authentication/v1alpha1"
+	authv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	k8stesting "k8s.io/client-go/testing"
-
-	authenticationv1alpha1api "istio.io/api/authentication/v1alpha1"
-	authv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/eventing/pkg/reconciler"
 	"knative.dev/pkg/apis"
 	duckv1alpha1 "knative.dev/pkg/apis/duck/v1alpha1"
 	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
+	"knative.dev/pkg/client/injection/ducks/duck/v1/addressable"
+	_ "knative.dev/pkg/client/injection/ducks/duck/v1/addressable/fake"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/logging"
@@ -42,14 +29,6 @@ import (
 	"knative.dev/pkg/ptr"
 	rt "knative.dev/pkg/reconciler/testing"
 	"knative.dev/pkg/resolver"
-	"knative.dev/serving/pkg/apis/autoscaling"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
-	fakeservingclient "knative.dev/serving/pkg/client/injection/client/fake"
-	routeconfig "knative.dev/serving/pkg/reconciler/route/config"
-
-	"knative.dev/pkg/client/injection/ducks/duck/v1/addressable"
-	_ "knative.dev/pkg/client/injection/ducks/duck/v1/addressable/fake"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	fakesourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
@@ -58,17 +37,17 @@ import (
 )
 
 const (
-	tNs          = "testns"
-	tName        = "test"
-	tUID         = types.UID("00000000-0000-0000-0000-000000000000")
-	tImg         = "sources.kyma-project.io/http:latest"
-	tPort        = 8080
-	tSinkURI     = "http://" + tName + "-kn-channel." + tNs + ".svc.cluster.local"
-	tSource      = "varkes"
-	tRevision    = "varkes-foo"
-	tPolicy      = "varkes-foo-private"
-	tRevisionSvc = "varkes-foo-private"
-	tTargetPort  = "http-usermetric"
+	tNs           = "testns"
+	tName         = "test"
+	tUID          = types.UID("00000000-0000-0000-0000-000000000000")
+	tImg          = "sources.kyma-project.io/http:latest"
+	tExternalPort = 80
+	tPort         = 8080
+	tSinkURI      = "http://" + tName + "-kn-channel." + tNs + ".svc.cluster.local"
+	tSource       = "varkes"
+	tPolicy       = "test"
+	tRevisionSvc  = "test"
+	tTargetPort   = "http-usermetric"
 
 	tMetricsDomain = "testing"
 )
@@ -111,11 +90,13 @@ var tEnvVars = []corev1.EnvVar{
 		Value: `{"Domain":"` + tMetricsDomain + `",` +
 			`"Component":"` + component + `",` +
 			`"PrometheusPort":` + strconv.Itoa(adapterMetricsPort) + `,` +
-
 			`"ConfigMap":{"metrics.backend":"prometheus"}}`,
 	}, {
 		Name:  loggingConfigEnvVar,
 		Value: `{"zap-logger-config":"{\"level\": \"info\"}"}`,
+	}, {
+		Name:  adapterPortEnvVar,
+		Value: strconv.Itoa(adapterPort),
 	},
 }
 
@@ -150,7 +131,7 @@ func TestReconcile(t *testing.T) {
 			},
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: newSourceWithoutSink(), // "Deployed" condition remains Unknown
+				Object: newSource(WithoutSink), // "Deployed" condition remains Unknown
 			}},
 			WantEvents: []string{
 				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Channel %q", tName),
@@ -160,10 +141,11 @@ func TestReconcile(t *testing.T) {
 			Name: "Everything up-to-date",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceDeployedWithSinkAndPolicy(),
-				newServiceReady(),
+				newSource(Deployed, WithSink, WithPolicy, WithService),
+				newDeploymentAvailable(),
 				newChannelReady(),
 				newPolicyWithSpec(),
+				newService(),
 			},
 			WantCreates:       nil,
 			WantUpdates:       nil,
@@ -173,22 +155,23 @@ func TestReconcile(t *testing.T) {
 			Name: "Adapter Service spec does not match expectation",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceDeployedWithSinkAndPolicy(),
-				func() *servingv1alpha1.Service {
-					svc := newServiceReady()
-					svc.Labels["some-label"] = "unexpected"
-					return svc
+				newSource(Deployed, WithSink, WithPolicy, WithService),
+				func() *appsv1.Deployment {
+					deploy := newDeploymentAvailable()
+					deploy.Labels["some-label"] = "unexpected"
+					return deploy
 				}(),
 				newChannelReady(),
 				newPolicyWithSpec(),
+				newService(),
 			},
 			WantCreates: nil,
 			WantUpdates: []k8stesting.UpdateActionImpl{{
-				Object: newServiceReady(),
+				Object: newDeploymentAvailable(),
 			}},
 			WantStatusUpdates: nil,
 			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(updateReason), "Updated Knative Service %q", tName),
+				rt.Eventf(corev1.EventTypeNormal, string(updateReason), "Updated Deployment %q", tName),
 			},
 		},
 
@@ -198,8 +181,8 @@ func TestReconcile(t *testing.T) {
 			Name: "Channel missing",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceDeployedWithoutSink(),
-				newServiceReady(),
+				newSource(Deployed, WithoutSink),
+				newDeploymentAvailable(),
 			},
 			WantCreates: []runtime.Object{
 				newChannelNotReady(),
@@ -214,13 +197,14 @@ func TestReconcile(t *testing.T) {
 			Name: "Channel spec does not match expectation",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceDeployedWithSinkAndPolicy(),
-				newServiceReady(),
+				newSource(Deployed, WithSink, WithPolicy, WithService),
+				newDeploymentAvailable(),
 				func() *messagingv1alpha1.Channel {
 					ch := newChannelReady()
 					ch.Labels["some-label"] = "unexpected"
 					return ch
 				}(),
+				newService(),
 				newPolicyWithSpec(),
 			},
 			WantCreates: nil,
@@ -236,12 +220,13 @@ func TestReconcile(t *testing.T) {
 		/* Policy synchronization */
 
 		{
-			Name: "Policy missing when a Knative Revision is missing",
+			Name: "Policy missing when deployment not available",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceNotDeployedWithSinkWithoutPolicy(),
-				newServiceNotReady(),
+				newSource(NotDeployed, WithSink, WithoutPolicy, WithService),
+				newDeploymentNotAvailable(),
 				newChannelReady(),
+				newService(),
 			},
 			WantCreates:       nil,
 			WantUpdates:       nil,
@@ -252,9 +237,10 @@ func TestReconcile(t *testing.T) {
 			Name: "Policy created",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceDeployedWithSinkAndPolicy(),
-				newServiceReady(),
+				newSource(Deployed, WithSink, WithPolicy, WithService),
+				newDeploymentAvailable(),
 				newChannelReady(),
+				newService(),
 			},
 			WantCreates: []runtime.Object{
 				newPolicyWithSpec(),
@@ -265,30 +251,14 @@ func TestReconcile(t *testing.T) {
 				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Istio Policy %q", tPolicy),
 			},
 		},
-
-		/* Status updates */
-
 		{
-			Name: "Adapter Service deployment in progress with a Knative Revision in status",
+			Name: "Adapter deployment in progress",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceNotDeployedWithSinkWithPolicy(),
-				newServiceNotReadyWithRevision(),
+				newSource(NotDeployed, WithSink, WithoutPolicy, WithService),
+				newDeploymentNotAvailable(),
 				newChannelReady(),
-				newPolicyWithSpec(),
-			},
-			WantCreates:       nil,
-			WantUpdates:       nil,
-			WantStatusUpdates: nil,
-			WantEvents:        nil,
-		},
-		{
-			Name: "Adapter Service deployment in progress without a Revision",
-			Key:  tNs + "/" + tName,
-			Objects: []runtime.Object{
-				newSourceNotDeployedWithSinkWithoutPolicy(),
-				newServiceNotReady(),
-				newChannelReady(),
+				newService(),
 			},
 			WantCreates:       nil,
 			WantUpdates:       nil,
@@ -299,15 +269,16 @@ func TestReconcile(t *testing.T) {
 			Name: "Adapter Service became ready",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceNotDeployedWithSinkWithPolicy(),
-				newServiceReady(),
+				newSource(NotDeployed, WithSink, WithService, WithPolicy),
+				newDeploymentAvailable(),
 				newChannelReady(),
 				newPolicyWithSpec(),
+				newService(),
 			},
 			WantCreates: nil,
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: newSourceDeployedWithSinkAndPolicy(),
+				Object: newSource(Deployed, WithSink, WithService, WithPolicy),
 			}},
 			WantEvents: nil,
 		},
@@ -315,14 +286,15 @@ func TestReconcile(t *testing.T) {
 			Name: "Adapter Service became not ready",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceDeployedWithSinkWithoutPolicy(),
-				newServiceNotReady(),
+				newSource(Deployed, WithSink, WithService, WithoutPolicy),
+				newDeploymentNotAvailable(),
 				newChannelReady(),
+				newService(),
 			},
 			WantCreates: nil,
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: newSourceNotDeployedWithSinkWithoutPolicy(),
+				Object: newSource(NotDeployed, WithSink, WithService, WithoutPolicy),
 			}},
 			WantEvents: nil,
 		},
@@ -330,16 +302,17 @@ func TestReconcile(t *testing.T) {
 			Name: "Channel becomes available",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceDeployedWithoutSinkWithoutPolicy(),
-				newServiceReady(),
+				newSource(Deployed, WithoutSink, WithoutPolicy, WithService),
+				newDeploymentAvailable(),
 				newChannelReady(),
+				newService(),
 			},
 			WantCreates: []runtime.Object{
 				newPolicyWithSpec(),
 			},
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: newSourceDeployedWithSinkAndPolicy(),
+				Object: newSource(Deployed, WithSink, WithPolicy, WithService),
 			}},
 			WantEvents: []string{
 				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Istio Policy %q", tPolicy),
@@ -349,14 +322,15 @@ func TestReconcile(t *testing.T) {
 			Name: "Channel becomes unavailable",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSourceDeployedWithSink(),
-				newServiceNotReady(),
+				newSource(Deployed, WithSink, WithService),
+				newDeploymentAvailable(),
 				newChannelNotReady(),
+				newService(),
 			},
 			WantCreates: nil,
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: newSourceDeployedWithoutSink(), // previous Deployed status remains
+				Object: newSource(Deployed, WithService, WithoutSink), // previous Deployed status remains
 			}},
 			WantEvents: nil,
 		},
@@ -379,11 +353,11 @@ func TestReconcile(t *testing.T) {
 				Port:  tPort,
 			},
 			httpsourceLister: ls.GetHTTPSourceLister(),
-			ksvcLister:       ls.GetServiceLister(),
+			deploymentLister: ls.GetDeploymentLister(),
 			chLister:         ls.GetChannelLister(),
 			policyLister:     ls.GetPolicyLister(),
+			serviceLister:    ls.GetServiceLister(),
 			sourcesClient:    fakesourcesclient.Get(ctx).SourcesV1alpha1(),
-			servingClient:    fakeservingclient.Get(ctx).ServingV1alpha1(),
 			messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
 			authClient:       fakeistioclient.Get(ctx).AuthenticationV1alpha1(),
 			sinkResolver:     resolver.NewURIResolver(ctx, func(types.NamespacedName) {}),
@@ -398,8 +372,10 @@ func TestReconcile(t *testing.T) {
 	testCases.Test(t, MakeFactory(ctor))
 }
 
+type SourceOption func(*sourcesv1alpha1.HTTPSource)
+
 // newSource returns a test HTTPSource object with pre-filled metadata.
-func newSource() *sourcesv1alpha1.HTTPSource {
+func newSource(opts ...SourceOption) *sourcesv1alpha1.HTTPSource {
 	src := &sourcesv1alpha1.HTTPSource{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: tNs,
@@ -413,108 +389,43 @@ func newSource() *sourcesv1alpha1.HTTPSource {
 
 	src.Status.InitializeConditions()
 
+	for _, opt := range opts {
+		opt(src)
+	}
+
 	return src
 }
 
-// Deployed: Unknown, SinkProvided: False
-func newSourceWithoutSink() *sourcesv1alpha1.HTTPSource {
-	src := newSource()
+func WithoutSink(src *sourcesv1alpha1.HTTPSource) {
 	src.Status.MarkNoSink()
-	return src
 }
 
-// Deployed: True, SinkProvided: True
-func newSourceDeployedWithSink() *sourcesv1alpha1.HTTPSource {
-	src := newSource()
-	src.Status.PropagateServiceReady(newServiceReady())
+func WithSink(src *sourcesv1alpha1.HTTPSource) {
 	src.Status.MarkSink(tSinkURI)
-	return src
 }
 
-// Deployed: True, SinkProvided: True, Policy: False
-func newSourceDeployedWithSinkAndNoPolicy() *sourcesv1alpha1.HTTPSource {
-	src := newSource()
-	src.Status.PropagateServiceReady(newServiceNotReady())
-	src.Status.MarkSink(tSinkURI)
-	src.Status.MarkPolicyCreated(nil)
-	return src
+func WithService(src *sourcesv1alpha1.HTTPSource) {
+	src.Status.MarkServiceCreated(newService())
 }
 
-// Deployed: True, SinkProvided: False, Policy: True
-func newSourceDeployedWithoutSinkWithPolicy() *sourcesv1alpha1.HTTPSource {
-	src := newSource()
-	src.Status.PropagateServiceReady(newServiceReady())
-	src.Status.MarkNoSink()
+func WithoutService(src *sourcesv1alpha1.HTTPSource) {
+	src.Status.MarkServiceCreated(nil)
+}
+
+func WithPolicy(src *sourcesv1alpha1.HTTPSource) {
 	src.Status.MarkPolicyCreated(newPolicyWithSpec())
-	return src
 }
 
-// Deployed: True, SinkProvided: True, Policy: True
-func newSourceDeployedWithSinkAndPolicy() *sourcesv1alpha1.HTTPSource {
-	src := newSource()
-	src.Status.PropagateServiceReady(newServiceReady())
-	src.Status.MarkSink(tSinkURI)
-	src.Status.MarkPolicyCreated(newPolicyWithSpec())
-	return src
-}
-
-// Deployed: True, SinkProvided: False
-func newSourceDeployedWithoutSink() *sourcesv1alpha1.HTTPSource {
-	src := newSource()
-	src.Status.PropagateServiceReady(newServiceReady())
-	src.Status.MarkNoSink()
-	return src
-}
-
-// Deployed: True, SinkProvided: False, PolicyCreated: False
-func newSourceDeployedWithoutSinkWithoutPolicy() *sourcesv1alpha1.HTTPSource {
-	src := newSource()
-	src.Status.PropagateServiceReady(newServiceReady())
-	src.Status.MarkNoSink()
+func WithoutPolicy(src *sourcesv1alpha1.HTTPSource) {
 	src.Status.MarkPolicyCreated(nil)
-	return src
 }
 
-func newSourceDeployedWithSinkWithoutPolicy() *sourcesv1alpha1.HTTPSource {
-	src := newSource()
-	src.Status.PropagateServiceReady(newServiceReady())
-	src.Status.MarkSink(tSinkURI)
-	src.Status.MarkPolicyCreated(nil)
-	return src
+func Deployed(src *sourcesv1alpha1.HTTPSource) {
+	src.Status.PropagateDeploymentReady(newDeploymentAvailable())
 }
 
-// Deployed: False, SinkProvided: True
-func newSourceNotDeployedWithSink() *sourcesv1alpha1.HTTPSource {
-	src := newSource()
-	src.Status.PropagateServiceReady(newServiceNotReady())
-	src.Status.MarkSink(tSinkURI)
-	return src
-}
-
-// Deployed: False, SinkProvided: True, PolicyCreated: False
-func newSourceNotDeployedWithSinkWithoutPolicy() *sourcesv1alpha1.HTTPSource {
-	src := newSource()
-	src.Status.PropagateServiceReady(newServiceNotReady())
-	src.Status.MarkSink(tSinkURI)
-	src.Status.MarkPolicyCreated(nil)
-	return src
-}
-
-// Deployed: False, SinkProvided: True, PolicyCreated: True
-func newSourceNotDeployedWithSinkWithPolicy() *sourcesv1alpha1.HTTPSource {
-	src := newSource()
-	src.Status.PropagateServiceReady(newServiceNotReady())
-	src.Status.MarkSink(tSinkURI)
-	src.Status.MarkPolicyCreated(newPolicyWithSpec())
-	return src
-}
-
-// Deployed: True, SinkProvided: True, PolicyCreated: True
-func newSourceDeployedWithPolicy() *sourcesv1alpha1.HTTPSource {
-	src := newSource()
-	src.Status.PropagateServiceReady(newServiceReady())
-	src.Status.MarkPolicyCreated(newPolicyWithSpec())
-	return src
+func NotDeployed(src *sourcesv1alpha1.HTTPSource) {
+	src.Status.PropagateDeploymentReady(newDeploymentNotAvailable())
 }
 
 // newChannel returns a test Channel object with pre-filled metadata.
@@ -601,48 +512,53 @@ func newChannelNotReady() *messagingv1alpha1.Channel {
 	return ch
 }
 
-// newService returns a test Service object with pre-filled metadata.
-func newService() *servingv1alpha1.Service {
-	return &servingv1alpha1.Service{
+// newDeployment returns a test Service object with pre-filled metadata.
+func newDeployment() *appsv1.Deployment {
+	var replicas int32 = 1
+	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: tNs,
 			Name:      tName,
 			Labels: map[string]string{
-				routeconfig.VisibilityLabelKey: routeconfig.VisibilityClusterLocal,
-				applicationNameLabelKey:        tName,
+				applicationNameLabelKey: tName,
 			},
 			OwnerReferences: []metav1.OwnerReference{tOwnerRef},
 		},
-		Spec: servingv1alpha1.ServiceSpec{
-			ConfigurationSpec: servingv1alpha1.ConfigurationSpec{
-				Template: &servingv1alpha1.RevisionTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: map[string]string{
-							autoscaling.MinScaleAnnotationKey: "1",
-						},
-						Labels: map[string]string{
-							dashboardLabelKey: dashboardLabelValue,
-						},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: &replicas,
+			Selector: &metav1.LabelSelector{MatchLabels: map[string]string{applicationNameLabelKey: tName}},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						dashboardLabelKey:       dashboardLabelValue,
+						eventSourceLabelKey:     eventSourceLabelValue,
+						applicationNameLabelKey: tName,
+						applicationLabelKey:     tName,
 					},
-					Spec: servingv1alpha1.RevisionSpec{
-						RevisionSpec: servingv1.RevisionSpec{
-							PodSpec: corev1.PodSpec{
-								Containers: []corev1.Container{{
-									Image: tImg,
-									Ports: []corev1.ContainerPort{{
-										ContainerPort: tPort,
-									}},
-									Env: tEnvVars,
-									ReadinessProbe: &corev1.Probe{
-										Handler: corev1.Handler{
-											HTTPGet: &corev1.HTTPGetAction{
-												Path: adapterHealthEndpoint,
-											},
-										},
-									},
-								}},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{{
+						Image: tImg,
+						Ports: []corev1.ContainerPort{{
+							Name:          portName,
+							ContainerPort: tPort,
+						},
+							{
+								Name:          metricsPortName,
+								ContainerPort: metricsPort,
 							},
 						},
+						Name: adapterContainerName,
+						Env:  tEnvVars,
+						ReadinessProbe: &corev1.Probe{
+							Handler: corev1.Handler{
+								HTTPGet: &corev1.HTTPGetAction{
+									Path: adapterHealthEndpoint,
+									Port: intstr.FromInt(adapterPort),
+								},
+							},
+						},
+					},
 					},
 				},
 			},
@@ -650,34 +566,45 @@ func newService() *servingv1alpha1.Service {
 	}
 }
 
-// Ready: True
-func newServiceReady() *servingv1alpha1.Service {
-	svc := newService()
-	svc.Status.SetConditions(apis.Conditions{{
-		Type:   apis.ConditionReady,
-		Status: corev1.ConditionTrue,
-	}})
-	svc.Status.ConfigurationStatusFields.LatestCreatedRevisionName = tRevision
-	return svc
+// Available: True
+func newDeploymentAvailable() *appsv1.Deployment {
+	deploy := newDeployment()
+	deploy.Status.AvailableReplicas = 1
+	return deploy
 }
 
-// Ready: False
-func newServiceNotReady() *servingv1alpha1.Service {
-	svc := newService()
-	svc.Status.SetConditions(apis.Conditions{{
-		Type:   apis.ConditionReady,
-		Status: corev1.ConditionFalse,
-	}})
-	return svc
+// Available: False
+func newDeploymentNotAvailable() *appsv1.Deployment {
+	deploy := newDeployment()
+	deploy.Status.AvailableReplicas = 0
+	return deploy
 }
 
-// Ready: False with a Revision
-func newServiceNotReadyWithRevision() *servingv1alpha1.Service {
-	svc := newService()
-	svc.Status.SetConditions(apis.Conditions{{
-		Type:   apis.ConditionReady,
-		Status: corev1.ConditionFalse,
-	}})
-	svc.Status.ConfigurationStatusFields.LatestCreatedRevisionName = tRevision
-	return svc
+func newService() *corev1.Service {
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: tNs,
+			Name:      tName,
+			Labels: map[string]string{
+				dashboardLabelKey:       dashboardLabelValue,
+				applicationNameLabelKey: tName,
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name:       portName,
+					Port:       tExternalPort,
+					TargetPort: intstr.FromInt(tPort),
+				},
+				{
+					Name:       metricsPortName,
+					Port:       metricsPort,
+					TargetPort: intstr.FromInt(metricsPort),
+				},
+			},
+			Selector: tChLabels,
+		},
+	}
+
 }

@@ -1,0 +1,105 @@
+{{- if .Values.kyma.authProxy.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}
+  namespace: {{ template "grafana.namespace" . }}
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/name: auth-proxy
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "grafana.chart" . }}
+spec:
+  replicas: {{ .Values.kyma.authProxy.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: auth-proxy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/name: auth-proxy
+    spec:
+      {{- if .Values.global.isLocalEnv }}
+      hostNetwork: true   #only for minikube
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+          - "dex.{{ .Values.global.ingress.domainName }}"
+      {{- end }}
+      {{- if .Values.kyma.authProxy.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.kyma.authProxy.nodeSelector | indent 8 }}
+      {{- end }}
+      containers:
+      - image: "{{ .Values.kyma.authProxy.image.repository }}:{{ .Values.kyma.authProxy.image.tag }}"
+        imagePullPolicy: {{ .Values.kyma.authProxy.image.pullPolicy }}
+        name: auth-proxy
+        command: ["/keycloak-gatekeeper"]
+        args:
+        - --discovery-url=https://dex.{{ .Values.global.ingress.domainName }}
+        - --skip-openid-provider-tls-verify={{ not .Values.kyma.authProxy.config.tlsVerify }}
+        - --client-id=$(CLIENT_ID)
+        - --client-secret=$(CLIENT_SECRET)
+        - --resources=uri={{ .Values.kyma.authProxy.config.resources.uri }}{{ template "grafana.kyma.authProxy.methods" . }}{{ template "grafana.kyma.authProxy.groups" . }}{{ template "grafana.kyma.authProxy.roles" . }}
+        - --redirection-url=https://grafana.{{ .Values.global.ingress.domainName }}
+        {{- if .Values.kyma.authProxy.config.scopes }}
+        {{- range $i, $scope := (splitList "," .Values.kyma.authProxy.config.scopes) }}
+        - --scopes={{ $scope }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.kyma.authProxy.config.addClaims }}
+        {{- range $i, $claim := (splitList "," .Values.kyma.authProxy.config.addClaims) }}
+        - --add-claims={{ $claim }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.kyma.authProxy.config.matchClaims }}
+        {{- range $i, $claim := (splitList "," .Values.kyma.authProxy.config.matchClaims) }}
+        - --match-claims={{ $claim }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.kyma.authProxy.config.headers }}
+        {{- range $i, $header := (splitList "," .Values.kyma.authProxy.config.headers) }}
+        - --headers={{ $header }}
+        {{- end }}
+        {{- end }}
+        - --verbose=false
+        - --listen=0.0.0.0:{{ .Values.kyma.authProxy.port }}
+        - --upstream-url=http://{{ template "grafana.fullname" . }}:{{ .Values.service.port }}
+        - --enable-logging=false
+        - --enable-json-logging=true
+        - --secure-cookie=true
+        - --enable-authorization-cookies=false
+        - --enable-authorization-header=false
+        - --enable-token-header=false
+        - --enable-encrypted-token=true
+        - --enable-security-filter=true
+        - --filter-browser-xss=true
+        - --filter-content-nosniff=true
+        - --filter-frame-deny=true
+        - --encryption-key=$(ENCRYPTION_KEY)
+        - --http-only-cookie=true
+        - --upstream-keepalives=true
+        - --upstream-keepalive-timeout=60s
+        - --cookie-domain=https://grafana.{{ .Values.global.ingress.domainName }}
+        - --cookie-access-name=KYMA_GRAFANA_TOKEN
+        envFrom:
+        - secretRef:
+            name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}
+            optional: false
+        ports:
+        - name: http
+          containerPort: {{ .Values.kyma.authProxy.port }}
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /oauth/health
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /oauth/health
+            port: http
+        resources:
+{{ toYaml .Values.kyma.authProxy.resources | indent 10 }}
+{{- end}}

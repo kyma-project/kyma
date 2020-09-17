@@ -3,6 +3,7 @@
 package v1alpha1
 
 import (
+	"context"
 	time "time"
 
 	uiv1alpha1 "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
@@ -44,13 +45,13 @@ func NewFilteredClusterMicroFrontendInformer(client versioned.Interface, resyncP
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.UiV1alpha1().ClusterMicroFrontends().List(options)
+				return client.UiV1alpha1().ClusterMicroFrontends().List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.UiV1alpha1().ClusterMicroFrontends().Watch(options)
+				return client.UiV1alpha1().ClusterMicroFrontends().Watch(context.TODO(), options)
 			},
 		},
 		&uiv1alpha1.ClusterMicroFrontend{},

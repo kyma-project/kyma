@@ -26,6 +26,8 @@ clusterRoles:
       - "settings.k8s.io"
       - "metrics.k8s.io"
       - "coordination.k8s.io"
+      - "validatingwebhookconfigurations.admissionregistration.k8s.io"
+      - "mutatingwebhookconfigurations.admissionregistration.k8s.io"
     istio:
       - "authentication.istio.io"
       - "config.istio.io"
@@ -35,7 +37,6 @@ clusterRoles:
       - "authentication.kyma-project.io"
       - "gateway.kyma-project.io"
       - "servicecatalog.kyma-project.io"
-      - "ui.kyma-project.io"
       - "kyma.cx"
       - "ui.kyma.cx"
       - "testing.kyma-project.io"
@@ -62,6 +63,10 @@ clusterRoles:
       - "sources.kyma-project.io"
       - "messaging.knative.dev"
       - "eventing.knative.dev"
+    svcat:
+      - "settings.svcat.k8s.io"
+    ui:
+      - "ui.kyma-project.io"
   verbs:
     edit:
       - "create"

@@ -10,12 +10,12 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-	mappingLister "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
+	res "github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/iosafety"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 
@@ -24,7 +24,6 @@ import (
 	"github.com/pkg/errors"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/cache"
@@ -50,28 +49,32 @@ type applicationService struct {
 	aCli        dynamic.NamespaceableResourceInterface
 	appInformer cache.SharedIndexInformer
 
-	mCli            mappingCli.ApplicationconnectorV1alpha1Interface
-	mappingLister   mappingLister.ApplicationMappingLister
+	mCli            dynamic.NamespaceableResourceInterface
 	mappingInformer cache.SharedIndexInformer
 
-	connectorSvcURL string
-	httpClient      *http.Client
-	appNameRegex    *regexp.Regexp
-	notifier        notifier
-	extractor       extractor.ApplicationUnstructuredExtractor
+	connectorSvcURL  string
+	httpClient       *http.Client
+	appNameRegex     *regexp.Regexp
+	notifier         notifier
+	extractor        extractor.ApplicationUnstructuredExtractor
+	mappingExtractor extractor.ApplicationMappingUnstructuredExtractor
 
 	appMappingConverter applicationMappingConverter
 }
 
-func newApplicationService(cfg Config, aCli dynamic.NamespaceableResourceInterface, mCli mappingCli.ApplicationconnectorV1alpha1Interface, mInformer cache.SharedIndexInformer, mLister mappingLister.ApplicationMappingLister, appInformer cache.SharedIndexInformer) (*applicationService, error) {
+func newApplicationService(cfg Config, aCli dynamic.NamespaceableResourceInterface, mCli dynamic.NamespaceableResourceInterface, mInformer cache.SharedIndexInformer, appInformer cache.SharedIndexInformer) (*applicationService, error) {
 	err := mInformer.AddIndexers(cache.Indexers{
 		appMappingNameIndex: func(obj interface{}) ([]string, error) {
-			mapping, ok := obj.(*mappingTypes.ApplicationMapping)
-			if !ok {
-				return nil, errors.New("cannot convert item")
+			m := &mappingTypes.ApplicationMapping{}
+			u, err := res.ToUnstructured(obj)
+			if err != nil {
+				return nil, errors.Wrapf(err, "while converting applicationMapping obj to unstructured")
 			}
-
-			return []string{mapping.Name}, nil
+			err = res.FromUnstructured(u, m)
+			if err != nil {
+				return nil, errors.Wrapf(err, "while converting unstructured to applicationMapping")
+			}
+			return []string{m.Name}, nil
 		},
 	})
 	if err != nil {
@@ -87,7 +90,6 @@ func newApplicationService(cfg Config, aCli dynamic.NamespaceableResourceInterfa
 	}
 	return &applicationService{
 		mCli:            mCli,
-		mappingLister:   mLister,
 		mappingInformer: mInformer,
 
 		aCli:        aCli,
@@ -179,9 +181,14 @@ func (svc *applicationService) ListNamespacesFor(appName string) ([]string, erro
 
 	nsList := make([]string, 0, len(mappingObjs))
 	for _, item := range mappingObjs {
-		appMapping, ok := item.(*mappingTypes.ApplicationMapping)
-		if !ok {
-			return nil, fmt.Errorf("incorrect item type: %T, should be: 'ApplicationMapping' in version 'v1alpha1'", item)
+		unstructured, err := res.ToUnstructured(item)
+		if err != nil {
+			return nil, errors.Wrapf(err, "while converting mappingObj to unstructured")
+		}
+		appMapping := &mappingTypes.ApplicationMapping{}
+		err = res.FromUnstructured(unstructured, appMapping)
+		if err != nil {
+			return nil, errors.Wrapf(err, "while converting ApplicationMapping from unstructured")
 		}
 		nsList = append(nsList, appMapping.Namespace)
 	}
@@ -224,13 +231,19 @@ func (svc *applicationService) List(params pager.PagingParams) ([]*v1alpha1.Appl
 }
 
 func (svc *applicationService) ListInNamespace(namespace string) ([]*v1alpha1.Application, error) {
-	mappings, err := svc.mappingLister.ApplicationMappings(namespace).List(labels.Everything())
+	mappings, err := svc.mappingInformer.GetIndexer().ByIndex("namespace", namespace)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while listing %s", pretty.ApplicationMapping)
 	}
 
 	res := make([]*v1alpha1.Application, 0)
-	for _, mapping := range mappings {
+	for _, item := range mappings {
+
+		mapping, err := svc.mappingExtractor.Do(item)
+		if err != nil {
+			return nil, fmt.Errorf("cannot convert item to 'applicationMapping': %v", item)
+		}
+
 		// Application CR is cluster wide so the key is only the name
 		item, exists, err := svc.appInformer.GetIndexer().GetByKey(mapping.Name)
 		if err != nil {
@@ -257,7 +270,7 @@ func (svc *applicationService) ListInNamespace(namespace string) ([]*v1alpha1.Ap
 // Enable enables Application in given namespace by creating ApplicationMapping
 func (svc *applicationService) Enable(namespace, name string, services []*gqlschema.ApplicationMappingService) (*mappingTypes.ApplicationMapping, error) {
 	mappingServices := svc.appMappingConverter.transformApplicationMappingServiceFromGQL(services)
-	em, err := svc.mCli.ApplicationMappings(namespace).Create(&mappingTypes.ApplicationMapping{
+	m, err := svc.mappingExtractor.ToUnstructured(&mappingTypes.ApplicationMapping{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ApplicationMapping",
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
@@ -269,35 +282,63 @@ func (svc *applicationService) Enable(namespace, name string, services []*gqlsch
 			Services: mappingServices,
 		},
 	})
-	return em, err
+
+	if err != nil {
+		return &mappingTypes.ApplicationMapping{}, err
+	}
+
+	created, err := svc.mCli.Namespace(namespace).Create(m, metav1.CreateOptions{})
+
+	if err != nil {
+		return &mappingTypes.ApplicationMapping{}, err
+	}
+	return svc.mappingExtractor.FromUnstructured(created)
 }
 
 // UpdateApplicationMapping updates ApplicationMapping based on its name and namespace
 func (svc *applicationService) UpdateApplicationMapping(namespace, name string, services []*gqlschema.ApplicationMappingService) (*mappingTypes.ApplicationMapping, error) {
-	em, err := svc.mCli.ApplicationMappings(namespace).Get(name, metav1.GetOptions{})
+	key := fmt.Sprintf("%s/%s", namespace, name)
+	item, exists, err := svc.mappingInformer.GetStore().GetByKey(key)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while fetching %s", pretty.ApplicationMapping)
+	}
+	if !exists {
+		return nil, errors.Wrapf(err, "mapping %s not found", pretty.ApplicationMapping)
+	}
+
+	em, err := svc.mappingExtractor.Do(item)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while converting %s", pretty.ApplicationMapping)
 	}
 
 	emUpdate := em.DeepCopy()
 	emUpdate.Spec.Services = svc.appMappingConverter.transformApplicationMappingServiceFromGQL(services)
-	emDone, err := svc.mCli.ApplicationMappings(namespace).Update(emUpdate)
+
+	u, err := svc.mappingExtractor.ToUnstructured(emUpdate)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while updating %s", pretty.ApplicationMapping)
+		return nil, err
 	}
 
-	return emDone, nil
+	updated, err := svc.mCli.Namespace(namespace).Update(u, metav1.UpdateOptions{})
+
+	if err != nil {
+		return nil, errors.Wrapf(err, "while updating %s [%s]", pretty.ApplicationMapping, name)
+	}
+
+	return svc.mappingExtractor.FromUnstructured(updated)
 }
 
 // ListApplicationMapping return list of ApplicationMapping from all namespaces base on name
 func (svc *applicationService) ListApplicationMapping(name string) ([]*mappingTypes.ApplicationMapping, error) {
-	mappings, err := svc.mappingLister.ApplicationMappings(metav1.NamespaceAll).List(labels.Everything())
-	if err != nil {
-		return nil, errors.Wrapf(err, "while listing %s", pretty.ApplicationMapping)
-	}
+
+	mappings := svc.mappingInformer.GetStore().List()
 
 	result := make([]*mappingTypes.ApplicationMapping, 0)
-	for _, mapping := range mappings {
+	for _, item := range mappings {
+		mapping, err := svc.mappingExtractor.Do(item)
+		if err != nil {
+			return nil, fmt.Errorf("cannot convert item to 'applicationMapping': %v", item)
+		}
 		if mapping.Name == name {
 			result = append(result, mapping)
 		}
@@ -308,7 +349,7 @@ func (svc *applicationService) ListApplicationMapping(name string) ([]*mappingTy
 
 // Disable disables Application in given namespace by removing ApplicationMapping
 func (svc *applicationService) Disable(namespace, name string) error {
-	return svc.mCli.ApplicationMappings(namespace).Delete(name, &metav1.DeleteOptions{})
+	return svc.mCli.Namespace(namespace).Delete(name, nil)
 }
 
 func (svc *applicationService) GetConnectionURL(appName string) (string, error) {

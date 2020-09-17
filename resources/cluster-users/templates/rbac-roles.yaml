@@ -47,6 +47,15 @@ rules:
     - namespaces
   verbs:
     - "list"
+    - "watch"
+- apiGroups:
+    - ""
+  resources:
+    - "configmaps"
+  resourceNames: 
+    - "serverless-webhook-envs"  
+  verbs:
+    - "get"
 - nonResourceURLs:
     - "*" #give access to all non resource urls
   verbs:
@@ -68,6 +77,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-crd-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-self: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-ui-view: "true"
 rules: []
 
 ---
@@ -279,6 +290,10 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-snapshots: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-svcat-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-ui-admin: "true"
 rules: []
 
 ---
@@ -323,6 +338,10 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-ory-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-snapshots: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-backendmodule-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-mf-view: "true"
 rules: []
 
 ---
@@ -367,6 +386,10 @@ aggregationRule:
       rbac.authorization.k8s.io/aggregate-to-edit: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-backendmodule-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-mf-view: "true"
 rules: []
 
 ---

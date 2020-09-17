@@ -2,6 +2,8 @@
 package secrets
 
 import (
+	"context"
+
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/strategy"
@@ -12,6 +14,7 @@ import (
 )
 
 // Repository contains operations for managing client credentials
+//go:generate mockery --name Repository
 type Repository interface {
 	Create(application string, appUID types.UID, name, serviceID string, data strategy.SecretData) apperrors.AppError
 	Get(name string) (strategy.SecretData, apperrors.AppError)
@@ -24,11 +27,12 @@ type repository struct {
 }
 
 // Manager contains operations for managing k8s secrets
+//go:generate mockery --name Manager
 type Manager interface {
-	Create(secret *v1.Secret) (*v1.Secret, error)
-	Get(name string, options metav1.GetOptions) (*v1.Secret, error)
-	Delete(name string, options *metav1.DeleteOptions) error
-	Update(secret *v1.Secret) (*v1.Secret, error)
+	Create(ctx context.Context, secret *v1.Secret, options metav1.CreateOptions) (*v1.Secret, error)
+	Get(ctx context.Context, name string, options metav1.GetOptions) (*v1.Secret, error)
+	Delete(ctx context.Context, name string, options metav1.DeleteOptions) error
+	Update(ctx context.Context, secret *v1.Secret, opts metav1.UpdateOptions) (*v1.Secret, error)
 }
 
 // NewRepository creates a new secrets repository
@@ -45,7 +49,7 @@ func (r *repository) Create(application string, appUID types.UID, name, serviceI
 }
 
 func (r *repository) Get(name string) (data strategy.SecretData, error apperrors.AppError) {
-	secret, err := r.secretsManager.Get(name, metav1.GetOptions{})
+	secret, err := r.secretsManager.Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return strategy.SecretData{}, apperrors.NotFound("Secret %s not found", name)
@@ -57,7 +61,7 @@ func (r *repository) Get(name string) (data strategy.SecretData, error apperrors
 }
 
 func (r *repository) Delete(name string) apperrors.AppError {
-	err := r.secretsManager.Delete(name, &metav1.DeleteOptions{})
+	err := r.secretsManager.Delete(context.Background(), name, metav1.DeleteOptions{})
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return apperrors.Internal("Deleting %s secret failed, %s", name, err.Error())
 	}
@@ -67,7 +71,7 @@ func (r *repository) Delete(name string) apperrors.AppError {
 func (r *repository) Upsert(application string, appUID types.UID, name, serviceID string, data strategy.SecretData) apperrors.AppError {
 	secret := makeSecret(name, serviceID, application, appUID, data)
 
-	_, err := r.secretsManager.Update(secret)
+	_, err := r.secretsManager.Update(context.Background(), secret, metav1.UpdateOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return r.create(application, secret, name)
@@ -78,7 +82,7 @@ func (r *repository) Upsert(application string, appUID types.UID, name, serviceI
 }
 
 func (r *repository) create(application string, secret *v1.Secret, name string) apperrors.AppError {
-	_, err := r.secretsManager.Create(secret)
+	_, err := r.secretsManager.Create(context.Background(), secret, metav1.CreateOptions{})
 	if err != nil {
 		if k8serrors.IsAlreadyExists(err) {
 			return apperrors.AlreadyExists("Secret %s already exists", name)

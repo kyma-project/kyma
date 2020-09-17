@@ -4,4 +4,7 @@ resources:
 - group: serverless
   kind: Function
   version: v1alpha1
+- group: serverless
+  kind: GitRepository
+  version: v1alpha1
 version: "2"

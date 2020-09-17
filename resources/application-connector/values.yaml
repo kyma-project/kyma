@@ -4,9 +4,6 @@ connector_service:
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
-connectivity_certs_controller:
-  enabled: false
-
 global:
   disableLegacyConnectivity: false
   isLocalEnv: false
@@ -26,37 +23,37 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    version: "1066324c"
+    version: "PR-9407"
   application_operator_tests:
-    version: "1066324c"
+    version: "PR-9407"
   connector_service:
-    version: "4e3576cd"
+    version: "PR-9407"
   connector_service_tests:
-    version: "27eff119"
+    version: "PR-9407"
   connection_token_handler:
-    version: "fbf1000b"
+    version: "PR-9407"
   connection_token_handler_tests:
-    version: "fbf1000b"
+    version: "PR-9407"
   event_service:
-    version: "PR-8874"
+    version: "d4372526"
   event_service_integration_tests:
-    version: "PR-8874"
+    version: "2c51c024"
   application_gateway:
-    version: "b06fbd6f"
+    version: "PR-9407"
   application_gateway_tests:
-    version: "1272752c"
+    version: "PR-9407"
+  application_gateway_legacy_tests:
+    version: "4eeef0b7"
   application_registry:
-    version: "4bd4dbfb"
+    version: "PR-9407"
   application_registry_tests:
-    version: "c608dbf3"
+    version: "PR-9407"
   application_broker:
-    version: "1acc510b"
+    version: "PR-9407"
   application_connectivity_certs_setup_job:
-    version: "fbf1000b"
+    version: "PR-9407"
   application_connectivity_validator:
-    version: "39d1ab87"
-  connectivity_certs_controller:
-    version: "fbf1000b"
+    version: "PR-9407"
 
 application_connectivity_certs_setup_job:
   secrets:
@@ -76,5 +73,5 @@ tests:
       central: false
     skipSslVerify: true
     image:
-      version: "5afd3227"
+      version: "c9ff90c3"
       pullPolicy: IfNotPresent

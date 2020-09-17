@@ -388,6 +388,42 @@ function testRafter() {
 	done
 }
 
+function testServerless() {
+  local -r userEmail="${1}"
+	local -r testNamespace="${2}"
+	local -r hasEditPermission="${3}"
+	local -r hasViewPermission="${4}"
+
+	local editPermissionText=""
+	if [[ "${hasEditPermission}" == "no" ]]; then
+		editPermissionText=" NOT"
+	fi
+
+	local viewAccessText=""
+	if [[ "${hasViewPermission}" == "no" ]]; then
+		viewAccessText=" NOT"
+	fi
+	readonly editPermissionText viewAccessText
+
+	local -r resources=( "functions.serverless.kyma-project.io" "gitrepositories.serverless.kyma-project.io" )
+
+	# View
+	for resource in "${resources[@]}"; do
+		for operation in "${VIEW_OPERATIONS[@]}"; do
+			echo "--> ${userEmail} should${viewAccessText} be able to ${operation} ${resource} CR in ${testNamespace}"
+			testPermissions "${operation}" "${resource}" "${testNamespace}" "${hasViewPermission}"
+		done
+	done
+
+	# Edit
+	for resource in "${resources[@]}"; do
+		for operation in "${EDIT_OPERATIONS[@]}"; do
+			echo "--> ${userEmail} should${editPermissionText} be able to ${operation} ${resource} CR in ${testNamespace}"
+			testPermissions "${operation}" "${resource}" "${testNamespace}" "${hasEditPermission}"
+		done
+	done
+}
+
 function runTests() {
 	EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
@@ -437,11 +473,16 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to create servicebindings in ${NAMESPACE}"
 	testPermissions "create" "servicebindings" "${NAMESPACE}" "yes"
 
+	echo "--> ${ADMIN_EMAIL} should be able to get serverless-webhook-envs configmap in ${NAMESPACE}"
+	testPermissions "get" "configmap/serverless-webhook-envs" "${NAMESPACE}" "yes"
+
 	testRafter "${ADMIN_EMAIL}" "${NAMESPACE}" "yes"
 	testKnativeServing "${ADMIN_EMAIL}" "${NAMESPACE}" "yes"
 
 	testKymaEventing "${ADMIN_EMAIL}" "${NAMESPACE}" "yes" "yes"
 	testKymaEventing "${ADMIN_EMAIL}" "${SYSTEM_NAMESPACE}" "yes" "yes"
+
+	testServerless "${ADMIN_EMAIL}" "${NAMESPACE}" "yes" "yes"
 
 	echo "--> ${ADMIN_EMAIL} should be able to delete any namespace in the cluster"
 	testPermissionsClusterScoped "delete" "namespace" "yes"
@@ -457,6 +498,39 @@ function runTests() {
 
 	echo "--> ${ADMIN_EMAIL} should be able to describe Nodes in the cluster"
 	testDescribeClusterScoped "nodes" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to create podpreset.settings.svcat.k8s.io"
+	testPermissions "create" "podpreset.settings.svcat.k8s.io" "${NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to list podpreset.settings.svcat.k8s.io"
+	testPermissions "list" "podpreset.settings.svcat.k8s.io" "${NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to get microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "get" "microfrontend" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to create microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "microfrontend" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to delete microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "delete" "microfrontend" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to get clustermicrofrontend"
+	testPermissionsClusterScoped "get" "clustermicrofrontend"  "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to create clustermicrofrontend"
+	testPermissionsClusterScoped "create" "clustermicrofrontend" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to delete clustermicrofrontend"
+	testPermissionsClusterScoped "delete" "clustermicrofrontend" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to get backendmodule"
+	testPermissionsClusterScoped "get" "backendmodule" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to create backendmodule"
+	testPermissionsClusterScoped "create" "backendmodule" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to delete backendmodule"
+	testPermissionsClusterScoped "delete" "backendmodule" "yes"
 
 	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
@@ -482,17 +556,47 @@ function runTests() {
 	echo "--> ${VIEW_EMAIL} should NOT be able to create ory Access Rule"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "no"
 
+	echo "--> ${VIEW_EMAIL} should be able to get serverless-webhook-envs configmap"
+	testPermissions "get" "configmap/serverless-webhook-envs" "${NAMESPACE}" "yes"
+
 	testRafter "${VIEW_EMAIL}" "${NAMESPACE}" "no"
 	testKnativeServing "${VIEW_EMAIL}" "${NAMESPACE}" "no"
 
 	testKymaEventing "${VIEW_EMAIL}" "${NAMESPACE}" "no" "yes"
 	testKymaEventing "${VIEW_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "yes"
 
+	testServerless "${VIEW_EMAIL}" "${NAMESPACE}" "no" "yes"
+	testServerless "${VIEW_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "yes"
+
 	echo "--> ${VIEW_EMAIL} should NOT be able to create serviceinstances in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "serviceinstances" "${CUSTOM_NAMESPACE}" "no"
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to create servicebindings in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "servicebindings" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${VIEW_EMAIL} should NOT be able to create podpreset.settings.svcat.k8s.io"
+	testPermissions "create" "podpreset.settings.svcat.k8s.io" "${NAMESPACE}" "no"
+
+	echo "--> ${VIEW_EMAIL} should NOT be able to list podpreset.settings.svcat.k8s.io"
+	testPermissions "list" "podpreset.settings.svcat.k8s.io" "${NAMESPACE}" "no"
+
+	echo "--> ${VIEW_EMAIL} should be able to get microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "get" "microfrontend" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${VIEW_EMAIL} should NOT be able to create microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "microfrontend" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${VIEW_EMAIL} should be able to get clustermicrofrontend"
+	testPermissionsClusterScoped "get" "clustermicrofrontend"  "yes"
+
+	echo "--> ${VIEW_EMAIL} should NOT be able to create clustermicrofrontend"
+	testPermissionsClusterScoped "create" "clustermicrofrontend" "no"
+
+	echo "--> ${VIEW_EMAIL} should be able to get backendmodule"
+	testPermissionsClusterScoped "get" "backendmodule" "yes"
+
+	echo "--> ${VIEW_EMAIL} should be able to create backendmodule"
+	testPermissionsClusterScoped "create" "backendmodule" "no"
 
 	EMAIL=${NAMESPACE_ADMIN_EMAIL} PASSWORD=${NAMESPACE_ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
@@ -529,6 +633,9 @@ function runTests() {
 
 	testKymaEventing "${NAMESPACE_ADMIN_EMAIL}" "${NAMESPACE}" "yes" "yes"
 	testKymaEventing "${NAMESPACE_ADMIN_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "no"
+
+	testServerless "${NAMESPACE_ADMIN_EMAIL}" "${NAMESPACE}" "yes" "yes"
+	testServerless "${NAMESPACE_ADMIN_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "no"
 
 	# namespace admin should not be able to create clusterrolebindings - if they can't create it in one namespace,
 	# that means they can't create it in any namespace (resource is non namespaced and RBAC is permissive)
@@ -666,7 +773,10 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create servicebindings in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "servicebindings" "${CUSTOM_NAMESPACE}" "yes"
 
-  # namespace-admin role doesn't allow to create addonsconfigurations
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get serverless-webhook-envs configmap in ${CUSTOM_NAMESPACE}"
+	testPermissions "get" "configmap/serverless-webhook-envs" "${NAMESPACE}" "yes"
+
+  	# namespace-admin role doesn't allow to create addonsconfigurations
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create addonsconfigurations in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "addonsconfigurations" "${CUSTOM_NAMESPACE}" "no"
 
@@ -684,6 +794,8 @@ function runTests() {
 
 	testRafter "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "no"
 	testKnativeServing "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "no"
+
+	testServerless "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "yes" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get addonsconfigurations.addons.kyma-project.io in the namespace they created"
 	testPermissions "get" "addonsconfigurations/status.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
@@ -705,6 +817,33 @@ function runTests() {
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to describe Nodes in the cluster"
 	testDescribeClusterScoped "nodes" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create podpreset.settings.svcat.k8s.io"
+	testPermissions "create" "podpreset.settings.svcat.k8s.io" "${NAMESPACE}" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to list podpreset.settings.svcat.k8s.io"
+	testPermissions "list" "podpreset.settings.svcat.k8s.io" "${NAMESPACE}" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "get" "microfrontend" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "microfrontend" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get clustermicrofrontend in default"
+	testPermissions "get" "clustermicrofrontend" "default" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create clustermicrofrontend in default"
+	testPermissions "create" "clustermicrofrontend" "default" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get backendmodule in default"
+	testPermissions "get" "backendmodule" "default" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create backendmodule in default"
+	testPermissions "create" "backendmodule" "default" "yes"
+
+	echo "--> ${ADNAMESPACE_ADMIN_EMAILMIN_EMAIL} should be able to delete backendmodule in default"
+	testPermissions "delete" "backendmodule" "default" "yes"
 
 	# developer who was granted kyma-developer role should be able to operate in the scope of its namespace
 	EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
@@ -773,6 +912,9 @@ function runTests() {
 	testKymaEventing "${DEVELOPER_EMAIL}" "${CUSTOM_NAMESPACE}" "yes" "yes"
 	testKymaEventing "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "no"
 
+	testServerless "${DEVELOPER_EMAIL}" "${CUSTOM_NAMESPACE}" "yes" "yes"
+	testServerless "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "no"
+
 	# developer who was granted kyma-developer role should not be able to operate in system namespaces
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to list Deployments in system namespace"
 	testPermissions "list" "deployment" "${SYSTEM_NAMESPACE}" "no"
@@ -809,6 +951,39 @@ function runTests() {
 
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to describe Pods in ${SYSTEM_NAMESPACE}"
 	testDescribe "pods" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to get serverless-webhook-envs configmap in ${SYSTEM_NAMESPACE}"
+	testPermissions "get" "configmap/serverless-webhook-envs" "${NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create podpreset.settings.svcat.k8s.io in ${SYSTEM_NAMESPACE}"
+	testPermissions "create" "podpreset.settings.svcat.k8s.io" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to list podpreset.settings.svcat.k8s.io in ${SYSTEM_NAMESPACE}"
+	testPermissions "list" "podpreset.settings.svcat.k8s.io" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create podpreset.settings.svcat.k8s.io in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "podpreset.settings.svcat.k8s.io" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to list podpreset.settings.svcat.k8s.io in ${CUSTOM_NAMESPACE}"
+	testPermissions "list" "podpreset.settings.svcat.k8s.io" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to get microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "get" "microfrontend" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create microfrontend in ${CUSTOM_NAMESPACE}"
+	testPermissions "create" "microfrontend" "${CUSTOM_NAMESPACE}" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to get clustermicrofrontend in default"
+	testPermissions "get" "clustermicrofrontend" "default" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create clustermicrofrontend in default"
+	testPermissions "create" "clustermicrofrontend" "default" "no"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to get backendmodule in default"
+	testPermissions "get" "backendmodule" "default" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create backendmodule in default"
+	testPermissions "create" "backendmodule" "default" "no"
 }
 
 function cleanup() {

@@ -2,7 +2,6 @@ aliases:
   documentation-reviewers:
     - kazydek
     - klaudiagrz
-    - tomekpapiernik
     - bszwarc
     - mmitoraj
     - majakurcius
@@ -10,7 +9,6 @@ aliases:
   documentation-approvers:
     - kazydek
     - klaudiagrz
-    - tomekpapiernik
     - bszwarc
     - mmitoraj
     - majakurcius

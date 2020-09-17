@@ -47,4 +47,4 @@ EOF
 
 ## Define the value in the Runtime
 
-If you have already installed Kyma and do not want to trigger any updates, edit the `istio-pilot` deployment to set the desired value for **PILOT_TRACE_SAMPLING**. For detailed instructions, see the [Istio documentation](https://istio.io/docs/tasks/observability/distributed-tracing/configurability/#trace-sampling).
+If you have already installed Kyma and do not want to trigger any updates, edit the `istio-pilot` deployment to set the desired value for **PILOT_TRACE_SAMPLING**. For detailed instructions, see the [Istio documentation](https://istio.io/latest/docs/tasks/observability/distributed-tracing/configurability/#customizing-trace-sampling).

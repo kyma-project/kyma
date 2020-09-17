@@ -1,11 +1,11 @@
-type Trigger @goModel(model: "github.com/knative/eventing/pkg/apis/eventing/v1alpha1.Trigger"){
+type Trigger @goModel(model: "knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger"){
     name: String!
     namespace: String!
     spec: TriggerSpec!
     status: TriggerStatus!
 }
 
-type TriggerSpec @goModel(model: "github.com/knative/eventing/pkg/apis/eventing/v1alpha1.TriggerSpec"){
+type TriggerSpec @goModel(model: "knative.dev/eventing/pkg/apis/eventing/v1alpha1.TriggerSpec"){
     broker: String!
     filter: JSON
     subscriber: Subscriber!

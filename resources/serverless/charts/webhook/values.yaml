@@ -4,15 +4,14 @@
 
 nameOverride:
 fullnameOverride:
-
 image:
   repository: "eu.gcr.io/kyma-project/function-webhook"
-  tag: "1cc47db6"
+  tag: "b04bc441"
   pullPolicy: IfNotPresent
 
 commonLabels:
-  app: "{{ template \"webhook.fullname\" . }}"
-  app.kubernetes.io/name: "{{ template \"webhook.fullname\" . }}"
+  app: '{{ template "webhook.fullname" . }}'
+  app.kubernetes.io/name: '{{ template "webhook.fullname" . }}'
   app.kubernetes.io/instance: "{{ .Release.Name }}"
   app.kubernetes.io/managed-by: "{{ .Release.Service }}"
   role: webhook
@@ -49,11 +48,11 @@ container:
     metricsDomain:
       value: "kyma-project.io/serverless"
     configObservabilityName:
-      value: "{{ template \"webhook.fullname\" . }}-config-observability"
+      value: '{{ template "webhook.fullname" . }}-config-observability'
     webhookServiceName:
-      value: "{{ template \"webhook.fullname\" . }}"
+      value: '{{ template "webhook.fullname" . }}'
     webhookSecretName:
-      value: "{{ template \"webhook.fullname\" . }}"
+      value: '{{ template "webhook.fullname" . }}'
     webhookPort:
       value: "{{ .Values.service.ports.httpsWebhook.targetPort }}"
     minRequestCpu:
@@ -63,7 +62,7 @@ container:
     minReplicasValue:
       value: "1"
     reservedEnvs:
-      value: "FUNC_RUNTIME,FUNC_HANDLER,FUNC_PORT,MOD_NAME,NODE_PATH" # https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js
+      value: "FUNC_RUNTIME,FUNC_HANDLER,FUNC_PORT,MOD_NAME,NODE_PATH,PYTHONPATH" # https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js;https://github.com/kubeless/runtimes/tree/master/stable/python
     requestCpu:
       value: "50m"
     requestMemory:

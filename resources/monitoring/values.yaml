@@ -515,19 +515,29 @@ grafana:
 
   ## Configure additional grafana datasources
   ## ref: https://grafana.com/docs/grafana/latest/features/datasources/
+
+
+  dataSources:
+    loki:
+      enabled: true
+      config:
+        - name: Loki
+          type: loki
+          access: proxy
+          url: http://logging-loki.kyma-system:3100
+          editable: true
+          jsonData:
+            maxLines: 1000
+    jaeger:
+      enabled: true
+      config:
+        - name: Jaeger
+          type: jaeger
+          access: proxy
+          url: http://tracing-jaeger-query.kyma-system:16686
+          editable: true
+
   additionalDataSources:
-    - name: Loki
-      type: loki
-      access: proxy
-      url: http://logging-loki.kyma-system:3100
-      editable: true
-      jsonData:
-        maxLines: 1000
-    - name: Jaeger
-      type: jaeger
-      access: proxy
-      url: http://tracing-jaeger-query.kyma-system:16686
-      editable: true
   # - name: prometheus-sample
   #   access: proxy
   #   basicAuth: true
@@ -1043,7 +1053,7 @@ prometheusOperator:
   tlsProxy:
     enabled: false
     image:
-      repository: squareup/ghostunnel
+      repository: squareup/ghostunnel # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
       tag: v1.5.2
       pullPolicy: IfNotPresent
     resources: {}
@@ -1060,7 +1070,7 @@ prometheusOperator:
     patch:
       enabled: false
       image:
-        repository: jettech/kube-webhook-certgen
+        repository: jettech/kube-webhook-certgen # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
         tag: v1.0.0
         pullPolicy: IfNotPresent
       resources: {}
@@ -1188,13 +1198,13 @@ prometheusOperator:
 
   ## Resource limits & requests
   ##
-  resources: {}
-  # limits:
-  #   cpu: 200m
-  #   memory: 200Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 100Mi
+  resources:
+    limits:
+      cpu: 200m
+      memory: 200Mi
+    requests:
+      cpu: 10m
+      memory: 90Mi
 
   ## Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -1258,7 +1268,7 @@ prometheusOperator:
   ## Hyperkube image to use when cleaning up
   ##
   hyperkubeImage:
-    repository: k8s.gcr.io/hyperkube
+    repository: k8s.gcr.io/hyperkube # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
     tag: v1.12.1
     pullPolicy: IfNotPresent
 
@@ -1542,7 +1552,7 @@ prometheus:
     ##
     query:
       maxConcurrency: 100
-      timeout: 1m
+      timeout: 30s
 
     ## Namespaces to be selected for PrometheusRules discovery.
     ## If nil, select own namespace. Namespaces to be selected for ServiceMonitor discovery.

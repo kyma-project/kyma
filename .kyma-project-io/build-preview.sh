@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Script for build preview of this repo like in https://kyma-project.io/docs/ on every PR.
-# For more information, please contact with: @michal-hudy @m00g3n @aerfio @pPrecel @magicmatatjahu
+# For more information, please contact with: @m00g3n @aerfio @pPrecel @magicmatatjahu
 
 set -eo pipefail
 
@@ -17,7 +17,6 @@ readonly WEBSITE_REPO="https://github.com/kyma-project/website"
 
 readonly BUILD_DIR="${KYMA_PROJECT_IO_DIR}/${WEBSITE_DIR}"
 readonly PUBLIC_DIR="${KYMA_PROJECT_IO_DIR}/${WEBSITE_DIR}/public"
-
 readonly DOCS_DIR="$( cd "${KYMA_PROJECT_IO_DIR}/../docs" && pwd )"
 
 # Colors
@@ -45,7 +44,9 @@ copy-website-repo() {
 }
 
 build-preview() {
-  export PREVIEW_SOURCE_DIR="${KYMA_PROJECT_IO_DIR}/.." 
+  export APP_PREVIEW_SOURCE_DIR="${KYMA_PROJECT_IO_DIR}/.."
+  export APP_DOCS_BRANCHES="preview"
+  export APP_PREPARE_FOR_REPO="kyma"
   make -C "${BUILD_DIR}" netlify-docs-preview
 }
 

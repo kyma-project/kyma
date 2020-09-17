@@ -31,5 +31,5 @@ spec:
       - access-control-allow-origin
       - authorization
   gateways:
-  - kyma-gateway
+  - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
 {{- end }}

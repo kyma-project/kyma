@@ -1,4 +1,5 @@
-#!/bin/bash -e
+set -e
+
 if [ -f "/etc/istio/overrides.yaml" ]; then
   #New way: just merge default IstioControlPlane definition with a user-provided one.
   yq merge -a -x /etc/istio/config.yaml /etc/istio/overrides.yaml > /etc/combo.yaml

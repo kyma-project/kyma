@@ -29,6 +29,19 @@ spec:
     {{- end }}
     {{- if .Values.hydra.autoMigrate }}
       initContainers:
+        - name: wait-for-db
+          image: "{{ .Values.busybox.repository }}:{{ .Values.busybox.tag }}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+{{ .Files.Get "files/wait-for-db.sh" | printf "%s" | indent 14 }}
+          env:
+            - name: DSN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "hydra.secretName" . }}
+                  key: dsn
         - name: {{ .Chart.Name }}-automigrate
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}

@@ -5,7 +5,7 @@ metadata:
   namespace: kyma-system
   annotations:
     helm.sh/hook: pre-install,pre-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "0"
 data:
   akspatchcleanup.sh: |
@@ -25,7 +25,7 @@ metadata:
   name: aks-kubelet-monitoring-cleanup-patch
   annotations:
     helm.sh/hook: pre-install,pre-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "0"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -34,7 +34,7 @@ metadata:
   name: aks-kubelet-monitoring-cleanup-patch
   annotations:
     helm.sh/hook: pre-install,pre-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "0"
 rules:
   - apiGroups: [""]
@@ -59,7 +59,7 @@ metadata:
   name: aks-kubelet-monitoring-cleanup-patch
   annotations:
     helm.sh/hook: pre-install,pre-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     helm.sh/hook-weight: "0"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -77,7 +77,7 @@ metadata:
   namespace: kyma-system
   annotations:
     helm.sh/hook: pre-install,pre-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
     sidecar.istio.io/inject: "false"
     helm.sh/hook-weight: "9"
 spec:

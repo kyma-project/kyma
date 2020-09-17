@@ -176,6 +176,9 @@ func (t TargetsAndRulesTest) testTargetsAreHealthy() error {
 			allTargetsAreHealthy := true
 			timeoutMessage = ""
 			for _, target := range activeTargets {
+				if shouldIgnoreTarget(target.Labels) {
+					continue
+				}
 				if target.Health != "up" {
 					allTargetsAreHealthy = false
 					timeoutMessage += "The following target is not healthy:\n"
@@ -191,6 +194,45 @@ func (t TargetsAndRulesTest) testTargetsAreHealthy() error {
 		}
 	}
 
+}
+
+func shouldIgnoreTarget(target prom.Labels) bool {
+	jobsToBeIgnored := []string{
+		// Note: These targets will be tested here: https://github.com/kyma-project/kyma/issues/6457
+		"knative-eventing/knative-eventing-event-mesh-dashboard-broker",
+		"knative-eventing/knative-eventing-event-mesh-dashboard-httpsource",
+	}
+
+	podsToBeIgnored := []string{
+		// Ignore the pods that are created during tests.
+		"-testsuite-",
+		"test",
+		"nodejs12-",
+		"nodejs10-",
+		"upgrade",
+	}
+
+	namespacesToBeIgnored := []string{"test"}
+
+	for _, p := range podsToBeIgnored {
+		if strings.Contains(target["pod_name"], p) {
+			return true
+		}
+	}
+
+	for _, j := range jobsToBeIgnored {
+		if target["job"] == j {
+			return true
+		}
+	}
+
+	for _, n := range namespacesToBeIgnored {
+		if strings.Contains(target["namespace"], n) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (t TargetsAndRulesTest) testRulesAreHealthy() error {
