@@ -115,7 +115,9 @@ data:
         Kube_URL            https://kubernetes.default.svc:443
         Merge_Log           {{ .Values.conf.Filter.Kubernetes.Merge_Log }}
         Keep_Log            {{ .Values.conf.Filter.Kubernetes.Keep_Log }}
+{{- if .Values.conf.Filter.Kubernetes.Merge_Log_Key }}
         Merge_Log_Key       {{ .Values.conf.Filter.Kubernetes.Merge_Log_Key }}
+{{- end }}
         K8S-Logging.Parser  On
         K8S-Logging.Exclude On
 {{- if .Values.conf.Filter.custom_parser.enabled }}
