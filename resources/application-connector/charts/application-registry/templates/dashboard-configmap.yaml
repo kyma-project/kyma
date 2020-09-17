@@ -631,6 +631,7 @@ data:
         "from": "now-2h",
         "to": "now"
       },
+      "refresh": "10s",
       "timepicker": {
         "refresh_intervals": [
           "5s",

@@ -2117,7 +2117,7 @@ data:
         "schemaVersion": 22,
         "style": "dark",
         "tags": [
-            "monitoring",
+            "kubernetes",
             "kyma"
         ],
         "templating": {

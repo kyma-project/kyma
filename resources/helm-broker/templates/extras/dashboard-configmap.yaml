@@ -1043,6 +1043,7 @@ data:
         "from": "now-30m",
         "to": "now"
       },
+      "refresh": "10s",
       "timepicker": {
         "refresh_intervals": [
           "5s",

@@ -1217,7 +1217,7 @@ data:
           "valueName": "max"
         }
       ],
-      "refresh": "5s",
+      "refresh": "10s",
       "schemaVersion": 18,
       "style": "dark",
       "tags": [

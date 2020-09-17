@@ -450,7 +450,7 @@ data:
           }
         }
       ],
-      "refresh": "",
+      "refresh": "10s",
       "schemaVersion": 21,
       "style": "dark",
       "tags": [
