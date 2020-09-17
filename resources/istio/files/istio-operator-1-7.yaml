@@ -80,6 +80,7 @@ spec:
             cpu: 100m
             memory: 96Mi
         service:
+          type: LoadBalancer
           ports:
           - name: status-port
             port: 15021
@@ -274,7 +275,6 @@ spec:
         - mountPath: /etc/istio/ingressgateway-ca-certs
           name: ingressgateway-ca-certs
           secretName: istio-ingressgateway-ca-certs
-        type: LoadBalancer
         zvpn: {}
     
     global:
