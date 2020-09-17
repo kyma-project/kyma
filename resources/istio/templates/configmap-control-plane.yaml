@@ -15,3 +15,5 @@ data:
   overrides.yaml: |-
 {{ .Values.kyma_istio_operator | printf "%s" | indent 4 }}
 {{ end }}
+  operator-1-7.yaml: |-
+{{ tpl (.Files.Get "files/istio-operator-1-7.yaml" | printf "%s" | indent 4) . }}
