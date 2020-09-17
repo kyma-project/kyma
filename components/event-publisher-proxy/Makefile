@@ -1,4 +1,4 @@
-APP_NAME = cloud-event-gateway-proxy
+APP_NAME = event-publisher-proxy
 APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200117-d3885041
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles

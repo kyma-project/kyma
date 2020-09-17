@@ -1,8 +1,8 @@
-# Cloud Event Gateway Proxy
+# Event Publisher Proxy
 
 ## Overview
 
-The Cloud Event Gateway Proxy receives Cloud Event publishing requests from the cluster workloads (microservice or Serverless functions) and redirects it to the Enterprise Messaging Service Cloud Event Gateway.
+The Event Publisher Proxy receives Cloud Event publishing requests from the cluster workloads (microservice or Serverless functions) and redirects it to an eventing platform. An example of an eventing platform would be SAP's One Event Bus.
 
 ## Prerequisites
 
