@@ -54,34 +54,53 @@ spec:
             - /bin/bash
             - -c
             - |
+              declare -A objectsToRestart
+
               pods=$(kubectl get po -A -o json | jq -rc '.items | .[] | select(.spec.containers | .[].image == "docker.io/istio/proxyv2:1.4.10-distroless") | "\(.metadata.name)/\(.metadata.namespace)"' )
+              podArray=($(echo $pods | tr " " "\n"))
 
-              array=($(echo $pods | tr " " "\n"))
+              echo "NUMBER OF PODS MATCHED: ${#podArray[@]}"
 
-
-              for i in "${array[@]}"
+              for i in "${podArray[@]}"
               do
-                namespacedName=($(echo $i | tr "/" "\n"))
+                  namespacedName=($(echo $i | tr "/" "\n"))
 
-                podName="${namespacedName[0]}"
-                namespace="${namespacedName[1]}"
+                  podName="${namespacedName[0]}"
+                  namespace="${namespacedName[1]}"
 
-                podJson=$(kubectl get pod "${podName}" -n "${namespace}" -o json)
+                  podJson=$(kubectl get pod "${podName}" -n "${namespace}" -o json)
 
-                parentObjectKind=$(jq -r '.metadata.ownerReferences[0].kind' <<< "${podJson}" | tr '[:upper:]' '[:lower:]')
-                parentObjectName=$(jq -r '.metadata.ownerReferences[0].name' <<< "${podJson}")
+                  parentObjectKind=$(jq -r '.metadata.ownerReferences[0].kind' <<< "${podJson}" | tr '[:upper:]' '[:lower:]')
+                  parentObjectName=$(jq -r '.metadata.ownerReferences[0].name' <<< "${podJson}")
 
-                case "${parentObjectKind}" in
-                ("")
-                  echo "Pod ${podName} in namespace ${namespace} has no parent object. Skipping..."
-                  continue
-                  ;;
-                ("replicaset")
-                  parentDeployment=$(kubectl get "${parentObjectKind}" "${parentObjectName}" -n "${namespace}" -o jsonpath='{.metadata.ownerReferences[0].name}')
-                  kubectl rollout restart deployment "${parentDeployment}" -n "${namespace}"
-                  ;;
-                (*)
-                  kubectl rollout restart "${parentObjectKind}" "${parentObjectName}" -n "${namespace}"
-                  ;;
-                esac
+                  case "${parentObjectKind}" in
+                  ("")
+                    echo "Pod ${podName} in namespace ${namespace} has no parent object. Skipping..."
+                    continue
+                    ;;
+                  ("replicaset")
+                    parentDeploymentName=$(kubectl get "${parentObjectKind}" "${parentObjectName}" -n "${namespace}" -o jsonpath='{.metadata.ownerReferences[0].name}')
+                    echo "deployment ${parentDeploymentName} in namespace ${namespace} eligible for restart"
+                    objectsToRestart["deployment/${namespace}/${parentDeploymentName}"]=""
+                    ;;
+                  (*)
+                    echo "${parentObjectKind} ${parentObjectName} in namespace ${namespace} eligible for restart"
+                    objectsToRestart["${parentObjectKind}/${namespace}/${parentObjectName}"]=""
+                    ;;
+                  esac
+              done
+
+              echo "NUMBER OF OBJECTS TO RESTART: ${#objectsToRestart[@]}"
+
+              for key in "${!objectsToRestart[@]}"
+              do
+
+                attributes=($(echo "${key}" | tr "/" "\n"))
+
+                kind="${attributes[0]}"
+                namespace="${attributes[1]}"
+                name="${attributes[2]}"
+
+                kubectl rollout restart "${kind}" "${name}" -n "${namespace}"
+
               done
