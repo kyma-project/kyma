@@ -1,0 +1,18 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Release.Name }}-remove-knative-serving
+  annotations:
+    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "0"
+    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
+  labels:
+    job: {{ .Release.Name }}-remove-knative-serving
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Name }}-remove-knative-serving
+subjects:
+- kind: ServiceAccount
+  name: {{ .Release.Name }}-remove-knative-serving
+  namespace: kyma-system
