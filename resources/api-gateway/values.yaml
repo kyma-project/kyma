@@ -42,8 +42,8 @@ config:
   domainWhiteList:
   defaultDomain:
   cors: # values listed below will be used to set corsPolicy in created VirtualServices (https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/#CorsPolicy)
-    allowOrigin:
-      - "*"
+    allowOrigins:
+      - regex: ".*"
     allowMethods: # no possibility to use "*"
       - "GET"
       - "POST"
