@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name:  {{ include "event-publisher-proxy.fullname" . }}
+  name: {{ include "event-publisher-proxy.fullname" . }}
   labels:
   {{- include "event-publisher-proxy.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{ include "event-publisher-proxy.selectorLabels" . | nindent 6 }}
+  {{ include "event-publisher-proxy.selectorLabels" . | nindent 6 }}
   strategy:
     type: RollingUpdate
   template:
     metadata:
       labels:
-        {{ include "event-publisher-proxy.selectorLabels" . | nindent 8 }}
+    {{ include "event-publisher-proxy.selectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "event-publisher-proxy.serviceAccountName" . }}
       containers:
@@ -39,8 +39,7 @@ spec:
                 secretKeyRef:
                   name: event-publisher-proxy
                   key: ems-publish-url
-          # TODO:
-          image: docker.io/nachtmaar/cloud-event-gateway-proxy-cd4ff4b403b0f3c363f401de52d105ef@sha256:d8ece16affff418aafb07c6a8423472536fd773e7069e67f6e9402952a44a919
+          image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           name: event-publisher-proxy
           ports:
