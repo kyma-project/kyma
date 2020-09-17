@@ -345,14 +345,14 @@ data:
           "refId": "B"
         },
         {
-          "expr": "container_memory_usage_bytes{container_name=~\"oathkeeper-maester|istio-proxy\", pod_name=~\"ory-oathkeeper-maester.*\"}",
+          "expr": "container_memory_usage_bytes{container=~\"oathkeeper-maester|istio-proxy\", pod=~\"ory-oathkeeper-maester.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }} (k8s)",
+          "legendFormat": "{{ container }} (k8s)",
           "refId": "C"
         },
         {
-          "expr": "sum(container_memory_usage_bytes{container_name=~\"oathkeeper-maester|istio-proxy\", pod_name=~\"ory-oathkeeper-maester.*\"})",
+          "expr": "sum(container_memory_usage_bytes{container=~\"oathkeeper-maester|istio-proxy\", pod=~\"ory-oathkeeper-maester.*\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Total",

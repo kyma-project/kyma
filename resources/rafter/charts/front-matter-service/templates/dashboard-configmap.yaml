@@ -584,12 +584,12 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by(container_name) (container_memory_usage_bytes{pod=~\"rafter-front-matter-service-.*\", container_name!=\"POD\"})",
+              "expr": "sum by(container) (container_memory_usage_bytes{pod=~\"rafter-front-matter-service-.*\", container!=\"POD\"})",
               "format": "time_series",
               "instant": false,
               "interval": "10s",
               "intervalFactor": 1,
-              "legendFormat": "Current: {{`{{container_name}}`}}",
+              "legendFormat": "Current: {{`{{container}}`}}",
               "metric": "container_memory_usage_bytes",
               "refId": "A",
               "step": 15
@@ -700,10 +700,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (container_name)(rate(container_cpu_usage_seconds_total{image!=\"\",container_name!=\"POD\",pod=~\"rafter-front-matter-service-.*\"}[1m]))",
+              "expr": "sum by (container)(rate(container_cpu_usage_seconds_total{image!=\"\",container!=\"POD\",pod=~\"rafter-front-matter-service-.*\"}[1m]))",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{`{{container_name}}`}}",
+              "legendFormat": "{{`{{container}}`}}",
               "refId": "A",
               "step": 30
             },
