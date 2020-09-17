@@ -186,10 +186,10 @@ func shouldIgnoreTarget(target prom.Labels) bool {
 		"upgrade",
 	}
 
-	namespacesToBeIgnored := []string{"test"}
+	namespacesToBeIgnored := []string{"test", "e2e-"}
 
 	for _, p := range podsToBeIgnored {
-		if strings.Contains(target["pod_name"], p) {
+		if strings.Contains(target["pod"], p) {
 			return true
 		}
 	}
