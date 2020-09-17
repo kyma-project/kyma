@@ -33,6 +33,5 @@ $(eval $(call buildpack-cp-ro,resolve))
 $(eval $(call buildpack-mount,mod-verify))
 $(eval $(call buildpack-mount,test))
 
-.PHONY: path-to-referenced-charts
 path-to-referenced-charts:
 	@echo "resources/event-publisher-proxy"
