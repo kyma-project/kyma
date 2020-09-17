@@ -1,0 +1,7 @@
+apiVersion: v2
+name: Kyma Component 'eventing'
+description: Kyma Eventing
+type: application
+version: 0.1.0
+home: https://kyma-project.io
+icon: https://github.com/kyma-project/kyma/blob/master/logo.png?raw=true
