@@ -5,7 +5,8 @@ ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/event-publisher
 WORKDIR $DOCK_PKG_DIR
 COPY . $DOCK_PKG_DIR
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o event-publisher-proxy ./cmd/event-publisher-proxy
+RUN GOOS=linux GO111MODULE=on go mod vendor &&\
+    go build -o event-publisher-proxy ./cmd/event-publisher-proxy
 
 FROM scratch
 LABEL source = git@github.com:kyma-project/kyma.git
