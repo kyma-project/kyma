@@ -790,7 +790,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(container_cpu_cfs_throttled_seconds_total{namespace=\"$namespace\",container!=\"\",pod=~\"demo-service.*\"}[5m])",
+              "expr": "rate(container_cpu_cfs_throttled_seconds_total{namespace=\"$namespace\",container!=\"\",pod=~\"$service.*\"}[5m])",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "cpu_cfs_throttled:{{`{{pod}}`}}/{{`{{container}}`}}",

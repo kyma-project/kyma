@@ -961,7 +961,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by(container) (container_memory_usage_bytes{pod=~\"rafter-controller-manager-.*\", container!=\"POD\"})",
+              "expr": "sum by(container) (container_memory_usage_bytes{pod=~\"rafter-ctrl-mngr-.*\", container!=\"POD\"})",
               "format": "time_series",
               "instant": false,
               "interval": "10s",
@@ -972,7 +972,7 @@ data:
               "step": 15
             },
             {
-              "expr": "kube_pod_container_resource_requests_memory_bytes{pod=~\"rafter-controller-manager-.*\"}",
+              "expr": "kube_pod_container_resource_requests_memory_bytes{pod=~\"rafter-ctrl-mngr-.*\"}",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
@@ -982,7 +982,7 @@ data:
               "step": 20
             },
             {
-              "expr": "kube_pod_container_resource_limits_memory_bytes{pod=~\"rafter-controller-manager-.*\"}",
+              "expr": "kube_pod_container_resource_limits_memory_bytes{pod=~\"rafter-ctrl-mngr-.*\"}",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
@@ -1085,7 +1085,7 @@ data:
               "step": 30
             },
             {
-              "expr": "kube_pod_container_resource_requests_cpu_cores{pod=~\"rafter-controller-manager-.*\"}",
+              "expr": "kube_pod_container_resource_requests_cpu_cores{pod=~\"rafter-ctrl-mngr-.*\"}",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
@@ -1095,7 +1095,7 @@ data:
               "step": 20
             },
             {
-              "expr": "kube_pod_container_resource_limits_cpu_cores{pod=~\"rafter-controller-manager-.*\"}",
+              "expr": "kube_pod_container_resource_limits_cpu_cores{pod=~\"rafter-ctrl-mngr-.*\"}",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
@@ -1190,7 +1190,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sort_desc(sum by (pod) (rate(container_network_receive_bytes_total{pod=~\"rafter-controller-manager-.*\"}[1m])))",
+              "expr": "sort_desc(sum by (pod) (rate(container_network_receive_bytes_total{pod=~\"rafter-ctrl-mngr-.*\"}[1m])))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
