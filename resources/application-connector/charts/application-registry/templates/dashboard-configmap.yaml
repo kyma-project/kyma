@@ -628,7 +628,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-2h",
+        "from": "now-1h",
         "to": "now"
       },
       "refresh": "10s",
