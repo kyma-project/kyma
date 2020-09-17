@@ -35,4 +35,4 @@ $(eval $(call buildpack-mount,test))
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
-	@echo "resources/cloud-event-gateway-proxy"
+	@echo "resources/event-publisher-proxy"

@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/env"
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/oauth"
-	testingutils "github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/testing"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
+	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
 const (

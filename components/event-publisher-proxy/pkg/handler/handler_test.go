@@ -3,15 +3,16 @@ package handler
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/oauth"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/receiver"
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/sender"
-	testingutils "github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/testing"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
+	"github.com/sirupsen/logrus"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
+	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
 const (

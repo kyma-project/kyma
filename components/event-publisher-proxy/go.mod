@@ -1,4 +1,4 @@
-module github.com/kyma-project/kyma/components/cloud-event-gateway-proxy
+module github.com/kyma-project/kyma/components/event-publisher-proxy
 
 go 1.15
 

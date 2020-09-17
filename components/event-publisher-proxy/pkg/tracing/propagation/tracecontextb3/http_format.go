@@ -5,7 +5,7 @@ import (
 	"go.opencensus.io/plugin/ochttp/propagation/tracecontext"
 	ocpropagation "go.opencensus.io/trace/propagation"
 
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/tracing/propagation"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/tracing/propagation"
 )
 
 // TraceContextEgress is a propagation.HTTPFormat that reads both TraceContext and B3 tracing

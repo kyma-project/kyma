@@ -3,7 +3,7 @@ package oauth
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/env"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 )
 
 func TestConfig(t *testing.T) {

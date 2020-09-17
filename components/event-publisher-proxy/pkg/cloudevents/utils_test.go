@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	cehttp "github.com/cloudevents/sdk-go/v2/protocol/http"
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/ems"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/ems"
 )
 
 func TestWriteRequestWithHeaders(t *testing.T) {

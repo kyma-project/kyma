@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: cloud-event-gateway-proxy
+  name: event-publisher-proxy
 spec:
   type: ClusterIP
   selector:
-    app: cloud-event-gateway-proxy
+    app: event-publisher-proxy
   ports:
     - protocol: TCP
       port: 80

@@ -10,8 +10,8 @@ import (
 	"go.opencensus.io/plugin/ochttp"
 	"golang.org/x/oauth2"
 
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/env"
-	testingutils "github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/testing"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
+	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
 func TestNewClient(t *testing.T) {

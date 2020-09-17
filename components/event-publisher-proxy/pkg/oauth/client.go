@@ -7,8 +7,8 @@ import (
 	"go.opencensus.io/plugin/ochttp"
 	"golang.org/x/oauth2"
 
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/env"
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/tracing/propagation/tracecontextb3"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/tracing/propagation/tracecontextb3"
 )
 
 // NewClient returns a new HTTP client which have nested transports for handling oauth2 security, HTTP connection pooling, and tracing.

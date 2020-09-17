@@ -2,45 +2,45 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: cloud-event-gateway-proxy
-  name: cloud-event-gateway-proxy
+    app: event-publisher-proxy
+  name: event-publisher-proxy
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cloud-event-gateway-proxy
+      app: event-publisher-proxy
   strategy:
     type: RollingUpdate
   template:
     metadata:
       labels:
-        app: cloud-event-gateway-proxy
+        app: event-publisher-proxy
     spec:
       containers:
         - env:
             - name: CLIENT_ID
               valueFrom:
                 secretKeyRef:
-                  name: cloud-event-gateway-proxy
+                  name: event-publisher-proxy
                   key: client-id
             - name: CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: cloud-event-gateway-proxy
+                  name: event-publisher-proxy
                   key: client-secret
             - name: TOKEN_ENDPOINT
               valueFrom:
                 secretKeyRef:
-                  name: cloud-event-gateway-proxy
+                  name: event-publisher-proxy
                   key: token-endpoint
             - name: EMS_PUBLISH_URL
               valueFrom:
                 secretKeyRef:
-                  name: cloud-event-gateway-proxy
+                  name: event-publisher-proxy
                   key: ems-publish-url
-          image: github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/cmd/cloud-event-gateway-proxy
+          image: github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy
           imagePullPolicy: IfNotPresent
-          name: cloud-event-gateway-proxy
+          name: event-publisher-proxy
           ports:
             - containerPort: 8080
               name: http

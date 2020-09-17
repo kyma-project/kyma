@@ -13,11 +13,11 @@ import (
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	cehttp "github.com/cloudevents/sdk-go/v2/protocol/http"
 
-	cloudevents "github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/cloudevents"
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/ems"
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/health"
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/receiver"
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/sender"
+	cloudevents "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/ems"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/health"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 )
 
 const (

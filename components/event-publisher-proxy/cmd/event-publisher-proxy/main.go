@@ -4,12 +4,12 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/sirupsen/logrus"
 
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/env"
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/handler"
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/oauth"
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/receiver"
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/sender"
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/signals"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/signals"
 )
 
 func main() {

@@ -3,7 +3,7 @@ package oauth
 import (
 	"golang.org/x/oauth2/clientcredentials"
 
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/env"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 )
 
 // Config returns a new oauth2 client credentials config instance.

@@ -3,7 +3,7 @@ package testing
 import (
 	"time"
 
-	"github.com/kyma-project/kyma/components/cloud-event-gateway-proxy/pkg/env"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 )
 
 func NewEnvConfig(emsCEURL, authURL string, opts ...EnvConfigOption) *env.Config {
