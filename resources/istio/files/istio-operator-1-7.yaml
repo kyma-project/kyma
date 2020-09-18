@@ -366,7 +366,7 @@ spec:
           maxNumberOfAttributes: 200
           maxNumberOfMessageEvents: 200
         zipkin:
-          address: "zipkin.kyma-system:9411"
+          address: "{{ .Values.global.tracing.zipkinAddress }}"
       trustDomain: cluster.local
       useMCP: false
     grafana:
