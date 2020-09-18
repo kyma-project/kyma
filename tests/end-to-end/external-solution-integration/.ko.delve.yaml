@@ -1,2 +1,1 @@
-# optionally build your own image from Dockerfile.delve
-defaultBaseImage: <will be set by make debug-local>
+defaultBaseImage: docker.io/nachtmaar/dlv

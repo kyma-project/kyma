@@ -108,7 +108,7 @@ Currently, the test cannot be executed locally, as it requires access to interna
 
 >**Requirements:** 
   > * [ko](https://github.com/google/ko)
-  > * [dlv](https://github.com/go-delve/delve)
+  > * [delve](https://github.com/go-delve/delve)
 
 Even though the test cannot be run locally, there is a way to debug it locally while the test is actually running inside the cluster.
 The idea is as follows: 
@@ -117,11 +117,24 @@ The idea is as follows:
 - establish a port-forward between the remote debug server and localhost
 - connect with a delve compatible client to the debug server (via port-forward)
 
-#### Start test with dlv
+#### Start test with delve
+
+Prepare the delve base image. This step needs to be executed once only:
+
+```bash
+make build-push-delve-image
+```
+
+Resolve dependencies. This steps needs to be executed each time the dependencies change:
+
+```bash
+make resolve-local
+```
 
 Deploy the new test code and start the dlv debugger:
 
 ```bash
+make build-push-delve-image
 TEST_DEBUG_SCENARIO=e2e-event-mesh make debug-local
 kubectl port-forward -n kyma-system core-test-external-solution 40000
 ```
