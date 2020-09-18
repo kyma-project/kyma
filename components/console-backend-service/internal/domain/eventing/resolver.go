@@ -34,7 +34,7 @@ func (r *Resolver) TriggersQuery(ctx context.Context, namespace string, subscrib
 		key := createTriggersSubscriberRefURIKey(namespace, subscriber.URI)
 		err = r.Service().ListByIndex(triggersSubscriberURIIndex, key, &items)
 	} else {
-		return nil, errors.New("tets subscriber is not null but it is empty")
+		return nil, errors.New("subscriber is not null but it is empty")
 	}
 	return items, err
 }
