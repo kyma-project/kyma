@@ -119,7 +119,7 @@ service:
   labels: {}
   portName: http-service
 
-extraExposePorts: []
+extraExposePorts:
  # - name: keycloak
  #   port: 8080
  #   targetPort: 8080
