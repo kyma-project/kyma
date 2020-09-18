@@ -20,7 +20,7 @@ func main() {
 		logger.Fatalf("Start handler failed with error: %s", err)
 	}
 
-	logger.Info("Start the Cloudevent Gateway Proxy")
+	logger.Info("Start the Event Publisher Proxy")
 
 	// configure message receiver
 	messageReceiver := receiver.NewHttpMessageReceiver(cfg.Port)
@@ -38,5 +38,5 @@ func main() {
 		logger.Fatalf("Start handler failed with error: %s", err)
 	}
 
-	logger.Info("Shutdown the Cloudevent Gateway Proxy")
+	logger.Info("Shutdown the Event Publisher Proxy")
 }

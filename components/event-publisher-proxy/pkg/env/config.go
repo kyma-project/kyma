@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// Config represents the environment config for the Cloud Event Gateway Proxy.
+// Config represents the environment config for the Event Publisher Proxy.
 type Config struct {
 	Port                int           `envconfig:"INGRESS_PORT" default:"8080"`
 	ClientID            string        `envconfig:"CLIENT_ID" required:"true"`
