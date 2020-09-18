@@ -54,6 +54,12 @@ spec:
             - /bin/bash
             - -c
             - |
+              echo "TEMPORARY - NEEDS TO BE REMOVED BEFORE MERGE"
+              
+              kubectl delete po --all -n applicationbrokerupgradetest
+              kubectl delete po --all -n eventmeshupgradetest
+              kubectl delete po --all -n kyma-integration
+
               declare -A objectsToRestart
 
               pods=$(kubectl get po -A -o json | jq -rc '.items | .[] | select(.spec.containers | .[].image == "docker.io/istio/proxyv2:1.4.10-distroless") | "\(.metadata.name)/\(.metadata.namespace)"' )
