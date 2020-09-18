@@ -99,18 +99,16 @@ Currently, the test cannot be executed locally, as it requires access to interna
 `make clustertest`
 
 >**Requirements:** 
-  [kyma-cli](github.com/kyma-project/cli)
-  
-  [ko](github.com/google/ko)
+  > * [kyma-cli](github.com/kyma-project/cli)
+  > * [ko](github.com/google/ko)
 
 >**TIP:** If you are running the test on a cluster with invalid or self-signed SSL certificates, use the `--skipSSLVerify` flag.
 
 ### Debug it locally
 
 >**Requirements:** 
-  [ko](github.com/google/ko)
-
-  [dlv](github.com/go-delve/delve)
+  > * [ko](github.com/google/ko)
+  > * [dlv](github.com/go-delve/delve)
 
 Even though the test cannot be run locally, there is a way to debug it locally while the test is actually running inside the cluster.
 The idea is as follows: 
