@@ -80,7 +80,11 @@ spec:
             cpu: 100m
             memory: 96Mi
         service:
+          {{- if .Values.global.isLocalEnv }}
+          type: NodePort
+          {{- else }}
           type: LoadBalancer
+          {{- end }}
           ports:
           - name: status-port
             port: 15021
