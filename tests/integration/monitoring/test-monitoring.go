@@ -11,14 +11,14 @@ import (
 	"strings"
 	"time"
 
+	monitoringv1 "github.com/coreos/prometheus-operator/pkg/client/versioned/typed/monitoring/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/kyma-project/kyma/tests/integration/monitoring/prom"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-
-	"github.com/kyma-project/kyma/tests/integration/monitoring/prom"
 )
 
 const prometheusURL = "http://monitoring-prometheus.kyma-system:9090"
@@ -31,15 +31,21 @@ const expectedGrafanaInstance = 1
 
 var kubeConfig *rest.Config
 var k8sClient *kubernetes.Clientset
+var monitoringClient *monitoringv1.MonitoringV1Client
 var httpClient *http.Client
+
+// void struct is used to simulate a set data structure using a map
+type void struct{}
 
 func main() {
 	kubeConfig = loadKubeConfigOrDie()
 	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
+	monitoringClient = monitoringv1.NewForConfigOrDie(kubeConfig)
 	httpClient = getHttpClient()
 
 	testPodsAreReady()
-	// testTargetsAreHealthy()
+	testTargetsAreHealthy()
+	checkScrapePools()
 	testRulesAreHealthy()
 	testGrafanaIsReady()
 	checkLambdaUIDashboard()
@@ -210,6 +216,81 @@ func shouldIgnoreTarget(target prom.Labels) bool {
 		}
 	}
 
+	return false
+}
+
+func checkScrapePools() {
+	scrapePools := make(map[string]struct{})
+	timeout := time.After(3 * time.Minute)
+	tick := time.NewTicker(5 * time.Second)
+	for {
+		select {
+		case <-timeout:
+			tick.Stop()
+			timeoutMessage := "Unable to scrape targets in the following scrape pool(s):\n"
+			for scrapePool := range scrapePools {
+				timeoutMessage += fmt.Sprintf("%s\n", scrapePool)
+			}
+			log.Fatal(timeoutMessage)
+		case <-tick.C:
+			scrapePools = buildScrapePoolSet()
+			var resp prom.TargetsResponse
+			url := fmt.Sprintf("%s/api/v1/targets", prometheusURL)
+			respBody, statusCode := doGet(url)
+			if err := json.Unmarshal([]byte(respBody), &resp); err != nil {
+				log.Fatalf("Error unmarshalling response: %v.\nResponse body: %s", err, respBody)
+			}
+			if statusCode != 200 || resp.Status != "success" {
+				log.Fatalf("Error in response status with ErrorType: %s.\nError: %s", resp.ErrorType, resp.Error)
+			}
+			activeTargets := resp.Data.ActiveTargets
+			for _, target := range activeTargets {
+				delete(scrapePools, target.ScrapePool)
+			}
+			if len(scrapePools) == 0 {
+				log.Println("All scrape pools have active targets")
+				return
+			}
+		}
+	}
+
+}
+
+func buildScrapePoolSet() map[string]struct{} {
+	scrapePools := make(map[string]struct{})
+	serviceMonitors, err := monitoringClient.ServiceMonitors("").List(metav1.ListOptions{})
+	if err != nil {
+		log.Fatalf("Error while listing service monitors: %v", err)
+	}
+	for _, serviceMonitor := range serviceMonitors.Items {
+		if shouldIgnoreServiceMonitor(serviceMonitor.Name) {
+			continue
+		}
+		for i := range serviceMonitor.Spec.Endpoints {
+			scrapePool := fmt.Sprintf("%s/%s/%d", serviceMonitor.ObjectMeta.Namespace, serviceMonitor.Name, i)
+			scrapePools[scrapePool] = void{}
+		}
+	}
+	return scrapePools
+}
+
+func shouldIgnoreServiceMonitor(serviceMonitorName string) bool {
+	var serviceMonitorsToBeIgnored = []string{
+		// kiali-operator-metrics is created automatically by kiali operator and can't be disabled
+		"kiali-operator-metrics",
+		// tracing-metrics is created automatically by jaeger operator and can't be disabled
+		"tracing-metrics",
+		// istio-mixer shouldn't be ignored once istio upgrade is done https://github.com/kyma-project/kyma/issues/8868
+		"istio-mixer",
+		// will not need to exclude monitoring-kube-proxy once this issue is resolved https://github.com/kyma-project/kyma/issues/9457
+		"monitoring-kube-proxy",
+	}
+
+	for _, sm := range serviceMonitorsToBeIgnored {
+		if sm == serviceMonitorName {
+			return true
+		}
+	}
 	return false
 }
 
