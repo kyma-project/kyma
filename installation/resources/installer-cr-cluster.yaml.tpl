@@ -22,6 +22,10 @@ spec:
       namespace: "kyma-installer"
     - name: "istio-kyma-patch"
       namespace: "istio-system"
+      namespace: "istio-system"
+    # TODO(nachtmaar): comment me before merging
+    - name: "eventing"
+      namespace: kyma-system
     - name: "knative-serving"
       namespace: "knative-serving"
     - name: "knative-eventing"
