@@ -3,6 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: application-registry-dashboard
+  namespace: kyma-system
   labels:
     grafana_dashboard: "1"
     app: monitoring-grafana
