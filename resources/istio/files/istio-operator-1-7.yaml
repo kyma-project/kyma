@@ -117,16 +117,16 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 0
-        # TOCHECK
-        # overlays:
-        # - kind: Deployment
-        #   name: istio-ingressgateway
-        #   patches:
-        #   - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:80].hostPort
-        #     value: 80
-        #   - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:443].hostPort
-        #     value: 443
-        # ENDTOCHECK
+        {{- if .Values.global.isLocalEnv }}
+        overlays:
+        - kind: Deployment
+          name: istio-ingressgateway
+          patches:
+          - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:8080].hostPort
+            value: 80
+          - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:8443].hostPort
+            value: 443
+        {{- end }}
       name: istio-ingressgateway
 
     istiodRemote:
