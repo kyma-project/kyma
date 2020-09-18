@@ -79,7 +79,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "go_gc_duration_seconds{service=\"rafter-front-matter-svc\"}",
+              "expr": "go_gc_duration_seconds{service=\"rafter-front-matter-service\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{`{{quantile}}`}}",
@@ -169,7 +169,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "process_open_fds{service=\"rafter-front-matter-svc\"}",
+              "expr": "process_open_fds{service=\"rafter-front-matter-service\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -259,7 +259,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "go_threads{service=\"rafter-front-matter-svc\"}",
+              "expr": "go_threads{service=\"rafter-front-matter-service\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{`{{pod}}`}}",
@@ -354,7 +354,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "go_memstats_alloc_bytes{service=\"rafter-front-matter-svc\"}",
+              "expr": "go_memstats_alloc_bytes{service=\"rafter-front-matter-service\"}",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -364,7 +364,7 @@ data:
               "step": 4
             },
             {
-              "expr": "rate(go_memstats_alloc_bytes_total{service=\"rafter-front-matter-svc\"}[30s])",
+              "expr": "rate(go_memstats_alloc_bytes_total{service=\"rafter-front-matter-service\"}[30s])",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -374,7 +374,7 @@ data:
               "step": 4
             },
             {
-              "expr": "go_memstats_stack_inuse_bytes{service=\"rafter-front-matter-svc\"}",
+              "expr": "go_memstats_stack_inuse_bytes{service=\"rafter-front-matter-service\"}",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -384,7 +384,7 @@ data:
               "step": 4
             },
             {
-              "expr": "go_memstats_heap_inuse_bytes{service=\"rafter-front-matter-svc\"}",
+              "expr": "go_memstats_heap_inuse_bytes{service=\"rafter-front-matter-service\"}",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -474,7 +474,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "go_goroutines{service=\"rafter-front-matter-svc\"}",
+              "expr": "go_goroutines{service=\"rafter-front-matter-service\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{`{{pod}}`}}",
