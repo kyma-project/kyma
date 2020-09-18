@@ -49,7 +49,7 @@ type Handler struct {
 	Logger *logrus.Logger
 }
 
-// NewHandler returns a new Handler instance for the Cloud Events Gateway Proxy.
+// NewHandler returns a new Handler instance for the Event Publisher Proxy.
 func NewHandler(receiver *receiver.HttpMessageReceiver, sender *sender.HttpMessageSender, requestTimeout time.Duration, logger *logrus.Logger) *Handler {
 	return &Handler{Receiver: receiver, Sender: sender, RequestTimeout: requestTimeout, Logger: logger}
 }
