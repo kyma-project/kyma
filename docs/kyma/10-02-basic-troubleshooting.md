@@ -54,3 +54,18 @@ minikube ssh -- docker run -i --rm --privileged --pid=host debian nsenter -t 1 -
 
 If you restart Kyma using unauthorized methods, such as triggering the installation when a Minikube cluster with Kyma is already running, the cluster might become unresponsive which can be fixed by reinstalling Kyma.
 To prevent such behavior, [stop and restart Kyma](#installation-install-kyma-locally-stop-and-restart-kyma-without-reinstalling) using only the method described.
+
+## Unable to deprovision Gardener cluster
+
+If you are unable to deprovision a Gardener cluster and you receive the following error:
+
+```
+Flow "Shoot cluster deletion" encountered task errors: [task "Cleaning extended API groups" failed: 1 error occurred:
+retry failed with context deadline exceeded, last error: remaining objects are still present: [*v1beta1.CustomResourceDefinition /installations.installer.kyma-project.io]
+```
+
+You need to first remove the finalizer from `kyma-installation` CR. Run this command: 
+
+```
+kubectl patch installation kyma-installation --type=merge -p '{"metadata":{"finalizers":null}}'
+```
