@@ -24,7 +24,7 @@ clustertest:
 	kyma test run core-test-external-solution --watch
 
 debug-local:
-	kubectl delete pod -n kyma-system -l app=core-test-external-solution
+	kubectl delete pod -n kyma-system -l app=core-test-external-solution --ignore-not-found
 	rm .ko.yaml || true
 	ln -s .ko.delve.yaml .ko.yaml
 	cat debug-locally-delve.ko.yaml | TEST_DEBUG_SCENARIO=$(TEST_DEBUG_SCENARIO) KYMADOMAIN=$(shell kubectl get configmap net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.domainName}') envsubst |  ko apply --disable-optimizations -f -
