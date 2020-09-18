@@ -629,7 +629,8 @@ data:
       "schemaVersion": 16,
       "style": "dark",
       "tags": [
-        "kyma"
+        "kyma",
+        "connectivity"
       ],
       "templating": {
         "list": [

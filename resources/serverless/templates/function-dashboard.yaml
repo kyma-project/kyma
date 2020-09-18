@@ -1085,7 +1085,7 @@ data:
       "schemaVersion": 25,
       "style": "dark",
       "tags": [
-        "kyma"
+        "kyma", "serverless"
       ],
       "templating": {
         "list": [
