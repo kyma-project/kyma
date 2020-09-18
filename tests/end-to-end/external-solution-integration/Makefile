@@ -23,9 +23,13 @@ clustertest:
 	cat testdefinition.ko.yaml | KYMADOMAIN=$(shell kubectl get configmap net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.domainName}') envsubst | ko apply -n kyma-system -f -
 	kyma test run core-test-external-solution --watch
 
-debug-local:
+DELVE_IMAGE = $(KO_DOCKER_REPO)/dlv
+debug-local: resolve-local
 	kubectl delete pod -n kyma-system -l app=core-test-external-solution --ignore-not-found
 	rm .ko.yaml || true
+	docker build -f Dockerfile.delve -t $(DELVE_IMAGE) .
+	docker push $(DELVE_IMAGE)
+	echo "defaultBaseImage: $(DELVE_IMAGE)" > .ko.delve.yaml
 	ln -s .ko.delve.yaml .ko.yaml
 	cat debug-locally-delve.ko.yaml | TEST_DEBUG_SCENARIO=$(TEST_DEBUG_SCENARIO) KYMADOMAIN=$(shell kubectl get configmap net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.domainName}') envsubst |  ko apply --disable-optimizations -f -
 
