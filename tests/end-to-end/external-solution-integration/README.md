@@ -100,6 +100,7 @@ Currently, the test cannot be executed locally, as it requires access to interna
 
 >**Requirements:** 
   [kyma-cli](github.com/kyma-project/cli)
+  
   [ko](github.com/google/ko)
 
 >**TIP:** If you are running the test on a cluster with invalid or self-signed SSL certificates, use the `--skipSSLVerify` flag.
@@ -108,6 +109,7 @@ Currently, the test cannot be executed locally, as it requires access to interna
 
 >**Requirements:** 
   [ko](github.com/google/ko)
+
   [dlv](github.com/go-delve/delve)
 
 Even though the test cannot be run locally, there is a way to debug it locally while the test is actually running inside the cluster.
