@@ -62,3 +62,10 @@ spec:
               path: /readyz
               port: 8080
               scheme: HTTP
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.cpu }}

@@ -5,14 +5,13 @@
 image:
   # name is the name of the container image for the event-publisher-proxy
   name: "event-publisher-proxy"
-  # repository is the container repository where the image for event-publisher-proxy is located in
-  repository: <todo>
   # tag is the container tag of the event-publisher-proxy image
-  tag: <todo>
+  tag: "PR-9475"
   # pullPolicy is the pullPolicy for the event-publisher-proxy image
-  pullPolicy: IfNotPresent
+  pullPolicy: "IfNotPresent"
 
-oeb:
+# "eu.gcr.io/kyma-project/pr/event-publisher-proxy:PR-9475"
+upstreamAuthentication:
   # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from EMS
   oauthClientId: ""
   # oauthClientSecret is the Oauth2 client id used in order to get an Oauth2 token from EMS
@@ -21,3 +20,11 @@ oeb:
   oauthTokenEndpoint: ""
   # publishUrl is the URL for publishing events to OEB
   publishUrl: ""
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
