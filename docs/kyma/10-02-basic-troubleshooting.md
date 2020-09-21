@@ -64,7 +64,7 @@ Flow "Shoot cluster deletion" encountered task errors: [task "Cleaning extended 
 retry failed with context deadline exceeded, last error: remaining objects are still present: [*v1beta1.CustomResourceDefinition /installations.installer.kyma-project.io]
 ```
 
-You need to first remove the finalizer from `kyma-installation` CR. Run this command: 
+If this happens, you must first remove the finalizer from `kyma-installation` CR. Run this command: 
 
 ```
 kubectl patch installation kyma-installation --type=merge -p '{"metadata":{"finalizers":null}}'
