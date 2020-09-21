@@ -125,7 +125,7 @@ Prepare the delve base image. This step needs to be executed once only:
 make build-push-delve-image
 ```
 
-Resolve dependencies. This steps needs to be executed each time the dependencies change:
+Resolve dependencies. This step needs to be executed each time the dependencies change:
 
 ```bash
 make resolve-local
