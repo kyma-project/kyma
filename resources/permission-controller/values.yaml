@@ -1,6 +1,6 @@
 image:
   repository: eu.gcr.io/kyma-project/permission-controller
-  tag: PR-9491
+  tag: PR-9496
   pullPolicy: IfNotPresent
 
 deployment:
