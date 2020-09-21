@@ -55,7 +55,7 @@ minikube ssh -- docker run -i --rm --privileged --pid=host debian nsenter -t 1 -
 If you restart Kyma using unauthorized methods, such as triggering the installation when a Minikube cluster with Kyma is already running, the cluster might become unresponsive which can be fixed by reinstalling Kyma.
 To prevent such behavior, [stop and restart Kyma](#installation-install-kyma-locally-stop-and-restart-kyma-without-reinstalling) using only the method described.
 
-## Unable to deprovision Gardener cluster
+## Can't deprovision Gardener cluster
 
 If you are unable to deprovision a Gardener cluster, you might receive the following error:
 
