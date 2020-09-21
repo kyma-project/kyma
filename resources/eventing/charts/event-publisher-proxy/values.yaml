@@ -23,11 +23,11 @@ upstreamAuthentication:
   # publishUrl is the URL for publishing events to BEB
   publishUrl: ""
   # secretName defines optionally another name than the default secret name
-  # secretName: ""
+  secretName: ""
 
 serviceAccount:
   # name defines optionally another name than the default name for the service account
-  # name: ""
+  name: ""
 
 resources:
   limits:

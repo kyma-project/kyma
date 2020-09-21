@@ -5,7 +5,7 @@ metadata:
   labels:
   {{- include "event-publisher-proxy.labels" . | nindent 4 }}
 spec:
-  replicas: "{{ .Values.replicaCount }}"
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
   {{ include "event-publisher-proxy.selectorLabels" . | nindent 6 }}
@@ -65,7 +65,7 @@ spec:
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}
-              memory: {{ .Values.resources.requests }}
+              memory: {{ .Values.resources.requests.memory }}
             limits:
               cpu: {{ .Values.resources.limits.cpu }}
-              memory: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}

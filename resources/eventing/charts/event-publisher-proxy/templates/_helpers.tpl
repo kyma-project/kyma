@@ -63,5 +63,5 @@ Create the name of the service account to use
 Create the name of the secret to use
 */}}
 {{- define "event-publisher-proxy.secretName" -}}
-{{ default "event-publisher-proxy.fullname" .Values.upstreamAuthentication.secretName }}
+{{ default (include "event-publisher-proxy.fullname" .) .Values.upstreamAuthentication.secretName }}
 {{- end }}
