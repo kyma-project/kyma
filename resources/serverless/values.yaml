@@ -72,7 +72,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "f4e7f64c"
+    tag: "PR-9491"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
@@ -142,7 +142,7 @@ containers:
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v0.22.0
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:1088c1af
+        value: eu.gcr.io/kyma-project/function-build-init:PR-9491
 
 services:
   manager:
