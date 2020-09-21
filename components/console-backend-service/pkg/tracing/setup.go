@@ -3,6 +3,7 @@ package tracing
 import (
 	"strconv"
 
+	"github.com/golang/glog"
 	"github.com/opentracing/opentracing-go"
 	zipkin "github.com/openzipkin/zipkin-go-opentracing"
 	"github.com/pkg/errors"
@@ -10,6 +11,8 @@ import (
 
 func Setup(cfg Config, hostPort int) error {
 	tracingEnabled := cfg.Enabled
+
+	glog.Infof("tracingEnabled value: %s", strconv.FormatBool(tracingEnabled))
 	if tracingEnabled == true {
 		return nil
 	}
