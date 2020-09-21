@@ -8,8 +8,8 @@ if [ -f "/etc/istio/overrides.yaml" ]; then
     --from-file /etc/istio/overrides.yaml \
     --from-file /etc/combo.yaml \
     -o yaml --dry-run | kubectl replace -f -
-  printf "istioctl manifest apply -f /etc/combo.yaml\n"
-  istioctl manifest apply -f /etc/combo.yaml
+  printf "istioctl manifest apply --wait --readiness-timeout 2m -f /etc/combo.yaml\n"
+  istioctl manifest apply --wait --readiness-timeout 2m -f /etc/combo.yaml
 else
   #Old way: apply single-value Helm overrides using `istioctl --set "key=val"`
   overrides=$(kubectl get cm --all-namespaces -l "installer=overrides,component=istio" -o go-template --template='{{ range .items }}{{ range $key, $value := .data }}{{ if ne $key "kyma_istio_operator" }}{{ printf "%s: %s\n" $key . }}{{ end }}{{ end }}{{ end }}' )
@@ -58,8 +58,8 @@ else
     done <<< "$overrides"
   fi
 
-  printf "istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}\n"
-  istioctl manifest apply -f /etc/istio/config.yaml ${overrides_transformed}
+  printf "istioctl manifest apply --wait --readiness-timeout 2m -f /etc/istio/config.yaml ${overrides_transformed}\n"
+  istioctl manifest apply --wait --readiness-timeout 2m -f /etc/istio/config.yaml ${overrides_transformed}
 fi
 
 echo "Apply custom kyma manifests"
