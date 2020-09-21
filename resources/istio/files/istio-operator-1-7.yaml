@@ -84,6 +84,9 @@ spec:
           type: NodePort
           {{- else }}
           type: LoadBalancer
+          {{- if .Values gateways.istio-ingressgateway.loadBalancerIP }}
+          loadBalancerIP: {{ .Values gateways.istio-ingressgateway.loadBalancerIP }}
+          {{- end }}
           {{- end }}
           ports:
           - name: status-port
