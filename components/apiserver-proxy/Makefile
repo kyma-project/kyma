@@ -6,7 +6,8 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 
 ENTRYPOINT := ./cmd/proxy/main.go
 
-verify:: vet
+verify:: mod-verify
+
 
 .PHONY: clean
 clean:
@@ -15,3 +16,10 @@ clean:
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
 	@echo "resources/core"
+
+resolve-local:
+	GO111MODULE=on go mod download
+	GO111MODULE=on go mod vendor
+
+mod-verify-local:
+	GO111MODULE=on go mod verify
