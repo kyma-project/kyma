@@ -134,7 +134,6 @@ make resolve-local
 Deploy the new test code and start the dlv debugger:
 
 ```bash
-make build-push-delve-image
 TEST_DEBUG_SCENARIO=e2e-event-mesh make debug-local
 kubectl port-forward -n kyma-system core-test-external-solution 40000
 ```
