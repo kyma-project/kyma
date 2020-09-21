@@ -2,6 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# replicaCount configures the number of replicas for the event-publisher-proxy deployment
+replicaCount: 1
+
 image:
   # name is the name of the container image for the event-publisher-proxy
   name: "event-publisher-proxy"
@@ -10,21 +13,26 @@ image:
   # pullPolicy is the pullPolicy for the event-publisher-proxy image
   pullPolicy: "IfNotPresent"
 
-# "eu.gcr.io/kyma-project/pr/event-publisher-proxy:PR-9475"
 upstreamAuthentication:
-  # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from EMS
+  # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from BEB
   oauthClientId: ""
-  # oauthClientSecret is the Oauth2 client id used in order to get an Oauth2 token from EMS
+  # oauthClientSecret is the Oauth2 secret used in order to get an Oauth2 token from BEB
   oauthClientSecret: ""
-  # oauthTokenEndpoint is the Oauth2 endpoint from OEB from where Oauth2 tokens can be retrieved
+  # oauthTokenEndpoint is the Oauth2 endpoint from BEB from where Oauth2 tokens can be retrieved
   oauthTokenEndpoint: ""
-  # publishUrl is the URL for publishing events to OEB
+  # publishUrl is the URL for publishing events to BEB
   publishUrl: ""
+  # secretName defines optionally another name than the default secret name
+  # secretName: ""
+
+serviceAccount:
+  # name defines optionally another name than the default name for the service account
+  # name: ""
 
 resources:
   limits:
     cpu: 100m
     memory: 128Mi
   requests:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 32m
+    memory: 64Mi
