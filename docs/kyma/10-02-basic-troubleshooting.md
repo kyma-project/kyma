@@ -57,7 +57,7 @@ To prevent such behavior, [stop and restart Kyma](#installation-install-kyma-loc
 
 ## Unable to deprovision Gardener cluster
 
-If you are unable to deprovision a Gardener cluster and you receive the following error:
+If you are unable to deprovision a Gardener cluster, you might receive the following error:
 
 ```
 Flow "Shoot cluster deletion" encountered task errors: [task "Cleaning extended API groups" failed: 1 error occurred:
