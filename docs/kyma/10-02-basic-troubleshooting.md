@@ -66,6 +66,6 @@ retry failed with context deadline exceeded, last error: remaining objects are s
 
 If this happens, you must first remove the finalizer from `kyma-installation` CR. Run this command: 
 
-```
+```bash
 kubectl patch installation kyma-installation --type=merge -p '{"metadata":{"finalizers":null}}'
 ```
