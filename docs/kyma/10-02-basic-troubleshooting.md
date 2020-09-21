@@ -59,7 +59,7 @@ To prevent such behavior, [stop and restart Kyma](#installation-install-kyma-loc
 
 If you are unable to deprovision a Gardener cluster, you might receive the following error:
 
-```
+```bash
 Flow "Shoot cluster deletion" encountered task errors: [task "Cleaning extended API groups" failed: 1 error occurred:
 retry failed with context deadline exceeded, last error: remaining objects are still present: [*v1beta1.CustomResourceDefinition /installations.installer.kyma-project.io]
 ```
