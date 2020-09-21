@@ -21,13 +21,12 @@ import (
 	v1alpha14 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
-	v12 "k8s.io/api/rbac/v1"
+	v11 "k8s.io/api/rbac/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	v1alpha13 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	"knative.dev/pkg/apis"
-	v11 "knative.dev/pkg/apis/duck/v1"
+	v12 "knative.dev/pkg/apis/duck/v1"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -783,7 +782,7 @@ type ComplexityRoot struct {
 		ServiceInstance             func(childComplexity int, name string, namespace string) int
 		ServiceInstances            func(childComplexity int, namespace string, first *int, offset *int, status *InstanceStatusType) int
 		Services                    func(childComplexity int, namespace string, excludedLabels []string, first *int, offset *int) int
-		Triggers                    func(childComplexity int, namespace string, subscriber *v11.Destination) int
+		Triggers                    func(childComplexity int, namespace string, serviceName string) int
 		UsageKinds                  func(childComplexity int, first *int, offset *int) int
 		VersionInfo                 func(childComplexity int) int
 	}
@@ -1061,7 +1060,6 @@ type ComplexityRoot struct {
 
 	Subscriber struct {
 		Ref func(childComplexity int) int
-		URI func(childComplexity int) int
 	}
 
 	SubscriberRef struct {
@@ -1095,7 +1093,7 @@ type ComplexityRoot struct {
 		ServiceBrokerEvent              func(childComplexity int, namespace string) int
 		ServiceEvent                    func(childComplexity int, namespace string) int
 		ServiceInstanceEvent            func(childComplexity int, namespace string) int
-		TriggerEvent                    func(childComplexity int, namespace string, subscriber *v11.Destination) int
+		TriggerEvent                    func(childComplexity int, namespace string, serviceName string) int
 	}
 
 	Trigger struct {
@@ -1113,6 +1111,8 @@ type ComplexityRoot struct {
 	TriggerSpec struct {
 		Broker     func(childComplexity int) int
 		Filter     func(childComplexity int) int
+		Path       func(childComplexity int) int
+		Port       func(childComplexity int) int
 		Subscriber func(childComplexity int) int
 	}
 
@@ -1241,10 +1241,10 @@ type MutationResolver interface {
 	CreateOAuth2Client(ctx context.Context, name string, namespace string, params v1alpha12.OAuth2ClientSpec) (*v1alpha12.OAuth2Client, error)
 	UpdateOAuth2Client(ctx context.Context, name string, namespace string, generation int, params v1alpha12.OAuth2ClientSpec) (*v1alpha12.OAuth2Client, error)
 	DeleteOAuth2Client(ctx context.Context, name string, namespace string) (*v1alpha12.OAuth2Client, error)
-	CreateRoleBinding(ctx context.Context, name string, namespace string, params RoleBindingInput) (*v12.RoleBinding, error)
-	DeleteRoleBinding(ctx context.Context, namespace string, name string) (*v12.RoleBinding, error)
-	CreateClusterRoleBinding(ctx context.Context, name string, params ClusterRoleBindingInput) (*v12.ClusterRoleBinding, error)
-	DeleteClusterRoleBinding(ctx context.Context, name string) (*v12.ClusterRoleBinding, error)
+	CreateRoleBinding(ctx context.Context, name string, namespace string, params RoleBindingInput) (*v11.RoleBinding, error)
+	DeleteRoleBinding(ctx context.Context, namespace string, name string) (*v11.RoleBinding, error)
+	CreateClusterRoleBinding(ctx context.Context, name string, params ClusterRoleBindingInput) (*v11.ClusterRoleBinding, error)
+	DeleteClusterRoleBinding(ctx context.Context, name string) (*v11.ClusterRoleBinding, error)
 	CreateGitRepository(ctx context.Context, namespace string, name string, spec v1alpha11.GitRepositorySpec) (*v1alpha11.GitRepository, error)
 	UpdateGitRepository(ctx context.Context, namespace string, name string, spec v1alpha11.GitRepositorySpec) (*v1alpha11.GitRepository, error)
 	DeleteGitRepository(ctx context.Context, namespace string, name string) (*v1alpha11.GitRepository, error)
@@ -1310,15 +1310,15 @@ type QueryResolver interface {
 	Functions(ctx context.Context, namespace string) ([]*Function, error)
 	APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error)
 	APIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
-	Triggers(ctx context.Context, namespace string, subscriber *v11.Destination) ([]*v1alpha13.Trigger, error)
+	Triggers(ctx context.Context, namespace string, serviceName string) ([]*v1alpha13.Trigger, error)
 	OAuth2Clients(ctx context.Context, namespace string) ([]*v1alpha12.OAuth2Client, error)
 	OAuth2Client(ctx context.Context, name string, namespace string) (*v1alpha12.OAuth2Client, error)
-	Roles(ctx context.Context, namespace string) ([]*v12.Role, error)
-	Role(ctx context.Context, namespace string, name string) (*v12.Role, error)
-	ClusterRoles(ctx context.Context) ([]*v12.ClusterRole, error)
-	ClusterRole(ctx context.Context, name string) (*v12.ClusterRole, error)
-	RoleBindings(ctx context.Context, namespace string) ([]*v12.RoleBinding, error)
-	ClusterRoleBindings(ctx context.Context) ([]*v12.ClusterRoleBinding, error)
+	Roles(ctx context.Context, namespace string) ([]*v11.Role, error)
+	Role(ctx context.Context, namespace string, name string) (*v11.Role, error)
+	ClusterRoles(ctx context.Context) ([]*v11.ClusterRole, error)
+	ClusterRole(ctx context.Context, name string) (*v11.ClusterRole, error)
+	RoleBindings(ctx context.Context, namespace string) ([]*v11.RoleBinding, error)
+	ClusterRoleBindings(ctx context.Context) ([]*v11.ClusterRoleBinding, error)
 	GitRepositories(ctx context.Context, namespace string) ([]*v1alpha11.GitRepository, error)
 	GitRepository(ctx context.Context, namespace string, name string) (*v1alpha11.GitRepository, error)
 }
@@ -1369,7 +1369,7 @@ type SubscriptionResolver interface {
 	NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan *NamespaceEvent, error)
 	FunctionEvent(ctx context.Context, namespace string, functionName *string) (<-chan *FunctionEvent, error)
 	APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan *APIRuleEvent, error)
-	TriggerEvent(ctx context.Context, namespace string, subscriber *v11.Destination) (<-chan *TriggerEvent, error)
+	TriggerEvent(ctx context.Context, namespace string, serviceName string) (<-chan *TriggerEvent, error)
 	OAuth2ClientEvent(ctx context.Context, namespace string) (<-chan *OAuth2ClientEvent, error)
 	RoleBindingEvent(ctx context.Context, namespace string) (<-chan *RoleBindingEvent, error)
 	ClusterRoleBindingEvent(ctx context.Context) (<-chan *ClusterRoleBindingEvent, error)
@@ -1379,6 +1379,8 @@ type TriggerResolver interface {
 }
 type TriggerSpecResolver interface {
 	Filter(ctx context.Context, obj *v1alpha13.TriggerSpec) (JSON, error)
+	Port(ctx context.Context, obj *v1alpha13.TriggerSpec) (uint32, error)
+	Path(ctx context.Context, obj *v1alpha13.TriggerSpec) (string, error)
 }
 
 type executableSchema struct {
@@ -5113,7 +5115,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Triggers(childComplexity, args["namespace"].(string), args["subscriber"].(*v11.Destination)), true
+		return e.complexity.Query.Triggers(childComplexity, args["namespace"].(string), args["serviceName"].(string)), true
 
 	case "Query.usageKinds":
 		if e.complexity.Query.UsageKinds == nil {
@@ -6240,13 +6242,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Subscriber.Ref(childComplexity), true
 
-	case "Subscriber.uri":
-		if e.complexity.Subscriber.URI == nil {
-			break
-		}
-
-		return e.complexity.Subscriber.URI(childComplexity), true
-
 	case "SubscriberRef.apiVersion":
 		if e.complexity.SubscriberRef.APIVersion == nil {
 			break
@@ -6531,7 +6526,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Subscription.TriggerEvent(childComplexity, args["namespace"].(string), args["subscriber"].(*v11.Destination)), true
+		return e.complexity.Subscription.TriggerEvent(childComplexity, args["namespace"].(string), args["serviceName"].(string)), true
 
 	case "Trigger.name":
 		if e.complexity.Trigger.Name == nil {
@@ -6588,6 +6583,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.TriggerSpec.Filter(childComplexity), true
+
+	case "TriggerSpec.path":
+		if e.complexity.TriggerSpec.Path == nil {
+			break
+		}
+
+		return e.complexity.TriggerSpec.Path(childComplexity), true
+
+	case "TriggerSpec.port":
+		if e.complexity.TriggerSpec.Port == nil {
+			break
+		}
+
+		return e.complexity.TriggerSpec.Port(childComplexity), true
 
 	case "TriggerSpec.subscriber":
 		if e.complexity.TriggerSpec.Subscriber == nil {
@@ -6872,6 +6881,8 @@ extend type Subscription {
 type TriggerSpec @goModel(model: "knative.dev/eventing/pkg/apis/eventing/v1alpha1.TriggerSpec"){
     broker: String!
     filter: JSON
+    port: Port!
+    path: String!
     subscriber: Subscriber!
 }
 
@@ -6887,7 +6898,6 @@ enum TriggerStatusType {
 }
 
 type Subscriber @goModel(model: "knative.dev/pkg/apis/duck/v1.Destination"){
-    uri: URI
     ref: SubscriberRef
 }
 
@@ -6898,9 +6908,10 @@ type SubscriberRef @goModel(model: "knative.dev/pkg/apis/duck/v1.KReference"){
     namespace: String!
 }
 
-input SubscriberInput @goModel(model: "knative.dev/pkg/apis/duck/v1.Destination"){
-    uri: URI
-    ref: SubscriberRefInput
+input SubscriberInput {
+    ref: SubscriberRefInput!
+    port: Port
+    path: String
 }
 
 input SubscriberRefInput @goModel(model: "knative.dev/pkg/apis/duck/v1.KReference"){
@@ -6932,7 +6943,7 @@ type TriggerEvent {
 }
 
 extend type Query {
-    triggers(namespace: String!, subscriber: SubscriberInput): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "list", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    triggers(namespace: String!, serviceName: String!): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "list", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 extend type Mutation {
@@ -6943,7 +6954,7 @@ extend type Mutation {
 }
 
 extend type Subscription {
-    triggerEvent(namespace: String!, subscriber: SubscriberInput): TriggerEvent! @HasAccess(attributes: {resource: "triggers", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    triggerEvent(namespace: String!, serviceName: String!): TriggerEvent! @HasAccess(attributes: {resource: "triggers", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }`, BuiltIn: false},
 	&ast.Source{Name: "internal/gqlschema/oauth.graphql", Input: `scalar GrantType @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.GrantType")
 
@@ -11312,14 +11323,14 @@ func (ec *executionContext) field_Query_triggers_args(ctx context.Context, rawAr
 		}
 	}
 	args["namespace"] = arg0
-	var arg1 *v11.Destination
-	if tmp, ok := rawArgs["subscriber"]; ok {
-		arg1, err = ec.unmarshalOSubscriberInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, tmp)
+	var arg1 string
+	if tmp, ok := rawArgs["serviceName"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["subscriber"] = arg1
+	args["serviceName"] = arg1
 	return args, nil
 }
 
@@ -11626,14 +11637,14 @@ func (ec *executionContext) field_Subscription_triggerEvent_args(ctx context.Con
 		}
 	}
 	args["namespace"] = arg0
-	var arg1 *v11.Destination
-	if tmp, ok := rawArgs["subscriber"]; ok {
-		arg1, err = ec.unmarshalOSubscriberInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, tmp)
+	var arg1 string
+	if tmp, ok := rawArgs["serviceName"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["subscriber"] = arg1
+	args["serviceName"] = arg1
 	return args, nil
 }
 
@@ -15693,7 +15704,7 @@ func (ec *executionContext) _ClusterMicroFrontend_navigationNodes(ctx context.Co
 	return ec.marshalNNavigationNode2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNavigationNodeᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ClusterRole_name(ctx context.Context, field graphql.CollectedField, obj *v12.ClusterRole) (ret graphql.Marshaler) {
+func (ec *executionContext) _ClusterRole_name(ctx context.Context, field graphql.CollectedField, obj *v11.ClusterRole) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -15727,7 +15738,7 @@ func (ec *executionContext) _ClusterRole_name(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ClusterRole_rules(ctx context.Context, field graphql.CollectedField, obj *v12.ClusterRole) (ret graphql.Marshaler) {
+func (ec *executionContext) _ClusterRole_rules(ctx context.Context, field graphql.CollectedField, obj *v11.ClusterRole) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -15753,12 +15764,12 @@ func (ec *executionContext) _ClusterRole_rules(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]v12.PolicyRule)
+	res := resTmp.([]v11.PolicyRule)
 	fc.Result = res
 	return ec.marshalOPolicyRule2ᚕk8sᚗioᚋapiᚋrbacᚋv1ᚐPolicyRuleᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ClusterRoleBinding_name(ctx context.Context, field graphql.CollectedField, obj *v12.ClusterRoleBinding) (ret graphql.Marshaler) {
+func (ec *executionContext) _ClusterRoleBinding_name(ctx context.Context, field graphql.CollectedField, obj *v11.ClusterRoleBinding) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -15792,7 +15803,7 @@ func (ec *executionContext) _ClusterRoleBinding_name(ctx context.Context, field 
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ClusterRoleBinding_roleRef(ctx context.Context, field graphql.CollectedField, obj *v12.ClusterRoleBinding) (ret graphql.Marshaler) {
+func (ec *executionContext) _ClusterRoleBinding_roleRef(ctx context.Context, field graphql.CollectedField, obj *v11.ClusterRoleBinding) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -15821,7 +15832,7 @@ func (ec *executionContext) _ClusterRoleBinding_roleRef(ctx context.Context, fie
 		}
 		return graphql.Null
 	}
-	res := resTmp.(v12.RoleRef)
+	res := resTmp.(v11.RoleRef)
 	fc.Result = res
 	return ec.marshalNRoleRef2k8sᚗioᚋapiᚋrbacᚋv1ᚐRoleRef(ctx, field.Selections, res)
 }
@@ -15889,7 +15900,7 @@ func (ec *executionContext) _ClusterRoleBindingEvent_clusterRoleBinding(ctx cont
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*v12.ClusterRoleBinding)
+	res := resTmp.(*v11.ClusterRoleBinding)
 	fc.Result = res
 	return ec.marshalNClusterRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBinding(ctx, field.Selections, res)
 }
@@ -24373,7 +24384,7 @@ func (ec *executionContext) _Mutation_createRoleBinding(ctx context.Context, fie
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(*v12.RoleBinding); ok {
+		if data, ok := tmp.(*v11.RoleBinding); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/rbac/v1.RoleBinding`, tmp)
@@ -24388,7 +24399,7 @@ func (ec *executionContext) _Mutation_createRoleBinding(ctx context.Context, fie
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*v12.RoleBinding)
+	res := resTmp.(*v11.RoleBinding)
 	fc.Result = res
 	return ec.marshalNRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBinding(ctx, field.Selections, res)
 }
@@ -24438,7 +24449,7 @@ func (ec *executionContext) _Mutation_deleteRoleBinding(ctx context.Context, fie
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(*v12.RoleBinding); ok {
+		if data, ok := tmp.(*v11.RoleBinding); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/rbac/v1.RoleBinding`, tmp)
@@ -24453,7 +24464,7 @@ func (ec *executionContext) _Mutation_deleteRoleBinding(ctx context.Context, fie
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*v12.RoleBinding)
+	res := resTmp.(*v11.RoleBinding)
 	fc.Result = res
 	return ec.marshalNRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBinding(ctx, field.Selections, res)
 }
@@ -24503,7 +24514,7 @@ func (ec *executionContext) _Mutation_createClusterRoleBinding(ctx context.Conte
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(*v12.ClusterRoleBinding); ok {
+		if data, ok := tmp.(*v11.ClusterRoleBinding); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/rbac/v1.ClusterRoleBinding`, tmp)
@@ -24518,7 +24529,7 @@ func (ec *executionContext) _Mutation_createClusterRoleBinding(ctx context.Conte
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*v12.ClusterRoleBinding)
+	res := resTmp.(*v11.ClusterRoleBinding)
 	fc.Result = res
 	return ec.marshalNClusterRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBinding(ctx, field.Selections, res)
 }
@@ -24568,7 +24579,7 @@ func (ec *executionContext) _Mutation_deleteClusterRoleBinding(ctx context.Conte
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(*v12.ClusterRoleBinding); ok {
+		if data, ok := tmp.(*v11.ClusterRoleBinding); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/rbac/v1.ClusterRoleBinding`, tmp)
@@ -24583,7 +24594,7 @@ func (ec *executionContext) _Mutation_deleteClusterRoleBinding(ctx context.Conte
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*v12.ClusterRoleBinding)
+	res := resTmp.(*v11.ClusterRoleBinding)
 	fc.Result = res
 	return ec.marshalNClusterRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBinding(ctx, field.Selections, res)
 }
@@ -26457,7 +26468,7 @@ func (ec *executionContext) _PodEvent_pod(ctx context.Context, field graphql.Col
 	return ec.marshalNPod2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐPod(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _PolicyRule_apiGroups(ctx context.Context, field graphql.CollectedField, obj *v12.PolicyRule) (ret graphql.Marshaler) {
+func (ec *executionContext) _PolicyRule_apiGroups(ctx context.Context, field graphql.CollectedField, obj *v11.PolicyRule) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -26491,7 +26502,7 @@ func (ec *executionContext) _PolicyRule_apiGroups(ctx context.Context, field gra
 	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _PolicyRule_resources(ctx context.Context, field graphql.CollectedField, obj *v12.PolicyRule) (ret graphql.Marshaler) {
+func (ec *executionContext) _PolicyRule_resources(ctx context.Context, field graphql.CollectedField, obj *v11.PolicyRule) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -26525,7 +26536,7 @@ func (ec *executionContext) _PolicyRule_resources(ctx context.Context, field gra
 	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _PolicyRule_verbs(ctx context.Context, field graphql.CollectedField, obj *v12.PolicyRule) (ret graphql.Marshaler) {
+func (ec *executionContext) _PolicyRule_verbs(ctx context.Context, field graphql.CollectedField, obj *v11.PolicyRule) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -29546,7 +29557,7 @@ func (ec *executionContext) _Query_triggers(ctx context.Context, field graphql.C
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().Triggers(rctx, args["namespace"].(string), args["subscriber"].(*v11.Destination))
+			return ec.resolvers.Query().Triggers(rctx, args["namespace"].(string), args["serviceName"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "eventing.knative.dev", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "triggers", "verb": "list"})
@@ -29755,7 +29766,7 @@ func (ec *executionContext) _Query_roles(ctx context.Context, field graphql.Coll
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.([]*v12.Role); ok {
+		if data, ok := tmp.([]*v11.Role); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*k8s.io/api/rbac/v1.Role`, tmp)
@@ -29770,7 +29781,7 @@ func (ec *executionContext) _Query_roles(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*v12.Role)
+	res := resTmp.([]*v11.Role)
 	fc.Result = res
 	return ec.marshalNRole2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleᚄ(ctx, field.Selections, res)
 }
@@ -29820,7 +29831,7 @@ func (ec *executionContext) _Query_role(ctx context.Context, field graphql.Colle
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(*v12.Role); ok {
+		if data, ok := tmp.(*v11.Role); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/rbac/v1.Role`, tmp)
@@ -29835,7 +29846,7 @@ func (ec *executionContext) _Query_role(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*v12.Role)
+	res := resTmp.(*v11.Role)
 	fc.Result = res
 	return ec.marshalNRole2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRole(ctx, field.Selections, res)
 }
@@ -29878,7 +29889,7 @@ func (ec *executionContext) _Query_clusterRoles(ctx context.Context, field graph
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.([]*v12.ClusterRole); ok {
+		if data, ok := tmp.([]*v11.ClusterRole); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*k8s.io/api/rbac/v1.ClusterRole`, tmp)
@@ -29893,7 +29904,7 @@ func (ec *executionContext) _Query_clusterRoles(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*v12.ClusterRole)
+	res := resTmp.([]*v11.ClusterRole)
 	fc.Result = res
 	return ec.marshalNClusterRole2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleᚄ(ctx, field.Selections, res)
 }
@@ -29943,7 +29954,7 @@ func (ec *executionContext) _Query_clusterRole(ctx context.Context, field graphq
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(*v12.ClusterRole); ok {
+		if data, ok := tmp.(*v11.ClusterRole); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/rbac/v1.ClusterRole`, tmp)
@@ -29958,7 +29969,7 @@ func (ec *executionContext) _Query_clusterRole(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*v12.ClusterRole)
+	res := resTmp.(*v11.ClusterRole)
 	fc.Result = res
 	return ec.marshalNClusterRole2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRole(ctx, field.Selections, res)
 }
@@ -30008,7 +30019,7 @@ func (ec *executionContext) _Query_roleBindings(ctx context.Context, field graph
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.([]*v12.RoleBinding); ok {
+		if data, ok := tmp.([]*v11.RoleBinding); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*k8s.io/api/rbac/v1.RoleBinding`, tmp)
@@ -30023,7 +30034,7 @@ func (ec *executionContext) _Query_roleBindings(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*v12.RoleBinding)
+	res := resTmp.([]*v11.RoleBinding)
 	fc.Result = res
 	return ec.marshalNRoleBinding2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBindingᚄ(ctx, field.Selections, res)
 }
@@ -30066,7 +30077,7 @@ func (ec *executionContext) _Query_clusterRoleBindings(ctx context.Context, fiel
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.([]*v12.ClusterRoleBinding); ok {
+		if data, ok := tmp.([]*v11.ClusterRoleBinding); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*k8s.io/api/rbac/v1.ClusterRoleBinding`, tmp)
@@ -30081,7 +30092,7 @@ func (ec *executionContext) _Query_clusterRoleBindings(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*v12.ClusterRoleBinding)
+	res := resTmp.([]*v11.ClusterRoleBinding)
 	fc.Result = res
 	return ec.marshalNClusterRoleBinding2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBindingᚄ(ctx, field.Selections, res)
 }
@@ -31173,7 +31184,7 @@ func (ec *executionContext) _ResourceValues_cpu(ctx context.Context, field graph
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Role_name(ctx context.Context, field graphql.CollectedField, obj *v12.Role) (ret graphql.Marshaler) {
+func (ec *executionContext) _Role_name(ctx context.Context, field graphql.CollectedField, obj *v11.Role) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -31207,7 +31218,7 @@ func (ec *executionContext) _Role_name(ctx context.Context, field graphql.Collec
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Role_namespace(ctx context.Context, field graphql.CollectedField, obj *v12.Role) (ret graphql.Marshaler) {
+func (ec *executionContext) _Role_namespace(ctx context.Context, field graphql.CollectedField, obj *v11.Role) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -31241,7 +31252,7 @@ func (ec *executionContext) _Role_namespace(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Role_rules(ctx context.Context, field graphql.CollectedField, obj *v12.Role) (ret graphql.Marshaler) {
+func (ec *executionContext) _Role_rules(ctx context.Context, field graphql.CollectedField, obj *v11.Role) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -31267,12 +31278,12 @@ func (ec *executionContext) _Role_rules(ctx context.Context, field graphql.Colle
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]v12.PolicyRule)
+	res := resTmp.([]v11.PolicyRule)
 	fc.Result = res
 	return ec.marshalOPolicyRule2ᚕk8sᚗioᚋapiᚋrbacᚋv1ᚐPolicyRuleᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RoleBinding_name(ctx context.Context, field graphql.CollectedField, obj *v12.RoleBinding) (ret graphql.Marshaler) {
+func (ec *executionContext) _RoleBinding_name(ctx context.Context, field graphql.CollectedField, obj *v11.RoleBinding) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -31306,7 +31317,7 @@ func (ec *executionContext) _RoleBinding_name(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RoleBinding_namespace(ctx context.Context, field graphql.CollectedField, obj *v12.RoleBinding) (ret graphql.Marshaler) {
+func (ec *executionContext) _RoleBinding_namespace(ctx context.Context, field graphql.CollectedField, obj *v11.RoleBinding) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -31340,7 +31351,7 @@ func (ec *executionContext) _RoleBinding_namespace(ctx context.Context, field gr
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RoleBinding_roleRef(ctx context.Context, field graphql.CollectedField, obj *v12.RoleBinding) (ret graphql.Marshaler) {
+func (ec *executionContext) _RoleBinding_roleRef(ctx context.Context, field graphql.CollectedField, obj *v11.RoleBinding) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -31369,7 +31380,7 @@ func (ec *executionContext) _RoleBinding_roleRef(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(v12.RoleRef)
+	res := resTmp.(v11.RoleRef)
 	fc.Result = res
 	return ec.marshalNRoleRef2k8sᚗioᚋapiᚋrbacᚋv1ᚐRoleRef(ctx, field.Selections, res)
 }
@@ -31437,12 +31448,12 @@ func (ec *executionContext) _RoleBindingEvent_roleBinding(ctx context.Context, f
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*v12.RoleBinding)
+	res := resTmp.(*v11.RoleBinding)
 	fc.Result = res
 	return ec.marshalNRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBinding(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RoleRef_name(ctx context.Context, field graphql.CollectedField, obj *v12.RoleRef) (ret graphql.Marshaler) {
+func (ec *executionContext) _RoleRef_name(ctx context.Context, field graphql.CollectedField, obj *v11.RoleRef) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -31476,7 +31487,7 @@ func (ec *executionContext) _RoleRef_name(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RoleRef_kind(ctx context.Context, field graphql.CollectedField, obj *v12.RoleRef) (ret graphql.Marshaler) {
+func (ec *executionContext) _RoleRef_kind(ctx context.Context, field graphql.CollectedField, obj *v11.RoleRef) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -35509,38 +35520,7 @@ func (ec *executionContext) _ServiceStatus_loadBalancer(ctx context.Context, fie
 	return ec.marshalNLoadBalancerStatus2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLoadBalancerStatus(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Subscriber_uri(ctx context.Context, field graphql.CollectedField, obj *v11.Destination) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Subscriber",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.URI, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*apis.URL)
-	fc.Result = res
-	return ec.marshalOURI2ᚖknativeᚗdevᚋpkgᚋapisᚐURL(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Subscriber_ref(ctx context.Context, field graphql.CollectedField, obj *v11.Destination) (ret graphql.Marshaler) {
+func (ec *executionContext) _Subscriber_ref(ctx context.Context, field graphql.CollectedField, obj *v12.Destination) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -35566,12 +35546,12 @@ func (ec *executionContext) _Subscriber_ref(ctx context.Context, field graphql.C
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*v11.KReference)
+	res := resTmp.(*v12.KReference)
 	fc.Result = res
 	return ec.marshalOSubscriberRef2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _SubscriberRef_apiVersion(ctx context.Context, field graphql.CollectedField, obj *v11.KReference) (ret graphql.Marshaler) {
+func (ec *executionContext) _SubscriberRef_apiVersion(ctx context.Context, field graphql.CollectedField, obj *v12.KReference) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -35605,7 +35585,7 @@ func (ec *executionContext) _SubscriberRef_apiVersion(ctx context.Context, field
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _SubscriberRef_kind(ctx context.Context, field graphql.CollectedField, obj *v11.KReference) (ret graphql.Marshaler) {
+func (ec *executionContext) _SubscriberRef_kind(ctx context.Context, field graphql.CollectedField, obj *v12.KReference) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -35639,7 +35619,7 @@ func (ec *executionContext) _SubscriberRef_kind(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _SubscriberRef_name(ctx context.Context, field graphql.CollectedField, obj *v11.KReference) (ret graphql.Marshaler) {
+func (ec *executionContext) _SubscriberRef_name(ctx context.Context, field graphql.CollectedField, obj *v12.KReference) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -35673,7 +35653,7 @@ func (ec *executionContext) _SubscriberRef_name(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _SubscriberRef_namespace(ctx context.Context, field graphql.CollectedField, obj *v11.KReference) (ret graphql.Marshaler) {
+func (ec *executionContext) _SubscriberRef_namespace(ctx context.Context, field graphql.CollectedField, obj *v12.KReference) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -37197,7 +37177,7 @@ func (ec *executionContext) _Subscription_triggerEvent(ctx context.Context, fiel
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Subscription().TriggerEvent(rctx, args["namespace"].(string), args["subscriber"].(*v11.Destination))
+			return ec.resolvers.Subscription().TriggerEvent(rctx, args["namespace"].(string), args["serviceName"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "eventing.knative.dev", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "triggers", "verb": "watch"})
@@ -37734,6 +37714,74 @@ func (ec *executionContext) _TriggerSpec_filter(ctx context.Context, field graph
 	return ec.marshalOJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _TriggerSpec_port(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.TriggerSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "TriggerSpec",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.TriggerSpec().Port(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(uint32)
+	fc.Result = res
+	return ec.marshalNPort2uint32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TriggerSpec_path(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.TriggerSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "TriggerSpec",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.TriggerSpec().Path(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _TriggerSpec_subscriber(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.TriggerSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -37763,7 +37811,7 @@ func (ec *executionContext) _TriggerSpec_subscriber(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(v11.Destination)
+	res := resTmp.(v12.Destination)
 	fc.Result = res
 	return ec.marshalNSubscriber2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, field.Selections, res)
 }
@@ -40178,21 +40226,27 @@ func (ec *executionContext) unmarshalInputServiceInstanceCreateInputResourceRef(
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputSubscriberInput(ctx context.Context, obj interface{}) (v11.Destination, error) {
-	var it v11.Destination
+func (ec *executionContext) unmarshalInputSubscriberInput(ctx context.Context, obj interface{}) (SubscriberInput, error) {
+	var it SubscriberInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
 		switch k {
-		case "uri":
+		case "ref":
 			var err error
-			it.URI, err = ec.unmarshalOURI2ᚖknativeᚗdevᚋpkgᚋapisᚐURL(ctx, v)
+			it.Ref, err = ec.unmarshalNSubscriberRefInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "ref":
+		case "port":
 			var err error
-			it.Ref, err = ec.unmarshalOSubscriberRefInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx, v)
+			it.Port, err = ec.unmarshalOPort2ᚖuint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "path":
+			var err error
+			it.Path, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -40202,8 +40256,8 @@ func (ec *executionContext) unmarshalInputSubscriberInput(ctx context.Context, o
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputSubscriberRefInput(ctx context.Context, obj interface{}) (v11.KReference, error) {
-	var it v11.KReference
+func (ec *executionContext) unmarshalInputSubscriberRefInput(ctx context.Context, obj interface{}) (v12.KReference, error) {
+	var it v12.KReference
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -40264,7 +40318,7 @@ func (ec *executionContext) unmarshalInputTriggerCreateInput(ctx context.Context
 			}
 		case "subscriber":
 			var err error
-			it.Subscriber, err = ec.unmarshalNSubscriberInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, v)
+			it.Subscriber, err = ec.unmarshalNSubscriberInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriberInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -41614,7 +41668,7 @@ func (ec *executionContext) _ClusterMicroFrontend(ctx context.Context, sel ast.S
 
 var clusterRoleImplementors = []string{"ClusterRole"}
 
-func (ec *executionContext) _ClusterRole(ctx context.Context, sel ast.SelectionSet, obj *v12.ClusterRole) graphql.Marshaler {
+func (ec *executionContext) _ClusterRole(ctx context.Context, sel ast.SelectionSet, obj *v11.ClusterRole) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, clusterRoleImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -41643,7 +41697,7 @@ func (ec *executionContext) _ClusterRole(ctx context.Context, sel ast.SelectionS
 
 var clusterRoleBindingImplementors = []string{"ClusterRoleBinding"}
 
-func (ec *executionContext) _ClusterRoleBinding(ctx context.Context, sel ast.SelectionSet, obj *v12.ClusterRoleBinding) graphql.Marshaler {
+func (ec *executionContext) _ClusterRoleBinding(ctx context.Context, sel ast.SelectionSet, obj *v11.ClusterRoleBinding) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, clusterRoleBindingImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -43973,7 +44027,7 @@ func (ec *executionContext) _PodEvent(ctx context.Context, sel ast.SelectionSet,
 
 var policyRuleImplementors = []string{"PolicyRule"}
 
-func (ec *executionContext) _PolicyRule(ctx context.Context, sel ast.SelectionSet, obj *v12.PolicyRule) graphql.Marshaler {
+func (ec *executionContext) _PolicyRule(ctx context.Context, sel ast.SelectionSet, obj *v11.PolicyRule) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, policyRuleImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -45101,7 +45155,7 @@ func (ec *executionContext) _ResourceValues(ctx context.Context, sel ast.Selecti
 
 var roleImplementors = []string{"Role"}
 
-func (ec *executionContext) _Role(ctx context.Context, sel ast.SelectionSet, obj *v12.Role) graphql.Marshaler {
+func (ec *executionContext) _Role(ctx context.Context, sel ast.SelectionSet, obj *v11.Role) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, roleImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -45135,7 +45189,7 @@ func (ec *executionContext) _Role(ctx context.Context, sel ast.SelectionSet, obj
 
 var roleBindingImplementors = []string{"RoleBinding"}
 
-func (ec *executionContext) _RoleBinding(ctx context.Context, sel ast.SelectionSet, obj *v12.RoleBinding) graphql.Marshaler {
+func (ec *executionContext) _RoleBinding(ctx context.Context, sel ast.SelectionSet, obj *v11.RoleBinding) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, roleBindingImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -45204,7 +45258,7 @@ func (ec *executionContext) _RoleBindingEvent(ctx context.Context, sel ast.Selec
 
 var roleRefImplementors = []string{"RoleRef"}
 
-func (ec *executionContext) _RoleRef(ctx context.Context, sel ast.SelectionSet, obj *v12.RoleRef) graphql.Marshaler {
+func (ec *executionContext) _RoleRef(ctx context.Context, sel ast.SelectionSet, obj *v11.RoleRef) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, roleRefImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -46449,7 +46503,7 @@ func (ec *executionContext) _ServiceStatus(ctx context.Context, sel ast.Selectio
 
 var subscriberImplementors = []string{"Subscriber"}
 
-func (ec *executionContext) _Subscriber(ctx context.Context, sel ast.SelectionSet, obj *v11.Destination) graphql.Marshaler {
+func (ec *executionContext) _Subscriber(ctx context.Context, sel ast.SelectionSet, obj *v12.Destination) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, subscriberImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -46458,8 +46512,6 @@ func (ec *executionContext) _Subscriber(ctx context.Context, sel ast.SelectionSe
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Subscriber")
-		case "uri":
-			out.Values[i] = ec._Subscriber_uri(ctx, field, obj)
 		case "ref":
 			out.Values[i] = ec._Subscriber_ref(ctx, field, obj)
 		default:
@@ -46475,7 +46527,7 @@ func (ec *executionContext) _Subscriber(ctx context.Context, sel ast.SelectionSe
 
 var subscriberRefImplementors = []string{"SubscriberRef"}
 
-func (ec *executionContext) _SubscriberRef(ctx context.Context, sel ast.SelectionSet, obj *v11.KReference) graphql.Marshaler {
+func (ec *executionContext) _SubscriberRef(ctx context.Context, sel ast.SelectionSet, obj *v12.KReference) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, subscriberRefImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -46689,6 +46741,34 @@ func (ec *executionContext) _TriggerSpec(ctx context.Context, sel ast.SelectionS
 					}
 				}()
 				res = ec._TriggerSpec_filter(ctx, field, obj)
+				return res
+			})
+		case "port":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._TriggerSpec_port(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "path":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._TriggerSpec_path(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "subscriber":
@@ -48118,11 +48198,11 @@ func (ec *executionContext) marshalNClusterMicroFrontend2ᚖgithubᚗcomᚋkyma�
 	return ec._ClusterMicroFrontend(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNClusterRole2k8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRole(ctx context.Context, sel ast.SelectionSet, v v12.ClusterRole) graphql.Marshaler {
+func (ec *executionContext) marshalNClusterRole2k8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRole(ctx context.Context, sel ast.SelectionSet, v v11.ClusterRole) graphql.Marshaler {
 	return ec._ClusterRole(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNClusterRole2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleᚄ(ctx context.Context, sel ast.SelectionSet, v []*v12.ClusterRole) graphql.Marshaler {
+func (ec *executionContext) marshalNClusterRole2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleᚄ(ctx context.Context, sel ast.SelectionSet, v []*v11.ClusterRole) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -48159,7 +48239,7 @@ func (ec *executionContext) marshalNClusterRole2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1
 	return ret
 }
 
-func (ec *executionContext) marshalNClusterRole2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRole(ctx context.Context, sel ast.SelectionSet, v *v12.ClusterRole) graphql.Marshaler {
+func (ec *executionContext) marshalNClusterRole2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRole(ctx context.Context, sel ast.SelectionSet, v *v11.ClusterRole) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -48169,11 +48249,11 @@ func (ec *executionContext) marshalNClusterRole2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐ
 	return ec._ClusterRole(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNClusterRoleBinding2k8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBinding(ctx context.Context, sel ast.SelectionSet, v v12.ClusterRoleBinding) graphql.Marshaler {
+func (ec *executionContext) marshalNClusterRoleBinding2k8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBinding(ctx context.Context, sel ast.SelectionSet, v v11.ClusterRoleBinding) graphql.Marshaler {
 	return ec._ClusterRoleBinding(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNClusterRoleBinding2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBindingᚄ(ctx context.Context, sel ast.SelectionSet, v []*v12.ClusterRoleBinding) graphql.Marshaler {
+func (ec *executionContext) marshalNClusterRoleBinding2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBindingᚄ(ctx context.Context, sel ast.SelectionSet, v []*v11.ClusterRoleBinding) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -48210,7 +48290,7 @@ func (ec *executionContext) marshalNClusterRoleBinding2ᚕᚖk8sᚗioᚋapiᚋrb
 	return ret
 }
 
-func (ec *executionContext) marshalNClusterRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBinding(ctx context.Context, sel ast.SelectionSet, v *v12.ClusterRoleBinding) graphql.Marshaler {
+func (ec *executionContext) marshalNClusterRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBinding(ctx context.Context, sel ast.SelectionSet, v *v11.ClusterRoleBinding) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -49863,7 +49943,7 @@ func (ec *executionContext) marshalNPodStatusType2githubᚗcomᚋkymaᚑproject�
 	return v
 }
 
-func (ec *executionContext) marshalNPolicyRule2k8sᚗioᚋapiᚋrbacᚋv1ᚐPolicyRule(ctx context.Context, sel ast.SelectionSet, v v12.PolicyRule) graphql.Marshaler {
+func (ec *executionContext) marshalNPolicyRule2k8sᚗioᚋapiᚋrbacᚋv1ᚐPolicyRule(ctx context.Context, sel ast.SelectionSet, v v11.PolicyRule) graphql.Marshaler {
 	return ec._PolicyRule(ctx, sel, &v)
 }
 
@@ -50210,11 +50290,11 @@ func (ec *executionContext) marshalNResponseType2ᚕgithubᚗcomᚋoryᚋhydra�
 	return ret
 }
 
-func (ec *executionContext) marshalNRole2k8sᚗioᚋapiᚋrbacᚋv1ᚐRole(ctx context.Context, sel ast.SelectionSet, v v12.Role) graphql.Marshaler {
+func (ec *executionContext) marshalNRole2k8sᚗioᚋapiᚋrbacᚋv1ᚐRole(ctx context.Context, sel ast.SelectionSet, v v11.Role) graphql.Marshaler {
 	return ec._Role(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNRole2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleᚄ(ctx context.Context, sel ast.SelectionSet, v []*v12.Role) graphql.Marshaler {
+func (ec *executionContext) marshalNRole2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleᚄ(ctx context.Context, sel ast.SelectionSet, v []*v11.Role) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -50251,7 +50331,7 @@ func (ec *executionContext) marshalNRole2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRole
 	return ret
 }
 
-func (ec *executionContext) marshalNRole2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRole(ctx context.Context, sel ast.SelectionSet, v *v12.Role) graphql.Marshaler {
+func (ec *executionContext) marshalNRole2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRole(ctx context.Context, sel ast.SelectionSet, v *v11.Role) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -50261,11 +50341,11 @@ func (ec *executionContext) marshalNRole2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRole(ct
 	return ec._Role(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNRoleBinding2k8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBinding(ctx context.Context, sel ast.SelectionSet, v v12.RoleBinding) graphql.Marshaler {
+func (ec *executionContext) marshalNRoleBinding2k8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBinding(ctx context.Context, sel ast.SelectionSet, v v11.RoleBinding) graphql.Marshaler {
 	return ec._RoleBinding(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNRoleBinding2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBindingᚄ(ctx context.Context, sel ast.SelectionSet, v []*v12.RoleBinding) graphql.Marshaler {
+func (ec *executionContext) marshalNRoleBinding2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBindingᚄ(ctx context.Context, sel ast.SelectionSet, v []*v11.RoleBinding) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -50302,7 +50382,7 @@ func (ec *executionContext) marshalNRoleBinding2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1
 	return ret
 }
 
-func (ec *executionContext) marshalNRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBinding(ctx context.Context, sel ast.SelectionSet, v *v12.RoleBinding) graphql.Marshaler {
+func (ec *executionContext) marshalNRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBinding(ctx context.Context, sel ast.SelectionSet, v *v11.RoleBinding) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -50371,7 +50451,7 @@ func (ec *executionContext) marshalNRoleKind2githubᚗcomᚋkymaᚑprojectᚋkym
 	return v
 }
 
-func (ec *executionContext) marshalNRoleRef2k8sᚗioᚋapiᚋrbacᚋv1ᚐRoleRef(ctx context.Context, sel ast.SelectionSet, v v12.RoleRef) graphql.Marshaler {
+func (ec *executionContext) marshalNRoleRef2k8sᚗioᚋapiᚋrbacᚋv1ᚐRoleRef(ctx context.Context, sel ast.SelectionSet, v v11.RoleRef) graphql.Marshaler {
 	return ec._RoleRef(ctx, sel, &v)
 }
 
@@ -51180,19 +51260,31 @@ func (ec *executionContext) marshalNSubjectKind2githubᚗcomᚋkymaᚑprojectᚋ
 	return v
 }
 
-func (ec *executionContext) marshalNSubscriber2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, sel ast.SelectionSet, v v11.Destination) graphql.Marshaler {
+func (ec *executionContext) marshalNSubscriber2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, sel ast.SelectionSet, v v12.Destination) graphql.Marshaler {
 	return ec._Subscriber(ctx, sel, &v)
 }
 
-func (ec *executionContext) unmarshalNSubscriberInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, v interface{}) (v11.Destination, error) {
+func (ec *executionContext) unmarshalNSubscriberInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriberInput(ctx context.Context, v interface{}) (SubscriberInput, error) {
 	return ec.unmarshalInputSubscriberInput(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNSubscriberInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, v interface{}) (*v11.Destination, error) {
+func (ec *executionContext) unmarshalNSubscriberInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriberInput(ctx context.Context, v interface{}) (*SubscriberInput, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalNSubscriberInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, v)
+	res, err := ec.unmarshalNSubscriberInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriberInput(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalNSubscriberRefInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, v interface{}) (v12.KReference, error) {
+	return ec.unmarshalInputSubscriberRefInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNSubscriberRefInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, v interface{}) (*v12.KReference, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNSubscriberRefInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx, v)
 	return &res, err
 }
 
@@ -52551,7 +52643,7 @@ func (ec *executionContext) marshalOPod2ᚖgithubᚗcomᚋkymaᚑprojectᚋkyma�
 	return ec._Pod(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOPolicyRule2ᚕk8sᚗioᚋapiᚋrbacᚋv1ᚐPolicyRuleᚄ(ctx context.Context, sel ast.SelectionSet, v []v12.PolicyRule) graphql.Marshaler {
+func (ec *executionContext) marshalOPolicyRule2ᚕk8sᚗioᚋapiᚋrbacᚋv1ᚐPolicyRuleᚄ(ctx context.Context, sel ast.SelectionSet, v []v11.PolicyRule) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -52589,6 +52681,29 @@ func (ec *executionContext) marshalOPolicyRule2ᚕk8sᚗioᚋapiᚋrbacᚋv1ᚐP
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) unmarshalOPort2uint32(ctx context.Context, v interface{}) (uint32, error) {
+	return UnmarshalPort(v)
+}
+
+func (ec *executionContext) marshalOPort2uint32(ctx context.Context, sel ast.SelectionSet, v uint32) graphql.Marshaler {
+	return MarshalPort(v)
+}
+
+func (ec *executionContext) unmarshalOPort2ᚖuint32(ctx context.Context, v interface{}) (*uint32, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOPort2uint32(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOPort2ᚖuint32(ctx context.Context, sel ast.SelectionSet, v *uint32) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOPort2uint32(ctx, sel, *v)
 }
 
 func (ec *executionContext) marshalOReplicaSet2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐReplicaSet(ctx context.Context, sel ast.SelectionSet, v ReplicaSet) graphql.Marshaler {
@@ -52907,39 +53022,15 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return ec.marshalOString2string(ctx, sel, *v)
 }
 
-func (ec *executionContext) unmarshalOSubscriberInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, v interface{}) (v11.Destination, error) {
-	return ec.unmarshalInputSubscriberInput(ctx, v)
-}
-
-func (ec *executionContext) unmarshalOSubscriberInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, v interface{}) (*v11.Destination, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOSubscriberInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, v)
-	return &res, err
-}
-
-func (ec *executionContext) marshalOSubscriberRef2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, sel ast.SelectionSet, v v11.KReference) graphql.Marshaler {
+func (ec *executionContext) marshalOSubscriberRef2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, sel ast.SelectionSet, v v12.KReference) graphql.Marshaler {
 	return ec._SubscriberRef(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOSubscriberRef2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, sel ast.SelectionSet, v *v11.KReference) graphql.Marshaler {
+func (ec *executionContext) marshalOSubscriberRef2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, sel ast.SelectionSet, v *v12.KReference) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._SubscriberRef(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOSubscriberRefInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, v interface{}) (v11.KReference, error) {
-	return ec.unmarshalInputSubscriberRefInput(ctx, v)
-}
-
-func (ec *executionContext) unmarshalOSubscriberRefInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, v interface{}) (*v11.KReference, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOSubscriberRefInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx, v)
-	return &res, err
 }
 
 func (ec *executionContext) marshalOTrigger2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v v1alpha13.Trigger) graphql.Marshaler {
@@ -52991,29 +53082,6 @@ func (ec *executionContext) marshalOTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋ
 		return graphql.Null
 	}
 	return ec._Trigger(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOURI2knativeᚗdevᚋpkgᚋapisᚐURL(ctx context.Context, v interface{}) (apis.URL, error) {
-	return UnmarshalURI(v)
-}
-
-func (ec *executionContext) marshalOURI2knativeᚗdevᚋpkgᚋapisᚐURL(ctx context.Context, sel ast.SelectionSet, v apis.URL) graphql.Marshaler {
-	return MarshalURI(v)
-}
-
-func (ec *executionContext) unmarshalOURI2ᚖknativeᚗdevᚋpkgᚋapisᚐURL(ctx context.Context, v interface{}) (*apis.URL, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOURI2knativeᚗdevᚋpkgᚋapisᚐURL(ctx, v)
-	return &res, err
-}
-
-func (ec *executionContext) marshalOURI2ᚖknativeᚗdevᚋpkgᚋapisᚐURL(ctx context.Context, sel ast.SelectionSet, v *apis.URL) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec.marshalOURI2knativeᚗdevᚋpkgᚋapisᚐURL(ctx, sel, *v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
