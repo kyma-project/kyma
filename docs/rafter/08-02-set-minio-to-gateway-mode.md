@@ -279,7 +279,7 @@ metadata:
     kyma-project.io/installation: ""
 type: Opaque
 data:
-  controller-manager.minio.accessKey: "$(echo "${AZ_ACCOUNT_NAME}" | base64)"
+  controller-manager.minio.accessKey: "$(echo -n "${AZ_ACCOUNT_NAME}" | base64)"
   controller-manager.minio.secretKey: "${AZ_ACCOUNT_KEY}"
 ---
 apiVersion: v1
@@ -330,8 +330,8 @@ metadata:
     kyma-project.io/installation: ""
 type: Opaque
 data:
-  controller-manager.minio.accessKey: "$(echo "${AWS_ACCESS_KEY}" | base64)"
-  controller-manager.minio.secretKey: "$(echo "${AWS_SECRET_KEY}" | base64)"
+  controller-manager.minio.accessKey: "$(echo -n "${AWS_ACCESS_KEY}" | base64)"
+  controller-manager.minio.secretKey: "$(echo -n "${AWS_SECRET_KEY}" | base64)"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -382,8 +382,8 @@ metadata:
     kyma-project.io/installation: ""
 type: Opaque
 data:
-  controller-manager.minio.accessKey: "$(echo "${ALIBABA_ACCESS_KEY}" | base64)"
-  controller-manager.minio.secretKey: "$(echo "${ALIBABA_SECRET_KEY}" | base64)"
+  controller-manager.minio.accessKey: "$(echo -n "${ALIBABA_ACCESS_KEY}" | base64)"
+  controller-manager.minio.secretKey: "$(echo -n "${ALIBABA_SECRET_KEY}" | base64)"
 ---
 apiVersion: v1
 kind: ConfigMap

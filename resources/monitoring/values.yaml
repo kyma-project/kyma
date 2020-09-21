@@ -568,7 +568,7 @@ grafana:
     ##
     metricRelabelings:
     - sourceLabels: [ __name__ ]
-      regex: ^(grafana_.*|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes)$
+      regex: ^(http_request_total|grafana_.*|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes)$
       action: keep
 
     # 	relabel configs to apply to samples before ingestion.
@@ -727,7 +727,7 @@ kubeControllerManager:
 ## Component scraping coreDns. Use either this or kubeDns
 ##
 coreDns:
-  enabled: true
+  enabled: false
   service:
     port: 9153
     targetPort: 9153
@@ -758,7 +758,7 @@ coreDns:
 ## Component scraping kubeDns. Use either this or coreDns
 ##
 kubeDns:
-  enabled: true
+  enabled: false
   service:
     dnsmasq:
       port: 10054
@@ -920,7 +920,7 @@ kubeScheduler:
 ## Component scraping kube proxy
 ##
 kubeProxy:
-  enabled: true
+  enabled: false
 
   ## If your kube proxy is not deployed as a pod, specify IPs it can be found on
   ##
@@ -1710,7 +1710,7 @@ prometheus:
     resources:
       limits:
         cpu: 600m
-        memory: 3000Mi
+        memory: 2000Mi
       requests:
         cpu: 300m
         memory: 1000Mi
