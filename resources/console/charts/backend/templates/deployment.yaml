@@ -80,6 +80,8 @@ spec:
             value: "{{ .Values.tracing.debug }}"
           - name: APP_TRACING_SERVICE_SPAN_NAME
             value: {{ .Values.tracing.serviceSpanName }}
+          - name: APP_TRACING_ENABLED
+            value: {{ .Values.tracing.enabled }}
           - name: APP_SERVERLESS_USAGE_KIND
             value: serverless-function
         ports:

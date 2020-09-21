@@ -26,3 +26,4 @@ systemNamespaces: "istio-system,knative-eventing,knative-serving,kube-public,kub
 global:
   tracing:
     zipkinAddress: zipkin.kyma-system:9411
+    enabled: true

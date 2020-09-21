@@ -32,11 +32,12 @@ Use the following environment variables to configure the application:
 | APP_OIDC_USERNAME_CLAIM | No | `email` | The OpenID claim to use as the user name. |
 | APP_OIDC_USERNAME_PREFIX | No | None | If provided, all usernames will be prefixed with this value. |
 | APP_OIDC_GROUPS_CLAIM | No | `groups` | The name of a custom OpenID Connect claim for specifying user groups. |
-| APP_OIDC_GROUPS_PREFIX | NO | None | If provided, all groups will be prefixed with this value. |
-| APP_OIDC_SUPPORTED_SIGNING_ALGS | NO | `RS256` | Comma-separated list of the allowed JOSE asymmetric signing algorithms. Tokens with the 'alg' header value not in this list will be rejected. Values are defined by [RFC 7518](https://tools.ietf.org/html/rfc7518#section-3.1). |
-| APP_TRACING_COLLECTOR_URL | YES | `http://zipkin.kyma-system:9411/api/v1/spans` | The collector URL to handle post requests. |
-| APP_TRACING_DEBUG | YES | `false` | The recorder debug flag. |
-| APP_TRACING_SERVICE_SPAN_NAME | YES | `console-backend-service` | The name of the service span. |
+| APP_OIDC_GROUPS_PREFIX | No | None | If provided, all groups will be prefixed with this value. |
+| APP_OIDC_SUPPORTED_SIGNING_ALGS | No | `RS256` | Comma-separated list of the allowed JOSE asymmetric signing algorithms. Tokens with the 'alg' header value not in this list will be rejected. Values are defined by [RFC 7518](https://tools.ietf.org/html/rfc7518#section-3.1). |
+| APP_TRACING_COLLECTOR_URL | Yes | `http://zipkin.kyma-system:9411/api/v1/spans` | The collector URL to handle post requests. |
+| APP_TRACING_DEBUG | Yes | `false` | The recorder debug flag. |
+| APP_TRACING_SERVICE_SPAN_NAME | Yes | `console-backend-service` | The name of the service span. |
+| APP_TRACING_ENABLED | No | `true` | Enable tracing for Console Backend Service. |
 
 ## Configure logger verbosity level
 
