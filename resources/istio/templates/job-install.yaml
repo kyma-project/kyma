@@ -4,7 +4,7 @@ kind: Job
 metadata:
   annotations:
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
-    helm.sh/hook: "post-install,post-upgrade"
+    helm.sh/hook: "post-install"
     helm.sh/hook-weight: "10"
   name: istio-install-job
 spec:
@@ -13,8 +13,7 @@ spec:
   template:
     spec:
       containers:
-        -
-          command:
+        - command:
             - bash
             - "-c"
             - |

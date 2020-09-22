@@ -7,11 +7,19 @@ if [ -f "/etc/istio/overrides.yaml" ]; then
 	OPERATOR_FILE="/etc/combo.yaml"
 fi
 
-echo "--> Remove current installation of Istio"
-istioctl manifest generate -f "${OPERATOR_FILE}" | yq r -d '*' --prettyPrint -j - | jq 'select(.kind != "CustomResourceDefinition") | select(.kind != "Namespace")' | kubectl delete -f -
+echo "--> Get Istio 1.6"
+export ISTIOCTL_VERSION=1.6.9
+curl -L https://github.com/istio/istio/releases/download/${ISTIOCTL_VERSION}/istioctl-${ISTIOCTL_VERSION}-linux-amd64.tar.gz -o istioctl.tar.gz &&\
+tar xvzf istioctl.tar.gz
+chmod +x istioctl
+mv istioctl /usr/local/bin/istioctl-${ISTIOCTL_VERSION}
+rm istioctl.tar.gz
+
+echo "--> Upgrade to Istio 1.6"
+/usr/local/bin/istioctl-${ISTIOCTL_VERSION} upgrade -f /etc/istio/operator-1-6.yaml -y
 
 echo "--> Get Istio 1.7"
-export ISTIOCTL_VERSION=1.7.1
+export ISTIOCTL_VERSION=1.7.2
 curl -L https://github.com/istio/istio/releases/download/${ISTIOCTL_VERSION}/istioctl-${ISTIOCTL_VERSION}-linux-amd64.tar.gz -o istioctl.tar.gz &&\
 tar xvzf istioctl.tar.gz
 chmod +x istioctl
@@ -19,7 +27,7 @@ mv istioctl /usr/local/bin/istioctl-${ISTIOCTL_VERSION}
 rm istioctl.tar.gz
 
 echo "--> Install Istio 1.7"
-/usr/local/bin/istioctl-${ISTIOCTL_VERSION} install -f /etc/istio/operator-1-7.yaml -y
+/usr/local/bin/istioctl-${ISTIOCTL_VERSION} upgrade -f /etc/istio/operator-1-7.yaml -y
 
 echo "Apply custom kyma manifests"
 kubectl apply -f /etc/manifests

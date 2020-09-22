@@ -17,3 +17,5 @@ data:
 {{ end }}
   operator-1-7.yaml: |-
 {{ tpl (.Files.Get "files/istio-operator-1-7.yaml" | printf "%s" | indent 4) . }}
+  operator-1-6.yaml: |-
+{{ tpl (.Files.Get "files/istio-operator-1-6.yaml" | printf "%s" | indent 4) . }}
