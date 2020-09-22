@@ -5,17 +5,13 @@ This helm charts contains all components required for eventing in Kyma:
 Components:
 - event-publisher-proxy
 
-## Event-Publisher-Proxy
+## Event Publisher Proxy
 
 This component receives Cloud Event publishing requests from the cluster workloads (microservice or Serverless functions) and redirects it to the Enterprise Messaging Service Cloud Event Gateway. See [here](https://github.com/kyma-project/kyma/tree/master/components/event-publisher-proxy) for more details.
 
 ## Install
 
 You can install this helm chart either using Helm or via Kyma CLI. In both cases, the secret details for BEB have to be configured using the `beb` prefixed variables.
-
-```bash
-$ kyma install -s <source-image> -o installation-overrides-epp.yaml
-```
 
 Using Helm 3:
 
@@ -55,4 +51,6 @@ stringData:
     event-publisher-proxy.upstreamAuthentication.oauthTokenEndpoint: "$bebOauthTokenEndpoint"
     event-publisher-proxy.upstreamAuthentication.publishUrl: "$bebPublishUrl"
 EOF
+
+$ kyma install -s <source-image> -o installation-overrides-epp.yaml
 ```
