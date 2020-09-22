@@ -34,7 +34,7 @@ $ ko apply -f config/
 ```bash
 curl -v -X POST \
     -H "Content-Type: application/cloudevents+json" \
-    --data @<(cat <<EOF
+    --data @<(<<EOF
     {
         "specversion": "1.0",
         "source": "/default/sap.kyma/kt1",
