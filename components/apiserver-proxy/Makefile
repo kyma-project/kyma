@@ -17,9 +17,21 @@ clean:
 path-to-referenced-charts:
 	@echo "resources/core"
 
+ensure-local:
+	@echo "Go modules present in component - omitting."
+
+dep-status:
+	@echo "Go modules present in component - omitting."
+
+dep-status-local:
+	@echo "Go modules present in component - omitting."
+
 resolve-local:
 	GO111MODULE=on go mod download
 	GO111MODULE=on go mod vendor
 
 mod-verify-local:
 	GO111MODULE=on go mod verify
+
+$(eval $(call buildpack-cp-ro,resolve))
+$(eval $(call buildpack-mount,mod-verify))
