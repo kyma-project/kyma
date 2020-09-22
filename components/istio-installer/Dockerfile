@@ -5,7 +5,7 @@ LABEL source=git@github.com:kyma-project/kyma.git
 ENV ISTIOCTL_VERSION 1.6.9
 ENV YQ_VERSION 3.1.1
 
-RUN curl -L https://github.com/istio/istio/releases/download/${ISTIOCTL_VERSION}/istioctl-${ISTIOCTL_VERSION}-linux.tar.gz -o istioctl.tar.gz &&\
+RUN curl -L https://github.com/istio/istio/releases/download/${ISTIOCTL_VERSION}/istioctl-${ISTIOCTL_VERSION}-linux-amd64.tar.gz -o istioctl.tar.gz &&\
 	tar xvzf istioctl.tar.gz &&\
 	chmod +x istioctl &&\
 	mv istioctl /usr/local/bin/istioctl &&\
