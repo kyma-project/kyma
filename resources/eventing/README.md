@@ -1,23 +1,23 @@
 # Eventing Chart
 
-This helm charts contains all components required for eventing in Kyma:
+This Helm chart contains all components required for eventing in Kyma:
 
 Components:
 - event-publisher-proxy
 
 ## Event-Publisher-Proxy
 
-This component receives Cloud Event publishing requests from the cluster workloads (microservice or Serverless functions) and redirects it to the Enterprise Messaging Service Cloud Event Gateway. See [here](https://github.com/kyma-project/kyma/tree/master/components/event-publisher-proxy) for more details.
+This component receives Cloud Event publishing requests from the cluster workloads (microservice or Serverless functions) and redirects them to the Enterprise Messaging Service Cloud Event Gateway. Click [here](https://github.com/kyma-project/kyma/tree/master/components/event-publisher-proxy) for more details.
 
 ## Install
 
-You can install this helm chart either using Helm or via Kyma CLI. In both cases, the secret details for BEB have to be configured using the `beb` prefixed variables.
+You can install this Helm chart using either Helm or Kyma CLI. In both cases, the secret details for BEB have to be configured using the `beb` prefixed variables:
 
 ```bash
 $ kyma install -s <source-image> -o installation-overrides-epp.yaml
 ```
 
-Using Helm 3:
+### Using Helm 3:
 
 ```bash
 $ cat << EOF > helm-values.yaml
@@ -35,7 +35,7 @@ $ helm install \
      eventing . \
 ```
 
-Using Kyma CLI:
+### Using Kyma CLI:
 
 ```bash
 cat << EOF > installation-overrides-epp.yaml
