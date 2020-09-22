@@ -7,6 +7,19 @@ if [ -f "/etc/istio/overrides.yaml" ]; then
 	OPERATOR_FILE="/etc/combo.yaml"
 fi
 
+echo "--> Remove deprecated resources"
+kubectl delete meshpolicies.authentication.istio.io -n istio-system default
+kubectl delete clusterrbacconfigs.rbac.istio.io default
+
+echo "--> Delete deprecated CRDs"
+kubectl delete customresourcedefinitions.apiextensions.k8s.io clusterrbacconfigs.rbac.istio.io
+kubectl delete customresourcedefinitions.apiextensions.k8s.io meshpolicies.authentication.istio.io
+kubectl delete customresourcedefinitions.apiextensions.k8s.io policies.authentication.istio.io
+kubectl delete customresourcedefinitions.apiextensions.k8s.io rbacconfigs.rbac.istio.io
+kubectl delete customresourcedefinitions.apiextensions.k8s.io servicerolebindings.rbac.istio.io
+kubectl delete customresourcedefinitions.apiextensions.k8s.io serviceroles.rbac.istio.io
+
+
 echo "--> Get Istio 1.6"
 export ISTIOCTL_VERSION=1.6.9
 curl -L https://github.com/istio/istio/releases/download/${ISTIOCTL_VERSION}/istioctl-${ISTIOCTL_VERSION}-linux-amd64.tar.gz -o istioctl.tar.gz &&\
