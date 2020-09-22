@@ -22,7 +22,6 @@ spec:
       namespace: "kyma-installer"
     - name: "istio-kyma-patch"
       namespace: "istio-system"
-      namespace: "istio-system"
     # - name: "eventing"
     #   namespace: kyma-system
     - name: "knative-serving"
