@@ -29,6 +29,26 @@ $ make test-local
 $ ko apply -f config/
 ```
 
+### Send Events
+
+```bash
+curl -v -X POST \
+    -H "Content-Type: application/cloudevents+json" \
+    --data @<(cat <<EOF
+    {
+        "specversion": "1.0",
+        "source": "/default/sap.kyma/kt1",
+        "type": "sap.kyma.FreightOrder.Arrived.v1",
+        "eventtypeversion": "v1",
+        "id": "A234-1234-1234",
+        "data" : "{\"foo\":\"bar\"}",
+        "datacontenttype":"application/json"
+    }
+EOF
+    ) \
+    http://<hostname>/publish
+```
+
 ## Environment Variables
 
 | Environment Variable    | Default Value | Description                                                                                   |

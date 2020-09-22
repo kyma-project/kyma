@@ -1,6 +1,6 @@
 # Eventing Chart
 
-This helm charts contains all components required for eventing in Kyma;
+This helm charts contains all components required for eventing in Kyma:
 
 Components:
 - event-publisher-proxy
