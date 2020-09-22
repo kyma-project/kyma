@@ -30,7 +30,7 @@ This list shows the available Istio components and the components enabled in Kym
 | Tracing | ⛔️ |
 | Kiali | ⛔️ |
 
->*NOTE*: In Istio 1.5, separate components like Pilot or Sidecar Injector are replaced by a single binary - Istiod. Details can be found [in this section of upgrade notes](https://istio.io/latest/news/releases/1.5.x/announcing-1.5/upgrade-notes/#control-plane-restructuring).
+>**NOTE:** In Istio 1.5, separate components like Pilot or Sidecar Injector are replaced by Istiod, a single binary. You can find the details [in the ugrade notes](https://istio.io/latest/news/releases/1.5.x/announcing-1.5/upgrade-notes/#control-plane-restructuring).
 
 ## Kyma-specific configuration
 
@@ -45,5 +45,5 @@ These configuration changes are applied to customize Istio for use with Kyma:
 - DestinationRules are created by default, which disables mTLS for the `kubernetes.default.svc.cluster.local` service. In local (Minikube) installation mTLS is also disabled for
 `istio-ingressgateway.istio-system.svc.cluster.local` service.
 - The `istio-sidecar-injector` Mutating Webhook Configuration is patched to exclude Gardener resources in the kube-system namespace and the timeout is set to 10 seconds.
-- All Istio components have decreased resources requests and limits.
+- All Istio components have decreased resource requests and limits.
 - The use of HTTP 1.0 is enabled in the outbound HTTP listeners by `PILOT_HTTP10` flag set in Istiod component environment variables.
