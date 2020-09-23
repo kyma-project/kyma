@@ -18,5 +18,6 @@ require (
 
 replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.4.1
+	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc92
 	golang.org/x/text => golang.org/x/text v0.3.3
 )
