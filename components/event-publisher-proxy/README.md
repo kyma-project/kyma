@@ -60,4 +60,4 @@ EOF
 | CLIENT_ID               |               | The Client ID used to acquire Access Tokens from the Authentication server.                   |
 | CLIENT_SECRET           |               | The Client Secret used to acquire Access Tokens from the Authentication server.               |
 | TOKEN_ENDPOINT          |               | The Authentication Server Endpoint to provide Access Tokens.                                  |
-| EMS_PUBLISH_URL         |               | The Messaging Server Endpoint that accepts publishing CloudEvents to it.                      |
+| PUBLISH_URL         |               | The Messaging Server Endpoint that accepts publishing CloudEvents to it.                      |
