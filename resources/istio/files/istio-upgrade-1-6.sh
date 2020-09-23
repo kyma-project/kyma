@@ -19,7 +19,6 @@ kubectl delete customresourcedefinitions.apiextensions.k8s.io rbacconfigs.rbac.i
 kubectl delete customresourcedefinitions.apiextensions.k8s.io servicerolebindings.rbac.istio.io --ignore-not-found
 kubectl delete customresourcedefinitions.apiextensions.k8s.io serviceroles.rbac.istio.io --ignore-not-found
 
-
 echo "--> Get Istio 1.6"
 export ISTIOCTL_VERSION=1.6.9
 curl -L https://github.com/istio/istio/releases/download/${ISTIOCTL_VERSION}/istioctl-${ISTIOCTL_VERSION}-linux-amd64.tar.gz -o istioctl.tar.gz &&\
@@ -30,17 +29,6 @@ rm istioctl.tar.gz
 
 echo "--> Upgrade to Istio 1.6"
 /usr/local/bin/istioctl-${ISTIOCTL_VERSION} upgrade -f /etc/istio/operator-1-6.yaml -y
-
-echo "--> Get Istio 1.7"
-export ISTIOCTL_VERSION=1.7.2
-curl -L https://github.com/istio/istio/releases/download/${ISTIOCTL_VERSION}/istioctl-${ISTIOCTL_VERSION}-linux-amd64.tar.gz -o istioctl.tar.gz &&\
-tar xvzf istioctl.tar.gz
-chmod +x istioctl
-mv istioctl /usr/local/bin/istioctl-${ISTIOCTL_VERSION}
-rm istioctl.tar.gz
-
-echo "--> Install Istio 1.7"
-/usr/local/bin/istioctl-${ISTIOCTL_VERSION} upgrade -f /etc/istio/operator-1-7.yaml -y
 
 echo "Apply custom kyma manifests"
 kubectl apply -f /etc/manifests
