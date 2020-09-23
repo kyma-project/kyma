@@ -2,19 +2,16 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "event-publisher-proxy.fullname" . }}
-  labels:
-  {{- include "event-publisher-proxy.labels" . | nindent 4 }}
+  labels: {{- include "event-publisher-proxy.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
-    matchLabels:
-  {{ include "event-publisher-proxy.selectorLabels" . | nindent 6 }}
+    matchLabels: {{- include "event-publisher-proxy.selectorLabels" . | nindent 6 }}
   strategy:
     type: RollingUpdate
   template:
     metadata:
-      labels:
-    {{ include "event-publisher-proxy.selectorLabels" . | nindent 8 }}
+      labels: {{- include "event-publisher-proxy.selectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "event-publisher-proxy.serviceAccountName" . }}
       containers:
