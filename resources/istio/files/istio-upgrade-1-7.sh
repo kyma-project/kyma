@@ -7,17 +7,8 @@ if [ -f "/etc/istio/overrides.yaml" ]; then
 	OPERATOR_FILE="/etc/combo.yaml"
 fi
 
-echo "--> Remove deprecated resources"
-kubectl delete meshpolicies.authentication.istio.io -n istio-system default --ignore-not-found
-kubectl delete clusterrbacconfigs.rbac.istio.io default --ignore-not-found
-
-echo "--> Delete deprecated CRDs"
-kubectl delete customresourcedefinitions.apiextensions.k8s.io clusterrbacconfigs.rbac.istio.io --ignore-not-found
-kubectl delete customresourcedefinitions.apiextensions.k8s.io meshpolicies.authentication.istio.io --ignore-not-found
-kubectl delete customresourcedefinitions.apiextensions.k8s.io policies.authentication.istio.io --ignore-not-found
-kubectl delete customresourcedefinitions.apiextensions.k8s.io rbacconfigs.rbac.istio.io --ignore-not-found
-kubectl delete customresourcedefinitions.apiextensions.k8s.io servicerolebindings.rbac.istio.io --ignore-not-found
-kubectl delete customresourcedefinitions.apiextensions.k8s.io serviceroles.rbac.istio.io --ignore-not-found
+echo "--> Temporary disable ingress-gateway"
+kubectl scale deploy -n istio-system istio-ingressgateway --replicas 0
 
 echo "--> Install Istio 1.7"
 istioctl upgrade -f /etc/istio/operator-1-7.yaml -y
