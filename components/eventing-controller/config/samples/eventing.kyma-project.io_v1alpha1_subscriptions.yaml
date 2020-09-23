@@ -1,7 +1,0 @@
-apiVersion: eventing.kyma-project.io.kyma-project.io/v1alpha1
-kind: Subscriptions
-metadata:
-  name: subscriptions-sample
-spec:
-  # Add fields here
-  foo: bar

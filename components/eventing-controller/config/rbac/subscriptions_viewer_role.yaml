@@ -5,7 +5,7 @@ metadata:
   name: subscriptions-viewer-role
 rules:
 - apiGroups:
-  - eventing.kyma-project.io.kyma-project.io
+  - eventing.kyma-project.io
   resources:
   - subscriptions
   verbs:
@@ -13,7 +13,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - eventing.kyma-project.io.kyma-project.io
+  - eventing.kyma-project.io
   resources:
   - subscriptions/status
   verbs:

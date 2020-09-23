@@ -20,22 +20,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // SubscriptionsSpec defines the desired state of Subscriptions
 type SubscriptionsSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
 	// Id is the unique identifier of the subscription.
 	Id string `json:"id,omitempty"`
+
+	// Id is the unique identifier of the subscription.
+	Foo string `json:"id,omitempty"`
 }
 
 // SubscriptionsStatus defines the observed state of Subscriptions
 type SubscriptionsStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 }
 
 // +kubebuilder:object:root=true

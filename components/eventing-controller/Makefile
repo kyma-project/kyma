@@ -3,6 +3,8 @@ APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20200831-e46c648b
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
+# DEV_IMG is the image used during development workflow only
+DEV_IMG = ko://github.com/kyma-project/kyma/components/eventing-controller
 override ENTRYPOINT = cmd/main.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
@@ -34,16 +36,25 @@ run: generate fmt vet manifests
 
 # Install CRDs into a cluster
 install: manifests
-	kustomize build config/crd | kubectl apply -f -
+	kustomize build config/crd | ko apply -f -
 
 # Uninstall CRDs from a cluster
 uninstall: manifests
-	kustomize build config/crd | kubectl delete -f -
+	kustomize build config/crd | ko delete -f -
+
+# Deploy controller in the configured Kubernetes cluster in ~/.kube/config for local development
+deploy-local: manifests
+	cd config/manager && kustomize edit set image controller=${DEV_IMG}
+ifeq ($(shell kubectl get ns kyma-system),)
+	echo "Creating kyma-system namespace"
+	kubectl create ns kyma-system
+endif
+	kustomize build config/default | ko apply -f -
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-deploy: manifests
-	cd config/manager && kustomize edit set image controller=${IMG}
-	kustomize build config/default | kubectl apply -f -
+deploy-dry-run: manifests
+	cd config/manager && kustomize edit set image controller=${DEV_IMG}
+	kustomize build config/default
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
@@ -60,7 +71,6 @@ vet:
 # Generate code
 generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
-
 
 verify:: mod-verify
 

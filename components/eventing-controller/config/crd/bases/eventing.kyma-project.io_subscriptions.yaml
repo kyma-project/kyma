@@ -6,9 +6,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: subscriptions.eventing.kyma-project.io.kyma-project.io
+  name: subscriptions.eventing.kyma-project.io
 spec:
-  group: eventing.kyma-project.io.kyma-project.io
+  group: eventing.kyma-project.io
   names:
     kind: Subscriptions
     listKind: SubscriptionsList

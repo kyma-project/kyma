@@ -2,7 +2,7 @@
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
-- bases/eventing.kyma-project.io.kyma-project.io_subscriptions.yaml
+- bases/eventing.kyma-project.io_subscriptions.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

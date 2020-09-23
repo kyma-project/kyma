@@ -24,7 +24,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	eventingkymaprojectiov1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
 // SubscriptionsReconciler reconciles a Subscriptions object
@@ -34,20 +34,20 @@ type SubscriptionsReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=eventing.kyma-project.io.kyma-project.io,resources=subscriptions,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=eventing.kyma-project.io.kyma-project.io,resources=subscriptions/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions/status,verbs=get;update;patch
 
 func (r *SubscriptionsReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
 	_ = r.Log.WithValues("subscriptions", req.NamespacedName)
 
-	// your logic here
+	r.Log.Info("reconciled obj", req.Namespace, req.Name)
 
 	return ctrl.Result{}, nil
 }
 
 func (r *SubscriptionsReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&eventingkymaprojectiov1alpha1.Subscriptions{}).
+		For(&eventingv1alpha1.Subscriptions{}).
 		Complete(r)
 }

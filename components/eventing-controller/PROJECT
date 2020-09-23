@@ -1,7 +1,7 @@
 domain: kyma-project.io
 repo: github.com/kyma-project/kyma/components/eventing-controller
 resources:
-- group: eventing.kyma-project.io
+- group: eventing
   kind: Subscriptions
   version: v1alpha1
 version: "2"
