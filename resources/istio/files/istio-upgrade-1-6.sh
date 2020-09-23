@@ -3,13 +3,18 @@ set -ex
 OPERATOR_FILE="/etc/istio/config.yaml"
 echo "--> Check overrides"
 if [ -f "/etc/istio/overrides.yaml" ]; then
-	yq merge -x /etc/istio/config.yaml /etc/istio/overrides.yaml > /etc/combo.yaml
-	OPERATOR_FILE="/etc/combo.yaml"
+    yq merge -x /etc/istio/config.yaml /etc/istio/overrides.yaml > /etc/combo.yaml
+    OPERATOR_FILE="/etc/combo.yaml"
 fi
 
 echo "--> Remove deprecated resources"
-kubectl delete meshpolicies.authentication.istio.io -n istio-system default --ignore-not-found
-kubectl delete clusterrbacconfigs.rbac.istio.io default --ignore-not-found
+if kubectl api-versions | grep -c rbac.istio.io ; then
+    kubectl delete clusterrbacconfigs.rbac.istio.io default --ignore-not-found=true
+fi
+
+if kubectl api-versions | grep -c authentication.istio.io ; then
+    kubectl delete meshpolicies.authentication.istio.io -n istio-system default --ignore-not-found=true
+fi
 
 echo "--> Delete deprecated CRDs"
 kubectl delete customresourcedefinitions.apiextensions.k8s.io clusterrbacconfigs.rbac.istio.io --ignore-not-found
