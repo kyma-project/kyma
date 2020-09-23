@@ -6,12 +6,12 @@ nameOverride:
 fullnameOverride:
 image:
   repository: "eu.gcr.io/kyma-project/function-webhook"
-  tag: "PR-9339"
+  tag: "0c4f9f00"
   pullPolicy: IfNotPresent
 
 commonLabels:
-  app: "{{ template \"webhook.fullname\" . }}"
-  app.kubernetes.io/name: "{{ template \"webhook.fullname\" . }}"
+  app: '{{ template "webhook.fullname" . }}'
+  app.kubernetes.io/name: '{{ template "webhook.fullname" . }}'
   app.kubernetes.io/instance: "{{ .Release.Name }}"
   app.kubernetes.io/managed-by: "{{ .Release.Service }}"
   role: webhook
@@ -48,11 +48,11 @@ container:
     metricsDomain:
       value: "kyma-project.io/serverless"
     configObservabilityName:
-      value: "{{ template \"webhook.fullname\" . }}-config-observability"
+      value: '{{ template "webhook.fullname" . }}-config-observability'
     webhookServiceName:
-      value: "{{ template \"webhook.fullname\" . }}"
+      value: '{{ template "webhook.fullname" . }}'
     webhookSecretName:
-      value: "{{ template \"webhook.fullname\" . }}"
+      value: '{{ template "webhook.fullname" . }}'
     webhookPort:
       value: "{{ .Values.service.ports.httpsWebhook.targetPort }}"
     minRequestCpu:

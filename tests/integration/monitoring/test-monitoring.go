@@ -171,10 +171,31 @@ func testTargetsAreHealthy() {
 }
 
 func shouldIgnoreTarget(target prom.Labels) bool {
-	var jobsToBeIgnored = []string{
+	jobsToBeIgnored := []string{
 		// Note: These targets will be tested here: https://github.com/kyma-project/kyma/issues/6457
 		"knative-eventing/knative-eventing-event-mesh-dashboard-broker",
 		"knative-eventing/knative-eventing-event-mesh-dashboard-httpsource",
+	}
+
+	podsToBeIgnored := []string{
+		// Ignore the pods that are created during tests.
+		"-testsuite-",
+		"test",
+		"nodejs12-",
+		"nodejs10-",
+		"upgrade",
+		// Ignore the pods created by jobs which are executed after installation of control-plane.
+		"compass-migration",
+		"compass-director-tenant-loader-default",
+		"compass-agent-configuration",
+	}
+
+	namespacesToBeIgnored := []string{"test", "e2e"} // Since some namespaces are named -e2e and some are e2e-
+
+	for _, p := range podsToBeIgnored {
+		if strings.Contains(target["pod"], p) {
+			return true
+		}
 	}
 
 	for _, j := range jobsToBeIgnored {
@@ -182,6 +203,13 @@ func shouldIgnoreTarget(target prom.Labels) bool {
 			return true
 		}
 	}
+
+	for _, n := range namespacesToBeIgnored {
+		if strings.Contains(target["namespace"], n) {
+			return true
+		}
+	}
+
 	return false
 }
 

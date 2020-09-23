@@ -9,6 +9,8 @@ minio:
   enabled: true
   accessKey: ""
   secretKey: ""
+  podAnnotations:
+    persistence: "on"
 
 image:
   repository: eu.gcr.io/kyma-project/rafter-controller-manager

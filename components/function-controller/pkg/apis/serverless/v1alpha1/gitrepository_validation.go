@@ -28,5 +28,8 @@ func (in *RepositoryAuth) validate(path string) *apis.FieldError {
 	return validateIfMissingFields(property{
 		name:  fmt.Sprintf("%s.secretName", path),
 		value: in.SecretName,
+	}, property{
+		name:  fmt.Sprintf("%s.type", path),
+		value: string(in.Type),
 	})
 }
