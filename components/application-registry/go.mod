@@ -22,6 +22,7 @@ require (
 
 replace (
 	github.com/asaskevich/govalidator => github.com/asaskevich/govalidator v0.0.0-20180315120708-ccb8e960c48f
+	github.com/containerd/containerd => github.com/containerd/containerd v1.4.1
 	golang.org/x/text => golang.org/x/text v0.3.3
 	k8s.io/client-go => k8s.io/client-go v0.18.8
 )
