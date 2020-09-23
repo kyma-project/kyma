@@ -2,13 +2,14 @@ package testsuite
 
 import (
 	"fmt"
+	"time"
+
 	retrygo "github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/example_schema"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/sirupsen/logrus"
-	"time"
 )
 
 // SendEventToCompatibilityLayerAndCheckEventId is a step which sends an event and checks if the correct EventId has been received

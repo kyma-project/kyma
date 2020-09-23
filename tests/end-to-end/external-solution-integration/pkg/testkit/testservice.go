@@ -3,10 +3,11 @@ package testkit
 import (
 	"encoding/json"
 	"fmt"
-	cloudevents "github.com/cloudevents/sdk-go"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+
+	cloudevents "github.com/cloudevents/sdk-go"
 
 	"k8s.io/apimachinery/pkg/runtime"
 
