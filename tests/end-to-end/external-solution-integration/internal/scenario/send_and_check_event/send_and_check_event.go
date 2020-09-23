@@ -40,13 +40,12 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 		s.testServiceImage,
 	)
 	state := s.NewState()
-	const eventId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
 
 	return []step.Step{
 		testsuite.NewConnectApplication(connector, state, s.ApplicationTenant, s.ApplicationGroup),
-		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.FunctionPayload, state, eventId),
+		testsuite.NewSendEventToCompatibilityLayer(s.testID, helpers.FunctionPayload, state),
 		testsuite.NewCheckCounterPod(testService, 1),
-		testsuite.NewSendEventToMesh(s.testID, helpers.FunctionPayload, state, eventId),
+		testsuite.NewSendEventToMesh(s.testID, helpers.FunctionPayload, state),
 		testsuite.NewCheckCounterPod(testService, 2),
 	}, nil
 }

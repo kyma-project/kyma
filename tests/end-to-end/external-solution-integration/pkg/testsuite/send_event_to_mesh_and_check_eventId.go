@@ -15,8 +15,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// SendEventAndCheckId is a step which sends and event and checks if the correct EventId has been received
-type SendEventAndCheckId struct {
+// SendEventToMeshAndCheckEventId is a step which sends an event and checks if the correct EventId has been received
+type SendEventToMeshAndCheckEventId struct {
 	state       SendEventState
 	appName     string
 	payload     string
@@ -24,12 +24,13 @@ type SendEventAndCheckId struct {
 	retryOpts   []retrygo.Option
 }
 
-var _ step.Step = &SendEventAndCheckId{}
+var counterMesh = 0
+var _ step.Step = &SendEventToMeshAndCheckEventId{}
 
-// NewSendEventAndCheckId returns new SendEventAndCheckId
-func NewSendEventAndCheckId(appName, payload string, state SendEventState, testService *testkit.TestService,
-	opts ...retrygo.Option) *SendEventAndCheckId {
-	return &SendEventAndCheckId{
+// NewSendEventToMeshAndCheckEventId returns new SendEventToMeshAndCheckEventId
+func NewSendEventToMeshAndCheckEventId(appName, payload string, state SendEventState, testService *testkit.TestService,
+	opts ...retrygo.Option) *SendEventToMeshAndCheckEventId {
+	return &SendEventToMeshAndCheckEventId{
 		appName:     appName,
 		payload:     payload,
 		state:       state,
@@ -39,42 +40,35 @@ func NewSendEventAndCheckId(appName, payload string, state SendEventState, testS
 }
 
 // Name returns name name of the step
-func (s *SendEventAndCheckId) Name() string {
-	return "Send event and check event id"
+func (s *SendEventToMeshAndCheckEventId) Name() string {
+	return "Send event to mesh and check event id"
 }
 
 // Run executes the step
-func (s *SendEventAndCheckId) Run() error {
+func (s *SendEventToMeshAndCheckEventId) Run() error {
 	const basicId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa"
-	counter := 0
-	eventId := fmt.Sprint(basicId, counter)
-	// send event to mesh
-	err := s.sendEventToMesh(eventId)
+	eventId := fmt.Sprint(basicId, counterMesh)
 
+	err := s.sendEventToMesh(eventId)
 	if err != nil {
 		return err
 	}
 
-	// check if event with correct id has been received
 	err = s.checkEventId(eventId)
-
-	// if not, check all received ce
 	if err != nil {
+		counterMesh++
 		return s.testService.CheckAllReceivedEvents()
 	}
-
-	// increase counter
-	counter++
 
 	return nil
 }
 
 // Cleanup removes all resources that may possibly created by the step
-func (s *SendEventAndCheckId) Cleanup() error {
+func (s *SendEventToMeshAndCheckEventId) Cleanup() error {
 	return nil
 }
 
-func (s *SendEventAndCheckId) checkEventId(eventId string) error {
+func (s *SendEventToMeshAndCheckEventId) checkEventId(eventId string) error {
 	err := retry.Do(func() error {
 		return s.testService.CheckEventId(eventId)
 	}, s.retryOpts...)
@@ -82,7 +76,7 @@ func (s *SendEventAndCheckId) checkEventId(eventId string) error {
 	return err
 }
 
-func (s *SendEventAndCheckId) sendEventToMesh(eventId string) error {
+func (s *SendEventToMeshAndCheckEventId) sendEventToMesh(eventId string) error {
 	ctx := context.TODO()
 	event, err := s.prepareEvent(eventId)
 	if err != nil {
@@ -90,11 +84,12 @@ func (s *SendEventAndCheckId) sendEventToMesh(eventId string) error {
 	}
 
 	_, _, err = s.state.GetEventSender().SendCloudEventToMesh(ctx, event)
-	logrus.WithField("component", "SendEventToMesh").Debugf("SendCloudEventToMesh: eventID: %v; error: %v", event.ID(), err)
+	logrus.WithField("component", "SendEventToMesh").
+		Debugf("SendCloudEventToMesh: eventID: %v; error: %v", event.ID(), err)
 	return err
 }
 
-func (s *SendEventAndCheckId) prepareEvent(eventId string) (cloudevents.Event, error) {
+func (s *SendEventToMeshAndCheckEventId) prepareEvent(eventId string) (cloudevents.Event, error) {
 	event := cloudevents.NewEvent(cloudevents.VersionV1)
 	event.SetID(eventId)
 	event.SetType(example_schema.EventType)

@@ -3,6 +3,7 @@ package testkit
 import (
 	"encoding/json"
 	"fmt"
+	cloudevents "github.com/cloudevents/sdk-go"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -104,58 +105,54 @@ func (ts *TestService) checkValue() (int, error) {
 }
 
 func (ts *TestService) CheckAllReceivedEvents() error {
-	// Get url
+
 	url := ts.GetTestServiceURL()
 	endpoint := url + "/ce"
-	// return list of all received cloudevents
+
 	resp, err := ts.HttpClient.Get(endpoint)
 
-	// check if there was an error when getting
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	// check and return the received cloudevents
 	if resp.StatusCode != http.StatusOK {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return err
 		}
-
 		return errors.Errorf("error response: %s", body)
 	}
 
-	var response struct {
-		Cloudevents []string `json:"ce"`
-	}
+	var response []cloudevents.Event
 
 	err = json.NewDecoder(resp.Body).Decode(&response)
-
 	if err != nil {
 		return err
 	}
 
-	//return response.Cloudevents, nil
-	return errors.Errorf("received cloudevents: %s", response.Cloudevents)
+	var receivedCEs []string
+
+	for _, event := range response {
+		s := fmt.Sprintf("Event %s: %+v \n", event.Context.GetID(), event)
+		receivedCEs = append(receivedCEs, s)
+	}
+
+	return errors.Errorf("received cloudevents: %s", receivedCEs)
 }
 
 func (ts *TestService) CheckEventId(eventId string) error {
 
-	// Combine strings for the correct url endpoint
 	url := ts.GetTestServiceURL()
-	// endpoint = url/ce/<uuid>
-	endpoint := url + "/ce/" + eventId
-	// return cloud event with matching uuid. Returns 200 on success, 204 if no event was found
+	endpoint := url + "/ce/by-uuid/" + eventId
+
 	resp, err := ts.HttpClient.Get(endpoint)
 
-	// check if there was an error when getting
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	// checks if the status is ok
 	if resp.StatusCode != http.StatusOK {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
