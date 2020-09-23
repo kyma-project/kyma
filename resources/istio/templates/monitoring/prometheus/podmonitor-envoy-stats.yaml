@@ -44,7 +44,7 @@ spec:
       - __meta_kubernetes_pod_name
       targetLabel: pod_name
     - action: labeldrop
-      regex: ^(pod_name|container|job)$
+      regex: ^(pod_name|container|job|pod|instance|namespace|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$
   selector:
     matchExpressions:
     - key: testing.kyma-project.io/created-by-octopus
