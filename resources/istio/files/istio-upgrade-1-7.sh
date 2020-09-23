@@ -20,7 +20,7 @@ kubectl delete customresourcedefinitions.apiextensions.k8s.io servicerolebinding
 kubectl delete customresourcedefinitions.apiextensions.k8s.io serviceroles.rbac.istio.io --ignore-not-found
 
 echo "--> Install Istio 1.7"
-/usr/local/bin/istioctl-${ISTIOCTL_VERSION} upgrade -f /etc/istio/operator-1-7.yaml -y
+istioctl upgrade -f /etc/istio/operator-1-7.yaml -y
 
 echo "Apply custom kyma manifests"
 kubectl apply -f /etc/manifests

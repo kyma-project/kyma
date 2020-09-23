@@ -4,12 +4,12 @@ kind: Job
 metadata:
   annotations:
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
-    helm.sh/hook: "post-upgrade"
-    helm.sh/hook-weight: "20"
+    helm.sh/hook: "post-install,post-upgrade"
+    helm.sh/hook-weight: "30"
   name: istio-upgrade-job-1-7
 spec:
   activeDeadlineSeconds: 1000
-  backoffLimit: 3
+  backoffLimit: 1
   template:
     spec:
       containers:
