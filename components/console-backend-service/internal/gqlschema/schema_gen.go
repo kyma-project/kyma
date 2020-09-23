@@ -47,6 +47,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	APIRule() APIRuleResolver
 	Application() ApplicationResolver
 	Asset() AssetResolver
 	AssetGroup() AssetGroupResolver
@@ -78,6 +79,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	APIRule struct {
 		Generation func(childComplexity int) int
+		JSON       func(childComplexity int) int
 		Name       func(childComplexity int) int
 		Spec       func(childComplexity int) int
 		Status     func(childComplexity int) int
@@ -1149,6 +1151,9 @@ type ComplexityRoot struct {
 	}
 }
 
+type APIRuleResolver interface {
+	JSON(ctx context.Context, obj *v1alpha1.APIRule) (JSON, error)
+}
 type ApplicationResolver interface {
 	EnabledInNamespaces(ctx context.Context, obj *Application) ([]string, error)
 	EnabledMappingServices(ctx context.Context, obj *Application) ([]*EnabledMappingService, error)
@@ -1404,6 +1409,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.APIRule.Generation(childComplexity), true
+
+	case "APIRule.json":
+		if e.complexity.APIRule.JSON == nil {
+			break
+		}
+
+		return e.complexity.APIRule.JSON(childComplexity), true
 
 	case "APIRule.name":
 		if e.complexity.APIRule.Name == nil {
@@ -6791,6 +6803,7 @@ type APIRule @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1
     spec: APIRuleSpec!
     status: APIRuleStatuses!
     generation: Int!
+    json: JSON!
 }
 
 type APIRuleSpec @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleSpec") {
@@ -11818,6 +11831,40 @@ func (ec *executionContext) _APIRule_generation(ctx context.Context, field graph
 	res := resTmp.(int64)
 	fc.Result = res
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _APIRule_json(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.APIRule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "APIRule",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.APIRule().JSON(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	fc.Result = res
+	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _APIRuleAccessStrategy_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Authenticator) (ret graphql.Marshaler) {
@@ -40350,23 +40397,37 @@ func (ec *executionContext) _APIRule(ctx context.Context, sel ast.SelectionSet, 
 		case "name":
 			out.Values[i] = ec._APIRule_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "spec":
 			out.Values[i] = ec._APIRule_spec(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "status":
 			out.Values[i] = ec._APIRule_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "generation":
 			out.Values[i] = ec._APIRule_generation(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
+		case "json":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._APIRule_json(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
