@@ -84,4 +84,4 @@ spec:
       containers:
         - name: application-broker-eventing-migration
           image: "{{ .Values.global.containerRegistry.path }}/application-broker-eventing-service-instance-migration:{{ .Values.global.application_broker_eventing_migration.version }}"
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent

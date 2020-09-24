@@ -15,10 +15,6 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- /*
-application-broker-eventing-migration.labels.standard prints the standard labels.
-Standard labels are used in metadata.
-*/ -}}
 {{- define "application-broker-eventing-migration.name" -}}
 {{- printf "application-broker-eventing-migration" -}}
 {{- end -}}
@@ -27,6 +23,10 @@ Standard labels are used in metadata.
 {{- printf "%s-%s" .Release.Name "application-broker-eventing-migration" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- /*
+application-broker-eventing-migration.labels.standard prints the standard labels.
+Standard labels are used in metadata.
+*/ -}}
 {{- define "application-broker-eventing-migration.labels.standard" -}}
 app.kubernetes.io/name: {{ template "application-broker-eventing-migration.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
