@@ -61,7 +61,7 @@ spec:
         - name: ISTIO_META_ROUTER_MODE
           value: sni-dnat
         hpaSpec:
-          maxReplicas: 1 #We use host port, multiple instances will not work
+          maxReplicas: 1
           metrics:
           - resource:
               name: cpu
@@ -80,11 +80,7 @@ spec:
             cpu: 100m
             memory: 96Mi
         service:
-          {{- if .Values.global.isLocalEnv }}
           type: NodePort
-          {{- else }}
-          type: LoadBalancer
-          {{- end }}
           ports:
           - name: status-port
             port: 15021
@@ -117,7 +113,6 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 0
-        {{- if .Values.global.isLocalEnv }}
         overlays:
         - kind: Deployment
           name: istio-ingressgateway
@@ -126,7 +121,6 @@ spec:
             value: 80
           - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:8443].hostPort
             value: 443
-        {{- end }}
       name: istio-ingressgateway
 
     istiodRemote:
@@ -138,20 +132,18 @@ spec:
         env:
         - name: PILOT_TRACE_SAMPLING
           value: "100"
-        # TOCHECK
-        # - name: PILOT_HTTP10
-        #   value: "1"
-        # - name: POD_NAME
-        #   valueFrom:
-        #     fieldRef:
-        #       apiVersion: v1
-        #       fieldPath: metadata.name
-        # - name: POD_NAMESPACE
-        #   valueFrom:
-        #     fieldRef:
-        #       apiVersion: v1
-        #       fieldPath: metadata.namespace
-        # ENDTOCHECK
+        - name: PILOT_HTTP10
+          value: "1"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
         readinessProbe:
           httpGet:
             path: /ready
