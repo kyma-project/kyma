@@ -11,7 +11,7 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 
 VERIFY_IGNORE := /vendor\|/mocks
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:trivialVersions=true"
+CRD_OPTIONS ?= "crd:trivialVersions=false"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -44,7 +44,7 @@ install-samples: manifests
 
 # Uninstall sample CRs into a cluster
 uninstall-samples: manifests
-	ko apply -f config/samples
+	ko delete -f config/samples
 
 # Uninstall CRDs from a cluster
 uninstall: manifests

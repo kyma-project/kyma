@@ -15,11 +15,11 @@ This component contains controllers for various CustomResourceDefinitions relate
 
 - To deploy the controller inside a cluster, make sure you have `ko` installed and configured according to the [usage instructions](https://github.com/google/ko#usage), then run:
 
-    ```shell script
-    $ make deploy-local
+    ```sh
+    make deploy-local
 
-    $ ## To verify all the manifests after the processing by Kustomize without applying to the cluster use make target deploy-local-dry-run    
-    $ make deploy-local-dry-run
+    ## To verify all the manifests after the processing by Kustomize without applying to the cluster use make target deploy-local-dry-run    
+    make deploy-local-dry-run
     ```
 
 ## Usage 
@@ -36,26 +36,26 @@ This section explains how to use the eventing-controller.
 
 - To install the CustomResourceDefinitions in a cluster run:
 
-    ```shell script
-    $ make install
+    ```sh
+    make install
     ```
 
 - To uninstall the CustomResourceDefinitions in a cluster run:
 
-    ```shell script
-    $ make install
+    ```sh
+    make uninstall
     ```
 
 - To install the sample CustomResources in a cluster run:
 
-    ```shell script
-    $ make install-samples
+    ```sh
+    make install-samples
     ```
 
 - To uninstall the sample CustomResources in a cluster run:
 
-    ```shell script
-    $ make uninstall-samples
+    ```sh
+    make uninstall-samples
     ```
 
 ## Development
@@ -64,10 +64,10 @@ This section explains how to use the eventing-controller.
 
 Before running the component, execute the following command once to pull software dependencies and run tests:
 
-```shell script
-$ make test
-$ ## To download dependencies only
-$ make resolve-local 
+```sh
+make test
+## To download dependencies only
+make resolve-local 
 ```
 
 ### Generate code during local development
@@ -76,16 +76,16 @@ $ make resolve-local
 
 - Add new apis using [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) CLI followed by generating boiler-plate code by executing the following script:
 
-    ```shell script
-    $ kubebuilder create api --group batch --version v1 --kind CronJob
+    ```sh
+    kubebuilder create api --group batch --version v1 --kind CronJob
 
-    $ make manifests
+    make manifests
     ```
 
 - Update fields in the `spec` of an existing CustomResourceDefinition by modifying the go file for the type i.e. `api/version/<crd>_types.go`. E.g. `api/v1alpha1/subscriptions_types.go` for Subscriptions CRD. After that, execute the following command to generate boiler-plate code:
 
-    ```shell script
-    $ make manifests
+    ```sh
+    make manifests
     ```
 
 - Add the necessary changes manually in the sample CustomResources after updating fields for an existing CustomResourceDefinition inside the folder `config/samples/`. E.g. for subscriptions update the fields manually in `config/samples/eventing_v1alpha1_subscriptioncomponents/eventing-controller/config/crd/bases/eventing.kyma-project.io_subscriptions.yaml.yaml`
@@ -100,12 +100,12 @@ $ make resolve-local
 
 2. Build the binary:
 
-    ```console
-    $ make manager
+    ```sh
+    make manager
     ```
 
 3. Run the controller:
 
-    ```console
-    $ make run
+    ```sh
+    make run
     ```
