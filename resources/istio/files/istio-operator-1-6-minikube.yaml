@@ -488,7 +488,7 @@ spec:
 
     gateways:
       istio-egressgateway:
-        autoscaleEnabled: true
+        autoscaleEnabled: false
         type: ClusterIP
         name: istio-egressgateway
         secretVolumes:
