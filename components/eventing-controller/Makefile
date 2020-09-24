@@ -26,9 +26,9 @@ all: manager
 test: generate fmt vet manifests
 	go test ./... -coverprofile cover.out
 
-# Build manager binary
+# Build controller binary
 manager: generate fmt vet
-	go build -o bin/manager main.go
+	go build -o bin/controller main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
@@ -37,6 +37,14 @@ run: generate fmt vet manifests
 # Install CRDs into a cluster
 install: manifests
 	kustomize build config/crd | ko apply -f -
+
+# Install sample CRs into a cluster
+install-samples: manifests
+	ko apply -f config/samples
+
+# Uninstall sample CRs into a cluster
+uninstall-samples: manifests
+	ko apply -f config/samples
 
 # Uninstall CRDs from a cluster
 uninstall: manifests
@@ -51,8 +59,8 @@ ifeq ($(shell kubectl get ns kyma-system),)
 endif
 	kustomize build config/default | ko apply -f -
 
-# Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-deploy-dry-run: manifests
+# Dry run for deploying controller for local development
+deploy-local-dry-run: manifests
 	cd config/manager && kustomize edit set image controller=${DEV_IMG}
 	kustomize build config/default
 
@@ -97,7 +105,7 @@ $(eval $(call buildpack-mount,mod-verify))
 $(eval $(call buildpack-mount,test))
 
 path-to-referenced-charts:
-	@echo "resources/eventing-controller"
+	@echo "resources/eventing-manager/eventing-controller"
 
 # find or download controller-gen
 # download controller-gen if necessary

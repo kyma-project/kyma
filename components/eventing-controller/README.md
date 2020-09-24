@@ -2,34 +2,97 @@
 
 ## Overview
 
-This component contains controllers for various CustomResourceDefinitions related to eventing in Kyma.
+This component contains controllers for various CustomResourceDefinitions related to eventing in Kyma. The controller comes with 2 containers:
+- [controller](https://github.com/kubernetes-sigs/controller-runtime)
+- [kube-rbac-proxy](https://github.com/brancz/kube-rbac-proxy)
 
-## Usage
+
+## Prerequisites
+- Install [ko](https://github.com/google/ko) which is used to build and deploy the controller during local development
+- Install [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) which is the base framework for this controller
+
+### Installation
+
+- To deploy the controller inside a cluster, make sure you have `ko` installed and configured according to the [usage instructions](https://github.com/google/ko#usage), then run:
+
+    ```shell script
+    $ make deploy-local
+
+    $ ## To verify all the manifests after the processing by Kustomize without applying to the cluster use make target deploy-local-dry-run    
+    $ make deploy-local-dry-run
+    ```
+
+## Usage 
+
+This section explains how to use the eventing-controller.
+
+- The eventing-controller comes with the following command line argument flags
+
+    | Flag    | Default Value | Description                                                                                   |
+    | ----------------------- | ------------- |---------------------------------------------------------------------------------------------- |
+    | metrics-addr            | :8080          | It's address the metric endpoint binds to.
+    | enable-leader-election            | false          | It enables leader-election in controller and ensures there is only one active controller. 
+    | lease-duration            | 15s          | It's duration the non-leader candidates will wait to force acquire leadership. Valid time units are ns, us (or µs), ms, s, m, h. 
+
+- To install the CustomResourceDefinitions in a cluster run:
+
+    ```shell script
+    $ make install
+    ```
+
+- To uninstall the CustomResourceDefinitions in a cluster run:
+
+    ```shell script
+    $ make install
+    ```
+
+- To install the sample CustomResources in a cluster run:
+
+    ```shell script
+    $ make install-samples
+    ```
+
+- To uninstall the sample CustomResources in a cluster run:
+
+    ```shell script
+    $ make uninstall-samples
+    ```
+
+## Development
 
 ### Project setup
 
-Before running the component, execute the following command once to pull software dependencies, apply mandatory patches, and compile all binaries:
+Before running the component, execute the following command once to pull software dependencies and run tests:
 
 ```shell script
-$ make resolve-local
+$ make test
+$ ## To download dependencies only
+$ make resolve-local 
 ```
 
-### Run the controller inside the cluster
+### Generate code during local development
 
-To deploy the controller inside a cluster, make sure you have `ko` installed and configured according to the [usage instructions](https://github.com/google/ko#usage), then run:
+> More details on scaffolding code using kubebuilder can be found [here](https://github.com/kubernetes-sigs/kubebuilder/blob/master/designs/simplified-scaffolding.md). 
 
-```shell script
-$ make deploy
-```
+- Add new apis using [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) CLI followed by generating boiler-plate code by executing tthe following script:
 
-#### Set up the environment
+    ```shell script
+    $ kubebuilder create api --group batch --version v1 --kind CronJob
 
-Follow these steps to set up the environment:
+    $ make manifests
+    ```
 
->**NOTE:** You only need to do this once.
+- Update fields in the `spec` of an existing CustomResourceDefinition is done by modifying the spec in the go file for the type inside `api/version/crd_types.go`. E.g. `api/v1alpha1/subscriptions_types.go` for Subscriptions CRD. After that, execute the following command to generate boiler-plate code:
 
+    ```shell script
+    $ make manifests
+    ```
 
-#### Start the controller
+- Add the necessary changes manually in the sample CustomResources after updating fields for an existing CustomResourceDefinition inside the folder `config/samples/`. E.g. for subscriptions update the fields manually in `config/samples/eventing_v1alpha1_subscriptions.yaml`
+
+### Set up the environment
+
+#### Start the controller locally
 
 1. Export the following mandatory environment variables:
 
@@ -38,31 +101,11 @@ Follow these steps to set up the environment:
 2. Build the binary:
 
     ```console
-    $ make controller-manager
+    $ make manager
     ```
 
 3. Run the controller:
 
     ```console
-    $ ./controller-manager
+    $ make run
     ```
-
-## Development
-
-- Create the CustomResourceDefinitions:
-
-    ```shell script
-    $ make install
-    ```
-
-### Custom types
-
-The client code for custom API objects is generated using [code generators](https://github.com/kubernetes/code-generator/). This includes native REST clients, listers and informers, as well as injection code for Knative.
-
-The client code must be re-generated whenever the API for custom types (`apis/.../types*.go`) changes:
-
-```console
-$ make codegen
-```
-
-For details, see [Generate code](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api_changes.md#generate-code) section of the Kubernetes API changes guide.

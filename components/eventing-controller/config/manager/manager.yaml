@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: controller-manager
+  name: eventing-controller
   namespace: system
   labels:
-    control-plane: controller-manager
+    control-plane: eventing-controller
 spec:
   selector:
     matchLabels:
-      control-plane: controller-manager
+      control-plane: eventing-controller
   replicas: 1
   template:
     metadata:
       labels:
-        control-plane: controller-manager
+        control-plane: eventing-controller
     spec:
       containers:
       - image: controller
         args:
         - --enable-leader-election
-        name: manager
+        name: controller
         resources:
           limits:
             cpu: 100m

@@ -13,7 +13,7 @@ spec:
     kind: Subscriptions
     listKind: SubscriptionsList
     plural: subscriptions
-    singular: subscriptions
+    singular: subscription
   scope: Namespaced
   validation:
     openAPIV3Schema:

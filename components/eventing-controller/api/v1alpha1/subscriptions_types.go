@@ -24,9 +24,6 @@ import (
 type SubscriptionsSpec struct {
 	// Id is the unique identifier of the subscription.
 	Id string `json:"id,omitempty"`
-
-	// Id is the unique identifier of the subscription.
-	Foo string `json:"id,omitempty"`
 }
 
 // SubscriptionsStatus defines the observed state of Subscriptions
