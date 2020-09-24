@@ -20,7 +20,7 @@ import (
 
 const (
 	destinationArg        = "--destination"
-	functionContainerName = "lambda"
+	functionContainerName = "function"
 	baseDir               = "/workspace/src/"
 	workspaceMountPath    = "/workspace"
 )
