@@ -16,7 +16,7 @@ func TestGitRepositoryValidation(t *testing.T) {
 		"should be valid - no auth": {
 			givenFunc: GitRepository{
 				Spec: GitRepositorySpec{
-					URL: "some_url",
+					URL: "https://github.com/kyma-project/kyma.git",
 				},
 			},
 			expectedError: gomega.BeNil(),
@@ -24,7 +24,7 @@ func TestGitRepositoryValidation(t *testing.T) {
 		"should be valid - auth": {
 			givenFunc: GitRepository{
 				Spec: GitRepositorySpec{
-					URL: "some_url",
+					URL: "https://github.com/kyma-project/kyma.git",
 					Auth: &RepositoryAuth{
 						Type:       RepositoryAuthBasic,
 						SecretName: "some_name",
@@ -75,6 +75,41 @@ func TestGitRepositoryValidation(t *testing.T) {
 			specifiedExpectedError: gomega.And(
 				gomega.ContainSubstring("spec.auth.type"),
 			),
+			expectedError: gomega.HaveOccurred(),
+		},
+		"should be valid git ssh": {
+			givenFunc: GitRepository{
+				Spec: GitRepositorySpec{
+					URL: "git@github.com:kyma-project/kyma.git",
+					Auth: &RepositoryAuth{
+						Type:       RepositoryAuthSSHKey,
+						SecretName: "my-secret",
+					},
+				},
+			},
+			expectedError: gomega.BeNil(),
+		},
+		"should be invalid git ssh, no auth provided": {
+			givenFunc: GitRepository{
+				Spec: GitRepositorySpec{
+					URL: "git@github.com:kyma-project/kyma.git",
+				},
+			},
+			specifiedExpectedError: gomega.ContainSubstring("spec.auth"),
+			expectedError:          gomega.HaveOccurred(),
+		},
+		"should be invalid git ssh, auth type is not key and secret name is empty": {
+			givenFunc: GitRepository{
+				Spec: GitRepositorySpec{
+					URL: "git@github.com:kyma-project/kyma.git",
+					Auth: &RepositoryAuth{
+						Type: RepositoryAuthBasic,
+					},
+				},
+			},
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring("spec.auth.type"),
+				gomega.ContainSubstring("spec.auth.secretName")),
 			expectedError: gomega.HaveOccurred(),
 		},
 	} {
