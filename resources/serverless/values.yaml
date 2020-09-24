@@ -76,7 +76,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-9496"
+    tag: "PR-9447"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
@@ -113,16 +113,6 @@ containers:
         memory: 32Mi
     extraProperties: {}
     envs:
-      runtimeConfigMapName:
-        value: dockerfile-nodejs-12
-      buildRequestsCPU:
-        value: 700m
-      buildRequestsMemory:
-        value: 700Mi
-      buildLimitsCPU:
-        value: 1100m
-      buildLimitsMemory:
-        value: 1100Mi
       configMapRequeueDuration:
         value: 5m
       secretRequeueDuration:
@@ -217,3 +207,6 @@ docker-registry:
 webhook:
   enabled: true
   fullnameOverride: "serverless-webhook"
+  image:
+    repository: "eu.gcr.io/kyma-project/function-webhook"
+    tag: "PR-9447"

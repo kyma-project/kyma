@@ -3,6 +3,10 @@ title: Environment variables
 type: Configuration
 ---
 
+Configuration of environment variables depends on Function's runtime.
+
+## NodeJS runtime
+
 To configure the Function with the Node.js runtime, override the default values of these environment variables:
 
 | Environment variable | Description                                                               | Type   | Default value |
@@ -33,6 +37,8 @@ spec:
       }
     }
 ```
+
+## Python runtime
 
 To configure a Function with the Python runtime, override the default values of these environment variables:
 
