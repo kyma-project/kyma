@@ -19,6 +19,9 @@ metadata:
 spec:
   disableConcurrency: false
   template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-tests
     spec:
       {{ if .Values.global.isLocalEnv }}
       hostAliases:

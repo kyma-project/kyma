@@ -10,4 +10,4 @@ spec:
   trafficPolicy:
     connectionPool:
       tcp:
-        connectTimeout: 30s
+        connectTimeout: "30s"

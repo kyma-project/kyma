@@ -8,7 +8,6 @@ metadata:
   labels:
     "kyma-project.io/upgrade-e2e-test": "executeTests"
     "kyma-project.io/test.after-upgrade": "true"
-    "kyma-project.io/test.after-restore": "true"
 
 spec:
   template:
@@ -46,7 +45,6 @@ metadata:
   labels:
     "kyma-project.io/upgrade-e2e-test": "prepareTests"
     "kyma-project.io/test.before-upgrade": "true"
-    "kyma-project.io/test.before-restore": "true"
 spec:
   template:
     metadata:

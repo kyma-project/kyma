@@ -44,10 +44,6 @@ func (t TargetsAndRulesTest) CreateResources(stop <-chan struct{}, log logrus.Fi
 	if err := t.testPodsAreReady(); err != nil {
 		return err
 	}
-	log.Println("checking that all targets are healthy before upgrade")
-	if err := t.testTargetsAreHealthy(); err != nil {
-		return err
-	}
 	log.Println("checking that all rules are healthy before upgrade")
 	if err := t.testRulesAreHealthy(); err != nil {
 		return err
@@ -59,10 +55,6 @@ func (t TargetsAndRulesTest) CreateResources(stop <-chan struct{}, log logrus.Fi
 func (t TargetsAndRulesTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("checking that monitoring pods are ready")
 	if err := t.testPodsAreReady(); err != nil {
-		return err
-	}
-	log.Println("checking that all targets are healthy after upgrade")
-	if err := t.testTargetsAreHealthy(); err != nil {
 		return err
 	}
 	log.Println("checking that all rules are healthy after upgrade")
@@ -210,12 +202,16 @@ func shouldIgnoreTarget(target prom.Labels) bool {
 		"nodejs12-",
 		"nodejs10-",
 		"upgrade",
+		// Ignore the pods created by jobs which are executed after installation of control-plane.
+		"compass-migration",
+		"compass-director-tenant-loader-default",
+		"compass-agent-configuration",
 	}
 
-	namespacesToBeIgnored := []string{"test"}
+	namespacesToBeIgnored := []string{"test", "e2e"} // Since some namespaces are named -e2e and some are e2e-
 
 	for _, p := range podsToBeIgnored {
-		if strings.Contains(target["pod_name"], p) {
+		if strings.Contains(target["pod"], p) {
 			return true
 		}
 	}

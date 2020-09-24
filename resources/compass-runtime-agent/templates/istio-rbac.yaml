@@ -1,8 +1,7 @@
-apiVersion: rbac.istio.io/v1alpha1
-kind: ServiceRole
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
 metadata:
   name: {{ .Chart.Name }}
-  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
@@ -11,26 +10,17 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  action: ALLOW
   rules:
-    - services: ["{{ .Chart.Name }}.{{ .Release.Namespace }}.svc.cluster.local"]
-      methods: ["*"]
-      paths: ["*"]
----
-apiVersion: rbac.istio.io/v1alpha1
-kind: ServiceRoleBinding
-metadata:
-  name: {{ .Chart.Name }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app: {{ .Chart.Name }}
-    release: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-spec:
-  subjects:
-    - user: "cluster.local/ns/kyma-integration/sa/application-broker"
-  roleRef:
-    kind: ServiceRole
-    name: {{ .Chart.Name }}
+  - from:
+    - source:
+        principals: ["cluster.local/ns/kyma-integration/sa/application-broker"]
+  - to:
+    - operation:
+        ports:
+        - "443" # compass-runtime-agent-service
+        - "{{ .Values.compassRuntimeAgent.healthCheck.port }}"
+        - "{{ .Values.compassRuntimeAgent.healthCheck.proxyStatusPort }}"

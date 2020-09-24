@@ -21,6 +21,7 @@ spec:
             sidecar.istio.io/inject: "true"
           labels:
             purpose: testing
+            app: {{ template "fullname" . }}-tests
         spec:
           {{ if .Values.global.isLocalEnv }}
           hostAliases:

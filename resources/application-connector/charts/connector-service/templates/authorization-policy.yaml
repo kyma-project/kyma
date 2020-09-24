@@ -1,0 +1,30 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
+{{ if .Values.istio.rbac.enabled }}
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ template "name" . }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals:
+{{ tpl (toYaml .Values.istio.rbac.connectorServiceInternalApi.subjects | indent 10) . }}
+  - to:
+    - operation:
+        ports:
+        - "{{ .Values.service.externalapi.port }}"
+        - "9090" # http-metrics
+{{ end }}
+{{- end }}

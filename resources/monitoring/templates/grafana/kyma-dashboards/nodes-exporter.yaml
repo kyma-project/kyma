@@ -2117,7 +2117,7 @@ data:
         "schemaVersion": 22,
         "style": "dark",
         "tags": [
-            "monitoring",
+            "kubernetes",
             "kyma"
         ],
         "templating": {
@@ -2297,7 +2297,6 @@ data:
           "to": "now"
         },
         "timepicker": {
-            "now": true,
             "refresh_intervals": [
             "5s",
             "10s",

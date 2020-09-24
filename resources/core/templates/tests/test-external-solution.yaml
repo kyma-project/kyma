@@ -22,6 +22,8 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
+      labels:
+        app: {{ $.Chart.Name }}-test-external-solution
     spec:
       restartPolicy: Never
       serviceAccountName: {{ $.Chart.Name }}-test-external-solution
