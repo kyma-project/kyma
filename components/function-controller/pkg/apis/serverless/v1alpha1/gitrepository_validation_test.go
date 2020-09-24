@@ -109,7 +109,8 @@ func TestGitRepositoryValidation(t *testing.T) {
 			},
 			specifiedExpectedError: gomega.And(
 				gomega.ContainSubstring("spec.auth.type"),
-				gomega.ContainSubstring("spec.auth.secretName")),
+				gomega.ContainSubstring("spec.auth.secretName"),
+				gomega.ContainSubstring("invalid value for git ssh")),
 			expectedError: gomega.HaveOccurred(),
 		},
 	} {

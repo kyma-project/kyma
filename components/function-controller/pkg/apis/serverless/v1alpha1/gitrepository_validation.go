@@ -45,7 +45,8 @@ func (in *RepositoryAuth) validateSSHAuth(path string) *apis.FieldError {
 	}
 	var err *apis.FieldError
 	if in.Type != RepositoryAuthSSHKey {
-		err = apis.ErrInvalidValue(in.Type, fmt.Sprintf("%s.type", path))
+		err = apis.ErrGeneric(fmt.Sprintf("invalid value for git ssh, expected %s, current: %s",
+			RepositoryAuthSSHKey, in.Type), fmt.Sprintf("%s.type", path))
 	}
 
 	return err.Also(validateIfMissingFields(property{
