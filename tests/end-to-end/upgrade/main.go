@@ -154,10 +154,8 @@ func main() {
 		//"LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
 	}
 
-	if testName != "" {
-		tests = map[string]runner.UpgradeTest{
-			testName: tests[testName],
-		}
+	if testToRun, found := tests[testName]; found {
+		tests = map[string]runner.UpgradeTest{testName:testToRun}
 	}
 
 	tRegistry, err := runner.NewConfigMapTestRegistry(k8sCli, cfg.WorkingNamespace, cfg.TestsInfoConfigMapName)
