@@ -20,8 +20,10 @@ route:
   {{- if and (not (eq "" .Values.global.alertTools.credentials.victorOps.apikey)) (not (eq "" .Values.global.alertTools.credentials.victorOps.routingkey))}}
   - receiver: "victorOps"
     continue: true # If set to `false`, it stops after the first matching.
+  {{- with .Values.global.alertTools.credentials.victorOps.matchExpression }}
     match_re:
-      {{ tpl ( toYaml .Values.global.alertTools.credentials.victorOps.matchExpression | indent 6) . }}
+    {{- tpl . $ | nindent 6}}
+  {{- end }}
   {{- with .Values.global.alertTools.credentials.victorOps.routes }}
     routes:
     {{- tpl . $ | nindent 4}}
@@ -32,8 +34,10 @@ route:
   {{- if and (not (eq "" .Values.global.alertTools.credentials.slack.channel)) (not (eq "" .Values.global.alertTools.credentials.slack.apiurl))}}
   - receiver: "slack"
     continue: true # If set to `false`, it stops after the first matching.
+  {{- with .Values.global.alertTools.credentials.slack.matchExpression }}
     match_re:
-      {{ tpl ( toYaml .Values.global.alertTools.credentials.slack.matchExpression | indent 6) . }}
+    {{- tpl . $ | nindent 6}}
+  {{- end }}
   {{- with .Values.global.alertTools.credentials.slack.routes }}
     routes:
     {{- tpl . $ | nindent 4}}

@@ -2,7 +2,10 @@ package apigateway
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+
+	errs "github.com/pkg/errors"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -37,6 +40,7 @@ func (r *Resolver) APIRulesQuery(ctx context.Context, namespace string, serviceN
 func (r *Resolver) APIRuleQuery(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {
 	var result *v1alpha1.APIRule
 	err := r.Service().GetInNamespace(name, namespace, &result)
+
 	return result, err
 }
 
@@ -96,4 +100,29 @@ func (r *Resolver) DeleteAPIRule(ctx context.Context, name string, namespace str
 	result := &v1alpha1.APIRule{}
 	err := r.Service().DeleteInNamespace(namespace, name, result)
 	return result, err
+}
+
+func (r *Resolver) JsonField(ctx context.Context, obj *v1alpha1.APIRule) (gqlschema.JSON, error) {
+	if obj == nil {
+		return nil, nil
+	}
+
+	jsonByte, err := json.Marshal(obj)
+	if err != nil {
+		return nil, errs.Wrapf(err, "while marshalling apirule `%s`", obj.Name)
+	}
+
+	var jsonMap map[string]interface{}
+	err = json.Unmarshal(jsonByte, &jsonMap)
+	if err != nil {
+		return nil, errs.Wrapf(err, "while unmarshalling apirule `%s` to map", obj.Name)
+	}
+
+	var result gqlschema.JSON
+	err = result.UnmarshalGQL(jsonMap)
+	if err != nil {
+		return nil, errs.Wrapf(err, "while unmarshalling apirule `%s` to GQL JSON", obj.Name)
+	}
+
+	return result, nil
 }
