@@ -57,15 +57,6 @@ spec:
       annotations:
         description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
         summary: "{{`{{ $labels.pod }}`}} is not running"
-  - name: kn-serving-pod-not-running-rule
-    rules:
-    - alert: KnServingSystemPodNotRunning
-      expr: sum(kube_pod_container_status_running { namespace="knative-serving", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
-      for: 60s
-      #labels:
-      #  severity: critical
-      annotations:
-        message: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
   - name: cpu-90-percent-usage-rule
     rules:
     - alert: CPU90PercentUsage
