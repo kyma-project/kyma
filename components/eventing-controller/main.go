@@ -18,7 +18,6 @@ package main
 
 import (
 	"flag"
-	"log"
 	"os"
 	"time"
 
@@ -57,7 +56,6 @@ func main() {
 	flag.Parse()
 	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 
-	log.Printf("lease durationnnnnn  %v", leaseDuration)
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
 		MetricsBindAddress: metricsAddr,

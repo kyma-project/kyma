@@ -35,7 +35,7 @@ spec:
           description: SubscriptionSpec defines the desired state of Subscription
           properties:
             id:
-              description: Id is the unique identifier of the subscription.
+              description: Id is the unique identifier of Subscription.
               type: string
           type: object
         status:

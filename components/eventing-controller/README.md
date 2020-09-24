@@ -74,7 +74,7 @@ $ make resolve-local
 
 > More details on scaffolding code using kubebuilder can be found [here](https://github.com/kubernetes-sigs/kubebuilder/blob/master/designs/simplified-scaffolding.md). 
 
-- Add new apis using [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) CLI followed by generating boiler-plate code by executing tthe following script:
+- Add new apis using [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) CLI followed by generating boiler-plate code by executing the following script:
 
     ```shell script
     $ kubebuilder create api --group batch --version v1 --kind CronJob
@@ -82,13 +82,13 @@ $ make resolve-local
     $ make manifests
     ```
 
-- Update fields in the `spec` of an existing CustomResourceDefinition is done by modifying the spec in the go file for the type inside `api/version/crd_types.go`. E.g. `api/v1alpha1/subscriptions_types.go` for Subscriptions CRD. After that, execute the following command to generate boiler-plate code:
+- Update fields in the `spec` of an existing CustomResourceDefinition by modifying the go file for the type i.e. `api/version/<crd>_types.go`. E.g. `api/v1alpha1/subscriptions_types.go` for Subscriptions CRD. After that, execute the following command to generate boiler-plate code:
 
     ```shell script
     $ make manifests
     ```
 
-- Add the necessary changes manually in the sample CustomResources after updating fields for an existing CustomResourceDefinition inside the folder `config/samples/`. E.g. for subscriptions update the fields manually in `config/samples/eventing_v1alpha1_subscriptions.yaml`
+- Add the necessary changes manually in the sample CustomResources after updating fields for an existing CustomResourceDefinition inside the folder `config/samples/`. E.g. for subscriptions update the fields manually in `config/samples/eventing_v1alpha1_subscriptioncomponents/eventing-controller/config/crd/bases/eventing.kyma-project.io_subscriptions.yaml.yaml`
 
 ### Set up the environment
 

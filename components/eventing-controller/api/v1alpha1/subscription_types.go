@@ -22,7 +22,7 @@ import (
 
 // SubscriptionSpec defines the desired state of Subscription
 type SubscriptionSpec struct {
-	// Id is the unique identifier of the subscription.
+	// Id is the unique identifier of Subscription.
 	Id string `json:"id,omitempty"`
 }
 
