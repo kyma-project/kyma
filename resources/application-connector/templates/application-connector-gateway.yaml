@@ -11,7 +11,6 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   selector:
-    app: istio-ingressgateway
     istio: ingressgateway # use istio default ingress gateway
   servers:
     - port:

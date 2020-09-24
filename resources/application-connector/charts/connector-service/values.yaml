@@ -51,9 +51,9 @@ istio:
     enabled: true
     connectorServiceInternalApi:
       subjects:
-      - cluster.local/ns/kyma-integration/sa/connection-token-handler
-      - cluster.local/ns/kyma-integration/sa/{{ .Chart.Name }}-tests
-      - cluster.local/ns/kyma-system/sa/console-backend
+      - user: cluster.local/ns/kyma-integration/sa/connection-token-handler
+      - user: cluster.local/ns/kyma-integration/sa/{{ .Chart.Name }}-tests
+      - user: cluster.local/ns/kyma-system/sa/console-backend
   mtlsDestinationRule:
     required: false
 
