@@ -54,6 +54,8 @@ global:
     version: "PR-9407"
   application_connectivity_validator:
     version: "PR-9512"
+  application_broker_eventing_migration:
+    version: "PR-9389"
 
 application_connectivity_certs_setup_job:
   secrets:
