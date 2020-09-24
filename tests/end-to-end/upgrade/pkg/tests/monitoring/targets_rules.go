@@ -44,10 +44,6 @@ func (t TargetsAndRulesTest) CreateResources(stop <-chan struct{}, log logrus.Fi
 	if err := t.testPodsAreReady(); err != nil {
 		return err
 	}
-	// log.Println("checking that all targets are healthy before upgrade")
-	// if err := t.testTargetsAreHealthy(); err != nil {
-	// 	return err
-	// }
 	log.Println("checking that all rules are healthy before upgrade")
 	if err := t.testRulesAreHealthy(); err != nil {
 		return err
@@ -61,10 +57,6 @@ func (t TargetsAndRulesTest) TestResources(stop <-chan struct{}, log logrus.Fiel
 	if err := t.testPodsAreReady(); err != nil {
 		return err
 	}
-	// log.Println("checking that all targets are healthy after upgrade")
-	// if err := t.testTargetsAreHealthy(); err != nil {
-	// 	return err
-	// }
 	log.Println("checking that all rules are healthy after upgrade")
 	if err := t.testRulesAreHealthy(); err != nil {
 		return err
