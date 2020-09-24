@@ -41,10 +41,14 @@ spec:
       targetLabel: namespace
     - action: replace
       sourceLabels:
+      - __meta_kubernetes_pod_container_name
+      targetLabel: instance
+    - action: replace
+      sourceLabels:
       - __meta_kubernetes_pod_name
       targetLabel: pod_name
     - action: labeldrop
-      regex: ^(pod_name|container|job|pod|instance|namespace|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$
+      regex: ^(pod_name|container|job|pod|namespace|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$
   selector:
     matchExpressions:
     - key: testing.kyma-project.io/created-by-octopus

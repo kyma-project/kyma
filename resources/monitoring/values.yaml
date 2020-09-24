@@ -11,7 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: d2a06af0
+    version: 0de5247a
     tests:
       enabled: true
 
