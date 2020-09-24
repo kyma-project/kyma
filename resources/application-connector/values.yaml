@@ -25,7 +25,7 @@ global:
   application_operator:
     version: "PR-9496"
   application_operator_tests:
-    version: "PR-9407"
+    version: "PR-9512"
   connector_service:
     version: "PR-9407"
   connector_service_tests:
@@ -39,13 +39,13 @@ global:
   event_service_integration_tests:
     version: "2c51c024"
   application_gateway:
-    version: "PR-9407"
+    version: "PR-9512"
   application_gateway_tests:
-    version: "PR-9407"
+    version: "PR-9512"
   application_gateway_legacy_tests:
     version: "4eeef0b7"
   application_registry:
-    version: "PR-9407"
+    version: "PR-9512"
   application_registry_tests:
     version: "PR-9407"
   application_broker:
@@ -53,7 +53,7 @@ global:
   application_connectivity_certs_setup_job:
     version: "PR-9407"
   application_connectivity_validator:
-    version: "PR-9407"
+    version: "PR-9512"
 
 application_connectivity_certs_setup_job:
   secrets:
