@@ -7,7 +7,7 @@ import (
 
 type SourceType string
 
-// +kubebuilder:validation:Enum=nodejs12;nodejs10;python37
+// +kubebuilder:validation:Enum=nodejs12;nodejs10;python38
 
 type Runtime string
 
@@ -18,7 +18,7 @@ const (
 const (
 	Nodejs12 Runtime = "nodejs12"
 	Nodejs10 Runtime = "nodejs10"
-	Python37 Runtime = "python37"
+	Python38 Runtime = "python38"
 )
 
 // FunctionSpec defines the desired state of Function
@@ -48,7 +48,7 @@ type FunctionSpec struct {
 	Labels map[string]string `json:"labels,omitempty"`
 
 	// +optional
-	SourceType SourceType `json:"sourceType,omitempty"`
+	Type SourceType `json:"type,omitempty"`
 
 	Repository `json:",inline,omitempty"`
 }

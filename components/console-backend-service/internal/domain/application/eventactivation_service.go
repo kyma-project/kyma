@@ -1,9 +1,9 @@
 package application
 
 import (
-	"fmt"
-
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	res "github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
+	"github.com/pkg/errors"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -27,9 +27,14 @@ func (svc *eventActivationService) List(namespace string) ([]*v1alpha1.EventActi
 }
 
 func (svc *eventActivationService) toEventActivation(item interface{}) (*v1alpha1.EventActivation, error) {
-	eventActivation, ok := item.(*v1alpha1.EventActivation)
-	if !ok {
-		return nil, fmt.Errorf("incorrect item type: %T, should be: *EventActivation", item)
+	unstructured, err := res.ToUnstructured(item)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while converting item to unstructured")
+	}
+	eventActivation := &v1alpha1.EventActivation{}
+	err = res.FromUnstructured(unstructured, eventActivation)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while converting EventActivation from unstructured")
 	}
 
 	return eventActivation, nil

@@ -256,6 +256,9 @@ components/etcd-tls-setup-job/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksp
 # Compass Runtime Agent
 /components/compass-runtime-agent/ @PK85 @crabtree @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
 
+# Cloud Event Gateway Proxy
+/components/cloud-event-gateway-proxy @anishj0shi @k15r @lilitgh @marcobebway @montaro @nachtmaar @radufa @sayanh
+
 # Tests
 # Service Catalog acceptance tests
 /tests/service-catalog/ @mszostok @polskikiel @ksputo @piotrmiskiewicz @PK85 @jasiu001 @adamwalach
@@ -310,9 +313,6 @@ components/etcd-tls-setup-job/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksp
 
 # Tools
 
-# The alpine-net directory
-/tools/alpine-net/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
-
 # The failery directory
 /tools/failery/ @m00g3n @aerfio @pPrecel @magicmatatjahu
 
@@ -321,6 +321,9 @@ components/etcd-tls-setup-job/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksp
 #
 # The tools/event-subscriber directory
 /tools/event-subscriber/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
+
+# The tools/gitserver directory
+/tools/gitserver/ @m00g3n @aerfio @pPrecel @magicmatatjahu @tgorgol @kfurgol @dbadura
 
 # external-solution-integration test directory
 /tests/end-to-end/external-solution-integration/ @janmedrek @rakesh-garimella @sayanh @tgorgol @dbadura @akgalwas @Szymongib @k15r

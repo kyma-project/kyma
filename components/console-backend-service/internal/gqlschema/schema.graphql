@@ -908,6 +908,10 @@ type Function {
     env: [FunctionEnv!]!
     replicas: FunctionReplicas!
     resources: FunctionResources!
+    runtime: String
+    sourceType: String
+    baseDir: String
+    reference: String
 
     # status
     status: FunctionStatus!
@@ -982,7 +986,7 @@ enum FunctionPhaseType {
 enum FunctionReasonType {
     CONFIG # ConfigMap
     JOB # K8S Job
-    SERVICE # KNative Service
+    SERVICE #  Deployment + Service + hpa
 }
 
 input FunctionMutationInput {
@@ -992,6 +996,10 @@ input FunctionMutationInput {
     env: [FunctionEnvInput!]!
     replicas: FunctionReplicasInput!
     resources: FunctionResourcesInput!
+    runtime: String
+    sourceType: String
+    baseDir: String
+    reference: String
 }
 
 type FunctionMetadata {
@@ -1143,7 +1151,7 @@ type Mutation {
     deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 
     createNamespace(name: String!, labels: Labels): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "create", apiGroup: "", apiVersion: "v1"})
-    updateNamespace(name: String!, labels: Labels!): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
+    updateNamespace(name: String!, labels: Labels): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
     deleteNamespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
 
     createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})

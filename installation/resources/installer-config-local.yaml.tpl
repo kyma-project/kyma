@@ -109,18 +109,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: core-tests
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: core
-    kyma-project.io/installation: ""
-data:
-  console.test.acceptance.enabled: "false"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: compass-runtime-agent-tests
   namespace: kyma-installer
   labels:
@@ -145,6 +133,17 @@ data:
   hydra.hydra.autoMigrate: "false"
   hydra.deployment.resources.requests.cpu: "50m"
   hydra.deployment.resources.limits.cpu: "150m"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tracing-global-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    kyma-project.io/installation: ""
+data:
+  global.tracing.enabled: "false"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -223,3 +222,15 @@ data:
   autoscaler_hpa.resources.requests.memory: "100Mi"
   controller.resources.requests.cpu: "30m"
   controller.resources.requests.memory: "100Mi"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: console-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: console
+    kyma-project.io/installation: ""
+data:
+  web.test.acceptance.enabled: "false"
