@@ -1085,7 +1085,7 @@ data:
       "schemaVersion": 25,
       "style": "dark",
       "tags": [
-        "kyma"
+        "kyma", "serverless"
       ],
       "templating": {
         "list": [
@@ -1144,8 +1144,8 @@ data:
           {
             "current": {
               "selected": true,
-              "text": "lambda",
-              "value": "lambda"
+              "text": "function",
+              "value": "function"
             },
             "hide": 2,
             "label": null,
@@ -1153,11 +1153,11 @@ data:
             "options": [
               {
                 "selected": true,
-                "text": "lambda",
-                "value": "lambda"
+                "text": "function",
+                "value": "function"
               }
             ],
-            "query": "lambda",
+            "query": "function",
             "skipUrlSync": false,
             "type": "constant"
           }
@@ -1169,6 +1169,7 @@ data:
       },
       "timepicker": {
         "refresh_intervals": [
+          "5s",
           "10s",
           "30s",
           "1m",
