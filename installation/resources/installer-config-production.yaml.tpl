@@ -28,14 +28,29 @@ metadata:
     component: istio
     kyma-project.io/installation: ""
 data:
-  global.proxy.resources.requests.cpu: "150m"
-  global.proxy.resources.requests.memory: "128Mi"
-  global.proxy.resources.limits.cpu: "500m"
-  global.proxy.resources.limits.memory: "1024Mi"
-
-  gateways.istio-ingressgateway.autoscaleMin: "3" 
-  gateways.istio-ingressgateway.autoscaleMax: "10"
-
+  kyma_istio_operator: |-
+    apiVersion: install.istio.io/v1alpha1
+    kind: IstioOperator
+    metadata:
+      namespace: istio-system
+    spec:
+      components:
+        ingressGateways:
+        - name: istio-ingressgateway
+          k8s:
+            hpaSpec:
+              maxReplicas: 10
+              minReplicas: 3
+      values:
+        global:
+          proxy:
+            resources:
+              requests:
+                cpu: 150m
+                memory: 128Mi
+              limits:
+                cpu: 500m
+                memory: 1024Mi
 ---
 apiVersion: v1
 kind: ConfigMap

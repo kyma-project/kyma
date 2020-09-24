@@ -156,14 +156,14 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.5, sum(irate(istio_request_duration_seconds_bucket{source_workload=~\"$service\", source_workload_namespace=~\"$namespace\"}[5m])) by (source_workload, source_workload_namespace, le))",
+              "expr": "histogram_quantile(0.5, sum(irate(istio_request_duration_milliseconds_bucket{source_workload=~\"$service\", source_workload_namespace=~\"$namespace\"}[5m])) by (source_workload, source_workload_namespace, le))",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "P50",
               "refId": "B"
             },
             {
-              "expr": "histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{source_workload=~\"$service\", source_workload_namespace=~\"$namespace\"}[5m])) by (source_workload, source_workload_namespace, le))",
+              "expr": "histogram_quantile(0.90, sum(irate(istio_request_duration_milliseconds_bucket{source_workload=~\"$service\", source_workload_namespace=~\"$namespace\"}[5m])) by (source_workload, source_workload_namespace, le))",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -171,7 +171,7 @@ data:
               "refId": "A"
             },
             {
-              "expr": "histogram_quantile(0.95, sum(irate(istio_request_duration_seconds_bucket{source_workload=~\"$service\", source_workload_namespace=~\"$namespace\"}[5m])) by (source_workload, source_workload_namespace, le))",
+              "expr": "histogram_quantile(0.95, sum(irate(istio_request_duration_milliseconds_bucket{source_workload=~\"$service\", source_workload_namespace=~\"$namespace\"}[5m])) by (source_workload, source_workload_namespace, le))",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "P95",

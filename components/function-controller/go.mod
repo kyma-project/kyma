@@ -2,6 +2,12 @@ module github.com/kyma-project/kyma/components/function-controller
 
 go 1.14
 
+replace (
+	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
+	golang.org/x/text => golang.org/x/text v0.3.3
+	gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.3.0
+)
+
 require (
 	cloud.google.com/go v0.47.0 // indirect
 	contrib.go.opencensus.io/exporter/ocagent v0.6.0 // indirect
@@ -39,9 +45,4 @@ require (
 	k8s.io/client-go v0.17.11
 	knative.dev/pkg v0.0.0-20200306230727-a56a6ea3fa56
 	sigs.k8s.io/controller-runtime v0.5.10
-)
-
-replace (
-	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
-	gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.3.0
 )

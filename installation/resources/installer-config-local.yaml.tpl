@@ -40,36 +40,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: istio-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: istio
-    kyma-project.io/installation: ""
-data:
-  pilot.resources.limits.memory: 1024Mi
-  pilot.resources.limits.cpu: 500m
-  pilot.resources.requests.memory: 512Mi
-  pilot.resources.requests.cpu: 250m
-  pilot.autoscaleEnabled: "false"
-
-  mixer.policy.resources.limits.memory: 2048Mi
-  mixer.policy.resources.limits.cpu: 500m
-  mixer.policy.resources.requests.memory: 512Mi
-  mixer.policy.resources.requests.cpu: 300m
-
-  mixer.telemetry.resources.limits.memory: 2048Mi
-  mixer.telemetry.resources.limits.cpu: 500m
-  mixer.telemetry.resources.requests.memory: 512Mi
-  mixer.telemetry.resources.requests.cpu: 300m
-  mixer.loadshedding.mode: disabled
-
-  mixer.policy.autoscaleEnabled: "false"
-  mixer.telemetry.autoscaleEnabled: "false"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: helm-broker-overrides
   namespace: kyma-installer
   labels:

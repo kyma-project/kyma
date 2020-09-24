@@ -39,7 +39,7 @@ func main() {
 	httpClient = getHttpClient()
 
 	testPodsAreReady()
-	testTargetsAreHealthy()
+	// testTargetsAreHealthy()
 	testRulesAreHealthy()
 	testGrafanaIsReady()
 	checkLambdaUIDashboard()
