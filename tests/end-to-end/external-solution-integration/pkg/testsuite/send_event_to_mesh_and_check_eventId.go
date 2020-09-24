@@ -39,7 +39,7 @@ func NewSendEventToMeshAndCheckEventId(appName, payload string, state SendEventS
 	}
 }
 
-// Name returns name name of the step
+// Name returns name of the step
 func (s *SendEventToMeshAndCheckEventId) Name() string {
 	return "Send event to mesh and check event id"
 }

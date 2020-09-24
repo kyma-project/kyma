@@ -34,20 +34,20 @@ function rejected(result) {
 }
 function sendReq(event, url, resolve, reject) {
 	const options = {
-        body: event,
-        uri: url,
-        json: true,
-        headers: {
-            'content-type': 'application/cloudevents+json'
-        }
+		body: event,
+		uri: url,
+		json: true,
+		headers: {
+			'content-type': 'application/cloudevents+json'
+		}
 	}
 	console.log(JSON.stringify(options));
-    request.post(options, (error, response, body) => {	
-        if (error) {	
-            reject(error);	
-        }	
-        resolve(response) ;	
-    });	
+	request.post(options, (error, response, body) => {	
+		if (error) {	
+			reject(error);	
+		}	
+		resolve(response) ;	
+	});
 }
 function getGateway() {
 	if (legacy) {
@@ -58,14 +58,14 @@ function getGateway() {
 	}
 }
 function prepareEvent(event){
-    return {
-        "specversion": event.extensions.request.headers["ce-specversion"],
-        "source": event.extensions.request.headers["ce-source"],
-        "type": event.extensions.request.headers["ce-type"],
-        "eventtypeversion": event.extensions.request.headers["ce-eventtypeversion"],
-        "id": event.extensions.request.headers["ce-id"],
-        "data" : event.data 
-    }
+	return {
+		"specversion": event.extensions.request.headers["ce-specversion"],
+		"source": event.extensions.request.headers["ce-source"],
+		"type": event.extensions.request.headers["ce-type"],
+		"eventtypeversion": event.extensions.request.headers["ce-eventtypeversion"],
+		"id": event.extensions.request.headers["ce-id"],
+		"data" : event.data 
+	}
 }
 
 module.exports = { main: function (event, context) {	

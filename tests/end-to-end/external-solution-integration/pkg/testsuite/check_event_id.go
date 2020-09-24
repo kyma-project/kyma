@@ -25,7 +25,7 @@ func NewCheckEventId(testService *testkit.TestService, eventId string, opts ...r
 	}
 }
 
-// Name returns name name of the step
+// Name returns name of the step
 func (s *CheckEventId) Name() string {
 	return "Check event id"
 }
@@ -36,9 +36,7 @@ func (s *CheckEventId) Run() error {
 		return s.testService.CheckEventId(s.eventId)
 	}, s.retryOpts...)
 	if err != nil {
-		//if all retries fail, the test should ask the subscriber for all events which it received
 		return s.testService.CheckAllReceivedEvents()
-		//return errors.Wrapf(err, "the event id could not be checked")
 	}
 	return nil
 }

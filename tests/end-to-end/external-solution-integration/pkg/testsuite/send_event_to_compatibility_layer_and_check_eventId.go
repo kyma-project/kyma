@@ -36,7 +36,7 @@ func NewSendEventToCompatibilityLayerAndCheckEventId(appName, payload string, st
 	}
 }
 
-// Name returns name name of the step
+// Name returns name of the step
 func (s *SendEventToCompatibilityLayerAndCheckEventId) Name() string {
 	return "Send event to compatibility layer and check event id"
 }
