@@ -20,36 +20,36 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// SubscriptionsSpec defines the desired state of Subscriptions
-type SubscriptionsSpec struct {
+// SubscriptionSpec defines the desired state of Subscription
+type SubscriptionSpec struct {
 	// Id is the unique identifier of the subscription.
 	Id string `json:"id,omitempty"`
 }
 
-// SubscriptionsStatus defines the observed state of Subscriptions
-type SubscriptionsStatus struct {
+// SubscriptionsStatus defines the observed state of Subscription
+type SubscriptionStatus struct {
 }
 
 // +kubebuilder:object:root=true
 
-// Subscriptions is the Schema for the subscriptions API
-type Subscriptions struct {
+// Subscription is the Schema for the subscriptions API
+type Subscription struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   SubscriptionsSpec   `json:"spec,omitempty"`
-	Status SubscriptionsStatus `json:"status,omitempty"`
+	Spec   SubscriptionSpec   `json:"spec,omitempty"`
+	Status SubscriptionStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// SubscriptionsList contains a list of Subscriptions
-type SubscriptionsList struct {
+// SubscriptionList contains a list of Subscriptions
+type SubscriptionList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Subscriptions `json:"items"`
+	Items           []Subscription `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&Subscriptions{}, &SubscriptionsList{})
+	SchemeBuilder.Register(&Subscription{}, &SubscriptionList{})
 }

@@ -4,8 +4,9 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   labels:
-    control-plane: controller-manager
-  name: controller-manager-metrics-monitor
+    control-plane:
+    eventing-controller
+  name: eventing-controller-metrics-monitor
   namespace: system
 spec:
   endpoints:
@@ -13,4 +14,4 @@ spec:
       port: https
   selector:
     matchLabels:
-      control-plane: controller-manager
+      control-plane: eventing-controller

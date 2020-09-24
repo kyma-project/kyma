@@ -2,7 +2,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: subscriptions-viewer-role
+  name: subscription-viewer-role
 rules:
 - apiGroups:
   - eventing.kyma-project.io

@@ -10,14 +10,14 @@ metadata:
 spec:
   group: eventing.kyma-project.io
   names:
-    kind: Subscriptions
-    listKind: SubscriptionsList
+    kind: Subscription
+    listKind: SubscriptionList
     plural: subscriptions
     singular: subscription
   scope: Namespaced
   validation:
     openAPIV3Schema:
-      description: Subscriptions is the Schema for the subscriptions API
+      description: Subscription is the Schema for the subscriptions API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -32,14 +32,14 @@ spec:
         metadata:
           type: object
         spec:
-          description: SubscriptionsSpec defines the desired state of Subscriptions
+          description: SubscriptionSpec defines the desired state of Subscription
           properties:
             id:
               description: Id is the unique identifier of the subscription.
               type: string
           type: object
         status:
-          description: SubscriptionsStatus defines the observed state of Subscriptions
+          description: SubscriptionsStatus defines the observed state of Subscription
           type: object
       type: object
   version: v1alpha1

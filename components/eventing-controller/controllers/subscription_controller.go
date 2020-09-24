@@ -27,8 +27,8 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
-// SubscriptionsReconciler reconciles a Subscriptions object
-type SubscriptionsReconciler struct {
+// SubscriptionReconciler reconciles a Subscription object
+type SubscriptionReconciler struct {
 	client.Client
 	Log    logr.Logger
 	Scheme *runtime.Scheme
@@ -37,17 +37,17 @@ type SubscriptionsReconciler struct {
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions/status,verbs=get;update;patch
 
-func (r *SubscriptionsReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
-	_ = r.Log.WithValues("subscriptions", req.NamespacedName)
+	_ = r.Log.WithValues("subscription", req.NamespacedName)
 
 	r.Log.Info("reconciled obj", req.Namespace, req.Name)
 
 	return ctrl.Result{}, nil
 }
 
-func (r *SubscriptionsReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *SubscriptionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&eventingv1alpha1.Subscriptions{}).
+		For(&eventingv1alpha1.Subscription{}).
 		Complete(r)
 }
