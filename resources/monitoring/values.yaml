@@ -11,11 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-<<<<<<< HEAD
-    version: d2a06af0
-=======
     version: 0de5247a
->>>>>>> 19e240cd79041e8f82b5f3c90e39bc64406f7b08
     tests:
       enabled: true
 
