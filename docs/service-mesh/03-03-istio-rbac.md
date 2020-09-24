@@ -3,22 +3,6 @@ title: Istio RBAC configuration
 type: Details
 ---
 
-As a core component, Istio is installed with Kyma by default. The ClusterRbacConfig custom resource (CR), which defines the global behavior of Istio, is created as a part of the installation process.
+>**CAUTION:** Support for Istio RBAC is discontinued in version 1.5 of Istio. Use the new [Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/) instead. The new Policy was introduced in Istio 1.4. For details, read the [Introducing the Istio v1beta1 Authorization Policy blog post](https://istio.io/v1.4/blog/2019/v1beta1-authorization-policy/).
 
-The default Istio RBAC configuration is defined in the [`config.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/istio-rbac/templates/rbac-config.yaml) file. 
-
-## Override the default configuration
-
-To override the default configuration of Istio RBAC, edit the ClusterRbacConfig CR on a running cluster. This CR is created in the `kyma-system` Namespace and therefore requires admin permissions to edit it.
-
-To show the current Istio RBAC configuration in the `yaml` format, run:
-```bash
-kubectl get -n kyma-system clusterrbacconfig -o yaml
-```
-
-To edit the Istio RBAC configuration, run:
-```bash
-kubectl edit -n kyma-system clusterrbacconfig
-```
-
-> **NOTE:** The `ClusterRbacConfig` object is a singleton, which means that only a single object of this kind can exist in a cluster. Additionally, the only valid name for the object is `default`. As such, the best way to customize Istio RBAC is by editing the existing `ClusterRbacConfig` object.
+There is no global Istio RBAC Configuration in Kyma. Use the [Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/) to configure authorization for your services.
