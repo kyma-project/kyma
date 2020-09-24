@@ -21,6 +21,9 @@ require (
 )
 
 replace (
+	github.com/containerd/containerd => github.com/containerd/containerd v1.4.1
+	github.com/coreos/etcd => go.etcd.io/etcd v0.5.0-alpha.5.0.20200824191128-ae9734ed278b
+	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc92
 	golang.org/x/text => golang.org/x/text v0.3.3
 	k8s.io/client-go => k8s.io/client-go v0.18.8
 )

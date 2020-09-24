@@ -1144,8 +1144,8 @@ data:
           {
             "current": {
               "selected": true,
-              "text": "lambda",
-              "value": "lambda"
+              "text": "function",
+              "value": "function"
             },
             "hide": 2,
             "label": null,
@@ -1153,11 +1153,11 @@ data:
             "options": [
               {
                 "selected": true,
-                "text": "lambda",
-                "value": "lambda"
+                "text": "function",
+                "value": "function"
               }
             ],
-            "query": "lambda",
+            "query": "function",
             "skipUrlSync": false,
             "type": "constant"
           }
