@@ -45,7 +45,7 @@ type config struct {
 	Host                 string        `envconfig:"default=127.0.0.1"`
 	Port                 int           `envconfig:"default=3000"`
 	AllowedOrigins       []string      `envconfig:"optional"`
-	Verbose              bool          `envconfig:"default=false"`
+	Verbose              bool          `envconfig:"default=true"`
 	KubeconfigPath       string        `envconfig:"optional"`
 	SystemNamespaces     []string      `envconfig:"default=istio-system;knative-eventing;knative-serving;kube-public;kube-system;kyma-installer;kyma-integration;kyma-system;natss;compass-system"`
 	InformerResyncPeriod time.Duration `envconfig:"default=10m"`
