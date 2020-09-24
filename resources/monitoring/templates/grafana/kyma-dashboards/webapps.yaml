@@ -73,21 +73,21 @@ data:
         "steppedLine":false,
         "targets":[
         {
-          "expr":"histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\",destination_service_name=~\"$ui\"}[1m])) by (le))",
+          "expr":"histogram_quantile(0.50, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_service_name=~\"$ui\"}[1m])) by (le))",
           "format":"time_series",
           "intervalFactor":1,
           "legendFormat":"Histogram 50 Quantile",
           "refId":"A"
         },
         {
-          "expr":"histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\",destination_service_name=~\"$ui\"}[1m])) by (le))",
+          "expr":"histogram_quantile(0.90, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_service_name=~\"$ui\"}[1m])) by (le))",
           "format":"time_series",
           "intervalFactor":1,
           "legendFormat":"Histogram 90 Quantile",
           "refId":"B"
         },
         {
-          "expr":"histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\",destination_service_name=~\"$ui\"}[1m])) by (le))",
+          "expr":"histogram_quantile(0.99, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_service_name=~\"$ui\"}[1m])) by (le))",
           "format":"time_series",
           "intervalFactor":1,
           "legendFormat":"Histogram 99 Quantile",
@@ -181,7 +181,7 @@ data:
         "steppedLine":false,
         "targets":[
         {
-          "expr":"histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{reporter=\"source\",destination_service_name=~\"$ui\"}[1m])) by (le))",
+          "expr":"histogram_quantile(0.50, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"source\",destination_service_name=~\"$ui\"}[1m])) by (le))",
           "format":"time_series",
           "hide":false,
           "intervalFactor":1,
@@ -189,14 +189,14 @@ data:
           "refId":"A"
         },
         {
-          "expr":"histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{reporter=\"source\",destination_service_name=~\"$ui\"}[1m])) by (le))",
+          "expr":"histogram_quantile(0.90, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"source\",destination_service_name=~\"$ui\"}[1m])) by (le))",
           "format":"time_series",
           "intervalFactor":1,
           "legendFormat":"Histogram 90 Quantile",
           "refId":"B"
         },
         {
-          "expr":"histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{reporter=\"source\",destination_service_name=~\"$ui\"}[1m])) by (le))",
+          "expr":"histogram_quantile(0.99, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"source\",destination_service_name=~\"$ui\"}[1m])) by (le))",
           "format":"time_series",
           "intervalFactor":1,
           "legendFormat":"Histogram 99 Quantile",

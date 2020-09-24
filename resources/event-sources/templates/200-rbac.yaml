@@ -76,7 +76,6 @@ rules:
       - "security.istio.io"
     resources:
       - peerauthentications
-      - authorisationpolicies
     verbs:
       - create
       - patch

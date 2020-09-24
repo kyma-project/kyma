@@ -25,17 +25,16 @@ metadata:
     kyma-project.io/installation: ""
 data:
   kyma_istio_control_plane: |-
-    apiVersion: install.istio.io/v1alpha2
-    kind: IstioControlPlane
+    apiVersion: install.istio.io/v1alpha1
+    kind: IstioOperator
+    metadata:
+      namespace: istio-system
     spec:
-      trafficManagement:
-        components:
-          pilot:
-            enabled: true
-            k8s:
-              env:
-              - name: PILOT_TRACE_SAMPLING
-                value: "60"
+      components:
+        pilot:
+          env:
+          - name: PILOT_TRACE_SAMPLING
+            value: "60"
 EOF
 ```
 
