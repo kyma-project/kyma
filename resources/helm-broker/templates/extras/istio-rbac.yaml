@@ -1,5 +1,5 @@
-apiVersion: rbac.istio.io/v1alpha1
-kind: ServiceRole
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
 metadata:
   name: {{ template "fullname" . }}
   labels:
@@ -8,23 +8,16 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
+  selector:
+    matchLabels:
+      app: {{ template "fullname" . }}
+  action: ALLOW
   rules:
-  - services: ["helm-broker.kyma-system.svc.cluster.local"]
-    methods: ["*"]
-    paths: ["*"]
----
-apiVersion: rbac.istio.io/v1alpha1
-kind: ServiceRoleBinding
-metadata:
-  name: {{ template "fullname" . }}
-  labels:
-    app: {{ template "name" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
-spec:
-  subjects:
-  - user: "cluster.local/ns/kyma-system/sa/service-catalog-controller-manager"
-  roleRef:
-    kind: ServiceRole
-    name: {{ template "fullname" . }}
+  - from:
+    - source:
+        principals: ["cluster.local/ns/kyma-system/sa/service-catalog-controller-manager"]
+  - to:
+    - operation:
+        ports:
+        - "{{ .Values.broker.metricsPort }}"
+        - "{{ .Values.ctrl.internalPort }}"
