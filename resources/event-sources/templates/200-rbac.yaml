@@ -73,6 +73,18 @@ rules:
       - patch
       - update
   - apiGroups:
+      - "security.istio.io"
+    resources:
+      - peerauthentications
+      - authorisationpolicies
+    verbs:
+      - create
+      - patch
+      - update
+      - get
+      - list
+      - watch
+  - apiGroups:
       - "authentication.istio.io"
     resources:
       - policies
@@ -83,6 +95,7 @@ rules:
       - get
       - list
       - watch
+      - delete
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
