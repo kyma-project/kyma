@@ -174,7 +174,7 @@ loki:
   # maxUnavailable: 1
 
   serviceMonitor:
-    enabled: false
+    enabled: true
     interval: ""
     additionalLabels: {}
     # scrapeTimeout: 10s

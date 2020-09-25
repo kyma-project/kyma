@@ -136,7 +136,7 @@ conf:
       serviceName: "logging-loki"
       servicePort: 3100
       serviceScheme: http
-      servicePath: /api/prom/push
+      servicePath: /loki/api/v1/push
       config:
         port: 2020
         loglevel: warn
@@ -295,7 +295,7 @@ serviceAccount:
   name:
 
 # Use an existing configMap as fluent-bit configuration.
-# If set, no ConfigMap resource gets genrated anymore
+# If set, no ConfigMap resource gets generated anymore
 existingConfigMap: ""
 
 # Extra volume mounts for the fluent-bit pod.
