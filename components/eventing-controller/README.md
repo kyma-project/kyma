@@ -10,7 +10,7 @@ This component contains controllers for various CustomResourceDefinitions relate
 ## Prerequisites
 - Install [ko](https://github.com/google/ko) which is used to build and deploy the controller during local development
 - Install [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) which is the base framework for this controller
-- Install [kustomize](https://github.com/kubernetes-sigs/kustomize) which lets customize raw, template-free YAML files during local development
+- Install [kustomize](https://github.com/kubernetes-sigs/kustomize) which lets you customize raw, template-free YAML files during local development
 
 ### Installation
 
