@@ -3,8 +3,9 @@ package testsuite
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"time"
+
+	"github.com/pkg/errors"
 
 	cloudevents "github.com/cloudevents/sdk-go"
 
