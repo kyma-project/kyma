@@ -25,9 +25,9 @@ This component contains controllers for various CustomResourceDefinitions relate
 
 ## Usage 
 
-This section explains how to use the eventing-controller.
+This section explains how to use the Eventing Controller.
 
-- The eventing-controller comes with the following command line argument flags
+- The Eventing Controller comes with the following command line argument flags:
 
     | Flag    | Default Value | Description                                                                                   |
     | ----------------------- | ------------- |---------------------------------------------------------------------------------------------- |
