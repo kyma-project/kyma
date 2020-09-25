@@ -25,4 +25,4 @@ global:
   console_backend_service:
     version: "PR-9447"
   console_backend_service_test:
-    version: 5b6f824d
+    version: "PR-9447"
