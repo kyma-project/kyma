@@ -27,10 +27,10 @@ required = [
 
 [[constraint]]
   name = "istio.io/client-go"
-  version = "1.4.6"
+  version = "1.5.8"
 [[constraint]]
   name = "istio.io/api"
-  version = "1.4.6"
+  version = "1.5.8"
 
 # Transitive dependencies of knative.dev/pkg
 [[override]]
