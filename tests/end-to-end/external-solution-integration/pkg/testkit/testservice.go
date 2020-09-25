@@ -105,7 +105,8 @@ func (ts *TestService) checkValue() (int, error) {
 	return response.Counter, nil
 }
 
-func (ts *TestService) CheckAllReceivedEvents() error {
+// DumpAllReceivedEvents returns an error containing all the received CloudEvents
+func (ts *TestService) DumpAllReceivedEvents() error {
 
 	url := ts.GetTestServiceURL()
 	endpoint := url + "/ce"

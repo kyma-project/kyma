@@ -3,6 +3,7 @@ package testsuite
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go"
@@ -17,6 +18,7 @@ import (
 
 // SendEventToMeshAndCheckEventId is a step which sends an event and checks if the correct EventId has been received
 type SendEventToMeshAndCheckEventId struct {
+	counter     int
 	state       SendEventState
 	appName     string
 	payload     string
@@ -24,13 +26,13 @@ type SendEventToMeshAndCheckEventId struct {
 	retryOpts   []retrygo.Option
 }
 
-var counterMesh = 0
 var _ step.Step = &SendEventToMeshAndCheckEventId{}
 
 // NewSendEventToMeshAndCheckEventId returns new SendEventToMeshAndCheckEventId
 func NewSendEventToMeshAndCheckEventId(appName, payload string, state SendEventState, testService *testkit.TestService,
 	opts ...retrygo.Option) *SendEventToMeshAndCheckEventId {
 	return &SendEventToMeshAndCheckEventId{
+		counter:     0,
 		appName:     appName,
 		payload:     payload,
 		state:       state,
@@ -47,7 +49,7 @@ func (s *SendEventToMeshAndCheckEventId) Name() string {
 // Run executes the step
 func (s *SendEventToMeshAndCheckEventId) Run() error {
 	const basicId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa"
-	eventId := fmt.Sprint(basicId, counterMesh)
+	eventId := fmt.Sprint(basicId, s.counter)
 
 	err := s.sendEventToMesh(eventId)
 	if err != nil {
@@ -56,8 +58,8 @@ func (s *SendEventToMeshAndCheckEventId) Run() error {
 
 	err = s.checkEventId(eventId)
 	if err != nil {
-		counterMesh++
-		return s.testService.CheckAllReceivedEvents()
+		s.counter++
+		return errors.Wrap(err, s.testService.DumpAllReceivedEvents().Error())
 	}
 
 	return nil

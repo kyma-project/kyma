@@ -2,6 +2,7 @@ package testsuite
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"time"
 
 	retrygo "github.com/avast/retry-go"
@@ -14,6 +15,7 @@ import (
 
 // SendEventToCompatibilityLayerAndCheckEventId is a step which sends an event and checks if the correct EventId has been received
 type SendEventToCompatibilityLayerAndCheckEventId struct {
+	counter     int
 	state       SendEventState
 	appName     string
 	payload     string
@@ -21,13 +23,13 @@ type SendEventToCompatibilityLayerAndCheckEventId struct {
 	retryOpts   []retrygo.Option
 }
 
-var counterLayer = 0
 var _ step.Step = &SendEventToCompatibilityLayerAndCheckEventId{}
 
 // NewSendEventToCompatibilityLayerAndCheckEventId returns new SendEventToCompatibilityLayerAndCheckEventId
 func NewSendEventToCompatibilityLayerAndCheckEventId(appName, payload string, state SendEventState, testService *testkit.TestService,
 	opts ...retrygo.Option) *SendEventToCompatibilityLayerAndCheckEventId {
 	return &SendEventToCompatibilityLayerAndCheckEventId{
+		counter:     0,
 		appName:     appName,
 		payload:     payload,
 		state:       state,
@@ -44,7 +46,7 @@ func (s *SendEventToCompatibilityLayerAndCheckEventId) Name() string {
 // Run executes the step
 func (s *SendEventToCompatibilityLayerAndCheckEventId) Run() error {
 	const basicId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa"
-	eventId := fmt.Sprint(basicId, counterLayer)
+	eventId := fmt.Sprint(basicId, s.counter)
 
 	err := s.sendEventToCompatibilityLayer(eventId)
 	if err != nil {
@@ -53,8 +55,8 @@ func (s *SendEventToCompatibilityLayerAndCheckEventId) Run() error {
 
 	err = s.checkEventId(eventId)
 	if err != nil {
-		counterLayer++
-		return s.testService.CheckAllReceivedEvents()
+		s.counter++
+		return errors.Wrap(err, s.testService.DumpAllReceivedEvents().Error())
 	}
 
 	return nil
