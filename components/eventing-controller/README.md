@@ -83,7 +83,7 @@ make resolve-local
     make manifests
     ```
 
-- Update fields in the `spec` of an existing CustomResourceDefinition by modifying the go file for the type i.e. `api/version/<crd>_types.go`. E.g. `api/v1alpha1/subscriptions_types.go` for Subscriptions CRD. After that, execute the following command to generate boiler-plate code:
+- Update fields in the `spec` of an existing CustomResourceDefinition by modifying the Go file for the type i.e. `api/version/<crd>_types.go`. For example, `api/v1alpha1/subscriptions_types.go` for Subscriptions CRD. After that, execute the following command to generate boilerplate code:
 
     ```sh
     make manifests
