@@ -49,13 +49,13 @@ global:
   application_registry_tests:
     version: "PR-9407"
   application_broker:
-    version: "PR-9389"
+    version: "d4be1327"
   application_connectivity_certs_setup_job:
     version: "PR-9407"
   application_connectivity_validator:
     version: "PR-9512"
   application_broker_eventing_migration:
-    version: "PR-9389"
+    version: "d4be1327"
 
 application_connectivity_certs_setup_job:
   secrets:
