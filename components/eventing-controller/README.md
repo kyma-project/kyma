@@ -75,7 +75,7 @@ make resolve-local
 
 > More details on scaffolding code using kubebuilder can be found [here](https://github.com/kubernetes-sigs/kubebuilder/blob/master/designs/simplified-scaffolding.md). 
 
-- Add new apis using [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) CLI followed by generating boiler-plate code by executing the following script:
+- Add new APIs using [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) CLI followed by generating boilerplate code by executing the following script:
 
     ```sh
     kubebuilder create api --group batch --version v1 --kind CronJob
