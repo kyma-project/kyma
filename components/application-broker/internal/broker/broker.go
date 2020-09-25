@@ -16,7 +16,7 @@ import (
 	gcli "github.com/kyma-project/kyma/components/application-broker/third_party/machinebox/graphql"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
-	istioCli "istio.io/client-go/pkg/clientset/versioned"
+	securityclientv1beta1 "istio.io/client-go/pkg/clientset/versioned/typed/security/v1beta1"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -141,7 +141,7 @@ func New(applicationFinder appFinder,
 	brokerService *NsBrokerService,
 	mClient *mappingCli.Interface,
 	knClient knative.Client,
-	istioClient *istioCli.Interface,
+	istioClient *securityclientv1beta1.SecurityV1beta1Interface,
 	log *logrus.Entry,
 	livenessCheckStatus *LivenessCheckStatus,
 	apiPackagesSupport bool,

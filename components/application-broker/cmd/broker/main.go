@@ -27,7 +27,7 @@ import (
 	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	appInformer "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
 	"github.com/sirupsen/logrus"
-	istioCli "istio.io/client-go/pkg/clientset/versioned"
+	securityclientv1beta1 "istio.io/client-go/pkg/clientset/versioned/typed/security/v1beta1"
 	v1 "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -68,7 +68,7 @@ func main() {
 	eventingClient, err := eventingCli.NewForConfig(k8sConfig)
 	fatalOnError(err)
 	knClient := knative.NewClient(eventingClient, k8sClient)
-	istioClient, err := istioCli.NewForConfig(k8sConfig)
+	istioClient, err := securityclientv1beta1.NewForConfig(k8sConfig)
 	fatalOnError(err)
 
 	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
@@ -85,7 +85,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	appClient appCli.Interface,
 	mClient mappingCli.Interface,
 	knClient knative.Client,
-	istioClient istioCli.Interface,
+	istioClient securityclientv1beta1.SecurityV1beta1Interface,
 	livenessCheckStatus *broker.LivenessCheckStatus,
 ) *broker.Server {
 
