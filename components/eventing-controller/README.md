@@ -35,25 +35,25 @@ This section explains how to use the Eventing Controller.
     | enable-leader-election            | false          | It enables leader-election in controller and ensures there is only one active controller. 
     | lease-duration            | 15s          | It's duration the non-leader candidates will wait to force acquire leadership. Valid time units are ns, us (or µs), ms, s, m, h. 
 
-- To install the CustomResourceDefinitions in a cluster run:
+- To install the CustomResourceDefinitions in a cluster, run:
 
     ```sh
     make install
     ```
 
-- To uninstall the CustomResourceDefinitions in a cluster run:
+- To uninstall the CustomResourceDefinitions in a cluster, run:
 
     ```sh
     make uninstall
     ```
 
-- To install the sample CustomResources in a cluster run:
+- To install the sample CustomResources in a cluster, run:
 
     ```sh
     make install-samples
     ```
 
-- To uninstall the sample CustomResources in a cluster run:
+- To uninstall the sample CustomResources in a cluster, run:
 
     ```sh
     make uninstall-samples
