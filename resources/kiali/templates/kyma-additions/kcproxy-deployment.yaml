@@ -59,7 +59,7 @@ spec:
         {{- end }}
         {{- end }}
         - --verbose=false
-        - --listen=0.0.0.0:{{ .Values.kcproxy.inPort }}
+        - --listen=0.0.0.0:{{ .Values.kcproxy.port }}
         - --upstream-url=http://{{ template "kiali.name" . }}:{{ .Values.kiali.spec.server.port }}
         - --enable-logging=false
         - --enable-json-logging=true
@@ -84,7 +84,7 @@ spec:
             optional: false
         ports:
         - name: http
-          containerPort: {{ .Values.kcproxy.inPort }}
+          containerPort: {{ .Values.kcproxy.port }}
           protocol: TCP
         livenessProbe:
           httpGet:
