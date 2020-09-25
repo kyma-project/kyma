@@ -1435,6 +1435,7 @@
     "istio.io/client-go/pkg/clientset/versioned/typed/security/v1beta1",
     "istio.io/client-go/pkg/informers/externalversions",
     "istio.io/client-go/pkg/informers/externalversions/authentication/v1alpha1",
+    "istio.io/client-go/pkg/informers/externalversions/security/v1beta1",
     "istio.io/client-go/pkg/listers/authentication/v1alpha1",
     "istio.io/client-go/pkg/listers/security/v1beta1",
     "k8s.io/api/apps/v1",

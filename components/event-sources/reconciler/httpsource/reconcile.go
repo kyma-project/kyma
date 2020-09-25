@@ -6,12 +6,9 @@ import (
 	"strconv"
 
 	pkgerrors "github.com/pkg/errors"
-	authenticationclientv1alpha1 "istio.io/client-go/pkg/clientset/versioned/typed/authentication/v1alpha1"
-	authenticationlistersv1alpha1 "istio.io/client-go/pkg/listers/authentication/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	appslistersv1 "k8s.io/client-go/listers/apps/v1"
 	v1 "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
@@ -58,11 +55,6 @@ type Reconciler struct {
 
 	// URI resolver for sink destinations
 	sinkResolver *resolver.URIResolver
-
-	// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
-	policyLister authenticationlistersv1alpha1.PolicyLister
-	authClient   authenticationclientv1alpha1.AuthenticationV1alpha1Interface
-	// END
 }
 
 // Mandatory adapter env vars
@@ -195,13 +187,6 @@ func (r *Reconciler) reconcilePeerAuthentication(src *sourcesv1alpha1.HTTPSource
 	}
 	desiredPeerAuthentication := r.makePeerAuthentication(src, deployment)
 
-	// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
-	// migrate from API group authentication.istio.io to security.istio.io
-	if err := r.deleteDeprecatedPolicy(src, desiredPeerAuthentication); err != nil {
-		return nil, err
-	}
-	// END
-
 	currentPeerAuthentication, err := r.getOrCreatePeerAuthentication(src, desiredPeerAuthentication)
 	if err != nil {
 		return nil, err
@@ -327,26 +312,6 @@ func (r *Reconciler) getOrCreatePeerAuthentication(src *sourcesv1alpha1.HTTPSour
 	}
 
 	return peerAuthentication, nil
-}
-
-// deleteDeprecatedPolicy deletes the Policy for a Revision of a Deployment. policies.authentication.istio.io/v1alpha is deprecated in Istio 1.6.
-// See also: https://istio.io/latest/news/releases/1.6.x/announcing-1.6/upgrade-notes/.
-func (r *Reconciler) deleteDeprecatedPolicy(src *sourcesv1alpha1.HTTPSource,
-	desiredPeerAuthentication *securityv1beta1.PeerAuthentication) error {
-	desiredPolicyName := desiredPeerAuthentication.Name
-	policy, err := r.policyLister.Policies(src.Namespace).Get(desiredPolicyName)
-	switch {
-	case apierrors.IsNotFound(err):
-		return nil
-	case err != nil:
-		return pkgerrors.Wrap(err, "failed to get Istio Policy from cache")
-	}
-	if err := r.authClient.Policies(src.Namespace).Delete(policy.Name, &metav1.DeleteOptions{}); err != nil {
-		return err
-	}
-	r.event(src, deleteReason, "Deleted deprecated Istio Policy %q", policy.Name)
-
-	return nil
 }
 
 // makeDeployment returns the desired Deployment object for a given
@@ -523,11 +488,6 @@ func (r *Reconciler) computeStatus(src *sourcesv1alpha1.HTTPSource, ch *messagin
 	}
 	status.MarkSink(sinkURI)
 	status.MarkPeerAuthenticationCreated(peerAuthentication)
-	// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
-	if err := status.ClearPolicyStatus(); err != nil {
-		r.Logger.Info("Error while clearing PolicyCreated condition: %v. Operations are not affected", err)
-	}
-	//E ND
 	status.MarkServiceCreated(service)
 
 	if deployment != nil {
