@@ -53,7 +53,7 @@ spec:
     - name: "iam-kubeconfig-service"
       namespace: "kyma-system"
     - name: "serverless"
-      namespace: "kyma-system"    
+      namespace: "kyma-system"
     - name: "knative-provisioner-natss"
       namespace: "knative-eventing"
     - name: "event-sources"
