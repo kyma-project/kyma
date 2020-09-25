@@ -32,8 +32,8 @@ This section explains how to use the Eventing Controller.
     | Flag    | Default Value | Description                                                                                   |
     | ----------------------- | ------------- |---------------------------------------------------------------------------------------------- |
     | metrics-addr            | :8080          | The address the metric endpoint binds to.
-    | enable-leader-election            | false          | It enables leader-election in controller and ensures there is only one active controller. 
-    | lease-duration            | 15s          | It's duration the non-leader candidates will wait to force acquire leadership. Valid time units are ns, us (or µs), ms, s, m, h. 
+    | enable-leader-election            | false          | Enables leader-election in controller and ensures there is only one active controller. 
+    | lease-duration            | 15s          | The duration the non-leader candidates will wait to force acquire leadership. Valid time units are ns, us (or µs), ms, s, m, h. 
 
 - To install the CustomResourceDefinitions in a cluster, run:
 
