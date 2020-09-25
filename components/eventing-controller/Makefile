@@ -5,7 +5,7 @@ SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 # DEV_IMG is the image used during development workflow only
 DEV_IMG = ko://github.com/kyma-project/kyma/components/eventing-controller
-override ENTRYPOINT = cmd/main.go
+override ENTRYPOINT = main.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
