@@ -3,7 +3,7 @@ package object
 import (
 	"reflect"
 
-	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/conversion"
@@ -14,13 +14,13 @@ import (
 // are not relevant for the reconciliation logic are intentionally omitted.
 var Semantic = conversion.EqualitiesOrDie(
 	channelEqual,
-	policyEqual,
+	peerAuthenticationEqual,
 	deploymentEqual,
 	serviceEqual,
 )
 
-// policyEqual asserts the equality of two Policy objects.
-func policyEqual(p1, p2 *authenticationv1alpha1.Policy) bool {
+// peerAuthenticationEqual asserts the equality of two PeerAuthentication objects.
+func peerAuthenticationEqual(p1, p2 *securityv1beta1.PeerAuthentication) bool {
 	if p1 == p2 {
 		return true
 	}
@@ -32,11 +32,11 @@ func policyEqual(p1, p2 *authenticationv1alpha1.Policy) bool {
 		return false
 	}
 
-	if !reflect.DeepEqual(p1.Spec.Targets, p2.Spec.Targets) {
+	if !reflect.DeepEqual(p1.Spec.Selector, p2.Spec.Selector) {
 		return false
 	}
 
-	if !reflect.DeepEqual(p1.Spec.Peers, p2.Spec.Peers) {
+	if !reflect.DeepEqual(p1.Spec.PortLevelMtls, p2.Spec.PortLevelMtls) {
 		return false
 	}
 

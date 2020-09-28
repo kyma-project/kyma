@@ -40,36 +40,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: istio-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: istio
-    kyma-project.io/installation: ""
-data:
-  pilot.resources.limits.memory: 1024Mi
-  pilot.resources.limits.cpu: 500m
-  pilot.resources.requests.memory: 512Mi
-  pilot.resources.requests.cpu: 250m
-  pilot.autoscaleEnabled: "false"
-
-  mixer.policy.resources.limits.memory: 2048Mi
-  mixer.policy.resources.limits.cpu: 500m
-  mixer.policy.resources.requests.memory: 512Mi
-  mixer.policy.resources.requests.cpu: 300m
-
-  mixer.telemetry.resources.limits.memory: 2048Mi
-  mixer.telemetry.resources.limits.cpu: 500m
-  mixer.telemetry.resources.requests.memory: 512Mi
-  mixer.telemetry.resources.requests.cpu: 300m
-  mixer.loadshedding.mode: disabled
-
-  mixer.policy.autoscaleEnabled: "false"
-  mixer.telemetry.autoscaleEnabled: "false"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: helm-broker-overrides
   namespace: kyma-installer
   labels:
@@ -201,27 +171,6 @@ data:
   # TODO: Solve a problem with DNS
   tests.enabled: "false"
 
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: knative-serving-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: knative-serving
-    kyma-project.io/installation: ""
-data:
-  networking_istio.resources.requests.cpu: "10m"
-  networking_istio.resources.requests.memory: "100Mi"
-  activator.resources.requests.cpu: "100m"
-  activator.resources.requests.memory: "100Mi"
-  autoscaler.resources.requests.cpu: "10m"
-  autoscaler.resources.requests.memory: "100Mi"
-  autoscaler_hpa.resources.requests.cpu: "10m"
-  autoscaler_hpa.resources.requests.memory: "100Mi"
-  controller.resources.requests.cpu: "30m"
-  controller.resources.requests.memory: "100Mi"
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -11,6 +11,8 @@ spec:
   disableConcurrency: {{ .Values.tests.disableConcurrency }}
   template:
     metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "rafterTests.name" . }}
       annotations:
         sidecar.istio.io/inject: "true"
     spec:

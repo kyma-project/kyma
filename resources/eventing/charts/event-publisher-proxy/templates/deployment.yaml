@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "event-publisher-proxy.fullname" . }}
+  labels: {{- include "event-publisher-proxy.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels: {{- include "event-publisher-proxy.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels: {{- include "event-publisher-proxy.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "event-publisher-proxy.serviceAccountName" . }}
+      containers:
+        - env:
+            - name: CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "event-publisher-proxy.secretName" . }}
+                  key: client-id
+            - name: CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "event-publisher-proxy.secretName" . }}
+                  key: client-secret
+            - name: TOKEN_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "event-publisher-proxy.secretName" . }}
+                  key: token-endpoint
+            - name: EMS_PUBLISH_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "event-publisher-proxy.secretName" . }}
+                  key: ems-publish-url
+          image: "{{ .Values.global.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          name: event-publisher-proxy
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 2
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /readyz
+              port: 8080
+              scheme: HTTP
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}

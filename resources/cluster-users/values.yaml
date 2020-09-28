@@ -32,6 +32,7 @@ clusterRoles:
       - "authentication.istio.io"
       - "config.istio.io"
       - "networking.istio.io"
+      - "security.istio.io"
     kyma:
       - "applicationconnector.kyma-project.io"
       - "authentication.kyma-project.io"
@@ -53,11 +54,6 @@ clusterRoles:
       - "hydra.ory.sh"
     rafter:
       - "rafter.kyma-project.io"
-    knativeServing:
-      - "networking.internal.knative.dev"
-      - "caching.internal.knative.dev"
-      - "autoscaling.internal.knative.dev"
-      - "serving.knative.dev"
     kymaEventing:
       - "knativekafka.kyma-project.io"
       - "sources.kyma-project.io"

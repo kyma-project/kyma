@@ -39,7 +39,7 @@ func main() {
 	httpClient = getHttpClient()
 
 	testPodsAreReady()
-	testTargetsAreHealthy()
+	// testTargetsAreHealthy()
 	testRulesAreHealthy()
 	testGrafanaIsReady()
 	checkLambdaUIDashboard()
@@ -184,12 +184,16 @@ func shouldIgnoreTarget(target prom.Labels) bool {
 		"nodejs12-",
 		"nodejs10-",
 		"upgrade",
+		// Ignore the pods created by jobs which are executed after installation of control-plane.
+		"compass-migration",
+		"compass-director-tenant-loader-default",
+		"compass-agent-configuration",
 	}
 
-	namespacesToBeIgnored := []string{"test"}
+	namespacesToBeIgnored := []string{"test", "e2e"} // Since some namespaces are named -e2e and some are e2e-
 
 	for _, p := range podsToBeIgnored {
-		if strings.Contains(target["pod_name"], p) {
+		if strings.Contains(target["pod"], p) {
 			return true
 		}
 	}
