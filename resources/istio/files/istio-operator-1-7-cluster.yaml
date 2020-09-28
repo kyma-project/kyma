@@ -36,8 +36,8 @@ spec:
             cpu: 2000m
             memory: 1024Mi
           requests:
-            cpu: 10m
-            memory: 40Mi
+            cpu: 100m
+            memory: 120Mi
         service:
           ports:
           - name: http2
@@ -75,10 +75,10 @@ spec:
         resources:
           limits:
             cpu: 2000m
-            memory: 256Mi
+            memory: 1024Mi
           requests:
             cpu: 100m
-            memory: 96Mi
+            memory: 128Mi
         service:
           type: LoadBalancer
           ports:
@@ -282,10 +282,8 @@ spec:
       imagePullPolicy: IfNotPresent
       imagePullSecrets: []
       istioNamespace: istio-system
-      # TOCHECK
       istiod:
         enableAnalysis: false
-      # ENDTOCHECK
       jwtPolicy: third-party-jwt
       logAsJson: false
       logging:
@@ -405,10 +403,8 @@ spec:
       contextPath: /kiali
       createDemoSecret: false
       dashboard:
-      # TOCHECK
         auth:
           strategy: login
-      # ENDTOCHECK
         grafanaInClusterURL: http://grafana:3000
         jaegerInClusterURL: http://tracing/jaeger
         passphraseKey: passphrase
@@ -516,15 +512,11 @@ spec:
         enabled: false
       v2:
         enabled: true
-        #TOCHECK
         metadataExchange:
           wasmEnabled: false
-          # ENDTOCHECK
         prometheus:
           enabled: true
-          # TOCHECK
           wasmEnabled: false
-          # ENCTOCHECK
         stackdriver:
           configOverride: {}
           enabled: false
