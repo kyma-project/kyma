@@ -27,7 +27,7 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: "04d95a7a"
+    tag: PR-2005
   service:
     externalPort: 80
     internalPort: 80
