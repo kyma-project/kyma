@@ -19,10 +19,8 @@ import (
 
 // SendEventToMeshAndCheckEventId is a step which sends an event and checks if the correct EventId has been received
 type SendEventToMeshAndCheckEventId struct {
+	sendEvent   testkit.SendEvent
 	counter     int
-	state       SendEventState
-	appName     string
-	payload     string
 	testService *testkit.TestService
 	retryOpts   []retrygo.Option
 }
@@ -30,13 +28,11 @@ type SendEventToMeshAndCheckEventId struct {
 var _ step.Step = &SendEventToMeshAndCheckEventId{}
 
 // NewSendEventToMeshAndCheckEventId returns new SendEventToMeshAndCheckEventId
-func NewSendEventToMeshAndCheckEventId(appName, payload string, state SendEventState, testService *testkit.TestService,
+func NewSendEventToMeshAndCheckEventId(appName, payload string, state testkit.SendEventState, testService *testkit.TestService,
 	opts ...retrygo.Option) *SendEventToMeshAndCheckEventId {
 	return &SendEventToMeshAndCheckEventId{
+		sendEvent:   testkit.SendEvent{State: state, AppName: appName, Payload: payload},
 		counter:     0,
-		appName:     appName,
-		payload:     payload,
-		state:       state,
 		testService: testService,
 		retryOpts:   opts,
 	}
@@ -86,7 +82,7 @@ func (s *SendEventToMeshAndCheckEventId) sendEventToMesh(eventId string) error {
 		return err
 	}
 
-	_, _, err = s.state.GetEventSender().SendCloudEventToMesh(ctx, event)
+	_, _, err = s.sendEvent.State.GetEventSender().SendCloudEventToMesh(ctx, event)
 	logrus.WithField("component", "SendEventToMesh").
 		Debugf("SendCloudEventToMesh: eventID: %v; error: %v", event.ID(), err)
 	return err
@@ -99,7 +95,7 @@ func (s *SendEventToMeshAndCheckEventId) prepareEvent(eventId string) (cloudeven
 	event.SetSource("some source")
 	// TODO(k15r): infer mime type automatically
 	event.SetDataContentType("text/plain")
-	if err := event.SetData(s.payload); err != nil {
+	if err := event.SetData(s.sendEvent.Payload); err != nil {
 		return event, err
 	}
 

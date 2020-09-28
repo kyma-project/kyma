@@ -16,10 +16,8 @@ import (
 
 // SendEventToCompatibilityLayerAndCheckEventId is a step which sends an event and checks if the correct EventId has been received
 type SendEventToCompatibilityLayerAndCheckEventId struct {
+	sendEvent   testkit.SendEvent
 	counter     int
-	state       SendEventState
-	appName     string
-	payload     string
 	testService *testkit.TestService
 	retryOpts   []retrygo.Option
 }
@@ -27,13 +25,11 @@ type SendEventToCompatibilityLayerAndCheckEventId struct {
 var _ step.Step = &SendEventToCompatibilityLayerAndCheckEventId{}
 
 // NewSendEventToCompatibilityLayerAndCheckEventId returns new SendEventToCompatibilityLayerAndCheckEventId
-func NewSendEventToCompatibilityLayerAndCheckEventId(appName, payload string, state SendEventState, testService *testkit.TestService,
+func NewSendEventToCompatibilityLayerAndCheckEventId(appName, payload string, state testkit.SendEventState, testService *testkit.TestService,
 	opts ...retrygo.Option) *SendEventToCompatibilityLayerAndCheckEventId {
 	return &SendEventToCompatibilityLayerAndCheckEventId{
+		sendEvent:   testkit.SendEvent{State: state, AppName: appName, Payload: payload},
 		counter:     0,
-		appName:     appName,
-		payload:     payload,
-		state:       state,
 		testService: testService,
 		retryOpts:   opts,
 	}
@@ -78,7 +74,7 @@ func (s *SendEventToCompatibilityLayerAndCheckEventId) checkEventId(eventId stri
 
 func (s *SendEventToCompatibilityLayerAndCheckEventId) sendEventToCompatibilityLayer(eventId string) error {
 	event := s.prepareEvent(eventId)
-	err := s.state.GetEventSender().SendEventToCompatibilityLayer(s.appName, event)
+	err := s.sendEvent.State.GetEventSender().SendEventToCompatibilityLayer(s.sendEvent.AppName, event)
 	logrus.WithField("component", "SendEventToCompatibilityLayer").Debugf("SendCloudEventToCompatibilityLayer: eventID: %v; error: %v", eventId, err)
 
 	return err
@@ -90,6 +86,6 @@ func (s *SendEventToCompatibilityLayerAndCheckEventId) prepareEvent(eventId stri
 		EventTypeVersion: example_schema.EventVersion,
 		EventID:          eventId,
 		EventTime:        time.Now(),
-		Data:             s.payload,
+		Data:             s.sendEvent.Payload,
 	}
 }

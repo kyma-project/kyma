@@ -10,16 +10,14 @@ import (
 
 // SendEventToCompatibilityLayer is a step which sends example event to the application gateway
 type SendEventToCompatibilityLayer struct {
-	state   SendEventState
-	appName string
-	payload string
+	testkit.SendEvent
 }
 
 var _ step.Step = &SendEventToCompatibilityLayer{}
 
 // NewSendEventToCompatibilityLayer returns new SendEventToCompatibilityLayer
-func NewSendEventToCompatibilityLayer(appName, payload string, state SendEventState) *SendEventToCompatibilityLayer {
-	return &SendEventToCompatibilityLayer{state: state, appName: appName, payload: payload}
+func NewSendEventToCompatibilityLayer(appName, payload string, state testkit.SendEventState) *SendEventToCompatibilityLayer {
+	return &SendEventToCompatibilityLayer{testkit.SendEvent{State: state, AppName: appName, Payload: payload}}
 }
 
 // Name returns name name of the step
@@ -30,7 +28,7 @@ func (s *SendEventToCompatibilityLayer) Name() string {
 // Run executes the step
 func (s *SendEventToCompatibilityLayer) Run() error {
 	event := s.prepareEvent()
-	return s.state.GetEventSender().SendEventToCompatibilityLayer(s.appName, event)
+	return s.State.GetEventSender().SendEventToCompatibilityLayer(s.AppName, event)
 }
 
 func (s *SendEventToCompatibilityLayer) prepareEvent() *testkit.ExampleEvent {
@@ -39,7 +37,7 @@ func (s *SendEventToCompatibilityLayer) prepareEvent() *testkit.ExampleEvent {
 		EventTypeVersion: example_schema.EventVersion,
 		EventID:          "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
 		EventTime:        time.Now(),
-		Data:             s.payload,
+		Data:             s.Payload,
 	}
 }
 
