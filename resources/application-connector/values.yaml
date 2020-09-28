@@ -41,13 +41,13 @@ global:
   application_gateway:
     version: "d0516ff9"
   application_gateway_tests:
-    version: "d0516ff9"
+    version: "PR-9569"
   application_gateway_legacy_tests:
     version: "4eeef0b7"
   application_registry:
     version: "d0516ff9"
   application_registry_tests:
-    version: "b9871385"
+    version: "PR-9569"
   application_broker:
     version: "d4be1327"
   application_connectivity_certs_setup_job:
@@ -75,5 +75,5 @@ tests:
       central: false
     skipSslVerify: true
     image:
-      version: "c9ff90c3"
+      version: "PR-9569"
       pullPolicy: IfNotPresent
