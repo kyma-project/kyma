@@ -41,9 +41,9 @@ global:
   application_gateway:
     version: "d0516ff9"
   application_gateway_tests:
-    version: "PR-9569"
+    version: "d0516ff9"
   application_gateway_legacy_tests:
-    version: "4eeef0b7"
+    version: "PR-9569"
   application_registry:
     version: "d0516ff9"
   application_registry_tests:
