@@ -4,6 +4,7 @@ metadata:
   name: {{ template "fullname" . }}-ctrl-mngr
   namespace: {{ .Release.Namespace }}
   labels:
+    kyma-project.io/component: controller
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
   {{- if .Values.deployment.labels }}
     {{- include "tplValue" ( dict "value" .Values.deployment.labels "context" . ) | nindent 4 }}
@@ -28,6 +29,7 @@ spec:
         app: {{ template "name" . }}
         app.kubernetes.io/name: {{ template "name" . }}
         app.kubernetes.io/instance: "{{ .Release.Name }}"
+        kyma-project.io/component: controller
       {{- if .Values.pod.labels }}
         {{ include "tplValue" ( dict "value" .Values.pod.labels "context" . ) | nindent 8 }}
       {{- end }}

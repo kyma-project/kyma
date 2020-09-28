@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: {{ template "name" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    kyma-project.io/component: backend
 spec:
   selector:
     matchLabels:
@@ -24,6 +26,7 @@ spec:
       labels:
         app: {{ template "name" . }}
         tlsSecret: ingress-tls-cert
+        kyma-project.io/component: backend
     spec:
       serviceAccountName: {{ template "name" . }}
       {{ if .Values.global.isLocalEnv }}
