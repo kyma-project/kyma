@@ -30,7 +30,7 @@ core_ui:
     tag: PR-2005
   service:
     externalPort: 80
-    internalPort: 80
+    internalPort: 8060
     name: nginx
   statusPort: 6081
 managementPlane: {}
