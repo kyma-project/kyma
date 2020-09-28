@@ -16,7 +16,7 @@ import (
 
 // SendEventToCompatibilityLayerAndCheckEventId is a step which sends an event and checks if the correct EventId has been received
 type SendEventToCompatibilityLayerAndCheckEventId struct {
-	sendEvent   testkit.SendEvent
+	testkit.SendEvent
 	counter     int
 	testService *testkit.TestService
 	retryOpts   []retrygo.Option
@@ -28,10 +28,10 @@ var _ step.Step = &SendEventToCompatibilityLayerAndCheckEventId{}
 func NewSendEventToCompatibilityLayerAndCheckEventId(appName, payload string, state testkit.SendEventState, testService *testkit.TestService,
 	opts ...retrygo.Option) *SendEventToCompatibilityLayerAndCheckEventId {
 	return &SendEventToCompatibilityLayerAndCheckEventId{
-		sendEvent:   testkit.SendEvent{State: state, AppName: appName, Payload: payload},
-		counter:     0,
-		testService: testService,
-		retryOpts:   opts,
+		testkit.SendEvent{State: state, AppName: appName, Payload: payload},
+		0,
+		testService,
+		opts,
 	}
 }
 
@@ -74,7 +74,7 @@ func (s *SendEventToCompatibilityLayerAndCheckEventId) checkEventId(eventId stri
 
 func (s *SendEventToCompatibilityLayerAndCheckEventId) sendEventToCompatibilityLayer(eventId string) error {
 	event := s.prepareEvent(eventId)
-	err := s.sendEvent.State.GetEventSender().SendEventToCompatibilityLayer(s.sendEvent.AppName, event)
+	err := s.State.GetEventSender().SendEventToCompatibilityLayer(s.AppName, event)
 	logrus.WithField("component", "SendEventToCompatibilityLayer").Debugf("SendCloudEventToCompatibilityLayer: eventID: %v; error: %v", eventId, err)
 
 	return err
@@ -86,6 +86,6 @@ func (s *SendEventToCompatibilityLayerAndCheckEventId) prepareEvent(eventId stri
 		EventTypeVersion: example_schema.EventVersion,
 		EventID:          eventId,
 		EventTime:        time.Now(),
-		Data:             s.sendEvent.Payload,
+		Data:             s.Payload,
 	}
 }

@@ -19,7 +19,7 @@ import (
 
 // SendEventToMeshAndCheckEventId is a step which sends an event and checks if the correct EventId has been received
 type SendEventToMeshAndCheckEventId struct {
-	sendEvent   testkit.SendEvent
+	testkit.SendEvent
 	counter     int
 	testService *testkit.TestService
 	retryOpts   []retrygo.Option
@@ -31,10 +31,10 @@ var _ step.Step = &SendEventToMeshAndCheckEventId{}
 func NewSendEventToMeshAndCheckEventId(appName, payload string, state testkit.SendEventState, testService *testkit.TestService,
 	opts ...retrygo.Option) *SendEventToMeshAndCheckEventId {
 	return &SendEventToMeshAndCheckEventId{
-		sendEvent:   testkit.SendEvent{State: state, AppName: appName, Payload: payload},
-		counter:     0,
-		testService: testService,
-		retryOpts:   opts,
+		testkit.SendEvent{State: state, AppName: appName, Payload: payload},
+		0,
+		testService,
+		opts,
 	}
 }
 
@@ -82,7 +82,7 @@ func (s *SendEventToMeshAndCheckEventId) sendEventToMesh(eventId string) error {
 		return err
 	}
 
-	_, _, err = s.sendEvent.State.GetEventSender().SendCloudEventToMesh(ctx, event)
+	_, _, err = s.State.GetEventSender().SendCloudEventToMesh(ctx, event)
 	logrus.WithField("component", "SendEventToMesh").
 		Debugf("SendCloudEventToMesh: eventID: %v; error: %v", event.ID(), err)
 	return err
@@ -95,7 +95,7 @@ func (s *SendEventToMeshAndCheckEventId) prepareEvent(eventId string) (cloudeven
 	event.SetSource("some source")
 	// TODO(k15r): infer mime type automatically
 	event.SetDataContentType("text/plain")
-	if err := event.SetData(s.sendEvent.Payload); err != nil {
+	if err := event.SetData(s.Payload); err != nil {
 		return event, err
 	}
 
