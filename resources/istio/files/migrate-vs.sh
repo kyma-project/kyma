@@ -3,7 +3,7 @@ set -e
 mkdir -p istio/base
 mkdir -p istio/merged
 
-kubectl get vs -A -o custom-columns=NAME:.metadata.name,NAMESPACE:.metadata.namespace | tail -n +2 > workload
+kubectl get vs -A -o custom-columns=NAME:.metadata.name,NAMESPACE:.metadata.namespace | tail -n +2 > istio/workload
 
 cat << EOF > istio/cors-patch.yaml
 ---
@@ -24,6 +24,6 @@ while read line; do
   	yq merge -x "istio/base/${NAMESPACE}-${NAME}.yaml" "istio/cors-patch.yaml" > istio/merged/"${NAMESPACE}-${NAME}.yaml"
   fi
 
-done < workload
+done < istio/workload
 
 kubectl apply -f istio/merged/
