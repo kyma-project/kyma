@@ -3,12 +3,12 @@ APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20200831-e46c648b
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-# DEV_IMG is the image used during development workflow only
-DEV_IMG = ko://github.com/kyma-project/kyma/components/eventing-controller
 override ENTRYPOINT = main.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
+# DEV_IMG is the image used during development workflow only
+DEV_IMG = ko://github.com/kyma-project/kyma/components/eventing-controller
 VERIFY_IGNORE := /vendor\|/mocks
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=false"
@@ -22,16 +22,12 @@ endif
 
 all: manager
 
-# Run tests
-test: generate fmt vet manifests
-	go test ./... -coverprofile cover.out
-
 # Build controller binary
-manager: generate fmt vet
+manager: generate-local fmt-local vet-local
 	go build -o bin/controller main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
-run: generate fmt vet manifests
+run: generate-local fmt-local vet-local manifests
 	go run ./main.go
 
 # Install CRDs into a cluster
@@ -65,19 +61,11 @@ deploy-local-dry-run: manifests
 	kustomize build config/default
 
 # Generate manifests e.g. CRD, RBAC etc.
-manifests: controller-gen
+manifests: controller-gen-local
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
-# Run go fmt against code
-fmt:
-	go fmt ./...
-
-# Run go vet against code
-vet:
-	go vet ./...
-
 # Generate code
-generate: controller-gen
+generate-local: controller-gen-local
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 verify:: mod-verify
@@ -97,19 +85,16 @@ dep-status-local:
 mod-verify-local:
 	GO111MODULE=on go mod verify
 
-test-local:
-	GO111MODULE=on go test ./...
-
-$(eval $(call buildpack-cp-ro,resolve))
-$(eval $(call buildpack-mount,mod-verify))
-$(eval $(call buildpack-mount,test))
+test-local: generate-local fmt-local vet-local
+	go test ./... -coverprofile cover.out
 
 path-to-referenced-charts:
 	@echo "resources/eventing-manager/eventing-controller"
 
 # find or download controller-gen
 # download controller-gen if necessary
-controller-gen:
+.PHONY: controller-gen-local
+controller-gen-local:
 ifeq (, $(shell which controller-gen))
 	@{ \
 	set -e ;\
@@ -123,3 +108,10 @@ CONTROLLER_GEN=$(GOBIN)/controller-gen
 else
 CONTROLLER_GEN=$(shell which controller-gen)
 endif
+
+$(eval $(call buildpack-mount,resolve))
+$(eval $(call buildpack-mount,mod-verify))
+$(eval $(call buildpack-mount,test))
+$(eval $(call buildpack-mount,controller-gen))
+$(eval $(call buildpack-mount,generate))
+$(eval $(call buildpack-mount,manifests))
