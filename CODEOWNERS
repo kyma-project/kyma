@@ -94,6 +94,9 @@
 # The `event-sources` chart
 /resources/event-sources/ @joek  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
+# The `eventing` chart
+/resources/eventing/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
+
 # The `nats-streaming` chart
 /resources/nats-streaming/ @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 

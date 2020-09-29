@@ -65,8 +65,3 @@ configurationFiles:
     # authorization {} it handled via init container+secrets. don't extend here
   stan.conf: |
     # content of configuration file used to override default NATS Streaming server settings
-monitoring:
-  grafana: enabled
-  alerts: enabled
-  alertcpu: 'yes'
-  alertmem: 'yes'

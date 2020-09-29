@@ -11,6 +11,7 @@ metadata:
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+    kyma-project.io/component: controller
 spec:
   replicas: 1
   strategy:
@@ -30,6 +31,7 @@ spec:
         app.kubernetes.io/name: {{ template "name" . }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        kyma-project.io/component: controller
     spec:
       serviceAccount: {{ .Chart.Name }}
       containers:

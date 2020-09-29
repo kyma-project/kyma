@@ -9,6 +9,7 @@ metadata:
     chart: {{ template "pod-preset.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    kyma-project.io/component: controller
 spec:
   selector:
     matchLabels:
@@ -22,6 +23,7 @@ spec:
       labels:
         app: {{ template "pod-preset.name" . }}-controller
         release: {{ .Release.Name }}
+        kyma-project.io/component: controller
     spec:
       serviceAccountName: {{ template "pod-preset.fullname" . }}-controller
       terminationGracePeriodSeconds: 10

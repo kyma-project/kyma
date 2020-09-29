@@ -195,7 +195,7 @@ controller-manager:
     enabled: true
 
     image:
-      tag: RELEASE.2019-10-12T01-39-57Z-a67baaa0
+      tag: RELEASE.2020-09-21T22-31-59Z-1d81f948
       repository: eu.gcr.io/kyma-project/incubator/develop/minio/minio
 
     persistence:
@@ -225,8 +225,8 @@ controller-manager:
         memory: 32Mi
         cpu: 10m
       limits:
-        memory: 128Mi
-        cpu: 100m
+        memory: 256Mi
+        cpu: 250m
 
     gcsgateway:
       replicas: 2

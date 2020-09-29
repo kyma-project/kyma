@@ -31,15 +31,13 @@ list of Istio CRDs that Kyma requires. If any of these CRDs is not deployed, the
 
 3. Patch Istio components. The script looks for `{resource-name}.{kind}.patch.json` format files which contain a 
 `JsonPatch`. The components are applied using the `kubectl patch` command. The modified resource may not exist, in which 
-case the patch is skipped. See the [job ConfigMap](../../resources/istio-kyma-patch/templates/configmap.yaml) to learn 
-which patches are applied by default. In case of failure, such as wrong a patch format or a network error, the 
+case the patch is skipped. In case of failure, such as wrong a patch format or a network error, the 
 application fails.
 
 4. Remove the unnecessary Istio components. The patch acts on a delete file which contains lines that follow the 
 `{kind} {resource-name}` format. Every line points to an Istio resource which the patch removes from the
 `istio-system` Namespace. The system doesn't return an error if a resource listed in the delete file is not present in 
-the istio-system Namespace. See the [job ConfigMap](../../resources/istio-kyma-patch/templates/configmap.yaml) to see 
-which patches are applied by default.
+the istio-system Namespace.
 
 5. Enable default sidecar injection. By default, sidecar injection is enabled in the Namespaces labeled with `istio-injection: enabled`. The patch reverses this behavior: sidecar injection is enabled in all Namespaces, except those labeled with `istio-injection: disabled`.
 

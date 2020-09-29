@@ -28,6 +28,7 @@ import (
 	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/httpsource/fake"
 	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/client/fake"
 	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/informers/authentication/v1alpha1/policy/fake"
+	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/informers/security/v1beta1/peerauthentication/fake"
 )
 
 const adapterImageEnvVar = "HTTP_ADAPTER_IMAGE"
@@ -49,7 +50,7 @@ func TestNewController(t *testing.T) {
 	ctx, informers := rt.SetupFakeContext(t)
 
 	// expected informers: HTTPSource, Channel, Deployment, Policy, Service
-	if expect, got := 5, len(informers); got != expect {
+	if expect, got := 6, len(informers); got != expect {
 		t.Errorf("Expected %d injected informers, got %d", expect, got)
 	}
 

@@ -136,7 +136,7 @@ conf:
       serviceName: "logging-loki"
       servicePort: 3100
       serviceScheme: http
-      servicePath: /api/prom/push
+      servicePath: /loki/api/v1/push
       config:
         port: 2020
         loglevel: warn
@@ -294,9 +294,8 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template.
   name:
 
-# ConfigMap override where fullname is {{.Release.Name}}-{{.Values.existingConfigMap}}
-# Defining existingConfigMap will cause templates/config.yaml
-# to NOT generate a ConfigMap resource
+# Use an existing configMap as fluent-bit configuration.
+# If set, no ConfigMap resource gets generated anymore
 existingConfigMap: ""
 
 # Extra volume mounts for the fluent-bit pod.
