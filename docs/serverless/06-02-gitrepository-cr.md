@@ -29,7 +29,7 @@ spec:
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
-| Parameter | Required for HTTP(s) | Required for SSH | Description |
+| Parameter | Required for HTTP(S) | Required for SSH | Description |
 |-----------|-------------|-------------|---------------|
 | **spec.url** | Yes | Yes | Provides the address to the Git repository with the Function's code and dependencies. Depending on whether the repository is public or private and what authentication method is used to access it, the URL must start with the `http(s)`, `git`, or `ssh` prefix, and end with the `.git` suffix. |
 | **spec.auth** | No | Yes | Specifies that you must authenticate to the Git repository. |

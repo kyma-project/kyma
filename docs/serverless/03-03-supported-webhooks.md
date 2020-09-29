@@ -49,12 +49,12 @@ It checks the following conditions for these CRs:
       - Start with the `http(s)`, `git`, or `ssh` prefix
       - End with the `.git` suffix
 
-   - If you use SSH to authenticate to repository, you have to provide:
+   - If you use SSH to authenticate to the repository:
 
      - **spec.auth.type** must be set to `key`
      - **spec.auth.secretName** must not be empty
 
-   - If you use HTTP(s) URL to point to repository and repository requires authentication (**spec.auth**):
+   - If you use HTTP(s) to point to the repository that requires authentication (**spec.auth**):
    
       - **spec.auth.type** must be set to either `key` (SSH key) or `basic` (password or token)
       - **spec.auth.secretName** must not be empty
