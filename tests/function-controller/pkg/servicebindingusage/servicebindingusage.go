@@ -88,12 +88,12 @@ func (sbu *ServiceBindingUsage) Get() (*v1alpha1.ServiceBindingUsage, error) {
 		return &v1alpha1.ServiceBindingUsage{}, errors.Wrapf(err, "while getting ServiceBindingUsage %s in namespace %s", sbu.name, sbu.namespace)
 	}
 
-	servicebindingusage, err := convertFromUnstructuredToServiceBindingUsage(u)
+	serviceBindingUsage, err := convertFromUnstructuredToServiceBindingUsage(u)
 	if err != nil {
 		return &v1alpha1.ServiceBindingUsage{}, err
 	}
 
-	return &servicebindingusage, nil
+	return &serviceBindingUsage, nil
 }
 
 func (sbu *ServiceBindingUsage) LogResource() error {

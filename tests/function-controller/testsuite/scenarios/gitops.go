@@ -58,7 +58,6 @@ func GitopsSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Log
 		Log:                genericContainer.Log,
 		DataKey:            testsuite.TestDataKey,
 	}
-
 	return []step.Step{
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
 		teststep.NewGitServer(gitCfg, "Start in-cluster Git Server", appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace)),
