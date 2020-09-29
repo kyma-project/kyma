@@ -13,23 +13,16 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 )
 
-// SendEvent is a step which sends an example event to the application gateway
+// SendEventToMesh is a step which sends an example event to the application gateway
 type SendEventToMesh struct {
-	state   SendEventState
-	appName string
-	payload string
-}
-
-// SendEventState represents SendEvent dependencies
-type SendEventState interface {
-	GetEventSender() *testkit.EventSender
+	testkit.SendEvent
 }
 
 var _ step.Step = &SendEventToMesh{}
 
 // NewSendEvent returns new SendEvent
-func NewSendEventToMesh(appName, payload string, state SendEventState) *SendEventToMesh {
-	return &SendEventToMesh{state: state, appName: appName, payload: payload}
+func NewSendEventToMesh(appName, payload string, state testkit.SendEventState) *SendEventToMesh {
+	return &SendEventToMesh{testkit.SendEvent{State: state, AppName: appName, Payload: payload}}
 }
 
 // Name returns name name of the step
@@ -45,7 +38,7 @@ func (s *SendEventToMesh) Run() error {
 		return err
 	}
 
-	_, _, err = s.state.GetEventSender().SendCloudEventToMesh(ctx, event)
+	_, _, err = s.State.GetEventSender().SendCloudEventToMesh(ctx, event)
 	logrus.WithField("component", "SendEventToMesh").Debugf("SendCloudEventToMesh: eventID: %v; error: %v", event.ID(), err)
 	return err
 }
@@ -57,7 +50,7 @@ func (s *SendEventToMesh) prepareEvent() (cloudevents.Event, error) {
 	event.SetSource("some source")
 	// TODO(k15r): infer mime type automatically
 	event.SetDataContentType("text/plain")
-	if err := event.SetData(s.payload); err != nil {
+	if err := event.SetData(s.Payload); err != nil {
 		return event, err
 	}
 
