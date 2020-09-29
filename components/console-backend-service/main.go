@@ -76,10 +76,10 @@ func main() {
 
 	gqlCfg := gqlschema.Config{Resolvers: resolvers}
 
-	// var authenticator authenticatorpkg.Request
+	var authenticator authenticatorpkg.Request
 
-	// authenticator, err = authn.NewOIDCAuthenticator(&cfg.OIDC)
-	// exitOnError(err, "Error while creating OIDC authenticator")
+	authenticator, err = authn.NewOIDCAuthenticator(&cfg.OIDC)
+	exitOnError(err, "Error while creating OIDC authenticator")
 	sarClient := kubeClient.AuthorizationV1().SubjectAccessReviews()
 	authorizer, err := authz.NewAuthorizer(sarClient, cfg.SARCacheConfig)
 	exitOnError(err, "Failed to create authorizer")
@@ -91,7 +91,7 @@ func main() {
 
 	executableSchema := gqlschema.NewExecutableSchema(gqlCfg)
 
-	runServer(stopCh, cfg, executableSchema, nil)
+	runServer(stopCh, cfg, executableSchema, authenticator)
 }
 
 func loadConfig(prefix string) (config, bool, error) {
