@@ -88,6 +88,8 @@ mod-verify-local:
 test-local: generate-local fmt-local vet-local
 	go test ./... -coverprofile cover.out
 
+release: resolve verify build-image push-image
+
 path-to-referenced-charts:
 	@echo "resources/eventing-manager/eventing-controller"
 
