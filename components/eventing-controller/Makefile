@@ -109,7 +109,7 @@ else
 CONTROLLER_GEN=$(shell which controller-gen)
 endif
 
-$(eval $(call buildpack-mount,resolve))
+$(eval $(call buildpack-cp-ro,resolve))
 $(eval $(call buildpack-mount,mod-verify))
 $(eval $(call buildpack-mount,test))
 $(eval $(call buildpack-mount,controller-gen))
