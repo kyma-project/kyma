@@ -804,7 +804,7 @@
   version = "2019.2.3"
 
 [[projects]]
-  digest = "1:4b6cfec9f2c7fcc231cd8d63a724398ae1d73ff76de66a5e1e755ccdec8e3666"
+  digest = "1:7e1038ca24143177689cd660d82267933716fdb68c5700ba1ce4d95a9bf19e69"
   name = "istio.io/api"
   packages = [
     "authentication/v1alpha1",
@@ -818,11 +818,11 @@
     "type/v1beta1",
   ]
   pruneopts = "T"
-  revision = "da46fe8e25be0d3f410d5b9dfcd729e7d1d2f85a"
-  version = "1.5.1"
+  revision = "34e474846e0d348c39ee16a268a71a3104cb6f9e"
+  version = "1.6.8"
 
 [[projects]]
-  digest = "1:1d23a2c7f0de8fa769b3cacf7a00f630c66e4c65882a1255b26557513f2bd03f"
+  digest = "1:bb9e105fbded3d1dfb3cd7a334b104e82f86cb2261606a912823469dd80dea67"
   name = "istio.io/client-go"
   packages = [
     "pkg/apis/authentication/v1alpha1",
@@ -867,8 +867,8 @@
     "pkg/listers/security/v1beta1",
   ]
   pruneopts = "T"
-  revision = "065c5926775027f386ef768afd355c14ff3dbdd8"
-  version = "1.5.1"
+  revision = "f8d9d8ff84e6e3753cdfcbb82c03f495269e29dc"
+  version = "1.5.10"
 
 [[projects]]
   digest = "1:08fc4e9de7826015a01fab79f1e21a9261dfd3dab3b696f5f8023177312f1173"
@@ -1425,13 +1425,18 @@
     "go.opencensus.io/trace",
     "go.uber.org/zap",
     "istio.io/api/authentication/v1alpha1",
+    "istio.io/api/security/v1beta1",
+    "istio.io/api/type/v1beta1",
     "istio.io/client-go/pkg/apis/authentication/v1alpha1",
+    "istio.io/client-go/pkg/apis/security/v1beta1",
     "istio.io/client-go/pkg/clientset/versioned",
     "istio.io/client-go/pkg/clientset/versioned/fake",
     "istio.io/client-go/pkg/clientset/versioned/typed/authentication/v1alpha1",
+    "istio.io/client-go/pkg/clientset/versioned/typed/security/v1beta1",
     "istio.io/client-go/pkg/informers/externalversions",
     "istio.io/client-go/pkg/informers/externalversions/authentication/v1alpha1",
     "istio.io/client-go/pkg/listers/authentication/v1alpha1",
+    "istio.io/client-go/pkg/listers/security/v1beta1",
     "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",

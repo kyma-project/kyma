@@ -11,9 +11,8 @@ import (
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 
-	istioauthenticationalpha1 "istio.io/api/authentication/v1alpha1"
-	istiov1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
-	istioversionedclient "istio.io/client-go/pkg/clientset/versioned"
+	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
+	securityclientv1beta1 "istio.io/client-go/pkg/clientset/versioned/typed/security/v1beta1"
 
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,6 +22,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
+	"github.com/kyma-project/kyma/components/application-broker/internal/istio"
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	v1client "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
@@ -47,14 +47,17 @@ const (
 	// knSubscriptionNamePrefix is the prefix used for the generated Knative Subscription name
 	knSubscriptionNamePrefix = "brokersub"
 
-	// brokerTargetSelectorName used for targeting the default-broker svc while creating an istio policy
-	brokerTargetSelectorName = "default-broker"
-	// filterTargetSelectorName used for targeting the default-broker-filter svc while creating an istio policy
-	filterTargetSelectorName = "default-broker-filter"
+	// peerAuthKnativeBrokerLabelKey is the key of the label for all Knative broker pods
+	peerAuthKnativeBrokerLabelKey = "eventing.knative.dev/broker"
 
-	istioMtlsPermissiveMode = 1
+	// peerAuthKnativeBrokerLabelValue is the value of the label for all Knative broker pods
+	peerAuthKnativeBrokerLabelValue = "default"
 
-	policyNameSuffix = "-broker"
+	// knativeBrokerMetricsPort is the port of the broker where metrics are exposed
+	knativeBrokerMetricsPort = uint32(9090)
+
+	// peerAuthNameSuffix is the suffix added to the PeerAuthentication CR as it is meant for Knative brokers
+	peerAuthNameSuffix = "-broker"
 )
 
 type RestoreProvisionRequest struct {
@@ -70,7 +73,7 @@ func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter insta
 	operationInserter operationInserter, operationUpdater operationUpdater,
 	accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder,
 	eaClient v1client.ApplicationconnectorV1alpha1Interface, knClient knative.Client,
-	istioClient istioversionedclient.Interface, iStateUpdater instanceStateUpdater,
+	istioClient securityclientv1beta1.SecurityV1beta1Interface, iStateUpdater instanceStateUpdater,
 	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger, selector appSvcIDSelector,
 	apiPkgCredsCreator apiPackageCredentialsCreator, validateReq func(req *osb.ProvisionRequest) *osb.HTTPStatusCodeError) *ProvisionService {
 	return &ProvisionService{
@@ -105,7 +108,7 @@ type ProvisionService struct {
 	eaClient                 v1client.ApplicationconnectorV1alpha1Interface
 	accessChecker            access.ProvisionChecker
 	knClient                 knative.Client
-	istioClient              istioversionedclient.Interface
+	istioClient              securityclientv1beta1.PeerAuthenticationsGetter
 	appSvcIDSelector         appSvcIDSelector
 	apiPkgCredCreator        apiPackageCredentialsCreator
 	validateProvisionRequest func(req *osb.ProvisionRequest) *osb.HTTPStatusCodeError
@@ -280,10 +283,10 @@ func (svc *ProvisionService) do(inputParams map[string]interface{}, iID internal
 		return
 	}
 
-	// Create istio policy
-	if err := svc.createIstioPolicy(ns); err != nil {
-		svc.log.Errorf("Error creating istio policy: %v", err)
-		opDesc := fmt.Sprintf("provisioning failed while creating an istio policy for application: %s"+
+	// CreateOrUpdate Istio PeerAuthentication
+	if err := svc.createOrUpdatePeerAuthentication(ns); err != nil {
+		svc.log.Errorf("Error creating istio PeerAuthentication: %v", err)
+		opDesc := fmt.Sprintf("provisioning failed while creating an istio PeerAuthentication for application: %s"+
 			" namespace: %s on error: %s", appName, ns, err)
 		svc.updateStateFailed(iID, opID, opDesc)
 		return
@@ -439,49 +442,28 @@ func (svc *ProvisionService) channelForApp(applicationName internal.ApplicationN
 	return svc.knClient.GetChannelByLabels(integrationNamespace, labels)
 }
 
-// Create a new policy
-func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
-	policyName := fmt.Sprintf("%s%s", ns, policyNameSuffix)
-
-	policyLabels := make(map[string]string)
-	policyLabels["eventing.knative.dev/broker"] = "default"
-
-	svc.log.Infof("Creating Policy %s in namespace: %s", policyName, string(ns))
-
-	brokerTargetSelector := &istioauthenticationalpha1.TargetSelector{
-		Name: brokerTargetSelectorName,
-	}
-	filterTargetSelector := &istioauthenticationalpha1.TargetSelector{
-		Name: filterTargetSelectorName,
-	}
-	mtls := &istioauthenticationalpha1.MutualTls{
-		Mode: istioMtlsPermissiveMode,
-	}
-	peerAuthenticationMethod := &istioauthenticationalpha1.PeerAuthenticationMethod{
-		Params: &istioauthenticationalpha1.PeerAuthenticationMethod_Mtls{
-			Mtls: mtls,
-		},
+// CreateOrUpdate PeerAuthentication to enable Prometheus scrape Knative brokers for metrics
+func (svc *ProvisionService) createOrUpdatePeerAuthentication(ns internal.Namespace) error {
+	peerAuthName := fmt.Sprintf("%s%s", ns, peerAuthNameSuffix)
+	namespace := string(ns)
+	labelSelectors := map[string]string{
+		peerAuthKnativeBrokerLabelKey: peerAuthKnativeBrokerLabelValue,
 	}
 
-	policy := &istiov1alpha1.Policy{
-		ObjectMeta: v1.ObjectMeta{
-			Name:      policyName,
-			Namespace: string(ns),
-			Labels:    policyLabels,
-		},
-		Spec: istioauthenticationalpha1.Policy{
-			Targets: []*istioauthenticationalpha1.TargetSelector{brokerTargetSelector, filterTargetSelector},
-			Peers:   []*istioauthenticationalpha1.PeerAuthenticationMethod{peerAuthenticationMethod},
-		},
-	}
+	svc.log.Infof("Creating PeerAuthentication %s in namespace: %s", peerAuthName, namespace)
+	peerAuth := istio.NewPeerAuthentication(namespace, peerAuthName,
+		istio.WithLabel(peerAuthKnativeBrokerLabelKey, peerAuthKnativeBrokerLabelValue),
+		istio.WithSelectorSpec(labelSelectors),
+		istio.WithPermissiveMode(knativeBrokerMetricsPort),
+	)
 
-	objInfo := fmt.Sprintf("Istio Policy: [%s], in namespace: [%s]", policy.Name, policy.Namespace)
-	_, err := svc.istioClient.AuthenticationV1alpha1().Policies(string(ns)).Create(policy)
+	objInfo := fmt.Sprintf("Istio PeerAuthentication: [%s], in namespace: [%s]", peerAuth.Name, peerAuth.Namespace)
+	_, err := svc.istioClient.PeerAuthentications(peerAuth.Namespace).Create(peerAuth)
 	switch {
 	case err == nil:
 		svc.log.Infof("Created %s", objInfo)
 	case apiErrors.IsAlreadyExists(err):
-		if err = svc.ensureIstioPolicy(policy); err != nil {
+		if err = svc.ensurePeerAuthentication(peerAuth); err != nil {
 			return errors.Wrapf(err, "while ensuring update on %s", objInfo)
 		}
 		svc.log.Infof("Updated %s", objInfo)
@@ -491,18 +473,18 @@ func (svc *ProvisionService) createIstioPolicy(ns internal.Namespace) error {
 	return nil
 }
 
-func (svc *ProvisionService) ensureIstioPolicy(newPolicy *istiov1alpha1.Policy) error {
-	oldPolicy, err := svc.istioClient.AuthenticationV1alpha1().Policies(newPolicy.Namespace).Get(newPolicy.Name, v1.GetOptions{})
+func (svc *ProvisionService) ensurePeerAuthentication(newPeerAuth *securityv1beta1.PeerAuthentication) error {
+	oldPeerAuth, err := svc.istioClient.PeerAuthentications(newPeerAuth.Namespace).Get(newPeerAuth.Name, v1.GetOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "while getting istio policy with name: %q in namespace: %q", newPolicy.Name, newPolicy.Namespace)
+		return errors.Wrapf(err, "while getting Istio PeerAuthentication with name: %q in namespace: %q", newPeerAuth.Name, newPeerAuth.Namespace)
 	}
 
-	toUpdate := oldPolicy.DeepCopy()
-	toUpdate.Labels = newPolicy.Labels
-	toUpdate.Spec = newPolicy.Spec
+	toUpdate := oldPeerAuth.DeepCopy()
+	toUpdate.Labels = newPeerAuth.Labels
+	toUpdate.Spec = newPeerAuth.Spec
 
-	if _, err := svc.istioClient.AuthenticationV1alpha1().Policies(toUpdate.Namespace).Update(toUpdate); err != nil {
-		return errors.Wrapf(err, "while updating istio policy with name: %q in namespace: %q", toUpdate.Name, newPolicy.Namespace)
+	if _, err := svc.istioClient.PeerAuthentications(toUpdate.Namespace).Update(toUpdate); err != nil {
+		return errors.Wrapf(err, "while updating Istio PeerAuthentication with name: %q in namespace: %q", toUpdate.Name, newPeerAuth.Namespace)
 	}
 	return nil
 }

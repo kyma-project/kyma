@@ -82,7 +82,7 @@ spec:
   source: auth-basic
   baseDir: "/"
   reference: "branchA"
-  runtime: "nodejs-12"
+  runtime: "nodejs12"
 ```
 
 ## Custom resource parameters

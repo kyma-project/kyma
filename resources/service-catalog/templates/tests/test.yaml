@@ -11,8 +11,10 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   disableConcurrency: false
-  template:
+  template:    
     metadata:
+      labels:
+        app: {{ .Chart.Name }}-tests
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
