@@ -9,7 +9,7 @@ type Resolver struct {
 }
 
 func New(factory *resource.GenericServiceFactory) *Resolver {
-	module := resource.NewModule("roles", factory, resource.ServiceCreators{
+	module := resource.NewModule("apigateway", factory, resource.ServiceCreators{
 		roleGroupVersionResource:               NewRoleService,
 		clusterRoleGroupVersionResource:        NewClusterRoleService,
 		roleBindingGroupVersionResource:        NewRoleBindingService,
