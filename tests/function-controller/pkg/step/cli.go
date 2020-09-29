@@ -6,21 +6,24 @@ import (
 )
 
 // Execute behavior is based on chose cleanup method. It is intended to be used with AddFlags
-func (r *Runner) Execute(steps []Step) error {
+func (r *Runner) Execute(suite TestSuite) error {
 	r.log.Infof("Cleanup mode: %s", r.cleanup)
 	var err error
 	switch r.cleanup {
 	case CleanupModeNo:
-		err = r.Run(steps, true)
+		err = r.Run(suite.Steps(), true)
 	case CleanupModeOnly:
-		r.Cleanup(steps)
+		r.Cleanup(suite.Steps())
 	case CleanupModeYes:
-		err = r.Run(steps, false)
+		err = r.Run(suite.Steps(), false)
 	case CleanupModeOnErrorOnly:
-		err = r.Run(steps, true)
+		err = r.Run(suite.Steps(), true)
 		if err != nil {
-			r.Cleanup(steps)
+			r.Cleanup(suite.Steps())
 		}
+	}
+	if err != nil {
+		return suite.OnError(err)
 	}
 	return err
 }
@@ -36,11 +39,11 @@ type CleanupMode string
 const (
 	// CleanupModeNo - Don't execute cleanup
 	CleanupModeNo CleanupMode = "no"
-	// CleanupModeOnly - Don't run steps, only cleanup
+	// CleanupModeOnly - Don't run Steps, only cleanup
 	CleanupModeOnly CleanupMode = "only"
-	// Execute both steps and cleanup
+	// Execute both Steps and cleanup
 	CleanupModeYes CleanupMode = "yes"
-	// Execute steps. If steps fail then run cleanup. Keep resources in case of success
+	// Execute Steps. If Steps fail then run cleanup. Keep resources in case of success
 	CleanupModeOnErrorOnly CleanupMode = "onerroronly"
 )
 

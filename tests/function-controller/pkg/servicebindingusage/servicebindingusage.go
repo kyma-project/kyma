@@ -2,6 +2,7 @@ package servicebindingusage
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -93,6 +94,21 @@ func (sbu *ServiceBindingUsage) Get() (*v1alpha1.ServiceBindingUsage, error) {
 	}
 
 	return &servicebindingusage, nil
+}
+
+func (sbu *ServiceBindingUsage) LogResource() error {
+	serviceBindingUsage, err := sbu.Get()
+	if err != nil {
+		return err
+	}
+
+	out, err := json.MarshalIndent(serviceBindingUsage, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	sbu.log.Infof("Service Binding Usage resource: %s", string(out))
+	return nil
 }
 
 func (sbu *ServiceBindingUsage) WaitForStatusRunning() error {

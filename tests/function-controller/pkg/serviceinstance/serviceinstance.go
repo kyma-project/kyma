@@ -2,6 +2,7 @@ package serviceinstance
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -91,6 +92,21 @@ func (si *ServiceInstance) Get() (*v1beta1.ServiceInstance, error) {
 	}
 
 	return &serviceinstance, nil
+}
+
+func (si *ServiceInstance) LogResource() error {
+	serviceInstance, err := si.Get()
+	if err != nil {
+		return err
+	}
+
+	out, err := json.MarshalIndent(serviceInstance, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	si.log.Infof("%s", string(out))
+	return nil
 }
 
 func (si *ServiceInstance) WaitForStatusRunning() error {

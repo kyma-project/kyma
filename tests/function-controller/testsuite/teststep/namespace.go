@@ -31,6 +31,10 @@ func (n NamespaceStep) Cleanup() error {
 	return errors.Wrap(n.ns.Delete(), "while deleting namespace")
 }
 
+func (n NamespaceStep) OnError(err error) error {
+	return n.ns.LogResource()
+}
+
 func NewNamespaceStep(stepName string, coreCli typedcorev1.CoreV1Interface, container shared.Container) NamespaceStep {
 	ns := namespace.New(coreCli, container)
 	return NamespaceStep{name: stepName, ns: ns}

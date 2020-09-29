@@ -29,11 +29,11 @@ func TestRuntimes(t *testing.T) {
 	runTests(t, scenarios.FunctionTestStep)
 }
 
-func TestGitops(t *testing.T) {
-	runTests(t, scenarios.GitopsSteps)
-}
+//func TestGitSourcesFunctions(t *testing.T) {
+//	runTests(t, scenarios.GitopsSteps)
+//}
 
-type testRunner func(*rest.Config, testsuite.Config, *logrus.Logger) ([]step.Step, error)
+type testRunner func(*rest.Config, testsuite.Config, *logrus.Logger) (step.TestSuite, error)
 
 func runTests(t *testing.T, testFunc testRunner) {
 	rand.Seed(time.Now().UnixNano())
@@ -48,11 +48,11 @@ func runTests(t *testing.T, testFunc testRunner) {
 	logf.SetFormatter(&logrus.TextFormatter{})
 	logf.SetReportCaller(false)
 
-	steps, err := testFunc(restConfig, cfg.Test, logf)
+	testSuite, err := testFunc(restConfig, cfg.Test, logf)
 	failOnError(g, err)
 	runner := step.NewRunner(step.WithCleanupDefault(cfg.Test.Cleanup), step.WithLogger(logf))
 
-	err = runner.Execute(steps)
+	err = runner.Execute(testSuite)
 	failOnError(g, err)
 }
 

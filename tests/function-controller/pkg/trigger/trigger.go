@@ -2,6 +2,7 @@ package trigger
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -83,23 +84,37 @@ func (t *Trigger) Delete() error {
 	return nil
 }
 
-func (t *Trigger) get() (*eventingv1alpha1.Trigger, error) {
+func (t *Trigger) Get() (*eventingv1alpha1.Trigger, error) {
 	u, err := t.resCli.Get(t.name)
 	if err != nil {
 		return &eventingv1alpha1.Trigger{}, errors.Wrapf(err, "while getting Trigger %s in namespace %s", t.name, t.namespace)
 	}
 
-	trigger := &eventingv1alpha1.Trigger{}
-	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, trigger)
+	tr, err := convertFromUnstructuredToTrigger(*u)
 	if err != nil {
 		return &eventingv1alpha1.Trigger{}, err
 	}
 
-	return trigger, nil
+	return &tr, nil
+}
+
+func (t *Trigger) LogResource() error {
+	trigger, err := t.Get()
+	if err != nil {
+		return err
+	}
+
+	out, err := json.MarshalIndent(trigger, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	t.log.Infof("%s", string(out))
+	return nil
 }
 
 func (t *Trigger) WaitForStatusRunning() error {
-	tr, err := t.get()
+	tr, err := t.Get()
 	if err != nil {
 		return err
 	}
@@ -152,18 +167,4 @@ func (t Trigger) isStateReady(trigger eventingv1alpha1.Trigger) bool {
 	shared.LogReadiness(ready, t.verbose, t.name, t.log, trigger)
 
 	return ready
-}
-
-func (t *Trigger) Get() (*eventingv1alpha1.Trigger, error) {
-	u, err := t.resCli.Get(t.name)
-	if err != nil {
-		return &eventingv1alpha1.Trigger{}, errors.Wrapf(err, "while getting Trigger %s in namespace %s", t.name, t.namespace)
-	}
-
-	tr, err := convertFromUnstructuredToTrigger(*u)
-	if err != nil {
-		return &eventingv1alpha1.Trigger{}, err
-	}
-
-	return &tr, nil
 }

@@ -38,6 +38,10 @@ func (c commitChanges) Run() error {
 	return errors.Wrap(err, "while replacing file content in git repository")
 }
 
+func (c commitChanges) OnError(cause error) error {
+	return nil
+}
+
 func (c commitChanges) Cleanup() error {
 	return nil
 }

@@ -89,7 +89,7 @@ func (n *Namespace) Create() (string, error) {
 		return n.name, errors.Wrapf(err, "while creating namespace %s", n.name)
 	}
 
-	n.log.Infof("CREATE: namespace %s", n.name)
+	n.log.Infof("Create: namespace %s", n.name)
 	if n.verbose {
 		n.log.Infof("%+v", ns)
 	}

@@ -2,6 +2,7 @@ package broker
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -40,7 +41,7 @@ func New(c shared.Container) *Broker {
 	}
 }
 
-func (b *Broker) get() (*eventingv1alpha1.Broker, error) {
+func (b *Broker) Get() (*eventingv1alpha1.Broker, error) {
 	u, err := b.resCli.Get(b.name)
 	if err != nil {
 		return &eventingv1alpha1.Broker{}, errors.Wrapf(err, "while getting Broker %s in namespace %s", b.name, b.namespace)
@@ -63,8 +64,23 @@ func (b *Broker) Delete() error {
 	return nil
 }
 
+func (b *Broker) LogResource() error {
+	broker, err := b.Get()
+	if err != nil {
+		return err
+	}
+
+	out, err := json.MarshalIndent(broker, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	b.log.Infof("Broker resource: %s", string(out))
+	return nil
+}
+
 func (b *Broker) WaitForStatusRunning() error {
-	broker, err := b.get()
+	broker, err := b.Get()
 	if err != nil {
 		return err
 	}

@@ -6,7 +6,7 @@ SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 IMG_NAME := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG := $(DOCKER_TAG)
 
-#include $(SCRIPTS_DIR)/generic-make-go.mk
+include $(SCRIPTS_DIR)/generic-make-go.mk
 
 VERIFY_IGNORE := /vendor\|/mocks
 

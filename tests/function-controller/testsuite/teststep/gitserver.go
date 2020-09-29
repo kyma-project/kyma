@@ -51,3 +51,7 @@ func (r newGitServer) Run() error {
 func (r newGitServer) Cleanup() error {
 	return errors.Wrap(r.gs.Delete(), "while deleting in-cluster Git server")
 }
+
+func (r newGitServer) OnError(cause error) error {
+	return nil
+}

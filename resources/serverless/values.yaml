@@ -54,7 +54,7 @@ tests:
   envs:
     waitTimeout: 15m
     verifySSL: "false"
-    verbose: "true"
+    verbose: "false"
     gitServer:
       image: "eu.gcr.io/kyma-project/gitserver"
       tag: "c0aa144a"

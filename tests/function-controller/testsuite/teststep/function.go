@@ -45,27 +45,29 @@ func (f newFunction) Cleanup() error {
 	return errors.Wrapf(f.fn.Delete(), "while deleting function: %s", f.name)
 }
 
-var _ step.Step = newFunction{}
-var _ step.Step = updateFunc{}
-var _ step.Step = EmptyFunction{}
+func (f newFunction) OnError(cause error) error {
+	return f.fn.LogResource()
+}
 
-type EmptyFunction struct {
+var _ step.Step = newFunction{}
+
+type emptyFunction struct {
 	name string
 	fn   *function.Function
 }
 
 func CreateEmptyFunction(fn *function.Function) step.Step {
-	return &EmptyFunction{
+	return &emptyFunction{
 		name: "Creating function without body should be rejected by the webhook",
 		fn:   fn,
 	}
 }
 
-func (e EmptyFunction) Name() string {
+func (e emptyFunction) Name() string {
 	return e.name
 }
 
-func (e EmptyFunction) Run() error {
+func (e emptyFunction) Run() error {
 	err := e.fn.Create(&function.FunctionData{})
 	if err == nil {
 		return errors.New("Creating empty funciton should return error, but got nil")
@@ -73,9 +75,15 @@ func (e EmptyFunction) Run() error {
 	return nil
 }
 
-func (e EmptyFunction) Cleanup() error {
+func (e emptyFunction) Cleanup() error {
 	return nil
 }
+
+func (e emptyFunction) OnError(cause error) error {
+	return e.fn.LogResource()
+}
+
+var _ step.Step = emptyFunction{}
 
 type updateFunc struct {
 	name     string
@@ -108,3 +116,9 @@ func (u updateFunc) Run() error {
 func (u updateFunc) Cleanup() error {
 	return nil
 }
+
+func (u updateFunc) OnError(cause error) error {
+	return u.fn.LogResource()
+}
+
+var _ step.Step = updateFunc{}

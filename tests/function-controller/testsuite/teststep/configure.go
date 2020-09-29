@@ -130,6 +130,34 @@ func (f ConfigreFunction) Run() error {
 	return nil
 }
 
+func (f ConfigreFunction) OnError(cause error) error {
+	if err := f.apiRule.LogResource(); err != nil {
+		return errors.Wrap(err, "while getting apirule")
+	}
+
+	if err := f.svcInstance.LogResource(); err != nil {
+		return errors.Wrap(err, "while getting service instance")
+	}
+
+	if err := f.svcBinding.LogResource(); err != nil {
+		return errors.Wrap(err, "while getting service binding")
+	}
+
+	if err := f.svcBindingUsage.LogResource(); err != nil {
+		return errors.Wrap(err, "while getting service binding usage")
+	}
+
+	if err := f.broker.LogResource(); err != nil {
+		return errors.Wrap(err, "while getting broker")
+	}
+
+	if err := f.trigger.LogResource(); err != nil {
+		return errors.Wrap(err, "while getting trigger")
+	}
+
+	return nil
+}
+
 type RuntimeObjectPrinter interface {
 	Print(object runtime.Object)
 }

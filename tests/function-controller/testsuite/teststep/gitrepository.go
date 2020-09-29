@@ -37,3 +37,7 @@ func (r createGitRepository) Run() error {
 func (r createGitRepository) Cleanup() error {
 	return errors.Wrapf(r.repo.Delete(), "while deleting GitRepository: %s", r.name)
 }
+
+func (r createGitRepository) OnError(cause error) error {
+	return nil
+}

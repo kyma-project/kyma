@@ -50,6 +50,16 @@ func (s SerialSteps) Cleanup() error {
 	return nil
 }
 
+func (s SerialSteps) OnError(cause error) error {
+	for _, testStep := range s.steps {
+		err := testStep.OnError(cause)
+		if err != nil {
+			return errors.Wrap(err, fmt.Sprintf("while fetching logs from serial steps: %s", s.name))
+		}
+	}
+	return nil
+}
+
 func NewSerialSteps(log *logrus.Entry, name string, steps ...step.Step) SerialSteps {
 	return SerialSteps{log: log, steps: steps, name: name}
 }

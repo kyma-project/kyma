@@ -2,6 +2,7 @@ package apirule
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -121,6 +122,21 @@ func (a *APIRule) WaitForStatusRunning() error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (a *APIRule) LogResource() error {
+	apiRule, err := a.Get()
+	if err != nil {
+		return err
+	}
+
+	out, err := json.MarshalIndent(apiRule, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	a.log.Infof("%s", string(out))
 	return nil
 }
 

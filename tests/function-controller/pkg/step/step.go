@@ -9,15 +9,17 @@ import (
 
 // Step represents a single action in test scenario
 type Step interface {
-	// Name returns name name of the step
+	// Name returns Name Name of the step
 	Name() string
 	// Run executes the step
 	Run() error
 	// Cleanup removes all resources that may possibly created by the step
 	Cleanup() error
+	// OnError is callback in case of error
+	OnError(error) error
 }
 
-// Runner executes steps in safe manner
+// Runner executes Steps in safe manner
 type Runner struct {
 	log     *logrus.Logger
 	cleanup CleanupMode
@@ -53,7 +55,7 @@ func NewRunner(opts ...RunnerOption) *Runner {
 	return runner
 }
 
-// Run executes steps in specified order. If skipCleanup is false it also executes Step.Cleanup in reverse order
+// Run executes Steps in specified order. If skipCleanup is false it also executes Step.Cleanup in reverse order
 // starting from last executed step
 func (r *Runner) Run(steps []Step, skipCleanup bool) error {
 	var startedStep int
@@ -70,7 +72,11 @@ func (r *Runner) Run(steps []Step, skipCleanup bool) error {
 		r.log.Infof("Step: '%s'", step.Name())
 		if err = r.runStep(step); err != nil {
 			r.log.Errorf("Error in '%s': %s", step.Name(), err)
-			break
+			callbackErr := step.OnError(err)
+			if callbackErr != nil {
+				//TODO: in case of callbackErr
+			}
+			return err
 		}
 	}
 
@@ -87,7 +93,7 @@ func (r *Runner) runStep(step Step) (err error) {
 	return step.Run()
 }
 
-// Cleanup cleans up given steps in reverse order
+// Cleanup cleans up given Steps in reverse order
 func (r *Runner) Cleanup(steps []Step) {
 	for i := len(steps) - 1; i >= 0; i-- {
 		r.log.Infof("Cleanup: '%s'", steps[i].Name())

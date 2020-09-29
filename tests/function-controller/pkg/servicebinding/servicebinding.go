@@ -2,6 +2,7 @@ package servicebinding
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -88,6 +89,22 @@ func (sb *ServiceBinding) Get() (*v1beta1.ServiceBinding, error) {
 	}
 
 	return &servicebinding, nil
+}
+
+func (sb *ServiceBinding) LogResource() error {
+	serviceBinding, err := sb.Get()
+	if err != nil {
+		return err
+	}
+
+	//TODO: Use pretty!
+	out, err := json.MarshalIndent(serviceBinding, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	sb.log.Infof("Service Binding resource: %s", string(out))
+	return nil
 }
 
 func (sb *ServiceBinding) WaitForStatusRunning() error {

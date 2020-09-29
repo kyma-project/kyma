@@ -1,15 +1,18 @@
-package step
+package teststep
 
 import (
 	"fmt"
 	"strings"
 	"sync"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
+	"github.com/pkg/errors"
+
 	"github.com/hashicorp/go-multierror"
 )
 
 type Parallelized struct {
-	steps []Step
+	steps []step.Step
 }
 
 func (p *Parallelized) Name() string {
@@ -22,18 +25,28 @@ func (p *Parallelized) Name() string {
 }
 
 func (p *Parallelized) Run() error {
-	return p.inParallel(func(step Step) error {
+	return p.inParallel(func(step step.Step) error {
 		return step.Run()
 	})
 }
 
 func (p *Parallelized) Cleanup() error {
-	return p.inParallel(func(step Step) error {
+	return p.inParallel(func(step step.Step) error {
 		return step.Cleanup()
 	})
 }
 
-func (p *Parallelized) inParallel(f func(step Step) error) error {
+func (p *Parallelized) OnError(cause error) error {
+	for _, step := range p.steps {
+		err := step.OnError(cause)
+		if err != nil {
+			return errors.Wrap(err, "while fetching logs from parallelized steps")
+		}
+	}
+	return nil
+}
+
+func (p *Parallelized) inParallel(f func(step step.Step) error) error {
 	wg := &sync.WaitGroup{}
 	wg.Add(len(p.steps))
 	errs := make(chan error, len(p.steps))
@@ -49,7 +62,7 @@ func (p *Parallelized) inParallel(f func(step Step) error) error {
 	return errAll.ErrorOrNil()
 }
 
-func (p *Parallelized) runStepInParallel(wg *sync.WaitGroup, errs chan<- error, step Step, f func(step Step) error) {
+func (p *Parallelized) runStepInParallel(wg *sync.WaitGroup, errs chan<- error, step step.Step, f func(step step.Step) error) {
 	defer wg.Done()
 	defer func() {
 		if err := recover(); err != nil {
@@ -59,6 +72,6 @@ func (p *Parallelized) runStepInParallel(wg *sync.WaitGroup, errs chan<- error, 
 	errs <- f(step)
 }
 
-func Parallel(steps ...Step) *Parallelized {
+func Parallel(steps ...step.Step) *Parallelized {
 	return &Parallelized{steps: steps}
 }
