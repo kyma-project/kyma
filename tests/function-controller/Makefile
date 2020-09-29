@@ -29,6 +29,16 @@ push-image:
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
 	docker push $(IMG_NAME):$(TAG)
 
+resolve-local:
+	GO111MODULE=on go mod download
+	GO111MODULE=on go mod vendor
+
+ensure-local:
+	@echo "Go modules present in component - omitting."
+
+dep-status-local:
+	@echo "Go modules present in component - omitting."
+
 .PHONY: pull-licenses
 pull-licenses:
 ifdef LICENSE_PULLER_PATH
