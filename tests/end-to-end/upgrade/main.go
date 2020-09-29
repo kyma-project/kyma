@@ -6,36 +6,28 @@ import (
 	"time"
 
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-
-	eventingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
-	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
-
-	"github.com/sirupsen/logrus"
-	"github.com/vrischmann/envconfig"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/dynamic"
-	k8sclientset "k8s.io/client-go/kubernetes"
-	restClient "k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-
-	"github.com/pkg/errors"
-
 	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	"github.com/vrischmann/envconfig"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/dynamic"
+	k8sclientset "k8s.io/client-go/kubernetes"
+	restClient "k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	eventingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
 	dex "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/fetch-dex-token"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/injector"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/ui"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/waiter"
-
-	//"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/logging"
 	apigateway "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-gateway"
 	applicationoperator "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/application-operator"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh"
@@ -43,6 +35,8 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/rafter"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/serverless"
 	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/ui"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/waiter"
 )
 
 // Config holds application configuration
@@ -151,11 +145,11 @@ func main() {
 		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
 		"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, sourcesCli, appBrokerCli, scCli, eventingCli, cfg.EventSubscriberImage),
 		"ServerlessUpgradeTest":           serverless.New(dynamicCli),
-		//"LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
+		// "LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
 	}
 
 	if testToRun, found := tests[testName]; found {
-		tests = map[string]runner.UpgradeTest{testName:testToRun}
+		tests = map[string]runner.UpgradeTest{testName: testToRun}
 	}
 
 	tRegistry, err := runner.NewConfigMapTestRegistry(k8sCli, cfg.WorkingNamespace, cfg.TestsInfoConfigMapName)
