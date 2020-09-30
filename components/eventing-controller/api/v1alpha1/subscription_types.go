@@ -10,7 +10,7 @@ type SubscriptionSpec struct {
 	Id string `json:"id,omitempty"`
 }
 
-// SubscriptionsStatus defines the observed state of Subscription
+// SubscriptionStatus defines the observed state of Subscription
 type SubscriptionStatus struct {
 }
 
@@ -27,7 +27,7 @@ type Subscription struct {
 
 // +kubebuilder:object:root=true
 
-// SubscriptionList contains a list of Subscriptions
+// SubscriptionList contains a list of Subscription
 type SubscriptionList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

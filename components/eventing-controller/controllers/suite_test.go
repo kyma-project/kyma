@@ -42,6 +42,7 @@ var _ = BeforeSuite(func(done Done) {
 	}
 
 	var err error
+
 	cfg, err = testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
 	Expect(cfg).ToNot(BeNil())

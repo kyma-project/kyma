@@ -41,7 +41,7 @@ spec:
                 type: string
             type: object
           status:
-            description: SubscriptionsStatus defines the observed state of Subscription
+            description: SubscriptionStatus defines the observed state of Subscription
             type: object
         type: object
     served: true
