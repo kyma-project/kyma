@@ -3,7 +3,7 @@ title: Sidecar Proxy Injection
 type: Details
 ---
 
-By default, the Istio sidecar injector watches all Pod creation operations on all Namespaces and injects the newly created Pods with a sidecar proxy.
+By default, the Istio watches all Pod creation operations on all Namespaces and injects the newly created Pods with a sidecar proxy.
 
 You can disable sidecar proxy injection for either an entire Namespace or a single Deployment.
 
