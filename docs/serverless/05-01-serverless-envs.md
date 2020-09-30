@@ -40,7 +40,7 @@ To configure a Function with the Python runtime, override the default values of 
 | -------------------- | ------------------------------------------------ | ------ | --------------- |
 | **FUNC_MEMFILE_MAX** | Maximum size of memory buffer for the HTTP request body in bytes. | Number | `100*1024*1024` | <!-- https://bottlepy.org/docs/dev/api.html#bottle.BaseRequest.MEMFILE_MAX --> |
 
-See [`kubeless.py`](https://github.com/kubeless/runtimes/blob/master/stable/python/kubeless.py) to get a deeper understanding of how the Bottle server, that acts as a runtime, uses these values internally to run Python Functions.
+See [`kubeless.py`](https://github.com/kubeless/runtimes/blob/master/stable/python/_kubeless.py) to get a deeper understanding of how the Bottle server, that acts as a runtime, uses these values internally to run Python Functions.
 
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha1
