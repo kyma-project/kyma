@@ -5,10 +5,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
-	"github.com/pkg/errors"
-
 	"github.com/hashicorp/go-multierror"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
 )
 
 type Parallelized struct {
@@ -26,7 +24,11 @@ func (p *Parallelized) Name() string {
 
 func (p *Parallelized) Run() error {
 	return p.inParallel(func(step step.Step) error {
-		return step.Run()
+		err := step.Run()
+		if err != nil {
+			return step.OnError(err)
+		}
+		return nil
 	})
 }
 
@@ -37,12 +39,12 @@ func (p *Parallelized) Cleanup() error {
 }
 
 func (p *Parallelized) OnError(cause error) error {
-	for _, step := range p.steps {
-		err := step.OnError(cause)
-		if err != nil {
-			return errors.Wrap(err, "while fetching logs from parallelized steps")
-		}
-	}
+	//for _, step := range p.steps {
+	//	err := step.OnError(cause)
+	//	if err != nil {
+	//		return errors.Wrap(err, "while fetching logs from parallelized steps")
+	//	}
+	//}
 	return nil
 }
 

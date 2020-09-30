@@ -1,9 +1,13 @@
 package scenarios
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"net/url"
 	"time"
+
+	corev1 "k8s.io/api/core/v1"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/sirupsen/logrus"
@@ -25,6 +29,15 @@ import (
 )
 
 const scenarioKey = "scenario"
+
+type RuntimesTestSuite struct {
+	Name      string
+	clientset *kubernetes.Clientset
+}
+
+func (rst RuntimesTestSuite) OnError(cause error) error {
+	return nil
+}
 
 func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Logger) ([]step.Step, error) {
 	currentDate := time.Now()
@@ -86,7 +99,7 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 		return nil, err
 	}
 
-	logrus.Infof("Testing function in namespace: %s", cfg.Namespace)
+	logf.Infof("Testing function in namespace: %s", cfg.Namespace)
 
 	poll := poller.Poller{
 		MaxPollingTime:     cfg.MaxPollingTime,
@@ -97,20 +110,20 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
 		teststep.NewAddonConfiguration("Create addon configuration", addon, addonURL, genericContainer),
 		teststep.Parallel(
-			teststep.NewSerialSteps(python38Logger, "Python37 test",
+			teststep.NewSerialTestRunner(python38Logger, "Python37 test",
 				teststep.CreateFunction(python38Logger, python38Cfg.Fn, "Create Python37 Function", runtimes.BasicPythonFunction("Hello From python")),
 				teststep.NewHTTPCheck(python38Logger, "Python37 pre update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python38Logger), "Hello From python"),
 				teststep.UpdateFunction(python38Logger, python38Cfg.Fn, "Update Python37 Function", runtimes.BasicPythonFunction("Hello From updated python")),
 				teststep.NewHTTPCheck(python38Logger, "Python37 post update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python38Logger), "Hello From updated python"),
 			),
-			teststep.NewSerialSteps(nodejs10Logger, "NodeJS10 test",
+			teststep.NewSerialTestRunner(nodejs10Logger, "NodeJS10 test",
 				teststep.CreateConfigMap(nodejs10Logger, cm, "Create Test ConfigMap", cmData),
 				teststep.CreateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Create NodeJS10 Function", runtimes.NodeJSFunctionWithEnvFromConfigMap(cm.Name(), cmEnvKey, serverlessv1alpha1.Nodejs10)),
 				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 pre update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), cmEnvValue),
 				teststep.UpdateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Update NodeJS10 Function", runtimes.BasicNodeJSFunction("Hello From updated nodejs10", serverlessv1alpha1.Nodejs10)),
 				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 post update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), "Hello From updated nodejs10"),
 			),
-			teststep.NewSerialSteps(nodejs12Logger, "NodeJS12 test",
+			teststep.NewSerialTestRunner(nodejs12Logger, "NodeJS12 test",
 				teststep.CreateEmptyFunction(nodejs12Cfg.Fn),
 				teststep.CreateFunction(nodejs12Logger, nodejs12Cfg.Fn, "Create NodeJS12 Function", runtimes.BasicNodeJSFunction("Hello From nodejs", serverlessv1alpha1.Nodejs12)),
 				teststep.NewDefaultedFunctionCheck("Check NodeJS12 function has correct default values", nodejs12Cfg.Fn),
@@ -123,4 +136,32 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 				teststep.NewE2EFunctionCheck(nodejs12Logger, "NodeJS12 post update e2e check", nodejs12Cfg.InClusterURL, nodejs12Cfg.APIRuleURL, nodejs12Cfg.BrokerURL, poll.WithLogger(nodejs12Logger)),
 			)),
 	}, nil
+}
+
+func getPodLogs(pod corev1.Pod) string {
+	podLogOpts := corev1.PodLogOptions{}
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		return "error in getting config"
+	}
+	// creates the clientset
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return "error in getting access to K8S"
+	}
+	req := clientset.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
+	podLogs, err := req.Stream()
+	if err != nil {
+		return "error in opening stream"
+	}
+	defer podLogs.Close()
+
+	buf := new(bytes.Buffer)
+	_, err = io.Copy(buf, podLogs)
+	if err != nil {
+		return "error in copy information from podLogs to buf"
+	}
+	str := buf.String()
+
+	return str
 }

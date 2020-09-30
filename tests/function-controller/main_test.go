@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -21,8 +22,7 @@ import (
 )
 
 type config struct {
-	KubeconfigPath string `envconfig:"optional"`
-	Test           testsuite.Config
+	Test testsuite.Config
 }
 
 func TestRuntimes(t *testing.T) {
@@ -33,9 +33,9 @@ func TestGitSourcesFunctions(t *testing.T) {
 	runTests(t, scenarios.GitopsSteps)
 }
 
-type testRunner func(*rest.Config, testsuite.Config, *logrus.Logger) ([]step.Step, error)
+type testSuite func(*rest.Config, testsuite.Config, *logrus.Logger) ([]step.Step, error)
 
-func runTests(t *testing.T, testFunc testRunner) {
+func runTests(t *testing.T, testFunc testSuite) {
 	rand.Seed(time.Now().UnixNano())
 	g := gomega.NewGomegaWithT(t)
 
@@ -47,7 +47,8 @@ func runTests(t *testing.T, testFunc testRunner) {
 	logf := logrus.New()
 	logf.SetFormatter(&logrus.TextFormatter{})
 	logf.SetReportCaller(false)
-
+	logf.AddHook(TestHook{SuiteName: t.Name()})
+	logf.Info("damian")
 	steps, err := testFunc(restConfig, cfg.Test, logf)
 	failOnError(g, err)
 	runner := step.NewRunner(step.WithCleanupDefault(cfg.Test.Cleanup), step.WithLogger(logf))
@@ -55,6 +56,31 @@ func runTests(t *testing.T, testFunc testRunner) {
 	err = runner.Execute(steps)
 	failOnError(g, err)
 }
+
+func TestOnError(t *testing.T) {
+	runTests(t, scenarios.TestSteps)
+
+	logf := logrus.New()
+	newLogger := logf.WithField("test", "value")
+
+	newLogger.Info("first")
+	newLogger.Info("second")
+}
+
+type TestHook struct {
+	SuiteName string
+}
+
+func (t TestHook) Levels() []logrus.Level {
+	return logrus.AllLevels
+}
+
+func (t TestHook) Fire(entry *logrus.Entry) error {
+	entry.Message = fmt.Sprintf("Suite=%s; msg=%s", t.SuiteName, entry.Message)
+	return nil
+}
+
+var _ logrus.Hook = TestHook{}
 
 func loadConfig(prefix string) (config, error) {
 	cfg := config{}

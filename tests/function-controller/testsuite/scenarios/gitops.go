@@ -50,7 +50,7 @@ func GitopsSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Log
 		return nil, errors.Wrapf(err, "while creating Git config")
 	}
 
-	logrus.Infof("Testing Git Function in namespace: %s", cfg.Namespace)
+	logf.Infof("Testing Git Function in namespace: %s", cfg.Namespace)
 
 	poll := poller.Poller{
 		MaxPollingTime:     cfg.MaxPollingTime,
