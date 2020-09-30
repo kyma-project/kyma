@@ -1,4 +1,3 @@
-{{- if .Values.pushgateway.enabled }}
 apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
 metadata:
@@ -13,4 +12,3 @@ spec:
       release: {{ .Release.Name }}
   mtls:
     mode: "PERMISSIVE"
-{{- end }}
