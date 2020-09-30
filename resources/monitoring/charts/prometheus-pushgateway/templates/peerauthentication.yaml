@@ -1,0 +1,16 @@
+{{- if .Values.pushgateway.enabled }}
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  name: {{ template "prometheus-pushgateway.name" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "prometheus-pushgateway.name" . }}
+      release: {{ .Release.Name }}
+  mtls:
+    mode: "PERMISSIVE"
+{{- end }}
