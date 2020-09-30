@@ -14,10 +14,12 @@ VERIFY_IGNORE := /vendor\|/mocks
 CRD_OPTIONS ?= "crd:trivialVersions=false"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
+ifneq (,$(shell which go))
 ifeq (,$(shell go env GOBIN))
 GOBIN=$(shell go env GOPATH)/bin
 else
 GOBIN=$(shell go env GOBIN)
+endif
 endif
 
 all: manager
