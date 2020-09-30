@@ -1631,11 +1631,11 @@ prometheus:
 
     ## Maximum size of metrics
     ##
-    retentionSize: 2GB
+    retentionSize: 256MB
 
     ## Enable compression of the write-ahead log using Snappy.
     ##
-    walCompression: false
+    walCompression: true
 
     ## If true, the Operator won't process any Prometheus configuration changes
     ##
