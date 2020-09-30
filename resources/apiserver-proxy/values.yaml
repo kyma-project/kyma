@@ -7,8 +7,8 @@ port:
 
 
 corsPolicy:
-  allowOrigins:
-    - regex: ".*"
+  allowOrigin:
+    - "*"
   allowHeaders:
     - "authorization"
     - "content-type"
