@@ -3,7 +3,7 @@ title: Environment variables
 type: Configuration
 ---
 
-Configuration of environment variables depends on Function's runtime.
+Configuration of environment variables depends on the Function's runtime.
 
 ## NodeJS runtime
 

@@ -110,7 +110,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.resources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Function's Pod to use.      |
 | **spec.resources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the Function's Pod to operate.       |
 | **spec.resources.requests.memory**       |       No       | Specifies the amount of memory requested by the Function's Pod to operate.               |
-| **spec.buildResources.limits.cpu**            |       No       | Defines the maximum number of CPUs available for the Kubernetes Job's Pod responsible for building Function's image to use.      |
+| **spec.buildResources.limits.cpu**            |       No       | Defines the maximum number of CPUs available to use for the Kubernetes Job's Pod responsible for building the Function's image.      |
 | **spec.buildResources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Job's Pod to use.      |
 | **spec.buildResources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the build Job's Pod to operate.       |
 | **spec.buildResources.requests.memory**       |       No       | Specifies the amount of memory requested by the build Job's Pod to operate.               |

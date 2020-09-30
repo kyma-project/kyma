@@ -20,13 +20,11 @@ This table lists the configurable parameters, their descriptions, and default va
 | ----------------------------------------------- | --------------------------------------------------------------------- | ------------- | ----------------- |
 | **webhook.values.buildJob.resources.minRequestCpu**    | Minimum number of CPUs requested by the image-building Pod to operate.        | `200m`        | `200m`   |
 | **webhook.values.buildJob.resources.minRequestMemory** | Minimum amount of memory requested by the image-building Pod to operate.      | `200Mi`       | `200Mi`  |
-| **webhook.values.buildJob.resources.defaultPreset**    | Default *preset for image-building Pod's resources.      | `normal`        | `local-dev`   |
-| **webhook.values.function.replicas.minValue**      | Minimum number of replicas of single Function.   | `1`       | `1`            |
-| **webhook.values.function.replicas.defaultPreset**      | Default *preset for Function's replicas.   | `S`       | `S`            |
+| **webhook.values.buildJob.resources.defaultPreset**    | Default preset for image-building Pod's resources.      | `normal`        | `local-dev`   |
+| **webhook.values.function.replicas.minValue**      | Minimum number of replicas of a single Function.   | `1`       | `1`            |
+| **webhook.values.function.replicas.defaultPreset**      | Default preset for Function's replicas.   | `S`       | `S`            |
 | **webhook.values.function.resources.minRequestCpu**      | Maximum number of CPUs available for the image-building Pod to use.   | `10m`       | `10m`            |
 | **webhook.values.function.resources.minRequestMemory**   | Maximum amount of memory available for the image-building Pod to use. | `16Mi`      | `16Mi`           |
-| **webhook.values.function.resources.defaultPreset**      | Default *preset for Function's resources.   | `M`       | `M`            |
-
-*preset - predefined group of values. Read [available presets](#details-supported-webhooks-available-presets) to find out more.
+| **webhook.values.function.resources.defaultPreset**      | Default preset for Function's resources.   | `M`       | `M`            |
 
 > **TIP:** To learn more, read the official documentation on [resource units in Kubernetes](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes).
