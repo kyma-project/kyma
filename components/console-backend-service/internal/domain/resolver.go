@@ -115,12 +115,6 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	newServerlessResolver := serverless.NewR(genericServiceFactory)
 	makePluggable(newServerlessResolver)
 
-	eventingResolver := eventing.New(genericServiceFactory)
-	makePluggable(eventingResolver)
-
-	oAuthResolver := oauth.New(genericServiceFactory)
-	makePluggable(oAuthResolver)
-
 	rolesResolver := roles.New(genericServiceFactory)
 	makePluggable(rolesResolver)
 
@@ -134,8 +128,6 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 		ag:            agResolver,
 		serverless:    serverlessResolver,
 		newServerless: newServerlessResolver,
-		eventing:      eventingResolver,
-		oauth:         oAuthResolver,
 		roles:         rolesResolver,
 	}, nil
 }
@@ -152,9 +144,7 @@ func (r *Resolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.app.StopCacheSyncOnClose(stopCh)
 	r.rafter.StopCacheSyncOnClose(stopCh)
 	r.ag.StopCacheSyncOnClose(stopCh)
-	r.eventing.StopCacheSyncOnClose(stopCh)
 	r.serverless.StopCacheSyncOnClose(stopCh)
 	r.newServerless.StopCacheSyncOnClose(stopCh)
-	r.oauth.StopCacheSyncOnClose(stopCh)
 	r.roles.StopCacheSyncOnClose(stopCh)
 }
