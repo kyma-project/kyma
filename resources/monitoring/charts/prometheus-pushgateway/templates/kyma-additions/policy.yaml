@@ -8,7 +8,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: {{ template "prometheus-pushgateway.fullname" . }}
+      app: {{ template "prometheus-pushgateway.name" . }}
       release: {{ .Release.Name }}
   mtls:
     mode: "PERMISSIVE"
