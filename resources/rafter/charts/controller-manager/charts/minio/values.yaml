@@ -54,6 +54,8 @@ mountPath: "/export"
 replicas: 4
 zones: 1
 
+patchCredentialsSecretName: ""
+
 ## TLS Settings for Minio
 tls:
   enabled: false
