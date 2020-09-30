@@ -11,7 +11,7 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 DEV_IMG = ko://github.com/kyma-project/kyma/components/eventing-controller
 VERIFY_IGNORE := /vendor\|/mocks
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:trivialVersions=false"
+CRD_OPTIONS ?= "crd:crdVersions=v1"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifneq (,$(shell which go))
