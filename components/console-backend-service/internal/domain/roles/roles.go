@@ -10,10 +10,10 @@ type Resolver struct {
 
 func New(factory *resource.GenericServiceFactory) *Resolver {
 	module := resource.NewModule("apigateway", factory, resource.ServiceCreators{
-		//roleGroupVersionResource:               NewRoleService,
-		//clusterRoleGroupVersionResource:        NewClusterRoleService,
-		//roleBindingGroupVersionResource:        NewRoleBindingService,
-		//clusterRoleBindingGroupVersionResource: NewClusterRoleBindingService,
+		roleGroupVersionResource:               NewRoleService,
+		clusterRoleGroupVersionResource:        NewClusterRoleService,
+		roleBindingGroupVersionResource:        NewRoleBindingService,
+		clusterRoleBindingGroupVersionResource: NewClusterRoleBindingService,
 	})
 
 	return &Resolver{
@@ -21,19 +21,18 @@ func New(factory *resource.GenericServiceFactory) *Resolver {
 	}
 }
 
-//
-//func (r *Resolver) RoleService() *resource.GenericService {
-//	return r.Module.Service(roleGroupVersionResource)
-//}
-//
-//func (r *Resolver) ClusterRoleService() *resource.GenericService {
-//	return r.Module.Service(clusterRoleGroupVersionResource)
-//}
-//
-//func (r *Resolver) RoleBindingService() *resource.GenericService {
-//	return r.Module.Service(roleBindingGroupVersionResource)
-//}
-//
-//func (r *Resolver) ClusterRoleBindingService() *resource.GenericService {
-//	return r.Module.Service(clusterRoleBindingGroupVersionResource)
-//}
+func (r *Resolver) RoleService() *resource.GenericService {
+	return r.Module.Service(roleGroupVersionResource)
+}
+
+func (r *Resolver) ClusterRoleService() *resource.GenericService {
+	return r.Module.Service(clusterRoleGroupVersionResource)
+}
+
+func (r *Resolver) RoleBindingService() *resource.GenericService {
+	return r.Module.Service(roleBindingGroupVersionResource)
+}
+
+func (r *Resolver) ClusterRoleBindingService() *resource.GenericService {
+	return r.Module.Service(clusterRoleBindingGroupVersionResource)
+}
