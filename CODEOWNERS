@@ -296,6 +296,9 @@ components/etcd-tls-setup-job/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksp
 # Application Gateway Tests
 /tests/application-gateway-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
+# Application Gateway Legacy Tests
+/tests/application-gateway-legacy-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+
 # Application Operator Tests
 /tests/application-operator-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
