@@ -56,7 +56,7 @@ Follows these steps:
 
 5. Select **Create** to confirm the changes.
 
-You will be redirected to the **Catalog Management** > **Instances** > **redis-service** view. Wait until the status of the instance changes from `PROVISIONING` to `RUNNING`.
+You will be redirected to the **Service Management** > **Instances** > **redis-service** view. Wait until the status of the instance changes from `PROVISIONING` to `RUNNING`.
 
     </details>
 </div>
