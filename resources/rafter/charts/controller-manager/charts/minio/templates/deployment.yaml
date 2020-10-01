@@ -138,7 +138,7 @@ spec:
                 secretKeyRef:
                   name: {{ if .Values.existingSecret }}{{ .Values.existingSecret }}{{ else }}{{ template "minio.fullname" . }}{{ end }}
                   key: secretkey
-            {{- if Release.IsUpgrade }}
+            {{- if .Release.IsUpgrade }}
             - name: MINIO_ACCESS_KEY_OLD
               valueFrom:
                 secretKeyRef:
