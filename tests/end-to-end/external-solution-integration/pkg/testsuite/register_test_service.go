@@ -42,7 +42,7 @@ func (s *RegisterTestService) Run() error {
 	service := s.prepareService(url)
 
 	var id string
-	err :=retry.Do(func() error {
+	err := retry.Do(func() error {
 		var err error = nil
 		id, err = s.state.GetRegistryClient().RegisterService(service)
 		if err != nil {
