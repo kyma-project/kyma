@@ -42,7 +42,7 @@ func (s *RegisterTestService) Run() error {
 	service := s.prepareService(url)
 
 	var id string
-	retry.Do(func() error {
+	err :=retry.Do(func() error {
 		var err error = nil
 		id, err = s.state.GetRegistryClient().RegisterService(service)
 		if err != nil {
@@ -53,7 +53,7 @@ func (s *RegisterTestService) Run() error {
 	})
 
 	s.state.SetServiceClassID(id)
-	return nil
+	return err
 }
 
 func (s *RegisterTestService) prepareService(targetURL string) *testkit.ServiceDetails {
