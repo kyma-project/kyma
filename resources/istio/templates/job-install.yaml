@@ -31,7 +31,7 @@ spec:
           - name: NAMESPACE
             value: "{{ .Release.Namespace }}"
           - name: CONFIGMAP_NAME
-            value: kyma-istio-operator-config
+            value: kyma-istio-operator-config-backup
       volumes:
       - name: config
         configMap:

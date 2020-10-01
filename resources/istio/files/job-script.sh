@@ -6,8 +6,7 @@ if [ -f "/etc/istio/overrides.yaml" ]; then
   kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}" \
     --from-file /etc/istio/config.yaml \
     --from-file /etc/istio/overrides.yaml \
-    --from-file /etc/combo.yaml \
-    -o yaml --dry-run | kubectl replace -f -
+    --from-file /etc/combo.yaml
   printf "istioctl manifest apply --wait --readiness-timeout 2m -f /etc/combo.yaml\n"
   istioctl manifest apply --wait --readiness-timeout 2m -f /etc/combo.yaml
 else
