@@ -81,7 +81,7 @@ Get a default domain from values if set or use the default domain name for Kyma
 {{- define "api-gateway.cors.allowOrigins" -}}
 {{- range $i, $e := .Values.config.cors.allowOrigins -}}
 {{- range $e -}}
-{{ printf "%s:%s," . $i -}}
+{{ printf "%s:%s," $i . -}}
 {{- end }}
 {{- end }}
 {{- end -}}

@@ -229,7 +229,7 @@ spec:
     accessLogFile: /dev/stdout
     defaultConfig:
       proxyMetadata: {}
-    enablePrometheusMerge: true
+    enablePrometheusMerge: false
 
   values:
     base:
