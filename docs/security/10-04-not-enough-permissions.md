@@ -3,9 +3,9 @@ title: '"Not enough permissions" error'
 type: Troubleshooting
 ---
 
-If you log in to the SKR and receive an error message `Not enough permissions`:
+If you log in to the Kyma console and receive an error message `Not enough permissions`:
 
-1. Fetch the ID Token. For example, use the [Chrome Developer Tools](https://developers.google.com/web/tools/chrome-devtools) and search for the token in sent requests.
+1. Fetch the ID Token. For example, use the [Chrome Developer Tools](https://developers.google.com/web/tools/chrome-devtools) and search for the token in sent requests authorization header.
 2. Decode the ID Token. For example, use the [jwt.io](https://jwt.io/) page.
 3. Check the value of `"email_verified"` property:
 
@@ -26,4 +26,4 @@ If you log in to the SKR and receive an error message `Not enough permissions`:
 }
 ```
 
-4. If the value is `false`, make sure that you have a valid account in your IDP.
+4. If the value is `false`, it means that IDP was unable to verify your email address. Contact your IDP for further guidance.
