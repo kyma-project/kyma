@@ -6,7 +6,7 @@ echo "--> Check overrides"
 if [ -f "/etc/istio/overrides.yaml" ]; then
     yq merge -x "${OPERATOR_FILE}" /etc/istio/overrides.yaml > /etc/combo.yaml
     kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}" \
-        --from-file "${CONFIGMAP_NAME}" \
+        --from-file "${OPERATOR_FILE}" \
         --from-file /etc/istio/overrides.yaml \
         --from-file /etc/combo.yaml
     OPERATOR_FILE="/etc/combo.yaml"
