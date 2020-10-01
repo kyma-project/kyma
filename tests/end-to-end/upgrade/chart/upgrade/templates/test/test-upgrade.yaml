@@ -10,7 +10,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ .Chart.Name }}-tests
+        app: {{ $.Chart.Name }}-tests
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
@@ -62,6 +62,8 @@ metadata:
 spec:
   template:
     metadata:
+      labels:
+        app: {{ $.Chart.Name }}-tests
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
