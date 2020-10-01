@@ -2,31 +2,29 @@ package roles
 
 import (
 	"context"
-	"sort"
-
 	v1 "k8s.io/api/rbac/v1"
+	"sort"
 )
 
-type RolesList []*v1.Role
-
-func (l *RolesList) Append() interface{} {
-	e := &v1.Role{}
-	*l = append(*l, e)
-	return e
+func RolesAsPointers(objs []v1.Role) []*v1.Role {
+	var pointers []*v1.Role
+	for i := range objs {
+		pointers = append(pointers, &objs[i])
+	}
+	return pointers
 }
 
 func (r *Resolver) RolesQuery(ctx context.Context, namespace string) ([]*v1.Role, error) {
-	items := RolesList{}
-	var err error
-	err = r.RoleService().ListInNamespace(namespace, &items)
-	sort.Slice(items, func(i, j int) bool {
-		return items[i].Name < items[j].Name
+	roles := &v1.RoleList{}
+	err := r.ListInNamespace(ctx, namespace, roles)
+	sort.Slice(roles.Items, func(i, j int) bool {
+		return roles.Items[i].Name < roles.Items[j].Name
 	})
-	return items, err
+	return RolesAsPointers(roles.Items), err
 }
 
 func (r *Resolver) RoleQuery(ctx context.Context, namespace string, name string) (*v1.Role, error) {
-	var result *v1.Role
-	err := r.RoleService().GetInNamespace(name, namespace, &result)
-	return result, err
+	role := &v1.Role{}
+	err := r.GetInNamespace(ctx, namespace, name, role)
+	return role, err
 }

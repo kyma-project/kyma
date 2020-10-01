@@ -53,6 +53,7 @@ require (
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
 	knative.dev/eventing v0.13.1
 	knative.dev/pkg v0.0.0-20200306230727-a56a6ea3fa56
+	sigs.k8s.io/controller-runtime v0.5.1
 )
 
 replace (

@@ -7,26 +7,25 @@ import (
 	v1 "k8s.io/api/rbac/v1"
 )
 
-type ClusterRolesList []*v1.ClusterRole
-
-func (l *ClusterRolesList) Append() interface{} {
-	e := &v1.ClusterRole{}
-	*l = append(*l, e)
-	return e
+func ClusterRolesAsPointers(objs []v1.ClusterRole) []*v1.ClusterRole {
+	var pointers []*v1.ClusterRole
+	for i := range objs {
+		pointers = append(pointers, &objs[i])
+	}
+	return pointers
 }
 
 func (r *Resolver) ClusterRolesQuery(ctx context.Context) ([]*v1.ClusterRole, error) {
-	items := ClusterRolesList{}
-	var err error
-	err = r.ClusterRoleService().List(&items)
-	sort.Slice(items, func(i, j int) bool {
-		return items[i].Name < items[j].Name
+	roles := &v1.ClusterRoleList{}
+	err := r.List(ctx, roles)
+	sort.Slice(roles.Items, func(i, j int) bool {
+		return roles.Items[i].Name < roles.Items[j].Name
 	})
-	return items, err
+	return ClusterRolesAsPointers(roles.Items), err
 }
 
 func (r *Resolver) ClusterRoleQuery(ctx context.Context, name string) (*v1.ClusterRole, error) {
-	var result *v1.ClusterRole
-	err := r.ClusterRoleService().Get(name, &result)
-	return result, err
+	role := &v1.ClusterRole{}
+	err := r.Get(ctx, name, role)
+	return role, err
 }

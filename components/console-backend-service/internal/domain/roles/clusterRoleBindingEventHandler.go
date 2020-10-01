@@ -3,6 +3,7 @@ package roles
 import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	v1 "k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type ClusterRoleBindingEventHandler struct {
@@ -11,7 +12,7 @@ type ClusterRoleBindingEventHandler struct {
 	res     *v1.ClusterRoleBinding
 }
 
-func (h *ClusterRoleBindingEventHandler) K8sResource() interface{} {
+func (h *ClusterRoleBindingEventHandler) K8sResource() runtime.Object {
 	return h.res
 }
 

@@ -51,7 +51,7 @@ func (r *queryResolver) ClusterRoleBindings(ctx context.Context) ([]*v1.ClusterR
 }
 
 func (r *subscriptionResolver) RoleBindingEvent(ctx context.Context, namespace string) (<-chan *gqlschema.RoleBindingEvent, error) {
-	return r.roles.RoleBindingSubscription(ctx, namespace)
+	panic("nope")//return r.roles.RoleBindingSubscription(ctx, namespace)
 }
 
 func (r *subscriptionResolver) ClusterRoleBindingEvent(ctx context.Context) (<-chan *gqlschema.ClusterRoleBindingEvent, error) {

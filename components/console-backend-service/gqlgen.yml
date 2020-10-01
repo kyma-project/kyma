@@ -153,3 +153,4 @@ models:
         resolver: true
   APIRuleAccessStrategyInput:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.APIRuleAccessStrategyInput"
+#    omit_slice_element_pointers: true

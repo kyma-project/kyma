@@ -2,30 +2,28 @@ package roles
 
 import (
 	"context"
-	"sort"
-
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sort"
 
 	v1 "k8s.io/api/rbac/v1"
 )
 
-type ClusterRoleBindingList []*v1.ClusterRoleBinding
-
-func (l *ClusterRoleBindingList) Append() interface{} {
-	e := &v1.ClusterRoleBinding{}
-	*l = append(*l, e)
-	return e
+func ClusterRoleBindingsAsPointers(objs []v1.ClusterRoleBinding) []*v1.ClusterRoleBinding {
+	var pointers []*v1.ClusterRoleBinding
+	for i := range objs {
+		pointers = append(pointers, &objs[i])
+	}
+	return pointers
 }
 
 func (r *Resolver) ClusterRoleBindingsQuery(ctx context.Context) ([]*v1.ClusterRoleBinding, error) {
-	items := ClusterRoleBindingList{}
-	var err error
-	err = r.ClusterRoleBindingService().List(&items)
-	sort.Slice(items, func(i, j int) bool {
-		return items[i].Name < items[j].Name
+	bindings := &v1.ClusterRoleBindingList{}
+	err := r.List(ctx, bindings)
+	sort.Slice(bindings.Items, func(i, j int) bool {
+		return bindings.Items[i].Name < bindings.Items[j].Name
 	})
-	return items, err
+	return ClusterRoleBindingsAsPointers(bindings.Items), err
 }
 
 func (r *Resolver) CreateClusterRoleBinding(ctx context.Context, name string, params gqlschema.ClusterRoleBindingInput) (*v1.ClusterRoleBinding, error) {
@@ -50,14 +48,13 @@ func (r *Resolver) CreateClusterRoleBinding(ctx context.Context, name string, pa
 		},
 	}
 
-	result := &v1.ClusterRoleBinding{}
-	err := r.ClusterRoleBindingService().Create(clusterRoleBinding, result)
-	return result, err
+	err := r.Create(ctx, clusterRoleBinding)
+	return clusterRoleBinding, err
 }
 
 func (r *Resolver) DeleteClusterRoleBinding(ctx context.Context, name string) (*v1.ClusterRoleBinding, error) {
 	result := &v1.ClusterRoleBinding{}
-	err := r.ClusterRoleBindingService().Delete(name, result)
+	err := r.Delete(ctx, name, result)
 	return result, err
 }
 
@@ -65,7 +62,7 @@ func (r *Resolver) ClusterRoleBindingSubscription(ctx context.Context) (<-chan *
 	channel := make(chan *gqlschema.ClusterRoleBindingEvent, 1)
 	filter := func(apiRule v1.ClusterRoleBinding) bool { return true }
 
-	unsubscribe, err := r.ClusterRoleBindingService().Subscribe(NewClusterRoleBindingEventHandler(channel, filter))
+	unsubscribe, err := r.Subscribe(NewClusterRoleBindingEventHandler(channel, filter))
 	if err != nil {
 		return nil, err
 	}

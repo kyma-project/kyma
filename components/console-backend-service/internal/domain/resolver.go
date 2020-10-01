@@ -5,7 +5,9 @@ package domain
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 import (
+	"fmt"
 	"math/rand"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"time"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/roles"
@@ -59,6 +61,10 @@ func GetRandomNumber() time.Duration {
 }
 
 func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, serverlessCfg serverless.Config, informerResyncPeriod time.Duration, _ experimental.FeatureToggles, systemNamespaces []string) (*Resolver, error) {
+
+	c, err := client.New(restConfig, client.Options{})
+	fmt.Println(err)
+
 	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod+GetRandomNumber())
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing service factory")
@@ -121,12 +127,12 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	oAuthResolver := oauth.New(genericServiceFactory)
 	makePluggable(oAuthResolver)
 
-	rolesResolver := roles.New(genericServiceFactory)
-	makePluggable(rolesResolver)
-	err = rolesResolver.Enable() // enable manually
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing roles resolver")
-	}
+	rolesResolver := roles.New(&c)
+	//makePluggable(rolesResolver)
+	//err = rolesResolver.Enable() // enable manually
+	//if err != nil {
+	//	return nil, errors.Wrap(err, "while initializing roles resolver")
+	//}
 
 	return &Resolver{
 		k8s:           k8sResolver,
@@ -160,5 +166,5 @@ func (r *Resolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.serverless.StopCacheSyncOnClose(stopCh)
 	r.newServerless.StopCacheSyncOnClose(stopCh)
 	r.oauth.StopCacheSyncOnClose(stopCh)
-	r.roles.StopCacheSyncOnClose(stopCh)
+	//r.roles.StopCacheSyncOnClose(stopCh)
 }
