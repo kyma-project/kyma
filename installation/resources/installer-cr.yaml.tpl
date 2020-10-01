@@ -68,5 +68,5 @@ spec:
     #  namespace: "kyma-system"
     - name: "console"
       namespace: "kyma-system"
-    #- name: "compass-runtime-agent"
-    #  namespace: "compass-system"
+    - name: "compass-runtime-agent"
+      namespace: "compass-system"
