@@ -1,11 +1,6 @@
 set -ex
 
-OPERATOR_FILE="/etc/istio/config.yaml"
-echo "--> Check overrides"
-if [ -f "/etc/istio/overrides.yaml" ]; then
-    yq merge -x /etc/istio/config.yaml /etc/istio/overrides.yaml > /etc/combo.yaml
-    OPERATOR_FILE="/etc/combo.yaml"
-fi
+OPERATOR_FILE="/etc/istio/operator-1-6.yaml"
 
 echo "--> Remove deprecated resources"
 if kubectl api-versions | grep -c rbac.istio.io ; then
@@ -28,7 +23,7 @@ echo "--> Temporary disable ingress-gateway"
 kubectl scale deploy -n istio-system istio-ingressgateway --replicas 0
 
 echo "--> Upgrade to Istio 1.6"
-istioctl upgrade -f /etc/istio/operator-1-6.yaml -y
+istioctl upgrade -f "${OPERATOR_FILE}" -y
 
 echo "Apply custom kyma manifests"
 kubectl apply -f /etc/manifests

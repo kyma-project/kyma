@@ -6,7 +6,7 @@ metadata:
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
     helm.sh/hook: "post-install,post-upgrade"
     helm.sh/hook-weight: "30"
-  name: istio-upgrade-job-1-7
+  name: istio-job-1-7
 spec:
   activeDeadlineSeconds: 1000
   backoffLimit: 1
@@ -17,7 +17,11 @@ spec:
             - bash
             - "-c"
             - |
-{{.Files.Get "files/istio-upgrade-1-7.sh" | printf "%s" | indent 16}}
+{{- if .Release.IsUpgrade }}
+{{ .Files.Get "files/istio-upgrade-1-7.sh" | printf "%s" | indent 16 }}
+{{- else }}
+{{ .Files.Get "files/istio-install-1-7.sh" | printf "%s" | indent 16 }}
+{{- end }}
           image: {{ .Values.istio.installer.image }}:{{ .Values.istio.installer.tag17 }}
           name: installer
           volumeMounts:
@@ -31,7 +35,7 @@ spec:
           - name: NAMESPACE
             value: "{{ .Release.Namespace }}"
           - name: CONFIGMAP_NAME
-            value: kyma-istio-operator-config
+            value: kyma-istio-operator-config-backup
       volumes:
       - name: config
         configMap:
