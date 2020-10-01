@@ -280,10 +280,6 @@ func shouldIgnoreServiceMonitor(serviceMonitorName string) bool {
 		"kiali-operator-metrics",
 		// tracing-metrics is created automatically by jaeger operator and can't be disabled
 		"tracing-metrics",
-		// istio-mixer shouldn't be ignored once istio upgrade is done https://github.com/kyma-project/kyma/issues/8868
-		"istio-mixer",
-		// will not need to exclude monitoring-kube-proxy once this issue is resolved https://github.com/kyma-project/kyma/issues/9457
-		"monitoring-kube-proxy",
 	}
 
 	for _, sm := range serviceMonitorsToBeIgnored {
