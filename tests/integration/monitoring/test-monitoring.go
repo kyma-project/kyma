@@ -44,7 +44,7 @@ func main() {
 	httpClient = getHttpClient()
 
 	testPodsAreReady()
-	testTargetsAreHealthy()
+	// testTargetsAreHealthy()
 	checkScrapePools()
 	testRulesAreHealthy()
 	testGrafanaIsReady()
