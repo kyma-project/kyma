@@ -97,7 +97,7 @@ Follow these steps:
   Console UI
   </summary>
 
-1. From the `orders-service` Namespace view, go to **Catalog Management** > **Instances** in the left navigation panel.
+1. From the `orders-service` Namespace view, go to **Service Management** > **Instances** in the left navigation panel.
 
 2. Switch to the **Add-Ons** tab.
 
