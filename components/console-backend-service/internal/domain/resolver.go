@@ -116,7 +116,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	makePluggable(newServerlessResolver)
 
 	rolesResolver := roles.New(genericServiceFactory)
-	makePluggable(rolesResolver)
+	//makePluggable(rolesResolver)
 
 	return &Resolver{
 		k8s:           k8sResolver,
