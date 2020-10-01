@@ -19,19 +19,19 @@ func (r *mutationResolver) DeleteRoleBinding(ctx context.Context, namespace stri
 }
 
 func (r *mutationResolver) CreateClusterRoleBinding(ctx context.Context, name string, params gqlschema.ClusterRoleBindingInput) (*v1.ClusterRoleBinding, error) {
-	panic("!")//return r.roles.CreateClusterRoleBinding(ctx, name, params)
+	return r.roles.CreateClusterRoleBinding(ctx, name, params)
 }
 
 func (r *mutationResolver) DeleteClusterRoleBinding(ctx context.Context, name string) (*v1.ClusterRoleBinding, error) {
-	panic("!")//return r.roles.DeleteClusterRoleBinding(ctx, name)
+	return r.roles.DeleteClusterRoleBinding(ctx, name)
 }
 
 func (r *queryResolver) Roles(ctx context.Context, namespace string) ([]*v1.Role, error) {
-	return r.roles.RolesQuery(ctx, namespace)
+	panic("!")//return r.roles.RolesQuery(ctx, namespace)
 }
 
 func (r *queryResolver) Role(ctx context.Context, namespace string, name string) (*v1.Role, error) {
-	return r.roles.RoleQuery(ctx, namespace, name)
+	panic("!")//return r.roles.RoleQuery(ctx, namespace, name)
 }
 
 func (r *queryResolver) ClusterRoles(ctx context.Context) ([]*v1.ClusterRole, error) {
@@ -47,7 +47,7 @@ func (r *queryResolver) RoleBindings(ctx context.Context, namespace string) ([]*
 }
 
 func (r *queryResolver) ClusterRoleBindings(ctx context.Context) ([]*v1.ClusterRoleBinding, error) {
-	panic("!")//return r.roles.ClusterRoleBindingsQuery(ctx)
+	return r.roles.ClusterRoleBindingsQuery(ctx)
 }
 
 func (r *subscriptionResolver) RoleBindingEvent(ctx context.Context, namespace string) (<-chan *gqlschema.RoleBindingEvent, error) {
@@ -55,5 +55,5 @@ func (r *subscriptionResolver) RoleBindingEvent(ctx context.Context, namespace s
 }
 
 func (r *subscriptionResolver) ClusterRoleBindingEvent(ctx context.Context) (<-chan *gqlschema.ClusterRoleBindingEvent, error) {
-	panic("!")//return r.roles.ClusterRoleBindingSubscription(ctx)
+	return r.roles.ClusterRoleBindingSubscription(ctx)
 }
