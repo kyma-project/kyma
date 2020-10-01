@@ -15,10 +15,9 @@ spec:
       labels:
         control-plane: eventing-controller
     spec:
+      serviceAccountName: default
       containers:
       - image: controller
-        args:
-        - --enable-leader-election
         name: controller
         resources:
           limits:
