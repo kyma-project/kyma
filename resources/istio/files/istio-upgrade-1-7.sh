@@ -1,10 +1,15 @@
 set -ex
 
-OPERATOR_FILE="/etc/istio/config.yaml"
+OPERATOR_FILE="/etc/istio/operator-1-7.yaml"
+
 echo "--> Check overrides"
 if [ -f "/etc/istio/overrides.yaml" ]; then
-	yq merge -x /etc/istio/config.yaml /etc/istio/overrides.yaml > /etc/combo.yaml
-	OPERATOR_FILE="/etc/combo.yaml"
+    yq merge -x "${OPERATOR_FILE}" /etc/istio/overrides.yaml > /etc/combo.yaml
+    kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}" \
+        --from-file "${CONFIGMAP_NAME}" \
+        --from-file /etc/istio/overrides.yaml \
+        --from-file /etc/combo.yaml
+    OPERATOR_FILE="/etc/combo.yaml"
 fi
 
 echo "--> Temporary disable ingress-gateway"
