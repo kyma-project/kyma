@@ -51,9 +51,7 @@ uninstall: manifests
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config for local development
 deploy-local: manifests
 	cd config/manager && kustomize edit set image controller=${DEV_IMG}
-	@if [ ! $(kubectl get ns kyma-system) ]; then \
-		kubectl create ns kyma-system; \
-	fi;
+	kubectl create ns kyma-system || true
 	kustomize build config/default | ko apply -f -
 
 # Dry run for deploying controller for local development
