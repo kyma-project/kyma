@@ -9,6 +9,8 @@ metadata:
     {{- if .Values.serviceAccountLabels }}
     {{ toYaml .Values.serviceAccountLabels | indent 4 }}
     {{- end }}
+    app: {{ template "prometheus-pushgateway.name" . }}
+    release: {{ .Release.Name }}
 spec:
   type: {{ .Values.service.type }}
   ports:
