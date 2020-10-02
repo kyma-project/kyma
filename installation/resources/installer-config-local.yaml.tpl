@@ -150,7 +150,7 @@ data:
   prometheus.prometheusSpec.resources.requests.cpu: "100m"
   prometheus.prometheusSpec.resources.requests.memory: "200Mi"
   prometheus.prometheusSpec.retention: "2h"
-  prometheus.prometheusSpec.retentionSize: "500MB"
+  prometheus.prometheusSpec.retentionSize: "256MB"
   prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: "1Gi"
   grafana.persistence.enabled: "false"
 ---

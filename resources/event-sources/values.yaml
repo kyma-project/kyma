@@ -9,5 +9,5 @@ global:
   httpAdapter:
     image: event-sources-http-adapter
     dir: ''
-    version: a28b2c77
+    version: 760fe348
     tracingEnabled: "true"
