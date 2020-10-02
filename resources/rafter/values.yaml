@@ -190,7 +190,7 @@ controller-manager:
   minio:
     enabled: true
 
-    # Secret name for storing old credentials for minio. More info: https://github.com/minio/minio/tree/master/docs/config#rotating-encryption-with-new-credentials
+    # Values for patches old credentials in minio release. More info: https://github.com/minio/minio/tree/master/docs/config#rotating-encryption-with-new-credentials
     patchCredentials:
       secretName: "rafter-minio-old-credentials"
       image:
@@ -254,8 +254,8 @@ upload-service:
       size: 10Gi
 
   image:
-    repository: eu.gcr.io/kyma-project/pr/rafter-upload-service
-    tag: PR-85
+    repository: eu.gcr.io/kyma-project/rafter-upload-service
+    tag: a9c94fb7
     pullPolicy: IfNotPresent
 
   deployment:
