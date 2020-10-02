@@ -5,12 +5,10 @@ go 1.14
 require (
 	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/kubernetes-sigs/service-catalog v0.3.0
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20200817094157-8392259f5be1
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20201001133129-69ce1b75fa6d
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.6.1
-	google.golang.org/genproto v0.0.0-20190916214212-f660b8655731 // indirect
-	gotest.tools/v3 v3.0.2 // indirect
-	helm.sh/helm/v3 v3.3.0
+	helm.sh/helm/v3 v3.3.1
 	istio.io/client-go v0.0.0-20200814134724-bcbf0ed82b30
 	istio.io/gogo-genproto v0.0.0-20200130224810-a0338448499a // indirect
 	k8s.io/api v0.18.8
