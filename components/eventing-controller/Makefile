@@ -9,6 +9,7 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 
 # DEV_IMG is the image used during development workflow only
 DEV_IMG = ko://github.com/kyma-project/kyma/components/eventing-controller
+NAMESPACE = "eventing"
 VERIFY_IGNORE := /vendor\|/mocks
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:crdVersions=v1"
@@ -49,14 +50,17 @@ uninstall: manifests
 	kustomize build config/crd | ko delete -f -
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-local: manifests
-	cd config/manager && kustomize edit set image controller=${DEV_IMG}
-	kubectl create ns kyma-system || true
+deploy-local: manifests deploy-local-dry-run
+	kubectl create ns ${NAMESPACE} || true
 	kustomize build config/default | ko apply -f -
+
+undeploy-local: manifests
+	kustomize build config/default | kubectl delete -f -
 
 # Dry run for deploying controller for local development
 deploy-local-dry-run: manifests
-	cd config/manager && kustomize edit set image controller=${DEV_IMG}
+	cd config/manager && kustomize edit set image controller=${DEV_IMG} && kustomize edit set namespace ${NAMESPACE}
+	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
 	kustomize build config/default
 
 # Generate manifests e.g. CRD, RBAC etc.

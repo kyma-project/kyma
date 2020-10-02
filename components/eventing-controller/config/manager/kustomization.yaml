@@ -5,3 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: ko://github.com/kyma-project/kyma/components/eventing-controller
+namespace: eventing
