@@ -70,6 +70,8 @@ spec:
                   value: {{ .Values.test.acceptance.ui.logging.enabled | quote }}
                 - name: CYPRESS_FUNCTIONS_ENABLED
                   value: {{ .Values.test.acceptance.ui.functions.enabled | quote }}
+                - name: CYPRESS_RAFTER_ENABLED
+                  value: {{ .Values.test.acceptance.ui.rafter.enabled | quote }}
               command:
                 - "/bin/sh"
               args:

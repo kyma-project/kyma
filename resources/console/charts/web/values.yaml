@@ -53,3 +53,5 @@ test:
         enabled: false
       functions:
         enabled: true
+      rafter:
+        enabled: true
