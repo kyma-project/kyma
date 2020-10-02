@@ -48,3 +48,7 @@ required = [
 [[override]]
   name = "k8s.io/code-generator"
   version = "kubernetes-1.16.9"
+
+[[override]]
+  name = "golang.org/x/text"
+  version = "v0.3.3"
