@@ -5,7 +5,7 @@ global:
     runtimeAgent:
       version: "d0516ff9"
     runtimeAgentTests:
-      version: "b9871385"
+      version: "PR-9569"
     compassExternalSolutionTests:
       version: "1a5b13b8"
   istio:
