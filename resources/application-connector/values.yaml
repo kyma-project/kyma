@@ -35,7 +35,7 @@ global:
   connection_token_handler_tests:
     version: "b9871385"
   event_service:
-    version: "d4372526"
+    version: "760fe348"
   event_service_integration_tests:
     version: "2c51c024"
   application_gateway:
