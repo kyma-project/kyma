@@ -92,7 +92,7 @@ make resolve-local
 - The kubebuilder bootstrapped files have been reduced to the bare minimum. If at a later point one of theses files are required (e.g. for a webhook), get them either from [this PR](https://github.com/kyma-project/kyma/pull/9510/commits/6ce5b914c5ef175dea45c27ccca826becb1b5818) or create a sample kubebuilder project and copy all required files from there:
 
     ```sh
-    kubebuilder init --domain kyma-project.io -h
+    kubebuilder init --domain kyma-project.io
     ```
 
 
