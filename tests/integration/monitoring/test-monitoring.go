@@ -34,9 +34,6 @@ var k8sClient *kubernetes.Clientset
 var monitoringClient *monitoringv1.MonitoringV1Client
 var httpClient *http.Client
 
-// void struct is used to simulate a set data structure using a map
-type void struct{}
-
 func main() {
 	kubeConfig = loadKubeConfigOrDie()
 	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
@@ -143,7 +140,7 @@ func testTargetsAreHealthy() {
 			log.Fatal(timeoutMessage)
 		case <-tick.C:
 			var resp prom.TargetsResponse
-			url := fmt.Sprintf("%s/api/v1/targets", prometheusURL)
+			url := fmt.Sprintf("%s/api/v1/targets?state=active", prometheusURL)
 			respBody, statusCode := doGet(url)
 			if err := json.Unmarshal([]byte(respBody), &resp); err != nil {
 				log.Fatalf("Error unmarshalling response: %v.\nResponse body: %s", err, respBody)
@@ -235,7 +232,7 @@ func checkScrapePools() {
 		case <-tick.C:
 			scrapePools = buildScrapePoolSet()
 			var resp prom.TargetsResponse
-			url := fmt.Sprintf("%s/api/v1/targets", prometheusURL)
+			url := fmt.Sprintf("%s/api/v1/targets?state=active", prometheusURL)
 			respBody, statusCode := doGet(url)
 			if err := json.Unmarshal([]byte(respBody), &resp); err != nil {
 				log.Fatalf("Error unmarshalling response: %v.\nResponse body: %s", err, respBody)
@@ -258,6 +255,7 @@ func checkScrapePools() {
 
 func buildScrapePoolSet() map[string]struct{} {
 	scrapePools := make(map[string]struct{})
+
 	serviceMonitors, err := monitoringClient.ServiceMonitors("").List(metav1.ListOptions{})
 	if err != nil {
 		log.Fatalf("Error while listing service monitors: %v", err)
@@ -268,9 +266,24 @@ func buildScrapePoolSet() map[string]struct{} {
 		}
 		for i := range serviceMonitor.Spec.Endpoints {
 			scrapePool := fmt.Sprintf("%s/%s/%d", serviceMonitor.ObjectMeta.Namespace, serviceMonitor.Name, i)
-			scrapePools[scrapePool] = void{}
+			scrapePools[scrapePool] = struct{}{}
 		}
 	}
+
+	podMonitors, err := monitoringClient.PodMonitors("").List(metav1.ListOptions{})
+	if err != nil {
+		log.Fatalf("Error while listing pod monitors: %v", err)
+	}
+	for _, podMonitor := range podMonitors.Items {
+		if shouldIgnorePodMonitor(podMonitor.Name) {
+			continue
+		}
+		for i := range podMonitor.Spec.PodMetricsEndpoints {
+			scrapePool := fmt.Sprintf("%s/%s/%d", podMonitor.ObjectMeta.Namespace, podMonitor.Name, i)
+			scrapePools[scrapePool] = struct{}{}
+		}
+	}
+
 	return scrapePools
 }
 
@@ -284,6 +297,21 @@ func shouldIgnoreServiceMonitor(serviceMonitorName string) bool {
 
 	for _, sm := range serviceMonitorsToBeIgnored {
 		if sm == serviceMonitorName {
+			return true
+		}
+	}
+	return false
+}
+
+func shouldIgnorePodMonitor(podMonitorName string) bool {
+	var podMonitorsToBeIgnored = []string{
+		// The targets scraped by these podmonitors will be tested here: https://github.com/kyma-project/kyma/issues/6457
+		"knative-eventing-event-mesh-dashboard-broker",
+		"knative-eventing-event-mesh-dashboard-httpsource",
+	}
+
+	for _, pm := range podMonitorsToBeIgnored {
+		if pm == podMonitorName {
 			return true
 		}
 	}

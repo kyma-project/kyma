@@ -11,7 +11,7 @@ rules:
   resources: ["pods", "nodes"]
   verbs: ["list", "get"]
 - apiGroups: ["monitoring.coreos.com"]
-  resources: ["servicemonitors"]
+  resources: ["servicemonitors", "podmonitors"]
   verbs: ["list"]
 ---
 apiVersion: v1
