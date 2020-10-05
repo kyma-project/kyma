@@ -7,7 +7,7 @@ If you log in to the Kyma Console and receive `Not enough permissions` error mes
 
 1. Fetch the ID Token. For example, use [Chrome DevTools](https://developers.google.com/web/tools/chrome-devtools) and search for the token in the sent requests authorization header.
 2. Decode the ID Token. For example, use the [jwt.io](https://jwt.io/) page.
-3. Check the value of `"email_verified"` property:
+3. Check the value of the **"email_verified"** property:
 
 ```bash
 {
