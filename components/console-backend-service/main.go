@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -58,6 +59,7 @@ type config struct {
 	SARCacheConfig       authz.SARCacheConfig
 	FeatureToggles       experimental.FeatureToggles
 	Tracing              tracing.Config
+	DebugDomain          string `envconfig:"optional"`
 }
 
 func main() {
@@ -96,9 +98,20 @@ func main() {
 
 func loadConfig(prefix string) (config, bool, error) {
 	cfg := config{}
+
 	err := envconfig.InitWithPrefix(&cfg, prefix)
 	if err != nil {
 		return cfg, false, err
+	}
+
+	if cfg.DebugDomain != "" {
+		//debug mode
+		cfg.Rafter.Address = strings.Join([]string{"https://storage", cfg.DebugDomain}, ".")
+		cfg.Verbose = true
+		cfg.Rafter.VerifySSL = true
+		cfg.Application.Gateway.IntegrationNamespace = "kyma-integration"
+		cfg.OIDC.IssuerURL = strings.Join([]string{"https://dex", cfg.DebugDomain}, ".")
+		cfg.OIDC.ClientID = "kyma-client"
 	}
 
 	developmentMode := cfg.KubeconfigPath != ""
