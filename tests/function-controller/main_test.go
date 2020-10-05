@@ -33,7 +33,7 @@ func TestGitSourcesFunctions(t *testing.T) {
 	runTests(t, scenarios.GitopsSteps)
 }
 
-type testSuite func(*rest.Config, testsuite.Config, *logrus.Logger) ([]step.Step, error)
+type testSuite func(*rest.Config, testsuite.Config, *logrus.Entry) ([]step.Step, error)
 
 func runTests(t *testing.T, testFunc testSuite) {
 	rand.Seed(time.Now().UnixNano())
@@ -47,14 +47,15 @@ func runTests(t *testing.T, testFunc testSuite) {
 	logf := logrus.New()
 	logf.SetFormatter(&logrus.TextFormatter{})
 	logf.SetReportCaller(false)
-	logf.AddHook(TestHook{SuiteName: t.Name()})
-	logf.Info("damian")
-	steps, err := testFunc(restConfig, cfg.Test, logf)
+
+	//logf.AddHook(TestHook{SuiteName: t.Name()})
+	//logf.Info("damian")
+	steps, err := testFunc(restConfig, cfg.Test, logf.WithField("Suite", t.Name()))
 	failOnError(g, err)
 	runner := step.NewRunner(step.WithCleanupDefault(cfg.Test.Cleanup), step.WithLogger(logf))
 
 	err = runner.Execute(steps)
-	failOnError(g, err)
+	//failOnError(g, err)
 }
 
 func TestOnError(t *testing.T) {

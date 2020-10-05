@@ -1,16 +1,18 @@
-package teststep
+package step
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"strings"
 	"sync"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
 )
 
 type Parallelized struct {
-	steps []step.Step
+	steps []Step
+	logf  *logrus.Entry
 }
 
 func (p *Parallelized) Name() string {
@@ -23,17 +25,23 @@ func (p *Parallelized) Name() string {
 }
 
 func (p *Parallelized) Run() error {
-	return p.inParallel(func(step step.Step) error {
+	return p.inParallel(func(step Step) error {
 		err := step.Run()
+		p.logf.Infof("Run in parallel: %s", p.Name())
 		if err != nil {
-			return step.OnError(err)
+			p.logf.Errorf("Step: %s, returned error: %s", step.Name(), err.Error())
+			if callbackErr := step.OnError(err); callbackErr != nil {
+				//TODO: somethng with
+				errors.Wrap(callbackErr, "")
+			}
+			return errors.Wrapf(err, "while executing step: %s", step.Name())
 		}
 		return nil
 	})
 }
 
 func (p *Parallelized) Cleanup() error {
-	return p.inParallel(func(step step.Step) error {
+	return p.inParallel(func(step Step) error {
 		return step.Cleanup()
 	})
 }
@@ -48,7 +56,7 @@ func (p *Parallelized) OnError(cause error) error {
 	return nil
 }
 
-func (p *Parallelized) inParallel(f func(step step.Step) error) error {
+func (p *Parallelized) inParallel(f func(step Step) error) error {
 	wg := &sync.WaitGroup{}
 	wg.Add(len(p.steps))
 	errs := make(chan error, len(p.steps))
@@ -64,7 +72,7 @@ func (p *Parallelized) inParallel(f func(step step.Step) error) error {
 	return errAll.ErrorOrNil()
 }
 
-func (p *Parallelized) runStepInParallel(wg *sync.WaitGroup, errs chan<- error, step step.Step, f func(step step.Step) error) {
+func (p *Parallelized) runStepInParallel(wg *sync.WaitGroup, errs chan<- error, step Step, f func(step Step) error) {
 	defer wg.Done()
 	defer func() {
 		if err := recover(); err != nil {
@@ -74,6 +82,6 @@ func (p *Parallelized) runStepInParallel(wg *sync.WaitGroup, errs chan<- error, 
 	errs <- f(step)
 }
 
-func Parallel(steps ...step.Step) *Parallelized {
-	return &Parallelized{steps: steps}
+func Parallel(logf *logrus.Entry, name string, steps ...Step) *Parallelized {
+	return &Parallelized{logf: logf.WithField("Parallel", name), steps: steps}
 }

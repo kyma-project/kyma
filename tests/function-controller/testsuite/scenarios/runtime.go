@@ -39,7 +39,7 @@ func (rst RuntimesTestSuite) OnError(cause error) error {
 	return nil
 }
 
-func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Logger) ([]step.Step, error) {
+func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) ([]step.Step, error) {
 	currentDate := time.Now()
 	cfg.Namespace = fmt.Sprintf("%s-%dh-%dm-%ds", "test-parallel", currentDate.Hour(), currentDate.Minute(), currentDate.Second())
 
@@ -67,7 +67,7 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 		Namespace:   cfg.Namespace,
 		WaitTimeout: cfg.WaitTimeout,
 		Verbose:     cfg.Verbose,
-		Log:         logrus.NewEntry(logf),
+		Log:         logf,
 	}
 
 	nodejs12Cfg, err := runtimes.NewFunctionConfig("nodejs12", cfg.UsageKindName, cfg.DomainName, genericContainer.WithLogger(nodejs12Logger), clientset)
@@ -109,21 +109,21 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 	return []step.Step{
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
 		teststep.NewAddonConfiguration("Create addon configuration", addon, addonURL, genericContainer),
-		teststep.Parallel(
-			teststep.NewSerialTestRunner(python38Logger, "Python37 test",
+		step.Parallel(logf,
+			step.NewSerialTestRunner(python38Logger, "Python37 test",
 				teststep.CreateFunction(python38Logger, python38Cfg.Fn, "Create Python37 Function", runtimes.BasicPythonFunction("Hello From python")),
 				teststep.NewHTTPCheck(python38Logger, "Python37 pre update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python38Logger), "Hello From python"),
 				teststep.UpdateFunction(python38Logger, python38Cfg.Fn, "Update Python37 Function", runtimes.BasicPythonFunction("Hello From updated python")),
 				teststep.NewHTTPCheck(python38Logger, "Python37 post update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python38Logger), "Hello From updated python"),
 			),
-			teststep.NewSerialTestRunner(nodejs10Logger, "NodeJS10 test",
+			step.NewSerialTestRunner(nodejs10Logger, "NodeJS10 test",
 				teststep.CreateConfigMap(nodejs10Logger, cm, "Create Test ConfigMap", cmData),
 				teststep.CreateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Create NodeJS10 Function", runtimes.NodeJSFunctionWithEnvFromConfigMap(cm.Name(), cmEnvKey, serverlessv1alpha1.Nodejs10)),
 				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 pre update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), cmEnvValue),
 				teststep.UpdateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Update NodeJS10 Function", runtimes.BasicNodeJSFunction("Hello From updated nodejs10", serverlessv1alpha1.Nodejs10)),
 				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 post update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), "Hello From updated nodejs10"),
 			),
-			teststep.NewSerialTestRunner(nodejs12Logger, "NodeJS12 test",
+			step.NewSerialTestRunner(nodejs12Logger, "NodeJS12 test",
 				teststep.CreateEmptyFunction(nodejs12Cfg.Fn),
 				teststep.CreateFunction(nodejs12Logger, nodejs12Cfg.Fn, "Create NodeJS12 Function", runtimes.BasicNodeJSFunction("Hello From nodejs", serverlessv1alpha1.Nodejs12)),
 				teststep.NewDefaultedFunctionCheck("Check NodeJS12 function has correct default values", nodejs12Cfg.Fn),
