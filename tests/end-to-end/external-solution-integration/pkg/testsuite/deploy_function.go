@@ -32,13 +32,22 @@ function rejected(result) {
   console.log('Rejected:');	
   console.log(JSON.stringify(result, null, 2));	
 }
-function sendReq(url, resolve, reject) {	
-    request.post(url, { json: true }, (error, response, body) => {	
-        if (error) {	
-            reject(error);	
-        }	
-        resolve(response) ;	
-    });	
+function sendReq(event, url, resolve, reject) {
+	const options = {
+		body: event,
+		uri: url,
+		json: true,
+		headers: {
+			'content-type': 'application/cloudevents+json'
+		}
+	}
+	console.log(JSON.stringify(options));
+	request.post(options, (error, response, body) => {	
+		if (error) {	
+			reject(error);	
+		}	
+		resolve(response) ;	
+	});
 }
 function getGateway() {
 	if (legacy) {
@@ -46,6 +55,16 @@ function getGateway() {
 	} else {
 		let envKey = Object.keys(process.env).find(val => val.endsWith('_GATEWAY_URL'));
 		return process.env[envKey]
+	}
+}
+function prepareEvent(event){
+	return {
+		"specversion": event.extensions.request.headers["ce-specversion"],
+		"source": event.extensions.request.headers["ce-source"],
+		"type": event.extensions.request.headers["ce-type"],
+		"eventtypeversion": event.extensions.request.headers["ce-eventtypeversion"],
+		"id": event.extensions.request.headers["ce-id"],
+		"data" : event.data 
 	}
 }
 
@@ -69,9 +88,10 @@ module.exports = { main: function (event, context) {
 		throw new Error("Payload not as expected")	
     }
 	return new Promise((resolve, reject) => {	
-		const url = gateway;	
+		const url = gateway + "/ce";
+		var preparedEvent = prepareEvent(event);
 		console.log("Counter URL: ", url);	
-		sendReq(url, resolve, reject);	
+		sendReq(preparedEvent, url, resolve, reject);	
 	}).then(resolved, rejected);	
 } };	
 `

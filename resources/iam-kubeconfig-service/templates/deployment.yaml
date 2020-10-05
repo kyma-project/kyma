@@ -8,6 +8,7 @@ metadata:
   labels:
     app: {{ template "name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    kyma-project.io/component: backend
 spec:
   selector:
     matchLabels:
@@ -19,6 +20,7 @@ spec:
         app: {{ template "name" . }}
         tlsSecret: ingress-tls-cert
         chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+        kyma-project.io/component: backend
     spec:
       {{ if .Values.global.isLocalEnv }}
       hostAliases:

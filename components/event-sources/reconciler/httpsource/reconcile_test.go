@@ -5,8 +5,12 @@ import (
 	"strconv"
 	"testing"
 
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	clientgotesting "k8s.io/client-go/testing"
+
 	pkgerrors "github.com/pkg/errors"
 	authenticationv1alpha1api "istio.io/api/authentication/v1alpha1"
+	istiov1beta1apis "istio.io/api/type/v1beta1"
 	authv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -30,6 +34,9 @@ import (
 	rt "knative.dev/pkg/reconciler/testing"
 	"knative.dev/pkg/resolver"
 
+	securityv1beta1apis "istio.io/api/security/v1beta1"
+	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
+
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	fakesourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
 	fakeistioclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/client/fake"
@@ -37,17 +44,20 @@ import (
 )
 
 const (
-	tNs           = "testns"
-	tName         = "test"
-	tUID          = types.UID("00000000-0000-0000-0000-000000000000")
-	tImg          = "sources.kyma-project.io/http:latest"
-	tExternalPort = 80
-	tPort         = 8080
-	tSinkURI      = "http://" + tName + "-kn-channel." + tNs + ".svc.cluster.local"
-	tSource       = "varkes"
-	tPolicy       = "test"
-	tRevisionSvc  = "test"
-	tTargetPort   = "http-usermetric"
+	tNs                 = "testns"
+	tName               = "test"
+	tUID                = types.UID("00000000-0000-0000-0000-000000000000")
+	tImg                = "sources.kyma-project.io/http:latest"
+	tExternalPort       = 80
+	tPort               = 8080
+	tSinkURI            = "http://" + tName + "-kn-channel." + tNs + ".svc.cluster.local"
+	tSource             = "varkes"
+	tPeerAuthentication = "test"
+	tRevisionSvc        = "test"
+	tTargetPort         = metricsPort
+	// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
+	tTargetPortName = "http-usermetric"
+	// END
 
 	tMetricsDomain = "testing"
 )
@@ -141,10 +151,10 @@ func TestReconcile(t *testing.T) {
 			Name: "Everything up-to-date",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSource(Deployed, WithSink, WithPolicy, WithService),
+				newSource(Deployed, WithSink, WithPeerAuthentication, WithService),
 				newDeploymentAvailable(),
 				newChannelReady(),
-				newPolicyWithSpec(),
+				newPeerAuthenticationWithSpec(),
 				newService(),
 			},
 			WantCreates:       nil,
@@ -155,14 +165,14 @@ func TestReconcile(t *testing.T) {
 			Name: "Adapter Service spec does not match expectation",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSource(Deployed, WithSink, WithPolicy, WithService),
+				newSource(Deployed, WithSink, WithPeerAuthentication, WithService),
 				func() *appsv1.Deployment {
 					deploy := newDeploymentAvailable()
 					deploy.Labels["some-label"] = "unexpected"
 					return deploy
 				}(),
 				newChannelReady(),
-				newPolicyWithSpec(),
+				newPeerAuthenticationWithSpec(),
 				newService(),
 			},
 			WantCreates: nil,
@@ -197,7 +207,7 @@ func TestReconcile(t *testing.T) {
 			Name: "Channel spec does not match expectation",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSource(Deployed, WithSink, WithPolicy, WithService),
+				newSource(Deployed, WithSink, WithPeerAuthentication, WithService),
 				newDeploymentAvailable(),
 				func() *messagingv1alpha1.Channel {
 					ch := newChannelReady()
@@ -205,7 +215,7 @@ func TestReconcile(t *testing.T) {
 					return ch
 				}(),
 				newService(),
-				newPolicyWithSpec(),
+				newPeerAuthenticationWithSpec(),
 			},
 			WantCreates: nil,
 			WantUpdates: []k8stesting.UpdateActionImpl{{
@@ -217,13 +227,13 @@ func TestReconcile(t *testing.T) {
 			},
 		},
 
-		/* Policy synchronization */
+		/* PeerAuthentication synchronization */
 
 		{
-			Name: "Policy missing when deployment not available",
+			Name: "PeerAuthentication missing when deployment not available",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSource(NotDeployed, WithSink, WithoutPolicy, WithService),
+				newSource(NotDeployed, WithSink, WithoutPeerAuthentication, WithService),
 				newDeploymentNotAvailable(),
 				newChannelReady(),
 				newService(),
@@ -234,28 +244,64 @@ func TestReconcile(t *testing.T) {
 			WantEvents:        nil,
 		},
 		{
-			Name: "Policy created",
+			Name: "PeerAuthentication created",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSource(Deployed, WithSink, WithPolicy, WithService),
+				newSource(Deployed, WithSink, WithPeerAuthentication, WithService),
 				newDeploymentAvailable(),
 				newChannelReady(),
 				newService(),
 			},
 			WantCreates: []runtime.Object{
-				newPolicyWithSpec(),
+				newPeerAuthenticationWithSpec(),
 			},
 			WantUpdates:       nil,
 			WantStatusUpdates: nil,
 			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Istio Policy %q", tPolicy),
+				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Istio PeerAuthentication %q", tPeerAuthentication),
 			},
 		},
+		// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
+		{
+			Name: "Istio Policy migrated to PeerAuthentication",
+			Key:  tNs + "/" + tName,
+			Objects: []runtime.Object{
+				newSource(Deployed, WithSink, WithPeerAuthentication, WithService),
+				newDeploymentAvailable(),
+				newChannelReady(),
+				newService(),
+				newPolicyWithSpec(),
+			},
+			WantCreates: []runtime.Object{
+				newPeerAuthenticationWithSpec(),
+			},
+			WantDeletes: []clientgotesting.DeleteActionImpl{
+				{
+					Name: tName,
+					ActionImpl: clientgotesting.ActionImpl{
+						Namespace: tNs,
+						Verb:      "delete",
+						Resource: schema.GroupVersionResource{
+							Group:    "security.istio.io",
+							Version:  "v1beta1",
+							Resource: "PeerAuthentication",
+						},
+					},
+				},
+			},
+			WantUpdates:       nil,
+			WantStatusUpdates: nil,
+			WantEvents: []string{
+				rt.Eventf(corev1.EventTypeNormal, string(deleteReason), "Deleted deprecated Istio Policy %q", tPeerAuthentication),
+				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Istio PeerAuthentication %q", tPeerAuthentication),
+			},
+		},
+		// END
 		{
 			Name: "Adapter deployment in progress",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSource(NotDeployed, WithSink, WithoutPolicy, WithService),
+				newSource(NotDeployed, WithSink, WithoutPeerAuthentication, WithService),
 				newDeploymentNotAvailable(),
 				newChannelReady(),
 				newService(),
@@ -269,16 +315,16 @@ func TestReconcile(t *testing.T) {
 			Name: "Adapter Service became ready",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSource(NotDeployed, WithSink, WithService, WithPolicy),
+				newSource(NotDeployed, WithSink, WithService, WithPeerAuthentication),
 				newDeploymentAvailable(),
 				newChannelReady(),
-				newPolicyWithSpec(),
+				newPeerAuthenticationWithSpec(),
 				newService(),
 			},
 			WantCreates: nil,
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: newSource(Deployed, WithSink, WithService, WithPolicy),
+				Object: newSource(Deployed, WithSink, WithService, WithPeerAuthentication),
 			}},
 			WantEvents: nil,
 		},
@@ -286,7 +332,7 @@ func TestReconcile(t *testing.T) {
 			Name: "Adapter Service became not ready",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSource(Deployed, WithSink, WithService, WithoutPolicy),
+				newSource(Deployed, WithSink, WithService, WithoutPeerAuthentication),
 				newDeploymentNotAvailable(),
 				newChannelReady(),
 				newService(),
@@ -294,7 +340,7 @@ func TestReconcile(t *testing.T) {
 			WantCreates: nil,
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: newSource(NotDeployed, WithSink, WithService, WithoutPolicy),
+				Object: newSource(NotDeployed, WithSink, WithService, WithoutPeerAuthentication),
 			}},
 			WantEvents: nil,
 		},
@@ -302,20 +348,20 @@ func TestReconcile(t *testing.T) {
 			Name: "Channel becomes available",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				newSource(Deployed, WithoutSink, WithoutPolicy, WithService),
+				newSource(Deployed, WithoutSink, WithoutPeerAuthentication, WithService),
 				newDeploymentAvailable(),
 				newChannelReady(),
 				newService(),
 			},
 			WantCreates: []runtime.Object{
-				newPolicyWithSpec(),
+				newPeerAuthenticationWithSpec(),
 			},
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: newSource(Deployed, WithSink, WithPolicy, WithService),
+				Object: newSource(Deployed, WithSink, WithPeerAuthentication, WithService),
 			}},
 			WantEvents: []string{
-				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Istio Policy %q", tPolicy),
+				rt.Eventf(corev1.EventTypeNormal, string(createReason), "Created Istio PeerAuthentication %q", tPeerAuthentication),
 			},
 		},
 		{
@@ -352,15 +398,17 @@ func TestReconcile(t *testing.T) {
 				Image: tImg,
 				Port:  tPort,
 			},
-			httpsourceLister: ls.GetHTTPSourceLister(),
-			deploymentLister: ls.GetDeploymentLister(),
-			chLister:         ls.GetChannelLister(),
-			policyLister:     ls.GetPolicyLister(),
-			serviceLister:    ls.GetServiceLister(),
-			sourcesClient:    fakesourcesclient.Get(ctx).SourcesV1alpha1(),
-			messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
-			authClient:       fakeistioclient.Get(ctx).AuthenticationV1alpha1(),
-			sinkResolver:     resolver.NewURIResolver(ctx, func(types.NamespacedName) {}),
+			httpsourceLister:         ls.GetHTTPSourceLister(),
+			deploymentLister:         ls.GetDeploymentLister(),
+			chLister:                 ls.GetChannelLister(),
+			policyLister:             ls.GetPolicyLister(),
+			peerAuthenticationLister: ls.GetPeerAuthenticationLister(),
+			serviceLister:            ls.GetServiceLister(),
+			sourcesClient:            fakesourcesclient.Get(ctx).SourcesV1alpha1(),
+			messagingClient:          rb.EventingClientSet.MessagingV1alpha1(),
+			authClient:               fakeistioclient.Get(ctx).AuthenticationV1alpha1(),
+			sinkResolver:             resolver.NewURIResolver(ctx, func(types.NamespacedName) {}),
+			securityClient:           fakeistioclient.Get(ctx).SecurityV1beta1(),
 		}
 
 		cmw.Watch(metrics.ConfigMapName(), r.updateAdapterMetricsConfig)
@@ -412,12 +460,12 @@ func WithoutService(src *sourcesv1alpha1.HTTPSource) {
 	src.Status.MarkServiceCreated(nil)
 }
 
-func WithPolicy(src *sourcesv1alpha1.HTTPSource) {
-	src.Status.MarkPolicyCreated(newPolicyWithSpec())
+func WithPeerAuthentication(src *sourcesv1alpha1.HTTPSource) {
+	src.Status.MarkPeerAuthenticationCreated(newPeerAuthenticationWithSpec())
 }
 
-func WithoutPolicy(src *sourcesv1alpha1.HTTPSource) {
-	src.Status.MarkPolicyCreated(nil)
+func WithoutPeerAuthentication(src *sourcesv1alpha1.HTTPSource) {
+	src.Status.MarkPeerAuthenticationCreated(nil)
 }
 
 func Deployed(src *sourcesv1alpha1.HTTPSource) {
@@ -445,6 +493,7 @@ func newChannel() *messagingv1alpha1.Channel {
 	}
 }
 
+// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
 // newPolicy returns a test Policy object with pre-filled metadata
 func newPolicy() *authv1alpha1.Policy {
 	lbls := make(map[string]string, len(tChLabels))
@@ -455,7 +504,7 @@ func newPolicy() *authv1alpha1.Policy {
 	return &authv1alpha1.Policy{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:       tNs,
-			Name:            tPolicy,
+			Name:            tPeerAuthentication,
 			Labels:          lbls,
 			OwnerReferences: []metav1.OwnerReference{tOwnerRef},
 		},
@@ -471,7 +520,7 @@ func newPolicyWithSpec() *authv1alpha1.Policy {
 			Ports: []*authenticationv1alpha1api.PortSelector{
 				{
 					Port: &authenticationv1alpha1api.PortSelector_Name{
-						Name: tTargetPort,
+						Name: tTargetPortName,
 					},
 				},
 			},
@@ -485,6 +534,41 @@ func newPolicyWithSpec() *authv1alpha1.Policy {
 	}
 
 	return policy
+}
+
+// END
+
+// newPeerAuthentication returns a test PeerAuthentication object with pre-filled metadata
+func newPeerAuthentication() *securityv1beta1.PeerAuthentication {
+	lbls := make(map[string]string, len(tChLabels))
+	for k, v := range tChLabels {
+		lbls[k] = v
+	}
+
+	return &securityv1beta1.PeerAuthentication{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:       tNs,
+			Name:            tPeerAuthentication,
+			Labels:          lbls,
+			OwnerReferences: []metav1.OwnerReference{tOwnerRef},
+		},
+	}
+}
+
+// newPeerAuthentication returns a test PeerAuthentication object with Spec
+func newPeerAuthenticationWithSpec() *securityv1beta1.PeerAuthentication {
+	peerAuthentication := newPeerAuthentication()
+	peerAuthentication.Spec.PortLevelMtls = map[uint32]*securityv1beta1apis.PeerAuthentication_MutualTLS{
+		tTargetPort: {
+			Mode: securityv1beta1apis.PeerAuthentication_MutualTLS_PERMISSIVE,
+		},
+	}
+	peerAuthentication.Spec.Selector = &istiov1beta1apis.WorkloadSelector{
+		MatchLabels: map[string]string{
+			applicationLabelKey: tName,
+		},
+	}
+	return peerAuthentication
 }
 
 // addressable

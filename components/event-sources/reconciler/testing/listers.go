@@ -22,6 +22,8 @@ import (
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	fakesourcesclientset "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/fake"
 	sourceslistersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/lister/sources/v1alpha1"
+	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
+	securitylistersv1alpha1 "istio.io/client-go/pkg/listers/security/v1beta1"
 )
 
 var clientSetSchemes = []func(*runtime.Scheme) error{
@@ -98,8 +100,15 @@ func (l *Listers) GetChannelLister() messaginglistersv1alpha1.ChannelLister {
 	return messaginglistersv1alpha1.NewChannelLister(l.IndexerFor(&messagingv1alpha1.Channel{}))
 }
 
+// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
 func (l *Listers) GetPolicyLister() authenticationlistersv1alpha1.PolicyLister {
 	return authenticationlistersv1alpha1.NewPolicyLister(l.IndexerFor(&authv1alpha1.Policy{}))
+}
+
+// END
+
+func (l *Listers) GetPeerAuthenticationLister() securitylistersv1alpha1.PeerAuthenticationLister {
+	return securitylistersv1alpha1.NewPeerAuthenticationLister(l.IndexerFor(&securityv1beta1.PeerAuthentication{}))
 }
 
 func (l *Listers) GetServiceLister() corelistersv1.ServiceLister {
