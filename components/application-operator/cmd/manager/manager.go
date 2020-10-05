@@ -53,7 +53,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Printf("Registering Components for tests:")
+	log.Printf("Registering Components:")
 
 	log.Printf("Setting up scheme.")
 
