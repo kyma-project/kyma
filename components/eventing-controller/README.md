@@ -2,13 +2,13 @@
 
 ## Overview
 
-This component contains controllers for various CustomResourceDefinitions related to eventing in Kyma. The controller comes with 2 containers:
+This component contains controllers for various CustomResourceDefinitions related to eventing in Kyma. The controller comes with this container:
 - [controller](https://github.com/kubernetes-sigs/controller-runtime)
 
 ## Prerequisites
 - Install [ko](https://github.com/google/ko) which is used to build and deploy the controller during local development
 - Install [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) which is the base framework for this controller
-- Install [kustomize](https://github.com/kubernetes-sigs/kustomize) which lets you customize raw, template-free YAML files during local development
+- Install [kustomize](https://github.com/kubernetes-sigs/kustomize) which lets you customize raw, template-free `yaml` files during local development
 
 ### Installation
 
@@ -17,7 +17,7 @@ This component contains controllers for various CustomResourceDefinitions relate
     ```sh
     make deploy-local
 
-    ## To verify all the manifests after the processing by Kustomize without applying to the cluster use make target deploy-local-dry-run    
+    ## To verify all the manifests after the processing by Kustomize without applying to the cluster, use make target deploy-local-dry-run    
     make deploy-local-dry-run
     ```
 
