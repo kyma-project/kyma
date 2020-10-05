@@ -26,4 +26,4 @@ If you log in to the Kyma Console and receive `Not enough permissions` error mes
 }
 ```
 
-4. If the value is `false`, it means that IDP was unable to verify your email address. Contact your IDP for further guidance.
+4. If the value is set to `false`, it means that the identity provider was unable to verify your email address. Contact your identity provider for further guidance.
