@@ -226,7 +226,7 @@ func checkScrapePools() {
 			tick.Stop()
 			timeoutMessage := "Unable to scrape targets in the following scrape pool(s):\n"
 			for scrapePool := range scrapePools {
-				timeoutMessage += fmt.Sprintf("%s\n", scrapePool)
+				timeoutMessage += fmt.Sprintf("- %s\n", scrapePool)
 			}
 			log.Fatal(timeoutMessage)
 		case <-tick.C:

@@ -77,3 +77,7 @@ required = [
 [[constraint]]
   branch = "master"
   name = "k8s.io/utils"
+
+[[constraint]]
+  name = "github.com/coreos/prometheus-operator"
+  version = "0.38.3"
