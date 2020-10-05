@@ -20,6 +20,9 @@ type SubscriptionReconciler struct {
 	Scheme *runtime.Scheme
 }
 
+// TODO: emit events
+// TODO: write tests
+
 const (
 	// TODO:
 	finalizerName = "todo"
