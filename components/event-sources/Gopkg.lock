@@ -578,7 +578,7 @@
   revision = "6d18c012aee9febd81bbf9806760c8c4480e870d"
 
 [[projects]]
-  digest = "1:0a6103b1dc59b52f7e64a491b398b854c0fcaacde43c25ce468610a64311b72d"
+  digest = "1:514f778824d7307cb3452f6b63b650b0024e320eeca7056d286c665a52e1f89f"
   name = "golang.org/x/text"
   packages = [
     "collate",
@@ -599,8 +599,8 @@
     "unicode/rangetable",
   ]
   pruneopts = "T"
-  revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
-  version = "v0.3.2"
+  revision = "23ae387dee1f90d29a23c0e87ee0b46038fbed0e"
+  version = "v0.3.3"
 
 [[projects]]
   branch = "master"
@@ -1424,18 +1424,13 @@
     "go.opencensus.io/stats/view",
     "go.opencensus.io/trace",
     "go.uber.org/zap",
-    "istio.io/api/authentication/v1alpha1",
     "istio.io/api/security/v1beta1",
     "istio.io/api/type/v1beta1",
-    "istio.io/client-go/pkg/apis/authentication/v1alpha1",
     "istio.io/client-go/pkg/apis/security/v1beta1",
     "istio.io/client-go/pkg/clientset/versioned",
     "istio.io/client-go/pkg/clientset/versioned/fake",
-    "istio.io/client-go/pkg/clientset/versioned/typed/authentication/v1alpha1",
     "istio.io/client-go/pkg/clientset/versioned/typed/security/v1beta1",
     "istio.io/client-go/pkg/informers/externalversions",
-    "istio.io/client-go/pkg/informers/externalversions/authentication/v1alpha1",
-    "istio.io/client-go/pkg/listers/authentication/v1alpha1",
     "istio.io/client-go/pkg/listers/security/v1beta1",
     "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",

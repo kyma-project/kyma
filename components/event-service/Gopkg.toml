@@ -39,3 +39,6 @@ required = [
 [[override]]
   name = "k8s.io/client-go"
   version = "kubernetes-1.16.11"
+[[override]]
+  name = "golang.org/x/text"
+  version = "v0.3.3"
