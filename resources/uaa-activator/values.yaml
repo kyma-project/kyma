@@ -10,7 +10,7 @@ global:
 image:
   registryPath: eu.gcr.io/kyma-project
   pullPolicy: IfNotPresent
-  version: PR-9626
+  version: "1c48e0a0"
 
 nameOverride: ""
 fullnameOverride: ""
