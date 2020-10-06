@@ -128,4 +128,4 @@ securityContext: {}
 
 ## images for migration process
 migration:
-  alpineKcImage: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+  alpineKcImage: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20201006-f331d22b

@@ -74,7 +74,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: {{ .Release.Name }}-post-upgrade
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20201006-f331d22b
           command:
             - "/bin/bash"
           args:

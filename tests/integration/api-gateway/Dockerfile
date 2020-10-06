@@ -20,7 +20,7 @@ RUN mkdir /test &&\
 	mv ${BASE_DIR}/app.test /test/app.test  &&\
 	mv ${BASE_DIR}/licenses /test/licenses
 
-FROM eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+FROM eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20201006-f331d22b
 LABEL source=git@github.com:kyma-project/kyma.git
 WORKDIR /test
 

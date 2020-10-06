@@ -92,7 +92,7 @@ spec:
           serviceAccountName: volume-snapshotter
           containers:
           - name: job
-            image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+            image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20201006-f331d22b
             command:
               - /bin/bash
               - -c

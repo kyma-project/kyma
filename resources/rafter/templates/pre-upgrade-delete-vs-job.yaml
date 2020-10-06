@@ -90,7 +90,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - command: ["sh", "/scripts/delete-resources.sh"]
-        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20201006-f331d22b
         imagePullPolicy: IfNotPresent
         name: pre-upgrade-delete-vs-rafter-minio
         volumeMounts:
