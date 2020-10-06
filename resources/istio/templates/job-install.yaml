@@ -32,6 +32,8 @@ spec:
             value: "{{ .Release.Namespace }}"
           - name: CONFIGMAP_NAME
             value: kyma-istio-operator-config-backup
+          - name: TARGET_VERSION
+            value: {{ .Chart.Version }}
       volumes:
       - name: config
         configMap:

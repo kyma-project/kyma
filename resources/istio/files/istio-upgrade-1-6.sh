@@ -1,5 +1,13 @@
 set -ex
 
+echo "Checking current Istio version"
+
+CURRENT_VERSION=$(kubectl -n istio-system get deployment istiod -o jsonpath='{.spec.template.spec.containers[0].image}' | awk -F: '{print $2}')
+if [[ "${CURRENT_VERSION}" == "${TARGET_VERSION}" ]]; then
+    echo "Istio is already in version ${TARGET_VERSION}. Exiting..."
+    exit 0
+fi
+
 OPERATOR_FILE="/etc/istio/operator-1-6.yaml"
 
 echo "--> Remove deprecated resources"
