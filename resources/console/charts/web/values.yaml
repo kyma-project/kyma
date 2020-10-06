@@ -18,7 +18,7 @@ cluster:
 console:
   image:
     pullPolicy: IfNotPresent
-    tag: PR-2011
+    tag: ebf06dc1
   service:
     externalPort: 80
     internalPort: 8080
