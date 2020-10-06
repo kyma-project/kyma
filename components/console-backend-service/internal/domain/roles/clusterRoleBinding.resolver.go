@@ -34,7 +34,7 @@ func (r *Resolver) CreateClusterRoleBinding(ctx context.Context, name string, pa
 	for i, sub := range params.Subjects {
 		convertedSubjects[i] = v1.Subject{
 			Kind:     string(sub.Kind),
-			APIGroup: clusterRoleGroupVersionResource.Group,
+			APIGroup: clusterRoleBindingGroupVersionResource.Group,
 			Name:     sub.Name,
 		}
 	}
