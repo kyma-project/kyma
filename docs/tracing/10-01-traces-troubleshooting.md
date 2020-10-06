@@ -24,7 +24,7 @@ metadata:
     component: istio
     kyma-project.io/installation: ""
 data:
-  kyma_istio_control_plane: |-
+  kyma_istio_operator: |-
     apiVersion: install.istio.io/v1alpha1
     kind: IstioOperator
     metadata:
@@ -32,9 +32,10 @@ data:
     spec:
       components:
         pilot:
-          env:
-          - name: PILOT_TRACE_SAMPLING
-            value: "60"
+          k8s:
+            env:
+            - name: PILOT_TRACE_SAMPLING
+              value: "60"
 EOF
 ```
 
