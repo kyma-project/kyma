@@ -83,21 +83,6 @@ rules:
       - get
       - list
       - watch
-  # required for migration to new api group until Kyma 1.16 is out
-  # TODO: delete me then Kyma 1.16 is out
-  - apiGroups:
-      - "authentication.istio.io"
-    resources:
-      - policies
-    verbs:
-      - create
-      - patch
-      - update
-      - get
-      - list
-      - watch
-      - delete
-  # END
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
