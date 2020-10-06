@@ -3,7 +3,7 @@ global:
     containerRegistry:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
-      version: "d0516ff9"
+      version: "PR-9593"
     runtimeAgentTests:
       version: "PR-9569"
     compassExternalSolutionTests:
