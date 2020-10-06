@@ -24,7 +24,7 @@ type Resolver struct {
 	*deploymentResolver
 	*resourceQuotaResolver
 	*resourceQuotaStatusResolver
-	*limitRangeResolver
+	// *limitRangeResolver
 	*podResolver
 	*serviceResolver
 	*replicaSetResolver
@@ -58,7 +58,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 		return nil, errors.Wrap(err, "while creating deployment service")
 	}
 
-	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer(), clientset.CoreV1())
+	// limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer(), clientset.CoreV1())
 
 	resourceService := newResourceService(clientset.Discovery())
 	secretService := newSecretService(informerFactory.Core().V1().Secrets().Informer(), client)
@@ -71,14 +71,14 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	serviceSvc := newServiceService(informerFactory.Core().V1().Services().Informer(), client)
 	selfSubjectRulesService := newSelfSubjectRulesService(clientset.AuthorizationV1())
 	return &Resolver{
-		resourceResolver:            newResourceResolver(resourceService),
-		namespaceResolver:           newNamespaceResolver(namespaceSvc, applicationRetriever, systemNamespaces, podService),
-		secretResolver:              newSecretResolver(*secretService),
-		deploymentResolver:          newDeploymentResolver(deploymentService, scRetriever, scaRetriever),
-		podResolver:                 newPodResolver(podService),
-		serviceResolver:             newServiceResolver(serviceSvc),
-		replicaSetResolver:          newReplicaSetResolver(replicaSetService),
-		limitRangeResolver:          newLimitRangeResolver(limitRangeService),
+		resourceResolver:   newResourceResolver(resourceService),
+		namespaceResolver:  newNamespaceResolver(namespaceSvc, applicationRetriever, systemNamespaces, podService),
+		secretResolver:     newSecretResolver(*secretService),
+		deploymentResolver: newDeploymentResolver(deploymentService, scRetriever, scaRetriever),
+		podResolver:        newPodResolver(podService),
+		serviceResolver:    newServiceResolver(serviceSvc),
+		replicaSetResolver: newReplicaSetResolver(replicaSetService),
+		// limitRangeResolver:          newLimitRangeResolver(limitRangeService),
 		resourceQuotaResolver:       newResourceQuotaResolver(resourceQuotaService),
 		resourceQuotaStatusResolver: newResourceQuotaStatusResolver(resourceQuotaStatusService),
 		configMapResolver:           newConfigMapResolver(configMapService),

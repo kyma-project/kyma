@@ -465,29 +465,7 @@ type EnvPrefix {
     name: String!
 }
 
-type LimitRange {
-    name: String!
-    limits: [LimitRangeItem!]!
-}
 
-type LimitRangeItem {
-    limitType: LimitType!
-    max: ResourceType
-    default: ResourceType
-    defaultRequest: ResourceType
-}
-
-input LimitRangeInput {
-    default: ResourceValuesInput!,
-    defaultRequest: ResourceValuesInput!
-    max: ResourceValuesInput!
-    type: String!
-}
-
-enum LimitType {
-    Container
-    Pod
-}
 
 type ResourceType {
     memory: String
@@ -1079,8 +1057,7 @@ type Query {
 
     eventActivations(namespace: String!): [EventActivation!]! @HasAccess(attributes: {resource: "eventactivations", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 
-    limitRanges(namespace: String!): [LimitRange!]! @HasAccess(attributes: {resource: "limitranges", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
-
+   
     backendModules: [BackendModule!]! @HasAccess(attributes: {resource: "backendmodules", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
 
     secret(name: String!, namespace: String!): Secret @HasAccess(attributes: {resource: "secrets", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
@@ -1153,8 +1130,6 @@ type Mutation {
     createNamespace(name: String!, labels: Labels): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "create", apiGroup: "", apiVersion: "v1"})
     updateNamespace(name: String!, labels: Labels): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
     deleteNamespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
-
-    createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     createFunction(name: String!, namespace: String!, params: FunctionMutationInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
     updateFunction(name: String!, namespace: String!, params: FunctionMutationInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})

@@ -241,10 +241,6 @@ func (r *mutationResolver) DeleteNamespace(ctx context.Context, name string) (*g
 	return r.k8s.DeleteNamespace(ctx, name)
 }
 
-func (r *mutationResolver) CreateLimitRange(ctx context.Context, namespace string, name string, limitRange gqlschema.LimitRangeInput) (*gqlschema.LimitRange, error) {
-	return r.k8s.CreateLimitRange(ctx, namespace, name, limitRange)
-}
-
 func (r *mutationResolver) CreateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionMutationInput) (*gqlschema.Function, error) {
 	return r.serverless.Resolver.CreateFunction(ctx, name, namespace, params)
 }
@@ -427,10 +423,6 @@ func (r *queryResolver) ResourceQuotasStatus(ctx context.Context, namespace stri
 
 func (r *queryResolver) EventActivations(ctx context.Context, namespace string) ([]*gqlschema.EventActivation, error) {
 	return r.app.Resolver.EventActivationsQuery(ctx, namespace)
-}
-
-func (r *queryResolver) LimitRanges(ctx context.Context, namespace string) ([]*gqlschema.LimitRange, error) {
-	return r.k8s.LimitRangesQuery(ctx, namespace)
 }
 
 func (r *queryResolver) BackendModules(ctx context.Context) ([]*gqlschema.BackendModule, error) {

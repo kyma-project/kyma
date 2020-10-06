@@ -30,6 +30,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8sNew"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
@@ -38,9 +39,9 @@ import (
 //go:generate go run github.com/99designs/gqlgen
 
 type Resolver struct {
-	ui  *ui.Resolver
-	k8s *k8s.Resolver
-
+	ui            *ui.Resolver
+	k8s           *k8s.Resolver
+	k8sNew        *k8sNew.Resolver
 	sc            *servicecatalog.PluggableContainer
 	sca           *servicecatalogaddons.PluggableContainer
 	app           *application.PluggableContainer
@@ -103,6 +104,8 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}
 
+	k8sNewResolver := k8sNew.New(genericServiceFactory)
+
 	agResolver := apigateway.New(genericServiceFactory)
 	makePluggable(agResolver)
 
@@ -130,6 +133,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 
 	return &Resolver{
 		k8s:           k8sResolver,
+		k8sNew:        k8sNewResolver,
 		ui:            uiContainer.Resolver,
 		sc:            scContainer,
 		sca:           scaContainer,
@@ -148,6 +152,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 func (r *Resolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	// Not pluggable modules
 	r.k8s.WaitForCacheSync(stopCh)
+	// r.k8sNew.WaitForCacheSync(stopCh)
 	r.ui.WaitForCacheSync(stopCh)
 
 	// Pluggable modules

@@ -10,7 +10,7 @@ import (
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
-	v1 "k8s.io/api/rbac/v1"
+	"k8s.io/api/rbac/v1"
 	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	v11 "knative.dev/pkg/apis/duck/v1"
 )
@@ -393,11 +393,6 @@ type FunctionStatus struct {
 	Message *string             `json:"message"`
 }
 
-type LimitRange struct {
-	Name   string            `json:"name"`
-	Limits []*LimitRangeItem `json:"limits"`
-}
-
 type LimitRangeInput struct {
 	Default        *ResourceValuesInput `json:"default"`
 	DefaultRequest *ResourceValuesInput `json:"defaultRequest"`
@@ -410,6 +405,7 @@ type LimitRangeItem struct {
 	Max            *ResourceType `json:"max"`
 	Default        *ResourceType `json:"default"`
 	DefaultRequest *ResourceType `json:"defaultRequest"`
+	JSON           JSON          `json:"json"`
 }
 
 type LoadBalancerIngress struct {

@@ -348,6 +348,7 @@ github.com/kyma-incubator/api-gateway v0.0.0-20191125140217-295e8fcaa03f h1:rFF+
 github.com/kyma-incubator/api-gateway v0.0.0-20191125140217-295e8fcaa03f/go.mod h1:EwSqotNAjdWdMGQdE7hQaRF68MM2raDRJlRnBi9sltY=
 github.com/kyma-project/helm-broker v0.0.0-20190906085923-d07feb2d365a h1:G+lhfd6RaU+zZe5jOyWZFbjHPbJ6A61dgJpNNiXQ8b0=
 github.com/kyma-project/helm-broker v0.0.0-20190906085923-d07feb2d365a/go.mod h1:VFnkD5ddzF9s8qcY12DRzYOznJJlpMbSRWGRgM4P1XA=
+github.com/kyma-project/kyma v0.5.0 h1:msjpImAtZ3l+y6j+dHvOwF4Nm0J4IGJXRRBw7VwnqpA=
 github.com/kyma-project/kyma v0.5.1-0.20200609051543-f5997d4a36d6 h1:P3R3c4pewIa+IjzNldO9WRFA58s0r3WVqRxLK6feYc8=
 github.com/kyma-project/kyma v0.5.1-0.20200609051543-f5997d4a36d6/go.mod h1:cfj5AQwIOmmoXLZUhW3bIiaB66Z6vgjCYu7TRK3+1lc=
 github.com/kyma-project/kyma/components/function-controller v0.0.0-20200901115958-8e0d3c51dd7a h1:9QullUKcC5XE5o3D9x4gYrsSRP3Tgb4FnSByLby4V0U=
