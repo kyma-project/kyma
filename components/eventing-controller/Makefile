@@ -64,7 +64,7 @@ deploy-local-dry-run: manifests
 	kustomize build config/default
 
 # Generate manifests e.g. CRD, RBAC etc.
-manifests: controller-gen-local
+manifests-local: controller-gen-local
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 # Generate code
