@@ -1,0 +1,6 @@
+apiVersion: eventing.kyma-project.io/v1alpha1
+kind: Subscription
+metadata:
+  name: subscription-sample
+spec:
+  id: sample-uuid

@@ -15,10 +15,10 @@ rules:
   - apiGroups: [""]
     resources: ["namespaces"]
     verbs: ["get", "list"]
-  - apiGroups: ["apps"]
+  - apiGroups: ["apps", "extensions"]
     resources: ["deployments", "daemonsets", "statefulsets"]
     verbs: ["get", "patch"]
-  - apiGroups: ["apps"]
+  - apiGroups: ["apps", "extensions"]
     resources: ["replicasets"]
     verbs: ["get", "patch", "delete"]
 ---
