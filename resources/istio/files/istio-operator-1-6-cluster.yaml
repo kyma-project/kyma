@@ -686,6 +686,5 @@ spec:
         cert_file: /kiali-cert/cert-chain.pem
         private_key_file: /kiali-cert/key.pem
 
-    # TODO: derive from operator API
     version: ""
     clusterResources: true
