@@ -8,8 +8,11 @@ import (
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	// +kubebuilder:scaffold:imports
@@ -21,20 +24,65 @@ const (
 	subscriptionName      = "test-subs-1"
 	subscriptionNamespace = "test-subs-1"
 	subscriptionID        = "test-subs-1"
+
+	namespaceCleanupTimeout  = time.Second * 10
+	namespaceCleanupInterval = time.Second * 1
 )
 
 var _ = ginkgo.Describe("Subscription", func() {
+	ginkgo.AfterEach(func() {
+		// Clean up all resources in test namespace
+		// If a custom namespace is used in a test, the test is responsible for cleaning resources up
+		ctx := context.Background()
+
+		gomega.Eventually(func() error {
+			testNamespace := fixtureNamespace(subscriptionNamespace)
+			logf.Log.V(1).Info("deleting namespace", "namespace", testNamespace)
+			deletePolicy := metav1.DeletePropagationForeground
+			gracePeriod := int64(0)
+			if err := k8sClient.Delete(ctx, testNamespace, &client.DeleteOptions{
+				PropagationPolicy:  &deletePolicy,
+				GracePeriodSeconds: &gracePeriod,
+			}); err != nil && !errors.IsNotFound(err) {
+
+				// TODO: is there an easier way to log in debug mode ?
+				logf.Log.V(1).Info("error while deleting namespace: ", "error", err)
+
+				// print subscription details
+				subscriptionList := eventingv1alpha1.SubscriptionList{}
+				if err := k8sClient.List(ctx, &subscriptionList); err != nil {
+					logf.Log.V(1).Info("error while getting subscription list", "error", err)
+					return err
+				}
+				logf.Log.V(1).Info("subscriptions", "subscriptions", subscriptionList)
+
+				// print namespace details
+				namespace := v1.Namespace{}
+				if err := k8sClient.Get(ctx, types.NamespacedName{Name: testNamespace.Name}, &namespace); err != nil && !errors.IsNotFound(err) {
+					logf.Log.V(1).Info("error while getting namespace", "error", err)
+					return err
+				}
+				logf.Log.V(1).Info("namespace", "namespace", namespace)
+
+				return err
+			}
+
+			return nil
+		}, namespaceCleanupTimeout, namespaceCleanupInterval).Should(gomega.Or(
+			gomega.BeNil(),
+		))
+	})
+
 	// TODO: test required fields are provided  but with wrong values => basically testing the CRD schema
 	// TODO: test required fields are provided => basically testing the CRD schema
 	ginkgo.Context("When creating a valid BEB Subscription", func() {
 		ginkgo.It("Should reconcile the Subscription", func() {
 			ctx := context.Background()
-			givenSubscription := fixtureSubscription()
+			givenSubscription := fixtureValidSubscription()
 			ensureSubscriptionCreated(givenSubscription, ctx)
-
-			ginkgo.By("Setting a finalizer")
 			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: subscriptionNamespace}
 
+			ginkgo.By("Setting a finalizer")
 			getSubscription(subscriptionLookupKey, ctx).Should(
 				haveName(subscriptionName),
 				haveFinalizer(finalizerName),
@@ -42,12 +90,42 @@ var _ = ginkgo.Describe("Subscription", func() {
 
 			ginkgo.By("Creating a BEB Subscription")
 			// TODO(nachtmaar): check that an HTTP call against BEB was done
+
+			ginkgo.By("Emitting some k8s events")
+			// TODO(nachtmaar):
+		})
+	})
+
+	ginkgo.Context("When deleting a valid BEB Subscription", func() {
+		ginkgo.It("Should reconcile the Subscription", func() {
+			ctx := context.Background()
+			givenSubscription := fixtureValidSubscription()
+			ensureSubscriptionCreated(givenSubscription, ctx)
+			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: subscriptionNamespace}
+
+			// ensure subscription is given
+			getSubscription(subscriptionLookupKey, ctx).Should(
+				haveName(subscriptionName),
+				haveFinalizer(finalizerName),
+			)
+
+			ginkgo.By("Deleting the BEB Subscription")
+			// TODO(nachtmaar): check that an HTTP call against BEB was done
+
+			ginkgo.By("Removing the finalizer")
+			getSubscription(subscriptionLookupKey, ctx).Should(
+				haveName(subscriptionName),
+				gomega.Not(haveFinalizer(finalizerName)),
+			)
+
+			ginkgo.By("Emitting some k8s events")
+			// TODO(nachtmaar):
 		})
 	})
 })
 
-func fixtureSubscription() *eventingv1alpha1.Subscription {
-	// Create a valid subscription
+// fixtureValidSubscription returns a valid subscription
+func fixtureValidSubscription() *eventingv1alpha1.Subscription {
 	return &eventingv1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Subscription",
@@ -110,20 +188,40 @@ func getSubscription(lookupKey types.NamespacedName, ctx context.Context) gomega
 // ensureSubscriptionCreated creates a Subscription in the k8s cluster. If a custom namespace is used, it will be created as well.
 func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx context.Context) {
 	if subscription.Namespace != "default " {
-		namespace := v1.Namespace{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Namespace",
-				APIVersion: "v1",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: subscription.Namespace,
-			},
-		}
-		gomega.Expect(k8sClient.Create(ctx, &namespace)).Should(gomega.BeNil())
+		namespace := fixtureNamespace(subscription.Namespace)
+		// TODO:
+		// err := k8sClient.Create(ctx, &namespace)
+		// if e, ok := err.(*errors.StatusError); ok {
+		// 	if e.ErrStatus.Code == 409 && e.ErrStatus.Reason == "AlreadyExists" {
+		// 		fmt.Printf("ignorning that namespace already exists")
+
+		// 	} else {
+		// 		gomega.Expect(false)
+		// 	}
+		// }
+		gomega.Expect(k8sClient.Create(ctx, namespace)).Should(gomega.Or(
+			// ignore if namespaces is already created
+			// isK8sAlreadyExistsError(),
+			gomega.BeNil(),
+		))
 	}
 	gomega.Expect(k8sClient.Create(ctx, subscription)).Should(gomega.BeNil())
 }
 
+func fixtureNamespace(name string) *v1.Namespace {
+	namespace := v1.Namespace{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Namespace",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+	}
+	return &namespace
+}
+
+// TODO: add subscription prefix or move to subscription package
 // TODO: move matchers  to extra file ?
 func haveName(name string) gomegatypes.GomegaMatcher {
 	return gomega.WithTransform(func(s *eventingv1alpha1.Subscription) string { return s.Name }, gomega.Equal(name))
@@ -132,3 +230,11 @@ func haveName(name string) gomegatypes.GomegaMatcher {
 func haveFinalizer(finalizer string) gomegatypes.GomegaMatcher {
 	return gomega.WithTransform(func(s *eventingv1alpha1.Subscription) []string { return s.ObjectMeta.Finalizers }, gomega.ContainElement(finalizer))
 }
+
+// func isK8sAlreadyExistsError() gomegatypes.GomegaMatcher {
+// 	return gomega.WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, gomega.Equal("AlreadyExists"))
+// }
+//
+// func isK8sKnotFoundError() gomegatypes.GomegaMatcher {
+// 	return gomega.WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, gomega.Equal("NotFound"))
+// }
