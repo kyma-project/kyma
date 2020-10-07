@@ -11,15 +11,29 @@ import (
 	"k8s.io/api/core/v1"
 )
 
-func (r *limitRangeResolver) Limits(ctx context.Context, obj *v1.LimitRange) ([]*gqlschema.LimitRangeItem, error) {
+func (r *limitRangeItemResolver) Type(ctx context.Context, obj *v1.LimitRangeItem) (*string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *limitRangeItemResolver) Max(ctx context.Context, obj *v1.LimitRangeItem) (*gqlschema.ResourceType, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *limitRangeItemResolver) Default(ctx context.Context, obj *v1.LimitRangeItem) (*gqlschema.ResourceType, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *limitRangeItemResolver) DefaultRequest(ctx context.Context, obj *v1.LimitRangeItem) (*gqlschema.ResourceType, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) LimitRanges(ctx context.Context, namespace string) ([]*v1.LimitRange, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.k8sNew.LimitRangesQuery(ctx, namespace)
 }
 
-// LimitRange returns gqlschema.LimitRangeResolver implementation.
-func (r *Resolver) LimitRange() gqlschema.LimitRangeResolver { return &limitRangeResolver{r} }
+// LimitRangeItem returns gqlschema.LimitRangeItemResolver implementation.
+func (r *Resolver) LimitRangeItem() gqlschema.LimitRangeItemResolver {
+	return &limitRangeItemResolver{r}
+}
 
-type limitRangeResolver struct{ *Resolver }
+type limitRangeItemResolver struct{ *Resolver }

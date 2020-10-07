@@ -1,19 +1,18 @@
-type LimitRange @goModel(model: "k8s.io/api/core/v1.LimitRange") {
-  name: String!
-  limits: [LimitRangeItem!]!
-}
+scalar LimitType @goModel(model: "k8s.io/api/core/v1.LimitType")
 
-type LimitRangeItem {
-  limitType: LimitType!
+type LimitRangeItem @goModel(model: "k8s.io/api/core/v1.LimitRangeItem") {
+  type: String
   max: ResourceType
   default: ResourceType
   defaultRequest: ResourceType
-  json: JSON!
 }
 
-enum LimitType {
-  Container
-  Pod
+type LimitRangeSpec @goModel(model: "k8s.io/api/core/v1.LimitRangeSpec") {
+  limits: [LimitRangeItem!]!
+}
+type LimitRange @goModel(model: "k8s.io/api/core/v1.LimitRange") {
+  name: String!
+  spec: LimitRangeSpec!
 }
 
 input LimitRangeInput {

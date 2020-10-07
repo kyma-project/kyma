@@ -400,14 +400,6 @@ type LimitRangeInput struct {
 	Type           string               `json:"type"`
 }
 
-type LimitRangeItem struct {
-	LimitType      LimitType     `json:"limitType"`
-	Max            *ResourceType `json:"max"`
-	Default        *ResourceType `json:"default"`
-	DefaultRequest *ResourceType `json:"defaultRequest"`
-	JSON           JSON          `json:"json"`
-}
-
 type LoadBalancerIngress struct {
 	IP       string `json:"ip"`
 	HostName string `json:"hostName"`
@@ -1109,47 +1101,6 @@ func (e *InstanceStatusType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e InstanceStatusType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type LimitType string
-
-const (
-	LimitTypeContainer LimitType = "Container"
-	LimitTypePod       LimitType = "Pod"
-)
-
-var AllLimitType = []LimitType{
-	LimitTypeContainer,
-	LimitTypePod,
-}
-
-func (e LimitType) IsValid() bool {
-	switch e {
-	case LimitTypeContainer, LimitTypePod:
-		return true
-	}
-	return false
-}
-
-func (e LimitType) String() string {
-	return string(e)
-}
-
-func (e *LimitType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = LimitType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid LimitType", str)
-	}
-	return nil
-}
-
-func (e LimitType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

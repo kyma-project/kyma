@@ -42,16 +42,14 @@ type resourceQuotaStatusService struct {
 	rqLister resourceQuotaLister
 	rsLister replicaSetLister
 	ssLister statefulSetLister
-	lrLister limitRangeLister
 }
 
-func newResourceQuotaStatusService(rqInformer resourceQuotaLister, rsInformer replicaSetLister, ssInformer statefulSetLister, lrInformer limitRangeLister) *resourceQuotaStatusService {
+func newResourceQuotaStatusService(rqInformer resourceQuotaLister, rsInformer replicaSetLister, ssInformer statefulSetLister) *resourceQuotaStatusService {
 	return &resourceQuotaStatusService{
 		rqConv:   resourceQuotaStatusConverter{},
 		rqLister: rqInformer,
 		rsLister: rsInformer,
 		ssLister: ssInformer,
-		lrLister: lrInformer,
 	}
 }
 
@@ -129,29 +127,29 @@ func (svc *resourceQuotaStatusService) checkResourcesRequests(namespace string, 
 }
 
 func (svc *resourceQuotaStatusService) getDefaultLimits(namespace string) (ranges, error) {
-	limitRanges, err := svc.lrLister.List(namespace)
-	if err != nil {
-		return ranges{}, errors.Wrapf(err, "while listing %s [namespace: %s]", pretty.LimitRanges, namespace)
-	}
+	// limitRanges, err := svc.lrLister.List(namespace)
+	// if err != nil {
+	// 	return ranges{}, errors.Wrapf(err, "while listing %s [namespace: %s]", pretty.LimitRanges, namespace)
+	// }
 	defaultRanges := ranges{}
-	for _, lr := range limitRanges {
-		for _, limit := range lr.Spec.Limits {
-			if limit.Type == v1.LimitTypeContainer {
-				if limit.DefaultRequest.Memory().Value() > defaultRanges.Requests.Memory.Value() {
-					defaultRanges.Requests.Memory = *limit.DefaultRequest.Memory()
-				}
-				if limit.DefaultRequest.Cpu().Value() > defaultRanges.Requests.CPU.Value() {
-					defaultRanges.Requests.CPU = *limit.DefaultRequest.Cpu()
-				}
-				if limit.Default.Memory().Value() > defaultRanges.Limit.Memory.Value() {
-					defaultRanges.Limit.Memory = *limit.Default.Memory()
-				}
-				if limit.Default.Cpu().Value() > defaultRanges.Limit.CPU.Value() {
-					defaultRanges.Limit.CPU = *limit.Default.Cpu()
-				}
-			}
-		}
-	}
+	// for _, lr := range limitRanges {
+	// 	for _, limit := range lr.Spec.Limits {
+	// 		if limit.Type == v1.LimitTypeContainer {
+	// 			if limit.DefaultRequest.Memory().Value() > defaultRanges.Requests.Memory.Value() {
+	// 				defaultRanges.Requests.Memory = *limit.DefaultRequest.Memory()
+	// 			}
+	// 			if limit.DefaultRequest.Cpu().Value() > defaultRanges.Requests.CPU.Value() {
+	// 				defaultRanges.Requests.CPU = *limit.DefaultRequest.Cpu()
+	// 			}
+	// 			if limit.Default.Memory().Value() > defaultRanges.Limit.Memory.Value() {
+	// 				defaultRanges.Limit.Memory = *limit.Default.Memory()
+	// 			}
+	// 			if limit.Default.Cpu().Value() > defaultRanges.Limit.CPU.Value() {
+	// 				defaultRanges.Limit.CPU = *limit.Default.Cpu()
+	// 			}
+	// 		}
+	// 	}
+	// }
 	return defaultRanges, nil
 }
 

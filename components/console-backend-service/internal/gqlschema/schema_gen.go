@@ -58,7 +58,7 @@ type ResolverRoot interface {
 	ClusterServicePlan() ClusterServicePlanResolver
 	Deployment() DeploymentResolver
 	EventActivation() EventActivationResolver
-	LimitRange() LimitRangeResolver
+	LimitRangeItem() LimitRangeItemResolver
 	Mutation() MutationResolver
 	Namespace() NamespaceResolver
 	NamespaceListItem() NamespaceListItemResolver
@@ -539,16 +539,19 @@ type ComplexityRoot struct {
 	}
 
 	LimitRange struct {
-		Limits func(childComplexity int) int
-		Name   func(childComplexity int) int
+		Name func(childComplexity int) int
+		Spec func(childComplexity int) int
 	}
 
 	LimitRangeItem struct {
 		Default        func(childComplexity int) int
 		DefaultRequest func(childComplexity int) int
-		JSON           func(childComplexity int) int
-		LimitType      func(childComplexity int) int
 		Max            func(childComplexity int) int
+		Type           func(childComplexity int) int
+	}
+
+	LimitRangeSpec struct {
+		Limits func(childComplexity int) int
 	}
 
 	LoadBalancerIngress struct {
@@ -1188,8 +1191,11 @@ type DeploymentResolver interface {
 type EventActivationResolver interface {
 	Events(ctx context.Context, obj *EventActivation) ([]*EventActivationEvent, error)
 }
-type LimitRangeResolver interface {
-	Limits(ctx context.Context, obj *v11.LimitRange) ([]*LimitRangeItem, error)
+type LimitRangeItemResolver interface {
+	Type(ctx context.Context, obj *v11.LimitRangeItem) (*string, error)
+	Max(ctx context.Context, obj *v11.LimitRangeItem) (*ResourceType, error)
+	Default(ctx context.Context, obj *v11.LimitRangeItem) (*ResourceType, error)
+	DefaultRequest(ctx context.Context, obj *v11.LimitRangeItem) (*ResourceType, error)
 }
 type MutationResolver interface {
 	CreateResource(ctx context.Context, namespace string, resource JSON) (JSON, error)
@@ -3201,19 +3207,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.GitRepositorySpec.URL(childComplexity), true
 
-	case "LimitRange.limits":
-		if e.complexity.LimitRange.Limits == nil {
-			break
-		}
-
-		return e.complexity.LimitRange.Limits(childComplexity), true
-
 	case "LimitRange.name":
 		if e.complexity.LimitRange.Name == nil {
 			break
 		}
 
 		return e.complexity.LimitRange.Name(childComplexity), true
+
+	case "LimitRange.spec":
+		if e.complexity.LimitRange.Spec == nil {
+			break
+		}
+
+		return e.complexity.LimitRange.Spec(childComplexity), true
 
 	case "LimitRangeItem.default":
 		if e.complexity.LimitRangeItem.Default == nil {
@@ -3229,26 +3235,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.LimitRangeItem.DefaultRequest(childComplexity), true
 
-	case "LimitRangeItem.json":
-		if e.complexity.LimitRangeItem.JSON == nil {
-			break
-		}
-
-		return e.complexity.LimitRangeItem.JSON(childComplexity), true
-
-	case "LimitRangeItem.limitType":
-		if e.complexity.LimitRangeItem.LimitType == nil {
-			break
-		}
-
-		return e.complexity.LimitRangeItem.LimitType(childComplexity), true
-
 	case "LimitRangeItem.max":
 		if e.complexity.LimitRangeItem.Max == nil {
 			break
 		}
 
 		return e.complexity.LimitRangeItem.Max(childComplexity), true
+
+	case "LimitRangeItem.type":
+		if e.complexity.LimitRangeItem.Type == nil {
+			break
+		}
+
+		return e.complexity.LimitRangeItem.Type(childComplexity), true
+
+	case "LimitRangeSpec.limits":
+		if e.complexity.LimitRangeSpec.Limits == nil {
+			break
+		}
+
+		return e.complexity.LimitRangeSpec.Limits(childComplexity), true
 
 	case "LoadBalancerIngress.hostName":
 		if e.complexity.LoadBalancerIngress.HostName == nil {
@@ -6968,22 +6974,21 @@ extend type Mutation {
 extend type Subscription {
     triggerEvent(namespace: String!, serviceName: String!): TriggerEvent! @HasAccess(attributes: {resource: "triggers", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }`, BuiltIn: false},
-	&ast.Source{Name: "internal/gqlschema/k8sNew.graphql", Input: `type LimitRange @goModel(model: "k8s.io/api/core/v1.LimitRange") {
-  name: String!
-  limits: [LimitRangeItem!]!
-}
+	&ast.Source{Name: "internal/gqlschema/k8sNew.graphql", Input: `scalar LimitType @goModel(model: "k8s.io/api/core/v1.LimitType")
 
-type LimitRangeItem {
-  limitType: LimitType!
+type LimitRangeItem @goModel(model: "k8s.io/api/core/v1.LimitRangeItem") {
+  type: String
   max: ResourceType
   default: ResourceType
   defaultRequest: ResourceType
-  json: JSON!
 }
 
-enum LimitType {
-  Container
-  Pod
+type LimitRangeSpec @goModel(model: "k8s.io/api/core/v1.LimitRangeSpec") {
+  limits: [LimitRangeItem!]!
+}
+type LimitRange @goModel(model: "k8s.io/api/core/v1.LimitRange") {
+  name: String!
+  spec: LimitRangeSpec!
 }
 
 input LimitRangeInput {
@@ -20207,7 +20212,7 @@ func (ec *executionContext) _LimitRange_name(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _LimitRange_limits(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRange) (ret graphql.Marshaler) {
+func (ec *executionContext) _LimitRange_spec(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRange) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20218,30 +20223,61 @@ func (ec *executionContext) _LimitRange_limits(ctx context.Context, field graphq
 		Object:   "LimitRange",
 		Field:    field,
 		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Spec, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v11.LimitRangeSpec)
+	fc.Result = res
+	return ec.marshalNLimitRangeSpec2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LimitRangeItem_type(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRangeItem) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "LimitRangeItem",
+		Field:    field,
+		Args:     nil,
 		IsMethod: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.LimitRange().Limits(rctx, obj)
+		return ec.resolvers.LimitRangeItem().Type(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.([]*LimitRangeItem)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNLimitRangeItem2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeItemᚄ(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _LimitRangeItem_limitType(ctx context.Context, field graphql.CollectedField, obj *LimitRangeItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _LimitRangeItem_max(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRangeItem) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20252,47 +20288,13 @@ func (ec *executionContext) _LimitRangeItem_limitType(ctx context.Context, field
 		Object:   "LimitRangeItem",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.LimitType, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(LimitType)
-	fc.Result = res
-	return ec.marshalNLimitType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitType(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _LimitRangeItem_max(ctx context.Context, field graphql.CollectedField, obj *LimitRangeItem) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "LimitRangeItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Max, nil
+		return ec.resolvers.LimitRangeItem().Max(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20306,7 +20308,7 @@ func (ec *executionContext) _LimitRangeItem_max(ctx context.Context, field graph
 	return ec.marshalOResourceType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _LimitRangeItem_default(ctx context.Context, field graphql.CollectedField, obj *LimitRangeItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _LimitRangeItem_default(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRangeItem) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20317,13 +20319,13 @@ func (ec *executionContext) _LimitRangeItem_default(ctx context.Context, field g
 		Object:   "LimitRangeItem",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Default, nil
+		return ec.resolvers.LimitRangeItem().Default(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20337,7 +20339,7 @@ func (ec *executionContext) _LimitRangeItem_default(ctx context.Context, field g
 	return ec.marshalOResourceType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _LimitRangeItem_defaultRequest(ctx context.Context, field graphql.CollectedField, obj *LimitRangeItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _LimitRangeItem_defaultRequest(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRangeItem) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20348,13 +20350,13 @@ func (ec *executionContext) _LimitRangeItem_defaultRequest(ctx context.Context, 
 		Object:   "LimitRangeItem",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.DefaultRequest, nil
+		return ec.resolvers.LimitRangeItem().DefaultRequest(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20368,7 +20370,7 @@ func (ec *executionContext) _LimitRangeItem_defaultRequest(ctx context.Context, 
 	return ec.marshalOResourceType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _LimitRangeItem_json(ctx context.Context, field graphql.CollectedField, obj *LimitRangeItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _LimitRangeSpec_limits(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRangeSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20376,7 +20378,7 @@ func (ec *executionContext) _LimitRangeItem_json(ctx context.Context, field grap
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "LimitRangeItem",
+		Object:   "LimitRangeSpec",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -20385,7 +20387,7 @@ func (ec *executionContext) _LimitRangeItem_json(ctx context.Context, field grap
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.JSON, nil
+		return obj.Limits, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20397,9 +20399,9 @@ func (ec *executionContext) _LimitRangeItem_json(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(JSON)
+	res := resTmp.([]v11.LimitRangeItem)
 	fc.Result = res
-	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
+	return ec.marshalNLimitRangeItem2ᚕk8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeItemᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _LoadBalancerIngress_ip(ctx context.Context, field graphql.CollectedField, obj *LoadBalancerIngress) (ret graphql.Marshaler) {
@@ -43148,22 +43150,13 @@ func (ec *executionContext) _LimitRange(ctx context.Context, sel ast.SelectionSe
 		case "name":
 			out.Values[i] = ec._LimitRange_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
-		case "limits":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._LimitRange_limits(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+		case "spec":
+			out.Values[i] = ec._LimitRange_spec(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -43177,7 +43170,7 @@ func (ec *executionContext) _LimitRange(ctx context.Context, sel ast.SelectionSe
 
 var limitRangeItemImplementors = []string{"LimitRangeItem"}
 
-func (ec *executionContext) _LimitRangeItem(ctx context.Context, sel ast.SelectionSet, obj *LimitRangeItem) graphql.Marshaler {
+func (ec *executionContext) _LimitRangeItem(ctx context.Context, sel ast.SelectionSet, obj *v11.LimitRangeItem) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, limitRangeItemImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -43186,19 +43179,74 @@ func (ec *executionContext) _LimitRangeItem(ctx context.Context, sel ast.Selecti
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("LimitRangeItem")
-		case "limitType":
-			out.Values[i] = ec._LimitRangeItem_limitType(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+		case "type":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._LimitRangeItem_type(ctx, field, obj)
+				return res
+			})
 		case "max":
-			out.Values[i] = ec._LimitRangeItem_max(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._LimitRangeItem_max(ctx, field, obj)
+				return res
+			})
 		case "default":
-			out.Values[i] = ec._LimitRangeItem_default(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._LimitRangeItem_default(ctx, field, obj)
+				return res
+			})
 		case "defaultRequest":
-			out.Values[i] = ec._LimitRangeItem_defaultRequest(ctx, field, obj)
-		case "json":
-			out.Values[i] = ec._LimitRangeItem_json(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._LimitRangeItem_defaultRequest(ctx, field, obj)
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var limitRangeSpecImplementors = []string{"LimitRangeSpec"}
+
+func (ec *executionContext) _LimitRangeSpec(ctx context.Context, sel ast.SelectionSet, obj *v11.LimitRangeSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, limitRangeSpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LimitRangeSpec")
+		case "limits":
+			out.Values[i] = ec._LimitRangeSpec_limits(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -49498,11 +49546,11 @@ func (ec *executionContext) marshalNLimitRange2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐL
 	return ec._LimitRange(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNLimitRangeItem2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeItem(ctx context.Context, sel ast.SelectionSet, v LimitRangeItem) graphql.Marshaler {
+func (ec *executionContext) marshalNLimitRangeItem2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeItem(ctx context.Context, sel ast.SelectionSet, v v11.LimitRangeItem) graphql.Marshaler {
 	return ec._LimitRangeItem(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNLimitRangeItem2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeItemᚄ(ctx context.Context, sel ast.SelectionSet, v []*LimitRangeItem) graphql.Marshaler {
+func (ec *executionContext) marshalNLimitRangeItem2ᚕk8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeItemᚄ(ctx context.Context, sel ast.SelectionSet, v []v11.LimitRangeItem) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -49526,7 +49574,7 @@ func (ec *executionContext) marshalNLimitRangeItem2ᚕᚖgithubᚗcomᚋkymaᚑp
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNLimitRangeItem2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeItem(ctx, sel, v[i])
+			ret[i] = ec.marshalNLimitRangeItem2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeItem(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -49539,23 +49587,8 @@ func (ec *executionContext) marshalNLimitRangeItem2ᚕᚖgithubᚗcomᚋkymaᚑp
 	return ret
 }
 
-func (ec *executionContext) marshalNLimitRangeItem2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeItem(ctx context.Context, sel ast.SelectionSet, v *LimitRangeItem) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._LimitRangeItem(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNLimitType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitType(ctx context.Context, v interface{}) (LimitType, error) {
-	var res LimitType
-	return res, res.UnmarshalGQL(v)
-}
-
-func (ec *executionContext) marshalNLimitType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitType(ctx context.Context, sel ast.SelectionSet, v LimitType) graphql.Marshaler {
-	return v
+func (ec *executionContext) marshalNLimitRangeSpec2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeSpec(ctx context.Context, sel ast.SelectionSet, v v11.LimitRangeSpec) graphql.Marshaler {
+	return ec._LimitRangeSpec(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNLoadBalancerIngress2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLoadBalancerIngress(ctx context.Context, sel ast.SelectionSet, v LoadBalancerIngress) graphql.Marshaler {
