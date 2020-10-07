@@ -18,6 +18,7 @@ type Config struct {
 	AgentConfigurationSecret     string        `envconfig:"default=compass-system/compass-agent-configuration"`
 	ControllerSyncPeriod         time.Duration `envconfig:"default=20s"`
 	MinimalCompassSyncTime       time.Duration `envconfig:"default=10s"`
+	TimeToRequeueAfterFailure    time.Duration `envconfig:"default=2m"`
 	CertValidityRenewalThreshold float64       `envconfig:"default=0.3"`
 	ClusterCertificatesSecret    string        `envconfig:"default=compass-system/cluster-client-certificates"`
 	CaCertificatesSecret         string        `envconfig:"default=istio-system/ca-certificates"`
@@ -34,14 +35,14 @@ type Config struct {
 
 func (o *Config) String() string {
 	return fmt.Sprintf("AgentConfigurationSecret=%s, "+
-		"ControllerSyncPeriod=%s, MinimalCompassSyncTime=%s, "+
+		"ControllerSyncPeriod=%s, MinimalCompassSyncTime=%s, TimeToRequeueAfterFailure=%s"+
 		"CertValidityRenewalThreshold=%f, ClusterCertificatesSecret=%s, CaCertificatesSecret=%s, "+
 		"SkipCompassTLSVerify=%v, GatewayPort=%d, UploadServiceUrl=%s, "+
 		"QueryLogging=%v, MetricsLoggingTimeInterval=%s, "+
 		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s"+
 		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v, HealthPort=%s",
 		o.AgentConfigurationSecret,
-		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
+		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(), o.TimeToRequeueAfterFailure.String(),
 		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
 		o.SkipCompassTLSVerify, o.GatewayPort, o.UploadServiceUrl,
 		o.QueryLogging, o.MetricsLoggingTimeInterval,

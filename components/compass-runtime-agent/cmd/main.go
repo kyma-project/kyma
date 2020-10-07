@@ -90,6 +90,7 @@ func main() {
 		RuntimeURLsConfig:            options.Runtime,
 		CertValidityRenewalThreshold: options.CertValidityRenewalThreshold,
 		MinimalCompassSyncTime:       options.MinimalCompassSyncTime,
+		TimeToRequeueAfterFailure:    options.TimeToRequeueAfterFailure,
 	}
 
 	compassConnectionSupervisor, err := controllerDependencies.InitializeController()

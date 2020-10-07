@@ -21,6 +21,7 @@ compassRuntimeAgent:
   sync:
     controllerSyncPeriod: 15s
     minimalConfigSyncTime: 15s
+    timeToRequeueAfterFailure: 2m
   resources:
     integrationNamespace: "kyma-integration"
     dexSecretNamespace: "kyma-system"

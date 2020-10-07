@@ -40,6 +40,8 @@ spec:
               value: {{ .Values.compassRuntimeAgent.sync.controllerSyncPeriod | quote }}
             - name: APP_MINIMAL_COMPASS_SYNC_TIME
               value: {{ .Values.compassRuntimeAgent.sync.minimalConfigSyncTime | quote }}
+            - name: APP_TIME_TO_REQUEUE_AFTER_FAILURE
+              value: {{ .Values.compassRuntimeAgent.sync.timeToRequeueAfterFailure | quote }}
             - name: APP_CERT_VALIDITY_RENEWAL_THRESHOLD
               value: {{ .Values.compassRuntimeAgent.certificates.renewal.validityThreshold | quote }}
             - name: APP_CLUSTER_CERTIFICATES_SECRET

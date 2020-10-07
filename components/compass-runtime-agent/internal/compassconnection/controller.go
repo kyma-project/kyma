@@ -32,17 +32,19 @@ type Reconciler struct {
 	client     Client
 	supervisor Supervisor
 
-	minimalConfigSyncTime time.Duration
+	minimalConfigSyncTime     time.Duration
+	timeToRequeueAfterFailure time.Duration
 
 	log *logrus.Entry
 }
 
 func InitCompassConnectionController(
 	mgr manager.Manager,
-	supervisior Supervisor,
-	minimalConfigSyncTime time.Duration) error {
+	supervisor Supervisor,
+	minimalConfigSyncTime,
+	timeToRequeueAfterFailure time.Duration) error {
 
-	reconciler := newReconciler(mgr.GetClient(), supervisior, minimalConfigSyncTime)
+	reconciler := newReconciler(mgr.GetClient(), supervisor, minimalConfigSyncTime, timeToRequeueAfterFailure)
 
 	return startController(mgr, reconciler)
 }
@@ -56,12 +58,18 @@ func startController(mgr manager.Manager, reconciler reconcile.Reconciler) error
 	return c.Watch(&source.Kind{Type: &v1alpha1.CompassConnection{}}, &handler.EnqueueRequestForObject{})
 }
 
-func newReconciler(client Client, supervisior Supervisor, minimalConfigSyncTime time.Duration) reconcile.Reconciler {
+func newReconciler(
+	client Client,
+	supervisor Supervisor,
+	minimalConfigSyncTime,
+	timeToRequeueAfterFailure time.Duration) reconcile.Reconciler {
+
 	return &Reconciler{
-		client:                client,
-		supervisor:            supervisior,
-		minimalConfigSyncTime: minimalConfigSyncTime,
-		log:                   logrus.WithField("Controller", "CompassConnection"),
+		client:                    client,
+		supervisor:                supervisor,
+		minimalConfigSyncTime:     minimalConfigSyncTime,
+		timeToRequeueAfterFailure: timeToRequeueAfterFailure,
+		log:                       logrus.WithField("Controller", "CompassConnection"),
 	}
 }
 
@@ -80,16 +88,16 @@ func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 			instance, err := r.supervisor.InitializeCompassConnection()
 			if err != nil {
 				log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
-				return reconcile.Result{}, err
+				return reconcile.Result{RequeueAfter: r.timeToRequeueAfterFailure}, err
 			}
 
 			log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
-			return reconcile.Result{}, nil
+			return reconcile.Result{RequeueAfter: r.timeToRequeueAfterFailure}, nil
 		}
 
 		// SynchronizationFailed reading the object - requeue the request.
 		log.Info("Failed to read Compass Connection.")
-		return reconcile.Result{}, err
+		return reconcile.Result{RequeueAfter: r.timeToRequeueAfterFailure}, err
 	}
 
 	log.Infof("Processing Compass Connection, current status: %s", instance.Status)
@@ -100,7 +108,7 @@ func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 		instance, err := r.supervisor.InitializeCompassConnection()
 		if err != nil {
 			log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
-			return reconcile.Result{}, err
+			return reconcile.Result{RequeueAfter: r.timeToRequeueAfterFailure}, err
 		}
 
 		log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
@@ -119,7 +127,7 @@ func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	synchronized, err := r.supervisor.SynchronizeWithCompass(instance)
 	if err != nil {
 		log.Errorf("Failed to synchronize with Compass: %s", err.Error())
-		return reconcile.Result{}, err
+		return reconcile.Result{RequeueAfter: r.timeToRequeueAfterFailure}, err
 	}
 
 	log.Infof("Synchronization finished. Compass Connection status: %s", synchronized.Status)

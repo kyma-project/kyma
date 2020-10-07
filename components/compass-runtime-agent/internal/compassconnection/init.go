@@ -33,6 +33,7 @@ type DependencyConfig struct {
 	RuntimeURLsConfig            director.RuntimeURLsConfig
 	CertValidityRenewalThreshold float64
 	MinimalCompassSyncTime       time.Duration
+	TimeToRequeueAfterFailure    time.Duration
 }
 
 func (config DependencyConfig) InitializeController() (Supervisor, error) {
@@ -56,7 +57,12 @@ func (config DependencyConfig) InitializeController() (Supervisor, error) {
 		config.RuntimeURLsConfig,
 		config.ConnectionDataCache)
 
-	if err := InitCompassConnectionController(config.ControllerManager, connectionSupervisor, config.MinimalCompassSyncTime); err != nil {
+	err = InitCompassConnectionController(
+		config.ControllerManager,
+		connectionSupervisor,
+		config.MinimalCompassSyncTime,
+		config.TimeToRequeueAfterFailure)
+	if err != nil {
 		return nil, errors.Wrap(err, "Unable to register controllers to the manager")
 	}
 
