@@ -17,10 +17,17 @@ type WebhookAuth struct {
 // ProtocolSettings defines the CE protocol setting specification implementation
 type ProtocolSettings struct {
 	ContentMode     string       `json:"contentMode,omitempty"`
+	// TODO(nachtmaar): discuss with radu, either make it true by default or remove it for now
 	ExemptHandshake bool         `json:"exemptHandshake,omitempty"`
 	Qos             string       `json:"qos,omitempty"`
 	WebhookAuth     *WebhookAuth `json:"webhookAuth"`
 }
+
+// TODO(nachtmaar): validate me in controller
+const (
+	ProtocolSettingsContentModeBinary     string = "BINARY"
+	ProtocolSettingsContentModeStructured string = "STRUCTURED"
+)
 
 // Filter defines the CE filter element
 type Filter struct {
