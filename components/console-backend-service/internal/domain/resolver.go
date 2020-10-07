@@ -152,7 +152,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 func (r *Resolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	// Not pluggable modules
 	r.k8s.WaitForCacheSync(stopCh)
-	// r.k8sNew.WaitForCacheSync(stopCh)
+	r.k8sNew.WaitForCacheSync(stopCh)
 	r.ui.WaitForCacheSync(stopCh)
 
 	// Pluggable modules

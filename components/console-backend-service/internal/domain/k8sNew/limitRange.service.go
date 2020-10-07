@@ -7,6 +7,8 @@ import (
 	// "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	// "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	// "github.com/pkg/errors"
+	"fmt"
+
 	intResource "github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -25,6 +27,7 @@ type Service struct {
 }
 
 func NewLimitRangesService(serviceFactory *intResource.GenericServiceFactory) (*intResource.GenericService, error) {
+	fmt.Println(serviceFactory)
 	return serviceFactory.ForResource(limitRangesGroupVersionResource), nil
 }
 
