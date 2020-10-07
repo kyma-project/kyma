@@ -1,13 +1,13 @@
 set -e
 
 
-echo "Checking current Istio version"
-
-CURRENT_VERSION=$(kubectl -n istio-system get deployment istiod -o jsonpath='{.spec.template.spec.containers[0].image}' | awk -F: '{print $2}')
-if [[ "$CURRENT_VERSION" == "${TARGET_VERSION}" ]]; then
-    echo "Istio is already in version ${TARGET_VERSION}. Exiting..."
-    exit 0
-fi
+#echo "Checking current Istio version"
+#
+#CURRENT_VERSION=$(kubectl -n istio-system get deployment istiod -o jsonpath='{.spec.template.spec.containers[0].image}' | awk -F: '{print $2}')
+#if [[ "$CURRENT_VERSION" == "${TARGET_VERSION}" ]]; then
+#    echo "Istio is already in version ${TARGET_VERSION}. Exiting..."
+#    exit 0
+#fi
 
 if [ -f "/etc/istio/overrides.yaml" ]; then
   #New way: just merge default IstioOperator definition with a user-provided one.
