@@ -3,7 +3,7 @@ title: Sidecar Proxy Injection
 type: Details
 ---
 
-By default, the Istiod watches all Pod creation operations on all Namespaces and injects the newly created Pods with a sidecar proxy.
+By default, istiod watches all Pod creation operations on all Namespaces and injects the newly created Pods with a sidecar proxy.
 
 You can disable sidecar proxy injection for either an entire Namespace or a single Deployment.
 
