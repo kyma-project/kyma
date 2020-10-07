@@ -20,7 +20,7 @@ func (l *LimitRangeList) Append() interface{} {
 
 func (r *Resolver) LimitRangesQuery(ctx context.Context, namespace string) ([]*v1.LimitRange, error) {
 	items := LimitRangeList{}
-	err := r.Service().ListInNamespace(namespace, &items)
-
+	err := r.LimitRangesService().ListInNamespace(namespace, &items)
+	// panic(err)
 	return items, err
 }

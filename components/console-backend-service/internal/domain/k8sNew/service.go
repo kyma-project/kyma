@@ -7,18 +7,17 @@ import (
 	// "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	// "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	// "github.com/pkg/errors"
-	"fmt"
 
 	intResource "github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/api/core/v1"
 
 	// corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 var limitRangesGroupVersionResource = schema.GroupVersionResource{
-	Version:  metav1.SchemeGroupVersion.Version,
-	Group:    metav1.SchemeGroupVersion.Group,
+	Version:  v1.SchemeGroupVersion.Version,
+	Group:    v1.SchemeGroupVersion.Group,
 	Resource: "limitranges",
 }
 
@@ -27,7 +26,6 @@ type Service struct {
 }
 
 func NewLimitRangesService(serviceFactory *intResource.GenericServiceFactory) (*intResource.GenericService, error) {
-	fmt.Println(serviceFactory)
 	return serviceFactory.ForResource(limitRangesGroupVersionResource), nil
 }
 
