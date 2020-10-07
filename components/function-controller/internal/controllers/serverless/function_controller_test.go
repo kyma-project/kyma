@@ -269,7 +269,6 @@ func TestFunctionReconciler_envsEqual(t *testing.T) {
 		},
 	}
 
-
 	differentEnvVarSrc := &corev1.EnvVarSource{
 		ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
 			LocalObjectReference: corev1.LocalObjectReference{
