@@ -22,6 +22,7 @@ type SubscriptionReconciler struct {
 
 // TODO: emit events
 // TODO: write tests
+// TODO: use additional printer columns: https://book.kubebuilder.io/reference/generating-crd.html#additional-printer-columns
 
 const (
 	// TODO:
