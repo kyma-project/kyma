@@ -21,9 +21,9 @@ Run end-to-end upgrade tests for the Kyma [upgrade plan](https://github.com/kyma
 
 1. Install Kyma from the [latest](https://github.com/kyma-project/kyma/releases/latest) release.
 2. Install the upgrade-test [helm chart](chart/upgrade). 
-3. Execute all testdefinitions with the label `kyma-project.io/test.before-upgrade`.
-4. Upgrade Kyma cluster.
-5. Execute all testdefinitions with the label `kyma-project.io/test.after-upgrade`.
+3. Execute all TestDefinitions with the label `kyma-project.io/test.before-upgrade`.
+4. Upgrade the Kyma cluster.
+5. Execute all TestDefinitions with the label `kyma-project.io/test.after-upgrade`.
 
 ### Use environment variables
 
@@ -55,14 +55,12 @@ go run main.go --action prepareData --verbose
 
 ## Development
 
->**NOTE:** The following approach for adding new tests to the upgrade scenario is not needed anymore. To prepare data during the preparation phase just create a new testdefinition that executes your preparation code and add the label `kyma-project.io/before-upgrade=true`. To execute evaluation code during the evaluation phase create a new testdefinition with the label `kyma-project.io/after-upgrade=true` 
+>**NOTE:** The following approach for adding new tests to the upgrade scenario is not needed anymore. To prepare data during the preparation phase, create a new TestDefinition that executes your preparation code and add the label `kyma-project.io/before-upgrade=true`. To execute evaluation code during the evaluation phase, create a new TestDefinition with the label `kyma-project.io/after-upgrade=true` 
 
 
 This section presents how to add and run a new test. It also describes how to verify the code and ensure that your test is correct.
 
-### Add a new test (Deprecated)
-
->**DEPRECATION NOTICE:** The following approach for adding new tests to the upgrade scenario is not needed anymore. To prepare data during the preparation phase just create a new testdefinition that executes your preparation code and add the label `kyma-project.io/before-upgrade=true`. To execute evaluation code during the evaluation phase create a new testdefinition with the label `kyma-project.io/after-upgrade=true` 
+### Add a new test
 
 Add a new test under the `pkg/tests/{domain-name}` directory and implement the following interface:
 
