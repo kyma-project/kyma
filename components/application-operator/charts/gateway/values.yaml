@@ -17,6 +17,11 @@ service:
   proxy:
     port: *proxyPort
 
+autoscaling:
+  minReplicas: 1
+  maxReplicas: 10
+  cpuUsagePercent: 40
+
 acceptanceTest:
   image:
     pullPolicy: IfNotPresent
