@@ -532,8 +532,8 @@ type ResourceRule struct {
 }
 
 type ResourceType struct {
-	Memory *string `json:"memory"`
 	CPU    *string `json:"cpu"`
+	Memory *string `json:"memory"`
 }
 
 type ResourceValues struct {

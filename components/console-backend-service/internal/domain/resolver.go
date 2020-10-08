@@ -105,6 +105,12 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	}
 
 	k8sNewResolver := k8sNew.New(genericServiceFactory)
+	makePluggable(k8sNewResolver)
+
+	err = k8sNewResolver.Enable() // enable manually
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing k8sNew resolver")
+	}
 
 	agResolver := apigateway.New(genericServiceFactory)
 	makePluggable(agResolver)

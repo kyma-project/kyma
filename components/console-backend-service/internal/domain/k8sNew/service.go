@@ -8,7 +8,7 @@ import (
 	// "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	// "github.com/pkg/errors"
 
-	intResource "github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	v1 "k8s.io/api/core/v1"
 
 	// corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -22,10 +22,10 @@ var limitRangesGroupVersionResource = schema.GroupVersionResource{
 }
 
 type Service struct {
-	*intResource.Service
+	*resource.Service
 }
 
-func NewLimitRangesService(serviceFactory *intResource.GenericServiceFactory) (*intResource.GenericService, error) {
+func NewLimitRangesService(serviceFactory *resource.GenericServiceFactory) (*resource.GenericService, error) {
 	return serviceFactory.ForResource(limitRangesGroupVersionResource), nil
 }
 
