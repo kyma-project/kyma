@@ -8,7 +8,7 @@ This diagram illustrates the workflow that leads to exposing a service in Kyma:
 
 - **API Gateway Controller** is a component responsible for exposing services. The API Gateway Controller is an application deployed in the `kyma-system` Namespace, implemented according to the [Kubernetes Controller](https://book.kubebuilder.io/) principles. The API Gateway Controller listens for newly created custom resources (CR) that follow the set `apirule.gateway.kyma-project.io` CustomResourceDefinition (CRD), which describes the details of exposing services in Kyma.
 
-- **Istio Virtual Service** specifies the services visible outside the cluster. The API Gateway Controller creates a Virtual Service for the hostname defined in the `apirule.gateway.kyma-project.io` CRD. The convention is to create a hostname using the name of the service as the subdomain, and the domain of the Kyma cluster. To learn more about the Istio Virtual Service concept, read this [Istio documentation](https://kubernetes.io/docs/concepts/services-networking/ingress/).
+- **Istio Virtual Service** specifies the services visible outside the cluster. The API Gateway Controller creates a Virtual Service for the hostname defined in the `apirule.gateway.kyma-project.io` CRD. The convention is to create a hostname using the name of the service as the subdomain, and the domain of the Kyma cluster. To learn more about the Istio Virtual Service concept, read this [Istio documentation](https://istio.io/latest/docs/reference/config/networking/virtual-service/).
 To get the list of Virtual Services in Kyma, run:
 
   ```shell
