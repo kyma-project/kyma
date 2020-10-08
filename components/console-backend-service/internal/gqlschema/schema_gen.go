@@ -23,7 +23,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 	v11 "k8s.io/api/core/v1"
 	v12 "k8s.io/api/rbac/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	v1alpha13 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
@@ -638,6 +638,7 @@ type ComplexityRoot struct {
 		UpdateConfigMap                            func(childComplexity int, name string, namespace string, configMap JSON) int
 		UpdateFunction                             func(childComplexity int, name string, namespace string, params FunctionMutationInput) int
 		UpdateGitRepository                        func(childComplexity int, namespace string, name string, spec v1alpha11.GitRepositorySpec) int
+		UpdateLimitRange                           func(childComplexity int, namespace string, name string, json JSON) int
 		UpdateNamespace                            func(childComplexity int, name string, labels Labels) int
 		UpdateOAuth2Client                         func(childComplexity int, name string, namespace string, generation int, params v1alpha12.OAuth2ClientSpec) int
 		UpdatePod                                  func(childComplexity int, name string, namespace string, pod JSON) int
@@ -1262,6 +1263,7 @@ type MutationResolver interface {
 	CreateManyTriggers(ctx context.Context, namespace string, triggers []*TriggerCreateInput, ownerRef []*v1.OwnerReference) ([]*v1alpha13.Trigger, error)
 	DeleteTrigger(ctx context.Context, namespace string, triggerName string) (*v1alpha13.Trigger, error)
 	DeleteManyTriggers(ctx context.Context, namespace string, triggerNames []string) ([]*v1alpha13.Trigger, error)
+	UpdateLimitRange(ctx context.Context, namespace string, name string, json JSON) (*v11.LimitRange, error)
 	CreateOAuth2Client(ctx context.Context, name string, namespace string, params v1alpha12.OAuth2ClientSpec) (*v1alpha12.OAuth2Client, error)
 	UpdateOAuth2Client(ctx context.Context, name string, namespace string, generation int, params v1alpha12.OAuth2ClientSpec) (*v1alpha12.OAuth2Client, error)
 	DeleteOAuth2Client(ctx context.Context, name string, namespace string) (*v1alpha12.OAuth2Client, error)
@@ -4049,6 +4051,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateGitRepository(childComplexity, args["namespace"].(string), args["name"].(string), args["spec"].(v1alpha11.GitRepositorySpec)), true
+
+	case "Mutation.updateLimitRange":
+		if e.complexity.Mutation.UpdateLimitRange == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateLimitRange_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateLimitRange(childComplexity, args["namespace"].(string), args["name"].(string), args["json"].(JSON)), true
 
 	case "Mutation.updateNamespace":
 		if e.complexity.Mutation.UpdateNamespace == nil {
@@ -7041,18 +7055,18 @@ extend type Query {
   )
 }
 
-# extend type Mutation {
-#   createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange
-#   @HasAccess(
-#     attributes: {
-#       resource: "limitrange"
-#       verb: "create"
-#       apiGroup: ""
-#       apiVersion: "v1"
-#       namespaceArg: "namespace"
-#     }
-#   )
-# }
+extend type Mutation {
+  updateLimitRange(namespace: String!, name: String!, json: JSON!): LimitRange
+  @HasAccess(
+    attributes: {
+      resource: "limitrange"
+      verb: "create"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+}
 `, BuiltIn: false},
 	&ast.Source{Name: "internal/gqlschema/oauth.graphql", Input: `scalar GrantType @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.GrantType")
 
@@ -10054,6 +10068,36 @@ func (ec *executionContext) field_Mutation_updateGitRepository_args(ctx context.
 		}
 	}
 	args["spec"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateLimitRange_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	var arg2 JSON
+	if tmp, ok := rawArgs["json"]; ok {
+		arg2, err = ec.unmarshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["json"] = arg2
 	return args, nil
 }
 
@@ -24234,6 +24278,68 @@ func (ec *executionContext) _Mutation_deleteManyTriggers(ctx context.Context, fi
 	res := resTmp.([]*v1alpha13.Trigger)
 	fc.Result = res
 	return ec.marshalOTrigger2ᚕᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateLimitRange(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateLimitRange_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().UpdateLimitRange(rctx, args["namespace"].(string), args["name"].(string), args["json"].(JSON))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "limitrange", "verb": "create"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v11.LimitRange); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/core/v1.LimitRange`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v11.LimitRange)
+	fc.Result = res
+	return ec.marshalOLimitRange2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRange(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createOAuth2Client(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -43676,6 +43782,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_deleteTrigger(ctx, field)
 		case "deleteManyTriggers":
 			out.Values[i] = ec._Mutation_deleteManyTriggers(ctx, field)
+		case "updateLimitRange":
+			out.Values[i] = ec._Mutation_updateLimitRange(ctx, field)
 		case "createOAuth2Client":
 			out.Values[i] = ec._Mutation_createOAuth2Client(ctx, field)
 		case "updateOAuth2Client":
@@ -52813,6 +52921,17 @@ func (ec *executionContext) marshalOLabels2githubᚗcomᚋkymaᚑprojectᚋkyma�
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) marshalOLimitRange2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRange(ctx context.Context, sel ast.SelectionSet, v v11.LimitRange) graphql.Marshaler {
+	return ec._LimitRange(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOLimitRange2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRange(ctx context.Context, sel ast.SelectionSet, v *v11.LimitRange) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._LimitRange(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalONamespace2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespace(ctx context.Context, sel ast.SelectionSet, v Namespace) graphql.Marshaler {
