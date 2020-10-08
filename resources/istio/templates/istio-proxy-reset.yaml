@@ -12,7 +12,7 @@ rules:
   - apiGroups: [""]
     resources: ["pods"]
     verbs: ["get", "list", "delete"]
-  - apiGroups: ["apps"]
+  - apiGroups: ["apps", "extensions"]
     resources: ["replicasets", "deployments", "daemonsets", "statefulsets"]
     verbs: ["get", "patch"]
 ---

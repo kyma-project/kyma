@@ -66,8 +66,6 @@ spec:
                   value: {{ .Values.global.disableLegacyConnectivity | quote }}
                 - name: CYPRESS_CATALOG_ENABLED
                   value: {{ .Values.test.acceptance.ui.service_catalog.enabled | quote }}
-                - name: CYPRESS_LOGGING_ENABLED
-                  value: {{ .Values.test.acceptance.ui.logging.enabled | quote }}
                 - name: CYPRESS_FUNCTIONS_ENABLED
                   value: {{ .Values.test.acceptance.ui.functions.enabled | quote }}
                 - name: CYPRESS_RAFTER_ENABLED
