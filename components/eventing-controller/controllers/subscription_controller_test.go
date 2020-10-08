@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/onsi/ginkgo"
+	ginkgotable "github.com/onsi/ginkgo/extensions/table"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 	v1 "k8s.io/api/core/v1"
@@ -145,17 +146,39 @@ var _ = ginkgo.Describe("Subscription", func() {
 		})
 	})
 
-	ginkgo.Context("When creating an invalid Subscription", func() {
-		ginkgo.It("Should not reconcile the Subscription", func() {
-			subscriptionName := "test-invalid-subscription-1"
+	ginkgotable.DescribeTable("Schema tests",
+		func(subscription *eventingv1alpha1.Subscription) {
 			ctx := context.Background()
-			givenSubscription := fixtureValidSubscription(subscriptionName)
-			givenSubscription.Spec.Filter = nil
-
 			ginkgo.By("Letting the APIServer reject the custom resource")
-			ensureSubscriptionCreationFails(givenSubscription, ctx)
-		})
-	})
+			ensureSubscriptionCreationFails(subscription, ctx)
+		},
+		ginkgotable.Entry("filter missing",
+			func() *eventingv1alpha1.Subscription {
+				subscription := fixtureValidSubscription("schema-filter-missing")
+				subscription.Spec.Filter = nil
+				return subscription
+			}()),
+		ginkgotable.Entry("protocolsettings missing",
+			func() *eventingv1alpha1.Subscription {
+				subscription := fixtureValidSubscription("schema-filter-missing")
+				subscription.Spec.ProtocolSettings = nil
+				return subscription
+			}()),
+		ginkgotable.Entry("protocolsettings.webhookauth missing",
+			func() *eventingv1alpha1.Subscription {
+				subscription := fixtureValidSubscription("schema-filter-missing")
+				subscription.Spec.ProtocolSettings.WebhookAuth = nil
+				return subscription
+			}()),
+		// TODO: find a way to set values to nil or remove in raw format, currently not testable with this test impl.
+		// ginkgotable.Entry("protocol empty",
+		// 	func() *eventingv1alpha1.Subscription {
+		// 		subscription := fixtureValidSubscription("schema-filter-missing")
+		// 		subscription.Spec.Protocol = ""
+		// 		return subscription
+		// 	}()),
+	)
+
 })
 
 // fixtureValidSubscription returns a valid subscription
@@ -256,8 +279,23 @@ func ensureSubscriptionCreationFails(subscription *eventingv1alpha1.Subscription
 			))
 		}
 	}
-	// TODO: check for error code
-	gomega.Expect(k8sClient.Create(ctx, subscription)).Should(isK8sUnprocessableEntity())
+	gomega.Expect(k8sClient.Create(ctx, subscription)).Should(
+		gomega.And(
+			// prevent nil-pointer stacktrace
+			gomega.Not(gomega.BeNil()),
+			isK8sUnprocessableEntity(),
+		),
+	)
+	// gomega.Expect(getK8sError(k8sClient.Create(ctx, subscription)).Status()).Should(isK8sUnprocessableEntity())
+}
+
+func getK8sError(err error) *errors.StatusError {
+	switch e := err.(type) {
+	case *errors.StatusError:
+		return e
+	default:
+		return nil
+	}
 }
 
 func fixtureNamespace(name string) *v1.Namespace {
