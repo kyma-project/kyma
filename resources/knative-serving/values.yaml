@@ -73,3 +73,7 @@ global:
 test:
   target: "Test Target"
   enabled: false
+  labels:
+    integration: false
+    after-upgrade: false
+

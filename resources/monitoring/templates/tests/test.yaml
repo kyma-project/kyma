@@ -1,4 +1,4 @@
-{{- if .Values.global.monitoring_integration_tests.tests.enabled }}
+{{- if .Values.global.monitoring_integration_tests.enabled }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -7,10 +7,16 @@ metadata:
   labels:
     {{- include "prometheus-test.labels" . | nindent 4 }}
     app: {{ .Chart.Name }}-tests
+    {{- range $key, $val := .Values.global.monitoring_integration_tests.labels }}
+    kyma-project.io/test.{{ $key }}: {{ $val | quote }}
+    {{- end }}
+
 spec:
   disableConcurrency: false
   template:
     metadata:
+      labels:
+        app: {{ .Chart.Name }}-tests
       annotations:
         sidecar.istio.io/inject: "false"
     spec:

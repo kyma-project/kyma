@@ -24,18 +24,18 @@ metadata:
     component: istio
     kyma-project.io/installation: ""
 data:
-  kyma_istio_control_plane: |-
-    apiVersion: install.istio.io/v1alpha2
-    kind: IstioControlPlane
+  kyma_istio_operator: |-
+    apiVersion: install.istio.io/v1alpha1
+    kind: IstioOperator
+    metadata:
+      namespace: istio-system
     spec:
-      trafficManagement:
-        components:
-          pilot:
-            enabled: true
-            k8s:
-              env:
-              - name: PILOT_TRACE_SAMPLING
-                value: "60"
+      components:
+        pilot:
+          k8s:
+            env:
+            - name: PILOT_TRACE_SAMPLING
+              value: "60"
 EOF
 ```
 
@@ -48,4 +48,4 @@ EOF
 
 ## Define the value in the Runtime
 
-If you have already installed Kyma and do not want to trigger any updates, edit the `istio-pilot` deployment to set the desired value for **PILOT_TRACE_SAMPLING**. For detailed instructions, see the [Istio documentation](https://istio.io/latest/docs/tasks/observability/distributed-tracing/configurability/#customizing-trace-sampling).
+If you have already installed Kyma and do not want to trigger any updates, edit the `istio-pilot` deployment to set the desired value for **PILOT_TRACE_SAMPLING**. For detailed instructions, see the [Istio documentation](https://istio.io/v1.5/docs/tasks/observability/distributed-tracing/overview/#trace-sampling).

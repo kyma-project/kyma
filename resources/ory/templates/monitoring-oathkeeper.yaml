@@ -1,17 +1,17 @@
-{{ if and (.Capabilities.APIVersions.Has "monitoring.coreos.com/v1") (.Capabilities.APIVersions.Has "authentication.istio.io/v1alpha1") }}
+{{ if and (.Capabilities.APIVersions.Has "monitoring.coreos.com/v1") (.Capabilities.APIVersions.Has "security.istio.io/v1beta1") }}
 ---
-apiVersion: authentication.istio.io/v1alpha1
-kind: Policy
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
 metadata:
   name: {{ include "oathkeeper.fullname" . }}-oathkeeper-maester-metrics
 spec:
-  peers:
-  - mtls:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: oathkeeper
+  portLevelMtls:
+    {{ .Values.oathkeeper.sidecar.port.metrics }}:
       mode: PERMISSIVE
-  targets:
-  - name: {{ include "ory.fullname" . }}-oathkeeper-maester-metrics
-    ports:
-    - name: metrics
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor

@@ -12,12 +12,18 @@ metadata:
     app.kubernetes.io/managed-by: {{ $.Release.Service }}
     app.kubernetes.io/instance: {{ $.Release.Name }}
     helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
+    {{- range $label, $value := $val.labels }}
+    kyma-project.io/test.{{ $label }}: {{ $value | quote }}
+    {{- end }}
+
 spec:
   disableConcurrency: false
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
+      labels:
+        app: {{ $.Chart.Name }}-test-external-solution
     spec:
       restartPolicy: Never
       serviceAccountName: {{ $.Chart.Name }}-test-external-solution

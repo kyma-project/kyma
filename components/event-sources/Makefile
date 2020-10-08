@@ -47,7 +47,7 @@ build-local: $(cmds) test-local ;
 # Example:
 #   make controller-manager
 GOBUILD_FLAGS := -v
-$(cmds): %: resolve-local $(patched_trace)
+$(cmds): %: resolve-local istio-injection $(patched_trace)
 	@echo "+ Building $*"
 	@CGO_ENABLED=0 go build -o $* \
 		$(GOBUILD_FLAGS) \
@@ -61,7 +61,7 @@ $(patched_trace): hack/set-span-id.patch vendor
 	cp $< $@
 
 
-test-local: $(patched_trace)
+test-local: istio-injection $(patched_trace)
 
 .PHONY: $(cmds_images) $(cmds_images_push)
 
@@ -99,7 +99,7 @@ API_GROUPS := sources/v1alpha1
 api-import-paths := $(foreach group,$(API_GROUPS),$(PKG)/apis/$(group))
 
 # e.g. "authentication/v1alpha1 networking/v1alpha3"
-ISTIO_API_GROUPS := "authentication/v1alpha1"
+ISTIO_API_GROUPS := "security/v1beta1"
 # generates e.g. "ISTIO_CLIENT_GO_PKG/apis/sources/v1alpha1 ISTIO_CLIENT_GO_PKG/apis/sources/v1alpha2"
 istio-api-import-paths := $(foreach group,$(ISTIO_API_GROUPS),$(ISTIO_CLIENT_GO_PKG)/apis/$(group))
 
