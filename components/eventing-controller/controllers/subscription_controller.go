@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	"k8s.io/client-go/tools/record"
+
 	// TODO: use different package
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -16,18 +18,31 @@ import (
 // SubscriptionReconciler reconciles a Subscription object
 type SubscriptionReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 // TODO: emit events
-// TODO: write tests
 // TODO: use additional printer columns: https://book.kubebuilder.io/reference/generating-crd.html#additional-printer-columns
 
-const (
-	// TODO:
-	finalizerName = "todo"
+var (
+	finalizerName = eventingv1alpha1.GroupVersion.Group
 )
+
+func NewSubscriptionReconciler(
+	client client.Client,
+	log logr.Logger,
+	recorder record.EventRecorder,
+	scheme *runtime.Scheme,
+) *SubscriptionReconciler {
+	return &SubscriptionReconciler{
+		Client:   client,
+		Log:      log,
+		recorder: recorder,
+		Scheme:   scheme,
+	}
+}
 
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions/status,verbs=get;update;patch
@@ -35,9 +50,6 @@ const (
 func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
 	_ = r.Log.WithValues("subscription", req.NamespacedName)
-
-	// TODO: pass logger via constructor
-	// logger := r.Log.WithName("controllers").WithName("beb")
 
 	subscription := &eventingv1alpha1.Subscription{}
 	ctx := context.TODO()
@@ -54,13 +66,18 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		"version", subscription.GetGeneration(),
 	)
 
+	// TODO:
+	r.recorder.Event(subscription, "Normal", "foo", "bar")
+
 	// Ensure the finalizer is set
 	if err := r.syncFinalizer(subscription, ctx, log); err != nil {
+		log.Error(err, "error while syncing finalizer")
 		return ctrl.Result{}, err
 	}
 
 	// Sync the BEB Subscription with the Subscription CR
 	if err := r.syncBEBSubscription(subscription, ctx, log); err != nil {
+		log.Error(err, "error while syncing BEB subscription")
 		return ctrl.Result{}, err
 	}
 

@@ -31,26 +31,6 @@ const (
 	namespaceCleanupInterval = time.Second * 1
 )
 
-func printSubscriptions(ctx context.Context) error {
-	// print subscription details
-	subscriptionList := eventingv1alpha1.SubscriptionList{}
-	if err := k8sClient.List(ctx, &subscriptionList); err != nil {
-		logf.Log.V(1).Info("error while getting subscription list", "error", err)
-		return err
-	}
-	logf.Log.V(1).Info("subscriptions", "subscriptions", subscriptionList)
-	return nil
-}
-func printNamespaces(namespaceName string, ctx context.Context) error {
-	namespace := v1.Namespace{}
-	if err := k8sClient.Get(ctx, types.NamespacedName{Name: namespaceName}, &namespace); err != nil && !errors.IsNotFound(err) {
-		logf.Log.V(1).Info("error while getting namespace", "error", err)
-		return err
-	}
-	logf.Log.V(1).Info("namespace", "namespace", namespace)
-	return nil
-}
-
 var _ = ginkgo.Describe("Subscription", func() {
 	ginkgo.BeforeEach(func() {
 		// Clean up all resources in test namespace
@@ -112,6 +92,7 @@ var _ = ginkgo.Describe("Subscription", func() {
 			// TODO(nachtmaar): check that an HTTP call against BEB was done
 
 			ginkgo.By("Emitting some k8s events")
+
 			// TODO(nachtmaar):
 		})
 	})
@@ -362,3 +343,24 @@ func isK8sUnprocessableEntity() gomegatypes.GomegaMatcher {
 // func isK8sKnotFoundError() gomegatypes.GomegaMatcher {
 // 	return gomega.WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, gomega.Equal("NotFound"))
 // }
+
+func printSubscriptions(ctx context.Context) error {
+	// print subscription details
+	subscriptionList := eventingv1alpha1.SubscriptionList{}
+	if err := k8sClient.List(ctx, &subscriptionList); err != nil {
+		logf.Log.V(1).Info("error while getting subscription list", "error", err)
+		return err
+	}
+	logf.Log.V(1).Info("subscriptions", "subscriptions", subscriptionList)
+	return nil
+}
+
+func printNamespaces(namespaceName string, ctx context.Context) error {
+	namespace := v1.Namespace{}
+	if err := k8sClient.Get(ctx, types.NamespacedName{Name: namespaceName}, &namespace); err != nil && !errors.IsNotFound(err) {
+		logf.Log.V(1).Info("error while getting namespace", "error", err)
+		return err
+	}
+	logf.Log.V(1).Info("namespace", "namespace", namespace)
+	return nil
+}

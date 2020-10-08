@@ -67,11 +67,13 @@ var _ = BeforeSuite(func(done Done) {
 		Scheme: scheme.Scheme,
 	})
 	Expect(err).ToNot(HaveOccurred())
-
-	err = (&SubscriptionReconciler{
-		Client: k8sManager.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Subscription"),
-	}).SetupWithManager(k8sManager)
+	err =
+		NewSubscriptionReconciler(
+			k8sManager.GetClient(),
+			ctrl.Log.WithName("controllers").WithName("Subscription"),
+			k8sManager.GetEventRecorderFor("subscription-controller"),
+			nil,
+		).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {
