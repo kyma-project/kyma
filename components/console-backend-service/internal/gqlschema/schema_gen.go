@@ -58,6 +58,7 @@ type ResolverRoot interface {
 	ClusterServicePlan() ClusterServicePlanResolver
 	Deployment() DeploymentResolver
 	EventActivation() EventActivationResolver
+	LimitRange() LimitRangeResolver
 	LimitRangeItem() LimitRangeItemResolver
 	Mutation() MutationResolver
 	Namespace() NamespaceResolver
@@ -539,6 +540,7 @@ type ComplexityRoot struct {
 	}
 
 	LimitRange struct {
+		JSON func(childComplexity int) int
 		Name func(childComplexity int) int
 		Spec func(childComplexity int) int
 	}
@@ -1195,6 +1197,9 @@ type DeploymentResolver interface {
 }
 type EventActivationResolver interface {
 	Events(ctx context.Context, obj *EventActivation) ([]*EventActivationEvent, error)
+}
+type LimitRangeResolver interface {
+	JSON(ctx context.Context, obj *v11.LimitRange) (JSON, error)
 }
 type LimitRangeItemResolver interface {
 	Max(ctx context.Context, obj *v11.LimitRangeItem) (*ResourceLimits, error)
@@ -3210,6 +3215,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.GitRepositorySpec.URL(childComplexity), true
+
+	case "LimitRange.json":
+		if e.complexity.LimitRange.JSON == nil {
+			break
+		}
+
+		return e.complexity.LimitRange.JSON(childComplexity), true
 
 	case "LimitRange.name":
 		if e.complexity.LimitRange.Name == nil {
@@ -7012,6 +7024,7 @@ type LimitRangeSpec @goModel(model: "k8s.io/api/core/v1.LimitRangeSpec") {
 type LimitRange @goModel(model: "k8s.io/api/core/v1.LimitRange") {
   name: String!
   spec: LimitRangeSpec!
+  json: JSON!
 }
 
 input LimitRangeInput {
@@ -7024,13 +7037,7 @@ input LimitRangeInput {
 extend type Query {
   limitRanges(namespace: String!): [LimitRange!]!
   @HasAccess(
-    attributes: {
-      resource: "se"
-      verb: "list"
-      apiGroup: ""
-      apiVersion: "v1"
-      namespaceArg: "namespace"
-    }
+    attributes: { resource: "se", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace" }
   )
 }
 
@@ -20267,6 +20274,40 @@ func (ec *executionContext) _LimitRange_spec(ctx context.Context, field graphql.
 	res := resTmp.(v11.LimitRangeSpec)
 	fc.Result = res
 	return ec.marshalNLimitRangeSpec2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LimitRange_json(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRange) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "LimitRange",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.LimitRange().JSON(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	fc.Result = res
+	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _LimitRangeItem_type(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRangeItem) (ret graphql.Marshaler) {
@@ -43238,13 +43279,27 @@ func (ec *executionContext) _LimitRange(ctx context.Context, sel ast.SelectionSe
 		case "name":
 			out.Values[i] = ec._LimitRange_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "spec":
 			out.Values[i] = ec._LimitRange_spec(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
+		case "json":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._LimitRange_json(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

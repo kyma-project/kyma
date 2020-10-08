@@ -1,17 +1,8 @@
 package k8sNew
 
 import (
-	// "fmt"
-
-	// "github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
-	// "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
-	// "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	// "github.com/pkg/errors"
-
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	v1 "k8s.io/api/core/v1"
-
-	// corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
