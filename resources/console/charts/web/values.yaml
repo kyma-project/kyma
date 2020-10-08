@@ -18,7 +18,7 @@ cluster:
 console:
   image:
     pullPolicy: IfNotPresent
-    tag: c55762dc
+    tag: ebf06dc1
   service:
     externalPort: 80
     internalPort: 8080
@@ -53,4 +53,6 @@ test:
       service_catalog:
         enabled: true
       functions:
+        enabled: true
+      rafter:
         enabled: true
