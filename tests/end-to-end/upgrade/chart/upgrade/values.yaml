@@ -37,3 +37,4 @@ tests:
   RafterUpgradeTest: true
   EventMeshUpgradeTest: true
   ServerlessUpgradeTest: true
+  LoggingUpgradeTest: true
