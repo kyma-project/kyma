@@ -7,7 +7,7 @@ subscriberimage:
 
 image:
   dir:
-  version: PR-9284
+  version: PR-9662
   pullPolicy: "IfNotPresent"
 
 dex:
@@ -37,3 +37,4 @@ tests:
   RafterUpgradeTest: true
   EventMeshUpgradeTest: true
   ServerlessUpgradeTest: true
+  LoggingUpgradeTest: true
