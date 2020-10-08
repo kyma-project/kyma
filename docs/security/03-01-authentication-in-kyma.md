@@ -15,7 +15,7 @@ The diagram shows the user authentication flow, focusing on the role Dex plays i
 2. If the application does not find a [JWT token](#ID-Tokens) in the browser session storage, it will redirect you to Dex to handle the authentication.
 3. Dex lists all the defined identity providers in your browser window.
 
-    >**NOTE:** Out of the box, Kyma implements the [static user store](#static-user-store) Dex uses to authenticate users. You can add a custom external identity provider by following steps in this [tutorial](#tutorials-add-an-identity-provider-to-dex).
+    >**NOTE:** Out of the box, Kyma implements the [static user store](/components/security#details-authentication-in-kyma-static-user-store) Dex uses to authenticate users. You can add a custom external identity provider by following steps in this [tutorial](#tutorials-add-an-identity-provider-to-dex).
 
 4. Select the identity provider and provide the data required for authentication.
 5. After successful authentication, Dex issues a JWT token that is stored in the browser session and used for all subsequent requests. This means that if you want to use a different UI, such as Jaeger or Grafana, Dex will use the stored token instead of requesting you to log in again.
@@ -54,8 +54,8 @@ Read the [tutorial](#tutorials-manage-static-users-in-dex) to learn how to manag
 
 ## Service-to-service authentication
 
-As Kyma is build on top of Istio Service Mesh, service-to-service authentication and encryption is enabled with [Istio MutualTLS](https://istio.io/latest/docs/concepts/security/#mutual-tls-authentication). For details, read the [Kyma-specific Istio configuration](components/service-mesh/#details-istio-setup-in-kyma-kyma-specific-configuration) documentation.
+As Kyma is build on top of Istio Service Mesh, service-to-service authentication and encryption is enabled with [Istio MutualTLS](https://istio.io/latest/docs/concepts/security/#mutual-tls-authentication). For details, read the [Kyma-specific Istio configuration](/components/service-mesh/#details-istio-setup-in-kyma-kyma-specific-configuration) documentation.
 
 ## User-to-service authentication
 
-Kyma uses a custom [API Gateway](/components/api-gateway/#overview-overview) component that is build on top of [ORY Oathkeeper](https://www.ory.sh/oathkeeper/docs/). The API Gateway allows exposing user applications within the Kyma environment and secures them if necessary. You can then access the secured resources using [authentication options](components/api-gateway/#architecture-architecture-request-flow).
+Kyma uses a custom [API Gateway](/components/api-gateway/#overview-overview) component that is build on top of [ORY Oathkeeper](https://www.ory.sh/oathkeeper/docs/). The API Gateway allows exposing user applications within the Kyma environment and secures them if necessary. You can then access the secured resources using [authentication options](/components/api-gateway/#architecture-architecture-request-flow).
