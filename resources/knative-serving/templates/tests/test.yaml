@@ -1,15 +1,16 @@
+{{- if .Values.test.enabled }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: {{ .Chart.Name }}-connection
+  name: {{ .Chart.Name }}
   labels:
     app: {{ .Chart.Name }}-tests
     app.kubernetes.io/name: {{ .Chart.Name }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    {{- range $key, $val := .Values.tests.labels }}
+    {{- range $key, $val := .Values.test.labels }}
     kyma-project.io/test.{{ $key }}: {{ $val | quote }}
     {{- end }}
 
@@ -17,22 +18,18 @@ spec:
   disableConcurrency: false
   template:
     metadata:
-      labels:
-        app: {{ .Chart.Name }}-tests
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
+      serviceAccount: {{ .Chart.Name }}-tests
       containers:
       - name: tests
-        image: tutum/curl:alpine
-        command: ["/usr/bin/curl"]
-        args: [
-          "--fail",
-          "--max-time", "10",
-          "--retry", "60",
-          "--retry-delay", "3",
-          "http://dex-service.{{ .Release.Namespace }}.svc.cluster.local:5556/.well-known/openid-configuration"
-        ]
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_knative_serving_acceptance.dir }}knative-serving-acceptance-tests:{{ .Values.global.test_knative_serving_acceptance.version }}"
+        env:
+        - name: INGRESSGATEWAY_ADDRESS
+          value: istio-ingressgateway.istio-system.svc.cluster.local
+        - name: TARGET
+          value: {{ .Values.test.target }}
       restartPolicy: Never
----
+{{- end }}
 {{- end }}

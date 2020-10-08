@@ -12,8 +12,10 @@ global:
     name: monitoring-integration-tests
     dir:
     version: 0de5247a
-    tests:
-      enabled: true
+    enabled: true
+    labels:
+      integration: true
+      after-upgrade: true
 
   rbac:
     create: true
