@@ -10,7 +10,7 @@ import (
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
-	"k8s.io/api/rbac/v1"
+	v1 "k8s.io/api/rbac/v1"
 	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	v11 "knative.dev/pkg/apis/duck/v1"
 )
@@ -498,6 +498,11 @@ type ResourceAttributes struct {
 	IsChildResolver bool    `json:"isChildResolver"`
 }
 
+type ResourceLimits struct {
+	Memory *string `json:"memory"`
+	CPU    *string `json:"cpu"`
+}
+
 type ResourceQuota struct {
 	Name     string          `json:"name"`
 	Pods     *string         `json:"pods"`
@@ -532,8 +537,8 @@ type ResourceRule struct {
 }
 
 type ResourceType struct {
-	CPU    *string `json:"cpu"`
 	Memory *string `json:"memory"`
+	CPU    *string `json:"cpu"`
 }
 
 type ResourceValues struct {

@@ -8,23 +8,37 @@ import (
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 )
 
-func (r *limitRangeItemResolver) Type(ctx context.Context, obj *v1.LimitRangeItem) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *limitRangeItemResolver) Max(ctx context.Context, obj *v1.LimitRangeItem) (*gqlschema.ResourceLimits, error) {
+	fmt.Println(obj.Max.Memory())
+	fmt.Println(obj.Max.Cpu())
+	a := "ej"
+	return &gqlschema.ResourceLimits{
+		Memory: &a,
+		CPU:    &a,
+	}, nil
+}
+
+func (r *limitRangeItemResolver) Default(ctx context.Context, obj *v1.LimitRangeItem) (*gqlschema.ResourceLimits, error) {
+	//return &gqlschema.ResourceLimits{
+	//	Memory: obj.Default.Memory().String(),
+	//	CPU:    obj.Default.Cpu().String(),
+	//}, nil
+	panic("default")
+}
+
+func (r *limitRangeItemResolver) DefaultRequest(ctx context.Context, obj *v1.LimitRangeItem) (*gqlschema.ResourceLimits, error) {
+	//return &gqlschema.ResourceLimits{
+	//	//	Memory: obj.DefaultRequest.Memory().String(),
+	//	//	CPU:    obj.DefaultRequest.Cpu().String(),
+	//	//}, nil
+	panic("defaultrequest")
 }
 
 func (r *queryResolver) LimitRanges(ctx context.Context, namespace string) ([]*v1.LimitRange, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *resourceListResolver) CPU(ctx context.Context, obj *v1.ResourceList) (*v1.ResourceName, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *resourceListResolver) Memory(ctx context.Context, obj *v1.ResourceList) (*v1.ResourceName, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.k8sNew.LimitRangesQuery(ctx, namespace)
 }
 
 // LimitRangeItem returns gqlschema.LimitRangeItemResolver implementation.
@@ -32,24 +46,4 @@ func (r *Resolver) LimitRangeItem() gqlschema.LimitRangeItemResolver {
 	return &limitRangeItemResolver{r}
 }
 
-// ResourceList returns gqlschema.ResourceListResolver implementation.
-func (r *Resolver) ResourceList() gqlschema.ResourceListResolver { return &resourceListResolver{r} }
-
 type limitRangeItemResolver struct{ *Resolver }
-type resourceListResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *limitRangeItemResolver) Max(ctx context.Context, obj *v1.LimitRangeItem) (*gqlschema.ResourceType, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-func (r *limitRangeItemResolver) Default(ctx context.Context, obj *v1.LimitRangeItem) (*gqlschema.ResourceType, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-func (r *limitRangeItemResolver) DefaultRequest(ctx context.Context, obj *v1.LimitRangeItem) (*gqlschema.ResourceType, error) {
-	panic(fmt.Errorf("not implemented"))
-}

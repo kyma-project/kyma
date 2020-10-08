@@ -1,17 +1,15 @@
 scalar LimitType @goModel(model: "k8s.io/api/core/v1.LimitType")
-scalar MemoryLimit @goModel(model: "k8s.io/api/core/v1.ResourceLimitsMemory")
-scalar CpuLimit @goModel(model: "k8s.io/api/core/v1.ResourceLimitsCPU")
 
-type ResourceList @goModel(model: "k8s.io/api/core/v1.ResourceList") {
-  cpu: CpuLimit
-  memory: MemoryLimit
+type ResourceLimits {
+  memory: String
+  cpu: String
 }
 
 type LimitRangeItem @goModel(model: "k8s.io/api/core/v1.LimitRangeItem") {
-  type: String!
-  max: ResourceList
-  default: ResourceList
-  defaultRequest: ResourceList
+  type: LimitType!
+  max: ResourceLimits
+  default: ResourceLimits
+  defaultRequest: ResourceLimits
 }
 
 type LimitRangeSpec @goModel(model: "k8s.io/api/core/v1.LimitRangeSpec") {
@@ -33,7 +31,7 @@ extend type Query {
   limitRanges(namespace: String!): [LimitRange!]!
   @HasAccess(
     attributes: {
-      resource: "limitranges"
+      resource: "se"
       verb: "list"
       apiGroup: ""
       apiVersion: "v1"
