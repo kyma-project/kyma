@@ -96,7 +96,6 @@ func excludedNamespaces() map[string]interface{} {
 	return map[string]interface{}{
 		"istio-system":     "",
 		"knative-eventing": "",
-		"knative-serving":  "",
 		"kube-node-lease":  "",
 		"kube-public":      "",
 		"kube-system":      "",
