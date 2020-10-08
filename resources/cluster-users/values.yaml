@@ -1,4 +1,7 @@
 tests:
+  labels:
+    integration: true
+    after-upgrade: true
   enabled: true
   image:
     name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl

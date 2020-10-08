@@ -49,7 +49,7 @@ global:
   application_registry_tests:
     version: "PR-9569"
   application_broker:
-    version: "d4be1327"
+    version: "1c48e0a0"
   application_connectivity_certs_setup_job:
     version: "b9871385"
   application_connectivity_validator:
@@ -70,6 +70,9 @@ application_connectivity_certs_setup_job:
 
 tests:
   application_connector_tests:
+    labels:
+      integration: true
+      after-upgrade: true
     enabled: true
     connector_service:
       central: false

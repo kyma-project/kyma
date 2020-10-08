@@ -18,7 +18,7 @@ cluster:
 console:
   image:
     pullPolicy: IfNotPresent
-    tag: aa7ff2b4
+    tag: ebf06dc1
   service:
     externalPort: 80
     internalPort: 8080
@@ -27,7 +27,7 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: "6e28921b"
+    tag: "b463e2de"
   service:
     externalPort: 80
     internalPort: 80
@@ -38,6 +38,9 @@ replicaCount: 1
 resources: {}
 test:
   acceptance:
+    labels:
+      integration: true
+      after-upgrade: true
     enabled: true
     ui:
       # tests uses chromium that require more memory
@@ -49,7 +52,7 @@ test:
         memory: 900Mi
       service_catalog:
         enabled: true
-      logging:
-        enabled: false
       functions:
+        enabled: true
+      rafter:
         enabled: true
