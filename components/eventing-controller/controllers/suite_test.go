@@ -22,6 +22,12 @@ import (
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
+// TODO: make configurable
+const (
+	useExistingCluster       = false
+	attachControlPlaneOutput = false
+)
+
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
@@ -38,8 +44,11 @@ var _ = BeforeSuite(func(done Done) {
 	logf.SetLogger(zap.LoggerTo(GinkgoWriter, true))
 
 	By("bootstrapping test environment")
+	useExistingCluster := useExistingCluster
 	testEnv = &envtest.Environment{
-		CRDDirectoryPaths: []string{filepath.Join("..", "config", "crd", "bases")},
+		CRDDirectoryPaths:        []string{filepath.Join("..", "config", "crd", "bases")},
+		AttachControlPlaneOutput: attachControlPlaneOutput,
+		UseExistingCluster:       &useExistingCluster,
 	}
 
 	var err error

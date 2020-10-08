@@ -22,7 +22,7 @@ const (
 	timeout  = time.Second * 10
 	interval = time.Millisecond * 250
 	// subscriptionName      = "test-subs-1"
-	// TODO(nachtmaar) switch back to custom namespace? there is a namespace deletion problem :/
+	// TODO(nachtmaar) switch back to custom namespace? there is a namespace deletion problem :/ or otherwise cleanup in each test respectively
 	subscriptionNamespace = "default"
 	subscriptionID        = "test-subs-1"
 
@@ -117,7 +117,7 @@ var _ = ginkgo.Describe("Subscription", func() {
 
 	ginkgo.Context("When deleting a valid Subscription", func() {
 		ginkgo.It("Should reconcile the Subscription", func() {
-			subscriptionName := "test-invalid-subscription-1"
+			subscriptionName := "test-delete-valid-subscription-1"
 			ctx := context.Background()
 			givenSubscription := fixtureValidSubscription(subscriptionName)
 			ensureSubscriptionCreated(givenSubscription, ctx)
@@ -142,6 +142,18 @@ var _ = ginkgo.Describe("Subscription", func() {
 
 			ginkgo.By("Emitting some k8s events")
 			// TODO(nachtmaar):
+		})
+	})
+
+	ginkgo.Context("When creating an invalid Subscription", func() {
+		ginkgo.It("Should not reconcile the Subscription", func() {
+			subscriptionName := "test-invalid-subscription-1"
+			ctx := context.Background()
+			givenSubscription := fixtureValidSubscription(subscriptionName)
+			givenSubscription.Spec.Filter = nil
+
+			ginkgo.By("Letting the APIServer reject the custom resource")
+			ensureSubscriptionCreationFails(givenSubscription, ctx)
 		})
 	})
 })
@@ -232,6 +244,22 @@ func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx 
 	gomega.Expect(k8sClient.Create(ctx, subscription)).Should(gomega.BeNil())
 }
 
+// ensureSubscriptionCreationFails creates a Subscription in the k8s cluster and ensures that it is reject because of invalid schema
+func ensureSubscriptionCreationFails(subscription *eventingv1alpha1.Subscription, ctx context.Context) {
+	if subscription.Namespace != "default " {
+		namespace := fixtureNamespace(subscription.Namespace)
+		if namespace.Name != "default" {
+			gomega.Expect(k8sClient.Create(ctx, namespace)).Should(gomega.Or(
+				// ignore if namespaces is already created
+				// isK8sAlreadyExistsError(),
+				gomega.BeNil(),
+			))
+		}
+	}
+	// TODO: check for error code
+	gomega.Expect(k8sClient.Create(ctx, subscription)).Should(isK8sUnprocessableEntity())
+}
+
 func fixtureNamespace(name string) *v1.Namespace {
 	namespace := v1.Namespace{
 		TypeMeta: metav1.TypeMeta{
@@ -257,6 +285,40 @@ func haveFinalizer(finalizer string) gomegatypes.GomegaMatcher {
 
 func isK8sAlreadyExistsError() gomegatypes.GomegaMatcher {
 	return gomega.WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, gomega.Equal("AlreadyExists"))
+}
+
+func isK8sUnprocessableEntity() gomegatypes.GomegaMatcher {
+	// TODO: also check for status code 422
+	//  <*errors.StatusError | 0xc0001330e0>: {
+	//     ErrStatus: {
+	//         TypeMeta: {Kind: "", APIVersion: ""},
+	//         ListMeta: {
+	//             SelfLink: "",
+	//             ResourceVersion: "",
+	//             Continue: "",
+	//             RemainingItemCount: nil,
+	//         },
+	//         Status: "Failure",
+	//         Message: "Subscription.eventing.kyma-project.io \"test-valid-subscription-1\" is invalid: spec.filter: Invalid value: \"null\": spec.filter in body must be of type object: \"null\"",
+	//         Reason: "Invalid",
+	//         Details: {
+	//             Name: "test-valid-subscription-1",
+	//             Group: "eventing.kyma-project.io",
+	//             Kind: "Subscription",
+	//             UID: "",
+	//             Causes: [
+	//                 {
+	//                     Type: "FieldValueInvalid",
+	//                     Message: "Invalid value: \"null\": spec.filter in body must be of type object: \"null\"",
+	//                     Field: "spec.filter",
+	//                 },
+	//             ],
+	//             RetryAfterSeconds: 0,
+	//         },
+	//         Code: 422,
+	//     },
+	// }
+	return gomega.WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, gomega.Equal(metav1.StatusReasonInvalid))
 }
 
 // func isK8sKnotFoundError() gomegatypes.GomegaMatcher {
