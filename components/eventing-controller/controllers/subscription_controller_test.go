@@ -75,7 +75,7 @@ var _ = ginkgo.Describe("Subscription", func() {
 
 	// TODO: test required fields are provided  but with wrong values => basically testing the CRD schema
 	// TODO: test required fields are provided => basically testing the CRD schema
-	ginkgo.Context("When creating a valid BEB Subscription", func() {
+	ginkgo.Context("When creating a valid Subscription", func() {
 		ginkgo.It("Should reconcile the Subscription", func() {
 			ctx := context.Background()
 			givenSubscription := fixtureValidSubscription()
@@ -84,6 +84,7 @@ var _ = ginkgo.Describe("Subscription", func() {
 
 			ginkgo.By("Setting a finalizer")
 			getSubscription(subscriptionLookupKey, ctx).Should(
+				gomega.Not(gomega.BeNil()),
 				haveName(subscriptionName),
 				haveFinalizer(finalizerName),
 			)
@@ -96,7 +97,7 @@ var _ = ginkgo.Describe("Subscription", func() {
 		})
 	})
 
-	ginkgo.Context("When deleting a valid BEB Subscription", func() {
+	ginkgo.Context("When deleting a valid Subscription", func() {
 		ginkgo.It("Should reconcile the Subscription", func() {
 			ctx := context.Background()
 			givenSubscription := fixtureValidSubscription()
@@ -105,6 +106,7 @@ var _ = ginkgo.Describe("Subscription", func() {
 
 			// ensure subscription is given
 			getSubscription(subscriptionLookupKey, ctx).Should(
+				gomega.Not(gomega.BeNil()),
 				haveName(subscriptionName),
 				haveFinalizer(finalizerName),
 			)
@@ -114,6 +116,7 @@ var _ = ginkgo.Describe("Subscription", func() {
 
 			ginkgo.By("Removing the finalizer")
 			getSubscription(subscriptionLookupKey, ctx).Should(
+				gomega.Not(gomega.BeNil()),
 				haveName(subscriptionName),
 				gomega.Not(haveFinalizer(finalizerName)),
 			)
