@@ -5,36 +5,37 @@ package domain
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
-func (r *limitRangeItemResolver) Max(ctx context.Context, obj *v1.LimitRangeItem) (*gqlschema.ResourceLimits, error) {
-	fmt.Println(obj.Max.Memory())
-	fmt.Println(obj.Max.Cpu())
-	a := "ej"
+type resourceLimitsItem interface {
+	Memory() *resource.Quantity
+	Cpu() *resource.Quantity
+}
+
+func GetResourceLimits(item resourceLimitsItem) *gqlschema.ResourceLimits {
+	mem := item.Memory().String()
+	cpu := item.Cpu().String()
+
 	return &gqlschema.ResourceLimits{
-		Memory: &a,
-		CPU:    &a,
-	}, nil
+		Memory: &mem,
+		CPU:    &cpu,
+	}
+}
+
+func (r *limitRangeItemResolver) Max(ctx context.Context, obj *v1.LimitRangeItem) (*gqlschema.ResourceLimits, error) {
+	return GetResourceLimits(&obj.Max), nil
 }
 
 func (r *limitRangeItemResolver) Default(ctx context.Context, obj *v1.LimitRangeItem) (*gqlschema.ResourceLimits, error) {
-	//return &gqlschema.ResourceLimits{
-	//	Memory: obj.Default.Memory().String(),
-	//	CPU:    obj.Default.Cpu().String(),
-	//}, nil
-	panic("default")
+	return GetResourceLimits(&obj.Default), nil
 }
 
 func (r *limitRangeItemResolver) DefaultRequest(ctx context.Context, obj *v1.LimitRangeItem) (*gqlschema.ResourceLimits, error) {
-	//return &gqlschema.ResourceLimits{
-	//	//	Memory: obj.DefaultRequest.Memory().String(),
-	//	//	CPU:    obj.DefaultRequest.Cpu().String(),
-	//	//}, nil
-	panic("defaultrequest")
+	return GetResourceLimits(&obj.DefaultRequest), nil
 }
 
 func (r *queryResolver) LimitRanges(ctx context.Context, namespace string) ([]*v1.LimitRange, error) {
