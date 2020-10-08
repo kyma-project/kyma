@@ -3,8 +3,12 @@ package k8sNew
 import (
 	"context"
 	"encoding/json"
+	"errors"
+
+	apimachinery "k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	errs "github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 )
@@ -47,4 +51,40 @@ func (r *Resolver) JsonField(ctx context.Context, obj *v1.LimitRange) (gqlschema
 	}
 
 	return result, nil
+}
+
+func (r *Resolver) UpdateLimitRange(ctx context.Context, name string, namespace string, generation int64, newJSON gqlschema.JSON) (*v1.LimitRange, error) {
+	var newLimitRange v1.LimitRange
+
+	unstructured, unstructuredParseError := resource.ToUnstructured(&newJSON)
+	jsonParseError := resource.FromUnstructured(unstructured, &newLimitRange)
+	if jsonParseError != nil || unstructuredParseError != nil {
+		return nil, errors.New("could not parse input JSON")
+	}
+
+	result := &v1.LimitRange{}
+	err := r.LimitRangesService().UpdateInNamespace(name, namespace, result, func() error {
+		if result.Generation > generation {
+			return errors.New("resource already modified")
+		}
+
+		result = &newLimitRange
+		return nil
+	})
+	return result, err
+}
+
+type ResourceLimitsItem interface {
+	Memory() *apimachinery.Quantity
+	Cpu() *apimachinery.Quantity
+}
+
+func (r *Resolver) GetResourceLimits(item ResourceLimitsItem) (*gqlschema.ResourceLimits, error) {
+	mem := item.Memory().String()
+	cpu := item.Cpu().String()
+
+	return &gqlschema.ResourceLimits{
+		Memory: &mem,
+		CPU:    &cpu,
+	}, nil
 }
