@@ -19,66 +19,84 @@ import (
 )
 
 const (
-	timeout               = time.Second * 10
-	interval              = time.Millisecond * 250
-	subscriptionName      = "test-subs-1"
-	subscriptionNamespace = "test-subs-1"
+	timeout  = time.Second * 10
+	interval = time.Millisecond * 250
+	// subscriptionName      = "test-subs-1"
+	// TODO(nachtmaar) switch back to custom namespace? there is a namespace deletion problem :/
+	subscriptionNamespace = "default"
 	subscriptionID        = "test-subs-1"
 
-	namespaceCleanupTimeout  = time.Second * 10
+	namespaceCleanupTimeout  = time.Second * 30
 	namespaceCleanupInterval = time.Second * 1
 )
 
+func printSubscriptions(ctx context.Context) error {
+	// print subscription details
+	subscriptionList := eventingv1alpha1.SubscriptionList{}
+	if err := k8sClient.List(ctx, &subscriptionList); err != nil {
+		logf.Log.V(1).Info("error while getting subscription list", "error", err)
+		return err
+	}
+	logf.Log.V(1).Info("subscriptions", "subscriptions", subscriptionList)
+	return nil
+}
+func printNamespaces(namespaceName string, ctx context.Context) error {
+	namespace := v1.Namespace{}
+	if err := k8sClient.Get(ctx, types.NamespacedName{Name: namespaceName}, &namespace); err != nil && !errors.IsNotFound(err) {
+		logf.Log.V(1).Info("error while getting namespace", "error", err)
+		return err
+	}
+	logf.Log.V(1).Info("namespace", "namespace", namespace)
+	return nil
+}
+
 var _ = ginkgo.Describe("Subscription", func() {
-	ginkgo.AfterEach(func() {
+	ginkgo.BeforeEach(func() {
 		// Clean up all resources in test namespace
 		// If a custom namespace is used in a test, the test is responsible for cleaning resources up
 		ctx := context.Background()
 
-		gomega.Eventually(func() error {
-			testNamespace := fixtureNamespace(subscriptionNamespace)
-			logf.Log.V(1).Info("deleting namespace", "namespace", testNamespace)
-			deletePolicy := metav1.DeletePropagationForeground
-			gracePeriod := int64(0)
-			if err := k8sClient.Delete(ctx, testNamespace, &client.DeleteOptions{
-				PropagationPolicy:  &deletePolicy,
-				GracePeriodSeconds: &gracePeriod,
-			}); err != nil && !errors.IsNotFound(err) {
+		testNamespace := fixtureNamespace(subscriptionNamespace)
+		if testNamespace.Name != "default" {
+			gomega.Eventually(func() error {
+				// logf.Log.V(1).Info("deleting namespace", "namespace", testNamespace)
+				deletePolicy := metav1.DeletePropagationForeground
+				// gracePeriod := int64(0)
+				if err := k8sClient.Delete(ctx, testNamespace, &client.DeleteOptions{
+					PropagationPolicy: &deletePolicy,
+					// GracePeriodSeconds: &gracePeriod,
+				}); err != nil && !errors.IsNotFound(err) {
 
-				// TODO: is there an easier way to log in debug mode ?
-				logf.Log.V(1).Info("error while deleting namespace: ", "error", err)
+					// TODO: is there an easier way to log in debug mode ?
+					// logf.Log.V(1).Info("error while deleting namespace: ", "error", err)
+					if err := printSubscriptions(ctx); err != nil {
+						return err
+					}
 
-				// print subscription details
-				subscriptionList := eventingv1alpha1.SubscriptionList{}
-				if err := k8sClient.List(ctx, &subscriptionList); err != nil {
-					logf.Log.V(1).Info("error while getting subscription list", "error", err)
+					if err := printNamespaces(testNamespace.Name, ctx); err != nil {
+						return err
+					}
+
 					return err
 				}
-				logf.Log.V(1).Info("subscriptions", "subscriptions", subscriptionList)
 
-				// print namespace details
-				namespace := v1.Namespace{}
-				if err := k8sClient.Get(ctx, types.NamespacedName{Name: testNamespace.Name}, &namespace); err != nil && !errors.IsNotFound(err) {
-					logf.Log.V(1).Info("error while getting namespace", "error", err)
-					return err
-				}
-				logf.Log.V(1).Info("namespace", "namespace", namespace)
+				return nil
+			}, namespaceCleanupTimeout, namespaceCleanupInterval).Should(gomega.Or(
+				gomega.BeNil(),
+			))
+		}
 
-				return err
-			}
-
-			return nil
-		}, namespaceCleanupTimeout, namespaceCleanupInterval).Should(gomega.Or(
-			gomega.BeNil(),
-		))
+		_ = printSubscriptions(ctx)
+		_ = printNamespaces(testNamespace.Name, ctx)
 	})
 
 	// TODO: test required fields are provided  but with wrong values => basically testing the CRD schema
 	// TODO: test required fields are provided => basically testing the CRD schema
 	ginkgo.Context("When creating a valid Subscription", func() {
 		ginkgo.It("Should reconcile the Subscription", func() {
+			subscriptionName := "test-valid-subscription-1"
 			ctx := context.Background()
-			givenSubscription := fixtureValidSubscription()
+			givenSubscription := fixtureValidSubscription(subscriptionName)
 			ensureSubscriptionCreated(givenSubscription, ctx)
 			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: subscriptionNamespace}
 
@@ -99,8 +117,9 @@ var _ = ginkgo.Describe("Subscription", func() {
 
 	ginkgo.Context("When deleting a valid Subscription", func() {
 		ginkgo.It("Should reconcile the Subscription", func() {
+			subscriptionName := "test-invalid-subscription-1"
 			ctx := context.Background()
-			givenSubscription := fixtureValidSubscription()
+			givenSubscription := fixtureValidSubscription(subscriptionName)
 			ensureSubscriptionCreated(givenSubscription, ctx)
 			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: subscriptionNamespace}
 
@@ -128,14 +147,14 @@ var _ = ginkgo.Describe("Subscription", func() {
 })
 
 // fixtureValidSubscription returns a valid subscription
-func fixtureValidSubscription() *eventingv1alpha1.Subscription {
+func fixtureValidSubscription(name string) *eventingv1alpha1.Subscription {
 	return &eventingv1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Subscription",
 			APIVersion: "eventing.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      subscriptionName,
+			Name:      name,
 			Namespace: subscriptionNamespace,
 		},
 		// TODO: validate all fields from here in the controller
@@ -202,11 +221,13 @@ func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx 
 		// 		gomega.Expect(false)
 		// 	}
 		// }
-		gomega.Expect(k8sClient.Create(ctx, namespace)).Should(gomega.Or(
-			// ignore if namespaces is already created
-			// isK8sAlreadyExistsError(),
-			gomega.BeNil(),
-		))
+		if namespace.Name != "default" {
+			gomega.Expect(k8sClient.Create(ctx, namespace)).Should(gomega.Or(
+				// ignore if namespaces is already created
+				// isK8sAlreadyExistsError(),
+				gomega.BeNil(),
+			))
+		}
 	}
 	gomega.Expect(k8sClient.Create(ctx, subscription)).Should(gomega.BeNil())
 }
@@ -234,10 +255,10 @@ func haveFinalizer(finalizer string) gomegatypes.GomegaMatcher {
 	return gomega.WithTransform(func(s *eventingv1alpha1.Subscription) []string { return s.ObjectMeta.Finalizers }, gomega.ContainElement(finalizer))
 }
 
-// func isK8sAlreadyExistsError() gomegatypes.GomegaMatcher {
-// 	return gomega.WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, gomega.Equal("AlreadyExists"))
-// }
-//
+func isK8sAlreadyExistsError() gomegatypes.GomegaMatcher {
+	return gomega.WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, gomega.Equal("AlreadyExists"))
+}
+
 // func isK8sKnotFoundError() gomegatypes.GomegaMatcher {
 // 	return gomega.WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, gomega.Equal("NotFound"))
 // }

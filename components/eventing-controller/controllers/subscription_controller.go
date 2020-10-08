@@ -76,10 +76,13 @@ func (r *SubscriptionReconciler) syncFinalizer(subscription *eventingv1alpha1.Su
 		return nil
 	}
 
-	// Add Finalizer
-	return r.addFinalizer(subscription, ctx)
-}
+	// Add Finalizer if not in deletion mode
+	if !r.isInDeletion(subscription) {
+		return r.addFinalizer(subscription, ctx, logger)
+	}
 
+	return nil
+}
 
 func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) error {
 	logger.Info("Syncing subscription with BEB")
@@ -89,7 +92,7 @@ func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alp
 	// TODO: react on finalizer
 	if r.isInDeletion(subscription) {
 		logger.Info("Deleting BEB subscription")
-		if err := r.removeFinalizer(subscription, ctx); err != nil {
+		if err := r.removeFinalizer(subscription, ctx, logger); err != nil {
 			return err
 		}
 		// TODO: delete BEB subscription
@@ -106,15 +109,17 @@ func (r *SubscriptionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&eventingv1alpha1.Subscription{}).
 		Complete(r)
 }
-func (r *SubscriptionReconciler) addFinalizer(subscription *eventingv1alpha1.Subscription, ctx context.Context) error {
+func (r *SubscriptionReconciler) addFinalizer(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) error {
 	subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, finalizerName)
+	logger.V(1).Info("Adding finalizer")
 	if err := r.Update(ctx, subscription); err != nil {
 		return errors.Wrapf(err, "error while adding Finalizer with name: %s", finalizerName)
 	}
+	logger.V(1).Info("Added finalizer")
 	return nil
 }
 
-func (r *SubscriptionReconciler) removeFinalizer(subscription *eventingv1alpha1.Subscription, ctx context.Context) error {
+func (r *SubscriptionReconciler) removeFinalizer(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) error {
 	var finalizers []string
 
 	// Build finalizer list without the one the controller owns
@@ -125,10 +130,12 @@ func (r *SubscriptionReconciler) removeFinalizer(subscription *eventingv1alpha1.
 		finalizers = append(finalizers, finalizer)
 	}
 
+	logger.V(1).Info("Removing finalizer")
 	subscription.ObjectMeta.Finalizers = finalizers
 	if err := r.Update(ctx, subscription); err != nil {
 		return errors.Wrapf(err, "error while removing Finalizer with name: %s", finalizerName)
 	}
+	logger.V(1).Info("Removed finalizer")
 	return nil
 }
 
