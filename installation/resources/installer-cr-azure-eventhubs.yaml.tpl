@@ -24,8 +24,6 @@ spec:
       namespace: "istio-system"
     - name: "certificates"
       namespace: "istio-system"
-    - name: "knative-serving"
-      namespace: "knative-serving"
     - name: "knative-eventing"
       namespace: "knative-eventing"
     - name: "knative-eventing-kafka"

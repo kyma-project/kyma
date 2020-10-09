@@ -33,7 +33,7 @@ global:
     version: d022112f
   e2e_external_solution:
     dir:
-    version: "1a5b13b8"
+    version: "PR-9354"
   e2e_external_solution_test_service:
     dir:
     version: 9913ea21
@@ -43,9 +43,16 @@ tests:
   application_connector_tests:
     connector_service:
       central: false
+      labels:
+        integration: true
+        after-upgrade: true
 
 test:
   external_solution:
     event_mesh:
       enabled: true
       testsuite: e2e-event-mesh
+      labels:
+        integration: true
+        after-upgrade: true
+

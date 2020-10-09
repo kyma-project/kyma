@@ -689,7 +689,7 @@
   revision = "ac6580df4449443a05718fd7858c1f91ad5f8d20"
 
 [[projects]]
-  digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
+  digest = "1:fa940333c48808b0d86ef21f412ffcfd0e5084a82f13905c028a404803b1908f"
   name = "golang.org/x/text"
   packages = [
     "collate",
@@ -710,8 +710,8 @@
     "unicode/rangetable",
   ]
   pruneopts = "UT"
-  revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
-  version = "v0.3.2"
+  revision = "23ae387dee1f90d29a23c0e87ee0b46038fbed0e"
+  version = "v0.3.3"
 
 [[projects]]
   branch = "master"
@@ -1041,15 +1041,7 @@
   version = "kubernetes-1.15.3"
 
 [[projects]]
-  branch = "release-1.12"
-  digest = "1:9d15b3b19ff07702451e28152bde999bbf216a3fc22cf0760ac8a78bf8e568a6"
-  name = "k8s.io/cli-runtime"
-  packages = ["pkg/genericclioptions/printers"]
-  pruneopts = "UT"
-  revision = "1d4f3e836fd24e95c1457ce8d096f5ab5107054a"
-
-[[projects]]
-  digest = "1:d8d3801b555decd0041471264a979c30e95d02540f16fd1694784e3bee4a9ed5"
+  digest = "1:f6ef044c98ccd05be6cf7a130383ee0d9bb84886b49d13150145025f25a95960"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -1183,7 +1175,6 @@
     "rest",
     "rest/watch",
     "restmapper",
-    "third_party/forked/golang/template",
     "tools/auth",
     "tools/cache",
     "tools/clientcmd",
@@ -1200,7 +1191,6 @@
     "util/connrotation",
     "util/flowcontrol",
     "util/homedir",
-    "util/jsonpath",
     "util/keyutil",
     "util/retry",
     "util/workqueue",
@@ -1382,7 +1372,6 @@
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apimachinery/pkg/util/wait",
-    "k8s.io/cli-runtime/pkg/genericclioptions/printers",
     "k8s.io/client-go/dynamic",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/scheme",

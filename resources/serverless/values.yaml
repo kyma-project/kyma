@@ -18,6 +18,10 @@ runtimeMigration:
 
 tests:
   enabled: true
+  labels:
+    integration: true
+    after-upgrade: true
+
   long:
     initTimeout: 120s
     resources:
@@ -72,7 +76,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "1088c1af"
+    tag: "5cf2ad0b"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
@@ -142,7 +146,7 @@ containers:
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v0.22.0
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:1088c1af
+        value: eu.gcr.io/kyma-project/function-build-init:0c4f9f00
 
 services:
   manager:

@@ -24,7 +24,6 @@ const expectedPrometheusInstances = 1
 const expectedKubeStateMetrics = 1
 const expectedGrafanaInstance = 1
 
-
 // TargetsAndRulesTest checks that all targets and rules are healthy
 type TargetsAndRulesTest struct {
 	k8sCli     kubernetes.Interface
@@ -45,10 +44,6 @@ func (t TargetsAndRulesTest) CreateResources(stop <-chan struct{}, log logrus.Fi
 	if err := t.testPodsAreReady(); err != nil {
 		return err
 	}
-	log.Println("checking that all targets are healthy before upgrade")
-	if err := t.testTargetsAreHealthy(); err != nil {
-		return err
-	}
 	log.Println("checking that all rules are healthy before upgrade")
 	if err := t.testRulesAreHealthy(); err != nil {
 		return err
@@ -60,10 +55,6 @@ func (t TargetsAndRulesTest) CreateResources(stop <-chan struct{}, log logrus.Fi
 func (t TargetsAndRulesTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("checking that monitoring pods are ready")
 	if err := t.testPodsAreReady(); err != nil {
-		return err
-	}
-	log.Println("checking that all targets are healthy after upgrade")
-	if err := t.testTargetsAreHealthy(); err != nil {
 		return err
 	}
 	log.Println("checking that all rules are healthy after upgrade")
@@ -198,10 +189,31 @@ func (t TargetsAndRulesTest) testTargetsAreHealthy() error {
 }
 
 func shouldIgnoreTarget(target prom.Labels) bool {
-	var jobsToBeIgnored = []string{
+	jobsToBeIgnored := []string{
 		// Note: These targets will be tested here: https://github.com/kyma-project/kyma/issues/6457
 		"knative-eventing/knative-eventing-event-mesh-dashboard-broker",
 		"knative-eventing/knative-eventing-event-mesh-dashboard-httpsource",
+	}
+
+	podsToBeIgnored := []string{
+		// Ignore the pods that are created during tests.
+		"-testsuite-",
+		"test",
+		"nodejs12-",
+		"nodejs10-",
+		"upgrade",
+		// Ignore the pods created by jobs which are executed after installation of control-plane.
+		"compass-migration",
+		"compass-director-tenant-loader-default",
+		"compass-agent-configuration",
+	}
+
+	namespacesToBeIgnored := []string{"test", "e2e"} // Since some namespaces are named -e2e and some are e2e-
+
+	for _, p := range podsToBeIgnored {
+		if strings.Contains(target["pod"], p) {
+			return true
+		}
 	}
 
 	for _, j := range jobsToBeIgnored {
@@ -209,6 +221,13 @@ func shouldIgnoreTarget(target prom.Labels) bool {
 			return true
 		}
 	}
+
+	for _, n := range namespacesToBeIgnored {
+		if strings.Contains(target["namespace"], n) {
+			return true
+		}
+	}
+
 	return false
 }
 

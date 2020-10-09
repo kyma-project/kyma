@@ -309,41 +309,6 @@ function testKymaEventing() {
 	done
 }
 
-function testKnativeServing() {
-	local -r userEmail="${1}"
-	local -r testNamespace="${2}"
-	local -r isAdmin="${3}"
-	local isAdminText=""
-	if [[ "${isAdmin}" == "no" ]]; then
-		isAdminText=" NOT"
-	fi
-	local viewAccess="yes"
-	local viewAccessText=""
-	if [[ "${testNamespace}" == "${SYSTEM_NAMESPACE}" ]]; then
-		viewAccess="no"
-		viewAccessText=" NOT"
-	fi
-	readonly isAdminText viewAccess viewAccessText
-
-	local -r resources=( "services.serving.knative.dev" "routes.serving.knative.dev" "revisions.serving.knative.dev" "configurations.serving.knative.dev" "podautoscalers.autoscaling.internal.knative.dev" "images.caching.internal.knative.dev" )
-
-	# View
-	for resource in "${resources[@]}"; do
-		for operation in "${VIEW_OPERATIONS[@]}"; do
-			echo "--> ${userEmail} should${viewAccessText} be able to ${operation} ${resource} CR in ${testNamespace}"
-			testPermissions "${operation}" "${resource}" "${testNamespace}" "${viewAccess}"
-		done
-	done
-
-	# Edit
-	for resource in "${resources[@]}"; do
-		for operation in "${EDIT_OPERATIONS[@]}"; do
-			echo "--> ${userEmail} should${isAdminText} be able to ${operation} ${resource} CR in ${testNamespace}"
-			testPermissions "${operation}" "${resource}" "${testNamespace}" "${isAdmin}"
-		done
-	done
-}
-
 function testRafter() {
 	local -r userEmail="${1}"
 	local -r testNamespace="${2}"
@@ -477,7 +442,6 @@ function runTests() {
 	testPermissions "get" "configmap/serverless-webhook-envs" "${NAMESPACE}" "yes"
 
 	testRafter "${ADMIN_EMAIL}" "${NAMESPACE}" "yes"
-	testKnativeServing "${ADMIN_EMAIL}" "${NAMESPACE}" "yes"
 
 	testKymaEventing "${ADMIN_EMAIL}" "${NAMESPACE}" "yes" "yes"
 	testKymaEventing "${ADMIN_EMAIL}" "${SYSTEM_NAMESPACE}" "yes" "yes"
@@ -566,7 +530,6 @@ function runTests() {
 	testPermissions "get" "configmap/serverless-webhook-envs" "${NAMESPACE}" "yes"
 
 	testRafter "${VIEW_EMAIL}" "${NAMESPACE}" "no"
-	testKnativeServing "${VIEW_EMAIL}" "${NAMESPACE}" "no"
 
 	testKymaEventing "${VIEW_EMAIL}" "${NAMESPACE}" "no" "yes"
 	testKymaEventing "${VIEW_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "yes"
@@ -644,7 +607,6 @@ function runTests() {
 	testPermissions "create" "servicebindings" "${SYSTEM_NAMESPACE}" "no"
 
 	testRafter "${NAMESPACE_ADMIN_EMAIL}" "${SYSTEM_NAMESPACE}" "no"
-	testKnativeServing "${NAMESPACE_ADMIN_EMAIL}" "${SYSTEM_NAMESPACE}" "no"
 
 	testKymaEventing "${NAMESPACE_ADMIN_EMAIL}" "${NAMESPACE}" "yes" "yes"
 	testKymaEventing "${NAMESPACE_ADMIN_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "no"
@@ -808,7 +770,6 @@ function runTests() {
 	testPermissions "list" "addonsconfigurations.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
 	testRafter "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "no"
-	testKnativeServing "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "no"
 
 	testServerless "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "yes" "yes"
 
@@ -931,7 +892,6 @@ function runTests() {
 	testPermissions "delete" "servicebindingusages" "${CUSTOM_NAMESPACE}" "yes"
 
 	testRafter "${DEVELOPER_EMAIL}" "${CUSTOM_NAMESPACE}" "no"
-	testKnativeServing "${DEVELOPER_EMAIL}" "${CUSTOM_NAMESPACE}" "no"
 
 	testKymaEventing "${DEVELOPER_EMAIL}" "${CUSTOM_NAMESPACE}" "yes" "yes"
 	testKymaEventing "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "no"
@@ -965,7 +925,6 @@ function runTests() {
 	testPermissions "create" "servicebindings" "${SYSTEM_NAMESPACE}" "no"
 
 	testRafter "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}" "no"
-	testKnativeServing "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}" "no"
 
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create servicebindingusages in system namespace"
 	testPermissions "create" "servicebindingusages" "${SYSTEM_NAMESPACE}" "no"

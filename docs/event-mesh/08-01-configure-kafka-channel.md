@@ -31,7 +31,7 @@ Follow these steps:
   $ export kafkaUsername=$ConnectionString
   $ export kafkaProvider=azure
   ```
-4. Prepare the override which creates the Azure Secret for Kafka and save it to a file called `azure-secret.yaml`.  
+4. Prepare the override which creates the Azure Secret for Kafka and save it to a file called `azure-secret.yaml`.
 
   ```yaml
   apiVersion: v1
@@ -43,7 +43,7 @@ Follow these steps:
       installer: overrides
       component: knative-eventing-kafka
       kyma-project.io/installation: ""
-  type: Opaque    
+  type: Opaque
   stringData:
     kafka.brokers.hostname: $kafkaBrokersHost
     kafka.brokers.port : $kafkaBrokersPort

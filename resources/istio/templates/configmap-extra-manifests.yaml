@@ -6,6 +6,8 @@ metadata:
 data:
   destination-rules.yaml: |-
 {{ tpl (.Files.Get "files/destination-rules.yaml" | printf "%s" | indent 4) . }}
+  mtls-global.yaml: |-
+{{ tpl (.Files.Get "files/mtls-global-v1.yaml" | printf "%s" | indent 4) . }}
 {{- if .Values.global.isLocalEnv }}
   destination-rules-minikube.yaml: |-
 {{ tpl (.Files.Get "files/destination-rules-minikube.yaml" | printf "%s" | indent 4) . }}

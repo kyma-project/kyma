@@ -8,6 +8,7 @@ metadata:
   labels:
     app: {{ template "name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    kyma-project.io/component: backend
 spec:
   selector:
     matchLabels:
@@ -18,6 +19,7 @@ spec:
       labels:
         app: {{ template "name" . }}
         chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+        kyma-project.io/component: backend
     spec:
 
       {{- if .Values.global.isLocalEnv }}

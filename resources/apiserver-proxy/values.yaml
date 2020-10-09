@@ -29,6 +29,9 @@ hpa:
 
 tests:
   enabled: true
+  labels:
+    integration: true
+    after-upgrade: true
 global:
   tlsCrt: "cGxhY2Vob2xkZXI="
   tlsKey: "cGxhY2Vob2xkZXI="

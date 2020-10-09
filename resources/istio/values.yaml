@@ -1,6 +1,10 @@
 ---
 global:
   isLocalEnv: false
+  tracing:
+    enabled: true
+    zipkinAddress: "zipkin.kyma-system:9411"
+    
 kyma:
   namespaces2Label:
     - istio-system
@@ -12,4 +16,4 @@ kyma:
 istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
-    tag: ff249b80
+    tag: 19e240cd

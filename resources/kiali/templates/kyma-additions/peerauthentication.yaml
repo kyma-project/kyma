@@ -1,0 +1,16 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: {{ template "kiali.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kiali.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "kiali.name" . }}
+  mtls:
+    mode: UNSET
+  portLevelMtls:
+    9090:
+      mode: PERMISSIVE
