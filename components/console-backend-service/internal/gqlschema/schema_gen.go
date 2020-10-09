@@ -23,7 +23,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 	v11 "k8s.io/api/core/v1"
 	v12 "k8s.io/api/rbac/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	v1alpha13 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
@@ -540,10 +540,9 @@ type ComplexityRoot struct {
 	}
 
 	LimitRange struct {
-		Generation func(childComplexity int) int
-		JSON       func(childComplexity int) int
-		Name       func(childComplexity int) int
-		Spec       func(childComplexity int) int
+		JSON func(childComplexity int) int
+		Name func(childComplexity int) int
+		Spec func(childComplexity int) int
 	}
 
 	LimitRangeItem struct {
@@ -639,7 +638,7 @@ type ComplexityRoot struct {
 		UpdateConfigMap                            func(childComplexity int, name string, namespace string, configMap JSON) int
 		UpdateFunction                             func(childComplexity int, name string, namespace string, params FunctionMutationInput) int
 		UpdateGitRepository                        func(childComplexity int, namespace string, name string, spec v1alpha11.GitRepositorySpec) int
-		UpdateLimitRange                           func(childComplexity int, namespace string, name string, generation int, json JSON) int
+		UpdateLimitRange                           func(childComplexity int, namespace string, name string, json JSON) int
 		UpdateNamespace                            func(childComplexity int, name string, labels Labels) int
 		UpdateOAuth2Client                         func(childComplexity int, name string, namespace string, generation int, params v1alpha12.OAuth2ClientSpec) int
 		UpdatePod                                  func(childComplexity int, name string, namespace string, pod JSON) int
@@ -1264,7 +1263,7 @@ type MutationResolver interface {
 	CreateManyTriggers(ctx context.Context, namespace string, triggers []*TriggerCreateInput, ownerRef []*v1.OwnerReference) ([]*v1alpha13.Trigger, error)
 	DeleteTrigger(ctx context.Context, namespace string, triggerName string) (*v1alpha13.Trigger, error)
 	DeleteManyTriggers(ctx context.Context, namespace string, triggerNames []string) ([]*v1alpha13.Trigger, error)
-	UpdateLimitRange(ctx context.Context, namespace string, name string, generation int, json JSON) (*v11.LimitRange, error)
+	UpdateLimitRange(ctx context.Context, namespace string, name string, json JSON) (*v11.LimitRange, error)
 	CreateOAuth2Client(ctx context.Context, name string, namespace string, params v1alpha12.OAuth2ClientSpec) (*v1alpha12.OAuth2Client, error)
 	UpdateOAuth2Client(ctx context.Context, name string, namespace string, generation int, params v1alpha12.OAuth2ClientSpec) (*v1alpha12.OAuth2Client, error)
 	DeleteOAuth2Client(ctx context.Context, name string, namespace string) (*v1alpha12.OAuth2Client, error)
@@ -3219,13 +3218,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.GitRepositorySpec.URL(childComplexity), true
 
-	case "LimitRange.generation":
-		if e.complexity.LimitRange.Generation == nil {
-			break
-		}
-
-		return e.complexity.LimitRange.Generation(childComplexity), true
-
 	case "LimitRange.json":
 		if e.complexity.LimitRange.JSON == nil {
 			break
@@ -4070,7 +4062,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateLimitRange(childComplexity, args["namespace"].(string), args["name"].(string), args["generation"].(int), args["json"].(JSON)), true
+		return e.complexity.Mutation.UpdateLimitRange(childComplexity, args["namespace"].(string), args["name"].(string), args["json"].(JSON)), true
 
 	case "Mutation.updateNamespace":
 		if e.complexity.Mutation.UpdateNamespace == nil {
@@ -7047,7 +7039,6 @@ type LimitRange @goModel(model: "k8s.io/api/core/v1.LimitRange") {
   name: String!
   spec: LimitRangeSpec!
   json: JSON!
-  generation: Int!
 }
 
 input LimitRangeInput {
@@ -7065,7 +7056,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  updateLimitRange(namespace: String!, name: String!, generation: Int!, json: JSON!): LimitRange
+  updateLimitRange(namespace: String!, name: String!, json: JSON!): LimitRange
   @HasAccess(
     attributes: {
       resource: "limitrange"
@@ -10099,22 +10090,14 @@ func (ec *executionContext) field_Mutation_updateLimitRange_args(ctx context.Con
 		}
 	}
 	args["name"] = arg1
-	var arg2 int
-	if tmp, ok := rawArgs["generation"]; ok {
-		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["generation"] = arg2
-	var arg3 JSON
+	var arg2 JSON
 	if tmp, ok := rawArgs["json"]; ok {
-		arg3, err = ec.unmarshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, tmp)
+		arg2, err = ec.unmarshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["json"] = arg3
+	args["json"] = arg2
 	return args, nil
 }
 
@@ -20371,40 +20354,6 @@ func (ec *executionContext) _LimitRange_json(ctx context.Context, field graphql.
 	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _LimitRange_generation(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRange) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "LimitRange",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Generation, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int64)
-	fc.Result = res
-	return ec.marshalNInt2int64(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _LimitRangeItem_type(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRangeItem) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -24356,7 +24305,7 @@ func (ec *executionContext) _Mutation_updateLimitRange(ctx context.Context, fiel
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().UpdateLimitRange(rctx, args["namespace"].(string), args["name"].(string), args["generation"].(int), args["json"].(JSON))
+			return ec.resolvers.Mutation().UpdateLimitRange(rctx, args["namespace"].(string), args["name"].(string), args["json"].(JSON))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "limitrange", "verb": "create"})
@@ -43457,11 +43406,6 @@ func (ec *executionContext) _LimitRange(ctx context.Context, sel ast.SelectionSe
 				}
 				return res
 			})
-		case "generation":
-			out.Values[i] = ec._LimitRange_generation(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

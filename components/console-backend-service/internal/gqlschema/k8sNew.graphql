@@ -19,7 +19,6 @@ type LimitRange @goModel(model: "k8s.io/api/core/v1.LimitRange") {
   name: String!
   spec: LimitRangeSpec!
   json: JSON!
-  generation: Int!
 }
 
 input LimitRangeInput {
@@ -37,7 +36,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  updateLimitRange(namespace: String!, name: String!, generation: Int!, json: JSON!): LimitRange
+  updateLimitRange(namespace: String!, name: String!, json: JSON!): LimitRange
   @HasAccess(
     attributes: {
       resource: "limitrange"
