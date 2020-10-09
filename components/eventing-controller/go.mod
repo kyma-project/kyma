@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/cloudevents/sdk-go/v2 v2.3.1
 	github.com/go-logr/logr v0.1.0
+	github.com/mitchellh/hashstructure v1.0.0
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.8.1
 	k8s.io/api v0.18.2

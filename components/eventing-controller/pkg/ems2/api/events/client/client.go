@@ -17,7 +17,7 @@ var _ Interface = Client{}
 
 type Interface interface {
 	Publish(token *auth2.AccessToken, cloudEvent cloudevents.Event, qos types2.Qos) (*types2.PublishResponse, error)
-	Create(token *auth2.AccessToken, subscription types2.Subscription) (*types2.CreateResponse, error)
+	Create(token *auth2.AccessToken, subscription *types2.Subscription) (*types2.CreateResponse, error)
 	List(token *auth2.AccessToken) (types2.Subscriptions, error)
 	Get(token *auth2.AccessToken, name string) (*types2.Subscription, error)
 	Delete(token *auth2.AccessToken, name string) (*types2.DeleteResponse, error)
@@ -57,7 +57,7 @@ func (c Client) Publish(token *auth2.AccessToken, event cloudevents.Event, qos t
 	return &response, nil
 }
 
-func (c Client) Create(token *auth2.AccessToken, subscription types2.Subscription) (*types2.CreateResponse, error) {
+func (c Client) Create(token *auth2.AccessToken, subscription *types2.Subscription) (*types2.CreateResponse, error) {
 	req, err := c.httpClient.NewRequest(token, http.MethodPost, c.config.CreateURL, subscription)
 	if err != nil {
 		return nil, err
