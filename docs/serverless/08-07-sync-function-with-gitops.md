@@ -174,7 +174,7 @@ cd {LOCAL_GITHUB_REPOSITORY_FOLDER}
 3. Run the `apply` Kyma CLI command to create a Function CR in the YAML format on your remote GitHub repository. This command will generate the output in the `my-function.yaml` file.
 
 ```bash
-kyma apply function --filename {FULL_PATH_TO_LOCAL_WORKSPACE_FOLDER}/config.yaml --output yaml > ./{GH_REPO}/${GH_FOLDER}/my-function.yaml
+kyma apply function --filename {FULL_PATH_TO_LOCAL_WORKSPACE_FOLDER}/config.yaml --output yaml --dry-run > ./{GH_REPO}/${GH_FOLDER}/my-function.yaml
 ```
 
 4. Push the local changes to the remote repository:
@@ -216,10 +216,10 @@ triggers:
   type: t1
 ```
 
-2. Apply the Function using the Kyma CLI command:
+2. Create the Function resource from local sources and place the output it your Git repository folder:
 
 ```bash
-kyma apply function --filename {FULL_PATH_TO_LOCAL_WORKSPACE_FOLDER}/config.yaml --output yaml > ./{GH_REPO}/${GH_FOLDER}/my-function.yaml
+kyma apply function --filename {FULL_PATH_TO_LOCAL_WORKSPACE_FOLDER}/config.yaml --output yaml --dry-run > ./{GH_REPO}/${GH_FOLDER}/my-function.yaml
 ```
 
 3. Push the local changes to the remote repository:
