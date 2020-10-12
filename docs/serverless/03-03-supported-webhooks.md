@@ -38,7 +38,7 @@ It checks the following conditions for these CRs:
 
 1. [Function CR](#custom-resource-function)
 
-   - Minimum values requested for CPU, memory, and replicas for a Function and CPU as well as memory for a Kubernetes Job responsible for building the Function's image must not be lower than the required ones:
+   - Minimum values requested for a Function (CPU, memory, and replicas) and a Kubernetes Job (CPU and memory) responsible for building the Function's image must not be lower than the required ones:
 
    | Parameter            | Required value |
    | -------------------- | -------------- |
