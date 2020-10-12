@@ -334,6 +334,8 @@ github.com/kyma-project/helm-broker v0.0.0-20190906085923-d07feb2d365a h1:G+lhfd
 github.com/kyma-project/helm-broker v0.0.0-20190906085923-d07feb2d365a/go.mod h1:VFnkD5ddzF9s8qcY12DRzYOznJJlpMbSRWGRgM4P1XA=
 github.com/kyma-project/kyma v0.5.1-0.20200609051543-f5997d4a36d6 h1:P3R3c4pewIa+IjzNldO9WRFA58s0r3WVqRxLK6feYc8=
 github.com/kyma-project/kyma v0.5.1-0.20200609051543-f5997d4a36d6/go.mod h1:cfj5AQwIOmmoXLZUhW3bIiaB66Z6vgjCYu7TRK3+1lc=
+github.com/kyma-project/kyma/components/function-controller v0.0.0-20201012150043-858bc2c23ef5 h1:1W+DlYohLpOZ5XdwJaUTWBgXFvMxJyXa7Mu7HKkrlL8=
+github.com/kyma-project/kyma/components/function-controller v0.0.0-20201012150043-858bc2c23ef5/go.mod h1:842PCaqaSMTkmr80oQsckxMyZ6WXBLy6E22/JPQeUl0=
 github.com/kyma-project/rafter v0.0.0-20200402080904-a0157e52e150 h1:UYawXgUZBPBe+wcSDsjpyy+mDM9Q7CugfLXix3bwbWE=
 github.com/kyma-project/rafter v0.0.0-20200402080904-a0157e52e150/go.mod h1:zlQEXkFdCYTii7GGjd0jLOudgPtxgZLJy2VDXW7j54I=
 github.com/logrusorgru/aurora v0.0.0-20200102142835-e9ef32dff381/go.mod h1:7rIyQOR62GCctdiQpZ/zOJlFyk6y+94wXzv6RNZgaR4=
