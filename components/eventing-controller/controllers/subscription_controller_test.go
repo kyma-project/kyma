@@ -85,7 +85,7 @@ var _ = ginkgo.Describe("Subscription", func() {
 			getSubscription(subscriptionLookupKey, ctx).Should(
 				gomega.Not(gomega.BeNil()),
 				haveName(subscriptionName),
-				haveFinalizer(finalizerName),
+				haveFinalizer(FinalizerName),
 			)
 
 			ginkgo.By("Creating a BEB Subscription")
@@ -109,7 +109,7 @@ var _ = ginkgo.Describe("Subscription", func() {
 			getSubscription(subscriptionLookupKey, ctx).Should(
 				gomega.Not(gomega.BeNil()),
 				haveName(subscriptionName),
-				haveFinalizer(finalizerName),
+				haveFinalizer(FinalizerName),
 			)
 
 			ginkgo.By("Deleting the BEB Subscription")
@@ -119,7 +119,7 @@ var _ = ginkgo.Describe("Subscription", func() {
 			getSubscription(subscriptionLookupKey, ctx).Should(
 				gomega.Not(gomega.BeNil()),
 				haveName(subscriptionName),
-				gomega.Not(haveFinalizer(finalizerName)),
+				gomega.Not(haveFinalizer(FinalizerName)),
 			)
 
 			ginkgo.By("Emitting some k8s events")

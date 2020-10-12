@@ -92,6 +92,8 @@ spec:
                   contentMode:
                     type: string
                   exemptHandshake:
+                    description: 'TODO(nachtmaar): discuss with radu, either make
+                      it true by default or remove it for now'
                     type: boolean
                   qos:
                     type: string
@@ -135,14 +137,30 @@ spec:
               TODO: it should contain: - the status of BEB subscription - the status
               of the exposed Webhook'
             properties:
-              ready:
-                type: string
-            required:
-            - ready
+              conditions:
+                items:
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    message:
+                      type: string
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  type: object
+                type: array
             type: object
         type: object
     served: true
     storage: true
+    subresources:
+      status: {}
 status:
   acceptedNames:
     kind: ""
