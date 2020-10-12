@@ -2,8 +2,11 @@ package controllers
 
 import (
 	"context"
+	"reflect"
 
 	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/record"
 
 	// TODO: use different package
@@ -27,7 +30,7 @@ type SubscriptionReconciler struct {
 // TODO: use additional printer columns: https://book.kubebuilder.io/reference/generating-crd.html#additional-printer-columns
 
 var (
-	finalizerName = eventingv1alpha1.GroupVersion.Group
+	FinalizerName = eventingv1alpha1.GroupVersion.Group
 )
 
 func NewSubscriptionReconciler(
@@ -46,6 +49,10 @@ func NewSubscriptionReconciler(
 
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions/status,verbs=get;update;patch
+
+// Generate required RBAC to emit kubernetes events in the controller
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
+// Source: https://book-v1.book.kubebuilder.io/beyond_basics/creating_events.html
 
 func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
@@ -67,7 +74,7 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	)
 
 	// TODO:
-	r.recorder.Event(subscription, "Normal", "foo", "bar")
+	r.recorder.Event(subscription, corev1.EventTypeNormal, "foo", "bar")
 
 	// Ensure the finalizer is set
 	if err := r.syncFinalizer(subscription, ctx, log); err != nil {
@@ -81,7 +88,12 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, err
 	}
 
-	log.Info("reconciled obj", req.Namespace, req.Name)
+	if !r.isInDeletion(subscription) {
+		if err := r.syncStatus(subscription, ctx, log); err != nil {
+			log.Error(err, "error while syncing status")
+			return ctrl.Result{}, err
+		}
+	}
 
 	return ctrl.Result{}, nil
 }
@@ -102,7 +114,6 @@ func (r *SubscriptionReconciler) syncFinalizer(subscription *eventingv1alpha1.Su
 }
 
 func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) error {
-	logger.Info("Syncing subscription with BEB")
 	// TODO: get beb credentials from secret
 	// TODO: CRUD BEB subscription
 
@@ -116,10 +127,72 @@ func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alp
 		return nil
 	}
 
-	logger.Info("Updating BEB subscription")
+	logger.Info("Creating BEB subscription")
 
 	return nil
 }
+
+// syncStatus determines the desires status and updates it
+func (r *SubscriptionReconciler) syncStatus(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) error {
+	currentStatus := subscription.Status
+	currentStatus.InitializeConditions()
+	expectedStatus := r.computeStatus(subscription, ctx, logger)
+
+	if reflect.DeepEqual(currentStatus, expectedStatus) {
+		return nil
+	}
+
+	subscription.Status = *expectedStatus
+	if err := r.Status().Update(ctx, subscription); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// computeStatus computes the status of the Subscription
+func (r *SubscriptionReconciler) computeStatus(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) *eventingv1alpha1.SubscriptionStatus {
+	status := subscription.Status.DeepCopy()
+	status.InitializeConditions()
+	// TODO: set status for BEB subscription
+
+	return status
+}
+
+func conditionEquals(c1 eventingv1alpha1.Condition, c2 eventingv1alpha1.Condition) bool {
+	if c1.Type == c2.Type && c1.Reason == c2.Reason && c1.Status == c2.Status {
+		return true
+	}
+	return false
+}
+
+// TODO: create own file for status handling, this is more a init method (constructor)
+func makeCondition(conditionType eventingv1alpha1.ConditionType, reason eventingv1alpha1.ConditionReason, status corev1.ConditionStatus) eventingv1alpha1.Condition {
+	return eventingv1alpha1.Condition{
+		Type:               conditionType,
+		Status:             status,
+		LastTransitionTime: metav1.Time{},
+		Reason:             reason,
+		// TODO:
+		Message: "",
+	}
+
+}
+
+func (r *SubscriptionReconciler) updateStatus(subscription *eventingv1alpha1.Subscription, ctx context.Context) error {
+	eventType := corev1.EventTypeNormal
+	reason := "todo"
+	message := "todo"
+
+	if err := r.Client.Status().Update(ctx, subscription); err != nil {
+		return err
+	}
+	r.recorder.Event(subscription, eventType, reason, message)
+
+	return nil
+}
+
+// TODO: do not update when nothing changed
 
 func (r *SubscriptionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
@@ -127,10 +200,10 @@ func (r *SubscriptionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 func (r *SubscriptionReconciler) addFinalizer(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) error {
-	subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, finalizerName)
+	subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, FinalizerName)
 	logger.V(1).Info("Adding finalizer")
 	if err := r.Update(ctx, subscription); err != nil {
-		return errors.Wrapf(err, "error while adding Finalizer with name: %s", finalizerName)
+		return errors.Wrapf(err, "error while adding Finalizer with name: %s", FinalizerName)
 	}
 	logger.V(1).Info("Added finalizer")
 	return nil
@@ -141,7 +214,7 @@ func (r *SubscriptionReconciler) removeFinalizer(subscription *eventingv1alpha1.
 
 	// Build finalizer list without the one the controller owns
 	for _, finalizer := range subscription.ObjectMeta.Finalizers {
-		if finalizer == finalizerName {
+		if finalizer == FinalizerName {
 			continue
 		}
 		finalizers = append(finalizers, finalizer)
@@ -150,7 +223,7 @@ func (r *SubscriptionReconciler) removeFinalizer(subscription *eventingv1alpha1.
 	logger.V(1).Info("Removing finalizer")
 	subscription.ObjectMeta.Finalizers = finalizers
 	if err := r.Update(ctx, subscription); err != nil {
-		return errors.Wrapf(err, "error while removing Finalizer with name: %s", finalizerName)
+		return errors.Wrapf(err, "error while removing Finalizer with name: %s", FinalizerName)
 	}
 	logger.V(1).Info("Removed finalizer")
 	return nil
@@ -160,7 +233,7 @@ func (r *SubscriptionReconciler) removeFinalizer(subscription *eventingv1alpha1.
 func (r *SubscriptionReconciler) isFinalizerSet(subscription *eventingv1alpha1.Subscription) bool {
 	// Check if finalizer is already set
 	for _, finalizer := range subscription.ObjectMeta.Finalizers {
-		if finalizer == finalizerName {
+		if finalizer == FinalizerName {
 			return true
 		}
 	}

@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -65,10 +66,12 @@ type SubscriptionSpec struct {
 // - the status of BEB subscription
 // - the status of the exposed Webhook
 type SubscriptionStatus struct {
-	Ready string `json:"ready"`
+	Conditions []Condition `json:"conditions,omitempty"`
 }
 
 // +kubebuilder:object:root=true
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:subresource:status
 
 // Subscription is the Schema for the subscriptions API
 type Subscription struct {
@@ -87,6 +90,26 @@ type SubscriptionList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Subscription `json:"items"`
 }
+
+type ConditionType string
+
+const (
+	ConditionSubscribed ConditionType = "Subscribed"
+)
+
+type Condition struct {
+	Type               ConditionType      `json:"type,omitempty"`
+	Status             v1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
+	LastTransitionTime metav1.Time        `json:"lastTransitionTime,omitempty"`
+	Reason             ConditionReason    `json:"reason,omitempty"`
+	Message            string             `json:"message,omitempty"`
+}
+
+type ConditionReason string
+
+const (
+	ConditionReasonSubscriptionCreated ConditionReason = "SubscriptionCreated"
+)
 
 func init() {
 	SchemeBuilder.Register(&Subscription{}, &SubscriptionList{})
