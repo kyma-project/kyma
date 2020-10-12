@@ -2,11 +2,9 @@ package controllers
 
 import (
 	"context"
-	"reflect"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/record"
 
 	// TODO: use different package
@@ -60,9 +58,10 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 
 	subscription := &eventingv1alpha1.Subscription{}
 	ctx := context.TODO()
+	result := ctrl.Result{}
 
 	// Ensure the object was not deleted in the meantime
-	if err := r.Client.Get(ctx, req.NamespacedName, subscription); err != nil {
+	if err := r.Get(ctx, req.NamespacedName, subscription); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
@@ -73,33 +72,37 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		"version", subscription.GetGeneration(),
 	)
 
-	// TODO:
-	r.recorder.Event(subscription, corev1.EventTypeNormal, "foo", "bar")
-
 	// Ensure the finalizer is set
-	if err := r.syncFinalizer(subscription, ctx, log); err != nil {
+	if err := r.syncFinalizer(subscription, &result, ctx, log); err != nil {
 		log.Error(err, "error while syncing finalizer")
-		return ctrl.Result{}, err
+		return result, err
 	}
-
-	// Sync the BEB Subscription with the Subscription CR
-	if err := r.syncBEBSubscription(subscription, ctx, log); err != nil {
-		log.Error(err, "error while syncing BEB subscription")
-		return ctrl.Result{}, err
+	if result.Requeue {
+		return result, nil
 	}
 
 	if !r.isInDeletion(subscription) {
-		if err := r.syncStatus(subscription, ctx, log); err != nil {
+		if err := r.syncInitialStatus(subscription, &result, ctx, log); err != nil {
 			log.Error(err, "error while syncing status")
-			return ctrl.Result{}, err
+			return result, err
 		}
 	}
+	if result.Requeue {
+		return result, nil
+	}
 
-	return ctrl.Result{}, nil
+	// Sync the BEB Subscription with the Subscription CR
+	if err := r.syncBEBSubscription(subscription, &result, ctx, log); err != nil {
+		log.Error(err, "error while syncing BEB subscription")
+		return result, err
+	}
+
+	result.Requeue = false
+	return result, nil
 }
 
 // syncFinalizer sets the finalizer in the Subscription
-func (r *SubscriptionReconciler) syncFinalizer(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) error {
+func (r *SubscriptionReconciler) syncFinalizer(subscription *eventingv1alpha1.Subscription, result *ctrl.Result, ctx context.Context, logger logr.Logger) error {
 	// Check if finalizer is already set
 	if r.isFinalizerSet(subscription) {
 		return nil
@@ -107,89 +110,102 @@ func (r *SubscriptionReconciler) syncFinalizer(subscription *eventingv1alpha1.Su
 
 	// Add Finalizer if not in deletion mode
 	if !r.isInDeletion(subscription) {
-		return r.addFinalizer(subscription, ctx, logger)
+		if err := r.addFinalizer(subscription, ctx, logger); err != nil {
+			result.Requeue = true
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) error {
+func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscription, result *ctrl.Result, ctx context.Context, logger logr.Logger) error {
 	// TODO: get beb credentials from secret
 	// TODO: CRUD BEB subscription
 
 	// TODO: react on finalizer
 	if r.isInDeletion(subscription) {
 		logger.Info("Deleting BEB subscription")
-		if err := r.removeFinalizer(subscription, ctx, logger); err != nil {
+		if err := r.removeFinalizer(subscription, result, ctx, logger); err != nil {
 			return err
 		}
 		// TODO: delete BEB subscription
 		return nil
 	}
 
+	if !subscription.Status.IsConditionSubscribed() {
+		// TODO: use by radu
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, "TODO", corev1.ConditionTrue)
+		if err := r.updateStatus(subscription, condition, ctx, logger); err != nil {
+			return err
+		}
+	}
 	logger.Info("Creating BEB subscription")
 
 	return nil
 }
 
-// syncStatus determines the desires status and updates it
-func (r *SubscriptionReconciler) syncStatus(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) error {
+// syncInitialStatus determines the desires initial status and updates it accordingly (if conditions changed)
+func (r *SubscriptionReconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription, result *ctrl.Result, ctx context.Context, logger logr.Logger) error {
 	currentStatus := subscription.Status
-	currentStatus.InitializeConditions()
-	expectedStatus := r.computeStatus(subscription, ctx, logger)
 
-	if reflect.DeepEqual(currentStatus, expectedStatus) {
+	expectedStatus := eventingv1alpha1.SubscriptionStatus{}
+	expectedStatus.InitializeConditions()
+
+	// case: conditions are already initialized
+	if len(currentStatus.Conditions) == len(expectedStatus.Conditions) {
 		return nil
 	}
 
-	subscription.Status = *expectedStatus
+	subscription.Status = expectedStatus
+	// TODO: this causes problem, investigate why
 	if err := r.Status().Update(ctx, subscription); err != nil {
 		return err
 	}
+	result.Requeue = true
 
 	return nil
 }
 
-// computeStatus computes the status of the Subscription
-func (r *SubscriptionReconciler) computeStatus(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) *eventingv1alpha1.SubscriptionStatus {
-	status := subscription.Status.DeepCopy()
-	status.InitializeConditions()
-	// TODO: set status for BEB subscription
+func (r *SubscriptionReconciler) updateStatus(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition, ctx context.Context, logger logr.Logger) error {
 
-	return status
-}
-
-func conditionEquals(c1 eventingv1alpha1.Condition, c2 eventingv1alpha1.Condition) bool {
-	if c1.Type == c2.Type && c1.Reason == c2.Reason && c1.Status == c2.Status {
-		return true
-	}
-	return false
-}
-
-// TODO: create own file for status handling, this is more a init method (constructor)
-func makeCondition(conditionType eventingv1alpha1.ConditionType, reason eventingv1alpha1.ConditionReason, status corev1.ConditionStatus) eventingv1alpha1.Condition {
-	return eventingv1alpha1.Condition{
-		Type:               conditionType,
-		Status:             status,
-		LastTransitionTime: metav1.Time{},
-		Reason:             reason,
-		// TODO:
-		Message: "",
+	// compile list of desired conditions
+	desiredConditions := make([]eventingv1alpha1.Condition, 0)
+	for _, c := range subscription.Status.Conditions {
+		if c.Type == condition.Type {
+			// take given condition
+			desiredConditions = append(desiredConditions, condition)
+		} else {
+			// take already present condition
+			desiredConditions = append(desiredConditions, c)
+		}
 	}
 
-}
+	// prevent unnecessary updates
+	if isEqualConditions(subscription.Status.Conditions, desiredConditions) {
+		return nil
+	}
 
-func (r *SubscriptionReconciler) updateStatus(subscription *eventingv1alpha1.Subscription, ctx context.Context) error {
-	eventType := corev1.EventTypeNormal
-	reason := "todo"
-	message := "todo"
-
-	if err := r.Client.Status().Update(ctx, subscription); err != nil {
+	// update the status
+	subscription.Status.Conditions = desiredConditions
+	if err := r.Status().Update(ctx, subscription); err != nil {
 		return err
 	}
-	r.recorder.Event(subscription, eventType, reason, message)
+	r.emitConditionEvent(subscription, condition)
 
 	return nil
+}
+
+// emitConditionEvent emits a kubernetes event and sets the event type based on the Condition status
+func (r *SubscriptionReconciler) emitConditionEvent(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition) {
+	eventType := corev1.EventTypeNormal
+	if condition.Status == corev1.ConditionFalse {
+		eventType = corev1.EventTypeWarning
+	}
+	// TODO:
+	reason := "todo"
+	message := "todo"
+	r.recorder.Event(subscription, eventType, reason, message)
 }
 
 // TODO: do not update when nothing changed
@@ -209,7 +225,7 @@ func (r *SubscriptionReconciler) addFinalizer(subscription *eventingv1alpha1.Sub
 	return nil
 }
 
-func (r *SubscriptionReconciler) removeFinalizer(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) error {
+func (r *SubscriptionReconciler) removeFinalizer(subscription *eventingv1alpha1.Subscription, result *ctrl.Result, ctx context.Context, logger logr.Logger) error {
 	var finalizers []string
 
 	// Build finalizer list without the one the controller owns
@@ -225,6 +241,7 @@ func (r *SubscriptionReconciler) removeFinalizer(subscription *eventingv1alpha1.
 	if err := r.Update(ctx, subscription); err != nil {
 		return errors.Wrapf(err, "error while removing Finalizer with name: %s", FinalizerName)
 	}
+	result.Requeue = true
 	logger.V(1).Info("Removed finalizer")
 	return nil
 }

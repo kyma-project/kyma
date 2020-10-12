@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -90,26 +89,6 @@ type SubscriptionList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Subscription `json:"items"`
 }
-
-type ConditionType string
-
-const (
-	ConditionSubscribed ConditionType = "Subscribed"
-)
-
-type Condition struct {
-	Type               ConditionType      `json:"type,omitempty"`
-	Status             v1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
-	LastTransitionTime metav1.Time        `json:"lastTransitionTime,omitempty"`
-	Reason             ConditionReason    `json:"reason,omitempty"`
-	Message            string             `json:"message,omitempty"`
-}
-
-type ConditionReason string
-
-const (
-	ConditionReasonSubscriptionCreated ConditionReason = "SubscriptionCreated"
-)
 
 func init() {
 	SchemeBuilder.Register(&Subscription{}, &SubscriptionList{})

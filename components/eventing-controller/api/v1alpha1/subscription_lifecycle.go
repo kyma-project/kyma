@@ -3,6 +3,27 @@ package v1alpha1
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/api/core/v1"
+)
+
+type ConditionType string
+
+const (
+	ConditionSubscribed ConditionType = "Subscribed"
+)
+
+type Condition struct {
+	Type               ConditionType      `json:"type,omitempty"`
+	Status             v1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
+	LastTransitionTime metav1.Time        `json:"lastTransitionTime,omitempty"`
+	Reason             ConditionReason    `json:"reason,omitempty"`
+	Message            string             `json:"message,omitempty"`
+}
+
+type ConditionReason string
+
+const (
+	ConditionReasonSubscriptionCreated ConditionReason = "SubscriptionCreated"
 )
 
 // InitializeConditions sets unset conditions to Unknown
@@ -37,4 +58,24 @@ func makeConditions() []Condition {
 		},
 	}
 	return conditions
+}
+
+func MakeCondition(conditionType ConditionType, reason ConditionReason, status corev1.ConditionStatus) Condition {
+	return Condition{
+		Type:               conditionType,
+		Status:             status,
+		LastTransitionTime: metav1.Now(),
+		Reason:             reason,
+		// TODO:
+		Message: "",
+	}
+}
+
+func (s *SubscriptionStatus) IsConditionSubscribed() bool {
+	for _, condition := range s.Conditions {
+		if condition.Type == ConditionSubscribed && condition.Status == corev1.ConditionTrue {
+			return true
+		}
+	}
+	return false
 }
