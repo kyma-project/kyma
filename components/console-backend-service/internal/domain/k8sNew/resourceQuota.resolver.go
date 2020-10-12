@@ -2,6 +2,8 @@ package k8sNew
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
@@ -39,38 +41,19 @@ func (r *Resolver) ResourceQuotaJSONfield(ctx context.Context, obj *v1.ResourceQ
 	return resource.ToJson(obj)
 }
 
-// func (r *Resolver) JsonField(ctx context.Context, obj *v1.LimitRange) (gqlschema.JSON, error) {
-// 	return resource.ToJson(obj)
-// }
+func (r *Resolver) UpdateResourceQuota(ctx context.Context, namespace string, name string, newJSON gqlschema.JSON) (*v1.ResourceQuota, error) {
+	unstructured, unstructuredParseError := resource.ToUnstructured(&newJSON)
+	if unstructuredParseError != nil {
+		return nil, errors.New(fmt.Sprintf("could not parse input JSON to unstructured %s", unstructuredParseError))
+	}
 
-// func (r *Resolver) UpdateLimitRange(ctx context.Context, namespace string, name string, newJSON gqlschema.JSON) (*v1.LimitRange, error) {
-// 	unstructured, unstructuredParseError := resource.ToUnstructured(&newJSON)
-// 	if unstructuredParseError != nil {
-// 		return nil, errors.New(fmt.Sprintf("could not parse input JSON to unstructured %s", unstructuredParseError))
-// 	}
+	newResourceQuota := &v1.ResourceQuota{}
+	jsonParseError := resource.FromUnstructured(unstructured, newResourceQuota)
+	if jsonParseError != nil {
+		return nil, errors.New(fmt.Sprintf("could not convert ResourceQuota from unstructured %s", jsonParseError))
+	}
 
-// 	newLimitRange := &v1.LimitRange{}
-// 	jsonParseError := resource.FromUnstructured(unstructured, newLimitRange)
-// 	if jsonParseError != nil {
-// 		return nil, errors.New(fmt.Sprintf("could not convert LimitRange from unstructured %s", jsonParseError))
-// 	}
-
-// 	result := &v1.LimitRange{}
-// 	err := r.LimitRangesService().Apply(newLimitRange, result)
-// 	return result, err
-// }
-
-// type resourceLimitsItem interface {
-// 	Memory() *apimachinery.Quantity
-// 	Cpu() *apimachinery.Quantity
-// }
-
-// func (r *Resolver) GetResourceLimits(item resourceLimitsItem) (*gqlschema.ResourceLimits, error) {
-// 	mem := item.Memory().String()
-// 	cpu := item.Cpu().String()
-
-// 	return &gqlschema.ResourceLimits{
-// 		Memory: &mem,
-// 		CPU:    &cpu,
-// 	}, nil
-// }
+	result := &v1.ResourceQuota{}
+	err := r.ResourceQuotasService().Apply(newResourceQuota, result)
+	return result, err
+}

@@ -32,7 +32,7 @@ func (r *mutationResolver) UpdateLimitRange(ctx context.Context, namespace strin
 }
 
 func (r *mutationResolver) UpdateResourceQuota(ctx context.Context, namespace string, name string, json gqlschema.JSON) (*v1.ResourceQuota, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.k8sNew.UpdateResourceQuota(ctx, namespace, name, json)
 }
 
 func (r *queryResolver) LimitRanges(ctx context.Context, namespace string) ([]*v1.LimitRange, error) {
