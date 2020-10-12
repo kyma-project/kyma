@@ -109,11 +109,12 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 	return []step.Step{
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
 		teststep.NewAddonConfiguration("Create addon configuration", addon, addonURL, genericContainer),
-		step.Parallel(logf,
+		step.Parallel(logf, "fn_tests",
 			step.NewSerialTestRunner(python38Logger, "Python37 test",
 				teststep.CreateFunction(python38Logger, python38Cfg.Fn, "Create Python37 Function", runtimes.BasicPythonFunction("Hello From python")),
 				teststep.NewHTTPCheck(python38Logger, "Python37 pre update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python38Logger), "Hello From python"),
 				teststep.UpdateFunction(python38Logger, python38Cfg.Fn, "Update Python37 Function", runtimes.BasicPythonFunction("Hello From updated python")),
+				testStep{name: "Falt Step", logf: logf, err: errors.New("Ups")},
 				teststep.NewHTTPCheck(python38Logger, "Python37 post update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python38Logger), "Hello From updated python"),
 			),
 			step.NewSerialTestRunner(nodejs10Logger, "NodeJS10 test",

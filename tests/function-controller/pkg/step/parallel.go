@@ -12,6 +12,7 @@ import (
 
 type Parallelized struct {
 	steps []Step
+	name  string
 	logf  *logrus.Entry
 }
 
@@ -21,18 +22,17 @@ func (p *Parallelized) Name() string {
 		names[i] = step.Name()
 	}
 	joined := strings.Join(names, ", ")
-	return fmt.Sprintf("Parallelized: %s", joined)
+	return fmt.Sprintf("Parralel:%s, %s", p.name, joined)
 }
 
 func (p *Parallelized) Run() error {
 	return p.inParallel(func(step Step) error {
+		p.logf.Infof("Run in parallel: %s", step.Name())
 		err := step.Run()
-		p.logf.Infof("Run in parallel: %s", p.Name())
 		if err != nil {
 			p.logf.Errorf("Step: %s, returned error: %s", step.Name(), err.Error())
 			if callbackErr := step.OnError(err); callbackErr != nil {
-				//TODO: somethng with
-				errors.Wrap(callbackErr, "")
+				p.logf.Errorf("while executing OnError on %s, err: %s", step.Name(), callbackErr.Error())
 			}
 			return errors.Wrapf(err, "while executing step: %s", step.Name())
 		}
@@ -47,12 +47,6 @@ func (p *Parallelized) Cleanup() error {
 }
 
 func (p *Parallelized) OnError(cause error) error {
-	//for _, step := range p.steps {
-	//	err := step.OnError(cause)
-	//	if err != nil {
-	//		return errors.Wrap(err, "while fetching logs from parallelized steps")
-	//	}
-	//}
 	return nil
 }
 
@@ -83,5 +77,5 @@ func (p *Parallelized) runStepInParallel(wg *sync.WaitGroup, errs chan<- error, 
 }
 
 func Parallel(logf *logrus.Entry, name string, steps ...Step) *Parallelized {
-	return &Parallelized{logf: logf.WithField("Parallel", name), steps: steps}
+	return &Parallelized{logf: logf, name: name, steps: steps}
 }

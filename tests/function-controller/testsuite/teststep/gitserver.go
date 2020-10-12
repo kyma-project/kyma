@@ -53,5 +53,5 @@ func (r newGitServer) Cleanup() error {
 }
 
 func (r newGitServer) OnError(cause error) error {
-	return nil
+	return r.gs.LogResource()
 }

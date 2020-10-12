@@ -43,7 +43,7 @@ func (n Namespace) LogResource() error {
 	if err != nil {
 		return err
 	}
-
+	ns.TypeMeta.Kind = "namespace"
 	out, err := json.Marshal(ns)
 	if err != nil {
 		return err

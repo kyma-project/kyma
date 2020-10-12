@@ -37,8 +37,8 @@ func (s SerialRunner) Run() error {
 	for i, serialStep := range s.steps {
 		s.log.Infof("Step %d: %s", i, serialStep.Name())
 		if err := serialStep.Run(); err != nil {
-			if callBackErr := s.onError(err, i); callBackErr != nil {
-
+			if callBackErr := s.stepsOnError(err, i); callBackErr != nil {
+				s.log.Errorf("while executing OnError on %s,, err: %s", serialStep.Name(), callBackErr.Error())
 			}
 			return errors.Wrapf(err, "while executing step: %s", serialStep.Name())
 		}
@@ -46,9 +46,9 @@ func (s SerialRunner) Run() error {
 	return nil
 }
 
-func (s SerialRunner) onError(err error, stepIdx int) error {
+func (s SerialRunner) stepsOnError(cause error, stepIdx int) error {
 	for i := stepIdx; i >= 0; i-- {
-		err := s.steps[i].OnError(err)
+		err := s.steps[i].OnError(cause)
 		if err != nil {
 			return err
 		}
@@ -57,7 +57,8 @@ func (s SerialRunner) onError(err error, stepIdx int) error {
 }
 
 func (s SerialRunner) Cleanup() error {
-	for _, serialStep := range s.steps {
+	for i := len(s.steps) - 1; i >= 0; i-- {
+		serialStep := s.steps[i]
 		s.log.Infof("Cleanup Serial Step: %s", serialStep.Name())
 		if err := serialStep.Cleanup(); err != nil {
 			return errors.Wrapf(err, "while clean up step: %s", serialStep.Name())

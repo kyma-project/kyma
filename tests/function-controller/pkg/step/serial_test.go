@@ -2,7 +2,6 @@ package step_test
 
 import (
 	"errors"
-	"fmt"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
 	"github.com/onsi/gomega"
 	"github.com/sirupsen/logrus"
@@ -47,7 +46,6 @@ func TestSerialTestRunner(t *testing.T) {
 	hook.Reset()
 }
 
-
 func getLogsContains(entries []*logrus.Entry, text string) []*logrus.Entry {
 	filteredEntries := []*logrus.Entry{}
 
@@ -72,6 +70,7 @@ func (e testStep) Name() string {
 }
 
 func (e testStep) Run() error {
+	e.logf = e.logf.WithField("Step", e.name)
 	return e.err
 }
 
@@ -81,6 +80,6 @@ func (e testStep) Cleanup() error {
 
 func (e testStep) OnError(cause error) error {
 	*e.counter++
-	e.logf.Info(fmt.Sprintf("OnError: %s", e.name))
+	e.logf.Infof("Called on Error, resource: %s", e.name)
 	return nil
 }

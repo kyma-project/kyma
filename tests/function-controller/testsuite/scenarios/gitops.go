@@ -59,13 +59,39 @@ func GitopsSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Ent
 		DataKey:            testsuite.TestDataKey,
 	}
 	return []step.Step{
-		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
-		teststep.NewGitServer(gitCfg, "Start in-cluster Git Server", appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace)),
-		teststep.NewCreateGitRepository(genericContainer.Log, gitCfg.Repo, "Create GitRepository", gitops.NoAuthRepositorySpec(gitCfg.GetGitServerInClusterURL())),
-		teststep.CreateFunction(genericContainer.Log, gitCfg.Fn, "Create Git Function", gitops.GitopsFunction(gitCfg.RepoName, serverlessv1alpha1.Nodejs12)),
-		teststep.NewDefaultedFunctionCheck("Check if Git Function has correct default values", gitCfg.Fn),
-		teststep.NewHTTPCheck(genericContainer.Log, "Git Function pre update simple check through gateway", gitCfg.InClusterURL, poll, "GITOPS 1"),
-		teststep.NewCommitChanges(genericContainer.Log, "Commit changes to Git Function", gitCfg.GetGitServerInClusterURL()),
-		teststep.NewHTTPCheck(genericContainer.Log, "Git Function post update simple check through gateway", gitCfg.InClusterURL, poll, "GITOPS 2"),
+		step.NewSerialTestRunner(logf, "Create Git Func",
+			teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
+			teststep.NewGitServer(gitCfg, "Start in-cluster Git Server", appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace)),
+			teststep.NewCreateGitRepository(genericContainer.Log, gitCfg.Repo, "Create GitRepository", gitops.NoAuthRepositorySpec(gitCfg.GetGitServerInClusterURL())),
+			teststep.CreateFunction(genericContainer.Log, gitCfg.Fn, "Create Git Function", gitops.GitopsFunction(gitCfg.RepoName, serverlessv1alpha1.Nodejs12)),
+			teststep.NewDefaultedFunctionCheck("Check if Git Function has correct default values", gitCfg.Fn),
+			teststep.NewHTTPCheck(genericContainer.Log, "Git Function pre update simple check through gateway", gitCfg.InClusterURL, poll, "GITOPS 1"),
+			teststep.NewCommitChanges(genericContainer.Log, "Commit changes to Git Function", gitCfg.GetGitServerInClusterURL()),
+			teststep.NewHTTPCheck(genericContainer.Log, "Git Function post update simple check through gateway", gitCfg.InClusterURL, poll, "GITOPS 2"),
+			testStep{name: "Falt Step", logf: logf, err: errors.New("Ups")}),
 	}, nil
+}
+
+type testStep struct {
+	err  error
+	name string
+	logf *logrus.Entry
+}
+
+func (e testStep) Name() string {
+	return e.name
+}
+
+func (e testStep) Run() error {
+	e.logf = e.logf.WithField("Step", e.name)
+	return e.err
+}
+
+func (e testStep) Cleanup() error {
+	return nil
+}
+
+func (e testStep) OnError(cause error) error {
+	e.logf.Infof("Called on Error, resource: %s", e.name)
+	return nil
 }

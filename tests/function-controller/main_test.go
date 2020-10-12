@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -48,40 +47,13 @@ func runTests(t *testing.T, testFunc testSuite) {
 	logf.SetFormatter(&logrus.TextFormatter{})
 	logf.SetReportCaller(false)
 
-	//logf.AddHook(TestHook{SuiteName: t.Name()})
-	//logf.Info("damian")
 	steps, err := testFunc(restConfig, cfg.Test, logf.WithField("Suite", t.Name()))
 	failOnError(g, err)
 	runner := step.NewRunner(step.WithCleanupDefault(cfg.Test.Cleanup), step.WithLogger(logf))
 
 	err = runner.Execute(steps)
-	//failOnError(g, err)
+	failOnError(g, err)
 }
-
-func TestOnError(t *testing.T) {
-	runTests(t, scenarios.TestSteps)
-
-	logf := logrus.New()
-	newLogger := logf.WithField("test", "value")
-
-	newLogger.Info("first")
-	newLogger.Info("second")
-}
-
-type TestHook struct {
-	SuiteName string
-}
-
-func (t TestHook) Levels() []logrus.Level {
-	return logrus.AllLevels
-}
-
-func (t TestHook) Fire(entry *logrus.Entry) error {
-	entry.Message = fmt.Sprintf("Suite=%s; msg=%s", t.SuiteName, entry.Message)
-	return nil
-}
-
-var _ logrus.Hook = TestHook{}
 
 func loadConfig(prefix string) (config, error) {
 	cfg := config{}

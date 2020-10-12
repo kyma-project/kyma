@@ -1,6 +1,7 @@
 package gitserver
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -168,4 +169,42 @@ func (gs *GitServer) Delete() error {
 	errDeployment := gs.deployments.Delete(gs.name, &metav1.DeleteOptions{})
 	err := multierror.Append(errDeployment, errService, errDestRule)
 	return err.ErrorOrNil()
+}
+
+func (gs *GitServer) LogResource() error {
+	deployment, err := gs.deployments.Get(gs.name, metav1.GetOptions{})
+	if err != nil {
+		return errors.Wrap(err, "while getting deployment")
+	}
+	//The client doesn't fill deployment TypeMeta
+	deployment.TypeMeta.Kind = "deployment"
+	out, err := json.MarshalIndent(deployment, "", "")
+	if err != nil {
+		return errors.Wrap(err, "while marshalling deployment")
+	}
+	gs.log.Info(string(out))
+
+	svc, err := gs.services.Get(gs.name, metav1.GetOptions{})
+	if err != nil {
+		return errors.Wrap(err, "while getting service")
+	}
+	//The client doesn't fill service TypeMeta
+	svc.TypeMeta.Kind = "service"
+	out, err = json.MarshalIndent(svc, "", "")
+	if err != nil {
+		return errors.Wrap(err, "while marshalling service")
+	}
+	gs.log.Info(string(out))
+
+	obj, err := gs.resCli.Get(gs.name)
+	if err != nil {
+		return errors.Wrap(err, "while getting destination rule")
+	}
+	out, err = json.MarshalIndent(obj, "", "")
+	if err != nil {
+		return errors.Wrap(err, "while marshalling APU Rule")
+	}
+	gs.log.Info(string(out))
+
+	return nil
 }
