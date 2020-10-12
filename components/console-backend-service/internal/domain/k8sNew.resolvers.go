@@ -8,11 +8,11 @@ import (
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 )
 
 func (r *limitRangeResolver) JSON(ctx context.Context, obj *v1.LimitRange) (gqlschema.JSON, error) {
-	return r.k8sNew.JsonField(ctx, obj)
+	return r.k8sNew.LimitRangeJSONfield(ctx, obj)
 }
 
 func (r *limitRangeItemResolver) Max(ctx context.Context, obj *v1.LimitRangeItem) (*gqlschema.ResourceLimits, error) {
@@ -31,12 +31,20 @@ func (r *mutationResolver) UpdateLimitRange(ctx context.Context, namespace strin
 	return r.k8sNew.UpdateLimitRange(ctx, namespace, name, json)
 }
 
+func (r *mutationResolver) UpdateResourceQuota(ctx context.Context, namespace string, name string, json gqlschema.JSON) (*v1.ResourceQuota, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *queryResolver) LimitRanges(ctx context.Context, namespace string) ([]*v1.LimitRange, error) {
 	return r.k8sNew.LimitRangesQuery(ctx, namespace)
 }
 
 func (r *queryResolver) ResourceQuotas(ctx context.Context, namespace string) ([]*v1.ResourceQuota, error) {
 	return r.k8sNew.ResourceQuotasQuery(ctx, namespace)
+}
+
+func (r *resourceQuotaResolver) JSON(ctx context.Context, obj *v1.ResourceQuota) (gqlschema.JSON, error) {
+	return r.k8sNew.ResourceQuotaJSONfield(ctx, obj)
 }
 
 func (r *resourceQuotaSpecResolver) Hard(ctx context.Context, obj *v1.ResourceQuotaSpec) (*gqlschema.ResourceQuotaHard, error) {
@@ -51,6 +59,9 @@ func (r *Resolver) LimitRangeItem() gqlschema.LimitRangeItemResolver {
 	return &limitRangeItemResolver{r}
 }
 
+// ResourceQuota returns gqlschema.ResourceQuotaResolver implementation.
+func (r *Resolver) ResourceQuota() gqlschema.ResourceQuotaResolver { return &resourceQuotaResolver{r} }
+
 // ResourceQuotaSpec returns gqlschema.ResourceQuotaSpecResolver implementation.
 func (r *Resolver) ResourceQuotaSpec() gqlschema.ResourceQuotaSpecResolver {
 	return &resourceQuotaSpecResolver{r}
@@ -58,6 +69,7 @@ func (r *Resolver) ResourceQuotaSpec() gqlschema.ResourceQuotaSpecResolver {
 
 type limitRangeResolver struct{ *Resolver }
 type limitRangeItemResolver struct{ *Resolver }
+type resourceQuotaResolver struct{ *Resolver }
 type resourceQuotaSpecResolver struct{ *Resolver }
 
 // !!! WARNING !!!

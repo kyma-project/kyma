@@ -27,7 +27,7 @@ func (r *Resolver) LimitRangesQuery(ctx context.Context, namespace string) ([]*v
 	return items, err
 }
 
-func (r *Resolver) JsonField(ctx context.Context, obj *v1.LimitRange) (gqlschema.JSON, error) {
+func (r *Resolver) LimitRangeJSONfield(ctx context.Context, obj *v1.LimitRange) (gqlschema.JSON, error) {
 	return resource.ToJson(obj)
 }
 

@@ -36,7 +36,7 @@ type ResourceQuotaSpec @goModel(model: "k8s.io/api/core/v1.ResourceQuotaSpec") {
 type ResourceQuota @goModel(model: "k8s.io/api/core/v1.ResourceQuota") {
   name: String!
   spec: ResourceQuotaSpec!
-
+  json: JSON!
   # limits: ResourceLimits!
   # requests: ResourceLimits!
 }
@@ -99,14 +99,14 @@ extend type Mutation {
     }
   )
 
-  # updateResourceQuota(namespace: String!, name: String!, json: JSON!): ResourceQuota
-  # @HasAccess(
-  #   attributes: {
-  #     resource: "resourcequotas"
-  #     verb: "update"
-  #     apiGroup: ""
-  #     apiVersion: "v1"
-  #     namespaceArg: "namespace"
-  #   }
-  # )
+  updateResourceQuota(namespace: String!, name: String!, json: JSON!): ResourceQuota
+  @HasAccess(
+    attributes: {
+      resource: "resourcequotas"
+      verb: "update"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
 }

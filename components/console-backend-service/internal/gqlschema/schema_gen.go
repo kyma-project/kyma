@@ -65,6 +65,7 @@ type ResolverRoot interface {
 	NamespaceListItem() NamespaceListItemResolver
 	OAuth2Client() OAuth2ClientResolver
 	Query() QueryResolver
+	ResourceQuota() ResourceQuotaResolver
 	ResourceQuotaSpec() ResourceQuotaSpecResolver
 	ServiceBinding() ServiceBindingResolver
 	ServiceBindingUsage() ServiceBindingUsageResolver
@@ -637,6 +638,7 @@ type ComplexityRoot struct {
 		UpdateOAuth2Client                         func(childComplexity int, name string, namespace string, generation int, params v1alpha12.OAuth2ClientSpec) int
 		UpdatePod                                  func(childComplexity int, name string, namespace string, pod JSON) int
 		UpdateReplicaSet                           func(childComplexity int, name string, namespace string, replicaSet JSON) int
+		UpdateResourceQuota                        func(childComplexity int, namespace string, name string, json JSON) int
 		UpdateSecret                               func(childComplexity int, name string, namespace string, secret JSON) int
 		UpdateService                              func(childComplexity int, name string, namespace string, service JSON) int
 	}
@@ -817,6 +819,7 @@ type ComplexityRoot struct {
 	}
 
 	ResourceQuota struct {
+		JSON func(childComplexity int) int
 		Name func(childComplexity int) int
 		Spec func(childComplexity int) int
 	}
@@ -1259,6 +1262,7 @@ type MutationResolver interface {
 	DeleteTrigger(ctx context.Context, namespace string, triggerName string) (*v1alpha13.Trigger, error)
 	DeleteManyTriggers(ctx context.Context, namespace string, triggerNames []string) ([]*v1alpha13.Trigger, error)
 	UpdateLimitRange(ctx context.Context, namespace string, name string, json JSON) (*v11.LimitRange, error)
+	UpdateResourceQuota(ctx context.Context, namespace string, name string, json JSON) (*v11.ResourceQuota, error)
 	CreateOAuth2Client(ctx context.Context, name string, namespace string, params v1alpha12.OAuth2ClientSpec) (*v1alpha12.OAuth2Client, error)
 	UpdateOAuth2Client(ctx context.Context, name string, namespace string, generation int, params v1alpha12.OAuth2ClientSpec) (*v1alpha12.OAuth2Client, error)
 	DeleteOAuth2Client(ctx context.Context, name string, namespace string) (*v1alpha12.OAuth2Client, error)
@@ -1341,6 +1345,9 @@ type QueryResolver interface {
 	ClusterRoleBindings(ctx context.Context) ([]*v12.ClusterRoleBinding, error)
 	GitRepositories(ctx context.Context, namespace string) ([]*v1alpha11.GitRepository, error)
 	GitRepository(ctx context.Context, namespace string, name string) (*v1alpha11.GitRepository, error)
+}
+type ResourceQuotaResolver interface {
+	JSON(ctx context.Context, obj *v11.ResourceQuota) (JSON, error)
 }
 type ResourceQuotaSpecResolver interface {
 	Hard(ctx context.Context, obj *v11.ResourceQuotaSpec) (*ResourceQuotaHard, error)
@@ -4076,6 +4083,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateReplicaSet(childComplexity, args["name"].(string), args["namespace"].(string), args["replicaSet"].(JSON)), true
 
+	case "Mutation.updateResourceQuota":
+		if e.complexity.Mutation.UpdateResourceQuota == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateResourceQuota_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateResourceQuota(childComplexity, args["namespace"].(string), args["name"].(string), args["json"].(JSON)), true
+
 	case "Mutation.updateSecret":
 		if e.complexity.Mutation.UpdateSecret == nil {
 			break
@@ -5232,6 +5251,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ResourceLimits.Memory(childComplexity), true
+
+	case "ResourceQuota.json":
+		if e.complexity.ResourceQuota.JSON == nil {
+			break
+		}
+
+		return e.complexity.ResourceQuota.JSON(childComplexity), true
 
 	case "ResourceQuota.name":
 		if e.complexity.ResourceQuota.Name == nil {
@@ -7008,7 +7034,7 @@ type ResourceQuotaSpec @goModel(model: "k8s.io/api/core/v1.ResourceQuotaSpec") {
 type ResourceQuota @goModel(model: "k8s.io/api/core/v1.ResourceQuota") {
   name: String!
   spec: ResourceQuotaSpec!
-
+  json: JSON!
   # limits: ResourceLimits!
   # requests: ResourceLimits!
 }
@@ -7071,16 +7097,16 @@ extend type Mutation {
     }
   )
 
-  # updateResourceQuota(namespace: String!, name: String!, json: JSON!): ResourceQuota
-  # @HasAccess(
-  #   attributes: {
-  #     resource: "resourcequotas"
-  #     verb: "update"
-  #     apiGroup: ""
-  #     apiVersion: "v1"
-  #     namespaceArg: "namespace"
-  #   }
-  # )
+  updateResourceQuota(namespace: String!, name: String!, json: JSON!): ResourceQuota
+  @HasAccess(
+    attributes: {
+      resource: "resourcequotas"
+      verb: "update"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
 }
 `, BuiltIn: false},
 	&ast.Source{Name: "internal/gqlschema/oauth.graphql", Input: `scalar GrantType @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.GrantType")
@@ -10178,6 +10204,36 @@ func (ec *executionContext) field_Mutation_updateReplicaSet_args(ctx context.Con
 		}
 	}
 	args["replicaSet"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateResourceQuota_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	var arg2 JSON
+	if tmp, ok := rawArgs["json"]; ok {
+		arg2, err = ec.unmarshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["json"] = arg2
 	return args, nil
 }
 
@@ -24124,6 +24180,68 @@ func (ec *executionContext) _Mutation_updateLimitRange(ctx context.Context, fiel
 	return ec.marshalOLimitRange2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRange(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_updateResourceQuota(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateResourceQuota_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().UpdateResourceQuota(rctx, args["namespace"].(string), args["name"].(string), args["json"].(JSON))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "resourcequotas", "verb": "update"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v11.ResourceQuota); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/core/v1.ResourceQuota`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v11.ResourceQuota)
+	fc.Result = res
+	return ec.marshalOResourceQuota2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuota(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createOAuth2Client(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -30732,6 +30850,40 @@ func (ec *executionContext) _ResourceQuota_spec(ctx context.Context, field graph
 	res := resTmp.(v11.ResourceQuotaSpec)
 	fc.Result = res
 	return ec.marshalNResourceQuotaSpec2k8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuotaSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ResourceQuota_json(ctx context.Context, field graphql.CollectedField, obj *v11.ResourceQuota) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ResourceQuota",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ResourceQuota().JSON(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	fc.Result = res
+	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ResourceQuotaHard_cpu(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotaHard) (ret graphql.Marshaler) {
@@ -43393,6 +43545,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_deleteManyTriggers(ctx, field)
 		case "updateLimitRange":
 			out.Values[i] = ec._Mutation_updateLimitRange(ctx, field)
+		case "updateResourceQuota":
+			out.Values[i] = ec._Mutation_updateResourceQuota(ctx, field)
 		case "createOAuth2Client":
 			out.Values[i] = ec._Mutation_createOAuth2Client(ctx, field)
 		case "updateOAuth2Client":
@@ -44938,13 +45092,27 @@ func (ec *executionContext) _ResourceQuota(ctx context.Context, sel ast.Selectio
 		case "name":
 			out.Values[i] = ec._ResourceQuota_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "spec":
 			out.Values[i] = ec._ResourceQuota_spec(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
+		case "json":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ResourceQuota_json(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -52656,6 +52824,17 @@ func (ec *executionContext) marshalOResourceLimits2ᚖgithubᚗcomᚋkymaᚑproj
 		return graphql.Null
 	}
 	return ec._ResourceLimits(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOResourceQuota2k8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuota(ctx context.Context, sel ast.SelectionSet, v v11.ResourceQuota) graphql.Marshaler {
+	return ec._ResourceQuota(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOResourceQuota2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuota(ctx context.Context, sel ast.SelectionSet, v *v11.ResourceQuota) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ResourceQuota(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOResourceQuotaHard2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaHard(ctx context.Context, sel ast.SelectionSet, v ResourceQuotaHard) graphql.Marshaler {

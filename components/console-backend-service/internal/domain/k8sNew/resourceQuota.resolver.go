@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -27,16 +28,15 @@ func (r *Resolver) GetHardField(item v1.ResourceList) (*gqlschema.ResourceQuotaH
 	cpu := item.Cpu().String()
 	pods := item.Pods().String()
 
-	// limits := gqlschema.ResourceLimits{
-	// 	Memory: &mem,
-	// 	CPU:    &cpu,
-	// }
-
 	return &gqlschema.ResourceQuotaHard{
 		Memory: &mem,
 		CPU:    &cpu,
 		Pods:   &pods,
 	}, nil
+}
+
+func (r *Resolver) ResourceQuotaJSONfield(ctx context.Context, obj *v1.ResourceQuota) (gqlschema.JSON, error) {
+	return resource.ToJson(obj)
 }
 
 // func (r *Resolver) JsonField(ctx context.Context, obj *v1.LimitRange) (gqlschema.JSON, error) {
