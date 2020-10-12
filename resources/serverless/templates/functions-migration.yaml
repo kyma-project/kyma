@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "fullname" . }}-runtime-migration-job
+  name: {{ template "fullname" . }}-migration-job
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
@@ -11,13 +11,13 @@ metadata:
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
 data:
-  runtime-migration: |-
-{{ include (print $.Template.BasePath "/_helper_funtction_runtime_migration.txt") . | indent 4 }}
+  migration: |-
+{{ include (print $.Template.BasePath "/_helper_migration.txt") . | indent 4 }}
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ template "fullname" . }}-runtime-migration-job
+  name: {{ template "fullname" . }}-migration-job
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
@@ -29,7 +29,7 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ template "fullname" . }}-runtime-migration-job
+  name: {{ template "fullname" . }}-migration-job
   labels:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
   annotations:
@@ -44,7 +44,7 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ template "fullname" . }}-runtime-migration-job
+  name: {{ template "fullname" . }}-migration-job
   labels:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
   annotations:
@@ -53,17 +53,17 @@ metadata:
     helm.sh/hook-weight: "0"
 subjects:
 - kind: ServiceAccount
-  name: {{ template "fullname" . }}-runtime-migration-job
+  name: {{ template "fullname" . }}-migration-job
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ template "fullname" . }}-runtime-migration-job
+  name: {{ template "fullname" . }}-migration-job
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "fullname" . }}-runtime-migration-job
+  name: {{ template "fullname" . }}-migration-job
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
@@ -79,23 +79,23 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      serviceAccountName: {{ template "fullname" . }}-runtime-migration-job
+      serviceAccountName: {{ template "fullname" . }}-migration-job
       restartPolicy: OnFailure
       volumes:
         - name: migration-script
           projected:
             sources:
             - configMap:
-                name: {{ template "fullname" . }}-runtime-migration-job
+                name: {{ template "fullname" . }}-migration-job
         - name: export
           emptyDir: {}
       containers:
-      - name: runtime-migration-job
-        image: "{{ .Values.runtimeMigration.image.repository }}:{{ .Values.runtimeMigration.image.tag }}"
-        imagePullPolicy: "{{ .Values.runtimeMigration.image.pullPolicy }}"
+      - name: migration-job
+        image: "{{ .Values.migration.image.repository }}:{{ .Values.migration.image.tag }}"
+        imagePullPolicy: "{{ .Values.migration.image.pullPolicy }}"
         command: 
           - "/bin/bash"
-          - "/config/runtime-migration"
+          - "/config/migration"
         volumeMounts:
           - name: migration-script
             mountPath: /config
