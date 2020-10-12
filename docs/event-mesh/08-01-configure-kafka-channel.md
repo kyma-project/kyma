@@ -1,6 +1,6 @@
 ---
-title: Kafka Channel
-type: Configuration
+title: Configure the Kafka Channel
+type: Tutorials
 ---
 
 Instead of the default NATS Channel implementation, you can use the Knative-compatible [Kafka Channel](https://github.com/kyma-incubator/knative-kafka). To ensure Kafka works properly, you must:
@@ -11,9 +11,9 @@ Instead of the default NATS Channel implementation, you can use the Knative-comp
 
 >**NOTE**: Although Event Hubs and Kafka are nearly identical as concepts, they use a different naming convention. To avoid confusion, read [this document](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-for-kafka-ecosystem-overview#kafka-and-event-hub-conceptual-mapping).
 
-## Configuration process
+## Steps
 
-To configure the Kafka channel, follow these steps:
+Follow these steps:
 
 1. Use the Azure portal to create a [resource group](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-create#create-a-resource-group) where your will place your cluster.
 
