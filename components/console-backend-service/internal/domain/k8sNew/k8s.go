@@ -10,7 +10,8 @@ type Resolver struct {
 
 func New(factory *resource.GenericServiceFactory) *Resolver {
 	module := resource.NewModule("k8sNew", factory, resource.ServiceCreators{
-		limitRangesGroupVersionResource: NewLimitRangesService,
+		limitRangesGroupVersionResource:    NewLimitRangesService,
+		resourceQuotasGroupVersionResource: NewResourceQuotasService,
 	})
 	// informerFactory := informers.NewSharedInformerFactory(clientset, informerResyncPeriod)
 
@@ -22,6 +23,9 @@ func New(factory *resource.GenericServiceFactory) *Resolver {
 
 func (r *Resolver) LimitRangesService() *resource.GenericService {
 	return r.Module.Service(limitRangesGroupVersionResource)
+}
+func (r *Resolver) ResourceQuotasService() *resource.GenericService {
+	return r.Module.Service(resourceQuotasGroupVersionResource)
 }
 
 // func (r *Resolver) WaitForCacheSync(stopCh <-chan struct{}) {

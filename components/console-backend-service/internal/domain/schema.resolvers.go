@@ -209,10 +209,6 @@ func (r *mutationResolver) DeleteReplicaSet(ctx context.Context, name string, na
 	return r.k8s.DeleteReplicaSetMutation(ctx, name, namespace)
 }
 
-func (r *mutationResolver) CreateResourceQuota(ctx context.Context, namespace string, name string, resourceQuota gqlschema.ResourceQuotaInput) (*gqlschema.ResourceQuota, error) {
-	return r.k8s.CreateResourceQuota(ctx, namespace, name, resourceQuota)
-}
-
 func (r *mutationResolver) UpdateConfigMap(ctx context.Context, name string, namespace string, configMap gqlschema.JSON) (*gqlschema.ConfigMap, error) {
 	return r.k8s.UpdateConfigMapMutation(ctx, name, namespace, configMap)
 }
@@ -411,14 +407,6 @@ func (r *queryResolver) ReplicaSet(ctx context.Context, name string, namespace s
 
 func (r *queryResolver) ReplicaSets(ctx context.Context, namespace string, first *int, offset *int) ([]*gqlschema.ReplicaSet, error) {
 	return r.k8s.ReplicaSetsQuery(ctx, namespace, first, offset)
-}
-
-func (r *queryResolver) ResourceQuotas(ctx context.Context, namespace string) ([]*gqlschema.ResourceQuota, error) {
-	return r.k8s.ResourceQuotasQuery(ctx, namespace)
-}
-
-func (r *queryResolver) ResourceQuotasStatus(ctx context.Context, namespace string) (*gqlschema.ResourceQuotasStatus, error) {
-	return r.k8s.ResourceQuotasStatus(ctx, namespace)
 }
 
 func (r *queryResolver) EventActivations(ctx context.Context, namespace string) ([]*gqlschema.EventActivation, error) {

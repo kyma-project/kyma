@@ -6,18 +6,28 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+type Service struct {
+	*resource.Service
+}
+
 var limitRangesGroupVersionResource = schema.GroupVersionResource{
 	Version:  v1.SchemeGroupVersion.Version,
 	Group:    v1.SchemeGroupVersion.Group,
 	Resource: "limitranges",
 }
 
-type Service struct {
-	*resource.Service
-}
-
 func NewLimitRangesService(serviceFactory *resource.GenericServiceFactory) (*resource.GenericService, error) {
 	return serviceFactory.ForResource(limitRangesGroupVersionResource), nil
+}
+
+var resourceQuotasGroupVersionResource = schema.GroupVersionResource{
+	Version:  v1.SchemeGroupVersion.Version,
+	Group:    v1.SchemeGroupVersion.Group,
+	Resource: "resourcequotas",
+}
+
+func NewResourceQuotasService(serviceFactory *resource.GenericServiceFactory) (*resource.GenericService, error) {
+	return serviceFactory.ForResource(resourceQuotasGroupVersionResource), nil
 }
 
 //==================================

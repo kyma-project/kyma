@@ -53,7 +53,7 @@ type resourceLimitsItem interface {
 	Cpu() *apimachinery.Quantity
 }
 
-func (r *Resolver) GetResourceLimits(item resourceLimitsItem) (*gqlschema.ResourceLimits, error) {
+func (r *Resolver) GetLimitRangeResources(item resourceLimitsItem) (*gqlschema.ResourceLimits, error) {
 	mem := item.Memory().String()
 	cpu := item.Cpu().String()
 

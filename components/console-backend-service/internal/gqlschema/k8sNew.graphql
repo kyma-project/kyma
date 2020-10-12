@@ -5,6 +5,7 @@ type ResourceLimits {
   cpu: String
 }
 
+# LIMIT RANGE
 type LimitRangeItem @goModel(model: "k8s.io/api/core/v1.LimitRangeItem") {
   type: LimitType!
   max: ResourceLimits
@@ -21,18 +22,69 @@ type LimitRange @goModel(model: "k8s.io/api/core/v1.LimitRange") {
   json: JSON!
 }
 
-input LimitRangeInput {
-  default: ResourceValuesInput!
-  defaultRequest: ResourceValuesInput!
-  max: ResourceValuesInput!
-  type: String!
+# # RESOURCE QUOTA
+
+type ResourceQuotaHard {
+  cpu: String
+  memory: String
+  pods: String
 }
+
+type ResourceQuotaSpec @goModel(model: "k8s.io/api/core/v1.ResourceQuotaSpec") {
+  hard: ResourceQuotaHard
+}
+type ResourceQuota @goModel(model: "k8s.io/api/core/v1.ResourceQuota") {
+  name: String!
+  spec: ResourceQuotaSpec!
+
+  # limits: ResourceLimits!
+  # requests: ResourceLimits!
+}
+
+# type ResourceQuotasStatus {
+#   exceeded: Boolean!
+#   exceededQuotas: [ExceededQuota!]!
+# }
+
+# type ExceededQuota {
+#   quotaName: String!
+#   resourceName: String!
+#   affectedResources: [String!]!
+# }
 
 extend type Query {
   limitRanges(namespace: String!): [LimitRange!]!
   @HasAccess(
-    attributes: { resource: "se", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace" }
+    attributes: {
+      resource: "limitRange"
+      verb: "list"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
   )
+
+  resourceQuotas(namespace: String!): [ResourceQuota!]!
+  @HasAccess(
+    attributes: {
+      resource: "resourcequotas"
+      verb: "list"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+
+  # resourceQuotasStatus(namespace: String!): ResourceQuotasStatus!
+  # @HasAccess(
+  #   attributes: {
+  #     resource: "resourcequotas"
+  #     verb: "list"
+  #     apiGroup: ""
+  #     apiVersion: "v1"
+  #     namespaceArg: "namespace"
+  #   }
+  # )
 }
 
 extend type Mutation {
@@ -46,4 +98,15 @@ extend type Mutation {
       namespaceArg: "namespace"
     }
   )
+
+  # updateResourceQuota(namespace: String!, name: String!, json: JSON!): ResourceQuota
+  # @HasAccess(
+  #   attributes: {
+  #     resource: "resourcequotas"
+  #     verb: "update"
+  #     apiGroup: ""
+  #     apiVersion: "v1"
+  #     namespaceArg: "namespace"
+  #   }
+  # )
 }

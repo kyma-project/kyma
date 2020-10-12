@@ -10,7 +10,7 @@ import (
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
-	v1 "k8s.io/api/rbac/v1"
+	"k8s.io/api/rbac/v1"
 	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	v11 "knative.dev/pkg/apis/duck/v1"
 )
@@ -285,12 +285,6 @@ type EventActivationEvent struct {
 	Schema      JSON   `json:"schema"`
 }
 
-type ExceededQuota struct {
-	QuotaName         string   `json:"quotaName"`
-	ResourceName      string   `json:"resourceName"`
-	AffectedResources []string `json:"affectedResources"`
-}
-
 type File struct {
 	URL      string `json:"url"`
 	Metadata JSON   `json:"metadata"`
@@ -391,13 +385,6 @@ type FunctionStatus struct {
 	Phase   FunctionPhaseType   `json:"phase"`
 	Reason  *FunctionReasonType `json:"reason"`
 	Message *string             `json:"message"`
-}
-
-type LimitRangeInput struct {
-	Default        *ResourceValuesInput `json:"default"`
-	DefaultRequest *ResourceValuesInput `json:"defaultRequest"`
-	Max            *ResourceValuesInput `json:"max"`
-	Type           string               `json:"type"`
 }
 
 type LoadBalancerIngress struct {
@@ -503,21 +490,10 @@ type ResourceLimits struct {
 	CPU    *string `json:"cpu"`
 }
 
-type ResourceQuota struct {
-	Name     string          `json:"name"`
-	Pods     *string         `json:"pods"`
-	Limits   *ResourceValues `json:"limits"`
-	Requests *ResourceValues `json:"requests"`
-}
-
-type ResourceQuotaInput struct {
-	Limits   *ResourceValuesInput `json:"limits"`
-	Requests *ResourceValuesInput `json:"requests"`
-}
-
-type ResourceQuotasStatus struct {
-	Exceeded       bool             `json:"exceeded"`
-	ExceededQuotas []*ExceededQuota `json:"exceededQuotas"`
+type ResourceQuotaHard struct {
+	CPU    *string `json:"cpu"`
+	Memory *string `json:"memory"`
+	Pods   *string `json:"pods"`
 }
 
 type ResourceRef struct {

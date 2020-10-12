@@ -22,8 +22,8 @@ type Resolver struct {
 	*namespaceResolver
 	*secretResolver
 	*deploymentResolver
-	*resourceQuotaResolver
-	*resourceQuotaStatusResolver
+	// *resourceQuotaResolver
+	// *resourceQuotaStatusResolver
 	// *limitRangeResolver
 	*podResolver
 	*serviceResolver
@@ -64,9 +64,9 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	secretService := newSecretService(informerFactory.Core().V1().Secrets().Informer(), client)
 
 	replicaSetService := newReplicaSetService(informerFactory.Apps().V1().ReplicaSets().Informer(), clientset.AppsV1())
-	resourceQuotaService := newResourceQuotaService(informerFactory.Core().V1().ResourceQuotas().Informer(),
-		informerFactory.Apps().V1().ReplicaSets().Informer(), informerFactory.Apps().V1().StatefulSets().Informer(), client)
-	resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService)
+	// resourceQuotaService := newResourceQuotaService(informerFactory.Core().V1().ResourceQuotas().Informer(),
+	// 	informerFactory.Apps().V1().ReplicaSets().Informer(), informerFactory.Apps().V1().StatefulSets().Informer(), client)
+	// resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService)
 	configMapService := newConfigMapService(informerFactory.Core().V1().ConfigMaps().Informer(), clientset.CoreV1())
 	serviceSvc := newServiceService(informerFactory.Core().V1().Services().Informer(), client)
 	selfSubjectRulesService := newSelfSubjectRulesService(clientset.AuthorizationV1())
@@ -79,12 +79,12 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 		serviceResolver:    newServiceResolver(serviceSvc),
 		replicaSetResolver: newReplicaSetResolver(replicaSetService),
 		// limitRangeResolver:          newLimitRangeResolver(limitRangeService),
-		resourceQuotaResolver:       newResourceQuotaResolver(resourceQuotaService),
-		resourceQuotaStatusResolver: newResourceQuotaStatusResolver(resourceQuotaStatusService),
-		configMapResolver:           newConfigMapResolver(configMapService),
-		selfSubjectRulesResolver:    newSelfSubjectRulesResolver(selfSubjectRulesService),
-		versionInfoResolver:         newVersionInfoResolver(deploymentService),
-		informerFactory:             informerFactory,
+		// resourceQuotaResolver:       newResourceQuotaResolver(resourceQuotaService),
+		// resourceQuotaStatusResolver: newResourceQuotaStatusResolver(resourceQuotaStatusService),
+		configMapResolver:        newConfigMapResolver(configMapService),
+		selfSubjectRulesResolver: newSelfSubjectRulesResolver(selfSubjectRulesService),
+		versionInfoResolver:      newVersionInfoResolver(deploymentService),
+		informerFactory:          informerFactory,
 	}, nil
 }
 
