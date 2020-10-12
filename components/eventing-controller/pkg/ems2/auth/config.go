@@ -1,26 +1,19 @@
 package auth
 
 import (
-	"log"
-
-	"github.com/vrischmann/envconfig"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
 type Config struct {
 	ClientID      string
 	ClientSecret  string
 	TokenEndpoint string
-	// TODO for OAuth2 secured webhooks
-	//SubscriptionClientID string
-	//SubscriptionClientSecret string
-	//SubscriptionTokenUrl string
 }
 
 func GetDefaultConfig() *Config {
 	c := Config{}
-	if err := envconfig.InitWithPrefix(&c, "EMS"); err != nil {
-		log.Fatalf("Did not find required EMS environment variables: %v", err)
-	}
-
+	c.ClientID = env.GetConfig().ClientID
+	c.ClientSecret = env.GetConfig().ClientSecret
+	c.TokenEndpoint = env.GetConfig().TokenEndpoint
 	return &c
 }

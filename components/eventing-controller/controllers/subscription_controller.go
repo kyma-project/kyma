@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -22,6 +23,7 @@ type SubscriptionReconciler struct {
 	Log      logr.Logger
 	recorder record.EventRecorder
 	Scheme   *runtime.Scheme
+	bebClient *handlers.Beb
 }
 
 // TODO: emit events
@@ -37,11 +39,15 @@ func NewSubscriptionReconciler(
 	recorder record.EventRecorder,
 	scheme *runtime.Scheme,
 ) *SubscriptionReconciler {
+	bebClient := &handlers.Beb{
+		Log: log,
+	}
 	return &SubscriptionReconciler{
 		Client:   client,
 		Log:      log,
 		recorder: recorder,
 		Scheme:   scheme,
+		bebClient: bebClient,
 	}
 }
 
@@ -119,18 +125,39 @@ func (r *SubscriptionReconciler) syncFinalizer(subscription *eventingv1alpha1.Su
 	return nil
 }
 
+
 func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscription, result *ctrl.Result, ctx context.Context, logger logr.Logger) error {
+
+var ev2Hash, emsHash uint64  // only as a temp solution-> should migrate in CR state
+
+
+	logger.Info("Syncing subscription with BEB")
+
 	// TODO: get beb credentials from secret
-	// TODO: CRUD BEB subscription
+
+	r.bebClient.Initialize()
 
 	// TODO: react on finalizer
 	if r.isInDeletion(subscription) {
 		logger.Info("Deleting BEB subscription")
+		if err := r.bebClient.DeleteBebSubscription(subscription); err != nil {
+			return err
+		}
 		if err := r.removeFinalizer(subscription, result, ctx, logger); err != nil {
 			return err
 		}
-		// TODO: delete BEB subscription
-		return nil
+		// TODO, not necessary, they will be saved in status
+		ev2Hash = 0
+		emsHash = 0
+	} else {
+		if newEv2Hash, newEmsHash, err := r.bebClient.SyncBebSubscription(subscription, ev2Hash, emsHash); err != nil {
+			logger.Error(err, "Update BEB subscription failed")
+			return err
+		} else {
+			// TODO save the values for the next call
+			ev2Hash = newEv2Hash
+			emsHash = newEmsHash
+		}
 	}
 
 	if !subscription.Status.IsConditionSubscribed() {

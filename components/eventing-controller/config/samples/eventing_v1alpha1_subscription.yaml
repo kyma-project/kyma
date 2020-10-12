@@ -6,7 +6,6 @@ metadata:
 spec:
   protocol: BEB
   protocolsettings:
-    contentMode: 'BINARY'
     exemptHandshake: true
     qos: 'AT-LEAST-ONCE'
     webhookAuth:

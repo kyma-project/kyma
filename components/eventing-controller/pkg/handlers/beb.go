@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"net/http"
 	"time"
 
@@ -14,9 +15,14 @@ import (
 	"github.com/go-logr/logr"
 )
 
-const (
-	activateTimeout = time.Second * 10 // timeout for the subscription to be active
-)
+// compile time check
+var _ Interface = &Beb{}
+
+type Interface interface {
+	Initialize()
+	SyncBebSubscription(subscription *eventingv1alpha1.Subscription, oldEv2Hash uint64, oldEmsHash uint64) (uint64, uint64, error)
+	DeleteBebSubscription(subscription *eventingv1alpha1.Subscription) error
+}
 
 type Beb struct {
 	Token  *auth2.AccessToken
@@ -24,14 +30,27 @@ type Beb struct {
 	Log    logr.Logger
 }
 
-func (b *Beb) ChekAndUpdateEmsSubscription(subscription *eventingv1alpha1.Subscription, oldEv2Hash uint64, oldEmsHash uint64) (uint64, uint64, error) {
-	// get the internal view of ev2 subscription
-	sEv2, err := GetInternalView4Ev2(subscription)
+type BebResponse struct {
+	StatusCode int
+	Error    error
+}
+
+func (b *Beb) Initialize() {
+	if b.Token == nil {
+		if err := b.authenticate(); err != nil {
+			b.Log.Error(err, "failed to authenticate")
+		}
+	}
+}
+
+func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription, oldEv2Hash uint64, oldEmsHash uint64) (uint64, uint64, error) {
+	// get the internal view for the ev2 subscription
+	sEv2, err := getInternalView4Ev2(subscription)
 	if err != nil {
 		b.Log.Error(err, "failed to get internal view for ev2 subscription", "name:", subscription.Name)
 		return 0, 0, err
 	}
-	newEv2Hash, err := GetHash(sEv2)
+	newEv2Hash, err := getHash(sEv2)
 	if err != nil {
 		b.Log.Error(err, "failed to get the hash value", "subscription name", sEv2.Name)
 		return 0, 0, err
@@ -51,11 +70,12 @@ func (b *Beb) ChekAndUpdateEmsSubscription(subscription *eventingv1alpha1.Subscr
 		b.Log.Error(err, "failed to get ems subscription", "subscription name", sEv2.Name)
 		return 0, 0, err
 	}
-	sEms, err := GetInternalView4Ems(emsSubscription)
+	// get the internal view for the ems subscription
+	sEms, err := getInternalView4Ems(emsSubscription)
 	if err != nil {
 		b.Log.Error(err, "failed to get internal view for ems subscription", "subscription name:", emsSubscription.Name)
 	}
-	newEmsHash, err := GetHash(sEms)
+	newEmsHash, err := getHash(sEms)
 	if err != nil {
 		b.Log.Error(err, "failed to get the hash value for ems subscription", "subscription", sEms.Name)
 		return 0, 0, err
@@ -70,6 +90,15 @@ func (b *Beb) ChekAndUpdateEmsSubscription(subscription *eventingv1alpha1.Subscr
 	}
 	// returns, no changes
 	return oldEv2Hash, oldEmsHash, nil
+}
+
+func (b *Beb) DeleteBebSubscription(subscription *eventingv1alpha1.Subscription) error {
+	sEv2, err := getInternalView4Ev2(subscription)
+	if err != nil {
+		b.Log.Error(err, "failed to get internal view for ev2 subscription", "name:", subscription.Name)
+		return err
+	}
+	return b.deleteSubscription(sEv2.Name)
 }
 
 func (b *Beb) deleteCreateAndHashSubscription(subscription *types2.Subscription) (uint64, error) {
@@ -90,11 +119,11 @@ func (b *Beb) deleteCreateAndHashSubscription(subscription *types2.Subscription)
 		return 0, err
 	}
 	// get the new hash
-	sEms, err := GetInternalView4Ems(emsSubscription)
+	sEms, err := getInternalView4Ems(emsSubscription)
 	if err != nil {
 		b.Log.Error(err, "failed to get internal view for ems subscription", "subscription name:", emsSubscription.Name)
 	}
-	newEmsHash, err := GetHash(sEms)
+	newEmsHash, err := getHash(sEms)
 	if err != nil {
 		b.Log.Error(err, "failed to get the hash value for ems subscription", "subscription", sEms.Name)
 		return 0, err
@@ -102,41 +131,56 @@ func (b *Beb) deleteCreateAndHashSubscription(subscription *types2.Subscription)
 	return newEmsHash, nil
 }
 
-// TODO:
-// wrap each function with Authenticate wrapper which should react to a returned 401 and should authenticate
-// again and create a new valid token in Beb.Token
-
-func (b *Beb) authenticate() (*auth2.AccessToken, error) {
+func (b *Beb) authenticate() error {
+	b.Log.Info("BEB authenticate()")
 	authenticator := auth2.NewAuthenticator(auth2.GetDefaultConfig())
 	token, err := authenticator.Authenticate()
 	if err != nil {
-		return nil, fmt.Errorf("failed to authenticate with error: %v", err)
+		return fmt.Errorf("failed to authenticate with error: %v", err)
 	}
 	b.Token = token
 	b.Client = client2.NewClient(config2.GetDefaultConfig())
-	return token, nil
+	return nil
 }
 
 func (b *Beb) getSubscription(name string) (*types2.Subscription, error) {
-	emsSubscription, err := b.Client.Get(b.Token, name)
+	b.Log.Info("BEB getSubscription()","subscription name:", name)
+	emsSubscription, resp, err := b.Client.Get(b.Token, name)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get subscription with error: %v", err)
+	}
+	if resp.StatusCode == http.StatusUnauthorized {
+		b.Token = nil
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to get subscription with error: %v; %v", resp.StatusCode, resp.Message)
 	}
 	return emsSubscription, nil
 }
 
 func (b *Beb) deleteSubscription(name string) error {
-	// delete subscription
-	if _, err := b.Client.Delete(b.Token, name); err != nil {
+	b.Log.Info("BEB deleteSubscription()","subscription name:", name)
+	resp, err := b.Client.Delete(b.Token, name)
+	if err != nil {
 		return fmt.Errorf("failed to delete subscription with error: %v", err)
+	}
+	if resp.StatusCode == http.StatusUnauthorized {
+		b.Token = nil
+	}
+	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusNotFound {
+		return fmt.Errorf("failed to delete subscription with error: %v", resp.StatusCode)
 	}
 	return nil
 }
 
 func (b *Beb) createSubscription(subscription *types2.Subscription) error {
+	b.Log.Info("BEB createSubscription()","subscription name:", subscription.Name)
 	createResponse, err := b.Client.Create(b.Token, subscription)
 	if err != nil {
 		return fmt.Errorf("failed to create subscription with error: %v", err)
+	}
+	if createResponse.StatusCode == http.StatusUnauthorized {
+		b.Token = nil
 	}
 	if createResponse.StatusCode > http.StatusAccepted && createResponse.StatusCode != http.StatusConflict {
 		return fmt.Errorf("failed to create subscription with error: %v", createResponse)
@@ -148,7 +192,7 @@ func (b *Beb) createSubscription(subscription *types2.Subscription) error {
 }
 
 func (b *Beb) waitForSubscriptionActive(name string) bool {
-	timeout := time.After(activateTimeout)
+	timeout := time.After(env.GetConfig().WebhookActivationTimeout)
 	tick := time.Tick(time.Millisecond * 500)
 	for {
 		select {
@@ -158,7 +202,7 @@ func (b *Beb) waitForSubscriptionActive(name string) bool {
 			}
 		case <-tick:
 			{
-				sub, err := b.Client.Get(b.Token, name)
+				sub, _, err := b.Client.Get(b.Token, name)
 				if err != nil {
 					return false
 				}

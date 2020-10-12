@@ -3,21 +3,22 @@ package handlers
 import (
 	"fmt"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"strings"
 
 	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
 	"github.com/mitchellh/hashstructure"
 )
 
-func GetHash(subscription *types2.Subscription) (uint64, error) {
-	if hash, err := Hash(subscription); err != nil {
+func getHash(subscription *types2.Subscription) (uint64, error) {
+	if hash, err := hashstructure.Hash(subscription, nil); err != nil {
 		return 0, err
 	} else {
 		return hash, nil
 	}
 }
 
-func GetInternalView4Ev2(subscription *eventingv1alpha1.Subscription) (*types2.Subscription, error) {
-	emsSubscription := &types2.Subscription{}
+func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription) (*types2.Subscription, error) {
+	emsSubscription := &types2.Subscription{} //false, too many default fields
 
 	// Name
 	emsSubscription.Name = subscription.Name
@@ -25,9 +26,10 @@ func GetInternalView4Ev2(subscription *eventingv1alpha1.Subscription) (*types2.S
 	emsSubscription.ExemptHandshake = subscription.Spec.ProtocolSettings.ExemptHandshake
 
 	// Qos
-	if subscription.Spec.ProtocolSettings.Qos == string(types2.QosAtLeastOnce) {
+	qos := strings.ReplaceAll(subscription.Spec.ProtocolSettings.Qos, "-", "_")
+	if qos == string(types2.QosAtLeastOnce) {
 		emsSubscription.Qos = types2.QosAtLeastOnce
-	} else if subscription.Spec.ProtocolSettings.Qos == string(types2.QosAtMostOnce) {
+	} else if qos == string(types2.QosAtMostOnce) {
 		emsSubscription.Qos = types2.QosAtMostOnce
 	} else {
 		return nil, fmt.Errorf("invalid Qos: %v", subscription.Spec.ProtocolSettings.Qos)
@@ -63,7 +65,7 @@ func GetInternalView4Ev2(subscription *eventingv1alpha1.Subscription) (*types2.S
 	return emsSubscription, nil
 }
 
-func GetInternalView4Ems(subscription *types2.Subscription) (*types2.Subscription, error) {
+func getInternalView4Ems(subscription *types2.Subscription) (*types2.Subscription, error) {
 	emsSubscription := &types2.Subscription{}
 
 	// Name
@@ -87,15 +89,7 @@ func GetInternalView4Ems(subscription *types2.Subscription) (*types2.Subscriptio
 	return emsSubscription, nil
 }
 
-func Hash(subscription *types2.Subscription) (uint64, error) {
-	if hash, err := hashstructure.Hash(subscription, nil); err != nil {
-		return 0, err
-	} else {
-		return hash, nil
-	}
-}
-
-func Hash4WebhookAuth(subscription *types2.Subscription) (uint64, error) {
+func getHash4WebhookAuth(subscription *types2.Subscription) (uint64, error) {
 	hash, err := hashstructure.Hash(subscription.WebhookAuth, nil)
 	if err != nil {
 		return 0, err

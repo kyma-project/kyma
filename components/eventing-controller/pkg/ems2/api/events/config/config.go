@@ -1,5 +1,7 @@
 package config
 
+import "github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 type Config struct {
 	BaseURL              string
 	PublishURL           string
@@ -12,7 +14,7 @@ type Config struct {
 }
 
 func GetDefaultConfig() *Config {
-	baseApiURL := "https://enterprise-messaging-pubsub.cfapps.sap.hana.ondemand.com/sap/cp-kernel/ems-ce/v1"
+	baseApiURL := env.GetConfig().BebApiUrl
 	return &Config{
 		BaseURL:              baseApiURL,
 		PublishURL:           baseApiURL + "/events",

@@ -2,9 +2,8 @@ package client
 
 import (
 	"fmt"
-	"net/http"
-
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"net/http"
 
 	config2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/config"
 	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
@@ -18,8 +17,8 @@ var _ Interface = Client{}
 type Interface interface {
 	Publish(token *auth2.AccessToken, cloudEvent cloudevents.Event, qos types2.Qos) (*types2.PublishResponse, error)
 	Create(token *auth2.AccessToken, subscription *types2.Subscription) (*types2.CreateResponse, error)
-	List(token *auth2.AccessToken) (types2.Subscriptions, error)
-	Get(token *auth2.AccessToken, name string) (*types2.Subscription, error)
+	List(token *auth2.AccessToken) (types2.Subscriptions, *types2.Response, error)
+	Get(token *auth2.AccessToken, name string) (*types2.Subscription, *types2.Response, error)
 	Delete(token *auth2.AccessToken, name string) (*types2.DeleteResponse, error)
 	TriggerHandshake(token *auth2.AccessToken, name string) (*types2.TriggerHandshake, error)
 	UpdateState(token *auth2.AccessToken, name string, state types2.State) (*types2.UpdateStateResponse, error)
@@ -64,7 +63,7 @@ func (c Client) Create(token *auth2.AccessToken, subscription *types2.Subscripti
 	}
 
 	var response types2.CreateResponse
-	if resp, err := c.httpClient.Do(req, &response); err != nil {
+	if resp, err := c.httpClient.Do(req, response); err != nil {
 		return nil, err
 	} else if resp == nil {
 		return nil, fmt.Errorf("could not unmarshal response: %v", resp)
@@ -76,36 +75,44 @@ func (c Client) Create(token *auth2.AccessToken, subscription *types2.Subscripti
 	return &response, nil
 }
 
-func (c Client) List(token *auth2.AccessToken) (types2.Subscriptions, error) {
+func (c Client) List(token *auth2.AccessToken) (types2.Subscriptions, *types2.Response, error) {
 	req, err := c.httpClient.NewRequest(token, http.MethodGet, c.config.ListURL, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var subscriptions types2.Subscriptions
-	if _, err := c.httpClient.Do(req, &subscriptions); err != nil {
-		return nil, err
+	var response types2.Response
+	if resp, err := c.httpClient.Do(req, &subscriptions); err != nil {
+		return nil, nil, err
+	} else if resp == nil {
+		return nil, nil, fmt.Errorf("could not unmarshal response: %v", resp)
+	} else {
+		response.StatusCode = resp.StatusCode
+		response.Message = resp.Status
 	}
 
-	return subscriptions, nil
+	return subscriptions, &response, nil
 }
 
-func (c Client) Get(token *auth2.AccessToken, name string) (*types2.Subscription, error) {
+func (c Client) Get(token *auth2.AccessToken, name string) (*types2.Subscription, *types2.Response, error) {
 	req, err := c.httpClient.NewRequest(token, http.MethodGet, fmt.Sprintf(c.config.GetURLFormat, name), nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var subscription *types2.Subscription
+	var response types2.Response
 	if resp, err := c.httpClient.Do(req, &subscription); err != nil {
-		return nil, err
+		return nil, nil, err
 	} else if resp == nil {
-		return nil, fmt.Errorf("Could not unmarshal response: %v", resp)
-	} else if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Failed to get subscription with error: %v; %v", resp.StatusCode, resp.Status)
+		return nil, nil, fmt.Errorf("could not unmarshal response: %v", resp)
+	} else {
+		response.StatusCode = resp.StatusCode
+		response.Message = resp.Status
 	}
 
-	return subscription, nil
+	return subscription, &response, nil
 }
 
 func (c Client) Delete(token *auth2.AccessToken, name string) (*types2.DeleteResponse, error) {
@@ -119,6 +126,7 @@ func (c Client) Delete(token *auth2.AccessToken, name string) (*types2.DeleteRes
 		return nil, err
 	} else {
 		response.StatusCode = resp.StatusCode
+		response.Message = resp.Status
 	}
 
 	return &response, nil
@@ -135,6 +143,7 @@ func (c Client) TriggerHandshake(token *auth2.AccessToken, name string) (*types2
 		return nil, err
 	} else {
 		response.StatusCode = resp.StatusCode
+		response.Message = resp.Status
 	}
 
 	return &response, nil
@@ -151,6 +160,7 @@ func (c Client) UpdateState(token *auth2.AccessToken, name string, state types2.
 		return nil, err
 	} else {
 		response.StatusCode = resp.StatusCode
+		response.Message = resp.Status
 	}
 
 	return &response, nil
