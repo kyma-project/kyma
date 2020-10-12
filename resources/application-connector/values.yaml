@@ -54,8 +54,6 @@ global:
     version: "b9871385"
   application_connectivity_validator:
     version: "PR-9593"
-  application_broker_eventing_migration:
-    version: "d4be1327"
 
 application_connectivity_certs_setup_job:
   secrets:
