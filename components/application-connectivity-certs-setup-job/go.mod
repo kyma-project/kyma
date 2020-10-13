@@ -3,9 +3,7 @@ module github.com/kyma-project/kyma/components/application-connectivity-certs-se
 go 1.14
 
 require (
-	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/golang/protobuf v1.4.2 // indirect
-	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/googleapis/gnostic v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/pkg/errors v0.9.1
@@ -21,11 +19,10 @@ require (
 	google.golang.org/protobuf v1.24.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200603094226-e3079894b1e8 // indirect
-	k8s.io/api v0.16.10
-	k8s.io/apimachinery v0.16.11-rc.0
+	k8s.io/api v0.18.8
+	k8s.io/apimachinery v0.18.8
 	k8s.io/client-go v0.16.10
 	k8s.io/utils v0.0.0-20200603063816-c1c6865ac451 // indirect
-	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
 replace golang.org/x/text => golang.org/x/text v0.3.3
