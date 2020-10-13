@@ -76,7 +76,7 @@ if [[ "$CERT_TYPE" != "detect" ]]; then
 fi
 
 echo "--> Is legacy mode?"
-if $TLS_CRT_EXISTS; then
+if [[ -n "$TLS_CRT_EXISTS" ]]; then
   echo "----> Legacy Cert overrides detected, legacy mode enabled"
   legacyMode
   exit 0
