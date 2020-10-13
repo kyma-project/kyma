@@ -3,7 +3,9 @@ title: Sync Git resources with the cluster using a GitOps operator
 type: Tutorials
 ---
 
-This tutorial shows how you can automate the deployment of the local resources on a cluster using the GitOps logic. You will use Kyma CLI to create an inline Function with a trigger. You will push both to a GitHub repository and sync the changes from the Git repository to a cluster using a GitOps operator. For the purpose of this tutorial, you will install and use the [Flux](https://docs.fluxcd.io/en/1.17.1/tutorials/get-started.html) GitOps operator and a lightweight [k3d](https://k3d.io/) cluster.
+This tutorial shows how you can automate the deployment of local Kyma resources on a cluster using the GitOps logic. You will use [Kyma CLI](https://kyma-project.io/docs/cli/) to create an inline Python Function with a trigger. You will later push both resources to a GitHub repository of your choice and set up a GitOps operator to monitor the given repository folder and synchronize any changes in it with your cluster. For the purpose of this tutorial, you will install and use the [Flux](https://docs.fluxcd.io/en/1.17.1/tutorials/get-started.html) GitOps operator and a lightweight [k3d](https://k3d.io/) cluster.
+
+> **TIP:** Although this tutorial uses Flux to synchronize Git resources with the cluster, you can use an alternative GitOps operator for this purpose, such as [Argo](https://argoproj.github.io/argo-cd/).
 
 ## Prerequisites
 
@@ -15,9 +17,9 @@ All you need before you start is to have the following:
 
 ## Steps
 
-These sections will lead you through the whole process. You will first install k3d and create a cluster for your custom resources (CRs). Then, you will need to apply the necessary Custom Resource Definitions (CRDs) from Kyma to be able to create Functions and triggers. Finally, you will install Flux and authorize it with the `write` access to your GitHub repository in which you store the resource files. Flux will automatically synchronize any new changes in your repository with your k3d cluster.
+These sections will lead you through the whole installation, configuration, and synchronization process. You will first install k3d and create a cluster for your custom resources (CRs). Then, you will need to apply the necessary Custom Resource Definitions (CRDs) from Kyma to be able to create Functions and triggers. Finally, you will install Flux and authorize it with the `write` access to your GitHub repository in which you store the resource files. Flux will automatically synchronize any new changes pushed to your repository with your k3d cluster.
 
-## Install and configure a k3d cluster
+### Install and configure a k3d cluster
 
 1. Install k3d using brew:
 
@@ -48,7 +50,7 @@ This command also sets your context to the newly created cluster. Run this comma
   kubectl get customresourcedefinitions
   ```
 
-## Prepare your local workspace
+### Prepare your local workspace
 
 1. Create a workspace folder in which you will create source files for your Function:
 
@@ -61,6 +63,8 @@ This command also sets your context to the newly created cluster. Run this comma
   ```bash
   kyma init function --runtime python38 --dir $PWD/{WORKSPACE_FOLDER}
   ```
+
+  > **TIP:** Python 3.8 is only one of the available runtimes. Read about all [supported runtimes and sample Functions to run on them](#details-runtimes).
 
   This command will download the following files to your workspace folder:
 
@@ -79,9 +83,9 @@ This command also sets your context to the newly created cluster. Run this comma
       sourcePath: {FULL_PATH_TO_WORKSPACE_FOLDER}
   ```
 
-## Install and configure Flux
+### Install and configure Flux
 
-You can now install the Flux operator, connect it with a specific Git repository, and authorize Flux to automatically pull changes from the repository and apply them on your cluster.
+You can now install the Flux operator, connect it with a specific Git repository folder, and authorize Flux to automatically pull changes from this repository folder and apply them on your cluster.
 
 1. Install flux:
 
@@ -95,7 +99,7 @@ You can now install the Flux operator, connect it with a specific Git repository
   kubectl create namespace flux
   ```
 
-3. Export details of your GitHub repository - its name, account name and related e-mail address, and the folder to which you will push Function and Trigger CRs built from local sources. Flux will synchronize the cluster with the content of this folder.
+3. Export details of your GitHub repository - its name, the account name and related e-mail address, and the folder to which you will push Function and Trigger CRs built from local sources. Flux will synchronize the cluster with the content of this folder on the `main` branch.
 
   ```bash
   export GH_USER="{USERNAME}"
@@ -104,7 +108,7 @@ You can now install the Flux operator, connect it with a specific Git repository
   export GH_FOLDER="{GH_FOLDER_FOR_FUNCTION_RESOURCES}"
   ```
 
-4. Run this command apply CRDs of the Flux operator in the `flux` Namespace on your cluster.
+4. Run this command to apply CRDs of the Flux operator to the `flux` Namespace on your cluster.
 
   ```bash
   fluxctl install \
@@ -139,7 +143,7 @@ You can now install the Flux operator, connect it with a specific Git repository
   fluxctl identity --k8s-fwd-ns flux | pbcopy
   ```
 
-7. Go to your GitHub account **Settings**:
+7. Go to **Settings** in your GitHub account:
 
   ![GitHub account settings](./assets/settings.png)
 
@@ -151,13 +155,10 @@ You can now install the Flux operator, connect it with a specific Git repository
 
   ![Add a new SSH key](./assets/add-ssh-key.png)
 
-## Create resources
-
-You will now create a sample Function and modify it by adding a trigger to it.
-
 ### Create a Function
 
 Now that Flux is authenticated to pull changes from your Git repository, you can start creating CRs from your local workspace files.
+You will create a sample inline Function and modify it by adding a trigger to it.
 
 1. Back in the terminal, clone this GitHub repository to your current workspace location:
 
@@ -185,7 +186,7 @@ Now that Flux is authenticated to pull changes from your Git repository, you can
   git push origin main # Push the changes to the "main" branch of your Git repository
   ```
 
-5. Go to the GitHub repository and see that the changes were pushed.
+5. Go to the GitHub repository to check that the changes were pushed.
 
 6. By default, Flux pulls CRs from the Git repository and pushes them to the cluster in 5-minute intervals. To enforce immediate synchronization, run this command from the terminal:
 
@@ -199,9 +200,9 @@ Now that Flux is authenticated to pull changes from your Git repository, you can
   kubectl get functions
   ```
 
-## Create a Trigger
+### Create a Trigger
 
-1. From your workspace folder, modify the local `config.yaml` file by adding a trigger details (**triggers**) to your Function as follows:
+1. From your workspace folder, modify the local `config.yaml` file by adding trigger details (**triggers**) to your Function as follows:
 
   ```yaml
   name: my-function
@@ -211,12 +212,12 @@ Now that Flux is authenticated to pull changes from your Git repository, you can
       sourceType: inline
       sourcePath: {FULL_PATH_TO_WORKSPACE_FOLDER}
   triggers:
-  - eventTypeVersion: evt1
+  - version: evt1
     source: the-source
     type: t1
   ```
 
-2. Create the Function resource from local sources and place the output it your Git repository folder:
+2. Create the Function resource from local sources and place the output in your Git repository folder:
 
   ```bash
   kyma apply function --filename {FULL_PATH_TO_LOCAL_WORKSPACE_FOLDER}/config.yaml --output yaml --dry-run > ./{GH_REPO}/${GH_FOLDER}/my-function.yaml
