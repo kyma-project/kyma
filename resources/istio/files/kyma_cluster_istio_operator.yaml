@@ -3,7 +3,7 @@ kind: IstioOperator
 metadata:
   namespace: istio-system
 spec:
-  hub: docker.io/istio
+  hub: eu.gcr.io/kyma-project/external/istio
   tag: {{ .Chart.AppVersion }}-distroless
 
   # Traffic management feature
