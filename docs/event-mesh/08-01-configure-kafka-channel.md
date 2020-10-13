@@ -3,7 +3,7 @@ title: Configure the Kafka Channel
 type: Tutorials
 ---
 
-Instead of the default Channel implementation, you can use the Knative-compatible [Kafka Channel](https://github.com/kyma-incubator/knative-kafka). To ensure Kafka works properly, you must:
+Instead of the default NATS Channel implementation, you can use the Knative-compatible [Kafka Channel](https://github.com/kyma-incubator/knative-kafka). To ensure Kafka works properly, you must:
 
 * Set up a Kafka cluster using Azure Event Hubs.
 * Create a Secret which the controller uses to communicate with the cluster.
