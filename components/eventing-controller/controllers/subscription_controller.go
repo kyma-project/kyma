@@ -215,6 +215,7 @@ func (r *SubscriptionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&eventingv1alpha1.Subscription{}).
 		Complete(r)
 }
+
 func (r *SubscriptionReconciler) addFinalizer(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) error {
 	subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, FinalizerName)
 	logger.V(1).Info("Adding finalizer")
