@@ -76,18 +76,18 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "5cf2ad0b"
+    tag: "PR-9496"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "2bba165a"
+      tag: "PR-9659"
     nodejs10:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
-      tag: "2bba165a"
+      tag: "PR-9659"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "2bba165a"
+      tag: "PR-9659"
 
 deployment:
   replicas: 1
@@ -130,7 +130,7 @@ containers:
       serviceAccountRequeueDuration:
         value: 5m
       namespaceExcludedNames:
-        value: "istio-system,knative-eventing,knative-serving,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
+        value: "istio-system,knative-eventing,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
       imageRegistryDockerConfigSecretName:
         value: '{{ template "fullname" . }}-image-pull-secret'
       imagePullAccountName:
@@ -146,7 +146,7 @@ containers:
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v0.22.0
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:0c4f9f00
+        value: eu.gcr.io/kyma-project/function-build-init:PR-9496
 
 services:
   manager:
