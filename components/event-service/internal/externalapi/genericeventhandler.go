@@ -2,12 +2,13 @@ package externalapi
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"regexp"
-	"strings"
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
@@ -19,11 +20,14 @@ import (
 
 const (
 	requestBodyTooLargeErrorMessage = "http: request body too large"
+	xB3Prefix                       = "x-b3-"
+	b3Prefix                        = "b3-"
 )
 
 var (
 	isValidEventTypeVersion = regexp.MustCompile(shared.AllowedEventTypeVersionChars).MatchString
 	isValidEventID          = regexp.MustCompile(shared.AllowedEventIDChars).MatchString
+	traceHeaders            = []string{"traceId", "parentSpanId", "spanId", "sampled"}
 )
 
 type maxBytesHandler struct {
@@ -41,9 +45,15 @@ type traceHeaderHandler struct {
 }
 
 func (h traceHeaderHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	for key := range r.Header {
-		if strings.HasPrefix(strings.ToLower(key), "x-b3-") || strings.ToLower(key) == "b3" {
-			r = r.WithContext(cloudevents.ContextWithHeader(r.Context(), key, r.Header.Get(key)))
+	for _, traceHeader := range traceHeaders {
+		xb3HeaderKey := fmt.Sprintf("%s%s", xB3Prefix, traceHeader)
+		if val := r.Header.Get(xb3HeaderKey); len(val) > 0 {
+			r = r.WithContext(cloudevents.ContextWithHeader(r.Context(), xb3HeaderKey, r.Header.Get(xb3HeaderKey)))
+		}
+
+		b3HeaderKey := fmt.Sprintf("%s%s", b3Prefix, traceHeader)
+		if val := r.Header.Get(b3HeaderKey); len(val) > 0 {
+			r = r.WithContext(cloudevents.ContextWithHeader(r.Context(), b3HeaderKey, r.Header.Get(b3HeaderKey)))
 		}
 	}
 	h.next.ServeHTTP(rw, r)
