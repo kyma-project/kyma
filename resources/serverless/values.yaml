@@ -10,7 +10,7 @@ injectCerts:
     tag: "v20200617-32c1f3ff"
     pullPolicy: IfNotPresent
 
-runtimeMigration:
+migration:
   image:
     repository: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl"
     tag: "v20200617-32c1f3ff"
@@ -76,7 +76,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-9496"
+    tag: "858bc2c2"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
@@ -113,16 +113,6 @@ containers:
         memory: 32Mi
     extraProperties: {}
     envs:
-      runtimeConfigMapName:
-        value: dockerfile-nodejs-12
-      buildRequestsCPU:
-        value: 700m
-      buildRequestsMemory:
-        value: 700Mi
-      buildLimitsCPU:
-        value: 1100m
-      buildLimitsMemory:
-        value: 1100Mi
       configMapRequeueDuration:
         value: 5m
       secretRequeueDuration:
@@ -217,3 +207,6 @@ docker-registry:
 webhook:
   enabled: true
   fullnameOverride: "serverless-webhook"
+  image:
+    repository: "eu.gcr.io/kyma-project/function-webhook"
+    tag: "858bc2c2"
