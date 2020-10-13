@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Values.configMapName }}-copy
-  namespace: {{ .Release.Namespace }}
+  namespace: "{{ .Values.overrides.namespace }}"
   labels:
     installer: overrides
     kyma-project.io/installation: ""
@@ -40,7 +40,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: certificates-overrides
-  namespace: {{ .Release.Namespace }}
+  namespace: "{{ .Values.overrides.namespace }}"
   labels:
     installer: overrides
     kyma-project.io/installation: ""

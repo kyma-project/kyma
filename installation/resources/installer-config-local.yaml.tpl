@@ -36,7 +36,7 @@ data:
   global.domainName: "kyma.local"
   global.adminPassword: ""
   global.minikubeIP: ""
-  global.certificates.type: "legacy"
+  # global.certificates.type: "legacy"
 ---
 apiVersion: v1
 kind: ConfigMap

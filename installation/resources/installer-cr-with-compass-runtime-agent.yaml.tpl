@@ -12,8 +12,6 @@ spec:
   version: "__VERSION__"
   url: "__URL__"
   components:
-    - name: "cluster-info"
-      namespace: "kyma-installer"
     - name: "cluster-essentials"
       namespace: "kyma-system"
     - name: "testing"

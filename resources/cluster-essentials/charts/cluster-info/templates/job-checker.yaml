@@ -1,0 +1,44 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "cluster-info.fullname" . }}
+  annotations: 
+    helm.sh/hook: post-install,post-upgrade
+    # helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook-weight: "10"
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      name: {{ include "cluster-info.fullname" . }}
+      labels:
+        app: {{ include "cluster-info.fullname" . }}
+    spec:
+      serviceAccountName: {{ include "cluster-info.fullname" . }}
+      restartPolicy: Never
+      containers:
+      - name: {{ include "cluster-info.fullname" . }}
+        image: {{ .Values.jobs.image }}:{{ .Values.jobs.tag }}
+        command:
+          - /bin/bash
+          - -c
+          - |
+{{ .Files.Get "files/checker.sh" | printf "%s" | indent 12 }}
+        env:
+        - name: OVERRIDES_NS
+          value: "{{ .Values.overrides.namespace }}"
+        - name: OVERRIDES_NAME
+          value: "{{ .Values.overrides.name }}"
+        {{- if .Values.global.tlsCrt }}
+        - name: TLS_CRT_EXISTS
+          value: "true"
+        {{- end }}
+        - name: CERT_TYPE
+          value: "{{ .Values.global.certificates.type }}"
+        - name: OVERRIDE_NAME
+          value: "{{ .Values.overrides.name }}"
+        - name: OVERRIDE_NS
+          value: "{{ .Values.overrides.namespace }}"
+        terminationMessagePolicy: "FallbackToLogsOnError"

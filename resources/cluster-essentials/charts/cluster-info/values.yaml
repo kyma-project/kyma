@@ -9,6 +9,9 @@ global:
     type: "detect" # legacy/gardener/xip/user-provided/detect
 
 configMapName: net-global-overrides
+overrides:
+  name: net-global-overrides
+  namespace: kyma-installer
 jobs:
   image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
   tag: "v20200617-32c1f3ff"
