@@ -8,7 +8,7 @@ metadata:
     helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   name: {{ .Release.Name }}-remove-subscription-crd
   annotations:
@@ -23,7 +23,7 @@ rules:
       - subscriptions.eventing.kyma-project.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
   name: {{ .Release.Name }}-remove-subscription-crd
   annotations:
@@ -32,7 +32,7 @@ metadata:
     helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
+  kind: ClusterRole
   name: {{ .Release.Name }}-remove-subscription-crd
 subjects:
   - kind: ServiceAccount
