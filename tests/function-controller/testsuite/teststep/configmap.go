@@ -36,4 +36,4 @@ func (c ConfigMaps) Cleanup() error {
 	return errors.Wrap(c.configMap.Delete(), "while deleting configmap")
 }
 
-var _ step.Step = Addons{}
+var _ step.Step = ConfigMaps{}
