@@ -24,7 +24,7 @@ import (
 
 // TODO: make configurable
 const (
-	useExistingCluster       = true
+	useExistingCluster       = false
 	attachControlPlaneOutput = false
 )
 
