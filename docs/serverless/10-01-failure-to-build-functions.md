@@ -29,13 +29,12 @@ Follow these steps:
   kubectl get pvc serverless-docker-registry -n kyma-system
   ```
 
-You will get this result:
+  You will get this result:
 
-```bash
-NAME                        STATUS   VOLUME                                    CAPACITY   ACCESS MODES   STORAGECLASS   AGE
-serverless-docker-registry  Bound    pvc-a69b96hc-ahbc-k85d-0gh6-19gkcr4yns4k  30Gi       RWO            standard       23d
-```
-
+  ```bash
+  NAME                        STATUS   VOLUME                                    CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+  serverless-docker-registry  Bound    pvc-a69b96hc-ahbc-k85d-0gh6-19gkcr4yns4k  30Gi       RWO            standard       23d
+  ```
 
 If the value of the storage does not change, restart a Pod to which pvc is connected to finish the volume resize.
 
