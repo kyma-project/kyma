@@ -143,8 +143,6 @@ func (hc *Client) IsReleaseDeletable(nn NamespacedName) (bool, error) {
 		func() error {
 			rel, err := status.Run(nn.Name)
 			if err != nil {
-				log.Println(err)
-
 				if strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
 					isDeletable = false
 					return nil
