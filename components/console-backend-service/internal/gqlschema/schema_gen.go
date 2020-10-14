@@ -586,10 +586,12 @@ type ComplexityRoot struct {
 		CreateClusterRoleBinding                   func(childComplexity int, name string, params ClusterRoleBindingInput) int
 		CreateFunction                             func(childComplexity int, name string, namespace string, params FunctionMutationInput) int
 		CreateGitRepository                        func(childComplexity int, namespace string, name string, spec v1alpha11.GitRepositorySpec) int
+		CreateLimitRange                           func(childComplexity int, namespace string, name string, limitRange LimitRangeInput) int
 		CreateManyTriggers                         func(childComplexity int, namespace string, triggers []*TriggerCreateInput, ownerRef []*v1.OwnerReference) int
 		CreateNamespace                            func(childComplexity int, name string, labels Labels) int
 		CreateOAuth2Client                         func(childComplexity int, name string, namespace string, params v1alpha12.OAuth2ClientSpec) int
 		CreateResource                             func(childComplexity int, namespace string, resource JSON) int
+		CreateResourceQuota                        func(childComplexity int, namespace string, name string, resourceQuota ResourceQuotaInput) int
 		CreateRoleBinding                          func(childComplexity int, name string, namespace string, params RoleBindingInput) int
 		CreateServiceBinding                       func(childComplexity int, serviceBindingName *string, serviceInstanceName string, namespace string, parameters JSON) int
 		CreateServiceBindingUsage                  func(childComplexity int, namespace string, createServiceBindingUsageInput *CreateServiceBindingUsageInput) int
@@ -1261,7 +1263,9 @@ type MutationResolver interface {
 	CreateManyTriggers(ctx context.Context, namespace string, triggers []*TriggerCreateInput, ownerRef []*v1.OwnerReference) ([]*v1alpha13.Trigger, error)
 	DeleteTrigger(ctx context.Context, namespace string, triggerName string) (*v1alpha13.Trigger, error)
 	DeleteManyTriggers(ctx context.Context, namespace string, triggerNames []string) ([]*v1alpha13.Trigger, error)
+	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*v11.LimitRange, error)
 	UpdateLimitRange(ctx context.Context, namespace string, name string, json JSON) (*v11.LimitRange, error)
+	CreateResourceQuota(ctx context.Context, namespace string, name string, resourceQuota ResourceQuotaInput) (*v11.ResourceQuota, error)
 	UpdateResourceQuota(ctx context.Context, namespace string, name string, json JSON) (*v11.ResourceQuota, error)
 	CreateOAuth2Client(ctx context.Context, name string, namespace string, params v1alpha12.OAuth2ClientSpec) (*v1alpha12.OAuth2Client, error)
 	UpdateOAuth2Client(ctx context.Context, name string, namespace string, generation int, params v1alpha12.OAuth2ClientSpec) (*v1alpha12.OAuth2Client, error)
@@ -3459,6 +3463,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateGitRepository(childComplexity, args["namespace"].(string), args["name"].(string), args["spec"].(v1alpha11.GitRepositorySpec)), true
 
+	case "Mutation.createLimitRange":
+		if e.complexity.Mutation.CreateLimitRange == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createLimitRange_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateLimitRange(childComplexity, args["namespace"].(string), args["name"].(string), args["limitRange"].(LimitRangeInput)), true
+
 	case "Mutation.createManyTriggers":
 		if e.complexity.Mutation.CreateManyTriggers == nil {
 			break
@@ -3506,6 +3522,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateResource(childComplexity, args["namespace"].(string), args["resource"].(JSON)), true
+
+	case "Mutation.createResourceQuota":
+		if e.complexity.Mutation.CreateResourceQuota == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createResourceQuota_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateResourceQuota(childComplexity, args["namespace"].(string), args["name"].(string), args["resourceQuota"].(ResourceQuotaInput)), true
 
 	case "Mutation.createRoleBinding":
 		if e.complexity.Mutation.CreateRoleBinding == nil {
@@ -7085,11 +7113,45 @@ extend type Query {
   # )
 }
 
+input ResourceQuotaInput {
+  limits: ResourceValuesInput!
+  requests: ResourceValuesInput!
+}
+
+input LimitRangeInput {
+  default: ResourceValuesInput!
+  defaultRequest: ResourceValuesInput!
+  max: ResourceValuesInput!
+  type: String!
+}
+
 extend type Mutation {
+  createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange
+  @HasAccess(
+    attributes: {
+      resource: "limitrange"
+      verb: "create"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+
   updateLimitRange(namespace: String!, name: String!, json: JSON!): LimitRange
   @HasAccess(
     attributes: {
       resource: "limitrange"
+      verb: "create"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+
+  createResourceQuota(namespace: String!, name: String!, resourceQuota: ResourceQuotaInput!): ResourceQuota
+  @HasAccess(
+    attributes: {
+      resource: "resourcequotas"
       verb: "create"
       apiGroup: ""
       apiVersion: "v1"
@@ -8879,6 +8941,36 @@ func (ec *executionContext) field_Mutation_createGitRepository_args(ctx context.
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createLimitRange_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	var arg2 LimitRangeInput
+	if tmp, ok := rawArgs["limitRange"]; ok {
+		arg2, err = ec.unmarshalNLimitRangeInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limitRange"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createManyTriggers_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -8958,6 +9050,36 @@ func (ec *executionContext) field_Mutation_createOAuth2Client_args(ctx context.C
 		}
 	}
 	args["params"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createResourceQuota_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	var arg2 ResourceQuotaInput
+	if tmp, ok := rawArgs["resourceQuota"]; ok {
+		arg2, err = ec.unmarshalNResourceQuotaInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["resourceQuota"] = arg2
 	return args, nil
 }
 
@@ -24118,6 +24240,68 @@ func (ec *executionContext) _Mutation_deleteManyTriggers(ctx context.Context, fi
 	return ec.marshalOTrigger2ᚕᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createLimitRange(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createLimitRange_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CreateLimitRange(rctx, args["namespace"].(string), args["name"].(string), args["limitRange"].(LimitRangeInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "limitrange", "verb": "create"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v11.LimitRange); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/core/v1.LimitRange`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v11.LimitRange)
+	fc.Result = res
+	return ec.marshalOLimitRange2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRange(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_updateLimitRange(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -24178,6 +24362,68 @@ func (ec *executionContext) _Mutation_updateLimitRange(ctx context.Context, fiel
 	res := resTmp.(*v11.LimitRange)
 	fc.Result = res
 	return ec.marshalOLimitRange2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRange(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createResourceQuota(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createResourceQuota_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CreateResourceQuota(rctx, args["namespace"].(string), args["name"].(string), args["resourceQuota"].(ResourceQuotaInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "resourcequotas", "verb": "create"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v11.ResourceQuota); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/core/v1.ResourceQuota`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v11.ResourceQuota)
+	fc.Result = res
+	return ec.marshalOResourceQuota2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuota(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updateResourceQuota(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -39845,6 +40091,42 @@ func (ec *executionContext) unmarshalInputGitRepositorySpecInput(ctx context.Con
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputLimitRangeInput(ctx context.Context, obj interface{}) (LimitRangeInput, error) {
+	var it LimitRangeInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "default":
+			var err error
+			it.Default, err = ec.unmarshalNResourceValuesInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceValuesInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "defaultRequest":
+			var err error
+			it.DefaultRequest, err = ec.unmarshalNResourceValuesInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceValuesInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "max":
+			var err error
+			it.Max, err = ec.unmarshalNResourceValuesInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceValuesInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "type":
+			var err error
+			it.Type, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputLocalObjectReferenceInput(ctx context.Context, obj interface{}) (LocalObjectReferenceInput, error) {
 	var it LocalObjectReferenceInput
 	var asMap = obj.(map[string]interface{})
@@ -40034,6 +40316,30 @@ func (ec *executionContext) unmarshalInputResourceAttributes(ctx context.Context
 		case "isChildResolver":
 			var err error
 			it.IsChildResolver, err = ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputResourceQuotaInput(ctx context.Context, obj interface{}) (ResourceQuotaInput, error) {
+	var it ResourceQuotaInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "limits":
+			var err error
+			it.Limits, err = ec.unmarshalNResourceValuesInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceValuesInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "requests":
+			var err error
+			it.Requests, err = ec.unmarshalNResourceValuesInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceValuesInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -43543,8 +43849,12 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_deleteTrigger(ctx, field)
 		case "deleteManyTriggers":
 			out.Values[i] = ec._Mutation_deleteManyTriggers(ctx, field)
+		case "createLimitRange":
+			out.Values[i] = ec._Mutation_createLimitRange(ctx, field)
 		case "updateLimitRange":
 			out.Values[i] = ec._Mutation_updateLimitRange(ctx, field)
+		case "createResourceQuota":
+			out.Values[i] = ec._Mutation_createResourceQuota(ctx, field)
 		case "updateResourceQuota":
 			out.Values[i] = ec._Mutation_updateResourceQuota(ctx, field)
 		case "createOAuth2Client":
@@ -49551,6 +49861,10 @@ func (ec *executionContext) marshalNLimitRange2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐL
 	return ec._LimitRange(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNLimitRangeInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeInput(ctx context.Context, v interface{}) (LimitRangeInput, error) {
+	return ec.unmarshalInputLimitRangeInput(ctx, v)
+}
+
 func (ec *executionContext) marshalNLimitRangeItem2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeItem(ctx context.Context, sel ast.SelectionSet, v v11.LimitRangeItem) graphql.Marshaler {
 	return ec._LimitRangeItem(ctx, sel, &v)
 }
@@ -50238,6 +50552,10 @@ func (ec *executionContext) marshalNResourceQuota2ᚖk8sᚗioᚋapiᚋcoreᚋv1�
 		return graphql.Null
 	}
 	return ec._ResourceQuota(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNResourceQuotaInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaInput(ctx context.Context, v interface{}) (ResourceQuotaInput, error) {
+	return ec.unmarshalInputResourceQuotaInput(ctx, v)
 }
 
 func (ec *executionContext) marshalNResourceQuotaSpec2k8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuotaSpec(ctx context.Context, sel ast.SelectionSet, v v11.ResourceQuotaSpec) graphql.Marshaler {

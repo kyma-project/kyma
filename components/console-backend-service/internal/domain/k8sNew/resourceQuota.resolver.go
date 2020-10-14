@@ -5,9 +5,13 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	v1 "k8s.io/api/core/v1"
+	amResource "k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type ResourceQuotaList []*v1.ResourceQuota
@@ -39,6 +43,44 @@ func (r *Resolver) GetHardField(item v1.ResourceList) (*gqlschema.ResourceQuotaH
 
 func (r *Resolver) ResourceQuotaJSONfield(ctx context.Context, obj *v1.ResourceQuota) (gqlschema.JSON, error) {
 	return resource.ToJson(obj)
+}
+
+func (r *Resolver) CreateResourceQuota(ctx context.Context, namespace string, name string, input gqlschema.ResourceQuotaInput) (*v1.ResourceQuota, error) {
+
+	result := &v1.ResourceQuota{}
+
+	var errs apierror.ErrorFieldAggregate
+	memoryLimitsParsed, err := amResource.ParseQuantity(*input.Limits.Memory)
+	if err != nil {
+		errs = append(errs, apierror.NewInvalidField("limits.memory", *input.Limits.Memory, fmt.Sprintf("while parsing %s memory limits", pretty.ResourceQuota)))
+	}
+
+	memoryRequestsParsed, err := amResource.ParseQuantity(*input.Requests.Memory)
+	if err != nil {
+		errs = append(errs, apierror.NewInvalidField("requests.memory", *input.Requests.Memory, fmt.Sprintf("while parsing %s memory requests", pretty.ResourceQuota)))
+	}
+
+	if len(errs) > 0 {
+		return nil, apierror.NewInvalid(pretty.ResourceQuota, errs)
+	}
+
+	newResourceQuota := &v1.ResourceQuota{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: v1.ResourceQuotaSpec{
+			Hard: v1.ResourceList{
+				v1.ResourceLimitsMemory:   memoryLimitsParsed,
+				v1.ResourceRequestsMemory: memoryRequestsParsed,
+			},
+		},
+	}
+
+	creationError := r.ResourceQuotasService().Create(newResourceQuota, result)
+
+	return result, creationError
+
 }
 
 func (r *Resolver) UpdateResourceQuota(ctx context.Context, namespace string, name string, newJSON gqlschema.JSON) (*v1.ResourceQuota, error) {

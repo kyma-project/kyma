@@ -27,8 +27,16 @@ func (r *limitRangeItemResolver) DefaultRequest(ctx context.Context, obj *v1.Lim
 	return r.k8sNew.GetLimitRangeResources(&obj.DefaultRequest)
 }
 
+func (r *mutationResolver) CreateLimitRange(ctx context.Context, namespace string, name string, limitRange gqlschema.LimitRangeInput) (*v1.LimitRange, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *mutationResolver) UpdateLimitRange(ctx context.Context, namespace string, name string, json gqlschema.JSON) (*v1.LimitRange, error) {
 	return r.k8sNew.UpdateLimitRange(ctx, namespace, name, json)
+}
+
+func (r *mutationResolver) CreateResourceQuota(ctx context.Context, namespace string, name string, resourceQuota gqlschema.ResourceQuotaInput) (*v1.ResourceQuota, error) {
+	return r.k8sNew.CreateResourceQuota(ctx, namespace, name, resourceQuota)
 }
 
 func (r *mutationResolver) UpdateResourceQuota(ctx context.Context, namespace string, name string, json gqlschema.JSON) (*v1.ResourceQuota, error) {

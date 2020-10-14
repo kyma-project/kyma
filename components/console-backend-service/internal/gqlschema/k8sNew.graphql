@@ -87,11 +87,45 @@ extend type Query {
   # )
 }
 
+input ResourceQuotaInput {
+  limits: ResourceValuesInput!
+  requests: ResourceValuesInput!
+}
+
+input LimitRangeInput {
+  default: ResourceValuesInput!
+  defaultRequest: ResourceValuesInput!
+  max: ResourceValuesInput!
+  type: String!
+}
+
 extend type Mutation {
+  createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange
+  @HasAccess(
+    attributes: {
+      resource: "limitrange"
+      verb: "create"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+
   updateLimitRange(namespace: String!, name: String!, json: JSON!): LimitRange
   @HasAccess(
     attributes: {
       resource: "limitrange"
+      verb: "create"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+
+  createResourceQuota(namespace: String!, name: String!, resourceQuota: ResourceQuotaInput!): ResourceQuota
+  @HasAccess(
+    attributes: {
+      resource: "resourcequotas"
       verb: "create"
       apiGroup: ""
       apiVersion: "v1"

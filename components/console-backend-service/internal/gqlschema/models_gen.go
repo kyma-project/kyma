@@ -387,6 +387,13 @@ type FunctionStatus struct {
 	Message *string             `json:"message"`
 }
 
+type LimitRangeInput struct {
+	Default        *ResourceValuesInput `json:"default"`
+	DefaultRequest *ResourceValuesInput `json:"defaultRequest"`
+	Max            *ResourceValuesInput `json:"max"`
+	Type           string               `json:"type"`
+}
+
 type LoadBalancerIngress struct {
 	IP       string `json:"ip"`
 	HostName string `json:"hostName"`
@@ -494,6 +501,11 @@ type ResourceQuotaHard struct {
 	CPU    *string `json:"cpu"`
 	Memory *string `json:"memory"`
 	Pods   *string `json:"pods"`
+}
+
+type ResourceQuotaInput struct {
+	Limits   *ResourceValuesInput `json:"limits"`
+	Requests *ResourceValuesInput `json:"requests"`
 }
 
 type ResourceRef struct {
