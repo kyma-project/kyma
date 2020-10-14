@@ -11,6 +11,10 @@ global:
   disableLegacyConnectivity: false
   delete-helm-release:
     enabled: true
+  # Use this mechanism to exclude a CRD from being installed if you don't need it.
+  # Provide a string with a comma-separated list of CRD file names (without path!) that will be excluded from installation.
+  # The files are located in the ./files directory of this chart.
+  skipCrds: ""
 
 containerRegistry:
   path: eu.gcr.io/kyma-project
