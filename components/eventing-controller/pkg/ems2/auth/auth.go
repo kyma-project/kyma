@@ -36,9 +36,9 @@ func (a *Authenticator) Authenticate() (*AccessToken, error) {
 	defer func() { _ = resp.Body.Close() }()
 
 	if resp == nil {
-		return nil, fmt.Errorf("Could not unmarshal response: %v", resp)
+		return nil, fmt.Errorf("could not unmarshal response: %v", resp)
 	} else if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Failed to authenticate with error: %v; %v", resp.StatusCode, resp.Status)
+		return nil, fmt.Errorf("failed to authenticate with error: %v; %v", resp.StatusCode, resp.Status)
 	}
 
 	token := new(AccessToken)

@@ -132,9 +132,9 @@ func (r *SubscriptionReconciler) syncFinalizer(subscription *eventingv1alpha1.Su
 
 func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscription, result *ctrl.Result, ctx context.Context, logger logr.Logger) error {
 	logger.Info("Syncing subscription with BEB")
-	// TODO: get beb credentials from secret
-
-	r.bebClient.Initialize()
+	if err := r.bebClient.Initialize(); err != nil {
+		return err
+	}
 
 	// TODO: react on finalizer
 	if r.isInDeletion(subscription) {

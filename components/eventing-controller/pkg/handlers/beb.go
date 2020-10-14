@@ -19,7 +19,7 @@ import (
 var _ Interface = &Beb{}
 
 type Interface interface {
-	Initialize()
+	Initialize() error
 	SyncBebSubscription(subscription *eventingv1alpha1.Subscription, oldEv2Hash uint64, oldEmsHash uint64) (uint64, uint64, error)
 	DeleteBebSubscription(subscription *eventingv1alpha1.Subscription) error
 }
@@ -35,12 +35,14 @@ type BebResponse struct {
 	Error      error
 }
 
-func (b *Beb) Initialize() {
+func (b *Beb) Initialize() error {
 	if b.Token == nil {
 		if err := b.authenticate(); err != nil {
 			b.Log.Error(err, "failed to authenticate")
+			return err
 		}
 	}
+	return nil
 }
 
 func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription, oldEv2Hash uint64, oldEmsHash uint64) (uint64, uint64, error) {
@@ -162,6 +164,7 @@ func (b *Beb) deleteSubscription(name string) error {
 	b.Log.Info("BEB deleteSubscription()", "subscription name:", name)
 	resp, err := b.Client.Delete(b.Token, name)
 	if err != nil {
+		// TODO(nachtmaar(: err.Error() is empty string :/
 		return fmt.Errorf("failed to delete subscription with error: %v", err)
 	}
 	if resp.StatusCode == http.StatusUnauthorized {
