@@ -9,11 +9,14 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gstruct"
 	. "github.com/onsi/gomega/types"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -61,18 +64,42 @@ var _ = Describe("Subscription", func() {
 			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: namespaceName}
 
 			By("Setting a finalizer")
-			getSubscription(subscriptionLookupKey, ctx).Should(
+			var subscription = &eventingv1alpha1.Subscription{}
+			getSubscription(subscription, subscriptionLookupKey, ctx).Should(
 				Not(BeNil()),
 				haveName(subscriptionName),
 				haveFinalizer(FinalizerName),
+			)
+
+			By("Setting a Subscribed condition")
+			condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, "TODO", v1.ConditionTrue)
+			getSubscription(subscription, subscriptionLookupKey, ctx).Should(
+				Not(BeNil()),
+				haveName(subscriptionName),
+				haveFinalizer(FinalizerName),
+				haveCondition(condition),
 			)
 
 			By("Creating a BEB Subscription")
 			// TODO(nachtmaar): check that an HTTP call against BEB was done
 
 			By("Emitting some k8s events")
+			var subscriptionEvents = v1.EventList{}
+			// TODO: adjust to event we want to have
+			event := v1.Event{
+				Reason:  "todo",
+				Message: "todo",
+				Type:    v1.EventTypeNormal,
+			}
+			Eventually(func() v1.EventList {
+				err := k8sClient.List(ctx, &subscriptionEvents, client.InNamespace(namespaceName))
+				if err != nil {
+					return v1.EventList{}
+				}
+				return subscriptionEvents
 
-			// TODO(nachtmaar):
+			}).Should(haveEvent(event))
+
 		})
 	})
 
@@ -88,7 +115,8 @@ var _ = Describe("Subscription", func() {
 			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: namespaceName}
 
 			// ensure subscription is given
-			getSubscription(subscriptionLookupKey, ctx).Should(
+			var subscription = &eventingv1alpha1.Subscription{}
+			getSubscription(subscription, subscriptionLookupKey, ctx).Should(
 				Not(BeNil()),
 				haveName(subscriptionName),
 				haveFinalizer(FinalizerName),
@@ -98,13 +126,14 @@ var _ = Describe("Subscription", func() {
 			// TODO(nachtmaar): check that an HTTP call against BEB was done
 
 			By("Removing the finalizer")
-			getSubscription(subscriptionLookupKey, ctx).Should(
+			getSubscription(subscription, subscriptionLookupKey, ctx).Should(
 				Not(BeNil()),
 				haveName(subscriptionName),
 				Not(haveFinalizer(FinalizerName)),
 			)
 
 			By("Emitting some k8s events")
+
 			// TODO(nachtmaar):
 		})
 	})
@@ -199,13 +228,12 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 }
 
 // TODO: document
-func getSubscription(lookupKey types.NamespacedName, ctx context.Context) AsyncAssertion {
+func getSubscription(subscription *eventingv1alpha1.Subscription, lookupKey types.NamespacedName, ctx context.Context) AsyncAssertion {
 	return Eventually(func() *eventingv1alpha1.Subscription {
-		wantSubscription := &eventingv1alpha1.Subscription{}
-		if err := k8sClient.Get(ctx, lookupKey, wantSubscription); err != nil {
+		if err := k8sClient.Get(ctx, lookupKey, subscription); err != nil {
 			return nil
 		}
-		return wantSubscription
+		return subscription
 	}, timeout, interval)
 }
 
@@ -288,8 +316,20 @@ func haveFinalizer(finalizer string) GomegaMatcher {
 	return WithTransform(func(s *eventingv1alpha1.Subscription) []string { return s.ObjectMeta.Finalizers }, ContainElement(finalizer))
 }
 
+func haveCondition(condition eventingv1alpha1.Condition) GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha1.Subscription) []eventingv1alpha1.Condition { return s.Status.Conditions }, ContainElement(condition))
+}
+
 func isK8sAlreadyExistsError() GomegaMatcher {
 	return WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, Equal("AlreadyExists"))
+}
+
+func haveEvent(event v1.Event) GomegaMatcher {
+	return WithTransform(func(l v1.EventList) []v1.Event { return l.Items }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
+		"Reason":  Equal(event.Reason),
+		"Message": Equal(event.Message),
+		"Type":    Equal(event.Type),
+	})))
 }
 
 func isK8sUnprocessableEntity() GomegaMatcher {
