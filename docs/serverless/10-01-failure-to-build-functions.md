@@ -7,13 +7,13 @@ In its default configuration, Serverless uses persistent volumes as the internal
 
 Follow these steps:
 
-1. Edit the `serverless-docker-registry` pvc:
+1. Edit the `serverless-docker-registry` PVC:
 
   ```bash
   kubectl edit pvc -n kyma-system serverless-docker-registry
   ```
 
-2.  Change the value of **spec.resources.requests.storage** to higher, such as 30 GB, to increase the pvc capacity:
+2.  Change the value of **spec.resources.requests.storage** to higher, such as 30 GB, to increase the PVC capacity:
 
   ```yaml
   ...
@@ -23,7 +23,7 @@ Follow these steps:
         storage: 30Gi
   ```
 
-3. Save the changes and wait for a few minutes. List all `serverless-docker-registry` to check that its **CAPACITY** has changed as expected:
+3. Save the changes and wait for a few minutes. Use this command to check if the **CAPACITY** of the `serverless-docker-registry` PVC has changed as expected:
 
   ```bash
   kubectl get pvc serverless-docker-registry -n kyma-system
@@ -36,11 +36,11 @@ Follow these steps:
   serverless-docker-registry  Bound    pvc-a69b96hc-ahbc-k85d-0gh6-19gkcr4yns4k  30Gi       RWO            standard       23d
   ```
 
-If the value of the storage does not change, restart a Pod to which this pvc is bound to finish the volume resize.
+If the value of the storage does not change, restart the Pod to which this PVC is bound to finish the volume resize.
 
 To do this, follow these steps:
 
-1. List all available pods in the `kyma-system` Namespace:
+1. List all available Pods in the `kyma-system` Namespace:
 
   ```bash
   kubectl get pods -n kyma-system
