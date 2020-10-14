@@ -115,7 +115,6 @@ func (hc *Client) IsReleasePresent(nn NamespacedName) (bool, error) {
 		}
 		return true, err
 	}
-	log.Println("completed the new action config step")
 
 	status := action.NewStatus(cfg)
 
@@ -137,14 +136,8 @@ func (hc *Client) IsReleasePresent(nn NamespacedName) (bool, error) {
 			return time.Duration(fixedDelay) * time.Second
 		}),
 	)
-	_, err = status.Run(nn.Name)
-	if err != nil {
-		if strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
-			return false, nil
-		}
-	}
 
-	return true, err
+	return isPresent, err
 }
 
 // IsReleaseDeletable returns true for release that can be deleted
