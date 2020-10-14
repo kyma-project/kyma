@@ -2,9 +2,10 @@ package steps
 
 import (
 	"errors"
+	"strings"
+
 	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/storage/driver"
-	"strings"
 )
 
 type uninstallStep struct {
