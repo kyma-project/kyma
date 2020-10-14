@@ -12,7 +12,7 @@ certs:
       serviceNamespace: istio-system
     rootCA:
       secretName: kyma-ca-key-pair
-      secretNamespace: istio-system
+      secretNamespace: cert-manager
 clusterInfoConfigMap:
   name: net-global-overrides
   namespace: kyma-installer
