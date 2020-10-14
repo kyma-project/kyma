@@ -32,7 +32,7 @@ type Beb struct {
 
 type BebResponse struct {
 	StatusCode int
-	Error    error
+	Error      error
 }
 
 func (b *Beb) Initialize() {
@@ -144,7 +144,7 @@ func (b *Beb) authenticate() error {
 }
 
 func (b *Beb) getSubscription(name string) (*types2.Subscription, error) {
-	b.Log.Info("BEB getSubscription()","subscription name:", name)
+	b.Log.Info("BEB getSubscription()", "subscription name:", name)
 	emsSubscription, resp, err := b.Client.Get(b.Token, name)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get subscription with error: %v", err)
@@ -159,7 +159,7 @@ func (b *Beb) getSubscription(name string) (*types2.Subscription, error) {
 }
 
 func (b *Beb) deleteSubscription(name string) error {
-	b.Log.Info("BEB deleteSubscription()","subscription name:", name)
+	b.Log.Info("BEB deleteSubscription()", "subscription name:", name)
 	resp, err := b.Client.Delete(b.Token, name)
 	if err != nil {
 		return fmt.Errorf("failed to delete subscription with error: %v", err)
@@ -174,7 +174,7 @@ func (b *Beb) deleteSubscription(name string) error {
 }
 
 func (b *Beb) createSubscription(subscription *types2.Subscription) error {
-	b.Log.Info("BEB createSubscription()","subscription name:", subscription.Name)
+	b.Log.Info("BEB createSubscription()", "subscription name:", subscription.Name)
 	createResponse, err := b.Client.Create(b.Token, subscription)
 	if err != nil {
 		return fmt.Errorf("failed to create subscription with error: %v", err)
