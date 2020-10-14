@@ -1,0 +1,17 @@
+# Default values for certificate-manager.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+modules:
+  manager:
+    enabled: true
+
+cert-manager:
+  installCRDs: true
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
+  webhook:
+    podAnnotations:
+      sidecar.istio.io/inject: "false"
+  cainjector:
+    podAnnotations:
+      sidecar.istio.io/inject: "false"

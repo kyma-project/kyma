@@ -20,6 +20,8 @@ spec:
       namespace: "istio-system"
     - name: "istio-kyma-patch"
       namespace: "istio-system"
+    - name: "certificate-manager"
+      namespace: "cert-manager"      
     - name: "certificates"
       namespace: "istio-system"
     # - name: "eventing"
