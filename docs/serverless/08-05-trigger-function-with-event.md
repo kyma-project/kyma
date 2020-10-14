@@ -86,7 +86,7 @@ These variables refer to the following:
 
 The message appears on the UI confirming that the Event Trigger was successfully created, and you will see it in the **Event Triggers** section in your Function.
 
-    </details>
+  </details>
 </div>
 
 ## Test the trigger

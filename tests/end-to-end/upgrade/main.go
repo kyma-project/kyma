@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	monitoringv1 "github.com/coreos/prometheus-operator/pkg/client/versioned/typed/monitoring/v1"
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
@@ -119,6 +120,9 @@ func main() {
 	eventingCli, err := eventingclientv1alpha1.NewForConfig(k8sConfig)
 	fatalOnError(err, "while generating knative eventing client")
 
+	monitoringCli, err := monitoringv1.NewForConfig(k8sConfig)
+	fatalOnError(err, "while generating monitoring client")
+
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
 
@@ -137,7 +141,7 @@ func main() {
 		"HelmBrokerConflictUpgradeTest":   servicecatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest":    servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
 		"GrafanaUpgradeTest":              monitoring.NewGrafanaUpgradeTest(k8sCli),
-		"TargetsAndRulesUpgradeTest":      monitoring.NewTargetsAndRulesTest(k8sCli),
+		"TargetsAndRulesUpgradeTest":      monitoring.NewTargetsAndRulesTest(k8sCli, monitoringCli),
 		"MetricsUpgradeTest":              metricUpgradeTest,
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),

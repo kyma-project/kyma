@@ -23,15 +23,15 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    version: "PR-9593"
+    version: "PR-9496"
   application_operator_tests:
     version: "PR-9593"
   connector_service:
-    version: "b9871385"
+    version: "PR-9683"
   connector_service_tests:
     version: "b9871385"
   connection_token_handler:
-    version: "b9871385"
+    version: "PR-9683"
   connection_token_handler_tests:
     version: "b9871385"
   event_service:
@@ -51,7 +51,7 @@ global:
   application_broker:
     version: "1c48e0a0"
   application_connectivity_certs_setup_job:
-    version: "b9871385"
+    version: "PR-9683"
   application_connectivity_validator:
     version: "PR-9593"
   application_broker_eventing_migration:
