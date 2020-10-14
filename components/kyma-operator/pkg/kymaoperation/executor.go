@@ -141,6 +141,7 @@ func (extr *Executor) processComponents(removeLabelAndReturn func(err error) err
 
 		err := retry.Do(
 			func() error {
+
 				processErr := step.Run()
 				if extr.errorHandlers.CheckError("Step error: ", processErr) {
 					_ = extr.statusManager.Error(step.GetReleaseName(), stepName, processErr)

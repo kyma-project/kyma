@@ -20,6 +20,7 @@ import (
 type ClientInterface interface {
 	ListReleases() ([]*Release, error)
 	IsReleaseDeletable(nn NamespacedName) (bool, error)
+	IsReleasePresent(nn NamespacedName) (bool, error)
 	ReleaseDeployedRevision(nn NamespacedName) (int, error)
 	InstallRelease(chartDir string, nn NamespacedName, overrides overrides.Map) (*Release, error)
 	UpgradeRelease(chartDir string, nn NamespacedName, overrides overrides.Map) (*Release, error)
@@ -100,6 +101,30 @@ func (hc *Client) ReleaseStatus(nn NamespacedName) (*ReleaseStatus, error) {
 	return helmReleaseToKymaRelease(rel).ReleaseStatus, nil
 }
 
+// IsReleasePresent returns true for release that cis present on the cluster
+func (hc *Client) IsReleasePresent(nn NamespacedName) (bool, error) {
+
+	cfg, err := hc.newActionConfig(nn.Namespace)
+	if err != nil {
+		if strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
+			return false, nil
+		}
+		return true, err
+	}
+	log.Println("completed the new action config step")
+
+	status := action.NewStatus(cfg)
+
+	_, err = status.Run(nn.Name)
+	if err != nil {
+		if strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
+			return false, nil
+		}
+	}
+
+	return true, err
+}
+
 // IsReleaseDeletable returns true for release that can be deleted
 func (hc *Client) IsReleaseDeletable(nn NamespacedName) (bool, error) {
 
@@ -118,6 +143,8 @@ func (hc *Client) IsReleaseDeletable(nn NamespacedName) (bool, error) {
 		func() error {
 			rel, err := status.Run(nn.Name)
 			if err != nil {
+				log.Println(err)
+
 				if strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
 					isDeletable = false
 					return nil
@@ -243,7 +270,7 @@ func (hc *Client) RollbackRelease(nn NamespacedName, revision int) error {
 	return rollback.Run(nn.Name)
 }
 
-// DeleteRelease uninstalls a Helm release
+// UninstallRelease uninstalls a Helm release
 func (hc *Client) UninstallRelease(nn NamespacedName) error {
 
 	cfg, err := hc.newActionConfig(nn.Namespace)
