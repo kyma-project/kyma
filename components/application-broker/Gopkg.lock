@@ -410,10 +410,9 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:ae92f05296783bbb51741229b1dced5442f94d12de521ec2261feb9d5be59c41"
+  digest = "1:7afcaec648a706226791de4ae1b97cecbac9756dd4a7449a9eb35ff94426adbb"
   name = "github.com/kubernetes-sigs/service-catalog"
   packages = [
-    "pkg/apis/servicecatalog",
     "pkg/apis/servicecatalog/v1beta1",
     "pkg/apis/settings",
     "pkg/apis/settings/v1alpha1",
@@ -435,7 +434,7 @@
     "pkg/filter",
   ]
   pruneopts = "NUT"
-  revision = "ccab5234396729fee8dbf70620eafdfbc3d1a6af"
+  revision = "v0.3.0"
 
 [[projects]]
   digest = "1:9cc47dbb96d7c407d485b49b66685635dc5293839a0eebfd8f4fcc8b75fe7a17"
