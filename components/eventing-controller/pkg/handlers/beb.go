@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/httpclient"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"net/http"
 	"time"
@@ -164,14 +165,16 @@ func (b *Beb) deleteSubscription(name string) error {
 	b.Log.Info("BEB deleteSubscription()", "subscription name:", name)
 	resp, err := b.Client.Delete(b.Token, name)
 	if err != nil {
-		// TODO(nachtmaar(: err.Error() is empty string :/
 		return fmt.Errorf("failed to delete subscription with error: %v", err)
 	}
 	if resp.StatusCode == http.StatusUnauthorized {
 		b.Token = nil
 	}
 	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusNotFound {
-		return fmt.Errorf("failed to delete subscription with error: %v", resp.StatusCode)
+		return httpclient.NewError(nil,
+			httpclient.WithMessage("failed to delete subscription"),
+			httpclient.WithStatusCode(resp.StatusCode),
+		)
 	}
 	return nil
 }
@@ -185,6 +188,9 @@ func (b *Beb) createSubscription(subscription *types2.Subscription) error {
 	if createResponse.StatusCode == http.StatusUnauthorized {
 		b.Token = nil
 	}
+	// TODO(nachtmaar): why is this check necessary? can't we just return an error in the create call ?
+	// error message in reconciler is not helping too much
+	// 2020-10-14T20:34:34.803+0200	ERROR	controllers.Subscription	create ems subscription failed	{"subscription name:": "test-valid-subscription-1", "error": "failed to create subscription with error: &{{204 204 No Content} }"}
 	if createResponse.StatusCode > http.StatusAccepted && createResponse.StatusCode != http.StatusConflict {
 		return fmt.Errorf("failed to create subscription with error: %v", createResponse)
 	}
