@@ -1,0 +1,5 @@
+deleteJob:
+  image:
+    repository: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl"
+    tag: "v20200617-32c1f3ff"
+    pullPolicy: IfNotPresent

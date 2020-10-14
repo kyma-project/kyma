@@ -9,10 +9,8 @@ jobs:
 global:
   isLocalEnv: false
   disableLegacyConnectivity: false
-  # Use this mechanism to exclude a CRD from being installed if you don't need it.
-  # Provide a string with a comma-separated list of CRD file names (without path!) that will be excluded from installation.
-  # The files are located in the ./files directory of this chart.
-  skipCrds: ""
+  delete-xip-patch-job:
+    enabled: true
 
 containerRegistry:
   path: eu.gcr.io/kyma-project

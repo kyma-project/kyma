@@ -1,0 +1,5 @@
+dependencies:
+  - name: delete-xip-patch
+    version: 0.1.0
+    condition: global.delete-xip-patch-job.enabled
+

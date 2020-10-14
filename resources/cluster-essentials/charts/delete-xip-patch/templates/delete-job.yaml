@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "delete-xip-patch.fullname" . }}-job
+  namespace: kyma-installer
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook: "post-upgrade"
+    helm.sh/hook-weight: "10"
+  labels:
+    chart: {{ template "delete-xip-patch.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  activeDeadlineSeconds: 1000
+  backoffLimit: 3
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: “false”
+    spec:
+      containers:
+        -
+          command:
+            - bash
+            - "-c"
+            - |
+{{.Files.Get "files/job-script.sh" | printf "%s" | indent 16}}
+          image: {{ .Values.deleteJob.image.repository }}:{{ .Values.deleteJob.image.tag }}
+          name: job
+      restartPolicy: Never
+      serviceAccountName: kyma-installer
+
