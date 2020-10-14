@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -19,9 +20,10 @@ import (
 // SubscriptionReconciler reconciles a Subscription object
 type SubscriptionReconciler struct {
 	client.Client
-	Log      logr.Logger
-	recorder record.EventRecorder
-	Scheme   *runtime.Scheme
+	Log       logr.Logger
+	recorder  record.EventRecorder
+	Scheme    *runtime.Scheme
+	bebClient *handlers.Beb
 }
 
 // TODO: emit events
@@ -37,11 +39,15 @@ func NewSubscriptionReconciler(
 	recorder record.EventRecorder,
 	scheme *runtime.Scheme,
 ) *SubscriptionReconciler {
+	bebClient := &handlers.Beb{
+		Log: log,
+	}
 	return &SubscriptionReconciler{
-		Client:   client,
-		Log:      log,
-		recorder: recorder,
-		Scheme:   scheme,
+		Client:    client,
+		Log:       log,
+		recorder:  recorder,
+		Scheme:    scheme,
+		bebClient: bebClient,
 	}
 }
 
@@ -56,14 +62,17 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	_ = context.Background()
 	_ = r.Log.WithValues("subscription", req.NamespacedName)
 
-	subscription := &eventingv1alpha1.Subscription{}
+	cachedSubscription := &eventingv1alpha1.Subscription{}
+
 	ctx := context.TODO()
 	result := ctrl.Result{}
 
 	// Ensure the object was not deleted in the meantime
-	if err := r.Get(ctx, req.NamespacedName, subscription); err != nil {
+	if err := r.Get(ctx, req.NamespacedName, cachedSubscription); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+	// Handle only the new subscription
+	subscription := cachedSubscription.DeepCopy()
 
 	// Bind fields to logger
 	log := r.Log.WithValues("kind", subscription.GetObjectKind().GroupVersionKind().Kind,
@@ -91,13 +100,15 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		return result, nil
 	}
 
+	// TODO sync the Subscription CR with he corresponding APIRule.
+	// Expose the webhook
+
 	// Sync the BEB Subscription with the Subscription CR
 	if err := r.syncBEBSubscription(subscription, &result, ctx, log); err != nil {
 		log.Error(err, "error while syncing BEB subscription")
 		return result, err
 	}
 
-	result.Requeue = false
 	return result, nil
 }
 
@@ -111,36 +122,53 @@ func (r *SubscriptionReconciler) syncFinalizer(subscription *eventingv1alpha1.Su
 	// Add Finalizer if not in deletion mode
 	if !r.isInDeletion(subscription) {
 		if err := r.addFinalizer(subscription, ctx, logger); err != nil {
-			result.Requeue = true
 			return err
 		}
+		result.Requeue = true
 	}
 
 	return nil
 }
 
 func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscription, result *ctrl.Result, ctx context.Context, logger logr.Logger) error {
+	logger.Info("Syncing subscription with BEB")
 	// TODO: get beb credentials from secret
-	// TODO: CRUD BEB subscription
+
+	r.bebClient.Initialize()
 
 	// TODO: react on finalizer
 	if r.isInDeletion(subscription) {
 		logger.Info("Deleting BEB subscription")
+		if err := r.bebClient.DeleteBebSubscription(subscription); err != nil {
+			return err
+		}
 		if err := r.removeFinalizer(subscription, result, ctx, logger); err != nil {
 			return err
 		}
-		// TODO: delete BEB subscription
 		return nil
 	}
 
+	ev2Hash := subscription.Status.Ev2hash
+	emsHash := subscription.Status.Emshash
+	if newEv2Hash, newEmsHash, err := r.bebClient.SyncBebSubscription(subscription, ev2Hash, emsHash); err != nil {
+		logger.Error(err, "Update BEB subscription failed")
+		return err
+	} else {
+		if ev2Hash != newEv2Hash {
+			subscription.Status.Ev2hash = newEv2Hash
+		}
+		if emsHash != newEmsHash {
+			subscription.Status.Emshash = newEmsHash
+		}
+	}
+	// OK
 	if !subscription.Status.IsConditionSubscribed() {
-		// TODO: use by radu
-		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, "TODO", corev1.ConditionTrue)
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, "Successfully synchronized with BEB subscription", corev1.ConditionTrue)
 		if err := r.updateStatus(subscription, condition, ctx, logger); err != nil {
 			return err
 		}
+		result.Requeue = false // the last call in reconcile(), don't force a new reconcile() yet.
 	}
-	logger.Info("Creating BEB subscription")
 
 	return nil
 }
@@ -153,12 +181,11 @@ func (r *SubscriptionReconciler) syncInitialStatus(subscription *eventingv1alpha
 	expectedStatus.InitializeConditions()
 
 	// case: conditions are already initialized
-	if len(currentStatus.Conditions) == len(expectedStatus.Conditions) {
+	if len(currentStatus.Conditions) >= len(expectedStatus.Conditions) {
 		return nil
 	}
 
 	subscription.Status = expectedStatus
-	// TODO: this causes problem, investigate why
 	if err := r.Status().Update(ctx, subscription); err != nil {
 		return err
 	}

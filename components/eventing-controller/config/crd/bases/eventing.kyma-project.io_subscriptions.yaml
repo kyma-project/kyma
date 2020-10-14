@@ -155,6 +155,12 @@ spec:
                   - status
                   type: object
                 type: array
+              emshash:
+                format: int64
+                type: integer
+              ev2hash:
+                format: int64
+                type: integer
             type: object
         type: object
     served: true

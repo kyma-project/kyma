@@ -66,6 +66,8 @@ type SubscriptionSpec struct {
 // - the status of the exposed Webhook
 type SubscriptionStatus struct {
 	Conditions []Condition `json:"conditions,omitempty"`
+	Ev2hash    uint64      `json:"ev2hash,omitempty"`
+	Emshash    uint64      `json:"emshash,omitempty"`
 }
 
 // +kubebuilder:object:root=true
