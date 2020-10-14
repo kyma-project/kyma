@@ -36,7 +36,7 @@ Follow these steps:
   serverless-docker-registry  Bound    pvc-a69b96hc-ahbc-k85d-0gh6-19gkcr4yns4k  30Gi       RWO            standard       23d
   ```
 
-If the value of the storage does not change, restart a Pod to which pvc is connected to finish the volume resize.
+If the value of the storage does not change, restart a Pod to which this pvc is bound to finish the volume resize.
 
 To do this, follow these steps:
 
