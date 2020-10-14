@@ -64,3 +64,6 @@ test:
   dir: ''
   version: d4372526
   enabled: true
+  labels:
+    integration: true
+    after-upgrade: true

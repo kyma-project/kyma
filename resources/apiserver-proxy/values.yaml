@@ -29,6 +29,9 @@ hpa:
 
 tests:
   enabled: true
+  labels:
+    integration: true
+    after-upgrade: true
 global:
   apiserver_proxy:
     dir:
