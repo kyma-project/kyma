@@ -1,5 +1,5 @@
 ---
-title: Sync Git resources with the cluster using a GitOps operator
+title: Synchronize Git resources with the cluster using a GitOps operator
 type: Tutorials
 ---
 
@@ -11,8 +11,8 @@ This tutorial shows how you can automate the deployment of local Kyma resources 
 
 All you need before you start is to have the following:
 
-- CLI
-- brew
+- Kyma CLI
+- [Homebrew](https://docs.brew.sh/Installation)
 - Git repository
 
 ## Steps
@@ -21,16 +21,16 @@ These sections will lead you through the whole installation, configuration, and 
 
 ### Install and configure a k3d cluster
 
-1. Install k3d using brew:
+1. Install k3d using Homebrew:
 
   ```bash
   brew install k3d
   ```
 
-2. Cluster a default k3d cluster with a single server node:
+2. Create a default k3d cluster with a single server node:
 
   ```bash
-  k3d cluster create {CLUSTER-NAME}
+  k3d cluster create {CLUSTER_NAME}
   ```
 
 This command also sets your context to the newly created cluster. Run this command to display the cluster information:
@@ -39,12 +39,12 @@ This command also sets your context to the newly created cluster. Run this comma
   kubectl cluster-info
   ```
 
-3. Apply the Kyma's `functions.serverless.kyma-project.io` and `triggers.eventing.knative.dev` CRDs from the sources in the [`kyma`](https://github.com/kyma-project/kyma/tree/master/resources/cluster-essentials/files) repository. You will need them to create the Function and Trigger CRs on the cluster.
+3. Apply the `functions.serverless.kyma-project.io` and `triggers.eventing.knative.dev` CRDs from sources in the [`kyma`](https://github.com/kyma-project/kyma/tree/master/resources/cluster-essentials/files) repository. You will need them to create the Function and Trigger CRs on the cluster.
 
   ```bash
   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/resources/cluster-essentials/files/functions.serverless.crd.yaml && kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/resources/cluster-essentials/files/triggers.eventing.knative.dev.crd.yaml
   ```
-4. Run this command to make sure the CRs were applied:
+4. Run this command to make sure the CRs are applied:
 
   ```bash
   kubectl get customresourcedefinitions
@@ -87,13 +87,13 @@ This command also sets your context to the newly created cluster. Run this comma
 
 You can now install the Flux operator, connect it with a specific Git repository folder, and authorize Flux to automatically pull changes from this repository folder and apply them on your cluster.
 
-1. Install flux:
+1. Install Flux:
 
   ```bash
   brew install fluxctl
   ```
 
-2. Create a `flux` Namespace for the Flux operator's CRDs.
+2. Create a `flux` Namespace for the Flux operator's CRDs:
 
   ```bash
   kubectl create namespace flux
@@ -108,7 +108,7 @@ You can now install the Flux operator, connect it with a specific Git repository
   export GH_FOLDER="{GH_FOLDER_FOR_FUNCTION_RESOURCES}"
   ```
 
-4. Run this command to apply CRDs of the Flux operator to the `flux` Namespace on your cluster.
+4. Run this command to apply CRDs of the Flux operator to the `flux` Namespace on your cluster:
 
   ```bash
   fluxctl install \
@@ -147,11 +147,11 @@ You can now install the Flux operator, connect it with a specific Git repository
 
   ![GitHub account settings](./assets/settings.png)
 
-8. Go to the **SSH and GPG keys** section and select the **New SSH key** button.
+8. Go to the **SSH and GPG keys** section and select the **New SSH key** button:
 
   ![Create a new SSH key](./assets/create-ssh-key.png)
 
-9. Provide the new key name, paste the previously copied SSH key, and confirm changes by selecting the **Add SSH Key** button.
+9. Provide the new key name, paste the previously copied SSH key, and confirm changes by selecting the **Add SSH Key** button:
 
   ![Add a new SSH key](./assets/add-ssh-key.png)
 
@@ -172,7 +172,7 @@ You will create a sample inline Function and modify it by adding a trigger to it
   cd {LOCAL_GITHUB_REPOSITORY_FOLDER}
   ```
 
-3. Run the `apply` Kyma CLI command to create a Function CR in the YAML format on your remote GitHub repository. This command will generate the output in the `my-function.yaml` file.
+3. Run the `apply` Kyma CLI command to create a Function CR in the YAML format in your remote GitHub repository. This command will generate the output in the `my-function.yaml` file.
 
   ```bash
   kyma apply function --filename {FULL_PATH_TO_LOCAL_WORKSPACE_FOLDER}/config.yaml --output yaml --dry-run > ./{GH_REPO}/${GH_FOLDER}/my-function.yaml
@@ -181,9 +181,9 @@ You will create a sample inline Function and modify it by adding a trigger to it
 4. Push the local changes to the remote repository:
 
   ```bash
-  git add .  # Stage changes for the commit
+  git add .                       # Stage changes for the commit
   git commit -m 'Add my-function' # Add a commit message
-  git push origin main # Push the changes to the "main" branch of your Git repository
+  git push origin main            # Push the changes to the "main" branch of your Git repository
   ```
 
 5. Go to the GitHub repository to check that the changes were pushed.
@@ -249,4 +249,4 @@ You can see that Flux synchronized the resources and the new Trigger CR for the 
 
 ## Reverting feature
 
-Once you set it up, Flux will keep monitoring the given Git repository folder for any changes. If you modify the existing resources directly on the cluster, Flux will automatically revert these changes and update the given resource back its version on the `main` branch of the Git repository.  
+Once you set it up, Flux will keep monitoring the given Git repository folder for any changes. If you modify the existing resources directly on the cluster, Flux will automatically revert these changes and update the given resource back to its version on the `main` branch of the Git repository.  
