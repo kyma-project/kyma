@@ -29,7 +29,7 @@ spec:
          - "cluster.local/ns/kyma-system/sa/monitoring-grafana"
      to:
      - operation:
-         paths: ["/loki/api/v1/labels","/loki/api/v1/tail","/loki/api/v1/label/*","/loki/api/v1/query","/loki/api/v1/query_range"]
+         paths: ["/loki/api/v1/*"]
          methods: ["GET"]
    # fluent-bit with SA can push to v1 API
    - from:

@@ -93,6 +93,11 @@ global:
 
 nodeSelector: {}
 
+tests:
+  labels:
+    integration: true
+    after-upgrade: true
+
 livenessProbe:
   enabled: false
   initialDelaySeconds: 60

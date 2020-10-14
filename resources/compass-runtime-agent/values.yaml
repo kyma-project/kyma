@@ -3,7 +3,7 @@ global:
     containerRegistry:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
-      version: "d0516ff9"
+      version: "PR-9593"
     runtimeAgentTests:
       version: "PR-9569"
     compassExternalSolutionTests:
@@ -57,6 +57,9 @@ compassRuntimeAgent:
     port: 8090
     proxyStatusPort: 15020
   tests:
+    labels:
+      integration: true
+      after-upgrade: true
     enabled: true
     mockService:
       port: 8080

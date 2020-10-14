@@ -6,6 +6,10 @@ metadata:
   name: kiali
   labels:
     {{- include "kiali.labels" . | nindent 4 }}
+    {{- range $key, $val := .Values.tests.labels }}
+    kyma-project.io/test.{{ $key }}: {{ $val | quote }}
+    {{- end }}
+
 spec:
   disableConcurrency: false
   template:

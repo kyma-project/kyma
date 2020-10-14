@@ -4,10 +4,8 @@ go 1.14
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/googleapis/gnostic v0.3.1 // indirect
 	github.com/gorilla/mux v1.7.3
-	github.com/json-iterator/go v1.1.8 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.0.0
@@ -22,8 +20,8 @@ require (
 	golang.org/x/sys v0.0.0-20191204072324-ce4227a45e2e // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
-	k8s.io/api v0.16.10
-	k8s.io/apimachinery v0.16.11-rc.0
+	k8s.io/api v0.18.8
+	k8s.io/apimachinery v0.18.8
 	k8s.io/client-go v0.16.10
 	k8s.io/utils v0.0.0-20191114200735-6ca3b61696b6 // indirect
 )

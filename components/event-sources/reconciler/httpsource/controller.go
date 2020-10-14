@@ -23,7 +23,6 @@ import (
 	sourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client"
 	httpsourceinformersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/httpsource"
 	istioclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/client"
-	policyinformersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/informers/authentication/v1alpha1/policy"
 	peerauthenticationinformersv1beta1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/informers/security/v1beta1/peerauthentication"
 )
 
@@ -50,7 +49,6 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	httpSourceInformer := httpsourceinformersv1alpha1.Get(ctx)
 	deploymentInformer := deploymentinformer.Get(ctx)
 	chInformer := messaginginformersv1alpha1.Get(ctx)
-	policyInformer := policyinformersv1alpha1.Get(ctx)
 	serviceInformer := serviceinformer.Get(ctx)
 	peerAuthenticationInformer := peerauthenticationinformersv1beta1.Get(ctx)
 
@@ -66,11 +64,6 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		sourcesClient:            sourcesclient.Get(ctx).SourcesV1alpha1(),
 		messagingClient:          rb.EventingClientSet.MessagingV1alpha1(),
 		securityClient:           istioclient.Get(ctx).SecurityV1beta1(),
-
-		// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
-		policyLister: policyInformer.Lister(),
-		authClient:   istioclient.Get(ctx).AuthenticationV1alpha1(),
-		// END
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 
@@ -93,9 +86,6 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	chInformer.Informer().AddEventHandler(eventHandler)
 
 	// istio
-	// TODO: remove as part of https://github.com/kyma-project/kyma/issues/9331
-	policyInformer.Informer().AddEventHandler(eventHandler)
-	// END
 	peerAuthenticationInformer.Informer().AddEventHandler(eventHandler)
 
 	// watch for changes to metrics/logging configs
