@@ -102,19 +102,10 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 					},
 					Containers: []corev1.Container{
 						{
-							Name:  "executor",
-							Image: r.config.Build.ExecutorImage,
-							Args:  args,
-							Resources: corev1.ResourceRequirements{
-								Limits: corev1.ResourceList{
-									corev1.ResourceMemory: r.config.Build.LimitsMemoryValue,
-									corev1.ResourceCPU:    r.config.Build.LimitsCPUValue,
-								},
-								Requests: corev1.ResourceList{
-									corev1.ResourceMemory: r.config.Build.RequestsMemoryValue,
-									corev1.ResourceCPU:    r.config.Build.RequestsCPUValue,
-								},
-							},
+							Name:      "executor",
+							Image:     r.config.Build.ExecutorImage,
+							Args:      args,
+							Resources: instance.Spec.BuildResources,
 							VolumeMounts: []corev1.VolumeMount{
 								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
 								// If COPY is not used, then the cache will not work
@@ -289,19 +280,10 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 					},
 					Containers: []corev1.Container{
 						{
-							Name:  "executor",
-							Image: r.config.Build.ExecutorImage,
-							Args:  args,
-							Resources: corev1.ResourceRequirements{
-								Limits: corev1.ResourceList{
-									corev1.ResourceMemory: r.config.Build.LimitsMemoryValue,
-									corev1.ResourceCPU:    r.config.Build.LimitsCPUValue,
-								},
-								Requests: corev1.ResourceList{
-									corev1.ResourceMemory: r.config.Build.RequestsMemoryValue,
-									corev1.ResourceCPU:    r.config.Build.RequestsCPUValue,
-								},
-							},
+							Name:      "executor",
+							Image:     r.config.Build.ExecutorImage,
+							Args:      args,
+							Resources: instance.Spec.BuildResources,
 							VolumeMounts: []corev1.VolumeMount{
 								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
 								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
