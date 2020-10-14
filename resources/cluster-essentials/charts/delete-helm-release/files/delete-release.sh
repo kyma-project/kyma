@@ -1,14 +1,30 @@
 #!/usr/bin/env bash
 
-RELEASE_NAME="xip-patch"
-RELEASE_NAMESPACE="kyma-installer"
+########################################
+# Must come from env:                  #
+# RELEASE_NAME                         #
+# RELEASE_NAMESPACE                    #
+########################################
+
+
+if [[ -z "${RELEASE_NAME}" ]]; then
+    echo "Missing RELEASE_NAME env variable"
+    exit 1
+fi
+
+
+if [[ -z "${RELEASE_NAMESPACE}" ]]; then
+    echo "Missing RELEASE_NAMESPACE env variable"
+    exit 1
+fi
+
 MAX_RETRIES=3
 
 set +e
 
 retry=0
 
-#Find the xip-patch status.
+#Find the release status.
 while [[ ${retry} -lt ${MAX_RETRIES} ]]; do
     echo "Checking the status of the relase: \"${RELEASE_NAME}\" in namespace: \"${RELEASE_NAMESPACE}\":"
     result=$(helm3 status ${RELEASE_NAME} --namespace ${RELEASE_NAMESPACE} 2>&1)
@@ -45,7 +61,7 @@ if [[ ${retry} -eq ${MAX_RETRIES} ]]; then
     exit 1
 fi
 
-#Delete the xip-patch release
+#Delete the release (uninstall)
 while [[ ${retry} -lt ${MAX_RETRIES} ]]; do
     echo "Deleting the relase: \"${RELEASE_NAME}\" in namespace: \"${RELEASE_NAMESPACE}\":"
     result=$(helm3 delete ${RELEASE_NAME} --namespace ${RELEASE_NAMESPACE} 2>&1)

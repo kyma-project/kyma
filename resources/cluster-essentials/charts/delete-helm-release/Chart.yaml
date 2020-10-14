@@ -1,0 +1,5 @@
+name: delete-helm-release
+description: A Helm chart for deleting (uninstalling) Helm Releases.
+version: 0.1.0
+appVersion: "0.1.0"
+apiVersion: v1

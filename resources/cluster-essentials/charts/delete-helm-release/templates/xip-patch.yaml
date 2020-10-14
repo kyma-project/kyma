@@ -1,14 +1,14 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "delete-xip-patch.fullname" . }}-job
+  name: {{ template "delete-helm-release.fullname" . }}-xip-patch-job
   namespace: kyma-installer
   annotations:
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
     helm.sh/hook: "post-upgrade"
     helm.sh/hook-weight: "10"
   labels:
-    chart: {{ template "delete-xip-patch.chart" . }}
+    chart: {{ template "delete-helm-release.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
@@ -17,17 +17,22 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.istio.io/inject: “false”
+        sidecar.istio.io/inject: "false"
     spec:
       containers:
-        -
+        - name: job
           command:
             - bash
             - "-c"
             - |
-{{.Files.Get "files/job-script.sh" | printf "%s" | indent 16}}
+{{.Files.Get "files/delete-release.sh" | printf "%s" | indent 16}}
           image: {{ .Values.deleteJob.image.repository }}:{{ .Values.deleteJob.image.tag }}
-          name: job
+          imagePullPolicy: {{ .Values.deleteJob.image.pullPolicy}}
+          env:
+          - name: RELEASE_NAME
+            value: "xip-patch"
+          - name: RELEASE_NAMESPACE
+            value: "kyma-installer"
       restartPolicy: Never
       serviceAccountName: kyma-installer
 

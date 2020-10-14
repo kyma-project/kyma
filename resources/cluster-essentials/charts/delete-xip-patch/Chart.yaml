@@ -1,5 +1,0 @@
-name: delete-xip-patch
-description: A Helm chart running a job that deletes 'xip-patch' Helm Release.
-version: 0.1.0
-appVersion: "0.1.0"
-apiVersion: v1
