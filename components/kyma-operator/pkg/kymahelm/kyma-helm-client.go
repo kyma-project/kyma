@@ -104,6 +104,10 @@ func (hc *Client) ReleaseStatus(nn NamespacedName) (*ReleaseStatus, error) {
 // IsReleasePresent returns true for release that cis present on the cluster
 func (hc *Client) IsReleasePresent(nn NamespacedName) (bool, error) {
 
+	isPresent := true
+	maxAttempts := 3
+	fixedDelay := 3
+
 	cfg, err := hc.newActionConfig(nn.Namespace)
 	if err != nil {
 		if strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
@@ -115,6 +119,24 @@ func (hc *Client) IsReleasePresent(nn NamespacedName) (bool, error) {
 
 	status := action.NewStatus(cfg)
 
+	err = retry.Do(
+		func() error {
+			_, err := status.Run(nn.Name)
+			if err != nil {
+				if strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
+					isPresent = false
+					return nil
+				}
+				return err
+			}
+			return nil
+		},
+		retry.Attempts(uint(maxAttempts)),
+		retry.DelayType(func(attempt uint, config *retry.Config) time.Duration {
+			log.Printf("Retry number %d on getting release status.\n", attempt+1)
+			return time.Duration(fixedDelay) * time.Second
+		}),
+	)
 	_, err = status.Run(nn.Name)
 	if err != nil {
 		if strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
