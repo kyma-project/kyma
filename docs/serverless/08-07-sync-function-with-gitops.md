@@ -175,7 +175,7 @@ You will create a sample inline Function and modify it by adding a trigger to it
 3. Run the `apply` Kyma CLI command to create a Function CR in the YAML format in your remote GitHub repository. This command will generate the output in the `my-function.yaml` file.
 
   ```bash
-  kyma apply function --filename {FULL_PATH_TO_LOCAL_WORKSPACE_FOLDER}/config.yaml --output yaml --dry-run > ./{GH_REPO}/${GH_FOLDER}/my-function.yaml
+  kyma apply function --filename {FULL_PATH_TO_LOCAL_WORKSPACE_FOLDER}/config.yaml --output yaml --dry-run > ./${GH_FOLDER}/my-function.yaml
   ```
 
 4. Push the local changes to the remote repository:
@@ -212,7 +212,7 @@ You will create a sample inline Function and modify it by adding a trigger to it
       sourceType: inline
       sourcePath: {FULL_PATH_TO_WORKSPACE_FOLDER}
   triggers:
-  - version: evt1
+  - eventTypeVersion: evt1
     source: the-source
     type: t1
   ```
