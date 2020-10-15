@@ -81,13 +81,13 @@ images:
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "PR-9659"
+      tag: "12225f37"
     nodejs10:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
-      tag: "PR-9659"
+      tag: "12225f37"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "PR-9659"
+      tag: "12225f37"
 
 deployment:
   replicas: 1
