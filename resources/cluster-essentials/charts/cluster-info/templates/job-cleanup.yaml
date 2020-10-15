@@ -16,6 +16,8 @@ spec:
       name: {{ include "cluster-info.fullname" . }}-cleanup
       labels:
         app: {{ include "cluster-info.fullname" . }}-cleanup
+      annotations:
+        sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: {{ include "cluster-info.fullname" . }}-cleanup
       restartPolicy: Never
