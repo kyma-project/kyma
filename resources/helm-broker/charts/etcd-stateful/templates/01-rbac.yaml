@@ -27,3 +27,7 @@ rules:
   - apiGroups: [""]
     resources: ["configmaps"]
     verbs: ["get", "create", "delete"]
+  - apiGroups: ["policy"]
+    resources: ["podsecuritypolicies"]
+    verbs:     ["use"]
+    resourceNames: ["helm-broker.unprivileged"]
