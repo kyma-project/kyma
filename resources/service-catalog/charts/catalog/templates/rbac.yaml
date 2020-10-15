@@ -66,27 +66,6 @@ rules:
         {{- end }}
 
 ---
-# PodSecurityPolicy
-apiVersion: policy/v1beta1
-kind: PodSecurityPolicy
-metadata:
-  name: "servicecatalog.k8s.io:unprivileged"
-spec:
-  allowedCapabilities:
-    - 'NET_ADMIN'
-    - 'NET_RAW'
-  privileged: false
-  seLinux:
-    rule: RunAsAny
-  supplementalGroups:
-    rule: RunAsAny
-  runAsUser:
-    rule: RunAsAny
-  fsGroup:
-    rule: RunAsAny
-  volumes:
-    - '*'
----
 
 # give the controller-manager service account access to whats defined in its role.
 apiVersion: {{ .Values.rbacApiVersion }}
