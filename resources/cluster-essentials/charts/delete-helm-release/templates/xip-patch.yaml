@@ -12,8 +12,8 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  activeDeadlineSeconds: 1000
-  backoffLimit: 3
+  activeDeadlineSeconds: 30
+  backoffLimit: 1
   template:
     metadata:
       annotations:
@@ -27,12 +27,15 @@ spec:
             - |
 {{.Files.Get "files/delete-release.sh" | printf "%s" | indent 16}}
           image: {{ .Values.deleteJob.image.repository }}:{{ .Values.deleteJob.image.tag }}
-          imagePullPolicy: {{ .Values.deleteJob.image.pullPolicy}}
+          imagePullPolicy: {{ .Values.deleteJob.image.pullPolicy }}
           env:
           - name: RELEASE_NAME
             value: "xip-patch"
           - name: RELEASE_NAMESPACE
             value: "kyma-installer"
+          # Generic retry in the script to overcome random network failures.
+          - name: RETRIES_ON_COMMAND_FAILURE
+            value: "2"
       restartPolicy: Never
       serviceAccountName: kyma-installer
 

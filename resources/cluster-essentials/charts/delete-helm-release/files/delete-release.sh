@@ -4,8 +4,10 @@
 # Must come from env:                  #
 # RELEASE_NAME                         #
 # RELEASE_NAMESPACE                    #
+# RETRIES_ON_COMMAND_FAILURE           #
 ########################################
 
+set +e
 
 if [[ -z "${RELEASE_NAME}" ]]; then
     echo "Missing RELEASE_NAME env variable"
@@ -18,9 +20,19 @@ if [[ -z "${RELEASE_NAMESPACE}" ]]; then
     exit 1
 fi
 
+
+# Setup default value
 MAX_RETRIES=3
 
-set +e
+if [[ -n "${RETRIES_ON_COMMAND_FAILURE}" ]]; then
+    if [[ "${RETRIES_ON_COMMAND_FAILURE}" =~ ^[1-9][0-9]*$ ]]; then
+        MAX_RETRIES=${RETRIES_ON_COMMAND_FAILURE}
+        echo "RETRIES_ON_COMMAND_FAILURE configured to ${RETRIES_ON_COMMAND_FAILURE}"
+    else
+        echo "RETRIES_ON_COMMAND_FAILURE is not a number (value: \"${RETRIES_ON_COMMAND_FAILURE}\")"
+        exit 1
+    fi
+fi
 
 retry=0
 

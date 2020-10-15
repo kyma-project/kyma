@@ -1,5 +1,0 @@
-dependencies:
-  - name: delete-helm-release
-    version: 0.1.0
-    condition: global.delete-helm-release.enabled
-
