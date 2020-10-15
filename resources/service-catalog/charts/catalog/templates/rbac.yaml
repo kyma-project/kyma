@@ -10,6 +10,11 @@ kind: ClusterRole
 metadata:
     name: "servicecatalog.k8s.io:controller-manager"
 rules:
+    - apiGroups: ["policy"]
+      resources: ["podsecuritypolicies"]
+      verbs:     ["use"]
+      resourceNames:
+      - "servicecatalog.unprivileged"
     - apiGroups: [""]
       resources: ["events"]
       verbs:     ["create","patch","update"]
@@ -60,6 +65,27 @@ rules:
       verbs:     ["update"]
         {{- end }}
 
+---
+# PodSecurityPolicy
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: "servicecatalog.k8s.io:unprivileged"
+spec:
+  allowedCapabilities:
+    - 'NET_ADMIN'
+    - 'NET_RAW'
+  privileged: false
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  runAsUser:
+    rule: RunAsAny
+  fsGroup:
+    rule: RunAsAny
+  volumes:
+    - '*'
 ---
 
 # give the controller-manager service account access to whats defined in its role.
