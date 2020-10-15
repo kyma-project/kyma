@@ -1,0 +1,100 @@
+  # About:
+  # This migration job performs the migration from Istio Policy => PeerAuthentication.
+  # For more details see the summary in the job shell script.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-knative-broker-migration
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}-knative-broker-migration
+  annotations:
+    helm.sh/hook: "post-upgrade"
+    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
+    helm.sh/hook-weight: "0"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Name }}-knative-broker-migration
+  labels:
+    app: {{ .Release.Name }}-knative-broker-migration
+  annotations:
+    helm.sh/hook: "post-upgrade"
+    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
+    helm.sh/hook-weight: "0"
+rules:
+  - apiGroups: [ "" ]
+    resources: [ "namespaces" ]
+    verbs: [ "get", "list" ]
+  - apiGroups: [ "eventing.knative.dev" ]
+    resources: [ "brokers" ]
+    verbs: [ "get", "list" ]
+  - apiGroups: [ "authentication.istio.io" ]
+    resources: [ "policies" ]
+    verbs: [ "get", "list", "delete" ]
+  - apiGroups: [ "security.istio.io" ]
+    resources: [ "peerauthentications" ]
+    verbs: [ "get", "create", "patch" ]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Release.Name }}-knative-broker-migration
+  labels:
+    app: {{ .Release.Name }}-knative-broker-migration
+  annotations:
+    helm.sh/hook: "post-upgrade"
+    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
+    helm.sh/hook-weight: "1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Name }}-knative-broker-migration
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Release.Name }}-knative-broker-migration
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-knative-broker-migration
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}-knative-broker-migration
+  annotations:
+    helm.sh/hook: "post-upgrade"
+    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
+    helm.sh/hook-weight: "2"
+    sidecar.istio.io/inject: "false"
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: {{ .Release.Name }}-knative-broker-migration
+      name: {{ .Release.Name }}-knative-broker-migration
+    spec:
+      serviceAccountName: {{ .Release.Name }}-knative-broker-migration
+      restartPolicy: Never
+      containers:
+        - name: {{ .Release.Name }}-knative-broker-migration
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
+          command:
+            - "/bin/bash"
+          args:
+            - "-c"
+            - |
+          {{ .Files.Get "knative-broker-migration.sh" | nindent 14 }}
+          terminationMessagePolicy: "FallbackToLogsOnError"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
