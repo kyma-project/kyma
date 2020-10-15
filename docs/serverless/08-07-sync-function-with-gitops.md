@@ -231,9 +231,9 @@ You will create a sample inline Function and modify it by adding a trigger to it
       sourceType: inline
       sourcePath: {FULL_PATH_TO_WORKSPACE_FOLDER}
   triggers:
-  - eventTypeVersion: evt1
-    source: the-source
-    type: t1
+    - eventTypeVersion: evt1
+      source: the-source
+      type: t1
   ```
 
 
