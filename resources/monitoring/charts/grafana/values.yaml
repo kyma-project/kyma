@@ -560,7 +560,7 @@ kyma:
     enabled: true
 
   authProxy:
-    enabled: false
+    enabled1: false
     replicaCount: 1
     clientId: "grafana"
     clientSecret: "apie4eeX6hiC9ainieli"
