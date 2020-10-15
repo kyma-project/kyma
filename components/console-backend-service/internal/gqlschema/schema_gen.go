@@ -828,9 +828,9 @@ type ComplexityRoot struct {
 	}
 
 	ResourceQuotaHard struct {
-		CPU    func(childComplexity int) int
-		Memory func(childComplexity int) int
-		Pods   func(childComplexity int) int
+		Limits   func(childComplexity int) int
+		Pods     func(childComplexity int) int
+		Requests func(childComplexity int) int
 	}
 
 	ResourceQuotaSpec struct {
@@ -5309,19 +5309,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ResourceQuota.Spec(childComplexity), true
 
-	case "ResourceQuotaHard.cpu":
-		if e.complexity.ResourceQuotaHard.CPU == nil {
+	case "ResourceQuotaHard.limits":
+		if e.complexity.ResourceQuotaHard.Limits == nil {
 			break
 		}
 
-		return e.complexity.ResourceQuotaHard.CPU(childComplexity), true
-
-	case "ResourceQuotaHard.memory":
-		if e.complexity.ResourceQuotaHard.Memory == nil {
-			break
-		}
-
-		return e.complexity.ResourceQuotaHard.Memory(childComplexity), true
+		return e.complexity.ResourceQuotaHard.Limits(childComplexity), true
 
 	case "ResourceQuotaHard.pods":
 		if e.complexity.ResourceQuotaHard.Pods == nil {
@@ -5329,6 +5322,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ResourceQuotaHard.Pods(childComplexity), true
+
+	case "ResourceQuotaHard.requests":
+		if e.complexity.ResourceQuotaHard.Requests == nil {
+			break
+		}
+
+		return e.complexity.ResourceQuotaHard.Requests(childComplexity), true
 
 	case "ResourceQuotaSpec.hard":
 		if e.complexity.ResourceQuotaSpec.Hard == nil {
@@ -7042,9 +7042,9 @@ type ResourceLimits {
 # LIMIT RANGE
 type LimitRangeItem @goModel(model: "k8s.io/api/core/v1.LimitRangeItem") {
   type: LimitType!
-  max: ResourceLimits
-  default: ResourceLimits
-  defaultRequest: ResourceLimits
+  max: ResourceLimits!
+  default: ResourceLimits!
+  defaultRequest: ResourceLimits!
 }
 
 type LimitRangeSpec @goModel(model: "k8s.io/api/core/v1.LimitRangeSpec") {
@@ -7058,33 +7058,26 @@ type LimitRange @goModel(model: "k8s.io/api/core/v1.LimitRange") {
 
 # # RESOURCE QUOTA
 
+# type ResourceQuotaHard @goModel(model: "k8s.io/api/core/v1.ResourceList") {
+#   # limits: ResourceLimits!
+#   # requests: ResourceLimits!
+#   pods: String
+# }
+
 type ResourceQuotaHard {
-  cpu: String
-  memory: String
-  pods: String
+  limits: ResourceLimits!
+  requests: ResourceLimits!
+  pods: String!
 }
 
 type ResourceQuotaSpec @goModel(model: "k8s.io/api/core/v1.ResourceQuotaSpec") {
-  hard: ResourceQuotaHard
+  hard: ResourceQuotaHard!
 }
 type ResourceQuota @goModel(model: "k8s.io/api/core/v1.ResourceQuota") {
   name: String!
   spec: ResourceQuotaSpec!
   json: JSON!
-  # limits: ResourceLimits!
-  # requests: ResourceLimits!
 }
-
-# type ResourceQuotasStatus {
-#   exceeded: Boolean!
-#   exceededQuotas: [ExceededQuota!]!
-# }
-
-# type ExceededQuota {
-#   quotaName: String!
-#   resourceName: String!
-#   affectedResources: [String!]!
-# }
 
 extend type Query {
   limitRanges(namespace: String!): [LimitRange!]!
@@ -20483,11 +20476,14 @@ func (ec *executionContext) _LimitRangeItem_max(ctx context.Context, field graph
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*ResourceLimits)
 	fc.Result = res
-	return ec.marshalOResourceLimits2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx, field.Selections, res)
+	return ec.marshalNResourceLimits2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _LimitRangeItem_default(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRangeItem) (ret graphql.Marshaler) {
@@ -20514,11 +20510,14 @@ func (ec *executionContext) _LimitRangeItem_default(ctx context.Context, field g
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*ResourceLimits)
 	fc.Result = res
-	return ec.marshalOResourceLimits2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx, field.Selections, res)
+	return ec.marshalNResourceLimits2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _LimitRangeItem_defaultRequest(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRangeItem) (ret graphql.Marshaler) {
@@ -20545,11 +20544,14 @@ func (ec *executionContext) _LimitRangeItem_defaultRequest(ctx context.Context, 
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*ResourceLimits)
 	fc.Result = res
-	return ec.marshalOResourceLimits2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx, field.Selections, res)
+	return ec.marshalNResourceLimits2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _LimitRangeSpec_limits(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRangeSpec) (ret graphql.Marshaler) {
@@ -31181,7 +31183,7 @@ func (ec *executionContext) _ResourceQuota_json(ctx context.Context, field graph
 	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ResourceQuotaHard_cpu(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotaHard) (ret graphql.Marshaler) {
+func (ec *executionContext) _ResourceQuotaHard_limits(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotaHard) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -31198,21 +31200,24 @@ func (ec *executionContext) _ResourceQuotaHard_cpu(ctx context.Context, field gr
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.CPU, nil
+		return obj.Limits, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*ResourceLimits)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNResourceLimits2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ResourceQuotaHard_memory(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotaHard) (ret graphql.Marshaler) {
+func (ec *executionContext) _ResourceQuotaHard_requests(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotaHard) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -31229,18 +31234,21 @@ func (ec *executionContext) _ResourceQuotaHard_memory(ctx context.Context, field
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Memory, nil
+		return obj.Requests, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*ResourceLimits)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNResourceLimits2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ResourceQuotaHard_pods(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotaHard) (ret graphql.Marshaler) {
@@ -31267,11 +31275,14 @@ func (ec *executionContext) _ResourceQuotaHard_pods(ctx context.Context, field g
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ResourceQuotaSpec_hard(ctx context.Context, field graphql.CollectedField, obj *v11.ResourceQuotaSpec) (ret graphql.Marshaler) {
@@ -31298,11 +31309,14 @@ func (ec *executionContext) _ResourceQuotaSpec_hard(ctx context.Context, field g
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*ResourceQuotaHard)
 	fc.Result = res
-	return ec.marshalOResourceQuotaHard2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaHard(ctx, field.Selections, res)
+	return ec.marshalNResourceQuotaHard2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaHard(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ResourceRef_name(ctx context.Context, field graphql.CollectedField, obj *ResourceRef) (ret graphql.Marshaler) {
@@ -43571,6 +43585,9 @@ func (ec *executionContext) _LimitRangeItem(ctx context.Context, sel ast.Selecti
 					}
 				}()
 				res = ec._LimitRangeItem_max(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "default":
@@ -43582,6 +43599,9 @@ func (ec *executionContext) _LimitRangeItem(ctx context.Context, sel ast.Selecti
 					}
 				}()
 				res = ec._LimitRangeItem_default(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "defaultRequest":
@@ -43593,6 +43613,9 @@ func (ec *executionContext) _LimitRangeItem(ctx context.Context, sel ast.Selecti
 					}
 				}()
 				res = ec._LimitRangeItem_defaultRequest(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		default:
@@ -45505,12 +45528,21 @@ func (ec *executionContext) _ResourceQuotaHard(ctx context.Context, sel ast.Sele
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ResourceQuotaHard")
-		case "cpu":
-			out.Values[i] = ec._ResourceQuotaHard_cpu(ctx, field, obj)
-		case "memory":
-			out.Values[i] = ec._ResourceQuotaHard_memory(ctx, field, obj)
+		case "limits":
+			out.Values[i] = ec._ResourceQuotaHard_limits(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "requests":
+			out.Values[i] = ec._ResourceQuotaHard_requests(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "pods":
 			out.Values[i] = ec._ResourceQuotaHard_pods(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -45542,6 +45574,9 @@ func (ec *executionContext) _ResourceQuotaSpec(ctx context.Context, sel ast.Sele
 					}
 				}()
 				res = ec._ResourceQuotaSpec_hard(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		default:
@@ -50572,6 +50607,20 @@ func (ec *executionContext) unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑp
 	return ec.unmarshalInputResourceAttributes(ctx, v)
 }
 
+func (ec *executionContext) marshalNResourceLimits2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx context.Context, sel ast.SelectionSet, v ResourceLimits) graphql.Marshaler {
+	return ec._ResourceLimits(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNResourceLimits2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx context.Context, sel ast.SelectionSet, v *ResourceLimits) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ResourceLimits(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNResourceQuota2k8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuota(ctx context.Context, sel ast.SelectionSet, v v11.ResourceQuota) graphql.Marshaler {
 	return ec._ResourceQuota(ctx, sel, &v)
 }
@@ -50621,6 +50670,20 @@ func (ec *executionContext) marshalNResourceQuota2ᚖk8sᚗioᚋapiᚋcoreᚋv1�
 		return graphql.Null
 	}
 	return ec._ResourceQuota(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNResourceQuotaHard2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaHard(ctx context.Context, sel ast.SelectionSet, v ResourceQuotaHard) graphql.Marshaler {
+	return ec._ResourceQuotaHard(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNResourceQuotaHard2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaHard(ctx context.Context, sel ast.SelectionSet, v *ResourceQuotaHard) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ResourceQuotaHard(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNResourceQuotaInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaInput(ctx context.Context, v interface{}) (ResourceQuotaInput, error) {
@@ -53202,17 +53265,6 @@ func (ec *executionContext) unmarshalORepositoryAuthInput2ᚖgithubᚗcomᚋkyma
 	return &res, err
 }
 
-func (ec *executionContext) marshalOResourceLimits2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx context.Context, sel ast.SelectionSet, v ResourceLimits) graphql.Marshaler {
-	return ec._ResourceLimits(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOResourceLimits2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx context.Context, sel ast.SelectionSet, v *ResourceLimits) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._ResourceLimits(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalOResourceQuota2k8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuota(ctx context.Context, sel ast.SelectionSet, v v11.ResourceQuota) graphql.Marshaler {
 	return ec._ResourceQuota(ctx, sel, &v)
 }
@@ -53222,17 +53274,6 @@ func (ec *executionContext) marshalOResourceQuota2ᚖk8sᚗioᚋapiᚋcoreᚋv1�
 		return graphql.Null
 	}
 	return ec._ResourceQuota(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOResourceQuotaHard2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaHard(ctx context.Context, sel ast.SelectionSet, v ResourceQuotaHard) graphql.Marshaler {
-	return ec._ResourceQuotaHard(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOResourceQuotaHard2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaHard(ctx context.Context, sel ast.SelectionSet, v *ResourceQuotaHard) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._ResourceQuotaHard(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOResourceRef2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceRef(ctx context.Context, sel ast.SelectionSet, v ResourceRef) graphql.Marshaler {

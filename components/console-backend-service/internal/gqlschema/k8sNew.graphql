@@ -8,9 +8,9 @@ type ResourceLimits {
 # LIMIT RANGE
 type LimitRangeItem @goModel(model: "k8s.io/api/core/v1.LimitRangeItem") {
   type: LimitType!
-  max: ResourceLimits
-  default: ResourceLimits
-  defaultRequest: ResourceLimits
+  max: ResourceLimits!
+  default: ResourceLimits!
+  defaultRequest: ResourceLimits!
 }
 
 type LimitRangeSpec @goModel(model: "k8s.io/api/core/v1.LimitRangeSpec") {
@@ -22,35 +22,22 @@ type LimitRange @goModel(model: "k8s.io/api/core/v1.LimitRange") {
   json: JSON!
 }
 
-# # RESOURCE QUOTA
+# RESOURCE QUOTA
 
 type ResourceQuotaHard {
-  cpu: String
-  memory: String
-  pods: String
+  limits: ResourceLimits!
+  requests: ResourceLimits!
+  pods: String!
 }
 
 type ResourceQuotaSpec @goModel(model: "k8s.io/api/core/v1.ResourceQuotaSpec") {
-  hard: ResourceQuotaHard
+  hard: ResourceQuotaHard!
 }
 type ResourceQuota @goModel(model: "k8s.io/api/core/v1.ResourceQuota") {
   name: String!
   spec: ResourceQuotaSpec!
   json: JSON!
-  # limits: ResourceLimits!
-  # requests: ResourceLimits!
 }
-
-# type ResourceQuotasStatus {
-#   exceeded: Boolean!
-#   exceededQuotas: [ExceededQuota!]!
-# }
-
-# type ExceededQuota {
-#   quotaName: String!
-#   resourceName: String!
-#   affectedResources: [String!]!
-# }
 
 extend type Query {
   limitRanges(namespace: String!): [LimitRange!]!

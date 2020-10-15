@@ -500,9 +500,9 @@ type ResourceLimits struct {
 }
 
 type ResourceQuotaHard struct {
-	CPU    *string `json:"cpu"`
-	Memory *string `json:"memory"`
-	Pods   *string `json:"pods"`
+	Limits   *ResourceLimits `json:"limits"`
+	Requests *ResourceLimits `json:"requests"`
+	Pods     string          `json:"pods"`
 }
 
 type ResourceQuotaInput struct {

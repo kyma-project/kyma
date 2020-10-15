@@ -29,15 +29,21 @@ func (r *Resolver) ResourceQuotasQuery(ctx context.Context, namespace string) ([
 	return items, err
 }
 
-func (r *Resolver) GetHardField(item v1.ResourceList) (*gqlschema.ResourceQuotaHard, error) {
-	mem := item.Memory().String()
-	cpu := item.Cpu().String()
-	pods := item.Pods().String()
+func (r *Resolver) GetHardField(item *v1.ResourceQuotaSpec) (*gqlschema.ResourceQuotaHard, error) {
+	limitsMemory := item.Hard["limits.memory"]
+	limitsMemoryString := limitsMemory.String()
+
+	requestsMemory := item.Hard["requests.memory"]
+	requestsMemoryString := requestsMemory.String()
 
 	return &gqlschema.ResourceQuotaHard{
-		Memory: &mem,
-		CPU:    &cpu,
-		Pods:   &pods,
+		Limits: &gqlschema.ResourceLimits{
+			Memory: &limitsMemoryString,
+		},
+		Requests: &gqlschema.ResourceLimits{
+			Memory: &requestsMemoryString,
+		},
+		Pods: item.Hard.Pods().String(),
 	}, nil
 }
 

@@ -5,7 +5,6 @@ package domain
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	v1 "k8s.io/api/core/v1"
@@ -56,7 +55,7 @@ func (r *resourceQuotaResolver) JSON(ctx context.Context, obj *v1.ResourceQuota)
 }
 
 func (r *resourceQuotaSpecResolver) Hard(ctx context.Context, obj *v1.ResourceQuotaSpec) (*gqlschema.ResourceQuotaHard, error) {
-	return r.k8sNew.GetHardField(obj.Hard)
+	return r.k8sNew.GetHardField(obj)
 }
 
 // LimitRange returns gqlschema.LimitRangeResolver implementation.
@@ -79,17 +78,3 @@ type limitRangeResolver struct{ *Resolver }
 type limitRangeItemResolver struct{ *Resolver }
 type resourceQuotaResolver struct{ *Resolver }
 type resourceQuotaSpecResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *resourceQuotaSpecResolver) Limits(ctx context.Context, obj *v1.ResourceQuotaSpec) (*gqlschema.ResourceLimits, error) {
-	fmt.Println(obj)
-	panic(fmt.Errorf("not implemented"))
-}
-func (r *resourceQuotaSpecResolver) Requests(ctx context.Context, obj *v1.ResourceQuotaSpec) (*gqlschema.ResourceLimits, error) {
-	panic(fmt.Errorf("not implemented"))
-}
