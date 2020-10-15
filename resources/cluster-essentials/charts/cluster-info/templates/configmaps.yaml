@@ -20,7 +20,7 @@ data:
   global.certificates.type: "detect"
   {{- end }}
   {{- if .Values.global.domainName }}
-  global.ingress.domainName: "{{ .Values.global.domainName }}"
+  global.domainName: "{{ .Values.global.domainName }}"
   {{- end }}
   {{- if .Values.global.loadBalancerIP }}
   global.loadBalancerIP: "{{ .Values.global.loadBalancerIP }}"
@@ -29,10 +29,10 @@ data:
   global.minikubeIP: "{{ .Values.global.minikubeIP }}"
   {{- end }}
   {{- if .Values.global.tlsCrt }}
-  global.ingress.tlsCrt: "{{ .Values.global.tlsCrt }}"
+  global.tlsCrt: "{{ .Values.global.tlsCrt }}"
   {{- end }}
   {{- if .Values.global.tlsKey }}
-  global.ingress.tlsKey: "{{ .Values.global.tlsKey }}"
+  global.tlsKey: "{{ .Values.global.tlsKey }}"
   {{- end }}
 
 ---

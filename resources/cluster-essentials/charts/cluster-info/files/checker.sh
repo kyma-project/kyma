@@ -13,7 +13,7 @@ data:
   modules.legacy.enabled: "true"
 EOF
 
-  patchCM "${OVERRIDE_NAME}" "$PWD/overrides-global.yaml"
+  patchCM "${OVERRIDES_NAME}" "$PWD/overrides-global.yaml"
   patchCM "certificates-overrides" "$PWD/overrides-modules.yaml"
 }
 
@@ -31,7 +31,7 @@ data:
   modules.gardener.enabled: "true"
 EOF
 
-  patchCM "${OVERRIDE_NAME}" "$PWD/overrides-global.yaml"
+  patchCM "${OVERRIDES_NAME}" "$PWD/overrides-global.yaml"
   patchCM "certificates-overrides" "$PWD/overrides-modules.yaml"
 }
 
@@ -49,7 +49,7 @@ data:
   modules.user-provided.enabled: "true"
 EOF
 
-  patchCM "${OVERRIDE_NAME}" "$PWD/overrides-global.yaml"
+  patchCM "${OVERRIDES_NAME}" "$PWD/overrides-global.yaml"
   patchCM "certificates-overrides" "$PWD/overrides-modules.yaml"
 }
 
@@ -57,9 +57,9 @@ function patchCM() {
   CM_NAME="$1"
   PATCH_YAML=$(cat "$2")
 
-  echo "---> Patching cm ${OVERRIDE_NS}/${CM_NAME}"
+  echo "---> Patching cm ${OVERRIDES_NS}/${CM_NAME}"
   set +e
-  msg=$(kubectl patch cm ${CM_NAME} --patch "${PATCH_YAML}" -n ${OVERRIDE_NS} 2>&1)
+  msg=$(kubectl patch cm ${CM_NAME} --patch "${PATCH_YAML}" -n ${OVERRIDES_NS} 2>&1)
   status=$?
   set -e
 
@@ -76,6 +76,7 @@ if [[ "$CERT_TYPE" != "detect" ]]; then
 fi
 
 echo "--> Is legacy mode?"
+TLS_CRT_EXISTS=$(kubectl get cm -n "${OVERRIDES_NS}" "${OVERRIDES_NAME}" -o jsonpath='{.data.global\.tlsCrt}' --ignore-not-found)
 if [[ -n "$TLS_CRT_EXISTS" ]]; then
   echo "----> Legacy Cert overrides detected, legacy mode enabled"
   legacyMode

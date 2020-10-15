@@ -33,14 +33,6 @@ spec:
           value: "{{ .Values.overrides.namespace }}"
         - name: OVERRIDES_NAME
           value: "{{ .Values.overrides.name }}"
-        {{- if .Values.global.tlsCrt }}
-        - name: TLS_CRT_EXISTS
-          value: "true"
-        {{- end }}
         - name: CERT_TYPE
           value: "{{ .Values.global.certificates.type }}"
-        - name: OVERRIDE_NAME
-          value: "{{ .Values.overrides.name }}"
-        - name: OVERRIDE_NS
-          value: "{{ .Values.overrides.namespace }}"
         terminationMessagePolicy: "FallbackToLogsOnError"
