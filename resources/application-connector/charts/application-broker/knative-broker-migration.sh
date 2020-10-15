@@ -27,7 +27,7 @@ function migrate() {
      done
 }
 
-# creates an Istio PeerAuthentication with the given name and namespace
+# creates an Istio PeerAuthentication in the the given namespace
 function create_istio_peer_authentication() {
     local namespace="${1}"
     # the peerauthentication uses the namespace name + the broker suffix, see here: https://github.com/kyma-project/kyma/blob/d4be1327717a6737177b64cd730467eb17982213/components/application-broker/internal/broker/provision.go#L447
@@ -51,7 +51,7 @@ spec:
 EOF
 }
 
-# deletes an Istio Policy with the given name and namespace
+# deletes an Istio Policy with in the given namespace
 function delete_istio_policy() {
     local namespace="${1}"
     # the peerauthentication uses the namespace name + the broker suffix, see here: https://github.com/kyma-project/kyma/blob/d4be1327717a6737177b64cd730467eb17982213/components/application-broker/internal/broker/provision.go#L447
