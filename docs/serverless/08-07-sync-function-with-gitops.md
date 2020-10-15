@@ -33,7 +33,7 @@ These sections will lead you through the whole installation, configuration, and 
   k3d cluster create {CLUSTER_NAME}
   ```
 
-This command also sets your context to the newly created cluster. Run this command to display the cluster information:
+  This command also sets your context to the newly created cluster. Run this command to display the cluster information:
 
   ```bash
   kubectl cluster-info
@@ -182,16 +182,22 @@ You will create a sample inline Function and modify it by adding a trigger to it
 2. Go to the repository folder:
 
   ```bash
-  cd {LOCAL_GITHUB_REPOSITORY_FOLDER}
+  cd ${GH_REPO}
   ```
 
-3. Run the `apply` Kyma CLI command to create a Function CR in the YAML format in your remote GitHub repository. This command will generate the output in the `my-function.yaml` file.
+3. If the folder you specified during the Flux configuration does not exist yet in the Git repository, create it:
+
+  ```bash
+  mkdir ${GH_FOLDER}
+  ```
+
+4. Run the `apply` Kyma CLI command to create a Function CR in the YAML format in your remote GitHub repository. This command will generate the output in the `my-function.yaml` file.
 
   ```bash
   kyma apply function --filename {FULL_PATH_TO_LOCAL_WORKSPACE_FOLDER}/config.yaml --output yaml --dry-run > ./${GH_FOLDER}/my-function.yaml
   ```
 
-4. Push the local changes to the remote repository:
+5. Push the local changes to the remote repository:
 
   ```bash
   git add .                       # Stage changes for the commit
@@ -199,15 +205,15 @@ You will create a sample inline Function and modify it by adding a trigger to it
   git push origin main            # Push the changes to the "main" branch of your Git repository
   ```
 
-5. Go to the GitHub repository to check that the changes were pushed.
+6. Go to the GitHub repository to check that the changes were pushed.
 
-6. By default, Flux pulls CRs from the Git repository and pushes them to the cluster in 5-minute intervals. To enforce immediate synchronization, run this command from the terminal:
+7. By default, Flux pulls CRs from the Git repository and pushes them to the cluster in 5-minute intervals. To enforce immediate synchronization, run this command from the terminal:
 
   ```bash
   fluxctl sync --k8s-fwd-ns flux
   ```
 
-7. Make sure that the Function CR was applied by Flux to the cluster:
+8. Make sure that the Function CR was applied by Flux to the cluster:
 
   ```bash
   kubectl get functions
@@ -229,6 +235,7 @@ You will create a sample inline Function and modify it by adding a trigger to it
     source: the-source
     type: t1
   ```
+
 
 2. Create the Function resource from local sources and place the output in your Git repository folder:
 
