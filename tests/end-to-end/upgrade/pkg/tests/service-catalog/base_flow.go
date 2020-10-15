@@ -278,16 +278,30 @@ func (f *baseFlow) waitForInstanceFail(name string) error {
 
 func (f *baseFlow) waitForInstanceRemoved(name string) error {
 	f.log.Infof("Waiting for %s instance to be removed", name)
-	return f.wait(3*time.Minute, func() (bool, error) {
-		_, err := f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).Get(name, metav1.GetOptions{})
+	var lastInstance *v1beta1.ServiceInstance
+	err := f.wait(3*time.Minute, func() (bool, error) {
+		instance, err := f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).Get(name, metav1.GetOptions{})
 		if err != nil {
 			if errors.IsNotFound(err) {
 				return true, nil
 			}
 			f.log.Warnf(err.Error())
 		}
+		lastInstance = instance
 		return false, nil
 	})
+	if err == nil {
+		return nil
+	}
+	conditionMessages := make([]string, 0)
+	for _, condition := range lastInstance.Status.Conditions {
+		if condition.Reason == "Deprovisioning" && condition.Status == v1beta1.ConditionFalse {
+			f.log.Warnf("ServiceInstance %s is still in a deprovisioning state. Skip waiting for removing.", lastInstance.Name)
+			return nil
+		}
+		conditionMessages = append(conditionMessages, condition.Message)
+	}
+	return fmt.Errorf("timeout for the removal of the instance %s, last conditions: %s", lastInstance.Name, strings.Join(conditionMessages, " | "))
 }
 
 func (f *baseFlow) waitForDeployment(name string) error {
