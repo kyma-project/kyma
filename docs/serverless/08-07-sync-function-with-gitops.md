@@ -131,27 +131,40 @@ You can now install the Flux operator, connect it with a specific Git repository
   service/memcached created
   ```
 
-5. Obtain the certificate (SSH key) that Flux generated:
+5. List all Pods in the `flux` Namespace to make sure that the one for Flux is in the `Running` state:
+
+  ```bash
+  kubectl get pods --namespace flux
+  ```
+
+  Expect a response similar to this one:
+
+  ```bash
+  NAME                        READY   STATUS    RESTARTS   AGE
+  flux-75758595b9-m4885       1/1     Running   0          32m
+  ```
+
+6. Obtain the certificate (SSH key) that Flux generated:
 
   ```bash
   fluxctl identity --k8s-fwd-ns flux
   ```
 
-6. Run this command to copy the SSH key to the clipboard:
+7. Run this command to copy the SSH key to the clipboard:
 
   ```bash
   fluxctl identity --k8s-fwd-ns flux | pbcopy
   ```
 
-7. Go to **Settings** in your GitHub account:
+8. Go to **Settings** in your GitHub account:
 
   ![GitHub account settings](./assets/settings.png)
 
-8. Go to the **SSH and GPG keys** section and select the **New SSH key** button:
+9. Go to the **SSH and GPG keys** section and select the **New SSH key** button:
 
   ![Create a new SSH key](./assets/create-ssh-key.png)
 
-9. Provide the new key name, paste the previously copied SSH key, and confirm changes by selecting the **Add SSH Key** button:
+10. Provide the new key name, paste the previously copied SSH key, and confirm changes by selecting the **Add SSH Key** button:
 
   ![Add a new SSH key](./assets/add-ssh-key.png)
 
