@@ -46,9 +46,6 @@ func (r *Resolver) ResourceQuotaJSONfield(ctx context.Context, obj *v1.ResourceQ
 }
 
 func (r *Resolver) CreateResourceQuota(ctx context.Context, namespace string, name string, input gqlschema.ResourceQuotaInput) (*v1.ResourceQuota, error) {
-
-	result := &v1.ResourceQuota{}
-
 	var errs apierror.ErrorFieldAggregate
 	memoryLimitsParsed, err := amResource.ParseQuantity(*input.Limits.Memory)
 	if err != nil {
@@ -77,6 +74,7 @@ func (r *Resolver) CreateResourceQuota(ctx context.Context, namespace string, na
 		},
 	}
 
+	result := &v1.ResourceQuota{}
 	creationError := r.ResourceQuotasService().Create(newResourceQuota, result)
 
 	return result, creationError

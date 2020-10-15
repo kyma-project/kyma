@@ -391,7 +391,7 @@ type LimitRangeInput struct {
 	Default        *ResourceValuesInput `json:"default"`
 	DefaultRequest *ResourceValuesInput `json:"defaultRequest"`
 	Max            *ResourceValuesInput `json:"max"`
-	Type           string               `json:"type"`
+	Type           LimitRangeType       `json:"type"`
 }
 
 type LoadBalancerIngress struct {
@@ -1094,6 +1094,47 @@ func (e *InstanceStatusType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e InstanceStatusType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type LimitRangeType string
+
+const (
+	LimitRangeTypeContainer LimitRangeType = "Container"
+	LimitRangeTypePod       LimitRangeType = "Pod"
+)
+
+var AllLimitRangeType = []LimitRangeType{
+	LimitRangeTypeContainer,
+	LimitRangeTypePod,
+}
+
+func (e LimitRangeType) IsValid() bool {
+	switch e {
+	case LimitRangeTypeContainer, LimitRangeTypePod:
+		return true
+	}
+	return false
+}
+
+func (e LimitRangeType) String() string {
+	return string(e)
+}
+
+func (e *LimitRangeType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = LimitRangeType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid LimitRangeType", str)
+	}
+	return nil
+}
+
+func (e LimitRangeType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

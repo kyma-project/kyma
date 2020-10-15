@@ -7113,6 +7113,11 @@ extend type Query {
   # )
 }
 
+enum LimitRangeType {
+  Container
+  Pod
+}
+
 input ResourceQuotaInput {
   limits: ResourceValuesInput!
   requests: ResourceValuesInput!
@@ -7122,7 +7127,7 @@ input LimitRangeInput {
   default: ResourceValuesInput!
   defaultRequest: ResourceValuesInput!
   max: ResourceValuesInput!
-  type: String!
+  type: LimitRangeType!
 }
 
 extend type Mutation {
@@ -40117,7 +40122,7 @@ func (ec *executionContext) unmarshalInputLimitRangeInput(ctx context.Context, o
 			}
 		case "type":
 			var err error
-			it.Type, err = ec.unmarshalNString2string(ctx, v)
+			it.Type, err = ec.unmarshalNLimitRangeType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -49908,6 +49913,15 @@ func (ec *executionContext) marshalNLimitRangeItem2ᚕk8sᚗioᚋapiᚋcoreᚋv1
 
 func (ec *executionContext) marshalNLimitRangeSpec2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeSpec(ctx context.Context, sel ast.SelectionSet, v v11.LimitRangeSpec) graphql.Marshaler {
 	return ec._LimitRangeSpec(ctx, sel, &v)
+}
+
+func (ec *executionContext) unmarshalNLimitRangeType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeType(ctx context.Context, v interface{}) (LimitRangeType, error) {
+	var res LimitRangeType
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNLimitRangeType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeType(ctx context.Context, sel ast.SelectionSet, v LimitRangeType) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNLimitType2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitType(ctx context.Context, v interface{}) (v11.LimitType, error) {

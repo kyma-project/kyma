@@ -5,8 +5,12 @@ import (
 	"errors"
 	"fmt"
 
+	amResource "k8s.io/apimachinery/pkg/api/resource"
 	apimachinery "k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	v1 "k8s.io/api/core/v1"
@@ -46,6 +50,57 @@ func (r *Resolver) UpdateLimitRange(ctx context.Context, namespace string, name 
 	result := &v1.LimitRange{}
 	err := r.LimitRangesService().Apply(newLimitRange, result)
 	return result, err
+}
+
+func (r *Resolver) CreateLimitRange(ctx context.Context, namespace string, name string, input gqlschema.LimitRangeInput) (*v1.LimitRange, error) {
+	var errs apierror.ErrorFieldAggregate
+	defaultParsed, err := amResource.ParseQuantity(*input.Default.Memory)
+	if err != nil {
+		errs = append(errs, apierror.NewInvalidField("limits.memory", *input.Default.Memory, fmt.Sprintf("while parsing %s memory limits", pretty.LimitRange)))
+	}
+
+	defaultRequestParsed, err := amResource.ParseQuantity(*input.DefaultRequest.Memory)
+	if err != nil {
+		errs = append(errs, apierror.NewInvalidField("requests.memory", *input.DefaultRequest.Memory, fmt.Sprintf("while parsing %s memory requests", pretty.LimitRange)))
+	}
+
+	maxParsed, err := amResource.ParseQuantity(*input.Max.Memory)
+	if err != nil {
+		errs = append(errs, apierror.NewInvalidField("requests.memory", *input.Max.Memory, fmt.Sprintf("while parsing %s memory requests", pretty.LimitRange)))
+	}
+
+	if len(errs) > 0 {
+		return nil, apierror.NewInvalid(pretty.LimitRange, errs)
+	}
+
+	newLimitRange := &v1.LimitRange{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: v1.LimitRangeSpec{
+			Limits: []v1.LimitRangeItem{
+				{
+					Type: v1.LimitType(input.Type),
+					Default: v1.ResourceList{
+						v1.ResourceMemory: defaultParsed,
+					},
+					DefaultRequest: v1.ResourceList{
+						v1.ResourceMemory: defaultRequestParsed,
+					},
+					Max: v1.ResourceList{
+						v1.ResourceMemory: maxParsed,
+					},
+				},
+			},
+		},
+	}
+
+	result := &v1.LimitRange{}
+	creationError := r.LimitRangesService().Create(newLimitRange, result)
+
+	return result, creationError
+
 }
 
 type resourceLimitsItem interface {

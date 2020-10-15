@@ -28,7 +28,7 @@ func (r *limitRangeItemResolver) DefaultRequest(ctx context.Context, obj *v1.Lim
 }
 
 func (r *mutationResolver) CreateLimitRange(ctx context.Context, namespace string, name string, limitRange gqlschema.LimitRangeInput) (*v1.LimitRange, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.k8sNew.CreateLimitRange(ctx, namespace, name, limitRange)
 }
 
 func (r *mutationResolver) UpdateLimitRange(ctx context.Context, namespace string, name string, json gqlschema.JSON) (*v1.LimitRange, error) {

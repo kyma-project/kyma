@@ -87,6 +87,11 @@ extend type Query {
   # )
 }
 
+enum LimitRangeType {
+  Container
+  Pod
+}
+
 input ResourceQuotaInput {
   limits: ResourceValuesInput!
   requests: ResourceValuesInput!
@@ -96,7 +101,7 @@ input LimitRangeInput {
   default: ResourceValuesInput!
   defaultRequest: ResourceValuesInput!
   max: ResourceValuesInput!
-  type: String!
+  type: LimitRangeType!
 }
 
 extend type Mutation {
