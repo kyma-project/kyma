@@ -2,8 +2,13 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -20,9 +25,10 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	bebauth "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/auth"
+
 	// gcp auth etc.
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-
 	// +kubebuilder:scaffold:imports
 )
 
@@ -51,6 +57,25 @@ func getUniqueNamespaceName() string {
 }
 
 var _ = Describe("Subscription", func() {
+	var beb *bebMock
+	BeforeEach(func() {
+		By("Preparing BEB Mock")
+		err := os.Setenv("CLIENT_ID", "foo")
+		Expect(err).ShouldNot(HaveOccurred())
+		err = os.Setenv("CLIENT_SECRET", "foo")
+		Expect(err).ShouldNot(HaveOccurred())
+
+		beb = &bebMock{}
+		bebURI := beb.start()
+		logf.Log.Info("beb mock listening at", "address", bebURI)
+		authURL := fmt.Sprintf("%s%s", bebURI, urlAuth)
+		messagingURL := fmt.Sprintf("%s%s", bebURI, urlMessagingApi)
+
+		err = os.Setenv("TOKEN_ENDPOINT", authURL)
+		Expect(err).ShouldNot(HaveOccurred())
+		err = os.Setenv("BEB_API_URL", messagingURL)
+		Expect(err).ShouldNot(HaveOccurred())
+	})
 
 	// TODO: test required fields are provided  but with wrong values => basically testing the CRD schema
 	// TODO: test required fields are provided => basically testing the CRD schema
@@ -389,4 +414,38 @@ func printNamespaces(namespaceName string, ctx context.Context) error {
 	}
 	logf.Log.V(1).Info("namespace", "namespace", namespace)
 	return nil
+}
+
+const (
+	startPort       = 54321
+	urlAuth         = "/auth"
+	urlMessagingApi = "/messaging"
+)
+
+type bebMock struct {
+	requests []*http.Request
+}
+
+func (h *bebMock) start() string {
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logf.Log.V(1).Info("received request")
+
+		// oauth2 request
+		if r.Method == "POST" && r.RequestURI == urlAuth {
+			accessToken := bebauth.AccessToken{
+				Value: "1234",
+			}
+			err := json.NewEncoder(w).Encode(accessToken)
+			Expect(err).ShouldNot(HaveOccurred())
+			w.WriteHeader(http.StatusOK)
+		}
+		if strings.HasPrefix(r.RequestURI, urlMessagingApi) {
+			w.WriteHeader(http.StatusNoContent)
+		}
+		h.requests = append(h.requests, r)
+	}))
+	uri := ts.URL
+
+	return uri
 }

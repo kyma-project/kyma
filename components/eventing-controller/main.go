@@ -53,6 +53,7 @@ func main() {
 	}
 	// +kubebuilder:scaffold:builder
 
+	// TODO: add message that the controller has started
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "problem running manager")
