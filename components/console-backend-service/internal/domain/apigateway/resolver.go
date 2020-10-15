@@ -3,6 +3,7 @@ package apigateway
 import (
 	"context"
 	"errors"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
