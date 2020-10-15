@@ -2,18 +2,14 @@ package auth
 
 import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"golang.org/x/oauth2/clientcredentials"
 )
 
-type Config struct {
-	ClientID      string
-	ClientSecret  string
-	TokenEndpoint string
-}
-
-func GetDefaultConfig() *Config {
-	c := Config{}
-	c.ClientID = env.GetConfig().ClientID
-	c.ClientSecret = env.GetConfig().ClientSecret
-	c.TokenEndpoint = env.GetConfig().TokenEndpoint
-	return &c
+// Config returns a new oauth2 client credentials config instance.
+func getDefaultOauth2Config(cfg *env.Config) *clientcredentials.Config {
+	return &clientcredentials.Config{
+		ClientID:     cfg.ClientID,
+		ClientSecret: cfg.ClientSecret,
+		TokenURL:     cfg.TokenEndpoint,
+	}
 }

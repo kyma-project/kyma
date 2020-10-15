@@ -1,21 +1,37 @@
 package auth
 
 import (
-	"fmt"
+	"golang.org/x/oauth2"
+	"net/http"
 	"testing"
 )
 
-func TestAuth_Login(t *testing.T) {
-	authenticator := NewAuthenticator(GetDefaultConfig())
-	token, err := authenticator.Authenticate()
+const (
+	// default value in httpTransport implementation
+	maxIdleConns        = 100
+	maxIdleConnsPerHost = 0
+)
 
-	if err != nil {
-		t.Fatalf("Failed to authenticate with error: %v", err)
+func TestAuthenticator(t *testing.T) {
+
+	// authenticate
+	authenticator := NewAuthenticator()
+
+	httpClient := authenticator.GetClient().GetHttpClient()
+
+	secTransport, ok := httpClient.Transport.(*oauth2.Transport)
+	if !ok {
+		t.Errorf("Failed to convert to oauth2 transport")
+	}
+	httpTransport, ok := secTransport.Base.(*http.Transport)
+	if !ok {
+		t.Errorf("Failed to convert to HTTP transport")
 	}
 
-	if token == nil || len(token.Value) == 0 {
-		t.Fatal("Received empty token")
+	if httpTransport.MaxIdleConns != maxIdleConns {
+		t.Errorf("HTTP Client Transport MaxIdleConns is misconfigured want: %d but got: %d", maxIdleConns, httpTransport.MaxIdleConns)
 	}
-
-	fmt.Printf("%#v\n", token)
+	if httpTransport.MaxIdleConnsPerHost != maxIdleConnsPerHost {
+		t.Errorf("HTTP Client Transport MaxIdleConnsPerHost is misconfigured want: %d but got: %d", maxIdleConnsPerHost, httpTransport.MaxIdleConnsPerHost)
+	}
 }

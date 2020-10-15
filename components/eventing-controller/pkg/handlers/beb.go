@@ -20,13 +20,12 @@ import (
 var _ Interface = &Beb{}
 
 type Interface interface {
-	Initialize() error
+	Initialize()
 	SyncBebSubscription(subscription *eventingv1alpha1.Subscription, oldEv2Hash uint64, oldEmsHash uint64) (uint64, uint64, error)
 	DeleteBebSubscription(subscription *eventingv1alpha1.Subscription) error
 }
 
 type Beb struct {
-	Token  *auth2.AccessToken
 	Client *client2.Client
 	Log    logr.Logger
 }
@@ -36,14 +35,12 @@ type BebResponse struct {
 	Error      error
 }
 
-func (b *Beb) Initialize() error {
-	if b.Token == nil {
-		if err := b.authenticate(); err != nil {
-			b.Log.Error(err, "failed to authenticate")
-			return err
-		}
+func (b *Beb) Initialize() {
+	if b.Client == nil {
+		authenticator := auth2.NewAuthenticator()
+		b.Client = client2.NewClient(config2.GetDefaultConfig(), authenticator)
 	}
-	return nil
+	// TODO error?
 }
 
 func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription, oldEv2Hash uint64, oldEmsHash uint64) (uint64, uint64, error) {
@@ -134,26 +131,12 @@ func (b *Beb) deleteCreateAndHashSubscription(subscription *types2.Subscription)
 	return newEmsHash, nil
 }
 
-func (b *Beb) authenticate() error {
-	b.Log.Info("BEB authenticate()")
-	authenticator := auth2.NewAuthenticator(auth2.GetDefaultConfig())
-	token, err := authenticator.Authenticate()
-	if err != nil {
-		return fmt.Errorf("failed to authenticate with error: %v", err)
-	}
-	b.Token = token
-	b.Client = client2.NewClient(config2.GetDefaultConfig())
-	return nil
-}
 
 func (b *Beb) getSubscription(name string) (*types2.Subscription, error) {
 	b.Log.Info("BEB getSubscription()", "subscription name:", name)
-	emsSubscription, resp, err := b.Client.Get(b.Token, name)
+	emsSubscription, resp, err := b.Client.Get(name)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get subscription with error: %v", err)
-	}
-	if resp.StatusCode == http.StatusUnauthorized {
-		b.Token = nil
 	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("failed to get subscription with error: %v; %v", resp.StatusCode, resp.Message)
@@ -163,12 +146,9 @@ func (b *Beb) getSubscription(name string) (*types2.Subscription, error) {
 
 func (b *Beb) deleteSubscription(name string) error {
 	b.Log.Info("BEB deleteSubscription()", "subscription name:", name)
-	resp, err := b.Client.Delete(b.Token, name)
+	resp, err := b.Client.Delete(name)
 	if err != nil {
 		return fmt.Errorf("failed to delete subscription with error: %v", err)
-	}
-	if resp.StatusCode == http.StatusUnauthorized {
-		b.Token = nil
 	}
 	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusNotFound {
 		return httpclient.NewError(nil,
@@ -181,16 +161,10 @@ func (b *Beb) deleteSubscription(name string) error {
 
 func (b *Beb) createSubscription(subscription *types2.Subscription) error {
 	b.Log.Info("BEB createSubscription()", "subscription name:", subscription.Name)
-	createResponse, err := b.Client.Create(b.Token, subscription)
+	createResponse, err := b.Client.Create(subscription)
 	if err != nil {
 		return fmt.Errorf("failed to create subscription with error: %v", err)
 	}
-	if createResponse.StatusCode == http.StatusUnauthorized {
-		b.Token = nil
-	}
-	// TODO(nachtmaar): why is this check necessary? can't we just return an error in the create call ?
-	// error message in reconciler is not helping too much
-	// 2020-10-14T20:34:34.803+0200	ERROR	controllers.Subscription	create ems subscription failed	{"subscription name:": "test-valid-subscription-1", "error": "failed to create subscription with error: &{{204 204 No Content} }"}
 	if createResponse.StatusCode > http.StatusAccepted && createResponse.StatusCode != http.StatusConflict {
 		return fmt.Errorf("failed to create subscription with error: %v", createResponse)
 	}
@@ -211,7 +185,7 @@ func (b *Beb) waitForSubscriptionActive(name string) bool {
 			}
 		case <-tick:
 			{
-				sub, _, err := b.Client.Get(b.Token, name)
+				sub, _, err := b.Client.Get(name)
 				if err != nil {
 					return false
 				}

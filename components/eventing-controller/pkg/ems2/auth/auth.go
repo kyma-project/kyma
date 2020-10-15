@@ -1,50 +1,21 @@
 package auth
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
+	httpclient2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/httpclient"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
 type Authenticator struct {
-	config *Config
+	client *httpclient2.Client
 }
 
-type AccessToken struct {
-	Value string `json:"access_token"`
+func NewAuthenticator() *Authenticator {
+	authenticator := &Authenticator{}
+	config := getDefaultOauth2Config(env.GetConfig())
+	authenticator.client = httpclient2.NewHttpClient(config)
+	return authenticator
 }
 
-func NewAuthenticator(config *Config) *Authenticator {
-	return &Authenticator{config: config}
-}
-
-func (a *Authenticator) Authenticate() (*AccessToken, error) {
-	req, err := http.NewRequest(http.MethodPost, a.config.TokenEndpoint, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.SetBasicAuth(a.config.ClientID, a.config.ClientSecret)
-	req.Header.Set("Accept", "application/json")
-
-	client := http.Client{}
-	defer client.CloseIdleConnections()
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	if resp == nil {
-		return nil, fmt.Errorf("could not unmarshal response: %v", resp)
-	} else if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to authenticate with error: %v; %v", resp.StatusCode, resp.Status)
-	}
-
-	token := new(AccessToken)
-	if err = json.NewDecoder(resp.Body).Decode(token); err != nil {
-		return nil, err
-	}
-
-	return token, nil
+func (a *Authenticator) GetClient() *httpclient2.Client {
+	return a.client
 }

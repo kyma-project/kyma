@@ -18,7 +18,7 @@ func getHash(subscription *types2.Subscription) (uint64, error) {
 }
 
 func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription) (*types2.Subscription, error) {
-	emsSubscription := &types2.Subscription{} //false, too many default fields
+	emsSubscription := &types2.Subscription{}
 
 	// Name
 	emsSubscription.Name = subscription.Name
