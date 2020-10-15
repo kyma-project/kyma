@@ -16,7 +16,7 @@ func TestSteps(r *rest.Config, ts testsuite.Config, logf *logrus.Entry) ([]step.
 	return []step.Step{
 		EmptyStep{msg: "first step", logf: logf},
 		EmptyStep{msg: "second step", logf: logf},
-		step.Parallel(logger, "Parallel",
+		step.NewParallelRunner(logger, "NewParallelRunner",
 			step.NewSerialTestRunner(logger, "SubTest1",
 				EmptyStep{msg: "second step 1", logf: logf},
 				EmptyStep{msg: "second step 2", logf: logf},

@@ -57,30 +57,33 @@ func NewRunner(opts ...RunnerOption) *Runner {
 
 // Run executes Steps in specified order. If skipCleanup is false it also executes Step.Cleanup in reverse order
 // starting from last executed step
-func (r *Runner) Run(steps []Step, skipCleanup bool) error {
-	var startedStep int
-	var step Step
+func (r *Runner) Run(step Step, skipCleanup bool) error {
+	//var startedStep int
+	//var step Step
 	var err error
 
 	defer func() {
 		if !skipCleanup {
-			r.Cleanup(steps[0:(startedStep + 1)])
+			err = step.Cleanup()
+			r.log.Error("while executing clean up", err)
+			//r.Cleanup(steps[0:(startedStep + 1)])
 		}
 	}()
-
-	for startedStep, step = range steps {
-		r.log.Infof("Step: '%s'", step.Name())
-		if err = r.runStep(step); err != nil {
-			r.log.Errorf("Error in '%s': %s", step.Name(), err)
-			callbackErr := step.OnError(err)
-			if callbackErr != nil {
-				//TODO: in case of callbackErr
-			}
-			return err
-		}
+	err = step.Run()
+	callbackErr := step.OnError(err)
+	if callbackErr != nil {
+		//TODO: in case of callbackErr
 	}
-
 	return err
+	//for startedStep, step = range steps {
+	//	r.log.Infof("Step: '%s'", step.Name())
+	//	if err = r.runStep(step); err != nil {
+	//		r.log.Errorf("Error in '%s': %s", step.Name(), err)
+	//
+	//	}
+	//}
+	//
+	//return err
 }
 
 // runStep allows to recover in case of panic in step

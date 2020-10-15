@@ -6,20 +6,21 @@ import (
 )
 
 // Execute behavior is based on chose cleanup method. It is intended to be used with AddFlags
-func (r *Runner) Execute(steps []Step) error {
+func (r *Runner) Execute(step Step) error {
 	r.log.Infof("Cleanup mode: %s", r.cleanup)
 	var err error
 	switch r.cleanup {
 	case CleanupModeNo:
-		err = r.Run(steps, true)
+		err = r.Run(step, true)
 	case CleanupModeOnly:
-		r.Cleanup(steps)
+		return step.Cleanup()
+		//r.Cleanup(step)
 	case CleanupModeYes:
-		err = r.Run(steps, false)
+		err = r.Run(step, false)
 	case CleanupModeOnErrorOnly:
-		err = r.Run(steps, true)
+		err = r.Run(step, true)
 		if err != nil {
-			r.Cleanup(steps)
+			return step.Cleanup()
 		}
 	}
 	return err

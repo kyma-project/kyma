@@ -1,6 +1,7 @@
 package namespace
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/pkg/errors"
@@ -8,7 +9,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/wait"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	k8sretry "k8s.io/client-go/util/retry"
@@ -44,7 +44,7 @@ func (n Namespace) LogResource() error {
 		return err
 	}
 	ns.TypeMeta.Kind = "namespace"
-	out, err := json.Marshal(ns)
+	out, err := json.MarshalIndent(ns, "", "  ")
 	if err != nil {
 		return err
 	}

@@ -2,10 +2,11 @@ package step
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"strings"
 	"sync"
+
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 
 	"github.com/hashicorp/go-multierror"
 )
@@ -22,7 +23,7 @@ func (p *Parallelized) Name() string {
 		names[i] = step.Name()
 	}
 	joined := strings.Join(names, ", ")
-	return fmt.Sprintf("Parralel:%s, %s", p.name, joined)
+	return fmt.Sprintf("Parallel:%s, %s", p.name, joined)
 }
 
 func (p *Parallelized) Run() error {
@@ -76,6 +77,6 @@ func (p *Parallelized) runStepInParallel(wg *sync.WaitGroup, errs chan<- error, 
 	errs <- f(step)
 }
 
-func Parallel(logf *logrus.Entry, name string, steps ...Step) *Parallelized {
+func NewParallelRunner(logf *logrus.Entry, name string, steps ...Step) *Parallelized {
 	return &Parallelized{logf: logf, name: name, steps: steps}
 }

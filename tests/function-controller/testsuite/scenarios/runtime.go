@@ -39,7 +39,7 @@ func (rst RuntimesTestSuite) OnError(cause error) error {
 	return nil
 }
 
-func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) ([]step.Step, error) {
+func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
 	currentDate := time.Now()
 	cfg.Namespace = fmt.Sprintf("%s-%dh-%dm-%ds", "test-parallel", currentDate.Hour(), currentDate.Minute(), currentDate.Second())
 
@@ -58,7 +58,7 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 		return nil, errors.Wrap(err, "while creating k8s CoreV1Client")
 	}
 
-	python38Logger := logf.WithField(scenarioKey, "python37")
+	python38Logger := logf.WithField(scenarioKey, "python38")
 	nodejs10Logger := logf.WithField(scenarioKey, "nodejs10")
 	nodejs12Logger := logf.WithField(scenarioKey, "nodejs12")
 
@@ -75,7 +75,7 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 		return nil, errors.Wrapf(err, "while creating nodejs12 config")
 	}
 
-	python38Cfg, err := runtimes.NewFunctionSimpleConfig("python37", genericContainer.WithLogger(python38Logger))
+	python38Cfg, err := runtimes.NewFunctionSimpleConfig("python38", genericContainer.WithLogger(python38Logger))
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating python38 config")
 	}
@@ -106,16 +106,15 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 		InsecureSkipVerify: cfg.InsecureSkipVerify,
 		DataKey:            testsuite.TestDataKey,
 	}
-	return []step.Step{
+	return step.NewSerialTestRunner(logf, "Runtime Test",
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
 		teststep.NewAddonConfiguration("Create addon configuration", addon, addonURL, genericContainer),
-		step.Parallel(logf, "fn_tests",
-			step.NewSerialTestRunner(python38Logger, "Python37 test",
-				teststep.CreateFunction(python38Logger, python38Cfg.Fn, "Create Python37 Function", runtimes.BasicPythonFunction("Hello From python")),
-				teststep.NewHTTPCheck(python38Logger, "Python37 pre update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python38Logger), "Hello From python"),
-				teststep.UpdateFunction(python38Logger, python38Cfg.Fn, "Update Python37 Function", runtimes.BasicPythonFunction("Hello From updated python")),
-				testStep{name: "Falt Step", logf: logf, err: errors.New("Ups")},
-				teststep.NewHTTPCheck(python38Logger, "Python37 post update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python38Logger), "Hello From updated python"),
+		step.NewParallelRunner(logf, "fn_tests",
+			step.NewSerialTestRunner(python38Logger, "Python38 test",
+				teststep.CreateFunction(python38Logger, python38Cfg.Fn, "Create Python38 Function", runtimes.BasicPythonFunction("Hello From python")),
+				teststep.NewHTTPCheck(python38Logger, "Python38 pre update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python38Logger), "Hello From python"),
+				teststep.UpdateFunction(python38Logger, python38Cfg.Fn, "Update Python38 Function", runtimes.BasicPythonFunction("Hello From updated python")),
+				teststep.NewHTTPCheck(python38Logger, "Python38 post update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python38Logger), "Hello From updated python"),
 			),
 			step.NewSerialTestRunner(nodejs10Logger, "NodeJS10 test",
 				teststep.CreateConfigMap(nodejs10Logger, cm, "Create Test ConfigMap", cmData),
@@ -134,9 +133,10 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 				teststep.NewHTTPCheck(nodejs12Logger, "NodeJS12 pre update simple check through service", nodejs12Cfg.APIRuleURL, poll.WithLogger(nodejs12Logger), "Hello From nodejs"),
 				teststep.NewHTTPCheck(nodejs12Logger, "NodeJS12 pre update simple check through gateway", nodejs12Cfg.InClusterURL, poll.WithLogger(nodejs12Logger), "Hello From nodejs"),
 				teststep.UpdateFunction(nodejs12Logger, nodejs12Cfg.Fn, "Update NodeJS12 Function", runtimes.GetUpdatedNodeJSFunction()),
+				testStep{name: "Falt Step", logf: nodejs12Logger, err: errors.New("Ups")},
 				teststep.NewE2EFunctionCheck(nodejs12Logger, "NodeJS12 post update e2e check", nodejs12Cfg.InClusterURL, nodejs12Cfg.APIRuleURL, nodejs12Cfg.BrokerURL, poll.WithLogger(nodejs12Logger)),
 			)),
-	}, nil
+	), nil
 }
 
 func getPodLogs(pod corev1.Pod) string {
