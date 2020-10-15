@@ -9,6 +9,10 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "chart" . }}
+    {{- range $key, $val := .Values.tests.labels }}
+    kyma-project.io/test.{{ $key }}: {{ $val | quote }}
+    {{- end }}
+
 spec:
   disableConcurrency: {{ .Values.tests.disableConcurrency }}
   template:
@@ -46,4 +50,4 @@ spec:
           resources:
 {{ include "tplValue" ( dict "value" .Values.tests.resources "context" $ ) | indent 12 }}
 {{- end }}
-{{- end}}
+{{- end }}

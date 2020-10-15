@@ -23,3 +23,7 @@
 required = [
   "golang.org/x/lint/golint"
 ]
+
+[[constraint]]
+  name = "github.com/coreos/prometheus-operator"
+  version = "0.38.3"

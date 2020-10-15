@@ -1,0 +1,82 @@
+{{- if .Values.tests.enabled }}
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+---
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: test-e2e-external-solution-evaluate-tests
+  labels:
+    "kyma-project.io/upgrade-e2e-test": "executeTests"
+    "kyma-project.io/test.after-upgrade": "true"
+
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: {{ .Chart.Name }}-tests
+    spec:
+      serviceAccountName:  test-{{ template "fullname" . }}
+      restartPolicy: Never
+      containers:
+      - name: tests
+        image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}external-solution-end-to-end-tests:{{ .Values.image.version }}"
+        imagePullPolicy: "{{ .Values.image.pullPolicy}}"
+        command: 
+          - /bin/sh
+          - -c
+          - |
+            echo 'TESTING start'
+            sleep 20
+            /e2e e2e-evaluate \
+            --domain {{ .Values.domain }} \
+            --testID {{ .Release.Name }}-external-solution \
+            --skipSSLVerify
+            exit_code=$?
+            echo exit_code is $exit_code
+            echo 'stopping pilot-agent...'
+            curl -XPOST http://127.0.0.1:15020/quitquitquit
+            sleep 5
+            exit $exit_code
+---
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: test-e2e-external-solution-prepare-tests
+  labels:
+    "kyma-project.io/upgrade-e2e-test": "prepareTests"
+    "kyma-project.io/test.before-upgrade": "true"
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: {{ .Chart.Name }}-tests
+  spec:
+    serviceAccountName: test-{{ template "fullname" . }}
+    restartPolicy: Never
+    containers:
+      - name: tests
+        image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}external-solution-end-to-end-tests:{{ .Values.image.version }}"
+        imagePullPolicy: "{{ .Values.image.pullPolicy}}"
+        command:
+          - /bin/sh
+          - -c
+          - |
+            echo 'TESTING start'
+            sleep 20
+            /e2e e2e-prepare \
+            --domain {{ .Values.domain }} \
+            --testID {{ .Release.Name }}-external-solution \
+            --skipSSLVerify \
+            --testServiceImage "{{ .Values.containerRegistry.path }}/{{ .Values.testServiceImage.dir }}event-subscriber-tools:{{ .Values.testServiceImage.version }}"
+            exit_code=$?
+            echo exit_code is $exit_code
+            echo 'stopping pilot-agent...'
+            curl -XPOST http://127.0.0.1:15020/quitquitquit
+            sleep 5
+            exit $exit_code
+  {{- end }}
+{{- end }}

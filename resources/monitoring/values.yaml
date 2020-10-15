@@ -11,9 +11,11 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: 0de5247a
-    tests:
-      enabled: true
+    version: PR-9481
+    enabled: true
+    labels:
+      integration: true
+      after-upgrade: true
 
   rbac:
     create: true
@@ -1631,7 +1633,7 @@ prometheus:
 
     ## Maximum size of metrics
     ##
-    retentionSize: 256MB
+    retentionSize: 2GB
 
     ## Enable compression of the write-ahead log using Snappy.
     ##

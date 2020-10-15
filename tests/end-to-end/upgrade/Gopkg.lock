@@ -125,6 +125,19 @@
   version = "v0.2.1"
 
 [[projects]]
+  digest = "1:73b8447bcbc2217d57c74094b24ca238b31dbd4324e4ec42addb8b100f7e71c6"
+  name = "github.com/coreos/prometheus-operator"
+  packages = [
+    "pkg/apis/monitoring",
+    "pkg/apis/monitoring/v1",
+    "pkg/client/versioned/scheme",
+    "pkg/client/versioned/typed/monitoring/v1",
+  ]
+  pruneopts = "UT"
+  revision = "beaa1a519e21c8230bab86a15c04bf7e0a9267c1"
+  version = "v0.38.3"
+
+[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -689,7 +702,7 @@
   revision = "ac6580df4449443a05718fd7858c1f91ad5f8d20"
 
 [[projects]]
-  digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
+  digest = "1:fa940333c48808b0d86ef21f412ffcfd0e5084a82f13905c028a404803b1908f"
   name = "golang.org/x/text"
   packages = [
     "collate",
@@ -710,8 +723,8 @@
     "unicode/rangetable",
   ]
   pruneopts = "UT"
-  revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
-  version = "v0.3.2"
+  revision = "23ae387dee1f90d29a23c0e87ee0b46038fbed0e"
+  version = "v0.3.3"
 
 [[projects]]
   branch = "master"
@@ -1330,6 +1343,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/avast/retry-go",
+    "github.com/coreos/prometheus-operator/pkg/client/versioned/typed/monitoring/v1",
     "github.com/go-redis/redis",
     "github.com/gofrs/uuid",
     "github.com/google/go-cmp/cmp",
