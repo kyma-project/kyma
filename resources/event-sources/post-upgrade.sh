@@ -24,4 +24,10 @@ function delete_orphaned_ksvcs() {
   done
 }
 
+
+function delete_orphaned_policies() {
+    kubectl delete policy -n kyma-integration -l application-name
+}
+
 delete_orphaned_ksvcs
+delete_orphaned_policies
