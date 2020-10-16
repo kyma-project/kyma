@@ -23,39 +23,39 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    version: "PR-9653"
+    version: "82b304ab"
   application_operator_tests:
-    version: "PR-9593"
+    version: "470796a1"
   connector_service:
-    version: "PR-9683"
+    version: "470796a1"
   connector_service_tests:
-    version: "b9871385"
+    version: "470796a1"
   connection_token_handler:
-    version: "PR-9683"
+    version: "85665778"
   connection_token_handler_tests:
-    version: "b9871385"
+    version: "470796a1"
   event_service:
-    version: "760fe348"
+    version: "PR-9669"
   event_service_integration_tests:
     version: "2c51c024"
   application_gateway:
-    version: "PR-9593"
+    version: "c0341336"
   application_gateway_tests:
-    version: "PR-9593"
+    version: "470796a1"
   application_gateway_legacy_tests:
-    version: "PR-9569"
+    version: "470796a1"
   application_registry:
-    version: "PR-9593"
+    version: "c0341336"
   application_registry_tests:
-    version: "PR-9569"
+    version: "cda9f380"
   application_broker:
-    version: "1c48e0a0"
+    version: "a8a6bca9"
   application_connectivity_certs_setup_job:
-    version: "PR-9683"
+    version: "470796a1"
   application_connectivity_validator:
-    version: "PR-9593"
+    version: "c0341336"
   application_broker_eventing_migration:
-    version: "d4be1327"
+    version: "a8a6bca9"
 
 application_connectivity_certs_setup_job:
   secrets:
@@ -78,5 +78,5 @@ tests:
       central: false
     skipSslVerify: true
     image:
-      version: "PR-9569"
+      version: "470796a1"
       pullPolicy: IfNotPresent
