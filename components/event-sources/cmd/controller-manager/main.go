@@ -22,6 +22,7 @@ const (
 	defaultMetricsDomain   = "kyma-project.io/event-sources"
 )
 
+// CHANGE
 func init() {
 	if err := ensureEnvVars(); err != nil {
 		panic(pkgerrors.Wrap(err, "setting environment variables"))
