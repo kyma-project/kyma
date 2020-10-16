@@ -69,17 +69,8 @@ function patchCM() {
   fi
 }
 
-
 if [[ "$CERT_TYPE" != "detect" ]]; then
   echo "--> $CERT_TYPE requested. No need to detect"
-  exit 0
-fi
-
-echo "--> Is legacy mode?"
-TLS_CRT_EXISTS=$(kubectl get cm -n "${OVERRIDES_NS}" "${OVERRIDES_NAME}" -o jsonpath='{.data.global\.tlsCrt}' --ignore-not-found)
-if [[ -n "$TLS_CRT_EXISTS" ]]; then
-  echo "----> Legacy Cert overrides detected, legacy mode enabled"
-  legacyMode
   exit 0
 fi
 
@@ -88,6 +79,14 @@ API_VERSIONS=$(kubectl api-versions)
 if echo $API_VERSIONS | grep -c cert.gardener.cloud ; then
   echo "--> Gardener Certificate CR present, gardener mode enabled"
   gardenerMode
+  exit 0
+fi
+
+echo "--> Is legacy mode?"
+TLS_CRT_EXISTS=$(kubectl get cm -n "${OVERRIDES_NS}" "${OVERRIDES_NAME}" -o jsonpath='{.data.global\.tlsCrt}' --ignore-not-found)
+if [[ -n "$TLS_CRT_EXISTS" ]]; then
+  echo "----> Legacy Cert overrides detected, legacy mode enabled"
+  legacyMode
   exit 0
 fi
 

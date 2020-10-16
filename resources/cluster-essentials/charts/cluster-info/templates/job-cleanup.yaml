@@ -62,9 +62,16 @@ rules:
     resources: ["secrets"]
     verbs:
       - get
-      - delete
     resourceNames:
       - kyma-gateway-certs
+      - apiserver-proxy-tls-cert
+  - apiGroups: ["cert.gardener.cloud"]
+    resources: ["certificates"]
+    verbs:
+      - get
+      - delete
+    resourceNames:
+      - kyma-tls-cert
       - apiserver-proxy-tls-cert
 ---
 kind: ClusterRoleBinding
