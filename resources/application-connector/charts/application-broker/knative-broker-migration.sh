@@ -13,11 +13,13 @@ readonly ISTIO_POLICY_API_GROUP="policies.authentication.istio.io"
 #   - delete the old Istio Policy
 #   - create a new Istio PeerAuthentication
 function migrate() {
-     local namespaces=$(kubectl get ns --no-headers -l knative-eventing-injection | awk '{print $1}')
+     local namespaces
+     namespaces=$(kubectl get ns --no-headers -l knative-eventing-injection | awk '{print $1}')
      echo "found the following namespaces with broker injection enabled: \"${namespaces}\""
      for namespace in ${namespaces}; do
-        local brokers=$(kubectl get ${KNATIVE_BROKER_API_GROUP} --no-headers --namespace ${namespace} | awk '{print $1}')
-        echo "found the following Knative Brokers in namespace: \"${namespace}\”: \”${brokers}\""
+        local brokers
+        brokers=$(kubectl get ${KNATIVE_BROKER_API_GROUP} --no-headers --namespace "${namespace}" | awk '{print $1}')
+        echo "found the following Knative Brokers in namespace: \"${namespace}\": \"${brokers}\""
         for broker in ${brokers}; do
             echo "migration of broker ${broker}/${namespace} [started]"
             delete_istio_policy "${broker}" "${namespace}"
