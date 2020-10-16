@@ -14,6 +14,11 @@ service:
   externalapi:
     port: *externalAPIPort
 
+autoscaling:
+  minReplicas: 1
+  maxReplicas: 10
+  cpuUsagePercent: 40
+
 applicationConnectivityValidator:
   image:
     pullPolicy: IfNotPresent
