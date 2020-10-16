@@ -23,7 +23,7 @@ func NewAddonConfiguration(name string, addonConfig *addons.AddonConfiguration, 
 		name:        name,
 		addonConfig: addonConfig,
 		url:         url,
-		log:         container.Log,
+		log:         container.Log.WithField(step.LogStepKey, name),
 	}
 }
 

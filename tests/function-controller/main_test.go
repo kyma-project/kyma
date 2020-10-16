@@ -29,7 +29,7 @@ func TestRuntimes(t *testing.T) {
 }
 
 func TestGitSourcesFunctions(t *testing.T) {
-	//runTests(t, scenarios.GitopsSteps)
+	runTests(t, scenarios.GitopsSteps)
 }
 
 type testSuite func(*rest.Config, testsuite.Config, *logrus.Entry) (step.Step, error)

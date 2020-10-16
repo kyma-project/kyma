@@ -15,12 +15,12 @@ type newFunction struct {
 	log      *logrus.Entry
 }
 
-func CreateFunction(log *logrus.Entry, fn *function.Function, stepName string, data *function.FunctionData) step.Step {
+func CreateFunction(log *logrus.Entry, fn *function.Function, name string, data *function.FunctionData) step.Step {
 	return newFunction{
 		fn:       fn,
-		name:     stepName,
+		name:     name,
 		funcData: data,
-		log:      log,
+		log:      log.WithField(step.LogStepKey, name),
 	}
 }
 
@@ -97,7 +97,7 @@ func UpdateFunction(log *logrus.Entry, fn *function.Function, name string, data 
 		fn:       fn,
 		name:     name,
 		funcData: data,
-		log:      log,
+		log:      log.WithField(step.LogStepKey, name),
 	}
 }
 
@@ -118,7 +118,7 @@ func (u updateFunc) Cleanup() error {
 }
 
 func (u updateFunc) OnError(cause error) error {
-	return u.fn.LogResource()
+	return nil
 }
 
 var _ step.Step = updateFunc{}

@@ -26,7 +26,7 @@ var _ step.Step = HTTPCheck{}
 func NewHTTPCheck(log *logrus.Entry, name string, url *url.URL, poller poller.Poller, expectedMsg string) *HTTPCheck {
 	return &HTTPCheck{
 		name:        name,
-		log:         log,
+		log:         log.WithField(step.LogStepKey, name),
 		endpoint:    url.String(),
 		expectedMsg: expectedMsg,
 		poll:        poller,
@@ -110,7 +110,7 @@ type E2EFunctionCheck struct {
 
 func NewE2EFunctionCheck(log *logrus.Entry, name string, inClusterURL, fnGatewayURL, brokerURL *url.URL, poller poller.Poller) E2EFunctionCheck {
 	return E2EFunctionCheck{
-		log:          log,
+		log:          log.WithField(step.LogStepKey, name),
 		name:         name,
 		inClusterURL: inClusterURL.String(),
 		fnGatewayURL: fnGatewayURL.String(),

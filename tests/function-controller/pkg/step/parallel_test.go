@@ -69,17 +69,14 @@ func getFirstMatchingLog(entries []*logrus.Entry, text string, startIdx int) (*l
 func TestMixed(t *testing.T) {
 	//GIVEN
 	g := gomega.NewWithT(t)
-	//logger, hook := test.NewNullLogger()
-	logger := logrus.New()
-	logger.SetReportCaller(true)
+	logger, hook := test.NewNullLogger()
+	//logger = logrus.New()
 	logf := logger.WithField("TestSuite", "Test")
 	log1 := logf.WithField("Test", "suite1")
 	log2 := logf.WithField("Test", "suite2")
 	log3 := logf.WithField("Test", "suite3")
 	idx := 0
 
-	//TODO: Check if array of steps is ok, becasue I see doubled logs
-	//TODO: Analyze the log from this output
 	steps := step.NewSerialTestRunner(logf, "Suite",
 		testStep{name: "outside of parallel", counter: &idx, logf: logf},
 		step.NewParallelRunner(logf, "test",
@@ -116,6 +113,14 @@ func TestMixed(t *testing.T) {
 	g.Expect(err.Error()).To(gomega.ContainSubstring("while executing step: step 1.4"))
 	g.Expect(idx).To(gomega.Equal(5))
 
+	allLogs := hook.AllEntries()
+	step1Logs := getLogs(allLogs, "Test", "suite1")
+	g.Expect(len(step1Logs)).To(gomega.Equal(13))
+
+	step2Logs := getLogs(allLogs, "Test", "suite2")
+	g.Expect(len(step2Logs)).To(gomega.Equal(8))
+	g.Expect(step2Logs[0].Message).To(gomega.ContainSubstring(""))
+
 	//errLog := getLogsContains(hook.AllEntries(), "OnError")
 	//g.Expect(len(errLog)).To(gomega.Equal(4))
 	//g.Expect(errLog[0].Message).To(gomega.Equal("OnError: step 4"))
@@ -123,5 +128,22 @@ func TestMixed(t *testing.T) {
 	//g.Expect(errLog[2].Message).To(gomega.Equal("OnError: step 2"))
 	//g.Expect(errLog[3].Message).To(gomega.Equal("OnError: step 1"))
 	//
-	//hook.Reset()
+	hook.Reset()
+}
+
+func getLogs(entries []*logrus.Entry, key, value string) []*logrus.Entry {
+	var foundLogs []*logrus.Entry
+	for _, entry := range entries {
+		field, ok := entry.Data[key]
+		if ok {
+			logValue, ok := field.(string)
+			if ok {
+				if logValue == value {
+					foundLogs = append(foundLogs, entry)
+				}
+			}
+		}
+	}
+	return foundLogs
+
 }
