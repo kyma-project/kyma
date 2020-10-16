@@ -1,10 +1,10 @@
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: "helm-broker.unprivileged"
+  name: "helm-broker.privileged"
 spec:
   allowedCapabilities: ["*"]
-  privileged: false
+  privileged: true
   runAsUser:
     rule: 'RunAsAny'
   seLinux:

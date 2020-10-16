@@ -29,6 +29,9 @@ spec:
       containers:
       - name: "{{ template "etcd-hb-fullname" . }}"
         image: "{{.Values.etcd.image}}:{{.Values.etcd.imageTag}}"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
         ports:
         - containerPort: 2379
           name: client
