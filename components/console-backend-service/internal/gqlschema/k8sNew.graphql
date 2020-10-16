@@ -107,7 +107,7 @@ extend type Mutation {
   @HasAccess(
     attributes: {
       resource: "limitrange"
-      verb: "create"
+      verb: "update"
       apiGroup: ""
       apiVersion: "v1"
       namespaceArg: "namespace"
