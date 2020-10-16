@@ -26,6 +26,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 60
       restartPolicy: Always
+      serviceAccountName: {{ template "etcd-hb-fullname" . }}-etcd-certs
       containers:
       - name: "{{ template "etcd-hb-fullname" . }}"
         image: "{{.Values.etcd.image}}:{{.Values.etcd.imageTag}}"
