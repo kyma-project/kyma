@@ -99,13 +99,13 @@ You can now install the Flux operator, connect it with a specific Git repository
   kubectl create namespace flux
   ```
 
-3. Export details of your GitHub repository - its name, the account name and related e-mail address, and the folder to which you will push Function and Trigger CRs built from local sources. Flux will synchronize the cluster with the content of this folder on the `main` branch.
+3. Export details of your GitHub repository - its name, the account name, and related e-mail address. You must also specify the name of the folder in your GitHub repository to which you will push Function and Trigger CRs built from local sources. If you don't have this folder in your repository yet, you will create it in further steps. Flux will synchronize the cluster with the content of this folder on the `main` (`master`) branch.
 
   ```bash
   export GH_USER="{USERNAME}"
   export GH_REPO="{REPOSITORY_NAME}"
   export GH_EMAIL="{EMAIL_OF_YOUR_GH_ACCOUNT}"
-  export GH_FOLDER="{GH_FOLDER_FOR_FUNCTION_RESOURCES}"
+  export GH_FOLDER="{GIT_REPO_FOLDER_FOR_FUNCTION_RESOURCES}"
   ```
 
 4. Run this command to apply CRDs of the Flux operator to the `flux` Namespace on your cluster:
@@ -200,9 +200,9 @@ You will create a sample inline Function and modify it by adding a trigger to it
 5. Push the local changes to the remote repository:
 
   ```bash
-  git add .                       # Stage changes for the commit
-  git commit -m 'Add my-function' # Add a commit message
-  git push origin main            # Push the changes to the "main" branch of your Git repository
+  git add .                        # Stage changes for the commit
+  git commit -m 'Add my-function'  # Add a commit message
+  git push origin main             # Push changes to the "main" branch of your Git repository. If you have a repository with the "master" branch, use this command instead: git push origin master
   ```
 
 6. Go to the GitHub repository to check that the changes were pushed.
@@ -248,7 +248,7 @@ You will create a sample inline Function and modify it by adding a trigger to it
   ```bash
   git add .
   git commit -m 'Update my-function'
-  git push origin main
+  git push origin main                # Or run: git push origin master
   ```
 
 4. Go to the GitHub repository and see that the `my-function.yaml` file was modified as intended.
@@ -269,4 +269,4 @@ You can see that Flux synchronized the resources and the new Trigger CR for the 
 
 ## Reverting feature
 
-Once you set it up, Flux will keep monitoring the given Git repository folder for any changes. If you modify the existing resources directly on the cluster, Flux will automatically revert these changes and update the given resource back to its version on the `main` branch of the Git repository.  
+Once you set it up, Flux will keep monitoring the given Git repository folder for any changes. If you modify the existing resources directly on the cluster, Flux will automatically revert these changes and update the given resource back to its version on the `main` (`master`) branch of the Git repository.  
