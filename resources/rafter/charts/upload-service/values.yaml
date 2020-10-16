@@ -30,8 +30,14 @@ deployment:
 pod:
   labels: {}
   annotations: {}
-  extraProperties: {}
-  extraContainerProperties: {}
+  extraProperties:
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+  extraContainerProperties:
+    securityContext:
+      privileged: false
+      allowPrivilegeEscalation: false
 
 service:
   name:
