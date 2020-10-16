@@ -36,4 +36,8 @@ func (c ConfigMaps) Cleanup() error {
 	return errors.Wrap(c.configMap.Delete(), "while deleting configmap")
 }
 
+func (c ConfigMaps) OnError(cause error) error {
+	return c.configMap.LogResource()
+}
+
 var _ step.Step = ConfigMaps{}
