@@ -66,8 +66,7 @@ func GitopsSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Ent
 		teststep.NewDefaultedFunctionCheck("Check if Git Function has correct default values", gitCfg.Fn),
 		teststep.NewHTTPCheck(genericContainer.Log, "Git Function pre update simple check through gateway", gitCfg.InClusterURL, poll, "GITOPS 1"),
 		teststep.NewCommitChanges(genericContainer.Log, "Commit changes to Git Function", gitCfg.GetGitServerInClusterURL()),
-		teststep.NewHTTPCheck(genericContainer.Log, "Git Function post update simple check through gateway", gitCfg.InClusterURL, poll, "GITOPS 2"),
-		testStep{name: "Falt Step", logf: logf, err: errors.New("Ups")}), nil
+		teststep.NewHTTPCheck(genericContainer.Log, "Git Function post update simple check through gateway", gitCfg.InClusterURL, poll, "GITOPS 2")), nil
 }
 
 type testStep struct {

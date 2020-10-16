@@ -109,7 +109,6 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 pre update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), cmEnvValue),
 				teststep.UpdateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Update NodeJS10 Function", runtimes.BasicNodeJSFunction("Hello From updated nodejs10", serverlessv1alpha1.Nodejs10)),
 				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 post update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), "Hello From updated nodejs10"),
-				testStep{name: "Faulty Step", logf: nodejs10Logger, err: errors.New("NodeJS10")},
 			),
 			step.NewSerialTestRunner(nodejs12Logger, "NodeJS12 test",
 				teststep.CreateEmptyFunction(nodejs12Cfg.Fn),
@@ -121,7 +120,6 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 				teststep.NewHTTPCheck(nodejs12Logger, "NodeJS12 pre update simple check through service", nodejs12Cfg.APIRuleURL, poll.WithLogger(nodejs12Logger), "Hello From nodejs"),
 				teststep.NewHTTPCheck(nodejs12Logger, "NodeJS12 pre update simple check through gateway", nodejs12Cfg.InClusterURL, poll.WithLogger(nodejs12Logger), "Hello From nodejs"),
 				teststep.UpdateFunction(nodejs12Logger, nodejs12Cfg.Fn, "Update NodeJS12 Function", runtimes.GetUpdatedNodeJSFunction()),
-				testStep{name: "Faulty Step", logf: nodejs12Logger, err: errors.New("NodeJS12")},
 				teststep.NewE2EFunctionCheck(nodejs12Logger, "NodeJS12 post update e2e check", nodejs12Cfg.InClusterURL, nodejs12Cfg.APIRuleURL, nodejs12Cfg.BrokerURL, poll.WithLogger(nodejs12Logger)),
 			)),
 	), nil

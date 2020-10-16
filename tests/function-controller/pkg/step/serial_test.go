@@ -2,12 +2,10 @@ package step_test
 
 import (
 	"errors"
-	"strings"
 	"testing"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
 	"github.com/onsi/gomega"
-	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
 )
 
@@ -43,42 +41,4 @@ func TestSerialTestRunner(t *testing.T) {
 	g.Expect(errLog[3].Message).To(gomega.Equal("Called on Error, resource: step 1"))
 
 	hook.Reset()
-}
-
-func getLogsContains(entries []*logrus.Entry, text string) []*logrus.Entry {
-	filteredEntries := []*logrus.Entry{}
-
-	for _, entry := range entries {
-		if strings.Contains(entry.Message, text) {
-			filteredEntries = append(filteredEntries, entry)
-		}
-	}
-
-	return filteredEntries
-}
-
-type testStep struct {
-	err     error
-	name    string
-	counter *int
-	logf    *logrus.Entry
-}
-
-func (e testStep) Name() string {
-	return e.name
-}
-
-func (e testStep) Run() error {
-	e.logf = e.logf.WithField("Step", e.name)
-	return e.err
-}
-
-func (e testStep) Cleanup() error {
-	return nil
-}
-
-func (e testStep) OnError(cause error) error {
-	*e.counter++
-	e.logf.Infof("Called on Error, resource: %s", e.name)
-	return nil
 }

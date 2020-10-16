@@ -2,12 +2,10 @@ package step_test
 
 import (
 	"errors"
-	"strings"
 	"testing"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
 	"github.com/onsi/gomega"
-	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
 )
 
@@ -55,15 +53,6 @@ func TestParallelRunner(t *testing.T) {
 	entry, nextLogIdx = getFirstMatchingLog(logEntries, "Cleanup Serial Step: start 0", nextLogIdx)
 	g.Expect(entry).ToNot(gomega.BeNil())
 	hook.Reset()
-}
-
-func getFirstMatchingLog(entries []*logrus.Entry, text string, startIdx int) (*logrus.Entry, int) {
-	for i := startIdx; i < len(entries); i++ {
-		if strings.Contains(entries[i].Message, text) {
-			return entries[i], i
-		}
-	}
-	return nil, -1
 }
 
 func TestMixed(t *testing.T) {
@@ -129,21 +118,4 @@ func TestMixed(t *testing.T) {
 	//g.Expect(errLog[3].Message).To(gomega.Equal("OnError: step 1"))
 	//
 	hook.Reset()
-}
-
-func getLogs(entries []*logrus.Entry, key, value string) []*logrus.Entry {
-	var foundLogs []*logrus.Entry
-	for _, entry := range entries {
-		field, ok := entry.Data[key]
-		if ok {
-			logValue, ok := field.(string)
-			if ok {
-				if logValue == value {
-					foundLogs = append(foundLogs, entry)
-				}
-			}
-		}
-	}
-	return foundLogs
-
 }

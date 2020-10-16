@@ -71,7 +71,7 @@ func (c *ConfigMap) Get() (*corev1.ConfigMap, error) {
 		return nil, errors.Wrapf(err, "while getting ConfigMap %s in namespace %s", c.name, c.namespace)
 	}
 	cm := corev1.ConfigMap{}
-	if err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, cm); err != nil {
+	if err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &cm); err != nil {
 		return nil, errors.Wrap(err, "while constructing ConfigMap from unstructured")
 	}
 
