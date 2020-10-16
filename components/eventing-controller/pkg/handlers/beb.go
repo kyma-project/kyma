@@ -3,7 +3,6 @@ package handlers
 import (
 	"fmt"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/httpclient"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"net/http"
 	"time"
@@ -151,10 +150,7 @@ func (b *Beb) deleteSubscription(name string) error {
 		return fmt.Errorf("failed to delete subscription with error: %v", err)
 	}
 	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusNotFound {
-		return httpclient.NewError(nil,
-			httpclient.WithMessage("failed to delete subscription"),
-			httpclient.WithStatusCode(resp.StatusCode),
-		)
+		return fmt.Errorf("failed to delete subscription with error: %v; %v", resp.StatusCode, resp.Message)
 	}
 	return nil
 }
