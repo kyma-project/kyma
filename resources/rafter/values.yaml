@@ -241,7 +241,7 @@ controller-manager:
 
     metrics:
       serviceMonitor:
-        enabled: true
+        enabled: false
         additionalLabels:
           prometheus: "monitoring"
 

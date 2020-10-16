@@ -7,7 +7,7 @@ metadata:
 {{ include "prometheus-operator.labels" . | indent 4 }}
 spec:
   groups:
-  - name: kyma-pod-not-running-rule
+  - name: kyma.pod-not-running.rules
     rules:
     - alert: KymaSystemPodNotRunning
       expr: sum(kube_pod_container_status_running { namespace=~"kyma-.*", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
@@ -17,18 +17,6 @@ spec:
       annotations:
         description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
         summary: "{{`{{ $labels.pod }}`}} is not running"
-  - name: kube-pod-not-running-rule
-    rules:
-    - alert: KubeSystemPodNotRunning
-      expr: sum(kube_pod_container_status_running { namespace="kube-system", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
-      for: 60s
-      #labels:
-      #  severity: critical
-      annotations:
-        description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
-        summary: "{{`{{ $labels.pod }}`}} is not running"
-  - name: istio-pod-not-running-rule
-    rules:
     - alert: IstioSystemPodNotRunning
       expr: sum(kube_pod_container_status_running { namespace="istio-system", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
       for: 60s
@@ -37,8 +25,6 @@ spec:
       annotations:
         description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
         summary: "{{`{{ $labels.pod }}`}} is not running"
-  - name: natss-pod-not-running-rule
-    rules:
     - alert: NatssSystemPodNotRunning
       expr: sum(kube_pod_container_status_running { namespace="natss", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
       for: 60s
@@ -47,8 +33,6 @@ spec:
       annotations:
         description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
         summary: "{{`{{ $labels.pod }}`}} is not running"
-  - name: kn-eventing-pod-not-running-rule
-    rules:
     - alert: KnEventingSystemPodNotRunning
       expr: sum(kube_pod_container_status_running { namespace="knative-eventing", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
       for: 60s
@@ -57,7 +41,7 @@ spec:
       annotations:
         description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
         summary: "{{`{{ $labels.pod }}`}} is not running"
-  - name: pvc-90-percent-full-rule
+  - name: kyma.pvc.rules
     rules:
     - alert: PVC90PercentFull
       expr: kubelet_volume_stats_used_bytes{namespace="kube-system",exported_namespace=~"kyma-.*|kube-.*|istio-.*|natss" } / kubelet_volume_stats_capacity_bytes{namespace="kube-system",exported_namespace=~"kyma-.*|kube-.*|istio-.*|natss"} * 100 > 90
@@ -66,7 +50,7 @@ spec:
         severity: critical
       annotations:
         message:  "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
-  - name: kube-pod-oomkilled
+  - name: kyma.pod-oomkilled.rules
     rules:
     - alert: KubePodOOMKilled
       expr: sum_over_time(kube_pod_container_status_terminated_reason{reason="OOMKilled"}[5m]) > 0
@@ -75,3 +59,23 @@ spec:
         severity: warning
       annotations:
         message: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.container {{`}}`}}) is OOMKilled for 5 minutes.
+  - name: kyma.file-descriptor.rules
+    rules:
+    - record: fd_utilization
+      expr: process_open_fds / process_max_fds
+    - alert: FdExhaustionClose
+      expr: predict_linear(fd_utilization[1h], 3600 * 4) > 1
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        message: '{{`{{ $labels.job }}`}}: {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} instance
+          will exhaust in file/socket descriptors within the next 4 hours'
+    - alert: FdExhaustionClose
+      expr: predict_linear(fd_utilization[10m], 3600) > 1
+      for: 10m
+      labels:
+        severity: critical
+      annotations:
+        message: '{{`{{ $labels.job }}`}}: {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} instance
+          will exhaust in file/socket descriptors within the next hour'

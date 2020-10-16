@@ -1,10 +1,11 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: logging.rules
+  name: {{ template "loki.fullname" . }}
   labels:
-    app: {{ template "prometheus-operator.name" . }}
-{{ include "prometheus-operator.labels" . | indent 4 }}
+    app: monitoring
+    chart: {{ template "loki.chart" . }}
+    release: {{ .Release.Name }}
 spec:
   groups:
   - name: logging.rules
