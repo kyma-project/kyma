@@ -20,7 +20,9 @@ spec:
       - istio-system
   endpoints:
     - path: /metrics
-      interval: 30s
+      {{- if .Values.prometheus.istioServiceMonitor.scrapeInterval }}
+      interval: {{ .Values.prometheus.istioServiceMonitor.scrapeInterval }}
+      {{- end }}
       relabelings:
         - sourceLabels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
           separator: ;

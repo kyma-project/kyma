@@ -17,3 +17,13 @@ istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
     tag: 19e240cd
+
+prometheus:
+  envoyPodMonitor:
+    scrapeInterval: 2m
+    #comma separated list of namespaces to match. If not set, all namespaces will be matched
+    #namespaces: 
+  recordingRules:
+    interval: 1m
+  istioServiceMonitor:
+    scrapeInterval: 1m

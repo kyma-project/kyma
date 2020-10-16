@@ -1462,7 +1462,7 @@ prometheus:
 
     ## Interval between consecutive scrapes.
     ##
-    scrapeInterval: 30s
+    scrapeInterval: 1m
 
     ## Interval between consecutive evaluations.
     ##
@@ -1712,7 +1712,7 @@ prometheus:
     resources:
       limits:
         cpu: 600m
-        memory: 2000Mi
+        memory: 3000Mi
       requests:
         cpu: 300m
         memory: 1000Mi
