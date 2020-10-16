@@ -1,14 +1,14 @@
-# About:
-# This post-upgrade job deletes knative services which belong to HTTPSource
-# The knative services got replaced by deployments and are not required anymore
+  # About:
+  # This migration job performs the migration from Istio Policy => PeerAuthentication.
+  # For more details see the summary in the job shell script.
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Release.Name }}-post-upgrade
+  name: {{ .Release.Name }}-knative-broker-migration
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Release.Name }}-post-upgrade
+    app: {{ .Release.Name }}-knative-broker-migration
   annotations:
     helm.sh/hook: "post-upgrade"
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
@@ -17,27 +17,33 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ .Release.Name }}-post-upgrade
+  name: {{ .Release.Name }}-knative-broker-migration
   labels:
-    app: {{ .Release.Name }}-post-upgrade
+    app: {{ .Release.Name }}-knative-broker-migration
   annotations:
     helm.sh/hook: "post-upgrade"
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
     helm.sh/hook-weight: "0"
 rules:
-  - apiGroups: ["serving.knative.dev"]
-    resources: ["services"]
-    verbs: ["get", "list", "delete"]
-  - apiGroups: ["authentication.istio.io"]
-    resources: ["policies"]
-    verbs: ["get", "list", "delete"]
+  - apiGroups: [ "" ]
+    resources: [ "namespaces" ]
+    verbs: [ "get", "list" ]
+  - apiGroups: [ "eventing.knative.dev" ]
+    resources: [ "brokers" ]
+    verbs: [ "get", "list" ]
+  - apiGroups: [ "authentication.istio.io" ]
+    resources: [ "policies" ]
+    verbs: [ "get", "list", "delete" ]
+  - apiGroups: [ "security.istio.io" ]
+    resources: [ "peerauthentications" ]
+    verbs: [ "get", "create", "patch" ]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ .Release.Name }}-post-upgrade
+  name: {{ .Release.Name }}-knative-broker-migration
   labels:
-    app: {{ .Release.Name }}-post-upgrade
+    app: {{ .Release.Name }}-knative-broker-migration
   annotations:
     helm.sh/hook: "post-upgrade"
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
@@ -45,19 +51,19 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ .Release.Name }}-post-upgrade
+  name: {{ .Release.Name }}-knative-broker-migration
 subjects:
   - kind: ServiceAccount
-    name: {{ .Release.Name }}-post-upgrade
+    name: {{ .Release.Name }}-knative-broker-migration
     namespace: {{ .Release.Namespace }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-post-upgrade
+  name: {{ .Release.Name }}-knative-broker-migration
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Release.Name }}-post-upgrade
+    app: {{ .Release.Name }}-knative-broker-migration
   annotations:
     helm.sh/hook: "post-upgrade"
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
@@ -70,20 +76,20 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
-        app: {{ .Release.Name }}-post-upgrade
-      name: {{ .Release.Name }}-post-upgrade
+        app: {{ .Release.Name }}-knative-broker-migration
+      name: {{ .Release.Name }}-knative-broker-migration
     spec:
-      serviceAccountName: {{ .Release.Name }}-post-upgrade
+      serviceAccountName: {{ .Release.Name }}-knative-broker-migration
       restartPolicy: Never
       containers:
-        - name: {{ .Release.Name }}-post-upgrade
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+        - name: {{ .Release.Name }}-knative-broker-migration
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
           command:
             - "/bin/bash"
           args:
             - "-c"
             - |
-{{ .Files.Get "post-upgrade.sh" | indent 14 }}
+          {{ .Files.Get "knative-broker-migration.sh" | nindent 14 }}
           terminationMessagePolicy: "FallbackToLogsOnError"
           resources:
             requests:
