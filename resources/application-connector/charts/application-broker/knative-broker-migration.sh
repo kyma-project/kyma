@@ -16,16 +16,18 @@ function migrate() {
      local namespaces
      namespaces=$(kubectl get ns --no-headers -l knative-eventing-injection | awk '{print $1}')
      echo "found the following namespaces with broker injection enabled: \"${namespaces}\""
+     echo
      for namespace in ${namespaces}; do
         local brokers
         brokers=$(kubectl get ${KNATIVE_BROKER_API_GROUP} --no-headers --namespace "${namespace}" | awk '{print $1}')
         echo "found the following Knative Brokers in namespace: \"${namespace}\": \"${brokers}\""
         for broker in ${brokers}; do
             echo "migration of broker ${broker}/${namespace} [started]"
-            delete_istio_policy "${broker}" "${namespace}"
+            delete_istio_policy "${namespace}"
             create_istio_peer_authentication "${namespace}"
             echo "migration of broker ${broker}/${namespace} [done]"
         done
+      echo
      done
 }
 
