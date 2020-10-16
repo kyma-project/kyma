@@ -1,7 +1,7 @@
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: "servicecatalog.k8s.io:unprivileged"
+  name: "servicecatalog.unprivileged"
 spec:
   allowedCapabilities:
     - 'NET_ADMIN'
