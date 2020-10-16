@@ -27,7 +27,7 @@ type Config struct {
 	Namespace          string           `envconfig:"default=test-function"`
 	DomainName         string           `envconfig:"default=kyma.local"`
 	Verbose            bool             `envconfig:"default=false"`
-	WaitTimeout        time.Duration    `envconfig:"default=15m"` // damn istio + knative combo
+	WaitTimeout        time.Duration    `envconfig:"default=15m"` // damn istio
 	DomainPort         uint32           `envconfig:"default=80"`
 	MaxPollingTime     time.Duration    `envconfig:"default=5m"`
 	InsecureSkipVerify bool             `envconfig:"default=true"`
