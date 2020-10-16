@@ -21,7 +21,7 @@ These sections will lead you through the whole installation, configuration, and 
 
 ### Install and configure a k3d cluster
 
-1. Install k3d using Homebrew:
+1. Install k3d using Homebrew on macOS:
 
   ```bash
   brew install k3d
