@@ -640,6 +640,14 @@
   version = "v3.0.1"
 
 [[projects]]
+  digest = "1:7008ec21a0ce773bd21deefdb7d17fab8cb9f1ae0bc44026cdd2b658ab1582ca"
+  name = "github.com/rogpeppe/go-internal"
+  packages = ["semver"]
+  pruneopts = "NUT"
+  revision = "1115b6af0369aff6bd0766818c61a9a75678c6cc"
+  version = "v1.6.2"
+
+[[projects]]
   digest = "1:f4aaa07a6c33f2b354726d0571acbc8ca118837c75709f6353203ae1a3f8eeab"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
@@ -855,9 +863,12 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:382bb5a7fb4034db3b6a2d19e5a4a6bcf52f4750530603c01ca18a172fa3089b"
+  digest = "1:a2fc247e64b5dafd3251f12d396ec85f163d5bb38763c4997856addddf6e78d8"
   name = "golang.org/x/sync"
-  packages = ["semaphore"]
+  packages = [
+    "errgroup",
+    "semaphore",
+  ]
   pruneopts = "NUT"
   revision = "cd5d95a43a6e21273425c7ae415d3df9ea832eeb"
 
@@ -1130,9 +1141,10 @@
   version = "1.4.5"
 
 [[projects]]
-  digest = "1:061024a203efbf02654d4aa55d69cd10d1f8985dada4cbafe5d6ce1b6914d22a"
+  digest = "1:d77b48cc0ea74f3edbc8e0515a0ce2fa2154eb414137dd4fb5a642a73296d403"
   name = "k8s.io/api"
   packages = [
+    "admission/v1beta1",
     "admissionregistration/v1",
     "admissionregistration/v1beta1",
     "apps/v1",
@@ -1231,12 +1243,13 @@
   version = "kubernetes-1.16.10"
 
 [[projects]]
-  digest = "1:717e9a802d6db281e9f8ccdd86c30c697fa17d5415223f583199f11b6d96406c"
+  digest = "1:9b3bb171ef37c98d57855975922f0fdb1ea027f73c3ebb17bc0036c96136194a"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "discovery/fake",
     "dynamic",
+    "dynamic/fake",
     "informers",
     "informers/admissionregistration",
     "informers/admissionregistration/v1",
@@ -1409,9 +1422,11 @@
     "pkg/apis/clientauthentication/v1beta1",
     "pkg/version",
     "plugin/pkg/client/auth/exec",
+    "plugin/pkg/client/auth/gcp",
     "rest",
     "rest/watch",
     "testing",
+    "third_party/forked/golang/template",
     "tools/auth",
     "tools/cache",
     "tools/clientcmd",
@@ -1429,6 +1444,7 @@
     "util/connrotation",
     "util/flowcontrol",
     "util/homedir",
+    "util/jsonpath",
     "util/keyutil",
     "util/retry",
     "util/workqueue",
@@ -1555,7 +1571,7 @@
 
 [[projects]]
   branch = "release-0.12"
-  digest = "1:70b6412fc611c0fa42dd2e5c2394be6cd458c9f80445eb59b4d04a7a721aa3b5"
+  digest = "1:8c57a66c4f68aa3ff691ce4f6bd4ae71692c8106b20bc69c2f7c939dc99b1387"
   name = "knative.dev/pkg"
   packages = [
     "apis",
@@ -1564,9 +1580,12 @@
     "apis/duck/v1alpha1",
     "apis/duck/v1beta1",
     "changeset",
+    "client/injection/kube/client",
+    "client/injection/kube/informers/factory",
     "configmap",
     "controller",
     "injection",
+    "injection/sharedmain",
     "kmeta",
     "kmp",
     "logging",
@@ -1574,10 +1593,15 @@
     "logging/testing",
     "metrics",
     "metrics/metricskey",
+    "profiling",
     "reconciler/testing",
+    "signals",
     "system",
     "system/testing",
     "tracker",
+    "version",
+    "webhook",
+    "webhook/certificates/resources",
   ]
   pruneopts = "NUT"
   revision = "b8dc5fbc6d2f4717a69d15382921a51f93ab4cbb"
@@ -1639,14 +1663,18 @@
     "golang.org/x/lint/golint",
     "golang.org/x/tools/cmd/goimports",
     "gopkg.in/yaml.v2",
+    "istio.io/api/authentication/v1alpha1",
     "istio.io/api/security/v1beta1",
     "istio.io/api/type/v1beta1",
+    "istio.io/client-go/pkg/apis/authentication/v1alpha1",
     "istio.io/client-go/pkg/apis/security/v1beta1",
+    "istio.io/client-go/pkg/clientset/versioned",
     "istio.io/client-go/pkg/clientset/versioned/fake",
     "istio.io/client-go/pkg/clientset/versioned/typed/security/v1beta1",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
     "k8s.io/apimachinery/pkg/labels",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
@@ -1654,15 +1682,20 @@
     "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apimachinery/pkg/util/runtime",
+    "k8s.io/apimachinery/pkg/util/sets",
     "k8s.io/apimachinery/pkg/util/strategicpatch",
     "k8s.io/apimachinery/pkg/util/wait",
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
+    "k8s.io/client-go/dynamic",
+    "k8s.io/client-go/dynamic/fake",
     "k8s.io/client-go/informers/core/v1",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/fake",
+    "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/kubernetes/typed/core/v1",
+    "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/testing",
     "k8s.io/client-go/tools/cache",
@@ -1689,6 +1722,7 @@
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/duck/v1",
+    "knative.dev/pkg/injection/sharedmain",
     "knative.dev/pkg/reconciler/testing",
   ]
   solver-name = "gps-cdcl"
