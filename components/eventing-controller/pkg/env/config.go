@@ -8,7 +8,7 @@ import (
 
 // Config represents the environment config for the Event Publisher Proxy.
 type Config struct {
-	BebApiUrl     string `envconfig:"BEB_API_URL" default:"https://enterprise-messaging-pubsub.cfapps.sap.hana.ondemand.com/sap/cp-kernel/ems-ce/v1"`
+	BebApiUrl     string `envconfig:"BEB_API_URL" default:"https://enterprise-messaging-pubsub.cfapps.sap.hana.ondemand.com/sap/ems/v1"`
 	ClientID      string `envconfig:"CLIENT_ID" required:"true"`
 	ClientSecret  string `envconfig:"CLIENT_SECRET" required:"true"`
 	TokenEndpoint string `envconfig:"TOKEN_ENDPOINT" required:"true"`
