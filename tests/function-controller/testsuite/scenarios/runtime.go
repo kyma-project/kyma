@@ -15,6 +15,7 @@ import (
 	"k8s.io/client-go/rest"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/addons"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/configmap"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/poller"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
@@ -73,6 +74,13 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 
 	addon := addons.New("test-addon", genericContainer)
 
+	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer)
+	cmEnvKey := "CM_ENV_KEY"
+	cmEnvValue := "Value taken as env from ConfigMap"
+	cmData := map[string]string{
+		cmEnvKey: cmEnvValue,
+	}
+
 	addonURL, err := url.Parse(testsuite.AddonsConfigUrl)
 	if err != nil {
 		return nil, err
@@ -97,8 +105,9 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 				teststep.NewHTTPCheck(python38Logger, "Python37 post update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python38Logger), "Hello From updated python"),
 			),
 			teststep.NewSerialSteps(nodejs10Logger, "NodeJS10 test",
-				teststep.CreateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Create NodeJS10 Function", runtimes.BasicNodeJSFunction("Hello From nodejs10", serverlessv1alpha1.Nodejs10)),
-				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 pre update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), "Hello From nodejs10"),
+				teststep.CreateConfigMap(nodejs10Logger, cm, "Create Test ConfigMap", cmData),
+				teststep.CreateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Create NodeJS10 Function", runtimes.NodeJSFunctionWithEnvFromConfigMap(cm.Name(), cmEnvKey, serverlessv1alpha1.Nodejs10)),
+				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 pre update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), cmEnvValue),
 				teststep.UpdateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Update NodeJS10 Function", runtimes.BasicNodeJSFunction("Hello From updated nodejs10", serverlessv1alpha1.Nodejs10)),
 				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 post update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), "Hello From updated nodejs10"),
 			),
