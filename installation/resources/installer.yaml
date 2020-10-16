@@ -96,7 +96,7 @@ spec:
         image: eu.gcr.io/kyma-project/kyma-installer:1.16.0-rc3
         imagePullPolicy: IfNotPresent
         args:
-          - -overrideLogFile=/app/overrides.txtgit
+          - -overrideLogFile=/app/overrides.txt
           - -helmDebugMode=true
         resources:
           requests:
