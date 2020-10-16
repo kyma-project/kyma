@@ -1,0 +1,11 @@
+approvers:
+  - colunira
+  - Demonsthere
+  - kubadz
+  - piotrmsc
+  - strekm
+  - Tomasz-Smelcerz-SAP
+
+labels:
+- area/service-mesh
+- area/installation
