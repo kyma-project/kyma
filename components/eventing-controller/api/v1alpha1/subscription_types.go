@@ -58,16 +58,24 @@ type SubscriptionSpec struct {
 	Filter           *BebFilters       `json:"filter"`
 }
 
+type EmsSubscriptionStatus struct {
+	SubscriptionStatus       string `json:"subscriptionStatus,omitempty"`
+	SubscriptionStatusReason string `json:"subscriptionStatusReason,omitempty"`
+	LastSuccessfulDelivery   string `json:"lastSuccessfulDelivery,omitempty"`
+	LastFailedDelivery       string `json:"lastFailedDelivery,omitempty"`
+	LastFailedDeliveryReason string `json:"lastFailedDeliveryReason,omitempty"`
+}
+
 // +kubebuilder:subresource:status
 
 // SubscriptionStatus defines the observed state of Subscription
 // TODO: it should contain:
-// - the status of BEB subscription
 // - the status of the exposed Webhook
 type SubscriptionStatus struct {
-	Conditions []Condition `json:"conditions,omitempty"`
-	Ev2hash    uint64      `json:"ev2hash,omitempty"`
-	Emshash    uint64      `json:"emshash,omitempty"`
+	Conditions            []Condition           `json:"conditions,omitempty"`
+	Ev2hash               uint64                `json:"ev2hash,omitempty"`
+	Emshash               uint64                `json:"emshash,omitempty"`
+	EmsSubscriptionStatus EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 }
 
 // +kubebuilder:object:root=true

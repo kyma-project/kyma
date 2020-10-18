@@ -20,7 +20,7 @@ var _ Interface = &Beb{}
 
 type Interface interface {
 	Initialize()
-	SyncBebSubscription(subscription *eventingv1alpha1.Subscription, oldEv2Hash uint64, oldEmsHash uint64) (uint64, uint64, error)
+	SyncBebSubscription(subscription *eventingv1alpha1.Subscription) (bool, error)
 	DeleteBebSubscription(subscription *eventingv1alpha1.Subscription) error
 }
 
@@ -42,53 +42,82 @@ func (b *Beb) Initialize() {
 	// TODO error?
 }
 
-func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription, oldEv2Hash uint64, oldEmsHash uint64) (uint64, uint64, error) {
+func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription) (bool, error) {
 	// get the internal view for the ev2 subscription
+	var statusChanged = false
 	sEv2, err := getInternalView4Ev2(subscription)
 	if err != nil {
 		b.Log.Error(err, "failed to get internal view for ev2 subscription", "name:", subscription.Name)
-		return 0, 0, err
+		return false, err
 	}
 	newEv2Hash, err := getHash(sEv2)
 	if err != nil {
 		b.Log.Error(err, "failed to get the hash value", "subscription name", sEv2.Name)
-		return 0, 0, err
+		return false, err
 	}
-	if newEv2Hash != oldEv2Hash {
+	var emsSubscription *types2.Subscription
+	// check the hash values for ev2 and ems
+	if newEv2Hash != subscription.Status.Ev2hash {
 		// delete & create a new Ems subscription
-		newEmsHash, err := b.deleteCreateAndHashSubscription(sEv2)
+		var newEmsHash uint64
+		emsSubscription, newEmsHash, err = b.deleteCreateAndHashSubscription(sEv2)
 		if err != nil {
-			return 0, 0, err
+			return false, err
 		}
-		return newEv2Hash, newEmsHash, nil
-	}
-	// no change on ev2 side
-	// check if ems subscription is the same as in the past
-	emsSubscription, err := b.getSubscription(sEv2.Name)
-	if err != nil {
-		b.Log.Error(err, "failed to get ems subscription", "subscription name", sEv2.Name)
-		return 0, 0, err
-	}
-	// get the internal view for the ems subscription
-	sEms, err := getInternalView4Ems(emsSubscription)
-	if err != nil {
-		b.Log.Error(err, "failed to get internal view for ems subscription", "subscription name:", emsSubscription.Name)
-	}
-	newEmsHash, err := getHash(sEms)
-	if err != nil {
-		b.Log.Error(err, "failed to get the hash value for ems subscription", "subscription", sEms.Name)
-		return 0, 0, err
-	}
-	if newEmsHash != oldEmsHash {
-		// delete & create a new Ems subscription
-		newEmsHash, err = b.deleteCreateAndHashSubscription(sEv2)
+		subscription.Status.Ev2hash = newEv2Hash
+		subscription.Status.Emshash = newEmsHash
+		statusChanged = true
+	} else {
+		// check if ems subscription is the same as in the past
+		emsSubscription, err = b.getSubscription(sEv2.Name)
 		if err != nil {
-			return 0, 0, err
+			b.Log.Error(err, "failed to get ems subscription", "subscription name", sEv2.Name)
+			return false, err
 		}
-		return oldEv2Hash, newEmsHash, err
+		// get the internal view for the ems subscription
+		sEms, err := getInternalView4Ems(emsSubscription)
+		if err != nil {
+			b.Log.Error(err, "failed to get internal view for ems subscription", "subscription name:", emsSubscription.Name)
+			return false, err
+		}
+		newEmsHash, err := getHash(sEms)
+		if err != nil {
+			b.Log.Error(err, "failed to get the hash value for ems subscription", "subscription", sEms.Name)
+			return false, err
+		}
+		if newEmsHash != subscription.Status.Emshash {
+			// delete & create a new Ems subscription
+			emsSubscription, newEmsHash, err = b.deleteCreateAndHashSubscription(sEv2)
+			if err != nil {
+				return false, err
+			}
+			subscription.Status.Emshash = newEmsHash
+			statusChanged = true
+		}
 	}
-	// returns, no changes
-	return oldEv2Hash, oldEmsHash, nil
+	// set the status of emsSubscription in ev2Subscription
+	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus != string(emsSubscription.SubscriptionStatus) {
+		subscription.Status.EmsSubscriptionStatus.SubscriptionStatus = string(emsSubscription.SubscriptionStatus)
+		statusChanged = true
+	}
+	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatusReason != emsSubscription.SubscriptionStatusReason {
+		subscription.Status.EmsSubscriptionStatus.SubscriptionStatusReason = emsSubscription.SubscriptionStatusReason
+		statusChanged = true
+	}
+	if subscription.Status.EmsSubscriptionStatus.LastSuccessfulDelivery != emsSubscription.LastSuccessfulDelivery {
+		subscription.Status.EmsSubscriptionStatus.LastSuccessfulDelivery = emsSubscription.LastSuccessfulDelivery
+		statusChanged = true
+	}
+	if subscription.Status.EmsSubscriptionStatus.LastFailedDelivery != emsSubscription.LastFailedDelivery {
+		subscription.Status.EmsSubscriptionStatus.LastFailedDelivery = emsSubscription.LastFailedDelivery
+		statusChanged = true
+	}
+	if subscription.Status.EmsSubscriptionStatus.LastFailedDeliveryReason != emsSubscription.LastFailedDeliveryReason {
+		subscription.Status.EmsSubscriptionStatus.LastFailedDeliveryReason = emsSubscription.LastFailedDeliveryReason
+		statusChanged = true
+	}
+
+	return statusChanged, nil
 }
 
 func (b *Beb) DeleteBebSubscription(subscription *eventingv1alpha1.Subscription) error {
@@ -100,22 +129,22 @@ func (b *Beb) DeleteBebSubscription(subscription *eventingv1alpha1.Subscription)
 	return b.deleteSubscription(sEv2.Name)
 }
 
-func (b *Beb) deleteCreateAndHashSubscription(subscription *types2.Subscription) (uint64, error) {
+func (b *Beb) deleteCreateAndHashSubscription(subscription *types2.Subscription) (*types2.Subscription, uint64, error) {
 	// delete Ems susbcription
 	if err := b.deleteSubscription(subscription.Name); err != nil {
 		b.Log.Error(err, "delete ems subscription failed", "subscription name:", subscription.Name)
-		return 0, err
+		return nil, 0, err
 	}
 	// create a new Ems subscription
 	if err := b.createSubscription(subscription); err != nil {
 		b.Log.Error(err, "create ems subscription failed", "subscription name:", subscription.Name)
-		return 0, err
+		return nil, 0, err
 	}
 	// get the new Ems subscription
 	emsSubscription, err := b.getSubscription(subscription.Name)
 	if err != nil {
 		b.Log.Error(err, "failed to get ems subscription", "subscription name", subscription.Name)
-		return 0, err
+		return nil, 0, err
 	}
 	// get the new hash
 	sEms, err := getInternalView4Ems(emsSubscription)
@@ -125,11 +154,10 @@ func (b *Beb) deleteCreateAndHashSubscription(subscription *types2.Subscription)
 	newEmsHash, err := getHash(sEms)
 	if err != nil {
 		b.Log.Error(err, "failed to get the hash value for ems subscription", "subscription", sEms.Name)
-		return 0, err
+		return nil, 0, err
 	}
-	return newEmsHash, nil
+	return emsSubscription, newEmsHash, nil
 }
-
 
 func (b *Beb) getSubscription(name string) (*types2.Subscription, error) {
 	b.Log.Info("BEB getSubscription()", "subscription name:", name)

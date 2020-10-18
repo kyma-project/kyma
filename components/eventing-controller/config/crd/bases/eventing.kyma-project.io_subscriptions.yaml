@@ -134,8 +134,7 @@ spec:
             type: object
           status:
             description: 'SubscriptionStatus defines the observed state of Subscription
-              TODO: it should contain: - the status of BEB subscription - the status
-              of the exposed Webhook'
+              TODO: it should contain: - the status of the exposed Webhook'
             properties:
               conditions:
                 items:
@@ -155,6 +154,19 @@ spec:
                   - status
                   type: object
                 type: array
+              emsSubscriptionStatus:
+                properties:
+                  lastFailedDelivery:
+                    type: string
+                  lastFailedDeliveryReason:
+                    type: string
+                  lastSuccessfulDelivery:
+                    type: string
+                  subscriptionStatus:
+                    type: string
+                  subscriptionStatusReason:
+                    type: string
+                type: object
               emshash:
                 format: int64
                 type: integer

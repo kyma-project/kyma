@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"context"
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -25,7 +25,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	bebauth "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/auth"
+	//bebauth "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/auth"
 
 	// gcp auth etc.
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -427,17 +427,17 @@ type bebMock struct {
 }
 
 func (h *bebMock) start() string {
-
+	// TODO ...
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logf.Log.V(1).Info("received request")
 
 		// oauth2 request
 		if r.Method == "POST" && r.RequestURI == urlAuth {
-			accessToken := bebauth.AccessToken{
-				Value: "1234",
-			}
-			err := json.NewEncoder(w).Encode(accessToken)
-			Expect(err).ShouldNot(HaveOccurred())
+			//accessToken := bebauth.AccessToken{
+			//	Value: "1234",
+			//}
+			//err := json.NewEncoder(w).Encode(accessToken)
+			//Expect(err).ShouldNot(HaveOccurred())
 			w.WriteHeader(http.StatusOK)
 		}
 		if strings.HasPrefix(r.RequestURI, urlMessagingApi) {

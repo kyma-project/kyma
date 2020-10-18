@@ -91,7 +91,7 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	}
 
 	if !r.isInDeletion(subscription) {
-		if err := r.syncInitialStatus(subscription, &result, ctx, log); err != nil {
+		if err := r.syncInitialStatus(subscription, &result, ctx); err != nil {
 			log.Error(err, "error while syncing status")
 			return result, err
 		}
@@ -142,39 +142,40 @@ func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alp
 		if err := r.bebClient.DeleteBebSubscription(subscription); err != nil {
 			return err
 		}
-		if err := r.removeFinalizer(subscription, result, ctx, logger); err != nil {
+		if err := r.removeFinalizer(subscription, ctx, logger); err != nil {
 			return err
 		}
 		return nil
 	}
-
-	ev2Hash := subscription.Status.Ev2hash
-	emsHash := subscription.Status.Emshash
-	if newEv2Hash, newEmsHash, err := r.bebClient.SyncBebSubscription(subscription, ev2Hash, emsHash); err != nil {
+	var statusChanged bool
+	var err error
+	if statusChanged, err = r.bebClient.SyncBebSubscription(subscription); err != nil {
 		logger.Error(err, "Update BEB subscription failed")
 		return err
-	} else {
-		if ev2Hash != newEv2Hash {
-			subscription.Status.Ev2hash = newEv2Hash
+	}
+
+	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, "Successfully synchronized with BEB subscription", corev1.ConditionTrue)
+	if !subscription.Status.IsConditionSubscribed() {
+		if err := r.updateStatus(subscription, condition); err != nil {
+			return err
 		}
-		if emsHash != newEmsHash {
-			subscription.Status.Emshash = newEmsHash
+		statusChanged = true
+	}
+	// save the new status only if it was changed
+	if statusChanged {
+		if err := r.Status().Update(ctx, subscription); err != nil {
+			return err
 		}
 	}
 	// OK
-	if !subscription.Status.IsConditionSubscribed() {
-		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, "Successfully synchronized with BEB subscription", corev1.ConditionTrue)
-		if err := r.updateStatus(subscription, condition, ctx, logger); err != nil {
-			return err
-		}
-		result.Requeue = false // the last call in reconcile(), don't force a new reconcile() yet.
-	}
+	r.emitConditionEvent(subscription, condition)
+	result.Requeue = false // all is ok, this is the last call in reconcile(), don't force a new reconcile()
 
 	return nil
 }
 
 // syncInitialStatus determines the desires initial status and updates it accordingly (if conditions changed)
-func (r *SubscriptionReconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription, result *ctrl.Result, ctx context.Context, logger logr.Logger) error {
+func (r *SubscriptionReconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription, result *ctrl.Result, ctx context.Context) error {
 	currentStatus := subscription.Status
 
 	expectedStatus := eventingv1alpha1.SubscriptionStatus{}
@@ -194,8 +195,7 @@ func (r *SubscriptionReconciler) syncInitialStatus(subscription *eventingv1alpha
 	return nil
 }
 
-func (r *SubscriptionReconciler) updateStatus(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition, ctx context.Context, logger logr.Logger) error {
-
+func (r *SubscriptionReconciler) updateStatus(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition) error {
 	// compile list of desired conditions
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)
 	for _, c := range subscription.Status.Conditions {
@@ -215,11 +215,6 @@ func (r *SubscriptionReconciler) updateStatus(subscription *eventingv1alpha1.Sub
 
 	// update the status
 	subscription.Status.Conditions = desiredConditions
-	if err := r.Status().Update(ctx, subscription); err != nil {
-		return err
-	}
-	r.emitConditionEvent(subscription, condition)
-
 	return nil
 }
 
@@ -253,7 +248,7 @@ func (r *SubscriptionReconciler) addFinalizer(subscription *eventingv1alpha1.Sub
 	return nil
 }
 
-func (r *SubscriptionReconciler) removeFinalizer(subscription *eventingv1alpha1.Subscription, result *ctrl.Result, ctx context.Context, logger logr.Logger) error {
+func (r *SubscriptionReconciler) removeFinalizer(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) error {
 	var finalizers []string
 
 	// Build finalizer list without the one the controller owns
@@ -269,7 +264,6 @@ func (r *SubscriptionReconciler) removeFinalizer(subscription *eventingv1alpha1.
 	if err := r.Update(ctx, subscription); err != nil {
 		return errors.Wrapf(err, "error while removing Finalizer with name: %s", FinalizerName)
 	}
-	result.Requeue = true
 	logger.V(1).Info("Removed finalizer")
 	return nil
 }
