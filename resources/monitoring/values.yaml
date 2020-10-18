@@ -538,6 +538,14 @@ grafana:
           access: proxy
           url: http://tracing-jaeger-query.kyma-system:16686
           editable: true
+    prometheusIstio:
+      enabled: true
+      config:
+        - name: Prometheus-Istio
+          type: prometheus
+          access: proxy
+          url: http://monitoring-prometheus-istio-server.kyma-system:80
+          editable: true
 
   additionalDataSources:
   # - name: prometheus-sample
@@ -552,6 +560,7 @@ grafana:
   #   type: prometheus
   #   url: https://prometheus.svc:9090
   #   version: 1
+
 
   ## Passed to grafana subchart and used by servicemonitor below
   ##
@@ -1712,10 +1721,10 @@ prometheus:
     resources:
       limits:
         cpu: 600m
-        memory: 3000Mi
+        memory: 2Gi
       requests:
-        cpu: 300m
-        memory: 1000Mi
+        cpu: 200m
+        memory: 600Mi
 
     ## Prometheus StorageSpec for persistent data
     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/user-guides/storage.md
@@ -1972,3 +1981,5 @@ prometheus:
 
 pushgateway:
   enabled: false
+prometheusIstio:
+  enabled: true

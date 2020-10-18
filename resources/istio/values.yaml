@@ -22,14 +22,6 @@ monitoring:
   enabled: true
   dashboards:
     enabled: true
-  envoyPodMonitor:
-    enabled: true
-    scrapeInterval: ""
-    # comma separated list of namespaces to match. If not set, all namespaces will be matched
-    namespaces: ""
-  recordingRules:
-    enabled: true
-    interval: ""
   istioServiceMonitor:
     enabled: true
     scrapeInterval: ""
