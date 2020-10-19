@@ -2,15 +2,9 @@ package controllers
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"math/rand"
-	"net/http"
-	"net/http/httptest"
-	"net/url"
 	"os"
-	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -18,8 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	. "github.com/onsi/gomega/types"
-	"golang.org/x/oauth2"
-
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,8 +20,8 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/config"
-	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
 	// gcp auth etc.
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	// +kubebuilder:scaffold:imports
@@ -60,7 +52,7 @@ func getUniqueNamespaceName() string {
 }
 
 var _ = Describe("Subscription", func() {
-	var beb *bebMock
+	var beb *testing.BebMock
 	var bebConfig *config.Config
 
 	// enable me for debugging
@@ -75,11 +67,11 @@ var _ = Describe("Subscription", func() {
 		err = os.Setenv("CLIENT_SECRET", "foo")
 		Expect(err).ShouldNot(HaveOccurred())
 
-		beb = &bebMock{}
-		bebURI := beb.start()
+		beb = &testing.BebMock{}
+		bebURI := beb.Start()
 		logf.Log.Info("beb mock listening at", "address", bebURI)
-		authURL := fmt.Sprintf("%s%s", bebURI, urlAuth)
-		messagingURL := fmt.Sprintf("%s%s", bebURI, urlMessagingApi)
+		authURL := fmt.Sprintf("%s%s", bebURI, testing.UrlAuth)
+		messagingURL := fmt.Sprintf("%s%s", bebURI, testing.UrlMessagingApi)
 
 		err = os.Setenv("TOKEN_ENDPOINT", authURL)
 		Expect(err).ShouldNot(HaveOccurred())
@@ -87,11 +79,11 @@ var _ = Describe("Subscription", func() {
 		Expect(err).ShouldNot(HaveOccurred())
 
 		bebConfig = config.GetDefaultConfig()
-		beb.bebConfig = bebConfig
+		beb.BebConfig = bebConfig
 	})
 
 	AfterEach(func() {
-		logf.Log.Info("beb mock calls", "calls", fmt.Sprintf("%+v", beb.requests))
+		logf.Log.Info("beb mock calls", "calls", fmt.Sprintf("%+v", beb.Requests))
 	})
 
 	// TODO: test required fields are provided  but with wrong values => basically testing the CRD schema
@@ -431,116 +423,4 @@ func printNamespaces(namespaceName string, ctx context.Context) error {
 	}
 	logf.Log.V(1).Info("namespace", "namespace", namespace)
 	return nil
-}
-
-const (
-	urlAuth         = "/auth"
-	urlMessagingApi = "/messaging"
-)
-
-// bebMock implements a mock for BEB
-type bebMock struct {
-	requests  []http.Request
-	bebConfig *config.Config
-}
-
-func (m *bebMock) start() string {
-	// implementation based on https://pages.github.tools.sap/KernelServices/APIDefinitions/?urls.primaryName=Business%20Event%20Bus%20-%20CloudEvents
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log := logf.Log.WithName("beb mock")
-		payload, err := ioutil.ReadAll(r.Body)
-		Expect(err).ShouldNot(HaveOccurred())
-
-		log.V(1).Info("received request",
-			"uri", r.RequestURI,
-			"method", r.Method,
-			"payload", payload,
-		)
-		config.GetDefaultConfig()
-
-		m.requests = append(m.requests, *r)
-
-		w.Header().Set("Content-Type", "application/json")
-
-		// oauth2 request
-		if r.Method == "POST" && r.RequestURI == urlAuth {
-			bebAuthResponseSuccess(w)
-			return
-		}
-		// messaging API request
-		if strings.HasPrefix(r.RequestURI, urlMessagingApi) {
-			switch r.Method {
-			case http.MethodDelete:
-				bebDeleteResponseSuccess(w)
-			case http.MethodPost:
-				bebCreateSuccess(w)
-			case http.MethodGet:
-				switch r.RequestURI {
-				case m.bebConfig.ListURL:
-					bebListSuccess(w)
-				// get on a single subscription
-				default:
-					parsedUrl, err := url.Parse(r.RequestURI)
-					Expect(err).ShouldNot(HaveOccurred())
-					subscriptionName := parsedUrl.Path
-					bebGetSuccess(w, subscriptionName)
-				}
-				return
-			default:
-				w.WriteHeader(http.StatusNotImplemented)
-			}
-			return
-		}
-	}))
-	uri := ts.URL
-
-	return uri
-}
-
-func bebAuthResponseSuccess(w http.ResponseWriter) {
-	token := oauth2.Token{
-		AccessToken:  "some-token",
-		TokenType:    "",
-		RefreshToken: "",
-	}
-	w.WriteHeader(http.StatusOK)
-	err := json.NewEncoder(w).Encode(token)
-	Expect(err).ShouldNot(HaveOccurred())
-}
-
-func bebCreateSuccess(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusAccepted)
-	response := bebtypes.CreateResponse{
-		Response: bebtypes.Response{
-			StatusCode: http.StatusAccepted,
-			Message:    "",
-		},
-		Href: "",
-	}
-	err := json.NewEncoder(w).Encode(response)
-	Expect(err).ShouldNot(HaveOccurred())
-}
-
-func bebGetSuccess(w http.ResponseWriter, name string) {
-	w.WriteHeader(http.StatusOK)
-	s := bebtypes.Subscription{
-		Name:               name,
-		SubscriptionStatus: bebtypes.SubscriptionStatusActive,
-	}
-	err := json.NewEncoder(w).Encode(s)
-	Expect(err).ShouldNot(HaveOccurred())
-}
-
-func bebListSuccess(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusAccepted)
-	response := bebtypes.Response{
-		StatusCode: http.StatusOK,
-		Message:    "",
-	}
-	err := json.NewEncoder(w).Encode(response)
-	Expect(err).ShouldNot(HaveOccurred())
-}
-
-func bebDeleteResponseSuccess(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusNoContent)
 }
