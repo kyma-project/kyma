@@ -83,3 +83,8 @@ global:
     tls:
       crt: "TBD"
       key: "TBD"
+
+securityContext: {runAsUser: 1000}
+podSecurityPolicy:
+  enabled: true
+  name: helmbroker.restricted

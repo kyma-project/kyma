@@ -24,6 +24,9 @@ spec:
         release: "{{ .Release.Name }}"
         heritage: "{{ .Release.Service }}"
     spec:
+{{- with .Values.securityContext }}
+      securityContext:
+{{ toYaml . | indent 8 }}
       terminationGracePeriodSeconds: 60
       restartPolicy: Always
       serviceAccountName: {{ template "etcd-hb-fullname" . }}-etcd-certs

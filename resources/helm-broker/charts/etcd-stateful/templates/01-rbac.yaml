@@ -21,6 +21,13 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ template "etcd-hb-fullname" . }}-etcd-certs
 rules:
+{{ if .Values.podSecurityPolicy.enabled}}
+  - apiGroups: ["policy"]
+    resources: ["podsecuritypolicies"]
+    verbs:     ["use"]
+    resourceNames:
+      - {{ .Values.podSecurityPolicy.name }}
+{{ end }}
   - apiGroups: [""]
     resources: ["secrets"]
     verbs: ["get", "list", "patch"]
