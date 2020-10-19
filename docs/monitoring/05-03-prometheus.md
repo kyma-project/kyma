@@ -16,5 +16,5 @@ This table lists the configurable parameters, their descriptions, and default va
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
 | **prometheusSpec.retention** | Specifies a period for which Prometheus stores the metrics.| `1d` |
-| **prometheusSpec.retentionSize** | Maximum number of bytes that storage blocks can use. The oldest data will be removed first.| `2GB` |
-| **prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage** | Specifies the size of a Persistent Volume Claim (PVC). | `10Gi` |
+| **prometheusSpec.retentionSize** | Specifies the maximum number of bytes that storage blocks can use. The oldest data will be removed first.| `2GB` |
+| **prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage** | Specifies the size of a PersistentVolumeClaim (PVC). | `10Gi` |
