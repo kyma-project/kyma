@@ -96,7 +96,7 @@ func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription) (
 		}
 	}
 	// set the status of emsSubscription in ev2Subscription
-	statusChanged = statusChanged || b.setEmsSubscritionStatus(subscription, emsSubscription)
+	statusChanged = b.setEmsSubscritionStatus(subscription, emsSubscription) || statusChanged
 
 	return statusChanged, nil
 }
