@@ -154,7 +154,6 @@ metrics:
       protocol: TCP
   serviceMonitor:
     create: true
-    scrapeInterval: 30s
     labels: {}
     annotations: {}
   pod:
