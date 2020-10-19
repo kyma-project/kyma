@@ -3,6 +3,8 @@ title: API Server Proxy chart
 type: Configuration
 ---
 
+>**CAUTION:** The API Server PRoxy component (apiserver-proxy) is deprecated.
+
 To configure the API Server Proxy chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
 
 >**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
