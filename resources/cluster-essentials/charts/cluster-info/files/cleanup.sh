@@ -29,7 +29,7 @@ if kubectl get namespace kyma-system; then
       kubectl delete certificates.cert.gardener.cloud -n kyma-system apiserver-proxy-tls-cert --ignore-not-found
     else
       echo Deleting Secret apiserver-proxy-tls-cert
-      kubectl delete secret -n istio-system apiserver-proxy-tls-cert --ignore-not-found
+      kubectl delete secret -n kyma-system apiserver-proxy-tls-cert --ignore-not-found
     fi
   fi
 fi
