@@ -7,5 +7,13 @@ data:
 EOF
 )
 
-echo $PATCH_YAML
-kubectl patch configmap $CM_NAME --patch "${PATCH_YAML}" -n $CM_NAMESPACE
+echo "---> Patching CM ${CM_NAMESPACE}/${CM_NAME} with ingress domain name"
+set +e
+msg=$(kubectl patch cm ${CM_NAME} --patch "${PATCH_YAML}" -n ${CM_NAMESPACE} 2>&1)
+status=$?
+set -e
+
+if [[ $status -ne 0 ]] && [[ ! "$msg" == *"not patched"* ]]; then
+    echo "$msg"
+    exit $status
+fi
