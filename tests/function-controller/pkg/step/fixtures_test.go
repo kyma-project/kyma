@@ -68,3 +68,13 @@ func getFirstMatchingLog(entries []*logrus.Entry, text string, startIdx int) (*l
 	}
 	return nil, -1
 }
+
+func getLogsWithLevel(entries []*logrus.Entry, level logrus.Level) []*logrus.Entry {
+	filtered := []*logrus.Entry{}
+	for _, entry := range entries {
+		if entry.Level == level {
+			filtered = append(filtered, entry)
+		}
+	}
+	return filtered
+}

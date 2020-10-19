@@ -64,9 +64,9 @@ func (r *Runner) Run(step Step, skipCleanup bool) error {
 
 	defer func() {
 		if !skipCleanup {
-			err = step.Cleanup()
-			r.log.Error("while executing clean up", err)
-			//r.Cleanup(steps[0:(startedStep + 1)])
+			if err = step.Cleanup(); err != nil {
+				r.log.Error("while executing clean up", err)
+			}
 		}
 	}()
 	err = step.Run()

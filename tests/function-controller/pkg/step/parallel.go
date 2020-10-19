@@ -17,6 +17,10 @@ type Parallelized struct {
 	logf  *logrus.Entry
 }
 
+func NewParallelRunner(logf *logrus.Entry, name string, steps ...Step) *Parallelized {
+	return &Parallelized{logf: logf, name: name, steps: steps}
+}
+
 func (p *Parallelized) Name() string {
 	names := make([]string, len(p.steps))
 	for i, step := range p.steps {
@@ -75,8 +79,4 @@ func (p *Parallelized) runStepInParallel(wg *sync.WaitGroup, errs chan<- error, 
 		}
 	}()
 	errs <- f(step)
-}
-
-func NewParallelRunner(logf *logrus.Entry, name string, steps ...Step) *Parallelized {
-	return &Parallelized{logf: logf, name: name, steps: steps}
 }

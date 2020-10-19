@@ -38,7 +38,7 @@ func (s SerialRunner) Name() string {
 
 func (s *SerialRunner) Run() error {
 	for i, serialStep := range s.steps {
-		s.log.Infof("Step %d: %s", i, serialStep.Name())
+		s.log.Infof("Running Step %d: %s", i, serialStep.Name())
 		if err := serialStep.Run(); err != nil {
 			s.log.Errorf("Error in %s, error: %s", serialStep.Name(), err.Error())
 			if callBackErr := s.stepsOnError(err, i); callBackErr != nil {
