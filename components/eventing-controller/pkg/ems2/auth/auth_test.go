@@ -3,6 +3,7 @@ package auth
 import (
 	"golang.org/x/oauth2"
 	"net/http"
+	"os"
 	"testing"
 )
 
@@ -13,6 +14,15 @@ const (
 )
 
 func TestAuthenticator(t *testing.T) {
+	if err := os.Setenv("CLIENT_ID", "foo"); err != nil {
+		t.Errorf("error while setting env var CLIENT_ID")
+	}
+	if err := os.Setenv("CLIENT_SECRET", "foo"); err != nil {
+		t.Errorf("error while setting env var CLIENT_SECRET")
+	}
+	if err := os.Setenv("TOKEN_ENDPOINT", "foo"); err != nil {
+		t.Errorf("error while setting env var TOKEN_ENDPOINT")
+	}
 
 	// authenticate
 	authenticator := NewAuthenticator()
