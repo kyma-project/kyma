@@ -3,24 +3,3 @@ name: prometheus-istio
 version: 11.16.2
 appVersion: 2.21.0
 description: Prometheus is a monitoring system and time series database.
-home: https://prometheus.io/
-icon: https://raw.githubusercontent.com/prometheus/prometheus.github.io/master/assets/prometheus_logo-cb55bb5c346.png
-sources:
-  - https://github.com/prometheus/alertmanager
-  - https://github.com/prometheus/prometheus
-  - https://github.com/prometheus/pushgateway
-  - https://github.com/prometheus/node_exporter
-  - https://github.com/kubernetes/kube-state-metrics
-maintainers:
-  - name: gianrubio
-    email: gianrubio@gmail.com
-  - name: zanhsieh
-    email: zanhsieh@gmail.com
-  - name: Xtigyro
-    email: miroslav.hadzhiev@gmail.com
-  - name: monotek
-    email: monotek23@gmail.com
-  - name: naseemkullah
-    email: naseem@transit.app
-engine: gotpl
-tillerVersion: ">=2.8.0"
