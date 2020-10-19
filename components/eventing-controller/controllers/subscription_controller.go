@@ -2,11 +2,12 @@ package controllers
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-
 	"github.com/go-logr/logr"
+	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
+	"time"
 
 	// TODO: use different package
 	"github.com/pkg/errors"
@@ -81,27 +82,29 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		"version", subscription.GetGeneration(),
 	)
 
-	// Ensure the finalizer is set
-	if err := r.syncFinalizer(subscription, &result, ctx, log); err != nil {
-		log.Error(err, "error while syncing finalizer")
-		return result, err
-	}
-	if result.Requeue {
-		return result, nil
-	}
-
 	if !r.isInDeletion(subscription) {
+		// Ensure the finalizer is set
+		if err := r.syncFinalizer(subscription, &result, ctx, log); err != nil {
+			log.Error(err, "error while syncing finalizer")
+			return result, err
+		}
+		if result.Requeue {
+			return result, nil
+		}
 		if err := r.syncInitialStatus(subscription, &result, ctx); err != nil {
 			log.Error(err, "error while syncing status")
 			return result, err
 		}
-	}
-	if result.Requeue {
-		return result, nil
+		if result.Requeue {
+			return result, nil
+		}
 	}
 
-	// TODO sync the Subscription CR with he corresponding APIRule.
-	// Expose the webhook
+	// Sync with APIRule, expose the webhook
+	if err := r.syncAPIRule(subscription, &result, ctx, log); err != nil {
+		log.Error(err, "error while syncing API rule")
+		return result, err
+	}
 
 	// Sync the BEB Subscription with the Subscription CR
 	if err := r.syncBEBSubscription(subscription, &result, ctx, log); err != nil {
@@ -109,6 +112,13 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		return result, err
 	}
 
+	if r.isInDeletion(subscription) {
+		// Remove finalizers
+		if err := r.removeFinalizer(subscription, ctx, log); err != nil {
+			return result, err
+		}
+		result.Requeue = false
+	}
 	return result, nil
 }
 
@@ -118,15 +128,10 @@ func (r *SubscriptionReconciler) syncFinalizer(subscription *eventingv1alpha1.Su
 	if r.isFinalizerSet(subscription) {
 		return nil
 	}
-
-	// Add Finalizer if not in deletion mode
-	if !r.isInDeletion(subscription) {
-		if err := r.addFinalizer(subscription, ctx, logger); err != nil {
-			return err
-		}
-		result.Requeue = true
+	if err := r.addFinalizer(subscription, ctx, logger); err != nil {
+		return err
 	}
-
+	result.Requeue = true
 	return nil
 }
 
@@ -136,17 +141,14 @@ func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alp
 
 	r.bebClient.Initialize()
 
-	// TODO: react on finalizer
 	if r.isInDeletion(subscription) {
 		logger.Info("Deleting BEB subscription")
 		if err := r.bebClient.DeleteBebSubscription(subscription); err != nil {
 			return err
 		}
-		if err := r.removeFinalizer(subscription, ctx, logger); err != nil {
-			return err
-		}
 		return nil
 	}
+
 	var statusChanged bool
 	var err error
 	if statusChanged, err = r.bebClient.SyncBebSubscription(subscription); err != nil {
@@ -164,13 +166,26 @@ func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alp
 	// save the new status only if it was changed
 	if statusChanged {
 		if err := r.Status().Update(ctx, subscription); err != nil {
+			logger.Error(err, "Update subscription status failed")
 			return err
+		}
+		if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus != string(types2.SubscriptionStatusActive) {
+			logger.Info("Wait for subscription to be active", "name:", subscription.Name, "status:", subscription.Status.EmsSubscriptionStatus.SubscriptionStatus)
+			warn := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, "Subscription not active", corev1.ConditionFalse)
+			result.RequeueAfter = time.Second * 1
+			r.emitConditionEvent(subscription, warn, "Wait for subscription to be active", "Retry")
+			return nil
+		} else {
+			result.Requeue = true
 		}
 	}
 	// OK
-	r.emitConditionEvent(subscription, condition)
-	result.Requeue = false // all is ok, this is the last call in reconcile(), don't force a new reconcile()
+	r.emitConditionEvent(subscription, condition, "Subscription active", "")
+	return nil
+}
 
+func (r *SubscriptionReconciler) syncAPIRule(subscription *eventingv1alpha1.Subscription, result *ctrl.Result, ctx context.Context, logger logr.Logger) error {
+	// TODO
 	return nil
 }
 
@@ -220,14 +235,11 @@ func (r *SubscriptionReconciler) replaceStatusCondition(subscription *eventingv1
 }
 
 // emitConditionEvent emits a kubernetes event and sets the event type based on the Condition status
-func (r *SubscriptionReconciler) emitConditionEvent(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition) {
+func (r *SubscriptionReconciler) emitConditionEvent(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition, reason string, message string) {
 	eventType := corev1.EventTypeNormal
 	if condition.Status == corev1.ConditionFalse {
 		eventType = corev1.EventTypeWarning
 	}
-	// TODO:
-	reason := "todo"
-	message := "todo"
 	r.recorder.Event(subscription, eventType, reason, message)
 }
 
