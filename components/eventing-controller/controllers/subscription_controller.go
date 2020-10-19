@@ -156,7 +156,7 @@ func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alp
 
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, "Successfully synchronized with BEB subscription", corev1.ConditionTrue)
 	if !subscription.Status.IsConditionSubscribed() {
-		if err := r.updateStatus(subscription, condition); err != nil {
+		if err := r.replaceStatusCondition(subscription, condition); err != nil {
 			return err
 		}
 		statusChanged = true
@@ -195,7 +195,8 @@ func (r *SubscriptionReconciler) syncInitialStatus(subscription *eventingv1alpha
 	return nil
 }
 
-func (r *SubscriptionReconciler) updateStatus(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition) error {
+// replaceStatusCondition replaces the given condition on the subscription
+func (r *SubscriptionReconciler) replaceStatusCondition(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition) error {
 	// compile list of desired conditions
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)
 	for _, c := range subscription.Status.Conditions {
