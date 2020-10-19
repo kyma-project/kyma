@@ -96,26 +96,7 @@ func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription) (
 		}
 	}
 	// set the status of emsSubscription in ev2Subscription
-	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus != string(emsSubscription.SubscriptionStatus) {
-		subscription.Status.EmsSubscriptionStatus.SubscriptionStatus = string(emsSubscription.SubscriptionStatus)
-		statusChanged = true
-	}
-	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatusReason != emsSubscription.SubscriptionStatusReason {
-		subscription.Status.EmsSubscriptionStatus.SubscriptionStatusReason = emsSubscription.SubscriptionStatusReason
-		statusChanged = true
-	}
-	if subscription.Status.EmsSubscriptionStatus.LastSuccessfulDelivery != emsSubscription.LastSuccessfulDelivery {
-		subscription.Status.EmsSubscriptionStatus.LastSuccessfulDelivery = emsSubscription.LastSuccessfulDelivery
-		statusChanged = true
-	}
-	if subscription.Status.EmsSubscriptionStatus.LastFailedDelivery != emsSubscription.LastFailedDelivery {
-		subscription.Status.EmsSubscriptionStatus.LastFailedDelivery = emsSubscription.LastFailedDelivery
-		statusChanged = true
-	}
-	if subscription.Status.EmsSubscriptionStatus.LastFailedDeliveryReason != emsSubscription.LastFailedDeliveryReason {
-		subscription.Status.EmsSubscriptionStatus.LastFailedDeliveryReason = emsSubscription.LastFailedDeliveryReason
-		statusChanged = true
-	}
+	statusChanged = statusChanged || b.setEmsSubscritionStatus(subscription, emsSubscription)
 
 	return statusChanged, nil
 }
@@ -157,6 +138,32 @@ func (b *Beb) deleteCreateAndHashSubscription(subscription *types2.Subscription)
 		return nil, 0, err
 	}
 	return emsSubscription, newEmsHash, nil
+}
+
+// Set the status of emsSubscription in ev2Subscription
+func (b *Beb) setEmsSubscritionStatus(subscription *eventingv1alpha1.Subscription, emsSubscription *types2.Subscription) bool {
+	var statusChanged = false
+	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus != string(emsSubscription.SubscriptionStatus) {
+		subscription.Status.EmsSubscriptionStatus.SubscriptionStatus = string(emsSubscription.SubscriptionStatus)
+		statusChanged = true
+	}
+	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatusReason != emsSubscription.SubscriptionStatusReason {
+		subscription.Status.EmsSubscriptionStatus.SubscriptionStatusReason = emsSubscription.SubscriptionStatusReason
+		statusChanged = true
+	}
+	if subscription.Status.EmsSubscriptionStatus.LastSuccessfulDelivery != emsSubscription.LastSuccessfulDelivery {
+		subscription.Status.EmsSubscriptionStatus.LastSuccessfulDelivery = emsSubscription.LastSuccessfulDelivery
+		statusChanged = true
+	}
+	if subscription.Status.EmsSubscriptionStatus.LastFailedDelivery != emsSubscription.LastFailedDelivery {
+		subscription.Status.EmsSubscriptionStatus.LastFailedDelivery = emsSubscription.LastFailedDelivery
+		statusChanged = true
+	}
+	if subscription.Status.EmsSubscriptionStatus.LastFailedDeliveryReason != emsSubscription.LastFailedDeliveryReason {
+		subscription.Status.EmsSubscriptionStatus.LastFailedDeliveryReason = emsSubscription.LastFailedDeliveryReason
+		statusChanged = true
+	}
+	return statusChanged
 }
 
 func (b *Beb) getSubscription(name string) (*types2.Subscription, error) {

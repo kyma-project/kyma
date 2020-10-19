@@ -33,10 +33,10 @@ func newOauth2Client(ctx context.Context, cfg *clientcredentials.Config) *http.C
 
 	// TODO configure tracing transport - not necessary now
 	/*
-	client.Transport = &ochttp.Transport{
-		Base:        client.Transport,
-		Propagation: publisher_trace.TraceContextEgress,
-	}
+		client.Transport = &ochttp.Transport{
+			Base:        client.Transport,
+			Propagation: publisher_trace.TraceContextEgress,
+		}
 	*/
 	return client
 }
