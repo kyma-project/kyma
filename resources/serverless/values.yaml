@@ -7,13 +7,13 @@ fullnameOverride: "serverless"
 injectCerts:
   image:
     repository: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl"
-    tag: "v20200617-32c1f3ff"
+    tag: "v20201016-058ecbc7"
     pullPolicy: IfNotPresent
 
 migration:
   image:
     repository: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl"
-    tag: "v20200617-32c1f3ff"
+    tag: "v20201016-058ecbc7"
     pullPolicy: IfNotPresent
 
 tests:
@@ -33,7 +33,7 @@ tests:
         cpu: 200m
     image:
       repository: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl"
-      tag: "v20200617-32c1f3ff"
+      tag: "v20201016-058ecbc7"
       pullPolicy: IfNotPresent
     namespace: "long-running-function-test"
     name: longrun

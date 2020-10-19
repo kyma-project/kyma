@@ -3,5 +3,5 @@ global:
 
 istio_kyma_patch:
   image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-  tag: "v20200617-32c1f3ff"
+  tag: "v20201016-058ecbc7"
 required_istio_version: 1.5.10-distroless
