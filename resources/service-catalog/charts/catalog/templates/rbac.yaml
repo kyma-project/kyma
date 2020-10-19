@@ -10,11 +10,13 @@ kind: ClusterRole
 metadata:
     name: "servicecatalog.k8s.io:controller-manager"
 rules:
+  {{ if .Values.podSecurityPolicy.enabled}}
     - apiGroups: ["policy"]
       resources: ["podsecuritypolicies"]
       verbs:     ["use"]
       resourceNames:
-      - "servicecatalog.unprivileged"
+      - {{ .Values.podSecurityPolicy.name }}
+  {{ end }}
     - apiGroups: [""]
       resources: ["events"]
       verbs:     ["create","patch","update"]
@@ -186,6 +188,13 @@ kind: ClusterRole
 metadata:
     name: "servicecatalog.k8s.io:webhook"
 rules:
+{{ if .Values.podSecurityPolicy.enabled}}
+    - apiGroups: ["policy"]
+      resources: ["podsecuritypolicies"]
+      verbs:     ["use"]
+      resourceNames:
+      - {{ .Values.podSecurityPolicy.name }}
+ {{ end }}
     # access to our service-catalog types
     - apiGroups: ["apiextensions.k8s.io"]
       resources: ["customresourcedefinitions"]

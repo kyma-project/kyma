@@ -123,8 +123,11 @@ servicePlanDefaultsEnabled: false
 cascadingDeletionEnabled: true
 ## Security context give the opportunity to run container as nonroot by setting a securityContext
 ## by example :
-## securityContext: { runAsUser: 1001 }
-securityContext: {}
+securityContext: { runAsUser: 1001 }
+podSecurityPolicy:
+  enabled: true
+  name: servicecatalog.restricted
+#securityContext: {}
 
 ## images for migration process
 migration:
