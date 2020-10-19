@@ -5,9 +5,9 @@ metadata:
   name: {{ .Values.podSecurityPolicy.name }}
   labels:
     app: {{ template "fullname" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   allowedCapabilities: ['NET_ADMIN', 'NET_RAW']
   privileged: false
@@ -40,4 +40,4 @@ spec:
     - persistentVolumeClaim
     - projected
     - secret
-{{ end }}
+  {{ end }}

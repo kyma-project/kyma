@@ -8,6 +8,13 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 rules:
+{{ if .Values.podSecurityPolicy.enabled}}
+  - apiGroups: ["policy"]
+    resources: ["podsecuritypolicies"]
+    verbs:     ["use"]
+    resourceNames:
+      - {{ .Values.podSecurityPolicy.name }}
+{{ end }}
 - apiGroups: ["settings.svcat.k8s.io"]
   resources: ["podpresets"]
   verbs: ["create", "delete"]
