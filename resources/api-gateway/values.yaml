@@ -3,7 +3,7 @@ replicaCount: 1
 rbacJob:
   image:
     repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20200617-32c1f3ff"
+    tag: "v20201016-058ecbc7"
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller

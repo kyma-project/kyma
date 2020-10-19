@@ -3,7 +3,7 @@ replicaCount: 1
 jobs:
   image:
     repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20200617-32c1f3ff"
+    tag: "v20201016-058ecbc7"
 
 config:
   # SyncPeriod determines the minimum frequency at which watched resources are
