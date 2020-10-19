@@ -3,7 +3,7 @@ title: Expose a service
 type: Tutorials
 ---
 
-This tutorial shows how to expose services or Functions using the API Gateway Controller. The controller reacts to an instance of the APIRule custom resource (CR) and creates an Istio Virtual Service according to the details specified in the CR.
+This tutorial shows how to expose services using the API Gateway Controller. The controller reacts to an instance of the APIRule custom resource (CR) and creates an Istio Virtual Service according to the details specified in the CR.
 
 The tutorial comes with a sample HttpBin service deployment.
 
@@ -11,7 +11,7 @@ The tutorial comes with a sample HttpBin service deployment.
 
 Follow the instruction to deploy an instance of the HttpBin service and expose it.
 
-1. Export this value as environment variable:
+1. Export this value as an environment variable:
 
 ```bash
 export DOMAIN={CLUSTER_DOMAIN}
@@ -43,7 +43,8 @@ spec:
       methods: ["GET"]
       accessStrategies:
         - handler: noop
-      mutators: []
+      mutators: 
+        - handler: noop
   EOF
   ```
 
