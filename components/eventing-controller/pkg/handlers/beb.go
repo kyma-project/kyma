@@ -3,14 +3,11 @@ package handlers
 import (
 	"fmt"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"net/http"
-	"time"
-
 	client2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/client"
 	config2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/config"
 	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
 	auth2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/auth"
+	"net/http"
 
 	"github.com/go-logr/logr"
 )
@@ -199,31 +196,5 @@ func (b *Beb) createSubscription(subscription *types2.Subscription) error {
 	if createResponse.StatusCode > http.StatusAccepted && createResponse.StatusCode != http.StatusConflict {
 		return fmt.Errorf("failed to create subscription with error: %v", createResponse)
 	}
-	if !b.waitForSubscriptionActive(subscription.Name) {
-		return fmt.Errorf("timeout waiting for the subscription to be active: %v", subscription.Name)
-	}
 	return nil
-}
-
-func (b *Beb) waitForSubscriptionActive(name string) bool {
-	timeout := time.After(env.GetConfig().WebhookActivationTimeout)
-	tick := time.Tick(time.Millisecond * 500)
-	for {
-		select {
-		case <-timeout:
-			{
-				return false
-			}
-		case <-tick:
-			{
-				sub, _, err := b.Client.Get(name)
-				if err != nil {
-					return false
-				}
-				if sub != nil && sub.SubscriptionStatus == types2.SubscriptionStatusActive {
-					return true
-				}
-			}
-		}
-	}
 }
