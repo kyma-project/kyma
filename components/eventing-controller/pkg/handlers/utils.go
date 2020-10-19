@@ -9,11 +9,11 @@ import (
 	"github.com/mitchellh/hashstructure"
 )
 
-func getHash(subscription *types2.Subscription) (uint64, error) {
+func getHash(subscription *types2.Subscription) (int64, error) {
 	if hash, err := hashstructure.Hash(subscription, nil); err != nil {
 		return 0, err
 	} else {
-		return hash, nil
+		return int64(hash), nil
 	}
 }
 

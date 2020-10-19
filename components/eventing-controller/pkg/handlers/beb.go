@@ -59,7 +59,7 @@ func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription) (
 	// check the hash values for ev2 and ems
 	if newEv2Hash != subscription.Status.Ev2hash {
 		// delete & create a new Ems subscription
-		var newEmsHash uint64
+		var newEmsHash int64
 		emsSubscription, newEmsHash, err = b.deleteCreateAndHashSubscription(sEv2)
 		if err != nil {
 			return false, err
@@ -110,7 +110,7 @@ func (b *Beb) DeleteBebSubscription(subscription *eventingv1alpha1.Subscription)
 	return b.deleteSubscription(sEv2.Name)
 }
 
-func (b *Beb) deleteCreateAndHashSubscription(subscription *types2.Subscription) (*types2.Subscription, uint64, error) {
+func (b *Beb) deleteCreateAndHashSubscription(subscription *types2.Subscription) (*types2.Subscription, int64, error) {
 	// delete Ems susbcription
 	if err := b.deleteSubscription(subscription.Name); err != nil {
 		b.Log.Error(err, "delete ems subscription failed", "subscription name:", subscription.Name)
