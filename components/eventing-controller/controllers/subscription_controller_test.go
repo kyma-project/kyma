@@ -121,8 +121,8 @@ var _ = Describe("Subscription", func() {
 			var subscriptionEvents = v1.EventList{}
 			// TODO: adjust to event we want to have
 			event := v1.Event{
-				Reason:  "todo",
-				Message: "todo",
+				Reason:  "Subscription active",
+				Message: "",
 				Type:    v1.EventTypeNormal,
 			}
 			Eventually(func() v1.EventList {

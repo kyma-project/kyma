@@ -89,10 +89,10 @@ func getInternalView4Ems(subscription *types2.Subscription) (*types2.Subscriptio
 	return emsSubscription, nil
 }
 
-func getHash4WebhookAuth(subscription *types2.Subscription) (uint64, error) {
+func getHash4WebhookAuth(subscription *types2.Subscription) (int64, error) {
 	hash, err := hashstructure.Hash(subscription.WebhookAuth, nil)
 	if err != nil {
 		return 0, err
 	}
-	return hash, nil
+	return int64(hash), nil
 }
