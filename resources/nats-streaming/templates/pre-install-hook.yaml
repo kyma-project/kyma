@@ -63,7 +63,7 @@ spec:
       terminationGracePeriodSeconds: 0
       containers:
         - name: {{ .Release.Name }}-pre-install
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20201016-058ecbc7
           imagePullPolicy: IfNotPresent
 
           command:
