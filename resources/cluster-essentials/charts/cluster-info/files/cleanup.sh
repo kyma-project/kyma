@@ -12,6 +12,9 @@ if kubectl get namespace istio-system; then
     if echo $API_VERSIONS | grep -c cert.gardener.cloud ; then
       echo Deleting Certificate kyma-tls-cert
       kubectl delete certificates.cert.gardener.cloud -n istio-system kyma-tls-cert --ignore-not-found
+    else
+      echo Deleting Secret kyma-gateway-certs
+      kubectl delete secret -n istio-system kyma-gateway-certs --ignore-not-found
     fi
   fi
 fi
@@ -24,6 +27,9 @@ if kubectl get namespace kyma-system; then
     if echo $API_VERSIONS | grep -c cert.gardener.cloud ; then
       echo Deleting Certificate apiserver-proxy-tls-cert
       kubectl delete certificates.cert.gardener.cloud -n kyma-system apiserver-proxy-tls-cert --ignore-not-found
+    else
+      echo Deleting Secret apiserver-proxy-tls-cert
+      kubectl delete secret -n istio-system apiserver-proxy-tls-cert --ignore-not-found
     fi
   fi
 fi

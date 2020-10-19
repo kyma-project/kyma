@@ -62,6 +62,7 @@ rules:
     resources: ["secrets"]
     verbs:
       - get
+      - delete
     resourceNames:
       - kyma-gateway-certs
       - apiserver-proxy-tls-cert
