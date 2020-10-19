@@ -11,7 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: 0de5247a
+    version: PR-9481
     enabled: true
     labels:
       integration: true
@@ -538,6 +538,14 @@ grafana:
           access: proxy
           url: http://tracing-jaeger-query.kyma-system:16686
           editable: true
+    prometheusIstio:
+      enabled: false
+      config:
+        - name: Prometheus-Istio
+          type: prometheus
+          access: proxy
+          url: http://monitoring-prometheus-istio-server.kyma-system:80
+          editable: true
 
   additionalDataSources:
   # - name: prometheus-sample
@@ -552,6 +560,7 @@ grafana:
   #   type: prometheus
   #   url: https://prometheus.svc:9090
   #   version: 1
+
 
   ## Passed to grafana subchart and used by servicemonitor below
   ##
@@ -657,7 +666,7 @@ kubelet:
 
     metricRelabelings:
     - sourceLabels: [ __name__ ]
-      regex: ^(apiserver_client_certificate_expiration_seconds_bucket|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|kubelet_cgroup_manager_duration_seconds_bucket|kubelet_cgroup_manager_duration_seconds_count|kubelet_node_name|kubelet_pleg_relist_duration_seconds_bucket|kubelet_pleg_relist_duration_seconds_count|kubelet_pleg_relist_interval_seconds_bucket|kubelet_pod_start_duration_seconds_count|kubelet_pod_worker_duration_seconds_bucket|kubelet_pod_worker_duration_seconds_count|kubelet_running_container_count|kubelet_running_pod_count|kubelet_runtime_operations|kubelet_runtime_operations_total|kubelet_runtime_operations_errors_total|kubelet_volume_stats_available_bytes|kubelet_volume_stats_capacity_bytes|kubelet_volume_stats_inodes|kubernetes_build_info|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_request_latency_seconds_bucket|rest_client_requests_total|storage_operation_duration_seconds_bucket|storage_operation_duration_seconds_count|storage_operation_errors_total|volume_manager_total_volumes)$
+      regex: ^(apiserver_client_certificate_expiration_seconds_bucket|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|kubelet_cgroup_manager_duration_seconds_bucket|kubelet_cgroup_manager_duration_seconds_count|kubelet_node_name|kubelet_pleg_relist_duration_seconds_bucket|kubelet_pleg_relist_duration_seconds_count|kubelet_pleg_relist_interval_seconds_bucket|kubelet_pod_start_duration_seconds_count|kubelet_pod_worker_duration_seconds_bucket|kubelet_pod_worker_duration_seconds_count|kubelet_running_container_count|kubelet_running_pod_count|kubelet_runtime_operations|kubelet_runtime_operations_total|kubelet_runtime_operations_errors_total|kubelet_volume_stats_available_bytes|kubelet_volume_stats_capacity_bytes|kubelet_volume_stats_inodes|kubernetes_build_info|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_requests_total)$
       action: keep
 
     # 	relabel configs to apply to samples before ingestion.
@@ -1466,7 +1475,7 @@ prometheus:
 
     ## Interval between consecutive evaluations.
     ##
-    evaluationInterval: ""
+    evaluationInterval: 30s
 
     ## ListenLocal makes the Prometheus server listen on loopback, so that it does not bind against the Pod IP.
     ##
@@ -1712,10 +1721,10 @@ prometheus:
     resources:
       limits:
         cpu: 600m
-        memory: 2000Mi
+        memory: 2Gi
       requests:
-        cpu: 300m
-        memory: 1000Mi
+        cpu: 200m
+        memory: 600Mi
 
     ## Prometheus StorageSpec for persistent data
     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/user-guides/storage.md
@@ -1972,3 +1981,5 @@ prometheus:
 
 pushgateway:
   enabled: false
+prometheusIstio:
+  enabled: true

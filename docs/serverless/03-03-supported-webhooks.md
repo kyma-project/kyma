@@ -9,17 +9,28 @@ A newly created or modified Function CR is first updated by the defaulting webho
 
 > **NOTE:** It only applies to the [Function custom resource (CR)](#custom-resource-function).
 
-The defaulting webhook sets the default values for CPU and memory requests and limits, and adds the maximum and the minimum number of replicas, if not specified already in the Function CR. It also sets the default runtime `nodejs12` unless specified otherwise.
+The defaulting webhook:
+
+- Sets default values for CPU and memory requests and limits for a Function.
+- Sets default values for CPU and memory requests and limits for a Kubernetes Job responsible for building the Function's image.
+- Adds the maximum and the minimum number of replicas, if not specified already in the Function CR.
+- Sets the default runtime `nodejs12` unless specified otherwise.
 
    | Parameter         | Default value |
    | ----------------- | ------------- |
-   | **requestCpu**    | `50m`         |
-   | **requestMemory** | `64Mi`        |
-   | **limitsCpu**     | `100m`        |
-   | **limitsMemory**  | `128Mi`       |
+   | **resources.requests.cpu**    | `50m`         |
+   | **resources.requests.memory** | `64Mi`        |
+   | **resources.limits.cpu**     | `100m`        |
+   | **resources.limits.memory**  | `128Mi`       |
+   | **buildResources.requests.cpu**    | `700m`         |
+   | **buildResources.requests.memory** | `700Mi`        |
+   | **buildResources.limits.cpu**     | `1100m`        |
+   | **buildResources.limits.memory**  | `1100Mi`       |
    | **minReplicas**   | `1`           |
    | **maxReplicas**   | `1`           |
    | **runtime**       | `nodejs12`    |
+  
+> **NOTE:** Function's resources and replicas as well as resources for a Kubernetes Job are based on presets. Read about all [available presets](#details-available-presets) to find out more.
 
 ## Validation webhook
 
@@ -27,13 +38,15 @@ It checks the following conditions for these CRs:
 
 1. [Function CR](#custom-resource-function)
 
-   - Minimum values requested for CPU, memory, and replicas are not lower than the required ones:
+   - Minimum values requested for a Function (CPU, memory, and replicas) and a Kubernetes Job (CPU and memory) responsible for building the Function's image must not be lower than the required ones:
 
    | Parameter            | Required value |
    | -------------------- | -------------- |
-   | **minRequestCpu**    | `10m`          |
-   | **minRequestMemory** | `16Mi`         |
-   | **minReplicasValue** | `1`            |
+   | **minReplicas** | `1`            |
+   | **resources.requests.cpu**    | `10m`          |
+   | **resources.requests.memory** | `16Mi`         |
+   | **buildResources.requests.cpu**    | `200m`          |
+   | **buildResources.requests.memory** | `200Mi`         |
 
    - Requests are lower than or equal to limits, and the minimum number of replicas is lower than or equal to the maximum one.
    - The Function CR contains all the required parameters.
