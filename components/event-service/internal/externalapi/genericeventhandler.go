@@ -20,14 +20,13 @@ import (
 
 const (
 	requestBodyTooLargeErrorMessage = "http: request body too large"
-	xB3Prefix                       = "x-b3-"
-	b3Prefix                        = "b3-"
 )
 
 var (
 	isValidEventTypeVersion = regexp.MustCompile(shared.AllowedEventTypeVersionChars).MatchString
 	isValidEventID          = regexp.MustCompile(shared.AllowedEventIDChars).MatchString
 	traceHeaders            = []string{"traceId", "parentSpanId", "spanId", "sampled"}
+	traceHeaderPrefixes     = []string{"x-b3-", "b3-"}
 )
 
 type maxBytesHandler struct {
@@ -46,14 +45,11 @@ type traceHeaderHandler struct {
 
 func (h traceHeaderHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	for _, traceHeader := range traceHeaders {
-		xb3HeaderKey := fmt.Sprintf("%s%s", xB3Prefix, traceHeader)
-		if val := r.Header.Get(xb3HeaderKey); len(val) > 0 {
-			r = r.WithContext(cloudevents.ContextWithHeader(r.Context(), xb3HeaderKey, r.Header.Get(xb3HeaderKey)))
-		}
-
-		b3HeaderKey := fmt.Sprintf("%s%s", b3Prefix, traceHeader)
-		if val := r.Header.Get(b3HeaderKey); len(val) > 0 {
-			r = r.WithContext(cloudevents.ContextWithHeader(r.Context(), b3HeaderKey, r.Header.Get(b3HeaderKey)))
+		for _, headerKeyPrefix := range traceHeaderPrefixes {
+			traceHeaderKey := fmt.Sprintf("%s%s", headerKeyPrefix, traceHeader)
+			if val := r.Header.Get(traceHeaderKey); len(val) > 0 {
+				r = r.WithContext(cloudevents.ContextWithHeader(r.Context(), traceHeaderKey, r.Header.Get(traceHeaderKey)))
+			}
 		}
 	}
 	h.next.ServeHTTP(rw, r)
