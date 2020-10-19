@@ -539,7 +539,7 @@ grafana:
           url: http://tracing-jaeger-query.kyma-system:16686
           editable: true
     prometheusIstio:
-      enabled: true
+      enabled: false
       config:
         - name: Prometheus-Istio
           type: prometheus
