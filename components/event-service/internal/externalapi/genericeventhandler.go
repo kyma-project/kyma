@@ -2,12 +2,13 @@ package externalapi
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"regexp"
-	"strings"
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
@@ -24,6 +25,8 @@ const (
 var (
 	isValidEventTypeVersion = regexp.MustCompile(shared.AllowedEventTypeVersionChars).MatchString
 	isValidEventID          = regexp.MustCompile(shared.AllowedEventIDChars).MatchString
+	traceHeaders            = []string{"traceId", "parentSpanId", "spanId", "sampled"}
+	traceHeaderPrefixes     = []string{"x-b3-", "b3-"}
 )
 
 type maxBytesHandler struct {
@@ -41,9 +44,12 @@ type traceHeaderHandler struct {
 }
 
 func (h traceHeaderHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	for key := range r.Header {
-		if strings.HasPrefix(strings.ToLower(key), "x-b3-") || strings.ToLower(key) == "b3" {
-			r = r.WithContext(cloudevents.ContextWithHeader(r.Context(), key, r.Header.Get(key)))
+	for _, traceHeader := range traceHeaders {
+		for _, headerKeyPrefix := range traceHeaderPrefixes {
+			traceHeaderKey := fmt.Sprintf("%s%s", headerKeyPrefix, traceHeader)
+			if val := r.Header.Get(traceHeaderKey); len(val) > 0 {
+				r = r.WithContext(cloudevents.ContextWithHeader(r.Context(), traceHeaderKey, r.Header.Get(traceHeaderKey)))
+			}
 		}
 	}
 	h.next.ServeHTTP(rw, r)
