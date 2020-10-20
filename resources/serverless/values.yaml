@@ -7,13 +7,13 @@ fullnameOverride: "serverless"
 injectCerts:
   image:
     repository: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl"
-    tag: "v20200617-32c1f3ff"
+    tag: "v20201016-058ecbc7"
     pullPolicy: IfNotPresent
 
 migration:
   image:
     repository: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl"
-    tag: "v20200617-32c1f3ff"
+    tag: "v20201016-058ecbc7"
     pullPolicy: IfNotPresent
 
 tests:
@@ -33,14 +33,14 @@ tests:
         cpu: 200m
     image:
       repository: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl"
-      tag: "v20200617-32c1f3ff"
+      tag: "v20201016-058ecbc7"
       pullPolicy: IfNotPresent
     namespace: "long-running-function-test"
     name: longrun
 
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "1088c1af"
+    tag: "PR-9640"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -76,18 +76,18 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "858bc2c2"
+    tag: "PR-9640"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "PR-9659"
+      tag: "12225f37"
     nodejs10:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
-      tag: "PR-9659"
+      tag: "12225f37"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "PR-9659"
+      tag: "12225f37"
 
 deployment:
   replicas: 1
@@ -154,7 +154,6 @@ metrics:
       protocol: TCP
   serviceMonitor:
     create: true
-    scrapeInterval: 30s
     labels: {}
     annotations: {}
   pod:
