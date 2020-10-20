@@ -67,7 +67,7 @@ generateXipDomain() {
     echo "${EXTERNAL_PUBLIC_IP}.xip.io"
 }
 
-kubectl get secret -n cert-manager kyma-ca-key-pair -o jsonpath='{.data.tls\.crt}' | base64 --decode > /etc/ca-tls-cert/tls.crt
+kubectl get secret -n "${CA_SECRET_NS}" "${CA_SECRET_NAME}" -o jsonpath='{.data.tls\.crt}' | base64 --decode > /etc/ca-tls-cert/tls.crt
 
 echo "Finding XIP domain for api-server LoadBalancer..."
 export XIP_DOMAIN=$(generateXipDomain "${APISERVER_SERVICE_NAME}" "${APISERVER_SERVICE_NAMESPACE}")

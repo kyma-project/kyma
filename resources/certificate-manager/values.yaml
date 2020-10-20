@@ -16,3 +16,5 @@ cert-manager:
   cainjector:
     podAnnotations:
       sidecar.istio.io/inject: "false"
+  extraArgs:
+  - --cluster-resource-namespace=istio-system

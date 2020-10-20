@@ -9,6 +9,9 @@ resources:
   requests:
     cpu: 50m
     memory: 32Mi
+caSecret:
+  name: kyma-ca-key-pair
+  namespace: istio-system
 global:
   tlsCrt: "cGxhY2Vob2xkZXI="
   tlsKey: "cGxhY2Vob2xkZXI="

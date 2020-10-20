@@ -22,5 +22,5 @@ echo $DOMAIN > /injected-config/domain
 if [[ $TYPE == "legacy" ]]; then
   echo "{{ .Values.global.tlsCrt }}" | base64 --decode > /injected-config/ca-tls-cert.crt
 elif [[ $TYPE == "xip" ]]; then
-  kubectl get secret -n istio-system kyma-ca-key-pair -o jsonpath='{.data.tls\.crt}' | base64 --decode > /injected-config/ca-tls-cert.crt
+  kubectl get secret -n "{{ .Values.caSecret.namespace }}" "{{ .Values.caSecret.name }}" -o jsonpath='{.data.tls\.crt}' | base64 --decode > /injected-config/ca-tls-cert.crt
 fi

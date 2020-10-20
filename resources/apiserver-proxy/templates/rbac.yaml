@@ -23,7 +23,7 @@ subjects:
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  namespace: cert-manager
+  namespace: {{ .Values.caSecret.namespace }}
   name: {{ template "name" . }}-init
 rules:
   - apiGroups: [""]
@@ -32,13 +32,13 @@ rules:
       - get
       - list
     resourceNames:
-      - kyma-ca-key-pair
+      - {{ .Values.caSecret.name }}
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ template "name" . }}-init
-  namespace: istio-system
+  namespace: {{ .Values.caSecret.namespace }}
 subjects:
   - kind: ServiceAccount
     name: {{ template "name" . }}

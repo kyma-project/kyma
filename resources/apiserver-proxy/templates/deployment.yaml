@@ -51,6 +51,10 @@ spec:
               value: "apiserver-proxy-tls-cert"
             - name: APISERVER_SECRET_NAMESPACE
               value: "{{ .Release.Namespace }}"
+            - name: CA_SECRET_NAME
+              value: "{{ .Values.caSecret.name }}"
+            - name: CA_SECRET_NS
+              value: "{{ .Values.caSecret.namespace }}"
           command:
             - bash
             - -c
