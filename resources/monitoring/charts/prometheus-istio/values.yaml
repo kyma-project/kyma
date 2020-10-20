@@ -364,9 +364,9 @@ configmapReload:
     ##
     resources:
       limits:
-        memory: 10Mi
+        memory: 25Mi
       requests:
-        memory: 2Mi
+        memory: 10Mi
   alertmanager:
     ## If false, the configmap-reload container will not be deployed
     ##
