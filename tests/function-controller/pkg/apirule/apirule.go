@@ -2,8 +2,9 @@ package apirule
 
 import (
 	"context"
-	"encoding/json"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -131,12 +132,12 @@ func (a *APIRule) LogResource() error {
 		return err
 	}
 
-	out, err := json.MarshalIndent(apiRule, "", "  ")
+	out, err := helpers.PrettyMarshall(apiRule)
 	if err != nil {
 		return err
 	}
 
-	a.log.Infof("%s", string(out))
+	a.log.Infof("%s", out)
 	return nil
 }
 

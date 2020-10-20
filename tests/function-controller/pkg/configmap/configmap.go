@@ -1,13 +1,13 @@
 package configmap
 
 import (
-	"encoding/json"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
@@ -83,11 +83,11 @@ func (c *ConfigMap) LogResource() error {
 		return errors.Wrap(err, "while getting ConfigMap")
 	}
 
-	out, err := json.MarshalIndent(cm, "", "  ")
+	out, err := helpers.PrettyMarshall(cm)
 	if err != nil {
 		return err
 	}
 
-	c.log.Infof("ConfigMap: %s", string(out))
+	c.log.Infof("ConfigMap: %s", out)
 	return nil
 }

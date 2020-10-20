@@ -2,8 +2,9 @@ package addons
 
 import (
 	"context"
-	"encoding/json"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 
 	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
 	"github.com/sirupsen/logrus"
@@ -96,12 +97,12 @@ func (a AddonConfiguration) LogResource() error {
 		return err
 	}
 
-	out, err := json.MarshalIndent(ad, "", "  ")
+	out, err := helpers.PrettyMarshall(ad)
 	if err != nil {
 		return err
 	}
 
-	a.log.Infof("Addon Configuration Resource: %s", string(out))
+	a.log.Infof("Addon Configuration Resource: %s", out)
 	return nil
 }
 

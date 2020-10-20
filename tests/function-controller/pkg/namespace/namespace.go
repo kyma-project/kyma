@@ -1,7 +1,6 @@
 package namespace
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/pkg/errors"
@@ -14,6 +13,7 @@ import (
 	k8sretry "k8s.io/client-go/util/retry"
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 )
@@ -44,12 +44,12 @@ func (n Namespace) LogResource() error {
 		return err
 	}
 	ns.TypeMeta.Kind = "namespace"
-	out, err := json.MarshalIndent(ns, "", "  ")
+	out, err := helpers.PrettyMarshall(ns)
 	if err != nil {
 		return err
 	}
 
-	n.log.Infof("%s", string(out))
+	n.log.Infof("%s", out)
 	return nil
 }
 

@@ -2,8 +2,9 @@ package servicebinding
 
 import (
 	"context"
-	"encoding/json"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/sirupsen/logrus"
@@ -96,14 +97,12 @@ func (sb *ServiceBinding) LogResource() error {
 	if err != nil {
 		return err
 	}
-
-	//TODO: Use pretty!
-	out, err := json.MarshalIndent(serviceBinding, "", "  ")
+	out, err := helpers.PrettyMarshall(serviceBinding)
 	if err != nil {
 		return err
 	}
 
-	sb.log.Infof("Service Binding resource: %s", string(out))
+	sb.log.Infof("Service Binding resource: %s", out)
 	return nil
 }
 

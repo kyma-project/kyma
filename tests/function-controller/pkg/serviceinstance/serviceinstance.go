@@ -2,7 +2,6 @@ package serviceinstance
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -12,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	watchtools "k8s.io/client-go/tools/watch"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
@@ -100,12 +100,12 @@ func (si *ServiceInstance) LogResource() error {
 		return err
 	}
 
-	out, err := json.MarshalIndent(serviceInstance, "", "  ")
+	out, err := helpers.PrettyMarshall(serviceInstance)
 	if err != nil {
 		return err
 	}
 
-	si.log.Infof("%s", string(out))
+	si.log.Infof("%s", out)
 	return nil
 }
 

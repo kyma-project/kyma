@@ -17,7 +17,6 @@ type SerialRunner struct {
 	log         *logrus.Entry
 }
 
-//TODO: Write test if steps are correclty executed and OnError also
 func NewSerialTestRunner(log *logrus.Entry, name string, steps ...Step) *SerialRunner {
 	return &SerialRunner{log: log, steps: steps, name: name}
 }
@@ -26,7 +25,6 @@ func (s SerialRunner) Name() string {
 	builder := strings.Builder{}
 	builder.WriteString(fmt.Sprintf("%s, Steps: ", s.name))
 	for i, v := range s.steps {
-		// TODO: improve formatting
 		builder.WriteString(fmt.Sprintf("%d:%s", i, v.Name()))
 		if len(s.steps) != i+1 {
 			builder.WriteString(", ")

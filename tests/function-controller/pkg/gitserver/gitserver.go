@@ -1,9 +1,10 @@
 package gitserver
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -178,11 +179,11 @@ func (gs *GitServer) LogResource() error {
 	}
 	//The client doesn't fill deployment TypeMeta
 	deployment.TypeMeta.Kind = "deployment"
-	out, err := json.MarshalIndent(deployment, "", "")
+	out, err := helpers.PrettyMarshall(deployment)
 	if err != nil {
 		return errors.Wrap(err, "while marshalling deployment")
 	}
-	gs.log.Info(string(out))
+	gs.log.Info(out)
 
 	svc, err := gs.services.Get(gs.name, metav1.GetOptions{})
 	if err != nil {
@@ -190,21 +191,21 @@ func (gs *GitServer) LogResource() error {
 	}
 	//The client doesn't fill service TypeMeta
 	svc.TypeMeta.Kind = "service"
-	out, err = json.MarshalIndent(svc, "", "")
+	out, err = helpers.PrettyMarshall(svc)
 	if err != nil {
 		return errors.Wrap(err, "while marshalling service")
 	}
-	gs.log.Info(string(out))
+	gs.log.Info(out)
 
 	obj, err := gs.resCli.Get(gs.name)
 	if err != nil {
 		return errors.Wrap(err, "while getting destination rule")
 	}
-	out, err = json.MarshalIndent(obj, "", "")
+	out, err = helpers.PrettyMarshall(obj)
 	if err != nil {
 		return errors.Wrap(err, "while marshalling APU Rule")
 	}
-	gs.log.Info(string(out))
+	gs.log.Info(out)
 
 	return nil
 }

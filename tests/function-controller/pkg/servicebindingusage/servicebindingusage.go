@@ -2,7 +2,6 @@ package servicebindingusage
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebindingusage/types/v1alpha1"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
@@ -102,12 +102,12 @@ func (sbu *ServiceBindingUsage) LogResource() error {
 		return err
 	}
 
-	out, err := json.MarshalIndent(serviceBindingUsage, "", "  ")
+	out, err := helpers.PrettyMarshall(serviceBindingUsage)
 	if err != nil {
 		return err
 	}
 
-	sbu.log.Infof("Service Binding Usage resource: %s", string(out))
+	sbu.log.Infof("Service Binding Usage resource: %s", out)
 	return nil
 }
 

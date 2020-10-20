@@ -2,7 +2,6 @@ package trigger
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -16,6 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
@@ -104,12 +104,12 @@ func (t *Trigger) LogResource() error {
 		return err
 	}
 
-	out, err := json.MarshalIndent(trigger, "", "  ")
+	out, err := helpers.PrettyMarshall(trigger)
 	if err != nil {
 		return err
 	}
 
-	t.log.Infof("%s", string(out))
+	t.log.Infof("%s", out)
 	return nil
 }
 

@@ -2,8 +2,9 @@ package broker
 
 import (
 	"context"
-	"encoding/json"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -70,12 +71,12 @@ func (b *Broker) LogResource() error {
 		return err
 	}
 
-	out, err := json.MarshalIndent(broker, "", "  ")
+	out, err := helpers.PrettyMarshall(broker)
 	if err != nil {
 		return err
 	}
 
-	b.log.Infof("Broker resource: %s", string(out))
+	b.log.Infof("Broker resource: %s", out)
 	return nil
 }
 

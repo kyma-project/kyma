@@ -27,7 +27,7 @@ func (p *Parallelized) Name() string {
 		names[i] = step.Name()
 	}
 	joined := strings.Join(names, ", ")
-	return fmt.Sprintf("Parallel:%s, %s", p.name, joined)
+	return fmt.Sprintf("Parallel: %s, %s", p.name, joined)
 }
 
 func (p *Parallelized) Run() error {

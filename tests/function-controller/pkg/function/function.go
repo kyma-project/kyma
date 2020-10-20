@@ -148,7 +148,7 @@ func (f Function) LogResource() error {
 		return err
 	}
 
-	f.log.Infof("%s", string(out))
+	f.log.Infof("%s", out)
 	return nil
 }
 
