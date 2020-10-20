@@ -2,6 +2,19 @@
 
 
 [[projects]]
+  digest = "1:59882ac5a4d049ce7ceb7399c71a579149cbaa6c44df2a11cb90f143116fc2f0"
+  name = "github.com/coreos/prometheus-operator"
+  packages = [
+    "pkg/apis/monitoring",
+    "pkg/apis/monitoring/v1",
+    "pkg/client/versioned/scheme",
+    "pkg/client/versioned/typed/monitoring/v1",
+  ]
+  pruneopts = ""
+  revision = "beaa1a519e21c8230bab86a15c04bf7e0a9267c1"
+  version = "v0.38.3"
+
+[[projects]]
   digest = "1:0deddd908b6b4b768cfc272c16ee61e7088a60f7fe2f06c547bd3d8e1f8b8e77"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -412,6 +425,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/coreos/prometheus-operator/pkg/client/versioned/typed/monitoring/v1",
     "golang.org/x/lint/golint",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1",

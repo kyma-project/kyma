@@ -3,7 +3,12 @@ tests:
   enabled: true
   image:
     name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    version: v20200703-d5c97fa6
+    version: v20201016-058ecbc7
+  labels:
+    integration: true
+    after-upgrade: true
+
+nodeSelector: {}
 
 global:
   isLocalEnv: false

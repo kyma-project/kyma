@@ -61,6 +61,7 @@ func (f *Function) Create(data *FunctionData) error {
 				BaseDir:   data.Repository.BaseDir,
 				Reference: data.Repository.Reference,
 			},
+			Env: data.Env,
 		},
 	}
 

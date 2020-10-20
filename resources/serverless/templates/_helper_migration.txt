@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+readonly FUNCTIONS_RESOURCE_TYPE="functions.serverless.kyma-project.io"
+
+# patchResources patches Functions
+#
+patchFunctions() {
+  local -r functions=$(kubectl get ${FUNCTIONS_RESOURCE_TYPE} --all-namespaces -ojson | jq -c ".items[]")
+
+  if [[ -z ${functions} ]]; then
+    echo "There are not any Functions. Skipping... :("
+    return 0
+  fi
+
+  IFS=$'\n'
+  for function in ${functions}
+  do
+    patchSingleFunction "${function}"
+  done
+}
+
+# patchSingleFunction patches single Function with default fields
+#
+# Arguments:
+#   $1 - Function resource
+patchSingleFunction() {
+  local -r function="${1}"
+  local -r functionName="$(echo ${function} | jq -r '.metadata.name')"
+  local -r functionNamespace="$(echo ${function} | jq -r '.metadata.namespace')"
+  local runtime="$(echo ${function} | jq -r '.spec.runtime')"
+
+  if [[ -z ${runtime} || "${runtime}" == "null" ]]; then
+    runtime="nodejs12"
+  fi
+
+  kubectl patch functions -n "${functionNamespace}" "${functionName}" \
+    --patch "{\"spec\": {\"runtime\": \"${runtime}\", \"buildResources\": {\"requests\": {\"cpu\": \"700m\", \"memory\": \"700Mi\"}, \"limits\": {\"cpu\": \"1100m\", \"memory\": \"1100Mi\"}}}}" \
+    --type=merge
+}
+
+main() {
+  patchFunctions
+}
+main

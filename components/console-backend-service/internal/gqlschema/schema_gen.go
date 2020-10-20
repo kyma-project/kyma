@@ -470,20 +470,21 @@ type ComplexityRoot struct {
 	}
 
 	Function struct {
-		BaseDir      func(childComplexity int) int
-		Dependencies func(childComplexity int) int
-		Env          func(childComplexity int) int
-		Labels       func(childComplexity int) int
-		Name         func(childComplexity int) int
-		Namespace    func(childComplexity int) int
-		Reference    func(childComplexity int) int
-		Replicas     func(childComplexity int) int
-		Resources    func(childComplexity int) int
-		Runtime      func(childComplexity int) int
-		Source       func(childComplexity int) int
-		SourceType   func(childComplexity int) int
-		Status       func(childComplexity int) int
-		UID          func(childComplexity int) int
+		BaseDir        func(childComplexity int) int
+		BuildResources func(childComplexity int) int
+		Dependencies   func(childComplexity int) int
+		Env            func(childComplexity int) int
+		Labels         func(childComplexity int) int
+		Name           func(childComplexity int) int
+		Namespace      func(childComplexity int) int
+		Reference      func(childComplexity int) int
+		Replicas       func(childComplexity int) int
+		Resources      func(childComplexity int) int
+		Runtime        func(childComplexity int) int
+		Source         func(childComplexity int) int
+		SourceType     func(childComplexity int) int
+		Status         func(childComplexity int) int
+		UID            func(childComplexity int) int
 	}
 
 	FunctionEnv struct {
@@ -2944,6 +2945,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Function.BaseDir(childComplexity), true
+
+	case "Function.buildResources":
+		if e.complexity.Function.BuildResources == nil {
+			break
+		}
+
+		return e.complexity.Function.BuildResources(childComplexity), true
 
 	case "Function.dependencies":
 		if e.complexity.Function.Dependencies == nil {
@@ -8021,6 +8029,7 @@ type Function {
     env: [FunctionEnv!]!
     replicas: FunctionReplicas!
     resources: FunctionResources!
+    buildResources: FunctionResources!
     runtime: String
     sourceType: String
     baseDir: String
@@ -8109,6 +8118,7 @@ input FunctionMutationInput {
     env: [FunctionEnvInput!]!
     replicas: FunctionReplicasInput!
     resources: FunctionResourcesInput!
+    buildResources: FunctionResourcesInput!
     runtime: String
     sourceType: String
     baseDir: String
@@ -19243,6 +19253,40 @@ func (ec *executionContext) _Function_resources(ctx context.Context, field graph
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Resources, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*FunctionResources)
+	fc.Result = res
+	return ec.marshalNFunctionResources2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionResources(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Function_buildResources(ctx context.Context, field graphql.CollectedField, obj *Function) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Function",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BuildResources, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -39679,6 +39723,12 @@ func (ec *executionContext) unmarshalInputFunctionMutationInput(ctx context.Cont
 			if err != nil {
 				return it, err
 			}
+		case "buildResources":
+			var err error
+			it.BuildResources, err = ec.unmarshalNFunctionResourcesInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionResourcesInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "runtime":
 			var err error
 			it.Runtime, err = ec.unmarshalOString2ᚖstring(ctx, v)
@@ -42848,6 +42898,11 @@ func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "resources":
 			out.Values[i] = ec._Function_resources(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "buildResources":
+			out.Values[i] = ec._Function_buildResources(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

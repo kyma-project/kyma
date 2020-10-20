@@ -43,9 +43,16 @@ tests:
   application_connector_tests:
     connector_service:
       central: false
+      labels:
+        integration: true
+        after-upgrade: true
 
 test:
   external_solution:
     event_mesh:
       enabled: true
       testsuite: e2e-event-mesh
+      labels:
+        integration: true
+        after-upgrade: true
+

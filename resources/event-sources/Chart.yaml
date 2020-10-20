@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: v2
 description: Kyma component 'event-sources'
 name: event-sources
 version: 1.0.0

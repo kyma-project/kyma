@@ -11,7 +11,7 @@ kyma:
     - kube-system
   labelJob:
     image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20200617-32c1f3ff"
+    tag: "v20201016-058ecbc7"
 
 istio:
   installer:
@@ -19,3 +19,11 @@ istio:
     tag: 19e240cd
     tag16: PR-9501
     tag17: PR-9500
+
+monitoring:
+  enabled: true
+  dashboards:
+    enabled: true
+  istioServiceMonitor:
+    enabled: true
+    scrapeInterval: ""
