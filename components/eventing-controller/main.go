@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"os"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -29,7 +30,9 @@ func init() {
 
 func main() {
 	var metricsAddr string
+	var resyncPeriod time.Duration
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
+	flag.DurationVar( &resyncPeriod, "reconcile-period",time.Minute * 10, "Period between triggering of reconciling calls" )
 	flag.Parse()
 	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 
@@ -37,6 +40,7 @@ func main() {
 		Scheme:             scheme,
 		MetricsBindAddress: metricsAddr,
 		Port:               9443,
+		SyncPeriod:			&resyncPeriod,
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
