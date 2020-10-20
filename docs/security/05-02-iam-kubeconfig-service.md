@@ -3,7 +3,7 @@ title: IAM Kubeconfig Service chart
 type: Configuration
 ---
 
->**CAUTION:** The IAM Kubeconfig component (iam-kubeconfig) is deprecated.
+>**CAUTION:** The IAM Kubeconfig component (iam-kubeconfig) is entering deprecation phase - a simpler solution is planned.
 
 To configure the IAM Kubeconfig Service chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
 
