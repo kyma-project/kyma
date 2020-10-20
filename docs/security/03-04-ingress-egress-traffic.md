@@ -49,7 +49,6 @@ You can install Kyma on top of [Gardener](https://gardener.cloud/) managed insta
 ### API Server Proxy
 
 >**NOTE:** The API Server Proxy component (apiserver-proxy) is entering deprecation phase.
->**NOTE:** The API Server Proxy component (apiserver-proxy) is deprecated.
 
 The [API Server Proxy](https://github.com/kyma-project/kyma/tree/master/components/apiserver-proxy) component is a reverse proxy which acts as an intermediary for the Kubernetes API. By default, it is exposed as a LoadBalancer Service, meaning it requires a dedicated certificate and DNS entry.
 
