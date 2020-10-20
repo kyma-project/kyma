@@ -2,10 +2,11 @@ package testing
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/http/httputil"
 	"net/url"
+	"path"
 	"strings"
 
 	. "github.com/onsi/gomega"
@@ -28,25 +29,31 @@ const (
 
 // BebMock implements a mock for BEB
 type BebMock struct {
-	Requests  []http.Request
+	Requests  map[*http.Request]interface{}
 	BebConfig *config.Config
 }
 
 func (m *BebMock) Start() string {
+	if m.Requests == nil {
+		m.Requests = make(map[*http.Request]interface{})
+	}
 	// implementation based on https://pages.github.tools.sap/KernelServices/APIDefinitions/?urls.primaryName=Business%20Event%20Bus%20-%20CloudEvents
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log := logf.Log.WithName("beb mock")
-		payload, err := ioutil.ReadAll(r.Body)
-		Expect(err).ShouldNot(HaveOccurred())
 
+		// store request
+		m.Requests[r] = nil
+
+		description := ""
+		reqBytes, err := httputil.DumpRequest(r, true)
+		if err == nil {
+			description = string(reqBytes)
+		}
 		log.V(1).Info("received request",
 			"uri", r.RequestURI,
 			"method", r.Method,
-			"payload", payload,
+			"description", description,
 		)
-		config.GetDefaultConfig()
-
-		m.Requests = append(m.Requests, *r)
 
 		w.Header().Set("Content-Type", "application/json")
 
@@ -61,6 +68,9 @@ func (m *BebMock) Start() string {
 			case http.MethodDelete:
 				bebDeleteResponseSuccess(w)
 			case http.MethodPost:
+				var subscription bebtypes.Subscription
+				_ = json.NewDecoder(r.Body).Decode(&subscription)
+				m.Requests[r] = subscription
 				bebCreateSuccess(w)
 			case http.MethodGet:
 				switch r.RequestURI {
@@ -131,4 +141,18 @@ func bebListSuccess(w http.ResponseWriter) {
 
 func bebDeleteResponseSuccess(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func IsBebSubscriptionCreate(r *http.Request, bebConfig config.Config) bool {
+	return r.Method == http.MethodPost && strings.Contains(bebConfig.CreateURL, r.RequestURI)
+}
+
+func IsBebCubscriptionDelete(r *http.Request) bool {
+	return r.Method == http.MethodDelete && strings.Contains(r.RequestURI, UrlMessagingApi)
+}
+
+// GetRestAPIObject gets the name of the involved object in a REST url
+// e.g. "/messaging/events/subscriptions/{subscriptionName}" => "{subscriptionName}"
+func GetRestAPIObject(u *url.URL) string {
+	return path.Base(u.Path)
 }
