@@ -13,18 +13,6 @@ image:
   # pullPolicy is the pullPolicy for the event-publisher-proxy image
   pullPolicy: "IfNotPresent"
 
-upstreamAuthentication:
-  # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from BEB
-  oauthClientId: ""
-  # oauthClientSecret is the Oauth2 secret used in order to get an Oauth2 token from BEB
-  oauthClientSecret: ""
-  # oauthTokenEndpoint is the Oauth2 endpoint from BEB from where Oauth2 tokens can be retrieved
-  oauthTokenEndpoint: ""
-  # publishUrl is the URL for publishing events to BEB
-  publishUrl: ""
-  # secretName defines optionally another name than the default secret name
-  secretName: ""
-
 serviceAccount:
   # name defines optionally another name than the default name for the service account
   name: ""
