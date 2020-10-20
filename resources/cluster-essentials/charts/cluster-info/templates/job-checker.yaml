@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "cluster-info.fullname" . }}
+  name: {{ include "cluster-info.fullname" . }}-detect
   annotations: 
     helm.sh/hook: post-install,post-upgrade
     # helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
