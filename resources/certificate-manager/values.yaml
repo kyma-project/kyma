@@ -6,6 +6,7 @@ modules:
     enabled: true
 
 cert-manager:
+  nameOverride: certificate-manager
   installCRDs: true
   podAnnotations:
     sidecar.istio.io/inject: "false"
