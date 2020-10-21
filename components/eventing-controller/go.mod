@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/eventing-controller
 
-go 1.13
+go 1.14
 
 require (
 	github.com/cloudevents/sdk-go/v2 v2.3.1
