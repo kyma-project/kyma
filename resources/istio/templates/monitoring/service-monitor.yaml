@@ -21,7 +21,8 @@ spec:
     matchExpressions:
     - {key: istio, operator: In, values: [pilot]}
   namespaceSelector:
-    any: true
+    matchNames:
+    - istio-system
   endpoints:
   - port: http-monitoring
     {{- if .Values.monitoring.istioServiceMonitor.scrapeInterval }}	
