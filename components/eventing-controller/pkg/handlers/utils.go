@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"fmt"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"strings"
 
-	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+
 	"github.com/mitchellh/hashstructure"
+
+	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
 )
 
 func getHash(subscription *types2.Subscription) (int64, error) {
@@ -87,12 +89,4 @@ func getInternalView4Ems(subscription *types2.Subscription) (*types2.Subscriptio
 	}
 
 	return emsSubscription, nil
-}
-
-func getHash4WebhookAuth(subscription *types2.Subscription) (int64, error) {
-	hash, err := hashstructure.Hash(subscription.WebhookAuth, nil)
-	if err != nil {
-		return 0, err
-	}
-	return int64(hash), nil
 }
