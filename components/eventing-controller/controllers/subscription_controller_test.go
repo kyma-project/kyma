@@ -22,6 +22,8 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/config"
+	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
+
 	// gcp auth etc.
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	// +kubebuilder:scaffold:imports
@@ -83,7 +85,15 @@ var _ = Describe("Subscription", func() {
 	})
 
 	AfterEach(func() {
-		logf.Log.Info("beb mock calls", "calls", fmt.Sprintf("%+v", beb.Requests))
+		// detailed request logs
+		logf.Log.V(1).Info("beb requests", "number", len(beb.Requests))
+
+		i := 0
+		for req, payloadObject := range beb.Requests {
+			reqDescription := fmt.Sprintf("method: %q, url: %q, payload object: %+v", req.Method, req.RequestURI, payloadObject)
+			fmt.Printf("request[%d]: %s\n", i, reqDescription)
+			i++
+		}
 	})
 
 	// TODO: test required fields are provided  but with wrong values => basically testing the CRD schema
@@ -115,7 +125,18 @@ var _ = Describe("Subscription", func() {
 			)
 
 			By("Creating a BEB Subscription")
-			// TODO(nachtmaar): check that an HTTP call against BEB was done
+			var bebSubscription bebtypes.Subscription
+			Eventually(func() bool {
+				for r, payloadObject := range beb.Requests {
+					if testing.IsBebSubscriptionCreate(r, *beb.BebConfig) {
+						bebSubscription = payloadObject.(bebtypes.Subscription)
+						receivedSubscriptionName := bebSubscription.Name
+						// ensure the correct subscription was created
+						return subscriptionName == receivedSubscriptionName
+					}
+				}
+				return false
+			}).Should(BeTrue())
 
 			By("Emitting some k8s events")
 			var subscriptionEvents = v1.EventList{}
@@ -156,8 +177,42 @@ var _ = Describe("Subscription", func() {
 				haveFinalizer(FinalizerName),
 			)
 
+			By("Creating a BEB Subscription")
+			var bebSubscription bebtypes.Subscription
+			processedBebRequests := 0
+			Eventually(func() bool {
+				for r, payloadObject := range beb.Requests {
+					if testing.IsBebSubscriptionCreate(r, *beb.BebConfig) {
+						bebSubscription = payloadObject.(bebtypes.Subscription)
+						receivedSubscriptionName := bebSubscription.Name
+						// ensure the correct subscription was created
+						return subscriptionName == receivedSubscriptionName
+					}
+					processedBebRequests++
+				}
+				return false
+			}).Should(BeTrue())
+
+			By("Deleting the Subscription")
+			Expect(k8sClient.Delete(ctx, subscription)).Should(BeNil())
+
 			By("Deleting the BEB Subscription")
-			// TODO(nachtmaar): check that an HTTP call against BEB was done
+			Eventually(func() bool {
+				i := -1
+				for r, _ := range beb.Requests {
+					i++
+					// only consider requests against beb after the subscription creation request
+					if i <= processedBebRequests {
+						continue
+					}
+					if testing.IsBebCubscriptionDelete(r) {
+						receivedSubscriptionName := testing.GetRestAPIObject(r.URL)
+						// ensure the correct subscription was created
+						return subscriptionName == receivedSubscriptionName
+					}
+				}
+				return false
+			}).Should(BeTrue())
 
 			By("Removing the finalizer")
 			getSubscription(subscription, subscriptionLookupKey, ctx).Should(
