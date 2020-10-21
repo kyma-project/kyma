@@ -27,12 +27,10 @@ jobs:
           ./ci/create-cluster-k3s.sh
           echo "Installing helm"
           curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-          while [[ $(kubectl get nodes -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "Waiting for cluster nodes to be ready"; sleep 2; done
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3          
+          while [[ $(kubectl get nodes -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "Waiting for cluster nodes to be ready"; sleep 2; done        
       - name: Install MongoDB using Helm
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm install mongo bitnami/mongodb
-      - name: Just a sleep to check if it installed
-        run: sleep 1m
+      - name: Lists releases to check if it's installed properly
+        run: helm list
