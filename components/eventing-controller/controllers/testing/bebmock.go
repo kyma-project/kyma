@@ -9,8 +9,9 @@ import (
 	"path"
 	"strings"
 
+	"github.com/go-logr/logr"
+	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
 	"golang.org/x/oauth2"
 
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -31,15 +32,30 @@ const (
 type BebMock struct {
 	Requests  map[*http.Request]interface{}
 	BebConfig *config.Config
+	log       logr.Logger
+}
+
+func NewBebMock(bebConfig *config.Config) *BebMock {
+	logger := logf.Log.WithName("beb mock")
+	return &BebMock{
+		nil,
+		bebConfig,
+		logger,
+	}
+
+}
+
+func (m *BebMock) Reset() {
+	m.log.Info("Initializing requests")
+	m.Requests = make(map[*http.Request]interface{})
 }
 
 func (m *BebMock) Start() string {
-	if m.Requests == nil {
-		m.Requests = make(map[*http.Request]interface{})
-	}
+	m.Reset()
+
 	// implementation based on https://pages.github.tools.sap/KernelServices/APIDefinitions/?urls.primaryName=Business%20Event%20Bus%20-%20CloudEvents
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log := logf.Log.WithName("beb mock")
+		defer GinkgoRecover()
 
 		// store request
 		m.Requests[r] = nil
@@ -49,7 +65,7 @@ func (m *BebMock) Start() string {
 		if err == nil {
 			description = string(reqBytes)
 		}
-		log.V(1).Info("received request",
+		m.log.V(1).Info("received request",
 			"uri", r.RequestURI,
 			"method", r.Method,
 			"description", description,
@@ -147,7 +163,7 @@ func IsBebSubscriptionCreate(r *http.Request, bebConfig config.Config) bool {
 	return r.Method == http.MethodPost && strings.Contains(bebConfig.CreateURL, r.RequestURI)
 }
 
-func IsBebCubscriptionDelete(r *http.Request) bool {
+func IsBebSubscriptionDelete(r *http.Request) bool {
 	return r.Method == http.MethodDelete && strings.Contains(r.RequestURI, UrlMessagingApi)
 }
 

@@ -63,25 +63,29 @@ var _ = Describe("Subscription", func() {
 
 	BeforeEach(func() {
 
-		By("Preparing BEB Mock")
-		err := os.Setenv("CLIENT_ID", "foo")
-		Expect(err).ShouldNot(HaveOccurred())
-		err = os.Setenv("CLIENT_SECRET", "foo")
-		Expect(err).ShouldNot(HaveOccurred())
+		if beb == nil {
+			By("Preparing BEB Mock")
+			err := os.Setenv("CLIENT_ID", "foo")
+			Expect(err).ShouldNot(HaveOccurred())
+			err = os.Setenv("CLIENT_SECRET", "foo")
+			Expect(err).ShouldNot(HaveOccurred())
 
-		beb = &testing.BebMock{}
-		bebURI := beb.Start()
-		logf.Log.Info("beb mock listening at", "address", bebURI)
-		authURL := fmt.Sprintf("%s%s", bebURI, testing.UrlAuth)
-		messagingURL := fmt.Sprintf("%s%s", bebURI, testing.UrlMessagingApi)
+			beb = testing.NewBebMock(nil)
+			bebURI := beb.Start()
+			logf.Log.Info("beb mock listening at", "address", bebURI)
+			authURL := fmt.Sprintf("%s%s", bebURI, testing.UrlAuth)
+			messagingURL := fmt.Sprintf("%s%s", bebURI, testing.UrlMessagingApi)
 
-		err = os.Setenv("TOKEN_ENDPOINT", authURL)
-		Expect(err).ShouldNot(HaveOccurred())
-		err = os.Setenv("BEB_API_URL", messagingURL)
-		Expect(err).ShouldNot(HaveOccurred())
+			err = os.Setenv("TOKEN_ENDPOINT", authURL)
+			Expect(err).ShouldNot(HaveOccurred())
+			err = os.Setenv("BEB_API_URL", messagingURL)
+			Expect(err).ShouldNot(HaveOccurred())
 
-		bebConfig = config.GetDefaultConfig()
-		beb.BebConfig = bebConfig
+			bebConfig = config.GetDefaultConfig()
+			beb.BebConfig = bebConfig
+		} else {
+			beb.Reset()
+		}
 	})
 
 	AfterEach(func() {
@@ -205,7 +209,7 @@ var _ = Describe("Subscription", func() {
 					if i <= processedBebRequests {
 						continue
 					}
-					if testing.IsBebCubscriptionDelete(r) {
+					if testing.IsBebSubscriptionDelete(r) {
 						receivedSubscriptionName := testing.GetRestAPIObject(r.URL)
 						// ensure the correct subscription was created
 						return subscriptionName == receivedSubscriptionName
