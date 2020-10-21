@@ -29,7 +29,7 @@ ENV TEST_DIR /go/src/github.com/kyma-project/kyma/tests/rafter
 # Install certificates and tools
 #
 
-RUN apk update && apk upgrade && apk add ca-certificates && apk add curl && rm -rf /var/cache/apk/*
+RUN apk update --no-cache && apk upgrade --no-cache && apk add ca-certificates && apk add curl && rm -rf /var/cache/apk/*
 
 #
 # Copy binaries
