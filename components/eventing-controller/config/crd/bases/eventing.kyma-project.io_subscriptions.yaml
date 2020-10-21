@@ -121,8 +121,6 @@ spec:
                     - grantType
                     - tokenUrl
                     type: object
-                required:
-                - webhookAuth
                 type: object
               sink:
                 type: string
