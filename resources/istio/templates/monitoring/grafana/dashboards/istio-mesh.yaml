@@ -1,3 +1,4 @@
+{{- if (and .Values.monitoring.enabled .Values.monitoring.dashboards.enabled) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -1236,3 +1237,4 @@ data:
       "uid": "G8wLrJIZk",
       "version": 5
     }
+{{- end }}

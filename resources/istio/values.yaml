@@ -17,3 +17,11 @@ istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
     tag: 19e240cd
+
+monitoring:
+  enabled: true
+  dashboards:
+    enabled: true
+  istioServiceMonitor:
+    enabled: true
+    scrapeInterval: ""
