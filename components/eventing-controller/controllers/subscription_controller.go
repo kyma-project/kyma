@@ -336,10 +336,11 @@ func (r *SubscriptionReconciler) isInDeletion(subscription *eventingv1alpha1.Sub
 }
 
 const timeoutRetryActiveEmsStatus = time.Second * 30
+
 // checkStatusActive checks if the subscription is active and if not, sets a timer for retry
-func(r*SubscriptionReconciler) checkStatusActive (subscription *eventingv1alpha1.Subscription) (statusChanged bool, retry bool, err error) {
+func (r *SubscriptionReconciler) checkStatusActive(subscription *eventingv1alpha1.Subscription) (statusChanged bool, retry bool, err error) {
 	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus == string(types2.SubscriptionStatusActive) {
-		if len(subscription.Status.FailedActivation) >0  {
+		if len(subscription.Status.FailedActivation) > 0 {
 			subscription.Status.FailedActivation = ""
 			statusChanged = true
 		}

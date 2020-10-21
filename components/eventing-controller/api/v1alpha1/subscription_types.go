@@ -75,7 +75,7 @@ type SubscriptionStatus struct {
 	Conditions            []Condition           `json:"conditions,omitempty"`
 	Ev2hash               int64                 `json:"ev2hash,omitempty"`
 	Emshash               int64                 `json:"emshash,omitempty"`
-	FailedActivation	  string			    `json:"failedActivation,omitempty"`
+	FailedActivation      string                `json:"failedActivation,omitempty"`
 	EmsSubscriptionStatus EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 }
 

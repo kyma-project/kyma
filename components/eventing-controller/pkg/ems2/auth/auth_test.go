@@ -1,10 +1,11 @@
 package auth
 
 import (
-	"golang.org/x/oauth2"
 	"net/http"
 	"os"
 	"testing"
+
+	"golang.org/x/oauth2"
 )
 
 const (

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/signals"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"

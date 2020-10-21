@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"fmt"
+	"net/http"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	client2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/client"
 	config2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/config"
 	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
 	auth2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/auth"
-	"net/http"
 
 	"github.com/go-logr/logr"
 )

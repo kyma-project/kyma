@@ -2,8 +2,9 @@ package client
 
 import (
 	"fmt"
-	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"net/http"
+
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 
 	config2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/config"
 	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"

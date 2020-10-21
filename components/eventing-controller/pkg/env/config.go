@@ -1,9 +1,10 @@
 package env
 
 import (
-	"github.com/kelseyhightower/envconfig"
 	"log"
 	"time"
+
+	"github.com/kelseyhightower/envconfig"
 )
 
 // Config represents the environment config for the Eventing Controller.
