@@ -6,6 +6,7 @@ import (
 
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
@@ -14,7 +15,9 @@ func Test_SyncBebSubscription(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	// given
-	beb := Beb{}
+	beb := Beb{
+		Log: ctrl.Log,
+	}
 	err := os.Setenv("CLIENT_ID", "foo")
 	g.Expect(err).ShouldNot(HaveOccurred())
 	err = os.Setenv("CLIENT_SECRET", "foo")
@@ -31,7 +34,8 @@ func Test_SyncBebSubscription(t *testing.T) {
 
 	// then
 	changed, err := beb.SyncBebSubscription(subscription)
-	g.Expect(changed).To(BeTrue())
+	g.Expect(err).To(Not(BeNil()))
+	g.Expect(changed).To(BeFalse())
 }
 
 // TODO: shared place for this duplicated fixture ?
