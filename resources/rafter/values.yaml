@@ -8,7 +8,7 @@ tests:
   enabled: true
   image:
     repository: "eu.gcr.io/kyma-project/rafter-test"
-    tag: e9138b36
+    tag: "23554405"
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
