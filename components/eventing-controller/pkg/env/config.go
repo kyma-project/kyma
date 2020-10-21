@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Config represents the environment config for the Event Publisher Proxy.
+// Config represents the environment config for the Eventing Controller.
 type Config struct {
 	BebApiUrl     string `envconfig:"BEB_API_URL" default:"https://enterprise-messaging-pubsub.cfapps.sap.hana.ondemand.com/sap/ems/v1"`
 	ClientID      string `envconfig:"CLIENT_ID" required:"true"`
