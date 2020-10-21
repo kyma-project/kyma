@@ -1,3 +1,4 @@
+{{- if (and .Values.monitoring.enabled .Values.monitoring.istioServiceMonitor.enabled) }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -19,3 +20,4 @@ spec:
     {{- if .Values.monitoring.istioServiceMonitor.scrapeInterval }}	
     interval: {{ .Values.monitoring.istioServiceMonitor.scrapeInterval }}	
     {{- end }}
+{{- end }}
