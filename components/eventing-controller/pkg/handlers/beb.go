@@ -39,6 +39,7 @@ func (b *Beb) Initialize() {
 	// TODO error?
 }
 
+// SyncBebSubscription synchronize the EV@ subscription with the EMS subscription. It returns true, if the EV2 susbcription status was changed
 func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription) (bool, error) {
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
@@ -98,6 +99,7 @@ func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription) (
 	return statusChanged, nil
 }
 
+// DeleteBebSubscription deletes the corresponding EMS subscription
 func (b *Beb) DeleteBebSubscription(subscription *eventingv1alpha1.Subscription) error {
 	sEv2, err := getInternalView4Ev2(subscription)
 	if err != nil {

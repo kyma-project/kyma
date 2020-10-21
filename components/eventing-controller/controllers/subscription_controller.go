@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-logr/logr"
 	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
@@ -163,24 +164,31 @@ func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alp
 		}
 		statusChanged = true
 	}
+
+	statusChangedAtCheck, retry, errTimeout := r.checkStatusActive(subscription)
+	statusChanged = statusChanged || statusChangedAtCheck
 	// save the new status only if it was changed
 	if statusChanged {
 		if err := r.Status().Update(ctx, subscription); err != nil {
 			logger.Error(err, "Update subscription status failed")
 			return err
 		}
-		if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus != string(types2.SubscriptionStatusActive) {
-			logger.Info("Wait for subscription to be active", "name:", subscription.Name, "status:", subscription.Status.EmsSubscriptionStatus.SubscriptionStatus)
-			warn := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, "Subscription not active", corev1.ConditionFalse)
-			result.RequeueAfter = time.Second * 1
-			r.emitConditionEvent(subscription, warn, "Wait for subscription to be active", "Retry")
-			return nil
-		} else {
-			result.Requeue = true
-		}
+		result.Requeue = true
+	}
+	if errTimeout != nil {
+		logger.Error(errTimeout, "Timeout at retry")
+		result.Requeue = false
+		return errTimeout
+	}
+	if retry {
+		logger.Info("Wait for subscription to be active", "name:", subscription.Name, "status:", subscription.Status.EmsSubscriptionStatus.SubscriptionStatus)
+		warn := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, "Subscription not active", corev1.ConditionFalse)
+		result.RequeueAfter = time.Second * 1
+		r.emitConditionEvent(subscription, warn, "Wait for subscription to be active", "Retry")
+	} else if statusChanged {
+		r.emitConditionEvent(subscription, condition, "Subscription active", "")
 	}
 	// OK
-	r.emitConditionEvent(subscription, condition, "Subscription active", "")
 	return nil
 }
 
@@ -295,4 +303,33 @@ func (r *SubscriptionReconciler) isFinalizerSet(subscription *eventingv1alpha1.S
 // isInDeletion checks if the Subscription shall be deleted
 func (r *SubscriptionReconciler) isInDeletion(subscription *eventingv1alpha1.Subscription) bool {
 	return !subscription.DeletionTimestamp.IsZero()
+}
+
+const timeoutRetryActiveEmsStatus = time.Second * 30
+// checkStatusActive checks if the subscription is active and if not, sets a timer for retry
+func(r*SubscriptionReconciler) checkStatusActive (subscription *eventingv1alpha1.Subscription) (statusChanged bool, retry bool, err error) {
+	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus == string(types2.SubscriptionStatusActive) {
+		if len(subscription.Status.FailedActivation) >0  {
+			subscription.Status.FailedActivation = ""
+			statusChanged = true
+		}
+		return
+	}
+	t1 := time.Now()
+	if len(subscription.Status.FailedActivation) == 0 {
+		// it's the first time
+		subscription.Status.FailedActivation = t1.Format(time.RFC3339)
+		statusChanged = true
+		retry = true
+	} else {
+		// check the timeout
+		if t0, er := time.Parse(time.RFC3339, subscription.Status.FailedActivation); er != nil {
+			err = er
+		} else if t1.Sub(t0) > timeoutRetryActiveEmsStatus {
+			err = fmt.Errorf("Timeout waiting for the subscription to be active: %v", subscription.Name)
+		} else {
+			retry = true
+		}
+	}
+	return
 }
