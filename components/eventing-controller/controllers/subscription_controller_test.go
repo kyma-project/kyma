@@ -9,10 +9,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gstruct"
-	. "github.com/onsi/gomega/types"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -74,17 +71,17 @@ var _ = Describe("Subscription", func() {
 			var subscription = &eventingv1alpha1.Subscription{}
 			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
 				Not(BeNil()),
-				haveName(subscriptionName),
-				haveFinalizer(FinalizerName),
+				testing.HaveSubscriptionName(subscriptionName),
+				testing.HaveSubscriptionFinalizer(FinalizerName),
 			))
 
 			By("Setting a Subscribed condition")
 			condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, v1.ConditionTrue)
 			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
 				Not(BeNil()),
-				haveName(subscriptionName),
-				haveFinalizer(FinalizerName),
-				haveCondition(condition),
+				testing.HaveSubscriptionName(subscriptionName),
+				testing.HaveSubscriptionFinalizer(FinalizerName),
+				testing.HaveCondition(condition),
 			))
 
 			By("Creating a BEB Subscription")
@@ -116,15 +113,13 @@ var _ = Describe("Subscription", func() {
 				}
 				return subscriptionEvents
 
-			}).Should(haveEvent(event))
+			}).Should(testing.HaveEvent(event))
 
 		})
 	})
 
 	Context("When deleting a valid Subscription", func() {
 		It("Should reconcile the Subscription", func() {
-			By(fmt.Sprintf("Using unique namespace name: %s", namespaceName))
-
 			subscriptionName := "test-delete-valid-subscription-1"
 			ctx := context.Background()
 			givenSubscription := fixtureValidSubscription(subscriptionName, namespaceName)
@@ -135,8 +130,8 @@ var _ = Describe("Subscription", func() {
 			var subscription = &eventingv1alpha1.Subscription{}
 			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
 				Not(BeNil()),
-				haveName(subscriptionName),
-				haveFinalizer(FinalizerName),
+				testing.HaveSubscriptionName(subscriptionName),
+				testing.HaveSubscriptionFinalizer(FinalizerName),
 			))
 
 			By("Creating a BEB Subscription")
@@ -265,7 +260,7 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 	}
 }
 
-// TODO: document
+// getSubscription fetches a subscription using the lookupKey and allows to make assertions on it
 func getSubscription(subscription *eventingv1alpha1.Subscription, lookupKey types.NamespacedName, ctx context.Context) AsyncAssertion {
 	return Eventually(func() *eventingv1alpha1.Subscription {
 		if err := k8sClient.Get(ctx, lookupKey, subscription); err != nil {
@@ -281,11 +276,7 @@ func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx 
 		// create testing namespace
 		namespace := fixtureNamespace(subscription.Namespace)
 		if namespace.Name != "default" {
-			Expect(k8sClient.Create(ctx, namespace)).Should(Or(
-				// ignore if namespaces is already created
-				// isK8sAlreadyExistsError(),
-				BeNil(),
-			))
+			Expect(k8sClient.Create(ctx, namespace)).Should(BeNil())
 		}
 	}
 	// create subscription
@@ -304,7 +295,7 @@ func ensureSubscriptionCreationFails(subscription *eventingv1alpha1.Subscription
 		And(
 			// prevent nil-pointer stacktrace
 			Not(BeNil()),
-			isK8sUnprocessableEntity(),
+			testing.IsK8sUnprocessableEntity(),
 		),
 	)
 }
@@ -320,66 +311,6 @@ func fixtureNamespace(name string) *v1.Namespace {
 		},
 	}
 	return &namespace
-}
-
-// TODO: add subscription prefix or move to subscription package
-// TODO: move matchers  to extra file ?
-func haveName(name string) GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) string { return s.Name }, Equal(name))
-}
-
-func haveFinalizer(finalizer string) GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) []string { return s.ObjectMeta.Finalizers }, ContainElement(finalizer))
-}
-
-func haveCondition(condition eventingv1alpha1.Condition) GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) []eventingv1alpha1.Condition { return s.Status.Conditions }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
-		"Type":    Equal(condition.Type),
-		"Reason":  Equal(condition.Reason),
-		"Message": Equal(condition.Message),
-	})))
-}
-
-func haveEvent(event v1.Event) GomegaMatcher {
-	return WithTransform(func(l v1.EventList) []v1.Event { return l.Items }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
-		"Reason":  Equal(event.Reason),
-		"Message": Equal(event.Message),
-		"Type":    Equal(event.Type),
-	})))
-}
-
-func isK8sUnprocessableEntity() GomegaMatcher {
-	// TODO: also check for status code 422
-	//  <*errors.StatusError | 0xc0001330e0>: {
-	//     ErrStatus: {
-	//         TypeMeta: {Kind: "", APIVersion: ""},
-	//         ListMeta: {
-	//             SelfLink: "",
-	//             ResourceVersion: "",
-	//             Continue: "",
-	//             RemainingItemCount: nil,
-	//         },
-	//         Status: "Failure",
-	//         Message: "Subscription.eventing.kyma-project.io \"test-valid-subscription-1\" is invalid: spec.filter: Invalid value: \"null\": spec.filter in body must be of type object: \"null\"",
-	//         Reason: "Invalid",
-	//         Details: {
-	//             Name: "test-valid-subscription-1",
-	//             Group: "eventing.kyma-project.io",
-	//             Kind: "Subscription",
-	//             UID: "",
-	//             Causes: [
-	//                 {
-	//                     Type: "FieldValueInvalid",
-	//                     Message: "Invalid value: \"null\": spec.filter in body must be of type object: \"null\"",
-	//                     Field: "spec.filter",
-	//                 },
-	//             ],
-	//             RetryAfterSeconds: 0,
-	//         },
-	//         Code: 422,
-	//     },
-	// }
-	return WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, Equal(metav1.StatusReasonInvalid))
 }
 
 // printSubscriptions prints all subscriptions in the given namespace
@@ -404,5 +335,6 @@ func generateTestSuiteID() int {
 func getUniqueNamespaceName() string {
 	testSuiteID := generateTestSuiteID()
 	namespaceName := fmt.Sprintf("%s%d", subscriptionNamespacePrefix, testSuiteID)
+	By(fmt.Sprintf("Using unique namespace name: %s", namespaceName))
 	return namespaceName
 }
