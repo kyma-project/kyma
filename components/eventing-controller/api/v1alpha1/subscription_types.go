@@ -20,7 +20,7 @@ type ProtocolSettings struct {
 	// TODO(nachtmaar): discuss with radu, either make it true by default or remove it for now
 	ExemptHandshake bool         `json:"exemptHandshake,omitempty"`
 	Qos             string       `json:"qos,omitempty"`
-	WebhookAuth     *WebhookAuth `json:"webhookAuth"`
+	WebhookAuth     *WebhookAuth `json:"webhookAuth,omitempty"`
 }
 
 // TODO(nachtmaar): validate me in controller
@@ -75,6 +75,7 @@ type SubscriptionStatus struct {
 	Conditions            []Condition           `json:"conditions,omitempty"`
 	Ev2hash               int64                 `json:"ev2hash,omitempty"`
 	Emshash               int64                 `json:"emshash,omitempty"`
+	FailedActivation	  string			    `json:"failedActivation,omitempty"`
 	EmsSubscriptionStatus EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 }
 

@@ -121,8 +121,6 @@ spec:
                     - grantType
                     - tokenUrl
                     type: object
-                required:
-                - webhookAuth
                 type: object
               sink:
                 type: string
@@ -173,6 +171,8 @@ spec:
               ev2hash:
                 format: int64
                 type: integer
+              failedActivation:
+                type: string
             type: object
         type: object
     served: true
