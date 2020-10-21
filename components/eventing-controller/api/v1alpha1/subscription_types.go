@@ -73,6 +73,7 @@ type EmsSubscriptionStatus struct {
 // - the status of the exposed Webhook
 type SubscriptionStatus struct {
 	Conditions            []Condition           `json:"conditions,omitempty"`
+	Ready                 bool                  `json:"ready,omitempty"`
 	Ev2hash               int64                 `json:"ev2hash,omitempty"`
 	Emshash               int64                 `json:"emshash,omitempty"`
 	FailedActivation      string                `json:"failedActivation,omitempty"`

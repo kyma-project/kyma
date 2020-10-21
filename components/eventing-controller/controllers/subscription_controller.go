@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/record"
 
 	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
@@ -61,6 +62,9 @@ func NewSubscriptionReconciler(
 // Generate required RBAC to emit kubernetes events in the controller
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 // Source: https://book-v1.book.kubebuilder.io/beyond_basics/creating_events.html
+
+// +kubebuilder:printcolumn:name="Ready",type=bool,JSONPath=`.status.Ready`
+// Source: https://book.kubebuilder.io/reference/generating-crd.html#additional-printer-columns
 
 func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
@@ -177,7 +181,7 @@ func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alp
 
 	if !subscription.Status.IsConditionSubscribed() {
 		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue)
-		if err := r.replaceStatusCondition(subscription, condition); err != nil {
+		if err := r.updateCondition(subscription, condition, ctx); err != nil {
 			return statusChanged, err
 		}
 		statusChanged = true
@@ -193,11 +197,15 @@ func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alp
 	if retry {
 		logger.Info("Wait for subscription to be active", "name:", subscription.Name, "status:", subscription.Status.EmsSubscriptionStatus.SubscriptionStatus)
 		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse)
+		if err := r.updateCondition(subscription, condition, ctx); err != nil {
+			return statusChanged, err
+		}
 		result.RequeueAfter = time.Second * 1
-		r.emitConditionEvent(subscription, condition)
 	} else if statusChanged {
 		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, corev1.ConditionTrue)
-		r.emitConditionEvent(subscription, condition)
+		if err := r.updateCondition(subscription, condition, ctx); err != nil {
+			return statusChanged, err
+		}
 	}
 	// OK
 	return statusChanged, nil
@@ -210,15 +218,7 @@ func (r *SubscriptionReconciler) deleteBEBSubscription(subscription *eventingv1a
 		return err
 	}
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionDeleted, corev1.ConditionFalse)
-	if err := r.replaceStatusCondition(subscription, condition); err != nil {
-		return err
-	}
-	if err := r.Status().Update(ctx, subscription); err != nil {
-		return err
-	}
-
-	r.emitConditionEvent(subscription, condition)
-	return nil
+	return r.updateCondition(subscription, condition, ctx)
 }
 
 func (r *SubscriptionReconciler) syncAPIRule(subscription *eventingv1alpha1.Subscription, result *ctrl.Result,
@@ -250,19 +250,42 @@ func (r *SubscriptionReconciler) syncInitialStatus(subscription *eventingv1alpha
 	return nil
 }
 
-// replaceStatusCondition replaces the given condition on the subscription
+// updateCondition replaces the given condition on the subscription and updates the status as well as emitting a kubernetes event
+func (r *SubscriptionReconciler) updateCondition(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition, ctx context.Context) error {
+	if err := r.replaceStatusCondition(subscription, condition); err != nil {
+		return err
+	}
+	if err := r.Status().Update(ctx, subscription); err != nil {
+		return err
+	}
+
+	r.emitConditionEvent(subscription, condition)
+	return nil
+}
+
+// replaceStatusCondition replaces the given condition on the subscription. Also it sets the readyness in the status.
+// So make sure you always use this method then changing a condition
 func (r *SubscriptionReconciler) replaceStatusCondition(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition) error {
+	// the subscription is ready if all conditions are fulfilled
+	isReady := true
+
 	// compile list of desired conditions
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)
 	for _, c := range subscription.Status.Conditions {
+		var chosenCondition eventingv1alpha1.Condition
 		if c.Type == condition.Type {
 			// take given condition
-			desiredConditions = append(desiredConditions, condition)
+			chosenCondition = condition
 		} else {
 			// take already present condition
-			desiredConditions = append(desiredConditions, c)
+			chosenCondition = c
+		}
+		desiredConditions = append(desiredConditions, chosenCondition)
+		if string(chosenCondition.Status) == string(v1.ConditionFalse) {
+			isReady = false
 		}
 	}
+	subscription.Status.Ready = isReady
 
 	// prevent unnecessary updates
 	if isEqualConditions(subscription.Status.Conditions, desiredConditions) {
@@ -357,7 +380,7 @@ func (r *SubscriptionReconciler) checkStatusActive(subscription *eventingv1alpha
 		if t0, er := time.Parse(time.RFC3339, subscription.Status.FailedActivation); er != nil {
 			err = er
 		} else if t1.Sub(t0) > timeoutRetryActiveEmsStatus {
-			err = fmt.Errorf("Timeout waiting for the subscription to be active: %v", subscription.Name)
+			err = fmt.Errorf("timeout waiting for the subscription to be active: %v", subscription.Name)
 		} else {
 			retry = true
 		}

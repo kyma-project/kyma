@@ -13,15 +13,22 @@ import (
 )
 
 func HaveSubscriptionName(name string) GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) string { return s.Name }, Equal(name))
+	return WithTransform(func(s eventingv1alpha1.Subscription) string { return s.Name }, Equal(name))
 }
 
 func HaveSubscriptionFinalizer(finalizer string) GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) []string { return s.ObjectMeta.Finalizers }, ContainElement(finalizer))
+	return WithTransform(func(s eventingv1alpha1.Subscription) []string { return s.ObjectMeta.Finalizers }, ContainElement(finalizer))
+}
+
+func HaveSubscriptionReady() GomegaMatcher {
+	// NOTE: testing the whole struct with MatchFields was chosen instead of a WithTransform because the output in the failure case is easier to debug
+	return MatchFields(IgnoreExtras|IgnoreMissing, Fields{
+		"status.Ready": BeTrue(),
+	})
 }
 
 func HaveCondition(condition eventingv1alpha1.Condition) GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) []eventingv1alpha1.Condition { return s.Status.Conditions }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
+	return WithTransform(func(s eventingv1alpha1.Subscription) []eventingv1alpha1.Condition { return s.Status.Conditions }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
 		"Type":    Equal(condition.Type),
 		"Reason":  Equal(condition.Reason),
 		"Message": Equal(condition.Message),
