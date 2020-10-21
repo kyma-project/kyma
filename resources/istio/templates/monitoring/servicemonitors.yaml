@@ -16,7 +16,9 @@ spec:
   endpoints:
   - path: /stats/prometheus
     targetPort: 15090
-    interval: 15s
+    {{- if .Values.monitoring.istioServiceMonitor.scrapeInterval }}	
+    interval: {{ .Values.monitoring.istioServiceMonitor.scrapeInterval }}	
+    {{- end }}
     relabelings:
     - sourceLabels: [__meta_kubernetes_pod_container_port_name]
       action: keep
@@ -48,4 +50,6 @@ spec:
     any: true
   endpoints:
   - port: http-monitoring
-    interval: 15s
+    {{- if .Values.monitoring.istioServiceMonitor.scrapeInterval }}	
+    interval: {{ .Values.monitoring.istioServiceMonitor.scrapeInterval }}	
+    {{- end }}
