@@ -124,7 +124,36 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	Context("When deleting a valid Subscription", func() {
+	When("Subscription hash did change", func() {
+		It("Should update the BEB subscription", func() {
+		})
+	})
+
+	When("Subscription hash did not change", func() {
+		It("Should not create a POST or DELETE call against BEB", func() {
+		})
+	})
+
+	When("BEB Subscription is not active", func() {
+		It("Should not mark the subscription as ready", func() {
+		})
+	})
+
+	When("BEB subscription creation failed", func() {
+		It("Should not mark the subscription as ready", func() {
+			By("Marking it as not ready")
+			By("Setting a subscription not created condition")
+		})
+	})
+
+	When("BEB subscription status is not ready", func() {
+		It("Should not mark the subscription as ready", func() {
+			By("Marking it as not ready")
+			By("Setting a subscription not active condition")
+		})
+	})
+
+	When("Deleting a valid Subscription", func() {
 		It("Should reconcile the Subscription", func() {
 
 			subscriptionName := "test-delete-valid-subscription-1"
