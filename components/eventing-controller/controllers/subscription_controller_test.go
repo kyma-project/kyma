@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"os"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -21,7 +20,6 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/testing"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/config"
 	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
 
 	// gcp auth etc.
@@ -30,62 +28,21 @@ import (
 )
 
 const (
-	timeout  = time.Second * 10
-	interval = time.Millisecond * 250
-	// subscriptionName      = "test-subs-1"
-	// TODO(nachtmaar) switch back to custom namespace? there is a namespace deletion problem :/ or otherwise cleanup in each test respectively
+	timeout                     = time.Second * 10
+	interval                    = time.Millisecond * 250
 	subscriptionNamespacePrefix = "test-"
 	subscriptionID              = "test-subs-1"
-
-	namespaceCleanupTimeout  = time.Second * 30
-	namespaceCleanupInterval = time.Second * 1
 )
 
-func generateTestSuiteID() int {
-	var seededRand *rand.Rand = rand.New(
-		rand.NewSource(time.Now().UnixNano()))
-	return seededRand.Int()
-}
-
-func getUniqueNamespaceName() string {
-	testSuiteID := generateTestSuiteID()
-	namespaceName := fmt.Sprintf("%s%d", subscriptionNamespacePrefix, testSuiteID)
-	return namespaceName
-}
-
 var _ = Describe("Subscription", func() {
-	var beb *testing.BebMock
-	var bebConfig *config.Config
 
 	// enable me for debugging
 	// SetDefaultEventuallyTimeout(time.Minute)
 	// SetDefaultEventuallyPollingInterval(time.Second)
 
 	BeforeEach(func() {
-
-		if beb == nil {
-			By("Preparing BEB Mock")
-			err := os.Setenv("CLIENT_ID", "foo")
-			Expect(err).ShouldNot(HaveOccurred())
-			err = os.Setenv("CLIENT_SECRET", "foo")
-			Expect(err).ShouldNot(HaveOccurred())
-
-			beb = testing.NewBebMock(nil)
-			bebURI := beb.Start()
-			logf.Log.Info("beb mock listening at", "address", bebURI)
-			authURL := fmt.Sprintf("%s%s", bebURI, testing.UrlAuth)
-			messagingURL := fmt.Sprintf("%s%s", bebURI, testing.UrlMessagingApi)
-
-			err = os.Setenv("TOKEN_ENDPOINT", authURL)
-			Expect(err).ShouldNot(HaveOccurred())
-			err = os.Setenv("BEB_API_URL", messagingURL)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			bebConfig = config.GetDefaultConfig()
-			beb.BebConfig = bebConfig
-		} else {
-			beb.Reset()
-		}
+		// we need to reset the http requests which the mock captured
+		beb.Reset()
 	})
 
 	AfterEach(func() {
@@ -100,8 +57,6 @@ var _ = Describe("Subscription", func() {
 		}
 	})
 
-	// TODO: test required fields are provided  but with wrong values => basically testing the CRD schema
-	// TODO: test required fields are provided => basically testing the CRD schema
 	Context("When creating a valid Subscription", func() {
 		It("Should reconcile the Subscription", func() {
 			namespaceName := getUniqueNamespaceName()
@@ -361,8 +316,6 @@ func ensureSubscriptionCreationFails(subscription *eventingv1alpha1.Subscription
 		namespace := fixtureNamespace(subscription.Namespace)
 		if namespace.Name != "default" {
 			Expect(k8sClient.Create(ctx, namespace)).Should(Or(
-				// ignore if namespaces is already created
-				// isK8sAlreadyExistsError(),
 				BeNil(),
 			))
 		}
@@ -374,17 +327,8 @@ func ensureSubscriptionCreationFails(subscription *eventingv1alpha1.Subscription
 			isK8sUnprocessableEntity(),
 		),
 	)
-	// Expect(getK8sError(k8sClient.Create(ctx, subscription)).Status()).Should(isK8sUnprocessableEntity())
 }
 
-func getK8sError(err error) *errors.StatusError {
-	switch e := err.(type) {
-	case *errors.StatusError:
-		return e
-	default:
-		return nil
-	}
-}
 
 func fixtureNamespace(name string) *v1.Namespace {
 	namespace := v1.Namespace{
@@ -482,4 +426,16 @@ func printNamespaces(namespaceName string, ctx context.Context) error {
 	}
 	logf.Log.V(1).Info("namespace", "namespace", namespace)
 	return nil
+}
+
+func generateTestSuiteID() int {
+	var seededRand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	return seededRand.Int()
+}
+
+func getUniqueNamespaceName() string {
+	testSuiteID := generateTestSuiteID()
+	namespaceName := fmt.Sprintf("%s%d", subscriptionNamespacePrefix, testSuiteID)
+	return namespaceName
 }

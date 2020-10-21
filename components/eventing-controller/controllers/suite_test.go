@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -16,10 +18,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/controllers/testing"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/config"
+
 	// +kubebuilder:scaffold:imports
 )
 
-// These tests use Ginkgo (BDD-style Go testing framework). Refer to
+// These tests use Ginkgo (BDD-style Go controllertesting framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
 // TODO: make configurable
@@ -31,6 +36,8 @@ const (
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
+var beb *controllertesting.BebMock
+var bebConfig *config.Config
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -61,6 +68,8 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).NotTo(HaveOccurred())
 
 	// +kubebuilder:scaffold:scheme
+
+	startBebMock()
 
 	// Source: https://book.kubebuilder.io/cronjob-tutorial/writing-tests.html
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
@@ -93,3 +102,26 @@ var _ = AfterSuite(func() {
 	err := testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
 })
+
+// startBebMock starts the beb mock and configures the controller process to use it
+func startBebMock() {
+	By("Preparing BEB Mock")
+	err := os.Setenv("CLIENT_ID", "foo")
+	Expect(err).ShouldNot(HaveOccurred())
+	err = os.Setenv("CLIENT_SECRET", "foo")
+	Expect(err).ShouldNot(HaveOccurred())
+
+	beb = controllertesting.NewBebMock(nil)
+	bebURI := beb.Start()
+	logf.Log.Info("beb mock listening at", "address", bebURI)
+	authURL := fmt.Sprintf("%s%s", bebURI, controllertesting.UrlAuth)
+	messagingURL := fmt.Sprintf("%s%s", bebURI, controllertesting.UrlMessagingApi)
+
+	err = os.Setenv("TOKEN_ENDPOINT", authURL)
+	Expect(err).ShouldNot(HaveOccurred())
+	err = os.Setenv("BEB_API_URL", messagingURL)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	bebConfig = config.GetDefaultConfig()
+	beb.BebConfig = bebConfig
+}
