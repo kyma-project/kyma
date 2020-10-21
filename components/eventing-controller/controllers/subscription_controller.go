@@ -3,12 +3,14 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/go-logr/logr"
-	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
-	"time"
+
+	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 
 	// TODO: use different package
 	"github.com/pkg/errors"
@@ -158,16 +160,12 @@ func (r *SubscriptionReconciler) syncFinalizer(subscription *eventingv1alpha1.Su
 func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscription,
 	result *ctrl.Result, ctx context.Context, logger logr.Logger) (bool, error) {
 	logger.Info("Syncing subscription with BEB")
-	// TODO: get beb credentials from secret
 
 	r.bebClient.Initialize()
 
+	// if object is marked for deletion, we need to delete the BEB subscription
 	if r.isInDeletion(subscription) {
-		logger.Info("Deleting BEB subscription")
-		if err := r.bebClient.DeleteBebSubscription(subscription); err != nil {
-			return false, err
-		}
-		return false, nil
+		return false, r.deleteBEBSubscription(subscription, logger, ctx)
 	}
 
 	var statusChanged bool
@@ -177,8 +175,8 @@ func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alp
 		return false, err
 	}
 
-	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, "Successfully synchronized with BEB subscription", corev1.ConditionTrue)
 	if !subscription.Status.IsConditionSubscribed() {
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue)
 		if err := r.replaceStatusCondition(subscription, condition); err != nil {
 			return statusChanged, err
 		}
@@ -194,14 +192,33 @@ func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alp
 	}
 	if retry {
 		logger.Info("Wait for subscription to be active", "name:", subscription.Name, "status:", subscription.Status.EmsSubscriptionStatus.SubscriptionStatus)
-		warn := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, "Subscription not active", corev1.ConditionFalse)
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse)
 		result.RequeueAfter = time.Second * 1
-		r.emitConditionEvent(subscription, warn, "Wait for subscription to be active", "Retry")
+		r.emitConditionEvent(subscription, condition)
 	} else if statusChanged {
-		r.emitConditionEvent(subscription, condition, "Subscription active", "")
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, corev1.ConditionTrue)
+		r.emitConditionEvent(subscription, condition)
 	}
 	// OK
 	return statusChanged, nil
+}
+
+// deleteBEBSubscription deletes the BEB subscription and updates the condition and k8s events
+func (r *SubscriptionReconciler) deleteBEBSubscription(subscription *eventingv1alpha1.Subscription, logger logr.Logger, ctx context.Context) error {
+	logger.Info("Deleting BEB subscription")
+	if err := r.bebClient.DeleteBebSubscription(subscription); err != nil {
+		return err
+	}
+	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionDeleted, corev1.ConditionFalse)
+	if err := r.replaceStatusCondition(subscription, condition); err != nil {
+		return err
+	}
+	if err := r.Status().Update(ctx, subscription); err != nil {
+		return err
+	}
+
+	r.emitConditionEvent(subscription, condition)
+	return nil
 }
 
 func (r *SubscriptionReconciler) syncAPIRule(subscription *eventingv1alpha1.Subscription, result *ctrl.Result,
@@ -258,12 +275,12 @@ func (r *SubscriptionReconciler) replaceStatusCondition(subscription *eventingv1
 }
 
 // emitConditionEvent emits a kubernetes event and sets the event type based on the Condition status
-func (r *SubscriptionReconciler) emitConditionEvent(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition, reason string, message string) {
+func (r *SubscriptionReconciler) emitConditionEvent(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition) {
 	eventType := corev1.EventTypeNormal
 	if condition.Status == corev1.ConditionFalse {
 		eventType = corev1.EventTypeWarning
 	}
-	r.recorder.Event(subscription, eventType, reason, message)
+	r.recorder.Event(subscription, eventType, string(condition.Reason), condition.Message)
 }
 
 func (r *SubscriptionReconciler) SetupWithManager(mgr ctrl.Manager) error {

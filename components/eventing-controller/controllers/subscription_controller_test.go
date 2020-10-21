@@ -28,19 +28,19 @@ import (
 )
 
 const (
-	timeout                     = time.Second * 10
-	interval                    = time.Millisecond * 250
 	subscriptionNamespacePrefix = "test-"
 	subscriptionID              = "test-subs-1"
 )
 
 var _ = Describe("Subscription", func() {
+	var namespaceName string
 
 	// enable me for debugging
 	// SetDefaultEventuallyTimeout(time.Minute)
 	// SetDefaultEventuallyPollingInterval(time.Second)
 
 	BeforeEach(func() {
+		namespaceName = getUniqueNamespaceName()
 		// we need to reset the http requests which the mock captured
 		beb.Reset()
 	})
@@ -55,11 +55,15 @@ var _ = Describe("Subscription", func() {
 			fmt.Printf("request[%d]: %s\n", i, reqDescription)
 			i++
 		}
+
+		// print all subscriptions in the namespace for debugging purposes
+		if err := printSubscriptions(namespaceName); err != nil {
+			logf.Log.Error(err, "error while printing subscriptions")
+		}
 	})
 
 	Context("When creating a valid Subscription", func() {
 		It("Should reconcile the Subscription", func() {
-			namespaceName := getUniqueNamespaceName()
 			subscriptionName := "test-valid-subscription-1"
 			ctx := context.Background()
 			givenSubscription := fixtureValidSubscription(subscriptionName, namespaceName)
@@ -68,20 +72,20 @@ var _ = Describe("Subscription", func() {
 
 			By("Setting a finalizer")
 			var subscription = &eventingv1alpha1.Subscription{}
-			getSubscription(subscription, subscriptionLookupKey, ctx).Should(
+			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
 				Not(BeNil()),
 				haveName(subscriptionName),
 				haveFinalizer(FinalizerName),
-			)
+			))
 
 			By("Setting a Subscribed condition")
-			condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, "TODO", v1.ConditionTrue)
-			getSubscription(subscription, subscriptionLookupKey, ctx).Should(
+			condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, v1.ConditionTrue)
+			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
 				Not(BeNil()),
 				haveName(subscriptionName),
 				haveFinalizer(FinalizerName),
 				haveCondition(condition),
-			)
+			))
 
 			By("Creating a BEB Subscription")
 			var bebSubscription bebtypes.Subscription
@@ -101,7 +105,7 @@ var _ = Describe("Subscription", func() {
 			var subscriptionEvents = v1.EventList{}
 			// TODO: adjust to event we want to have
 			event := v1.Event{
-				Reason:  "Subscription active",
+				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionActive),
 				Message: "",
 				Type:    v1.EventTypeNormal,
 			}
@@ -119,7 +123,6 @@ var _ = Describe("Subscription", func() {
 
 	Context("When deleting a valid Subscription", func() {
 		It("Should reconcile the Subscription", func() {
-			namespaceName := getUniqueNamespaceName()
 			By(fmt.Sprintf("Using unique namespace name: %s", namespaceName))
 
 			subscriptionName := "test-delete-valid-subscription-1"
@@ -130,11 +133,11 @@ var _ = Describe("Subscription", func() {
 
 			// ensure subscription is given
 			var subscription = &eventingv1alpha1.Subscription{}
-			getSubscription(subscription, subscriptionLookupKey, ctx).Should(
+			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
 				Not(BeNil()),
 				haveName(subscriptionName),
 				haveFinalizer(FinalizerName),
-			)
+			))
 
 			By("Creating a BEB Subscription")
 			var bebSubscription bebtypes.Subscription
@@ -174,11 +177,7 @@ var _ = Describe("Subscription", func() {
 			}).Should(BeTrue())
 
 			By("Removing the finalizer")
-			getSubscription(subscription, subscriptionLookupKey, ctx).Should(
-				Not(BeNil()),
-				haveName(subscriptionName),
-				Not(haveFinalizer(FinalizerName)),
-			)
+			getSubscription(subscription, subscriptionLookupKey, ctx).Should(BeNil())
 
 			By("Emitting some k8s events")
 
@@ -190,7 +189,6 @@ var _ = Describe("Subscription", func() {
 
 		func(subscription *eventingv1alpha1.Subscription) {
 			ctx := context.Background()
-			namespaceName := getUniqueNamespaceName()
 			subscription.Namespace = namespaceName
 
 			By("Letting the APIServer reject the custom resource")
@@ -214,13 +212,6 @@ var _ = Describe("Subscription", func() {
 				subscription.Spec.ProtocolSettings.WebhookAuth = nil
 				return subscription
 			}()),
-		// TODO: find a way to set values to nil or remove in raw format, currently not testable with this test impl.
-		// Entry("protocol empty",
-		// 	func() *eventingv1alpha1.Subscription {
-		// 		subscription := fixtureValidSubscription("schema-filter-missing")
-		// 		subscription.Spec.Protocol = ""
-		// 		return subscription
-		// 	}()),
 	)
 
 })
@@ -236,7 +227,6 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 			Name:      name,
 			Namespace: namespace,
 		},
-		// TODO: validate all fields from here in the controller
 		Spec: eventingv1alpha1.SubscriptionSpec{
 			Id:       subscriptionID,
 			Protocol: "BEB",
@@ -282,23 +272,14 @@ func getSubscription(subscription *eventingv1alpha1.Subscription, lookupKey type
 			return nil
 		}
 		return subscription
-	}, timeout, interval)
+	}, time.Second*10, time.Second)
 }
 
 // ensureSubscriptionCreated creates a Subscription in the k8s cluster. If a custom namespace is used, it will be created as well.
 func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx context.Context) {
 	if subscription.Namespace != "default " {
+		// create testing namespace
 		namespace := fixtureNamespace(subscription.Namespace)
-		// TODO:
-		// err := k8sClient.Create(ctx, &namespace)
-		// if e, ok := err.(*errors.StatusError); ok {
-		// 	if e.ErrStatus.Code == 409 && e.ErrStatus.Reason == "AlreadyExists" {
-		// 		fmt.Printf("ignorning that namespace already exists")
-
-		// 	} else {
-		// 		Expect(false)
-		// 	}
-		// }
 		if namespace.Name != "default" {
 			Expect(k8sClient.Create(ctx, namespace)).Should(Or(
 				// ignore if namespaces is already created
@@ -307,6 +288,7 @@ func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx 
 			))
 		}
 	}
+	// create subscription
 	Expect(k8sClient.Create(ctx, subscription)).Should(BeNil())
 }
 
@@ -315,9 +297,7 @@ func ensureSubscriptionCreationFails(subscription *eventingv1alpha1.Subscription
 	if subscription.Namespace != "default " {
 		namespace := fixtureNamespace(subscription.Namespace)
 		if namespace.Name != "default" {
-			Expect(k8sClient.Create(ctx, namespace)).Should(Or(
-				BeNil(),
-			))
+			Expect(k8sClient.Create(ctx, namespace)).Should(BeNil())
 		}
 	}
 	Expect(k8sClient.Create(ctx, subscription)).Should(
@@ -328,7 +308,6 @@ func ensureSubscriptionCreationFails(subscription *eventingv1alpha1.Subscription
 		),
 	)
 }
-
 
 func fixtureNamespace(name string) *v1.Namespace {
 	namespace := v1.Namespace{
@@ -354,11 +333,11 @@ func haveFinalizer(finalizer string) GomegaMatcher {
 }
 
 func haveCondition(condition eventingv1alpha1.Condition) GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) []eventingv1alpha1.Condition { return s.Status.Conditions }, ContainElement(condition))
-}
-
-func isK8sAlreadyExistsError() GomegaMatcher {
-	return WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, Equal("AlreadyExists"))
+	return WithTransform(func(s *eventingv1alpha1.Subscription) []eventingv1alpha1.Condition { return s.Status.Conditions }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
+		"Type":    Equal(condition.Type),
+		"Reason":  Equal(condition.Reason),
+		"Message": Equal(condition.Message),
+	})))
 }
 
 func haveEvent(event v1.Event) GomegaMatcher {
@@ -403,28 +382,16 @@ func isK8sUnprocessableEntity() GomegaMatcher {
 	return WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, Equal(metav1.StatusReasonInvalid))
 }
 
-// func isK8sKnotFoundError() GomegaMatcher {
-// 	return WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, Equal("NotFound"))
-// }
-
-func printSubscriptions(ctx context.Context) error {
+// printSubscriptions prints all subscriptions in the given namespace
+func printSubscriptions(namespace string) error {
 	// print subscription details
+	ctx := context.TODO()
 	subscriptionList := eventingv1alpha1.SubscriptionList{}
-	if err := k8sClient.List(ctx, &subscriptionList); err != nil {
+	if err := k8sClient.List(ctx, &subscriptionList, client.InNamespace(namespace)); err != nil {
 		logf.Log.V(1).Info("error while getting subscription list", "error", err)
 		return err
 	}
 	logf.Log.V(1).Info("subscriptions", "subscriptions", subscriptionList)
-	return nil
-}
-
-func printNamespaces(namespaceName string, ctx context.Context) error {
-	namespace := v1.Namespace{}
-	if err := k8sClient.Get(ctx, types.NamespacedName{Name: namespaceName}, &namespace); err != nil && !errors.IsNotFound(err) {
-		logf.Log.V(1).Info("error while getting namespace", "error", err)
-		return err
-	}
-	logf.Log.V(1).Info("namespace", "namespace", namespace)
 	return nil
 }
 

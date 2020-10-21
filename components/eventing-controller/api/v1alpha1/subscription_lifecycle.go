@@ -9,7 +9,8 @@ import (
 type ConditionType string
 
 const (
-	ConditionSubscribed ConditionType = "Subscribed"
+	ConditionSubscribed         ConditionType = "Subscribed"
+	ConditionSubscriptionActive ConditionType = "Subscription active"
 )
 
 type Condition struct {
@@ -23,7 +24,10 @@ type Condition struct {
 type ConditionReason string
 
 const (
-	ConditionReasonSubscriptionCreated ConditionReason = "SubscriptionCreated"
+	ConditionReasonSubscriptionCreated   ConditionReason = "BEB SubscriptionCreated"
+	ConditionReasonSubscriptionActive    ConditionReason = "BEB Subscription active"
+	ConditionReasonSubscriptionNotActive ConditionReason = "BEB Subscription not active"
+	ConditionReasonSubscriptionDeleted   ConditionReason = "BEB SubscriptionDeleted"
 )
 
 // InitializeConditions sets unset conditions to Unknown
@@ -48,11 +52,17 @@ func (s *SubscriptionStatus) InitializeConditions() {
 	s.Conditions = finalConditions
 }
 
+// TODO: add unit test which checks that all conditions are initialized
 // makeConditions creates an map of all conditions which the Subscription should have
 func makeConditions() []Condition {
 	conditions := []Condition{
 		{
 			Type:               ConditionSubscribed,
+			LastTransitionTime: metav1.Now(),
+			Status:             corev1.ConditionUnknown,
+		},
+		{
+			Type:               ConditionSubscriptionActive,
 			LastTransitionTime: metav1.Now(),
 			Status:             corev1.ConditionUnknown,
 		},
