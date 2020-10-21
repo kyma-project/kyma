@@ -227,7 +227,7 @@ var _ = Describe("Subscription", func() {
 		})
 	})
 
-	DescribeTable("Schema tests",
+	DescribeTable("Schema tests: ensuring required fields are not treated as optional",
 
 		func(subscription *eventingv1alpha1.Subscription) {
 			ctx := context.Background()
@@ -249,12 +249,6 @@ var _ = Describe("Subscription", func() {
 				subscription.Spec.ProtocolSettings = nil
 				return subscription
 			}()),
-		Entry("protocolsettings.webhookauth missing",
-			func() *eventingv1alpha1.Subscription {
-				subscription := fixtureValidSubscription("schema-filter-missing", "")
-				subscription.Spec.ProtocolSettings.WebhookAuth = nil
-				return subscription
-			}()),
 		// TODO: find a way to set values to nil or remove in raw format, currently not testable with this test impl.
 		// Entry("protocol empty",
 		// 	func() *eventingv1alpha1.Subscription {
@@ -264,6 +258,23 @@ var _ = Describe("Subscription", func() {
 		// 	}()),
 	)
 
+	DescribeTable("Schema tests: ensuring optional fields are not treated as required",
+
+		func(subscription *eventingv1alpha1.Subscription) {
+			ctx := context.Background()
+			namespaceName := getUniqueNamespaceName()
+			subscription.Namespace = namespaceName
+
+			By("Letting the APIServer reject the custom resource")
+			ensureSubscriptionCreated(subscription, ctx)
+		},
+		Entry("protocolsettings.webhookauth missing",
+			func() *eventingv1alpha1.Subscription {
+				subscription := fixtureValidSubscription("schema-filter-missing", "")
+				subscription.Spec.ProtocolSettings.WebhookAuth = nil
+				return subscription
+			}()),
+	)
 })
 
 // fixtureValidSubscription returns a valid subscription
