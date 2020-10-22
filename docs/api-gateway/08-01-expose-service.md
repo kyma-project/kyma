@@ -3,7 +3,7 @@ title: Expose a service
 type: Tutorials
 ---
 
-This tutorial shows how to expose services using the API Gateway Controller for the `GET` method.
+This tutorial shows how to expose services using the API Gateway Controller for the `GET` and `POST` methods.
 
 The tutorial comes with a sample HttpBin service deployment.
 
@@ -30,16 +30,22 @@ cat <<EOF | kubectl apply -f -
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
-  name: httpbin-unsecured
+  name: httpbin
 spec:
   service:
-    host: httpbin-un.$DOMAIN
-    name: httpbin-unsecured
+    host: httpbin.$DOMAIN
+    name: httpbin
     port: 8000
   gateway: kyma-gateway.kyma-system.svc.cluster.local
   rules:
     - path: /.*
       methods: ["GET"]
+      accessStrategies:
+        - handler: noop
+      mutators:
+        - handler: noop
+    - path: /post
+      methods: ["POST"]
       accessStrategies:
         - handler: noop
       mutators:
@@ -51,10 +57,16 @@ EOF
 
 ## Access the exposed resources
 
-Follow the instruction to call the service.
-
-1. Send a `GET` request to the HttpBin service:
+1. Call the endpoint by sending a `GET` request to the HttpBin service:
 
 ```bash
-curl -ik -X GET https://httpbinallow.$DOMAIN/headers
+curl -ik -X GET https://httpbinallow.$DOMAIN/ip
 ```
+
+2. Send a `POST` request to the HttpBin's `/post` endpoint:
+
+```bash
+curl -ik -X POST https://httpbin.$DOMAIN/post -d "test data"
+```
+
+These calls return the code `200` response.
