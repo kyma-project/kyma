@@ -1173,11 +1173,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "6287e2b171401931686bb9a4d1c769343f712343"
-  version = "kubernetes-1.16.10"
+  revision = "06c037ffc157ce8c1fceab2be50f1c52b9f746ba"
+  version = "kubernetes-1.16.15"
 
 [[projects]]
-  digest = "1:6c34c21186f1c0aafa04c2c8b97c5f3f6ec6ca14c97bcd2bef5d5a92cad30251"
+  digest = "1:2bd078d3581d160eff0a14ce39d7287281ffc60c3a6e64bd1c5de35175e74cc2"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/equality",
@@ -1227,8 +1227,8 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
-  revision = "9402b4926e83cddfcac78460d5dca7ae87c1dc49"
-  version = "kubernetes-1.16.10"
+  revision = "f7929272bda35db23eaa68452473887898be1a44"
+  version = "kubernetes-1.16.15"
 
 [[projects]]
   digest = "1:717e9a802d6db281e9f8ccdd86c30c697fa17d5415223f583199f11b6d96406c"
@@ -1434,8 +1434,8 @@
     "util/workqueue",
   ]
   pruneopts = "NUT"
-  revision = "0f69009510c3f4630de40c7b7f9034f2a2728023"
-  version = "kubernetes-1.16.10"
+  revision = "4744acb1ce5432afaa74b71df88af7063572bffc"
+  version = "kubernetes-1.16.15"
 
 [[projects]]
   digest = "1:8d82a13cedd42d1b39da74cf06ec07c71d8913ccdc500471f20c5685828c6ab7"
@@ -1467,7 +1467,7 @@
   ]
   pruneopts = "NUT"
   revision = "f5af5c5facffaf331fafd9e8ec9864ff738e9005"
-  version = "kubernetes-1.16.10"
+  version = "kubernetes-1.16.15"
 
 [[projects]]
   digest = "1:39912eb5f8eaf46486faae0839586c27c93423e552f76875defa048f52c15c15"
