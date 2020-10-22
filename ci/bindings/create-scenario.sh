@@ -2,7 +2,8 @@
 set -o errexit
 
 echo "Creating Scenario"
+ls
 
-kubectl apply -f secret.yaml
-kubectl apply -f binding-sample.yaml
-kubectl apply -f deployment-sandbox.yaml
+kubectl apply -f ci/bindings/secret.yaml
+kubectl apply -f ci/bindings/binding-sample.yaml
+kubectl apply -f ci/bindings/deployment-sandbox.yaml
