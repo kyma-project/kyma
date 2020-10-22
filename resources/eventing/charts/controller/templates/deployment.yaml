@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "controller.fullname" . }}
+  labels:
+    {{- include "controller.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "controller.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "controller.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "controller.serviceAccountName" . }}
+      terminationGracePeriodSeconds: 10
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - image: "{{ .Values.global.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          name: controller
+          resources:
+            limits:
+              cpu: 100m
+              memory: 30Mi
+            requests:
+              cpu: 100m
+              memory: 20Mi
+

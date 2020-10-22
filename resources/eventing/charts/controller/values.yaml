@@ -1,0 +1,16 @@
+replicaCount: 1
+serviceAccount:
+  # name defines optionally another name than the default name for the service account
+  name: ""
+
+clusterRole:
+  # name defines optionally another name than the default name for the cluster role
+  name: ""
+
+image:
+  # name is the name of the container image for the event-publisher-proxy
+  name: "eventing-controller"
+  # tag is the container tag of the event-publisher-proxy image
+  tag: "PR-9750"
+  # pullPolicy is the pullPolicy for the event-publisher-proxy image
+  pullPolicy: "IfNotPresent"
