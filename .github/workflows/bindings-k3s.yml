@@ -34,6 +34,6 @@ jobs:
       - name: Apply test scenario and check deployment
         run: |
           ./ci/bindings/create-scenario.sh
-          sleep 10
+          sleep 30
           kubectl get pods --selector=app=sandbox -oyaml 
 
