@@ -13,11 +13,9 @@ func New(factory *resource.GenericServiceFactory) *Resolver {
 		limitRangesGroupVersionResource:    NewLimitRangesService,
 		resourceQuotasGroupVersionResource: NewResourceQuotasService,
 	})
-	// informerFactory := informers.NewSharedInformerFactory(clientset, informerResyncPeriod)
 
 	return &Resolver{
 		Module: module,
-		// informerFactory: informerFactory,
 	}
 }
 
@@ -27,8 +25,3 @@ func (r *Resolver) LimitRangesService() *resource.GenericService {
 func (r *Resolver) ResourceQuotasService() *resource.GenericService {
 	return r.Module.Service(resourceQuotasGroupVersionResource)
 }
-
-// func (r *Resolver) WaitForCacheSync(stopCh <-chan struct{}) {
-// 	r.informerFactory.Start(stopCh)
-// 	r.informerFactory.WaitForCacheSync(stopCh)
-// }
