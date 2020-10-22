@@ -31,5 +31,7 @@ jobs:
       - name: Install Bindings component using Helm
         run: |
           helm install bindings ./resources/binding
-      - name: Lists releases to check if it's installed properly
-        run: helm list
+      - name: Apply test scenario and check deployment
+        run: |
+          ./ci/bindings/create-scenario.sh
+          kubectl get deployment sandbox -oyaml
