@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: binding-controller
+  labels:
+    app: binding-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: binding-controller
+  template:
+    metadata:
+      labels:
+        app: binding-controller
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: binding
+      containers:
+        - name: manager
+          image: "{{ .Values.global.images.containerRegistry.path }}/binding:{{ .Values.global.images.binding_controller.version }}"
+          ports:
+            - containerPort: 8080
+          imagePullPolicy: Always
