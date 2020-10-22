@@ -34,6 +34,5 @@ jobs:
       - name: Apply test scenario and check deployment
         run: |
           ./ci/bindings/create-scenario.sh
-          kubectl get deployment sandbox -oyaml
-      - name: Tmate
-        uses: mxschmitt/action-tmate@v3
+          kubectl get pods --selector=app=sandbox -oyaml
+
