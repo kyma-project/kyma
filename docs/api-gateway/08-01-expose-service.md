@@ -60,7 +60,7 @@ EOF
 1. Call the endpoint by sending a `GET` request to the HttpBin service:
 
 ```bash
-curl -ik -X GET https://httpbinallow.$DOMAIN/ip
+curl -ik -X GET https://httpbin.$DOMAIN/ip
 ```
 
 2. Send a `POST` request to the HttpBin's `/post` endpoint:
