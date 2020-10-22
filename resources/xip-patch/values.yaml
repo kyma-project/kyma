@@ -2,7 +2,7 @@ containerRegistry:
   path: eu.gcr.io/kyma-project
 xip_patch:
   dir:
-  version: 5eef7326
+  version: e58c0831
 tls:
   secretName: "kyma-gateway-certs"
 global:
