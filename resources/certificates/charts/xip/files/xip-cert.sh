@@ -92,7 +92,7 @@ generateRootCACerts() {
 
     # Store Root CA key pair as secret (necessary for cert-manager to issue certificates based on the Root CA)
     SECRET=$(kubectl get secret -n "${ROOTCA_SECRET_NAMESPACE}" "${ROOTCA_SECRET_NAME}" --ignore-not-found)
-    if [[ -n "${SECRET}" ]]; then
+    if [[ -z "${SECRET}" ]]; then
         kubectl create secret tls "${ROOTCA_SECRET_NAME}" \
           --cert=/tmp/ca.crt \
           --key=/tmp/ca.key \
