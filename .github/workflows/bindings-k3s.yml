@@ -35,3 +35,5 @@ jobs:
         run: |
           ./ci/bindings/create-scenario.sh
           kubectl get deployment sandbox -oyaml
+      - name: Tmate
+        uses: mxschmitt/action-tmate@v3

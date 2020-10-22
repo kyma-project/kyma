@@ -4,7 +4,7 @@ metadata:
   name: binding
 rules:
 - apiGroups: ["bindings.kyma-project.io"]
-  resources: ["bindings", "targetkinds"]
+  resources: ["bindings", "targetkinds", "deployments"]
   verbs: ["get", "list", "watch", "create", "update", "delete"]
 
 ---
