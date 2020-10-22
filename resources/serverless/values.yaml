@@ -120,7 +120,7 @@ containers:
       serviceAccountRequeueDuration:
         value: 5m
       namespaceExcludedNames:
-        value: "istio-system,knative-eventing,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
+        value: "istio-system,knative-eventing,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system,cert-manager"
       imageRegistryDockerConfigSecretName:
         value: '{{ template "fullname" . }}-image-pull-secret'
       imagePullAccountName:
