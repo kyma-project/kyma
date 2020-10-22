@@ -8,7 +8,7 @@ metadata:
   labels:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 data:
-  patch-docker.sh: |
+  patch-docker.sh: |-
     #!/usr/bin/env bash
         
     set -o nounset
@@ -18,9 +18,9 @@ data:
     apk update
     apk add --no-cache openssl
 
-    CERT_FILE_TEXT=$(kubectl get secret kyma-gateway-certs -n istio-system -o=jsonpath='{.data.cert}' --ignore-not-found)
+    CERT_FILE_TEXT=$(kubectl get secret kyma-ca-key-pair -n istio-system -o=jsonpath="{.data['tls\.crt']}" --ignore-not-found)
     if [ -z "${CERT_FILE_TEXT}" ]; then
-      echo "No cert key in secret kyma-gateway-certs to inject. Checking tls.crt."
+      echo "No cert key in secret kyma-ca-key-pair to inject. Checking kyma-gateway-certs."
 
       CERT_FILE_TEXT=$(kubectl get secret kyma-gateway-certs -n istio-system -o=jsonpath="{.data['tls\.crt']}" --ignore-not-found)
       if [ -z "${CERT_FILE_TEXT}" ]; then

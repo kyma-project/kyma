@@ -91,10 +91,13 @@ generateRootCACerts() {
     openssl req -x509 -new -nodes -key /tmp/ca.key -subj "/CN=$INGRESS_DOMAIN" -days 3650 -reqexts v3_req -extensions v3_ca -out /tmp/ca.crt
 
     # Store Root CA key pair as secret (necessary for cert-manager to issue certificates based on the Root CA)
-    kubectl create secret tls "${ROOTCA_SECRET_NAME}" \
-      --cert=/tmp/ca.crt \
-      --key=/tmp/ca.key \
-      --namespace="${ROOTCA_SECRET_NAMESPACE}"
+    SECRET=$(kubectl get secret -n "${ROOTCA_SECRET_NAMESPACE}" "${ROOTCA_SECRET_NAME}" --ignore-not-found)
+    if [[ -n "${SECRET}" ]]; then
+        kubectl create secret tls "${ROOTCA_SECRET_NAME}" \
+          --cert=/tmp/ca.crt \
+          --key=/tmp/ca.key \
+          --namespace="${ROOTCA_SECRET_NAMESPACE}"
+    fi
 
     # Cleanup
     rm -f /tmp/ca.key
