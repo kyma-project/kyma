@@ -45,8 +45,6 @@ components:
     namespace: "kyma-system"
   - name: "istio"
     namespace: "istio-system"
-  - name: "xip-patch"
-    namespace: "kyma-installer"
   - name: "istio-kyma-patch"
     namespace: "istio-system"
   - name: "knative-eventing"
