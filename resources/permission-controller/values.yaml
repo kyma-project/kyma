@@ -33,3 +33,4 @@ config:
     - kyma-system
     - natss
     - compass-system
+    - cert-manager

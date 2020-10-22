@@ -21,6 +21,7 @@ data:
   {{- end }}
   {{- if .Values.global.domainName }}
   global.domainName: "{{ .Values.global.domainName }}"
+  global.ingress.domainName: "{{ .Values.global.domainName }}"
   {{- end }}
   {{- if .Values.global.loadBalancerIP }}
   global.loadBalancerIP: "{{ .Values.global.loadBalancerIP }}"
