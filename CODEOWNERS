@@ -177,6 +177,9 @@ components/etcd-tls-setup-job/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksp
 #API server proxy Component
 /components/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
+# Binding Component
+/components/binding/ @PK85 @piotrmiskiewicz @polskikiel @jasiu001 @crabtree @kjaksik @ksputo
+
 # Binding usage controller Component
 /components/service-binding-usage-controller/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @crabtree @kjaksik
 
