@@ -16,14 +16,12 @@ type WebhookAuth struct {
 
 // ProtocolSettings defines the CE protocol setting specification implementation
 type ProtocolSettings struct {
-	ContentMode string `json:"contentMode,omitempty"`
-	// TODO(nachtmaar): discuss with radu, either make it true by default or remove it for now
+	ContentMode     string       `json:"contentMode,omitempty"`
 	ExemptHandshake bool         `json:"exemptHandshake,omitempty"`
 	Qos             string       `json:"qos,omitempty"`
 	WebhookAuth     *WebhookAuth `json:"webhookAuth,omitempty"`
 }
 
-// TODO(nachtmaar): validate me in controller
 const (
 	ProtocolSettingsContentModeBinary     string = "BINARY"
 	ProtocolSettingsContentModeStructured string = "STRUCTURED"
@@ -42,7 +40,7 @@ type BebFilter struct {
 	EventType   *Filter `json:"eventType"`
 }
 
-// BebFilters defines the list of Beb filters
+// BebFilters defines the list of BEB filters
 type BebFilters struct {
 	Dialect string       `json:"dialect,omitempty"`
 	Filters []*BebFilter `json:"filters"`
@@ -50,8 +48,8 @@ type BebFilters struct {
 
 // SubscriptionSpec defines the desired state of Subscription
 type SubscriptionSpec struct {
-	// Id is the unique identifier of Subscription, read-only.
-	Id               string            `json:"id,omitempty"`
+	// ID is the unique identifier of Subscription, read-only.
+	ID               string            `json:"id,omitempty"`
 	Protocol         string            `json:"protocol"`
 	ProtocolSettings *ProtocolSettings `json:"protocolsettings"`
 	Sink             string            `json:"sink"`
@@ -69,8 +67,6 @@ type EmsSubscriptionStatus struct {
 // +kubebuilder:subresource:status
 
 // SubscriptionStatus defines the observed state of Subscription
-// TODO: it should contain:
-// - the status of the exposed Webhook
 type SubscriptionStatus struct {
 	Conditions            []Condition           `json:"conditions,omitempty"`
 	Ev2hash               int64                 `json:"ev2hash,omitempty"`

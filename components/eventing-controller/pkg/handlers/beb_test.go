@@ -53,7 +53,7 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 		},
 		// TODO: validate all fields from here in the controller
 		Spec: eventingv1alpha1.SubscriptionSpec{
-			Id:       "id",
+			ID:       "id",
 			Protocol: "BEB",
 			ProtocolSettings: &eventingv1alpha1.ProtocolSettings{
 				ContentMode:     eventingv1alpha1.ProtocolSettingsContentModeBinary,

@@ -2,7 +2,6 @@ package v1alpha1
 
 import (
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -14,17 +13,17 @@ const (
 )
 
 type Condition struct {
-	Type               ConditionType      `json:"type,omitempty"`
-	Status             v1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
-	LastTransitionTime metav1.Time        `json:"lastTransitionTime,omitempty"`
-	Reason             ConditionReason    `json:"reason,omitempty"`
-	Message            string             `json:"message,omitempty"`
+	Type               ConditionType          `json:"type,omitempty"`
+	Status             corev1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
+	LastTransitionTime metav1.Time            `json:"lastTransitionTime,omitempty"`
+	Reason             ConditionReason        `json:"reason,omitempty"`
+	Message            string                 `json:"message,omitempty"`
 }
 
 type ConditionReason string
 
 const (
-	ConditionReasonSubscriptionCreated   ConditionReason = "BEB SubscriptionCreated"
+	ConditionReasonSubscriptionCreated   ConditionReason = "BEB Subscription created"
 	ConditionReasonSubscriptionActive    ConditionReason = "BEB Subscription active"
 	ConditionReasonSubscriptionNotActive ConditionReason = "BEB Subscription not active"
 	ConditionReasonSubscriptionDeleted   ConditionReason = "BEB SubscriptionDeleted"
@@ -33,7 +32,7 @@ const (
 // InitializeConditions sets unset conditions to Unknown
 func (s *SubscriptionStatus) InitializeConditions() {
 	initialConditions := makeConditions()
-	givenConditions := make(map[ConditionType]Condition, 0)
+	givenConditions := make(map[ConditionType]Condition)
 
 	// create map of Condition per ConditionType
 	for _, condition := range s.Conditions {
