@@ -47,7 +47,6 @@ metadata:
     kyma-project.io/installation: ""
     component: certificates
 data:
-  modules.manager.enabled: "{{ .Values.global.certificates.manager.enabled }}"
   {{- if eq .Values.global.certificates.type "xip" }}
   modules.xip.enabled: "true"
   {{- end }}
