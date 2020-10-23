@@ -49,7 +49,6 @@ func (c Client) Publish(event cloudevents.Event, qos types2.Qos) (*types2.Publis
 
 	// set required headers
 	req.Header.Set("qos", string(qos))
-	req.Header.Set("Content-Type", "application/cloudevents+json")
 
 	var response types2.PublishResponse
 	if resp, responseBody, err := c.httpClient.Do(req, &response); err != nil {

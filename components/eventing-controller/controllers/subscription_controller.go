@@ -64,12 +64,11 @@ func NewSubscriptionReconciler(
 
 // TODO: Optimize number of reconciliation calls in eventing-controller #9766: https://github.com/kyma-project/kyma/issues/9766
 func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	_ = context.Background()
+	ctx := context.Background()
 	_ = r.Log.WithValues("subscription", req.NamespacedName)
 
 	cachedSubscription := &eventingv1alpha1.Subscription{}
 
-	ctx := context.TODO()
 	result := ctrl.Result{}
 
 	// Ensure the object was not deleted in the meantime
@@ -157,7 +156,7 @@ func (r *SubscriptionReconciler) syncFinalizer(subscription *eventingv1alpha1.Su
 	return nil
 }
 
-// syncBEBSubscription it returns
+// syncBEBSubscription delegates the subscription synchronization to the backend client. It returns true if the subscription sattus was changed.
 func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscription,
 	result *ctrl.Result, ctx context.Context, logger logr.Logger) (bool, error) {
 	logger.Info("Syncing subscription with BEB")
