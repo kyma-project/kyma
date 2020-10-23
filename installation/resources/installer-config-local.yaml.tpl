@@ -37,6 +37,7 @@ data:
   global.adminPassword: ""
   global.minikubeIP: ""
   global.certificates.type: "legacy"
+  global.certificates.manager.enabled: "false"
 ---
 apiVersion: v1
 kind: ConfigMap
