@@ -37,7 +37,7 @@ jobs:
           helm install bindings ./resources/binding
       - name: Apply test scenario and check deployment
         run: |
-          ./ci/bindings/create-scenario.sh
+          ./ci/binding/create-scenario.sh
           sleep 30
           kubectl get pods --selector=app=sandbox -oyaml 
 
