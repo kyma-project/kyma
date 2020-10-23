@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gstruct"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -126,18 +127,31 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	When("Subscription hash did change", func() {
+	When("Subscription changed", func() {
 		It("Should update the BEB subscription", func() {
-		})
-	})
+			subscriptionName := "test-subscription-beb-not-status-not-ready"
+			ctx := context.Background()
+			givenSubscription := fixtureValidSubscription(subscriptionName, namespaceName)
+			ensureSubscriptionCreated(givenSubscription, ctx)
+			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: namespaceName}
 
-	When("Subscription hash did not change", func() {
-		It("Should not create a POST or DELETE call against BEB", func() {
-		})
-	})
+			By("Given subscription is ready")
+			var subscription = &eventingv1alpha1.Subscription{}
+			getSubscription(subscription, subscriptionLookupKey, ctx).Should(testing.HaveSubscriptionReady())
 
-	When("BEB Subscription is not active", func() {
-		It("Should not mark the subscription as ready", func() {
+			By("Updating the sink")
+			subscription.Spec.Sink = "https://something.else.com"
+			updateSubscription(subscription, ctx).Should(testing.HaveSubscriptionReady())
+
+			By("Updating the BEB Subscription with the new sink")
+			bebCreationRequests := make([]bebtypes.Subscription, 0)
+			getBebSubscriptionCreationRequests(bebCreationRequests).Should(And(
+				ContainElement(MatchFields(IgnoreMissing|IgnoreExtras,
+					Fields{
+						"Name":       BeEquivalentTo(subscription.Name),
+						"WebhookUrl": BeEquivalentTo(subscription.Spec.Sink),
+					},
+				))))
 		})
 	})
 
@@ -353,6 +367,15 @@ func getSubscription(subscription *eventingv1alpha1.Subscription, lookupKey type
 	}, time.Second*10, time.Second)
 }
 
+func updateSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Context) AsyncAssertion {
+	return Eventually(func() eventingv1alpha1.Subscription {
+		if err := k8sClient.Update(ctx, subscription); err != nil {
+			return eventingv1alpha1.Subscription{}
+		}
+		return *subscription
+	}, time.Second*10, time.Second)
+}
+
 // getK8sEvents returns all kubernetes events for the given namespace.
 // The result can be used in a gomega assertion.
 func getK8sEvents(eventList *v1.EventList, namespace string) AsyncAssertion {
@@ -384,6 +407,21 @@ func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx 
 	// create subscription
 	err := k8sClient.Create(ctx, subscription)
 	Expect(err).Should(BeNil())
+}
+
+// getBebSubscriptionCreationRequests filters the http requests made against BEB and returns the BEB Subscriptions
+func getBebSubscriptionCreationRequests(bebSubscriptions []bebtypes.Subscription) AsyncAssertion {
+
+	return Eventually(func() []bebtypes.Subscription {
+
+		for r, payloadObject := range beb.Requests {
+			if testing.IsBebSubscriptionCreate(r, *beb.BebConfig) {
+				bebSubscription := payloadObject.(bebtypes.Subscription)
+				bebSubscriptions = append(bebSubscriptions, bebSubscription)
+			}
+		}
+		return bebSubscriptions
+	})
 }
 
 // ensureSubscriptionCreationFails creates a Subscription in the k8s cluster and ensures that it is reject because of invalid schema
