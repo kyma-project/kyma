@@ -15,7 +15,6 @@ func TestParallelRunner(t *testing.T) {
 	//GIVEN
 	g := gomega.NewWithT(t)
 	logger, hook := test.NewNullLogger()
-	//logger = logrus.New()
 	logf := logger.WithField("Test", "Test")
 	idx := 0
 
@@ -49,7 +48,7 @@ func TestParallelRunner(t *testing.T) {
 	entry, nextLogIdx = getFirstMatchingLog(logEntries, "Called on Error, resource: start 0", nextLogIdx)
 	g.Expect(entry).ToNot(gomega.BeNil())
 
-	entry, nextLogIdx = getFirstMatchingLog(logEntries, "Cleanup Serial Step: Parallel:Parallel Step", nextLogIdx)
+	entry, nextLogIdx = getFirstMatchingLog(logEntries, "Cleanup Serial Step: Parallel: Parallel Step", nextLogIdx)
 	g.Expect(entry).ToNot(gomega.BeNil())
 
 	entry, nextLogIdx = getFirstMatchingLog(logEntries, "Cleanup Serial Step: start 0", nextLogIdx)
@@ -62,7 +61,6 @@ func TestMixed(t *testing.T) {
 	//GIVEN
 	g := gomega.NewWithT(t)
 	logger, hook := test.NewNullLogger()
-	//logger = logrus.New()
 	logf := logger.WithField("TestSuite", "Test")
 	log1 := logf.WithField("Test", "suite1")
 	log2 := logf.WithField("Test", "suite2")
@@ -131,7 +129,7 @@ func TestMixed(t *testing.T) {
 	g.Expect(len(errorLogs)).To(gomega.Equal(3))
 	g.Expect(errorLogs[0].Message).To(gomega.Equal("Error in step 2.4, error: Error Attention"))
 	g.Expect(errorLogs[1].Message).To(gomega.ContainSubstring("Fault Serial Runner, Steps: 0:step 2.1, 1:step 2.2, 2:step 2.3, 3:step 2.4, 4:step 2.5., returned error: while executing step: step 2.4: Error Attention"))
-	g.Expect(errorLogs[2].Message).To(gomega.ContainSubstring("Error in Parallel:test"))
+	g.Expect(errorLogs[2].Message).To(gomega.ContainSubstring("Error in Parallel: test"))
 
 	hook.Reset()
 }

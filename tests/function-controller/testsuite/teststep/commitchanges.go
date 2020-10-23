@@ -39,6 +39,11 @@ func (c commitChanges) Run() error {
 }
 
 func (c commitChanges) OnError(cause error) error {
+	out, err := c.gitClient.PullRemote(filePath)
+	if err != nil {
+		return errors.Wrap(err, "while pulling from remote repository")
+	}
+	c.log.Infof("Code from git repository: %s", out)
 	return nil
 }
 

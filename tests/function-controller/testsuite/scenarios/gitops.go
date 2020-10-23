@@ -58,7 +58,7 @@ func GitopsSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Ent
 		Log:                genericContainer.Log,
 		DataKey:            testsuite.TestDataKey,
 	}
-	return step.NewSerialTestRunner(logf, "Create Git Func",
+	return step.NewSerialTestRunner(logf, "create git func",
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
 		teststep.NewGitServer(gitCfg, "Start in-cluster Git Server", appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace)),
 		teststep.NewCreateGitRepository(genericContainer.Log, gitCfg.Repo, "Create GitRepository", gitops.NoAuthRepositorySpec(gitCfg.GetGitServerInClusterURL())),
@@ -67,28 +67,4 @@ func GitopsSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Ent
 		teststep.NewHTTPCheck(genericContainer.Log, "Git Function pre update simple check through gateway", gitCfg.InClusterURL, poll, "GITOPS 1"),
 		teststep.NewCommitChanges(genericContainer.Log, "Commit changes to Git Function", gitCfg.GetGitServerInClusterURL()),
 		teststep.NewHTTPCheck(genericContainer.Log, "Git Function post update simple check through gateway", gitCfg.InClusterURL, poll, "GITOPS 2")), nil
-}
-
-type testStep struct {
-	err  error
-	name string
-	logf *logrus.Entry
-}
-
-func (e testStep) Name() string {
-	return e.name
-}
-
-func (e testStep) Run() error {
-	e.logf = e.logf.WithField("Step", e.name)
-	return e.err
-}
-
-func (e testStep) Cleanup() error {
-	return nil
-}
-
-func (e testStep) OnError(cause error) error {
-	e.logf.Infof("Called on Error, resource: %s", e.name)
-	return nil
 }

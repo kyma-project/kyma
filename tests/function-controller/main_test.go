@@ -47,12 +47,15 @@ func runTests(t *testing.T, testFunc testSuite) {
 	logf.SetFormatter(&logrus.TextFormatter{})
 	logf.SetReportCaller(false)
 
-	steps, err := testFunc(restConfig, cfg.Test, logf.WithField("Suite", t.Name()))
+	steps, err := testFunc(restConfig, cfg.Test, logf.WithField("suite", t.Name()))
 	failOnError(g, err)
 	runner := step.NewRunner(step.WithCleanupDefault(cfg.Test.Cleanup), step.WithLogger(logf))
 
 	err = runner.Execute(steps)
 	failOnError(g, err)
+	if err != nil {
+		t.Fail()
+	}
 }
 
 func loadConfig(prefix string) (config, error) {

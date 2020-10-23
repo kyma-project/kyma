@@ -24,10 +24,6 @@ func (n NamespaceStep) Run() error {
 }
 
 func (n NamespaceStep) Cleanup() error {
-	if err := n.ns.LogResource(); err != nil {
-		return errors.Wrapf(err, "while logging namespace to stdout")
-	}
-
 	return errors.Wrap(n.ns.Delete(), "while deleting namespace")
 }
 

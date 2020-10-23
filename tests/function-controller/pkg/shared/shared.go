@@ -22,8 +22,9 @@ type Container struct {
 }
 
 func (c *Container) WithLogger(l *logrus.Entry) Container {
-	c.Log = l
-	return *c
+	newContainer := *c
+	newContainer.Log = l
+	return newContainer
 }
 
 func LogReadiness(ready, verbose bool, name string, log *logrus.Entry, resource interface{}) {

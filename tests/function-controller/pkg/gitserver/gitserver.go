@@ -173,17 +173,16 @@ func (gs *GitServer) Delete() error {
 }
 
 func (gs *GitServer) LogResource() error {
-	deployment, err := gs.deployments.Get(gs.name, metav1.GetOptions{})
+	obj, err := gs.resCli.Get(gs.name)
 	if err != nil {
-		return errors.Wrap(err, "while getting deployment")
+		return errors.Wrap(err, "while getting destination rule")
 	}
-	//The client doesn't fill deployment TypeMeta
-	deployment.TypeMeta.Kind = "deployment"
-	out, err := helpers.PrettyMarshall(deployment)
+	out, err := helpers.PrettyMarshall(obj)
 	if err != nil {
-		return errors.Wrap(err, "while marshalling deployment")
+		return errors.Wrap(err, "while marshalling APU Rule")
 	}
 	gs.log.Info(out)
+
 
 	svc, err := gs.services.Get(gs.name, metav1.GetOptions{})
 	if err != nil {
@@ -197,13 +196,15 @@ func (gs *GitServer) LogResource() error {
 	}
 	gs.log.Info(out)
 
-	obj, err := gs.resCli.Get(gs.name)
+	deployment, err := gs.deployments.Get(gs.name, metav1.GetOptions{})
 	if err != nil {
-		return errors.Wrap(err, "while getting destination rule")
+		return errors.Wrap(err, "while getting deployment")
 	}
-	out, err = helpers.PrettyMarshall(obj)
+	//The client doesn't fill deployment TypeMeta
+	deployment.TypeMeta.Kind = "deployment"
+	out, err = helpers.PrettyMarshall(deployment)
 	if err != nil {
-		return errors.Wrap(err, "while marshalling APU Rule")
+		return errors.Wrap(err, "while marshalling deployment")
 	}
 	gs.log.Info(out)
 

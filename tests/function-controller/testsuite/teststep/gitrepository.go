@@ -39,5 +39,5 @@ func (r createGitRepository) Cleanup() error {
 }
 
 func (r createGitRepository) OnError(cause error) error {
-	return nil
+	return r.repo.LogResource()
 }

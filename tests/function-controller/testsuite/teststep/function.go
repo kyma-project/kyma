@@ -38,10 +38,6 @@ func (f newFunction) Run() error {
 }
 
 func (f newFunction) Cleanup() error {
-	if err := f.fn.LogResource(); err != nil {
-		f.log.Warn(errors.Wrapf(err, "while logging function"))
-	}
-
 	return errors.Wrapf(f.fn.Delete(), "while deleting function: %s", f.name)
 }
 
@@ -80,7 +76,7 @@ func (e emptyFunction) Cleanup() error {
 }
 
 func (e emptyFunction) OnError(cause error) error {
-	return e.fn.LogResource()
+	return nil
 }
 
 var _ step.Step = emptyFunction{}

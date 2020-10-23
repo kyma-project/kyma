@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
+
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/sirupsen/logrus"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -56,6 +58,7 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 		Verbose:     cfg.Verbose,
 		Log:         logf,
 	}
+	emptyFn := function.NewFunction("empty-fn", genericContainer.WithLogger(nodejs12Logger))
 
 	nodejs12Cfg, err := runtimes.NewFunctionConfig("nodejs12", cfg.UsageKindName, cfg.DomainName, genericContainer.WithLogger(nodejs12Logger), clientset)
 	if err != nil {
@@ -74,7 +77,7 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 
 	addon := addons.New("test-addon", genericContainer)
 
-	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer)
+	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs10Logger))
 	cmEnvKey := "CM_ENV_KEY"
 	cmEnvValue := "Value taken as env from ConfigMap"
 	cmData := map[string]string{
@@ -93,7 +96,7 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 		InsecureSkipVerify: cfg.InsecureSkipVerify,
 		DataKey:            testsuite.TestDataKey,
 	}
-	return step.NewSerialTestRunner(logf, "Runtime Test",
+	return step.NewSerialTestRunner(logf, "runtime Test",
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
 		teststep.NewAddonConfiguration("Create addon configuration", addon, addonURL, genericContainer),
 		step.NewParallelRunner(logf, "fn_tests",
@@ -111,7 +114,7 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 post update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), "Hello From updated nodejs10"),
 			),
 			step.NewSerialTestRunner(nodejs12Logger, "NodeJS12 test",
-				teststep.CreateEmptyFunction(nodejs12Cfg.Fn),
+				teststep.CreateEmptyFunction(emptyFn),
 				teststep.CreateFunction(nodejs12Logger, nodejs12Cfg.Fn, "Create NodeJS12 Function", runtimes.BasicNodeJSFunction("Hello From nodejs", serverlessv1alpha1.Nodejs12)),
 				teststep.NewDefaultedFunctionCheck("Check NodeJS12 function has correct default values", nodejs12Cfg.Fn),
 				teststep.NewConfigureFunction(nodejs12Logger, "Check NodeJS12 function post-upgrade", nodejs12Cfg.FnName, nodejs12Cfg.ApiRule, nodejs12Cfg.APIRuleURL,
@@ -123,4 +126,28 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 				teststep.NewE2EFunctionCheck(nodejs12Logger, "NodeJS12 post update e2e check", nodejs12Cfg.InClusterURL, nodejs12Cfg.APIRuleURL, nodejs12Cfg.BrokerURL, poll.WithLogger(nodejs12Logger)),
 			)),
 	), nil
+}
+
+type testStep struct {
+	err  error
+	name string
+	logf *logrus.Entry
+}
+
+func (e testStep) Name() string {
+	return e.name
+}
+
+func (e testStep) Run() error {
+	e.logf = e.logf.WithField("Step", e.name)
+	return e.err
+}
+
+func (e testStep) Cleanup() error {
+	return nil
+}
+
+func (e testStep) OnError(cause error) error {
+	e.logf.Infof("Called on Error, resource: %s", e.name)
+	return nil
 }
