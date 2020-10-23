@@ -30,9 +30,6 @@ type SubscriptionReconciler struct {
 	bebClient *handlers.Beb
 }
 
-// TODO: emit events
-// TODO: use additional printer columns: https://book.kubebuilder.io/reference/generating-crd.html#additional-printer-columns
-
 var (
 	FinalizerName = eventingv1alpha1.GroupVersion.Group
 )
