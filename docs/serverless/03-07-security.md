@@ -15,4 +15,4 @@ To eliminate potential security risks when using Functions, bear in mind these f
 
     - Source code of all Functions within this Namespace
     - Internal Docker registry that contains Function images
-    - Secrets allowing the build Job to pull and push images from and to the Docker registry 
+    - Secrets allowing the build Job to pull and push images from and to the Docker registry (in non-system Namespaces)
