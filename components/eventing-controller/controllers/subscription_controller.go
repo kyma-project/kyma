@@ -10,7 +10,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/record"
 
-	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 
 	"github.com/pkg/errors"
@@ -104,7 +104,7 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	}
 
 	// mark if the subscription status was changed
-	var statusChanged bool
+	statusChanged := false
 
 	// Sync with APIRule, expose the webhook
 	if statusChangedForAPIRule, err := r.syncAPIRule(subscription, &result, ctx, log); err != nil {
@@ -367,28 +367,26 @@ const timeoutRetryActiveEmsStatus = time.Second * 30
 
 // checkStatusActive checks if the subscription is active and if not, sets a timer for retry
 func (r *SubscriptionReconciler) checkStatusActive(subscription *eventingv1alpha1.Subscription) (statusChanged, retry bool, err error) {
-	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus == string(types2.SubscriptionStatusActive) {
+	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus == string(types.SubscriptionStatusActive) {
 		if len(subscription.Status.FailedActivation) > 0 {
 			subscription.Status.FailedActivation = ""
-			statusChanged = true
+			return true, false, nil
 		}
-		return
+		return false, false, nil
 	}
 	t1 := time.Now()
 	if len(subscription.Status.FailedActivation) == 0 {
 		// it's the first time
 		subscription.Status.FailedActivation = t1.Format(time.RFC3339)
-		statusChanged = true
-		retry = true
-	} else {
-		// check the timeout
-		if t0, er := time.Parse(time.RFC3339, subscription.Status.FailedActivation); er != nil {
-			err = er
-		} else if t1.Sub(t0) > timeoutRetryActiveEmsStatus {
-			err = fmt.Errorf("timeout waiting for the subscription to be active: %v", subscription.Name)
-		} else {
-			retry = true
-		}
+		return true, true, nil
 	}
-	return
+	// check the timeout
+	if t0, er := time.Parse(time.RFC3339, subscription.Status.FailedActivation); er != nil {
+		err = er
+	} else if t1.Sub(t0) > timeoutRetryActiveEmsStatus {
+		err = fmt.Errorf("timeout waiting for the subscription to be active: %v", subscription.Name)
+	} else {
+		retry = true
+	}
+	return false, retry, err
 }
