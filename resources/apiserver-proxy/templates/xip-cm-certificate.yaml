@@ -1,4 +1,5 @@
-{{- if eq .Values.global.certificates.type "xip" }}
+{{- $generateCertForXIPDomain := (eq .Values.global.certificates.type "xip") -}}
+{{- if $generateCertForXIPDomain }}
 ---
 apiVersion: v1
 kind: ConfigMap

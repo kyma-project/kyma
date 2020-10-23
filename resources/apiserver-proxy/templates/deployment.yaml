@@ -1,3 +1,6 @@
+{{- $shouldMountCACert := (or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip")) -}}
+{{- $generateCertForXIPDomain := (eq .Values.global.certificates.type "xip") -}}
+{{- $useCertProvidedByUser := (eq .Values.global.certificates.type "legacy") -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -35,14 +38,12 @@ spec:
           hostnames:
             - "dex.{{ .Values.global.ingress.domainName }}"
       {{- end }}
-      {{- if or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip") }}
+      {{- if or $generateCertForXIPDomain $useCertProvidedByUser }}
       initContainers:
         - name: apiserver-proxy-init
           image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
           imagePullPolicy: IfNotPresent
           env:
-            - name: TYPE
-              value: "{{ .Values.global.certificates.type }}"
             - name: APISERVER_SERVICE_NAME
               value: "{{ template "name" . }}-ssl"
             - name: APISERVER_SERVICE_NAMESPACE
@@ -59,15 +60,15 @@ spec:
             - bash
             - -c
             - |
-{{- if eq .Values.global.certificates.type "xip" }}
+{{- if $generateCertForXIPDomain }}
 {{ .Files.Get "files/xip.sh" | printf "%s" | indent 14 }}
-{{- else if eq .Values.global.certificates.type "legacy" }}
+{{- else if $useCertProvidedByUser }}
               echo "{{ .Values.global.tlsCrt }}" | base64 --decode > /etc/ca-tls-cert/tls.crt
 {{- end }}
           volumeMounts:
             - name: ca-tls-cert
               mountPath: /etc/ca-tls-cert/
-        {{- if eq .Values.global.certificates.type "xip" }}
+        {{- if $generateCertForXIPDomain }}
             - name: manifests
               mountPath: /etc/manifests
               readOnly: true
@@ -94,7 +95,7 @@ spec:
         - --v=9
         - --oidc-issuer=https://dex.{{ .Values.global.ingress.domainName }}
         - --oidc-clientID=kyma-client
-      {{- if or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip") }}
+      {{- if $shouldMountCACert }}
         - --oidc-ca-file=/etc/ca-tls-cert/tls.crt
       {{- end }}
         - --cors-allow-origin={{ .Values.corsPolicy.allowOrigin | join "," }}
@@ -114,15 +115,15 @@ spec:
         volumeMounts:
         - name: tls-cert
           mountPath: /etc/tls-cert/
-      {{- if or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip") }}
+      {{- if $shouldMountCACert }}
         - name: ca-tls-cert
           mountPath: /etc/ca-tls-cert/
       {{- end }}
       volumes:
-    {{- if or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip") }}
+    {{- if $shouldMountCACert }}
       - name: ca-tls-cert
         emptyDir: {}
-      {{- if eq .Values.global.certificates.type "xip" }}
+      {{- if $generateCertForXIPDomain }}
       - name: manifests
         configMap:
           name: {{ include "fullname" . }}-xip-certificate

@@ -4,7 +4,6 @@ set -o pipefail
 # # # # # # # # # # # # # # # # # # #
 # VARs coming from environment:     #
 #                                   #
-# TYPE                              #
 # APISERVER_SERVICE_NAME            #
 # APISERVER_SERVICE_NAMESPACE       #
 # # # # # # # # # # # # # # # # # # #

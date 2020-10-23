@@ -1,3 +1,4 @@
+{{- $generateCertForXIPDomain := (eq .Values.global.certificates.type "xip") -}}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -18,7 +19,7 @@ subjects:
   name: {{ template "name" . }}
   namespace: {{ .Release.Namespace }}
 
-{{- if eq .Values.global.certificates.type "xip" }}
+{{- if $generateCertForXIPDomain }}
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1

@@ -1,4 +1,5 @@
-{{ if eq .Values.global.certificates.type "xip" }}
+{{- $shouldFetchXIPDomainCert := (eq .Values.global.certificates.type "xip") -}}
+{{ if $shouldFetchXIPDomainCert }}
 ---
 apiVersion: v1
 kind: ServiceAccount

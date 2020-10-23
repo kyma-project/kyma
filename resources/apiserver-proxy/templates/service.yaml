@@ -1,3 +1,4 @@
+{{- $useGardenerCertificatesFunctionality := (eq .Values.global.certificates.type "gardener") -}}
 ---
 # Secure port service
 apiVersion: v1
@@ -5,7 +6,7 @@ kind: Service
 metadata:
   name: {{ template "name" . }}-ssl
   namespace: {{ .Release.Namespace }}
-{{- if eq .Values.global.certificates.type "gardener" }}
+{{- if $useGardenerCertificatesFunctionality }}
   annotations:
     cert.gardener.cloud/secretname: {{ template "name" . }}-tls-cert
     dns.gardener.cloud/class: garden
