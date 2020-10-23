@@ -3,6 +3,8 @@ title: IAM Kubeconfig Service chart
 type: Configuration
 ---
 
+>**CAUTION:** The IAM Kubeconfig component (iam-kubeconfig) is deprecated and will be replaced with a different mechanism.
+
 To configure the IAM Kubeconfig Service chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
 
 >**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
