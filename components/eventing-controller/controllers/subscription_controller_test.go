@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
+	"net/http"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -141,15 +143,94 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 	When("BEB subscription creation failed", func() {
 		It("Should not mark the subscription as ready", func() {
-			By("Marking it as not ready")
+			subscriptionName := "test-subscription-beb-not-status-not-ready"
+			ctx := context.Background()
+			givenSubscription := fixtureValidSubscription(subscriptionName, namespaceName)
+			var subscription = &eventingv1alpha1.Subscription{}
+
+			By("preparing mock to simulate creation of BEB subscription failing on BEB side")
+			beb.CreateResponse = func(w http.ResponseWriter) {
+				// ups ... server returns 500
+				w.WriteHeader(http.StatusInternalServerError)
+				s := bebtypes.Response{
+					StatusCode: http.StatusInternalServerError,
+					Message:    "sorry, but this mock does not let you create a BEB subscription",
+				}
+				err := json.NewEncoder(w).Encode(s)
+				Expect(err).ShouldNot(HaveOccurred())
+			}
+
+			ensureSubscriptionCreated(givenSubscription, ctx)
+			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: namespaceName}
+
 			By("Setting a subscription not created condition")
+			subscriptionNotCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, v1.ConditionFalse)
+			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
+				testing.HaveSubscriptionName(subscriptionName),
+				testing.HaveCondition(subscriptionNotCreatedCondition),
+			))
+
+			By("Marking it as not ready")
+			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
+				testing.HaveSubscriptionName(subscriptionName),
+				Not(testing.HaveSubscriptionReady()),
+			))
+
+			By("Deleting the object to not provoke more reconciliation requests")
+			Expect(k8sClient.Delete(ctx, subscription)).Should(BeNil())
+			getSubscription(subscription, subscriptionLookupKey, ctx).ShouldNot(testing.HaveSubscriptionFinalizer(FinalizerName))
 		})
 	})
 
 	When("BEB subscription status is not ready", func() {
 		It("Should not mark the subscription as ready", func() {
-			By("Marking it as not ready")
+			subscriptionName := "test-subscription-beb-not-status-not-ready"
+			ctx := context.Background()
+			givenSubscription := fixtureValidSubscription(subscriptionName, namespaceName)
+			var subscription = &eventingv1alpha1.Subscription{}
+			isBebSubscriptionCreated := false
+
+			By("preparing mock to simulate a non ready BEB subscription")
+			beb.GetResponse = func(w http.ResponseWriter, subscriptionName string) {
+				// until the BEB subscription creation call was performed, send successful get requests
+				if !isBebSubscriptionCreated {
+					testing.BebGetSuccess(w, subscriptionName)
+				} else {
+					// after the BEB subscription was created, set the status to paused
+					w.WriteHeader(http.StatusOK)
+					s := bebtypes.Subscription{
+						Name: subscriptionName,
+						// ups ... BEB Subscription status is now paused
+						SubscriptionStatus: bebtypes.SubscriptionStatusPaused,
+					}
+					err := json.NewEncoder(w).Encode(s)
+					Expect(err).ShouldNot(HaveOccurred())
+				}
+			}
+			beb.CreateResponse = func(w http.ResponseWriter) {
+				isBebSubscriptionCreated = true
+				testing.BebCreateSuccess(w)
+			}
+
+			ensureSubscriptionCreated(givenSubscription, ctx)
+			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: namespaceName}
+
 			By("Setting a subscription not active condition")
+			subscriptionNotActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionNotActive, v1.ConditionFalse)
+			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
+				testing.HaveSubscriptionName(subscriptionName),
+				testing.HaveCondition(subscriptionNotActiveCondition),
+			))
+
+			By("Marking it as not ready")
+			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
+				testing.HaveSubscriptionName(subscriptionName),
+				Not(testing.HaveSubscriptionReady()),
+			))
+
+			By("Deleting the object to not provoke more reconciliation requests")
+			Expect(k8sClient.Delete(ctx, subscription)).Should(BeNil())
+			getSubscription(subscription, subscriptionLookupKey, ctx).ShouldNot(testing.HaveSubscriptionFinalizer(FinalizerName))
 		})
 	})
 
@@ -168,7 +249,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 				getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
 					testing.HaveSubscriptionName(subscriptionName),
-					testing.HaveSubscriptionFinalizer(FinalizerName),
 					testing.HaveSubscriptionReady(),
 				))
 
@@ -288,6 +368,8 @@ func getK8sEvents(eventList *v1.EventList, namespace string) AsyncAssertion {
 
 // ensureSubscriptionCreated creates a Subscription in the k8s cluster. If a custom namespace is used, it will be created as well.
 func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx context.Context) {
+
+	By(fmt.Sprintf("Ensuring the test namespace %q is created", subscription.Namespace))
 	if subscription.Namespace != "default " {
 		// create testing namespace
 		namespace := fixtureNamespace(subscription.Namespace)
@@ -297,6 +379,8 @@ func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx 
 			Expect(err).ShouldNot(HaveOccurred())
 		}
 	}
+
+	By(fmt.Sprintf("Ensuring the subscription %q is created", subscription.Name))
 	// create subscription
 	err := k8sClient.Create(ctx, subscription)
 	Expect(err).Should(BeNil())
@@ -390,7 +474,7 @@ func printSubscriptions(namespace string) error {
 		logf.Log.V(1).Info("error while getting subscription list", "error", err)
 		return err
 	}
-	logf.Log.V(1).Info("subscriptions", "subscriptions", subscriptionList)
+	fmt.Printf("subscriptions: %+v\n", subscriptionList)
 	return nil
 }
 
@@ -403,6 +487,5 @@ func generateTestSuiteID() int {
 func getUniqueNamespaceName() string {
 	testSuiteID := generateTestSuiteID()
 	namespaceName := fmt.Sprintf("%s%d", subscriptionNamespacePrefix, testSuiteID)
-	By(fmt.Sprintf("Using unique namespace name: %s", namespaceName))
 	return namespaceName
 }

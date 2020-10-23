@@ -175,6 +175,10 @@ func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alp
 	var err error
 	if statusChanged, err = r.bebClient.SyncBebSubscription(subscription); err != nil {
 		logger.Error(err, "Update BEB subscription failed")
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse)
+		if err := r.updateCondition(subscription, condition, ctx); err != nil {
+			return statusChanged, err
+		}
 		return false, err
 	}
 
@@ -251,9 +255,14 @@ func (r *SubscriptionReconciler) syncInitialStatus(subscription *eventingv1alpha
 
 // updateCondition replaces the given condition on the subscription and updates the status as well as emitting a kubernetes event
 func (r *SubscriptionReconciler) updateCondition(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition, ctx context.Context) error {
-	if err := r.replaceStatusCondition(subscription, condition); err != nil {
+	needsUpdate, err := r.replaceStatusCondition(subscription, condition)
+	if err != nil {
 		return err
 	}
+	if !needsUpdate {
+		return nil
+	}
+
 	if err := r.Status().Update(ctx, subscription); err != nil {
 		return err
 	}
@@ -264,7 +273,7 @@ func (r *SubscriptionReconciler) updateCondition(subscription *eventingv1alpha1.
 
 // replaceStatusCondition replaces the given condition on the subscription. Also it sets the readyness in the status.
 // So make sure you always use this method then changing a condition
-func (r *SubscriptionReconciler) replaceStatusCondition(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition) error {
+func (r *SubscriptionReconciler) replaceStatusCondition(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition) (bool, error) {
 	// the subscription is ready if all conditions are fulfilled
 	isReady := true
 
@@ -280,20 +289,20 @@ func (r *SubscriptionReconciler) replaceStatusCondition(subscription *eventingv1
 			chosenCondition = c
 		}
 		desiredConditions = append(desiredConditions, chosenCondition)
-		if string(chosenCondition.Status) == string(v1.ConditionFalse) {
+		if string(chosenCondition.Status) != string(v1.ConditionTrue) {
 			isReady = false
 		}
 	}
-	subscription.Status.Ready = isReady
 
 	// prevent unnecessary updates
-	if conditionsEquals(subscription.Status.Conditions, desiredConditions) {
-		return nil
+	if conditionsEquals(subscription.Status.Conditions, desiredConditions) && subscription.Status.Ready == isReady {
+		return false, nil
 	}
 
 	// update the status
 	subscription.Status.Conditions = desiredConditions
-	return nil
+	subscription.Status.Ready = isReady
+	return true, nil
 }
 
 // emitConditionEvent emits a kubernetes event and sets the event type based on the Condition status

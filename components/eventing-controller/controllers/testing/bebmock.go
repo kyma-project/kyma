@@ -28,11 +28,16 @@ const (
 	UrlMessagingApi = "/messaging"
 )
 
-// BebMock implements a mock for BEB
+// BebMock implements a programmable mock for BEB
 type BebMock struct {
-	Requests  map[*http.Request]interface{}
-	BebConfig *config.Config
-	log       logr.Logger
+	Requests       map[*http.Request]interface{}
+	BebConfig      *config.Config
+	log            logr.Logger
+	AuthResponse   response
+	GetResponse    responseWithName
+	ListResponse   response
+	CreateResponse response
+	DeleteResponse response
 }
 
 func NewBebMock(bebConfig *config.Config) *BebMock {
@@ -41,13 +46,20 @@ func NewBebMock(bebConfig *config.Config) *BebMock {
 		nil,
 		bebConfig,
 		logger,
+		nil, nil, nil, nil, nil,
 	}
-
 }
+
+type responseWithName func(w http.ResponseWriter, subscriptionName string)
+type response func(w http.ResponseWriter)
 
 func (m *BebMock) Reset() {
 	m.log.Info("Initializing requests")
 	m.Requests = make(map[*http.Request]interface{})
+	m.AuthResponse = nil
+	m.GetResponse = nil
+	m.ListResponse = nil
+	m.DeleteResponse = nil
 }
 
 func (m *BebMock) Start() string {
@@ -75,29 +87,53 @@ func (m *BebMock) Start() string {
 
 		// oauth2 request
 		if r.Method == "POST" && r.RequestURI == UrlAuth {
-			bebAuthResponseSuccess(w)
+			if m.AuthResponse != nil {
+				m.AuthResponse(w)
+			} else {
+				BebAuthResponseSuccess(w)
+			}
 			return
 		}
 		// messaging API request
 		if strings.HasPrefix(r.RequestURI, UrlMessagingApi) {
 			switch r.Method {
 			case http.MethodDelete:
-				bebDeleteResponseSuccess(w)
+				if m.DeleteResponse != nil {
+					m.DeleteResponse(w)
+				} else {
+					BebDeleteResponseSuccess(w)
+				}
 			case http.MethodPost:
 				var subscription bebtypes.Subscription
 				_ = json.NewDecoder(r.Body).Decode(&subscription)
 				m.Requests[r] = subscription
-				bebCreateSuccess(w)
+				if m.CreateResponse != nil {
+					m.CreateResponse(w)
+				} else {
+					BebCreateSuccess(w)
+				}
 			case http.MethodGet:
 				switch r.RequestURI {
 				case m.BebConfig.ListURL:
-					bebListSuccess(w)
+					if m.ListResponse != nil {
+						m.ListResponse(w)
+					} else {
+						BebListSuccess(w)
+					}
 				// get on a single subscription
 				default:
+					var subscription bebtypes.Subscription
+					_ = json.NewDecoder(r.Body).Decode(&subscription)
+					m.Requests[r] = subscription
+
 					parsedUrl, err := url.Parse(r.RequestURI)
 					Expect(err).ShouldNot(HaveOccurred())
 					subscriptionName := parsedUrl.Path
-					bebGetSuccess(w, subscriptionName)
+					if m.GetResponse != nil {
+						m.GetResponse(w, subscriptionName)
+					} else {
+						BebGetSuccess(w, subscriptionName)
+					}
 				}
 				return
 			default:
@@ -111,7 +147,8 @@ func (m *BebMock) Start() string {
 	return uri
 }
 
-func bebAuthResponseSuccess(w http.ResponseWriter) {
+// BebAuthResponseSuccess writes a oauth2 authentication response to the writer for the happy-path.
+func BebAuthResponseSuccess(w http.ResponseWriter) {
 	token := oauth2.Token{
 		AccessToken:  "some-token",
 		TokenType:    "",
@@ -122,7 +159,8 @@ func bebAuthResponseSuccess(w http.ResponseWriter) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-func bebCreateSuccess(w http.ResponseWriter) {
+// BebCreateSuccess writes a response to the writer for the happy-path of creating a BEB subscription.
+func BebCreateSuccess(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusAccepted)
 	response := bebtypes.CreateResponse{
 		Response: bebtypes.Response{
@@ -135,7 +173,8 @@ func bebCreateSuccess(w http.ResponseWriter) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-func bebGetSuccess(w http.ResponseWriter, name string) {
+// BebGetSuccess writes a response to the writer for the happy-path of getting a BEB subscription.
+func BebGetSuccess(w http.ResponseWriter, name string) {
 	w.WriteHeader(http.StatusOK)
 	s := bebtypes.Subscription{
 		Name:               name,
@@ -145,7 +184,8 @@ func bebGetSuccess(w http.ResponseWriter, name string) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-func bebListSuccess(w http.ResponseWriter) {
+// BebListSuccess writes a response to the writer for the happy-path of listing a BEB subscription.
+func BebListSuccess(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusAccepted)
 	response := bebtypes.Response{
 		StatusCode: http.StatusOK,
@@ -155,14 +195,17 @@ func bebListSuccess(w http.ResponseWriter) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-func bebDeleteResponseSuccess(w http.ResponseWriter) {
+// BebDeleteResponseSuccess writes a response to the writer for the happy-path of deleting a BEB subscription.
+func BebDeleteResponseSuccess(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// IsBebSubscriptionCreate determines if the http request is creating a BEB subscription.
 func IsBebSubscriptionCreate(r *http.Request, bebConfig config.Config) bool {
 	return r.Method == http.MethodPost && strings.Contains(bebConfig.CreateURL, r.RequestURI)
 }
 
+// IsBebSubscriptionCreate determines if the http request is deleting a BEB subscription.
 func IsBebSubscriptionDelete(r *http.Request) bool {
 	return r.Method == http.MethodDelete && strings.Contains(r.RequestURI, UrlMessagingApi)
 }

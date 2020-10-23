@@ -21,10 +21,9 @@ func HaveSubscriptionFinalizer(finalizer string) GomegaMatcher {
 }
 
 func HaveSubscriptionReady() GomegaMatcher {
-	// NOTE: testing the whole struct with MatchFields was chosen instead of a WithTransform because the output in the failure case is easier to debug
-	return MatchFields(IgnoreExtras|IgnoreMissing, Fields{
-		"status.Ready": BeTrue(),
-	})
+	return WithTransform(func(s eventingv1alpha1.Subscription) bool {
+		return s.Status.Ready
+	}, BeTrue())
 }
 
 func HaveCondition(condition eventingv1alpha1.Condition) GomegaMatcher {
