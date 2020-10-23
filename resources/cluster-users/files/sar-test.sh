@@ -14,6 +14,8 @@
 #  - NAMESPACE: namespace in which we perform the tests
 #  - SYSTEM_NAMESPACE: namespace to which namespace admin should not have access
 #  - CUSTOM_NAMESPACE: namespace which will be created by namespace admin
+# Optional ENVS:
+#  - SKIP_CERT_MANAGER_CHECKS: if defined, skip checks for cert-manager.io resources
 
 RETRY_TIME=3 #Seconds
 MAX_RETRIES=5
@@ -496,11 +498,15 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to delete backendmodule"
 	testPermissionsClusterScoped "delete" "backendmodule" "yes"
 
+	if [ -n "${SKIP_CERT_MANAGER_CHECKS}" ]; then
 	echo "--> ${ADMIN_EMAIL} should be able to create ClusterIssuer"
 	testPermissionsClusterScoped "create" "clusterissuer" "yes"
+	fi
 
+	if [ -n "${SKIP_CERT_MANAGER_CHECKS}" ]; then
 	echo "--> ${ADMIN_EMAIL} should be able to delete Certificate in ${CUSTOM_NAMESPACE}"
 	testPermissions "delete" "certificate" "${CUSTOM_NAMESPACE}" "yes"
+	fi
 
 	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
@@ -567,14 +573,20 @@ function runTests() {
 	echo "--> ${VIEW_EMAIL} should be able to create backendmodule"
 	testPermissionsClusterScoped "create" "backendmodule" "no"
 
+	if [ -n "${SKIP_CERT_MANAGER_CHECKS}" ]; then
 	echo "--> ${VIEW_EMAIL} should NOT be able to create ClusterIssuer"
 	testPermissionsClusterScoped "create" "clusterissuer" "no"
+	fi
 
+	if [ -n "${SKIP_CERT_MANAGER_CHECKS}" ]; then
 	echo "--> ${VIEW_EMAIL} should NOT be able to create issuer in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "issuer" "${CUSTOM_NAMESPACE}" "no"
+	fi
 
+	if [ -n "${SKIP_CERT_MANAGER_CHECKS}" ]; then
 	echo "--> ${VIEW_EMAIL} should be able to get certificate in ${CUSTOM_NAMESPACE}"
 	testPermissions "get" "certificate" "${CUSTOM_NAMESPACE}" "yes"
+	fi
 
 	EMAIL=${NAMESPACE_ADMIN_EMAIL} PASSWORD=${NAMESPACE_ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
@@ -821,14 +833,20 @@ function runTests() {
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete backendmodule in default"
 	testPermissions "delete" "backendmodule" "default" "yes"
 
+	if [ -n "${SKIP_CERT_MANAGER_CHECKS}" ]; then
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create ClusterIssuer"
 	testPermissionsClusterScoped "create" "clusterissuer" "no"
+	fi
 
+	if [ -n "${SKIP_CERT_MANAGER_CHECKS}" ]; then
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create issuer in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "issuer" "${CUSTOM_NAMESPACE}" "yes"
+	fi
 
+	if [ -n "${SKIP_CERT_MANAGER_CHECKS}" ]; then
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get certificate in ${CUSTOM_NAMESPACE}"
 	testPermissions "get" "certificate" "${CUSTOM_NAMESPACE}" "yes"
+	fi
 
 	# developer who was granted kyma-developer role should be able to operate in the scope of its namespace
 	EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
@@ -968,14 +986,20 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create backendmodule in default"
 	testPermissions "create" "backendmodule" "default" "no"
 
+	if [ -n "${SKIP_CERT_MANAGER_CHECKS}" ]; then
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create ClusterIssuer"
 	testPermissionsClusterScoped "create" "clusterissuer" "no"
+	fi
 
+	if [ -n "${SKIP_CERT_MANAGER_CHECKS}" ]; then
 	echo "--> ${DEVELOPER_EMAIL} should be able to create issuer in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "issuer" "${CUSTOM_NAMESPACE}" "yes"
+	fi
 
+	if [ -n "${SKIP_CERT_MANAGER_CHECKS}" ]; then
 	echo "--> ${DEVELOPER_EMAIL} should be able to get certificate in ${CUSTOM_NAMESPACE}"
 	testPermissions "get" "certificate" "${CUSTOM_NAMESPACE}" "yes"
+	fi
 }
 
 function cleanup() {

@@ -1,6 +1,6 @@
 set -ex
 
-function legacyMode() { 
+function legacyMode() {
   cat << EOF > overrides-global.yaml
 ---
 data:
@@ -35,7 +35,7 @@ EOF
   patchCM "certificates-overrides" "$PWD/overrides-modules.yaml"
 }
 
-function userProvidedMode() { 
+function userProvidedMode() {
   cat << EOF > overrides-global.yaml
 ---
 data:
@@ -45,12 +45,18 @@ EOF
   cat << EOF > overrides-modules.yaml
 ---
 data:
-  modules.manager.enabled: "true"
   modules.user-provided.enabled: "true"
+EOF
+
+  cat << EOF > certmanager-modules.yaml
+---
+data:
+  modules.manager.enabled: "true"
 EOF
 
   patchCM "${OVERRIDES_NAME}" "$PWD/overrides-global.yaml"
   patchCM "certificates-overrides" "$PWD/overrides-modules.yaml"
+  patchCM "cert-manager-overrides" "$PWD/certmanager-modules.yaml"
 }
 
 function patchCM() {
