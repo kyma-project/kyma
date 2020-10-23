@@ -12,7 +12,7 @@ injectCerts:
 
 migration:
   image:
-    repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf"
+    repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools"
     tag: "20201023-5de446cf"
     pullPolicy: IfNotPresent
 
