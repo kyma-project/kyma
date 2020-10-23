@@ -3,7 +3,7 @@ title: Expose a service
 type: Tutorials
 ---
 
-This tutorial shows how to expose service endpoints and configure different HTTP methods for them using the API Gateway Controller.
+This tutorial shows how to expose service endpoints and configure different allowed HTTP methods for them using the API Gateway Controller.
 
 The tutorial comes with a sample HttpBin service deployment.
 
