@@ -3,7 +3,7 @@ title: API Server Proxy chart
 type: Configuration
 ---
 
->**CAUTION:** The API Server Proxy component (apiserver-proxy) is entering deprecation phase - a simpler solution is planned.
+>**CAUTION:** The API Server Proxy component (apiserver-proxy) is deprecated and will be replaced with a different mechanism.
 
 To configure the API Server Proxy chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
 
