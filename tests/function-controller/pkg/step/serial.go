@@ -67,7 +67,7 @@ func (s SerialRunner) Cleanup() error {
 		serialStep := s.steps[i]
 		s.log.Infof("Cleanup Serial Step: %s", serialStep.Name())
 		if err := serialStep.Cleanup(); err != nil {
-			return errors.Wrapf(err, "while clean up step: %s", serialStep.Name())
+			s.log.Errorf("while clean up step: %s, error: %s", serialStep.Name(), err.Error())
 		}
 	}
 	return nil
