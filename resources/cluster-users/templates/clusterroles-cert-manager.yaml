@@ -1,5 +1,6 @@
+{{- if and (.Capabilities.APIVersions.Has "clusterissuer.cert-manager.io/v1") (.Capabilities.APIVersions.Has "certificate.cert-manager.io/v1") }}
+
 ---
-#View access to knative-eventing resources
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -56,3 +57,4 @@ rules:
   verbs:
 {{ toYaml .Values.clusterRoles.verbs.edit | indent 4 }}
 
+{{- end }}

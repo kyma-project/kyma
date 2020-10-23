@@ -101,6 +101,10 @@ spec:
             value: {{ .Values.tests.env.namespace }}
           - name: IAM_KUBECONFIG_SVC_FQDN
             value: "https://configurations-generator.{{ .Values.global.ingress.domainName }}"
+          {{- if not (and (.Capabilities.APIVersions.Has "clusterissuer.cert-manager.io/v1") (.Capabilities.APIVersions.Has "certificate.cert-manager.io/v1")) }}
+          - name: SKIP_CERTMANAGER_CHECKS
+            value: "true"
+          {{- end }}
       restartPolicy: Never
 {{- end }}
 {{- end }}
