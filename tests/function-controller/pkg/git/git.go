@@ -31,7 +31,7 @@ func (c Client) TryCloning() error {
 func (c Client) PullRemote(filePath string) (string, error) {
 	_, fs, err := c.cloneToMemory()
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "while cloning repository")
 	}
 
 	return c.readFileContent(fs, filePath)

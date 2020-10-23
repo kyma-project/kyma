@@ -127,7 +127,7 @@ func (f ConfigureFunction) Run() error {
 	return nil
 }
 
-func (f ConfigureFunction) OnError(cause error) error {
+func (f ConfigureFunction) OnError() error {
 	if err := f.apiRule.LogResource(); err != nil {
 		return errors.Wrap(err, "while getting apirule")
 	}

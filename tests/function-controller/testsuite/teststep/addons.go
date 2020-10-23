@@ -44,7 +44,7 @@ func (a Addons) Cleanup() error {
 	return errors.Wrap(a.addonConfig.Delete(), "while deleting addon configuration")
 }
 
-func (a Addons) OnError(cause error) error {
+func (a Addons) OnError() error {
 	return a.addonConfig.LogResource()
 }
 

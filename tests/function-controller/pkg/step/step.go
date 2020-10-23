@@ -16,7 +16,7 @@ type Step interface {
 	// Cleanup removes all resources that may possibly created by the step
 	Cleanup() error
 	// OnError is callback in case of error
-	OnError(error) error
+	OnError() error
 }
 
 // Runner executes Steps in safe manner
@@ -68,7 +68,10 @@ func (r *Runner) Run(step Step, skipCleanup bool) error {
 		}
 	}()
 	err = step.Run()
-	callbackErr := step.OnError(err)
+	if err == nil {
+		return nil
+	}
+	callbackErr := step.OnError()
 	if callbackErr != nil {
 		r.log.Errorf("while executing on Error for step: %s, error: %s", step.Name(), err.Error())
 	}

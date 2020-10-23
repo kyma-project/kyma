@@ -46,7 +46,7 @@ func (h HTTPCheck) Cleanup() error {
 	return nil
 }
 
-func (h HTTPCheck) OnError(cause error) error {
+func (h HTTPCheck) OnError() error {
 	return nil
 }
 
@@ -95,7 +95,7 @@ func (d DefaultedFunctionCheck) Cleanup() error {
 	return nil
 }
 
-func (d DefaultedFunctionCheck) OnError(cause error) error {
+func (d DefaultedFunctionCheck) OnError() error {
 	return nil
 }
 
@@ -168,6 +168,6 @@ func (c E2EFunctionCheck) Cleanup() error {
 	return nil
 }
 
-func (e E2EFunctionCheck) OnError(cause error) error {
+func (e E2EFunctionCheck) OnError() error {
 	return nil
 }

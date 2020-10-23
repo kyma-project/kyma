@@ -36,7 +36,7 @@ func (p *Parallelized) Run() error {
 		err := step.Run()
 		if err != nil {
 			p.logf.Errorf("Step: %s, returned error: %s", step.Name(), err.Error())
-			if callbackErr := step.OnError(err); callbackErr != nil {
+			if callbackErr := step.OnError(); callbackErr != nil {
 				p.logf.Errorf("while executing OnError on %s, err: %s", step.Name(), callbackErr.Error())
 			}
 			return errors.Wrapf(err, "while executing step: %s", step.Name())
@@ -51,7 +51,7 @@ func (p *Parallelized) Cleanup() error {
 	})
 }
 
-func (p *Parallelized) OnError(cause error) error {
+func (p *Parallelized) OnError() error {
 	return nil
 }
 

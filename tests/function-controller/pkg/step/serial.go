@@ -39,7 +39,7 @@ func (s *SerialRunner) Run() error {
 		s.log.Infof("Running Step %d: %s", i, serialStep.Name())
 		if err := serialStep.Run(); err != nil {
 			s.log.Errorf("Error in %s, error: %s", serialStep.Name(), err.Error())
-			if callBackErr := s.stepsOnError(err, i); callBackErr != nil {
+			if callBackErr := s.stepsOnError(i); callBackErr != nil {
 				s.log.Errorf("while executing OnError on %s,, err: %s", serialStep.Name(), callBackErr.Error())
 			}
 			s.lastStepIdx = i
@@ -50,11 +50,11 @@ func (s *SerialRunner) Run() error {
 	return nil
 }
 
-func (s SerialRunner) stepsOnError(cause error, stepIdx int) error {
+func (s SerialRunner) stepsOnError(stepIdx int) error {
 	var errAll *multierror.Error
 
 	for i := stepIdx; i >= 0; i-- {
-		err := s.steps[i].OnError(cause)
+		err := s.steps[i].OnError()
 		if err != nil {
 			errAll = multierror.Append(errAll, err)
 		}
@@ -73,7 +73,7 @@ func (s SerialRunner) Cleanup() error {
 	return nil
 }
 
-func (s SerialRunner) OnError(cause error) error {
+func (s SerialRunner) OnError() error {
 	return nil
 }
 

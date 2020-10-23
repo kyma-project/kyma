@@ -22,7 +22,7 @@ func NewCreateGitRepository(log *logrus.Entry, repo *gitrepository.GitRepository
 		name: stepName,
 		spec: spec,
 		repo: repo,
-		log:  log,
+		log:  log.WithField(step.LogStepKey, stepName),
 	}
 }
 
@@ -38,6 +38,6 @@ func (r createGitRepository) Cleanup() error {
 	return errors.Wrapf(r.repo.Delete(), "while deleting GitRepository: %s", r.name)
 }
 
-func (r createGitRepository) OnError(cause error) error {
+func (r createGitRepository) OnError() error {
 	return r.repo.LogResource()
 }

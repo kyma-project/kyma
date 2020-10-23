@@ -27,7 +27,7 @@ func (n NamespaceStep) Cleanup() error {
 	return errors.Wrap(n.ns.Delete(), "while deleting namespace")
 }
 
-func (n NamespaceStep) OnError(err error) error {
+func (n NamespaceStep) OnError() error {
 	return n.ns.LogResource()
 }
 

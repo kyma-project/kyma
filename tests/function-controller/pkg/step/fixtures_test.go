@@ -26,7 +26,7 @@ func (e testStep) Cleanup() error {
 	return nil
 }
 
-func (e testStep) OnError(cause error) error {
+func (e testStep) OnError() error {
 	*e.counter++
 	e.logf.Infof("Called on Error, resource: %s", e.name)
 	return nil

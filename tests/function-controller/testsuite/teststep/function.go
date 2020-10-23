@@ -41,7 +41,7 @@ func (f newFunction) Cleanup() error {
 	return errors.Wrapf(f.fn.Delete(), "while deleting function: %s", f.name)
 }
 
-func (f newFunction) OnError(cause error) error {
+func (f newFunction) OnError() error {
 	return f.fn.LogResource()
 }
 
@@ -66,7 +66,7 @@ func (e emptyFunction) Name() string {
 func (e emptyFunction) Run() error {
 	err := e.fn.Create(&function.FunctionData{})
 	if err == nil {
-		return errors.New("Creating empty funciton should return error, but got nil")
+		return errors.New("Creating empty function should return error, but got nil")
 	}
 	return nil
 }
@@ -75,7 +75,7 @@ func (e emptyFunction) Cleanup() error {
 	return nil
 }
 
-func (e emptyFunction) OnError(cause error) error {
+func (e emptyFunction) OnError() error {
 	return nil
 }
 
@@ -113,7 +113,7 @@ func (u updateFunc) Cleanup() error {
 	return nil
 }
 
-func (u updateFunc) OnError(cause error) error {
+func (u updateFunc) OnError() error {
 	return nil
 }
 

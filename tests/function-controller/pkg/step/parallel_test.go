@@ -56,7 +56,6 @@ func TestParallelRunner(t *testing.T) {
 	hook.Reset()
 }
 
-//TODO: Write this test
 func TestMixedRunners(t *testing.T) {
 	//GIVEN
 	g := gomega.NewWithT(t)
