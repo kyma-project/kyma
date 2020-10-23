@@ -13,22 +13,6 @@ VERIFY_IGNORE := /vendor\|/mocks
 test-local:
 	GO111MODULE=on go test -v ./pkg/...
 
-#.PHONY: path-to-referenced-charts
-#path-to-referenced-charts:
-#	@echo "resources/serverless"
-
-#.PHONY: release
-#release: build-image push-image
-#
-#.PHONY: build-image
-#build-image: pull-licenses
-#	docker build -t $(IMG_NAME) .
-
-#.PHONY: push-image
-#push-image:
-#	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
-#	docker push $(IMG_NAME):$(TAG)
-
 resolve-local:
 	GO111MODULE=on go mod download
 	GO111MODULE=on go mod vendor
@@ -38,11 +22,3 @@ ensure-local:
 
 dep-status-local:
 	@echo "Go modules present in component - omitting."
-
-#.PHONY: pull-licenses
-#pull-licenses:
-#ifdef LICENSE_PULLER_PATH
-#	bash $(LICENSE_PULLER_PATH)
-#else
-#	mkdir -p licenses
-#endif

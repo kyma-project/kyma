@@ -57,7 +57,7 @@ func TestParallelRunner(t *testing.T) {
 }
 
 //TODO: Write this test
-func TestMixed(t *testing.T) {
+func TestMixedRunners(t *testing.T) {
 	//GIVEN
 	g := gomega.NewWithT(t)
 	logger, hook := test.NewNullLogger()
@@ -102,8 +102,6 @@ func TestMixed(t *testing.T) {
 	g.Expect(idx).To(gomega.Equal(5))
 
 	allLogs := hook.AllEntries()
-	//step1Logs := getLogs(allLogs, "Test", "suite1")
-	//g.Expect(len(step1Logs)).To(gomega.Equal(13))
 
 	step2Logs := getLogs(allLogs, "Test", "suite2")
 	g.Expect(len(step2Logs)).To(gomega.Equal(13))
