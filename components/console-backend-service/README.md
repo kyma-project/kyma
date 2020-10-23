@@ -20,7 +20,7 @@ Use the following tools to set up the project:
 
 ### Run a local version
 
-To run the application without building the binary, set your `$KUBECONFIG` environment variable, then execute:
+To start the application without building the binary, set your `$KUBECONFIG` environment variable, and run:
 
 ```bash
 APP_KUBECONFIG_PATH=$KUBECONFIG APP_DEBUG_DOMAIN={kymaDomain} go run main.go
