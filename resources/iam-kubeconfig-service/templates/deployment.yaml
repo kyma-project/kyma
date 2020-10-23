@@ -1,5 +1,6 @@
 {{- $apiserverUrl := .Values.global.isLocalEnv | ternary "https://apiserver.$DOMAIN:9443" "https://apiserver.$DOMAIN" -}}
-
+{{- $shouldMountCACert := (or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip")) -}}
+{{- $shouldFetchXIPDomainCert := (eq .Values.global.certificates.type "xip") -}}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -28,7 +29,7 @@ spec:
         hostnames:
           - "dex.{{ .Values.global.ingress.domainName }}"
       {{- end }}
-      {{- if eq .Values.global.certificates.type "xip" }}
+      {{- if $shouldFetchXIPDomainCert }}
       serviceAccountName: {{ template "name" . }}
       {{- end }}
       initContainers:
@@ -57,7 +58,7 @@ spec:
           - |
 {{- if .Values.global.isLocalEnv }}
             /app/app -kube-config-cluster-name=$(cat /injected-config/domain) -kube-config-url="https://apiserver.$(cat /injected-config/domain):9443" -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/injected-config/ca-tls-cert.crt
-{{- else if or (eq .Values.global.certificates.type "legacy") (eq .Values.global.certificates.type "xip") }}
+{{- else if $shouldMountCACert }}
             /app/app -kube-config-cluster-name=$(cat /injected-config/domain) -kube-config-url="https://apiserver.$(cat /injected-config/domain)" -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/injected-config/ca-tls-cert.crt
 {{- else }}
             /app/app -kube-config-cluster-name=$(cat /injected-config/domain) -kube-config-url="https://apiserver.$(cat /injected-config/domain)" -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client
