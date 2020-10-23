@@ -13,7 +13,6 @@ import (
 	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 
-	// TODO: use different package
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -288,7 +287,7 @@ func (r *SubscriptionReconciler) replaceStatusCondition(subscription *eventingv1
 	subscription.Status.Ready = isReady
 
 	// prevent unnecessary updates
-	if isEqualConditions(subscription.Status.Conditions, desiredConditions) {
+	if conditionsEquals(subscription.Status.Conditions, desiredConditions) {
 		return nil
 	}
 
@@ -361,7 +360,7 @@ func (r *SubscriptionReconciler) isInDeletion(subscription *eventingv1alpha1.Sub
 const timeoutRetryActiveEmsStatus = time.Second * 30
 
 // checkStatusActive checks if the subscription is active and if not, sets a timer for retry
-func (r *SubscriptionReconciler) checkStatusActive(subscription *eventingv1alpha1.Subscription) (statusChanged bool, retry bool, err error) {
+func (r *SubscriptionReconciler) checkStatusActive(subscription *eventingv1alpha1.Subscription) (statusChanged, retry bool, err error) {
 	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus == string(types2.SubscriptionStatusActive) {
 		if len(subscription.Status.FailedActivation) > 0 {
 			subscription.Status.FailedActivation = ""

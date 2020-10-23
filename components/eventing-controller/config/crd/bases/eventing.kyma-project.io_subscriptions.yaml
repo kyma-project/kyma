@@ -37,7 +37,7 @@ spec:
             description: SubscriptionSpec defines the desired state of Subscription
             properties:
               filter:
-                description: BebFilters defines the list of Beb filters
+                description: BebFilters defines the list of BEB filters
                 properties:
                   dialect:
                     type: string
@@ -81,7 +81,7 @@ spec:
                 - filters
                 type: object
               id:
-                description: Id is the unique identifier of Subscription, read-only.
+                description: ID is the unique identifier of Subscription, read-only.
                 type: string
               protocol:
                 type: string
@@ -92,8 +92,6 @@ spec:
                   contentMode:
                     type: string
                   exemptHandshake:
-                    description: 'TODO(nachtmaar): discuss with radu, either make
-                      it true by default or remove it for now'
                     type: boolean
                   qos:
                     type: string
@@ -131,8 +129,7 @@ spec:
             - sink
             type: object
           status:
-            description: 'SubscriptionStatus defines the observed state of Subscription
-              TODO: it should contain: - the status of the exposed Webhook'
+            description: SubscriptionStatus defines the observed state of Subscription
             properties:
               conditions:
                 items:

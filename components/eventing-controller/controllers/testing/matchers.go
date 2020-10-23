@@ -44,7 +44,6 @@ func HaveEvent(event v1.Event) GomegaMatcher {
 }
 
 func IsK8sUnprocessableEntity() GomegaMatcher {
-	// TODO: also check for status code 422
 	//  <*errors.StatusError | 0xc0001330e0>: {
 	//     ErrStatus: {
 	//         TypeMeta: {Kind: "", APIVersion: ""},

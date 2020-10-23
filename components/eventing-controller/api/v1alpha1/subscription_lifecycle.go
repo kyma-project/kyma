@@ -2,7 +2,6 @@ package v1alpha1
 
 import (
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -14,20 +13,21 @@ const (
 )
 
 type Condition struct {
-	Type               ConditionType      `json:"type,omitempty"`
-	Status             v1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
-	LastTransitionTime metav1.Time        `json:"lastTransitionTime,omitempty"`
-	Reason             ConditionReason    `json:"reason,omitempty"`
-	Message            string             `json:"message,omitempty"`
+	Type               ConditionType          `json:"type,omitempty"`
+	Status             corev1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
+	LastTransitionTime metav1.Time            `json:"lastTransitionTime,omitempty"`
+	Reason             ConditionReason        `json:"reason,omitempty"`
+	Message            string                 `json:"message,omitempty"`
 }
 
 type ConditionReason string
 
 const (
-	ConditionReasonSubscriptionCreated   ConditionReason = "BEB SubscriptionCreated"
-	ConditionReasonSubscriptionActive    ConditionReason = "BEB Subscription active"
-	ConditionReasonSubscriptionNotActive ConditionReason = "BEB Subscription not active"
-	ConditionReasonSubscriptionDeleted   ConditionReason = "BEB SubscriptionDeleted"
+	ConditionReasonSubscriptionCreated        ConditionReason = "BEB Subscription created"
+	ConditionReasonSubscriptionCreationFailed ConditionReason = "BEB Subscription creation failed"
+	ConditionReasonSubscriptionActive         ConditionReason = "BEB Subscription active"
+	ConditionReasonSubscriptionNotActive      ConditionReason = "BEB Subscription not active"
+	ConditionReasonSubscriptionDeleted        ConditionReason = "BEB Subscription deleted"
 )
 
 // InitializeConditions sets unset conditions to Unknown
@@ -52,7 +52,6 @@ func (s *SubscriptionStatus) InitializeConditions() {
 	s.Conditions = finalConditions
 }
 
-// TODO: add unit test which checks that all conditions are initialized
 // makeConditions creates an map of all conditions which the Subscription should have
 func makeConditions() []Condition {
 	conditions := []Condition{

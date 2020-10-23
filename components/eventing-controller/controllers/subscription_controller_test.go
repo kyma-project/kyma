@@ -331,7 +331,7 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 			Namespace: namespace,
 		},
 		Spec: eventingv1alpha1.SubscriptionSpec{
-			Id:       subscriptionID,
+			ID:       subscriptionID,
 			Protocol: "BEB",
 			ProtocolSettings: &eventingv1alpha1.ProtocolSettings{
 				ContentMode:     eventingv1alpha1.ProtocolSettingsContentModeBinary,
