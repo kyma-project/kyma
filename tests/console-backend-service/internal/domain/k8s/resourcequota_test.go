@@ -84,14 +84,12 @@ func fixListResourceQuotasQuery() *graphql.Request {
 	query := `query($namespace: String!) {
 				resourceQuotas(namespace: $namespace) {
 					name
-					pods
-					limits {
-					  memory
-					  cpu
-					}
-					requests {
-					  memory
-					  cpu
+					spec {
+						hard {
+							memory
+							cpu
+							pods
+						}
 					}
 				}
 			}`

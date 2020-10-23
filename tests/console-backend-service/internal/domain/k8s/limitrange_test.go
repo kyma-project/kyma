@@ -87,7 +87,7 @@ func fixLimitRangeQuery() *graphql.Request {
 				limitRanges(namespace: $namespace) {
 					name
 					limits {
-						limitType
+						type
 						max {
 							memory
 						}
