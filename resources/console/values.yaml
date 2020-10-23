@@ -23,6 +23,6 @@ global:
   ui_acceptance_tests:
     version: ebf06dc1
   console_backend_service:
-    version: "c85877c4"
+    version: "9415be28"
   console_backend_service_test:
     version: "858bc2c2"
