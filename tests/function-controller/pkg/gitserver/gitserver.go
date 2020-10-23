@@ -183,7 +183,6 @@ func (gs *GitServer) LogResource() error {
 	}
 	gs.log.Info(out)
 
-
 	svc, err := gs.services.Get(gs.name, metav1.GetOptions{})
 	if err != nil {
 		return errors.Wrap(err, "while getting service")
