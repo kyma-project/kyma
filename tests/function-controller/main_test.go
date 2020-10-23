@@ -53,9 +53,6 @@ func runTests(t *testing.T, testFunc testSuite) {
 
 	err = runner.Execute(steps)
 	failOnError(g, err)
-	if err != nil {
-		t.Fail()
-	}
 }
 
 func loadConfig(prefix string) (config, error) {

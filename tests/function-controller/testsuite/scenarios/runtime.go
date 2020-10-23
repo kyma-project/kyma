@@ -127,27 +127,3 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 			)),
 	), nil
 }
-
-type testStep struct {
-	err  error
-	name string
-	logf *logrus.Entry
-}
-
-func (e testStep) Name() string {
-	return e.name
-}
-
-func (e testStep) Run() error {
-	e.logf = e.logf.WithField("Step", e.name)
-	return e.err
-}
-
-func (e testStep) Cleanup() error {
-	return nil
-}
-
-func (e testStep) OnError(cause error) error {
-	e.logf.Infof("Called on Error, resource: %s", e.name)
-	return nil
-}
