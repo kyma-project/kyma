@@ -56,7 +56,7 @@ EOF
 
   patchCM "${OVERRIDES_NAME}" "$PWD/overrides-global.yaml"
   patchCM "certificates-overrides" "$PWD/overrides-modules.yaml"
-  patchCM "cert-manager-overrides" "$PWD/certmanager-modules.yaml
+  patchCM "cert-manager-overrides" "$PWD/certmanager-modules.yaml"
 }
 
 function patchCM() {
