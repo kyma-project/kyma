@@ -19,7 +19,7 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/controllers/testing"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/config"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	// +kubebuilder:scaffold:imports
 )
 

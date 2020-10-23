@@ -16,8 +16,8 @@ import (
 
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/config"
-	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
+	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 
 	// gcp auth etc.
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"

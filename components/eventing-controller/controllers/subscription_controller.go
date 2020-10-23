@@ -10,7 +10,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/record"
 
-	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
+	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 
 	"github.com/pkg/errors"

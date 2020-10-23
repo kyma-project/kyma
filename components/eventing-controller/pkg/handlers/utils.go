@@ -6,12 +6,11 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/mitchellh/hashstructure"
-
-	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
 )
 
-func getHash(subscription *types2.Subscription) (int64, error) {
+func getHash(subscription *types.Subscription) (int64, error) {
 	if hash, err := hashstructure.Hash(subscription, nil); err != nil {
 		return 0, err
 	} else {
@@ -19,8 +18,8 @@ func getHash(subscription *types2.Subscription) (int64, error) {
 	}
 }
 
-func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription) (*types2.Subscription, error) {
-	emsSubscription := &types2.Subscription{}
+func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription) (*types.Subscription, error) {
+	emsSubscription := &types.Subscription{}
 
 	// Name
 	emsSubscription.Name = subscription.Name
@@ -29,10 +28,10 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription) (*types2.S
 
 	// Qos
 	qos := strings.ReplaceAll(subscription.Spec.ProtocolSettings.Qos, "-", "_")
-	if qos == string(types2.QosAtLeastOnce) {
-		emsSubscription.Qos = types2.QosAtLeastOnce
-	} else if qos == string(types2.QosAtMostOnce) {
-		emsSubscription.Qos = types2.QosAtMostOnce
+	if qos == string(types.QosAtLeastOnce) {
+		emsSubscription.Qos = types.QosAtLeastOnce
+	} else if qos == string(types.QosAtMostOnce) {
+		emsSubscription.Qos = types.QosAtMostOnce
 	} else {
 		return nil, fmt.Errorf("invalid Qos: %v", subscription.Spec.ProtocolSettings.Qos)
 	}
@@ -44,20 +43,20 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription) (*types2.S
 	for _, e := range subscription.Spec.Filter.Filters {
 		s := e.EventSource.Value
 		t := e.EventType.Value
-		emsSubscription.Events = append(emsSubscription.Events, types2.Event{Source: s, Type: t})
+		emsSubscription.Events = append(emsSubscription.Events, types.Event{Source: s, Type: t})
 	}
 
 	// WebhookAuth
-	auth := &types2.WebhookAuth{}
+	auth := &types.WebhookAuth{}
 	auth.ClientID = subscription.Spec.ProtocolSettings.WebhookAuth.ClientId
 	auth.ClientSecret = subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret
-	if subscription.Spec.ProtocolSettings.WebhookAuth.GrantType == string(types2.GrantTypeClientCredentials) {
-		auth.GrantType = types2.GrantTypeClientCredentials
+	if subscription.Spec.ProtocolSettings.WebhookAuth.GrantType == string(types.GrantTypeClientCredentials) {
+		auth.GrantType = types.GrantTypeClientCredentials
 	} else {
 		return nil, fmt.Errorf("invalid GrantType: %v", subscription.Spec.ProtocolSettings.WebhookAuth.GrantType)
 	}
-	if subscription.Spec.ProtocolSettings.WebhookAuth.Type == string(types2.AuthTypeClientCredentials) {
-		auth.Type = types2.AuthTypeClientCredentials
+	if subscription.Spec.ProtocolSettings.WebhookAuth.Type == string(types.AuthTypeClientCredentials) {
+		auth.Type = types.AuthTypeClientCredentials
 	} else {
 		return nil, fmt.Errorf("invalid Type: %v", subscription.Spec.ProtocolSettings.WebhookAuth.Type)
 	}
@@ -67,8 +66,8 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription) (*types2.S
 	return emsSubscription, nil
 }
 
-func getInternalView4Ems(subscription *types2.Subscription) (*types2.Subscription, error) {
-	emsSubscription := &types2.Subscription{}
+func getInternalView4Ems(subscription *types.Subscription) (*types.Subscription, error) {
+	emsSubscription := &types.Subscription{}
 
 	// Name
 	emsSubscription.Name = subscription.Name
@@ -85,7 +84,7 @@ func getInternalView4Ems(subscription *types2.Subscription) (*types2.Subscriptio
 	for _, e := range subscription.Events {
 		s := e.Source
 		t := e.Type
-		emsSubscription.Events = append(emsSubscription.Events, types2.Event{Source: s, Type: t})
+		emsSubscription.Events = append(emsSubscription.Events, types.Event{Source: s, Type: t})
 	}
 
 	return emsSubscription, nil

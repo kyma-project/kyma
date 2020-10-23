@@ -1,12 +1,5 @@
 package types
 
-import cloudevents "github.com/cloudevents/sdk-go/v2"
-
-type CloudEvent struct {
-	cloudevents.Event
-	Qos string `json:"qos,omitempty"`
-}
-
 type Event struct {
 	Source string `json:"source,omitempty"`
 	Type   string `json:"type,omitempty"`

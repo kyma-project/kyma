@@ -5,10 +5,10 @@ import (
 	"net/http"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	client2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/client"
-	config2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/config"
-	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
-	auth2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/auth"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/auth"
 
 	"github.com/go-logr/logr"
 )
@@ -23,7 +23,7 @@ type Interface interface {
 }
 
 type Beb struct {
-	Client *client2.Client
+	Client *client.Client
 	Log    logr.Logger
 }
 
@@ -34,8 +34,8 @@ type BebResponse struct {
 
 func (b *Beb) Initialize() {
 	if b.Client == nil {
-		authenticator := auth2.NewAuthenticator()
-		b.Client = client2.NewClient(config2.GetDefaultConfig(), authenticator)
+		authenticator := auth.NewAuthenticator()
+		b.Client = client.NewClient(config.GetDefaultConfig(), authenticator)
 	}
 }
 
@@ -53,7 +53,7 @@ func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription) (
 		b.Log.Error(err, "failed to get the hash value", "subscription name", sEv2.Name)
 		return false, err
 	}
-	var emsSubscription *types2.Subscription
+	var emsSubscription *types.Subscription
 	// check the hash values for ev2 and ems
 	if newEv2Hash != subscription.Status.Ev2hash {
 		// delete & create a new Ems subscription
@@ -109,7 +109,7 @@ func (b *Beb) DeleteBebSubscription(subscription *eventingv1alpha1.Subscription)
 	return b.deleteSubscription(sEv2.Name)
 }
 
-func (b *Beb) deleteCreateAndHashSubscription(subscription *types2.Subscription) (*types2.Subscription, int64, error) {
+func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription) (*types.Subscription, int64, error) {
 	// delete Ems susbcription
 	if err := b.deleteSubscription(subscription.Name); err != nil {
 		b.Log.Error(err, "delete ems subscription failed", "subscription name:", subscription.Name)
@@ -140,7 +140,7 @@ func (b *Beb) deleteCreateAndHashSubscription(subscription *types2.Subscription)
 }
 
 // Set the status of emsSubscription in ev2Subscription
-func (b *Beb) setEmsSubscritionStatus(subscription *eventingv1alpha1.Subscription, emsSubscription *types2.Subscription) bool {
+func (b *Beb) setEmsSubscritionStatus(subscription *eventingv1alpha1.Subscription, emsSubscription *types.Subscription) bool {
 	var statusChanged = false
 	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus != string(emsSubscription.SubscriptionStatus) {
 		subscription.Status.EmsSubscriptionStatus.SubscriptionStatus = string(emsSubscription.SubscriptionStatus)
@@ -165,7 +165,7 @@ func (b *Beb) setEmsSubscritionStatus(subscription *eventingv1alpha1.Subscriptio
 	return statusChanged
 }
 
-func (b *Beb) getSubscription(name string) (*types2.Subscription, error) {
+func (b *Beb) getSubscription(name string) (*types.Subscription, error) {
 	b.Log.Info("BEB getSubscription()", "subscription name:", name)
 	emsSubscription, resp, err := b.Client.Get(name)
 	if err != nil {
@@ -189,7 +189,7 @@ func (b *Beb) deleteSubscription(name string) error {
 	return nil
 }
 
-func (b *Beb) createSubscription(subscription *types2.Subscription) error {
+func (b *Beb) createSubscription(subscription *types.Subscription) error {
 	b.Log.Info("BEB createSubscription()", "subscription name:", subscription.Name)
 	createResponse, err := b.Client.Create(subscription)
 	if err != nil {

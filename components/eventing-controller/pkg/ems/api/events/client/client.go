@@ -6,42 +6,42 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 
-	config2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/config"
-	types2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
-	auth2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/auth"
-	httpclient2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/httpclient"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/auth"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/httpclient"
 )
 
 // compile time check
 var _ Interface = Client{}
 
 type Interface interface {
-	Publish(cloudEvent cloudevents.Event, qos types2.Qos) (*types2.PublishResponse, error)
-	Create(subscription *types2.Subscription) (*types2.CreateResponse, error)
-	List() (*types2.Subscriptions, *types2.Response, error)
-	Get(name string) (*types2.Subscription, *types2.Response, error)
-	Delete(name string) (*types2.DeleteResponse, error)
-	TriggerHandshake(name string) (*types2.TriggerHandshake, error)
-	UpdateState(name string, state types2.State) (*types2.UpdateStateResponse, error)
+	Publish(cloudEvent cloudevents.Event, qos types.Qos) (*types.PublishResponse, error)
+	Create(subscription *types.Subscription) (*types.CreateResponse, error)
+	List() (*types.Subscriptions, *types.Response, error)
+	Get(name string) (*types.Subscription, *types.Response, error)
+	Delete(name string) (*types.DeleteResponse, error)
+	TriggerHandshake(name string) (*types.TriggerHandshake, error)
+	UpdateState(name string, state types.State) (*types.UpdateStateResponse, error)
 }
 
 type Client struct {
-	config     *config2.Config
-	httpClient *httpclient2.Client
+	config     *config.Config
+	httpClient *httpclient.Client
 }
 
-func NewClient(config *config2.Config, authenticator *auth2.Authenticator) *Client {
+func NewClient(config *config.Config, authenticator *auth.Authenticator) *Client {
 	return &Client{
 		config:     config,
 		httpClient: authenticator.GetClient(),
 	}
 }
 
-func (c Client) GetHttpClient() *httpclient2.Client {
+func (c Client) GetHttpClient() *httpclient.Client {
 	return c.httpClient
 }
 
-func (c Client) Publish(event cloudevents.Event, qos types2.Qos) (*types2.PublishResponse, error) {
+func (c Client) Publish(event cloudevents.Event, qos types.Qos) (*types.PublishResponse, error) {
 	req, err := c.httpClient.NewRequest(http.MethodPost, c.config.PublishURL, event)
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func (c Client) Publish(event cloudevents.Event, qos types2.Qos) (*types2.Publis
 	// set required headers
 	req.Header.Set("qos", string(qos))
 
-	var response types2.PublishResponse
+	var response types.PublishResponse
 	if resp, responseBody, err := c.httpClient.Do(req, &response); err != nil {
 		return nil, err
 	} else {
@@ -64,20 +64,20 @@ func (c Client) Publish(event cloudevents.Event, qos types2.Qos) (*types2.Publis
 	return &response, nil
 }
 
-func (c Client) Create(subscription *types2.Subscription) (*types2.CreateResponse, error) {
+func (c Client) Create(subscription *types.Subscription) (*types.CreateResponse, error) {
 	req, err := c.httpClient.NewRequest(http.MethodPost, c.config.CreateURL, subscription)
 	if err != nil {
 		return nil, err
 	}
 
-	var response *types2.CreateResponse
+	var response *types.CreateResponse
 	if resp, responseBody, err := c.httpClient.Do(req, &response); err != nil {
 		return nil, err
 	} else if resp == nil {
 		return nil, fmt.Errorf("could not unmarshal response: %v", resp)
 	} else {
 		if response == nil {
-			response = &types2.CreateResponse{}
+			response = &types.CreateResponse{}
 		}
 		response.StatusCode = resp.StatusCode
 		response.Message = resp.Status
@@ -89,14 +89,14 @@ func (c Client) Create(subscription *types2.Subscription) (*types2.CreateRespons
 	return response, nil
 }
 
-func (c Client) List() (*types2.Subscriptions, *types2.Response, error) {
+func (c Client) List() (*types.Subscriptions, *types.Response, error) {
 	req, err := c.httpClient.NewRequest(http.MethodGet, c.config.ListURL, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var subscriptions *types2.Subscriptions
-	var response types2.Response
+	var subscriptions *types.Subscriptions
+	var response types.Response
 	if resp, responseBody, err := c.httpClient.Do(req, &subscriptions); err != nil {
 		return nil, nil, err
 	} else if resp == nil {
@@ -112,14 +112,14 @@ func (c Client) List() (*types2.Subscriptions, *types2.Response, error) {
 	return subscriptions, &response, nil
 }
 
-func (c Client) Get(name string) (*types2.Subscription, *types2.Response, error) {
+func (c Client) Get(name string) (*types.Subscription, *types.Response, error) {
 	req, err := c.httpClient.NewRequest(http.MethodGet, fmt.Sprintf(c.config.GetURLFormat, name), nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var subscription *types2.Subscription
-	var response types2.Response
+	var subscription *types.Subscription
+	var response types.Response
 	if resp, responseBody, err := c.httpClient.Do(req, &subscription); err != nil {
 		return nil, nil, err
 	} else if resp == nil {
@@ -135,13 +135,13 @@ func (c Client) Get(name string) (*types2.Subscription, *types2.Response, error)
 	return subscription, &response, nil
 }
 
-func (c Client) Delete(name string) (*types2.DeleteResponse, error) {
+func (c Client) Delete(name string) (*types.DeleteResponse, error) {
 	req, err := c.httpClient.NewRequest(http.MethodDelete, fmt.Sprintf(c.config.DeleteURLFormat, name), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	var response types2.DeleteResponse
+	var response types.DeleteResponse
 	if resp, responseBody, err := c.httpClient.Do(req, &response); err != nil {
 		return nil, err
 	} else {
@@ -155,13 +155,13 @@ func (c Client) Delete(name string) (*types2.DeleteResponse, error) {
 	return &response, nil
 }
 
-func (c Client) TriggerHandshake(name string) (*types2.TriggerHandshake, error) {
+func (c Client) TriggerHandshake(name string) (*types.TriggerHandshake, error) {
 	req, err := c.httpClient.NewRequest(http.MethodPost, fmt.Sprintf(c.config.HandshakeURLFormat, name), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	var response types2.TriggerHandshake
+	var response types.TriggerHandshake
 	if resp, responseBody, err := c.httpClient.Do(req, &response); err != nil {
 		return nil, err
 	} else {
@@ -175,13 +175,13 @@ func (c Client) TriggerHandshake(name string) (*types2.TriggerHandshake, error) 
 	return &response, nil
 }
 
-func (c Client) UpdateState(name string, state types2.State) (*types2.UpdateStateResponse, error) {
+func (c Client) UpdateState(name string, state types.State) (*types.UpdateStateResponse, error) {
 	req, err := c.httpClient.NewRequest(http.MethodPut, fmt.Sprintf(c.config.UpdateStateURLFormat, name), state)
 	if err != nil {
 		return nil, err
 	}
 
-	var response types2.UpdateStateResponse
+	var response types.UpdateStateResponse
 	if resp, responseBody, err := c.httpClient.Do(req, &response); err != nil {
 		return nil, err
 	} else {

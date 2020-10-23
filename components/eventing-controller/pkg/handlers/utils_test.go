@@ -7,13 +7,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems2/api/events/types"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 )
 
 func Test_getHash(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	bebSubscription := bebtypes.Subscription{}
+	bebSubscription := types.Subscription{}
 	hash, err := getHash(&bebSubscription)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(hash).To(BeNumerically(">", 0))
@@ -75,7 +75,7 @@ func Test_getInternalView4Ev2(t *testing.T) {
 	// when
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(bebSubscription.Name).To(BeEquivalentTo(subscription.Name))
-	g.Expect(bebSubscription.Events).To(BeEquivalentTo(bebtypes.Events{
+	g.Expect(bebSubscription.Events).To(BeEquivalentTo(types.Events{
 		{
 			Source: "/default/kyma/myinstance",
 			Type:   "kyma.ev2.poc.event1.v1",
@@ -85,6 +85,6 @@ func Test_getInternalView4Ev2(t *testing.T) {
 
 	g.Expect(bebSubscription.ExemptHandshake).To(BeEquivalentTo(subscription.Spec.ProtocolSettings.ExemptHandshake))
 	g.Expect(bebSubscription.WebhookUrl).To(BeEquivalentTo(subscription.Spec.Sink))
-	g.Expect(bebSubscription.Qos).To(BeEquivalentTo(bebtypes.QosAtLeastOnce))
+	g.Expect(bebSubscription.Qos).To(BeEquivalentTo(types.QosAtLeastOnce))
 	// TODO: test all other attributes as well
 }
