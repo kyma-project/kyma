@@ -33,17 +33,6 @@ func (r *secretResolver) SetSecretConverter(converter gqlSecretConverter) {
 	r.converter = converter
 }
 
-func NewResourceQuotaService(rqInformer cache.SharedIndexInformer, rsInformer cache.SharedIndexInformer, ssInformer cache.SharedIndexInformer, podClient v1.CoreV1Interface) *resourceQuotaService {
-	return newResourceQuotaService(rqInformer, rsInformer, ssInformer, podClient)
-}
-
-func NewResourceQuotaConverter() *resourceQuotaConverter {
-	return &resourceQuotaConverter{}
-}
-func (r *resourceQuotaResolver) SetResourceQuotaConverter(converter gqlResourceQuotaConverter) {
-	r.converter = converter
-}
-
 // Pod
 
 func NewPodResolver(podSvc podSvc) *podResolver {
