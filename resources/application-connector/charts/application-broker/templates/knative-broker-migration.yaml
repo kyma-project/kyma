@@ -83,7 +83,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: {{ .Release.Name }}-knative-broker-migration
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200507-070ff576
+          image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
           command:
             - "/bin/bash"
           args:
