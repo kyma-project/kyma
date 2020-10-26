@@ -86,5 +86,48 @@ func Test_getInternalView4Ev2(t *testing.T) {
 	g.Expect(bebSubscription.ExemptHandshake).To(BeEquivalentTo(subscription.Spec.ProtocolSettings.ExemptHandshake))
 	g.Expect(bebSubscription.WebhookUrl).To(BeEquivalentTo(subscription.Spec.Sink))
 	g.Expect(bebSubscription.Qos).To(BeEquivalentTo(types.QosAtLeastOnce))
-	// TODO: test all other attributes as well
+	g.Expect(bebSubscription.WebhookAuth.ClientID).To(BeEquivalentTo(subscription.Spec.ProtocolSettings.WebhookAuth.ClientId))
+	g.Expect(bebSubscription.WebhookAuth.ClientSecret).To(BeEquivalentTo(subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret))
+	g.Expect(bebSubscription.WebhookAuth.GrantType).To(BeEquivalentTo(types.GrantTypeClientCredentials))
+	g.Expect(bebSubscription.WebhookAuth.Type).To(BeEquivalentTo(types.AuthTypeClientCredentials))
+	g.Expect(bebSubscription.WebhookAuth.TokenURL).To(BeEquivalentTo(subscription.Spec.ProtocolSettings.WebhookAuth.TokenUrl))
+}
+
+func Test_getInternalView4Ems(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	// given
+	emsSubscription := &types.Subscription {
+		Name: "ev2subs1",
+		ContentMode: types.ContentModeStructured,
+		ExemptHandshake: true,
+		Qos: types.QosAtLeastOnce,
+		WebhookUrl: "https://webhook.xxx.com",
+
+		Events: []types.Event {
+			{
+				Source: "/default/kyma/myinstance",
+				Type:   "kyma.ev2.poc.event1.v1",
+			},
+		},
+	}
+
+	// then
+	bebSubscription, err := getInternalView4Ems(emsSubscription)
+
+	// when
+	g.Expect(err).ShouldNot(HaveOccurred())
+	g.Expect(bebSubscription.Name).To(BeEquivalentTo(emsSubscription.Name))
+	g.Expect(bebSubscription.ContentMode).To(BeEquivalentTo(emsSubscription.ContentMode))
+	g.Expect(bebSubscription.ExemptHandshake).To(BeEquivalentTo(emsSubscription.ExemptHandshake))
+	g.Expect(bebSubscription.Qos).To(BeEquivalentTo(types.QosAtLeastOnce))
+	g.Expect(bebSubscription.WebhookUrl).To(BeEquivalentTo(emsSubscription.WebhookUrl))
+
+	g.Expect(bebSubscription.Events).To(BeEquivalentTo(types.Events{
+		{
+			Source: "/default/kyma/myinstance",
+			Type:   "kyma.ev2.poc.event1.v1",
+		},
+	}))
+	g.Expect(bebSubscription)
 }
