@@ -2,7 +2,6 @@ package testsuite
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -10,6 +9,7 @@ import (
 	cloudevents "github.com/cloudevents/sdk-go"
 
 	retrygo "github.com/avast/retry-go"
+	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/example_schema"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
@@ -45,8 +45,7 @@ func (s *SendEventToMeshAndCheckEventId) Name() string {
 
 // Run executes the step
 func (s *SendEventToMeshAndCheckEventId) Run() error {
-	const basicId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa"
-	eventId := fmt.Sprint(basicId, s.counter)
+	eventId := uuid.New().String()
 
 	err := s.sendEventToMesh(eventId)
 	if err != nil {

@@ -1,9 +1,9 @@
 package testsuite
 
 import (
-	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
 	retrygo "github.com/avast/retry-go"
@@ -42,8 +42,7 @@ func (s *SendEventToCompatibilityLayerAndCheckEventId) Name() string {
 
 // Run executes the step
 func (s *SendEventToCompatibilityLayerAndCheckEventId) Run() error {
-	const basicId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa"
-	eventId := fmt.Sprint(basicId, s.counter)
+	eventId := uuid.New().String()
 
 	err := s.sendEventToCompatibilityLayer(eventId)
 	if err != nil {
