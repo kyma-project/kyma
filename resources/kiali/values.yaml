@@ -2,8 +2,13 @@
 tests:
   enabled: true
   image:
-    name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    version: v20201016-058ecbc7
+    name: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    version: 20201023-5de446cf
+  labels:
+    integration: true
+    after-upgrade: true
+
+nodeSelector: {}
 
 global:
   isLocalEnv: false
