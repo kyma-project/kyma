@@ -20,6 +20,7 @@ spec:
   template:
     metadata:
       labels:
+        {{- include "prometheus-pushgateway.labels" . | nindent 8 }}
         app: {{ template "prometheus-pushgateway.name" . }}
         release: {{ .Release.Name }}
       annotations:

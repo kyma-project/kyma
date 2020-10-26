@@ -4,8 +4,8 @@ tests:
     after-upgrade: true
   enabled: true
   image:
-    name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    version: v20200617-32c1f3ff
+    name: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    version: 20201023-5de446cf
   env:
     namespace: default
 
