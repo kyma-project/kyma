@@ -37,7 +37,6 @@ func (b *Beb) Initialize() {
 		authenticator := auth2.NewAuthenticator()
 		b.Client = client2.NewClient(config2.GetDefaultConfig(), authenticator)
 	}
-	// TODO error?
 }
 
 // SyncBebSubscription synchronize the EV@ subscription with the EMS subscription. It returns true, if the EV2 susbcription status was changed

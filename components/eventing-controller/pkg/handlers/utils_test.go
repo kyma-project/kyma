@@ -32,7 +32,6 @@ func Test_getInternalView4Ev2(t *testing.T) {
 			Name:      "name",
 			Namespace: "namespace",
 		},
-		// TODO: validate all fields from here in the controller
 		Spec: eventingv1alpha1.SubscriptionSpec{
 			ID:       "id",
 			Protocol: "BEB",

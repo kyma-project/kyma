@@ -38,8 +38,6 @@ func Test_SyncBebSubscription(t *testing.T) {
 	g.Expect(changed).To(BeFalse())
 }
 
-// TODO: shared place for this duplicated fixture ?
-
 // fixtureValidSubscription returns a valid subscription
 func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscription {
 	return &eventingv1alpha1.Subscription{
@@ -51,7 +49,6 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 			Name:      name,
 			Namespace: namespace,
 		},
-		// TODO: validate all fields from here in the controller
 		Spec: eventingv1alpha1.SubscriptionSpec{
 			ID:       "id",
 			Protocol: "BEB",

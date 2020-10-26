@@ -75,7 +75,7 @@ func MakeCondition(conditionType ConditionType, reason ConditionReason, status c
 		Status:             status,
 		LastTransitionTime: metav1.Now(),
 		Reason:             reason,
-		// TODO:
+		// TODO: https://github.com/kyma-project/kyma/issues/9770
 		Message: "",
 	}
 }

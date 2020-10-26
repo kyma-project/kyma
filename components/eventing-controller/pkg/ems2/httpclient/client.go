@@ -32,13 +32,7 @@ func newOauth2Client(ctx context.Context, cfg *clientcredentials.Config) *http.C
 	var base = http.DefaultTransport.(*http.Transport).Clone()
 	client.Transport.(*oauth2.Transport).Base = base
 
-	// TODO configure tracing transport - not necessary now
-	/*
-		client.Transport = &ochttp.Transport{
-			Base:        client.Transport,
-			Propagation: publisher_trace.TraceContextEgress,
-		}
-	*/
+	// TODO: Support tracing in eventing-controller #9767: https://github.com/kyma-project/kyma/issues/9767
 	return client
 }
 

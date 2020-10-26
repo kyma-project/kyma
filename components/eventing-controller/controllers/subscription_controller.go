@@ -62,6 +62,7 @@ func NewSubscriptionReconciler(
 // +kubebuilder:printcolumn:name="Ready",type=bool,JSONPath=`.status.Ready`
 // Source: https://book.kubebuilder.io/reference/generating-crd.html#additional-printer-columns
 
+// TODO: Optimize number of reconciliation calls in eventing-controller #9766: https://github.com/kyma-project/kyma/issues/9766
 func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
 	_ = r.Log.WithValues("subscription", req.NamespacedName)
@@ -223,7 +224,7 @@ func (r *SubscriptionReconciler) deleteBEBSubscription(subscription *eventingv1a
 
 func (r *SubscriptionReconciler) syncAPIRule(subscription *eventingv1alpha1.Subscription, result *ctrl.Result,
 	ctx context.Context, logger logr.Logger) (bool, error) {
-	// TODO
+	// TODO: https://github.com/kyma-project/kyma/issues/9563
 	var statusChanged bool
 
 	return statusChanged, nil
