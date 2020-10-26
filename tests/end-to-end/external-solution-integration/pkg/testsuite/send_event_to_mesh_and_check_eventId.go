@@ -20,7 +20,6 @@ import (
 // SendEventToMeshAndCheckEventId is a step which sends an event and checks if the correct EventId has been received
 type SendEventToMeshAndCheckEventId struct {
 	testkit.SendEvent
-	counter     int
 	testService *testkit.TestService
 	retryOpts   []retrygo.Option
 }
@@ -32,7 +31,6 @@ func NewSendEventToMeshAndCheckEventId(appName, payload string, state testkit.Se
 	opts ...retrygo.Option) *SendEventToMeshAndCheckEventId {
 	return &SendEventToMeshAndCheckEventId{
 		testkit.SendEvent{State: state, AppName: appName, Payload: payload},
-		0,
 		testService,
 		opts,
 	}
@@ -54,7 +52,6 @@ func (s *SendEventToMeshAndCheckEventId) Run() error {
 
 	err = s.checkEventId(eventId)
 	if err != nil {
-		s.counter++
 		return errors.Wrap(err, s.testService.DumpAllReceivedEvents().Error())
 	}
 
