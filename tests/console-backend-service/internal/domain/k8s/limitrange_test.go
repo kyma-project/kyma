@@ -86,16 +86,21 @@ func fixLimitRangeQuery() *graphql.Request {
 	query := `query ($namespace: String!) {
 				limitRanges(namespace: $namespace) {
 					name
-					limits {
-						type
-						max {
-							memory
-						}
-						default {
-							memory
-						}
-						defaultRequest {
-							memory
+					spec {
+						limits {
+							type
+							max {
+								memory
+								cpu
+							}
+							default {
+								memory
+								cpu
+							}
+							defaultRequest {
+								memory
+								cpu
+							}
 						}
 					}
 				}

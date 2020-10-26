@@ -63,19 +63,14 @@ func TestResourceQuotaQuery(t *testing.T) {
 	require.NoError(t, err)
 
 	var listResult resourceQuotas
-	var statusResult resourceQuotaStatus
 
 	err = c.Do(fixListResourceQuotasQuery(), &listResult)
 	require.NoError(t, err)
 	assert.Contains(t, listResult.ResourceQuotas, fixListResourceQuotasResponse())
 
-	err = c.Do(fixResourceQuotasStatusQuery(), &statusResult)
-	require.NoError(t, err)
-	assert.False(t, statusResult.Exceeded)
-
 	t.Log("Checking authorization directives...")
 	ops := &auth.OperationsInput{
-		auth.List: {fixListResourceQuotasQuery(), fixResourceQuotasStatusQuery()},
+		auth.List: {fixListResourceQuotasQuery()},
 	}
 	AuthSuite.Run(t, ops)
 }
@@ -86,25 +81,17 @@ func fixListResourceQuotasQuery() *graphql.Request {
 					name
 					spec {
 						hard {
-							memory
-							cpu
+							limits {
+								memory
+							}
+							requests {
+								memory
+							}
 							pods
 						}
 					}
 				}
 			}`
-	r := graphql.NewRequest(query)
-	r.SetVar("namespace", testNamespace)
-
-	return r
-}
-
-func fixResourceQuotasStatusQuery() *graphql.Request {
-	query := `query($namespace: String!) {
-				  resourceQuotasStatus(namespace: $namespace) {
-					exceeded
-				  }
-				}`
 	r := graphql.NewRequest(query)
 	r.SetVar("namespace", testNamespace)
 
