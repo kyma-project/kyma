@@ -27,7 +27,7 @@ echo "--> Temporary disable ingress-gateway"
 kubectl scale deploy -n istio-system istio-ingressgateway --replicas 0
 
 echo "--> Install Istio 1.7"
-istioctl upgrade -f /etc/istio/operator-1-7.yaml -y
+istioctl upgrade -f "${OPERATOR_FILE}" -y
 
 echo "Apply custom kyma manifests"
 kubectl apply -f /etc/manifests
