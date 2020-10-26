@@ -1,0 +1,37 @@
+{{- $ca := genCA "service-catalog-webhook-ca" 3650 }}
+{{- $cn := printf "%s-webhook" (include "fullname" .) }}
+{{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
+{{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
+{{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bindings-webhook-cert
+type: Opaque
+data:
+  tls.crt: {{ b64enc $cert.Cert }}
+  tls.key: {{ b64enc $cert.Key }}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: "bindings.kyma-project.io"
+webhooks:
+  - name: "bindings.kyma-project.io"
+    rules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+        scope: "Namespaced"
+    failurePolicy: Ignore
+    clientConfig:
+      caBundle: {{ b64enc $ca.Cert }}
+      service:
+        name: bindings-webhhook-pod
+        namespace: default
+        path: "/binding-mutating-pod"
+    admissionReviewVersions: ["v1", "v1beta1"]
+    sideEffects: None
+    timeoutSeconds: 5

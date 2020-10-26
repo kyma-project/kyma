@@ -1,3 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: bindings-webhhook-pod
+spec:
+  selector:
+    app: binding-controller
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: 8443
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -23,3 +35,16 @@ spec:
           ports:
             - containerPort: 8080
           imagePullPolicy: Always
+          volumeMounts:
+          - name: bindings-webhook-cert
+            mountPath: /var/run/binding-pod-webhook
+            readOnly: true
+      volumes:
+      - name: bindings-webhook-cert
+        secret:
+          secretName: bindings-webhook-cert
+          items:
+          - key: tls.crt
+            path: tls.crt
+          - key: tls.key
+            path: tls.key

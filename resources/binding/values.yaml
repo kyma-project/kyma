@@ -3,4 +3,4 @@ global:
     containerRegistry:
       path: eu.gcr.io/sap-se-cx-gopher
     binding_controller:
-      version: "0.1"
+      version: "0.2"
