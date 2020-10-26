@@ -16,7 +16,7 @@ kyma:
 istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
-    tag: 19e240cd
+    tag: 6fd499b9
 
 monitoring:
   enabled: true
