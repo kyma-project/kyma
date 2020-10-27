@@ -31,7 +31,7 @@ webhooks:
     clientConfig:
       caBundle: {{ b64enc $ca.Cert }}
       service:
-        name: bindings-webhhook-pod
+        name: {{ template "fullname" . }}-webhook-pod
         namespace: default
         path: "/binding-mutating-pod"
     admissionReviewVersions: ["v1beta1"]

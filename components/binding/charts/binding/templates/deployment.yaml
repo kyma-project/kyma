@@ -44,6 +44,8 @@ spec:
           env:
           - name: APP_PORT
             value: "{{ .Values.config.bindingController.port }}"
+          - name: APP_DEBUG_MODE
+            value: "{{ .Values.config.bindingController.debugMode }}"
       volumes:
       - name: webhook-cert
         secret:
