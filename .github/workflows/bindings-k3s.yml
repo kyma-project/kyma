@@ -1,0 +1,52 @@
+name: CI
+
+on: 
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths: 
+      - 'resources/binding'
+      - 'components/binding'
+      - 'ci/binding' 
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.14
+
+      - uses: actions/checkout@v2
+
+      - name: Get dependencies
+        run:  go get -v -t -d ./components/binding
+
+      - name: Go fmt
+        run:  go fmt -v ./components/binding
+
+      - name: Build
+        run: go build -v .
+
+      - name: Prepare k3s and helm 3
+        run: |
+          ./components/binding/scripts/create-cluster-k3s.sh
+          echo "Installing helm"
+          curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+          while [[ $(kubectl get nodes -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "Waiting for cluster nodes to be ready"; sleep 2; done        
+
+      - name: Install Bindings component using Helm
+        run: |
+          helm install bindings ./resources/binding
+
+      - name: Apply test scenario and check deployment
+        run: |
+          ./components/binding/scripts/create-scenario.sh
+          sleep 30
+          kubectl get pods --selector=app=sandbox -oyaml 
