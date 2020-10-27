@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: bindings-webhhook-pod
+  name: {{ template "fullname" . }}-bindings-webhhook-pod
 spec:
   selector:
     app: binding-controller
@@ -13,7 +13,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: binding-controller
+  name: {{ template "fullname" . }}-binding-controller
   labels:
     app: binding-controller
 spec:
