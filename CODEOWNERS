@@ -31,6 +31,8 @@
 # The `apiserver-proxy` chart
 /resources/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere @colunira
 
+# The `certificate-manager` chart
+/resources/certificate-manager/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere @colunira
 
 # The `certificates` chart
 /resources/certificates/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere @colunira
