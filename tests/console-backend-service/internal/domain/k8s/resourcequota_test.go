@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	resourceQuotaName = "test-resource-quota"
+	resourceQuotaName = "test-resource-quota" //yes
 )
 
 type resourceQuotas struct {
