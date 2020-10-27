@@ -32,6 +32,6 @@ webhooks:
         name: bindings-webhhook-pod
         namespace: default
         path: "/binding-mutating-pod"
-    admissionReviewVersions: ["v1", "v1beta1"]
+    admissionReviewVersions: ["v1beta1"]
     sideEffects: None
     timeoutSeconds: 5

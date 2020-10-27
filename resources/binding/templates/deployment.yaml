@@ -8,7 +8,7 @@ spec:
   ports:
     - protocol: TCP
       port: 443
-      targetPort: 8443
+      targetPort: {{ .Values.config.bindingController.port }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -31,14 +31,17 @@ spec:
       serviceAccountName: binding
       containers:
         - name: manager
-          image: "{{ .Values.global.images.containerRegistry.path }}/binding:{{ .Values.global.images.binding_controller.version }}"
+          image: "{{ .Values.images.containerRegistry.path }}/binding:{{ .Values.images.bindingController.version }}"
           ports:
-            - containerPort: 8080
+            - containerPort: {{ .Values.config.bindingController.port }}
           imagePullPolicy: Always
           volumeMounts:
           - name: bindings-webhook-cert
             mountPath: /var/run/binding-pod-webhook
             readOnly: true
+          env:
+          - name: APP_PORT
+            value: "{{ .Values.config.bindingController.port }}"
       volumes:
       - name: bindings-webhook-cert
         secret:
