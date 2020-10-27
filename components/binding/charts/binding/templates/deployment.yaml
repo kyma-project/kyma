@@ -28,7 +28,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      serviceAccountName: binding
+      serviceAccountName: {{ template "fullname" . }}-binding
       containers:
         - name: manager
           image: "{{ .Values.images.containerRegistry.path }}/binding:{{ .Values.images.bindingController.version }}"
