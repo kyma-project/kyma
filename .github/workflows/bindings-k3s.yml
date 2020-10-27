@@ -1,9 +1,7 @@
-name: CI
+name: Binding-pre-master
 
 on: 
-  push:
   pull_request:
-    types: [opened, synchronize, reopened]
     paths: 
       - 'components/binding/**'
 jobs:
