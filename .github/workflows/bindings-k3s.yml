@@ -1,7 +1,11 @@
-name: Binding
+name: Biding-pre-master
 
 on: 
   pull_request:
+    types: [opened, synchronize, reopened]
+    paths: 
+      - 'components/binding/**'
+      - '.github/workflows/bindings-k3s.yml'
 jobs:
   build:
     runs-on: ubuntu-latest
