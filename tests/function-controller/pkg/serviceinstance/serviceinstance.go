@@ -11,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	watchtools "k8s.io/client-go/tools/watch"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
@@ -91,6 +92,21 @@ func (si *ServiceInstance) Get() (*v1beta1.ServiceInstance, error) {
 	}
 
 	return &serviceinstance, nil
+}
+
+func (si *ServiceInstance) LogResource() error {
+	serviceInstance, err := si.Get()
+	if err != nil {
+		return err
+	}
+
+	out, err := helpers.PrettyMarshall(serviceInstance)
+	if err != nil {
+		return err
+	}
+
+	si.log.Infof("%s", out)
+	return nil
 }
 
 func (si *ServiceInstance) WaitForStatusRunning() error {
