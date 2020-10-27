@@ -5,19 +5,12 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths: 
-      - './resources/binding'
-      - './components/binding'
-      - './ci/binding' 
-
+      - 'components/binding/**'
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     steps:
-
       - name: Set up Go 1.x
         uses: actions/setup-go@v2
         with:
