@@ -22,7 +22,6 @@ const (
 )
 
 type Config struct {
-	KubeconfigPath     string           `envconfig:"optional"`
 	UsageKindName      string           `envconfig:"default=serverless-function"`
 	Namespace          string           `envconfig:"default=test-function"`
 	DomainName         string           `envconfig:"default=kyma.local"`
