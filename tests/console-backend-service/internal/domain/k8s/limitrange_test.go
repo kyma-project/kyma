@@ -59,9 +59,13 @@ type limitRangeQueryResponse struct {
 	LimitRange []limitRange `json:"limitRanges"`
 }
 
-type limitRange struct {
-	Name   string           `json:"name"`
+type limitRangeSpec struct {
 	Limits []limitRangeItem `json:"limits"`
+}
+
+type limitRange struct {
+	Name string         `json:"name"`
+	Spec limitRangeSpec `json:"spec"`
 }
 
 type limitRangeItem struct {
@@ -116,17 +120,19 @@ func fixLimitRangeQueryResponse() limitRangeQueryResponse {
 		LimitRange: []limitRange{
 			{
 				Name: limitRangeName,
-				Limits: []limitRangeItem{
-					{
-						LimitType: limitTypeContainer,
-						Max: resourceType{
-							Memory: "1Gi",
-						},
-						Default: resourceType{
-							Memory: "96Mi",
-						},
-						DefaultRequest: resourceType{
-							Memory: "32Mi",
+				Spec: limitRangeSpec{
+					Limits: []limitRangeItem{
+						{
+							LimitType: limitTypeContainer,
+							Max: resourceType{
+								Memory: "1Gi",
+							},
+							Default: resourceType{
+								Memory: "96Mi",
+							},
+							DefaultRequest: resourceType{
+								Memory: "32Mi",
+							},
 						},
 					},
 				},

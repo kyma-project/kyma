@@ -26,21 +26,24 @@ type resourceQuotas struct {
 	ResourceQuotas []resourceQuota `json:"resourceQuotas"`
 }
 
-type resourceQuota struct {
-	Name     string         `json:"name"`
+type resourceQuotaSpec struct {
+	Hard resourceQuotaHard `json:"hard"`
+}
+
+type resourceQuotaHard struct {
 	Pods     string         `json:"pods"`
 	Limits   resourceValues `json:"limits"`
 	Requests resourceValues `json:"requests"`
 }
 
+type resourceQuota struct {
+	Name string            `json:"name"`
+	Spec resourceQuotaSpec `json:"spec"`
+}
+
 type resourceValues struct {
 	Memory string `json:"memory"`
 	Cpu    string `json:"cpu"`
-}
-
-type resourceQuotaStatus struct {
-	Exceeded bool   `json:"exceeded"`
-	Message  string `json:"message"`
 }
 
 func TestResourceQuotaQuery(t *testing.T) {
@@ -101,14 +104,18 @@ func fixListResourceQuotasQuery() *graphql.Request {
 func fixListResourceQuotasResponse() resourceQuota {
 	return resourceQuota{
 		Name: resourceQuotaName,
-		Pods: "10",
-		Limits: resourceValues{
-			Cpu:    "900m",
-			Memory: "1Gi",
-		},
-		Requests: resourceValues{
-			Cpu:    "500m",
-			Memory: "512Mi",
+		Spec: resourceQuotaSpec{
+			Hard: resourceQuotaHard{
+				Pods: "10",
+				Limits: resourceValues{
+					Cpu:    "900m",
+					Memory: "1Gi",
+				},
+				Requests: resourceValues{
+					Cpu:    "500m",
+					Memory: "512Mi",
+				},
+			},
 		},
 	}
 }
