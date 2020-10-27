@@ -5,9 +5,9 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths: 
-      - 'resources/binding'
-      - 'components/binding'
-      - 'ci/binding' 
+      - './resources/binding'
+      - './components/binding'
+      - './ci/binding' 
 
 jobs:
 
