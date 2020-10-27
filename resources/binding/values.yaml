@@ -7,3 +7,4 @@ images:
 config:
   bindingController:
     port: 8443
+    
