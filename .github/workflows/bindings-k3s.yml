@@ -1,9 +1,7 @@
-name: Binding-pre-master
+name: Binding
 
 on: 
   pull_request:
-    paths: 
-      - 'components/binding/**'
 jobs:
   build:
     runs-on: ubuntu-latest
