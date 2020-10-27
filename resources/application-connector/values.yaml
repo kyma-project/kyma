@@ -5,7 +5,7 @@ connection_token_handler:
   enabled: *connectorServiceEnabled
 
 global:
-  disableLegacyConnectivity: false
+  disableLegacyConnectivity: true
   isLocalEnv: false
   namespace: kyma-integration
   strictMode: disabled
