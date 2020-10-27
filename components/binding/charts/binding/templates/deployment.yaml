@@ -1,10 +1,10 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: {{ template "fullname" . }}-bindings-webhhook-pod
+  name: {{ template "fullname" . }}-webhhook-pod
 spec:
   selector:
-    app: binding-controller
+    app: {{ template "fullname" . }}-controller
   ports:
     - protocol: TCP
       port: 443
@@ -13,22 +13,22 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}-binding-controller
+  name: {{ template "fullname" . }}-controller
   labels:
-    app: binding-controller
+    app: {{ template "fullname" . }}-controller
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: binding-controller
+      app: {{ template "fullname" . }}-controller
   template:
     metadata:
       labels:
-        app: binding-controller
+        app: {{ template "fullname" . }}-controller
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      serviceAccountName: {{ template "fullname" . }}-binding
+      serviceAccountName: {{ template "fullname" . }}-sa
       containers:
         - name: manager
           image: "{{ .Values.images.containerRegistry.path }}/binding:{{ .Values.images.bindingController.version }}"
@@ -36,16 +36,16 @@ spec:
             - containerPort: {{ .Values.config.bindingController.port }}
           imagePullPolicy: Always
           volumeMounts:
-          - name: bindings-webhook-cert
+          - name: {{ template "fullname" . }}-webhook-cert
             mountPath: /var/run/binding-pod-webhook
             readOnly: true
           env:
           - name: APP_PORT
             value: "{{ .Values.config.bindingController.port }}"
       volumes:
-      - name: bindings-webhook-cert
+      - name: {{ template "fullname" . }}-webhook-cert
         secret:
-          secretName: bindings-webhook-cert
+          secretName: {{ template "fullname" . }}-webhook-cert
           items:
           - key: tls.crt
             path: tls.crt
