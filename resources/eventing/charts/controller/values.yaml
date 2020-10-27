@@ -1,3 +1,5 @@
+# override name to avoid collision with kantive eventing resources
+nameOverride: subscription-controller
 replicaCount: 1
 serviceAccount:
   # name defines optionally another name than the default name for the service account
