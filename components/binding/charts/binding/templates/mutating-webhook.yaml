@@ -1,5 +1,5 @@
 {{- $ca := genCA "service-catalog-webhook-ca" 3650 }}
-{{- $cn := printf "%s-webhook" (include "fullname" .) }}
+{{- $cn := printf "%s-webhook-pod" (include "fullname" .) }}
 {{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
 {{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
 {{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
