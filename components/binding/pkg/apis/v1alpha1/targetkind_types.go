@@ -12,7 +12,6 @@ type TargetKindSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of TargetKind. Edit TargetKind_types.go to remove/update
 	DisplayName string    `json:"displayName"`
 	Resource    *Resource `json:"resource"`
 	LabelsPath  string    `json:"labelsPath"`

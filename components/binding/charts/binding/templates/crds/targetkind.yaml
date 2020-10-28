@@ -34,10 +34,21 @@ spec:
             spec:
               description: TargetKindSpec defines the desired state of TargetKind
               properties:
-                foo:
-                  description: Foo is an example field of TargetKind. Edit TargetKind_types.go
-                    to remove/update
+                displayName:
                   type: string
+                resource:
+                  properties:
+                    group:
+                      type: string
+                    kind:
+                      type: string
+                    version:
+                      type: string
+                  type: object
+                labelsPath:
+                  type: string
+                registered:
+                  type: boolean
               type: object
             status:
               description: TargetKindStatus defines the observed state of TargetKind

@@ -33,8 +33,10 @@ func (w *TargetKindWorker) Process(targetKind *v1alpha1.TargetKind, log log.Fiel
 				return &v1alpha1.TargetKind{}, errors.New(fmt.Sprintf("while registering TargetKind %q", targetKind.Spec.DisplayName))
 			}
 			targetKind.Spec.Registered = true
+			log.Infof("TargetKind %q registered", targetKind.Name)
 			return targetKind, nil
 		}
+		log.Infof("TargetKind %q was already registered", targetKind.Name)
 		return targetKind, nil
 	}
 	err := w.registerTargetKind(*targetKind)

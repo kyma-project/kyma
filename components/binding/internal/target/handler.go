@@ -49,7 +49,7 @@ func (h *Handler) AddLabel(b *v1alpha1.Binding) error {
 func (h *Handler) AddLabelToResource(b *v1alpha1.Binding) error {
 	ctx := context.Background()
 
-	targetKind, err := h.storage.Get(b.Spec.Target.Name)
+	targetKind, err := h.storage.Get(b.Spec.Target.Kind)
 	if err != nil {
 		return err
 	}
