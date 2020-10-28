@@ -69,7 +69,7 @@ type limitRange struct {
 }
 
 type limitRangeItem struct {
-	Type           limitType    `json:"limitType"`
+	Type           limitType    `json:"type"`
 	DefaultRequest resourceType `json:"defaultRequest"`
 	Default        resourceType `json:"default"`
 	Max            resourceType `json:"max"`
