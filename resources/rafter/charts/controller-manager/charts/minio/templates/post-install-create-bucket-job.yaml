@@ -58,7 +58,7 @@ spec:
         image: "{{ .Values.mcImage.repository }}:{{ .Values.mcImage.tag }}"
         imagePullPolicy: {{ .Values.mcImage.pullPolicy }}
         {{- if .Values.pod.extraContainerProperties }}
-        {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 10 }}
+        {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 8 }}
         {{- end }}
         command: ["/bin/sh", "/config/initialize"]
         env:
