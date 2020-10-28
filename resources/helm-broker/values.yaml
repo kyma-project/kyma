@@ -58,7 +58,7 @@ global:
     version: "579b3ffc"
   helm_controller:
     dir: "develop/"
-    version: "579b3ffc"
+    version: "a3cdf624"
   # etcd port uses by helm broker
   etcdClientPort: 2379
 
