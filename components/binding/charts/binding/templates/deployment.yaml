@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: {{ template "fullname" . }}-webhhook-pod
+  name: {{ template "fullname" . }}-webhook-pod
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
