@@ -11,9 +11,10 @@ This tutorial shows how you can automate the deployment of local Kyma resources 
 
 All you need before you start is to have the following:
 
-- Kyma CLI
-- [Homebrew](https://docs.brew.sh/Installation)
+- [Docker](https://www.docker.com/)
 - Git repository
+- [Homebrew](https://docs.brew.sh/Installation)
+- Kyma CLI
 
 ## Steps
 
