@@ -160,7 +160,7 @@ func (h *Handler) getResource(ctx context.Context, b *v1alpha1.Binding) (*unstru
 
 	err := h.client.Get(ctx, client.ObjectKey{Name: b.Spec.Target.Name, Namespace: b.Namespace}, &resource)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	return resource.DeepCopy(), nil
