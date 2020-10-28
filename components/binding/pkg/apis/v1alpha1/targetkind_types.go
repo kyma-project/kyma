@@ -13,7 +13,16 @@ type TargetKindSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of TargetKind. Edit TargetKind_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	DisplayName string    `json:"displayName"`
+	Resource    *Resource `json:"resource"`
+	LabelsPath  string    `json:"labelsPath"`
+	Registered bool       `json:"registered"`
+}
+
+type Resource struct {
+	Group   string `json:"group"`
+	Kind    string `json:"kind"`
+	Version string `json:"version"`
 }
 
 // TargetKindStatus defines the observed state of TargetKind
@@ -25,7 +34,7 @@ type TargetKindStatus struct {
 // +kubebuilder:object:root=true
 
 // TargetKind is the Schema for the targetkinds API
-type TargetKind struct {
+type 	TargetKind struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 

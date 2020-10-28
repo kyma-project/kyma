@@ -9,8 +9,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func SetupBindingReconciler(cli client.Client, log logrus.FieldLogger, scheme *runtime.Scheme) *BindingReconciler {
-	bindingWorker := worker.NewBindingWorker(target.NewHandler(cli))
+func SetupBindingReconciler(cli client.Client, log logrus.FieldLogger, targetKindStorage *target.KindStorage, scheme *runtime.Scheme) *BindingReconciler {
+	bindingWorker := worker.NewBindingWorker(target.NewHandler(cli, targetKindStorage))
 
 	return NewBindingReconciler(
 		cli,

@@ -3,9 +3,11 @@ package target
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	bindErr "github.com/kyma-project/kyma/components/binding/internal/error"
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -17,16 +19,17 @@ import (
 
 type Handler struct {
 	client client.Client
+	storage *KindStorage
 }
 
-func NewHandler(client client.Client) *Handler {
-	return &Handler{client: client}
+func NewHandler(client client.Client, storage *KindStorage) *Handler {
+	return &Handler{client: client, storage: storage}
 }
 
 func (h *Handler) AddLabel(b *v1alpha1.Binding) error {
 	ctx := context.Background()
 
-	deployment, err := h.getDeployment(ctx, b)
+	deployment, err := h.getDeployment(ctx, b) // rozne w zaleznosci od binding.Spec.Target
 	if err != nil {
 		return err
 	}
@@ -38,6 +41,49 @@ func (h *Handler) AddLabel(b *v1alpha1.Binding) error {
 
 	if err := h.updateDeployment(ctx, deployment); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (h *Handler) AddLabelToResource(b *v1alpha1.Binding) error {
+	ctx := context.Background()
+
+	targetKind, err := h.storage.Get(b.Spec.Target.Name)
+	if err != nil {
+		return err
+	}
+
+	resource, err := h.getResource(ctx, b)
+	if err != nil {
+		return err
+	}
+
+	var val interface{} = resource.Object
+
+	labelsPath := strings.Split(targetKind.Spec.LabelsPath, ".")
+
+
+	for i, field := range labelsPath {
+		if m, ok := val.(map[string]interface{}); i < len(labelsPath) && ok {
+			val, ok = m[field]
+			if !ok {
+				m[field] = map[string]interface{}{}
+				val = m[field]
+			}
+		} else {
+			return fmt.Errorf("accessor error: %v is of the type %T, expected map[string]interface{}", val, val)
+		}
+	}
+
+	_, ok := val.(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("expected type of field is map[string]string, but was %T", val)
+	}
+
+	err = h.client.Update(ctx, resource)
+	if err != nil {
+		return bindErr.AsTemporaryError(err, "while updating target deployment by client")
 	}
 
 	return nil
@@ -107,6 +153,17 @@ func (h *Handler) RemoveLabel(b *v1alpha1.Binding) error {
 	}
 
 	return nil
+}
+
+func (h *Handler) getResource(ctx context.Context, b *v1alpha1.Binding) (*unstructured.Unstructured, error) {
+	var resource unstructured.Unstructured
+
+	err := h.client.Get(ctx, client.ObjectKey{Name: b.Spec.Target.Name, Namespace: b.Namespace}, &resource)
+	if err != nil {
+		return nil, nil
+	}
+
+	return resource.DeepCopy(), nil
 }
 
 func (h *Handler) getDeployment(ctx context.Context, b *v1alpha1.Binding) (*v1.Deployment, error) {

@@ -2,7 +2,9 @@ package controller
 
 import (
 	"context"
+	"time"
 
+	bindErr "github.com/kyma-project/kyma/components/binding/internal/error"
 	bindingsv1alpha1 "github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
 
 	log "github.com/sirupsen/logrus"
@@ -11,25 +13,56 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+type TargetKindWorker interface {
+	Process(*bindingsv1alpha1.TargetKind, log.FieldLogger) (*bindingsv1alpha1.TargetKind, error)
+}
+
 // TargetKindReconciler reconciles a TargetKind object
 type TargetKindReconciler struct {
 	client client.Client
+	worker TargetKindWorker
 	log    log.FieldLogger
 	scheme *runtime.Scheme
 }
 
-func NewTargetKindReconciler(client client.Client, log log.FieldLogger, scheme *runtime.Scheme) *TargetKindReconciler {
+func NewTargetKindReconciler(client client.Client, worker TargetKindWorker, log log.FieldLogger, scheme *runtime.Scheme) *TargetKindReconciler {
 	return &TargetKindReconciler{
 		client: client,
+		worker: worker,
 		log:    log,
 		scheme: scheme,
 	}
 }
 
 func (r *TargetKindReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	_ = context.Background()
+	ctx := context.Background()
+	var targetKind bindingsv1alpha1.TargetKind
+	err := r.client.Get(ctx, req.NamespacedName, &targetKind)
+	if err != nil {
+		r.log.Warnf("TargetKind %s not found during reconcile process: %s", req.NamespacedName, err)
+	}
 
+	if targetKind.DeletionTimestamp != nil {
+		// TODO: handle removing targetkind here
+		return ctrl.Result{}, nil
+	}
 	// TODO: implement logic
+	r.log.Infof("start the reconcile TargetKind process: %s", req.NamespacedName)
+	updatedTargetKind, err := r.worker.Process(targetKind.DeepCopy(), r.log.WithField("TargetKind", req.NamespacedName))
+	switch {
+	case bindErr.IsTemporaryError(err):
+		r.log.Errorf("TargetKind %s process failed with temporary error: %s", req.NamespacedName, err)
+		return ctrl.Result{Requeue: true, RequeueAfter: 3 * time.Second}, err
+	case err != nil:
+		r.log.Errorf("TargetKind %s process failed: %s", req.NamespacedName, err)
+		return ctrl.Result{}, err
+	}
+
+	err = r.client.Update(ctx, updatedTargetKind)
+	if err != nil {
+		r.log.Errorf("cannot update TargetKind resource %s: %s", req.NamespacedName, err)
+		return ctrl.Result{Requeue: true, RequeueAfter: 10 * time.Second}, err
+	}
 
 	return ctrl.Result{}, nil
 }

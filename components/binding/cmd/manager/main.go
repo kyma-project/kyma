@@ -4,6 +4,7 @@ import (
 	"github.com/kyma-project/kyma/components/binding/internal/controller"
 	"github.com/kyma-project/kyma/components/binding/internal/webhook/binding"
 	"github.com/kyma-project/kyma/components/binding/internal/webhook/pod"
+	"github.com/kyma-project/kyma/components/binding/internal/target"
 	bindingsv1alpha1 "github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
 
 	log "github.com/sirupsen/logrus"
@@ -59,10 +60,12 @@ func main() {
 		"/binding-mutating",
 		&k8sWebhook.Admission{Handler: binding.NewMutationHandler(log.WithField("webhook", "binding-mutating"))})
 
-	bindingReconciler := controller.SetupBindingReconciler(mgr.GetClient(), logger, mgr.GetScheme())
+	targetKindStorage := target.NewKindStorage()
+
+	bindingReconciler := controller.SetupBindingReconciler(mgr.GetClient(), logger, targetKindStorage, mgr.GetScheme())
 	fatalOnError(bindingReconciler.SetupWithManager(mgr), "while creating BindingReconciler")
 
-	targetKindReconciler := controller.SetupTargetKindReconciler(mgr.GetClient(), logger, mgr.GetScheme())
+	targetKindReconciler := controller.SetupTargetKindReconciler(mgr.GetClient(), logger, targetKindStorage, mgr.GetScheme())
 	fatalOnError(targetKindReconciler.SetupWithManager(mgr), "while creating TargetKindReconciler")
 
 	fatalOnError(mgr.Start(ctrl.SetupSignalHandler()), "unable to run the manager")
