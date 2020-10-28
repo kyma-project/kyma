@@ -139,3 +139,15 @@ extraVolumes: []
 
 nameOverride:
 fullnameOverride:
+
+pod:
+  extraProperties:
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      fsGroup: 1000
+      runAsGroup: 1000
+  extraContainerProperties:
+    securityContext:
+      privileged: false
+      allowPrivilegeEscalation: false

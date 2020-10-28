@@ -101,6 +101,9 @@ pod:
     sidecar.istio.io/inject: "false"
   extraProperties:
     terminationGracePeriodSeconds: 10
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
 
 containers:
   manager:
@@ -111,7 +114,10 @@ containers:
       requests:
         cpu: 10m
         memory: 32Mi
-    extraProperties: {}
+    extraProperties:
+      securityContext:
+        privileged: false
+        allowPrivilegeEscalation: false
     envs:
       configMapRequeueDuration:
         value: 5m
@@ -134,7 +140,7 @@ containers:
       functionBuildExecutorArgs:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildExecutorImage:
-        value: gcr.io/kaniko-project/executor:v0.22.0
+        value: gcr.io/kaniko-project/executor:v1.2.0
       functionBuildRepoFetcherImage:
         value: eu.gcr.io/kyma-project/function-build-init:a8a6bca9
 
@@ -209,3 +215,14 @@ webhook:
   image:
     repository: "eu.gcr.io/kyma-project/function-webhook"
     tag: "858bc2c2"
+  container:
+    resources:
+      requests:
+        cpu: 30m
+        memory: 50Mi
+      limits:
+        cpu: 300m
+        memory: 300Mi
+    securityContext:
+        privileged: false
+        allowPrivilegeEscalation: false

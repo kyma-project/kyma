@@ -41,6 +41,25 @@ func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Functio
 	}
 }
 
+func jobContainerSecurityContext() *corev1.SecurityContext {
+	trueVal := true
+	return &corev1.SecurityContext{
+		Privileged:             &trueVal,
+		ReadOnlyRootFilesystem: &trueVal,
+	}
+}
+
+func podSecurityContext() *corev1.PodSecurityContext {
+	trueVal := true
+	userNum := int64(1000)
+	return &corev1.PodSecurityContext{
+		RunAsUser:    &userNum,
+		RunAsGroup:   &userNum,
+		RunAsNonRoot: &trueVal,
+		FSGroup:      &userNum,
+	}
+}
+
 func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, configMapName string) batchv1.Job {
 	one := int32(1)
 	zero := int32(0)
@@ -100,6 +119,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 							},
 						},
 					},
+					SecurityContext: podSecurityContext(),
 					Containers: []corev1.Container{
 						{
 							Name:      "executor",
@@ -118,6 +138,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 							Env: []corev1.EnvVar{
 								{Name: "DOCKER_CONFIG", Value: "/docker/.docker/"},
 							},
+							SecurityContext: jobContainerSecurityContext(),
 						},
 					},
 					RestartPolicy:      corev1.RestartPolicyNever,
@@ -264,6 +285,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 						},
 					},
+					SecurityContext: podSecurityContext(),
 					InitContainers: []corev1.Container{
 						{
 							Name:            "repo-fetcher",
@@ -295,6 +317,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 							Env: []corev1.EnvVar{
 								{Name: "DOCKER_CONFIG", Value: "/docker/.docker/"},
 							},
+							SecurityContext: jobContainerSecurityContext(),
 						},
 					},
 					RestartPolicy:      corev1.RestartPolicyNever,
@@ -313,6 +336,9 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 	envs := append(instance.Spec.Env, rtmConfig.RuntimeEnvs...)
 	envs = append(envs, envVarsForDeployment...)
 
+	falseVal := false
+	trueVal := true
+
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
@@ -330,6 +356,7 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 					Labels: podLabels, // podLabels contains InternalFnLabels, so it's ok
 				},
 				Spec: corev1.PodSpec{
+					SecurityContext: podSecurityContext(),
 					Containers: []corev1.Container{
 						{
 							Name:            functionContainerName,
@@ -337,6 +364,11 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 							Env:             envs,
 							Resources:       instance.Spec.Resources,
 							ImagePullPolicy: corev1.PullIfNotPresent,
+							SecurityContext: &corev1.SecurityContext{
+								Privileged:               &falseVal,
+								AllowPrivilegeEscalation: &falseVal,
+								ReadOnlyRootFilesystem:   &trueVal,
+							},
 						},
 					},
 					ServiceAccountName: r.config.ImagePullAccountName,

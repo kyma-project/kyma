@@ -33,19 +33,17 @@ spec:
         {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 8 }}
     spec:
       serviceAccountName: {{ template "webhook.fullname" . }}
+      {{- if .Values.pod.extraProperties }}
+      {{ include "tplValue" ( dict "value" .Values.pod.extraProperties "context" . ) | nindent 6 }}
+      {{- end }}
       containers:
         - name: webhook
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           resources:
-            requests:
-              cpu: 30m
-              memory: 50Mi
-            limits:
-              cpu: 300m
-              memory: 300Mi
+{{ toYaml .Values.container.resources | indent 12 }}
           securityContext:
-            allowPrivilegeEscalation: {{ .Values.container.allowPrivilegeEscalation }}
+{{ toYaml .Values.container.securityContext | indent 12 }}
           ports:
             - name: {{ .Values.service.ports.httpMetrics.name }}
               containerPort: {{ .Values.service.ports.httpMetrics.targetPort }}

@@ -26,6 +26,10 @@ pod:
   annotations:
     sidecar.istio.io/inject: "false"
     cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+  extraProperties:
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
 
 service:
   ports:
@@ -43,7 +47,8 @@ service:
       targetPort: 8443
 
 container:
-  allowPrivilegeEscalation: false
+  resources: {}
+  securityContext: {}
   envs:
     metricsDomain:
       value: "kyma-project.io/serverless"

@@ -39,17 +39,21 @@ spec:
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
       {{- end }}
+      serviceAccountName: {{ template "docker-registry.fullname" . }}
 {{- if .Values.priorityClassName }}
       priorityClassName: "{{ .Values.priorityClassName }}"
 {{- end }}
 {{- if .Values.securityContext.enabled }}
-      securityContext:
-        fsGroup: {{ .Values.securityContext.fsGroup }}
-        runAsUser: {{ .Values.securityContext.runAsUser }}
+{{- if .Values.pod.extraProperties }}
+{{ toYaml .Values.pod.extraProperties | indent 6 }}
+{{- end }}
 {{- end }}
       initContainers:
         - name: generate-htpasswd
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          {{- if .Values.pod.extraContainerProperties }}
+{{ toYaml .Values.pod.extraContainerProperties | indent 10 }}
+          {{- end }}
           volumeMounts:
             - name: registry-credentials
               mountPath: /regcred
@@ -67,6 +71,9 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.pod.extraContainerProperties }}
+{{ toYaml .Values.pod.extraContainerProperties | indent 10 }}
+          {{- end }}
           command:
           - /bin/registry
           - serve
