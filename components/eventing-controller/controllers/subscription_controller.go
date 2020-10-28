@@ -3,15 +3,29 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
 	"time"
+
+	"sigs.k8s.io/controller-runtime/pkg/cache"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8slabels "k8s.io/apimachinery/pkg/labels"
+	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -24,6 +38,7 @@ import (
 // SubscriptionReconciler reconciles a Subscription object
 type SubscriptionReconciler struct {
 	client.Client
+	cache.Cache
 	Log       logr.Logger
 	recorder  record.EventRecorder
 	Scheme    *runtime.Scheme
@@ -34,8 +49,21 @@ var (
 	FinalizerName = eventingv1alpha1.GroupVersion.Group
 )
 
+const (
+	SinkURLPrefix = "webhook"
+	// TODO: Think about the collisions when using length 6
+	SuffixLength                 = 10
+	ClusterLocalAPIGateway       = "kyma-gateway.kyma-system.svc.cluster.local"
+	ControllerServiceLabelKey    = "service"
+	ControllerIdentityLabelKey   = "beb"
+	ControllerIdentityLabelValue = "webhook"
+	ExternalHostPrefix           = "web"
+	ClusterLocalURLSuffix        = "svc.cluster.local"
+)
+
 func NewSubscriptionReconciler(
 	client client.Client,
+	cache cache.Cache,
 	log logr.Logger,
 	recorder record.EventRecorder,
 	scheme *runtime.Scheme,
@@ -45,6 +73,7 @@ func NewSubscriptionReconciler(
 	}
 	return &SubscriptionReconciler{
 		Client:    client,
+		Cache:     cache,
 		Log:       log,
 		recorder:  recorder,
 		Scheme:    scheme,
@@ -72,7 +101,7 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	result := ctrl.Result{}
 
 	// Ensure the object was not deleted in the meantime
-	if err := r.Get(ctx, req.NamespacedName, cachedSubscription); err != nil {
+	if err := r.Client.Get(ctx, req.NamespacedName, cachedSubscription); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 	// Handle only the new subscription
@@ -115,12 +144,12 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	}
 
 	// Sync the BEB Subscription with the Subscription CR
-	if statusChangedForBeb, err := r.syncBEBSubscription(subscription, &result, ctx, log); err != nil {
-		log.Error(err, "error while syncing BEB subscription")
-		return ctrl.Result{}, err
-	} else {
-		statusChanged = statusChanged || statusChangedForBeb
-	}
+	//if statusChangedForBeb, err := r.syncBEBSubscription(subscription, &result, ctx, log); err != nil {
+	//	log.Error(err, "error while syncing BEB subscription")
+	//	return ctrl.Result{}, err
+	//} else {
+	//	statusChanged = statusChanged || statusChangedForBeb
+	//}
 
 	if r.isInDeletion(subscription) {
 		// Remove finalizers
@@ -223,10 +252,239 @@ func (r *SubscriptionReconciler) deleteBEBSubscription(subscription *eventingv1a
 
 func (r *SubscriptionReconciler) syncAPIRule(subscription *eventingv1alpha1.Subscription, result *ctrl.Result,
 	ctx context.Context, logger logr.Logger) (bool, error) {
-	// TODO: https://github.com/kyma-project/kyma/issues/9563
 	var statusChanged bool
+	// Validate correctness of a URL
+	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
+	if err != nil {
+		logger.Error(err, "url is invalid")
+		return statusChanged, nil
+	}
 
+	// Validate svcNs and svcName from sink URL
+	svcNs, svcName, err := getSvcNsAndName(sURL.Host)
+	if err != nil {
+		logger.Error(err, "failed to parse svcName and svcNamespace")
+		return statusChanged, nil
+	}
+
+	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace
+	if subscription.Namespace != svcNs {
+		logger.Error(fmt.Errorf("stopping reconciliation as the namespace of Subscription: %s and the namespace of subscriber: %s are different", subscription.Namespace, svcNs), "")
+		return statusChanged, nil
+	}
+
+	// Validate sink URL is a cluster local URL
+	trimmedHost := strings.Split(sURL.Host, ":")[0]
+	if !strings.HasSuffix(trimmedHost, ClusterLocalURLSuffix) {
+		logger.Error(fmt.Errorf("sink does not contain %s URL", ClusterLocalURLSuffix), "")
+		return statusChanged, nil
+	}
+	// Validate svc is a cluster local one
+	_, err = r.validateClusterLocalService(ctx, svcNs, svcName)
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			logger.Error(err, "sink doesn't correspond to a valid cluster local svc")
+		}
+		return statusChanged, errors.Wrap(err, "failed to get the svc")
+	}
+
+	err = r.createOrUpdateAPIRule(*sURL, subscription, ctx, logger)
+	if err != nil {
+		return statusChanged, errors.Wrap(err, "failed to createOrUpdateAPIRule")
+	}
 	return statusChanged, nil
+}
+
+func (r *SubscriptionReconciler) validateClusterLocalService(ctx context.Context, svcNs, svcName string) (*corev1.Service, error) {
+	svcLookupKey := k8stypes.NamespacedName{Name: svcName, Namespace: svcNs}
+	svc := &corev1.Service{}
+	if err := r.Cache.Get(ctx, svcLookupKey, svc); err != nil {
+		if k8serrors.IsNotFound(err) {
+			return nil, errors.Wrap(err, "sink does not correspond to a valid k8s svc")
+		}
+		return nil, err
+	}
+	return svc, nil
+}
+
+func (r *SubscriptionReconciler) createOrUpdateAPIRule(sink url.URL, subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) error {
+	svcNs, svcName, err := getSvcNsAndName(sink.Host)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse svc name and ns in createOrUpdateAPIRule")
+	}
+	labels := map[string]string{
+		ControllerServiceLabelKey:  svcName,
+		ControllerIdentityLabelKey: ControllerIdentityLabelValue,
+	}
+
+	svcPort, err := convertURLPortForApiRulePort(sink)
+	if err != nil {
+		logger.Error(err, "error while converting URL port to APIRule port")
+		return nil
+	}
+	existingAPIRules, err := r.getAPIRulesForASvc(ctx, labels, svcNs)
+	if err != nil {
+		logger.Error(err, "error while fetching oldApiRule for labels", labels)
+		return nil
+	}
+	var existingAPIRule *apigatewayv1alpha1.APIRule
+	if existingAPIRules != nil {
+		existingAPIRule = r.filterAPIRuleOnPort(existingAPIRules, svcPort)
+	}
+
+	// Get all subscriptions valid for the cluster-local subscriber
+	subscriptions, err := r.getSubscriptionsForASvc(svcNs, svcName, ctx)
+	if err != nil {
+		logger.Error(err, "failed to fetch subscriptions for the subscriber is focus")
+		return nil
+	}
+	filteredSubscriptions := r.filterSubscriptionsOnPort(subscriptions, svcPort)
+
+	desiredAPIRule, err := r.makeAPIRule(svcNs, svcName, labels, filteredSubscriptions, svcPort)
+	if err != nil {
+		return errors.Wrap(err, "failed to make an APIRule")
+	}
+	if existingAPIRule == nil {
+		err = r.Client.Create(ctx, desiredAPIRule, &client.CreateOptions{})
+		if err != nil {
+			return errors.Wrap(err, "failed to create APIRule")
+		}
+		return nil
+	}
+	logger.Info("Existing APIRules", fmt.Sprintf("in ns: %s for svc: %s", svcNs, svcName), fmt.Sprintf("%v", *existingAPIRule))
+	// Assumption: there will be one APIRule for an svc with the labels injected by the controller hence trusting the 0th element in existingAPIRules list
+	object.ApplyExistingAPIRuleAttributes(existingAPIRule, desiredAPIRule)
+	if object.Semantic.DeepEqual(existingAPIRule, desiredAPIRule) {
+		return nil
+	}
+	// Update the existing APIRule
+	err = r.Client.Update(ctx, desiredAPIRule, &client.UpdateOptions{})
+	return nil
+}
+
+// getRelevantSubscriptions returns a list of Subscriptions which are valid for the subscriber in focus
+func (r *SubscriptionReconciler) getSubscriptionsForASvc(svcNs, svcName string, ctx context.Context) ([]eventingv1alpha1.Subscription, error) {
+	subscriptions := &eventingv1alpha1.SubscriptionList{}
+	relevantSubs := make([]eventingv1alpha1.Subscription, 0)
+	err := r.Cache.List(ctx, subscriptions, &client.ListOptions{
+		Namespace: svcNs,
+	})
+	if err != nil {
+		return []eventingv1alpha1.Subscription{}, err
+	}
+	for _, sub := range subscriptions.Items {
+		// Filtering subscriptions which are being deleted at the moment
+		if sub.DeletionTimestamp != nil {
+			continue
+		}
+		hostURL, err := url.ParseRequestURI(sub.Spec.Sink)
+		if err != nil {
+			// It's ok as the relevant subscription will have a valid cluster local URL in the same namespace
+			continue
+		}
+		// Filtering subscriptions valid for a valid subscriber
+		svcNsForSub, svcNameForSub, err := getSvcNsAndName(hostURL.Host)
+		if err != nil {
+			// It's ok as the relevant subscription will have a valid cluster local URL in the same namespace
+			continue
+		}
+		//svcPortForSub, err := convertURLPortForApiRulePort(*hostURL)
+		if svcNs == svcNsForSub && svcName == svcNameForSub {
+			relevantSubs = append(relevantSubs, sub)
+		}
+	}
+	return relevantSubs, nil
+}
+
+// filterSubscriptionsOnPort returns a list of Subscriptions which matches a particular port
+func (r *SubscriptionReconciler) filterSubscriptionsOnPort(subList []eventingv1alpha1.Subscription, svcPort uint32) []eventingv1alpha1.Subscription {
+	filteredSubs := make([]eventingv1alpha1.Subscription, 0)
+	for _, sub := range subList {
+		// Filtering subscriptions which are being deleted at the moment
+		if sub.DeletionTimestamp != nil {
+			continue
+		}
+		hostURL, err := url.ParseRequestURI(sub.Spec.Sink)
+		if err != nil {
+			// It's ok as the relevant subscription will have a valid cluster local URL in the same namespace
+			continue
+		}
+
+		svcPortForSub, err := convertURLPortForApiRulePort(*hostURL)
+		if err != nil {
+			// It's ok as the relevant subscription will have a valid port to filter on
+			continue
+		}
+		if svcPort == svcPortForSub {
+			filteredSubs = append(filteredSubs, sub)
+		}
+	}
+	return filteredSubs
+}
+
+func (r *SubscriptionReconciler) makeAPIRule(svcNs, svcName string, labels map[string]string, subs []eventingv1alpha1.Subscription, port uint32) (*apigatewayv1alpha1.APIRule, error) {
+
+	randomSuffix := handlers.GetRandSuffix(SuffixLength)
+	hostName := fmt.Sprintf("%s-%s", ExternalHostPrefix, randomSuffix)
+
+	apiRule := object.NewAPIRule(svcNs, SinkURLPrefix,
+		object.WithLabels(labels),
+		object.WithOwnerReference(subs),
+		object.WithService(hostName, svcName, port),
+		object.WithGateway(ClusterLocalAPIGateway),
+		object.WithRules(subs, http.MethodPost, http.MethodOptions))
+	return apiRule, nil
+}
+
+func convertURLPortForApiRulePort(sink url.URL) (uint32, error) {
+	port := uint32(0)
+	sinkPort := sink.Port()
+	if sinkPort != "" {
+		u64, err := strconv.ParseUint(sink.Port(), 10, 32)
+		if err != nil {
+			return port, errors.Wrapf(err, "failed to convert port: %s", sink.Port())
+		}
+		port = uint32(u64)
+	}
+	if port == uint32(0) {
+		switch strings.ToLower(sink.Scheme) {
+		case "http":
+			port = uint32(80)
+		case "https":
+			port = uint32(443)
+		}
+	}
+	return port, nil
+}
+
+func (r *SubscriptionReconciler) getAPIRulesForASvc(ctx context.Context, labels map[string]string, svcNs string) (*[]apigatewayv1alpha1.APIRule, error) {
+	existingAPIRules := &apigatewayv1alpha1.APIRuleList{}
+	err := r.Cache.List(ctx, existingAPIRules, &client.ListOptions{
+		LabelSelector: k8slabels.SelectorFromSet(labels),
+		Namespace:     svcNs,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &existingAPIRules.Items, nil
+}
+
+func (r *SubscriptionReconciler) filterAPIRuleOnPort(existingAPIRules *[]apigatewayv1alpha1.APIRule, port uint32) *apigatewayv1alpha1.APIRule {
+	for _, apiRule := range *existingAPIRules {
+		if *apiRule.Spec.Service.Port == port {
+			return &apiRule
+		}
+	}
+	return nil
+}
+
+// getSvcNsAndName returns namespace and name of the svc from the URL
+func getSvcNsAndName(url string) (string, string, error) {
+	parts := strings.Split(url, ".")
+	if len(parts) < 2 {
+		return "", "", fmt.Errorf("invalid sinkURL for cluster local svc: %s", url)
+	}
+	return parts[1], parts[0], nil
 }
 
 // syncInitialStatus determines the desires initial status and updates it accordingly (if conditions changed)

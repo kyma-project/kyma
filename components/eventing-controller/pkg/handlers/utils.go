@@ -2,13 +2,19 @@ package handlers
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
+	"time"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/mitchellh/hashstructure"
 )
+
+const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 func getHash(subscription *types.Subscription) (int64, error) {
 	if hash, err := hashstructure.Hash(subscription, nil); err != nil {
@@ -48,20 +54,22 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription) (*types.Su
 
 	// WebhookAuth
 	auth := &types.WebhookAuth{}
-	auth.ClientID = subscription.Spec.ProtocolSettings.WebhookAuth.ClientId
-	auth.ClientSecret = subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret
-	if subscription.Spec.ProtocolSettings.WebhookAuth.GrantType == string(types.GrantTypeClientCredentials) {
-		auth.GrantType = types.GrantTypeClientCredentials
-	} else {
-		return nil, fmt.Errorf("invalid GrantType: %v", subscription.Spec.ProtocolSettings.WebhookAuth.GrantType)
+	if subscription.Spec.ProtocolSettings.WebhookAuth != nil {
+		auth.ClientID = subscription.Spec.ProtocolSettings.WebhookAuth.ClientId
+		auth.ClientSecret = subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret
+		if subscription.Spec.ProtocolSettings.WebhookAuth.GrantType == string(types.GrantTypeClientCredentials) {
+			auth.GrantType = types.GrantTypeClientCredentials
+		} else {
+			return nil, fmt.Errorf("invalid GrantType: %v", subscription.Spec.ProtocolSettings.WebhookAuth.GrantType)
+		}
+		if subscription.Spec.ProtocolSettings.WebhookAuth.Type == string(types.AuthTypeClientCredentials) {
+			auth.Type = types.AuthTypeClientCredentials
+		} else {
+			return nil, fmt.Errorf("invalid Type: %v", subscription.Spec.ProtocolSettings.WebhookAuth.Type)
+		}
+		auth.TokenURL = subscription.Spec.ProtocolSettings.WebhookAuth.TokenUrl
+		emsSubscription.WebhookAuth = auth
 	}
-	if subscription.Spec.ProtocolSettings.WebhookAuth.Type == string(types.AuthTypeClientCredentials) {
-		auth.Type = types.AuthTypeClientCredentials
-	} else {
-		return nil, fmt.Errorf("invalid Type: %v", subscription.Spec.ProtocolSettings.WebhookAuth.Type)
-	}
-	auth.TokenURL = subscription.Spec.ProtocolSettings.WebhookAuth.TokenUrl
-	emsSubscription.WebhookAuth = auth
 
 	return emsSubscription, nil
 }
@@ -88,4 +96,13 @@ func getInternalView4Ems(subscription *types.Subscription) (*types.Subscription,
 	}
 
 	return emsSubscription, nil
+}
+
+// GetRandSuffix returns a random suffix of length l or -1 for the whole random string
+func GetRandSuffix(l int) string {
+	b := make([]byte, l)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(b)
 }

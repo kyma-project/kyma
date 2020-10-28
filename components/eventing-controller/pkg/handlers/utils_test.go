@@ -97,14 +97,14 @@ func Test_getInternalView4Ems(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	// given
-	emsSubscription := &types.Subscription {
-		Name: "ev2subs1",
-		ContentMode: types.ContentModeStructured,
+	emsSubscription := &types.Subscription{
+		Name:            "ev2subs1",
+		ContentMode:     types.ContentModeStructured,
 		ExemptHandshake: true,
-		Qos: types.QosAtLeastOnce,
-		WebhookUrl: "https://webhook.xxx.com",
+		Qos:             types.QosAtLeastOnce,
+		WebhookUrl:      "https://webhook.xxx.com",
 
-		Events: []types.Event {
+		Events: []types.Event{
 			{
 				Source: "/default/kyma/myinstance",
 				Type:   "kyma.ev2.poc.event1.v1",
@@ -130,4 +130,17 @@ func Test_getInternalView4Ems(t *testing.T) {
 		},
 	}))
 	g.Expect(bebSubscription)
+}
+
+func TestGetRandSuffix(t *testing.T) {
+	totalExecutions := 10
+	lengthOfRandomSuffix := 6
+	results := make(map[string]bool)
+	for i := 0; i < totalExecutions; i++ {
+		result := GetRandSuffix(lengthOfRandomSuffix)
+		if _, ok := results[result]; ok {
+			t.Fatalf("generated string already exists: %s", result)
+		}
+		results[result] = true
+	}
 }

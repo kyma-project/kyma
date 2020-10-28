@@ -5,6 +5,8 @@ import (
 	"os"
 	"time"
 
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -26,6 +28,8 @@ func init() {
 
 	_ = eventingv1alpha1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
+
+	_ = apigatewayv1alpha1.AddToScheme(scheme)
 }
 
 func main() {
@@ -48,6 +52,7 @@ func main() {
 	}
 	if err = controllers.NewSubscriptionReconciler(
 		mgr.GetClient(),
+		mgr.GetCache(),
 		ctrl.Log.WithName("controllers").WithName("Subscription"),
 		mgr.GetEventRecorderFor("subscription-controller"),
 		mgr.GetScheme(),
