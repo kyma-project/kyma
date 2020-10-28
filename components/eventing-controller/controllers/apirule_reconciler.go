@@ -3,10 +3,11 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
 	"net/url"
 	"strings"
+
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	k8stypes "k8s.io/apimachinery/pkg/types"
@@ -74,6 +75,9 @@ func isRelevantAPIRule(apiRule *apigatewayv1alpha1.APIRule) bool {
 
 // computeAPIRuleReadyStatus TODO ...
 func computeAPIRuleReadyStatus(apiRule *apigatewayv1alpha1.APIRule) bool {
+	if apiRule.Status.APIRuleStatus == nil || apiRule.Status.AccessRuleStatus == nil || apiRule.Status.VirtualServiceStatus == nil {
+		return false
+	}
 	apiRuleStatus := apiRule.Status.APIRuleStatus.Code == apigatewayv1alpha1.StatusOK
 	accessRuleStatus := apiRule.Status.AccessRuleStatus.Code == apigatewayv1alpha1.StatusOK
 	virtualServiceStatus := apiRule.Status.VirtualServiceStatus.Code == apigatewayv1alpha1.StatusOK
@@ -109,7 +113,7 @@ func (r *APIRuleReconciler) syncAPIRuleSubscriptionsStatus(apiRule *apigatewayv1
 		}
 
 		subscriptionCopy.Status.APIRuleReady = apiRuleReady
-		if err := r.Status().Update(ctx, subscriptionCopy); err != nil {
+		if err := r.Client.Status().Update(ctx, subscriptionCopy); err != nil {
 			log.Error(err, "Failed to update the Subscription status")
 			return ctrl.Result{}, err
 		}

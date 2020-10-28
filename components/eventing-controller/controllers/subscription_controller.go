@@ -115,23 +115,23 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		"version", subscription.GetGeneration(),
 	)
 
-	//if !r.isInDeletion(subscription) {
-	//	// Ensure the finalizer is set
-	//	if err := r.syncFinalizer(subscription, &result, ctx, log); err != nil {
-	//		log.Error(err, "error while syncing finalizer")
-	//		return ctrl.Result{}, err
-	//	}
-	//	if result.Requeue {
-	//		return result, nil
-	//	}
-	//	if err := r.syncInitialStatus(subscription, &result, ctx); err != nil {
-	//		log.Error(err, "error while syncing status")
-	//		return ctrl.Result{}, err
-	//	}
-	//	if result.Requeue {
-	//		return result, nil
-	//	}
-	//}
+	if !r.isInDeletion(subscription) {
+		// Ensure the finalizer is set
+		if err := r.syncFinalizer(subscription, &result, ctx, log); err != nil {
+			log.Error(err, "error while syncing finalizer")
+			return ctrl.Result{}, err
+		}
+		if result.Requeue {
+			return result, nil
+		}
+		if err := r.syncInitialStatus(subscription, &result, ctx); err != nil {
+			log.Error(err, "error while syncing status")
+			return ctrl.Result{}, err
+		}
+		if result.Requeue {
+			return result, nil
+		}
+	}
 
 	// mark if the subscription status was changed
 	statusChanged := false
