@@ -2,6 +2,7 @@ name: Biding-pre-master
 
 on: 
   pull_request:
+    branches: [ master ]
     types: [opened, synchronize, reopened]
     paths: 
       - 'components/binding/**'
