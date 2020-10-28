@@ -60,6 +60,16 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "Subscription")
 		os.Exit(1)
 	}
+	if err = controllers.NewAPIRuleReconciler(
+		mgr.GetClient(),
+		mgr.GetCache(),
+		ctrl.Log.WithName("controllers").WithName("APIRule"),
+		mgr.GetEventRecorderFor("subscription-controller"),
+		mgr.GetScheme(),
+	).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Subscription")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("starting manager")

@@ -70,8 +70,10 @@ type EmsSubscriptionStatus struct {
 type SubscriptionStatus struct {
 	Conditions            []Condition           `json:"conditions,omitempty"`
 	Ready                 bool                  `json:"ready,omitempty"`
+	APIRuleReady          bool                  `json:"apiRuleReady,omitempty"`
 	Ev2hash               int64                 `json:"ev2hash,omitempty"`
 	Emshash               int64                 `json:"emshash,omitempty"`
+	ExternalSink          string                `json:"externalSink,omitempty"`
 	FailedActivation      string                `json:"failedActivation,omitempty"`
 	EmsSubscriptionStatus EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 }
