@@ -86,9 +86,11 @@ func fixListResourceQuotasQuery() *graphql.Request {
 						hard {
 							limits {
 								memory
+								cpu
 							}
 							requests {
 								memory
+								cpu
 							}
 							pods
 						}

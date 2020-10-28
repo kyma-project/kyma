@@ -126,12 +126,15 @@ func fixLimitRangeQueryResponse() limitRangeQueryResponse {
 							LimitType: limitTypeContainer,
 							Max: resourceType{
 								Memory: "1Gi",
+								Cpu:    "0",
 							},
 							Default: resourceType{
 								Memory: "96Mi",
+								Cpu:    "0",
 							},
 							DefaultRequest: resourceType{
 								Memory: "32Mi",
+								Cpu:    "0",
 							},
 						},
 					},
