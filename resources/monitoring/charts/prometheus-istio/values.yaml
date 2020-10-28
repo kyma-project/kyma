@@ -1256,6 +1256,7 @@ serverFiles:
           - targets:
             - localhost:9090
       - job_name: istio-system/envoy-stats/0
+        sample_limit: 20000
         honor_timestamps: true
         metrics_path: /stats/prometheus
         scheme: http
