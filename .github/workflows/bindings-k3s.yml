@@ -25,7 +25,7 @@ jobs:
         run:  go fmt -v ./components/binding
 
       - name: Build
-        run: go build -v .
+        run: go build -v ./components/binding
 
       - name: Prepare k3s and helm 3
         run: |
