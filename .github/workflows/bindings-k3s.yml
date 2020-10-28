@@ -2,7 +2,6 @@ name: Biding-pre-master
 
 on: 
   pull_request_target:
-    branches: [ master ]
 jobs:
   build:
     runs-on: ubuntu-latest
