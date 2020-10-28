@@ -108,7 +108,11 @@ func WithRules(subs []eventingv1alpha1.Subscription, methods ...string) ObjectOp
 				// It's ok as the relevant subscription will have a valid cluster local URL in the same namespace
 				continue
 			}
-			paths = append(paths, hostURL.Path)
+			if hostURL.Path == "" {
+				paths = append(paths, "/")
+			} else {
+				paths = append(paths, hostURL.Path)
+			}
 		}
 		uniquePaths := removeDuplicateValues(paths)
 		for _, path := range uniquePaths {

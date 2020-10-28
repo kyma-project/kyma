@@ -19,6 +19,7 @@ import (
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8slabels "k8s.io/apimachinery/pkg/labels"
 	k8stypes "k8s.io/apimachinery/pkg/types"
@@ -114,23 +115,23 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		"version", subscription.GetGeneration(),
 	)
 
-	if !r.isInDeletion(subscription) {
-		// Ensure the finalizer is set
-		if err := r.syncFinalizer(subscription, &result, ctx, log); err != nil {
-			log.Error(err, "error while syncing finalizer")
-			return ctrl.Result{}, err
-		}
-		if result.Requeue {
-			return result, nil
-		}
-		if err := r.syncInitialStatus(subscription, &result, ctx); err != nil {
-			log.Error(err, "error while syncing status")
-			return ctrl.Result{}, err
-		}
-		if result.Requeue {
-			return result, nil
-		}
-	}
+	//if !r.isInDeletion(subscription) {
+	//	// Ensure the finalizer is set
+	//	if err := r.syncFinalizer(subscription, &result, ctx, log); err != nil {
+	//		log.Error(err, "error while syncing finalizer")
+	//		return ctrl.Result{}, err
+	//	}
+	//	if result.Requeue {
+	//		return result, nil
+	//	}
+	//	if err := r.syncInitialStatus(subscription, &result, ctx); err != nil {
+	//		log.Error(err, "error while syncing status")
+	//		return ctrl.Result{}, err
+	//	}
+	//	if result.Requeue {
+	//		return result, nil
+	//	}
+	//}
 
 	// mark if the subscription status was changed
 	statusChanged := false
@@ -351,7 +352,7 @@ func (r *SubscriptionReconciler) createOrUpdateAPIRule(sink url.URL, subscriptio
 		}
 		return nil
 	}
-	logger.Info("Existing APIRules", fmt.Sprintf("in ns: %s for svc: %s", svcNs, svcName), fmt.Sprintf("%v", *existingAPIRule))
+	logger.Info("Existing APIRules", fmt.Sprintf("in ns: %s for svc: %s", svcNs, svcName), fmt.Sprintf("%s", existingAPIRule.Name))
 	// Assumption: there will be one APIRule for an svc with the labels injected by the controller hence trusting the 0th element in existingAPIRules list
 	object.ApplyExistingAPIRuleAttributes(existingAPIRule, desiredAPIRule)
 	if object.Semantic.DeepEqual(existingAPIRule, desiredAPIRule) {
@@ -362,24 +363,29 @@ func (r *SubscriptionReconciler) createOrUpdateAPIRule(sink url.URL, subscriptio
 	if err != nil {
 		return errors.Wrap(err, "failed to update an APIRule")
 	}
-	// TODO: Cleanup APIRules if need be
-	//err = r.cleanupAPIRulesByPort(subscriptions, existingAPIRules)
-	//if err != nil {
-	//	return errors.Wrap(err, "failed to cleanup APIRules")
-	//}
+
+	freshExistingAPIRules, err := r.getAPIRulesForASvc(ctx, labels, svcNs)
+	if err != nil {
+		logger.Error(err, "error while fetching oldApiRules for labels after create/update", labels)
+		return nil
+	}
+	// Cleanup does the following:
+	// 1. Delete APIRule using obsolete ports
+	// 2. Update APIRule by deleting the OwnerReference of the Subscription with port different than that of the APIRule
+	err = r.cleanup(ctx, subscriptions, freshExistingAPIRules)
+	if err != nil {
+		return errors.Wrap(err, "failed to cleanup APIRules")
+	}
 	return nil
 }
 
-func (r *SubscriptionReconciler) cleanupAPIRulesByPort(subs []eventingv1alpha1.Subscription, apiRules []apigatewayv1alpha1.APIRule) error {
-	//apiRulesForPortExcept := apiRulesForPortExcept(apiRules, svcPort)
-	cleanupMap := make(map[*apigatewayv1alpha1.APIRule][]eventingv1alpha1.Subscription)
+func (r *SubscriptionReconciler) cleanup(ctx context.Context, subs []eventingv1alpha1.Subscription, apiRules []apigatewayv1alpha1.APIRule) error {
 	for _, apiRule := range apiRules {
-		tempSubArr := make([]eventingv1alpha1.Subscription, 0)
-		ownerRefs := apiRule.OwnerReferences
-		for _, or := range ownerRefs {
+		//filteredSubs := make([]eventingv1alpha1.Subscription, 0)
+		filteredOwnerRefs := make([]metav1.OwnerReference, 0)
+		for _, or := range apiRule.OwnerReferences {
 			for _, sub := range subs {
-				if or.Name == sub.Name && or.UID == sub.UID {
-
+				if isOwnerRefBelongingToSubscription(sub, or) {
 					subSinkURL, err := url.ParseRequestURI(sub.Spec.Sink)
 					if err != nil {
 						// It's ok as this subscription doesn't have a port anyway
@@ -391,29 +397,44 @@ func (r *SubscriptionReconciler) cleanupAPIRulesByPort(subs []eventingv1alpha1.S
 						continue
 					}
 					if port == *apiRule.Spec.Service.Port {
-						tempSubArr = append(tempSubArr, sub)
+						filteredOwnerRefs = append(filteredOwnerRefs, or)
+						//filteredSubs = append(filteredSubs, sub)
 					}
 				}
-
 			}
 		}
-		cleanupMap[&apiRule] = tempSubArr
-		// Update the apiRule based on the result
+		if len(filteredOwnerRefs) == 0 {
+			// Delete the APIRule as the port for the concerned svc is not used by any subscriptions
+			err := r.Client.Delete(ctx, &apiRule, &client.DeleteOptions{})
+			if err != nil {
+				return errors.Wrap(err, "failed to delete APIRule while cleanupAPIRules")
+			}
+			return nil
+		}
+
+		if len(filteredOwnerRefs) > 0 {
+			// Take the subscription out of the OwnerReferences and update the APIRule
+			desiredAPIRule := apiRule.DeepCopy()
+			object.ApplyExistingAPIRuleAttributes(&apiRule, desiredAPIRule)
+			desiredAPIRule.OwnerReferences = filteredOwnerRefs
+			err := r.Client.Update(ctx, desiredAPIRule, &client.UpdateOptions{})
+			if err != nil {
+				return errors.Wrap(err, "failed to update APIRule while cleanupAPIRules")
+			}
+			return nil
+		}
 	}
 	return nil
 }
 
-func apiRulesForPortExcept(apiRules []apigatewayv1alpha1.APIRule, svcPort uint32) []apigatewayv1alpha1.APIRule {
-	filteredAPIRules := make([]apigatewayv1alpha1.APIRule, 0)
-	for _, apiRule := range apiRules {
-		if *apiRule.Spec.Service.Port != svcPort {
-			filteredAPIRules = append(filteredAPIRules, apiRule)
-		}
+func isOwnerRefBelongingToSubscription(sub eventingv1alpha1.Subscription, ownerRef metav1.OwnerReference) bool {
+	if sub.Name == ownerRef.Name && sub.UID == ownerRef.UID {
+		return true
 	}
-	return filteredAPIRules
+	return false
 }
 
-// getRelevantSubscriptions returns a list of Subscriptions which are valid for the subscriber in focus
+// getSubscriptionsForASvc returns a list of Subscriptions which are valid for the subscriber in focus
 func (r *SubscriptionReconciler) getSubscriptionsForASvc(svcNs, svcName string, ctx context.Context) ([]eventingv1alpha1.Subscription, error) {
 	subscriptions := &eventingv1alpha1.SubscriptionList{}
 	relevantSubs := make([]eventingv1alpha1.Subscription, 0)
@@ -510,7 +531,7 @@ func convertURLPortForApiRulePort(sink url.URL) (uint32, error) {
 
 func (r *SubscriptionReconciler) getAPIRulesForASvc(ctx context.Context, labels map[string]string, svcNs string) ([]apigatewayv1alpha1.APIRule, error) {
 	existingAPIRules := &apigatewayv1alpha1.APIRuleList{}
-	err := r.Cache.List(ctx, existingAPIRules, &client.ListOptions{
+	err := r.Client.List(ctx, existingAPIRules, &client.ListOptions{
 		LabelSelector: k8slabels.SelectorFromSet(labels),
 		Namespace:     svcNs,
 	})
