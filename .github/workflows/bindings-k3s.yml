@@ -5,7 +5,7 @@ on:
     branches: [ master ]
     types: [opened, synchronize, reopened]
     paths: 
-      - 'components/binding/**'
+      - 'components/binding/*'
       - '.github/workflows/bindings-k3s.yml'
 jobs:
   build:
