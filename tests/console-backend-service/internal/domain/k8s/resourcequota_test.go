@@ -85,12 +85,10 @@ func fixListResourceQuotasQuery() *graphql.Request {
 					spec {
 						hard {
 							limits {
-								memory
-								cpu
+								memory				
 							}
 							requests {
-								memory
-								cpu
+								memory				
 							}
 							pods
 						}
@@ -110,11 +108,9 @@ func fixListResourceQuotasResponse() resourceQuota {
 			Hard: resourceQuotaHard{
 				Pods: "10",
 				Limits: resourceValues{
-					Cpu:    "900m",
 					Memory: "1Gi",
 				},
 				Requests: resourceValues{
-					Cpu:    "500m",
 					Memory: "512Mi",
 				},
 			},
@@ -131,9 +127,7 @@ func fixResourceQuota() *v1.ResourceQuota {
 		Spec: v1.ResourceQuotaSpec{
 			Hard: v1.ResourceList{
 				v1.ResourcePods:           resource.MustParse("10"),
-				v1.ResourceLimitsCPU:      resource.MustParse("900m"),
 				v1.ResourceLimitsMemory:   resource.MustParse("1Gi"),
-				v1.ResourceRequestsCPU:    resource.MustParse("500m"),
 				v1.ResourceRequestsMemory: resource.MustParse("512Mi"),
 			},
 		},
