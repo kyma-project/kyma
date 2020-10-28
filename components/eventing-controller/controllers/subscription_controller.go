@@ -329,7 +329,7 @@ func (r *SubscriptionReconciler) createOrUpdateAPIRule(sink url.URL, subscriptio
 	}
 	var existingAPIRule *apigatewayv1alpha1.APIRule
 	if existingAPIRules != nil {
-		existingAPIRule = r.filterAPIRuleOnPort(existingAPIRules, svcPort)
+		existingAPIRule = r.filterAPIRulesOnPort(existingAPIRules, svcPort)
 	}
 
 	// Get all subscriptions valid for the cluster-local subscriber
@@ -359,7 +359,58 @@ func (r *SubscriptionReconciler) createOrUpdateAPIRule(sink url.URL, subscriptio
 	}
 	// Update the existing APIRule
 	err = r.Client.Update(ctx, desiredAPIRule, &client.UpdateOptions{})
+	if err != nil {
+		return errors.Wrap(err, "failed to update an APIRule")
+	}
+	// TODO: Cleanup APIRules if need be
+	//err = r.cleanupAPIRulesByPort(subscriptions, existingAPIRules)
+	//if err != nil {
+	//	return errors.Wrap(err, "failed to cleanup APIRules")
+	//}
 	return nil
+}
+
+func (r *SubscriptionReconciler) cleanupAPIRulesByPort(subs []eventingv1alpha1.Subscription, apiRules []apigatewayv1alpha1.APIRule) error {
+	//apiRulesForPortExcept := apiRulesForPortExcept(apiRules, svcPort)
+	cleanupMap := make(map[*apigatewayv1alpha1.APIRule][]eventingv1alpha1.Subscription)
+	for _, apiRule := range apiRules {
+		tempSubArr := make([]eventingv1alpha1.Subscription, 0)
+		ownerRefs := apiRule.OwnerReferences
+		for _, or := range ownerRefs {
+			for _, sub := range subs {
+				if or.Name == sub.Name && or.UID == sub.UID {
+
+					subSinkURL, err := url.ParseRequestURI(sub.Spec.Sink)
+					if err != nil {
+						// It's ok as this subscription doesn't have a port anyway
+						continue
+					}
+					port, err := convertURLPortForApiRulePort(*subSinkURL)
+					if err != nil {
+						// It's ok as the port is not valid anyway
+						continue
+					}
+					if port == *apiRule.Spec.Service.Port {
+						tempSubArr = append(tempSubArr, sub)
+					}
+				}
+
+			}
+		}
+		cleanupMap[&apiRule] = tempSubArr
+		// Update the apiRule based on the result
+	}
+	return nil
+}
+
+func apiRulesForPortExcept(apiRules []apigatewayv1alpha1.APIRule, svcPort uint32) []apigatewayv1alpha1.APIRule {
+	filteredAPIRules := make([]apigatewayv1alpha1.APIRule, 0)
+	for _, apiRule := range apiRules {
+		if *apiRule.Spec.Service.Port != svcPort {
+			filteredAPIRules = append(filteredAPIRules, apiRule)
+		}
+	}
+	return filteredAPIRules
 }
 
 // getRelevantSubscriptions returns a list of Subscriptions which are valid for the subscriber in focus
@@ -457,7 +508,7 @@ func convertURLPortForApiRulePort(sink url.URL) (uint32, error) {
 	return port, nil
 }
 
-func (r *SubscriptionReconciler) getAPIRulesForASvc(ctx context.Context, labels map[string]string, svcNs string) (*[]apigatewayv1alpha1.APIRule, error) {
+func (r *SubscriptionReconciler) getAPIRulesForASvc(ctx context.Context, labels map[string]string, svcNs string) ([]apigatewayv1alpha1.APIRule, error) {
 	existingAPIRules := &apigatewayv1alpha1.APIRuleList{}
 	err := r.Cache.List(ctx, existingAPIRules, &client.ListOptions{
 		LabelSelector: k8slabels.SelectorFromSet(labels),
@@ -466,11 +517,11 @@ func (r *SubscriptionReconciler) getAPIRulesForASvc(ctx context.Context, labels 
 	if err != nil {
 		return nil, err
 	}
-	return &existingAPIRules.Items, nil
+	return existingAPIRules.Items, nil
 }
 
-func (r *SubscriptionReconciler) filterAPIRuleOnPort(existingAPIRules *[]apigatewayv1alpha1.APIRule, port uint32) *apigatewayv1alpha1.APIRule {
-	for _, apiRule := range *existingAPIRules {
+func (r *SubscriptionReconciler) filterAPIRulesOnPort(existingAPIRules []apigatewayv1alpha1.APIRule, port uint32) *apigatewayv1alpha1.APIRule {
+	for _, apiRule := range existingAPIRules {
 		if *apiRule.Spec.Service.Port == port {
 			return &apiRule
 		}
