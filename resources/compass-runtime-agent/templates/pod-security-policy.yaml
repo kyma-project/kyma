@@ -11,7 +11,7 @@ spec:
     rule: RunAsAny
   runAsUser:
     rule: RunAsAny
-  prvileged: false
+  privileged: false
   seLinux:
     rule: RunAsAny
   supplementalGroups:
