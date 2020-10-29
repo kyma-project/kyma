@@ -64,4 +64,4 @@ jobs:
         run: |
           ./scripts/create-scenario.sh
           sleep 30
-          kc get po -l app=sandbox -ojson | jq '.items | .[] | .spec.containers'
+          kubectl get po -l app=sandbox -ojson | jq '.items | .[] | .spec.containers'
