@@ -18,7 +18,15 @@ The configuration specifies the following parameters and their values:
 
 ## TLS management
 
-Kyma employs the Bring Your Own Domain/Certificates model that requires you to supply the certificate and key during installation. You can do it using the [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation). See a sample ConfigMap specifying the values to override: 
+### Bring Your Own
+Kyma employs the Bring Your Own Domain/Certificates model that requires you to supply the certificate and key during installation. 
+Two variations of this method are supported:
+
+- legacy: the user supplies the certificate and key as native k8s objects (ConfigMaps or Secrets) in the form of kyma overrides
+- cert-manager: the user is expected to generate their own Cert-manager objects (Issuers and Certificates) and deliver them before the installation process
+
+#### Native certificate management
+You can do it using the [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation). See a sample ConfigMap specifying the values to override: 
 
 ```yaml
 ---
@@ -36,9 +44,29 @@ data:
 ```
 During installation, the values are [propagated in the cluster](#certificate-propagation-paths) to all components that require them. 
 
-### Demo setup with xip.io
+#### Self managed 
+The second methods expects the user to create the cert-manager CRs and supply them to the cluster beforehand. Those certificates can be self-signed or signed by an external CA. The installation process waits for Certificates to be generated, but requires specific secrets to be generated.
 
-If you don't supply any certificates or domain during installation, the kyma-installer will default to a demo setup using the [xip.io](http://xip.io/) DNS-as-a-Service (DNSaaS) provider. In this case the domain is generated on demand using the clusters LoadBalancer IP in the form of `*.LoadBalancerIP.xip.io` along with a self-signed certificate for the domain.
+LIST OF REQUIRED SECRETS IN NAMESPACES
+
+### Demo setup with xip.io
+Previously, if you don't supply any certificates or domain during installation, the kyma-installer would default to a demo setup using the [xip.io](http://xip.io/) DNS-as-a-Service (DNSaaS) provider. This behavior has changed, and now xip has to be set using installation overrides, as in the example below. 
+
+```yaml
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: xip-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    kyma-project.io/installation: ""
+data:
+  global.certificates.type: "xip"
+```
+
+In this case the domain is generated on demand using the clusters LoadBalancer IP in the form of `*.LoadBalancerIP.xip.io` along with a self-signed certificate for the domain.
 
 >**NOTE:** Due to limited availability of the DNSaaS provider and a self-singed certificate which can be rejected by some browsers and applications, this setup is regarded as a working, visual demo. Do not use it for other scenarios.
 
