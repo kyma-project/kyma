@@ -33,7 +33,7 @@ const (
 	configMapEnvKey  = "CONFIG"
 )
 
-func TestPodHandler_Handle(t *testing.T) {
+func TestMutationHandler_Handle(t *testing.T) {
 	// given
 	sch, err := v1alpha1.SchemeBuilder.Build()
 	require.NoError(t, err)

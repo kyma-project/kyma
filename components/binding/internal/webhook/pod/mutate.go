@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma/components/binding/internal/webhook"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/binding/internal/webhook"
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
 
 	"github.com/pkg/errors"
@@ -147,44 +147,48 @@ func (h *MutationHandler) mutatePod(ctx context.Context, pod *corev1.Pod, bindin
 	return nil
 }
 
+// findSecret finds Secret based on Binding Source field
 func (h *MutationHandler) findSecret(ctx context.Context, binding *v1alpha1.Binding) (*corev1.Secret, error) {
 	secret := &corev1.Secret{}
 
-	var lastErrror error
+	var lastError error
 	err := wait.PollImmediate(500*time.Millisecond, 3*time.Second, func() (bool, error) {
 		err := h.client.Get(ctx, client.ObjectKey{Name: binding.Spec.Source.Name, Namespace: binding.Namespace}, secret)
 		if err != nil {
-			lastErrror = err
+			lastError = err
 			return false, nil
 		}
 		return true, nil
 	})
 	if err != nil {
-		return secret, errors.Wrapf(lastErrror, "while getting Secret %s/%s", binding.Namespace, binding.Spec.Source.Name)
+		return secret, errors.Wrapf(lastError, "while getting Secret %s/%s", binding.Namespace, binding.Spec.Source.Name)
 	}
 
 	return secret, nil
 }
 
+// findConfigMap finds ConfigMap based on Binding Source field
 func (h *MutationHandler) findConfigMap(ctx context.Context, binding *v1alpha1.Binding) (*corev1.ConfigMap, error) {
 	configmap := &corev1.ConfigMap{}
 
-	var lastErrror error
+	var lastError error
 	err := wait.PollImmediate(500*time.Millisecond, 3*time.Second, func() (bool, error) {
 		err := h.client.Get(ctx, client.ObjectKey{Name: binding.Spec.Source.Name, Namespace: binding.Namespace}, configmap)
 		if err != nil {
-			lastErrror = err
+			lastError = err
 			return false, nil
 		}
 		return true, nil
 	})
 	if err != nil {
-		return configmap, errors.Wrapf(lastErrror, "while getting ConfigMap %s/%s", binding.Namespace, binding.Spec.Source.Name)
+		return configmap, errors.Wrapf(lastError, "while getting ConfigMap %s/%s", binding.Namespace, binding.Spec.Source.Name)
 	}
 
 	return configmap, nil
 }
 
+// addSecretReference adds env parameter to each Pod's container. Env parameter contains the key
+// which is the name of the argument in Secret and references to this Secret
 func (h *MutationHandler) addSecretReference(pod *corev1.Pod, secret *corev1.Secret) {
 	for i, ctr := range pod.Spec.Containers {
 		origEnv := map[string]corev1.EnvVar{}
@@ -217,6 +221,8 @@ func (h *MutationHandler) addSecretReference(pod *corev1.Pod, secret *corev1.Sec
 	}
 }
 
+// addConfigMapReference adds env parameter to each Pod's container. Env parameter contains the key
+// which is the name of the argument in ConfigMap and references to this ConfigMap
 func (h *MutationHandler) addConfigMapReference(pod *corev1.Pod, configmap *corev1.ConfigMap) {
 	for i, ctr := range pod.Spec.Containers {
 		origEnv := map[string]corev1.EnvVar{}

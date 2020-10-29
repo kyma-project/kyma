@@ -27,6 +27,37 @@ func NewBindingWorker(km KindManager) *BindingWorker {
 	}
 }
 
+func (b *BindingWorker) RemoveProcess(binding *v1alpha1.Binding, log log.FieldLogger) (*v1alpha1.Binding, error) {
+	log.Info("start Binding removing process")
+
+	labelExist, err := b.kindManager.LabelExist(binding)
+	if err != nil {
+		errStatus := binding.Status.Failed()
+		if errStatus != nil {
+			return binding, errors.Wrapf(errStatus, "while set Binding phase to %s", v1alpha1.BindingFailed)
+		}
+		binding.Status.Message = fmt.Sprintf(internal.BindingRemovingFailed, err)
+		return binding, errors.Wrap(err, "while checking if label exist")
+	}
+
+	if !labelExist {
+		log.Info("label does not exist, remove process finished")
+		return b.removeFinalizer(binding), nil
+	}
+
+	err = b.kindManager.RemoveLabel(binding)
+	if err != nil {
+		errStatus := binding.Status.Failed()
+		if errStatus != nil {
+			return binding, errors.Wrapf(errStatus, "while set Binding phase to %s", v1alpha1.BindingFailed)
+		}
+		binding.Status.Message = fmt.Sprintf(internal.BindingRemovingFailed, err)
+		return binding, errors.Wrap(err, "while removing label")
+	}
+
+	return b.removeFinalizer(binding), nil
+}
+
 func (b *BindingWorker) Process(binding *v1alpha1.Binding, log log.FieldLogger) (*v1alpha1.Binding, error) {
 	log.Info("start Binding process")
 
@@ -125,4 +156,21 @@ func (b *BindingWorker) failedPhase(binding *v1alpha1.Binding, log log.FieldLogg
 	binding.Status.Message = internal.BindingPendingFromFailed
 
 	return binding, nil
+}
+
+func (b *BindingWorker) removeFinalizer(binding *v1alpha1.Binding) *v1alpha1.Binding {
+	if binding.Finalizers == nil {
+		return binding
+	}
+
+	updatedFinalizers := make([]string, 0)
+	for _, finalizer := range binding.Finalizers {
+		if finalizer == v1alpha1.BindingFinalizer {
+			continue
+		}
+		updatedFinalizers = append(updatedFinalizers, finalizer)
+	}
+
+	binding.Finalizers = updatedFinalizers
+	return binding
 }

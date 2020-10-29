@@ -16,6 +16,7 @@ import (
 
 type BindingWorker interface {
 	Process(*bindingsv1alpha1.Binding, log.FieldLogger) (*bindingsv1alpha1.Binding, error)
+	RemoveProcess(*bindingsv1alpha1.Binding, log.FieldLogger) (*bindingsv1alpha1.Binding, error)
 }
 
 // BindingReconciler reconciles a Binding object
@@ -45,8 +46,19 @@ func (r *BindingReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if binding.DeletionTimestamp != nil {
-		// TODO: add finalizer in webhook, handle removing binding here
 		r.log.Infof("start the removal Binding process: %s", req.NamespacedName)
+		updatedBinding, err := r.worker.RemoveProcess(binding.DeepCopy(), r.log.WithField("Binding", req.NamespacedName))
+		if err != nil {
+			r.log.Errorf("cannot finish remove process for %s: %s", req.NamespacedName, err)
+			return ctrl.Result{Requeue: true, RequeueAfter: 1 * time.Second}, err
+		}
+
+		err = r.client.Update(ctx, updatedBinding)
+		if err != nil {
+			r.log.Errorf("cannot update Binding resource %s: %s", req.NamespacedName, err)
+			return ctrl.Result{Requeue: true, RequeueAfter: 5 * time.Second}, err
+		}
+
 		return ctrl.Result{}, nil
 	}
 
@@ -64,7 +76,7 @@ func (r *BindingReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	err = r.client.Update(ctx, updatedBinding)
 	if err != nil {
 		r.log.Errorf("cannot update Binding resource %s: %s", req.NamespacedName, err)
-		return ctrl.Result{Requeue: true, RequeueAfter: 10 * time.Second}, err
+		return ctrl.Result{Requeue: true, RequeueAfter: 5 * time.Second}, err
 	}
 
 	return ctrl.Result{}, nil
