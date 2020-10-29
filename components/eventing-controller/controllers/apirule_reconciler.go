@@ -27,11 +27,12 @@ type APIRuleReconciler struct {
 	Log      logr.Logger
 	recorder record.EventRecorder
 	Scheme   *runtime.Scheme
+	Domain   string
 }
 
 // NewAPIRuleReconciler TODO ...
-func NewAPIRuleReconciler(client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, scheme *runtime.Scheme) *APIRuleReconciler {
-	return &APIRuleReconciler{Client: client, Cache: cache, Log: log, recorder: recorder, Scheme: scheme}
+func NewAPIRuleReconciler(client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, scheme *runtime.Scheme, domain string) *APIRuleReconciler {
+	return &APIRuleReconciler{Client: client, Cache: cache, Log: log, recorder: recorder, Scheme: scheme, Domain: domain}
 }
 
 // SetupWithManager TODO ...
@@ -87,7 +88,7 @@ func (r *APIRuleReconciler) syncAPIRuleSubscriptionsStatus(apiRule *apigatewayv1
 
 		// set subscription status externalSink if the APIRule status is ready
 		if apiRuleReady {
-			if err := setSubscriptionStatusExternalSink(subscriptionCopy); err != nil {
+			if err := setSubscriptionStatusExternalSink(subscriptionCopy, r.Domain); err != nil {
 				log.Error(err, "Failed to set Subscription status externalSink", "Subscription", subscription.Name, "Namespace", subscription.Namespace)
 				return ctrl.Result{}, err
 			}
@@ -122,7 +123,7 @@ func computeAPIRuleReadyStatus(apiRule *apigatewayv1alpha1.APIRule) bool {
 }
 
 // setSubscriptionStatusExternalSink TODO ...
-func setSubscriptionStatusExternalSink(subscription *eventingv1alpha1.Subscription) error {
+func setSubscriptionStatusExternalSink(subscription *eventingv1alpha1.Subscription, domain string) error {
 	u, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf(fmt.Sprintf("subscription: [%s/%s] has invalid sink", subscription.Name, subscription.Namespace)))
@@ -133,10 +134,7 @@ func setSubscriptionStatusExternalSink(subscription *eventingv1alpha1.Subscripti
 		return fmt.Errorf("subscription: [%s/%s] has invalid cluster local sink", subscription.Name, subscription.Namespace)
 	}
 
-	// TODO
-	//  - get the domain from env
-	//  - move logic to a common pkg
-	subscription.Status.ExternalSink = fmt.Sprintf("%s://%s.%s.%s%s", u.Scheme, parts[0], parts[1], "domain", u.Path)
+	subscription.Status.ExternalSink = fmt.Sprintf("%s://%s.%s.%s%s", u.Scheme, parts[0], parts[1], domain, u.Path)
 
 	return nil
 }

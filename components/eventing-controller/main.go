@@ -72,6 +72,7 @@ func main() {
 		ctrl.Log.WithName("controllers").WithName("APIRule"),
 		mgr.GetEventRecorderFor("subscription-controller"),
 		mgr.GetScheme(),
+		domain,
 	).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Subscription")
 		os.Exit(1)
