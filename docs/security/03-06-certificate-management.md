@@ -22,6 +22,7 @@ You also can disable built-in cert-manager by setting a global [override](link t
 This mode is only supported for local installations.
 It is detected when installation overrides containing certificate data named `global.tlsCrt` and `global.tlsKey` are defined.
 In this mode cert-manager is not used to manage certificates.
+You can manually enable this mode by setting an installation override: `global.certificates.type: "legacy"`.
 
 ### Gardener mode
 
