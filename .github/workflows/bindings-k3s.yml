@@ -11,11 +11,11 @@ defaults:
   run:
     working-directory: components/binding
 
-env:
-  PR_NUMBER: ${{ github.event.number }}
-  PROJECT_ID: "sap-se-cx-gopher"
 
 jobs:
+  env:
+    PR_NUMBER: ${{ github.event.number }}
+    PROJECT_ID: "sap-se-cx-gopher"
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -30,8 +30,8 @@ jobs:
       - name: Go test, vet, fmt
         run:  |
           go test ./...
-          go fmt ./...
-          go vet ./...
+          go fmt -v ./...
+          go vet -v ./...
 
 
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
