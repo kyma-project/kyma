@@ -26,6 +26,11 @@ rules:
     - apiGroups: ["metrics.k8s.io"]
       resources: ["nodes"]
       verbs: ["get", "list"]
+    - apiGroups: ['policy']
+      resources: ['podsecuritypolicies']
+      verbs:     ['use']
+      resourceNames:
+      - "compass-runtime-agent"
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
