@@ -126,7 +126,7 @@ func (h *PodHandler) mutatePod(ctx context.Context, pod *corev1.Pod, bindings []
 	for _, binding := range bindings {
 		switch binding.Spec.Source.Kind {
 		case v1alpha1.SourceKindSecret:
-			secret, err := h.findSecrets(ctx, binding)
+			secret, err := h.findSecret(ctx, binding)
 			if err != nil {
 				return errors.Wrapf(err, "while finding Secrets for %s/%s Binding", binding.Namespace, binding.Name)
 			}
@@ -146,7 +146,7 @@ func (h *PodHandler) mutatePod(ctx context.Context, pod *corev1.Pod, bindings []
 	return nil
 }
 
-func (h *PodHandler) findSecrets(ctx context.Context, binding *v1alpha1.Binding) (*corev1.Secret, error) {
+func (h *PodHandler) findSecret(ctx context.Context, binding *v1alpha1.Binding) (*corev1.Secret, error) {
 	secret := &corev1.Secret{}
 
 	var lastErrror error
@@ -186,30 +186,64 @@ func (h *PodHandler) findConfigMap(ctx context.Context, binding *v1alpha1.Bindin
 
 func (h *PodHandler) addSecretReference(pod *corev1.Pod, secret *corev1.Secret) {
 	for i, ctr := range pod.Spec.Containers {
-		var mergedEnvFrom []corev1.EnvFromSource
+		origEnv := map[string]corev1.EnvVar{}
+		for _, v := range ctr.Env {
+			origEnv[v.Name] = v
+		}
 
-		mergedEnvFrom = append(mergedEnvFrom, ctr.EnvFrom...)
-		mergedEnvFrom = append(mergedEnvFrom, corev1.EnvFromSource{
-			SecretRef: &corev1.SecretEnvSource{
-				LocalObjectReference: corev1.LocalObjectReference{Name: secret.Name},
-			},
-		})
-		ctr.EnvFrom = mergedEnvFrom
+		mergedEnv := make([]corev1.EnvVar, len(ctr.Env))
+		copy(mergedEnv, ctr.Env)
+
+		for key := range secret.Data {
+			_, ok := origEnv[key]
+			if ok {
+				h.log.Warnf("key %s from Secret already exist in container. Environment will not be injected. skip env.", key)
+				continue
+			}
+			mergedEnv = append(mergedEnv, corev1.EnvVar{
+				Name: key,
+				ValueFrom: &corev1.EnvVarSource{
+					SecretKeyRef: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{Name: secret.Name},
+						Key:                  key,
+					},
+				},
+			})
+		}
+
+		ctr.Env = mergedEnv
 		pod.Spec.Containers[i] = ctr
 	}
 }
 
 func (h *PodHandler) addConfigMapReference(pod *corev1.Pod, configmap *corev1.ConfigMap) {
 	for i, ctr := range pod.Spec.Containers {
-		var mergedEnvFrom []corev1.EnvFromSource
+		origEnv := map[string]corev1.EnvVar{}
+		for _, v := range ctr.Env {
+			origEnv[v.Name] = v
+		}
 
-		mergedEnvFrom = append(mergedEnvFrom, ctr.EnvFrom...)
-		mergedEnvFrom = append(mergedEnvFrom, corev1.EnvFromSource{
-			ConfigMapRef: &corev1.ConfigMapEnvSource{
-				LocalObjectReference: corev1.LocalObjectReference{Name: configmap.Name},
-			},
-		})
-		ctr.EnvFrom = mergedEnvFrom
+		mergedEnv := make([]corev1.EnvVar, len(ctr.Env))
+		copy(mergedEnv, ctr.Env)
+
+		for key := range configmap.Data {
+			_, ok := origEnv[key]
+			if ok {
+				h.log.Warnf("key %s from ConfigMap already exist in container. Environment will not be injected. skip env.", key)
+				continue
+			}
+			mergedEnv = append(mergedEnv, corev1.EnvVar{
+				Name: key,
+				ValueFrom: &corev1.EnvVarSource{
+					ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{Name: configmap.Name},
+						Key:                  key,
+					},
+				},
+			})
+		}
+
+		ctr.Env = mergedEnv
 		pod.Spec.Containers[i] = ctr
 	}
 }

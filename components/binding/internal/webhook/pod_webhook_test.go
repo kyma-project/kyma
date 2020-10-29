@@ -28,6 +28,9 @@ const (
 	secretNameOne    = "secret-test-one"
 	secretNameTwo    = "secret-test-two"
 	configMapName    = "config-map-test"
+	secretEnvOneKey  = "PASSWORD"
+	secretEnvTwoKey  = "TOKEN"
+	configMapEnvKey  = "CONFIG"
 )
 
 func TestPodHandler_Handle(t *testing.T) {
@@ -72,22 +75,34 @@ func TestPodHandler_Handle(t *testing.T) {
 
 	for _, patch := range patches {
 		assert.Equal(t, "add", patch.Operation)
-		assert.Contains(t, []string{"/spec/containers/0/envFrom", "/spec/containers/1/envFrom"}, patch.Path)
+		assert.Contains(t, []string{"/spec/containers/0/env", "/spec/containers/1/env"}, patch.Path)
 		assert.Len(t, patch.Value, 3)
 		assert.ElementsMatch(t, patch.Value, []interface{}{
 			map[string]interface{}{
-				"secretRef": map[string]interface{}{
-					"name": secretNameOne,
+				"name": secretEnvOneKey,
+				"valueFrom": map[string]interface{}{
+					"secretKeyRef": map[string]interface{}{
+						"key":  secretEnvOneKey,
+						"name": secretNameOne,
+					},
 				},
 			},
 			map[string]interface{}{
-				"secretRef": map[string]interface{}{
-					"name": secretNameTwo,
+				"name": secretEnvTwoKey,
+				"valueFrom": map[string]interface{}{
+					"secretKeyRef": map[string]interface{}{
+						"key":  secretEnvTwoKey,
+						"name": secretNameTwo,
+					},
 				},
 			},
 			map[string]interface{}{
-				"configMapRef": map[string]interface{}{
-					"name": configMapName,
+				"name": configMapEnvKey,
+				"valueFrom": map[string]interface{}{
+					"configMapKeyRef": map[string]interface{}{
+						"key":  configMapEnvKey,
+						"name": configMapName,
+					},
 				},
 			},
 		})
@@ -160,7 +175,9 @@ func fixSecretOne() *corev1.Secret {
 			Name:      secretNameOne,
 			Namespace: namespace,
 		},
-		Data: map[string][]byte{},
+		Data: map[string][]byte{
+			secretEnvOneKey: []byte("superSecretPassword"),
+		},
 	}
 }
 
@@ -170,7 +187,9 @@ func fixSecretTwo() *corev1.Secret {
 			Name:      secretNameTwo,
 			Namespace: namespace,
 		},
-		Data: map[string][]byte{},
+		Data: map[string][]byte{
+			secretEnvTwoKey: []byte("superSecretToken"),
+		},
 	}
 }
 
@@ -180,7 +199,9 @@ func fixConfigMap() *corev1.ConfigMap {
 			Name:      configMapName,
 			Namespace: namespace,
 		},
-		Data: map[string]string{},
+		Data: map[string]string{
+			configMapEnvKey: "configForPod",
+		},
 	}
 }
 
