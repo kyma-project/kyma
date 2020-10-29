@@ -78,9 +78,11 @@ var _ = BeforeSuite(func(done Done) {
 	err =
 		NewSubscriptionReconciler(
 			k8sManager.GetClient(),
+			k8sManager.GetCache(),
 			ctrl.Log.WithName("controllers").WithName("Subscription"),
 			k8sManager.GetEventRecorderFor("subscription-controller"),
 			nil,
+			"",
 		).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 

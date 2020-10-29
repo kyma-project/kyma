@@ -65,7 +65,6 @@ func (r *APIRuleReconciler) syncAPIRuleSubscriptionsStatus(apiRule *apigatewayv1
 		"version", apiRule.GetGeneration(),
 	)
 
-	// compute the APIRule status
 	apiRuleReady := computeAPIRuleReadyStatus(apiRule)
 
 	// update the statuses of the APIRule dependant subscriptions
@@ -75,8 +74,6 @@ func (r *APIRuleReconciler) syncAPIRuleSubscriptionsStatus(apiRule *apigatewayv1
 
 		if err := r.Cache.Get(ctx, lookupKey, subscription); err != nil {
 			log.Error(err, "Subscription not found", "Name", ownerRef.Name)
-
-			// TODO discuss return err or continue
 			return ctrl.Result{}, err
 		}
 
@@ -86,12 +83,12 @@ func (r *APIRuleReconciler) syncAPIRuleSubscriptionsStatus(apiRule *apigatewayv1
 		// set subscription status APIRule status condition
 		subscriptionCopy.Status.SetConditionAPIRuleStatus(apiRuleReady)
 
+		subscriptionCopy.Status.ExternalSink = ""
+
 		// set subscription status externalSink if the APIRule status is ready
 		if apiRuleReady {
 			if err := setSubscriptionStatusExternalSink(subscriptionCopy); err != nil {
 				log.Error(err, "Failed to set Subscription status externalSink", "Subscription", subscription.Name, "Namespace", subscription.Namespace)
-
-				// TODO discuss return err or continue
 				return ctrl.Result{}, err
 			}
 		}

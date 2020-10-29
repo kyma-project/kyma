@@ -26,6 +26,7 @@ func apiRuleEqual(a1, a2 *apigatewayv1alpha1.APIRule) bool {
 	if !reflect.DeepEqual(a1.Labels, a2.Labels) {
 		return false
 	}
+
 	if !reflect.DeepEqual(a1.OwnerReferences, a2.OwnerReferences) {
 		return false
 	}
