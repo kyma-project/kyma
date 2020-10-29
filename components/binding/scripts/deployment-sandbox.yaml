@@ -18,16 +18,3 @@ spec:
         - name: sandbox
           image: yauritux/busybox-curl
           command: ['sh', '-c', 'sleep 10000']
-
-          # envFrom:
-          #   - secretRef:
-          #       name: credentials
-
-      #     volumeMounts:
-      #       - name: scr
-      #         mountPath: "/secret"
-      #         readOnly: true
-      # volumes:
-      #   - name: scr
-      #     secret:
-      #       secretName: credentials
