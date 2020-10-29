@@ -42,12 +42,12 @@ jobs:
 
       - name: Build Image
         run: |
-          docker build -t eu.gcr.io/sap-se-cx-gopher/binding:${{ github.event.number }} .
+          docker build -t eu.gcr.io/sap-se-cx-gopher/binding:PR-${{ github.event.number }} .
 
       - name: Push Image
         run: |
           gcloud auth configure-docker -q
-          docker push eu.gcr.io/sap-se-cx-gopher/binding:${{ github.event.number }}
+          docker push eu.gcr.io/sap-se-cx-gopher/binding:PR-${{ github.event.number }}
 
       - name: Prepare k3s and helm 3
         run: |
