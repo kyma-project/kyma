@@ -138,7 +138,7 @@ containers:
       functionBuildRepoFetcherImage:
         value: eu.gcr.io/kyma-project/function-build-init:PR-9496
       funtionMaxConcurrentReconciles:
-        value: 10
+        value: "10"
 
 services:
   manager:
