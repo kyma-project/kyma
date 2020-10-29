@@ -20,15 +20,15 @@ jobs:
 
       - name: Get dependencies
         run:  |
-          pwd
+          cd components/binding
           ls
-          go get -v -t -d components/binding
+          go get -v -t -d ./...
 
       - name: Go fmt
-        run:  go fmt -v ./components/binding
+        run:  go fmt -v ./...
 
       - name: Build
-        run: go build -v ./components/binding
+        run: go build -v ./...
 
       - name: Prepare k3s and helm 3
         run: |
