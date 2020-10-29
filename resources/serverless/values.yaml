@@ -131,6 +131,8 @@ containers:
         value: '{{ template "fullname" . }}-image-pull-secret'
       imagePullAccountName:
         value: '{{ template "fullname" . }}'
+      buildServiceAccountName:
+        value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
       kserviceRequeueDuration:
