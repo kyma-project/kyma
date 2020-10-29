@@ -25,24 +25,24 @@ jobs:
           go get -v -t -d ./...
 
       - name: Go fmt
-        run:  go fmt  ./...
+        run:  go fmt  ./components/binding/...
 
       - name: Build
-        run: go build -v ./cmd/manager/main.go
+        run: go build -v .components/binding/cmd/manager/main.go
 
       - name: Prepare k3s and helm 3
         run: |
-          ./scripts/create-cluster-k3s.sh
+          ./components/binding/scripts/create-cluster-k3s.sh
           echo "Installing helm"
           curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
           while [[ $(kubectl get nodes -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "Waiting for cluster nodes to be ready"; sleep 2; done        
 
       - name: Install Bindings component using Helm
         run: |
-          helm install binding ./charts/binding
+          helm install binding .components/binding/charts/binding
 
       - name: Apply test scenario and check deployment
         run: |
-          ./scripts/create-scenario.sh
+          ./components/binding/scripts/create-scenario.sh
           sleep 30
           kubectl get pods --selector=app=sandbox -oyaml 
