@@ -41,4 +41,6 @@ Because it's a self-signed certificate, you have to manually mark it as a truste
 User-provided mode is a default one when no other mode is detected.
 You can manually enable this mode by defining an installation override: `global.certificates.type: "user-provided"`.
 This mode allows you to directly use cert-manager features. You have to manually create cert-manager custom resources such as Issuer and Certificate.
+
+> **NOTE:** In this setup, users provide their own issuers, which can be globally trusted (like LetsEncrypt), or SelfSigned. 
 Depending on the chosen flow and issuer, You may need credentials that allow cert-manager to set up DNS records for issuing the certificate. Refer to [cert-manager documentation](https://cert-manager.io/) for details.
