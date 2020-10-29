@@ -1,4 +1,4 @@
-package common
+package webhook
 
 import (
 	"fmt"

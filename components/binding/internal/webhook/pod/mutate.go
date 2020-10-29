@@ -1,10 +1,10 @@
-package webhook
+package pod
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma/components/binding/internal/common"
+	"github.com/kyma-project/kyma/components/binding/internal/webhook"
 	"net/http"
 	"strings"
 	"time"
@@ -39,7 +39,7 @@ func (h *PodHandler) Handle(ctx context.Context, req admission.Request) admissio
 	h.log.Infof("start handling pod: %s", req.UID)
 
 	pod := &corev1.Pod{}
-	if err := common.MatchKinds(pod, req.Kind); err != nil {
+	if err := webhook.MatchKinds(pod, req.Kind); err != nil {
 		h.log.Errorf("kind does not match: %s", err)
 		return admission.Errored(http.StatusBadRequest, err)
 	}

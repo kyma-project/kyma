@@ -3,8 +3,9 @@ package binding
 import (
 	"context"
 	"encoding/json"
-	"github.com/kyma-project/kyma/components/binding/internal/common"
+	"github.com/kyma-project/kyma/components/binding/internal/webhook"
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
+	admissionTypes "k8s.io/api/admission/v1beta1"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -21,7 +22,7 @@ type MutationHandler struct {
 
 func NewMutationHandler(log log.FieldLogger) *MutationHandler {
 	return &MutationHandler{
-		log:    log,
+		log: log,
 	}
 }
 
@@ -29,7 +30,7 @@ func (h *MutationHandler) Handle(ctx context.Context, req admission.Request) adm
 	h.log.Infof("start handling binding: %s", req.UID)
 
 	binding := &v1alpha1.Binding{}
-	if err := common.MatchKinds(binding, req.Kind); err != nil {
+	if err := webhook.MatchKinds(binding, req.Kind); err != nil {
 		h.log.Errorf("kind does not match: %s", err)
 		return admission.Errored(http.StatusBadRequest, err)
 	}
@@ -39,9 +40,16 @@ func (h *MutationHandler) Handle(ctx context.Context, req admission.Request) adm
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
-	if err := h.mutateBinding(ctx, binding); err != nil {
-		h.log.Errorf("cannot mutate Binding: %s", err)
-		return admission.Errored(http.StatusInternalServerError, err)
+	mutated := binding.DeepCopy()
+	switch req.Operation {
+	case admissionTypes.Create:
+		if err := h.mutateOnCreate(ctx, mutated); err != nil {
+			h.log.Errorf("cannot mutate Binding: %s", err)
+			return admission.Errored(http.StatusInternalServerError, err)
+		}
+	default:
+		log.Infof("Binding mutation wehbook does not support action %q", req.Operation)
+		return admission.Allowed("action not taken")
 	}
 
 	rawBinding, err := json.Marshal(binding)
@@ -59,7 +67,10 @@ func (h *MutationHandler) InjectDecoder(d *admission.Decoder) error {
 	return nil
 }
 
-func (h *MutationHandler) mutateBinding(ctx context.Context, binding *v1alpha1.Binding) error {
-	binding.Finalizers = []string{v1alpha1.BindingFinalizer}
+func (h *MutationHandler) mutateOnCreate(ctx context.Context, binding *v1alpha1.Binding) error {
+	if binding.Finalizers == nil {
+		binding.Finalizers = make([]string, 0)
+	}
+	binding.Finalizers = append(binding.Finalizers, v1alpha1.BindingFinalizer)
 	return nil
 }
