@@ -25,6 +25,10 @@ const (
 	workspaceMountPath    = "/workspace"
 )
 
+var istioSidecarInjectFalse = map[string]string{
+	"sidecar.istio.io/inject": "false",
+}
+
 func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function, rtm runtime.Runtime) corev1.ConfigMap {
 	data := map[string]string{
 		FunctionSourceKey: instance.Spec.Source,
@@ -62,10 +66,8 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 			BackoffLimit:          &zero,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: r.functionLabels(instance),
-					Annotations: map[string]string{
-						"sidecar.istio.io/inject": "false",
-					},
+					Labels:      r.functionLabels(instance),
+					Annotations: istioSidecarInjectFalse,
 				},
 				Spec: corev1.PodSpec{
 					Volumes: []corev1.Volume{
@@ -230,10 +232,8 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 			BackoffLimit:          &zero,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: r.functionLabels(instance),
-					Annotations: map[string]string{
-						"sidecar.istio.io/inject": "false",
-					},
+					Labels:      r.functionLabels(instance),
+					Annotations: istioSidecarInjectFalse,
 				},
 				Spec: corev1.PodSpec{
 					Volumes: []corev1.Volume{
