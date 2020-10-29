@@ -4,14 +4,6 @@ func NewDeploymentLister() *deploymentLister {
 	return new(deploymentLister)
 }
 
-func NewResourceQuotaLister() *resourceQuotaLister {
-	return new(resourceQuotaLister)
-}
-
-func NewGQLResourceQuotaConverter() *gqlResourceQuotaConverter {
-	return new(gqlResourceQuotaConverter)
-}
-
 func NewStatefulSetLister() *statefulSetLister {
 	return new(statefulSetLister)
 }
@@ -22,14 +14,6 @@ func NewReplicaSetLister() *replicaSetLister {
 
 func NewDeploymentGetter() *deploymentGetter {
 	return new(deploymentGetter)
-}
-
-func NewLimitRangeLister() *limitRangeLister {
-	return new(limitRangeLister)
-}
-
-func NewResourceQuotaStatusChecker() *resourceQuotaStatusChecker {
-	return new(resourceQuotaStatusChecker)
 }
 
 func NewPodSvc() *podSvc {

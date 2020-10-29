@@ -19,7 +19,7 @@ func CreateConfigMap(log *logrus.Entry, cm *configmap.ConfigMap, stepName string
 	return &ConfigMaps{
 		name:      stepName,
 		data:      data,
-		log:       log,
+		log:       log.WithField(step.LogStepKey, stepName),
 		configMap: cm,
 	}
 }
@@ -34,6 +34,10 @@ func (c ConfigMaps) Run() error {
 
 func (c ConfigMaps) Cleanup() error {
 	return errors.Wrap(c.configMap.Delete(), "while deleting configmap")
+}
+
+func (c ConfigMaps) OnError() error {
+	return c.configMap.LogResource()
 }
 
 var _ step.Step = ConfigMaps{}

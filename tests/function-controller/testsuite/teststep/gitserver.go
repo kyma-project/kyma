@@ -27,7 +27,7 @@ func NewGitServer(cfg gitops.GitopsConfig, stepName string, deployments appsCli.
 		name:      stepName,
 		gs:        gitserver.New(cfg.Toolbox, cfg.GitServerServiceName, cfg.GitServerImage, cfg.GitServerServicePort, deployments, services),
 		gitClient: git.New(cfg.GetGitServerInClusterURL()),
-		log:       cfg.Toolbox.Log,
+		log:       cfg.Toolbox.Log.WithField(step.LogStepKey, stepName),
 	}
 }
 
@@ -50,4 +50,8 @@ func (r newGitServer) Run() error {
 
 func (r newGitServer) Cleanup() error {
 	return errors.Wrap(r.gs.Delete(), "while deleting in-cluster Git server")
+}
+
+func (r newGitServer) OnError() error {
+	return r.gs.LogResource()
 }

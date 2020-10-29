@@ -8,12 +8,12 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/wait"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	k8sretry "k8s.io/client-go/util/retry"
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 )
@@ -43,13 +43,13 @@ func (n Namespace) LogResource() error {
 	if err != nil {
 		return err
 	}
-
-	out, err := json.Marshal(ns)
+	ns.TypeMeta.Kind = "namespace"
+	out, err := helpers.PrettyMarshall(ns)
 	if err != nil {
 		return err
 	}
 
-	n.log.Infof("%s", string(out))
+	n.log.Infof("%s", out)
 	return nil
 }
 
@@ -89,7 +89,7 @@ func (n *Namespace) Create() (string, error) {
 		return n.name, errors.Wrapf(err, "while creating namespace %s", n.name)
 	}
 
-	n.log.Infof("CREATE: namespace %s", n.name)
+	n.log.Infof("Create: namespace %s", n.name)
 	if n.verbose {
 		n.log.Infof("%+v", ns)
 	}

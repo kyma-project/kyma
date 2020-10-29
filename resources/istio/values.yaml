@@ -10,13 +10,13 @@ kyma:
     - istio-system
     - kube-system
   labelJob:
-    image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20201016-058ecbc7"
+    image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    tag: "20201023-5de446cf"
 
 istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
-    tag: 19e240cd
+    tag: 6fd499b9
 
 monitoring:
   enabled: true

@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
+
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -121,6 +123,21 @@ func (a *APIRule) WaitForStatusRunning() error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (a *APIRule) LogResource() error {
+	apiRule, err := a.Get()
+	if err != nil {
+		return err
+	}
+
+	out, err := helpers.PrettyMarshall(apiRule)
+	if err != nil {
+		return err
+	}
+
+	a.log.Infof("%s", out)
 	return nil
 }
 
