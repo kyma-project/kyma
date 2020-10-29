@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/kyma-project/kyma/components/binding/internal/controller"
 	"github.com/kyma-project/kyma/components/binding/internal/webhook"
+	"github.com/kyma-project/kyma/components/binding/internal/webhook/binding"
 	bindingsv1alpha1 "github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
 
 	log "github.com/sirupsen/logrus"
@@ -54,6 +55,9 @@ func main() {
 	mgr.GetWebhookServer().Register(
 		"/binding-mutating-pod",
 		&k8sWebhook.Admission{Handler: webhook.NewPodHandler(mgr.GetClient(), log.WithField("webhook", "Pod"))})
+	mgr.GetWebhookServer().Register(
+		"/binding-mutating",
+		&k8sWebhook.Admission{Handler: binding.NewMutationHandler(mgr.GetClient(), log.WithField("webhook", "binding-mutating"))})
 
 	bindingReconciler := controller.SetupBindingReconciler(mgr.GetClient(), logger, mgr.GetScheme())
 	fatalOnError(bindingReconciler.SetupWithManager(mgr), "while creating BindingReconciler")

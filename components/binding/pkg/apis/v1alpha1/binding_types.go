@@ -11,6 +11,10 @@ const (
 	BindingLabelKey = "bindings-kyma-project-io"
 )
 
+const (
+	BindingFinalizer string = "kyma-project-io/bindings"
+)
+
 type BindingPhase string
 
 const (

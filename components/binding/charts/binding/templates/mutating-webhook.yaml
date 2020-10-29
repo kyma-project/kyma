@@ -20,14 +20,14 @@ metadata:
   name: "bindings.kyma-project.io"
   namespace: {{ .Release.Namespace }}  
 webhooks:
-  - name: "bindings.kyma-project.io"
+  - name: "mutating.bindings.kyma-project.io/pods"
     rules:
       - apiGroups: [""]
         apiVersions: ["v1"]
         operations: ["CREATE", "UPDATE"]
         resources: ["pods"]
         scope: "Namespaced"
-    failurePolicy: Ignore
+    failurePolicy: Fail
     clientConfig:
       caBundle: {{ b64enc $ca.Cert }}
       service:
@@ -37,3 +37,20 @@ webhooks:
     admissionReviewVersions: ["v1beta1"]
     sideEffects: None
     timeoutSeconds: 5
+  - name: "mutating.bindings.kyma-project.io/bindings"
+      rules:
+        - apiGroups: ["bindings-kyma-project-io"]
+          apiVersions: ["v1alpha"]
+          operations: ["CREATE", "UPDATE"]
+          resources: ["binding"]
+          scope: "Namespaced"
+      failurePolicy: Fail
+      clientConfig:
+        caBundle: {{ b64enc $ca.Cert }}
+        service:
+          name: {{ template "fullname" . }}-webhook-pod
+          namespace: {{ .Release.Namespace }}
+          path: "/binding-mutating"
+      admissionReviewVersions: ["v1beta1"]
+      sideEffects: None
+      timeoutSeconds: 5
