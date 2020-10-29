@@ -28,7 +28,7 @@ jobs:
         run:  go fmt  ./...
 
       - name: Build
-        run: go build -v ./...
+        run: go build -v ./cmd/manager/main.go
 
       - name: Prepare k3s and helm 3
         run: |
