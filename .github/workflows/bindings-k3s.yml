@@ -11,6 +11,10 @@ defaults:
   run:
     working-directory: components/binding
 
+env:
+  PR_NUMBER: ${{ github.event.number }}
+  PROJECT_ID: "sap-se-cx-gopher"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,15 +27,27 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Get dependencies
+      - name: Go test, vet, fmt
         run:  |
-          go get -v -t -d ./...
+          go test ./...
+          go fmt ./...
+          go vet ./...
 
-      - name: Go fmt
-        run:  go fmt  ./...
 
-      - name: Build
-        run: go build -v ./cmd/manager/main.go
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.GOPHER_GCR_KEY }}
+          project_id: $PROJECT_ID
+          export_default_credentials: true
+
+      - name: Build Image
+        run: |
+          docker build -t eu.gcr.io/$PROJECT_ID/binding:$PR_NUMBER .
+
+      - name: Push Image
+        run: |
+          gcloud auth configure-docker -q
+          docker push eu.gcr.io/$PROJECT_ID/binding:$PR_NUMBER
 
       - name: Prepare k3s and helm 3
         run: |
@@ -48,4 +64,4 @@ jobs:
         run: |
           ./scripts/create-scenario.sh
           sleep 30
-          kubectl get pods --selector=app=sandbox -oyaml 
+          kc get po -l app=sandbox -ojson | jq '.items | .[] | .spec.containers'
