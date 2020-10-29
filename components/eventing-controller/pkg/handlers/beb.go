@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
@@ -18,7 +20,7 @@ var _ Interface = &Beb{}
 
 type Interface interface {
 	Initialize()
-	SyncBebSubscription(subscription *eventingv1alpha1.Subscription) (bool, error)
+	SyncBebSubscription(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule) (bool, error)
 	DeleteBebSubscription(subscription *eventingv1alpha1.Subscription) error
 }
 
@@ -40,10 +42,10 @@ func (b *Beb) Initialize() {
 }
 
 // SyncBebSubscription synchronize the EV@ subscription with the EMS subscription. It returns true, if the EV2 susbcription status was changed
-func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription) (bool, error) {
+func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule) (bool, error) {
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
-	sEv2, err := getInternalView4Ev2(subscription)
+	sEv2, err := getInternalView4Ev2(subscription, apiRule)
 	if err != nil {
 		b.Log.Error(err, "failed to get internal view for ev2 subscription", "name:", subscription.Name)
 		return false, err
@@ -101,12 +103,12 @@ func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription) (
 
 // DeleteBebSubscription deletes the corresponding EMS subscription
 func (b *Beb) DeleteBebSubscription(subscription *eventingv1alpha1.Subscription) error {
-	sEv2, err := getInternalView4Ev2(subscription)
-	if err != nil {
-		b.Log.Error(err, "failed to get internal view for ev2 subscription", "name:", subscription.Name)
-		return err
-	}
-	return b.deleteSubscription(sEv2.Name)
+	//sEv2, err := getInternalView4Ev2(subscription, apiRule)
+	//if err != nil {
+	//	b.Log.Error(err, "failed to get internal view for ev2 subscription", "name:", subscription.Name)
+	//	return err
+	//}
+	return b.deleteSubscription(subscription.Name)
 }
 
 func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription) (*types.Subscription, int64, error) {

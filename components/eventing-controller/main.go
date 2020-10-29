@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 	"os"
 	"time"
 
@@ -39,6 +40,10 @@ func main() {
 	flag.DurationVar(&resyncPeriod, "reconcile-period", time.Minute*10, "Period between triggering of reconciling calls")
 	flag.Parse()
 	ctrl.SetLogger(zap.New(zap.UseDevMode(false)))
+	domain := os.Getenv("DOMAIN")
+	if len(domain) == 0 {
+		log.Fatalf("env var DOMAIN should be a non-empty value")
+	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
@@ -56,6 +61,7 @@ func main() {
 		ctrl.Log.WithName("controllers").WithName("Subscription"),
 		mgr.GetEventRecorderFor("subscription-controller"),
 		mgr.GetScheme(),
+		domain,
 	).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Subscription")
 		os.Exit(1)
