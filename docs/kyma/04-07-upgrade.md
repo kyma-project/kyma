@@ -25,7 +25,7 @@ For more details, read about the [technical aspects](https://github.com/kyma-pro
 
 Follow these steps:
 
-1. Check which version you're currently running. Run this command:
+1. Kyma CLI should be in the same version of the release you would like to upgrade to. Check which version you're currently running. Run this command:
 
   ```bash
   kyma version
