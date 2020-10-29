@@ -10,6 +10,7 @@ type ConditionType string
 const (
 	ConditionSubscribed         ConditionType = "Subscribed"
 	ConditionSubscriptionActive ConditionType = "Subscription active"
+	ConditionAPIRuleStatus      ConditionType = "APIRule status"
 )
 
 type Condition struct {
@@ -28,6 +29,8 @@ const (
 	ConditionReasonSubscriptionActive         ConditionReason = "BEB Subscription active"
 	ConditionReasonSubscriptionNotActive      ConditionReason = "BEB Subscription not active"
 	ConditionReasonSubscriptionDeleted        ConditionReason = "BEB Subscription deleted"
+	ConditionReasonAPIRuleStatusReady         ConditionReason = "APIRule status ready"
+	ConditionReasonAPIRuleStatusNotReady      ConditionReason = "APIRule status not ready"
 )
 
 // InitializeConditions sets unset conditions to Unknown
@@ -55,6 +58,11 @@ func (s *SubscriptionStatus) InitializeConditions() {
 // makeConditions creates an map of all conditions which the Subscription should have
 func makeConditions() []Condition {
 	conditions := []Condition{
+		{
+			Type:               ConditionAPIRuleStatus,
+			LastTransitionTime: metav1.Now(),
+			Status:             corev1.ConditionUnknown,
+		},
 		{
 			Type:               ConditionSubscribed,
 			LastTransitionTime: metav1.Now(),
@@ -87,4 +95,22 @@ func (s *SubscriptionStatus) IsConditionSubscribed() bool {
 		}
 	}
 	return false
+}
+
+func (s *SubscriptionStatus) SetConditionAPIRuleStatus(ready bool) {
+	reason := ConditionReasonAPIRuleStatusNotReady
+	status := corev1.ConditionFalse
+	if ready {
+		reason = ConditionReasonAPIRuleStatusReady
+		status = corev1.ConditionTrue
+	}
+
+	newConditions := []Condition{MakeCondition(ConditionAPIRuleStatus, reason, status)}
+	for _, condition := range s.Conditions {
+		if condition.Type == ConditionAPIRuleStatus {
+			continue
+		}
+		newConditions = append(newConditions, condition)
+	}
+	s.Conditions = newConditions
 }

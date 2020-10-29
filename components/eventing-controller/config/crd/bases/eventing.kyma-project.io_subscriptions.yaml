@@ -131,8 +131,6 @@ spec:
           status:
             description: SubscriptionStatus defines the observed state of Subscription
             properties:
-              apiRuleReady:
-                type: boolean
               conditions:
                 items:
                   properties:
