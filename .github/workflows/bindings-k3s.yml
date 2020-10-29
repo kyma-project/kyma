@@ -1,11 +1,15 @@
-name: Biding-pre-master
+name: Binding-pre-master
 
 on: 
-  pull_request_target:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'components/binding/*'
+      - '.github/workflows/bindings-k3s.yml'
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 15z
     steps:
       - name: Set up Go 1.x
         uses: actions/setup-go@v2
