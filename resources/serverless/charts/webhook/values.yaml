@@ -26,10 +26,7 @@ pod:
   annotations:
     sidecar.istio.io/inject: "false"
     cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
-  extraProperties:
-    securityContext:
-      runAsNonRoot: true
-      runAsUser: 1000
+  extraProperties: {}
 
 service:
   ports:

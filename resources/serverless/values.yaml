@@ -76,7 +76,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "55e5b31a"
+    tag: "PR-9792"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
@@ -226,5 +226,12 @@ webhook:
         cpu: 300m
         memory: 300Mi
     securityContext:
-        privileged: false
-        allowPrivilegeEscalation: false
+      privileged: false
+      allowPrivilegeEscalation: false
+  pod:
+    extraProperties:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        runAsGroup: 1000
