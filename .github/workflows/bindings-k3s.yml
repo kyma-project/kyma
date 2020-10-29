@@ -20,9 +20,9 @@ jobs:
 
       - name: Get dependencies
         run:  |
-        pwd
-        ls
-        go get -v -t -d components/binding
+          pwd
+          ls
+          go get -v -t -d components/binding
 
       - name: Go fmt
         run:  go fmt -v ./components/binding
