@@ -58,7 +58,7 @@ jobs:
 
       - name: Install Bindings component using Helm
         run: |
-          helm install binding ./charts/binding
+          helm install binding ./charts/binding --set images.bindingController.version=PR-${{ github.event.number }} --wait
 
       - name: Apply test scenario and check deployment
         run: |
