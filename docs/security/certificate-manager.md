@@ -4,8 +4,9 @@ type: Configuration
 ---
 
 The Certificate Manager chart contains embedded [cert-manager.io](https://cert-manager.io/) instance.
-It should work in a dedicated namespace (cert-manager)
-To configure the Certificate Manager chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
+It should be installed in a dedicated namespace (cert-manager)
+To configure the Certificate Manager chart, override the default values of its `values.yaml` file.
+This document describes parameters that you can configure.
 
 >**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
 >* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
@@ -18,3 +19,8 @@ This table lists the configurable parameters, their descriptions, and default va
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
 | **modules.manager.enabled** | Controls if cert-manager is enabled. | `true` |
+
+>**NOTE:** For Cert-Manager specific configuration please refer to cert-manager[documentation](https://cert-manager.io/).
+>The original cert-manager configuration file is located in the subchart: `./charts/cert-manager/values.yaml`
+>When overriding these values please put the overrides in the root chart ./values.yaml file.
+
