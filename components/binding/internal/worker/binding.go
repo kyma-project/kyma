@@ -5,24 +5,18 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma/components/binding/internal"
+	"github.com/kyma-project/kyma/components/binding/internal/storage"
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
-type KindManager interface {
-	AddLabel(*v1alpha1.Binding) error
-	RemoveLabel(*v1alpha1.Binding) error
-	LabelExist(*v1alpha1.Binding) (bool, error)
-	RemoveOldAddNewLabel(*v1alpha1.Binding) error
-}
-
 type BindingWorker struct {
-	kindManager KindManager
+	kindManager storage.KindManager
 }
 
-func NewBindingWorker(km KindManager) *BindingWorker {
+func NewBindingWorker(km storage.KindManager) *BindingWorker {
 	return &BindingWorker{
 		kindManager: km,
 	}
