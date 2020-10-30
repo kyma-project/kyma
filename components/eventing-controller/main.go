@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -39,8 +41,10 @@ func main() {
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.DurationVar(&resyncPeriod, "reconcile-period", time.Minute*10, "Period between triggering of reconciling calls")
 	flag.Parse()
+	// TODO: Add a flag to control this value
 	ctrl.SetLogger(zap.New(zap.UseDevMode(false)))
-	domain := os.Getenv("DOMAIN")
+	cfg := env.GetConfig()
+	domain := cfg.Domain
 	if len(domain) == 0 {
 		log.Fatalf("env var DOMAIN should be a non-empty value")
 	}
@@ -61,7 +65,7 @@ func main() {
 		ctrl.Log.WithName("controllers").WithName("Subscription"),
 		mgr.GetEventRecorderFor("subscription-controller"),
 		mgr.GetScheme(),
-		domain,
+		cfg,
 	).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Subscription")
 		os.Exit(1)
@@ -72,7 +76,6 @@ func main() {
 		ctrl.Log.WithName("controllers").WithName("APIRule"),
 		mgr.GetEventRecorderFor("subscription-controller"),
 		mgr.GetScheme(),
-		domain,
 	).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Subscription")
 		os.Exit(1)

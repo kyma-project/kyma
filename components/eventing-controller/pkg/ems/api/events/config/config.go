@@ -13,8 +13,8 @@ type Config struct {
 	UpdateStateURLFormat string
 }
 
-func GetDefaultConfig() *Config {
-	baseApiURL := env.GetConfig().BebApiUrl
+func GetDefaultConfig(cfg *env.Config) *Config {
+	baseApiURL := cfg.BebApiUrl
 	return &Config{
 		BaseURL:              baseApiURL,
 		PublishURL:           baseApiURL + "/events",

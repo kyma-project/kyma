@@ -30,7 +30,7 @@ func getHash(subscription *types.Subscription) (int64, error) {
 	}
 }
 
-func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule) (*types.Subscription, error) {
+func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule, defaultWebhookAuth *types.WebhookAuth) (*types.Subscription, error) {
 	emsSubscription := &types.Subscription{}
 
 	// Name
@@ -62,8 +62,8 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 		emsSubscription.Events = append(emsSubscription.Events, types.Event{Source: s, Type: t})
 	}
 
-	// WebhookAuth
-	auth := &types.WebhookAuth{}
+	// Using default webhook auth unless specified in Subscription CR
+	auth := defaultWebhookAuth
 	if subscription.Spec.ProtocolSettings.WebhookAuth != nil {
 		auth.ClientID = subscription.Spec.ProtocolSettings.WebhookAuth.ClientId
 		auth.ClientSecret = subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret
@@ -78,9 +78,8 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 			return nil, fmt.Errorf("invalid Type: %v", subscription.Spec.ProtocolSettings.WebhookAuth.Type)
 		}
 		auth.TokenURL = subscription.Spec.ProtocolSettings.WebhookAuth.TokenUrl
-		emsSubscription.WebhookAuth = auth
 	}
-
+	emsSubscription.WebhookAuth = auth
 	return emsSubscription, nil
 }
 

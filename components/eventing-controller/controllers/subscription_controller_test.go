@@ -74,7 +74,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			var subscription = &eventingv1alpha1.Subscription{}
 			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
 				testing.HaveSubscriptionName(subscriptionName),
-				testing.HaveSubscriptionFinalizer(FinalizerName),
+				testing.HaveSubscriptionFinalizer(SubscriptionFinalizer),
 			))
 
 			By("Setting a subscribed condition")
@@ -192,7 +192,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Deleting the object to not provoke more reconciliation requests")
 			Expect(k8sClient.Delete(ctx, subscription)).Should(BeNil())
-			getSubscription(subscription, subscriptionLookupKey, ctx).ShouldNot(testing.HaveSubscriptionFinalizer(FinalizerName))
+			getSubscription(subscription, subscriptionLookupKey, ctx).ShouldNot(testing.HaveSubscriptionFinalizer(SubscriptionFinalizer))
 		})
 	})
 
@@ -244,7 +244,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Deleting the object to not provoke more reconciliation requests")
 			Expect(k8sClient.Delete(ctx, subscription)).Should(BeNil())
-			getSubscription(subscription, subscriptionLookupKey, ctx).ShouldNot(testing.HaveSubscriptionFinalizer(FinalizerName))
+			getSubscription(subscription, subscriptionLookupKey, ctx).ShouldNot(testing.HaveSubscriptionFinalizer(SubscriptionFinalizer))
 		})
 	})
 
@@ -304,7 +304,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}).Should(BeTrue())
 
 			By("Removing the finalizer")
-			getSubscription(subscription, subscriptionLookupKey, ctx).ShouldNot(testing.HaveSubscriptionFinalizer(FinalizerName))
+			getSubscription(subscription, subscriptionLookupKey, ctx).ShouldNot(testing.HaveSubscriptionFinalizer(SubscriptionFinalizer))
 
 			By("Emitting some k8s events")
 			var subscriptionEvents = v1.EventList{}

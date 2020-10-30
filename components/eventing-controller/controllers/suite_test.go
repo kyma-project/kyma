@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -75,14 +77,26 @@ var _ = BeforeSuite(func(done Done) {
 		Scheme: scheme.Scheme,
 	})
 	Expect(err).ToNot(HaveOccurred())
+	envConf := &env.Config{
+		BebApiUrl:                "",
+		ClientID:                 "",
+		ClientSecret:             "",
+		TokenEndpoint:            "",
+		WebhookActivationTimeout: 0,
+		WebhookClientID:          "",
+		WebhookClientSecret:      "",
+		WebhookTokenEndpoint:     "",
+		WebhookAuthType:          "",
+		WebhookGrantType:         "",
+		Domain:                   "",
+	}
 	err =
 		NewSubscriptionReconciler(
 			k8sManager.GetClient(),
 			k8sManager.GetCache(),
 			ctrl.Log.WithName("controllers").WithName("Subscription"),
 			k8sManager.GetEventRecorderFor("subscription-controller"),
-			nil,
-			"",
+			nil, envConf,
 		).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
@@ -122,7 +136,7 @@ func startBebMock() {
 	Expect(err).ShouldNot(HaveOccurred())
 	err = os.Setenv("BEB_API_URL", messagingURL)
 	Expect(err).ShouldNot(HaveOccurred())
-
-	bebConfig = config.GetDefaultConfig()
+	envConf := &env.Config{}
+	bebConfig = config.GetDefaultConfig(envConf)
 	beb.BebConfig = bebConfig
 }

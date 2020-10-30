@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -27,13 +26,24 @@ type APIRuleReconciler struct {
 	Log      logr.Logger
 	recorder record.EventRecorder
 	Scheme   *runtime.Scheme
-	Domain   string
 }
 
 // NewAPIRuleReconciler TODO ...
-func NewAPIRuleReconciler(client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, scheme *runtime.Scheme, domain string) *APIRuleReconciler {
-	return &APIRuleReconciler{Client: client, Cache: cache, Log: log, recorder: recorder, Scheme: scheme, Domain: domain}
+func NewAPIRuleReconciler(client client.Client,
+	cache cache.Cache,
+	log logr.Logger,
+	recorder record.EventRecorder,
+	scheme *runtime.Scheme) *APIRuleReconciler {
+	return &APIRuleReconciler{
+		Client:   client,
+		Cache:    cache,
+		Log:      log,
+		recorder: recorder,
+		Scheme:   scheme,
+	}
 }
+
+const ExternalSinkScheme = "https"
 
 // SetupWithManager TODO ...
 func (r *APIRuleReconciler) SetupWithManager(mgr ctrl.Manager) error {
@@ -78,6 +88,11 @@ func (r *APIRuleReconciler) syncAPIRuleSubscriptionsStatus(apiRule *apigatewayv1
 			return ctrl.Result{}, err
 		}
 
+		// Won't do anything if the subscription is marked for deletion
+		if subscription.DeletionTimestamp != nil {
+			continue
+		}
+
 		// work on a copy
 		subscriptionCopy := subscription.DeepCopy()
 
@@ -88,7 +103,7 @@ func (r *APIRuleReconciler) syncAPIRuleSubscriptionsStatus(apiRule *apigatewayv1
 
 		// set subscription status externalSink if the APIRule status is ready
 		if apiRuleReady {
-			if err := setSubscriptionStatusExternalSink(subscriptionCopy, r.Domain); err != nil {
+			if err := setSubscriptionStatusExternalSink(subscriptionCopy, apiRule); err != nil {
 				log.Error(err, "Failed to set Subscription status externalSink", "Subscription", subscription.Name, "Namespace", subscription.Namespace)
 				return ctrl.Result{}, err
 			}
@@ -123,18 +138,17 @@ func computeAPIRuleReadyStatus(apiRule *apigatewayv1alpha1.APIRule) bool {
 }
 
 // setSubscriptionStatusExternalSink TODO ...
-func setSubscriptionStatusExternalSink(subscription *eventingv1alpha1.Subscription, domain string) error {
+func setSubscriptionStatusExternalSink(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule) error {
 	u, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf(fmt.Sprintf("subscription: [%s/%s] has invalid sink", subscription.Name, subscription.Namespace)))
 	}
 
-	parts := strings.Split(u.Host, ".")
-	if len(parts) < 5 || !strings.HasSuffix(strings.Split(u.Host, ":")[0], ClusterLocalURLSuffix) {
-		return fmt.Errorf("subscription: [%s/%s] has invalid cluster local sink", subscription.Name, subscription.Namespace)
+	path := u.Path
+	if u.Path == "" {
+		path = "/"
 	}
-
-	subscription.Status.ExternalSink = fmt.Sprintf("%s://%s.%s.%s%s", u.Scheme, parts[0], parts[1], domain, u.Path)
+	subscription.Status.ExternalSink = fmt.Sprintf("%s://%s%s", ExternalSinkScheme, *apiRule.Spec.Service.Host, path)
 
 	return nil
 }

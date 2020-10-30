@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
@@ -68,11 +70,12 @@ func NewSubscriptionReconciler(
 	log logr.Logger,
 	recorder record.EventRecorder,
 	scheme *runtime.Scheme,
-	domain string,
+	cfg *env.Config,
 ) *SubscriptionReconciler {
 	bebClient := &handlers.Beb{
 		Log: log,
 	}
+	bebClient.Initialize(cfg)
 	return &SubscriptionReconciler{
 		Client:    client,
 		Cache:     cache,
@@ -80,7 +83,7 @@ func NewSubscriptionReconciler(
 		recorder:  recorder,
 		Scheme:    scheme,
 		bebClient: bebClient,
-		Domain:    domain,
+		Domain:    cfg.Domain,
 	}
 }
 
@@ -97,7 +100,7 @@ func NewSubscriptionReconciler(
 // TODO: Optimize number of reconciliation calls in eventing-controller #9766: https://github.com/kyma-project/kyma/issues/9766
 func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
-	_ = r.Log.WithValues("subscription", req.NamespacedName)
+	//_ = r.Log.WithValues("subscription", req.NamespacedName)
 
 	cachedSubscription := &eventingv1alpha1.Subscription{}
 
@@ -120,15 +123,13 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	if !r.isInDeletion(subscription) {
 		// Ensure the finalizer is set
 		if err := r.syncFinalizer(subscription, &result, ctx, log); err != nil {
-			log.Error(err, "error while syncing finalizer")
-			return ctrl.Result{}, err
+			return ctrl.Result{}, errors.Wrap(err, "failed to sync finalizer")
 		}
 		if result.Requeue {
 			return result, nil
 		}
 		if err := r.syncInitialStatus(subscription, &result, ctx); err != nil {
-			log.Error(err, "error while syncing status")
-			return ctrl.Result{}, err
+			return ctrl.Result{}, errors.Wrap(err, "failed to sync status")
 		}
 		if result.Requeue {
 			return result, nil
@@ -141,8 +142,25 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	// Sync with APIRule, expose the webhook
 	apiRule, err := r.syncAPIRule(subscription, &result, ctx, log)
 	if err != nil {
-		log.Error(err, "error while syncing API rule")
-		return ctrl.Result{}, err
+		return ctrl.Result{}, errors.Wrap(err, "failed to sync API rule")
+	}
+	if apiRule == nil && !r.isInDeletion(subscription) {
+		log.Error(fmt.Errorf("APIRule is nil hence no host URL to work with"), "")
+		// Change APIRule status to not ready
+		for _, cond := range subscription.Status.Conditions {
+			if cond.Type == eventingv1alpha1.ConditionAPIRuleStatus {
+				if cond.Reason != eventingv1alpha1.ConditionReasonAPIRuleStatusNotReady {
+					desiredSubscription := subscription.DeepCopy()
+					desiredSubscription.Status.SetConditionAPIRuleStatus(false)
+					desiredSubscription.Status.ExternalSink = ""
+					if err := r.Status().Update(ctx, desiredSubscription); err != nil {
+						return ctrl.Result{}, errors.Wrap(err, "failed to update status of Subscription when APIRule is nil")
+					}
+				}
+				return ctrl.Result{}, nil
+			}
+		}
+		return ctrl.Result{}, nil
 	}
 
 	// Sync the BEB Subscription with the Subscription CR
@@ -193,7 +211,8 @@ func (r *SubscriptionReconciler) syncBEBSubscription(subscription *eventingv1alp
 	result *ctrl.Result, ctx context.Context, logger logr.Logger, apiRule *apigatewayv1alpha1.APIRule) (bool, error) {
 	logger.Info("Syncing subscription with BEB")
 
-	r.bebClient.Initialize()
+	//No need to initialize in every sync
+	//r.bebClient.Initialize()
 
 	// if object is marked for deletion, we need to delete the BEB subscription
 	if r.isInDeletion(subscription) {
@@ -268,7 +287,7 @@ func (r *SubscriptionReconciler) syncAPIRule(subscription *eventingv1alpha1.Subs
 	}
 	if !isValidSink {
 		logger.Error(fmt.Errorf("sink URL is not valid"), subscription.Spec.Sink)
-		// TODO Event
+
 		return nil, nil
 	}
 

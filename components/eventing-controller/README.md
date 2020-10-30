@@ -31,6 +31,13 @@ This section explains how to use the Eventing Controller.
     | ----------------------- | ------------- |---------------------------------------------------------------------------------------------- |
     | metrics-addr            | :8080          | The address the metric endpoint binds to.
 
+- The Eventing Controller expects the following environment variables:
+
+    | Environment variable    | Default Value | Description                                                                                   |
+    | ----------------------- | ------------- |---------------------------------------------------------------------------------------------- |
+    | blah            | :8080          | The address the metric endpoint binds to.
+
+
 - To install the CustomResourceDefinitions in a cluster, run:
 
     ```sh
