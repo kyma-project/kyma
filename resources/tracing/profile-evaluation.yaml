@@ -1,0 +1,32 @@
+# jaeger-operator:
+resources:
+  limits:
+    cpu: 50m
+    memory: 100Mi
+  requests:
+    cpu: 10m
+    memory: 40Mi
+
+jaeger:
+  spec:
+    resources:
+      limits:
+        cpu: 50m
+        memory: 60Mi
+      requests:
+        cpu: 10m
+        memory: 40Mi
+    storage:
+      type: memory
+      options:
+        memory:
+          max-traces: 10000
+
+kcproxy:
+  resources:
+    limits:
+      cpu: 50m
+      memory: 20Mi
+    requests:
+      cpu: 10m
+      memory: 5Mi
