@@ -11,7 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: PR-9481
+    version: 470796a1
     enabled: true
     labels:
       integration: true
