@@ -57,7 +57,7 @@ jobs:
 
       - name: Install Bindings component using Helm
         run: |
-          helm install binding ./charts/binding --set images.bindingController.version=PR-$PR_NUMBER --wait
+          helm install binding ./charts/binding --set images.bindingController.version="PR-${PR_NUMBER}" --wait
 
       - name: Apply test scenario and check if secrets are injected
         run: |
