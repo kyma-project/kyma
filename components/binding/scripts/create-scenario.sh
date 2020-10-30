@@ -3,6 +3,6 @@ set -o errexit
 
 echo "Creating Scenario"
 
-kubectl apply -f ./scripts/secret.yaml
-kubectl apply -f ./scripts/deployment-sandbox.yaml
-kubectl apply -f ./scripts/binding-sample.yaml
+kubectl apply -f ./scripts/scenario/secret.yaml
+kubectl apply -f ./scripts/scenario/deployment.yaml
+kubectl apply -f ./scripts/scenario/binding.yaml
