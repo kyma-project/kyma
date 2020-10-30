@@ -6,7 +6,7 @@ type: Installation
 This installation guide explains how you can quickly deploy Kyma on a cluster.
 For Gardener clusters a DNS name and a TLS certificate is automatically provided by Gardener services.
 For GKE and AKS clusters a wildcard DNS provided by [`xip.io`](http://xip.io) service and a self-signed TLS certificate is used.
-See [certificates](https://link.here) for details about certificate management in Kyma available use-cases.
+See [certificates](https://link.here) for details about certificate management in Kyma and available use-cases.
 
 >**TIP:** An xip.io domain is not recommended for production. If you want to expose the Kyma cluster on your own domain, follow the [installation guide](#installation-install-kyma-with-your-own-domain). To install Kyma using your own image instead of a GitHub release, follow the [instructions](#installation-use-your-own-kyma-installer-image).
 
@@ -56,6 +56,8 @@ See [certificates](https://link.here) for details about certificate management i
 ## Choose the release to install
 
 1. Go to [Kyma releases](https://github.com/kyma-project/kyma/releases/) and choose the release 1.17.0 or later.
+
+>**NOTE:** Kyma releases earlier than 1.17.0 handled certificate management differently. For more information, see [certificates](link).
 
 2. Export the release version as an environment variable:
 
