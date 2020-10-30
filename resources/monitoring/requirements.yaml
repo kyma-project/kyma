@@ -2,4 +2,4 @@ dependencies:
     - name: prometheus-pushgateway
       condition: pushgateway.enabled
     - name: prometheus-istio
-      condition: prometheusIstio.enabled
+      condition: prometheus-istio.enabled
