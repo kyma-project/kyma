@@ -19,7 +19,7 @@ type Config struct {
 	WebhookActivationTimeout time.Duration `envconfig:"WEBHOOK_ACTIVATION_TIMEOUT" default:"60s"`
 	WebhookClientID          string        `envconfig:"WEBHOOK_CLIENT_ID" required:"true"`
 	WebhookClientSecret      string        `envconfig:"WEBHOOK_CLIENT_SECRET" required:"true"`
-	WebhookTokenEndpoint     string        `envconfig:"WEBHOOK_TOKEN_ENDPOINT" default:""`
+	WebhookTokenEndpoint     string        `envconfig:"WEBHOOK_TOKEN_ENDPOINT" required:"true"`
 	WebhookAuthType          string        `envconfig:"WEBHOOK_AUTH_TYPE" default:"oauth2"`
 	WebhookGrantType         string        `envconfig:"WEBHOOK_GRANT_TYPE" default:"client_credentials"`
 

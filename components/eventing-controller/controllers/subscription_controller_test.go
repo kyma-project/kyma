@@ -12,6 +12,7 @@ import (
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -248,14 +249,16 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	When("Deleting a valid Subscription", func() {
+	FWhen("Deleting a valid Subscription", func() {
 		It("Should reconcile the Subscription", func() {
 
 			subscriptionName := "test-delete-valid-subscription-1"
 			ctx := context.Background()
 			givenSubscription := fixtureValidSubscription(subscriptionName, namespaceName)
 			processedBebRequests := 0
+			svc := newSubscriberSvc("webhook", namespaceName)
 			var subscription = &eventingv1alpha1.Subscription{}
+			ensureSubscriberSvcCreated(svc, ctx)
 			ensureSubscriptionCreated(givenSubscription, ctx)
 			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: namespaceName}
 
@@ -409,6 +412,26 @@ func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx 
 	Expect(err).Should(BeNil())
 }
 
+// ensureSubscriberSvcCreated creates a Service in the k8s cluster. If a custom namespace is used, it will be created as well.
+func ensureSubscriberSvcCreated(svc *corev1.Service, ctx context.Context) {
+
+	By(fmt.Sprintf("Ensuring the test namespace %q is created", svc.Namespace))
+	if svc.Namespace != "default " {
+		// create testing namespace
+		namespace := fixtureNamespace(svc.Namespace)
+		if namespace.Name != "default" {
+			err := k8sClient.Create(ctx, namespace)
+			fmt.Println(err)
+			Expect(err).ShouldNot(HaveOccurred())
+		}
+	}
+
+	By(fmt.Sprintf("Ensuring the subscriber service %q is created", svc.Name))
+	// create subscription
+	err := k8sClient.Create(ctx, svc)
+	Expect(err).Should(BeNil())
+}
+
 // getBebSubscriptionCreationRequests filters the http requests made against BEB and returns the BEB Subscriptions
 func getBebSubscriptionCreationRequests(bebSubscriptions []bebtypes.Subscription) AsyncAssertion {
 
@@ -441,6 +464,32 @@ func ensureSubscriptionCreationFails(subscription *eventingv1alpha1.Subscription
 	)
 }
 
+func newSubscriberSvc(name, ns string) *corev1.Service {
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: ns,
+		},
+		Spec: corev1.ServiceSpec{
+			Ports:                    9999,
+			Selector:                 nil,
+			ClusterIP:                "",
+			Type:                     "",
+			ExternalIPs:              nil,
+			SessionAffinity:          "",
+			LoadBalancerIP:           "",
+			LoadBalancerSourceRanges: nil,
+			ExternalName:             "",
+			ExternalTrafficPolicy:    "",
+			HealthCheckNodePort:      0,
+			PublishNotReadyAddresses: false,
+			SessionAffinityConfig:    nil,
+			IPFamily:                 nil,
+			TopologyKeys:             nil,
+		},
+	}
+}
+
 // fixtureValidSubscription returns a valid subscription
 func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscription {
 	return &eventingv1alpha1.Subscription{
@@ -468,7 +517,7 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 					Scope:        []string{"guid-identifier"},
 				},
 			},
-			Sink: "https://webhook.xxx.com",
+			Sink: fmt.Sprintf("https://webhook.%s.svc.cluster.local", namespace),
 			Filter: &eventingv1alpha1.BebFilters{
 				Dialect: "beb",
 				Filters: []*eventingv1alpha1.BebFilter{

@@ -42,8 +42,9 @@ func Test_SyncBebSubscription(t *testing.T) {
 	subscription.Status.Emshash = 0
 	subscription.Status.Ev2hash = 0
 
+	apiRule := newAPIRule(withPath, withService)
 	// then
-	changed, err := beb.SyncBebSubscription(subscription, nil)
+	changed, err := beb.SyncBebSubscription(subscription, apiRule)
 	g.Expect(err).To(Not(BeNil()))
 	g.Expect(changed).To(BeFalse())
 }

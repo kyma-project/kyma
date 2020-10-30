@@ -63,25 +63,13 @@ func getWebHookAuthFromConfig(cfg *env.Config) *types.WebhookAuth {
 		authType = types.AuthTypeClientCredentials
 	}
 
-	tokenURL := getTokenURLFromAuthType(authType, cfg.Domain)
-
 	return &types.WebhookAuth{
 		Type:         authType,
 		GrantType:    grantType,
 		ClientID:     cfg.WebhookClientID,
 		ClientSecret: cfg.WebhookClientSecret,
-		TokenURL:     tokenURL,
+		TokenURL:     cfg.TokenEndpoint,
 	}
-}
-
-// getTokenURLFromAuthType returns a token url using authType and Domain
-func getTokenURLFromAuthType(authType types.AuthType, domain string) string {
-	var tokenURL string
-
-	if string(authType) == "oauth2" {
-		tokenURL = fmt.Sprintf("%s%s.%s%s", OAuth2SchemeTokenURL, OAuth2SubDomainTokenURL, domain, OAuth2PathTokenURL)
-	}
-	return tokenURL
 }
 
 // SyncBebSubscription synchronize the EV@ subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
