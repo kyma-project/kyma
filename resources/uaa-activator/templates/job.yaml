@@ -43,6 +43,8 @@ spec:
               value: "{{ .Release.Namespace }}"
             - name: UAA_SERVICEBINDING_NAME
               value: "uaa-issuer-secret"
+            - name: UAA_NEW_INSTANCE_CREATE_DELAY
+              value: "3s"
 
             - name: DEX_CONFIG_MAP_NAMESPACE
               value: "{{ .Release.Namespace }}"
