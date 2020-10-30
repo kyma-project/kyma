@@ -3,6 +3,8 @@ package handlers
 import (
 	"testing"
 
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -69,8 +71,19 @@ func Test_getInternalView4Ev2(t *testing.T) {
 		},
 	}
 
+	apiRule := &apigatewayv1alpha1.APIRule{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "",
+			Namespace: "",
+		},
+		Spec:   apigatewayv1alpha1.APIRuleSpec{},
+		Status: apigatewayv1alpha1.APIRuleStatus{},
+	}
+
+	defaultWebhookAuth := &types.WebhookAuth{}
+
 	// then
-	bebSubscription, err := getInternalView4Ev2(subscription)
+	bebSubscription, err := getInternalView4Ev2(subscription, apiRule, defaultWebhookAuth)
 
 	// when
 	g.Expect(err).ShouldNot(HaveOccurred())

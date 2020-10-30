@@ -40,7 +40,7 @@ func Test_InitializeConditions(t *testing.T) {
 			g := NewGomegaWithT(t)
 			s := SubscriptionStatus{}
 			s.Conditions = tt.givenConditions
-			wantConditionTypes := []ConditionType{ConditionSubscribed, ConditionSubscriptionActive}
+			wantConditionTypes := []ConditionType{ConditionSubscribed, ConditionSubscriptionActive, ConditionAPIRuleStatus}
 
 			// then
 			s.InitializeConditions()
