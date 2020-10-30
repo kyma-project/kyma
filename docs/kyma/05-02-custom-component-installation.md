@@ -68,7 +68,7 @@ components:
 
 You can only add a new component after the installation. Removal of the installed components is not possible. To add a component that was not installed with Kyma by default, perform the following steps.
 
-1. Download the current [Installation custom resource](#custom-resource-installation) on the cluster:
+1. Download the current [Installation custom resource](#custom-resource-installation) from the cluster:
 
     ```bash
     kubectl -n default get installation kyma-installation -o yaml > installation.yaml
