@@ -85,7 +85,7 @@ While installing Kyma, provide the file path using the `-o` flag. Once the insta
 
 For overrides that the system should keep in Secrets, just define a Secret object instead of a ConfigMap with the same key and a base64-encoded value. Be sure to label the Secret.
 
-If you add the overrides after installation, trigger the update process using Kyma CLI providing the same version of the installed Kyma:
+If you add the overrides after installation, trigger the update process using Kyma CLI. Provide the same version of the installed Kyma:
 
 ```bash
 kyma upgrade -s {VERSION}

@@ -46,13 +46,13 @@ In case of dependency conflicts or major changes between components versions, so
 
 ## Perform the update
 
-If your changes involve any modifications in the `/resources` folder that includes component chart configurations, perform the steps on "Update with resources modifications". If you only modify installation artifacts, for example by adding or removing components in the installation files or adding or removing overrides in the configuration files, perform the steps on "Update without resources modifications".
+If your changes involve any modifications in the `/resources` folder that includes component chart configurations, perform the steps under the **Update with resources modifications** tab. If you only modify installation artifacts, for example by adding or removing components in the installation files or adding or removing overrides in the configuration files, perform the steps under the **Update without resources modifications** tab.
 
 Read about each update step in the following sections.
 
 <div tabs name="perform-the-update">
    <details>
-   <summary label="update-with-resources-moditifations">
+   <summary label="update-with-resources-modifications">
    Update with resources modifications
    </summary>
 
@@ -62,7 +62,7 @@ Read about each update step in the following sections.
       kyma version
       ```
 
-   2. Provide the same version of the current cluster to the upgrade command. Provide also an image name and a tag so that Kyma CLI will build a Docker image with your local changes and push it to the registry. It will also trigger the update process. If you have changes for the overrides or the components list, you can also pass them using `-o` and `-c` flags.
+   2. Provide the same version of the current cluster to the upgrade command. Provide also an image name and a tag so that Kyma CLI will build a Docker image with your local changes and push it to the registry. It will also trigger the update process. If you have changes for the overrides or the components list, you can also pass them using the `-o` and `-c` flags.
 
       ```bash
       kyma upgrade -s {VERSION} --source-image {IMAGE_NAME}:{IMAGE_TAG}
@@ -70,7 +70,7 @@ Read about each update step in the following sections.
 
    </details>
    <details>
-   <summary label="update-without-resources-moditifations">
+   <summary label="update-without-resources-modifications">
    Update without resources modifications
    </summary>
 
@@ -80,7 +80,7 @@ Read about each update step in the following sections.
       kyma version
       ```
 
-   2. Provide the same version of the current cluster to the upgrade command. Pass the path of the overrides file via `-o` flag and/or the path of the installation file via `-c` flag:
+   2. Provide the same version of the current cluster to the upgrade command. Pass the path of the overrides file using the `-o` flag and/or the path of the installation file using the `-c` flag:
 
       ```bash
       kyma upgrade -s {VERSION} -o {OVERRIDES_FILE_PATH} -c {INSTALLATION_FILE_PATH}

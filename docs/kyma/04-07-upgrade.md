@@ -25,7 +25,7 @@ For more details, read about the [technical aspects](https://github.com/kyma-pro
 
 Follow these steps:
 
-1. Kyma CLI should be in the same version of the release you would like to upgrade to. Check which version you're currently running. Run this command:
+1. Kyma CLI should be in the same version of the release you would like to upgrade to. To check which version you're currently running, run this command:
 
   ```bash
   kyma version
@@ -35,7 +35,7 @@ Follow these steps:
   >**NOTE:** Not all releases require you to perform additional migration steps. If your target release doesn't come with a migration guide, proceed to the next step.
 
 3. Trigger the upgrade:
-  >**CAUTION:** Do not forget to supply the same overrides via `-o` flag and the same component list via `-c` flag, if you provided any of them during the installation. There might be new components on the version that you would like to upgrade to. It is important to add them also to your custom component list.
+  >**CAUTION:** Do not forget to supply the same overrides using the `-o` flag and the same component list using the `-c` flag if you provided any of them during the installation. There might be new components on the version that you would like to upgrade to. It is important to add them also to your custom component list.
 
   ```bash
   kyma upgrade -s {VERSION}

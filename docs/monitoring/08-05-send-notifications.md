@@ -57,7 +57,7 @@ Follow these steps to configure notifications for Slack every time Alertmanager 
 
 5. Proceed with Kyma installation.
 
-   >**NOTE**: If you add the overrides in the runtime, trigger the update process using Kyma CLI providing the same version of the installed Kyma::
+   >**NOTE**: If you add the overrides in the runtime, trigger the update process using Kyma CLI. Provide the same version of the installed Kyma:
    ```bash
    kyma upgrade -s {VERSION}
    ```
