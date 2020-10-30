@@ -10,7 +10,7 @@ To change this system behavior, you can override the existing settings or change
 
 Follow these steps to [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) the existing configuration with a customized control plane definition.
 
-1. Add and apply a ConfigMap in the `kyma-installer` Namespace in which you set the value for the **PILOT_TRACE_SAMPLING** attribute to `60`.
+1. Add and apply a ConfigMap in the `kyma-installer` Namespace in which you set the value for the **trace sampling** attribute to `60`.
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -30,12 +30,10 @@ data:
     metadata:
       namespace: istio-system
     spec:
-      components:
-        pilot:
-          k8s:
-            env:
-            - name: PILOT_TRACE_SAMPLING
-              value: "60"
+      meshConfig:
+        defaultConfig:
+          tracing:
+            sampling: 60
 EOF
 ```
 
