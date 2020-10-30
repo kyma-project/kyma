@@ -16,7 +16,10 @@ env:
   PROJECT_ID: "sap-se-cx-gopher"
 
 jobs:
-  build:
+  binding-pre-master:
+    env:
+      PR_NUMBER: ${{ github.event.number }}
+      PROJECT_ID: "sap-se-cx-gopher"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -37,17 +40,17 @@ jobs:
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           service_account_key: ${{ secrets.GOPHER_GCR_KEY }}
-          project_id: sap-se-cx-gopher
+          project_id: $PROJECT_ID
           export_default_credentials: true
 
       - name: Build Image
         run: |
-          docker build -t eu.gcr.io/sap-se-cx-gopher/binding:PR-${{ github.event.number }} .
+          docker build -t eu.gcr.io/$PROJECT_ID/binding:PR-$PR_NUMBER .
 
       - name: Push Image
         run: |
           gcloud auth configure-docker -q
-          docker push eu.gcr.io/sap-se-cx-gopher/binding:PR-${{ github.event.number }}
+          docker push eu.gcr.io/$PROJECT_ID/binding:PR-$PR_NUMBER
 
       - name: Prepare k3s and helm 3
         run: |
