@@ -92,6 +92,7 @@ docker-create-opts:
 post-pr-tag-image:
 ifdef DOCKER_POST_PR_TAG
 	docker tag $(IMG_NAME) $(IMG_NAME):$(DOCKER_POST_PR_TAG)
+	docker push $(IMG_NAME):$(DOCKER_POST_PR_TAG)
 endif
 
 # Targets mounting sources to buildpack
