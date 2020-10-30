@@ -59,7 +59,7 @@ func TestPodHandler_Handle(t *testing.T) {
 	decoder, err := admission.NewDecoder(scheme.Scheme)
 	require.NoError(t, err)
 
-	handler := NewPodHandler(fakeClient, logrus.New())
+	handler := NewMutationHandler(fakeClient, logrus.New())
 	err = handler.InjectDecoder(decoder)
 	require.NoError(t, err)
 
