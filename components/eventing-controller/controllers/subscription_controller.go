@@ -287,17 +287,17 @@ func (r *SubscriptionReconciler) syncAPIRule(subscription *eventingv1alpha1.Subs
 	}
 	if !isValidSink {
 		logger.Error(fmt.Errorf("sink URL is not valid"), subscription.Spec.Sink)
-
+		r.eventWarn(subscription, reasonValidationFailed, "Sink URL is not valid %s", subscription.Spec.Sink)
 		return nil, nil
 	}
 
 	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
 		logger.Error(err, "failed to parse sink URI")
-		// TODO Event
+		r.eventWarn(subscription, reasonValidationFailed, "Failed to parse sink URI %s", subscription.Spec.Sink)
 		return nil, nil
 	}
-	apiRule, err := r.createOrUpdateAPIRule(ctx, *sURL, logger)
+	apiRule, err := r.createOrUpdateAPIRule(subscription, ctx, *sURL, logger)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to createOrUpdateAPIRule")
 	}
@@ -352,7 +352,7 @@ func (r *SubscriptionReconciler) getClusterLocalService(ctx context.Context, svc
 	return svc, nil
 }
 
-func (r *SubscriptionReconciler) createOrUpdateAPIRule(ctx context.Context, sink url.URL, logger logr.Logger) (*apigatewayv1alpha1.APIRule, error) {
+func (r *SubscriptionReconciler) createOrUpdateAPIRule(subscription *eventingv1alpha1.Subscription, ctx context.Context, sink url.URL, logger logr.Logger) (*apigatewayv1alpha1.APIRule, error) {
 	svcNs, svcName, err := getSvcNsAndName(sink.Host)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse svc name and ns in createOrUpdateAPIRule")
@@ -390,8 +390,10 @@ func (r *SubscriptionReconciler) createOrUpdateAPIRule(ctx context.Context, sink
 	if existingAPIRule == nil {
 		err = r.Client.Create(ctx, desiredAPIRule, &client.CreateOptions{})
 		if err != nil {
+			r.eventWarn(subscription, reasonCreateFailed, "Create APIRule failed %s", desiredAPIRule.Name)
 			return nil, errors.Wrap(err, "failed to create APIRule")
 		}
+		r.eventNormal(subscription, reasonCreate, "Created APIRule %s", desiredAPIRule.Name)
 		return desiredAPIRule, nil
 	}
 	logger.Info("Existing APIRules", fmt.Sprintf("in ns: %s for svc: %s", svcNs, svcName), fmt.Sprintf("%s", existingAPIRule.Name))
@@ -402,8 +404,10 @@ func (r *SubscriptionReconciler) createOrUpdateAPIRule(ctx context.Context, sink
 	}
 	err = r.Client.Update(ctx, desiredAPIRule, &client.UpdateOptions{})
 	if err != nil {
+		r.eventWarn(subscription, reasonUpdateFailed, "Update APIRule failed %s", desiredAPIRule.Name)
 		return nil, errors.Wrap(err, "failed to update an APIRule")
 	}
+	r.eventNormal(subscription, reasonUpdate, "Updated APIRule %s", desiredAPIRule.Name)
 
 	freshExistingAPIRules, err := r.getAPIRulesForASvc(ctx, labels, svcNs)
 	if err != nil {
@@ -412,14 +416,14 @@ func (r *SubscriptionReconciler) createOrUpdateAPIRule(ctx context.Context, sink
 	// Cleanup does the following:
 	// 1. Delete APIRule using obsolete ports
 	// 2. Update APIRule by deleting the OwnerReference of the Subscription with port different than that of the APIRule
-	err = r.cleanup(ctx, subscriptions, freshExistingAPIRules)
+	err = r.cleanup(subscription, ctx, subscriptions, freshExistingAPIRules)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to cleanup APIRules")
 	}
 	return desiredAPIRule, nil
 }
 
-func (r *SubscriptionReconciler) cleanup(ctx context.Context, subs []eventingv1alpha1.Subscription, apiRules []apigatewayv1alpha1.APIRule) error {
+func (r *SubscriptionReconciler) cleanup(subscription *eventingv1alpha1.Subscription, ctx context.Context, subs []eventingv1alpha1.Subscription, apiRules []apigatewayv1alpha1.APIRule) error {
 	for _, apiRule := range apiRules {
 		filteredOwnerRefs := make([]metav1.OwnerReference, 0)
 		for _, or := range apiRule.OwnerReferences {
@@ -445,8 +449,10 @@ func (r *SubscriptionReconciler) cleanup(ctx context.Context, subs []eventingv1a
 		if len(filteredOwnerRefs) == 0 {
 			err := r.Client.Delete(ctx, &apiRule, &client.DeleteOptions{})
 			if err != nil {
+				r.eventWarn(subscription, reasonDeleteFailed, "Deleted APIRule failed %s", apiRule.Name)
 				return errors.Wrap(err, "failed to delete APIRule while cleanupAPIRules")
 			}
+			r.eventNormal(subscription, reasonDelete, "Deleted APIRule %s", apiRule.Name)
 			return nil
 		}
 
@@ -456,8 +462,10 @@ func (r *SubscriptionReconciler) cleanup(ctx context.Context, subs []eventingv1a
 		desiredAPIRule.OwnerReferences = filteredOwnerRefs
 		err := r.Client.Update(ctx, desiredAPIRule, &client.UpdateOptions{})
 		if err != nil {
+			r.eventWarn(subscription, reasonUpdateFailed, "Update APIRule failed %s", apiRule.Name)
 			return errors.Wrap(err, "failed to update APIRule while cleanupAPIRules")
 		}
+		r.eventNormal(subscription, reasonUpdate, "Updated APIRule %s", apiRule.Name)
 		return nil
 	}
 	return nil
