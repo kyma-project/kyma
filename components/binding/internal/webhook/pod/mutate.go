@@ -19,23 +19,23 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-var _ admission.Handler = &PodHandler{}
-var _ admission.DecoderInjector = &PodHandler{}
+var _ admission.Handler = &MutationHandler{}
+var _ admission.DecoderInjector = &MutationHandler{}
 
-type PodHandler struct {
+type MutationHandler struct {
 	decoder *admission.Decoder
 	log     log.FieldLogger
 	client  client.Client
 }
 
-func NewPodHandler(client client.Client, log log.FieldLogger) *PodHandler {
-	return &PodHandler{
+func NewMutationHandler(client client.Client, log log.FieldLogger) *MutationHandler {
+	return &MutationHandler{
 		client: client,
 		log:    log,
 	}
 }
 
-func (h *PodHandler) Handle(ctx context.Context, req admission.Request) admission.Response {
+func (h *MutationHandler) Handle(ctx context.Context, req admission.Request) admission.Response {
 	h.log.Infof("start handling pod: %s", req.UID)
 
 	pod := &corev1.Pod{}
@@ -76,13 +76,13 @@ func (h *PodHandler) Handle(ctx context.Context, req admission.Request) admissio
 	return admission.PatchResponseFromRaw(req.Object.Raw, rawPod)
 }
 
-func (h *PodHandler) InjectDecoder(d *admission.Decoder) error {
+func (h *MutationHandler) InjectDecoder(d *admission.Decoder) error {
 	h.decoder = d
 	return nil
 }
 
 // findAssignedBindings checks if pod has any label with an assigned Binding; if yes returns Bindings name
-func (h *PodHandler) findAssignedBindings(pod *corev1.Pod) []string {
+func (h *MutationHandler) findAssignedBindings(pod *corev1.Pod) []string {
 	bindingsName := make([]string, 0)
 	if pod.ObjectMeta.Labels == nil {
 		return bindingsName
@@ -99,7 +99,7 @@ func (h *PodHandler) findAssignedBindings(pod *corev1.Pod) []string {
 }
 
 // findBindings fetches all Bindings based on Bindings name and request namespace
-func (h *PodHandler) findBindings(ctx context.Context, bindingsName []string, namespace string) ([]*v1alpha1.Binding, error) {
+func (h *MutationHandler) findBindings(ctx context.Context, bindingsName []string, namespace string) ([]*v1alpha1.Binding, error) {
 	bindings := make([]*v1alpha1.Binding, 0)
 
 	for _, bindingName := range bindingsName {
@@ -123,7 +123,7 @@ func (h *PodHandler) findBindings(ctx context.Context, bindingsName []string, na
 }
 
 // mutatePod injects to the Pod envFromSource reference coming from Secret/ConfigMap based on Bindings
-func (h *PodHandler) mutatePod(ctx context.Context, pod *corev1.Pod, bindings []*v1alpha1.Binding) error {
+func (h *MutationHandler) mutatePod(ctx context.Context, pod *corev1.Pod, bindings []*v1alpha1.Binding) error {
 	for _, binding := range bindings {
 		switch binding.Spec.Source.Kind {
 		case v1alpha1.SourceKindSecret:
@@ -147,7 +147,7 @@ func (h *PodHandler) mutatePod(ctx context.Context, pod *corev1.Pod, bindings []
 	return nil
 }
 
-func (h *PodHandler) findSecret(ctx context.Context, binding *v1alpha1.Binding) (*corev1.Secret, error) {
+func (h *MutationHandler) findSecret(ctx context.Context, binding *v1alpha1.Binding) (*corev1.Secret, error) {
 	secret := &corev1.Secret{}
 
 	var lastErrror error
@@ -166,7 +166,7 @@ func (h *PodHandler) findSecret(ctx context.Context, binding *v1alpha1.Binding) 
 	return secret, nil
 }
 
-func (h *PodHandler) findConfigMap(ctx context.Context, binding *v1alpha1.Binding) (*corev1.ConfigMap, error) {
+func (h *MutationHandler) findConfigMap(ctx context.Context, binding *v1alpha1.Binding) (*corev1.ConfigMap, error) {
 	configmap := &corev1.ConfigMap{}
 
 	var lastErrror error
@@ -185,7 +185,7 @@ func (h *PodHandler) findConfigMap(ctx context.Context, binding *v1alpha1.Bindin
 	return configmap, nil
 }
 
-func (h *PodHandler) addSecretReference(pod *corev1.Pod, secret *corev1.Secret) {
+func (h *MutationHandler) addSecretReference(pod *corev1.Pod, secret *corev1.Secret) {
 	for i, ctr := range pod.Spec.Containers {
 		origEnv := map[string]corev1.EnvVar{}
 		for _, v := range ctr.Env {
@@ -217,7 +217,7 @@ func (h *PodHandler) addSecretReference(pod *corev1.Pod, secret *corev1.Secret) 
 	}
 }
 
-func (h *PodHandler) addConfigMapReference(pod *corev1.Pod, configmap *corev1.ConfigMap) {
+func (h *MutationHandler) addConfigMapReference(pod *corev1.Pod, configmap *corev1.ConfigMap) {
 	for i, ctr := range pod.Spec.Containers {
 		origEnv := map[string]corev1.EnvVar{}
 		for _, v := range ctr.Env {
