@@ -32,8 +32,6 @@ jobs:
 
       - name: Go test, vet, fmt
         run:  |
-          echo $PR_NUMBER
-          echo $PROJECT_ID
           go test ./...
           go fmt ./...
           go vet ./...
@@ -42,7 +40,7 @@ jobs:
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           service_account_key: ${{ secrets.GOPHER_GCR_KEY }}
-          project_id: $PROJECT_ID
+          project_id: sap-se-cx-gopher
           export_default_credentials: true
 
       - name: Build Image
