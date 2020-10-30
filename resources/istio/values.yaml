@@ -17,6 +17,8 @@ istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
     tag: 6fd499b9
+    tag16: PR-9501
+    tag17: PR-9500
 
 monitoring:
   enabled: true

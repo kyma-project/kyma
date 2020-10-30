@@ -4,22 +4,21 @@ kind: Job
 metadata:
   annotations:
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
-    helm.sh/hook: "post-install,post-upgrade"
-    helm.sh/hook-weight: "10"
-  name: istio-install-job
+    helm.sh/hook: "post-upgrade"
+    helm.sh/hook-weight: "20"
+  name: istio-upgrade-job-1-6
 spec:
   activeDeadlineSeconds: 1000
-  backoffLimit: 3
+  backoffLimit: 1
   template:
     spec:
       containers:
-        -
-          command:
+        - command:
             - bash
             - "-c"
             - |
-{{.Files.Get "files/job-script.sh" | printf "%s" | indent 16}}
-          image: {{ .Values.istio.installer.image }}:{{ .Values.istio.installer.tag }}
+{{.Files.Get "files/istio-upgrade-1-6.sh" | printf "%s" | indent 16}}
+          image: {{ .Values.istio.installer.image }}:{{ .Values.istio.installer.tag16 }}
           name: installer
           volumeMounts:
           - name: config
@@ -33,6 +32,8 @@ spec:
             value: "{{ .Release.Namespace }}"
           - name: CONFIGMAP_NAME
             value: kyma-istio-operator-config
+          - name: TARGET_VERSION
+            value: {{ .Chart.Version }}
       volumes:
       - name: config
         configMap:

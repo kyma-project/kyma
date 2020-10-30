@@ -1,6 +1,6 @@
 ---
 # DestinationRule to disable (m)TLS when talking to ingress-proxy
-apiVersion: networking.istio.io/v1alpha3 
+apiVersion: networking.istio.io/v1beta1 
 kind: DestinationRule
 metadata:
   name: istio-ingressgateway

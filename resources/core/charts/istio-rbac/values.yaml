@@ -1,8 +1,0 @@
----
-global:
-  cluster:
-    rbac:
-      mode: ON_WITH_INCLUSION
-      inclusion:
-        services:
-          - compass-connector-internal.compass-system.svc.cluster.local
