@@ -19,11 +19,11 @@ The configuration specifies the following parameters and their values:
 ## TLS management
 
 ### Bring Your Own
-Kyma employs the Bring Your Own Domain/Certificates model that requires you to supply the certificate and key during installation. 
+Kyma employs the Bring Your Own Domain/Certificates model that requires you to supply the certificate and key during installation.
 Two variations of this method are supported:
 
-- legacy: the user supplies the certificate and key as native k8s objects (ConfigMaps or Secrets) in the form of kyma overrides
-- cert-manager: the user is expected to generate their own Cert-manager objects (Issuers and Certificates) and deliver them before the installation process
+- legacy: user supplies the certificate and key as native k8s objects (ConfigMaps or Secrets) in the form of kyma overrides
+- cert-manager: user is expected to generate their own cert-manager objects (Issuers and Certificates) and deliver them before the installation process
 
 #### Native certificate management
 You can do it using the [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation). See a sample ConfigMap specifying the values to override: 
@@ -45,12 +45,12 @@ data:
 During installation, the values are [propagated in the cluster](#certificate-propagation-paths) to all components that require them. 
 
 #### Self managed 
-The second methods expects the user to create the cert-manager CRs and supply them to the cluster beforehand. Those certificates can be self-signed or signed by an external CA. The installation process waits for Certificates to be generated, but requires specific secrets to be generated.
+The second method expects that user creates the cert-manager CRs and supplies them to the cluster beforehand. Those certificates can be self-signed or signed by an external CA. The installation process waits for certificates to be generated, but requires specific secrets to be generated.
 
 LIST OF REQUIRED SECRETS IN NAMESPACES
 
 ### Demo setup with xip.io
-Previously, if you don't supply any certificates or domain during installation, the kyma-installer would default to a demo setup using the [xip.io](http://xip.io/) DNS-as-a-Service (DNSaaS) provider. This behavior has changed, and now xip has to be set using installation overrides, as in the example below. 
+Previously, if you didn't supply any certificates or domain during installation, the kyma-installer would default to a demo setup using the [xip.io](http://xip.io/) DNS-as-a-Service (DNSaaS) provider. This behavior has changed, and now xip has to be set using installation overrides, as in the example below.
 
 ```yaml
 ---
@@ -141,4 +141,4 @@ The order differs depending on the mode:
 ## Egress
 Currently no Egress limitations are implemented, meaning that all applications deployed in the Kyma cluster can access outside resources without limitations.
 
->**NOTE:** in the case of connection problems with external services it may be required to create an [Service Entry](https://istio.io/latest/docs/reference/config/networking/service-entry/) object to register the service. 
+>**NOTE:** in the case of connection problems with external services it may be required to create a [Service Entry](https://istio.io/latest/docs/reference/config/networking/service-entry/) object to register the service.

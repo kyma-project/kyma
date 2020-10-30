@@ -13,7 +13,7 @@ Out-of the box Kyma supports four predefined modes for handling certificates:
 - User-Provided
 
 The xip mode has to be enabled manually, the other modes are auto-detected, but can be also set manually with the help of overrides.
-You also can disable built-in cert-manager by setting a global [override](link to overrides docs) `global.certificates.manager.enabled: "false"`.
+You also can disable built-in cert-manager by setting a global [override](/docs/kyma/05-03-overrides.md) `global.certificates.manager.enabled: "false"`.
 
 ## Modes
 
