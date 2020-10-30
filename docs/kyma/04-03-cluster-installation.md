@@ -3,7 +3,10 @@ title: Install Kyma on a cluster
 type: Installation
 ---
 
-This installation guide explains how you can quickly deploy Kyma on a cluster with a wildcard DNS provided by [`xip.io`](http://xip.io) using a GitHub release of your choice.
+This installation guide explains how you can quickly deploy Kyma on a cluster.
+For Gardener clusters a DNS name and a TLS certificate is automatically provided by Gardener services.
+For GKE and AKS clusters a wildcard DNS provided by [`xip.io`](http://xip.io) service and a self-signed TLS certificate is used.
+See [certificates](https://link.here) for details about certificate management in Kyma available use-cases.
 
 >**TIP:** An xip.io domain is not recommended for production. If you want to expose the Kyma cluster on your own domain, follow the [installation guide](#installation-install-kyma-with-your-own-domain). To install Kyma using your own image instead of a GitHub release, follow the [instructions](#installation-use-your-own-kyma-installer-image).
 
@@ -52,7 +55,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 ## Choose the release to install
 
-1. Go to [Kyma releases](https://github.com/kyma-project/kyma/releases/) and choose the release you want to install.
+1. Go to [Kyma releases](https://github.com/kyma-project/kyma/releases/) and choose the release 1.17.0 or later.
 
 2. Export the release version as an environment variable:
 
@@ -185,12 +188,29 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 </div>
 
 ## Install Kyma
-
    >**NOTE**: If you want to use the Kyma production profile, see the following documents before you go to the next step:
    >* [Istio production profile](/components/service-mesh/#configuration-service-mesh-production-profile)
    >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-profiles)
 
-1. Install Kyma using Kyma CLI:
+1. Configure cert-management mode. If you're installing on GKE or AKS, a `xip` mode has to be enabled:
+
+    ```bash
+    cat <<EOF | kubectl apply -f -
+    ---
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: xip-overrides
+      namespace: kyma-installer
+      labels:
+        installer: overrides
+        kyma-project.io/installation: ""
+    data:
+      global.certificates.type: "xip"
+    EOF
+    ```
+
+2. Install Kyma using Kyma CLI:
 
     ```bash
     kyma install -s $KYMA_VERSION
