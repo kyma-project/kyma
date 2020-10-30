@@ -65,7 +65,7 @@ Read about each update step in the following sections.
    2. Provide the same version of the current cluster to the upgrade command. Provide also an image name and a tag so that Kyma CLI will build a Docker image with your local changes and push it to the registry. It will also trigger the update process. If you have changes for the overrides or the components list, you can also pass them using the `-o` and `-c` flags.
 
       ```bash
-      kyma upgrade -s {VERSION} --source-image {IMAGE_NAME}:{IMAGE_TAG}
+      kyma upgrade -s local --custom-image {IMAGE_NAME}:{IMAGE_TAG}
       ```
 
    </details>
