@@ -63,5 +63,5 @@ jobs:
       - name: Apply test scenario and check deployment
         run: |
           ./scripts/create-scenario.sh
-          sleep 30
+          while [[ $(kubectl get po -l app=sandbox -ojson | jq '.items | .[] | .spec.containers') != *"TEST_PASSWORD"* ]]; do echo "Waiting for the secrets to inject"; sleep 2; done
           kubectl get po -l app=sandbox -ojson | jq '.items | .[] | .spec.containers'
