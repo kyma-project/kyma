@@ -54,7 +54,8 @@ jobs:
           echo "Installing helm"
           curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
           while [[ $(kubectl get nodes -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "Waiting for cluster nodes to be ready"; sleep 2; done        
-
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
       - name: Install Bindings component using Helm
         run: |
           helm install binding ./charts/binding --set images.bindingController.version="PR-${PR_NUMBER}" --wait
