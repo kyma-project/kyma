@@ -19,20 +19,22 @@ spec:
         app: {{ template "kiali.name" . }}-operator
     spec:
       serviceAccountName: {{ template "kiali.name" . }}-operator
-      {{- if .Values.nodeSelector }}
+      {{- if .Values.kiali.operator.nodeSelector }}
       nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 8 }}
+{{ toYaml .Values.kiali.operator.nodeSelector | indent 8 }}
       {{- end }}
       containers:
       - name: operator
         image: "{{ .Values.kiali.operator.image.repository }}:{{ .Values.kiali.operator.image.tag }}"
         imagePullPolicy: {{ .Values.kiali.operator.image.pullPolicy }}
+        args:
+        - "--zap-level=info"
         volumeMounts:
         - mountPath: /tmp/ansible-operator/runner
           name: runner
         env:
         - name: WATCH_NAMESPACE
-          value: {{ .Release.Namespace }}
+          value: {{ .Values.kiali.operator.watchNamespace | default "\"\""  }}
         - name: POD_NAME
           valueFrom:
             fieldRef:
@@ -43,6 +45,15 @@ spec:
               fieldPath: metadata.namespace
         - name: OPERATOR_NAME
           value: "{{ template "kiali.name" . }}-operator"
+        - name: ANSIBLE_DEBUG_LOGS
+          value: {{ .Values.kiali.operator.debug.enabled | quote }}
+        - name: ANSIBLE_VERBOSITY_KIALI_KIALI_IO
+          value: {{ .Values.kiali.operator.debug.verbosity | quote }}
+        ports:
+        - name: http-metrics
+          containerPort: 8383
+        - name: cr-metrics
+          containerPort: 8686
         resources:
 {{ toYaml .Values.kiali.operator.resources | indent 10 }}
       volumes:

@@ -59,13 +59,17 @@ type limitRangeQueryResponse struct {
 	LimitRange []limitRange `json:"limitRanges"`
 }
 
-type limitRange struct {
-	Name   string           `json:"name"`
+type limitRangeSpec struct {
 	Limits []limitRangeItem `json:"limits"`
 }
 
+type limitRange struct {
+	Name string         `json:"name"`
+	Spec limitRangeSpec `json:"spec"`
+}
+
 type limitRangeItem struct {
-	LimitType      limitType    `json:"limitType"`
+	Type           limitType    `json:"type"`
 	DefaultRequest resourceType `json:"defaultRequest"`
 	Default        resourceType `json:"default"`
 	Max            resourceType `json:"max"`
@@ -86,16 +90,21 @@ func fixLimitRangeQuery() *graphql.Request {
 	query := `query ($namespace: String!) {
 				limitRanges(namespace: $namespace) {
 					name
-					limits {
-						limitType
-						max {
-							memory
-						}
-						default {
-							memory
-						}
-						defaultRequest {
-							memory
+					spec {
+						limits {
+							type
+							max {
+								memory
+								cpu
+							}
+							default {
+								memory
+								cpu
+							}
+							defaultRequest {
+								memory
+								cpu
+							}
 						}
 					}
 				}
@@ -111,17 +120,22 @@ func fixLimitRangeQueryResponse() limitRangeQueryResponse {
 		LimitRange: []limitRange{
 			{
 				Name: limitRangeName,
-				Limits: []limitRangeItem{
-					{
-						LimitType: limitTypeContainer,
-						Max: resourceType{
-							Memory: "1Gi",
-						},
-						Default: resourceType{
-							Memory: "96Mi",
-						},
-						DefaultRequest: resourceType{
-							Memory: "32Mi",
+				Spec: limitRangeSpec{
+					Limits: []limitRangeItem{
+						{
+							Type: limitTypeContainer,
+							Max: resourceType{
+								Memory: "1Gi",
+								Cpu:    "0",
+							},
+							Default: resourceType{
+								Memory: "96Mi",
+								Cpu:    "0",
+							},
+							DefaultRequest: resourceType{
+								Memory: "32Mi",
+								Cpu:    "0",
+							},
 						},
 					},
 				},

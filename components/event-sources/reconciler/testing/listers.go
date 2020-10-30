@@ -2,9 +2,7 @@ package testing
 
 import (
 	pkgerrors "github.com/pkg/errors"
-	authv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	fakeistioclientset "istio.io/client-go/pkg/clientset/versioned/fake"
-	authenticationlistersv1alpha1 "istio.io/client-go/pkg/listers/authentication/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -18,6 +16,9 @@ import (
 	fakelegacyclientset "knative.dev/eventing/pkg/legacyclient/clientset/versioned/fake"
 	_ "knative.dev/pkg/client/injection/ducks/duck/v1/addressable/fake"
 	rt "knative.dev/pkg/reconciler/testing"
+
+	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
+	securitylistersv1alpha1 "istio.io/client-go/pkg/listers/security/v1beta1"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	fakesourcesclientset "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/fake"
@@ -98,8 +99,8 @@ func (l *Listers) GetChannelLister() messaginglistersv1alpha1.ChannelLister {
 	return messaginglistersv1alpha1.NewChannelLister(l.IndexerFor(&messagingv1alpha1.Channel{}))
 }
 
-func (l *Listers) GetPolicyLister() authenticationlistersv1alpha1.PolicyLister {
-	return authenticationlistersv1alpha1.NewPolicyLister(l.IndexerFor(&authv1alpha1.Policy{}))
+func (l *Listers) GetPeerAuthenticationLister() securitylistersv1alpha1.PeerAuthenticationLister {
+	return securitylistersv1alpha1.NewPeerAuthenticationLister(l.IndexerFor(&securityv1beta1.PeerAuthentication{}))
 }
 
 func (l *Listers) GetServiceLister() corelistersv1.ServiceLister {

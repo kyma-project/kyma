@@ -21,21 +21,20 @@ import (
 )
 
 type config struct {
-	KubeconfigPath string `envconfig:"optional"`
-	Test           testsuite.Config
+	Test testsuite.Config
 }
 
 func TestRuntimes(t *testing.T) {
 	runTests(t, scenarios.FunctionTestStep)
 }
 
-func TestGitops(t *testing.T) {
+func TestGitSourcesFunctions(t *testing.T) {
 	runTests(t, scenarios.GitopsSteps)
 }
 
-type testRunner func(*rest.Config, testsuite.Config, *logrus.Logger) ([]step.Step, error)
+type testSuite func(*rest.Config, testsuite.Config, *logrus.Entry) (step.Step, error)
 
-func runTests(t *testing.T, testFunc testRunner) {
+func runTests(t *testing.T, testFunc testSuite) {
 	rand.Seed(time.Now().UnixNano())
 	g := gomega.NewGomegaWithT(t)
 
@@ -48,7 +47,7 @@ func runTests(t *testing.T, testFunc testRunner) {
 	logf.SetFormatter(&logrus.TextFormatter{})
 	logf.SetReportCaller(false)
 
-	steps, err := testFunc(restConfig, cfg.Test, logf)
+	steps, err := testFunc(restConfig, cfg.Test, logf.WithField("suite", t.Name()))
 	failOnError(g, err)
 	runner := step.NewRunner(step.WithCleanupDefault(cfg.Test.Cleanup), step.WithLogger(logf))
 

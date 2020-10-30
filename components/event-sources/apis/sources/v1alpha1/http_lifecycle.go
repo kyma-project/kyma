@@ -7,7 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"knative.dev/pkg/apis"
 
-	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
 )
 
 const (
@@ -19,9 +19,9 @@ const (
 	// has been successfully deployed.
 	HTTPConditionDeployed apis.ConditionType = "Deployed"
 
-	// HTTPConditionPolicyCreated has status True when the Policy for
+	// HTTPConditionPeerAuthenticationCreated has status True when the PeerAuthentication for
 	// Deployment has been successfully created.
-	HTTPConditionPolicyCreated apis.ConditionType = "PolicyCreated"
+	HTTPConditionPeerAuthenticationCreated apis.ConditionType = "PeerAuthenticationCreated"
 
 	// HTTPConditionServiceCreated has status True when the Service for
 	// Deployment has been successfully created.
@@ -31,7 +31,7 @@ const (
 var httpCondSet = apis.NewLivingConditionSet(
 	HTTPConditionSinkProvided,
 	HTTPConditionDeployed,
-	HTTPConditionPolicyCreated,
+	HTTPConditionPeerAuthenticationCreated,
 	HTTPConditionServiceCreated,
 )
 
@@ -51,11 +51,11 @@ func (s *HTTPSource) ToKey() string {
 }
 
 const (
-	HTTPSourceReasonSinkNotFound      = "SinkNotFound"
-	HTTPSourceReasonSinkEmpty         = "EmptySinkURI"
-	HTTPSourceReasonServiceNotReady   = "ServiceNotReady"
-	HTTPSourceReasonPolicyNotCreated  = "PolicyNotCreated"
-	HTTPSourceReasonServiceNotCreated = "ServiceNotCreated"
+	HTTPSourceReasonSinkNotFound                 = "SinkNotFound"
+	HTTPSourceReasonSinkEmpty                    = "EmptySinkURI"
+	HTTPSourceReasonServiceNotReady              = "ServiceNotReady"
+	HTTPSourceReasonPeerAuthenticationNotCreated = "PeerAuthenticationNotCreated"
+	HTTPSourceReasonServiceNotCreated            = "ServiceNotCreated"
 )
 
 // InitializeConditions sets relevant unset conditions to Unknown state.
@@ -84,14 +84,14 @@ func (s *HTTPSourceStatus) MarkServiceCreated(service *corev1.Service) {
 	httpCondSet.Manage(s).MarkTrue(HTTPConditionServiceCreated)
 }
 
-// MarkPolicyCreated sets the PolicyCreated condition to True once a Policy is created.
-func (s *HTTPSourceStatus) MarkPolicyCreated(policy *authenticationv1alpha1.Policy) {
-	if policy == nil {
-		httpCondSet.Manage(s).MarkUnknown(HTTPConditionPolicyCreated,
-			HTTPSourceReasonPolicyNotCreated, "The Istio policy is not created")
+// MarkPeerAuthenticationCreated sets the PeerAuthenticationCreated condition to True once a PeerAuthentication is created.
+func (s *HTTPSourceStatus) MarkPeerAuthenticationCreated(peerAuthentication *securityv1beta1.PeerAuthentication) {
+	if peerAuthentication == nil {
+		httpCondSet.Manage(s).MarkUnknown(HTTPConditionPeerAuthenticationCreated,
+			HTTPSourceReasonPeerAuthenticationNotCreated, "The Istio PeerAuthentication is not created")
 		return
 	}
-	httpCondSet.Manage(s).MarkTrue(HTTPConditionPolicyCreated)
+	httpCondSet.Manage(s).MarkTrue(HTTPConditionPeerAuthenticationCreated)
 }
 
 // MarkNoSink sets the SinkProvided condition to False with the given reason

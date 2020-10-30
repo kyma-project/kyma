@@ -34,7 +34,7 @@ func (r *Resolver) CreateRoleBinding(ctx context.Context, namespace string, name
 	for i, sub := range params.Subjects {
 		convertedSubjects[i] = v1.Subject{
 			Kind:     string(sub.Kind),
-			APIGroup: roleGroupVersionResource.Group,
+			APIGroup: roleBindingGroupVersionResource.Group,
 			Name:     sub.Name,
 		}
 	}

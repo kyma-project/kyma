@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
@@ -37,6 +39,7 @@ func (r *Resolver) APIRulesQuery(ctx context.Context, namespace string, serviceN
 func (r *Resolver) APIRuleQuery(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {
 	var result *v1alpha1.APIRule
 	err := r.Service().GetInNamespace(name, namespace, &result)
+
 	return result, err
 }
 
@@ -96,4 +99,8 @@ func (r *Resolver) DeleteAPIRule(ctx context.Context, name string, namespace str
 	result := &v1alpha1.APIRule{}
 	err := r.Service().DeleteInNamespace(namespace, name, result)
 	return result, err
+}
+
+func (r *Resolver) JsonField(ctx context.Context, obj *v1alpha1.APIRule) (gqlschema.JSON, error) {
+	return resource.ToJson(obj)
 }

@@ -11,6 +11,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebindingusage/types/v1alpha1"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
@@ -87,12 +88,27 @@ func (sbu *ServiceBindingUsage) Get() (*v1alpha1.ServiceBindingUsage, error) {
 		return &v1alpha1.ServiceBindingUsage{}, errors.Wrapf(err, "while getting ServiceBindingUsage %s in namespace %s", sbu.name, sbu.namespace)
 	}
 
-	servicebindingusage, err := convertFromUnstructuredToServiceBindingUsage(u)
+	serviceBindingUsage, err := convertFromUnstructuredToServiceBindingUsage(u)
 	if err != nil {
 		return &v1alpha1.ServiceBindingUsage{}, err
 	}
 
-	return &servicebindingusage, nil
+	return &serviceBindingUsage, nil
+}
+
+func (sbu *ServiceBindingUsage) LogResource() error {
+	serviceBindingUsage, err := sbu.Get()
+	if err != nil {
+		return err
+	}
+
+	out, err := helpers.PrettyMarshall(serviceBindingUsage)
+	if err != nil {
+		return err
+	}
+
+	sbu.log.Infof("Service Binding Usage resource: %s", out)
+	return nil
 }
 
 func (sbu *ServiceBindingUsage) WaitForStatusRunning() error {

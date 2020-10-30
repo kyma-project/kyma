@@ -581,7 +581,7 @@
   revision = "9197077df8675547dfa5e04c6dfcd024257a2030"
 
 [[projects]]
-  digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
+  digest = "1:fa940333c48808b0d86ef21f412ffcfd0e5084a82f13905c028a404803b1908f"
   name = "golang.org/x/text"
   packages = [
     "collate",
@@ -602,8 +602,8 @@
     "unicode/rangetable",
   ]
   pruneopts = "NUT"
-  revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
-  version = "v0.3.2"
+  revision = "23ae387dee1f90d29a23c0e87ee0b46038fbed0e"
+  version = "v0.3.3"
 
 [[projects]]
   branch = "master"
@@ -860,11 +860,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "b9332cd76d53ed3324232a1ea050323e7a9d1bb6"
-  version = "kubernetes-1.16.11"
+  revision = "06c037ffc157ce8c1fceab2be50f1c52b9f746ba"
+  version = "kubernetes-1.16.15"
 
 [[projects]]
-  digest = "1:6a1d3c9277486716053f71d8bd83b85848c64d21d82c8133bc882dc4e6b97ed3"
+  digest = "1:2bd078d3581d160eff0a14ce39d7287281ffc60c3a6e64bd1c5de35175e74cc2"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/equality",
@@ -914,8 +914,8 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
-  revision = "d77240b404c752e2e50cf9538ae9e1586c336888"
-  version = "kubernetes-1.16.11"
+  revision = "f7929272bda35db23eaa68452473887898be1a44"
+  version = "kubernetes-1.16.15"
 
 [[projects]]
   digest = "1:9d3960cb9ce6adae9c9e945f5060dd4366cc3f3d5bc0df44b656e3d0911bfc53"
@@ -1076,8 +1076,8 @@
     "util/workqueue",
   ]
   pruneopts = "NUT"
-  revision = "81c4b2b9eeffad7781dd72a9e7e5012ff513b373"
-  version = "kubernetes-1.16.11"
+  revision = "4744acb1ce5432afaa74b71df88af7063572bffc"
+  version = "kubernetes-1.16.15"
 
 [[projects]]
   digest = "1:c0693cb981f43d82a767a3217b7640a4bdb341731d3814b38602f4e5dc4f01b3"

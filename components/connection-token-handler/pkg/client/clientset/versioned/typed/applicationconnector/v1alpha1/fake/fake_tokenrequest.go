@@ -6,6 +6,8 @@
 package fake
 
 import (
+	"context"
+
 	v1alpha1 "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -26,7 +28,7 @@ var tokenrequestsResource = schema.GroupVersionResource{Group: "applicationconne
 var tokenrequestsKind = schema.GroupVersionKind{Group: "applicationconnector.kyma-project.io", Version: "v1alpha1", Kind: "TokenRequest"}
 
 // Get takes name of the tokenRequest, and returns the corresponding tokenRequest object, and an error if there is any.
-func (c *FakeTokenRequests) Get(name string, options v1.GetOptions) (result *v1alpha1.TokenRequest, err error) {
+func (c *FakeTokenRequests) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.TokenRequest, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(tokenrequestsResource, c.ns, name), &v1alpha1.TokenRequest{})
 
@@ -37,7 +39,7 @@ func (c *FakeTokenRequests) Get(name string, options v1.GetOptions) (result *v1a
 }
 
 // List takes label and field selectors, and returns the list of TokenRequests that match those selectors.
-func (c *FakeTokenRequests) List(opts v1.ListOptions) (result *v1alpha1.TokenRequestList, err error) {
+func (c *FakeTokenRequests) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.TokenRequestList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(tokenrequestsResource, tokenrequestsKind, c.ns, opts), &v1alpha1.TokenRequestList{})
 
@@ -59,14 +61,14 @@ func (c *FakeTokenRequests) List(opts v1.ListOptions) (result *v1alpha1.TokenReq
 }
 
 // Watch returns a watch.Interface that watches the requested tokenRequests.
-func (c *FakeTokenRequests) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeTokenRequests) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(tokenrequestsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a tokenRequest and creates it.  Returns the server's representation of the tokenRequest, and an error, if there is any.
-func (c *FakeTokenRequests) Create(tokenRequest *v1alpha1.TokenRequest) (result *v1alpha1.TokenRequest, err error) {
+func (c *FakeTokenRequests) Create(ctx context.Context, tokenRequest *v1alpha1.TokenRequest, opts v1.CreateOptions) (result *v1alpha1.TokenRequest, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewCreateAction(tokenrequestsResource, c.ns, tokenRequest), &v1alpha1.TokenRequest{})
 
@@ -77,7 +79,7 @@ func (c *FakeTokenRequests) Create(tokenRequest *v1alpha1.TokenRequest) (result 
 }
 
 // Update takes the representation of a tokenRequest and updates it. Returns the server's representation of the tokenRequest, and an error, if there is any.
-func (c *FakeTokenRequests) Update(tokenRequest *v1alpha1.TokenRequest) (result *v1alpha1.TokenRequest, err error) {
+func (c *FakeTokenRequests) Update(ctx context.Context, tokenRequest *v1alpha1.TokenRequest, opts v1.UpdateOptions) (result *v1alpha1.TokenRequest, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateAction(tokenrequestsResource, c.ns, tokenRequest), &v1alpha1.TokenRequest{})
 
@@ -89,7 +91,7 @@ func (c *FakeTokenRequests) Update(tokenRequest *v1alpha1.TokenRequest) (result 
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeTokenRequests) UpdateStatus(tokenRequest *v1alpha1.TokenRequest) (*v1alpha1.TokenRequest, error) {
+func (c *FakeTokenRequests) UpdateStatus(ctx context.Context, tokenRequest *v1alpha1.TokenRequest, opts v1.UpdateOptions) (*v1alpha1.TokenRequest, error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateSubresourceAction(tokenrequestsResource, "status", c.ns, tokenRequest), &v1alpha1.TokenRequest{})
 
@@ -100,7 +102,7 @@ func (c *FakeTokenRequests) UpdateStatus(tokenRequest *v1alpha1.TokenRequest) (*
 }
 
 // Delete takes name of the tokenRequest and deletes it. Returns an error if one occurs.
-func (c *FakeTokenRequests) Delete(name string, options *v1.DeleteOptions) error {
+func (c *FakeTokenRequests) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
 		Invokes(testing.NewDeleteAction(tokenrequestsResource, c.ns, name), &v1alpha1.TokenRequest{})
 
@@ -108,15 +110,15 @@ func (c *FakeTokenRequests) Delete(name string, options *v1.DeleteOptions) error
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeTokenRequests) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(tokenrequestsResource, c.ns, listOptions)
+func (c *FakeTokenRequests) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+	action := testing.NewDeleteCollectionAction(tokenrequestsResource, c.ns, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.TokenRequestList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched tokenRequest.
-func (c *FakeTokenRequests) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.TokenRequest, err error) {
+func (c *FakeTokenRequests) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.TokenRequest, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(tokenrequestsResource, c.ns, name, pt, data, subresources...), &v1alpha1.TokenRequest{})
 

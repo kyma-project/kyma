@@ -10,6 +10,9 @@ controller:
 
 tests:
   enabled: true
+  labels:
+    integration: true
+    after-upgrade: true
   image:
     pullPolicy: IfNotPresent
   gateway:
