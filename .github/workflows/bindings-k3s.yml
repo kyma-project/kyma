@@ -11,10 +11,6 @@ defaults:
   run:
     working-directory: components/binding
 
-env:
-  PR_NUMBER: ${{ github.event.number }}
-  PROJECT_ID: "sap-se-cx-gopher"
-
 jobs:
   binding-pre-master:
     env:
@@ -23,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Set up Go 1.x
+      - name: Set up Go 1.14
         uses: actions/setup-go@v2
         with:
           go-version: ^1.14
@@ -37,7 +33,8 @@ jobs:
           go vet ./...
 
 
-      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      - name: Setup gcloud
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           service_account_key: ${{ secrets.GOPHER_GCR_KEY }}
           project_id: sap-se-cx-gopher
@@ -63,7 +60,7 @@ jobs:
         run: |
           helm install binding ./charts/binding --set images.bindingController.version=0.2.2 --wait
 
-      - name: Apply test scenario and check deployment
+      - name: Apply test scenario and check if secrets are injected
         run: |
           ./scripts/create-scenario.sh
           while [[ $(kubectl get po -l app=sandbox -ojson | jq '.items | .[] | .spec.containers') != *"TEST_PASSWORD"* ]]; do echo "Waiting for the secrets to inject"; sleep 2; done
