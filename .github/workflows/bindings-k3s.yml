@@ -1,5 +1,4 @@
 name: Binding-pre-master
-
 on: 
   pull_request:
     types: [opened, synchronize, reopened]
