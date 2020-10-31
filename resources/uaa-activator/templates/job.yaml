@@ -22,6 +22,11 @@ spec:
     spec:
       restartPolicy: Never
       serviceAccountName: {{ include "uaa-activator.fullname" . }}
+      initContainers:
+        - name: "secret-wait"
+          image: "{{ .Values.initJobs.secret.image.registryPath }}/k8s-tools:{{ .Values.initJobs.secret.image.version }}"
+          command: ["sh", "-c"]
+          args: ["until kubectl get secret {{ include "uaa-activator.fullname" . }}; do echo waiting for secret; done; echo secret found"]
       containers:
         - name: {{ .Chart.Name }}
           securityContext:

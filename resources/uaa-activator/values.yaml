@@ -12,6 +12,12 @@ image:
   pullPolicy: IfNotPresent
   version: "PR-9809"
 
+initJobs:
+  secret:
+    image:
+      registryPath: eu.gcr.io/kyma-project/incubator/develop
+      tag: "20201023-5de446cf"
+
 nameOverride: ""
 fullnameOverride: ""
 
