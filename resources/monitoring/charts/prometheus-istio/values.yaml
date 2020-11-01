@@ -1273,52 +1273,11 @@ serverFiles:
           regex: "15090"
           replacement: $1
           action: keep
-        - source_labels: [__meta_kubernetes_endpoint_address_target_kind, __meta_kubernetes_endpoint_address_target_name]
-          separator: ;
-          regex: Node;(.*)
-          target_label: node
-          replacement: ${1}
-          action: replace
-        - source_labels: [__meta_kubernetes_endpoint_address_target_kind, __meta_kubernetes_endpoint_address_target_name]
-          separator: ;
-          regex: Pod;(.*)
-          target_label: pod
-          replacement: ${1}
-          action: replace
-        - source_labels: [__meta_kubernetes_namespace]
-          separator: ;
-          regex: (.*)
-          target_label: namespace
-          replacement: $1
-          action: replace
-        - source_labels: [__meta_kubernetes_service_name]
-          separator: ;
-          regex: (.*)
-          target_label: service
-          replacement: $1
-          action: replace
-        - source_labels: [__meta_kubernetes_pod_name]
-          separator: ;
-          regex: (.*)
-          target_label: pod
-          replacement: $1
-          action: replace
         - source_labels: [__meta_kubernetes_service_name]
           separator: ;
           regex: (.*)
           target_label: job
           replacement: ${1}
-          action: replace
-        - source_labels: [__meta_kubernetes_service_label_envoy_stats]
-          separator: ;
-          regex: (.+)
-          target_label: job
-          replacement: ${1}
-          action: replace
-        - separator: ;
-          regex: (.*)
-          target_label: endpoint
-          replacement: "15090"
           action: replace
         - source_labels: [__meta_kubernetes_pod_container_port_name]
           separator: ;
@@ -1329,20 +1288,8 @@ serverFiles:
           regex: __meta_kubernetes_pod_label_(.+)
           replacement: $1
           action: labeldrop
-        - source_labels: [__meta_kubernetes_namespace]
-          separator: ;
-          regex: (.*)
-          target_label: namespace
-          replacement: $1
-          action: replace
-        - source_labels: [__meta_kubernetes_pod_name]
-          separator: ;
-          regex: (.*)
-          target_label: pod_name
-          replacement: $1
-          action: replace
         - separator: ;
-          regex: ^(pod_name|container|pod|namespace|job|endpoint)$
+          regex: ^(job)$
           replacement: $1
           action: labeldrop
         metric_relabel_configs:
