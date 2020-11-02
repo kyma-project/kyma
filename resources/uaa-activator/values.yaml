@@ -10,7 +10,7 @@ global:
 image:
   registryPath: eu.gcr.io/kyma-project
   pullPolicy: IfNotPresent
-  version: "PR-9809"
+  version: "a0101415"
 
 initJobs:
   secret:
