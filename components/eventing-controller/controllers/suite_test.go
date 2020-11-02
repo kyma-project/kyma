@@ -141,6 +141,6 @@ func startBebMock() *controllertesting.BebMock {
 	beb.TokenURL = tokenURL
 	beb.MessagingURL = messagingURL
 	bebConfig = config.GetDefaultConfig(messagingURL)
-
+	beb.BebConfig = bebConfig
 	return beb
 }

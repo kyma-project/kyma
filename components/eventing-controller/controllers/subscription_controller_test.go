@@ -185,8 +185,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getBebSubscriptionCreationRequests(bebCreationRequests).Should(And(
 				ContainElement(MatchFields(IgnoreMissing|IgnoreExtras,
 					Fields{
-						"Name":       BeEquivalentTo(subscription.Name),
-						"WebhookUrl": BeEquivalentTo(subscription.Spec.Sink),
+						"Name": BeEquivalentTo(subscription.Name),
+						//"WebhookUrl": BeEquivalentTo(subscription.Spec.Sink),
 					},
 				))))
 		})
@@ -410,7 +410,7 @@ func getSubscription(subscription *eventingv1alpha1.Subscription, lookupKey type
 		}
 		fmt.Println(">>>", subscription.Status.Ready)
 		return *subscription
-	}, time.Second*60, time.Second)
+	}, time.Second*60, 5*time.Second)
 }
 
 // TODO change the function name
