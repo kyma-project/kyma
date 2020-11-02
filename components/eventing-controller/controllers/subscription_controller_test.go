@@ -450,7 +450,10 @@ func ensureAPIRuleCreated(apiRule *apigatewayv1alpha1.APIRule, ctx context.Conte
 	By(fmt.Sprintf("Ensuring the APIRule %q is created", apiRule.Name))
 	// create subscription
 	err := k8sClient.Create(ctx, apiRule)
-	Expect(err).Should(BeNil())
+	if !k8serrors.IsAlreadyExists(err) {
+		fmt.Println(err)
+		Expect(err).Should(BeNil())
+	}
 }
 
 // ensureSubscriptionCreated creates a Subscription in the k8s cluster. If a custom namespace is used, it will be created as well.

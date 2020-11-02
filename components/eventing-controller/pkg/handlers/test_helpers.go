@@ -3,8 +3,6 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
@@ -41,7 +39,7 @@ func WithService(apiRule *apigatewayv1alpha1.APIRule) {
 }
 
 func WithGateway(apiRule *apigatewayv1alpha1.APIRule) {
-	gateway := controllers.ClusterLocalAPIGateway
+	gateway := "foo.gateway"
 	apiRule.Spec.Gateway = &gateway
 }
 
