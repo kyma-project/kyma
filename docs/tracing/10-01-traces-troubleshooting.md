@@ -47,4 +47,4 @@ EOF
 
 If you have already installed Kyma and do not want to trigger any updates, edit the `istiod` deployment to set the desired value for **PILOT_TRACE_SAMPLING**. For detailed instructions, see the [Istio documentation](https://istio.io/latest/docs/tasks/observability/distributed-tracing/configurability/#customizing-trace-sampling).
 
-> Note: the change to PILOT_TRACE_SAMPLING would only take affect if the meshConfig override is not defined.
+> Note: the change to PILOT_TRACE_SAMPLING would only take effect if the meshConfig override is not defined.
