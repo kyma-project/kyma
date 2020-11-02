@@ -19,4 +19,15 @@ spec:
   - path: /metrics
     targetPort: 9090
     honorLabels: true
-
+  - params:
+      'match[]':
+      - '{__name__=~"workload:(.*)"}'
+      - '{__name__=~"envoy(.*)"}'
+    path: /federate
+    targetPort: 9090
+    honorLabels: true
+    metricRelabelings:
+    - sourceLabels: ["__name__"]
+      regex: 'workload:(.*)'
+      targetLabel: "__name__"
+      action: replace

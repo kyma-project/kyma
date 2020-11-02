@@ -1981,5 +1981,5 @@ prometheus:
 
 pushgateway:
   enabled: false
-prometheusIstio:
+prometheus-istio:
   enabled: true
