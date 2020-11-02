@@ -47,7 +47,7 @@ func (h *MutationHandler) Handle(ctx context.Context, req admission.Request) adm
 			return admission.Errored(http.StatusInternalServerError, err)
 		}
 	default:
-		log.Infof("Binding mutation wehbook does not support action %q", req.Operation)
+		log.Infof("Binding mutation webhook does not support action %q", req.Operation)
 		return admission.Allowed("action not taken")
 	}
 
@@ -66,7 +66,7 @@ func (h *MutationHandler) InjectDecoder(d *admission.Decoder) error {
 	return nil
 }
 
-func (h *MutationHandler) mutateOnCreate(ctx context.Context, binding *v1alpha1.Binding) error {
+func (h *MutationHandler) mutateOnCreate(_ context.Context, binding *v1alpha1.Binding) error {
 	if binding.Finalizers == nil {
 		binding.Finalizers = make([]string, 0)
 	}
