@@ -1273,25 +1273,11 @@ serverFiles:
           regex: "15090"
           replacement: $1
           action: keep
-        - source_labels: [__meta_kubernetes_service_name]
-          separator: ;
-          regex: (.*)
-          target_label: job
-          replacement: ${1}
-          action: replace
         - source_labels: [__meta_kubernetes_pod_container_port_name]
           separator: ;
           regex: .*-envoy-prom
           replacement: $1
           action: keep
-        - separator: ;
-          regex: __meta_kubernetes_pod_label_(.+)
-          replacement: $1
-          action: labeldrop
-        - separator: ;
-          regex: ^(job)$
-          replacement: $1
-          action: labeldrop
         metric_relabel_configs:
         - separator: ;
           regex: ^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$
