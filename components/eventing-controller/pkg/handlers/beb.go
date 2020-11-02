@@ -46,7 +46,7 @@ type BebResponse struct {
 func (b *Beb) Initialize(cfg *env.Config) {
 	if b.Client == nil {
 		authenticator := auth.NewAuthenticator(cfg)
-		b.Client = client.NewClient(config.GetDefaultConfig(cfg), authenticator)
+		b.Client = client.NewClient(config.GetDefaultConfig(cfg.BebApiUrl), authenticator)
 		b.WebhookAuth = getWebHookAuthFromConfig(cfg)
 	}
 }

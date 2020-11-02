@@ -2,9 +2,10 @@ package controllers
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"testing"
+
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
@@ -68,9 +69,11 @@ var _ = BeforeSuite(func(done Done) {
 	err = eventingv1alpha1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
+	err = apigatewayv1alpha1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
 	// +kubebuilder:scaffold:scheme
 
-	startBebMock()
+	bebMock := startBebMock()
 
 	// Source: https://book.kubebuilder.io/cronjob-tutorial/writing-tests.html
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
@@ -78,26 +81,34 @@ var _ = BeforeSuite(func(done Done) {
 	})
 	Expect(err).ToNot(HaveOccurred())
 	envConf := &env.Config{
-		BebApiUrl:                "",
-		ClientID:                 "",
-		ClientSecret:             "",
-		TokenEndpoint:            "",
+		BebApiUrl:                bebMock.MessagingURL,
+		ClientID:                 "foo-id",
+		ClientSecret:             "foo-secret",
+		TokenEndpoint:            bebMock.TokenURL,
 		WebhookActivationTimeout: 0,
-		WebhookClientID:          "",
-		WebhookClientSecret:      "",
-		WebhookTokenEndpoint:     "",
-		WebhookAuthType:          "",
-		WebhookGrantType:         "",
-		Domain:                   "",
+		WebhookClientID:          "foo-client-id",
+		WebhookClientSecret:      "foo-client-secet",
+		WebhookTokenEndpoint:     "foo-token-endpoint",
+		WebhookAuthType:          "oauth",
+		WebhookGrantType:         "client_credentials",
+		Domain:                   "domain.com",
 	}
-	err =
-		NewSubscriptionReconciler(
-			k8sManager.GetClient(),
-			k8sManager.GetCache(),
-			ctrl.Log.WithName("controllers").WithName("Subscription"),
-			k8sManager.GetEventRecorderFor("subscription-controller"),
-			nil, envConf,
-		).SetupWithManager(k8sManager)
+	err = NewSubscriptionReconciler(
+		k8sManager.GetClient(),
+		k8sManager.GetCache(),
+		ctrl.Log.WithName("controllers").WithName("Subscription"),
+		k8sManager.GetEventRecorderFor("subscription-controller"),
+		nil, envConf,
+	).SetupWithManager(k8sManager)
+	Expect(err).ToNot(HaveOccurred())
+
+	err = NewAPIRuleReconciler(
+		k8sManager.GetClient(),
+		k8sManager.GetCache(),
+		ctrl.Log.WithName("controllers").WithName("APIRule"),
+		k8sManager.GetEventRecorderFor("api-rule-controller"),
+		nil,
+	).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {
@@ -119,24 +130,17 @@ var _ = AfterSuite(func() {
 })
 
 // startBebMock starts the beb mock and configures the controller process to use it
-func startBebMock() {
+func startBebMock() *controllertesting.BebMock {
 	By("Preparing BEB Mock")
-	err := os.Setenv("CLIENT_ID", "foo")
-	Expect(err).ShouldNot(HaveOccurred())
-	err = os.Setenv("CLIENT_SECRET", "foo")
-	Expect(err).ShouldNot(HaveOccurred())
-
-	beb = controllertesting.NewBebMock(nil)
+	bebConfig := &config.Config{}
+	beb = controllertesting.NewBebMock(bebConfig)
 	bebURI := beb.Start()
 	logf.Log.Info("beb mock listening at", "address", bebURI)
-	authURL := fmt.Sprintf("%s%s", bebURI, controllertesting.UrlAuth)
-	messagingURL := fmt.Sprintf("%s%s", bebURI, controllertesting.UrlMessagingApi)
+	tokenURL := fmt.Sprintf("%s%s", bebURI, controllertesting.TokenURLPath)
+	messagingURL := fmt.Sprintf("%s%s", bebURI, controllertesting.MessagingURLPath)
+	beb.TokenURL = tokenURL
+	beb.MessagingURL = messagingURL
+	bebConfig = config.GetDefaultConfig(messagingURL)
 
-	err = os.Setenv("TOKEN_ENDPOINT", authURL)
-	Expect(err).ShouldNot(HaveOccurred())
-	err = os.Setenv("BEB_API_URL", messagingURL)
-	Expect(err).ShouldNot(HaveOccurred())
-	envConf := &env.Config{}
-	bebConfig = config.GetDefaultConfig(envConf)
-	beb.BebConfig = bebConfig
+	return beb
 }

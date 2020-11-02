@@ -3,6 +3,8 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
@@ -11,8 +13,8 @@ import (
 
 type APIRuleOption func(rule *apigatewayv1alpha1.APIRule)
 
-// newAPIRule returns a valid APIRule
-func newAPIRule(opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
+// NewAPIRule returns a valid APIRule
+func NewAPIRule(opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
 	apiRule := &apigatewayv1alpha1.APIRule{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "foo",
@@ -25,23 +27,25 @@ func newAPIRule(opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
 	return apiRule
 }
 
-func withService(apiRule *apigatewayv1alpha1.APIRule) {
+func WithService(apiRule *apigatewayv1alpha1.APIRule) {
 	port := uint32(9999)
 	isExternal := true
 	host := "foo-host"
+	svcName := "foo-svc"
 	apiRule.Spec.Service = &apigatewayv1alpha1.Service{
+		Name:       &svcName,
 		Port:       &port,
 		Host:       &host,
 		IsExternal: &isExternal,
 	}
 }
 
-func withGateway(apiRule *apigatewayv1alpha1.APIRule) {
-	gateway := "foo-gateway"
+func WithGateway(apiRule *apigatewayv1alpha1.APIRule) {
+	gateway := controllers.ClusterLocalAPIGateway
 	apiRule.Spec.Gateway = &gateway
 }
 
-func withPath(apiRule *apigatewayv1alpha1.APIRule) {
+func WithPath(apiRule *apigatewayv1alpha1.APIRule) {
 	handlerOAuth := "oauth2_introspection"
 	handler := oryv1alpha1.Handler{
 		Name: handlerOAuth,
@@ -60,5 +64,40 @@ func withPath(apiRule *apigatewayv1alpha1.APIRule) {
 				authenticator,
 			},
 		},
+	}
+}
+
+func WithoutPath(apiRule *apigatewayv1alpha1.APIRule) {
+	handlerOAuth := "oauth2_introspection"
+	handler := oryv1alpha1.Handler{
+		Name: handlerOAuth,
+	}
+	authenticator := &oryv1alpha1.Authenticator{
+		Handler: &handler,
+	}
+	apiRule.Spec.Rules = []apigatewayv1alpha1.Rule{
+		{
+			Path: "/",
+			Methods: []string{
+				http.MethodPost,
+				http.MethodOptions,
+			},
+			AccessStrategies: []*oryv1alpha1.Authenticator{
+				authenticator,
+			},
+		},
+	}
+}
+
+func WithStatusReady(apiRule *apigatewayv1alpha1.APIRule) {
+	statusOK := &apigatewayv1alpha1.APIRuleResourceStatus{
+		Code:        apigatewayv1alpha1.StatusOK,
+		Description: "",
+	}
+
+	apiRule.Status = apigatewayv1alpha1.APIRuleStatus{
+		APIRuleStatus:        statusOK,
+		VirtualServiceStatus: statusOK,
+		AccessRuleStatus:     statusOK,
 	}
 }

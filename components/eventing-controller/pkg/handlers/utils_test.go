@@ -69,7 +69,7 @@ func Test_getInternalView4Ev2(t *testing.T) {
 		},
 	}
 
-	apiRule := newAPIRule(withPath, withService)
+	apiRule := NewAPIRule(WithPath, WithService)
 
 	defaultWebhookAuth := &types.WebhookAuth{}
 

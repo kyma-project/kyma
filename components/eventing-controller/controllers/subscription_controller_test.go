@@ -4,9 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"time"
+
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
+	"k8s.io/apimachinery/pkg/util/intstr"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
@@ -128,11 +137,36 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	When("Subscription changed", func() {
+	FWhen("Subscription changed", func() {
 		It("Should update the BEB subscription", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready"
 			ctx := context.Background()
-			givenSubscription := fixtureValidSubscription(subscriptionName, namespaceName)
+
+			oldSvc := NewSubscriberSvc("webhook-old", namespaceName)
+			ensureSubscriberSvcCreated(oldSvc, ctx)
+
+			newSvc := NewSubscriberSvc("webhook-new", namespaceName)
+			ensureSubscriberSvcCreated(newSvc, ctx)
+
+			apiRuleForOldSvc := handlers.NewAPIRule(handlers.WithoutPath, handlers.WithGateway, handlers.WithService, handlers.WithStatusReady)
+			apiRuleForOldSvc.Namespace = namespaceName
+			apiRuleForOldSvc.Labels = map[string]string{
+				ControllerServiceLabelKey:  oldSvc.Name,
+				ControllerIdentityLabelKey: ControllerIdentityLabelValue,
+			}
+			ensureAPIRuleCreated(apiRuleForOldSvc, ctx)
+
+			apiRuleForNewSvc := handlers.NewAPIRule(handlers.WithoutPath, handlers.WithGateway, handlers.WithService, handlers.WithStatusReady)
+			apiRuleForNewSvc.Namespace = namespaceName
+			apiRuleForNewSvc.Labels = map[string]string{
+				ControllerServiceLabelKey:  newSvc.Name,
+				ControllerIdentityLabelKey: ControllerIdentityLabelValue,
+			}
+			ensureAPIRuleCreated(apiRuleForNewSvc, ctx)
+
+			givenSubscription := NewSubscription(subscriptionName, namespaceName, WithFilter, WithWebhook)
+			WithValidSink(oldSvc.Namespace, oldSvc.Name, givenSubscription)
+
 			ensureSubscriptionCreated(givenSubscription, ctx)
 			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: namespaceName}
 
@@ -141,7 +175,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(subscription, subscriptionLookupKey, ctx).Should(testing.HaveSubscriptionReady())
 
 			By("Updating the sink")
-			subscription.Spec.Sink = "https://something.else.com"
+			subscription.Spec.Sink = fmt.Sprintf("http://%s.%s.svc.cluster.local", newSvc.Name, newSvc.Namespace)
 			updateSubscription(subscription, ctx).Should(testing.HaveSubscriptionReady())
 
 			By("Updating the BEB Subscription with the new sink")
@@ -160,7 +194,10 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		It("Should not mark the subscription as ready", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready"
 			ctx := context.Background()
-			givenSubscription := fixtureValidSubscription(subscriptionName, namespaceName)
+			svc := NewSubscriberSvc("webhook-old", namespaceName)
+			ensureSubscriberSvcCreated(svc, ctx)
+			givenSubscription := NewSubscription(subscriptionName, namespaceName, WithWebhook, WithFilter)
+			WithValidSink(svc.Name, svc.Namespace, givenSubscription)
 			var subscription = &eventingv1alpha1.Subscription{}
 
 			By("preparing mock to simulate creation of BEB subscription failing on BEB side")
@@ -201,7 +238,10 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		It("Should not mark the subscription as ready", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready"
 			ctx := context.Background()
-			givenSubscription := fixtureValidSubscription(subscriptionName, namespaceName)
+			svc := NewSubscriberSvc("webhook-old", namespaceName)
+			ensureSubscriberSvcCreated(svc, ctx)
+			givenSubscription := NewSubscription(subscriptionName, namespaceName, WithWebhook, WithFilter)
+			WithValidSink(svc.Name, svc.Namespace, givenSubscription)
 			var subscription = &eventingv1alpha1.Subscription{}
 			isBebSubscriptionCreated := false
 
@@ -249,14 +289,14 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	FWhen("Deleting a valid Subscription", func() {
+	When("Deleting a valid Subscription", func() {
 		It("Should reconcile the Subscription", func() {
 
 			subscriptionName := "test-delete-valid-subscription-1"
 			ctx := context.Background()
 			givenSubscription := fixtureValidSubscription(subscriptionName, namespaceName)
 			processedBebRequests := 0
-			svc := newSubscriberSvc("webhook", namespaceName)
+			svc := NewSubscriberSvc("webhook", namespaceName)
 			var subscription = &eventingv1alpha1.Subscription{}
 			ensureSubscriberSvcCreated(svc, ctx)
 			ensureSubscriptionCreated(givenSubscription, ctx)
@@ -392,6 +432,27 @@ func getK8sEvents(eventList *v1.EventList, namespace string) AsyncAssertion {
 	})
 }
 
+// ensureAPIRuleCreated creates an APIRule with status READY
+func ensureAPIRuleCreated(apiRule *apigatewayv1alpha1.APIRule, ctx context.Context) {
+	By(fmt.Sprintf("Ensuring the test namespace %q is created", apiRule.Namespace))
+	if apiRule.Namespace != "default " {
+		// create testing namespace
+		namespace := fixtureNamespace(apiRule.Namespace)
+		if namespace.Name != "default" {
+			err := k8sClient.Create(ctx, namespace)
+			if !k8serrors.IsAlreadyExists(err) {
+				fmt.Println(err)
+				Expect(err).ShouldNot(HaveOccurred())
+			}
+		}
+	}
+
+	By(fmt.Sprintf("Ensuring the APIRule %q is created", apiRule.Name))
+	// create subscription
+	err := k8sClient.Create(ctx, apiRule)
+	Expect(err).Should(BeNil())
+}
+
 // ensureSubscriptionCreated creates a Subscription in the k8s cluster. If a custom namespace is used, it will be created as well.
 func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx context.Context) {
 
@@ -401,8 +462,10 @@ func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx 
 		namespace := fixtureNamespace(subscription.Namespace)
 		if namespace.Name != "default" {
 			err := k8sClient.Create(ctx, namespace)
-			fmt.Println(err)
-			Expect(err).ShouldNot(HaveOccurred())
+			if !k8serrors.IsAlreadyExists(err) {
+				fmt.Println(err)
+				Expect(err).ShouldNot(HaveOccurred())
+			}
 		}
 	}
 
@@ -421,8 +484,10 @@ func ensureSubscriberSvcCreated(svc *corev1.Service, ctx context.Context) {
 		namespace := fixtureNamespace(svc.Namespace)
 		if namespace.Name != "default" {
 			err := k8sClient.Create(ctx, namespace)
-			fmt.Println(err)
-			Expect(err).ShouldNot(HaveOccurred())
+			if !k8serrors.IsAlreadyExists(err) {
+				fmt.Println(err)
+				Expect(err).ShouldNot(HaveOccurred())
+			}
 		}
 	}
 
@@ -464,30 +529,93 @@ func ensureSubscriptionCreationFails(subscription *eventingv1alpha1.Subscription
 	)
 }
 
-func newSubscriberSvc(name, ns string) *corev1.Service {
+func NewSubscriberSvc(name, ns string) *corev1.Service {
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: ns,
 		},
 		Spec: corev1.ServiceSpec{
-			Ports:                    9999,
-			Selector:                 nil,
-			ClusterIP:                "",
-			Type:                     "",
-			ExternalIPs:              nil,
-			SessionAffinity:          "",
-			LoadBalancerIP:           "",
-			LoadBalancerSourceRanges: nil,
-			ExternalName:             "",
-			ExternalTrafficPolicy:    "",
-			HealthCheckNodePort:      0,
-			PublishNotReadyAddresses: false,
-			SessionAffinityConfig:    nil,
-			IPFamily:                 nil,
-			TopologyKeys:             nil,
+			Ports: []corev1.ServicePort{
+				{
+					Protocol: "TCP",
+					Port:     80,
+					TargetPort: intstr.IntOrString{
+						IntVal: 8080,
+					},
+				},
+			},
+			Selector: map[string]string{
+				"test": "test",
+			},
 		},
 	}
+}
+
+type subOpt func(subscription *eventingv1alpha1.Subscription)
+
+func NewSubscription(name, ns string, opts ...subOpt) *eventingv1alpha1.Subscription {
+	newSub := &eventingv1alpha1.Subscription{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: ns,
+		},
+		Spec: eventingv1alpha1.SubscriptionSpec{},
+	}
+	for _, o := range opts {
+		o(newSub)
+	}
+	return newSub
+}
+
+func WithoutWebhook(s *eventingv1alpha1.Subscription) {
+	s.Spec.Protocol = "BEB"
+	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
+		ContentMode:     eventingv1alpha1.ProtocolSettingsContentModeBinary,
+		ExemptHandshake: true,
+		Qos:             "AT-LEAST_ONCE",
+	}
+}
+
+func WithWebhook(s *eventingv1alpha1.Subscription) {
+	s.Spec.Protocol = "BEB"
+	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
+		ContentMode:     eventingv1alpha1.ProtocolSettingsContentModeBinary,
+		ExemptHandshake: true,
+		Qos:             "AT-LEAST_ONCE",
+		WebhookAuth: &eventingv1alpha1.WebhookAuth{
+			Type:         "oauth2",
+			GrantType:    "client_credentials",
+			ClientId:     "xxx",
+			ClientSecret: "xxx",
+			TokenUrl:     "https://oauth2.xxx.com/oauth2/token",
+			Scope:        []string{"guid-identifier"},
+		},
+	}
+}
+
+func WithFilter(s *eventingv1alpha1.Subscription) {
+	s.Spec.Filter = &eventingv1alpha1.BebFilters{
+		Dialect: "beb",
+		Filters: []*eventingv1alpha1.BebFilter{
+			{
+				EventSource: &eventingv1alpha1.Filter{
+					Type:     "exact",
+					Property: "source",
+					Value:    "/default/kyma/myinstance",
+				},
+				EventType: &eventingv1alpha1.Filter{
+					Type:     "exact",
+					Property: "type",
+					Value:    "kyma.ev2.poc.event1.v1",
+				},
+			},
+		},
+	}
+}
+
+func WithValidSink(svcNs, svcName string, s *eventingv1alpha1.Subscription) {
+	s.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, svcNs)
 }
 
 // fixtureValidSubscription returns a valid subscription
@@ -561,7 +689,11 @@ func printSubscriptions(namespace string) error {
 		logf.Log.V(1).Info("error while getting subscription list", "error", err)
 		return err
 	}
-	fmt.Printf("subscriptions: %+v\n", subscriptionList)
+	subscriptions := make([]string, 0)
+	for _, sub := range subscriptionList.Items {
+		subscriptions = append(subscriptions, sub.Name)
+	}
+	log.Printf("subscriptions: %v", subscriptions)
 	return nil
 }
 

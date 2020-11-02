@@ -24,13 +24,15 @@ import (
 )
 
 const (
-	UrlAuth         = "/auth"
-	UrlMessagingApi = "/messaging"
+	TokenURLPath     = "/auth"
+	MessagingURLPath = "/messaging"
 )
 
 // BebMock implements a programmable mock for BEB
 type BebMock struct {
 	Requests       map[*http.Request]interface{}
+	TokenURL       string
+	MessagingURL   string
 	BebConfig      *config.Config
 	log            logr.Logger
 	AuthResponse   response
@@ -43,8 +45,7 @@ type BebMock struct {
 func NewBebMock(bebConfig *config.Config) *BebMock {
 	logger := logf.Log.WithName("beb mock")
 	return &BebMock{
-		nil,
-		bebConfig,
+		nil, "", "", bebConfig,
 		logger,
 		nil, nil, nil, nil, nil,
 	}
@@ -86,7 +87,7 @@ func (m *BebMock) Start() string {
 		w.Header().Set("Content-Type", "application/json")
 
 		// oauth2 request
-		if r.Method == "POST" && r.RequestURI == UrlAuth {
+		if r.Method == http.MethodPost && r.RequestURI == TokenURLPath {
 			if m.AuthResponse != nil {
 				m.AuthResponse(w)
 			} else {
@@ -95,7 +96,7 @@ func (m *BebMock) Start() string {
 			return
 		}
 		// messaging API request
-		if strings.HasPrefix(r.RequestURI, UrlMessagingApi) {
+		if strings.HasPrefix(r.RequestURI, MessagingURLPath) {
 			switch r.Method {
 			case http.MethodDelete:
 				if m.DeleteResponse != nil {
@@ -207,7 +208,7 @@ func IsBebSubscriptionCreate(r *http.Request, bebConfig config.Config) bool {
 
 // IsBebSubscriptionCreate determines if the http request is deleting a BEB subscription.
 func IsBebSubscriptionDelete(r *http.Request) bool {
-	return r.Method == http.MethodDelete && strings.Contains(r.RequestURI, UrlMessagingApi)
+	return r.Method == http.MethodDelete && strings.Contains(r.RequestURI, MessagingURLPath)
 }
 
 // GetRestAPIObject gets the name of the involved object in a REST url
