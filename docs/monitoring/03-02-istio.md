@@ -1,14 +1,14 @@
 ---
-title: Istio Monitoring
+title: Istio monitoring
 type: Details
 ---
 
-The monitoring chart is pre-configured to collect all metrics relevant for observing the in-cluster [Istio](https://istio.io/latest/docs/concepts/observability/) service mesh, including the proxy-level, service-level and control-plane metrics.
+The monitoring chart is pre-configured to collect all metrics relevant for observing the in-cluster [Istio](https://istio.io/latest/docs/concepts/observability/) Service Mesh, including the proxy-level, service-level, and control-plane metrics.
 
-The concept for collecting the [service-level](https://istio.io/latest/docs/concepts/observability/#service-level-metrics) metrics is build around the Istio Proxy (implemented by Envoy), which is counting decentralized all communication inside the service mesh. After scraping these high cardinality metrics from the envoys, still an aggregation on service level is required to get the final service related metrics.
+The concept of collecting the [service-level](https://istio.io/latest/docs/concepts/observability/#service-level-metrics) metrics is built around the Istio Proxy implemented by Envoy. Istio Proxy collects all communication details inside the service mesh in a decentralized way. After scraping these high cardinality metrics from the envoys, the metrics need to be additionally aggregated on a service level to get the final service-related details.
 
-Following the [Istio Observability Best Practice](https://istio.io/latest/docs/ops/best-practices/observability/) the scraping and aggregating of the service-level metrics is done in a dedicated prometheus instance. That instance has the smallest possible data retention time configured as the raw metrics being scraped from the Istio Proxies have a high cardinality and are not further required to be kept. Instead, the aggregated metrics will be then scraped by the main prometheus instance via the federate endpoint.
+Following the [Istio's observability best practice](https://istio.io/latest/docs/ops/best-practices/observability/), the scraping and aggregation of the service-level metrics is done in a dedicated Prometheus instance. That instance has the smallest possible data retention time configured as the raw metrics scraped from the Istio Proxies have high cardinality and are not further required to be kept. Instead, the main Prometheus instance scrapes the aggregated metrics through the `/federate` endpoint.
 
-The istop-related instance is a Deployment with name 'monitoring-prometheus-istio-server'. It has a small data retention time which should not be changed, no PersistentVolume attached and it has a hardcoded configuration. Resources like a ServiceMonitor will never be picked up by that instance.
+The Istio-related instance is a Deployment named `monitoring-prometheus-istio-server`. This instance has a short data retention time and hardcoded configuration that should not be changed. It also has no PersistentVolume attached. This instance never discovers additional metric endpoints from such resources as ServiceMonitors.
 
 ![Istio Monitoring](./assets/monitoring-istio.svg)
