@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/kyma-project/kyma/components/binding/internal/controller"
 	"github.com/kyma-project/kyma/components/binding/internal/storage"
+	"github.com/kyma-project/kyma/components/binding/internal/target"
 	"github.com/kyma-project/kyma/components/binding/internal/webhook/binding"
 	"github.com/kyma-project/kyma/components/binding/internal/webhook/pod"
 	bindingsv1alpha1 "github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
@@ -65,11 +66,15 @@ func main() {
 	dc, err := dynamic.NewForConfig(ctrl.GetConfigOrDie())
 	fatalOnError(err, "while creating dynamic client")
 
-	bindingReconciler := controller.SetupBindingReconciler(mgr.GetClient(), targetKindStorage, logger, mgr.GetScheme())
-	fatalOnError(bindingReconciler.SetupWithManager(mgr), "while creating BindingReconciler")
+	targetKindManager := target.NewHandler(dc, targetKindStorage)
 
 	targetKindReconciler := controller.SetupTargetKindReconciler(mgr.GetClient(), dc, logger, targetKindStorage, mgr.GetScheme())
 	fatalOnError(targetKindReconciler.SetupWithManager(mgr), "while creating TargetKindReconciler")
+
+	//TODO: wait for all TargetKind to be synced and registered
+
+	bindingReconciler := controller.SetupBindingReconciler(mgr.GetClient(), targetKindManager, logger, mgr.GetScheme())
+	fatalOnError(bindingReconciler.SetupWithManager(mgr), "while creating BindingReconciler")
 
 	fatalOnError(mgr.Start(ctrl.SetupSignalHandler()), "unable to run the manager")
 }

@@ -15,7 +15,6 @@ type TargetKindSpec struct {
 	DisplayName string    `json:"displayName"`
 	Resource    *Resource `json:"resource"`
 	LabelsPath  string    `json:"labelsPath"`
-	Registered bool       `json:"registered"`
 }
 
 type Resource struct {
@@ -28,6 +27,7 @@ type Resource struct {
 type TargetKindStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Registered bool       `json:"registered"`
 }
 
 // +kubebuilder:object:root=true

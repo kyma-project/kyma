@@ -47,10 +47,11 @@ spec:
                   type: object
                 labelsPath:
                   type: string
-                registered:
-                  type: boolean
               type: object
             status:
+              properties:
+                registered:
+                  type: boolean
               description: TargetKindStatus defines the observed state of TargetKind
               type: object
           type: object
