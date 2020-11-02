@@ -9,8 +9,9 @@ This guide describes how to update Kyma deployed locally or on a cluster.
 
 ## Prerequisites
 
+- [Kyma CLI]((https://github.com/kyma-project/cli))
 - [Docker](https://www.docker.com/)
-- Access to a Docker Registry - only for cluster installation
+- Access to a Docker Registry - only for cluster update
 
 ## Overview
 
@@ -25,7 +26,6 @@ Update of an existing deployment can include:
 The update procedure consists of three main steps:
 
 - Prepare the update
-- Update the Kyma Installer
 - Trigger the update process
 
 In case of dependency conflicts or major changes between components versions, some updates may not be possible.
@@ -36,67 +36,55 @@ In case of dependency conflicts or major changes between components versions, so
 
 - If you update an existing component, make all required changes to the Helm charts of the component located in the [`resources`](https://github.com/kyma-project/kyma/tree/master/resources) directory.
 
-- If you add a new component to your Kyma deployment, add a top-level Helm chart for that component. Additionally, run this command to edit the [Installation custom resource](#custom-resource-installation) and add the new component to the installed components list:
+- If you add a new component to your Kyma deployment, add a top-level Helm chart for that component. Additionally, download the current [Installation custom resource](#custom-resource-installation) from the cluster and add the new component to the components list:
 
    ```bash
-   kubectl -n default edit installation kyma-installation
+   kubectl -n default get installation kyma-installation -o yaml > installation.yaml
    ```
 
-- If you introduced changes in overrides, update the existing ConfigMaps and Secrets. Add new ConfigMaps and Secrets if required. See the [configuration document](#configuration-helm-overrides-for-kyma-installation) for more information on overrides.
+- If you introduce changes in the overrides, create a file with your changes as ConfigMaps or Secrets. See the [configuration document](#configuration-helm-overrides-for-kyma-installation) for more information on overrides.
 
 ## Perform the update
 
-If your changes involve any modifications in the `/resources` folder that includes component chart configurations, perform the whole update process that includes updating the Kyma Installer and triggering the update. If you only modify installation artifacts, for example by adding or removing components in the installation files or adding or removing overrides in the configuration files, only trigger the update process.
+If your changes involve any modifications in the `/resources` folder that includes component chart configurations, perform the steps under the **Update with resources modifications** tab. If you only modify installation artifacts, for example by adding or removing components in the installation files or adding or removing overrides in the configuration files, perform the steps under the **Update without resources modifications** tab.
 
 Read about each update step in the following sections.
 
-### Update the Kyma Installer on a local deployment
+<div tabs name="perform-the-update">
+   <details>
+   <summary label="update-with-resources-modifications">
+   Update with resources modifications
+   </summary>
 
-1. Build a new image for the Kyma Installer:
+   1. Check which version you're currently running. Run this command:
 
-   ```bash
-   ./installation/scripts/build-kyma-installer.sh
-   ```
+      ```bash
+      kyma version
+      ```
 
-   > **NOTE:** If you started Kyma with the `run.sh` script with a `--vm-driver {value}` parameter, provide the same parameter to the `build-kyma-installer.sh` script.
+   2. Provide the same version of the current cluster to the upgrade command. Provide also an image name and a tag so that Kyma CLI will build a Docker image with your local changes and push it to the registry. It will also trigger the update process. If you have changes for the overrides or the components list, you can also pass them using the `-o` and `-c` flags.
 
-2. Restart the Kyma Installer Pod:
+      ```bash
+      kyma upgrade -s local --custom-image {IMAGE_NAME}:{IMAGE_TAG}
+      ```
 
-   ```bash
-   kubectl delete pod -n kyma-installer {INSTALLER_POD_NAME}
-   ```
+   </details>
+   <details>
+   <summary label="update-without-resources-modifications">
+   Update without resources modifications
+   </summary>
 
-### Update the Kyma Installer on a cluster deployment
+   1. Check which version you're currently running. Run this command:
 
-1. Build a new image for the Kyma Installer:
+      ```bash
+      kyma version
+      ```
 
-   ```bash
-   docker build -t {IMAGE_NAME}:{IMAGE_TAG} -f tools/kyma-installer/kyma.Dockerfile .
-   ```
+   2. Provide the same version of the current cluster to the upgrade command. Pass the path of the overrides file using the `-o` flag and/or the path of the installation file using the `-c` flag:
 
-2. Push the image to your Docker registry.
+      ```bash
+      kyma upgrade -s {VERSION} -o {OVERRIDES_FILE_PATH} -c {INSTALLATION_FILE_PATH}
+      ```
 
-3. Redeploy the Kyma Installer Pod using the new image. Run this command to edit the Deployment configuration:
-
-   ```bash
-   kubectl edit deployment kyma-installer -n kyma-installer
-   ```
-
-   Change the `image` and `imagePullPolicy` attributes in this section:
-
-   ```bash
-   spec:
-      containers:
-      - image: <your_image_name>:<your_tag>
-         imagePullPolicy: Always
-   ```
-
-   > **NOTE:** If the desired image name and `imagePullPolicy` is already set in the deployment configuration, restart the Pod by running `kubectl delete pod -n kyma-installer {INSTALLER_POD_NAME}`.
-
-### Trigger the update process
-
-Execute the following command to trigger the update process:
-
-```bash
-kubectl -n default label installation/kyma-installation action=install
-```
+   </details>
+</div>

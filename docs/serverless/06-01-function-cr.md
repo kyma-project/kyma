@@ -18,6 +18,7 @@ apiVersion: serverless.kyma-project.io/v1alpha1
 kind: Function
 metadata:
   name: my-test-function
+  namespace: default
 spec:
   env:
     - name: PERSON_NAME
@@ -43,6 +44,13 @@ spec:
     requests:
       cpu: 500m
       memory: 500Mi
+  buildResources:
+    limits:
+      cpu: 2
+      memory: 2Gi
+    requests:
+      cpu: 1
+      memory: 1Gi
   source: |
     module.exports = {
       main: function(event, context) {
@@ -82,7 +90,7 @@ spec:
   source: auth-basic
   baseDir: "/"
   reference: "branchA"
-  runtime: "nodejs-12"
+  runtime: "nodejs12"
 ```
 
 ## Custom resource parameters
@@ -102,6 +110,10 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.resources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Function's Pod to use.      |
 | **spec.resources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the Function's Pod to operate.       |
 | **spec.resources.requests.memory**       |       No       | Specifies the amount of memory requested by the Function's Pod to operate.               |
+| **spec.buildResources.limits.cpu**            |       No       | Defines the maximum number of CPUs available to use for the Kubernetes Job's Pod responsible for building the Function's image.      |
+| **spec.buildResources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Job's Pod to use.      |
+| **spec.buildResources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the build Job's Pod to operate.       |
+| **spec.buildResources.requests.memory**       |       No       | Specifies the amount of memory requested by the build Job's Pod to operate.               |
 | **spec.runtime**                         |       No       | Specifies the runtime of the Function. The available values are `nodejs12`, `nodejs10`, and `python38`. It is set to `nodejs12` unless specified otherwise.  |
 | **spec.type**                          |      No       | Defines that you use a Git repository as the source of Function's code and dependencies. It must be set to `git`. |
 | **spec.source**                          |      Yes       | Provides the Function's full source code or the name of the Git directory in which the code and dependencies are stored.     |

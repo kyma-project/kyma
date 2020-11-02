@@ -23,7 +23,7 @@ import (
 	sourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client"
 	httpsourceinformersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/httpsource"
 	istioclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/client"
-	policyinformersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/informers/authentication/v1alpha1/policy"
+	peerauthenticationinformersv1beta1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/informers/security/v1beta1/peerauthentication"
 )
 
 const (
@@ -49,21 +49,21 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	httpSourceInformer := httpsourceinformersv1alpha1.Get(ctx)
 	deploymentInformer := deploymentinformer.Get(ctx)
 	chInformer := messaginginformersv1alpha1.Get(ctx)
-	policyInformer := policyinformersv1alpha1.Get(ctx)
 	serviceInformer := serviceinformer.Get(ctx)
+	peerAuthenticationInformer := peerauthenticationinformersv1beta1.Get(ctx)
 
 	rb := reconciler.NewBase(ctx, controllerAgentName, cmw)
 	r := &Reconciler{
-		Base:             rb,
-		adapterEnvCfg:    adapterEnvCfg,
-		httpsourceLister: httpSourceInformer.Lister(),
-		deploymentLister: deploymentInformer.Lister(),
-		chLister:         chInformer.Lister(),
-		policyLister:     policyInformer.Lister(),
-		serviceLister:    serviceInformer.Lister(),
-		sourcesClient:    sourcesclient.Get(ctx).SourcesV1alpha1(),
-		messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
-		authClient:       istioclient.Get(ctx).AuthenticationV1alpha1(),
+		Base:                     rb,
+		adapterEnvCfg:            adapterEnvCfg,
+		httpsourceLister:         httpSourceInformer.Lister(),
+		deploymentLister:         deploymentInformer.Lister(),
+		chLister:                 chInformer.Lister(),
+		peerAuthenticationLister: peerAuthenticationInformer.Lister(),
+		serviceLister:            serviceInformer.Lister(),
+		sourcesClient:            sourcesclient.Get(ctx).SourcesV1alpha1(),
+		messagingClient:          rb.EventingClientSet.MessagingV1alpha1(),
+		securityClient:           istioclient.Get(ctx).SecurityV1beta1(),
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 
@@ -78,13 +78,17 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		Handler:    controller.HandleAll(impl.EnqueueControllerOf),
 	}
 
+	// for the deployment of the adapter
 	deploymentInformer.Informer().AddEventHandler(eventHandler)
-	chInformer.Informer().AddEventHandler(eventHandler)
-	policyInformer.Informer().AddEventHandler(eventHandler)
 	serviceInformer.Informer().AddEventHandler(eventHandler)
 
-	// watch for changes to metrics/logging configs
+	// the eventing channel
+	chInformer.Informer().AddEventHandler(eventHandler)
 
+	// istio
+	peerAuthenticationInformer.Informer().AddEventHandler(eventHandler)
+
+	// watch for changes to metrics/logging configs
 	cmw.Watch(metrics.ConfigMapName(), r.updateAdapterMetricsConfig)
 	cmw.Watch(logging.ConfigMapName(), r.updateAdapterLoggingConfig)
 

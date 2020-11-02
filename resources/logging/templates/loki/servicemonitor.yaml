@@ -16,7 +16,6 @@ spec:
     matchLabels:
       app: {{ template "loki.name" . }}
       release: {{ .Release.Name | quote }}
-      variant: headless
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace | quote }}
@@ -28,5 +27,9 @@ spec:
     {{- if .Values.loki.serviceMonitor.scrapeTimeout }}
     scrapeTimeout: {{ .Values.loki.serviceMonitor.scrapeTimeout }}
     {{- end }}
+    metricRelabelings:
+      - sourceLabels: [ __name__ ]
+        regex: ^(loki_.*|log_.*|promhttp_.*|querier_.*|go_.*|process_.*)$
+        action: keep
 {{- end }}
 {{- end }}

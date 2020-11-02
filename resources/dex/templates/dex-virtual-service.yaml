@@ -25,5 +25,5 @@ spec:
           add:
             "Vary": "Origin"
     corsPolicy:
-      allowOrigin:
-      - "*"
+      allowOrigins:
+      - regex: ".*"

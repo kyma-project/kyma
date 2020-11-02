@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -168,4 +170,42 @@ func (gs *GitServer) Delete() error {
 	errDeployment := gs.deployments.Delete(gs.name, &metav1.DeleteOptions{})
 	err := multierror.Append(errDeployment, errService, errDestRule)
 	return err.ErrorOrNil()
+}
+
+func (gs *GitServer) LogResource() error {
+	obj, err := gs.resCli.Get(gs.name)
+	if err != nil {
+		return errors.Wrap(err, "while getting destination rule")
+	}
+	out, err := helpers.PrettyMarshall(obj)
+	if err != nil {
+		return errors.Wrap(err, "while marshalling APU Rule")
+	}
+	gs.log.Info(out)
+
+	svc, err := gs.services.Get(gs.name, metav1.GetOptions{})
+	if err != nil {
+		return errors.Wrap(err, "while getting service")
+	}
+	//The client doesn't fill service TypeMeta
+	svc.TypeMeta.Kind = "service"
+	out, err = helpers.PrettyMarshall(svc)
+	if err != nil {
+		return errors.Wrap(err, "while marshalling service")
+	}
+	gs.log.Info(out)
+
+	deployment, err := gs.deployments.Get(gs.name, metav1.GetOptions{})
+	if err != nil {
+		return errors.Wrap(err, "while getting deployment")
+	}
+	//The client doesn't fill deployment TypeMeta
+	deployment.TypeMeta.Kind = "deployment"
+	out, err = helpers.PrettyMarshall(deployment)
+	if err != nil {
+		return errors.Wrap(err, "while marshalling deployment")
+	}
+	gs.log.Info(out)
+
+	return nil
 }

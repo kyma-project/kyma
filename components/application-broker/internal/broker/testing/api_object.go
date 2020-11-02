@@ -5,8 +5,11 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	istioauthenticationalpha1 "istio.io/api/authentication/v1alpha1"
-	istiov1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
+
+	securityv1beta1apis "istio.io/api/security/v1beta1"
+	istiov1beta1apis "istio.io/api/type/v1beta1"
+	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
@@ -18,12 +21,6 @@ import (
 const (
 	FakeChannelName      = "fake-chan"
 	FakeSubscriptionName = "fake-sub"
-	// brokerTargetSelectorName used for targeting the default-broker svc while creating an istio policy
-	brokerTargetSelectorName = "default-broker"
-	// filterTargetSelectorName used for targeting the default-broker-filter svc while creating an istio policy
-	filterTargetSelectorName = "default-broker-filter"
-
-	istioMtlsPermissiveMode = 1
 )
 
 // redefine here to avoid cyclic dependency
@@ -110,34 +107,26 @@ func NewDefaultBroker(ns string) *eventingv1alpha1.Broker {
 	}
 }
 
-func NewIstioPolicy(ns, policyName string) *istiov1alpha1.Policy {
+func NewIstioPeerAuthentication(ns, peerAuthName string) *securityv1beta1.PeerAuthentication {
 	labels := make(map[string]string)
 	labels["eventing.knative.dev/broker"] = "default"
-
-	brokerTargetSelector := &istioauthenticationalpha1.TargetSelector{
-		Name: brokerTargetSelectorName,
-	}
-	filterTargetSelector := &istioauthenticationalpha1.TargetSelector{
-		Name: filterTargetSelectorName,
-	}
-	mtls := &istioauthenticationalpha1.MutualTls{
-		Mode: istioMtlsPermissiveMode,
-	}
-	peerAuthenticationMethod := &istioauthenticationalpha1.PeerAuthenticationMethod{
-		Params: &istioauthenticationalpha1.PeerAuthenticationMethod_Mtls{
-			Mtls: mtls,
+	port := uint32(9090)
+	portLevelMtls := map[uint32]*securityv1beta1apis.PeerAuthentication_MutualTLS{
+		port: {
+			Mode: securityv1beta1apis.PeerAuthentication_MutualTLS_PERMISSIVE,
 		},
 	}
-
-	return &istiov1alpha1.Policy{
+	return &securityv1beta1.PeerAuthentication{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      policyName,
+			Name:      peerAuthName,
 			Namespace: ns,
 			Labels:    labels,
 		},
-		Spec: istioauthenticationalpha1.Policy{
-			Targets: []*istioauthenticationalpha1.TargetSelector{brokerTargetSelector, filterTargetSelector},
-			Peers:   []*istioauthenticationalpha1.PeerAuthenticationMethod{peerAuthenticationMethod},
+		Spec: securityv1beta1apis.PeerAuthentication{
+			Selector: &istiov1beta1apis.WorkloadSelector{
+				MatchLabels: labels,
+			},
+			PortLevelMtls: portLevelMtls,
 		},
 	}
 }

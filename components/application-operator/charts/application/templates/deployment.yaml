@@ -57,6 +57,9 @@ spec:
             port: {{ .Values.deployment.args.externalAPIPort }}
           initialDelaySeconds: 10
           periodSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
         ports:
           - containerPort: {{ .Values.deployment.args.proxyPort }}
             name: proxy-port

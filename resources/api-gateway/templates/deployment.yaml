@@ -4,6 +4,7 @@ kind: Deployment
 metadata:
   name: {{ include "api-gateway.fullname" . }}
   labels:
+    kyma-project.io/component: controller
 {{ include "api-gateway.labels" . | indent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
@@ -17,6 +18,7 @@ spec:
     metadata:
       labels:
         control-plane: controller-manager
+        kyma-project.io/component: controller
 {{ include "api-gateway.labels" . | indent 8 }}
       {{- with .Values.config.annotations }}
       annotations:
@@ -38,9 +40,7 @@ spec:
             - --generated-objects-labels={{ .Values.config.generatedObjects.labels }}
             - --domain-whitelist={{ include "api-gateway.domainWhiteList" . }}
             - --default-domain-name={{ include "api-gateway.defaultDomain" . }}
-            {{- with .Values.config.cors.allowOrigin }}
-            - --cors-allow-origin={{ . | join ", " }}
-            {{- end }}
+            - --cors-allow-origins={{ include "api-gateway.cors.allowOrigins" . | trimAll "," }}
             {{- with .Values.config.cors.allowMethods }}
             - --cors-allow-methods={{ . | join ", " }}
             {{- end }}

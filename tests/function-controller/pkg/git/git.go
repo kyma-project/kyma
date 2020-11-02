@@ -28,6 +28,15 @@ func (c Client) TryCloning() error {
 	return err
 }
 
+func (c Client) PullRemote(filePath string) (string, error) {
+	_, fs, err := c.cloneToMemory()
+	if err != nil {
+		return "", errors.Wrap(err, "while cloning repository")
+	}
+
+	return c.readFileContent(fs, filePath)
+}
+
 func (c Client) ReplaceInRemoteFile(filePath, oldValue, newValue string) error {
 	r, fs, err := c.cloneToMemory()
 	if err != nil {
@@ -38,7 +47,7 @@ func (c Client) ReplaceInRemoteFile(filePath, oldValue, newValue string) error {
 	if err != nil {
 		return err
 	}
-	newContent := strings.Replace(string(content), oldValue, newValue, -1)
+	newContent := strings.Replace(content, oldValue, newValue, -1)
 
 	err = c.replaceFileContent(fs, filePath, newContent)
 	if err != nil {
