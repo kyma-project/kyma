@@ -1,0 +1,34 @@
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: {{ template "fullname" . }}-build
+  labels:
+  {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+spec:
+  allowPrivilegeEscalation: false
+  privileged: false
+  fsGroup:
+    ranges:
+      - max: 65535
+        min: 1
+    rule: MustRunAs
+  readOnlyRootFilesystem: false
+  runAsUser:
+    rule: 'RunAsAny'
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    ranges:
+      - max: 65535
+        min: 1
+    rule: MustRunAs
+  hostIPC: false
+  hostPID: false
+  hostNetwork: false
+  volumes:
+    - persistentVolumeClaim
+    - secret
+    - emptyDir
+    - configMap
+    - projected
+    - downwardAPI

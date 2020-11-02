@@ -75,9 +75,9 @@ global:
 
 images:
   manager:
-    repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-9792"
-    pullPolicy: IfNotPresent
+    repository: "aerfio/function-controller"
+    tag: "latest"
+    pullPolicy: Always
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"

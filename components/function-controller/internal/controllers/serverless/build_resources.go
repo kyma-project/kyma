@@ -42,21 +42,24 @@ func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Functio
 }
 
 func jobContainerSecurityContext() *corev1.SecurityContext {
-	trueVal := true
+	// trueVal := true
+	falseVal := false
 	return &corev1.SecurityContext{
-		Privileged:             &trueVal,
-		ReadOnlyRootFilesystem: &trueVal,
+		Privileged:             &falseVal,
+		ReadOnlyRootFilesystem: &falseVal,
 	}
 }
 
-func podSecurityContext() *corev1.PodSecurityContext {
-	trueVal := true
-	userNum := int64(1000)
+func jobPodSecurityContext() *corev1.PodSecurityContext {
+	falseVal := false
+	userNum := int64(0)
+	groupNum := int64(1000)
+
 	return &corev1.PodSecurityContext{
 		RunAsUser:    &userNum,
-		RunAsGroup:   &userNum,
-		RunAsNonRoot: &trueVal,
-		FSGroup:      &userNum,
+		RunAsGroup:   &groupNum,
+		RunAsNonRoot: &falseVal,
+		FSGroup:      &groupNum,
 	}
 }
 
@@ -119,7 +122,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 							},
 						},
 					},
-					SecurityContext: podSecurityContext(),
+					SecurityContext: jobPodSecurityContext(),
 					Containers: []corev1.Container{
 						{
 							Name:      "executor",
@@ -285,7 +288,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 						},
 					},
-					SecurityContext: podSecurityContext(),
+					SecurityContext: jobPodSecurityContext(),
 					InitContainers: []corev1.Container{
 						{
 							Name:            "repo-fetcher",
@@ -338,6 +341,7 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 
 	falseVal := false
 	trueVal := true
+	userNum := int64(1000)
 
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -356,7 +360,12 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 					Labels: podLabels, // podLabels contains InternalFnLabels, so it's ok
 				},
 				Spec: corev1.PodSpec{
-					SecurityContext: podSecurityContext(),
+					SecurityContext: &corev1.PodSecurityContext{
+						RunAsUser:    &userNum,
+						RunAsGroup:   &userNum,
+						RunAsNonRoot: &trueVal,
+						FSGroup:      &userNum,
+					},
 					Containers: []corev1.Container{
 						{
 							Name:            functionContainerName,
