@@ -50,13 +50,13 @@ func (r *BindingReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		updatedBinding, err := r.worker.RemoveProcess(binding.DeepCopy(), r.log.WithField("Binding", req.NamespacedName))
 		if err != nil {
 			r.log.Errorf("cannot finish remove process for %s: %s", req.NamespacedName, err)
-			return ctrl.Result{Requeue: true, RequeueAfter: 1 * time.Second}, err
+			return ctrl.Result{RequeueAfter: 1 * time.Second}, err
 		}
 
 		err = r.client.Update(ctx, updatedBinding)
 		if err != nil {
 			r.log.Errorf("cannot update Binding resource %s: %s", req.NamespacedName, err)
-			return ctrl.Result{Requeue: true, RequeueAfter: 5 * time.Second}, err
+			return ctrl.Result{RequeueAfter: 5 * time.Second}, err
 		}
 
 		return ctrl.Result{}, nil
@@ -67,7 +67,7 @@ func (r *BindingReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	switch {
 	case bindErr.IsTemporaryError(err):
 		r.log.Errorf("Binding %s process failed with temporary error: %s", req.NamespacedName, err)
-		return ctrl.Result{Requeue: true, RequeueAfter: 3 * time.Second}, err
+		return ctrl.Result{RequeueAfter: 3 * time.Second}, err
 	case err != nil:
 		r.log.Errorf("Binding %s process failed: %s", req.NamespacedName, err)
 		return ctrl.Result{}, err
@@ -76,7 +76,7 @@ func (r *BindingReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	err = r.client.Update(ctx, updatedBinding)
 	if err != nil {
 		r.log.Errorf("cannot update Binding resource %s: %s", req.NamespacedName, err)
-		return ctrl.Result{Requeue: true, RequeueAfter: 5 * time.Second}, err
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, err
 	}
 
 	return ctrl.Result{}, nil
