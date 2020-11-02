@@ -115,6 +115,15 @@ func (r *APIRuleReconciler) syncAPIRuleSubscriptionsStatus(apiRule *apigatewayv1
 		}
 	}
 
+	// debug
+	items2 := &apigatewayv1alpha1.APIRuleList{}
+	err := r.Client.List(context.Background(), items2)
+	fmt.Println(err)
+
+	items1 := &eventingv1alpha1.SubscriptionList{}
+	err = r.Client.List(context.Background(), items1)
+	fmt.Println(err)
+
 	return ctrl.Result{}, nil
 }
 

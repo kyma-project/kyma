@@ -148,7 +148,12 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			newSvc := NewSubscriberSvc("webhook-new", namespaceName)
 			ensureSubscriberSvcCreated(newSvc, ctx)
 
-			apiRuleForOldSvc := handlers.NewAPIRule(handlers.WithoutPath, handlers.WithGateway, handlers.WithService, handlers.WithStatusReady)
+			// cheating
+			givenSubscription := NewSubscription(subscriptionName, namespaceName, WithFilter, WithWebhook)
+			WithValidSink(oldSvc.Namespace, oldSvc.Name, givenSubscription)
+			ensureSubscriptionCreated(givenSubscription, ctx)
+
+			apiRuleForOldSvc := handlers.NewAPIRule(givenSubscription, handlers.WithoutPath, handlers.WithGateway, handlers.WithService, handlers.WithStatusReady)
 			apiRuleForOldSvc.Namespace = namespaceName
 			apiRuleForOldSvc.Labels = map[string]string{
 				ControllerServiceLabelKey:  oldSvc.Name,
@@ -156,7 +161,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}
 			ensureAPIRuleCreated(apiRuleForOldSvc, ctx)
 
-			apiRuleForNewSvc := handlers.NewAPIRule(handlers.WithoutPath, handlers.WithGateway, handlers.WithService, handlers.WithStatusReady)
+			apiRuleForNewSvc := handlers.NewAPIRule(givenSubscription, handlers.WithoutPath, handlers.WithGateway, handlers.WithService, handlers.WithStatusReady)
 			apiRuleForNewSvc.Namespace = namespaceName
 			apiRuleForNewSvc.Labels = map[string]string{
 				ControllerServiceLabelKey:  newSvc.Name,
@@ -164,15 +169,12 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}
 			ensureAPIRuleCreated(apiRuleForNewSvc, ctx)
 
-			givenSubscription := NewSubscription(subscriptionName, namespaceName, WithFilter, WithWebhook)
-			WithValidSink(oldSvc.Namespace, oldSvc.Name, givenSubscription)
-
-			ensureSubscriptionCreated(givenSubscription, ctx)
 			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: namespaceName}
 
 			By("Given subscription is ready")
 			var subscription = &eventingv1alpha1.Subscription{}
 			getSubscription(subscription, subscriptionLookupKey, ctx).Should(testing.HaveSubscriptionReady())
+			//waitForSubscriptionReady(subscriptionLookupKey, ctx)
 
 			By("Updating the sink")
 			subscription.Spec.Sink = fmt.Sprintf("http://%s.%s.svc.cluster.local", newSvc.Name, newSvc.Namespace)
@@ -406,8 +408,18 @@ func getSubscription(subscription *eventingv1alpha1.Subscription, lookupKey type
 		if err := k8sClient.Get(ctx, lookupKey, subscription); err != nil {
 			return eventingv1alpha1.Subscription{}
 		}
+		fmt.Println(">>>", subscription.Status.Ready)
 		return *subscription
-	}, time.Second*10, time.Second)
+	}, time.Second*60, time.Second)
+}
+
+// TODO change the function name
+func getSubscription2(lookupKey types.NamespacedName, ctx context.Context) *eventingv1alpha1.Subscription {
+	subscription := &eventingv1alpha1.Subscription{}
+	if err := k8sClient.Get(ctx, lookupKey, subscription); err != nil {
+		return subscription
+	}
+	return nil
 }
 
 func updateSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Context) AsyncAssertion {
@@ -451,6 +463,12 @@ func ensureAPIRuleCreated(apiRule *apigatewayv1alpha1.APIRule, ctx context.Conte
 	// create subscription
 	err := k8sClient.Create(ctx, apiRule)
 	if !k8serrors.IsAlreadyExists(err) {
+		fmt.Println(err)
+		Expect(err).Should(BeNil())
+	}
+	// update status only once when APIRule creation succeeds
+	if err == nil {
+		err = k8sClient.Status().Update(ctx, apiRule)
 		fmt.Println(err)
 		Expect(err).Should(BeNil())
 	}

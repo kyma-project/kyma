@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"net/http"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,10 +13,18 @@ import (
 type APIRuleOption func(rule *apigatewayv1alpha1.APIRule)
 
 // NewAPIRule returns a valid APIRule
-func NewAPIRule(opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
+func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
 	apiRule := &apigatewayv1alpha1.APIRule{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "foo",
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion: "eventing.kyma-project.io/v1alpha1",
+					Kind:       "subscriptions",
+					Name:       subscription.Name,
+					UID:        subscription.UID,
+				},
+			},
 		},
 	}
 
@@ -26,7 +35,7 @@ func NewAPIRule(opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
 }
 
 func WithService(apiRule *apigatewayv1alpha1.APIRule) {
-	port := uint32(9999)
+	port := uint32(443)
 	isExternal := true
 	host := "foo-host"
 	svcName := "foo-svc"
