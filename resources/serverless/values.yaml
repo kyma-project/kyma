@@ -40,7 +40,7 @@ tests:
 
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-9580"
+    tag: "63266748"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -76,7 +76,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-9640"
+    tag: "55e5b31a"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
@@ -136,7 +136,7 @@ containers:
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v0.22.0
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:PR-9496
+        value: eu.gcr.io/kyma-project/function-build-init:a8a6bca9
 
 services:
   manager:

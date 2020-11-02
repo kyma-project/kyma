@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"os"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -29,7 +30,9 @@ func init() {
 
 func main() {
 	var metricsAddr string
+	var resyncPeriod time.Duration
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
+	flag.DurationVar(&resyncPeriod, "reconcile-period", time.Minute*10, "Period between triggering of reconciling calls")
 	flag.Parse()
 	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 
@@ -37,17 +40,18 @@ func main() {
 		Scheme:             scheme,
 		MetricsBindAddress: metricsAddr,
 		Port:               9443,
+		SyncPeriod:         &resyncPeriod,
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
-
-	if err = (&controllers.SubscriptionReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Subscription"),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+	if err = controllers.NewSubscriptionReconciler(
+		mgr.GetClient(),
+		ctrl.Log.WithName("controllers").WithName("Subscription"),
+		mgr.GetEventRecorderFor("subscription-controller"),
+		mgr.GetScheme(),
+	).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Subscription")
 		os.Exit(1)
 	}

@@ -1,0 +1,40 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ template "fullname" . }}-cr
+  namespace: {{ .Release.Namespace }}  
+rules:
+- apiGroups: ["bindings.kyma-project.io"]
+  resources: ["bindings", "targetkinds"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch", "update", "delete"]
+- apiGroups: [""]
+  resources: ["secrets", "configmaps"]
+  verbs: ["get", "list", "watch"]
+
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "fullname" . }}-sa
+  namespace: {{ .Release.Namespace }}
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ template "fullname" . }}-crb
+subjects:
+- kind: ServiceAccount
+  name: {{ template "fullname" . }}-sa
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "fullname" . }}-cr

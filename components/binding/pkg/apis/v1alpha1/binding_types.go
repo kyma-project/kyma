@@ -11,6 +11,10 @@ const (
 	BindingLabelKey = "bindings-kyma-project-io"
 )
 
+const (
+	BindingFinalizer string = "kyma-project-io/bindings"
+)
+
 type BindingPhase string
 
 const (
@@ -19,9 +23,16 @@ const (
 	BindingFailed  = "Failed"
 )
 
+type SourceKind string
+
+const (
+	SourceKindSecret    = "secret"
+	SourceKindConfigMap = "config-map"
+)
+
 type Source struct {
-	Kind string `json:"kind"`
-	Name string `json:"name"`
+	Kind SourceKind `json:"kind"`
+	Name string     `json:"name"`
 }
 
 type Target struct {

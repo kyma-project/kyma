@@ -9,6 +9,7 @@ COPY go.sum go.sum
 COPY main.go main.go
 COPY api/ api/
 COPY controllers/ controllers/
+COPY pkg/ pkg/
 
 # Build
 RUN GOOS=linux GO111MODULE=on go mod vendor && \
