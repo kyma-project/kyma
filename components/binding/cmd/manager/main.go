@@ -48,13 +48,13 @@ func main() {
 		Scheme:             scheme,
 		MetricsBindAddress: cfg.MetricsAddress,
 		Port:               cfg.Port,
-		CertDir:            "/var/run/binding-pod-webhook",
+		CertDir:            "/var/run/webhook",
 	})
 	fatalOnError(err, "while creating new manager")
 
 	mgr.GetWebhookServer().Register(
 		"/pod-mutating",
-		&k8sWebhook.Admission{Handler: pod.NewPodHandler(mgr.GetClient(), log.WithField("webhook", "pod-mutating"))})
+		&k8sWebhook.Admission{Handler: pod.NewMutationHandler(mgr.GetClient(), log.WithField("webhook", "pod-mutating"))})
 	mgr.GetWebhookServer().Register(
 		"/binding-mutating",
 		&k8sWebhook.Admission{Handler: binding.NewMutationHandler(log.WithField("webhook", "binding-mutating"))})

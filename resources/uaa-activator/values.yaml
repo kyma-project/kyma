@@ -10,7 +10,13 @@ global:
 image:
   registryPath: eu.gcr.io/kyma-project
   pullPolicy: IfNotPresent
-  version: "76a9d5d1"
+  version: "PR-9809"
+
+initJobs:
+  secret:
+    image:
+      registryPath: eu.gcr.io/kyma-project/incubator/develop
+      tag: "20201023-5de446cf"
 
 nameOverride: ""
 fullnameOverride: ""

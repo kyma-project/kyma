@@ -29,6 +29,6 @@ spec:
       {{- end }}
       metricRelabelings:
       - sourceLabels: [ __name__ ]
-        regex: ^(fluentbit_input_bytes_total|fluentbit_output_proc_bytes_total|fluentbit_output_errors_total|fluentbit_output_retries_total|fluentbit_output_retries_failed_total|process_start_time_seconds)$
+        regex: ^(fluentbit_.*|go_.*|process_.*)$
         action: keep
 {{- end }}

@@ -40,10 +40,9 @@ func (h *MutationHandler) Handle(ctx context.Context, req admission.Request) adm
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
-	mutated := binding.DeepCopy()
 	switch req.Operation {
 	case admissionTypes.Create:
-		if err := h.mutateOnCreate(ctx, mutated); err != nil {
+		if err := h.mutateOnCreate(ctx, binding); err != nil {
 			h.log.Errorf("cannot mutate Binding: %s", err)
 			return admission.Errored(http.StatusInternalServerError, err)
 		}
