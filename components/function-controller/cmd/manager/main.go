@@ -66,6 +66,8 @@ func main() {
 	configMapSvc := k8s.NewConfigMapService(resourceClient, config.Kubernetes)
 	secretSvc := k8s.NewSecretService(resourceClient, config.Kubernetes)
 	serviceAccountSvc := k8s.NewServiceAccountService(resourceClient, config.Kubernetes)
+	roleSvc := k8s.NewRoleService(resourceClient, config.Kubernetes)
+	roleBindingSvc := k8s.NewRoleBindingService(resourceClient, config.Kubernetes)
 
 	if err := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, mgr.GetEventRecorderFor("function-controller")).
 		SetupWithManager(mgr); err != nil {
@@ -94,6 +96,18 @@ func main() {
 	if err := k8s.NewServiceAccount(mgr.GetClient(), ctrl.Log, config.Kubernetes, serviceAccountSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create ServiceAccount controller")
+		os.Exit(1)
+	}
+
+	if err := k8s.NewRole(mgr.GetClient(), ctrl.Log, config.Kubernetes, roleSvc).
+		SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create Role controller")
+		os.Exit(1)
+	}
+
+	if err := k8s.NewRoleBinding(mgr.GetClient(), ctrl.Log, config.Kubernetes, roleBindingSvc).
+		SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create RoleBinding controller")
 		os.Exit(1)
 	}
 

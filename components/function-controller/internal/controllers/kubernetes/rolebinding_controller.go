@@ -4,55 +4,55 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
-	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
-type ConfigMapReconciler struct {
+type RoleBindingReconciler struct {
 	Log    logr.Logger
 	client client.Client
 	config Config
-	svc    ConfigMapService
+	svc    RoleBindingService
 }
 
-func NewConfigMap(client client.Client, log logr.Logger, config Config, service ConfigMapService) *ConfigMapReconciler {
-	return &ConfigMapReconciler{
+func NewRoleBinding(client client.Client, log logr.Logger, config Config, service RoleBindingService) *RoleBindingReconciler {
+	return &RoleBindingReconciler{
 		client: client,
-		Log:    log.WithName("controllers").WithName("configmap"),
+		Log:    log.WithName("controllers").WithName("role"),
 		config: config,
 		svc:    service,
 	}
 }
 
-func (r *ConfigMapReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *RoleBindingReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		Named("configmap-controller").
-		For(&corev1.ConfigMap{}).
+		Named("rolebinding-controller").
+		For(&rbacv1.RoleBinding{}).
 		WithEventFilter(r.predicate()).
 		Complete(r)
 }
 
-func (r *ConfigMapReconciler) predicate() predicate.Predicate {
+func (r *RoleBindingReconciler) predicate() predicate.Predicate {
 	return predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
-			runtime, ok := e.Object.(*corev1.ConfigMap)
+			runtime, ok := e.Object.(*rbacv1.RoleBinding)
 			if !ok {
 				return false
 			}
 			return r.svc.IsBase(runtime)
 		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			runtime, ok := e.ObjectNew.(*corev1.ConfigMap)
+			runtime, ok := e.ObjectNew.(*rbacv1.RoleBinding)
 			if !ok {
 				return false
 			}
 			return r.svc.IsBase(runtime)
 		},
 		GenericFunc: func(e event.GenericEvent) bool {
-			runtime, ok := e.Object.(*corev1.ConfigMap)
+			runtime, ok := e.Object.(*rbacv1.RoleBinding)
 			if !ok {
 				return false
 			}
@@ -65,14 +65,13 @@ func (r *ConfigMapReconciler) predicate() predicate.Predicate {
 }
 
 // Reconcile reads that state of the cluster for a ConfigMap object and makes changes based
-// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;list;watch
+// +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=rolebindings,verbs=get;list;watch;create;update;patch;delete
 
-func (r *ConfigMapReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
+func (r *RoleBindingReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	instance := &corev1.ConfigMap{}
+	instance := &rbacv1.RoleBinding{}
 	if err := r.client.Get(ctx, request.NamespacedName, instance); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -90,5 +89,5 @@ func (r *ConfigMapReconciler) Reconcile(request ctrl.Request) (ctrl.Result, erro
 		}
 	}
 
-	return ctrl.Result{RequeueAfter: r.config.ConfigMapRequeueDuration}, nil
+	return ctrl.Result{RequeueAfter: r.config.RoleRequeueDuration}, nil
 }
