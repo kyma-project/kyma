@@ -11,7 +11,7 @@ import (
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	testingeventing "github.com/kyma-project/kyma/components/eventing-controller/testing"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
@@ -76,7 +76,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		It("Should reconcile the Subscription", func() {
 			subscriptionName := "test-valid-subscription-1"
 			ctx := context.Background()
-			givenSubscription := fixtureValidSubscription(subscriptionName, namespaceName)
+			givenSubscription := testingeventing.FixtureValidSubscription(subscriptionName, namespaceName, subscriptionID)
 			ensureSubscriptionCreated(givenSubscription, ctx)
 			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: namespaceName}
 
@@ -137,7 +137,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	FWhen("Subscription changed", func() {
+	When("Subscription changed", func() {
 		It("Should update the BEB subscription", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready"
 			ctx := context.Background()
@@ -149,11 +149,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureSubscriberSvcCreated(newSvc, ctx)
 
 			// cheating
-			givenSubscription := NewSubscription(subscriptionName, namespaceName, WithFilter, WithWebhook)
-			WithValidSink(oldSvc.Namespace, oldSvc.Name, givenSubscription)
+			givenSubscription := testingeventing.NewSubscription(subscriptionName, namespaceName, testingeventing.WithFilter, testingeventing.WithWebhook)
+			testingeventing.WithValidSink(oldSvc.Namespace, oldSvc.Name, givenSubscription)
 			ensureSubscriptionCreated(givenSubscription, ctx)
 
-			apiRuleForOldSvc := handlers.NewAPIRule(givenSubscription, handlers.WithoutPath, handlers.WithGateway, handlers.WithService, handlers.WithStatusReady)
+			apiRuleForOldSvc := testingeventing.NewAPIRule(givenSubscription, testingeventing.WithoutPath, testingeventing.WithGateway, testingeventing.WithService, testingeventing.WithStatusReady)
 			apiRuleForOldSvc.Namespace = namespaceName
 			apiRuleForOldSvc.Labels = map[string]string{
 				ControllerServiceLabelKey:  oldSvc.Name,
@@ -161,7 +161,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}
 			ensureAPIRuleCreated(apiRuleForOldSvc, ctx)
 
-			apiRuleForNewSvc := handlers.NewAPIRule(givenSubscription, handlers.WithoutPath, handlers.WithGateway, handlers.WithService, handlers.WithStatusReady)
+			apiRuleForNewSvc := testingeventing.NewAPIRule(givenSubscription, testingeventing.WithoutPath, testingeventing.WithGateway, testingeventing.WithService, testingeventing.WithStatusReady)
 			apiRuleForNewSvc.Namespace = namespaceName
 			apiRuleForNewSvc.Labels = map[string]string{
 				ControllerServiceLabelKey:  newSvc.Name,
@@ -198,8 +198,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ctx := context.Background()
 			svc := NewSubscriberSvc("webhook-old", namespaceName)
 			ensureSubscriberSvcCreated(svc, ctx)
-			givenSubscription := NewSubscription(subscriptionName, namespaceName, WithWebhook, WithFilter)
-			WithValidSink(svc.Name, svc.Namespace, givenSubscription)
+			givenSubscription := testingeventing.NewSubscription(subscriptionName, namespaceName, testingeventing.WithWebhook, testingeventing.WithFilter)
+			testingeventing.WithValidSink(svc.Name, svc.Namespace, givenSubscription)
 			var subscription = &eventingv1alpha1.Subscription{}
 
 			By("preparing mock to simulate creation of BEB subscription failing on BEB side")
@@ -242,8 +242,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ctx := context.Background()
 			svc := NewSubscriberSvc("webhook-old", namespaceName)
 			ensureSubscriberSvcCreated(svc, ctx)
-			givenSubscription := NewSubscription(subscriptionName, namespaceName, WithWebhook, WithFilter)
-			WithValidSink(svc.Name, svc.Namespace, givenSubscription)
+			givenSubscription := testingeventing.NewSubscription(subscriptionName, namespaceName, testingeventing.WithWebhook, testingeventing.WithFilter)
+			testingeventing.WithValidSink(svc.Name, svc.Namespace, givenSubscription)
 			var subscription = &eventingv1alpha1.Subscription{}
 			isBebSubscriptionCreated := false
 
@@ -296,7 +296,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			subscriptionName := "test-delete-valid-subscription-1"
 			ctx := context.Background()
-			givenSubscription := fixtureValidSubscription(subscriptionName, namespaceName)
+			givenSubscription := testingeventing.FixtureValidSubscription(subscriptionName, namespaceName, subscriptionID)
 			processedBebRequests := 0
 			svc := NewSubscriberSvc("webhook", namespaceName)
 			var subscription = &eventingv1alpha1.Subscription{}
@@ -372,13 +372,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		},
 		Entry("filter missing",
 			func() *eventingv1alpha1.Subscription {
-				subscription := fixtureValidSubscription("schema-filter-missing", "")
+				subscription := testingeventing.FixtureValidSubscription("schema-filter-missing", "", subscriptionID)
 				subscription.Spec.Filter = nil
 				return subscription
 			}()),
 		Entry("protocolsettings missing",
 			func() *eventingv1alpha1.Subscription {
-				subscription := fixtureValidSubscription("schema-filter-missing", "")
+				subscription := testingeventing.FixtureValidSubscription("schema-filter-missing", "", subscriptionID)
 				subscription.Spec.ProtocolSettings = nil
 				return subscription
 			}()),
@@ -395,7 +395,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		},
 		Entry("protocolsettings.webhookauth missing",
 			func() *eventingv1alpha1.Subscription {
-				subscription := fixtureValidSubscription("schema-filter-missing", "")
+				subscription := testingeventing.FixtureValidSubscription("schema-filter-missing", "", subscriptionID)
 				subscription.Spec.ProtocolSettings.WebhookAuth = nil
 				return subscription
 			}()),
@@ -568,121 +568,6 @@ func NewSubscriberSvc(name, ns string) *corev1.Service {
 			},
 			Selector: map[string]string{
 				"test": "test",
-			},
-		},
-	}
-}
-
-type subOpt func(subscription *eventingv1alpha1.Subscription)
-
-func NewSubscription(name, ns string, opts ...subOpt) *eventingv1alpha1.Subscription {
-	newSub := &eventingv1alpha1.Subscription{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: ns,
-		},
-		Spec: eventingv1alpha1.SubscriptionSpec{},
-	}
-	for _, o := range opts {
-		o(newSub)
-	}
-	return newSub
-}
-
-func WithoutWebhook(s *eventingv1alpha1.Subscription) {
-	s.Spec.Protocol = "BEB"
-	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
-		ContentMode:     eventingv1alpha1.ProtocolSettingsContentModeBinary,
-		ExemptHandshake: true,
-		Qos:             "AT-LEAST_ONCE",
-	}
-}
-
-func WithWebhook(s *eventingv1alpha1.Subscription) {
-	s.Spec.Protocol = "BEB"
-	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
-		ContentMode:     eventingv1alpha1.ProtocolSettingsContentModeBinary,
-		ExemptHandshake: true,
-		Qos:             "AT-LEAST_ONCE",
-		WebhookAuth: &eventingv1alpha1.WebhookAuth{
-			Type:         "oauth2",
-			GrantType:    "client_credentials",
-			ClientId:     "xxx",
-			ClientSecret: "xxx",
-			TokenUrl:     "https://oauth2.xxx.com/oauth2/token",
-			Scope:        []string{"guid-identifier"},
-		},
-	}
-}
-
-func WithFilter(s *eventingv1alpha1.Subscription) {
-	s.Spec.Filter = &eventingv1alpha1.BebFilters{
-		Dialect: "beb",
-		Filters: []*eventingv1alpha1.BebFilter{
-			{
-				EventSource: &eventingv1alpha1.Filter{
-					Type:     "exact",
-					Property: "source",
-					Value:    "/default/kyma/myinstance",
-				},
-				EventType: &eventingv1alpha1.Filter{
-					Type:     "exact",
-					Property: "type",
-					Value:    "kyma.ev2.poc.event1.v1",
-				},
-			},
-		},
-	}
-}
-
-func WithValidSink(svcNs, svcName string, s *eventingv1alpha1.Subscription) {
-	s.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, svcNs)
-}
-
-// fixtureValidSubscription returns a valid subscription
-func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscription {
-	return &eventingv1alpha1.Subscription{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Subscription",
-			APIVersion: "eventing.kyma-project.io/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Spec: eventingv1alpha1.SubscriptionSpec{
-			ID:       subscriptionID,
-			Protocol: "BEB",
-			ProtocolSettings: &eventingv1alpha1.ProtocolSettings{
-				ContentMode:     eventingv1alpha1.ProtocolSettingsContentModeBinary,
-				ExemptHandshake: true,
-				Qos:             "AT-LEAST_ONCE",
-				WebhookAuth: &eventingv1alpha1.WebhookAuth{
-					Type:         "oauth2",
-					GrantType:    "client_credentials",
-					ClientId:     "xxx",
-					ClientSecret: "xxx",
-					TokenUrl:     "https://oauth2.xxx.com/oauth2/token",
-					Scope:        []string{"guid-identifier"},
-				},
-			},
-			Sink: fmt.Sprintf("https://webhook.%s.svc.cluster.local", namespace),
-			Filter: &eventingv1alpha1.BebFilters{
-				Dialect: "beb",
-				Filters: []*eventingv1alpha1.BebFilter{
-					{
-						EventSource: &eventingv1alpha1.Filter{
-							Type:     "exact",
-							Property: "source",
-							Value:    "/default/kyma/myinstance",
-						},
-						EventType: &eventingv1alpha1.Filter{
-							Type:     "exact",
-							Property: "type",
-							Value:    "kyma.ev2.poc.event1.v1",
-						},
-					},
-				},
 			},
 		},
 	}
