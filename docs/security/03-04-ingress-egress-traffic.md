@@ -48,7 +48,7 @@ You can install Kyma on top of [Gardener](https://gardener.cloud/) managed insta
 
 ### API Server Proxy
 
->**NOTE:** The API Server Proxy component (apiserver-proxy) is entering deprecation phase.
+>**NOTE:** The API Server Proxy component (`apiserver-proxy`) is entering a deprecation phase.
 
 The [API Server Proxy](https://github.com/kyma-project/kyma/tree/master/components/apiserver-proxy) component is a reverse proxy which acts as an intermediary for the Kubernetes API. By default, it is exposed as a LoadBalancer Service, meaning it requires a dedicated certificate and DNS entry.
 
@@ -115,4 +115,4 @@ The order differs depending on the mode:
 ## Egress
 Currently no Egress limitations are implemented, meaning that all applications deployed in the Kyma cluster can access outside resources without limitations.
 
->**NOTE:** in the case of connection problems with external services it may be required to create an [Service Entry](https://istio.io/latest/docs/reference/config/networking/service-entry/) object to register the service.
+>**NOTE:** in the case of connection problems with external services it may be required to create a [Service Entry](https://istio.io/latest/docs/reference/config/networking/service-entry/) object to register the service.
