@@ -11,6 +11,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	. "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func Test_SyncBebSubscription(t *testing.T) {
@@ -42,7 +43,7 @@ func Test_SyncBebSubscription(t *testing.T) {
 	subscription.Status.Emshash = 0
 	subscription.Status.Ev2hash = 0
 
-	apiRule := NewAPIRule(WithPath, WithService)
+	apiRule := NewAPIRule(subscription, WithPath, WithService)
 	// then
 	changed, err := beb.SyncBebSubscription(subscription, apiRule)
 	g.Expect(err).To(Not(BeNil()))

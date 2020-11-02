@@ -8,6 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	. "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func Test_replaceStatusCondition(t *testing.T) {
@@ -23,7 +24,7 @@ func Test_replaceStatusCondition(t *testing.T) {
 		{
 			name: "Updating a condition marks the status as changed",
 			giveSubscription: func() *eventingv1alpha1.Subscription {
-				subscription := fixtureValidSubscription("some-name", "some-namespace")
+				subscription := FixtureValidSubscription("some-name", "some-namespace", subscriptionID)
 				subscription.Status.InitializeConditions()
 				return subscription
 			}(),
@@ -37,7 +38,7 @@ func Test_replaceStatusCondition(t *testing.T) {
 		{
 			name: "All conditions true means status is ready",
 			giveSubscription: func() *eventingv1alpha1.Subscription {
-				subscription := fixtureValidSubscription("some-name", "some-namespace")
+				subscription := FixtureValidSubscription("some-name", "some-namespace", subscriptionID)
 				subscription.Status.InitializeConditions()
 				subscription.Status.Ready = false
 
