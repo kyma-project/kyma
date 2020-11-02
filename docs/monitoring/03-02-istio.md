@@ -11,4 +11,6 @@ Following the [Istio's observability best practice](https://istio.io/latest/docs
 
 The Istio-related instance is a Deployment named `monitoring-prometheus-istio-server`. This instance has a short data retention time and hardcoded configuration that should not be changed. It also has no PersistentVolume attached. This instance never discovers additional metric endpoints from such resources as ServiceMonitors.
 
+See the diagram for a broader view of how the Istio-related instance fits into the monitoring setup in Kyma:
+
 ![Istio Monitoring](./assets/monitoring-istio.svg)
