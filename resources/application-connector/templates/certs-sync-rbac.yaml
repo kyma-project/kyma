@@ -26,7 +26,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: istio-system
+  name: {{ .Chart.Name }}-certs-sync
 subjects:
   - kind: ServiceAccount
     name: {{ .Chart.Name }}-certs-sync
