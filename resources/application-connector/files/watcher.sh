@@ -1,4 +1,4 @@
-set -ex
+set -e
 set -o pipefail
 
 apk add inotify-tools
@@ -15,8 +15,8 @@ function patchSecret() {
   TLS_CERT_YAML=$(cat << EOF
 ---
 data:
-  cert: "$1"
-  key: "$2"
+  tls.crt: "$1"
+  tls.key: "$2"
 EOF
 )
 
