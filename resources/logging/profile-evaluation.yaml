@@ -1,0 +1,19 @@
+loki:
+  resources:
+    limits:
+      cpu: 100m
+      memory: 512Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+  persistence:
+    enabled: false
+
+fluent-bit:
+  resources:
+    limits:
+      cpu: 50m
+      memory: 80Mi
+    requests:
+      cpu: 20m
+      memory: 40Mi

@@ -50,6 +50,7 @@ type BindingSpec struct {
 type BindingStatus struct {
 	Phase             BindingPhase `json:"phase"`
 	Message           string       `json:"message"`
+	Target            string       `json:"target"`
 	Source            string       `json:"source"`
 	LastProcessedTime *metav1.Time `json:"lastProcessedTime,omitempty"`
 }
