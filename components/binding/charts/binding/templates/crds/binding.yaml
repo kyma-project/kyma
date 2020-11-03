@@ -70,6 +70,8 @@ spec:
                 type: string
               source:
                 type: string
+              target:
+                type: string
             required:
             - phase
             - message

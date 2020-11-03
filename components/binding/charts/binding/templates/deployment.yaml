@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: {{ template "fullname" . }}-webhook-pod
+  name: {{ template "fullname" . }}-webhook
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
@@ -39,7 +39,7 @@ spec:
           imagePullPolicy: Always
           volumeMounts:
           - name: webhook-cert
-            mountPath: /var/run/binding-pod-webhook
+            mountPath: /var/run/webhook
             readOnly: true
           env:
           - name: APP_PORT
@@ -50,8 +50,3 @@ spec:
       - name: webhook-cert
         secret:
           secretName: {{ template "fullname" . }}-webhook-cert
-          items:
-          - key: tls.crt
-            path: tls.crt
-          - key: tls.key
-            path: tls.key

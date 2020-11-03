@@ -1,0 +1,9 @@
+loki:
+  resources:
+    limits:
+      memory: 512Mi
+
+fluent-bit:
+  resources:
+    limits:
+      memory: 256Mi

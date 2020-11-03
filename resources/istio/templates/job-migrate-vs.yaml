@@ -1,0 +1,24 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook: "post-upgrade"
+    helm.sh/hook-weight: "100"
+  name: {{ include "istio.fullname" . }}-migrate-vs
+spec:
+  activeDeadlineSeconds: 1000
+  backoffLimit: 3
+  template:
+    spec:
+      containers:
+        - command:
+            - bash
+            - "-c"
+            - |
+{{.Files.Get "files/migrate-vs.sh" | printf "%s" | indent 16}}
+          image: {{ .Values.istio.installer.image }}:{{ .Values.istio.installer.tag }}
+          name: migrate-vs
+      restartPolicy: Never
+      serviceAccountName: istio-job

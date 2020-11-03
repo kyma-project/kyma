@@ -2,6 +2,7 @@ package uaa
 
 import (
 	"context"
+	"time"
 
 	"github.com/kyma-project/kyma/components/uaa-activator/internal/repeat"
 
@@ -39,6 +40,11 @@ func (p *Creator) EnsureUAAInstance(ctx context.Context) error {
 		if err != nil {
 			return errors.Wrap(err, "while removing ServiceInstance in not ready state")
 		}
+		// there is a problem with communication with the UAA. If an instance after deletion is created
+		// in too short a period of time, the UAA provider will return information that the instance with
+		// the given 'xsappname' is in the deleting process and the new instance will not be triggered to create it
+		// so there is a delay before a request for a new instance is sent
+		time.Sleep(p.config.NewInstanceCreateDelay)
 	}
 
 	err := p.cli.Create(ctx, &instance)

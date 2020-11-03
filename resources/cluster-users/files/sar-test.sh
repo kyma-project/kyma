@@ -389,6 +389,49 @@ function testServerless() {
 	done
 }
 
+function testIstio() {
+    local -r userEmail="${1}"
+	local -r testNamespace="${2}"
+	local -r hasEditPermission="${3}"
+	local -r hasViewPermission="${4}"
+
+	local editPermissionText=""
+	if [[ "${hasEditPermission}" == "no" ]]; then
+		editPermissionText=" NOT"
+	fi
+
+	local viewAccessText=""
+	if [[ "${hasViewPermission}" == "no" ]]; then
+		viewAccessText=" NOT"
+	fi
+	readonly editPermissionText viewAccessText
+
+	local -r resources=(
+	    "adapters.config.istio.io" "attributemanifests.config.istio.io" "authorizationpolicies.security.istio.io"
+	    "destinationrules.networking.istio.io" "envoyfilters.networking.istio.io" "gateways.networking.istio.io"
+	    "handlers.config.istio.io" "httpapispecbindings.config.istio.io" "httpapispecs.config.istio.io"
+	    "instances.config.istio.io" "peerauthentications.security.istio.io" "quotaspecbindings.config.istio.io"
+	    "quotaspecs.config.istio.io" "requestauthentications.security.istio.io" "rules.config.istio.io"
+	    "serviceentries.networking.istio.io" "sidecars.networking.istio.io" "templates.config.istio.io"
+	    "virtualservices.networking.istio.io" "workloadentries.networking.istio.io" )
+
+	# View
+	for resource in "${resources[@]}"; do
+		for operation in "${VIEW_OPERATIONS[@]}"; do
+			echo "--> ${userEmail} should${viewAccessText} be able to ${operation} ${resource} CR in ${testNamespace}"
+			testPermissions "${operation}" "${resource}" "${testNamespace}" "${hasViewPermission}"
+		done
+	done
+
+	# Edit
+	for resource in "${resources[@]}"; do
+		for operation in "${EDIT_OPERATIONS[@]}"; do
+			echo "--> ${userEmail} should${editPermissionText} be able to ${operation} ${resource} CR in ${testNamespace}"
+			testPermissions "${operation}" "${resource}" "${testNamespace}" "${hasEditPermission}"
+		done
+	done
+}
+
 function runTests() {
 	EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
@@ -496,6 +539,8 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to delete backendmodule"
 	testPermissionsClusterScoped "delete" "backendmodule" "yes"
 
+	testIstio "${ADMIN_EMAIL}" "${NAMESPACE}" "yes" "yes"
+
 	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
@@ -530,6 +575,9 @@ function runTests() {
 
 	testServerless "${VIEW_EMAIL}" "${NAMESPACE}" "no" "yes"
 	testServerless "${VIEW_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "yes"
+
+	testIstio "${VIEW_EMAIL}" "${NAMESPACE}" "no" "yes"
+	testIstio "${VIEW_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "yes"
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to create serviceinstances in ${CUSTOM_NAMESPACE}"
 	testPermissions "create" "serviceinstances" "${CUSTOM_NAMESPACE}" "no"
@@ -598,6 +646,9 @@ function runTests() {
 
 	testServerless "${NAMESPACE_ADMIN_EMAIL}" "${NAMESPACE}" "yes" "yes"
 	testServerless "${NAMESPACE_ADMIN_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "no"
+
+	testIstio "${NAMESPACE_ADMIN_EMAIL}" "${NAMESPACE}" "yes" "yes"
+	testIstio "${NAMESPACE_ADMIN_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "no"
 
 	# namespace admin should not be able to create clusterrolebindings - if they can't create it in one namespace,
 	# that means they can't create it in any namespace (resource is non namespaced and RBAC is permissive)
@@ -758,6 +809,8 @@ function runTests() {
 
 	testServerless "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "yes" "yes"
 
+	testIstio "${NAMESPACE_ADMIN_EMAIL}" "${CUSTOM_NAMESPACE}" "yes" "yes"
+
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to get addonsconfigurations.addons.kyma-project.io in the namespace they created"
 	testPermissions "get" "addonsconfigurations/status.addons.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
@@ -874,6 +927,9 @@ function runTests() {
 
 	testServerless "${DEVELOPER_EMAIL}" "${CUSTOM_NAMESPACE}" "yes" "yes"
 	testServerless "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "no"
+
+	testIstio "${DEVELOPER_EMAIL}" "${CUSTOM_NAMESPACE}" "yes" "yes"
+	testIstio "${DEVELOPER_EMAIL}" "${SYSTEM_NAMESPACE}" "no" "no"
 
 	# developer who was granted kyma-developer role should not be able to operate in system namespaces
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to list Deployments in system namespace"
