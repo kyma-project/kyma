@@ -1,0 +1,12 @@
+webhook.values.function.replicas.presets: "S"
+webhook.values.function.resources.presets: "S"
+webhook:
+  values:
+    buildJob:
+      resources:
+        defaultPreset: "slow"
+    function:
+      replicas:
+        defaultPreset: "S"
+      resources:
+        defaultPreset: "S"
