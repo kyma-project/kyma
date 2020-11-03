@@ -59,6 +59,7 @@ func (b *BindingWorker) RemoveProcess(binding *v1alpha1.Binding, log log.FieldLo
 }
 
 func (b *BindingWorker) Process(binding *v1alpha1.Binding, log log.FieldLogger) (*v1alpha1.Binding, error) {
+	log = log.WithField("Binding", fmt.Sprintf("%s/%s", binding.Name, binding.Namespace))
 	log.Info("start Binding process")
 
 	if binding.Status.IsEmpty() {
@@ -70,6 +71,14 @@ func (b *BindingWorker) Process(binding *v1alpha1.Binding, log log.FieldLogger) 
 		binding.Status.Target = fmt.Sprintf("%s/%s", binding.Spec.Target.Kind, binding.Spec.Target.Name)
 		binding.Status.Source = fmt.Sprintf("%s/%s", binding.Spec.Source.Kind, binding.Spec.Source.Name)
 		binding.Status.Message = internal.BindingInitialization
+		return binding, nil
+	}
+	if _, ok := binding.Labels[v1alpha1.BindingValidatedLabelKey]; !ok {
+		errStatus := binding.Status.Failed()
+		if errStatus != nil {
+			return binding, errors.Wrapf(errStatus, "while set Binding phase to %s", v1alpha1.BindingFailed)
+		}
+		binding.Status.Message = fmt.Sprintf(internal.BindingValidationFailed, v1alpha1.BindingValidatedLabelKey)
 		return binding, nil
 	}
 
