@@ -36,7 +36,7 @@ func New() (*Client, error) {
 	}
 
 	dexURL, _ := url.Parse(config.IdProviderConfig.DexConfig.BaseUrl)
-	_, err = net.DialTimeout("tcp", dexURL.Host+dexURL.Path+"a:80", 60*time.Second)
+	_, err = net.DialTimeout("tcp", dexURL.Host+dexURL.Path+":80", 60*time.Second)
 	if err != nil {
 		return nil, errors.Wrap(err, "Could not resolve Dex URL within a reasonable time")
 	}
