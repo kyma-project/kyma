@@ -33,7 +33,7 @@ fi
 }
 
 function syncSecret() {
-	echo "---> Get Gateway cert and key"
+  echo "---> Get Gateway cert and key"
   if [[ -f "${SECRETS_DIR}/cert" ]]; then
     TLS_CRT=$(cat "${SECRETS_DIR}/cert" | base64 -w 0)
     TLS_KEY==$(cat "${SECRETS_DIR}/key" | base64 -w 0)
@@ -45,8 +45,12 @@ function syncSecret() {
   patchSecret "${TLS_CRT}" "${TLS_KEY}"
 }
 
+echo "---> Initial sync"
+syncSecret
+
+echo "---> Listen for cert changes"
 inotifywait -e DELETE_SELF -m $SECRET_FILE |
-   while read path _ file; do
-      echo "---> $path$file modified"
-      syncSecret
-   done
+  while read path _ file; do
+    echo "---> $path$file modified"
+    syncSecret
+  done
