@@ -1,10 +1,10 @@
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
-  name: {{ template "kiali.name" . }}
+  name: {{ template "kiali-server.name" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "kiali.labels" . | nindent 4 }}
+    {{- include "kiali-server.labels" . | nindent 4 }}
 spec:
  version: v1
  category: Diagnostics

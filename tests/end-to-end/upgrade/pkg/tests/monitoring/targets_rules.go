@@ -325,8 +325,6 @@ func shouldIgnoreServiceMonitor(serviceMonitorName string) bool {
 		"istio-mixer",
 		// monitoring-kube-proxy needs to be ignored until the fix for this issue https://github.com/kyma-project/kyma/issues/9457 is included in the latest release
 		"monitoring-kube-proxy",
-		// kiali-operator-metrics is created automatically by kiali operator and can't be disabled
-		"kiali-operator-metrics",
 		// tracing-metrics is created automatically by jaeger operator and can't be disabled
 		"tracing-metrics",
 	}
