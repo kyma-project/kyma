@@ -1,5 +1,3 @@
-webhook.values.function.replicas.presets: "S"
-webhook.values.function.resources.presets: "S"
 webhook:
   values:
     buildJob:
@@ -9,4 +7,9 @@ webhook:
       replicas:
         defaultPreset: "S"
       resources:
-        defaultPreset: "S"
+        defaultPreset: "XS"
+
+docker-registry:
+  resources:
+    requests:
+      cpu: 10m
