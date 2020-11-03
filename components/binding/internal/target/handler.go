@@ -59,7 +59,10 @@ func (h *Handler) LabelExist(b *v1alpha1.Binding) (bool, error) {
 		return false, errors.Wrapf(err, "while getting resource for Binding %s", b.Name)
 	}
 
-	resourceLabels := resource.GetLabels()
+	resourceLabels, err := h.getResourceLabels(resource, resourceData.LabelFields)
+	if err != nil {
+		return false, errors.Wrapf(err, "while getting injected labels for Binding %s", b.Name)
+	}
 	for key, _ := range resourceLabels {
 		if key == h.labelKey(b) {
 			return true, nil
@@ -79,7 +82,10 @@ func (h *Handler) RemoveOldAddNewLabel(b *v1alpha1.Binding) error {
 		return errors.Wrapf(err, "while getting resource for Binding %s", b.Name)
 	}
 
-	resourceLabels := resource.GetLabels()
+	resourceLabels, err := h.getResourceLabels(resource, resourceData.LabelFields)
+	if err != nil {
+		return errors.Wrapf(err, "while getting injected labels for Binding %s", b.Name)
+	}
 	for key, _ := range resourceLabels {
 		if key == h.labelKey(b) {
 			labelsToApply := map[string]string{h.labelKey(b): uuid.New().String()}
@@ -110,17 +116,19 @@ func (h *Handler) RemoveLabel(b *v1alpha1.Binding) error {
 	if err != nil {
 		return errors.Wrapf(err, "while getting resource for Binding %s", b.Name)
 	}
-	existingLabels := resource.GetLabels()
-	appliedLabels := make(map[string]string, 0)
+	existingLabels, err := h.getResourceLabels(resource, resourceData.LabelFields)
+	if err != nil {
+		return errors.Wrapf(err, "while getting injected labels for Binding %s", b.Name)
+	}
+	labelsToDelete := make(map[string]string, 0)
 
 	for key, value := range existingLabels {
-		if key == h.labelKey(b) {
+		if key != h.labelKey(b) {
 			continue
 		}
-		appliedLabels[key] = value
+		labelsToDelete[key] = value
 	}
-
-	if err := h.ensureLabelsAreDeleted(resource, appliedLabels, resourceData.LabelFields); err != nil {
+	if err := h.ensureLabelsAreDeleted(resource, labelsToDelete, resourceData.LabelFields); err != nil {
 		return errors.Wrapf(err, "while trying to delete labels %v+")
 	}
 
@@ -150,6 +158,22 @@ func (h *Handler) updateResource(resource *unstructured.Unstructured, data *stor
 
 func (h *Handler) labelKey(b *v1alpha1.Binding) string {
 	return fmt.Sprintf("%s-%s", v1alpha1.BindingLabelKey, b.Name)
+}
+
+func (h *Handler) getResourceLabels(res *unstructured.Unstructured, labelFields []string) (map[string]string, error) {
+	labels, err := h.findOrCreateLabelsField(res, labelFields)
+	if err != nil {
+		return make(map[string]string, 0), err
+	}
+
+	result := make(map[string]string, 0)
+	for key, value := range labels {
+		strKey := fmt.Sprintf("%v", key)
+		strValue := fmt.Sprintf("%v", value)
+
+		result[strKey] = strValue
+	}
+	return result, nil
 }
 
 func (h *Handler) ensureLabelsAreApplied(res *unstructured.Unstructured, labelsToApply map[string]string, labelFields []string) error {
