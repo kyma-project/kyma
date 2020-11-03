@@ -1,0 +1,33 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+metadata:
+  name: {{ template "prometheus-operator.fullname" . }}-server
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ template "prometheus-operator.name" . }}-server
+{{ include "prometheus-operator.labels" . | indent 4 }}
+spec:
+  namespaceSelector:
+    matchNames:
+    - kyma-system
+  selector:
+    matchLabels:
+      app: prometheus-istio
+      component: server
+  endpoints:
+  - path: /metrics
+    targetPort: 9090
+    honorLabels: true
+  - params:
+      'match[]':
+      - '{__name__=~"workload:(.*)"}'
+      - '{__name__=~"envoy(.*)"}'
+    path: /federate
+    targetPort: 9090
+    honorLabels: true
+    metricRelabelings:
+    - sourceLabels: ["__name__"]
+      regex: 'workload:(.*)'
+      targetLabel: "__name__"
+      action: replace

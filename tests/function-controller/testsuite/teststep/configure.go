@@ -4,11 +4,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/json"
-
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebinding"
@@ -17,9 +12,11 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/trigger"
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
-type ConfigreFunction struct {
+type ConfigureFunction struct {
 	log             *logrus.Entry
 	name            string
 	fnName          string
@@ -33,15 +30,15 @@ type ConfigreFunction struct {
 	domainPort      uint32
 }
 
-func ConfigureFunction(log *logrus.Entry, name string, fnName string, apiRule *apirule.APIRule, apiruleURL *url.URL,
+func NewConfigureFunction(log *logrus.Entry, name string, fnName string, apiRule *apirule.APIRule, apiruleURL *url.URL,
 	serviceInstance *serviceinstance.ServiceInstance, binding *servicebinding.ServiceBinding, usage *servicebindingusage.ServiceBindingUsage, broker *broker.Broker, trigger *trigger.Trigger,
 	domainPort uint32) step.Step {
 
 	apiruleURLWithoutScheme := strings.Trim(apiruleURL.String(), apiruleURL.Scheme)
 	apiruleURLWithoutScheme = strings.Trim(apiruleURLWithoutScheme, "://")
 
-	return &ConfigreFunction{
-		log:             log,
+	return &ConfigureFunction{
+		log:             log.WithField(step.LogStepKey, name),
 		name:            name,
 		fnName:          fnName,
 		apiRule:         apiRule,
@@ -55,11 +52,11 @@ func ConfigureFunction(log *logrus.Entry, name string, fnName string, apiRule *a
 	}
 }
 
-func (f ConfigreFunction) Name() string {
+func (f ConfigureFunction) Name() string {
 	return f.name
 }
 
-func (f ConfigreFunction) Run() error {
+func (f ConfigureFunction) Run() error {
 	f.log.Infof("Creating APIRule...")
 	_, err := f.apiRule.Create(f.fnName, f.apiRuleURL, f.domainPort)
 	if err != nil {
@@ -130,65 +127,35 @@ func (f ConfigreFunction) Run() error {
 	return nil
 }
 
-type RuntimeObjectPrinter interface {
-	Print(object runtime.Object)
-}
+func (f ConfigureFunction) OnError() error {
+	if err := f.apiRule.LogResource(); err != nil {
+		return errors.Wrap(err, "while getting apirule")
+	}
 
-func stringifyToYaml(r interface{}) (string, error) {
-	out, err := json.Marshal(r)
-	if err != nil {
-		return "", err
+	if err := f.svcInstance.LogResource(); err != nil {
+		return errors.Wrap(err, "while getting service instance")
 	}
-	return string(out), nil
-}
 
-func (f ConfigreFunction) prettyPrint(obj interface{}) {
-	out, err := stringifyToYaml(obj)
-	if err != nil {
-		f.log.Warnf("error: %s", err)
-	} else {
-		f.log.Infof("%s", out)
+	if err := f.svcBinding.LogResource(); err != nil {
+		return errors.Wrap(err, "while getting service binding")
 	}
-}
 
-func (f ConfigreFunction) logResources() error {
-	tr, err := f.trigger.Get()
-	if err != nil {
-		return err
+	if err := f.svcBindingUsage.LogResource(); err != nil {
+		return errors.Wrap(err, "while getting service binding usage")
 	}
-	f.prettyPrint(tr)
 
-	sbu, err := f.svcBindingUsage.Get()
-	if err != nil {
-		return err
+	if err := f.broker.LogResource(); err != nil {
+		return errors.Wrap(err, "while getting broker")
 	}
-	f.prettyPrint(sbu)
-	sb, err := f.svcBinding.Get()
-	if err != nil {
-		return err
-	}
-	f.prettyPrint(sb)
 
-	si, err := f.svcInstance.Get()
-	if err != nil {
-		return err
+	if err := f.trigger.LogResource(); err != nil {
+		return errors.Wrap(err, "while getting trigger")
 	}
-	f.prettyPrint(si)
-
-	ar, err := f.apiRule.Get()
-	if err != nil {
-		return err
-	}
-	f.prettyPrint(ar)
 
 	return nil
 }
 
-func (f ConfigreFunction) Cleanup() error {
-	if err := f.logResources(); err != nil {
-		f.log.Warnf("%s", errors.Wrapf(err, "while logging resources before cleanup"))
-	}
-
+func (f ConfigureFunction) Cleanup() error {
 	err := f.trigger.Delete()
 	if err != nil {
 		return errors.Wrap(err, "while deleting trigger")

@@ -1,0 +1,89 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: bindings.bindings.kyma-project.io
+spec:
+  conversion:
+    strategy: None
+  group: bindings.kyma-project.io
+  names:
+    kind: Binding
+    listKind: BindingList
+    plural: bindings
+    singular: binding
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        x-kubernetes-preserve-unknown-fields: true
+        description: Binding is the Schema for the bindings API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: BindingSpec defines the desired state of Binding
+            properties:
+              source:
+                properties:
+                  kind:
+                    type: string
+                  name:
+                    type: string
+                required:
+                - kind
+                - name
+                type: object
+              target:
+                properties:
+                  kind:
+                    type: string
+                  name:
+                    type: string
+                required:
+                - kind
+                - name
+                type: object
+            required:
+            - source
+            - target
+            type: object
+          status:
+            description: BindingStatus defines the observed state of Binding
+            properties:
+              lastProcessedTime:
+                format: date-time
+                type: string
+              phase:
+                type: string
+              message:
+                type: string
+              source:
+                type: string
+              target:
+                type: string
+            required:
+            - phase
+            - message
+            type: object
+        type: object
+    served: true
+    storage: true
+    additionalPrinterColumns:
+    - name: Status
+      type: string
+      description: the field shows the current status of the resource
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp

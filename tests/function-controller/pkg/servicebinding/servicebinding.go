@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
+
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -88,6 +90,20 @@ func (sb *ServiceBinding) Get() (*v1beta1.ServiceBinding, error) {
 	}
 
 	return &servicebinding, nil
+}
+
+func (sb *ServiceBinding) LogResource() error {
+	serviceBinding, err := sb.Get()
+	if err != nil {
+		return err
+	}
+	out, err := helpers.PrettyMarshall(serviceBinding)
+	if err != nil {
+		return err
+	}
+
+	sb.log.Infof("Service Binding resource: %s", out)
+	return nil
 }
 
 func (sb *ServiceBinding) WaitForStatusRunning() error {

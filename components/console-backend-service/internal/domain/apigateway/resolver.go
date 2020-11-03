@@ -2,10 +2,9 @@ package apigateway
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 
-	errs "github.com/pkg/errors"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -103,26 +102,5 @@ func (r *Resolver) DeleteAPIRule(ctx context.Context, name string, namespace str
 }
 
 func (r *Resolver) JsonField(ctx context.Context, obj *v1alpha1.APIRule) (gqlschema.JSON, error) {
-	if obj == nil {
-		return nil, nil
-	}
-
-	jsonByte, err := json.Marshal(obj)
-	if err != nil {
-		return nil, errs.Wrapf(err, "while marshalling apirule `%s`", obj.Name)
-	}
-
-	var jsonMap map[string]interface{}
-	err = json.Unmarshal(jsonByte, &jsonMap)
-	if err != nil {
-		return nil, errs.Wrapf(err, "while unmarshalling apirule `%s` to map", obj.Name)
-	}
-
-	var result gqlschema.JSON
-	err = result.UnmarshalGQL(jsonMap)
-	if err != nil {
-		return nil, errs.Wrapf(err, "while unmarshalling apirule `%s` to GQL JSON", obj.Name)
-	}
-
-	return result, nil
+	return resource.ToJson(obj)
 }

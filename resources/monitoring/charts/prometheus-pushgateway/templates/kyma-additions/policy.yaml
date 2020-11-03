@@ -8,7 +8,6 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: {{ template "prometheus-pushgateway.fullname" . }}
-      release: {{ .Release.Name }}
+      {{- include "prometheus-pushgateway.selectorLabels" . | nindent 6 }}
   mtls:
     mode: "PERMISSIVE"

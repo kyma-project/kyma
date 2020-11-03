@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/util/json"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
+	"github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -61,6 +61,7 @@ func (f *Function) Create(data *FunctionData) error {
 				BaseDir:   data.Repository.BaseDir,
 				Reference: data.Repository.Reference,
 			},
+			Env: data.Env,
 		},
 	}
 
@@ -142,12 +143,12 @@ func (f Function) LogResource() error {
 		return err
 	}
 
-	out, err := json.Marshal(fn)
+	out, err := helpers.PrettyMarshall(fn)
 	if err != nil {
 		return err
 	}
 
-	f.log.Infof("%s", string(out))
+	f.log.Infof("%s", out)
 	return nil
 }
 
