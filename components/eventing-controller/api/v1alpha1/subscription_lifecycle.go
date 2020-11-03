@@ -97,6 +97,15 @@ func (s *SubscriptionStatus) IsConditionSubscribed() bool {
 	return false
 }
 
+func (s *SubscriptionStatus) GetConditionAPIRuleStatus() bool {
+	for _, condition := range s.Conditions {
+		if condition.Type == ConditionAPIRuleStatus {
+			return condition.Status == corev1.ConditionTrue
+		}
+	}
+	return false
+}
+
 func (s *SubscriptionStatus) SetConditionAPIRuleStatus(ready bool) {
 	reason := ConditionReasonAPIRuleStatusNotReady
 	status := corev1.ConditionFalse

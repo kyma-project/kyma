@@ -98,10 +98,9 @@ func (r *APIRuleReconciler) syncAPIRuleSubscriptionsStatus(apiRule *apigatewayv1
 		// work on a copy
 		subscriptionCopy := subscription.DeepCopy()
 
-		// set subscription status APIRule status condition
-		subscriptionCopy.Status.SetConditionAPIRuleStatus(apiRuleReady)
-
+		// set subscription initial status
 		subscriptionCopy.Status.ExternalSink = ""
+		subscriptionCopy.Status.SetConditionAPIRuleStatus(apiRuleReady)
 
 		// set subscription status externalSink if the APIRule status is ready
 		if apiRuleReady {
@@ -111,20 +110,16 @@ func (r *APIRuleReconciler) syncAPIRuleSubscriptionsStatus(apiRule *apigatewayv1
 			}
 		}
 
+		// skip updating the status if nothing changed
+		if subscription.Status.GetConditionAPIRuleStatus() == apiRuleReady && subscription.Status.ExternalSink == subscriptionCopy.Status.ExternalSink {
+			continue
+		}
+
 		if err := r.Client.Status().Update(ctx, subscriptionCopy); err != nil {
 			log.Error(err, "Failed to update Subscription status", "Subscription", subscription.Name, "Namespace", subscription.Namespace)
 			return ctrl.Result{}, err
 		}
 	}
-
-	// debug
-	items2 := &apigatewayv1alpha1.APIRuleList{}
-	err := r.Client.List(context.Background(), items2)
-	fmt.Println(err)
-
-	items1 := &eventingv1alpha1.SubscriptionList{}
-	err = r.Client.List(context.Background(), items1)
-	fmt.Println(err)
 
 	return ctrl.Result{}, nil
 }

@@ -36,6 +36,7 @@ func ApplyExistingAPIRuleAttributes(src, dst *apigatewayv1alpha1.APIRule) {
 	dst.Name = src.Name
 	dst.GenerateName = ""
 	dst.ResourceVersion = src.ResourceVersion
+	dst.Spec.Service.Host = src.Spec.Service.Host
 	// preserve status to avoid resetting conditions
 	dst.Status = src.Status
 }

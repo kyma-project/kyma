@@ -74,6 +74,7 @@ type SubscriptionStatus struct {
 	Emshash               int64                 `json:"emshash,omitempty"`
 	ExternalSink          string                `json:"externalSink,omitempty"`
 	FailedActivation      string                `json:"failedActivation,omitempty"`
+	APIRuleName           string                `json:"apiRuleName,omitempty"`
 	EmsSubscriptionStatus EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 }
 
