@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
+	corev1 "k8s.io/api/core/v1"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	oryv1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
@@ -27,6 +30,20 @@ func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOpti
 					UID:        subscription.UID,
 				},
 			},
+		},
+	}
+
+	for _, opt := range opts {
+		opt(apiRule)
+	}
+	return apiRule
+}
+
+// NewAPIRuleWithOwnRef returns a valid APIRule
+func NewAPIRuleWithOwnRef(opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
+	apiRule := &apigatewayv1alpha1.APIRule{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "foo",
 		},
 	}
 
@@ -221,6 +238,29 @@ func FixtureValidSubscription(name, namespace, id string) *eventingv1alpha1.Subs
 						},
 					},
 				},
+			},
+		},
+	}
+}
+
+func NewSubscriberSvc(name, ns string) *corev1.Service {
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: ns,
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Protocol: "TCP",
+					Port:     80,
+					TargetPort: intstr.IntOrString{
+						IntVal: 8080,
+					},
+				},
+			},
+			Selector: map[string]string{
+				"test": "test",
 			},
 		},
 	}

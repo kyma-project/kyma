@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
 	"sigs.k8s.io/controller-runtime/pkg/cache"
@@ -53,15 +55,10 @@ var (
 )
 
 const (
-	SinkURLPrefix = "webhook"
-	// TODO: Think about the collisions when using length 6
-	SuffixLength                 = 10
-	ClusterLocalAPIGateway       = "kyma-gateway.kyma-system.svc.cluster.local"
-	ControllerServiceLabelKey    = "service"
-	ControllerIdentityLabelKey   = "beb"
-	ControllerIdentityLabelValue = "webhook"
-	ExternalHostPrefix           = "web"
-	ClusterLocalURLSuffix        = "svc.cluster.local"
+	SinkURLPrefix         = "webhook"
+	SuffixLength          = 10
+	ExternalHostPrefix    = "web"
+	ClusterLocalURLSuffix = "svc.cluster.local"
 )
 
 func NewSubscriptionReconciler(
@@ -358,8 +355,8 @@ func (r *SubscriptionReconciler) createOrUpdateAPIRule(subscription *eventingv1a
 		return nil, errors.Wrap(err, "failed to parse svc name and ns in createOrUpdateAPIRule")
 	}
 	labels := map[string]string{
-		ControllerServiceLabelKey:  svcName,
-		ControllerIdentityLabelKey: ControllerIdentityLabelValue,
+		constants.ControllerServiceLabelKey:  svcName,
+		constants.ControllerIdentityLabelKey: constants.ControllerIdentityLabelValue,
 	}
 
 	svcPort, err := handlers.ConvertStringPortUInt32Port(sink)
@@ -547,7 +544,7 @@ func (r *SubscriptionReconciler) makeAPIRule(svcNs, svcName string, labels map[s
 		object.WithLabels(labels),
 		object.WithOwnerReference(subs),
 		object.WithService(hostName, svcName, port),
-		object.WithGateway(ClusterLocalAPIGateway),
+		object.WithGateway(constants.ClusterLocalAPIGateway),
 		object.WithRules(subs, http.MethodPost, http.MethodOptions))
 	return apiRule, nil
 }

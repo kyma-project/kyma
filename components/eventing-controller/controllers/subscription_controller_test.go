@@ -9,13 +9,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
+
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
 	testingeventing "github.com/kyma-project/kyma/components/eventing-controller/testing"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-
-	"k8s.io/apimachinery/pkg/util/intstr"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
@@ -40,6 +40,8 @@ import (
 const (
 	subscriptionNamespacePrefix = "test-"
 	subscriptionID              = "test-subs-1"
+	bigPollingInterval          = 5 * time.Second
+	bigTimeOut                  = time.Second * 60
 )
 
 var _ = Describe("Subscription Reconciliation Tests", func() {
@@ -72,26 +74,55 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		}
 	})
 
-	When("Creating a valid Subscription", func() {
+	When("Creating a valid Subscription with webhook with creation of APIRule", func() {
+
+	})
+	When("Creating a valid Subscription without webhook with already existing APIRule", func() {})
+	When("Creating a valid Subscription with invalid APIRule", func() {})
+	When("Subscription changed with creation of APIRule", func() {})
+	When("Subscription changed in sink path with update of APIRule", func() {
+		It("Should append to the array of rules in APIRule", func() {})
+	})
+	When("Subscription changed in sink path with update of APIRule", func() {
+		It("Should shrink the array of rules in APIRule", func() {})
+	})
+	When("Subscription changed in sink port with update of APIRule", func() {
+		It("Should add the Subscription to the ownerreferences of APIRule and remove it from the old APIRule ", func() {})
+	})
+	FWhen("Creating a valid Subscription(with webhook) with already existing APIRule", func() {
 		It("Should reconcile the Subscription", func() {
 			subscriptionName := "test-valid-subscription-1"
 			ctx := context.Background()
-			givenSubscription := testingeventing.FixtureValidSubscription(subscriptionName, namespaceName, subscriptionID)
+
+			// Ensuring subscriber svc
+			subscriberSvc := testingeventing.NewSubscriberSvc("webhook", namespaceName)
+			ensureSubscriberSvcCreated(subscriberSvc, ctx)
+
+			// Ensuring existing APIRule
+			apiRule := testingeventing.NewAPIRuleWithOwnRef(testingeventing.WithoutPath, testingeventing.WithGateway, testingeventing.WithService, testingeventing.WithStatusReady)
+			apiRule.Namespace = namespaceName
+			apiRule.Labels = map[string]string{
+				constants.ControllerServiceLabelKey:  subscriberSvc.Name,
+				constants.ControllerIdentityLabelKey: constants.ControllerIdentityLabelValue,
+			}
+			ensureAPIRuleCreated(apiRule, ctx)
+
+			givenSubscription := testingeventing.NewSubscription(subscriptionName, namespaceName, testingeventing.WithFilter, testingeventing.WithWebhook)
+			testingeventing.WithValidSink(namespaceName, subscriberSvc.Name, givenSubscription)
 			ensureSubscriptionCreated(givenSubscription, ctx)
-			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: namespaceName}
 
 			By("Setting a finalizer")
-			var subscription = &eventingv1alpha1.Subscription{}
-			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
-				testing.HaveSubscriptionName(subscriptionName),
-				testing.HaveSubscriptionFinalizer(SubscriptionFinalizer),
+			//var subscription = &eventingv1alpha1.Subscription{}
+			getSubscription(givenSubscription, ctx).Should(And(
+				testingeventing.HaveSubscriptionName(subscriptionName),
+				testingeventing.HaveSubscriptionFinalizer(SubscriptionFinalizer),
 			))
 
 			By("Setting a subscribed condition")
 			subscriptionCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, v1.ConditionTrue)
-			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
-				testing.HaveSubscriptionName(subscriptionName),
-				testing.HaveCondition(subscriptionCreatedCondition),
+			getSubscription(givenSubscription, ctx).Should(And(
+				testingeventing.HaveSubscriptionName(subscriptionName),
+				testingeventing.HaveCondition(subscriptionCreatedCondition),
 			))
 
 			By("Emitting a subscription created event")
@@ -101,13 +132,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				Message: "",
 				Type:    v1.EventTypeNormal,
 			}
-			getK8sEvents(&subscriptionEvents, subscription.Namespace).Should(testing.HaveEvent(subscriptionCreatedEvent))
+			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(testingeventing.HaveEvent(subscriptionCreatedEvent))
 
 			By("Setting a subscription active condition")
 			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, v1.ConditionTrue)
-			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
-				testing.HaveSubscriptionName(subscriptionName),
-				testing.HaveCondition(subscriptionActiveCondition),
+			getSubscription(givenSubscription, ctx).Should(And(
+				testingeventing.HaveSubscriptionName(subscriptionName),
+				testingeventing.HaveCondition(subscriptionActiveCondition),
 			))
 
 			By("Emitting a subscription active event")
@@ -116,7 +147,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				Message: "",
 				Type:    v1.EventTypeNormal,
 			}
-			getK8sEvents(&subscriptionEvents, subscription.Namespace).Should(testing.HaveEvent(subscriptionActiveEvent))
+			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(testingeventing.HaveEvent(subscriptionActiveEvent))
 
 			By("Creating a BEB Subscription")
 			var bebSubscription bebtypes.Subscription
@@ -133,22 +164,24 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}).Should(BeTrue())
 
 			By("Marking it as ready")
-			getSubscription(subscription, subscriptionLookupKey, ctx).Should(testing.HaveSubscriptionReady())
+			getSubscription(givenSubscription, ctx).Should(testingeventing.HaveSubscriptionReady())
+
+			By("Updating APIRule")
+			getAPIRule(apiRule, ctx).Should(testingeventing.HaveValidAPIRule(givenSubscription))
 		})
 	})
 
-	When("Subscription changed", func() {
+	FWhen("Subscription changed with already existing APIRule", func() {
 		It("Should update the BEB subscription", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready"
 			ctx := context.Background()
 
-			oldSvc := NewSubscriberSvc("webhook-old", namespaceName)
+			oldSvc := testingeventing.NewSubscriberSvc("webhook-old", namespaceName)
 			ensureSubscriberSvcCreated(oldSvc, ctx)
 
-			newSvc := NewSubscriberSvc("webhook-new", namespaceName)
+			newSvc := testingeventing.NewSubscriberSvc("webhook-new", namespaceName)
 			ensureSubscriberSvcCreated(newSvc, ctx)
 
-			// cheating
 			givenSubscription := testingeventing.NewSubscription(subscriptionName, namespaceName, testingeventing.WithFilter, testingeventing.WithWebhook)
 			testingeventing.WithValidSink(oldSvc.Namespace, oldSvc.Name, givenSubscription)
 			ensureSubscriptionCreated(givenSubscription, ctx)
@@ -156,29 +189,27 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			apiRuleForOldSvc := testingeventing.NewAPIRule(givenSubscription, testingeventing.WithoutPath, testingeventing.WithGateway, testingeventing.WithService, testingeventing.WithStatusReady)
 			apiRuleForOldSvc.Namespace = namespaceName
 			apiRuleForOldSvc.Labels = map[string]string{
-				ControllerServiceLabelKey:  oldSvc.Name,
-				ControllerIdentityLabelKey: ControllerIdentityLabelValue,
+				constants.ControllerServiceLabelKey:  oldSvc.Name,
+				constants.ControllerIdentityLabelKey: constants.ControllerIdentityLabelValue,
 			}
 			ensureAPIRuleCreated(apiRuleForOldSvc, ctx)
 
 			apiRuleForNewSvc := testingeventing.NewAPIRule(givenSubscription, testingeventing.WithoutPath, testingeventing.WithGateway, testingeventing.WithService, testingeventing.WithStatusReady)
 			apiRuleForNewSvc.Namespace = namespaceName
 			apiRuleForNewSvc.Labels = map[string]string{
-				ControllerServiceLabelKey:  newSvc.Name,
-				ControllerIdentityLabelKey: ControllerIdentityLabelValue,
+				constants.ControllerServiceLabelKey:  newSvc.Name,
+				constants.ControllerIdentityLabelKey: constants.ControllerIdentityLabelValue,
 			}
 			ensureAPIRuleCreated(apiRuleForNewSvc, ctx)
 
-			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: namespaceName}
-
 			By("Given subscription is ready")
 			var subscription = &eventingv1alpha1.Subscription{}
-			getSubscription(subscription, subscriptionLookupKey, ctx).Should(testing.HaveSubscriptionReady())
+			getSubscription(subscription, ctx).Should(testingeventing.HaveSubscriptionReady())
 			//waitForSubscriptionReady(subscriptionLookupKey, ctx)
 
 			By("Updating the sink")
 			subscription.Spec.Sink = fmt.Sprintf("http://%s.%s.svc.cluster.local", newSvc.Name, newSvc.Namespace)
-			updateSubscription(subscription, ctx).Should(testing.HaveSubscriptionReady())
+			updateSubscription(subscription, ctx).Should(testingeventing.HaveSubscriptionReady())
 
 			By("Updating the BEB Subscription with the new sink")
 			bebCreationRequests := make([]bebtypes.Subscription, 0)
@@ -196,7 +227,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		It("Should not mark the subscription as ready", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready"
 			ctx := context.Background()
-			svc := NewSubscriberSvc("webhook-old", namespaceName)
+			svc := testingeventing.NewSubscriberSvc("webhook-old", namespaceName)
 			ensureSubscriberSvcCreated(svc, ctx)
 			givenSubscription := testingeventing.NewSubscription(subscriptionName, namespaceName, testingeventing.WithWebhook, testingeventing.WithFilter)
 			testingeventing.WithValidSink(svc.Name, svc.Namespace, givenSubscription)
@@ -215,24 +246,23 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}
 
 			ensureSubscriptionCreated(givenSubscription, ctx)
-			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: namespaceName}
 
 			By("Setting a subscription not created condition")
 			subscriptionNotCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, v1.ConditionFalse)
-			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
-				testing.HaveSubscriptionName(subscriptionName),
-				testing.HaveCondition(subscriptionNotCreatedCondition),
+			getSubscription(subscription, ctx).Should(And(
+				testingeventing.HaveSubscriptionName(subscriptionName),
+				testingeventing.HaveCondition(subscriptionNotCreatedCondition),
 			))
 
 			By("Marking it as not ready")
-			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
-				testing.HaveSubscriptionName(subscriptionName),
-				Not(testing.HaveSubscriptionReady()),
+			getSubscription(subscription, ctx).Should(And(
+				testingeventing.HaveSubscriptionName(subscriptionName),
+				Not(testingeventing.HaveSubscriptionReady()),
 			))
 
 			By("Deleting the object to not provoke more reconciliation requests")
 			Expect(k8sClient.Delete(ctx, subscription)).Should(BeNil())
-			getSubscription(subscription, subscriptionLookupKey, ctx).ShouldNot(testing.HaveSubscriptionFinalizer(SubscriptionFinalizer))
+			getSubscription(subscription, ctx).ShouldNot(testingeventing.HaveSubscriptionFinalizer(SubscriptionFinalizer))
 		})
 	})
 
@@ -240,7 +270,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		It("Should not mark the subscription as ready", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready"
 			ctx := context.Background()
-			svc := NewSubscriberSvc("webhook-old", namespaceName)
+			svc := testingeventing.NewSubscriberSvc("webhook-old", namespaceName)
 			ensureSubscriberSvcCreated(svc, ctx)
 			givenSubscription := testingeventing.NewSubscription(subscriptionName, namespaceName, testingeventing.WithWebhook, testingeventing.WithFilter)
 			testingeventing.WithValidSink(svc.Name, svc.Namespace, givenSubscription)
@@ -270,24 +300,23 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}
 
 			ensureSubscriptionCreated(givenSubscription, ctx)
-			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: namespaceName}
 
 			By("Setting a subscription not active condition")
 			subscriptionNotActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionNotActive, v1.ConditionFalse)
-			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
-				testing.HaveSubscriptionName(subscriptionName),
-				testing.HaveCondition(subscriptionNotActiveCondition),
+			getSubscription(subscription, ctx).Should(And(
+				testingeventing.HaveSubscriptionName(subscriptionName),
+				testingeventing.HaveCondition(subscriptionNotActiveCondition),
 			))
 
 			By("Marking it as not ready")
-			getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
-				testing.HaveSubscriptionName(subscriptionName),
-				Not(testing.HaveSubscriptionReady()),
+			getSubscription(subscription, ctx).Should(And(
+				testingeventing.HaveSubscriptionName(subscriptionName),
+				Not(testingeventing.HaveSubscriptionReady()),
 			))
 
 			By("Deleting the object to not provoke more reconciliation requests")
 			Expect(k8sClient.Delete(ctx, subscription)).Should(BeNil())
-			getSubscription(subscription, subscriptionLookupKey, ctx).ShouldNot(testing.HaveSubscriptionFinalizer(SubscriptionFinalizer))
+			getSubscription(subscription, ctx).ShouldNot(testingeventing.HaveSubscriptionFinalizer(SubscriptionFinalizer))
 		})
 	})
 
@@ -298,17 +327,16 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ctx := context.Background()
 			givenSubscription := testingeventing.FixtureValidSubscription(subscriptionName, namespaceName, subscriptionID)
 			processedBebRequests := 0
-			svc := NewSubscriberSvc("webhook", namespaceName)
+			svc := testingeventing.NewSubscriberSvc("webhook", namespaceName)
 			var subscription = &eventingv1alpha1.Subscription{}
 			ensureSubscriberSvcCreated(svc, ctx)
 			ensureSubscriptionCreated(givenSubscription, ctx)
-			subscriptionLookupKey := types.NamespacedName{Name: subscriptionName, Namespace: namespaceName}
 
 			Context("Given the subscription is ready", func() {
 
-				getSubscription(subscription, subscriptionLookupKey, ctx).Should(And(
-					testing.HaveSubscriptionName(subscriptionName),
-					testing.HaveSubscriptionReady(),
+				getSubscription(subscription, ctx).Should(And(
+					testingeventing.HaveSubscriptionName(subscriptionName),
+					testingeventing.HaveSubscriptionReady(),
 				))
 
 				By("Creating a BEB Subscription")
@@ -349,7 +377,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}).Should(BeTrue())
 
 			By("Removing the finalizer")
-			getSubscription(subscription, subscriptionLookupKey, ctx).ShouldNot(testing.HaveSubscriptionFinalizer(SubscriptionFinalizer))
+			getSubscription(subscription, ctx).ShouldNot(testingeventing.HaveSubscriptionFinalizer(SubscriptionFinalizer))
 
 			By("Emitting some k8s events")
 			var subscriptionEvents = v1.EventList{}
@@ -358,7 +386,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				Message: "",
 				Type:    v1.EventTypeWarning,
 			}
-			getK8sEvents(&subscriptionEvents, subscription.Namespace).Should(testing.HaveEvent(subscriptionDeletedEvent))
+			getK8sEvents(&subscriptionEvents, subscription.Namespace).Should(testingeventing.HaveEvent(subscriptionDeletedEvent))
 		})
 	})
 
@@ -403,14 +431,19 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 })
 
 // getSubscription fetches a subscription using the lookupKey and allows to make assertions on it
-func getSubscription(subscription *eventingv1alpha1.Subscription, lookupKey types.NamespacedName, ctx context.Context) AsyncAssertion {
+func getSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Context) AsyncAssertion {
 	return Eventually(func() eventingv1alpha1.Subscription {
+		lookupKey := types.NamespacedName{
+			Namespace: subscription.Namespace,
+			Name:      subscription.Name,
+		}
 		if err := k8sClient.Get(ctx, lookupKey, subscription); err != nil {
+			log.Printf("failed to fetch subscription(%s): %v", lookupKey.String(), err)
 			return eventingv1alpha1.Subscription{}
 		}
 		fmt.Println(">>>", subscription.Status.Ready)
 		return *subscription
-	}, time.Second*60, 5*time.Second)
+	}, bigTimeOut, bigPollingInterval)
 }
 
 // TODO change the function name
@@ -545,32 +578,9 @@ func ensureSubscriptionCreationFails(subscription *eventingv1alpha1.Subscription
 		And(
 			// prevent nil-pointer stacktrace
 			Not(BeNil()),
-			testing.IsK8sUnprocessableEntity(),
+			testingeventing.IsK8sUnprocessableEntity(),
 		),
 	)
-}
-
-func NewSubscriberSvc(name, ns string) *corev1.Service {
-	return &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: ns,
-		},
-		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{
-				{
-					Protocol: "TCP",
-					Port:     80,
-					TargetPort: intstr.IntOrString{
-						IntVal: 8080,
-					},
-				},
-			},
-			Selector: map[string]string{
-				"test": "test",
-			},
-		},
-	}
 }
 
 func fixtureNamespace(name string) *v1.Namespace {
@@ -613,4 +623,16 @@ func getUniqueNamespaceName() string {
 	testSuiteID := generateTestSuiteID()
 	namespaceName := fmt.Sprintf("%s%d", subscriptionNamespacePrefix, testSuiteID)
 	return namespaceName
+}
+
+func getAPIRule(apiRule *apigatewayv1alpha1.APIRule, ctx context.Context) AsyncAssertion {
+	return Eventually(func() *apigatewayv1alpha1.APIRule {
+		lookUpKey := types.NamespacedName{
+			Namespace: apiRule.Namespace,
+			Name:      apiRule.Name,
+		}
+		err := k8sClient.Get(ctx, lookUpKey, apiRule)
+		Expect(err).ToNot(HaveOccurred())
+		return apiRule
+	})
 }

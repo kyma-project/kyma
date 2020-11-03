@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
+
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
@@ -129,7 +131,7 @@ func (r *APIRuleReconciler) syncAPIRuleSubscriptionsStatus(apiRule *apigatewayv1
 
 // isRelevantAPIRule TODO ...
 func isRelevantAPIRule(apiRule *apigatewayv1alpha1.APIRule) bool {
-	if v, ok := apiRule.Labels[ControllerIdentityLabelKey]; ok && v == ControllerIdentityLabelValue {
+	if v, ok := apiRule.Labels[constants.ControllerIdentityLabelKey]; ok && v == constants.ControllerIdentityLabelValue {
 		return true
 	}
 	return false
