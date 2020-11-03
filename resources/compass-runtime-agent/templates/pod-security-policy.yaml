@@ -17,5 +17,8 @@ spec:
   supplementalGroups:
     rule: RunAsAny
   volumes:
-  - secret
+  - configMap
+  - downwardAPI
   - emptyDir
+  - projected
+  - secret
