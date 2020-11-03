@@ -44,9 +44,17 @@ spec:
                       type: string
                     version:
                       type: string
+                  required:
+                  - group
+                  - kind
+                  - version
                   type: object
                 labelsPath:
                   type: string
+              required:
+                - displayName
+                - resource
+                - labelsPath
               type: object
             status:
               properties:
@@ -57,3 +65,8 @@ spec:
           type: object
       served: true
       storage: true
+      additionalPrinterColumns:
+      - name: Registered
+        type: boolean
+        description: the field shows the current registration status of the resource
+        jsonPath: .status.registered

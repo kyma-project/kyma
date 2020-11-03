@@ -17,7 +17,7 @@ import (
 // TODO: change Handler methods when TargetKind logic will be ready
 
 type Handler struct {
-	client dynamic.Interface
+	client  dynamic.Interface
 	storage worker.TargetKindStorage
 }
 

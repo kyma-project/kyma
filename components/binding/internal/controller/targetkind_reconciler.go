@@ -40,19 +40,20 @@ func (r *TargetKindReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 	err := r.client.Get(ctx, req.NamespacedName, &targetKind)
 	if err != nil {
 		r.log.Warnf("TargetKind %s not found during reconcile process: %s", req.NamespacedName, err)
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	if targetKind.DeletionTimestamp != nil {
 		// TODO: handle removing targetkind here
 		return ctrl.Result{}, nil
 	}
-	// TODO: implement logic
+
 	r.log.Infof("start the reconcile TargetKind process: %s", req.NamespacedName)
 	updatedTargetKind, err := r.worker.Process(targetKind.DeepCopy(), r.log.WithField("TargetKind", req.NamespacedName))
 	switch {
 	case bindErr.IsTemporaryError(err):
 		r.log.Errorf("TargetKind %s process failed with temporary error: %s", req.NamespacedName, err)
-		return ctrl.Result{Requeue: true, RequeueAfter: 3 * time.Second}, err
+		return ctrl.Result{RequeueAfter: 3 * time.Second}, err
 	case err != nil:
 		r.log.Errorf("TargetKind %s process failed: %s", req.NamespacedName, err)
 		return ctrl.Result{}, err
@@ -61,7 +62,7 @@ func (r *TargetKindReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 	err = r.client.Update(ctx, updatedTargetKind)
 	if err != nil {
 		r.log.Errorf("cannot update TargetKind resource %s: %s", req.NamespacedName, err)
-		return ctrl.Result{Requeue: true, RequeueAfter: 10 * time.Second}, err
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, err
 	}
 
 	return ctrl.Result{}, nil

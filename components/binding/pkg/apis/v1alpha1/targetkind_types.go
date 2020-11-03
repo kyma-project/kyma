@@ -27,13 +27,13 @@ type Resource struct {
 type TargetKindStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Registered bool       `json:"registered"`
+	Registered bool `json:"registered"`
 }
 
 // +kubebuilder:object:root=true
 
 // TargetKind is the Schema for the targetkinds API
-type 	TargetKind struct {
+type TargetKind struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 

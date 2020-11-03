@@ -17,13 +17,13 @@ type TargetKindStorage interface {
 }
 
 type TargetKindWorker struct {
-	storage TargetKindStorage
+	storage       TargetKindStorage
 	dynamicClient dynamic.Interface
 }
 
 func NewTargetKindWorker(storage TargetKindStorage, dynamicClient dynamic.Interface) *TargetKindWorker {
 	return &TargetKindWorker{storage: storage,
-	dynamicClient: dynamicClient,
+		dynamicClient: dynamicClient,
 	}
 }
 
@@ -32,7 +32,7 @@ func (w *TargetKindWorker) Process(targetKind *v1alpha1.TargetKind, log log.Fiel
 	// create client for kind and save to storage
 
 	if targetKind.Status.Registered {
-	_, err := w.storage.Get(storage.Kind(targetKind.Name))
+		_, err := w.storage.Get(storage.Kind(targetKind.Name))
 		if err != nil {
 			err = w.reconcileUponAddUpdate(*targetKind)
 			if err != nil {
@@ -59,6 +59,5 @@ func (w *TargetKindWorker) reconcileUponAddUpdate(targetKind v1alpha1.TargetKind
 }
 
 func (w *TargetKindWorker) reconcileUponDelete(targetKind v1alpha1.TargetKind) error {
-
 	return w.storage.Unregister(targetKind)
 }

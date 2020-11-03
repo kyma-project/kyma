@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -21,13 +20,13 @@ type KindManager interface {
 type Kind string
 
 type ResourceData struct {
-	Schema schema.GroupVersionResource
+	Schema      schema.GroupVersionResource
 	LabelFields []string
 }
 
 type KindStorage struct {
-	registered map[Kind] *ResourceData
-	mu sync.RWMutex
+	registered map[Kind]*ResourceData
+	mu         sync.RWMutex
 }
 
 func NewKindStorage() *KindStorage {
@@ -38,7 +37,7 @@ func NewKindStorage() *KindStorage {
 
 func newResourceData(gvr schema.GroupVersionResource, labelsPath string) *ResourceData {
 	return &ResourceData{
-		Schema: gvr,
+		Schema:      gvr,
 		LabelFields: strings.Split(labelsPath, "."),
 	}
 }
@@ -70,8 +69,7 @@ func (s *KindStorage) Get(kind Kind) (*ResourceData, error) {
 	defer s.mu.RUnlock()
 	concreteResourceData, exists := s.registered[kind]
 	if !exists {
-		return &ResourceData{}, errors.New(fmt.Sprintf("TargetKind %s was not found", kind))
+		return &ResourceData{}, fmt.Errorf("TargetKind %s was not found", kind)
 	}
-
 	return concreteResourceData, nil
 }
