@@ -68,6 +68,18 @@ application_connectivity_certs_setup_job:
   certificate:
     validityTime: 92d
 
+application_connectivity_certs_sync:
+  secrets:
+    caCertificateSecret:
+      name: kyma-gateway-certs-cacert
+      namespace: istio-system
+    tlsCertificateSecret:
+      name: kyma-gateway-certs
+      namespace: istio-system
+  image:
+    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    tag: "20201023-5de446cf"
+
 tests:
   application_connector_tests:
     labels:
