@@ -8,6 +8,10 @@ webhook:
         defaultPreset: "S"
       resources:
         defaultPreset: "XS"
+  deployment:
+    resources:
+      requests:
+        cpu: 10m
 
 docker-registry:
   resources:
