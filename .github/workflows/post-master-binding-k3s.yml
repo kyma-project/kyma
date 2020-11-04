@@ -1,19 +1,17 @@
-name: Binding-pre-master
+name: Binding-post-master
 on: 
-  pull_request:
-    types: [opened, synchronize, reopened]
-    paths:
-      - 'components/binding/*'
-      - '.github/workflows/bindings-k3s.yml'
-
+  push:
+    branches:
+      - main
+  
 defaults:
   run:
     working-directory: components/binding
 
 jobs:
-  binding-pre-master:
+  post-master-binding-k3s:
     env:
-      PR_NUMBER: ${{ github.event.number }}
+      COMMIT_HASH: $GITHUB_SHA
       PROJECT_ID: "sap-se-cx-gopher"
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -41,12 +39,12 @@ jobs:
 
       - name: Build Image
         run: |
-          docker build -t eu.gcr.io/$PROJECT_ID/binding:PR-$PR_NUMBER .
+          docker build -t eu.gcr.io/$PROJECT_ID/binding:$COMMIT_HASH .
 
       - name: Push Image
         run: |
           gcloud auth configure-docker -q
-          docker push eu.gcr.io/$PROJECT_ID/binding:PR-$PR_NUMBER
+          docker push eu.gcr.io/$PROJECT_ID/binding:$COMMIT_HASH
 
       - name: Prepare k3s and helm 3
         run: |
@@ -57,7 +55,7 @@ jobs:
 
       - name: Install Bindings component using Helm
         run: |
-          helm install binding ./charts/binding --set images.bindingController.version="PR-${PR_NUMBER}" --wait
+          helm install binding ./charts/binding --set images.bindingController.version="${COMMIT_HASH}" --wait
 
       - name: Apply test scenario and check if secrets are injected
         run: |

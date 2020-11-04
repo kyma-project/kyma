@@ -1,0 +1,46 @@
+# If someone with write access comments "/ok-to-test" on a pull request, emit a repository_dispatch event
+name: Is trusted dev?
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'components/binding/*'
+      - '.github/workflows/bindings-k3s.yml'
+
+jobs:
+  is-trusted-dev:
+    runs-on: ubuntu-latest
+    steps:
+    # Generate a GitHub App installation access token from an App ID and private key
+    # To create a new GitHub App:
+    #   https://developer.github.com/apps/building-github-apps/creating-a-github-app/
+    # See app.yml for an example app manifest
+    - name: Generate token
+      id: generate_token
+      uses: tibdex/github-app-token@v1
+      env: 
+        SECRET: "${{ secrets.PRIVATE_KEY }}" 
+      with: 
+        app_id: ${{ secrets.APP_ID }}
+        private_key: "${{ env.SECRET}}"
+
+    - name: Check if Author is a trusted dev
+      env:
+        TOKEN: ${{ steps.generate_token.outputs.token }}
+      run: |
+        RESPONSE=$(curl -H "Authorization: token ${{ env.TOKEN}}" -s -o /dev/null -w "%{http_code}" https://api.github.com/repos/kyma-project/kyma/collaborators/${{ github.event.pull_request.user.login }})
+        if [ "$RESPONSE" != "204" ]; then
+          echo "${{ github.event.pull_request.user.login }} is not a collaborator"
+          exit 1
+        fi
+
+    - name: Send ok-to-test event
+      uses: peter-evans/repository-dispatch@v1
+      env:
+        TOKEN: ${{ steps.generate_token.outputs.token }}
+      with:
+        token: ${{ env.TOKEN }} # GitHub App installation access token
+        event-type: ok-to-test-command
+        client-payload: '{"sha": "${{ github.event.pull_request.head.sha }}","pull_request":{"number":${{ github.event.number }}}}'
+        repository: kyma-project/kyma
