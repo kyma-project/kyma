@@ -8,20 +8,30 @@ metadata:
     helm.sh/hook-delete-policy: "before-hook-creation"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   name: kiali-migration-job
-  namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: "pre-install,pre-upgrade"
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
 rules:
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "delete"]
+  resourceNames:
+  - "kialis.kiali.io"
+- apiGroups: ["kiali.io"]
+  resources: ["kialis"]
+  verbs: ["get", "patch", "delete"]
+  resourceNames:
+  - "kiali"
 - apiGroups: [""]
   resources: ["services"]
   verbs: ["get", "delete"]
   resourceNames:
   - "kiali-operator-metrics"
+  - "kiali"
 - apiGroups: [""]
   resources: ["configmaps"]
   verbs: ["get", "delete"]
@@ -33,38 +43,47 @@ rules:
   verbs: ["get", "delete"]
   resourceNames:
   - "kiali-operator"
+  - "kiali"
 - apiGroups: [""]
   resources: ["serviceaccounts"]
   verbs: ["get", "delete"]
   resourceNames:
   - "kiali-operator"
+  - "kiali"
 - apiGroups: ["rbac.authorization.k8s.io"]
   resources: ["clusterroles"]
   verbs: ["get", "delete"]
   resourceNames:
   - "kiali-operator"
+  - "kiali"
 - apiGroups: ["rbac.authorization.k8s.io"]
   resources: ["clusterrolebindings"]
   verbs: ["get", "delete"]
   resourceNames:
   - "kiali-operator"
+  - "kiali"
+- apiGroups: ["monitoring.coreos.com"]
+  resources: ["servicemonitors"]
+  verbs: ["get", "delete"]
+  resourceNames:
+  - "kiali-operator-metrics"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
   name: kiali-migration-job
-  namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: "pre-install,pre-upgrade"
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
+  kind: ClusterRole
   name: kiali-migration-job
 subjects:
 - kind: ServiceAccount
   name: kiali-migration-job
+  namespace: {{ .Release.Namespace }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -95,11 +114,26 @@ spec:
           - -c
           - |
             set -e
+
             kubectl delete deployment.apps/kiali-operator -n kyma-system --ignore-not-found
             kubectl delete servicemonitor/kiali-operator-metrics -n kyma-system --ignore-not-found
             kubectl delete service/kiali-operator-metrics -n kyma-system --ignore-not-found
             kubectl delete cm kiali-operator-lock -n kyma-system --ignore-not-found
-            kubectl delete cm kiali -n kyma-system --ignore-not-found
             kubectl delete serviceaccount/kiali-operator -n kyma-system --ignore-not-found
             kubectl delete clusterrole/kiali-operator --ignore-not-found
             kubectl delete clusterrolebinding/kiali-operator --ignore-not-found
+
+            kubectl delete deployment.apps/kiali -n kyma-system --ignore-not-found
+            kubectl delete service/kiali -n kyma-system --ignore-not-found
+            kubectl delete cm kiali -n kyma-system --ignore-not-found
+            kubectl delete serviceaccount/kiali -n kyma-system --ignore-not-found
+            kubectl delete clusterrole/kiali --ignore-not-found
+            kubectl delete clusterrolebinding/kiali --ignore-not-found
+
+            EXISTS="$(kubectl get kiali kiali -n kyma-system --ignore-not-found)"
+            if [ -n "$EXISTS" ]; then
+              kubectl patch kiali kiali -n kyma-system -p '{"metadata":{"finalizers": []}}' --type=merge
+              kubectl delete kiali kiali -n kyma-system --ignore-not-found
+            fi
+
+            kubectl delete crd kialis.kiali.io --ignore-not-found

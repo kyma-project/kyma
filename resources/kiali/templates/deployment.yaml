@@ -4,7 +4,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "kiali-server.fullname" . }}
+  name: {{ include "kiali-server.fullname" . }}-server
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kiali-server.labels" . | nindent 4 }}
@@ -111,7 +111,7 @@ spec:
       volumes:
       - name: {{ include "kiali-server.fullname" . }}-configuration
         configMap:
-          name: {{ include "kiali-server.fullname" . }}
+          name: {{ include "kiali-server.fullname" . }}-configuration
       - name: {{ include "kiali-server.fullname" . }}-cert
         secret:
           {{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
