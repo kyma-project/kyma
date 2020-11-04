@@ -46,7 +46,7 @@ var (
 	serviceName    = "httpbin-apigateway-test"
 	deploymentName = serviceName
 	containerName  = serviceName
-	httpbinImage   = "kennethreitz/httpbin:test"
+	httpbinImage   = "eu.gcr.io/kyma-project/external/kennethreitz/httpbin:latest"
 	clientID       = "dummy_client"
 	clientSecret   = "dummy_secret"
 	scope          = "read"
