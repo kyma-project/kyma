@@ -55,7 +55,7 @@ var (
 )
 
 const (
-	SinkURLPrefix         = "webhook"
+	SinkURLPrefix         = "webhook-"
 	SuffixLength          = 10
 	ExternalHostPrefix    = "web"
 	ClusterLocalURLSuffix = "svc.cluster.local"

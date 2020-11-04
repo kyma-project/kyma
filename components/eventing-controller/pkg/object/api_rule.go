@@ -1,7 +1,6 @@
 package object
 
 import (
-	"fmt"
 	"net/url"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -16,7 +15,7 @@ func NewAPIRule(ns, nameSuffix string, opts ...ObjectOption) *apigatewayv1alpha1
 	s := &apigatewayv1alpha1.APIRule{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    ns,
-			GenerateName: fmt.Sprintf("%s-", nameSuffix),
+			GenerateName: nameSuffix,
 		},
 	}
 
