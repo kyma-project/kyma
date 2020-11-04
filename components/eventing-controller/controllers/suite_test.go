@@ -21,7 +21,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/controllers/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	// +kubebuilder:scaffold:imports
 )
@@ -38,7 +37,7 @@ const (
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
-var beb *controllertesting.BebMock
+var beb *BebMock
 var bebConfig *config.Config
 
 func TestAPIs(t *testing.T) {
@@ -130,14 +129,14 @@ var _ = AfterSuite(func() {
 })
 
 // startBebMock starts the beb mock and configures the controller process to use it
-func startBebMock() *controllertesting.BebMock {
+func startBebMock() *BebMock {
 	By("Preparing BEB Mock")
 	bebConfig := &config.Config{}
-	beb = controllertesting.NewBebMock(bebConfig)
+	beb = NewBebMock(bebConfig)
 	bebURI := beb.Start()
 	logf.Log.Info("beb mock listening at", "address", bebURI)
-	tokenURL := fmt.Sprintf("%s%s", bebURI, controllertesting.TokenURLPath)
-	messagingURL := fmt.Sprintf("%s%s", bebURI, controllertesting.MessagingURLPath)
+	tokenURL := fmt.Sprintf("%s%s", bebURI, TokenURLPath)
+	messagingURL := fmt.Sprintf("%s%s", bebURI, MessagingURLPath)
 	beb.TokenURL = tokenURL
 	beb.MessagingURL = messagingURL
 	bebConfig = config.GetDefaultConfig(messagingURL)

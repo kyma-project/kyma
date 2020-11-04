@@ -8,7 +8,6 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
-	. "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func Test_getHash(t *testing.T) {

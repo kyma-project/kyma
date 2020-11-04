@@ -11,7 +11,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	. "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func Test_SyncBebSubscription(t *testing.T) {
