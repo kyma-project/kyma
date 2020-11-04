@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.global.nats.fullname }}
+  labels:
+{{ include "nats.labels.standard" . | indent 4 }}
+spec:
+  ports:
+  - name: tcp-client
+    port: {{ .Values.global.nats.ports.client }}
+    targetPort: client
+  selector:
+{{ include "nats.labels.selectors" . | indent 4 }}

@@ -1,0 +1,10 @@
+# Default values for nats.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+global:
+  namespace: nats
+  nats:
+    fullname: nats
+    ports:
+      client: 4222
+      monitoring: 8222
