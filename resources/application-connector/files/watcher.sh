@@ -36,7 +36,7 @@ function syncSecret() {
   echo "---> Get Gateway cert and key"
   if [[ -f "${SECRETS_DIR}/cert" ]]; then
     TLS_CRT=$(cat "${SECRETS_DIR}/cert" | base64 -w 0)
-    TLS_KEY==$(cat "${SECRETS_DIR}/key" | base64 -w 0)
+    TLS_KEY=$(cat "${SECRETS_DIR}/key" | base64 -w 0)
   else
     TLS_CRT=$(cat "${SECRETS_DIR}/tls.crt" | base64 -w 0)
     TLS_KEY=$(cat "${SECRETS_DIR}/tls.key" | base64 -w 0)
