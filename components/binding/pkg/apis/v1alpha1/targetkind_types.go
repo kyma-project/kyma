@@ -4,29 +4,24 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+// Kind represents Kubernetes Kind name
+type Kind string
 
 // TargetKindSpec defines the desired state of TargetKind
 type TargetKindSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
 	DisplayName string    `json:"displayName"`
-	Resource    *Resource `json:"resource"`
+	Resource    Resource `json:"resource"`
 	LabelsPath  string    `json:"labelsPath"`
 }
 
 type Resource struct {
 	Group   string `json:"group"`
-	Kind    string `json:"kind"`
+	Kind    Kind `json:"kind"`
 	Version string `json:"version"`
 }
 
 // TargetKindStatus defines the observed state of TargetKind
 type TargetKindStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 	Registered bool `json:"registered"`
 }
 

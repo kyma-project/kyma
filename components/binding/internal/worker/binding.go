@@ -5,17 +5,23 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma/components/binding/internal"
-	"github.com/kyma-project/kyma/components/binding/internal/storage"
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
-type BindingWorker struct {
-	kindManager storage.KindManager
+type KindManager interface {
+	AddLabel(*v1alpha1.Binding) error
+	RemoveLabel(*v1alpha1.Binding) error
+	LabelExist(*v1alpha1.Binding) (bool, error)
+	RemoveOldAddNewLabel(*v1alpha1.Binding) error
 }
 
-func NewBindingWorker(km storage.KindManager) *BindingWorker {
+type BindingWorker struct {
+	kindManager KindManager
+}
+
+func NewBindingWorker(km KindManager) *BindingWorker {
 	return &BindingWorker{
 		kindManager: km,
 	}
@@ -109,7 +115,7 @@ func (b *BindingWorker) readyPhase(binding *v1alpha1.Binding, log log.FieldLogge
 	if binding.Status.Target != fmt.Sprintf("%s/%s", binding.Spec.Target.Kind, binding.Spec.Target.Name) {
 		log.Info("target was changed, removing label from old target")
 		bindingCopy := binding.DeepCopy()
-		bindingCopy.Spec.Target.Kind = strings.Split(binding.Status.Target, "/")[0]
+		bindingCopy.Spec.Target.Kind = v1alpha1.Kind(strings.Split(binding.Status.Target, "/")[0])
 		bindingCopy.Spec.Target.Name = strings.Split(binding.Status.Target, "/")[1]
 		err := b.kindManager.RemoveLabel(bindingCopy)
 		if err != nil {

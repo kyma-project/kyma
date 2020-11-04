@@ -9,29 +9,19 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-type KindManager interface {
-	AddLabel(*v1alpha1.Binding) error
-	RemoveLabel(*v1alpha1.Binding) error
-	LabelExist(*v1alpha1.Binding) (bool, error)
-	RemoveOldAddNewLabel(*v1alpha1.Binding) error
-}
-
-// Kind represents Kubernetes Kind name
-type Kind string
-
 type ResourceData struct {
 	Schema      schema.GroupVersionResource
 	LabelFields []string
 }
 
 type KindStorage struct {
-	registered map[Kind]*ResourceData
+	registered map[v1alpha1.Kind]*ResourceData
 	mu         sync.RWMutex
 }
 
 func NewKindStorage() *KindStorage {
 	return &KindStorage{
-		registered: make(map[Kind]*ResourceData),
+		registered: make(map[v1alpha1.Kind]*ResourceData),
 	}
 }
 
@@ -46,10 +36,10 @@ func newResourceData(gvr schema.GroupVersionResource, labelsPath string) *Resour
 func (s *KindStorage) Register(tk v1alpha1.TargetKind) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.registered[Kind(tk.Name)] = newResourceData(schema.GroupVersionResource{
+	s.registered[tk.Spec.Resource.Kind] = newResourceData(schema.GroupVersionResource{
 		Group:    tk.Spec.Resource.Group,
 		Version:  tk.Spec.Resource.Version,
-		Resource: strings.ToLower(tk.Spec.Resource.Kind + "s"),
+		Resource: strings.ToLower(fmt.Sprintf("%s%s", tk.Spec.Resource.Kind, "s")),
 	}, tk.Spec.LabelsPath)
 
 	return nil
@@ -59,12 +49,12 @@ func (s *KindStorage) Register(tk v1alpha1.TargetKind) error {
 func (s *KindStorage) Unregister(tk v1alpha1.TargetKind) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	delete(s.registered, Kind(tk.Name))
+	delete(s.registered, tk.Spec.Resource.Kind)
 	return nil
 }
 
 // Get returns KindManager for given Kind
-func (s *KindStorage) Get(kind Kind) (*ResourceData, error) {
+func (s *KindStorage) Get(kind v1alpha1.Kind) (*ResourceData, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	concreteResourceData, exists := s.registered[kind]
@@ -72,4 +62,11 @@ func (s *KindStorage) Get(kind Kind) (*ResourceData, error) {
 		return &ResourceData{}, fmt.Errorf("TargetKind %s was not found", kind)
 	}
 	return concreteResourceData, nil
+}
+
+func (s *KindStorage) Exist(kind v1alpha1.Kind) bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	_, exists := s.registered[kind]
+	return exists
 }

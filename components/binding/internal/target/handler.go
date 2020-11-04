@@ -9,12 +9,12 @@ import (
 	"github.com/kyma-project/kyma/components/binding/internal/worker"
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/dynamic"
 )
-
-// TODO: change Handler methods when TargetKind logic will be ready
 
 type Handler struct {
 	client  dynamic.Interface
@@ -29,7 +29,7 @@ func NewHandler(client dynamic.Interface, storage worker.TargetKindStorage) *Han
 }
 
 func (h *Handler) AddLabel(b *v1alpha1.Binding) error {
-	resourceData, err := h.storage.Get(storage.Kind(b.Spec.Target.Kind))
+	resourceData, err := h.storage.Get(b.Spec.Target.Kind)
 	if err != nil {
 		return errors.Wrapf(err, "while getting Kind %s from storage", b.Spec.Target.Kind)
 	}
@@ -37,6 +37,7 @@ func (h *Handler) AddLabel(b *v1alpha1.Binding) error {
 	if err != nil {
 		return errors.Wrapf(err, "while getting resource for Binding %s", b.Name)
 	}
+	logrus.Infof("Got resource: %+v", resource)
 	labelsToApply := map[string]string{h.labelKey(b): uuid.New().String()}
 	if err := h.ensureLabelsAreApplied(resource, labelsToApply, resourceData.LabelFields); err != nil {
 		return errors.Wrap(err, "while ensuring labels are applied")
@@ -50,7 +51,7 @@ func (h *Handler) AddLabel(b *v1alpha1.Binding) error {
 }
 
 func (h *Handler) LabelExist(b *v1alpha1.Binding) (bool, error) {
-	resourceData, err := h.storage.Get(storage.Kind(b.Spec.Target.Kind))
+	resourceData, err := h.storage.Get(b.Spec.Target.Kind)
 	if err != nil {
 		return false, errors.Wrapf(err, "while getting Kind %s from storage", b.Spec.Target.Kind)
 	}
@@ -63,17 +64,16 @@ func (h *Handler) LabelExist(b *v1alpha1.Binding) (bool, error) {
 	if err != nil {
 		return false, errors.Wrapf(err, "while getting injected labels for Binding %s", b.Name)
 	}
-	for key, _ := range resourceLabels {
+	for key := range resourceLabels {
 		if key == h.labelKey(b) {
 			return true, nil
 		}
-
 	}
 	return false, nil
 }
 
 func (h *Handler) RemoveOldAddNewLabel(b *v1alpha1.Binding) error {
-	resourceData, err := h.storage.Get(storage.Kind(b.Spec.Target.Kind))
+	resourceData, err := h.storage.Get(b.Spec.Target.Kind)
 	if err != nil {
 		return errors.Wrapf(err, "while getting Kind %s from storage", b.Spec.Target.Kind)
 	}
@@ -86,7 +86,7 @@ func (h *Handler) RemoveOldAddNewLabel(b *v1alpha1.Binding) error {
 	if err != nil {
 		return errors.Wrapf(err, "while getting injected labels for Binding %s", b.Name)
 	}
-	for key, _ := range resourceLabels {
+	for key := range resourceLabels {
 		if key == h.labelKey(b) {
 			labelsToApply := map[string]string{h.labelKey(b): uuid.New().String()}
 			if err := h.ensureLabelsAreApplied(resource, labelsToApply, resourceData.LabelFields); err != nil {
@@ -108,7 +108,7 @@ func (h *Handler) RemoveOldAddNewLabel(b *v1alpha1.Binding) error {
 }
 
 func (h *Handler) RemoveLabel(b *v1alpha1.Binding) error {
-	resourceData, err := h.storage.Get(storage.Kind(b.Spec.Target.Kind))
+	resourceData, err := h.storage.Get(b.Spec.Target.Kind)
 	if err != nil {
 		return errors.Wrapf(err, "while getting Kind %s from storage", b.Spec.Target.Kind)
 	}
@@ -120,16 +120,16 @@ func (h *Handler) RemoveLabel(b *v1alpha1.Binding) error {
 	if err != nil {
 		return errors.Wrapf(err, "while getting injected labels for Binding %s", b.Name)
 	}
-	labelsToDelete := make(map[string]string, 0)
+	labelsToDelete := make([]string, 0)
 
-	for key, value := range existingLabels {
+	for key := range existingLabels {
 		if key != h.labelKey(b) {
 			continue
 		}
-		labelsToDelete[key] = value
+		labelsToDelete = append(labelsToDelete, key)
 	}
 	if err := h.ensureLabelsAreDeleted(resource, labelsToDelete, resourceData.LabelFields); err != nil {
-		return errors.Wrapf(err, "while trying to delete labels %v+")
+		return errors.Wrapf(err, "while trying to delete labels %+v")
 	}
 
 	err = h.updateResource(resource, resourceData)
@@ -143,7 +143,7 @@ func (h *Handler) RemoveLabel(b *v1alpha1.Binding) error {
 func (h *Handler) getResource(b *v1alpha1.Binding, data *storage.ResourceData) (*unstructured.Unstructured, error) {
 	resource, err := h.client.Resource(data.Schema).Namespace(b.Namespace).Get(b.Spec.Target.Name, metav1.GetOptions{})
 	if err != nil {
-		return nil, errors.Wrap(err, "while getting resource")
+		return nil, bindErr.AsTemporaryError(err, "while getting resource %s %s in namespace %s", b.Spec.Target.Kind, b.Spec.Target.Name, b.Namespace)
 	}
 	return resource, nil
 }
@@ -163,7 +163,7 @@ func (h *Handler) labelKey(b *v1alpha1.Binding) string {
 func (h *Handler) getResourceLabels(res *unstructured.Unstructured, labelFields []string) (map[string]string, error) {
 	labels, err := h.findOrCreateLabelsField(res, labelFields)
 	if err != nil {
-		return make(map[string]string, 0), err
+		return make(map[string]string, 0), errors.Wrapf(err, "while finding labels field in resource")
 	}
 
 	result := make(map[string]string, 0)
@@ -179,7 +179,7 @@ func (h *Handler) getResourceLabels(res *unstructured.Unstructured, labelFields 
 func (h *Handler) ensureLabelsAreApplied(res *unstructured.Unstructured, labelsToApply map[string]string, labelFields []string) error {
 	labels, err := h.findOrCreateLabelsField(res, labelFields)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "while finding labels field in resource")
 	}
 	for k, v := range labelsToApply {
 		labels[k] = v
@@ -187,14 +187,14 @@ func (h *Handler) ensureLabelsAreApplied(res *unstructured.Unstructured, labelsT
 	return nil
 }
 
-func (h *Handler) ensureLabelsAreDeleted(res *unstructured.Unstructured, labelsToDelete map[string]string, labelFields []string) error {
+func (h *Handler) ensureLabelsAreDeleted(res *unstructured.Unstructured, labelsToDelete []string, labelFields []string) error {
 	labels, err := h.findOrCreateLabelsField(res, labelFields)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "while finding labels field in resource")
 	}
 
-	for k := range labelsToDelete {
-		delete(labels, k)
+	for _, v := range labelsToDelete {
+		delete(labels, v)
 	}
 
 	return nil
@@ -202,7 +202,6 @@ func (h *Handler) ensureLabelsAreDeleted(res *unstructured.Unstructured, labelsT
 
 func (h *Handler) findOrCreateLabelsField(res *unstructured.Unstructured, labelFields []string) (map[string]interface{}, error) {
 	var val interface{} = res.Object
-
 	for i, field := range labelFields {
 		if m, ok := val.(map[string]interface{}); i < len(labelFields) && ok {
 			val, ok = m[field]

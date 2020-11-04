@@ -13,7 +13,8 @@ import (
 type TargetKindStorage interface {
 	Register(tk v1alpha1.TargetKind) error
 	Unregister(tk v1alpha1.TargetKind) error
-	Get(kind storage.Kind) (*storage.ResourceData, error)
+	Get(kind v1alpha1.Kind) (*storage.ResourceData, error)
+	Exist(kind v1alpha1.Kind) bool
 }
 
 type TargetKindWorker struct {
@@ -29,23 +30,14 @@ func NewTargetKindWorker(storage TargetKindStorage, dynamicClient dynamic.Interf
 
 func (w *TargetKindWorker) Process(targetKind *v1alpha1.TargetKind, log log.FieldLogger) (*v1alpha1.TargetKind, error) {
 	log.Info("start TargetKind process")
-	// create client for kind and save to storage
 
 	if targetKind.Status.Registered {
-		_, err := w.storage.Get(storage.Kind(targetKind.Name))
-		if err != nil {
-			err = w.reconcileUponAddUpdate(*targetKind)
-			if err != nil {
-				return &v1alpha1.TargetKind{}, errors.New(fmt.Sprintf("while registering TargetKind %q", targetKind.Spec.DisplayName))
-			}
-			targetKind.Status.Registered = true
-			log.Infof("TargetKind %q registered", targetKind.Name)
+		if w.storage.Exist(targetKind.Spec.Resource.Kind) {
+			log.Infof("TargetKind %q was already registered", targetKind.Name)
 			return targetKind, nil
 		}
-		log.Infof("TargetKind %q was already registered", targetKind.Name)
-		return targetKind, nil
 	}
-	err := w.reconcileUponAddUpdate(*targetKind)
+	err := w.storage.Register(*targetKind)
 	if err != nil {
 		return &v1alpha1.TargetKind{}, errors.New(fmt.Sprintf("while registering TargetKind %q", targetKind.Spec.DisplayName))
 	}
@@ -54,10 +46,8 @@ func (w *TargetKindWorker) Process(targetKind *v1alpha1.TargetKind, log log.Fiel
 	return targetKind, nil
 }
 
-func (w *TargetKindWorker) reconcileUponAddUpdate(targetKind v1alpha1.TargetKind) error {
-	return w.storage.Register(targetKind)
-}
+func (w *TargetKindWorker) RemoveProcess(targetKind *v1alpha1.TargetKind, log log.FieldLogger) error {
+	log.Info("start TargetKind removing process")
 
-func (w *TargetKindWorker) reconcileUponDelete(targetKind v1alpha1.TargetKind) error {
-	return w.storage.Unregister(targetKind)
+	return w.storage.Unregister(*targetKind)
 }

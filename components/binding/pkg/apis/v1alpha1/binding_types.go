@@ -36,7 +36,7 @@ type Source struct {
 }
 
 type Target struct {
-	Kind string `json:"kind"`
+	Kind Kind `json:"kind"`
 	Name string `json:"name"`
 }
 

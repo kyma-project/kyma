@@ -6,7 +6,6 @@ import (
 
 	bindErr "github.com/kyma-project/kyma/components/binding/internal/error"
 	bindingsv1alpha1 "github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
-
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -15,6 +14,7 @@ import (
 
 type TargetKindWorker interface {
 	Process(*bindingsv1alpha1.TargetKind, log.FieldLogger) (*bindingsv1alpha1.TargetKind, error)
+	RemoveProcess(*bindingsv1alpha1.TargetKind, log.FieldLogger) error
 }
 
 // TargetKindReconciler reconciles a TargetKind object
@@ -44,7 +44,13 @@ func (r *TargetKindReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) 
 	}
 
 	if targetKind.DeletionTimestamp != nil {
-		// TODO: handle removing targetkind here
+		r.log.Infof("start the removal TargetKind process: %s", req.NamespacedName)
+		// TODO: handle removing corresponding Binding here
+		err := r.worker.RemoveProcess(targetKind.DeepCopy(), r.log.WithField("TargetKind", req.NamespacedName))
+		if err != nil {
+			r.log.Errorf("cannot finish remove process for %s: %s", req.NamespacedName, err)
+			return ctrl.Result{RequeueAfter: 1 * time.Second}, err
+		}
 		return ctrl.Result{}, nil
 	}
 
