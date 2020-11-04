@@ -1,9 +1,9 @@
 package testsuite
 
 import (
-	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
 	retrygo "github.com/avast/retry-go"
@@ -17,7 +17,6 @@ import (
 // SendEventToCompatibilityLayerAndCheckEventId is a step which sends an event and checks if the correct EventId has been received
 type SendEventToCompatibilityLayerAndCheckEventId struct {
 	testkit.SendEvent
-	counter     int
 	testService *testkit.TestService
 	retryOpts   []retrygo.Option
 }
@@ -29,7 +28,6 @@ func NewSendEventToCompatibilityLayerAndCheckEventId(appName, payload string, st
 	opts ...retrygo.Option) *SendEventToCompatibilityLayerAndCheckEventId {
 	return &SendEventToCompatibilityLayerAndCheckEventId{
 		testkit.SendEvent{State: state, AppName: appName, Payload: payload},
-		0,
 		testService,
 		opts,
 	}
@@ -42,8 +40,7 @@ func (s *SendEventToCompatibilityLayerAndCheckEventId) Name() string {
 
 // Run executes the step
 func (s *SendEventToCompatibilityLayerAndCheckEventId) Run() error {
-	const basicId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa"
-	eventId := fmt.Sprint(basicId, s.counter)
+	eventId := uuid.New().String()
 
 	err := s.sendEventToCompatibilityLayer(eventId)
 	if err != nil {
@@ -52,7 +49,6 @@ func (s *SendEventToCompatibilityLayerAndCheckEventId) Run() error {
 
 	err = s.checkEventId(eventId)
 	if err != nil {
-		s.counter++
 		return errors.Wrap(err, s.testService.DumpAllReceivedEvents().Error())
 	}
 
