@@ -22,4 +22,5 @@ data:
     {{- $_ := set $cm.identity "private_key_file" (include "kiali-server.identity.private_key_file" .) }}
     {{- $_ := set $cm.login_token "signing_key" (include "kiali-server.login_token.signing_key" .) }}
     {{- $_ := set $cm.server "web_root" (include "kiali-server.server.web_root" .) }}
-    {{- toYaml $cm | nindent 4 }}
+    {{- $_ := set $cm.external_services.tracing "enabled" .Values.global.tracing.enabled }}
+    {{- tpl (toYaml $cm | nindent 4) . }}
