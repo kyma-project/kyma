@@ -43,11 +43,11 @@ func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOpti
 	return apiRule
 }
 
-// NewAPIRuleWithOwnRef returns a valid APIRule
-func NewAPIRuleWithOwnRef(opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
+// NewAPIRuleWithoutOwnRef returns a valid APIRule
+func NewAPIRuleWithoutOwnRef(name string, opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
 	apiRule := &apigatewayv1alpha1.APIRule{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "foo",
+			Name: name,
 		},
 	}
 
@@ -57,11 +57,9 @@ func NewAPIRuleWithOwnRef(opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
 	return apiRule
 }
 
-func WithService(apiRule *apigatewayv1alpha1.APIRule) {
+func WithService(host, svcName string, apiRule *apigatewayv1alpha1.APIRule) {
 	port := uint32(443)
 	isExternal := true
-	host := "foo-host"
-	svcName := "foo-svc"
 	apiRule.Spec.Service = &apigatewayv1alpha1.Service{
 		Name:       &svcName,
 		Port:       &port,
@@ -257,7 +255,7 @@ func NewSubscriberSvc(name, ns string) *corev1.Service {
 			Ports: []corev1.ServicePort{
 				{
 					Protocol: "TCP",
-					Port:     80,
+					Port:     443,
 					TargetPort: intstr.IntOrString{
 						IntVal: 8080,
 					},

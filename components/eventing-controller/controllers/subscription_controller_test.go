@@ -155,7 +155,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			WithValidSink(namespaceName, subscriberSvc.Name, givenSubscription)
 
 			// Ensuring existing APIRule
-			apiRule := NewAPIRuleWithOwnRef(WithoutPath, WithGateway, WithService, WithStatusReady)
+			apiRule := NewAPIRuleWithoutOwnRef("foo", WithoutPath, WithGateway, WithStatusReady)
+			WithService(subscriberSvc.Name, subscriberSvc.Name, apiRule)
 			apiRule.Namespace = namespaceName
 			apiRule.Labels = map[string]string{
 				constants.ControllerServiceLabelKey:  subscriberSvc.Name,
@@ -228,7 +229,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	When("Subscription changed with already existing APIRule", func() {
+	FWhen("Subscription changed with already existing APIRule", func() {
 		It("Should update the BEB subscription", func() {
 			subscriptionName := "test-subscription-sub-changed"
 
@@ -240,7 +241,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			givenSubscription := NewSubscription(subscriptionName, namespaceName, WithFilter, WithWebhook)
 			WithValidSink(oldSvc.Namespace, oldSvc.Name, givenSubscription)
 
-			apiRuleForOldSvc := NewAPIRuleWithOwnRef(WithoutPath, WithGateway, WithService, WithStatusReady)
+			apiRuleForOldSvc := NewAPIRuleWithoutOwnRef("api-old", WithoutPath, WithGateway, WithStatusReady)
+			WithService(oldSvc.Name, oldSvc.Name, apiRuleForOldSvc)
 			apiRuleForOldSvc.Namespace = namespaceName
 			apiRuleForOldSvc.Labels = map[string]string{
 				constants.ControllerServiceLabelKey:  oldSvc.Name,
@@ -258,7 +260,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			newSvc := NewSubscriberSvc("webhook-new", namespaceName)
 			ensureSubscriberSvcCreated(newSvc, ctx)
 
-			apiRuleForNewSvc := NewAPIRuleWithOwnRef(WithoutPath, WithGateway, WithService, WithStatusReady)
+			apiRuleForNewSvc := NewAPIRuleWithoutOwnRef("api-new", WithoutPath, WithGateway, WithStatusReady)
+			WithService(newSvc.Name, newSvc.Name, apiRuleForNewSvc)
 			apiRuleForNewSvc.Namespace = namespaceName
 			apiRuleForNewSvc.Labels = map[string]string{
 				constants.ControllerServiceLabelKey:  newSvc.Name,
@@ -294,17 +297,17 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ctx := context.Background()
 
 			// Ensuring subscriber svc
-			svc := NewSubscriberSvc("webhook", namespaceName)
-			ensureSubscriberSvcCreated(svc, ctx)
+			subscriberSvc := NewSubscriberSvc("webhook", namespaceName)
+			ensureSubscriberSvcCreated(subscriberSvc, ctx)
 
 			givenSubscription := NewSubscription(subscriptionName, namespaceName, WithWebhook, WithFilter)
-			WithValidSink(svc.Namespace, svc.Name, givenSubscription)
 
 			// Ensuring existing APIRule
-			apiRule := NewAPIRuleWithOwnRef(WithoutPath, WithGateway, WithService, WithStatusReady)
+			apiRule := NewAPIRuleWithoutOwnRef("foo", WithoutPath, WithGateway, WithStatusReady)
+			WithService(subscriberSvc.Name, subscriberSvc.Name, apiRule)
 			apiRule.Namespace = namespaceName
 			apiRule.Labels = map[string]string{
-				constants.ControllerServiceLabelKey:  svc.Name,
+				constants.ControllerServiceLabelKey:  subscriberSvc.Name,
 				constants.ControllerIdentityLabelKey: constants.ControllerIdentityLabelValue,
 			}
 			SetSinkSvcPortInAPIRule(apiRule, givenSubscription.Spec.Sink)
@@ -366,7 +369,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			WithValidSink(svc.Namespace, svc.Name, givenSubscription)
 
 			// Ensuring existing APIRule
-			apiRule := NewAPIRuleWithOwnRef(WithoutPath, WithGateway, WithService, WithStatusReady)
+			apiRule := NewAPIRuleWithoutOwnRef("foo", WithoutPath, WithGateway, WithStatusReady)
+			WithService(svc.Name, svc.Name, apiRule)
 			apiRule.Namespace = namespaceName
 			apiRule.Labels = map[string]string{
 				constants.ControllerServiceLabelKey:  svc.Name,
@@ -438,7 +442,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureSubscriberSvcCreated(svc, ctx)
 
 			// Ensuring existing APIRule
-			apiRule := NewAPIRuleWithOwnRef(WithoutPath, WithGateway, WithService, WithStatusReady)
+			apiRule := NewAPIRuleWithoutOwnRef("foo", WithoutPath, WithGateway, WithStatusReady)
+			WithService(svc.Name, svc.Name, apiRule)
 			apiRule.Namespace = namespaceName
 			apiRule.Labels = map[string]string{
 				constants.ControllerServiceLabelKey:  svc.Name,
