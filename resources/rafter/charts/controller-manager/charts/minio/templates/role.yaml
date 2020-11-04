@@ -3,6 +3,11 @@ kind: Role
 metadata:
   name: {{ template "minio.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "minio.name" . }}
+    chart: {{ template "minio.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 rules:
   - apiGroups: ['policy']
     resources: ['podsecuritypolicies']

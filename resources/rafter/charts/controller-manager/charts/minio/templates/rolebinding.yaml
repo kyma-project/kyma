@@ -3,6 +3,11 @@ kind: RoleBinding
 metadata:
   name: {{ template "minio.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "minio.name" . }}
+    chart: {{ template "minio.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 roleRef:
   kind: Role
   name: {{ template "minio.fullname" . }}
