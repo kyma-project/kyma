@@ -229,7 +229,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	FWhen("Subscription changed with already existing APIRule", func() {
+	When("Subscription changed with already existing APIRule", func() {
 		It("Should update the BEB subscription", func() {
 			subscriptionName := "test-subscription-sub-changed"
 
@@ -293,7 +293,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	When("BEB subscription creation failed with existing APIRule", func() {
+	FWhen("BEB subscription creation failed with existing APIRule", func() {
 		It("Should not mark the subscription as ready", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready"
 			ctx := context.Background()
@@ -303,6 +303,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureSubscriberSvcCreated(subscriberSvc, ctx)
 
 			givenSubscription := NewSubscription(subscriptionName, namespaceName, WithWebhook, WithFilter)
+			WithValidSink(subscriberSvc.Namespace, subscriberSvc.Name, givenSubscription)
 
 			// Ensuring existing APIRule
 			apiRule := NewAPIRuleWithoutOwnRef("foo", WithoutPath, WithGateway, WithStatusReady)
@@ -344,7 +345,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				HaveCondition(subscriptionNotCreatedCondition),
 			))
 
-			By("Marking it as not ready")
+			By("Marking subscription as not ready")
 			getSubscription(givenSubscription, ctx).Should(And(
 				HaveSubscriptionName(subscriptionName),
 				Not(HaveSubscriptionReady()),
