@@ -39,6 +39,9 @@ func HaveSubscriptionReady() GomegaMatcher {
 
 func HaveValidAPIRule(s *eventingv1alpha1.Subscription) GomegaMatcher {
 	return WithTransform(func(apiRule *apigatewayv1alpha1.APIRule) bool {
+		if apiRule == nil {
+			return false
+		}
 		hasOwnRef, hasRule := false, false
 		for _, or := range apiRule.OwnerReferences {
 			if or.Name == s.Name && or.UID == s.UID {

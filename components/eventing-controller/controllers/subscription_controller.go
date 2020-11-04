@@ -166,14 +166,13 @@ func (r *SubscriptionReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		statusChanged = true
 	}
 
-	// TODO(marcobebway) uncomment code block below
 	// Sync the BEB Subscription with the Subscription CR
-	//if statusChangedForBeb, err := r.syncBEBSubscription(subscription, &result, ctx, log, apiRule); err != nil {
-	//	log.Error(err, "error while syncing BEB subscription")
-	//	return ctrl.Result{}, err
-	//} else {
-	//	statusChanged = statusChanged || statusChangedForBeb
-	//}
+	if statusChangedForBeb, err := r.syncBEBSubscription(subscription, &result, ctx, log, apiRule); err != nil {
+		log.Error(err, "error while syncing BEB subscription")
+		return ctrl.Result{}, err
+	} else {
+		statusChanged = statusChanged || statusChangedForBeb
+	}
 
 	if r.isInDeletion(subscription) {
 		// Remove finalizers

@@ -2,7 +2,11 @@ package testing
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"net/url"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -264,4 +268,16 @@ func NewSubscriberSvc(name, ns string) *corev1.Service {
 			},
 		},
 	}
+}
+
+func SetSinkSvcPortInAPIRule(apiRule *apigatewayv1alpha1.APIRule, sink string) {
+	sinkURL, err := url.ParseRequestURI(sink)
+	if err != nil {
+		log.Fatalf("failed to parse sink URI: %v", err)
+	}
+	sinkPort, err := handlers.ConvertStringPortUInt32Port(*sinkURL)
+	if err != nil {
+		log.Fatalf("failed to convert port from sink URL: %v", err)
+	}
+	apiRule.Spec.Service.Port = &sinkPort
 }
