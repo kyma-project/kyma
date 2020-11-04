@@ -3,7 +3,7 @@ kind: ServiceAccount
 metadata:
   name: kiali-migration-job
   annotations:
-    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook: "pre-upgrade"
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
 ---
@@ -12,7 +12,7 @@ kind: ClusterRole
 metadata:
   name: kiali-migration-job
   annotations:
-    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook: "pre-upgrade"
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
 rules:
@@ -73,7 +73,7 @@ kind: ClusterRoleBinding
 metadata:
   name: kiali-migration-job
   annotations:
-    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook: "pre-upgrade"
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
 roleRef:
@@ -91,7 +91,7 @@ metadata:
   name: kiali-migration-job
   annotations:
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook: "pre-upgrade"
     helm.sh/hook-weight: "10"
 spec:
   backoffLimit: 1
