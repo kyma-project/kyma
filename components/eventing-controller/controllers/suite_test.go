@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"testing"
+	"time"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
@@ -75,8 +76,10 @@ var _ = BeforeSuite(func(done Done) {
 	bebMock := startBebMock()
 
 	// Source: https://book.kubebuilder.io/cronjob-tutorial/writing-tests.html
+	syncPeriod := time.Second
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
-		Scheme: scheme.Scheme,
+		Scheme:     scheme.Scheme,
+		SyncPeriod: &syncPeriod,
 	})
 	Expect(err).ToNot(HaveOccurred())
 	envConf := &env.Config{
@@ -97,7 +100,7 @@ var _ = BeforeSuite(func(done Done) {
 		k8sManager.GetCache(),
 		ctrl.Log.WithName("controllers").WithName("Subscription"),
 		k8sManager.GetEventRecorderFor("subscription-controller"),
-		nil, envConf,
+		scheme.Scheme, envConf,
 	).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
@@ -106,7 +109,7 @@ var _ = BeforeSuite(func(done Done) {
 		k8sManager.GetCache(),
 		ctrl.Log.WithName("controllers").WithName("APIRule"),
 		k8sManager.GetEventRecorderFor("api-rule-controller"),
-		nil,
+		scheme.Scheme,
 	).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 

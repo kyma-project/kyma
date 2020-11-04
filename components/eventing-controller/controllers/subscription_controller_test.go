@@ -250,6 +250,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}
 			SetSinkSvcPortInAPIRule(apiRuleForOldSvc, givenSubscription.Spec.Sink)
 			ensureAPIRuleCreated(apiRuleForOldSvc, ctx)
+			getAPIRule(apiRuleForOldSvc, ctx).Should(HaveApiRuleReady())
 
 			ensureSubscriptionCreated(givenSubscription, ctx)
 
@@ -275,6 +276,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Updating the sink")
 			givenSubscription.Spec.Sink = newSink
 			updateSubscriptionSink(givenSubscription, ctx).Should(BeNil())
+			getSubscription(givenSubscription, ctx).Should(HaveSink(newSink))
 			getSubscription(givenSubscription, ctx).Should(HaveSubscriptionReady())
 
 			By("Updating the BEB Subscription with the new sink")
@@ -283,7 +285,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				ContainElement(MatchFields(IgnoreMissing|IgnoreExtras,
 					Fields{
 						"Name":       BeEquivalentTo(givenSubscription.Name),
-						"WebhookUrl": ContainSubstring("domain.com"),
+						"WebhookUrl": ContainSubstring("https://webhook-new"),
 					},
 				))))
 			By("Updating APIRule")
@@ -564,18 +566,8 @@ func getSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Co
 			log.Printf("failed to fetch subscription(%s): %v", lookupKey.String(), err)
 			return eventingv1alpha1.Subscription{}
 		}
-		log.Printf("are we here")
 		return *subscription
 	}, bigTimeOut, bigPollingInterval)
-}
-
-// TODO change the function name
-func getSubscription2(lookupKey types.NamespacedName, ctx context.Context) *eventingv1alpha1.Subscription {
-	subscription := &eventingv1alpha1.Subscription{}
-	if err := k8sClient.Get(ctx, lookupKey, subscription); err != nil {
-		return subscription
-	}
-	return nil
 }
 
 func updateSubscriptionSink(subscription *eventingv1alpha1.Subscription, ctx context.Context) AsyncAssertion {
@@ -636,7 +628,6 @@ func ensureAPIRuleCreated(apiRule *apigatewayv1alpha1.APIRule, ctx context.Conte
 	// update status only once when APIRule creation succeeds
 	if err == nil {
 		err = k8sClient.Status().Update(ctx, apiRule)
-		log.Printf("failed to update APIRule status: %v", err)
 		Expect(err).Should(BeNil())
 	}
 }
@@ -658,7 +649,6 @@ func ensureAPIRuleStatusUpdatedWithStatusReady(apiRule *apigatewayv1alpha1.APIRu
 		WithStatusReady(newAPIRule)
 		err = k8sClient.Status().Update(ctx, apiRule)
 		if err != nil {
-			log.Printf("are we here: %v", err)
 			return err
 		}
 		log.Printf("apirule is updated: %v", apiRule)
@@ -722,7 +712,7 @@ func getBebSubscriptionCreationRequests(bebSubscriptions []bebtypes.Subscription
 			}
 		}
 		return bebSubscriptions
-	})
+	}, bigTimeOut, bigPollingInterval)
 }
 
 // ensureSubscriptionCreationFails creates a Subscription in the k8s cluster and ensures that it is reject because of invalid schema
@@ -785,18 +775,17 @@ func getUniqueNamespaceName() string {
 }
 
 func getAPIRule(apiRule *apigatewayv1alpha1.APIRule, ctx context.Context) AsyncAssertion {
-	return Eventually(func() *apigatewayv1alpha1.APIRule {
+	return Eventually(func() apigatewayv1alpha1.APIRule {
 		lookUpKey := types.NamespacedName{
 			Namespace: apiRule.Namespace,
 			Name:      apiRule.Name,
 		}
-		err := k8sClient.Get(ctx, lookUpKey, apiRule)
-		if err != nil {
-			log.Printf("failed to fetch APIRule: %v", err)
-			return nil
+		if err := k8sClient.Get(ctx, lookUpKey, apiRule); err != nil {
+			log.Printf("failed to fetch APIRule(%s): %v", lookUpKey.String(), err)
+			return apigatewayv1alpha1.APIRule{}
 		}
-		return apiRule
-	})
+		return *apiRule
+	}, bigTimeOut, bigPollingInterval)
 }
 
 func filterAPIRulesForASvc(apiRules *apigatewayv1alpha1.APIRuleList, svc *corev1.Service) *apigatewayv1alpha1.APIRule {

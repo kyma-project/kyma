@@ -37,11 +37,26 @@ func HaveSubscriptionReady() GomegaMatcher {
 	}, BeTrue())
 }
 
-func HaveValidAPIRule(s *eventingv1alpha1.Subscription) GomegaMatcher {
-	return WithTransform(func(apiRule *apigatewayv1alpha1.APIRule) bool {
-		if apiRule == nil {
+func HaveSink(sink string) GomegaMatcher {
+	return WithTransform(func(s eventingv1alpha1.Subscription) bool {
+		return s.Spec.Sink == sink
+	}, BeTrue())
+}
+
+func HaveApiRuleReady() GomegaMatcher {
+	return WithTransform(func(a apigatewayv1alpha1.APIRule) bool {
+		if a.Status.APIRuleStatus == nil || a.Status.AccessRuleStatus == nil || a.Status.VirtualServiceStatus == nil {
 			return false
 		}
+		apiRuleStatus := a.Status.APIRuleStatus.Code == apigatewayv1alpha1.StatusOK
+		accessRuleStatus := a.Status.AccessRuleStatus.Code == apigatewayv1alpha1.StatusOK
+		virtualServiceStatus := a.Status.VirtualServiceStatus.Code == apigatewayv1alpha1.StatusOK
+		return apiRuleStatus && accessRuleStatus && virtualServiceStatus
+	}, BeTrue())
+}
+
+func HaveValidAPIRule(s *eventingv1alpha1.Subscription) GomegaMatcher {
+	return WithTransform(func(apiRule apigatewayv1alpha1.APIRule) bool {
 		hasOwnRef, hasRule := false, false
 		for _, or := range apiRule.OwnerReferences {
 			if or.Name == s.Name && or.UID == s.UID {
