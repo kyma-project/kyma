@@ -48,9 +48,11 @@ function syncSecret() {
 echo "---> Initial sync"
 syncSecret
 
-echo "---> Listen for cert changes"
-inotifywait -e DELETE_SELF -m $SECRET_FILE |
-  while read path _ file; do
-    echo "---> $path$file modified"
-    syncSecret
-  done
+while true; do
+  echo "---> Listen for cert changes"
+  inotifywait -e DELETE_SELF $SECRET_FILE |
+    while read path _ file; do
+      echo "---> $path$file modified"
+      syncSecret
+    done
+done
