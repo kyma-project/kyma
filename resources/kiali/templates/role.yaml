@@ -1,4 +1,3 @@
-{{- if not .Values.kiali.spec.deployment.view_only_mode }}
 {{- /*
   Taken from https://github.com/kiali/helm-charts/tree/master/kiali-server
   */ -}}
@@ -96,4 +95,3 @@ rules:
   - list
   - patch
   - watch
-{{- end }}
