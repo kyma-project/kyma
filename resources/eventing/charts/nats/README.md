@@ -8,7 +8,7 @@ $ kubectl create ns  install nats
 ```
 - Install it using Helm 3 on "nats" namespace:
 ```bash
-$ helm install nats nats -n nats
+$ helm install nats nats -n nats --set global.install.enabled=true
 ```
 - Test the installation:
 ```bash

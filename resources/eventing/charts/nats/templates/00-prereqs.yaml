@@ -1,3 +1,5 @@
+{{- if .Values.global.install.enabled }}
+
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -124,3 +126,5 @@ subjects:
 - kind: ServiceAccount
   name: nats-server
   namespace: {{ .Values.global.namespace}}
+
+  {{- end }}
