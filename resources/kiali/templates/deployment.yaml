@@ -94,7 +94,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         volumeMounts:
-        - name: {{ include "kiali-server.fullname" . }}-server
+        - name: {{ include "kiali-server.fullname" . }}
           mountPath: "/kiali-configuration"
         - name: {{ include "kiali-server.fullname" . }}-cert
           mountPath: "/kiali-cert"
@@ -109,9 +109,9 @@ spec:
         {{- toYaml .Values.kiali.spec.deployment.resources | nindent 10 }}
         {{- end }}
       volumes:
-      - name: {{ include "kiali-server.fullname" . }}-configuration
+      - name: {{ include "kiali-server.fullname" . }}
         configMap:
-          name: {{ include "kiali-server.fullname" . }}-configuration
+          name: {{ include "kiali-server.fullname" . }}-server
       - name: {{ include "kiali-server.fullname" . }}-cert
         secret:
           {{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
