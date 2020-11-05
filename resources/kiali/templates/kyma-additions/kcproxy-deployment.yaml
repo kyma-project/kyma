@@ -60,7 +60,7 @@ spec:
         {{- end }}
         - --verbose=false
         - --listen=0.0.0.0:{{ .Values.kcproxy.port }}
-        - --upstream-url=http://{{ template "kiali-server.name" . }}:{{ .Values.kiali.spec.server.port }}
+        - --upstream-url=http://{{ template "kiali-server.name" . }}-service:{{ .Values.kiali.spec.server.port }}
         - --enable-logging=false
         - --enable-json-logging=true
         - --secure-cookie=true
