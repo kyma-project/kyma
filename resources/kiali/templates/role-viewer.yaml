@@ -4,7 +4,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "kiali-server.fullname" . }}-viewer-role
+  name: {{ include "kiali-server.fullname" . }}-server-viewer
   labels:
     {{- include "kiali-server.labels" . | nindent 4 }}
 rules:

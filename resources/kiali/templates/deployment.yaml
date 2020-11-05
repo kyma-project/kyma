@@ -94,7 +94,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         volumeMounts:
-        - name: {{ include "kiali-server.fullname" . }}-configuration
+        - name: {{ include "kiali-server.fullname" . }}-server
           mountPath: "/kiali-configuration"
         - name: {{ include "kiali-server.fullname" . }}-cert
           mountPath: "/kiali-cert"
