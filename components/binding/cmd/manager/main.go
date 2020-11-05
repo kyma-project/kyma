@@ -2,9 +2,12 @@ package main
 
 import (
 	"github.com/kyma-project/kyma/components/binding/internal/controller"
+	"github.com/kyma-project/kyma/components/binding/internal/storage"
+	"github.com/kyma-project/kyma/components/binding/internal/target"
 	"github.com/kyma-project/kyma/components/binding/internal/webhook/binding"
 	"github.com/kyma-project/kyma/components/binding/internal/webhook/pod"
 	bindingsv1alpha1 "github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
+	"k8s.io/client-go/dynamic"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
@@ -59,11 +62,19 @@ func main() {
 		"/binding-mutating",
 		&k8sWebhook.Admission{Handler: binding.NewMutationHandler(log.WithField("webhook", "binding-mutating"))})
 
-	bindingReconciler := controller.SetupBindingReconciler(mgr.GetClient(), logger, mgr.GetScheme())
-	fatalOnError(bindingReconciler.SetupWithManager(mgr), "while creating BindingReconciler")
+	targetKindStorage := storage.NewKindStorage()
+	dc, err := dynamic.NewForConfig(ctrl.GetConfigOrDie())
+	fatalOnError(err, "while creating dynamic client")
 
-	targetKindReconciler := controller.SetupTargetKindReconciler(mgr.GetClient(), logger, mgr.GetScheme())
+	targetKindManager := target.NewHandler(dc, targetKindStorage)
+
+	targetKindReconciler := controller.SetupTargetKindReconciler(mgr.GetClient(), dc, logger, targetKindStorage, mgr.GetScheme())
 	fatalOnError(targetKindReconciler.SetupWithManager(mgr), "while creating TargetKindReconciler")
+
+	//TODO: wait for all TargetKind to be synced and registered
+
+	bindingReconciler := controller.SetupBindingReconciler(mgr.GetClient(), targetKindManager, logger, mgr.GetScheme())
+	fatalOnError(bindingReconciler.SetupWithManager(mgr), "while creating BindingReconciler")
 
 	fatalOnError(mgr.Start(ctrl.SetupSignalHandler()), "unable to run the manager")
 }

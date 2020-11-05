@@ -6,7 +6,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/binding/internal"
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
-
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
@@ -133,7 +132,6 @@ func (b *BindingWorker) readyPhase(binding *v1alpha1.Binding, log log.FieldLogge
 		}
 		binding.Status.Source = fmt.Sprintf("%s/%s", binding.Spec.Source.Kind, binding.Spec.Source.Name)
 	}
-
 	labelExist, err := b.kindManager.LabelExist(binding)
 	if err != nil {
 		return binding, errors.Wrap(err, "while checking if label exist in target")
