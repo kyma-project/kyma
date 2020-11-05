@@ -30,8 +30,12 @@ resolve-local:
 	GO111MODULE=on go mod download
 	GO111MODULE=on go mod vendor
 
+test-local:
+	GO111MODULE=on go test ./...
+
 mod-verify-local:
 	GO111MODULE=on go mod verify
 
 $(eval $(call buildpack-cp-ro,resolve))
 $(eval $(call buildpack-mount,mod-verify))
+$(eval $(call buildpack-mount,test))
