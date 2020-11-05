@@ -57,16 +57,24 @@ spec:
                 - labelsPath
               type: object
             status:
-              properties:
-                registered:
-                  type: boolean
               description: TargetKindStatus defines the observed state of TargetKind
+              properties:
+                lastProcessedTime:
+                  format: date-time
+                  type: string
+                phase:
+                  type: string
+                message:
+                  type: string
+              required:
+              - phase
+              - message
               type: object
           type: object
       served: true
       storage: true
       additionalPrinterColumns:
-      - name: Registered
-        type: boolean
+      - name: Status
+        type: string
         description: the field shows the current registration status of the resource
-        jsonPath: .status.registered
+        jsonPath: .status.phase

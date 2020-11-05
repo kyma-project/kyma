@@ -9,7 +9,6 @@ import (
 	"github.com/kyma-project/kyma/components/binding/internal/worker"
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -29,7 +28,7 @@ func NewHandler(client dynamic.Interface, storage worker.TargetKindStorage) *Han
 }
 
 func (h *Handler) AddLabel(b *v1alpha1.Binding) error {
-	resourceData, err := h.storage.Get(b.Spec.Target.Kind)
+	resourceData, err := h.storage.Get(v1alpha1.Kind(b.Spec.Target.Kind))
 	if err != nil {
 		return errors.Wrapf(err, "while getting Kind %s from storage", b.Spec.Target.Kind)
 	}
@@ -37,7 +36,6 @@ func (h *Handler) AddLabel(b *v1alpha1.Binding) error {
 	if err != nil {
 		return errors.Wrapf(err, "while getting resource for Binding %s", b.Name)
 	}
-	logrus.Infof("Got resource: %+v", resource)
 	labelsToApply := map[string]string{h.labelKey(b): uuid.New().String()}
 	if err := h.ensureLabelsAreApplied(resource, labelsToApply, resourceData.LabelFields); err != nil {
 		return errors.Wrap(err, "while ensuring labels are applied")
@@ -51,7 +49,7 @@ func (h *Handler) AddLabel(b *v1alpha1.Binding) error {
 }
 
 func (h *Handler) LabelExist(b *v1alpha1.Binding) (bool, error) {
-	resourceData, err := h.storage.Get(b.Spec.Target.Kind)
+	resourceData, err := h.storage.Get(v1alpha1.Kind(b.Spec.Target.Kind))
 	if err != nil {
 		return false, errors.Wrapf(err, "while getting Kind %s from storage", b.Spec.Target.Kind)
 	}
@@ -73,7 +71,7 @@ func (h *Handler) LabelExist(b *v1alpha1.Binding) (bool, error) {
 }
 
 func (h *Handler) RemoveOldAddNewLabel(b *v1alpha1.Binding) error {
-	resourceData, err := h.storage.Get(b.Spec.Target.Kind)
+	resourceData, err := h.storage.Get(v1alpha1.Kind(b.Spec.Target.Kind))
 	if err != nil {
 		return errors.Wrapf(err, "while getting Kind %s from storage", b.Spec.Target.Kind)
 	}
@@ -108,7 +106,7 @@ func (h *Handler) RemoveOldAddNewLabel(b *v1alpha1.Binding) error {
 }
 
 func (h *Handler) RemoveLabel(b *v1alpha1.Binding) error {
-	resourceData, err := h.storage.Get(b.Spec.Target.Kind)
+	resourceData, err := h.storage.Get(v1alpha1.Kind(b.Spec.Target.Kind))
 	if err != nil {
 		return errors.Wrapf(err, "while getting Kind %s from storage", b.Spec.Target.Kind)
 	}

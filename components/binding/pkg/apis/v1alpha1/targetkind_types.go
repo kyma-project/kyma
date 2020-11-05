@@ -1,28 +1,53 @@
 package v1alpha1
 
 import (
+	"time"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Kind represents Kubernetes Kind name
 type Kind string
 
+// TargetKindPhase describes TargetKind phase
+type TargetKindPhase string
+
+const (
+	TargetKindRegistered = "Registered"
+)
+
 // TargetKindSpec defines the desired state of TargetKind
 type TargetKindSpec struct {
-	DisplayName string    `json:"displayName"`
+	DisplayName string   `json:"displayName"`
 	Resource    Resource `json:"resource"`
-	LabelsPath  string    `json:"labelsPath"`
+	LabelsPath  string   `json:"labelsPath"`
 }
 
 type Resource struct {
 	Group   string `json:"group"`
-	Kind    Kind `json:"kind"`
+	Kind    Kind   `json:"kind"`
 	Version string `json:"version"`
 }
 
 // TargetKindStatus defines the observed state of TargetKind
 type TargetKindStatus struct {
-	Registered bool `json:"registered"`
+	Phase             TargetKindPhase `json:"phase"`
+	Message           string          `json:"message"`
+	LastProcessedTime *metav1.Time    `json:"lastProcessedTime,omitempty"`
+}
+
+func (tks *TargetKindStatus) IsRegistered() bool {
+	if tks.Phase == TargetKindRegistered {
+		return true
+	}
+	return false
+}
+
+func (tks *TargetKindStatus) Registered() error {
+	tks.Phase = TargetKindRegistered
+	tks.LastProcessedTime = &metav1.Time{Time: time.Now()}
+
+	return nil
 }
 
 // +kubebuilder:object:root=true

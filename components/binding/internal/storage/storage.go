@@ -11,6 +11,7 @@ import (
 
 type ResourceData struct {
 	Schema      schema.GroupVersionResource
+	LabelsPath  string
 	LabelFields []string
 }
 
@@ -28,6 +29,7 @@ func NewKindStorage() *KindStorage {
 func newResourceData(gvr schema.GroupVersionResource, labelsPath string) *ResourceData {
 	return &ResourceData{
 		Schema:      gvr,
+		LabelsPath:  labelsPath,
 		LabelFields: strings.Split(labelsPath, "."),
 	}
 }
@@ -64,9 +66,19 @@ func (s *KindStorage) Get(kind v1alpha1.Kind) (*ResourceData, error) {
 	return concreteResourceData, nil
 }
 
-func (s *KindStorage) Exist(kind v1alpha1.Kind) bool {
+func (s *KindStorage) Exist(tk v1alpha1.TargetKind) bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	_, exists := s.registered[kind]
+	_, exists := s.registered[tk.Spec.Resource.Kind]
+	if !exists {
+		return false
+	}
 	return exists
+}
+
+func (s *KindStorage) Equal(tk v1alpha1.TargetKind, registeredTk *ResourceData) bool {
+	if tk.Spec.Resource.Group != registeredTk.Schema.Group || fmt.Sprintf("%s%s", tk.Spec.Resource.Kind, "s") != registeredTk.Schema.Resource || tk.Spec.Resource.Version != registeredTk.Schema.Version || tk.Spec.LabelsPath != registeredTk.LabelsPath {
+		return false
+	}
+	return true
 }
