@@ -8,7 +8,7 @@ COPY go.sum go.sum
 
 COPY main.go main.go
 COPY api/ api/
-COPY controllers/ controllers/
+COPY reconciler/ reconciler/
 COPY pkg/ pkg/
 
 # Build
