@@ -35,6 +35,6 @@ test-local:
 mod-verify-local:
 	GO111MODULE=on go mod verify
 
-$(eval $(call buildpack-cp-ro,resolve))
+$(eval $(call buildpack-mount,resolve))
 $(eval $(call buildpack-mount,mod-verify))
 $(eval $(call buildpack-mount,test))
