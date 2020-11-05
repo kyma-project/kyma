@@ -2,10 +2,11 @@ package testing
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"log"
 	"net/http"
 	"net/url"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

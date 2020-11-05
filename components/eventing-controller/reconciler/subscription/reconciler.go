@@ -3,11 +3,12 @@ package subscription
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	"github.com/pkg/errors"
 

@@ -1,10 +1,11 @@
 package utils
 
 import (
-	"github.com/pkg/errors"
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // ConvertURLPortForApiRulePort converts string port from url.URL to uint32 port

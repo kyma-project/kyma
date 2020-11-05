@@ -1,12 +1,13 @@
 package testing
 
 import (
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"log"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"

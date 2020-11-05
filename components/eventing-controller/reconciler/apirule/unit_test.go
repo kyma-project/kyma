@@ -2,8 +2,9 @@ package apirule
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -248,7 +249,7 @@ func Test_setSubscriptionStatusExternalSink(t *testing.T) {
 			continue
 		}
 		if !tc.wantError && err != nil {
-			t.Errorf("Test: [%s] should have succedded but retunred error: [%v]", tc.name, err)
+			t.Errorf("Test: [%s] should have succedded but returned error: [%v]", tc.name, err)
 			continue
 		}
 		if tc.wantExternalSink != tc.givenSubscription.Status.ExternalSink {

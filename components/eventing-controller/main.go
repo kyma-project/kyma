@@ -2,11 +2,12 @@ package main
 
 import (
 	"flag"
-	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/apirule"
-	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription"
 	"log"
 	"os"
 	"time"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/apirule"
+	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
