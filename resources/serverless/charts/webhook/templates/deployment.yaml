@@ -42,8 +42,8 @@ spec:
               cpu: {{ .Values.deployment.resources.requests.cpu }}
               memory: {{ .Values.deployment.resources.requests.memory }}
             limits:
-              cpu: 300m
-              memory: 300Mi
+              cpu: {{ .Values.deployment.resources.limits.cpu }}
+              memory: {{ .Values.deployment.resources.limits }}
           securityContext:
             allowPrivilegeEscalation: {{ .Values.container.allowPrivilegeEscalation }}
           ports:
