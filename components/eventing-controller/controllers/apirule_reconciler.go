@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"strings"
 
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
@@ -134,6 +136,10 @@ func (r *APIRuleReconciler) handleAPIRuleAddOrUpdate(ctx context.Context, apiRul
 		lookupKey := k8stypes.NamespacedName{Name: ownerRef.Name, Namespace: apiRule.Namespace}
 
 		if err := r.Client.Get(ctx, lookupKey, subscription); err != nil {
+			if k8serrors.IsNotFound(err) {
+				// The subscription is deleted so nothing to do
+				return ctrl.Result{}, nil
+			}
 			log.Error(err, "Subscription not found", "Name", ownerRef.Name)
 			return ctrl.Result{}, err
 		}

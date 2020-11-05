@@ -74,12 +74,13 @@ var _ = BeforeSuite(func(done Done) {
 	// +kubebuilder:scaffold:scheme
 
 	bebMock := startBebMock()
-
+	//client, err := client.New()
 	// Source: https://book.kubebuilder.io/cronjob-tutorial/writing-tests.html
 	syncPeriod := time.Second
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:     scheme.Scheme,
 		SyncPeriod: &syncPeriod,
+		//NewClient: ,
 	})
 	Expect(err).ToNot(HaveOccurred())
 	envConf := &env.Config{

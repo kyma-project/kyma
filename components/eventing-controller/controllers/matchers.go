@@ -31,6 +31,25 @@ func HaveSubscriptionFinalizer(finalizer string) GomegaMatcher {
 	return WithTransform(func(s eventingv1alpha1.Subscription) []string { return s.ObjectMeta.Finalizers }, ContainElement(finalizer))
 }
 
+func IsAnEmptySubscription() GomegaMatcher {
+	return WithTransform(func(s eventingv1alpha1.Subscription) bool {
+		emptySub := eventingv1alpha1.Subscription{}
+		if reflect.DeepEqual(s, emptySub) {
+			return true
+		}
+		return false
+	}, BeTrue())
+}
+
+func IsAnEmptyAPIRule() GomegaMatcher {
+	return WithTransform(func(a apigatewayv1alpha1.APIRule) bool {
+		if a.Name == "" {
+			return true
+		}
+		return false
+	}, BeTrue())
+}
+
 func HaveSubscriptionReady() GomegaMatcher {
 	return WithTransform(func(s eventingv1alpha1.Subscription) bool {
 		return s.Status.Ready

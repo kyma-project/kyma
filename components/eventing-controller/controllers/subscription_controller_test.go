@@ -293,7 +293,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	FWhen("BEB subscription creation failed with existing APIRule", func() {
+	When("BEB subscription creation failed with existing APIRule", func() {
 		It("Should not mark the subscription as ready", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready"
 			ctx := context.Background()
@@ -457,6 +457,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			// Create subscription
 			ensureSubscriptionCreated(givenSubscription, ctx)
+			getAPIRule(apiRule, ctx).Should(HaveValidAPIRule(givenSubscription))
 
 			Context("Given the subscription is ready", func() {
 				getSubscription(givenSubscription, ctx).Should(And(
@@ -483,6 +484,10 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Deleting the Subscription")
 			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
 
+			By("Removing the Subscription")
+			//getSubscription(givenSubscription, ctx).ShouldNot(HaveSubscriptionFinalizer(SubscriptionFinalizer))
+			getSubscription(givenSubscription, ctx).Should(IsAnEmptySubscription())
+
 			By("Deleting the BEB Subscription")
 			Eventually(func() bool {
 				i := -1
@@ -501,9 +506,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				return false
 			}).Should(BeTrue())
 
-			By("Removing the finalizer")
-			getSubscription(givenSubscription, ctx).ShouldNot(HaveSubscriptionFinalizer(SubscriptionFinalizer))
-
 			By("Emitting some k8s events")
 			var subscriptionEvents = v1.EventList{}
 			subscriptionDeletedEvent := v1.Event{
@@ -511,6 +513,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				Message: "",
 				Type:    v1.EventTypeWarning,
 			}
+
+			By("Removing the APIRule")
+			getSubscription(givenSubscription, ctx).Should(IsAnEmptySubscription())
+			// TODO: Check for disappearing of APIRule which does not work in kubebuilder suite
+			//getAPIRule(apiRule, ctx).Should(IsAnEmptyAPIRule())
 
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(HaveEvent(subscriptionDeletedEvent))
 		})
@@ -785,6 +792,30 @@ func getAPIRule(apiRule *apigatewayv1alpha1.APIRule, ctx context.Context) AsyncA
 			log.Printf("failed to fetch APIRule(%s): %v", lookUpKey.String(), err)
 			return apigatewayv1alpha1.APIRule{}
 		}
+		apiRuleList := &apigatewayv1alpha1.APIRuleList{}
+		err := k8sClient.List(ctx, apiRuleList, &client.ListOptions{
+			Namespace: apiRule.Namespace,
+		})
+		if err != nil {
+			log.Printf("failed to list APIRules: %v", err)
+		}
+		log.Printf("apiRules :%d", len(apiRuleList.Items))
+		if len(apiRuleList.Items) > 0 && len(apiRule.OwnerReferences) > 0 {
+			log.Printf("#### owner ref ####")
+			log.Printf("oR: %v", apiRule.OwnerReferences[0])
+			log.Printf("delete timestamp: %v", apiRule.DeletionTimestamp)
+			sub := &eventingv1alpha1.Subscription{}
+			err = k8sClient.Get(ctx, types.NamespacedName{
+				Namespace: apiRule.Namespace,
+				Name:      apiRule.OwnerReferences[0].Name,
+			}, sub)
+			if err != nil {
+				log.Printf("failed to get sub: %v", err)
+			} else {
+				log.Printf("sub is %s", sub.Name)
+			}
+		}
+
 		return *apiRule
 	}, bigTimeOut, bigPollingInterval)
 }
