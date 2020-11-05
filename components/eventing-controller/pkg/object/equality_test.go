@@ -27,7 +27,7 @@ func TestApiRuleEqual(t *testing.T) {
 			http.MethodPost,
 		},
 		AccessStrategies: []*rulev1alpha1.Authenticator{
-			{handler},
+			{Handler: handler},
 		},
 	}
 	apiRule := apigatewayv1alpha1.APIRule{
@@ -133,7 +133,7 @@ func TestApiRuleEqual(t *testing.T) {
 					Name: "foo",
 				}
 				newRule.AccessStrategies = []*rulev1alpha1.Authenticator{
-					{newHandler},
+					{Handler: newHandler},
 				}
 				apiRuleCopy.Spec.Rules = []apigatewayv1alpha1.Rule{*newRule}
 				return apiRuleCopy
