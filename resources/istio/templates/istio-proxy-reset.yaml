@@ -12,9 +12,15 @@ rules:
   - apiGroups: [""]
     resources: ["pods"]
     verbs: ["get", "list", "delete"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list"]
   - apiGroups: ["apps", "extensions"]
-    resources: ["replicasets", "deployments", "daemonsets", "statefulsets"]
+    resources: ["deployments", "daemonsets", "statefulsets"]
     verbs: ["get", "patch"]
+  - apiGroups: ["apps", "extensions"]
+    resources: ["replicasets"]
+    verbs: ["get", "patch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -35,9 +41,9 @@ metadata:
   name: istio-proxy-reset
   namespace: {{ .Release.Namespace }}
   annotations:
-    helm.sh/hook-delete-policy: before-hook-creation
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
     helm.sh/hook: post-upgrade
-    helm.sh/hook-weight: "20"
+    helm.sh/hook-weight: "50"
 spec:
   backoffLimit: 1
   template:
@@ -49,7 +55,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: proxy-reset
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+          image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
           command:
             - /bin/bash
             - -c

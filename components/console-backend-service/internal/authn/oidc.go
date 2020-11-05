@@ -8,8 +8,8 @@ import (
 
 // OIDCConfig represents configuration used for JWT request authentication
 type OIDCConfig struct {
-	IssuerURL            string
-	ClientID             string
+	IssuerURL            string   `envconfig:"default=https://dex.kyma.local"`
+	ClientID             string   `envconfig:"default=kyma-client"`
 	CAFile               string   `envconfig:"optional"`
 	UsernameClaim        string   `envconfig:"default=email"`
 	UsernamePrefix       string   `envconfig:"optional"`

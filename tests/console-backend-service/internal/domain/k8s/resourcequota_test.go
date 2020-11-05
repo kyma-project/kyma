@@ -26,21 +26,24 @@ type resourceQuotas struct {
 	ResourceQuotas []resourceQuota `json:"resourceQuotas"`
 }
 
-type resourceQuota struct {
-	Name     string         `json:"name"`
+type resourceQuotaSpec struct {
+	Hard resourceQuotaHard `json:"hard"`
+}
+
+type resourceQuotaHard struct {
 	Pods     string         `json:"pods"`
 	Limits   resourceValues `json:"limits"`
 	Requests resourceValues `json:"requests"`
 }
 
+type resourceQuota struct {
+	Name string            `json:"name"`
+	Spec resourceQuotaSpec `json:"spec"`
+}
+
 type resourceValues struct {
 	Memory string `json:"memory"`
 	Cpu    string `json:"cpu"`
-}
-
-type resourceQuotaStatus struct {
-	Exceeded bool   `json:"exceeded"`
-	Message  string `json:"message"`
 }
 
 func TestResourceQuotaQuery(t *testing.T) {
@@ -63,19 +66,14 @@ func TestResourceQuotaQuery(t *testing.T) {
 	require.NoError(t, err)
 
 	var listResult resourceQuotas
-	var statusResult resourceQuotaStatus
 
 	err = c.Do(fixListResourceQuotasQuery(), &listResult)
 	require.NoError(t, err)
 	assert.Contains(t, listResult.ResourceQuotas, fixListResourceQuotasResponse())
 
-	err = c.Do(fixResourceQuotasStatusQuery(), &statusResult)
-	require.NoError(t, err)
-	assert.False(t, statusResult.Exceeded)
-
 	t.Log("Checking authorization directives...")
 	ops := &auth.OperationsInput{
-		auth.List: {fixListResourceQuotasQuery(), fixResourceQuotasStatusQuery()},
+		auth.List: {fixListResourceQuotasQuery()},
 	}
 	AuthSuite.Run(t, ops)
 }
@@ -84,14 +82,16 @@ func fixListResourceQuotasQuery() *graphql.Request {
 	query := `query($namespace: String!) {
 				resourceQuotas(namespace: $namespace) {
 					name
-					pods
-					limits {
-					  memory
-					  cpu
-					}
-					requests {
-					  memory
-					  cpu
+					spec {
+						hard {
+							limits {
+								memory				
+							}
+							requests {
+								memory				
+							}
+							pods
+						}
 					}
 				}
 			}`
@@ -101,29 +101,19 @@ func fixListResourceQuotasQuery() *graphql.Request {
 	return r
 }
 
-func fixResourceQuotasStatusQuery() *graphql.Request {
-	query := `query($namespace: String!) {
-				  resourceQuotasStatus(namespace: $namespace) {
-					exceeded
-				  }
-				}`
-	r := graphql.NewRequest(query)
-	r.SetVar("namespace", testNamespace)
-
-	return r
-}
-
 func fixListResourceQuotasResponse() resourceQuota {
 	return resourceQuota{
 		Name: resourceQuotaName,
-		Pods: "10",
-		Limits: resourceValues{
-			Cpu:    "900m",
-			Memory: "1Gi",
-		},
-		Requests: resourceValues{
-			Cpu:    "500m",
-			Memory: "512Mi",
+		Spec: resourceQuotaSpec{
+			Hard: resourceQuotaHard{
+				Pods: "10",
+				Limits: resourceValues{
+					Memory: "1Gi",
+				},
+				Requests: resourceValues{
+					Memory: "512Mi",
+				},
+			},
 		},
 	}
 }
@@ -137,9 +127,7 @@ func fixResourceQuota() *v1.ResourceQuota {
 		Spec: v1.ResourceQuotaSpec{
 			Hard: v1.ResourceList{
 				v1.ResourcePods:           resource.MustParse("10"),
-				v1.ResourceLimitsCPU:      resource.MustParse("900m"),
 				v1.ResourceLimitsMemory:   resource.MustParse("1Gi"),
-				v1.ResourceRequestsCPU:    resource.MustParse("500m"),
 				v1.ResourceRequestsMemory: resource.MustParse("512Mi"),
 			},
 		},

@@ -1,0 +1,10 @@
+images:
+  containerRegistry:
+    path: eu.gcr.io/sap-se-cx-gopher
+  bindingController:
+    version: "0.2.5"
+
+config:
+  bindingController:
+    port: 8443
+    debugMode: true

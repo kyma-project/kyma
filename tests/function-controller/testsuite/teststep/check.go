@@ -26,7 +26,7 @@ var _ step.Step = HTTPCheck{}
 func NewHTTPCheck(log *logrus.Entry, name string, url *url.URL, poller poller.Poller, expectedMsg string) *HTTPCheck {
 	return &HTTPCheck{
 		name:        name,
-		log:         log,
+		log:         log.WithField(step.LogStepKey, name),
 		endpoint:    url.String(),
 		expectedMsg: expectedMsg,
 		poll:        poller,
@@ -46,6 +46,10 @@ func (h HTTPCheck) Cleanup() error {
 	return nil
 }
 
+func (h HTTPCheck) OnError() error {
+	return nil
+}
+
 var _ step.Step = DefaultedFunctionCheck{}
 
 type DefaultedFunctionCheck struct {
@@ -60,12 +64,12 @@ func NewDefaultedFunctionCheck(name string, fn *function.Function) step.Step {
 	}
 }
 
-func (e DefaultedFunctionCheck) Name() string {
-	return e.name
+func (d DefaultedFunctionCheck) Name() string {
+	return d.name
 }
 
-func (e DefaultedFunctionCheck) Run() error {
-	fn, err := e.fn.Get()
+func (d DefaultedFunctionCheck) Run() error {
+	fn, err := d.fn.Get()
 	if err != nil {
 		return err
 	}
@@ -87,7 +91,11 @@ func (e DefaultedFunctionCheck) Run() error {
 	return nil
 }
 
-func (e DefaultedFunctionCheck) Cleanup() error {
+func (d DefaultedFunctionCheck) Cleanup() error {
+	return nil
+}
+
+func (d DefaultedFunctionCheck) OnError() error {
 	return nil
 }
 
@@ -102,7 +110,7 @@ type E2EFunctionCheck struct {
 
 func NewE2EFunctionCheck(log *logrus.Entry, name string, inClusterURL, fnGatewayURL, brokerURL *url.URL, poller poller.Poller) E2EFunctionCheck {
 	return E2EFunctionCheck{
-		log:          log,
+		log:          log.WithField(step.LogStepKey, name),
 		name:         name,
 		inClusterURL: inClusterURL.String(),
 		fnGatewayURL: fnGatewayURL.String(),
@@ -157,5 +165,9 @@ func (c E2EFunctionCheck) Run() error {
 }
 
 func (c E2EFunctionCheck) Cleanup() error {
+	return nil
+}
+
+func (e E2EFunctionCheck) OnError() error {
 	return nil
 }

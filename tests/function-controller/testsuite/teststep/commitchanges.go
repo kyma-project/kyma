@@ -25,7 +25,7 @@ func NewCommitChanges(log *logrus.Entry, stepName, repoURL string) step.Step {
 	return commitChanges{
 		name:      stepName,
 		gitClient: git.New(repoURL),
-		log:       log,
+		log:       log.WithField(step.LogStepKey, stepName),
 	}
 }
 
@@ -36,6 +36,15 @@ func (c commitChanges) Name() string {
 func (c commitChanges) Run() error {
 	err := c.gitClient.ReplaceInRemoteFile(filePath, oldValue, newValue)
 	return errors.Wrap(err, "while replacing file content in git repository")
+}
+
+func (c commitChanges) OnError() error {
+	out, err := c.gitClient.PullRemote(filePath)
+	if err != nil {
+		return errors.Wrap(err, "while pulling from remote repository")
+	}
+	c.log.Infof("Code from git repository: %s", out)
+	return nil
 }
 
 func (c commitChanges) Cleanup() error {

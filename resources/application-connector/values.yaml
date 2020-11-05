@@ -35,7 +35,7 @@ global:
   connection_token_handler_tests:
     version: "470796a1"
   event_service:
-    version: "PR-9669"
+    version: "24c55551"
   event_service_integration_tests:
     version: "2c51c024"
   application_gateway:
@@ -63,10 +63,22 @@ application_connectivity_certs_setup_job:
       name: connector-service-app-ca
       namespace: kyma-integration
     caCertificateSecret:
-      name: kyma-gateway-certs-cacert
+      name: app-connector-certs
       namespace: istio-system
   certificate:
     validityTime: 92d
+
+application_connectivity_certs_sync:
+  secrets:
+    caCertificateSecret:
+      name: app-connector-certs
+      namespace: istio-system
+    tlsCertificateSecret:
+      name: kyma-gateway-certs
+      namespace: istio-system
+  image:
+    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    tag: "20201023-5de446cf"
 
 tests:
   application_connector_tests:

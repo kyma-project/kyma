@@ -19,9 +19,8 @@ require (
 	github.com/vrischmann/envconfig v1.1.0
 	helm.sh/helm/v3 v3.2.1
 	k8s.io/api v0.18.2
-	k8s.io/apimachinery v0.18.2
+	k8s.io/apimachinery v0.18.6
 	k8s.io/cli-runtime v0.18.2
 	k8s.io/client-go v0.18.2
-	k8s.io/kubectl v0.18.0
 	rsc.io/letsencrypt v0.0.3 // indirect
 )

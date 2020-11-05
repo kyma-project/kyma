@@ -1663,6 +1663,7 @@
   input-imports = [
     "github.com/avast/retry-go",
     "github.com/cloudevents/sdk-go",
+    "github.com/google/uuid",
     "github.com/hashicorp/errwrap",
     "github.com/hashicorp/go-multierror",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",

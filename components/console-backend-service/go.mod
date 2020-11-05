@@ -7,7 +7,6 @@ require (
 	github.com/Shopify/sarama v1.26.0 // indirect
 	github.com/apache/thrift v0.13.0 // indirect
 	github.com/blang/semver v3.5.0+incompatible
-	github.com/coreos/etcd v3.3.15+incompatible // indirect
 	github.com/coreos/go-oidc v2.2.1+incompatible // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
@@ -59,5 +58,5 @@ replace (
 	github.com/coreos/etcd => github.com/coreos/etcd v3.3.24+incompatible
 	golang.org/x/text => golang.org/x/text v0.3.3
 	k8s.io/client-go => k8s.io/client-go v0.17.4
-	k8s.io/utils => k8s.io/utils v0.0.0-20191114184206-e782cd3c129f+incompatible
+	k8s.io/utils => k8s.io/utils v0.0.0-20191114184206-e782cd3c129f
 )
