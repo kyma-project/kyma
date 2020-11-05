@@ -1,10 +1,9 @@
-{{- if .Values.global.install.enabled }}
+{{- if .Values.install.enabled }}
 
 apiVersion: nats.io/v1alpha2
 kind: NatsCluster
 metadata:
-  name: {{ .Values.global.nats.fullname }}
-  namespace: {{ .Values.global.namespace }}
+  name: {{ .Values.nats.fullname }}
 spec:
   size: 1
   version: "2.1.8"

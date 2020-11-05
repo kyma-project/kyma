@@ -2,13 +2,10 @@
 
 This Helm chart deploy NATS: https://nats.io/
 Steps:
-- Create "nats" namespace:
+
+- Install NATS using Helm 3 into "nats" namespace:
 ```bash
-$ kubectl create ns  install nats
-```
-- Install it using Helm 3 on "nats" namespace:
-```bash
-$ helm install nats nats -n nats --set global.install.enabled=true
+$ helm install nats nats -n nats --set install.enabled=true --create-namespace
 ```
 - Test the installation:
 ```bash

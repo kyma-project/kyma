@@ -1,4 +1,4 @@
-{{- if .Values.global.install.enabled }}
+{{- if .Values.install.enabled }}
 
 apiVersion: apps/v1
 kind: Deployment
@@ -6,7 +6,6 @@ metadata:
   name: nats-operator
   # Change to the name of the namespace where to install NATS Operator.
   # Alternatively, change to "nats-io" to perform a cluster-scoped deployment in supported versions.
-  namespace: {{ .Values.global.namespace }}
 spec:
   replicas: 1
   selector:

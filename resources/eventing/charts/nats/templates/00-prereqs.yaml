@@ -1,4 +1,4 @@
-{{- if .Values.global.install.enabled }}
+{{- if .Values.install.enabled }}
 
 ---
 apiVersion: v1
@@ -7,7 +7,7 @@ metadata:
   name: nats-operator
   # Change to the name of the namespace where to install NATS Operator.
   # Alternatively, change to "nats-io" to perform a cluster-scoped deployment in supported versions.
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.namespace }}
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -23,7 +23,7 @@ subjects:
   name: nats-operator
   # Change to the name of the namespace where to install NATS Operator.
   # Alternatively, change to "nats-io" to perform a cluster-scoped deployment in supported versions.
-  namespace: {{ .Values.global.namespace}}
+  namespace: {{ .Values.namespace}}
 
 # NOTE: When performing multiple namespace-scoped installations, all
 # "nats-operator" service accounts (across the different namespaces)
@@ -102,7 +102,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: nats-server
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -125,6 +125,6 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: nats-server
-  namespace: {{ .Values.global.namespace}}
+  namespace: {{ .Values.namespace}}
 
   {{- end }}
