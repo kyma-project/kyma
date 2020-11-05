@@ -27,8 +27,7 @@ dep-status-local:
 	@echo "Go modules present in component - omitting."
 
 resolve-local:
-	GO111MODULE=on go mod download
-	GO111MODULE=on go mod vendor
+	GO111MODULE=on go mod vendor -v
 
 test-local:
 	GO111MODULE=on go test ./...
