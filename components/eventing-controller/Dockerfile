@@ -6,10 +6,12 @@ WORKDIR $DOCK_PKG_DIR
 COPY go.mod go.mod
 COPY go.sum go.sum
 
-COPY main.go main.go
 COPY api/ api/
-COPY reconciler/ reconciler/
 COPY pkg/ pkg/
+COPY reconciler/ reconciler/
+COPY testing/ testing/
+COPY utils/ utils/
+COPY main.go main.go
 
 # Build
 RUN GOOS=linux GO111MODULE=on go mod vendor && \
