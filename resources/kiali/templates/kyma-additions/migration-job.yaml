@@ -3,7 +3,7 @@ kind: ServiceAccount
 metadata:
   name: kiali-migration-job
   annotations:
-    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook: "pre-install,pre-upgrade"
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
 ---
@@ -12,7 +12,7 @@ kind: ClusterRole
 metadata:
   name: kiali-migration-job
   annotations:
-    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook: "pre-install,pre-upgrade"
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
 rules:
@@ -73,7 +73,7 @@ kind: ClusterRoleBinding
 metadata:
   name: kiali-migration-job
   annotations:
-    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook: "pre-install,pre-upgrade"
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
 roleRef:
@@ -91,7 +91,7 @@ metadata:
   name: kiali-migration-job
   annotations:
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook: "pre-install,pre-upgrade"
     helm.sh/hook-weight: "10"
 spec:
   backoffLimit: 1
@@ -130,10 +130,9 @@ spec:
             kubectl delete clusterrole/kiali --ignore-not-found
             kubectl delete clusterrolebinding/kiali --ignore-not-found
 
-            EXISTS="$(kubectl get kiali kiali -n kyma-system --ignore-not-found)"
+            EXISTS="$(kubectl get crd kialis.kiali.io --ignore-not-found)"
             if [ -n "$EXISTS" ]; then
               kubectl patch kiali kiali -n kyma-system -p '{"metadata":{"finalizers": []}}' --type=merge
               kubectl delete kiali kiali -n kyma-system --ignore-not-found
+              kubectl delete crd kialis.kiali.io --ignore-not-found
             fi
-
-            kubectl delete crd kialis.kiali.io --ignore-not-found
